@@ -1,0 +1,154 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.frame.internal.configuration;
+
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.EscalationLevel;
+import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
+
+/**
+ * Configuration of a {@link net.officefloor.frame.api.execute.Task}.
+ * 
+ * @author Daniel
+ */
+public interface TaskConfiguration<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+
+	/**
+	 * Obtains the name of this {@link net.officefloor.frame.api.execute.Task}
+	 * local to its {@link Work}.
+	 * 
+	 * @return Name of this {@link net.officefloor.frame.api.execute.Task} local
+	 *         to its {@link Work}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	String getTaskName() throws ConfigurationException;
+
+	/**
+	 * Obtains the {@link TaskFactory} for the
+	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * 
+	 * @return {@link TaskFactory}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	TaskFactory<P, W, M, F> getTaskFactory() throws ConfigurationException;
+
+	/**
+	 * Obtains the Id of the {@link net.officefloor.frame.spi.team.Team}
+	 * responsible for completing this
+	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * 
+	 * @return Id of the {@link net.officefloor.frame.spi.team.Team}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	String getTeamId() throws ConfigurationException;
+
+	/**
+	 * Obtains the reference to the next
+	 * {@link net.officefloor.frame.api.execute.Task} within the
+	 * {@link net.officefloor.frame.internal.structure.Flow}.
+	 * 
+	 * @return Reference to the next
+	 *         {@link net.officefloor.frame.api.execute.Task} within the
+	 *         {@link net.officefloor.frame.internal.structure.Flow}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	TaskNodeReference getNextTaskInFlow() throws ConfigurationException;
+
+	/**
+	 * Obtains the configuration of the
+	 * {@link net.officefloor.frame.internal.structure.Flow} instances for this
+	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * 
+	 * @return Configuration of the
+	 *         {@link net.officefloor.frame.internal.structure.Flow} instances
+	 *         for this {@link net.officefloor.frame.api.execute.Task}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	FlowConfiguration[] getFlowConfiguration() throws ConfigurationException;
+
+	/**
+	 * Obtains the configuration of the
+	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
+	 * for this {@link net.officefloor.frame.api.execute.Task}.
+	 * 
+	 * @return Configuration of the
+	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
+	 *         instances for this {@link net.officefloor.frame.api.execute.Task}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	TaskManagedObjectConfiguration[] getManagedObjectConfiguration()
+			throws ConfigurationException;
+
+	/**
+	 * Obtains the {@link EscalationLevel} instances in escalation order. Index
+	 * 0 being first, index 1 second and so forth.
+	 * 
+	 * @return {@link EscalationLevel} instances.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	EscalationLevel<Throwable>[] getEscalationLevels()
+			throws ConfigurationException;
+
+	/**
+	 * Obtains the {@link ParentEscalationProcedure} for the
+	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * 
+	 * @return {@link ParentEscalationProcedure} for the
+	 *         {@link net.officefloor.frame.api.execute.Task}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	ParentEscalationProcedure getParentEscalationProcedure()
+			throws ConfigurationException;
+
+	/**
+	 * Obtains the listing of the {@link TaskDutyConfiguration} for the
+	 * administration to be done before the
+	 * {@link net.officefloor.frame.api.execute.Task} is executed.
+	 * 
+	 * @return Listing of the {@link TaskDutyConfiguration} for the
+	 *         administration to be done before the
+	 *         {@link net.officefloor.frame.api.execute.Task} is executed.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	TaskDutyConfiguration<?>[] getPreTaskAdministratorDutyConfiguration()
+			throws ConfigurationException;
+
+	/**
+	 * Obtains the listing of the {@link TaskDutyConfiguration} for the
+	 * administration to be done after the
+	 * {@link net.officefloor.frame.api.execute.Task} is executed.
+	 * 
+	 * @return Listing of the {@link TaskDutyConfiguration} for the
+	 *         administration to be done after the
+	 *         {@link net.officefloor.frame.api.execute.Task} is executed.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	TaskDutyConfiguration<?>[] getPostTaskAdministratorDutyConfiguration()
+			throws ConfigurationException;
+
+}
