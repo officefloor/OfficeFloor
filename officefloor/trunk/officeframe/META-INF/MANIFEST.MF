@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Office Floor Frame
+Bundle-SymbolicName: net.officefloor.frame
+Bundle-Version: 1.0.0
+Bundle-Localization: plugin
+Export-Package: net.officefloor.frame.api,
+ net.officefloor.frame.api.build,
+ net.officefloor.frame.api.execute,
+ net.officefloor.frame.api.manage,
+ net.officefloor.frame.impl.spi.team,
+ net.officefloor.frame.spi.managedobject,
+ net.officefloor.frame.spi.managedobject.extension,
+ net.officefloor.frame.spi.managedobject.source,
+ net.officefloor.frame.spi.managedobject.source.impl,
+ net.officefloor.frame.spi.pool,
+ net.officefloor.frame.spi.team,
+ net.officefloor.frame.util
