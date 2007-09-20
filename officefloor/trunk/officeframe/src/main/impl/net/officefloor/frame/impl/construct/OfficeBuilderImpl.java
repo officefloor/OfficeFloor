@@ -26,6 +26,7 @@ import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectConfiguration;
@@ -64,12 +65,12 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Listing of registered {@link WorkBuilder} instances.
 	 */
-	private final Map<String, WorkBuilderImpl> works = new HashMap<String, WorkBuilderImpl>();
+	private final Map<String, WorkBuilderImpl<?>> works = new HashMap<String, WorkBuilderImpl<?>>();
 
 	/**
 	 * Registry of the {@link AdministratorBuilderImpl} instances by their Id.
 	 */
-	private final Map<String, AdministratorBuilderImpl> administrators = new HashMap<String, AdministratorBuilderImpl>();
+	private final Map<String, AdministratorBuilderImpl<?>> administrators = new HashMap<String, AdministratorBuilderImpl<?>>();
 
 	/**
 	 * List of start up {@link net.officefloor.frame.api.execute.Task} instances
@@ -156,7 +157,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 		}
 
 		// Specify name
-		WorkBuilderImpl impl = (WorkBuilderImpl) workBuilder;
+		WorkBuilderImpl<?> impl = (WorkBuilderImpl<?>) workBuilder;
 		impl.setWorkName(name);
 
 		// Register the Work
@@ -169,7 +170,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * @see net.officefloor.frame.api.build.OfficeBuilder#addTaskAdministrator(java.lang.String,
 	 *      net.officefloor.frame.api.build.TaskAdministratorBuilder)
 	 */
-	public void addAdministrator(String id, AdministratorBuilder builder)
+	public void addAdministrator(String id, AdministratorBuilder<?> builder)
 			throws BuildException {
 
 		// Ensure is correct type
@@ -180,7 +181,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 		}
 
 		// Specify the name
-		AdministratorBuilderImpl impl = (AdministratorBuilderImpl) builder;
+		AdministratorBuilderImpl<?> impl = (AdministratorBuilderImpl<?>) builder;
 		impl.setAdministratorName(id);
 
 		// Add
@@ -248,7 +249,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * 
 	 * @see net.officefloor.frame.internal.configuration.OfficeConfiguration#getWorkConfiguration()
 	 */
-	public WorkConfiguration[] getWorkConfiguration()
+	@SuppressWarnings("unchecked")
+	public <W extends Work> WorkConfiguration<W>[] getWorkConfiguration()
 			throws ConfigurationException {
 		return this.works.values().toArray(new WorkConfiguration[0]);
 	}

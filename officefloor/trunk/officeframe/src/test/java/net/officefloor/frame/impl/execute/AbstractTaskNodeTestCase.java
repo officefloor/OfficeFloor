@@ -124,7 +124,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} meta-data
 	 * for the {@link ProcessState}.
 	 */
-	private ManagedObjectMetaDataImpl moMetaData;
+	private ManagedObjectMetaDataImpl<?> moMetaData;
 
 	/**
 	 * Initiate the Test.
@@ -232,8 +232,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * @return Next {@link ExecutionNode} to be executed after the input
 	 *         {@link ExecutionNode}.
 	 */
-	protected <OW extends Work> ExecutionNode<?> bindNextNode(
-			ExecutionNode<OW> currentNode) {
+	protected ExecutionNode<?> bindNextNode(ExecutionNode<W> currentNode) {
 
 		// Ensure next node not already bound
 		if (currentNode.getNextTaskInFlow() != null) {
@@ -241,7 +240,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		}
 
 		// Create the next execution node
-		ExecutionNode<OW> nextNode = new ExecutionNode<OW>(this
+		ExecutionNode<W> nextNode = new ExecutionNode<W>(this
 				.nextExecutionNodeId(), this, currentNode.getWorkMetaData());
 
 		// Bind as next execution node
@@ -260,7 +259,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * @return {@link ExecutionNode} to be sequentially executed after the input
 	 *         {@link ExecutionNode}.
 	 */
-	protected ExecutionNode bindSequentialNode(ExecutionNode<?> currentNode) {
+	protected ExecutionNode<W> bindSequentialNode(ExecutionNode<W> currentNode) {
 		return this.bindFlow(FlowInstigationStrategyEnum.SEQUENTIAL,
 				currentNode);
 	}
@@ -274,7 +273,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * @return {@link ExecutionNode} to be executed in parallel to the input
 	 *         {@link ExecutionNode}.
 	 */
-	protected ExecutionNode bindParallelNode(ExecutionNode<?> currentNode) {
+	protected ExecutionNode<W> bindParallelNode(ExecutionNode<W> currentNode) {
 		return this.bindFlow(FlowInstigationStrategyEnum.PARALLEL, currentNode);
 	}
 
@@ -287,7 +286,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * @return {@link ExecutionNode} to be executed asynchronously to the input
 	 *         {@link ExecutionNode}.
 	 */
-	protected ExecutionNode bindAsynchronousNode(ExecutionNode<?> currentNode) {
+	protected ExecutionNode<W> bindAsynchronousNode(ExecutionNode<W> currentNode) {
 		return this.bindFlow(FlowInstigationStrategyEnum.ASYNCHRONOUS,
 				currentNode);
 	}
@@ -301,12 +300,12 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 *            {@link ExecutionNode}.
 	 * @return Flow {@link ExecutionNode}.
 	 */
-	private <OW extends Work> ExecutionNode<?> bindFlow(
+	private ExecutionNode<W> bindFlow(
 			FlowInstigationStrategyEnum instigationStrategy,
-			ExecutionNode<OW> currentNode) {
+			ExecutionNode<W> currentNode) {
 
 		// Create the flow node
-		ExecutionNode<OW> flowNode = new ExecutionNode<OW>(this
+		ExecutionNode<W> flowNode = new ExecutionNode<W>(this
 				.nextExecutionNodeId(), this, currentNode.getWorkMetaData());
 
 		// Bind as flow node
@@ -325,7 +324,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * @param futureNode
 	 *            {@link ExecutionNode} executing to completion.
 	 */
-	protected void joinNode(ExecutionNode waitNode, ExecutionNode futureNode) {
+	protected void joinNode(ExecutionNode<W> waitNode,
+			ExecutionNode<W> futureNode) {
 		// Wait on completion
 		waitNode.addJoin(futureNode);
 	}
@@ -339,7 +339,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		this.replayMockObjects();
 
 		// TODO consider testing with administrators
-		AdministratorMetaData[] adminMetaData = new AdministratorMetaData[0];
+		AdministratorMetaData<?, ?>[] adminMetaData = new AdministratorMetaData[0];
 
 		// Create Process for executing
 		ProcessState processState = new ProcessStateImpl(
@@ -349,7 +349,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
 
 		// Obtain the initial Flow meta-data
-		FlowMetaData flowMetaData = workMetaData.getInitialFlowMetaData();
+		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
 
 		// Create Flow for executing
 		Flow flow = processState.createThread(flowMetaData);
@@ -386,17 +386,17 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 *            Listing of {@link ExecutionNode} instances to validate are in
 	 *            order of execution.
 	 */
-	protected void validateExecutionOrder(ExecutionNode... expectedNodes) {
+	protected void validateExecutionOrder(ExecutionNode<?>... expectedNodes) {
 
 		// Record order of execution for expected
 		StringBuilder expected = new StringBuilder();
-		for (ExecutionNode node : expectedNodes) {
+		for (ExecutionNode<?> node : expectedNodes) {
 			expected.append(node.getExecutionNodeId() + " ");
 		}
 
 		// Record order of execution for actual
 		StringBuilder actual = new StringBuilder();
-		for (ExecutionNode node : this.executedNodes) {
+		for (ExecutionNode<?> node : this.executedNodes) {
 			actual.append(node.getExecutionNodeId() + " ");
 		}
 
@@ -409,7 +409,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Listing of {@link ExecutionNode} in order of being executed.
 	 */
-	private final List<ExecutionNode> executedNodes = new LinkedList<ExecutionNode>();
+	private final List<ExecutionNode<?>> executedNodes = new LinkedList<ExecutionNode<?>>();
 
 	/**
 	 * Adds an {@link ExecutionNode} that is being executed.
@@ -417,7 +417,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * @param node
 	 *            {@link ExecutionNode} that is being executed.
 	 */
-	void addExecutedNode(ExecutionNode node) {
+	void addExecutedNode(ExecutionNode<?> node) {
 		this.executedNodes.add(node);
 	}
 
@@ -428,9 +428,9 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 *            {@link ExecutionNode}.
 	 * @return <code>true</code> if input {@link ExecutionNode} was executed.
 	 */
-	boolean isExecuted(ExecutionNode node) {
+	boolean isExecuted(ExecutionNode<?> node) {
 		// Check if executed
-		for (ExecutionNode executedNode : this.executedNodes) {
+		for (ExecutionNode<?> executedNode : this.executedNodes) {
 			if (node == executedNode) {
 				return true;
 			}
@@ -443,7 +443,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Latest {@link ExecutionNode} to be created.
 	 */
-	private ExecutionNode latestTaskNode;
+	private ExecutionNode<?> latestTaskNode;
 
 	/**
 	 * Specifies the latest {@link ExecutionNode} to be created.
@@ -451,7 +451,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * @param node
 	 *            Latest {@link ExecutionNode} to be created.
 	 */
-	void setLatestTaskNode(ExecutionNode node) {
+	void setLatestTaskNode(ExecutionNode<?> node) {
 		this.latestTaskNode = node;
 	}
 
@@ -460,14 +460,14 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * 
 	 * @return Latest {@link ExecutionNode} to be created.
 	 */
-	ExecutionNode getLatestTaskNode() {
+	ExecutionNode<?> getLatestTaskNode() {
 		return this.latestTaskNode;
 	}
 
 	/**
 	 * {@link Map} of {@link ExecutionNode} to {@link FlowFuture} instances.
 	 */
-	private final Map<ExecutionNode, FlowFuture> flowFutures = new HashMap<ExecutionNode, FlowFuture>();
+	private final Map<ExecutionNode<?>, FlowFuture> flowFutures = new HashMap<ExecutionNode<?>, FlowFuture>();
 
 	/**
 	 * Registers the {@link FlowFuture} for the {@link ExecutionNode}.
@@ -477,7 +477,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * @param future
 	 *            {@link FlowFuture}.
 	 */
-	void registerFlowFuture(ExecutionNode node, FlowFuture future) {
+	void registerFlowFuture(ExecutionNode<?> node, FlowFuture future) {
 		this.flowFutures.put(node, future);
 	}
 
@@ -488,7 +488,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 *            {@link ExecutionNode}.
 	 * @return {@link FlowFuture}.
 	 */
-	FlowFuture getFlowFuture(ExecutionNode node) {
+	FlowFuture getFlowFuture(ExecutionNode<?> node) {
 		return this.flowFutures.get(node);
 	}
 

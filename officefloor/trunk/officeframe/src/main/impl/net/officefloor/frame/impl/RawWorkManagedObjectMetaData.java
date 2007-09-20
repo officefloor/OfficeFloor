@@ -51,7 +51,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 *             If fails configuration.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <D extends Enum<D>> RawWorkManagedObjectMetaData createWorkBound(
+	public static RawWorkManagedObjectMetaData createWorkBound(
 			ManagedObjectConfiguration workManagedObjectConfig,
 			RawOfficeResourceRegistry officeResources)
 			throws ConfigurationException {
@@ -69,15 +69,15 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 		long timeout = workManagedObjectConfig.getTimeout();
 
 		// Obtain the dependencies for the managed object
-		Class<D> dependencyListingEnum = (Class<D>) rawMetaData
+		Class<?> dependencyListingEnum = rawMetaData
 				.getManagedObjectSource().getMetaData().getDependencyKeys();
 
 		// Obtain the type defining the keys for dependencies
-		Map<D, Integer> dependencyMapping = null;
+		Map<Enum, Integer> dependencyMapping = null;
 		if (dependencyListingEnum != null) {
 
 			// Have dependencies thus create dependency mapping
-			dependencyMapping = new EnumMap<D, Integer>(dependencyListingEnum);
+			dependencyMapping = new EnumMap(dependencyListingEnum);
 
 			// Dependencies will be loaded later
 		}
@@ -87,7 +87,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 				.createManagedObjectMetaData(timeout, dependencyMapping);
 
 		// Add to listing of work bound
-		return new RawWorkManagedObjectMetaData<D>(managedObjectMetaData,
+		return new RawWorkManagedObjectMetaData(managedObjectMetaData,
 				workManagedObjectConfig, dependencyMapping);
 	}
 
@@ -103,7 +103,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link RawProcessManagedObjectRegistry}.
 	 * @return {@link RawWorkAdministratorMetaData}.
 	 */
-	public static <D extends Enum<D>> RawWorkManagedObjectMetaData createProcessBound(
+	public static <D extends Enum<D>> RawWorkManagedObjectMetaData<D> createProcessBound(
 			LinkedManagedObjectConfiguration linkedManagedObjectConfig,
 			RawProcessManagedObjectRegistry processMoRegistry)
 			throws ConfigurationException {
@@ -118,11 +118,11 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 		}
 
 		// Create the meta-data for the process managed object
-		ManagedObjectMetaData managedObjectMetaData = new ManagedObjectMetaDataImpl(
+		ManagedObjectMetaData<D> managedObjectMetaData = new ManagedObjectMetaDataImpl<D>(
 				rawMetaData.getProcessIndex());
 
 		// Add to listing of process bound
-		return new RawWorkManagedObjectMetaData(managedObjectMetaData,
+		return new RawWorkManagedObjectMetaData<D>(managedObjectMetaData,
 				linkedManagedObjectConfig, rawMetaData);
 	}
 
@@ -138,7 +138,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link RawProcessManagedObjectRegistry}.
 	 * @return {@link RawWorkAdministratorMetaData}.
 	 */
-	public static <D extends Enum<D>> RawWorkManagedObjectMetaData createProcessBound(
+	public static <D extends Enum<D>> RawWorkManagedObjectMetaData<D> createProcessBound(
 			String processManagedObjectName,
 			RawProcessManagedObjectRegistry processMoRegistry)
 			throws ConfigurationException {
@@ -152,11 +152,11 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 		}
 
 		// Create the meta-data for the process managed object
-		ManagedObjectMetaData managedObjectMetaData = new ManagedObjectMetaDataImpl(
+		ManagedObjectMetaData<D> managedObjectMetaData = new ManagedObjectMetaDataImpl<D>(
 				rawMetaData.getProcessIndex());
 
 		// Add to listing of process bound
-		return new RawWorkManagedObjectMetaData(managedObjectMetaData,
+		return new RawWorkManagedObjectMetaData<D>(managedObjectMetaData,
 				rawMetaData);
 	}
 
@@ -174,7 +174,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * {@link ManagedObjectMetaData}.
 	 */
-	private final ManagedObjectMetaData metaData;
+	private final ManagedObjectMetaData<D> metaData;
 
 	/**
 	 * Dependency mappings for the {@link ManagedObject}.
@@ -206,7 +206,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 * @param dependencyMapping
 	 *            Dependency mappings for the {@link ManagedObject}.
 	 */
-	private RawWorkManagedObjectMetaData(ManagedObjectMetaData metaData,
+	private RawWorkManagedObjectMetaData(ManagedObjectMetaData<D> metaData,
 			ManagedObjectConfiguration workManagedObjectConfig,
 			Map<D, Integer> dependencyMapping) {
 		this.isProcessBound = false;
@@ -226,7 +226,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 * @param workManagedObjectConfig
 	 *            {@link LinkedManagedObjectConfiguration}.
 	 */
-	private RawWorkManagedObjectMetaData(ManagedObjectMetaData metaData,
+	private RawWorkManagedObjectMetaData(ManagedObjectMetaData<D> metaData,
 			LinkedManagedObjectConfiguration processManagedObjectConfig,
 			RawProcessManagedObjectMetaData processMoMetaData) {
 		this.isProcessBound = true;
@@ -246,7 +246,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 * @param workManagedObjectConfig
 	 *            {@link LinkedManagedObjectConfiguration}.
 	 */
-	private RawWorkManagedObjectMetaData(ManagedObjectMetaData metaData,
+	private RawWorkManagedObjectMetaData(ManagedObjectMetaData<D> metaData,
 			RawProcessManagedObjectMetaData processMoMetaData) {
 		this.isProcessBound = true;
 		this.workManagedObjectConfig = null;
@@ -347,7 +347,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 		dependencies.add(new Integer(moIndex));
 
 		// Obtain the raw work managed object meta-data
-		RawWorkManagedObjectMetaData rawMoMetaData = workMoRegistry
+		RawWorkManagedObjectMetaData<?> rawMoMetaData = workMoRegistry
 				.getRawWorkManagedObjectMetaData()[moIndex];
 
 		// Handle based on bounding
@@ -367,7 +367,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 
 		} else {
 			// Work bound managed object
-			for (ManagedObjectDependencyConfiguration dependencyConfig : rawMoMetaData
+			for (ManagedObjectDependencyConfiguration<?> dependencyConfig : rawMoMetaData
 					.getWorkManagedObjectConfiguration()
 					.getDependencyConfiguration()) {
 
@@ -437,7 +437,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 * 
 	 * @return {@link ManagedObjectMetaData}.
 	 */
-	public ManagedObjectMetaData getManagedObjectMetaData() {
+	public ManagedObjectMetaData<D> getManagedObjectMetaData() {
 		return this.metaData;
 	}
 

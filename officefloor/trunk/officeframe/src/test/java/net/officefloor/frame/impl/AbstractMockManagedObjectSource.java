@@ -46,7 +46,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
-	private ManagedObjectExecuteContext executeContext;
+	private ManagedObjectExecuteContext<H> executeContext;
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceContext}.
@@ -62,7 +62,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 * 
 	 * @return {@link ManagedObjectExecuteContext}.
 	 */
-	protected final ManagedObjectExecuteContext getExecuteContext() {
+	protected final ManagedObjectExecuteContext<H> getExecuteContext() {
 		return this.executeContext;
 	}
 
@@ -93,7 +93,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 *            Dependency types.
 	 */
 	protected void initDependencies(PassByReference<Class<D>> dependencyKeys,
-			Map<D, Class> dependencies) {
+			Map<D, Class<?>> dependencies) {
 	}
 
 	/**
@@ -105,7 +105,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 *            Handler types.
 	 */
 	protected void initHandlers(PassByReference<Class<H>> handlerKeys,
-			Map<H, Class> handlers) {
+			Map<H, Class<?>> handlers) {
 	}
 
 	/**
@@ -113,7 +113,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 * 
 	 * @return {@link ManagedObject} class.
 	 */
-	protected Class getManagedObjectClass() {
+	protected Class<?> getManagedObjectClass() {
 		return ManagedObject.class;
 	}
 
@@ -122,7 +122,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 * 
 	 * @return Object class.
 	 */
-	protected Class getObjectClass() {
+	protected Class<?> getObjectClass() {
 		return Object.class;
 	}
 
@@ -184,11 +184,11 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
 	 */
 	@SuppressWarnings("unchecked")
-	public final ManagedObjectSourceMetaData getMetaData() {
+	public final ManagedObjectSourceMetaData<?, ?> getMetaData() {
 
 		// Create the listing of dependencies
 		final Class[] dependencyKeys = new Class[1];
-		Map<D, Class> dependencies = new HashMap<D, Class>();
+		Map<D, Class<?>> dependencies = new HashMap();
 		this.initDependencies(new PassByReference<Class<D>>() {
 			public void setValue(Class<D> value) {
 				dependencyKeys[0] = value;
@@ -197,7 +197,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 
 		// Create the listing of handlers
 		final Class[] handlerKeys = new Class[1];
-		Map<H, Class> handlers = new HashMap<H, Class>();
+		Map<H, Class<?>> handlers = new HashMap();
 		this.initHandlers(new PassByReference<Class<H>>() {
 			public void setValue(Class<H> value) {
 				handlerKeys[0] = value;
@@ -215,10 +215,11 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
-	public final void start(ManagedObjectExecuteContext context)
+	@SuppressWarnings("unchecked")
+	public final void start(ManagedObjectExecuteContext<?> context)
 			throws Exception {
 		// Specify context
-		this.executeContext = context;
+		this.executeContext = (ManagedObjectExecuteContext<H>) context;
 
 		// Start
 		this.start();

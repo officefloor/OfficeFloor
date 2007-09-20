@@ -82,7 +82,7 @@ public class RawAdministratorMetaData {
 	/**
 	 * {@link AdministratorSource}.
 	 */
-	protected final AdministratorSource administratorSource;
+	protected final AdministratorSource<?, ?> administratorSource;
 
 	/**
 	 * {@link OfficeScope}.
@@ -93,7 +93,7 @@ public class RawAdministratorMetaData {
 	 * Listing of {@link AdministratorMetaData} for this
 	 * {@link RawAdministratorMetaData}.
 	 */
-	protected final List<AdministratorMetaDataImpl> adminMetaData = new LinkedList<AdministratorMetaDataImpl>();
+	protected final List<AdministratorMetaDataImpl<?, ?>> adminMetaData = new LinkedList<AdministratorMetaDataImpl<?, ?>>();
 
 	/**
 	 * Index of this
@@ -114,7 +114,7 @@ public class RawAdministratorMetaData {
 	 */
 	private RawAdministratorMetaData(
 			AdministratorSourceConfiguration adminSourceConfig,
-			AdministratorSource administratorSource, OfficeScope adminScope) {
+			AdministratorSource<?, ?> administratorSource, OfficeScope adminScope) {
 		this.adminSourceConfig = adminSourceConfig;
 		this.administratorSource = administratorSource;
 		this.adminScope = adminScope;
@@ -134,7 +134,7 @@ public class RawAdministratorMetaData {
 	 * 
 	 * @return {@link AdministratorSource}.
 	 */
-	public AdministratorSource getAdministratorSource() {
+	public AdministratorSource<?, ?> getAdministratorSource() {
 		return this.administratorSource;
 	}
 
@@ -154,7 +154,7 @@ public class RawAdministratorMetaData {
 	 * 
 	 * @return {@link AdministratorMetaData} listing.
 	 */
-	public List<AdministratorMetaDataImpl> getAdministratorMetaData() {
+	public List<AdministratorMetaDataImpl<?, ?>> getAdministratorMetaData() {
 		return this.adminMetaData;
 	}
 

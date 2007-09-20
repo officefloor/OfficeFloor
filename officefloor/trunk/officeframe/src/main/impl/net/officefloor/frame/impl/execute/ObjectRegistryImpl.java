@@ -34,7 +34,7 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 	 * {@link WorkContainer} to obtain the co-ordinating
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
-	private final WorkContainer workContainer;
+	private final WorkContainer<?> workContainer;
 
 	/**
 	 * Map of dependency key to the
@@ -67,7 +67,7 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
 	 *            instances.
 	 */
-	public ObjectRegistryImpl(WorkContainer workContainer,
+	public ObjectRegistryImpl(WorkContainer<?> workContainer,
 			Map<D, Integer> dependencies, ThreadState threadState) {
 		this.workContainer = workContainer;
 		this.dependencies = dependencies;

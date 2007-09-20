@@ -32,5 +32,5 @@ public interface ManagedObjectDependencyMetaData {
 	 * 
 	 * @return Type of the dependency.
 	 */
-	Class getType();
+	Class<?> getType();
 }

@@ -43,7 +43,7 @@ public interface AdministratorSourceConfiguration {
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	<AS extends AdministratorSource> Class<AS> getAdministratorSourceClass()
+	<AS extends AdministratorSource<?, ?>> Class<AS> getAdministratorSourceClass()
 			throws ConfigurationException;
 
 	/**

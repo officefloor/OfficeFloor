@@ -31,6 +31,6 @@ public interface ProcessStateMetaData {
 	 * 
 	 * @return {@link ManagedObjectMetaData} instances.
 	 */
-	ManagedObjectMetaData[] getManagedObjectMetaData();
+	<D extends Enum<D>> ManagedObjectMetaData<D>[] getManagedObjectMetaData();
 
 }

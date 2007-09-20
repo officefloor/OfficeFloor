@@ -19,6 +19,7 @@ package net.officefloor.frame.impl;
 import java.util.EnumMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
@@ -37,12 +38,13 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	/**
 	 * {@link Class} of the {@link ManagedObject}.
 	 */
+	@SuppressWarnings("unchecked")
 	protected final Class managedObjectClass;
 
 	/**
 	 * Class of object being managed.
 	 */
-	protected final Class objectClass;
+	protected final Class<?> objectClass;
 
 	/**
 	 * Dependency keys.
@@ -62,7 +64,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	/**
 	 * Handler meta-data.
 	 */
-	protected final Map<H, Class> handlerMetaData;
+	protected final Map<H, Class<?>> handlerMetaData;
 
 	/**
 	 * Initiate from the {@link ManagedObject}.
@@ -87,10 +89,11 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * @param objectClass
 	 *            Class of the object being managed.
 	 */
-	public MockManagedObjectSourceMetaData(Class managedObjectClass,
-			Class objectClass, Class<D> dependencyKeys,
-			Map<D, Class> dependencyClasses, Class<H> handlerKeys,
-			Map<H, Class> handlerClasses) {
+	@SuppressWarnings("unchecked")
+	public <MO extends ManagedObject> MockManagedObjectSourceMetaData(
+			Class<MO> managedObjectClass, Class<?> objectClass,
+			Class<D> dependencyKeys, Map<D, Class<?>> dependencyClasses,
+			Class<H> handlerKeys, Map<H, Class<?>> handlerClasses) {
 		this.managedObjectClass = managedObjectClass;
 		this.objectClass = objectClass;
 
@@ -113,7 +116,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 		if (this.handlerKeys == null) {
 			this.handlerMetaData = null;
 		} else {
-			this.handlerMetaData = new EnumMap<H, Class>(this.handlerKeys);
+			this.handlerMetaData = new EnumMap(this.handlerKeys);
 			for (H key : this.handlerKeys.getEnumConstants()) {
 				this.handlerMetaData.put(key, handlerClasses.get(key));
 			}
@@ -125,7 +128,8 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
 	 */
-	public Class getManagedObjectClass() {
+	@SuppressWarnings("unchecked")
+	public <MO extends ManagedObject> Class<MO> getManagedObjectClass() {
 		return this.managedObjectClass;
 	}
 
@@ -134,7 +138,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getObjectClass()
 	 */
-	public Class getObjectClass() {
+	public Class<?> getObjectClass() {
 		return this.objectClass;
 	}
 
@@ -170,8 +174,9 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
 	 */
-	public Class getHandlerType(H key) {
-		return this.handlerMetaData.get(key);
+	@SuppressWarnings("unchecked")
+	public <HT extends Handler<?>> Class<HT> getHandlerType(H key) {
+		return (Class<HT>) this.handlerMetaData.get(key);
 	}
 
 	/*
@@ -179,7 +184,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
 	 */
-	public ManagedObjectExtensionInterfaceMetaData[] getExtensionInterfacesMetaData() {
+	public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
 		// TODO Auto-generated method stub
 		return null;
 	}

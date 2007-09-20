@@ -33,7 +33,7 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	/**
 	 * Instance.
 	 */
-	private static InputManagedObjectSource INSTANCE;
+	private static InputManagedObjectSource<?> INSTANCE;
 
 	/**
 	 * Inputs a parameter into the Office.
@@ -61,8 +61,9 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	 * @param handlers
 	 *            Handlers.
 	 */
+	@Override
 	protected void initHandlers(PassByReference<Class<Handlers>> handlerKeys,
-			Map<Handlers, Class> handlers) {
+			Map<Handlers, Class<?>> handlers) {
 		handlerKeys.setValue(Handlers.class);
 		handlers.put(Handlers.INPUT, MockHandler.class);
 	}

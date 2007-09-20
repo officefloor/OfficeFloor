@@ -37,7 +37,7 @@ public interface AdministratorBuilder<A extends Enum<A>> {
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	<S extends AdministratorSource> void setAdministratorSourceClass(
+	<S extends AdministratorSource<?, ?>> void setAdministratorSourceClass(
 			Class<S> administratorSourceClass) throws BuildException;
 
 	/**

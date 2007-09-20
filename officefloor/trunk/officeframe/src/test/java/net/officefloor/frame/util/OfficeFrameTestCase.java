@@ -102,7 +102,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			writer.println(" = null");
 
 		} else if (root instanceof Collection) {
-			Collection collection = (Collection) root;
+			Collection<?> collection = (Collection<?>) root;
 
 			// Display that collection
 			writer.println("[]");
@@ -644,7 +644,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws FileNotFoundException
 	 *             Should the file not be found.
 	 */
-	public File findFile(Class packageClass, String fileName)
+	public File findFile(Class<?> packageClass, String fileName)
 			throws FileNotFoundException {
 
 		// Obtain the relative file path
@@ -720,7 +720,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @throws FileNotFoundException
 	 *             Should the file not be found.
 	 */
-	public InputStream findInputStream(Class packageClass, String fileName)
+	public InputStream findInputStream(Class<?> packageClass, String fileName)
 			throws FileNotFoundException {
 
 		// Obtain the relative file path
@@ -745,7 +745,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Class to obtain the relative path from for its package.
 	 * @return Relative path of class's package.
 	 */
-	public String getPackageRelativePath(Class packageClass) {
+	public String getPackageRelativePath(Class<?> packageClass) {
 		// Obtain package
 		String packageName = packageClass.getPackage().getName();
 

@@ -58,6 +58,7 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	/**
 	 * {@link Class} of the {@link AdministratorSource}.
 	 */
+	@SuppressWarnings("unchecked")
 	protected Class administratorSourceClass;
 
 	/**
@@ -89,7 +90,7 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 * 
 	 * @see net.officefloor.frame.api.build.TaskAdministratorBuilder#setTaskAdministratorSourceClass(java.lang.Class)
 	 */
-	public <S extends AdministratorSource> void setAdministratorSourceClass(
+	public <S extends AdministratorSource<?, ?>> void setAdministratorSourceClass(
 			Class<S> administratorSourceClass) throws BuildException {
 		this.administratorSourceClass = administratorSourceClass;
 	}
@@ -172,7 +173,7 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 * @see net.officefloor.frame.internal.configuration.TaskAdministratorSourceConfiguration#getManagedObjectSourceClass()
 	 */
 	@SuppressWarnings("unchecked")
-	public <TS extends AdministratorSource> Class<TS> getAdministratorSourceClass()
+	public <TS extends AdministratorSource<?, ?>> Class<TS> getAdministratorSourceClass()
 			throws ConfigurationException {
 		return this.administratorSourceClass;
 	}

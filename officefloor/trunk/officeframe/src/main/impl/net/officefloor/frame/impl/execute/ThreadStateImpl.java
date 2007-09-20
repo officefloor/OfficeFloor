@@ -96,7 +96,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} for this {@link ThreadState}.
 	 */
-	public ThreadStateImpl(ProcessState processState, FlowMetaData flowMetaData) {
+	public ThreadStateImpl(ProcessState processState, FlowMetaData<?> flowMetaData) {
 		this.processState = processState;
 
 		// Create the thread monitor (if requird)
@@ -147,7 +147,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ThreadState#createFlow()
 	 */
-	public Flow createFlow(FlowMetaData flowMetaData) {
+	public Flow createFlow(FlowMetaData<?> flowMetaData) {
 		// Create the flow
 		Flow flow = new FlowImpl(this, this.flows);
 

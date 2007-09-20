@@ -18,6 +18,7 @@ package net.officefloor.frame.impl.execute;
 
 import java.util.Map;
 
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.OfficeImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -43,7 +44,7 @@ import net.officefloor.frame.spi.team.TaskContainer;
  * @author Daniel
  */
 public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
-		ManagedObjectMetaData, ManagedObjectPoolContext {
+		ManagedObjectMetaData<D>, ManagedObjectPoolContext {
 
 	/**
 	 * Index of the {@link ManagedObject} for this
@@ -287,8 +288,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#createObjectRegistry(net.officefloor.frame.internal.structure.WorkContainer,
 	 *      net.officefloor.frame.internal.structure.ThreadState)
 	 */
-	public ObjectRegistry<D> createObjectRegistry(WorkContainer workContainer,
-			ThreadState threadState) {
+	public <W extends Work> ObjectRegistry<D> createObjectRegistry(
+			WorkContainer<W> workContainer, ThreadState threadState) {
 		return new ObjectRegistryImpl<D>(workContainer, this.dependencyMapping,
 				threadState);
 	}

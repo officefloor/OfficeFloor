@@ -50,7 +50,7 @@ public class RawTaskRegistry {
 	 *             If fails.
 	 */
 	public static RawTaskRegistry createTaskRegistry(
-			WorkConfiguration workConfig,
+			WorkConfiguration<?> workConfig,
 			RawOfficeResourceRegistry officeResources,
 			RawWorkManagedObjectRegistry workMoRegistry,
 			RawWorkAdministratorRegistry workAdminRegistry,

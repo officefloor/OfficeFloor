@@ -21,7 +21,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel
  */
-public interface LinkedList<E extends LinkedListEntry> {
+public interface LinkedList<E extends LinkedListEntry<E>> {
 
 	/**
 	 * Obtains the head of this {@link LinkedList}.

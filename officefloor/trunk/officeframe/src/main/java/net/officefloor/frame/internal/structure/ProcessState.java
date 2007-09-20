@@ -16,6 +16,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.Work;
+
 /**
  * State of a process within the Office.
  * 
@@ -40,7 +42,7 @@ public interface ProcessState {
 	 * @return {@link Flow} for the new {@link ThreadState} bound to this
 	 *         {@link ProcessState}.
 	 */
-	Flow createThread(FlowMetaData flowMetaData);
+	<W extends Work> Flow createThread(FlowMetaData<W> flowMetaData);
 
 	/**
 	 * Flags that the input {@link ThreadState} has complete.
@@ -66,7 +68,7 @@ public interface ProcessState {
 	 *            Index of the {@link AdministratorContainer} to be returned.
 	 * @return {@link AdministratorContainer} for the index.
 	 */
-	AdministratorContainer getAdministratorContainer(int index);
+	AdministratorContainer<?, ?> getAdministratorContainer(int index);
 
 	/**
 	 * Registers a {@link ProcessCompletionListener} with this

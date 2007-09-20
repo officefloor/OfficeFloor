@@ -143,7 +143,7 @@ public class RawManagedObjectRegistry {
 	 *             If fails to load remaining state.
 	 */
 	@SuppressWarnings("unchecked")
-	public <H extends Enum<H>> void loadRemainingManagedObjectState(
+	public void loadRemainingManagedObjectState(
 			Map<String, RawOfficeMetaData> offices) throws Exception {
 
 		// Iterate over the raw managed objects
@@ -186,8 +186,8 @@ public class RawManagedObjectRegistry {
 					.getManagedObjectSourceConfiguration();
 
 			// Obtain the handler keys
-			Class<H> handlerKeys = rmo.getManagedObjectSource().getMetaData()
-					.getHandlerKeys();
+			Class<Enum> handlerKeys = (Class<Enum>) rmo
+					.getManagedObjectSource().getMetaData().getHandlerKeys();
 
 			// Create the map of handlers
 			Map<Enum, Handler> handlers;
@@ -246,11 +246,10 @@ public class RawManagedObjectRegistry {
 				handlers = new EnumMap(handlerKeys);
 
 				// Create the registry of handler configurations
-				EnumMap<H, HandlerConfiguration> handlerConfigs = new EnumMap<H, HandlerConfiguration>(
-						handlerKeys);
+				EnumMap handlerConfigs = new EnumMap(handlerKeys);
 				for (HandlerConfiguration handlerConfig : mosConfig
 						.getHandlerConfiguration()) {
-					handlerConfigs.put((H) handlerConfig.getHandlerKey(),
+					handlerConfigs.put(handlerConfig.getHandlerKey(),
 							handlerConfig);
 				}
 
@@ -258,7 +257,7 @@ public class RawManagedObjectRegistry {
 				for (Enum key : handlerKeys.getEnumConstants()) {
 
 					// Obtain the handle configuration
-					HandlerConfiguration handlerConfig = handlerConfigs
+					HandlerConfiguration handlerConfig = (HandlerConfiguration) handlerConfigs
 							.get(key);
 
 					// Create the process links

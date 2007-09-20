@@ -112,7 +112,7 @@ class MockHandler extends AbstractMockHandler<Indexed> {
 /**
  * Task to process handler input.
  */
-class InputTask extends AbstractMockTask {
+class InputTask extends AbstractMockTask<Object> {
 
 	/**
 	 * Parameter.

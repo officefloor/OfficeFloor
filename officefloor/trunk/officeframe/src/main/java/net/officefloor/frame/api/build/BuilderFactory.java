@@ -55,13 +55,13 @@ public interface BuilderFactory {
 	 * 
 	 * @return {@link ManagedObjectBuilder}.
 	 */
-	ManagedObjectBuilder createManagedObjectBuilder();
+	ManagedObjectBuilder<?> createManagedObjectBuilder();
 
 	/**
 	 * Creates the {@link AdministratorBuilder}.
 	 * 
 	 * @return {@link AdministratorBuilder}.
 	 */
-	AdministratorBuilder createAdministratorBuilder();
+	AdministratorBuilder<?> createAdministratorBuilder();
 
 }

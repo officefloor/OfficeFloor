@@ -82,7 +82,7 @@ public class ManagedObjectSourceLoader {
 	 * 
 	 * @return Loaded {@link ManagedObjectSource}.
 	 */
-	public <MS extends ManagedObjectSource> MS loadManagedObjectSource(
+	public <MS extends ManagedObjectSource, H extends Enum<H>> MS loadManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Create a new instance of the managed object source
@@ -92,7 +92,7 @@ public class ManagedObjectSourceLoader {
 		moSource.init(new LoadSourceContext());
 
 		// Start the managed object source
-		moSource.start(new LoadExecuteContext());
+		moSource.start(new LoadExecuteContext<H>());
 
 		// Return the loaded managed object source
 		return moSource;
@@ -137,7 +137,7 @@ public class ManagedObjectSourceLoader {
 		 * 
 		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getManagedObjectBuilder()
 		 */
-		public ManagedObjectBuilder getManagedObjectBuilder() {
+		public ManagedObjectBuilder<?> getManagedObjectBuilder() {
 			// TODO Auto-generated method stub
 			throw new UnsupportedOperationException("TODO implement");
 		}
@@ -167,14 +167,14 @@ public class ManagedObjectSourceLoader {
 	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
-	private class LoadExecuteContext implements ManagedObjectExecuteContext {
+	private class LoadExecuteContext<H extends Enum<H>> implements ManagedObjectExecuteContext<H> {
 
 		/*
 		 * (non-Javadoc)
 		 * 
 		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext#getHandler(H)
 		 */
-		public Handler getHandler(Enum key) {
+		public Handler<?> getHandler(H key) {
 			// TODO Auto-generated method stub
 			throw new UnsupportedOperationException("TODO implement");
 		}

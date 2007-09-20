@@ -57,7 +57,7 @@ public interface ManagedObjectSource {
 	 * 
 	 * @return Meta-data to describe this.
 	 */
-	ManagedObjectSourceMetaData getMetaData();
+	ManagedObjectSourceMetaData<?, ?> getMetaData();
 
 	/**
 	 * Called once after {@link #init(ManagedObjectSourceContext)} to indicate
@@ -70,7 +70,7 @@ public interface ManagedObjectSource {
 	 *             Should the {@link ManagedObjectSource} fail to start
 	 *             execution.
 	 */
-	void start(ManagedObjectExecuteContext context) throws Exception;
+	void start(ManagedObjectExecuteContext<?> context) throws Exception;
 
 	/**
 	 * Sources a {@link ManagedObject}from this {@link ManagedObjectSource}.

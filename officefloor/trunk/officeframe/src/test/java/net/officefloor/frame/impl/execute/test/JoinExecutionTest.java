@@ -32,7 +32,7 @@ public class JoinExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	 */
 	public void testJoinAsynchronous() {
 
-		ExecutionNode<?> asyncNode = this.bindAsynchronousNode(this
+		ExecutionNode<Work> asyncNode = this.bindAsynchronousNode(this
 				.getInitialNode());
 		this.joinNode(this.getInitialNode(), asyncNode);
 

@@ -56,7 +56,7 @@ public class ManagedObjectSourceContextImpl implements
 	/**
 	 * {@link ManagedObjectBuilder}.
 	 */
-	protected ManagedObjectBuilder managedObjectBuilder;
+	protected ManagedObjectBuilder<?> managedObjectBuilder;
 
 	/**
 	 * {@link OfficeBuilder} for the office using the
@@ -93,7 +93,7 @@ public class ManagedObjectSourceContextImpl implements
 	 */
 	public ManagedObjectSourceContextImpl(String managedObjectName,
 			Properties properties, ResourceLocator resourceLocator,
-			ManagedObjectBuilder managedObjectBuilder,
+			ManagedObjectBuilder<?> managedObjectBuilder,
 			OfficeBuilder officeBuilder, OfficeFrame officeFrame) {
 		this.managedObjectName = managedObjectName;
 		this.properties = properties;
@@ -149,7 +149,7 @@ public class ManagedObjectSourceContextImpl implements
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getManagedObjectBuilder()
 	 */
-	public ManagedObjectBuilder getManagedObjectBuilder() {
+	public ManagedObjectBuilder<?> getManagedObjectBuilder() {
 		return this.managedObjectBuilder;
 	}
 

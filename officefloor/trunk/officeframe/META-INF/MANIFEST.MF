@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Office Floor Frame
 Bundle-SymbolicName: net.officefloor.frame
 Bundle-Version: 1.0.0
-Bundle-Localization: plugin
 Export-Package: net.officefloor.frame.api,
  net.officefloor.frame.api.build,
  net.officefloor.frame.api.execute,

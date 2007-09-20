@@ -91,7 +91,7 @@ public class RawProcessManagedObjectRegistry {
 	 * {@link net.officefloor.frame.internal.structure.ProcessState}
 	 * {@link ManagedObjectMetaData}.
 	 */
-	private final ManagedObjectMetaData[] metaData;
+	private final ManagedObjectMetaData<?>[] metaData;
 
 	/**
 	 * Registry of {@link RawProcessManagedObjectMetaData} by their names.
@@ -108,7 +108,7 @@ public class RawProcessManagedObjectRegistry {
 	 *            Registry of {@link RawProcessManagedObjectMetaData} by their
 	 *            names.
 	 */
-	private RawProcessManagedObjectRegistry(ManagedObjectMetaData[] metaData,
+	private RawProcessManagedObjectRegistry(ManagedObjectMetaData<?>[] metaData,
 			Map<String, RawProcessManagedObjectMetaData> registry) {
 		this.metaData = metaData;
 		this.registry = registry;
@@ -121,7 +121,7 @@ public class RawProcessManagedObjectRegistry {
 	 * @return {@link net.officefloor.frame.internal.structure.ProcessState}
 	 *         {@link ManagedObjectMetaData}.
 	 */
-	public ManagedObjectMetaData[] getManagedObjectMetaData() {
+	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
 		return this.metaData;
 	}
 

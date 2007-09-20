@@ -56,7 +56,7 @@ public interface ThreadState extends FlowFuture {
 	 *            {@link FlowMetaData} for the new {@link Flow}.
 	 * @return New {@link Flow}.
 	 */
-	Flow createFlow(FlowMetaData flowMetaData);
+	Flow createFlow(FlowMetaData<?> flowMetaData);
 
 	/**
 	 * Obtains the {@link LinkedList} of

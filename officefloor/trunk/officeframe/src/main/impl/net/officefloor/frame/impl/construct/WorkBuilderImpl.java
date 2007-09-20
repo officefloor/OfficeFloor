@@ -266,6 +266,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	 * 
 	 * @see net.officefloor.frame.internal.configuration.WorkConfiguration#getTaskConfiguration()
 	 */
+	@SuppressWarnings("unchecked")
 	public TaskConfiguration<?, W, ?, ?>[] getTaskConfiguration()
 			throws ConfigurationException {
 		return (TaskConfiguration<?, W, ?, ?>[]) this.tasks.values().toArray(

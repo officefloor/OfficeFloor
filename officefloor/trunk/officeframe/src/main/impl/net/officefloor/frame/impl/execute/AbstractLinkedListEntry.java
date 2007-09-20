@@ -24,7 +24,7 @@ import net.officefloor.frame.internal.structure.LinkedListEntry;
  * 
  * @author Daniel
  */
-public class AbstractLinkedListEntry<E extends LinkedListEntry> implements
+public class AbstractLinkedListEntry<E extends LinkedListEntry<E>> implements
 		LinkedListEntry<E> {
 
 	/**

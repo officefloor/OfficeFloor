@@ -50,7 +50,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/**
 	 * Meta-data of the {@link ManagedObject}.
 	 */
-	private final ManagedObjectMetaData metaData;
+	private final ManagedObjectMetaData<?> metaData;
 
 	/**
 	 * Lock for managing of the {@link ManagedObjectContainer}.
@@ -109,7 +109,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * @param lock
 	 *            Lock for managing the {@link ManagedObjectContainer}.
 	 */
-	public ManagedObjectContainerImpl(ManagedObjectMetaData metaData,
+	public <D extends Enum<D>> ManagedObjectContainerImpl(ManagedObjectMetaData<D> metaData,
 			Object lock) {
 		// Store state
 		this.metaData = metaData;

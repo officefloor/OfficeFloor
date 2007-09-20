@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.execute;
 
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -74,7 +75,7 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	 *      net.officefloor.frame.spi.team.ExecutionContext,
 	 *      net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void coordinateManagedObject(WorkContainer workContainer,
+	public <W extends Work> void coordinateManagedObject(WorkContainer<W> workContainer,
 			ExecutionContext executionContext, TaskContainer taskContainer) {
 		taskContainer.getThreadState().getProcessState()
 				.getManagedObjectContainer(this.index).coordinateManagedObject(

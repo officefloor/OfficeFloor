@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -123,7 +124,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link ProcessState} bound {@link ManagedObject} instances.
 	 * @return {@link ObjectRegistry}.
 	 */
-	ObjectRegistry<D> createObjectRegistry(WorkContainer workContainer,
+	<W extends Work> ObjectRegistry<D> createObjectRegistry(WorkContainer<W> workContainer,
 			ThreadState threadState);
 
 	/**

@@ -222,7 +222,7 @@ public class RawWorkAdministratorRegistry {
 	 * {@link AdministratorMetaData} for the
 	 * {@link net.officefloor.frame.api.execute.Work}.
 	 */
-	protected final AdministratorMetaData[] adminMetaData;
+	protected final AdministratorMetaData<?, ?>[] adminMetaData;
 
 	/**
 	 * Indexes of the
@@ -245,7 +245,7 @@ public class RawWorkAdministratorRegistry {
 	 *            instances by their names.
 	 */
 	private RawWorkAdministratorRegistry(String workName,
-			AdministratorMetaData[] adminMetaData,
+			AdministratorMetaData<?, ?>[] adminMetaData,
 			Map<String, Integer> adminIndexes) {
 		this.workName = workName;
 		this.adminMetaData = adminMetaData;
@@ -259,7 +259,7 @@ public class RawWorkAdministratorRegistry {
 	 * @return Listing of {@link AdministratorMetaData} for the
 	 *         {@link net.officefloor.frame.api.execute.Work}.
 	 */
-	public AdministratorMetaData[] getWorkAdministratorListing() {
+	public AdministratorMetaData<?, ?>[] getWorkAdministratorListing() {
 		return this.adminMetaData;
 	}
 
@@ -355,7 +355,7 @@ class RawWorkAdministratorMetaData {
 	/**
 	 * {@link AdministratorMetaData}.
 	 */
-	protected final AdministratorMetaData metaData;
+	protected final AdministratorMetaData<?, ?> metaData;
 
 	/**
 	 * {@link WorkAdministratorConfiguration}.
@@ -374,7 +374,7 @@ class RawWorkAdministratorMetaData {
 	 *            {@link WorkAdministratorConfiguration}.
 	 */
 	public RawWorkAdministratorMetaData(String name,
-			AdministratorMetaData metaData,
+			AdministratorMetaData<?, ?> metaData,
 			WorkAdministratorConfiguration adminConfig) {
 		this.name = name;
 		this.metaData = metaData;

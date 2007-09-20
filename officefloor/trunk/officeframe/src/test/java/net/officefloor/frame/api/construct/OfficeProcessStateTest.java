@@ -41,6 +41,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 	 * Validate {@link net.officefloor.frame.internal.structure.ProcessState} is
 	 * passed between {@link net.officefloor.frame.api.execute.Work} instances.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testProcessState() throws Exception {
 
 		// Parameter to be passed between work instances
@@ -58,8 +59,8 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		WorkBuilder<WorkOne> workOneBuilder = this.constructWork("WORK_ONE",
 				workOne, "SENDER");
 		workOneBuilder.addWorkManagedObject("mo-one", "MANAGED_OBJECT");
-		TaskBuilder taskOneBuilder = this.constructTask("SENDER", Object.class,
-				workOne, "TEAM", null);
+		TaskBuilder<Object, WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> taskOneBuilder = this
+				.constructTask("SENDER", Object.class, workOne, "TEAM", null);
 		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL);
 		taskOneBuilder.linkManagedObject(
@@ -71,8 +72,8 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		WorkBuilder<WorkTwo> workTwoBuilder = this.constructWork("WORK_TWO",
 				workTwo, "RECEIVER");
 		workTwoBuilder.addWorkManagedObject("mo-two", "MANAGED_OBJECT");
-		TaskBuilder taskTwoBuilder = this.constructTask("RECEIVER",
-				Object.class, workTwo, "TEAM", null);
+		TaskBuilder<Object, WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> taskTwoBuilder = this
+				.constructTask("RECEIVER", Object.class, workTwo, "TEAM", null);
 		taskTwoBuilder.linkManagedObject(
 				WorkTwoManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(),
 				"mo-two");
