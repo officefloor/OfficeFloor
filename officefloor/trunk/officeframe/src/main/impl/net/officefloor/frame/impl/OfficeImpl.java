@@ -62,18 +62,18 @@ public class OfficeImpl implements Office {
 	 * {@link ManagedObjectMetaData} instances for the {@link ProcessState}
 	 * within this Office.
 	 */
-	protected final ManagedObjectMetaData[] processStateManagedObjectMetaData;
+	protected final ManagedObjectMetaData<?>[] processStateManagedObjectMetaData;
 
 	/**
 	 * {@link AdministratorMetaData} instances for the {@link ProcessState}
 	 * within this Office.
 	 */
-	protected final AdministratorMetaData[] processStateAdministratorMetaData;
+	protected final AdministratorMetaData<?, ?>[] processStateAdministratorMetaData;
 
 	/**
 	 * {@link Flow} instances to invoke on start up of the Office.
 	 */
-	protected final FlowMetaData[] startupFlows;
+	protected final FlowMetaData<?>[] startupFlows;
 
 	/**
 	 * Initiate.

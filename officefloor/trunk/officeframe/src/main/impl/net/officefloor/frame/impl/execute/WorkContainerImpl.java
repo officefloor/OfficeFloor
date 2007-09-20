@@ -63,7 +63,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	 * {@link AdministratorContainer} instances for the respective
 	 * {@link net.officefloor.frame.spi.administration.Administrator} instances.
 	 */
-	protected final AdministratorContainer[] administrators;
+	protected final AdministratorContainer<?, ?>[] administrators;
 
 	/**
 	 * Count of {@link ThreadState} actively using this {@link Work} of this
@@ -180,7 +180,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 		if (managedObjectIndexes.length >= 0) {
 
 			// Obtain the work managed object meta-data
-			ManagedObjectMetaData workMoMetaDatas[] = this.workMetaData
+			ManagedObjectMetaData<?> workMoMetaDatas[] = this.workMetaData
 					.getManagedObjectMetaData();
 
 			// Lock for loading the work scoped managed objects
@@ -233,7 +233,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 		if (managedObjectIndexes.length >= 0) {
 
 			// Obtain the work managed object meta-data
-			ManagedObjectMetaData workMoMetaDatas[] = this.workMetaData
+			ManagedObjectMetaData<?> workMoMetaDatas[] = this.workMetaData
 					.getManagedObjectMetaData();
 
 			// Lock for co-ordinating the work scoped managed objects
@@ -281,7 +281,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 		if (managedObjectIndexes.length >= 0) {
 
 			// Obtain the work managed object meta-data
-			ManagedObjectMetaData workMoMetaDatas[] = this.workMetaData
+			ManagedObjectMetaData<?> workMoMetaDatas[] = this.workMetaData
 					.getManagedObjectMetaData();
 
 			// Lock for checking the work scoped managed objects
@@ -339,7 +339,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 		ThreadState threadState = adminContext.getThreadState();
 
 		// Obtain the administrator container
-		AdministratorContainer<Object, A> container = this.administrators[duty
+		AdministratorContainer<Object, A> container = (AdministratorContainer<Object, A>) this.administrators[duty
 				.getAdministratorIndex()];
 
 		// Obtain the work managed object meta-data
@@ -440,7 +440,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 		if (remainingInterest == 0) {
 
 			// Obtain the work managed object meta-data
-			ManagedObjectMetaData workMoMetaDatas[] = this.workMetaData
+			ManagedObjectMetaData<?> workMoMetaDatas[] = this.workMetaData
 					.getManagedObjectMetaData();
 
 			// Unload the work scoped managed objects

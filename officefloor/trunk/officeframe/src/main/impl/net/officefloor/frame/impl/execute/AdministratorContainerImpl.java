@@ -158,7 +158,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 */
 	public void doFlow(int flowIndex, Object parameter) {
 		// Obtain the flow meta-data
-		FlowMetaData flowMetaData = this.dutyMetaData.getFlow(flowIndex);
+		FlowMetaData<?> flowMetaData = this.dutyMetaData.getFlow(flowIndex);
 
 		// Do the flow
 		this.adminContext.doFlow(flowMetaData, parameter);

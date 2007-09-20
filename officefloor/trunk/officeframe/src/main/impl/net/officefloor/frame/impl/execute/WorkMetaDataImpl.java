@@ -45,13 +45,13 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 * Meta-data of the
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances.
 	 */
-	protected final ManagedObjectMetaData[] managedObjectMetaData;
+	protected final ManagedObjectMetaData<?>[] managedObjectMetaData;
 
 	/**
 	 * Meta-data of the
 	 * {@link net.officefloor.frame.spi.administration.Administrator} instances.
 	 */
-	protected final AdministratorMetaData[] administratorMetaData;
+	protected final AdministratorMetaData<?, ?>[] administratorMetaData;
 
 	/**
 	 * {@link FlowMetaData} for the initial
@@ -80,8 +80,8 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 *            {@link Work}.
 	 */
 	public WorkMetaDataImpl(int workId, WorkFactory<W> workFactory,
-			ManagedObjectMetaData[] moMetaData,
-			AdministratorMetaData[] adminMetaData,
+			ManagedObjectMetaData<?>[] moMetaData,
+			AdministratorMetaData<?, ?>[] adminMetaData,
 			FlowMetaData<W> initialFlowMetaData) {
 		this.workId = workId;
 		this.workFactory = workFactory;
@@ -122,7 +122,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 * 
 	 * @see net.officefloor.frame.internal.structure.WorkMetaData#getManagedObjectMetaData()
 	 */
-	public ManagedObjectMetaData[] getManagedObjectMetaData() {
+	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
 		return this.managedObjectMetaData;
 	}
 
@@ -131,7 +131,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 * 
 	 * @see net.officefloor.frame.internal.structure.WorkMetaData#getAdministratorMetaData()
 	 */
-	public AdministratorMetaData[] getAdministratorMetaData() {
+	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
 		return this.administratorMetaData;
 	}
 

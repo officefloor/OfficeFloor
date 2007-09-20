@@ -44,9 +44,9 @@ public interface Flow extends FlowFuture, LinkedListEntry<Flow> {
 	 *            {@link TaskContainer}.
 	 * @return New configured {@link TaskContainer}.
 	 */
-	TaskContainer createTaskContainer(TaskMetaData taskMetaData,
+	TaskContainer createTaskContainer(TaskMetaData<?, ?, ?, ?> taskMetaData,
 			TaskNode parallelNodeOwner, Object parameter,
-			ThreadWorkLink currentWorkLink);
+			ThreadWorkLink<?> currentWorkLink);
 
 	/**
 	 * Flags that the input {@link TaskContainer} has completed.

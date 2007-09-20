@@ -364,7 +364,7 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 					// Possibly load the next task in the flow
 					if (this.getNextNode() == null) {
 						// No sequential node, therefore load next task in flow
-						TaskMetaData nextTaskMetaData = this.taskMetaData
+						TaskMetaData<?, ?, ?, ?> nextTaskMetaData = this.taskMetaData
 								.getNextTaskInFlow();
 						if (nextTaskMetaData != null) {
 							// Create next task
@@ -665,10 +665,11 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 	public FlowFuture doFlow(int flowIndex, Object parameter) {
 
 		// Obtain the Flow meta-data
-		FlowMetaData flowMetaData = this.taskMetaData.getFlow(flowIndex);
+		FlowMetaData<?> flowMetaData = this.taskMetaData.getFlow(flowIndex);
 
 		// Obtain the task meta-data for instigating the flow
-		TaskMetaData initTaskMetaData = flowMetaData.getInitialTaskMetaData();
+		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
+				.getInitialTaskMetaData();
 
 		// Instigate the flow
 		switch (flowMetaData.getInstigationStrategy()) {

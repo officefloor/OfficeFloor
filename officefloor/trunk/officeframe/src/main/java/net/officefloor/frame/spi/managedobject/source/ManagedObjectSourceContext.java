@@ -84,7 +84,7 @@ public interface ManagedObjectSourceContext {
 	 * 
 	 * @return {@link ManagedObjectBuilder}.
 	 */
-	ManagedObjectBuilder getManagedObjectBuilder();
+	ManagedObjectBuilder<?> getManagedObjectBuilder();
 
 	/**
 	 * Obtains the {@link OfficeBuilder} building the office that the

@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -73,7 +74,7 @@ public interface OfficeConfiguration {
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	WorkConfiguration[] getWorkConfiguration() throws ConfigurationException;
+	<W extends Work> WorkConfiguration<W>[] getWorkConfiguration() throws ConfigurationException;
 
 	/**
 	 * Obtains the configuration of the

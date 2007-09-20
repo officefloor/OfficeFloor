@@ -54,7 +54,7 @@ public class RawProcessManagedObjectMetaData {
 	 * @return {@link RawProcessManagedObjectMetaData}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <D extends Enum<D>> RawProcessManagedObjectMetaData createRawProcessManagedObjectMetaData(
+	public static RawProcessManagedObjectMetaData createRawProcessManagedObjectMetaData(
 			ManagedObjectConfiguration moConfig, int processManagedObjectIndex,
 			Map<String, RawManagedObjectMetaData> managedObjects)
 			throws ConfigurationException {
@@ -71,11 +71,11 @@ public class RawProcessManagedObjectMetaData {
 		}
 
 		// Obtain the dependency keys for the managed object
-		Class<D> dependencyKeys = rawMetaData.getManagedObjectSource()
-				.getMetaData().getDependencyKeys();
+		Class<?> dependencyKeys = (Class<?>) rawMetaData
+				.getManagedObjectSource().getMetaData().getDependencyKeys();
 
 		// Create the dependency mappings
-		Map<D, Integer> dependencyMapping;
+		Map<Enum, Integer> dependencyMapping;
 		String[] dependencyIds;
 		if (dependencyKeys == null) {
 			// No dependencies
@@ -84,7 +84,7 @@ public class RawProcessManagedObjectMetaData {
 
 		} else {
 			// Create the dependency mappings
-			dependencyMapping = new EnumMap<D, Integer>(dependencyKeys);
+			dependencyMapping = new EnumMap(dependencyKeys);
 
 			// Create the listing of dependencies
 			List<String> dependencyListing = new LinkedList<String>();
@@ -118,7 +118,7 @@ public class RawProcessManagedObjectMetaData {
 	/**
 	 * {@link ManagedObjectMetaData}.
 	 */
-	private final ManagedObjectMetaData metaData;
+	private final ManagedObjectMetaData<?> metaData;
 
 	/**
 	 * Index of the {@link ManagedObjectMetaData} within the
@@ -136,6 +136,7 @@ public class RawProcessManagedObjectMetaData {
 	 * Dependency map for the
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
+	@SuppressWarnings("unchecked")
 	private final Map dependencyMap;
 
 	/**
@@ -157,8 +158,8 @@ public class RawProcessManagedObjectMetaData {
 	 */
 	private RawProcessManagedObjectMetaData(
 			ManagedObjectConfiguration moConfig,
-			ManagedObjectMetaData metaData, int index, String[] dependencyIds,
-			Map dependencyMap) {
+			ManagedObjectMetaData<?> metaData, int index, String[] dependencyIds,
+			Map<?, ?> dependencyMap) {
 		this.moConfig = moConfig;
 		this.metaData = metaData;
 		this.index = index;
@@ -180,7 +181,7 @@ public class RawProcessManagedObjectMetaData {
 	 * 
 	 * @return {@link ManagedObjectMetaData}.
 	 */
-	public ManagedObjectMetaData getManagedObjectMetaData() {
+	public ManagedObjectMetaData<?> getManagedObjectMetaData() {
 		return this.metaData;
 	}
 

@@ -30,7 +30,7 @@ public class TypeMatcher extends AbstractMatcher {
 	/**
 	 * Types of the arguments expected.
 	 */
-	protected final Class[] matchTypes;
+	protected final Class<?>[] matchTypes;
 
 	/**
 	 * Initiate with a single argument type.
@@ -38,7 +38,7 @@ public class TypeMatcher extends AbstractMatcher {
 	 * @param type
 	 *            Type of the only parameter.
 	 */
-	public TypeMatcher(Class type) {
+	public TypeMatcher(Class<?> type) {
 		this(new Class[] { type });
 	}
 
@@ -48,7 +48,7 @@ public class TypeMatcher extends AbstractMatcher {
 	 * @param types
 	 *            Types corresponding the parameters.
 	 */
-	public TypeMatcher(Class[] types) {
+	public TypeMatcher(Class<?>[] types) {
 		// Initiate state
 		this.matchTypes = types;
 	}
@@ -74,7 +74,7 @@ public class TypeMatcher extends AbstractMatcher {
 
 		// Ensure parameters match
 		int index = 0;
-		for (Class matchType : this.matchTypes) {
+		for (Class<?> matchType : this.matchTypes) {
 			// Ensure null if expected
 			if (matchType == null) {
 				if (actual != null) {

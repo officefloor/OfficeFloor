@@ -63,7 +63,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * {@link WorkBuilder}.
 	 */
-	private WorkBuilder workBuilder;
+	private WorkBuilder<?> workBuilder;
 
 	/*
 	 * (non-Javadoc)
@@ -222,7 +222,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to register a
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
-	protected <S extends ManagedObjectSource> ManagedObjectBuilder constructManagedObject(
+	protected <S extends ManagedObjectSource> ManagedObjectBuilder<?> constructManagedObject(
 			String managedObjectName, Class<S> managedObjectSourceClass,
 			String managingOffice) throws BuildException {
 
@@ -258,12 +258,14 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
 	protected void constructManagedObject(String managedObjectName,
-			ManagedObjectSourceMetaData metaData, ManagedObject managedObject,
-			String managingOffice) throws BuildException {
+			ManagedObjectSourceMetaData<?, ?> metaData,
+			ManagedObject managedObject, String managingOffice)
+			throws BuildException {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder managedObjectBuilder = OfficeFrame.getInstance()
-				.getMetaDataFactory().createManagedObjectBuilder();
+		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame
+				.getInstance().getMetaDataFactory()
+				.createManagedObjectBuilder();
 
 		// Bind Managed Object
 		MockManagedObjectSource.bindManagedObject(managedObjectBuilder,
@@ -288,12 +290,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to register a
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void constructManagedObject(String managedObjectName,
 			ManagedObject managedObject, String managingOffice)
 			throws BuildException {
 
 		// Create the mock Managed Object Source meta-data
-		ManagedObjectSourceMetaData metaData = new MockManagedObjectSourceMetaData(
+		ManagedObjectSourceMetaData<?, ?> metaData = new MockManagedObjectSourceMetaData(
 				managedObject);
 
 		// Register the Managed Object
@@ -348,14 +351,16 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            Meta-data for the {@link AdministratorSourceMetaData}.
 	 * @return {@link AdministratorBuilder}.
 	 */
-	protected AdministratorBuilder constructAdministrator(String adminName,
-			Administrator adminOne,
-			AdministratorSourceMetaData adminOneMetaData, OfficeScope adminScope)
-			throws BuildException {
+	@SuppressWarnings("unchecked")
+	protected <I extends Object, A extends Enum<A>> AdministratorBuilder<A> constructAdministrator(
+			String adminName, Administrator<I, A> adminOne,
+			AdministratorSourceMetaData<I, A> adminOneMetaData,
+			OfficeScope adminScope) throws BuildException {
 
 		// Create the Administrator Builder
-		AdministratorBuilder adminBuilder = OfficeFrame.getInstance()
-				.getMetaDataFactory().createAdministratorBuilder();
+		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
+				.getInstance().getMetaDataFactory()
+				.createAdministratorBuilder();
 
 		// Bind the Administrator
 		MockAdministratorSource.bindAdministrator(adminBuilder, adminName,
@@ -382,13 +387,15 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            {@link OfficeScope} of the {@link Administrator}.
 	 * @return {@link AdministratorBuilder}.
 	 */
-	protected <AS extends AdministratorSource> AdministratorBuilder constructAdministrator(
+	@SuppressWarnings("unchecked")
+	protected <I extends Object, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> constructAdministrator(
 			String adminName, Class<AS> adminSource, OfficeScope adminScope)
 			throws BuildException {
 
 		// Create the Administrator Builder
-		AdministratorBuilder<?> adminBuilder = OfficeFrame.getInstance()
-				.getMetaDataFactory().createAdministratorBuilder();
+		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
+				.getInstance().getMetaDataFactory()
+				.createAdministratorBuilder();
 
 		// Configure the administrator
 		adminBuilder.setAdministratorSourceClass(adminSource);

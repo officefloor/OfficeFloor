@@ -97,7 +97,7 @@ public interface OfficeBuilder {
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	void addAdministrator(String id, AdministratorBuilder administratorBuilder)
+	void addAdministrator(String id, AdministratorBuilder<?> administratorBuilder)
 			throws BuildException;
 
 	/**

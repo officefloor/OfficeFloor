@@ -39,6 +39,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 	 * Validates that able to pass parameters between
 	 * {@link net.officefloor.frame.api.execute.Work} instances.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testPassParameterBetweenWork() throws Exception {
 
 		// Parameter to be passed between work instances
@@ -50,7 +51,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		// Add the first work
 		WorkOne workOne = new WorkOne(parameter);
 		this.constructWork("WORK_ONE", workOne, "SENDER");
-		TaskBuilder taskBuilder = this.constructTask("SENDER", Object.class,
+		TaskBuilder<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> taskBuilder = this.constructTask("SENDER", Object.class,
 				workOne, "TEAM", null);
 		taskBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL);

@@ -21,7 +21,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel
  */
-public interface LinkedListEntry<E extends LinkedListEntry> {
+public interface LinkedListEntry<E extends LinkedListEntry<E>> {
 
 	/**
 	 * Obtains the previous entry in the list.

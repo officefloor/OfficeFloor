@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.ExecutionContext;
 import net.officefloor.frame.spi.team.TaskContainer;
@@ -56,7 +57,7 @@ public interface ManagedObjectContainer {
 	 *            {@link TaskContainer} requesting the {@link ManagedObject} to
 	 *            co-ordinate.
 	 */
-	void coordinateManagedObject(WorkContainer workContainer,
+	<W extends Work> void coordinateManagedObject(WorkContainer<W> workContainer,
 			ExecutionContext executionContext, TaskContainer taskContainer);
 
 	/**

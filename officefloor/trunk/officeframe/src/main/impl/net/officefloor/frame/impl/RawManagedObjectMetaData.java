@@ -90,7 +90,7 @@ public class RawManagedObjectMetaData {
 		}
 
 		// Obtain the managed object builder
-		ManagedObjectBuilder managedObjectBuilder = (ManagedObjectBuilder) mosConfig;
+		ManagedObjectBuilder<?> managedObjectBuilder = (ManagedObjectBuilder<?>) mosConfig;
 
 		// Create the context for the Managed Object Source
 		ManagedObjectSourceContextImpl context = new ManagedObjectSourceContextImpl(
@@ -158,7 +158,7 @@ public class RawManagedObjectMetaData {
 	 * Listing of {@link ManagedObjectMetaData} for this
 	 * {@link RawManagedObjectMetaData}.
 	 */
-	private final List<ManagedObjectMetaDataImpl> moMetaData = new LinkedList<ManagedObjectMetaDataImpl>();
+	private final List<ManagedObjectMetaDataImpl<?>> moMetaData = new LinkedList<ManagedObjectMetaDataImpl<?>>();
 
 	/**
 	 * {@link RawAssetManagerRegistry}.
@@ -258,7 +258,7 @@ public class RawManagedObjectMetaData {
 	 * @return Listing of {@link ManagedObjectMetaData} for this
 	 *         {@link RawManagedObjectMetaData}.
 	 */
-	public List<ManagedObjectMetaDataImpl> getManagedObjectMetaData() {
+	public List<ManagedObjectMetaDataImpl<?>> getManagedObjectMetaData() {
 		return this.moMetaData;
 	}
 
@@ -285,12 +285,12 @@ public class RawManagedObjectMetaData {
 	 *            Mappings for dependencies of this
 	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
-	public <D extends Enum<D>> ManagedObjectMetaData createManagedObjectMetaData(
+	public <D extends Enum<D>> ManagedObjectMetaData<?> createManagedObjectMetaData(
 			long timeout, Map<D, Integer> dependencyMapping)
 			throws ConfigurationException {
 
 		// Obtain the class of the Managed Object
-		Class managedObjectClass = this.managedObjectSource.getMetaData()
+		Class<?> managedObjectClass = this.managedObjectSource.getMetaData()
 				.getManagedObjectClass();
 		if (managedObjectClass == null) {
 			throw new ConfigurationException(

@@ -63,7 +63,8 @@ public class BuilderFactoryImpl implements BuilderFactory {
 	 * 
 	 * @see net.officefloor.frame.api.construct.MetaDataFactory#createManagedObjectBuilder(java.lang.Class)
 	 */
-	public ManagedObjectBuilder createManagedObjectBuilder() {
+	@SuppressWarnings("unchecked")
+	public ManagedObjectBuilder<?> createManagedObjectBuilder() {
 		return new ManagedObjectBuilderImpl();
 	}
 
@@ -72,7 +73,8 @@ public class BuilderFactoryImpl implements BuilderFactory {
 	 * 
 	 * @see net.officefloor.frame.api.build.BuilderFactory#createTaskAdministratorBuilder()
 	 */
-	public AdministratorBuilder createAdministratorBuilder() {
+	@SuppressWarnings("unchecked")
+	public AdministratorBuilder<?> createAdministratorBuilder() {
 		return new AdministratorBuilderImpl();
 	}
 

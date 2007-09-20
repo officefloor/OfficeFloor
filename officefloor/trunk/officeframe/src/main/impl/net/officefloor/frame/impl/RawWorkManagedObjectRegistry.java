@@ -62,7 +62,7 @@ public class RawWorkManagedObjectRegistry {
 	 *             Indicates invalid configuration.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <D extends Enum<D>> RawWorkManagedObjectRegistry createWorkManagedObjectRegistry(
+	public static RawWorkManagedObjectRegistry createWorkManagedObjectRegistry(
 			WorkConfiguration workConfig,
 			RawOfficeResourceRegistry officeResources)
 			throws ConfigurationException {
@@ -219,13 +219,13 @@ public class RawWorkManagedObjectRegistry {
 	 * {@link ManagedObjectMetaData} for the
 	 * {@link net.officefloor.frame.api.execute.Work}.
 	 */
-	protected final ManagedObjectMetaData[] moMetaData;
+	protected final ManagedObjectMetaData<?>[] moMetaData;
 
 	/**
 	 * {@link RawWorkManagedObjectMetaData} for the
 	 * {@link net.officefloor.frame.api.execute.Work}.
 	 */
-	protected final RawWorkManagedObjectMetaData[] rawMoMetaData;
+	protected final RawWorkManagedObjectMetaData<?>[] rawMoMetaData;
 
 	/**
 	 * Indexes of the {@link ManagedObject} instances bound directly to the
@@ -260,8 +260,8 @@ public class RawWorkManagedObjectRegistry {
 	 *            for the {@link net.officefloor.frame.api.execute.Work}.
 	 */
 	private RawWorkManagedObjectRegistry(String workName,
-			ManagedObjectMetaData[] moMetaData,
-			RawWorkManagedObjectMetaData[] rawMoMetaData,
+			ManagedObjectMetaData<?>[] moMetaData,
+			RawWorkManagedObjectMetaData<?>[] rawMoMetaData,
 			Map<String, Integer> workMoIndexes,
 			Map<String, Integer> processMoIndexes) {
 		this.workName = workName;
@@ -278,7 +278,7 @@ public class RawWorkManagedObjectRegistry {
 	 * @return Listing of {@link ManagedObjectMetaData} for the
 	 *         {@link net.officefloor.frame.api.execute.Work}.
 	 */
-	public ManagedObjectMetaData[] getWorkManagedObjectListing() {
+	public ManagedObjectMetaData<?>[] getWorkManagedObjectListing() {
 		return this.moMetaData;
 	}
 
@@ -287,7 +287,7 @@ public class RawWorkManagedObjectRegistry {
 	 * 
 	 * @return {@link RawWorkManagedObjectMetaData} instances.
 	 */
-	public RawWorkManagedObjectMetaData[] getRawWorkManagedObjectMetaData() {
+	public RawWorkManagedObjectMetaData<?>[] getRawWorkManagedObjectMetaData() {
 		return this.rawMoMetaData;
 	}
 
@@ -300,7 +300,7 @@ public class RawWorkManagedObjectRegistry {
 	 * @throws ConfigurationException
 	 *             If not of this registry.
 	 */
-	public int getIndex(RawWorkManagedObjectMetaData moMetaData)
+	public int getIndex(RawWorkManagedObjectMetaData<?> moMetaData)
 			throws ConfigurationException {
 
 		// Return the matching index

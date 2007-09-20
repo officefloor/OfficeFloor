@@ -98,7 +98,7 @@ public class RawAdministratorRegistry {
 	 *             If fails configuration.
 	 */
 	@SuppressWarnings("unchecked")
-	public <A extends Enum<A>> void loadRemainingAdministratorState(
+	public void loadRemainingAdministratorState(
 			RawWorkRegistry workRegistry) throws ConfigurationException {
 
 		// Iterate over the raw administrator objects
@@ -112,31 +112,32 @@ public class RawAdministratorRegistry {
 			AdministratorSource source = radmin.getAdministratorSource();
 
 			// Obtain the duty keys
-			Class<A> dutyKeys = source.getMetaData().getAministratorDutyKeys();
+			Class<Enum> dutyKeys = source.getMetaData()
+					.getAministratorDutyKeys();
 
 			// Create the map of duties
-			Map<A, DutyMetaData> duties;
+			Map<Enum, DutyMetaData> duties;
 			if (dutyKeys == null) {
 				// No duties
 				duties = Collections.EMPTY_MAP;
 			} else {
 
 				// Create the list of duties
-				duties = new EnumMap<A, DutyMetaData>(dutyKeys);
+				duties = new EnumMap(dutyKeys);
 
 				// Create the registry of duty configuration
-				EnumMap<A, DutyConfiguration<?>> dutyConfigs = new EnumMap<A, DutyConfiguration<?>>(
-						dutyKeys);
+				EnumMap dutyConfigs = new EnumMap(dutyKeys);
 				for (DutyConfiguration<?> dutyConfig : sourceConfig
 						.getDutyConfiguration()) {
-					dutyConfigs.put((A) dutyConfig.getDutyKey(), dutyConfig);
+					dutyConfigs.put(dutyConfig.getDutyKey(), dutyConfig);
 				}
 
 				// Load the registry of duties
-				for (A key : dutyKeys.getEnumConstants()) {
+				for (Enum key : dutyKeys.getEnumConstants()) {
 
 					// Obtain the duty configuration
-					DutyConfiguration<?> dutyConfig = dutyConfigs.get(key);
+					DutyConfiguration<?> dutyConfig = (DutyConfiguration<?>) dutyConfigs
+							.get(key);
 
 					// Create teh flow links
 					FlowMetaData<?>[] flowLinks;

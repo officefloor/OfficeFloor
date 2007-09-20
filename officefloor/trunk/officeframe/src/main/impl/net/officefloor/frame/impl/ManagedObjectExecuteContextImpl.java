@@ -34,7 +34,7 @@ public class ManagedObjectExecuteContextImpl<H extends Enum<H>> implements
 	 * Registry of {@link Handler} instances for the
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
-	protected final Map<H, Handler> handlers;
+	protected final Map<H, Handler<?>> handlers;
 
 	/**
 	 * Initiate.
@@ -43,7 +43,7 @@ public class ManagedObjectExecuteContextImpl<H extends Enum<H>> implements
 	 *            Registry of {@link Handler} instances for the
 	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
-	public ManagedObjectExecuteContextImpl(Map<H, Handler> handlers) {
+	public ManagedObjectExecuteContextImpl(Map<H, Handler<?>> handlers) {
 		this.handlers = handlers;
 	}
 
@@ -61,7 +61,7 @@ public class ManagedObjectExecuteContextImpl<H extends Enum<H>> implements
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext#getHandler(H)
 	 */
-	public Handler getHandler(H key) {
+	public Handler<?> getHandler(H key) {
 		return this.handlers.get(key);
 	}
 

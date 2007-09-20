@@ -175,6 +175,7 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 * 
 	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
 	 */
+	@SuppressWarnings("unchecked")
 	public Task<P, W, M, F> createTask(W work) {
 		return (Task<P, W, M, F>) work;
 	}

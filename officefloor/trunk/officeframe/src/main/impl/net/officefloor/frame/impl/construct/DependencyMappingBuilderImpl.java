@@ -81,7 +81,7 @@ public class DependencyMappingBuilderImpl implements DependencyMappingBuilder,
 	 *      java.lang.String)
 	 */
 	@SuppressWarnings("unchecked")
-	public void registerDependencyMapping(Enum key, String managedObjectId)
+	public <D extends Enum<D>> void registerDependencyMapping(D key, String managedObjectId)
 			throws BuildException {
 		this.dependencies.add(new ManagedObjectDependencyConfigurationImpl(key,
 				managedObjectId));

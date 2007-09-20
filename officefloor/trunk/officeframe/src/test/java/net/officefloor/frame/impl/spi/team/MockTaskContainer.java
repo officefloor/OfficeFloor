@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import junit.framework.TestCase;
+import junit.framework.Assert;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.ExecutionContext;
 import net.officefloor.frame.spi.team.TaskContainer;
@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-class MockTaskContainer extends TestCase implements TaskContainer {
+class MockTaskContainer implements TaskContainer {
 
 	/**
 	 * Lock.
@@ -80,7 +80,7 @@ class MockTaskContainer extends TestCase implements TaskContainer {
 			try {
 				this.getLock().wait(waitTime * 1000);
 			} catch (InterruptedException ex) {
-				fail("Interrupted: " + ex.getMessage());
+				Assert.fail("Interrupted: " + ex.getMessage());
 			}
 		}
 	}
@@ -104,7 +104,7 @@ class MockTaskContainer extends TestCase implements TaskContainer {
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException ex) {
-			fail("Interrupted: Failed processing task - " + ex.getMessage());
+			Assert.fail("Interrupted: Failed processing task - " + ex.getMessage());
 		}
 
 		// Never complete

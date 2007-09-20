@@ -40,7 +40,7 @@ public interface DependencyMappingBuilder {
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	void registerDependencyMapping(Enum key, String managedObjectId)
+	<D extends Enum<D>> void registerDependencyMapping(D key, String managedObjectId)
 			throws BuildException;
 
 }

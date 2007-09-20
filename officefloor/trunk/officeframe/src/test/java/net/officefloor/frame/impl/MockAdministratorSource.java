@@ -34,7 +34,8 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecif
  * 
  * @author Daniel
  */
-public class MockAdministratorSource implements AdministratorSource {
+public class MockAdministratorSource<I extends Object, A extends Enum<A>>
+		implements AdministratorSource<I, A> {
 
 	/**
 	 * Property name to source the {@link Administrator}.
@@ -62,8 +63,9 @@ public class MockAdministratorSource implements AdministratorSource {
 	 *             If bind fails.
 	 */
 	public static void bindAdministrator(AdministratorBuilder<?> builder,
-			String name, Administrator administrator,
-			AdministratorSourceMetaData sourceMetaData) throws BuildException {
+			String name, Administrator<?, ?> administrator,
+			AdministratorSourceMetaData<?, ?> sourceMetaData)
+			throws BuildException {
 
 		// Specify the task administrator source class
 		builder.setAdministratorSourceClass(MockAdministratorSource.class);
@@ -126,8 +128,9 @@ public class MockAdministratorSource implements AdministratorSource {
 	 * 
 	 * @see net.officefloor.frame.spi.taskadministration.source.TaskAdministratorSource#getMetaData()
 	 */
-	public AdministratorSourceMetaData getMetaData() {
-		return this.taskAdministratorSourceState.taskAdministratorSourceMetaData;
+	@SuppressWarnings("unchecked")
+	public AdministratorSourceMetaData<I, A> getMetaData() {
+		return (AdministratorSourceMetaData<I, A>) this.taskAdministratorSourceState.taskAdministratorSourceMetaData;
 	}
 
 	/*
@@ -135,26 +138,25 @@ public class MockAdministratorSource implements AdministratorSource {
 	 * 
 	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#createAdministrator()
 	 */
-	public Administrator createAdministrator() {
-		return this.taskAdministratorSourceState.taskAdministrator;
+	@SuppressWarnings("unchecked")
+	public Administrator<I, A> createAdministrator() {
+		return (Administrator<I, A>) this.taskAdministratorSourceState.taskAdministrator;
 	}
 
-}
-
-/**
- * State of the
- * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
- */
-class TaskAdministratorSourceState {
-
 	/**
-	 * {@link Administrator}.
+	 * State of the
+	 * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
 	 */
-	Administrator taskAdministrator;
+	private static class TaskAdministratorSourceState {
 
-	/**
-	 * {@link AdministratorSourceMetaData}.
-	 */
-	AdministratorSourceMetaData taskAdministratorSourceMetaData;
+		/**
+		 * {@link Administrator}.
+		 */
+		Administrator<?, ?> taskAdministrator;
 
+		/**
+		 * {@link AdministratorSourceMetaData}.
+		 */
+		AdministratorSourceMetaData<?, ?> taskAdministratorSourceMetaData;
+	}
 }

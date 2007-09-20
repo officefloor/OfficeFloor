@@ -18,6 +18,7 @@ package net.officefloor.frame.spi.managedobject.source;
 
 import java.util.Properties;
 
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
 
@@ -48,7 +49,7 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * @return {@link Class} of the {@link ManagedObject} returned from the
 	 *         {@link #getManagedObject()}.
 	 */
-	Class getManagedObjectClass();
+	<MO extends ManagedObject> Class<MO> getManagedObjectClass();
 
 	/**
 	 * <p>
@@ -69,7 +70,7 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * @return The {@link Class} of the object being managed by the
 	 *         {@link ManagedObject} returned from {@link #getManagedObject()}.
 	 */
-	Class getObjectClass();
+	Class<?> getObjectClass();
 
 	/**
 	 * <p>
@@ -124,7 +125,7 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 *         {@link net.officefloor.frame.api.execute.Handler} for the
 	 *         specified key must implement.
 	 */
-	Class getHandlerType(H key);
+	<HT extends Handler<?>> Class<HT> getHandlerType(H key);
 
 	/**
 	 * Obtains the meta-data regarding the extension interfaces that this
@@ -133,5 +134,5 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * @return Meta-data regarding the extension interfaces that this
 	 *         {@link ManagedObject} implements.
 	 */
-	ManagedObjectExtensionInterfaceMetaData[] getExtensionInterfacesMetaData();
+	ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData();
 }

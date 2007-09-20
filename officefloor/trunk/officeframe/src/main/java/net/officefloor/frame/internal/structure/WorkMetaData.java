@@ -60,7 +60,7 @@ public interface WorkMetaData<W extends Work> {
 	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
 	 *         instances for the {@link Work}.
 	 */
-	ManagedObjectMetaData[] getManagedObjectMetaData();
+	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
 
 	/**
 	 * Obtains the meta-data of the
@@ -71,6 +71,6 @@ public interface WorkMetaData<W extends Work> {
 	 *         {@link net.officefloor.frame.spi.administration.Administrator}
 	 *         instances for the {@link Work}.
 	 */
-	AdministratorMetaData[] getAdministratorMetaData();
+	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
 
 }

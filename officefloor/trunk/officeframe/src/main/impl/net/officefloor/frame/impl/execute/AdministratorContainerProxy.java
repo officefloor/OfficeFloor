@@ -66,8 +66,8 @@ public class AdministratorContainerProxy<I extends Object, A extends Enum<A>>
 	@SuppressWarnings("unchecked")
 	public ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData(
 			AdministratorContext context) {
-		return context.getThreadState().getProcessState()
-				.getAdministratorContainer(this.index)
+		return (ExtensionInterfaceMetaData<I>[]) context.getThreadState()
+				.getProcessState().getAdministratorContainer(this.index)
 				.getExtensionInterfaceMetaData(context);
 	}
 
@@ -78,11 +78,16 @@ public class AdministratorContainerProxy<I extends Object, A extends Enum<A>>
 	 *      I[], net.officefloor.frame.internal.structure.AdministratorContext)
 	 */
 	@SuppressWarnings("unchecked")
-	public void doDuty(TaskDutyAssociation taskDutyAssociation,
+	public void doDuty(TaskDutyAssociation<A> taskDutyAssociation,
 			List<I> extensionInterfaces, AdministratorContext context)
 			throws Exception {
-		context.getThreadState().getProcessState().getAdministratorContainer(
-				this.index).doDuty(taskDutyAssociation, extensionInterfaces,
+		// Obtain the Administrator Container
+		AdministratorContainer<I, A> administratorContainer = (AdministratorContainer<I, A>) context
+				.getThreadState().getProcessState().getAdministratorContainer(
+						this.index);
+
+		// Do the administration duty
+		administratorContainer.doDuty(taskDutyAssociation, extensionInterfaces,
 				context);
 	}
 

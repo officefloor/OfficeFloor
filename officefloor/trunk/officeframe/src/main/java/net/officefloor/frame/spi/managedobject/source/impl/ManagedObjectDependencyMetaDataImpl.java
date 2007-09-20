@@ -30,7 +30,7 @@ public class ManagedObjectDependencyMetaDataImpl implements
 	/**
 	 * Type of dependency.
 	 */
-	protected final Class type;
+	protected final Class<?> type;
 
 	/**
 	 * Initiate.
@@ -38,7 +38,7 @@ public class ManagedObjectDependencyMetaDataImpl implements
 	 * @param type
 	 *            Type of dependency.
 	 */
-	public ManagedObjectDependencyMetaDataImpl(Class type) {
+	public ManagedObjectDependencyMetaDataImpl(Class<?> type) {
 		this.type = type;
 	}
 
@@ -47,7 +47,7 @@ public class ManagedObjectDependencyMetaDataImpl implements
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData#getType()
 	 */
-	public Class getType() {
+	public Class<?> getType() {
 		return this.type;
 	}
 

@@ -65,7 +65,7 @@ public class MockManagedObjectSource implements ManagedObjectSource {
 	 */
 	public static void bindManagedObject(ManagedObjectBuilder<?> metaData,
 			String name, ManagedObject managedObject,
-			ManagedObjectSourceMetaData sourceMetaData) throws BuildException {
+			ManagedObjectSourceMetaData<?, ?> sourceMetaData) throws BuildException {
 
 		// Specify the managed object source class
 		metaData.setManagedObjectSourceClass(MockManagedObjectSource.class);
@@ -131,7 +131,7 @@ public class MockManagedObjectSource implements ManagedObjectSource {
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
 	 */
-	public ManagedObjectSourceMetaData getMetaData() {
+	public ManagedObjectSourceMetaData<?, ?> getMetaData() {
 		return this.managedObjectSourceState.managedObjectSourceMetaData;
 	}
 
@@ -140,7 +140,7 @@ public class MockManagedObjectSource implements ManagedObjectSource {
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
-	public void start(ManagedObjectExecuteContext context) throws Exception {
+	public void start(ManagedObjectExecuteContext<?> context) throws Exception {
 		// Mock not require starting
 	}
 
@@ -169,6 +169,6 @@ class ManagedObjectSourceState {
 	/**
 	 * {@link ManagedObject}.
 	 */
-	ManagedObjectSourceMetaData managedObjectSourceMetaData;
+	ManagedObjectSourceMetaData<?, ?> managedObjectSourceMetaData;
 
 }

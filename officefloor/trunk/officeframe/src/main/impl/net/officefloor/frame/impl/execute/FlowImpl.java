@@ -75,9 +75,9 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow> implements Flow {
 	 *      net.officefloor.frame.internal.structure.TaskNode, java.lang.Object)
 	 */
 	@SuppressWarnings("unchecked")
-	public TaskContainer createTaskContainer(TaskMetaData taskMetaData,
+	public TaskContainer createTaskContainer(TaskMetaData<?, ?, ?, ?> taskMetaData,
 			TaskNode parallelNodeOwner, Object parameter,
-			ThreadWorkLink currentWorkLink) {
+			ThreadWorkLink<?> currentWorkLink) {
 
 		// Obtain the work meta-data
 		WorkMetaData workMetaData = taskMetaData.getWorkMetaData();

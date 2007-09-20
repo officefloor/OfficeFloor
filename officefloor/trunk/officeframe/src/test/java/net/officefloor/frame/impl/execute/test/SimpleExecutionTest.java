@@ -97,7 +97,7 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	public void testNext() {
 
 		// Add next node to execute
-		ExecutionNode nextNode = this.bindNextNode(this.getInitialNode());
+		ExecutionNode<?> nextNode = this.bindNextNode(this.getInitialNode());
 
 		// Execute the nodes
 		this.execute();
@@ -111,7 +111,7 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	public void testSequential() {
 
 		// Add sequential node to execute
-		ExecutionNode sequentialNode = this.bindSequentialNode(this
+		ExecutionNode<?> sequentialNode = this.bindSequentialNode(this
 				.getInitialNode());
 
 		// Execute the nodes
@@ -126,7 +126,7 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	public void testParallel() {
 
 		// Add parallel node to execute
-		ExecutionNode parallelNode = this.bindParallelNode(this
+		ExecutionNode<?> parallelNode = this.bindParallelNode(this
 				.getInitialNode());
 
 		// Execute the nodes
@@ -142,11 +142,11 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	public void testAsynchronous() {
 
 		// Add asynchronous node to execute
-		ExecutionNode asyncNode = this.bindAsynchronousNode(this
+		ExecutionNode<?> asyncNode = this.bindAsynchronousNode(this
 				.getInitialNode());
 
 		// Add next node to ensure order
-		ExecutionNode nextNode = this.bindNextNode(this.getInitialNode());
+		ExecutionNode<?> nextNode = this.bindNextNode(this.getInitialNode());
 
 		// Execute the nodes
 		this.execute();

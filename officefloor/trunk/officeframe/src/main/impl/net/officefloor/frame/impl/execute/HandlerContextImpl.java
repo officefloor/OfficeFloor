@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.team.TaskContainer;
  * 
  * @author Daniel
  */
-public class HandlerContextImpl implements HandlerContext {
+public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> {
 
 	/**
 	 * Index of the {@link ManagedObject} within the
@@ -75,7 +75,7 @@ public class HandlerContextImpl implements HandlerContext {
 	 *      java.lang.Object,
 	 *      net.officefloor.frame.spi.managedobject.ManagedObject)
 	 */
-	public void invokeProcess(Enum key, Object parameter,
+	public void invokeProcess(F key, Object parameter,
 			ManagedObject managedObject) {
 		this.invokeProcess(key.ordinal(), parameter, managedObject);
 	}

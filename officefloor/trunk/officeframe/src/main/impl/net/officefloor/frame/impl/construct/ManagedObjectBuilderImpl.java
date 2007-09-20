@@ -42,7 +42,7 @@ public class ManagedObjectBuilderImpl<H extends Enum<H>> implements
 	/**
 	 * Registry of {@link HandlerBuilder} instances.
 	 */
-	private final Map<Enum, HandlerBuilderImpl<H, ?>> handlers = new HashMap<Enum, HandlerBuilderImpl<H, ?>>();
+	private final Map<Enum<?>, HandlerBuilderImpl<H, ?>> handlers = new HashMap<Enum<?>, HandlerBuilderImpl<H, ?>>();
 
 	/**
 	 * Name of {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
@@ -58,6 +58,7 @@ public class ManagedObjectBuilderImpl<H extends Enum<H>> implements
 	/**
 	 * {@link Class} of the {@link ManagedObjectSource}.
 	 */
+	@SuppressWarnings("unchecked")
 	private Class managedObjectSourceClass;
 
 	/**

@@ -112,7 +112,7 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
 	 */
-	protected FlowMetaData[] flowMetaData;
+	protected FlowMetaData<?>[] flowMetaData;
 
 	/**
 	 * <p>
@@ -201,7 +201,7 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 *            {@link net.officefloor.frame.internal.structure.Flow}.
 	 */
 	public void loadRemainingState(WorkMetaData<W> workMetaData,
-			FlowMetaData[] flowMetaData, TaskMetaData<?, ?, ?, ?> nextTaskInFlow) {
+			FlowMetaData<?>[] flowMetaData, TaskMetaData<?, ?, ?, ?> nextTaskInFlow) {
 		this.workMetaData = workMetaData;
 		this.flowMetaData = flowMetaData;
 		this.nextTaskInFlow = nextTaskInFlow;

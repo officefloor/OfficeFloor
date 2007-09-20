@@ -66,6 +66,7 @@ public abstract class AbstractMockTask<P extends Object> implements Work,
 	 * 
 	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
 	 */
+	@SuppressWarnings("unchecked")
 	public final Task<P, Work, Indexed, Indexed> createTask(Work work) {
 		return (Task<P, Work, Indexed, Indexed>) work;
 	}

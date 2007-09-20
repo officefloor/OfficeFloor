@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
@@ -102,7 +103,7 @@ public class ProcessStateImpl implements ProcessState {
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ProcessState#createThread()
 	 */
-	public Flow createThread(FlowMetaData flowMetaData) {
+	public <W extends Work> Flow createThread(FlowMetaData<W> flowMetaData) {
 		// Create the new thread
 		ThreadState threadState = new ThreadStateImpl(this, flowMetaData);
 
@@ -132,7 +133,7 @@ public class ProcessStateImpl implements ProcessState {
 
 					// Unload the managed objects
 					this.managedObjectContainers[i].unloadManagedObject();
-					
+
 					// Notify process complete
 					for (ProcessCompletionListener listener : this.completionListeners) {
 						listener.processComplete();
@@ -156,7 +157,7 @@ public class ProcessStateImpl implements ProcessState {
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ProcessState#getAdministratorContainer(int)
 	 */
-	public AdministratorContainer getAdministratorContainer(int index) {
+	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
 		return this.administratorContainers[index];
 	}
 

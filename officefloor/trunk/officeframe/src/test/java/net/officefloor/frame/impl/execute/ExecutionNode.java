@@ -60,12 +60,12 @@ public class ExecutionNode<W extends Work> implements
 	 * Test case utilising this {@link ExecutionNode} to test execution of a
 	 * {@link Task} tree.
 	 */
-	protected final AbstractTaskNodeTestCase testCase;
+	protected final AbstractTaskNodeTestCase<W> testCase;
 
 	/**
 	 * Listing of the {@link TaskProcessItem}.
 	 */
-	private final List<TaskProcessItem> taskProcessing = new LinkedList<TaskProcessItem>();
+	private final List<TaskProcessItem<W>> taskProcessing = new LinkedList<TaskProcessItem<W>>();
 
 	/**
 	 * {@link WorkMetaData}.
@@ -85,7 +85,7 @@ public class ExecutionNode<W extends Work> implements
 	/**
 	 * {@link TaskMetaData} of the next {@link Task}.
 	 */
-	private TaskMetaData nextTask = null;
+	private TaskMetaData<?, ?, ?, ?> nextTask = null;
 
 	/**
 	 * Initiate.
@@ -98,7 +98,7 @@ public class ExecutionNode<W extends Work> implements
 	 *            {@link WorkMetaData}.
 	 */
 	public ExecutionNode(int executionNodeId,
-			AbstractTaskNodeTestCase testCase, WorkMetaData<W> workMetaData) {
+			AbstractTaskNodeTestCase<W> testCase, WorkMetaData<W> workMetaData) {
 		this.executionNodeId = executionNodeId;
 		this.testCase = testCase;
 		this.workMetaData = workMetaData;
@@ -202,7 +202,7 @@ public class ExecutionNode<W extends Work> implements
 	 * @param nextTask
 	 *            {@link TaskMetaData} of the next {@link Task}.
 	 */
-	void setNextTask(TaskMetaData nextTask) {
+	void setNextTask(TaskMetaData<?, W, ?, ?> nextTask) {
 		this.nextTask = nextTask;
 	}
 
@@ -216,7 +216,7 @@ public class ExecutionNode<W extends Work> implements
 	 *            {@link TaskMetaData} of the initial {@link Task}.
 	 */
 	void addFlow(FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData initialTask) {
+			TaskMetaData<?, W, ?, ?> initialTask) {
 		// Add to listing of processing for the Task
 		this.taskProcessing.add(new FlowTaskProcessItem<W>(instigationStrategy,
 				initialTask, this.testCase));
@@ -228,7 +228,7 @@ public class ExecutionNode<W extends Work> implements
 	 * @param futureNode
 	 *            {@link ExecutionNode} to join.
 	 */
-	void addJoin(ExecutionNode futureNode) {
+	void addJoin(ExecutionNode<W> futureNode) {
 		// Add to listing of processing for the Task
 		this.taskProcessing.add(new JoinTaskProcessItem<W>(futureNode,
 				this.testCase));
@@ -269,7 +269,7 @@ public class ExecutionNode<W extends Work> implements
 		int i = 0;
 		for (TaskProcessItem<W> item : this.taskProcessing) {
 			if (item instanceof ManagedObjectTaskProcessItem) {
-				ManagedObjectTaskProcessItem moItem = (ManagedObjectTaskProcessItem) item;
+				ManagedObjectTaskProcessItem<W, ?> moItem = (ManagedObjectTaskProcessItem<W, ?>) item;
 				moListing.add(moItem.getWorkManagedObjectIndex());
 			}
 			i++;
@@ -297,7 +297,7 @@ public class ExecutionNode<W extends Work> implements
 		int i = 0;
 		for (TaskProcessItem<W> item : this.taskProcessing) {
 			if (item instanceof ManagedObjectTaskProcessItem) {
-				ManagedObjectTaskProcessItem moItem = (ManagedObjectTaskProcessItem) item;
+				ManagedObjectTaskProcessItem<W, ?> moItem = (ManagedObjectTaskProcessItem<W, ?>) item;
 
 				// Only add if asynchronous
 				if (moItem.isAsynchronous()) {
@@ -324,7 +324,7 @@ public class ExecutionNode<W extends Work> implements
 	 * @see net.officefloor.frame.internal.structure.TaskMetaData#translateManagedObjectIndexForWork(int)
 	 */
 	public int translateManagedObjectIndexForWork(int taskMoIndex) {
-		return ((ManagedObjectTaskProcessItem) this.taskProcessing
+		return ((ManagedObjectTaskProcessItem<W, ?>) this.taskProcessing
 				.get(taskMoIndex)).getWorkManagedObjectIndex();
 	}
 
@@ -334,7 +334,7 @@ public class ExecutionNode<W extends Work> implements
 	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getFlow(int)
 	 */
 	public FlowMetaData<?> getFlow(int flowIndex) {
-		return (FlowMetaData) this.taskProcessing.get(flowIndex);
+		return (FlowMetaData<?>) this.taskProcessing.get(flowIndex);
 	}
 
 	/*
@@ -607,7 +607,7 @@ class ManagedObjectTaskProcessItem<W extends Work, O extends Object> implements
  * {@link net.officefloor.frame.internal.structure.Flow}.
  */
 class FlowTaskProcessItem<W extends Work> implements TaskProcessItem<W>,
-		FlowMetaData {
+		FlowMetaData<W> {
 
 	/**
 	 * {@link FlowInstigationStrategyEnum}.
@@ -617,12 +617,12 @@ class FlowTaskProcessItem<W extends Work> implements TaskProcessItem<W>,
 	/**
 	 * {@link TaskMetaData}.
 	 */
-	protected final TaskMetaData taskMetaData;
+	protected final TaskMetaData<?, W, ?, ?> taskMetaData;
 
 	/**
 	 * {@link AbstractTaskNodeTestCase}.
 	 */
-	protected final AbstractTaskNodeTestCase testCase;
+	protected final AbstractTaskNodeTestCase<W> testCase;
 
 	/**
 	 * {@link AssetManager} to managed the
@@ -641,7 +641,7 @@ class FlowTaskProcessItem<W extends Work> implements TaskProcessItem<W>,
 	 *            {@link AbstractTaskNodeTestCase}.
 	 */
 	public FlowTaskProcessItem(FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData taskMetaData, AbstractTaskNodeTestCase testCase) {
+			TaskMetaData<?, W, ?, ?> taskMetaData, AbstractTaskNodeTestCase<W> testCase) {
 		this.instigationStrategy = instigationStrategy;
 		this.taskMetaData = taskMetaData;
 		this.testCase = testCase;
@@ -673,7 +673,7 @@ class FlowTaskProcessItem<W extends Work> implements TaskProcessItem<W>,
 		FlowFuture future = context.doFlow(itemIndex, null);
 
 		// Obtain the execution node just created for flow
-		ExecutionNode flowNode = this.testCase.getLatestTaskNode();
+		ExecutionNode<?> flowNode = this.testCase.getLatestTaskNode();
 
 		// Register the flow future
 		this.testCase.registerFlowFuture(flowNode, future);
@@ -702,7 +702,7 @@ class FlowTaskProcessItem<W extends Work> implements TaskProcessItem<W>,
 	 * 
 	 * @see net.officefloor.frame.internal.structure.FlowMetaData#getInitialTaskMetaData()
 	 */
-	public TaskMetaData getInitialTaskMetaData() {
+	public TaskMetaData<?, W, ?, ?> getInitialTaskMetaData() {
 		return this.taskMetaData;
 	}
 
@@ -726,12 +726,12 @@ class JoinTaskProcessItem<W extends Work> implements TaskProcessItem<W> {
 	/**
 	 * {@link ExecutionNode} for completion.
 	 */
-	protected final ExecutionNode futureNode;
+	protected final ExecutionNode<W> futureNode;
 
 	/**
 	 * {@link AbstractTaskNodeTestCase}.
 	 */
-	protected final AbstractTaskNodeTestCase testCase;
+	protected final AbstractTaskNodeTestCase<W> testCase;
 
 	/**
 	 * Initiate.
@@ -741,8 +741,8 @@ class JoinTaskProcessItem<W extends Work> implements TaskProcessItem<W> {
 	 * @param testCase
 	 *            {@link AbstractTaskNodeTestCase}.
 	 */
-	public JoinTaskProcessItem(ExecutionNode futureNode,
-			AbstractTaskNodeTestCase testCase) {
+	public JoinTaskProcessItem(ExecutionNode<W> futureNode,
+			AbstractTaskNodeTestCase<W> testCase) {
 		this.futureNode = futureNode;
 		this.testCase = testCase;
 	}
