@@ -12,7 +12,12 @@
 		<module>officexml</module>
 		<module>officeapi</module>
 		<module>officecompiler</module>
+		<module>officemodelgen</module>
 		<module>officeeclipse</module>
+		<module>officeplugin_hibernate</module>
+		<module>officeplugin_jdbc</module>
+		<module>officeplugin_jms</module>
+		<module>officeplugin_socket</module>
 	</modules>
 	<build>
 		<plugins>
