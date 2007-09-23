@@ -290,7 +290,7 @@ public class RawManagedObjectMetaData {
 			throws ConfigurationException {
 
 		// Obtain the class of the Managed Object
-		Class<?> managedObjectClass = this.managedObjectSource.getMetaData()
+		Class<ManagedObject> managedObjectClass = this.managedObjectSource.getMetaData()
 				.getManagedObjectClass();
 		if (managedObjectClass == null) {
 			throw new ConfigurationException(
