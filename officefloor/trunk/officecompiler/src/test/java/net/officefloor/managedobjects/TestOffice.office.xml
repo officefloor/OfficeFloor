@@ -1,0 +1,8 @@
+<office>
+	<teams>
+		<team name="TEAM-NAME"/>
+	</teams>
+	<managed-objects>
+		<managed-object name="MO-NAME" object-type="java.lang.String"/>		
+	</managed-objects>
+</office>

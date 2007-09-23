@@ -1,0 +1,19 @@
+<room>
+	<external-managed-objects>
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="taskOne"/>
+	</external-flows>
+	<sub-rooms>
+		<sub-room id="1" desk="TestDesk.desk.xml">
+			<input-flows>
+			</input-flows>
+			<output-flows>
+				<output-flow name="output">
+				</output-flow>
+			</output-flows>
+			<managed-objects>
+			</managed-objects>
+		</sub-room>
+	</sub-rooms>
+</room>
