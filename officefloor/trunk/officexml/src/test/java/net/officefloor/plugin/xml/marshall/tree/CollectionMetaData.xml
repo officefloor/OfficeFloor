@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\..\..\src\schema\TreeXmlMarshaller.xsd" type="net.officefloor.plugin.xml.marshall.tree.objects.RootObject" element="root">
+	<collection method="getChildren" element="children">
+		<item type="net.officefloor.plugin.xml.marshall.tree.objects.RootObject">
+			<value method="getInt" element="int"/>
+		</item>
+	</collection>
+</marshall>
