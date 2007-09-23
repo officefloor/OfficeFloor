@@ -1,0 +1,81 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.plugin.jms;
+
+import java.util.Properties;
+
+/**
+ * Provides abstract functionality for a
+ * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
+ * for JMS.
+ * 
+ * @author Daniel
+ */
+public abstract class AbstractManagedObjectSource {
+
+	/**
+	 * Property name to obtain the class of the {@link JmsAdminObjectFactory}.
+	 */
+	public static final String JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY = "net.officefloor.plugin.jms.adminobjectfactory";
+
+	/**
+	 * Default constructor as required.
+	 */
+	public AbstractManagedObjectSource() {
+	}
+
+	/**
+	 * <p>
+	 * Obtains the {@link JmsAdminObjectFactory} to create the JMS administered
+	 * objects.
+	 * <p>
+	 * Separated out to allow overriding.
+	 * 
+	 * @param properties
+	 *            Properties to configure the {@link JmsAdminObjectFactory}.
+	 * @return {@link JmsAdminObjectFactory} to create the JMS administered
+	 *         objects.
+	 * @throws Exception
+	 *             If fails to create the {@link JmsAdminObjectFactory}.
+	 */
+	protected JmsAdminObjectFactory getJmsAdminObjectFactory(
+			Properties properties) throws Exception {
+
+		// Obtain the name of the JMS admin object factory
+		String className = properties
+				.getProperty(JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY);
+
+		// Ensure have the class name
+		if (className == null) {
+			throw new Exception("Must specify property "
+					+ JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY
+					+ " with the implementing class of the "
+					+ JmsAdminObjectFactory.class.getName());
+		}
+
+		// Create an instance of the JMS admin object factory
+		JmsAdminObjectFactory jmsAdminObjectFactory = (JmsAdminObjectFactory) Class
+				.forName(className).newInstance();
+
+		// Initiate the JMS admin object factory
+		jmsAdminObjectFactory.init(properties);
+
+		// Return the configured JMS admin object factory
+		return jmsAdminObjectFactory;
+	}
+
+}
