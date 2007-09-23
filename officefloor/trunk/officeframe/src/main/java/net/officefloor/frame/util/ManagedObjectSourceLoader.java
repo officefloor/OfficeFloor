@@ -82,7 +82,8 @@ public class ManagedObjectSourceLoader {
 	 * 
 	 * @return Loaded {@link ManagedObjectSource}.
 	 */
-	public <MS extends ManagedObjectSource, H extends Enum<H>> MS loadManagedObjectSource(
+	@SuppressWarnings("unchecked")
+	public <MS extends ManagedObjectSource> MS loadManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Create a new instance of the managed object source
@@ -92,7 +93,7 @@ public class ManagedObjectSourceLoader {
 		moSource.init(new LoadSourceContext());
 
 		// Start the managed object source
-		moSource.start(new LoadExecuteContext<H>());
+		moSource.start(new LoadExecuteContext());
 
 		// Return the loaded managed object source
 		return moSource;
