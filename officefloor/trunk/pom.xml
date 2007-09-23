@@ -12,6 +12,7 @@
 		<module>officexml</module>
 		<module>officeapi</module>
 		<module>officecompiler</module>
+		<module>officeeclipse</module>
 	</modules>
 	<build>
 		<plugins>
