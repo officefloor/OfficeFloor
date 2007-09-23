@@ -1,0 +1,41 @@
+<desk>
+	<external-managed-objects>
+		<external-managed-object name="mo" object-type="java.lang.String"/>
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="flow"/>
+	</external-flows>
+	<works>
+		<work id="work" loader="net.officefloor.work.clazz.ClassWorkLoader" configuration="net.officefloor.mock.MockWork">
+			<initial-flow-item id="1"/>
+			<task name="taskMethod">
+				<task-object object-type="java.lang.String">
+					<external-managed-object name="mo"/>
+				</task-object>
+			</task>
+			<task name="nonTaskMethod">
+				<task-object object-type="java.lang.Integer">
+					<external-managed-object name="mo"/>
+				</task-object>
+			</task>
+		</work>
+	</works>
+	<flow-items>
+		<flow-item id="1" x="300" y="10" public="true" work="work" task="taskMethod">
+			<output id="1">
+				<external-flow name="flow" link="Sequential"/>
+			</output>
+			<output id="2">
+				<flow-item id="2" link="Parallel"/>
+			</output>
+		</flow-item>
+		<flow-item id="2" x="300" y="60" public="false" work="work" task="nonTaskMethod">
+			<output id="1">
+				<external-flow name="flow" link="Asynchronous"/>
+			</output>
+			<output id="2">
+				<flow-item id="1" link="Parallel"/>
+			</output>
+		</flow-item>
+	</flow-items>
+</desk>

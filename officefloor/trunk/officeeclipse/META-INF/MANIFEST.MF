@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Office Floor Eclipse
+Bundle-SymbolicName: net.officefloor.eclipse; singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: net.officefloor.eclipse.OfficeFloorPlugin
+Bundle-Vendor: Daniel Sagenschneider
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui,
+ org.eclipse.ui.workbench,
+ org.eclipse.core.resources,
+ org.eclipse.ui.views,
+ org.eclipse.ui.ide,
+ org.eclipse.gef,
+ org.eclipse.jdt.core,
+ org.eclipse.jdt.launching,
+ org.eclipse.core.expressions
+Eclipse-LazyStart: true
