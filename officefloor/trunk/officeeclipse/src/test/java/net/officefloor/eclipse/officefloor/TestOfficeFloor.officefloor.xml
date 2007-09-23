@@ -1,0 +1,31 @@
+<office-floor>
+	<managed-object-sources>
+		<managed-object-source id="MO-ID" source="net.officefloor.mo.TestManagedObjectSource">
+			<managing-office name="OFFICE"/>
+			<properties>
+				<property name="mo prop name" value="mo prop value"/>
+			</properties>
+		</managed-object-source>
+	</managed-object-sources>
+	<team-instances>
+		<team-instance id="TEAM-ID" team-factory="net.officefloor.team.TestTeamFactory">
+			<properties>
+				<property name="team prop name" value="team prop value"/>
+			</properties>
+		</team-instance>
+	</team-instances>
+	<offices>
+		<office id="OFFICE" x="200" y="20">
+			<managed-objects>
+				<managed-object name="MO-NAME" scope="process">
+					<managed-object-source id="MO-ID"/>
+				</managed-object>
+			</managed-objects>
+			<teams>
+				<team name="TEAM-NAME">
+					<team-instance id="TEAM-ID"/>
+				</team>
+			</teams>
+		</office>
+	</offices>
+</office-floor>
