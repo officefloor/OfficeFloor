@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Office Floor Compiler
+Bundle-SymbolicName: net.officefloor.compiler
+Bundle-Version: 1.0.0
+Bundle-Vendor: Daniel Sagenschneider
+Eclipse-LazyStart: true
+Export-Package: net.officefloor,
+ net.officefloor.desk,
+ net.officefloor.office,
+ net.officefloor.officefloor,
+ net.officefloor.repository,
+ net.officefloor.repository.filesystem,
+ net.officefloor.room,
+ net.officefloor.work,
+ net.officefloor.work.clazz
+Require-Bundle: net.officefloor.api,
+ net.officefloor.frame,
+ net.officefloor.xml,
+ net.officefloor.model,
+ org.junit

@@ -1,0 +1,409 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.desk;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import net.officefloor.LoaderContext;
+import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.DeskTaskModel;
+import net.officefloor.model.desk.DeskTaskObjectModel;
+import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.DeskTaskToFlowItemModel;
+import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.DeskWorkToFlowItemModel;
+import net.officefloor.model.desk.ExternalFlowModel;
+import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.FlowItemOutputModel;
+import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
+import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
+import net.officefloor.model.work.TaskFlowModel;
+import net.officefloor.model.work.WorkModel;
+import net.officefloor.repository.ConfigurationContext;
+import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.repository.ModelRepository;
+import net.officefloor.util.DoubleKeyMap;
+import net.officefloor.work.WorkLoader;
+import net.officefloor.work.WorkLoaderContext;
+
+/**
+ * Loads the {@link net.officefloor.model.desk.DeskModel}.
+ * 
+ * @author Daniel
+ */
+public class DeskLoader {
+
+	/**
+	 * Sequential link type.
+	 */
+	public static final String SEQUENTIAL_LINK_TYPE = "Sequential";
+
+	/**
+	 * Parallel link type.
+	 */
+	public static final String PARALLEL_LINK_TYPE = "Parallel";
+
+	/**
+	 * Asynchronous link type.
+	 */
+	public static final String ASYNCHRONOUS_LINK_TYPE = "Asynchronous";
+
+	/**
+	 * {@link LoaderContext}.
+	 */
+	private final LoaderContext loaderContext;
+
+	/**
+	 * {@link ModelRepository}.
+	 */
+	private final ModelRepository modelRepository;
+
+	/**
+	 * Obtains the Id for the input {@link FlowItemModel}.
+	 * 
+	 * @param flowItem
+	 *            {@link FlowItemModel}.
+	 * @return Id of the input {@link FlowItemModel}.
+	 */
+	public static String getFlowItemOutputId(TaskFlowModel taskFlow) {
+		// Enum takes priority over index
+		Enum enumValue = taskFlow.getFlowKey();
+		if (enumValue != null) {
+			return enumValue.toString();
+		}
+
+		// Fall back to the index
+		int index = taskFlow.getFlowIndex();
+		return String.valueOf(index);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param loaderContext
+	 *            {@link LoaderContext} for loading classes of {@link WorkModel}.
+	 * @param modelRepository
+	 *            {@link ModelRepository}.
+	 */
+	public DeskLoader(LoaderContext loaderContext,
+			ModelRepository modelRepository) {
+		this.loaderContext = loaderContext;
+		this.modelRepository = modelRepository;
+	}
+
+	/**
+	 * Convience constructor.
+	 * 
+	 * @param classLoader
+	 *            {@link java.lang.ClassLoader}.
+	 */
+	public DeskLoader(ClassLoader classLoader) {
+		this.loaderContext = new LoaderContext(classLoader);
+		this.modelRepository = new ModelRepository();
+	}
+
+	/**
+	 * Loads the {@link DeskModel} without attaching the synchronisers.
+	 * 
+	 * @param configuration
+	 *            {@link ConfigurationItem}.
+	 * @return Configured {@link DeskModel}.
+	 * @throws Exception
+	 *             If fails.
+	 */
+	public DeskModel loadRawDesk(ConfigurationItem configuration)
+			throws Exception {
+
+		// Load the desk from the configuration
+		DeskModel desk = this.modelRepository.retrieve(new DeskModel(),
+				configuration);
+
+		// Create the set of external managed objects
+		Map<String, ExternalManagedObjectModel> externalManagedObjects = new HashMap<String, ExternalManagedObjectModel>();
+		for (ExternalManagedObjectModel mo : desk.getExternalManagedObjects()) {
+			externalManagedObjects.put(mo.getName(), mo);
+		}
+
+		// Connect the task objects to external managed objects
+		for (DeskWorkModel work : desk.getWorks()) {
+			for (DeskTaskModel task : work.getTasks()) {
+				for (DeskTaskObjectModel taskObject : task.getObjects()) {
+					// Obtain the connection
+					DeskTaskObjectToExternalManagedObjectModel conn = taskObject
+							.getManagedObject();
+					if (conn != null) {
+						// Obtain the external managed object
+						ExternalManagedObjectModel extMo = externalManagedObjects
+								.get(conn.getName());
+						if (extMo != null) {
+							// Connect
+							conn.setTaskObject(taskObject);
+							conn.setManagedObject(extMo);
+							conn.connect();
+						}
+					}
+				}
+			}
+		}
+
+		// Create the set of external flows
+		Map<String, ExternalFlowModel> externalFlows = new HashMap<String, ExternalFlowModel>();
+		for (ExternalFlowModel flow : desk.getExternalFlows()) {
+			externalFlows.put(flow.getName(), flow);
+		}
+
+		// Connect the flow item outputs to external flow
+		for (FlowItemModel flow : desk.getFlowItems()) {
+			for (FlowItemOutputModel output : flow.getOutputs()) {
+				// Obtain the connection
+				FlowItemOutputToExternalFlowModel conn = output
+						.getExternalFlow();
+				if (conn != null) {
+					// Obtain the external flow
+					ExternalFlowModel extFlow = externalFlows.get(conn
+							.getName());
+					if (extFlow != null) {
+						// Connect
+						conn.setOutput(output);
+						conn.setExternalFlow(extFlow);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Create the set of flows
+		Map<String, FlowItemModel> flowItems = new HashMap<String, FlowItemModel>();
+		for (FlowItemModel flowItem : desk.getFlowItems()) {
+			flowItems.put(flowItem.getId(), flowItem);
+		}
+
+		// Connect the flow item outputs to flow item
+		for (FlowItemModel flow : desk.getFlowItems()) {
+			for (FlowItemOutputModel output : flow.getOutputs()) {
+				// Obtain the connection
+				FlowItemOutputToFlowItemModel conn = output.getFlowItem();
+				if (conn != null) {
+					// Obtain the flow item
+					FlowItemModel flowItem = flowItems.get(conn.getId());
+					if (flowItem != null) {
+						// Connect
+						conn.setOutput(output);
+						conn.setFlowItem(flowItem);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Connect the work to initial flow item
+		for (DeskWorkModel deskWork : desk.getWorks()) {
+			// Obtain the connection
+			DeskWorkToFlowItemModel conn = deskWork.getInitialFlowItem();
+			if (conn != null) {
+				// Obtain the initial flow item
+				FlowItemModel flowItem = flowItems.get(conn.getFlowItemId());
+				if (flowItem != null) {
+					// Connect
+					conn.setDeskWork(deskWork);
+					conn.setInitialFlowItem(flowItem);
+					conn.connect();
+				}
+			}
+		}
+
+		// Create the set of tasks
+		DoubleKeyMap<String, String, DeskTaskModel> taskRegistry = new DoubleKeyMap<String, String, DeskTaskModel>();
+		for (DeskWorkModel deskWork : desk.getWorks()) {
+			for (DeskTaskModel deskTask : deskWork.getTasks()) {
+				taskRegistry
+						.put(deskWork.getId(), deskTask.getName(), deskTask);
+			}
+		}
+
+		// Connect the flows to their task
+		for (FlowItemModel flowItem : desk.getFlowItems()) {
+			// Obtain the task
+			DeskTaskModel deskTask = taskRegistry.get(flowItem.getWorkName(),
+					flowItem.getTaskName());
+			if (deskTask != null) {
+				// Connect
+				new DeskTaskToFlowItemModel(flowItem, deskTask).connect();
+			}
+		}
+
+		// Return the desk
+		return desk;
+	}
+
+	/**
+	 * Attaches the synchronisers to the desk to keep it synchronised with
+	 * underlying work.
+	 * 
+	 * @param desk
+	 *            {@link DeskModel}.
+	 * @param configuration
+	 *            {@link ConfigurationItem} of the {@link DeskModel}.
+	 * @throws Exception
+	 *             If fails
+	 */
+	public void attachSynchronisers(DeskModel desk,
+			ConfigurationItem configuration) throws Exception {
+
+		// Obtain the context
+		ConfigurationContext context = configuration.getContext();
+
+		// Load the work for the desk
+		for (DeskWorkModel work : desk.getWorks()) {
+			this.loadWork(work, context);
+		}
+
+		// Load the flow for the desk
+		for (FlowItemModel flowItem : desk.getFlowItems()) {
+			this.loadFlowItem(flowItem, desk);
+		}
+	}
+
+	/**
+	 * Loads the {@link DeskModel} from the configuration attaching the
+	 * synchronisers.
+	 * 
+	 * @param configuration
+	 *            {@link ConfigurationItem}.
+	 * @return Configured {@link DeskModel}.
+	 * @throws Exception
+	 *             If fails.
+	 */
+	public DeskModel loadDesk(ConfigurationItem configuration) throws Exception {
+
+		// Load the desk model
+		DeskModel desk = this.loadRawDesk(configuration);
+
+		// Attach synchronisers
+		this.attachSynchronisers(desk, configuration);
+
+		// Return the desk model
+		return desk;
+	}
+
+	/**
+	 * Stores the {@link DeskModel} in the input {@link ConfigurationItem}.
+	 * 
+	 * @param desk
+	 *            {@link DeskModel}.
+	 * @param configuration
+	 *            {@link ConfigurationItem}.
+	 * @throws Exception
+	 *             If fails to store the {@link DeskModel}.
+	 */
+	public void storeDesk(DeskModel desk, ConfigurationItem configuration)
+			throws Exception {
+		// Stores the desk
+		this.modelRepository.store(desk, configuration);
+	}
+
+	/**
+	 * Loads the {@link DeskWorkModel}.
+	 * 
+	 * @param work
+	 *            {@link DeskWorkModel}.
+	 * @param context
+	 *            {@link ConfigurationContext}.
+	 */
+	public void loadWork(final DeskWorkModel work,
+			final ConfigurationContext context) throws Exception {
+
+		// Obtain the name of the loader
+		String loaderClassName = work.getLoader();
+		if (loaderClassName != null) {
+
+			// Create the work loader
+			WorkLoader workLoader = this.loaderContext.createInstance(
+					WorkLoader.class, loaderClassName);
+
+			// Obtain the class loader
+			final ClassLoader classLoader = this.loaderContext.getClassLoader();
+
+			// Create the work loader context
+			WorkLoaderContext workLoaderContext = new WorkLoaderContext() {
+
+				public String getConfiguration() {
+					return work.getConfiguration();
+				}
+
+				public ConfigurationContext getConfigurationContext() {
+					return context;
+				}
+
+				public ClassLoader getClassLoader() {
+					return classLoader;
+				}
+			};
+
+			// Load the work model
+			WorkModel workModel = workLoader.loadWork(workLoaderContext);
+
+			// Synchronise the work
+			WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
+					work);
+		}
+	}
+
+	/**
+	 * Loads the {@link FlowItemModel}.
+	 * 
+	 * @param flowItem
+	 *            {@link FlowItemModel}.
+	 * @param desk
+	 *            {@link DeskModel}.
+	 */
+	private void loadFlowItem(FlowItemModel flowItem, DeskModel desk)
+			throws Exception {
+
+		// Obtain the work for the flow item
+		DeskWorkModel work = null;
+		for (DeskWorkModel model : desk.getWorks()) {
+			String workName = flowItem.getWorkName();
+			if ((workName != null) && (workName.equals(model.getId()))) {
+				work = model;
+			}
+		}
+		if (work == null) {
+			// Work not found therefore do not load
+			return;
+		}
+
+		// Obtain the task for the flow item
+		DeskTaskModel task = null;
+		for (DeskTaskModel model : work.getTasks()) {
+			if (flowItem.getTaskName().equals(model.getName())) {
+				task = model;
+			}
+		}
+		if (task == null) {
+			// Task not found therefore do not load
+			return;
+		}
+
+		// Synchronise task to flow item
+		TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task.getTask(),
+				flowItem);
+	}
+
+}

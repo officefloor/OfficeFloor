@@ -1,0 +1,82 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.util;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Map that provides a double key to obtain the entry.
+ * 
+ * @author Daniel
+ */
+public class DoubleKeyMap<A, B, E> {
+
+	/**
+	 * Internal registry.
+	 */
+	private final Map<A, Map<B, E>> registry = new HashMap<A, Map<B, E>>();
+
+	/**
+	 * Registers the entry.
+	 * 
+	 * @param a
+	 *            First value to register.
+	 * @param b
+	 *            Second value to register.
+	 * @param entry
+	 *            Entry to register.
+	 * @param registry
+	 *            Registry.
+	 */
+	public void put(A a, B b, E entry) {
+
+		// Obtain the inside map
+		Map<B, E> inside = registry.get(a);
+		if (inside == null) {
+			inside = new HashMap<B, E>();
+			registry.put(a, inside);
+		}
+
+		// Register the entry
+		inside.put(b, entry);
+	}
+
+	/**
+	 * Obtains the entry.
+	 * 
+	 * @param a
+	 *            First value to register.
+	 * @param b
+	 *            Second value to register.
+	 * @param registry
+	 *            Registry.
+	 * @return Entry from registry or <code>null</code> if not found.
+	 */
+	public E get(A a, B b) {
+
+		// Obtain the inside map
+		Map<B, E> inside = registry.get(a);
+		if (inside != null) {
+			return inside.get(b);
+		}
+
+		// Not found
+		return null;
+	}
+
+}

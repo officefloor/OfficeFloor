@@ -1,0 +1,18 @@
+<office-floor>
+	<managed-object-sources>
+	</managed-object-sources>
+	<team-instances>
+		<team-instance id="TEAM-ID" team-factory="net.officefloor.team.PassiveTeamFactory"/>
+	</team-instances>
+	<offices>
+		<office id="TestOffice.office.xml">
+			<managed-objects>
+			</managed-objects>
+			<teams>
+				<team name="TEAM-NAME">
+					<team-instance id="TEAM-ID"/>
+				</team>
+			</teams>
+		</office>
+	</offices>
+</office-floor>

@@ -1,0 +1,38 @@
+<room>
+	<external-managed-objects>
+		<external-managed-object name="mo" object-type="java.lang.String"/>
+	</external-managed-objects>
+	<external-flows>
+		<external-flow name="flow"/>
+	</external-flows>
+	<sub-rooms>
+		<sub-room id="1" desk="TestDesk.desk.xml" x="100" y="20">
+			<input-flows>
+				<input-flow name="input" public="true"/>
+			</input-flows>
+			<output-flows>
+				<output-flow name="output">
+					<input sub-room="2" name="input" link="Sequential"/>
+				</output-flow>
+			</output-flows>
+			<managed-objects>
+				<managed-object name="mo" object-type="java.lang.String">
+					<external-managed-object name="mo"/>
+				</managed-object>
+			</managed-objects>
+		</sub-room>
+		<sub-room id="2" room="TestSubRoom.room.xml" x="200" y="30">
+			<input-flows>
+				<input-flow name="input" public="false"/>
+			</input-flows>
+			<output-flows>
+				<output-flow name="output">
+					<external-flow name="flow" link="Parallel"/>
+				</output-flow>
+			</output-flows>
+			<managed-objects>
+				<managed-object name="mo" object-type="java.lang.String"/>
+			</managed-objects>
+		</sub-room>
+	</sub-rooms>
+</room>

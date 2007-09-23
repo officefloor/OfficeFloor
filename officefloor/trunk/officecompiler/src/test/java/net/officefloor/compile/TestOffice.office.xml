@@ -1,0 +1,16 @@
+<office>
+	<teams>
+		<team name="TEAM-NAME"/>
+	</teams>
+	<managed-objects>
+	</managed-objects>
+	<room id="TestRoom.room.xml">
+		<desk id="TestDesk.desk.xml">
+			<flow-item id="1" name="taskOne">
+				<team name="TEAM-NAME"/>
+			</flow-item>
+		</desk>
+	</room>
+	<administrators>
+	</administrators>
+</office>
