@@ -9,6 +9,7 @@
 	<modules>
 		<module>officeframe</module>
 		<module>officemodel</module>
+		<module>officexml</module>
 	</modules>
 	<build>
 		<plugins>
