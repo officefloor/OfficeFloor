@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\..\..\src\schema\TreeXmlMarshaller.xsd" 
+		type="net.officefloor.model.room.RoomModel" 
+		element="room">
+	<!-- EXTERNAL MANAGED OBJECTS -->
+	<collection method="getExternalManagedObjects" element="external-managed-objects">
+		<item type="net.officefloor.model.room.ExternalManagedObjectModel" element="external-managed-object">
+			<attributes>
+				<attribute method="getName" attribute="name"/>
+				<attribute method="getObjectType" attribute="object-type"/>
+			</attributes>
+		</item>
+	</collection>	
+	<!-- EXTERNAL FLOWS -->
+	<collection method="getExternalFlows" element="external-flows">
+		<item type="net.officefloor.model.room.ExternalFlowModel" element="external-flow">
+			<attributes>
+				<attribute method="getName" attribute="name"/>
+			</attributes>
+		</item>
+	</collection>
+	<!-- SUB ROOMS -->
+	<collection method="getSubRooms" element="sub-rooms">
+		<item type="net.officefloor.model.room.SubRoomModel" element="sub-room">
+			<attributes>
+				<attribute method="getId" attribute="id"/>
+				<attribute method="getDesk" attribute="desk"/>
+				<attribute method="getRoom" attribute="room"/>
+				<attribute method="getX" attribute="x"/>
+				<attribute method="getY" attribute="y"/>
+			</attributes>
+			<collection method="getInputFlows" element="input-flows">
+				<item type="net.officefloor.model.room.SubRoomInputFlowModel" element="input-flow">
+					<attributes>
+						<attribute method="getName" attribute="name"/>
+						<attribute method="getIsPublic" attribute="public"/>
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getOutputFlows" element="output-flows">
+				<item type="net.officefloor.model.room.SubRoomOutputFlowModel" element="output-flow">
+					<attributes>
+						<attribute method="getName" attribute="name"/>
+					</attributes>
+					<object method="getInput" element="input">
+						<attributes>
+							<attribute method="getSubRoomName" attribute="sub-room"/>
+							<attribute method="getInputFlowName" attribute="name"/>
+							<attribute method="getLinkType" attribute="link"/>
+						</attributes>
+					</object>
+					<object method="getExternalFlow" element="external-flow">
+						<attributes>
+							<attribute method="getExternalFlowName" attribute="name"/>
+							<attribute method="getLinkType" attribute="link"/>
+						</attributes>
+					</object>
+				</item>
+			</collection>
+			<collection method="getManagedObjects" element="managed-objects">
+				<item type="net.officefloor.model.room.SubRoomManagedObjectModel" element="managed-object">
+					<attributes>
+						<attribute method="getName" attribute="name"/>
+						<attribute method="getObjectType" attribute="object-type"/>
+					</attributes>
+					<object method="getExternalManagedObject" element="external-managed-object">
+						<attributes>
+							<attribute method="getName" attribute="name"/>
+						</attributes>
+					</object>
+				</item>
+			</collection>
+		</item>
+	</collection>
+</marshall>

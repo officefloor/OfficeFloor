@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field type="String" name="key"/>
+	<field type="String" name="flow keys"/>
+	<list type="DutyFlowModel" name="flow"/>
+	<list type="FlowItemToPreAdministratorDutyModel" name="pre admin flow item"/>
+	<list type="FlowItemToPostAdministratorDutyModel" name="post admin flow item"/>
+</model>

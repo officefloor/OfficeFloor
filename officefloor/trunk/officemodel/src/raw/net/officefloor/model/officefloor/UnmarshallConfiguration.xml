@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unmarshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../plugin/xml/src/schema/TreeXmlUnmarshaller.xsd" node="office-floor" class="net.officefloor.model.officefloor.OfficeFloorModel">
+	<!-- MANAGED OBJECTS -->
+	<object method="addManagedObjectSource" node="managed-object-source" class="net.officefloor.model.officefloor.ManagedObjectSourceModel">
+		<value method="setId" node="managed-object-source@id"/>
+		<value method="setSource" node="managed-object-source@source"/>
+		<object method="setManagingOffice" node="managing-office" class="net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel">
+			<value method="setManagingOfficeName" node="managing-office@name"/>
+		</object>
+		<object method="addProperty" node="property" class="net.officefloor.model.officefloor.PropertyModel">
+			<value method="setName" node="property@name"/>
+			<value method="setValue" node="property@value"/>
+		</object>
+	</object>
+	<!-- TEAMS -->
+	<object method="addTeam" node="team-instance" class="net.officefloor.model.officefloor.TeamModel">
+		<value method="setId" node="team-instance@id"/>
+		<value method="setTeamFactory" node="team-instance@team-factory"/>
+		<object method="addProperty" node="property" class="net.officefloor.model.officefloor.PropertyModel">
+			<value method="setName" node="property@name"/>
+			<value method="setValue" node="property@value"/>
+		</object>
+	</object>
+	<!-- OFFICES -->
+	<object method="addOffice" node="office" class="net.officefloor.model.officefloor.OfficeFloorOfficeModel">
+		<value method="setId" node="office@id"/>
+		<value method="setX" node="office@x"/>
+		<value method="setY" node="office@y"/>
+		<object method="addManagedObject" node="managed-object" class="net.officefloor.model.officefloor.OfficeManagedObjectModel">
+			<value method="setManagedObjectName" node="managed-object@name"/>
+			<value method="setScope" node="managed-object@scope"/>
+			<object method="setManagedObjectSource" node="managed-object-source" class="net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourceModel">
+				<value method="setManagedObjectSourceId" node="managed-object-source@id"/>
+			</object>
+		</object>
+		<object method="addTeam" node="team" class="net.officefloor.model.officefloor.OfficeTeamModel">
+			<value method="setTeamName" node="team@name"/>
+			<object method="setTeam" node="team-instance" class="net.officefloor.model.officefloor.OfficeTeamToTeamModel">
+				<value method="setTeamId" node="team-instance@id"/>
+			</object>
+		</object>
+	</object>
+</unmarshall>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<import>net.officefloor.model.work.TaskModel</import>
+	<field type="String" name="id"/>
+	<field type="boolean" name="is public"/>
+	<field type="String" name="work name"/>
+	<field type="String" name="task name"/>
+	<field type="TaskModel" name="task"/>
+	<field type="DeskWorkToFlowItemModel" name="desk work"/>
+	<field type="DeskTaskToFlowItemModel" name="desk task"/>
+	<list type="FlowItemOutputModel" name="output"/>
+	<list type="FlowItemOutputToFlowItemModel" name="input"/>
+</model>

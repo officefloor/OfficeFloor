@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field type="String" name="id"/>
+	<field type="String" name="team factory"/>
+	<list type="PropertyModel" name="property" plural="properties"/>
+	<list type="OfficeTeamToTeamModel" name="office team"/>
+</model>

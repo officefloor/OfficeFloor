@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field name="name" type="String"/>
+	<field description="Name of class that the object of the Managed Object must implement." name="object type" type="String"/>
+	<list type="DeskTaskObjectToExternalManagedObjectModel" name="task object"/>
+</model>
