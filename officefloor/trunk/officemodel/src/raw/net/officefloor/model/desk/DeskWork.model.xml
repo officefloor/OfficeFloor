@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<import>net.officefloor.model.work.WorkModel</import>
+	<field type="String" name="id"/>
+	<field type="String" name="loader"/>
+	<field type="String" name="configuration"/>
+	<field type="WorkModel" name="work"/>
+	<field type="DeskWorkToFlowItemModel" name="initial flow item"/>
+	<list type="DeskTaskModel" name="task"/>
+</model>

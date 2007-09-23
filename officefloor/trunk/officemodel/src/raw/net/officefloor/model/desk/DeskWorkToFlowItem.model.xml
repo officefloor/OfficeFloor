@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field type="String" name="flow item id"/>
+	<field type="DeskWorkModel" name="desk work" end-field="initial flow item"/>
+	<field type="FlowItemModel" name="initial flow item" end-field="desk work"/>
+</model>

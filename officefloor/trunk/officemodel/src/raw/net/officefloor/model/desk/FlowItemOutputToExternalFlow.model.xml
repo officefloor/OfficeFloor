@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field type="String" name="name"/>
+	<field type="FlowItemOutputModel" name="output" end-field="external flow"/>
+	<field type="ExternalFlowModel" name="external flow" end-list="output"/>
+	<field type="String" name="link type"/>
+</model>

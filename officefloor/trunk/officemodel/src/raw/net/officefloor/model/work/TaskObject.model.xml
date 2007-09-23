@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model class-suffix="&lt;M extends Enum&lt;M&gt;&gt;" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field type="M" name="managed object key"/>
+	<field type="String" name="object type" description="Name of class that the object of the Managed Object must implement."/>
+</model>

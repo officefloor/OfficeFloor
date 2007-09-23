@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Office Floor Model
+Bundle-SymbolicName: net.officefloor.model
+Bundle-Version: 1.0.0
+Bundle-Vendor: Daniel Sagenschneider
+Bundle-Localization: plugin
+Eclipse-AutoStart: true
+Export-Package: net.officefloor.model,
+ net.officefloor.model.desk,
+ net.officefloor.model.office,
+ net.officefloor.model.officefloor,
+ net.officefloor.model.room,
+ net.officefloor.model.work
+Require-Bundle: net.officefloor.frame

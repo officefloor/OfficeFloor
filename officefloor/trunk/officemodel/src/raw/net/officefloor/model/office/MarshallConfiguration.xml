@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\..\..\src\schema\TreeXmlMarshaller.xsd" 
+		type="net.officefloor.model.office.OfficeModel" 
+		element="office">
+	<!-- TEAMS -->
+	<collection method="getExternalTeams" element="teams">
+		<item type="net.officefloor.model.office.ExternalTeamModel" element="team">
+			<attributes>
+				<attribute method="getName" attribute="name"/>
+			</attributes>
+		</item>
+	</collection>
+	<!-- MANAGED OBJECTS -->
+	<collection method="getExternalManagedObjects" element="managed-objects">
+		<item type="net.officefloor.model.office.ExternalManagedObjectModel" element="managed-object">
+			<attributes>
+				<attribute method="getName" attribute="name"/>
+				<attribute method="getObjectType" attribute="object-type"/>
+			</attributes>
+		</item>
+	</collection>
+	<!-- ROOM -->
+	<object method="getRoom" element="room">
+		<attributes>
+			<attribute method="getId" attribute="id"/>
+		</attributes>
+		<collection method="getSubRooms" id="SUBROOMS">
+			<item type="net.officefloor.model.office.OfficeRoomModel" element="room">
+				<attributes>
+					<attribute method="getId" attribute="id"/>
+				</attributes>
+				<reference id="SUBROOMS" method="getSubRooms"/>
+				<collection method="getDesks" id="SUBDESKS">
+					<item type="net.officefloor.model.office.OfficeDeskModel" element="desk">
+						<attributes>
+							<attribute method="getId" attribute="id"/>
+						</attributes>
+						<collection method="getFlowItems">
+							<item type="net.officefloor.model.office.FlowItemModel" element="flow-item">
+								<attributes>
+									<attribute method="getId" attribute="id"/>
+									<attribute method="getName" attribute="name"/>
+								</attributes>
+								<object method="getTeam" element="team">
+									<attributes>
+										<attribute method="getTeamName" attribute="name"/>
+									</attributes>
+								</object>
+								<collection method="getPreAdminDutys">
+									<item type="net.officefloor.model.office.FlowItemToPreAdministratorDutyModel" element="pre-admin">
+										<attributes>
+											<attribute method="getAdministratorId" attribute="administrator"/>
+											<attribute method="getDutyKey" attribute="duty"/>
+										</attributes>
+									</item>
+								</collection>
+								<collection method="getPostAdminDutys">
+									<item type="net.officefloor.model.office.FlowItemToPostAdministratorDutyModel" element="post-admin">
+										<attributes>
+											<attribute method="getAdministratorId" attribute="administrator"/>
+											<attribute method="getDutyKey" attribute="duty"/>
+										</attributes>
+									</item>
+								</collection>
+							</item>
+						</collection>
+					</item>
+				</collection>
+			</item>
+		</collection>
+		<reference id="SUBDESKS" method="getDesks"/>
+	</object>
+	<!-- ADMINISTRATORS -->
+	<collection method="getAdministrators" element="administrators">
+		<item type="net.officefloor.model.office.AdministratorModel" element="administrator">
+			<attributes>
+				<attribute method="getId" attribute="id"/>
+				<attribute method="getSource" attribute="source"/>
+				<attribute method="getX" attribute="x"/>
+				<attribute method="getY" attribute="y"/>
+			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.office.PropertyModel" element="property">
+					<attributes>
+						<attribute method="getName" attribute="name"/>
+						<attribute method="getValue" attribute="value"/>
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getManagedObjects" element="managed-objects">
+				<item type="net.officefloor.model.office.AdministratorToManagedObjectModel" element="managed-object">
+					<attributes>
+						<attribute method="getName" attribute="name"/>
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getDuties" element="duties">
+				<item type="net.officefloor.model.office.DutyModel" element="duty">
+					<attributes>
+						<attribute method="getKey" attribute="key"/>
+						<attribute method="getFlowKeys" attribute="flow-keys"/>
+					</attributes>
+					<collection method="getFlows" element="flows">
+						<item type="net.officefloor.model.office.DutyFlowModel" element="flow">
+							<attributes>
+								<attribute method="getKey" attribute="key"/>
+							</attributes>
+							<object method="getFlowItem" element="flow-item">
+								<attributes>
+									<attribute method="getFlowItemId" attribute="id"/>
+								</attributes>
+							</object>
+						</item>
+					</collection>
+				</item>
+			</collection>
+		</item>
+	</collection>
+</marshall>

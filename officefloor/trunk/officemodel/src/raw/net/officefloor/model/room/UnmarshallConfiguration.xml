@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<unmarshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../plugin/xml/src/schema/TreeXmlUnmarshaller.xsd" node="room" class="net.officefloor.model.room.RoomModel">
+	<!-- EXTERNAL MANAGED OBJECTS -->
+	<object method="addExternalManagedObject" node="external-managed-object" class="net.officefloor.model.room.ExternalManagedObjectModel">
+		<value method="setName" node="external-managed-object@name"/>
+		<value method="setObjectType" node="external-managed-object@object-type"/>
+	</object>
+	<!-- EXTERNAL FLOWS -->
+	<object method="addExternalFlow" node="external-flow" class="net.officefloor.model.room.ExternalFlowModel">
+		<value method="setName" node="external-flow@name"/>	
+	</object>
+	<!-- SUB ROOMS -->
+	<object method="addSubRoom" node="sub-room" class="net.officefloor.model.room.SubRoomModel">
+		<value method="setId" node="sub-room@id"/>
+		<value method="setDesk" node="sub-room@desk"/>
+		<value method="setRoom" node="sub-room@room"/>
+		<value method="setX" node="sub-room@x"/>
+		<value method="setY" node="sub-room@y"/>
+		<object method="addInputFlow" node="input-flow" class="net.officefloor.model.room.SubRoomInputFlowModel">
+			<value method="setName" node="input-flow@name"/>
+			<value method="setIsPublic" node="input-flow@public"/>
+		</object>
+		<object method="addOutputFlow" node="output-flow" class="net.officefloor.model.room.SubRoomOutputFlowModel">
+			<value method="setName" node="output-flow@name"/>
+			<object method="setInput" node="input" class="net.officefloor.model.room.OutputFlowToInputFlowModel">
+				<value method="setSubRoomName" node="input@sub-room"/>
+				<value method="setInputFlowName" node="input@name"/>
+				<value method="setLinkType" node="input@link"/>
+			</object>
+			<object method="setExternalFlow" node="external-flow" class="net.officefloor.model.room.OutputFlowToExternalFlowModel">
+				<value method="setExternalFlowName" node="external-flow@name"/>
+				<value method="setLinkType" node="external-flow@link"/>			
+			</object>
+		</object>
+		<object method="addManagedObject" node="managed-object" class="net.officefloor.model.room.SubRoomManagedObjectModel">
+			<value method="setName" node="managed-object@name"/>
+			<value method="setObjectType" node="managed-object@object-type"/>
+			<object method="setExternalManagedObject" node="external-managed-object" class="net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel">
+				<value method="setName" node="external-managed-object@name"/>
+			</object>
+		</object>
+	</object>
+</unmarshall>

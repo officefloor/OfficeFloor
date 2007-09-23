@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field type="String" name="id"/>
+	<field type="String" name="desk"/>
+	<field type="String" name="room"/>
+	<list type="SubRoomManagedObjectModel" name="managed object"/>
+	<list type="SubRoomInputFlowModel" name="input flow"/>
+	<list type="SubRoomOutputFlowModel" name="output flow"/>	
+	<list type="SubRoomEscalationModel" name="escalation"/>	
+</model>
