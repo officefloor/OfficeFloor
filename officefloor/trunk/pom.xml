@@ -10,6 +10,8 @@
 		<module>officeframe</module>
 		<module>officemodel</module>
 		<module>officexml</module>
+		<module>officeapi</module>
+		<module>officecompiler</module>
 	</modules>
 	<build>
 		<plugins>
