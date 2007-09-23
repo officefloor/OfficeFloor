@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OXM for the Office Floor
+Bundle-SymbolicName: net.officefloor.xml
+Bundle-Version: 1.0.0
+Export-Package: net.officefloor.plugin.xml,
+ net.officefloor.plugin.xml.marshall.output,
+ net.officefloor.plugin.xml.marshall.tree,
+ net.officefloor.plugin.xml.unmarshall.designate,
+ net.officefloor.plugin.xml.unmarshall.tree
+Require-Bundle: net.officefloor.frame,
+ net.officefloor.model
