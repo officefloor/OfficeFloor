@@ -17,7 +17,6 @@
 package net.officefloor.frame.impl.execute.handler;
 
 import net.officefloor.frame.api.build.HandlerBuilder;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -93,7 +92,7 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 /**
  * Mock {@link net.officefloor.frame.api.execute.Handler}.
  */
-class MockHandler extends AbstractMockHandler<Indexed> {
+class MockHandler<H extends Enum<H>> extends AbstractMockHandler<H> {
 
 	/**
 	 * Handles the {@link ManagedObject}.

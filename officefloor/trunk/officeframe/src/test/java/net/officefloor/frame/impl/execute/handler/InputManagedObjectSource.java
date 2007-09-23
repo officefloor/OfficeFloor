@@ -18,6 +18,7 @@ package net.officefloor.frame.impl.execute.handler;
 
 import java.util.Map;
 
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.impl.AbstractMockManagedObjectSource;
 import net.officefloor.frame.impl.PassByReference;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -79,11 +80,12 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	@SuppressWarnings("unchecked")
 	public void inputParameter(Object parameter, ManagedObject managedObject) {
 		// Obtain the handler
-		MockHandler handler = (MockHandler) this.getExecuteContext()
+		Handler<?> handler = this.getExecuteContext()
 				.getHandler(Handlers.INPUT);
+		MockHandler mockHandler = (MockHandler) handler;
 
 		// Input the parameter
-		handler.handle(parameter, managedObject);
+		mockHandler.handle(parameter, managedObject);
 	}
 
 }

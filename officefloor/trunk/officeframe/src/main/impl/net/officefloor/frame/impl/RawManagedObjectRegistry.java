@@ -186,8 +186,8 @@ public class RawManagedObjectRegistry {
 					.getManagedObjectSourceConfiguration();
 
 			// Obtain the handler keys
-			Class<Enum> handlerKeys = (Class<Enum>) rmo
-					.getManagedObjectSource().getMetaData().getHandlerKeys();
+			Class<?> handlerKeys = rmo.getManagedObjectSource().getMetaData()
+					.getHandlerKeys();
 
 			// Create the map of handlers
 			Map<Enum, Handler> handlers;
@@ -254,7 +254,7 @@ public class RawManagedObjectRegistry {
 				}
 
 				// Create the registry of handlers
-				for (Enum key : handlerKeys.getEnumConstants()) {
+				for (Object key : handlerKeys.getEnumConstants()) {
 
 					// Obtain the handle configuration
 					HandlerConfiguration handlerConfig = (HandlerConfiguration) handlerConfigs
@@ -291,7 +291,7 @@ public class RawManagedObjectRegistry {
 					handler.setHandlerContext(handlerContext);
 
 					// Register with handlers
-					handlers.put(key, handler);
+					handlers.put((Enum) key, handler);
 				}
 			}
 

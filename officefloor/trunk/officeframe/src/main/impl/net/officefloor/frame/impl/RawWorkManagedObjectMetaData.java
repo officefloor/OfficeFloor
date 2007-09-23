@@ -69,8 +69,8 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 		long timeout = workManagedObjectConfig.getTimeout();
 
 		// Obtain the dependencies for the managed object
-		Class<?> dependencyListingEnum = rawMetaData
-				.getManagedObjectSource().getMetaData().getDependencyKeys();
+		Class<?> dependencyListingEnum = rawMetaData.getManagedObjectSource()
+				.getMetaData().getDependencyKeys();
 
 		// Obtain the type defining the keys for dependencies
 		Map<Enum, Integer> dependencyMapping = null;
@@ -103,7 +103,8 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link RawProcessManagedObjectRegistry}.
 	 * @return {@link RawWorkAdministratorMetaData}.
 	 */
-	public static <D extends Enum<D>> RawWorkManagedObjectMetaData<D> createProcessBound(
+	@SuppressWarnings("unchecked")
+	public static RawWorkManagedObjectMetaData<?> createProcessBound(
 			LinkedManagedObjectConfiguration linkedManagedObjectConfig,
 			RawProcessManagedObjectRegistry processMoRegistry)
 			throws ConfigurationException {
@@ -118,11 +119,11 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 		}
 
 		// Create the meta-data for the process managed object
-		ManagedObjectMetaData<D> managedObjectMetaData = new ManagedObjectMetaDataImpl<D>(
+		ManagedObjectMetaData<?> managedObjectMetaData = new ManagedObjectMetaDataImpl(
 				rawMetaData.getProcessIndex());
 
 		// Add to listing of process bound
-		return new RawWorkManagedObjectMetaData<D>(managedObjectMetaData,
+		return new RawWorkManagedObjectMetaData(managedObjectMetaData,
 				linkedManagedObjectConfig, rawMetaData);
 	}
 
@@ -138,7 +139,8 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link RawProcessManagedObjectRegistry}.
 	 * @return {@link RawWorkAdministratorMetaData}.
 	 */
-	public static <D extends Enum<D>> RawWorkManagedObjectMetaData<D> createProcessBound(
+	@SuppressWarnings("unchecked")
+	public static RawWorkManagedObjectMetaData<?> createProcessBound(
 			String processManagedObjectName,
 			RawProcessManagedObjectRegistry processMoRegistry)
 			throws ConfigurationException {
@@ -152,11 +154,11 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 		}
 
 		// Create the meta-data for the process managed object
-		ManagedObjectMetaData<D> managedObjectMetaData = new ManagedObjectMetaDataImpl<D>(
+		ManagedObjectMetaData<?> managedObjectMetaData = new ManagedObjectMetaDataImpl(
 				rawMetaData.getProcessIndex());
 
 		// Add to listing of process bound
-		return new RawWorkManagedObjectMetaData<D>(managedObjectMetaData,
+		return new RawWorkManagedObjectMetaData(managedObjectMetaData,
 				rawMetaData);
 	}
 
