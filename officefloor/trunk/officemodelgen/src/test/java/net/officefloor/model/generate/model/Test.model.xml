@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="D:\eclipse\systems\officefloor\model\src\schema\Model.xsd" name="test" package="net.officefloor.test">
+	<import>net.officefloor.test.ImportOne</import>
+	<import>net.officefloor.test.ImportTwo</import>
+	<field type="String" name="Field One" description="Test field" end-field="Link One" end-list="Link Two"/>
+	<list type="ImportOne" name="List One" description="Test list"/>
+</model>
