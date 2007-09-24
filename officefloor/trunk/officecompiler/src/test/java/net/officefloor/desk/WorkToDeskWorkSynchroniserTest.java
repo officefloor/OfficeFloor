@@ -16,8 +16,8 @@
  */
 package net.officefloor.desk;
 
-import net.officefloor.frame.util.ListItemMatcher;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.ListItemMatcher;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.work.TaskModel;

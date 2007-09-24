@@ -18,7 +18,7 @@ package net.officefloor.repository;
 
 import java.io.File;
 
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ModelRepository;
 import net.officefloor.repository.filesystem.FileSystemConfigurationContext;

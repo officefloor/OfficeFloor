@@ -16,7 +16,7 @@
  */
 package net.officefloor.room;
 
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.room.ExternalFlowModel;
 import net.officefloor.model.room.ExternalManagedObjectModel;
 import net.officefloor.model.room.RoomModel;

@@ -23,7 +23,7 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
 

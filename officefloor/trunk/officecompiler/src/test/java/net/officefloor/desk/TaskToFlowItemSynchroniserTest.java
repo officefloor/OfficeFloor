@@ -17,7 +17,7 @@
 package net.officefloor.desk;
 
 import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
