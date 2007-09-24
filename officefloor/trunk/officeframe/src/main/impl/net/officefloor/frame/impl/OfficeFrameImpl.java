@@ -48,6 +48,13 @@ public class OfficeFrameImpl extends OfficeFrame {
 	 */
 	protected final Map<String, OfficeFloor> officeFloors = new HashMap<String, OfficeFloor>();
 
+	/**
+	 * Clears the {@link OfficeFloor} instances.
+	 */
+	public synchronized void clearOfficeFloors() {
+		this.officeFloors.clear();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 

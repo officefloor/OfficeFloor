@@ -14,4 +14,4 @@ Export-Package: net.officefloor.frame.api,
  net.officefloor.frame.spi.managedobject.source.impl,
  net.officefloor.frame.spi.pool,
  net.officefloor.frame.spi.team,
- net.officefloor.frame.util
+ net.officefloor.frame.test

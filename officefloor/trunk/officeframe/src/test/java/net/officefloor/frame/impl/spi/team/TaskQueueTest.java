@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.spi.team;
 import net.officefloor.frame.impl.spi.team.TaskQueue;
 import net.officefloor.frame.spi.team.ExecutionContext;
 import net.officefloor.frame.spi.team.TaskContainer;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link net.officefloor.frame.impl.spi.team.TaskQueue}.

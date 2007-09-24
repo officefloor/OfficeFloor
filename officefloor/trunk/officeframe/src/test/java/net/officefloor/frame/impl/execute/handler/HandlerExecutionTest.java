@@ -22,9 +22,9 @@ import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.AbstractMockHandler;
 import net.officefloor.frame.impl.AbstractMockTask;
-import net.officefloor.frame.impl.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
  * Tests {@link net.officefloor.frame.api.execute.Handler} invoking a

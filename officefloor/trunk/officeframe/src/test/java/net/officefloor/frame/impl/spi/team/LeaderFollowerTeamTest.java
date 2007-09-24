@@ -18,7 +18,7 @@ package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.TeamMember;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link net.officefloor.frame.impl.spi.team.LeaderFollowerTeam}.

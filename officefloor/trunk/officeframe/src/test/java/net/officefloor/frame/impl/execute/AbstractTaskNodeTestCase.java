@@ -48,7 +48,7 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.team.ExecutionContext;
 import net.officefloor.frame.spi.team.TaskContainer;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Abstract functionality to test execution of
