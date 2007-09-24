@@ -20,9 +20,9 @@ import java.io.File;
 import java.io.FileInputStream;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceLoader;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
-import net.officefloor.frame.util.OfficeFrameTestCase;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 
 /**

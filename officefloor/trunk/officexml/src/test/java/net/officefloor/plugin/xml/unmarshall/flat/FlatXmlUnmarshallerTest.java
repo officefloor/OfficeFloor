@@ -20,7 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
 
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.xml.unmarshall.load.ValueLoaderFactory;
 import net.officefloor.plugin.xml.unmarshall.translate.TranslatorRegistry;
 

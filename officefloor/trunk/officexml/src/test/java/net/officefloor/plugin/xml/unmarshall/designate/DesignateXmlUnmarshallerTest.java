@@ -18,7 +18,7 @@ package net.officefloor.plugin.xml.unmarshall.designate;
 
 import java.io.InputStream;
 
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerTest;
 import net.officefloor.plugin.xml.unmarshall.tree.objects.FirstObject;
 import net.officefloor.plugin.xml.unmarshall.tree.objects.RecursiveObject;
