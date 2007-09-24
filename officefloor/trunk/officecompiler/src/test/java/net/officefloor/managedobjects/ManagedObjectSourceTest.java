@@ -23,7 +23,7 @@ import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockManagedObjectSource;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.filesystem.FileSystemConfigurationContext;

@@ -19,7 +19,7 @@ package net.officefloor.desk;
 import java.io.File;
 
 import net.officefloor.LoaderContext;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;

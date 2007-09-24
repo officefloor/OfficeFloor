@@ -17,7 +17,7 @@
 package net.officefloor.work.clazz;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
