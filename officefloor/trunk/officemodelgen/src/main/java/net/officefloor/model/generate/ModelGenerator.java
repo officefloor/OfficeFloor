@@ -165,6 +165,7 @@ public class ModelGenerator {
 	/**
 	 * Events.
 	 */
+	@SuppressWarnings("unchecked")
 	private void events() {
 		writeLine("    public static enum " + this.metaData.getEventName()
 				+ " {");
@@ -197,6 +198,7 @@ public class ModelGenerator {
 	/**
 	 * Convenience constructor.
 	 */
+	@SuppressWarnings("unchecked")
 	private void convenienceConstructor() {
 		writeLine("    /**");
 		writeLine("     * Convenience constructor.");
@@ -242,6 +244,7 @@ public class ModelGenerator {
 	/**
 	 * Convenience constructor.
 	 */
+	@SuppressWarnings("unchecked")
 	private void convenienceXyConstructor() {
 		writeLine("    /**");
 		writeLine("     * Convenience constructor allowing XY initialising.");
@@ -295,6 +298,7 @@ public class ModelGenerator {
 	/**
 	 * Fields.
 	 */
+	@SuppressWarnings("unchecked")
 	private void fields() {
 		writeListing("", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
@@ -337,6 +341,7 @@ public class ModelGenerator {
 	/**
 	 * Lists.
 	 */
+	@SuppressWarnings("unchecked")
 	private void lists() {
 		writeListing("", new WriteAction() {
 			protected void writeList(ListMetaData list) {
@@ -387,6 +392,7 @@ public class ModelGenerator {
 	/**
 	 * Connection methods.
 	 */
+	@SuppressWarnings("unchecked")
 	private void connectionMethods() {
 		// Is remove
 		writeLine("    /*");
