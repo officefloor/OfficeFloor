@@ -24,7 +24,7 @@ import net.officefloor.eclipse.EditorTestSpecific;
  * 
  * @author Daniel
  */
-public class DeskEditorTest extends AbstractEditorTest {
+public class DeskEditorTestEclipse extends AbstractEditorTest {
 
 	/*
 	 * (non-Javadoc)

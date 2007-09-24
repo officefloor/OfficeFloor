@@ -14,17 +14,17 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.office;
+package net.officefloor.eclipse.officefloor;
 
 import net.officefloor.eclipse.AbstractEditorTest;
 import net.officefloor.eclipse.EditorTestSpecific;
 
 /**
- * Tests the {@link net.officefloor.eclipse.office.OfficeEditor}.
+ * Tests the {@link net.officefloor.eclipse.officefloor.OfficeFloorEditor}.
  * 
  * @author Daniel
  */
-public class OfficeEditorTest extends AbstractEditorTest {
+public class OfficeFloorEditorTestEclipse extends AbstractEditorTest {
 
 	/*
 	 * (non-Javadoc)
@@ -33,17 +33,18 @@ public class OfficeEditorTest extends AbstractEditorTest {
 	 */
 	@Override
 	protected EditorTestSpecific getEditorTestSpecific() {
-		return new EditorTestSpecific("net.officefloor.editors.office",
-				"TestOffice.office.xml", "TestOffice.office.xml");
+		return new EditorTestSpecific("net.officefloor.editors.officefloor",
+				"TestOfficeFloor.officefloor.xml",
+				"TestOfficeFloor.officefloor.xml");
 	}
 
 	/**
-	 * Ensures able to open the office editor.
+	 * Ensures able to open the Office Floor Editor.
 	 */
-	public void testOpenOfficeEditor() {
-		// Flag the Office Editor as dirty so will no exit
-		OfficeEditor officeEditor = (OfficeEditor) this.getEditorPart();
-		officeEditor.flagDirty();
+	public void testOpenOfficeFloorEditor() {
+		// Flag the Office Floor Editor as dirty so will not exit
+		OfficeFloorEditor editor = (OfficeFloorEditor) this.getEditorPart();
+		editor.flagDirty();
 	}
 
 }

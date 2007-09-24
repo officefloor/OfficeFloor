@@ -14,37 +14,35 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.officefloor;
+package net.officefloor.eclipse.room;
 
 import net.officefloor.eclipse.AbstractEditorTest;
 import net.officefloor.eclipse.EditorTestSpecific;
 
 /**
- * Tests the {@link net.officefloor.eclipse.officefloor.OfficeFloorEditor}.
+ * Tests the {@link net.officefloor.eclipse.room.RoomEditor}.
  * 
  * @author Daniel
  */
-public class OfficeFloorEditorTest extends AbstractEditorTest {
+public class RoomEditorTestEclipse extends AbstractEditorTest {
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.eclipse.AbstractEditorTest#getEditorTestSpecific()
 	 */
-	@Override
 	protected EditorTestSpecific getEditorTestSpecific() {
-		return new EditorTestSpecific("net.officefloor.editors.officefloor",
-				"TestOfficeFloor.officefloor.xml",
-				"TestOfficeFloor.officefloor.xml");
+		return new EditorTestSpecific("net.officefloor.editors.room",
+				"TestRoom.room.xml", "TestRoom.room.xml");
 	}
 
 	/**
-	 * Ensures able to open the Office Floor Editor.
+	 * Open the {@link RoomEditor}.
 	 */
-	public void testOpenOfficeFloorEditor() {
-		// Flag the Office Floor Editor as dirty so will not exit
-		OfficeFloorEditor editor = (OfficeFloorEditor) this.getEditorPart();
-		editor.flagDirty();
+	public void testOpenRoomEditor() {
+		// Flag Room Editor as dirty so will not exit
+		RoomEditor roomEditor = (RoomEditor) this.getEditorPart();
+		roomEditor.flagDirty();
 	}
 
 }
