@@ -1,7 +1,7 @@
 /*
  * Created on Dec 16, 2005
  */
-package net.officefloor.frame.util;
+package net.officefloor.frame.test;
 
 import java.io.BufferedReader;
 import java.io.File;
