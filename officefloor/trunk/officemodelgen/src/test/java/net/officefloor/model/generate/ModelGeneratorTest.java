@@ -23,7 +23,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.generate.model.FieldMetaData;
 import net.officefloor.model.generate.model.ListMetaData;
 import net.officefloor.model.generate.model.ModelMetaData;
