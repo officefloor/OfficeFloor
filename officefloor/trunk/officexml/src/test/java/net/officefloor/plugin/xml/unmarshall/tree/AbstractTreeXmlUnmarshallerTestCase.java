@@ -19,7 +19,7 @@ package net.officefloor.plugin.xml.unmarshall.tree;
 import java.io.File;
 import java.io.FileInputStream;
 
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.xml.unmarshall.tree.objects.ComplexChild;
 import net.officefloor.plugin.xml.unmarshall.tree.objects.ComplexParent;
 import net.officefloor.plugin.xml.unmarshall.tree.objects.FirstObject;

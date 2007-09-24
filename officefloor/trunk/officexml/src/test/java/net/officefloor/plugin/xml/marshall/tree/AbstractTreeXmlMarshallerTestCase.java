@@ -18,7 +18,7 @@ package net.officefloor.plugin.xml.marshall.tree;
 
 import java.io.StringWriter;
 
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.xml.XmlMarshaller;
 import net.officefloor.plugin.xml.XmlOutput;
 import net.officefloor.plugin.xml.marshall.output.WriterXmlOutput;
