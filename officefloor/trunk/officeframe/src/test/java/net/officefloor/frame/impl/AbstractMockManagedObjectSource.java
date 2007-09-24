@@ -28,6 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourcePropert
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectSourcePropertyImpl;
+import net.officefloor.frame.test.MockManagedObjectSourceMetaData;
 
 /**
  * Mock

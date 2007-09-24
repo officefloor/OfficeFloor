@@ -23,7 +23,7 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.spi.team.TaskContainer;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link net.officefloor.frame.internal.structure.AssetMonitor}.

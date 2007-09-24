@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.asset;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.ExecutionContext;
 import net.officefloor.frame.spi.team.TaskContainer;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Mock {@link net.officefloor.frame.spi.team.TaskContainer}.

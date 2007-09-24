@@ -25,7 +25,7 @@ import net.officefloor.frame.api.execute.HandlerContext;
  * 
  * @author Daniel
  */
-public class AbstractMockHandler<F extends Enum<F>> implements Handler<F>,
+public abstract class AbstractMockHandler<F extends Enum<F>> implements Handler<F>,
 		HandlerFactory<F> {
 
 	/**

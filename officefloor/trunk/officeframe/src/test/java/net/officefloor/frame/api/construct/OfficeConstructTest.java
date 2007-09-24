@@ -28,7 +28,6 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -40,7 +39,8 @@ import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFacto
 import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.team.TaskContainer;
-import net.officefloor.frame.util.TypeMatcher;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.TypeMatcher;
 
 /**
  * Tests the construction of an

@@ -23,9 +23,9 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
  * Validates passing a parameter between two

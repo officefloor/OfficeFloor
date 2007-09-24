@@ -20,7 +20,7 @@ import net.officefloor.frame.impl.execute.AbstractLinkedList;
 import net.officefloor.frame.impl.execute.AbstractLinkedListEntry;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.LinkedListItem;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link net.officefloor.frame.impl.execute.AbstractLinkedList} and

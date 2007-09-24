@@ -25,6 +25,7 @@
 						<configuration>
 							<sources>
 								<source>src/main/impl</source>
+								<source>src/main/test</source>
 							</sources>
 						</configuration>
 					</execution>
@@ -42,7 +43,6 @@
 			<groupId>easymock</groupId>
 			<artifactId>easymock</artifactId>
 			<version>1.1</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

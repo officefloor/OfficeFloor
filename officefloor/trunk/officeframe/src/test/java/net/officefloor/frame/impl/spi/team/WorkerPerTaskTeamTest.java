@@ -17,7 +17,7 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam}.
