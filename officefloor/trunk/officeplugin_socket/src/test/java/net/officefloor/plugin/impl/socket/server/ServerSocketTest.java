@@ -34,7 +34,7 @@ import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource;
 import net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource.ServerSocketHandlersEnum;
 import net.officefloor.plugin.socket.server.spi.Connection;
