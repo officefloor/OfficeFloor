@@ -8,7 +8,7 @@
 		<artifactId>officefloor</artifactId>
 		<version>0.0.1</version>
 	</parent>
-	<artifactId>officefloor-plugin-hibernate</artifactId>
+	<artifactId>officeplugin_hibernate</artifactId>
 	<description>Office Floor plugin for Hibernate</description>
 	<dependencies>
 		<dependency>
