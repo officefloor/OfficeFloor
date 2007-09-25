@@ -128,7 +128,7 @@ public class HibernateManagedObjectSource implements ManagedObjectSource,
 		// Create the Session (tricking it to believe it has a user supplied
 		// connection)
 		Session session = this.sessionFactory.openSession(this.dummyConnection);
-
+		
 		// Create the Managed Object
 		HibernateManagedObject mo = new HibernateManagedObject(session);
 

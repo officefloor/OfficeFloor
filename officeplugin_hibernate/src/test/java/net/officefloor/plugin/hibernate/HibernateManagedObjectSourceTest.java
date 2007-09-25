@@ -24,10 +24,10 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.hibernate.HibernateManagedObjectSource.HibernateDependenciesEnum;
 
@@ -45,10 +45,11 @@ public class HibernateManagedObjectSourceTest extends
 	/**
 	 * Test Hibernate connection.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testHibernate() throws Exception {
 
 		// Configure the Hibernate managed object
-		ManagedObjectBuilder moBuilder = this.constructManagedObject(
+		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject(
 				"Hibernate", HibernateManagedObjectSource.class, "TEST");
 		moBuilder.addProperty("configuration",
 				"net/officefloor/plugin/hibernate/hibernate.cfg.xml");
@@ -61,11 +62,15 @@ public class HibernateManagedObjectSourceTest extends
 			}
 		}, "TEST");
 
+		// Flag in transaction so not 'aggressively released'
+		mockConnection.getAutoCommit();
+		this.control(mockConnection).setReturnValue(false);
+
 		// Allow specifying the session connection
 		final Connection[] connectionHolder = new Connection[1];
 
 		// Create the task to use the session
-		AbstractSingleTask task = new AbstractSingleTask() {
+		AbstractSingleTask<?, ?, ?, ?> task = new AbstractSingleTask() {
 			public Object doTask(TaskContext context) throws Exception {
 				// Obtain the Session
 				Session session = (Session) context.getObject(0);
@@ -81,7 +86,7 @@ public class HibernateManagedObjectSourceTest extends
 		};
 
 		// Configure the Work
-		WorkBuilder workBuilder = task.registerWork("work", this
+		WorkBuilder<?> workBuilder = task.registerWork("work", this
 				.getOfficeBuilder());
 		workBuilder.addWorkManagedObject("conn", "Connection");
 		DependencyMappingBuilder dependencyBuilder = workBuilder
@@ -90,8 +95,8 @@ public class HibernateManagedObjectSourceTest extends
 				HibernateDependenciesEnum.CONNECTION, "conn");
 
 		// Configure the Task
-		TaskBuilder taskBuilder = task
-				.registerTask("task", "team", workBuilder);
+		TaskBuilder<?, ?, ?, ?> taskBuilder = task.registerTask("task", "team",
+				workBuilder);
 		taskBuilder.linkManagedObject(0, "mo");
 
 		// Configure the Team

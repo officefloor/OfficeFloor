@@ -80,7 +80,7 @@ public class HibernateManagedObject implements ManagedObject,
 		// Obtain the connection
 		Connection connection = (Connection) registry
 				.getObject(HibernateDependenciesEnum.CONNECTION);
-
+		
 		// Load the connection onto the session
 		this.session.reconnect(connection);
 	}

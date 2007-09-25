@@ -32,9 +32,9 @@
 			<version>5.0.4</version>
 		</dependency>
 		<dependency>
-			<groupId>hibernate</groupId>
+			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate</artifactId>
-			<version>3.0.5</version>
+			<version>3.1</version>
 		</dependency>
 	</dependencies>
 </project>
