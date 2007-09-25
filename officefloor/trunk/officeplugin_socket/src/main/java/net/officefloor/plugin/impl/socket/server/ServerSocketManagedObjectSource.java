@@ -251,7 +251,7 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 	 */
 	@SuppressWarnings("unchecked")
 	public Class<H> getHandlerKeys() {
-		return (Class<H>) ServerSocketHandlersEnum.class;
+		return (Class) ServerSocketHandlersEnum.class;
 	}
 
 	/*
@@ -262,10 +262,10 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 	@SuppressWarnings("unchecked")
 	public <HT extends Handler<?>> Class<HT> getHandlerType(H key) {
 		// Return handler type
-		ServerSocketHandlersEnum handleKey = (ServerSocketHandlersEnum) key;
+		ServerSocketHandlersEnum handleKey = (ServerSocketHandlersEnum) (Enum) key;
 		switch (handleKey) {
 		case SERVER_SOCKET_HANDLER:
-			return (Class<HT>) ServerSocketHandler.class;
+			return (Class) ServerSocketHandler.class;
 		default:
 			return null;
 		}
