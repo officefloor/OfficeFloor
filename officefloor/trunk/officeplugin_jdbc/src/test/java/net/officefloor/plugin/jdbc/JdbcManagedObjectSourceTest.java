@@ -27,12 +27,12 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.impl.spi.pool.PassiveManagedObjectPool;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.TypeMatcher;
 import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.frame.util.TypeMatcher;
 
 /**
  * Tests the {@link net.officefloor.plugin.jdbc.JdbcManagedObjectSource}.
