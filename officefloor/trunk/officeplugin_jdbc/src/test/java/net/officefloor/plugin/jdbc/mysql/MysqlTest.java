@@ -25,7 +25,7 @@ import java.util.Properties;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
-import net.officefloor.frame.util.OfficeFrameTestCase;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.jdbc.DataSourceFactory;
 
 /**
@@ -51,10 +51,7 @@ public class MysqlTest extends OfficeFrameTestCase {
 		properties.setProperty("port", "3306");
 		properties.setProperty("database", "officefloor");
 		properties.setProperty("user", "officefloor");
-
-		// Source the password
-		String password = this.getFileContents(this.findFile("password.txt"));
-		properties.setProperty("password", password.trim());
+		properties.setProperty("password", "password");
 
 		// Return the properties
 		return properties;
