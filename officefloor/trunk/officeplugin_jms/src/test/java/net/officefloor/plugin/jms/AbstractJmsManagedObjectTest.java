@@ -14,7 +14,7 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import net.officefloor.frame.impl.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
  * Abstract {@link junit.framework.TestCase} for testing JMS

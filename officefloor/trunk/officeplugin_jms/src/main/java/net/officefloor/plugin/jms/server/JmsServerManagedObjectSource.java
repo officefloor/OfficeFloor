@@ -212,15 +212,15 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 				.getProperty(JMS_MAX_SERVER_SESSION));
 
 		// Register the OnMessageTask
-		TaskBuilder onMessageTask = new OnMessageTask().registerTask(
-				"jms.server.onmessage", "onmessage", "jms.server.onmessage",
-				context.getOfficeBuilder());
+		TaskBuilder<?, ?, ?, ?> onMessageTask = new OnMessageTask()
+				.registerTask("jms.server.onmessage", "onmessage",
+						"jms.server.onmessage", context.getOfficeBuilder());
 		onMessageTask.setNextTaskInFlow(properties
 				.getProperty(JMS_ON_MESSAGE_WORK), properties
 				.getProperty(JMS_ON_MESSAGE_TASK));
 
 		// Register the handler (and link OnMessageTask)
-		ManagedObjectBuilder<JmsServerHandlersEnum> managedObjectBuilder = (ManagedObjectBuilder<JmsServerHandlersEnum>) context
+		ManagedObjectBuilder managedObjectBuilder = context
 				.getManagedObjectBuilder();
 		HandlerBuilder<Indexed> handler = managedObjectBuilder
 				.registerHandler(JmsServerHandlersEnum.JMS_SERVER_HANDLER);
@@ -330,7 +330,7 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 	 */
 	@SuppressWarnings("unchecked")
 	public Class<H> getHandlerKeys() {
-		return (Class<H>) JmsServerHandlersEnum.class;
+		return (Class) JmsServerHandlersEnum.class;
 	}
 
 	/*
