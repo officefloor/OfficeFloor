@@ -5,7 +5,11 @@ Bundle-SymbolicName: net.officefloor.eclipse; singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Activator: net.officefloor.eclipse.OfficeFloorPlugin
 Bundle-Vendor: Daniel Sagenschneider
-Require-Bundle: org.eclipse.core.runtime,
+Require-Bundle: net.officefloor.frame,
+ net.officefloor.api,
+ net.officefloor.compiler,
+ net.officefloor.model,
+ org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.ui.workbench,
  org.eclipse.core.resources,
@@ -14,5 +18,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.gef,
  org.eclipse.jdt.core,
  org.eclipse.jdt.launching,
- org.eclipse.core.expressions
+ org.eclipse.core.expressions,
+ org.junit
 Eclipse-LazyStart: true
