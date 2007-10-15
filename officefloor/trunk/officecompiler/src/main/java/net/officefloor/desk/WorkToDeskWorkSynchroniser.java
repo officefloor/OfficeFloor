@@ -50,7 +50,7 @@ public class WorkToDeskWorkSynchroniser {
 
 		// Create the set task names
 		Set<String> taskNames = new HashSet<String>();
-		for (TaskModel task : work.getTasks()) {
+		for (TaskModel<?, ?> task : work.getTasks()) {
 			taskNames.add(task.getTaskName());
 		}
 
@@ -66,7 +66,7 @@ public class WorkToDeskWorkSynchroniser {
 		}
 
 		// Synchronise the tasks
-		for (TaskModel task : work.getTasks()) {
+		for (TaskModel<?, ?> task : work.getTasks()) {
 
 			// Obtain the desk task
 			DeskTaskModel deskTask = null;

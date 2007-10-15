@@ -24,10 +24,13 @@ import net.officefloor.mock.MockClass;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
+import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.FlowItemOutputModel;
+import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.repository.ModelRepository;
 import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.work.clazz.ClassWork;
@@ -75,17 +78,8 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		DeskModel desk = this.deskLoader.loadDesk(this.configurationItem);
 
 		// ----------------------------------------
-		// Validate the Desk
+		// Validate the Work
 		// ----------------------------------------
-
-		// Validate external managed objects
-		assertList(new String[] { "getName", "getObjectType" }, desk
-				.getExternalManagedObjects(), new ExternalManagedObjectModel(
-				"mo", "java.lang.String", null));
-
-		// Validate external flows
-		assertList(new String[] { "getName" }, desk.getExternalFlows(),
-				new ExternalFlowModel("flow", null));
 
 		// Validate work
 		assertList(new String[] { "getId", "getLoader", "getConfiguration" },
@@ -97,19 +91,24 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect initial flow item id", "1", desk.getWorks()
 				.get(0).getInitialFlowItem().getFlowItemId());
 
-		// Validate underlying work
-		ClassWork classWork = (ClassWork) desk.getWorks().get(0).getWork()
-				.getWorkFactory().createWork();
-		assertTrue("Incorrect work", classWork.getObject() instanceof MockClass);
-
 		// Validate tasks
 		assertList(new String[] { "getName" }, desk.getWorks().get(0)
-				.getTasks(), new DeskTaskModel("taskMethod", null, null, null));
+				.getTasks(), new DeskTaskModel("taskMethod", null, null, null),
+				new DeskTaskModel("noLongerExists", null, null, null));
 
 		// Validate task objects
-		assertList(new String[] {}, desk.getWorks().get(0).getTasks().get(0)
-				.getObjects(), new DeskTaskObjectModel("java.lang.String",
-				false, null, null));
+		assertList(new String[] { "getObjectType", "getIsParameter" }, desk
+				.getWorks().get(0).getTasks().get(0).getObjects(),
+				new DeskTaskObjectModel("java.lang.String", false, null, null));
+
+		// Validate task object to external managed object connections
+		assertEquals("Incorrect external managed object name (for taskMethod)",
+				"mo", desk.getWorks().get(0).getTasks().get(0).getObjects()
+						.get(0).getManagedObject().getName());
+		assertEquals(
+				"Incorrect external managed object name (for noLongerExists)",
+				"mo", desk.getWorks().get(0).getTasks().get(1).getObjects()
+						.get(0).getManagedObject().getName());
 
 		// Validate flow items
 		assertList(new String[] { "getId", "getWorkName", "getTaskName",
@@ -117,52 +116,105 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 				true, "work", "taskMethod", null, null, null, null, null, 100,
 				200), new FlowItemModel("2", false, "work", "noLongerExists",
 				null, null, null, null, null, 10, 20));
-		assertNotNull("Must link in existing Task", desk.getFlowItems().get(0)
-				.getTask());
-		assertNull(
-				"Do not link in missing task - required to relink to another task or delete",
-				desk.getFlowItems().get(1).getTask());
 
 		// Validate outputs of first flow item
 		FlowItemModel flowItemOne = desk.getFlowItems().get(0);
-		assertEquals("Incorrect number of outputs", 1, flowItemOne.getOutputs()
-				.size());
+		assertList(new String[] { "getId" }, flowItemOne.getOutputs(),
+				new FlowItemOutputModel("0", null, null, null),
+				new FlowItemOutputModel("1", null, null, null));
 
 		// Validate outputs on second flow item
 		FlowItemModel flowItemTwo = desk.getFlowItems().get(1);
-		assertEquals("Incorrect number of outputs", 2, flowItemTwo.getOutputs()
-				.size());
+		assertList(new String[] { "getId" }, flowItemTwo.getOutputs(),
+				new FlowItemOutputModel("FIRST_FLOW", null, null, null),
+				new FlowItemOutputModel("SECOND_FLOW", null, null, null));
 
 		// Validate link types of flows
 		assertEquals("Incorrect link type (sequential)",
 				DeskLoader.SEQUENTIAL_LINK_TYPE, flowItemOne.getOutputs()
 						.get(0).getExternalFlow().getLinkType());
+		assertEquals("Incorrect link type (parallel)",
+				DeskLoader.PARALLEL_LINK_TYPE, flowItemOne.getOutputs().get(1)
+						.getFlowItem().getLinkType());
 		assertEquals("Incorrect link type (asynchronous)",
 				DeskLoader.ASYNCHRONOUS_LINK_TYPE, flowItemTwo.getOutputs()
 						.get(0).getExternalFlow().getLinkType());
 		assertEquals("Incorrect link type (parallel)",
 				DeskLoader.PARALLEL_LINK_TYPE, flowItemTwo.getOutputs().get(1)
 						.getFlowItem().getLinkType());
+
+		// ----------------------------------------
+		// Validate the External Managed Objects
+		// ----------------------------------------
+
+		// Validate external managed objects
+		assertList(new String[] { "getName", "getObjectType" }, desk
+				.getExternalManagedObjects(), new ExternalManagedObjectModel(
+				"mo", "java.lang.String", null));
+
+		// Validate external managed object connections to work tasks
+		assertList(
+				new String[] { "getName" },
+				desk.getExternalManagedObjects().get(0).getTaskObjects(),
+				new DeskTaskObjectToExternalManagedObjectModel("mo", null, null),
+				new DeskTaskObjectToExternalManagedObjectModel("mo", null, null));
+
+		// ----------------------------------------
+		// Validate the External Flows
+		// ----------------------------------------
+
+		// Validate external flows
+		assertList(new String[] { "getName" }, desk.getExternalFlows(),
+				new ExternalFlowModel("flow", null));
+
+		// Validate external flow connections to flow items
+		assertList(new String[] { "getName", "getLinkType" }, desk
+				.getExternalFlows().get(0).getOutputs(),
+				new FlowItemOutputToExternalFlowModel("flow", null, null,
+						"Sequential"), new FlowItemOutputToExternalFlowModel(
+						"flow", null, null, "Asynchronous"));
 	}
 
 	/**
 	 * Ensure raw load and store (without the synchronisers).
 	 */
-	public void testRawLoadAndStore() throws Exception {
+	public void testLoadAndStore() throws Exception {
 
 		// Load the Desk
-		DeskModel desk = this.deskLoader.loadRawDesk(this.configurationItem);
+		DeskModel desk = this.deskLoader.loadDesk(this.configurationItem);
 
 		// Store the Desk
 		FileSystemConfigurationItem tempFile = new FileSystemConfigurationItem(
 				File.createTempFile("TestDesk.desk.xml", null), null);
 		this.deskLoader.storeDesk(desk, tempFile);
-		
+
 		// Reload the Desk
-		DeskModel reloadedDesk = this.deskLoader.loadRawDesk(tempFile);
+		DeskModel reloadedDesk = this.deskLoader.loadDesk(tempFile);
 
 		// Validate round trip
 		assertGraph(desk, reloadedDesk);
 	}
 
+	/**
+	 * TODO make below work on synchronising
+	 */
+	public void testTodo() throws Exception {
+		// TODO make below work on synchronising
+
+		fail("TODO synchronising put on loader");
+
+		DeskModel desk = null;
+
+		// Validate underlying work
+		ClassWork classWork = (ClassWork) desk.getWorks().get(0).getWork()
+				.getWorkFactory().createWork();
+		assertTrue("Incorrect work", classWork.getObject() instanceof MockClass);
+
+		// Validate underlying tasks
+		assertNotNull("Must link in existing Task", desk.getFlowItems().get(0)
+				.getTask());
+		assertNull(
+				"Do not link in missing task - required to relink to another task or delete",
+				desk.getFlowItems().get(1).getTask());
+	}
 }
