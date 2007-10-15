@@ -84,7 +84,7 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 	protected DeskModel retrieveModel(ConfigurationItem configuration)
 			throws Exception {
 		// Return the loaded Desk
-		return this.getDeskLoader(configuration).loadRawDesk(configuration);
+		return this.getDeskLoader(configuration).loadDesk(configuration);
 	}
 
 	/*
@@ -153,7 +153,7 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 				});
 
 		// Create the Figure Factory for flow links
-		FigureFactory linkFigureFactory = new FigureFactory<Object>() {
+		FigureFactory<Object> linkFigureFactory = new FigureFactory<Object>() {
 			public IFigure createFigure(Object model) {
 
 				// Obtain the link type
