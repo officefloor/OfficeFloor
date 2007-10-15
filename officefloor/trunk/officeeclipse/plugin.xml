@@ -8,7 +8,7 @@
       <editor
             class="net.officefloor.eclipse.desk.DeskEditor"
             default="true"
-            extensions="desk.xml"
+            extensions="desk"
             icon="icons/office.gif"
             id="net.officefloor.editors.desk"
             name="Desk Editor"/>
@@ -33,6 +33,20 @@
             icon="icons/office.gif"
             id="net.officefloor.editors.officefloor"
             name="OfficeFloor Editor"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="net.officefloor.eclipse"
+            name="Office Floor">
+      </category>
+      <wizard
+            category="net.officefloor.eclipse"
+            class="net.officefloor.eclipse.wizards.DeskNewWizard"
+            icon="icons/office.gif"
+            id="net.officefloor.eclipse.wizards.DeskNewWizard"
+            name="Desk">
+      </wizard>
    </extension>
 
 </plugin>
