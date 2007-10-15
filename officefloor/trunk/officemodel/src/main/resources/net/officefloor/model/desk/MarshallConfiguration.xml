@@ -1,51 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<marshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\..\..\src\schema\TreeXmlMarshaller.xsd" 
-		type="net.officefloor.model.desk.DeskModel" 
-		element="desk">
+<marshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\..\..\src\schema\TreeXmlMarshaller.xsd"
+	type="net.officefloor.model.desk.DeskModel" element="desk">
 	<!-- EXTERNAL MANAGED OBJECTS -->
-	<collection method="getExternalManagedObjects" element="external-managed-objects">
-		<item type="net.officefloor.model.desk.ExternalManagedObjectModel" element="external-managed-object">
+	<collection method="getExternalManagedObjects"
+		element="external-managed-objects">
+		<item
+			type="net.officefloor.model.desk.ExternalManagedObjectModel"
+			element="external-managed-object">
 			<attributes>
-				<attribute method="getName" attribute="name"/>
-				<attribute method="getObjectType" attribute="object-type"/>
+				<attribute method="getName" attribute="name" />
+				<attribute method="getObjectType"
+					attribute="object-type" />
 			</attributes>
 		</item>
-	</collection>	
+	</collection>
 	<!-- EXTERNAL FLOWS -->
 	<collection method="getExternalFlows" element="external-flows">
-		<item type="net.officefloor.model.desk.ExternalFlowModel" element="external-flow">
+		<item type="net.officefloor.model.desk.ExternalFlowModel"
+			element="external-flow">
 			<attributes>
-				<attribute method="getName" attribute="name"/>
+				<attribute method="getName" attribute="name" />
 			</attributes>
 		</item>
 	</collection>
 	<!-- WORKS -->
 	<collection method="getWorks" element="works">
-		<item type="net.officefloor.model.desk.DeskWorkModel" element="work">
+		<item type="net.officefloor.model.desk.DeskWorkModel"
+			element="work">
 			<attributes>
-				<attribute method="getId" attribute="id"/>
-				<attribute method="getLoader" attribute="loader"/>
-				<attribute method="getConfiguration" attribute="configuration"/>
+				<attribute method="getId" attribute="id" />
+				<attribute method="getLoader" attribute="loader" />
+				<attribute method="getConfiguration"
+					attribute="configuration" />
 			</attributes>
-			<object method="getInitialFlowItem" element="initial-flow-item">
+			<object method="getInitialFlowItem"
+				element="initial-flow-item">
 				<attributes>
-					<attribute method="getFlowItemId" attribute="id"/>
+					<attribute method="getFlowItemId" attribute="id" />
 				</attributes>
 			</object>
 			<collection method="getTasks">
-				<item type="net.officefloor.model.desk.DeskTaskModel" element="task">
+				<item type="net.officefloor.model.desk.DeskTaskModel"
+					element="task">
 					<attributes>
-						<attribute method="getName" attribute="name"/>
+						<attribute method="getName" attribute="name" />
 					</attributes>
 					<collection method="getObjects">
-						<item type="net.officefloor.model.desk.DeskTaskObjectModel" element="task-object">
+						<item
+							type="net.officefloor.model.desk.DeskTaskObjectModel"
+							element="task-object">
 							<attributes>
-								<attribute method="getObjectType" attribute="object-type"/>
+								<attribute method="getObjectType"
+									attribute="object-type" />
 							</attributes>
-							<object method="getManagedObject" element="external-managed-object">
-								<attributes>
-									<attribute method="getName" attribute="name"/>
-								</attributes>
+							<object method="getManagedObject">
+								<object method="getManagedObject"
+									element="external-managed-object">
+									<attributes>
+										<attribute method="getName"
+											attribute="name" />
+									</attributes>
+								</object>
 							</object>
 						</item>
 					</collection>
@@ -55,30 +71,37 @@
 	</collection>
 	<!-- FLOW ITEMS -->
 	<collection method="getFlowItems" element="flow-items">
-		<item type="net.officefloor.model.desk.FlowItemModel" element="flow-item">
+		<item type="net.officefloor.model.desk.FlowItemModel"
+			element="flow-item">
 			<attributes>
-				<attribute method="getId" attribute="id"/>
-				<attribute method="getIsPublic" attribute="public"/>
-				<attribute method="getWorkName" attribute="work"/>
-				<attribute method="getTaskName" attribute="task"/>
-				<attribute method="getX" attribute="x"/>
-				<attribute method="getY" attribute="y"/>
+				<attribute method="getId" attribute="id" />
+				<attribute method="getIsPublic" attribute="public" />
+				<attribute method="getWorkName" attribute="work" />
+				<attribute method="getTaskName" attribute="task" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getOutputs">
-				<item type="net.officefloor.model.desk.FlowItemOutputModel" element="output">
+				<item
+					type="net.officefloor.model.desk.FlowItemOutputModel"
+					element="output">
 					<attributes>
-						<attribute method="getId" attribute="id"/>
+						<attribute method="getId" attribute="id" />
 					</attributes>
-					<object method="getExternalFlow" element="external-flow">
+					<object method="getExternalFlow"
+						element="external-flow">
 						<attributes>
-							<attribute method="getName" attribute="name"/>
-							<attribute method="getLinkType" attribute="link"/>
+							<attribute method="getName"
+								attribute="name" />
+							<attribute method="getLinkType"
+								attribute="link" />
 						</attributes>
 					</object>
 					<object method="getFlowItem" element="flow-item">
 						<attributes>
-							<attribute method="getId" attribute="id"/>
-							<attribute method="getLinkType" attribute="link"/>
+							<attribute method="getId" attribute="id" />
+							<attribute method="getLinkType"
+								attribute="link" />
 						</attributes>
 					</object>
 				</item>
