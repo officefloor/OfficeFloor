@@ -81,9 +81,9 @@ public class DeskLoader {
 	 *            {@link FlowItemModel}.
 	 * @return Id of the input {@link FlowItemModel}.
 	 */
-	public static String getFlowItemOutputId(TaskFlowModel taskFlow) {
+	public static String getFlowItemOutputId(TaskFlowModel<?> taskFlow) {
 		// Enum takes priority over index
-		Enum enumValue = taskFlow.getFlowKey();
+		Enum<?> enumValue = taskFlow.getFlowKey();
 		if (enumValue != null) {
 			return enumValue.toString();
 		}
@@ -127,7 +127,7 @@ public class DeskLoader {
 	 * @throws Exception
 	 *             If fails.
 	 */
-	public DeskModel loadRawDesk(ConfigurationItem configuration)
+	public DeskModel loadDesk(ConfigurationItem configuration)
 			throws Exception {
 
 		// Load the desk from the configuration
@@ -290,10 +290,10 @@ public class DeskLoader {
 	 * @throws Exception
 	 *             If fails.
 	 */
-	public DeskModel loadDesk(ConfigurationItem configuration) throws Exception {
+	public DeskModel loadDeskAndSynchronise(ConfigurationItem configuration) throws Exception {
 
 		// Load the desk model
-		DeskModel desk = this.loadRawDesk(configuration);
+		DeskModel desk = this.loadDesk(configuration);
 
 		// Attach synchronisers
 		this.attachSynchronisers(desk, configuration);
