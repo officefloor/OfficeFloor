@@ -18,6 +18,8 @@ package net.officefloor.eclipse.common.editparts;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,6 +39,7 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.editpolicies.AbstractEditPolicy;
 import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -326,5 +329,43 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 
 		// Return the bean dialog
 		return new BeanDialog(editorShell, bean, classLoader, ignoreProperties);
+	}
+
+	/**
+	 * Displays the message as an error {@link MessageDialog}.
+	 * 
+	 * @param message
+	 *            Error message.
+	 */
+	protected void messageError(String message) {
+		MessageDialog.openError(this.getEditor().getEditorSite().getShell(),
+				"Office Floor", message);
+	}
+
+	/**
+	 * Displays the {@link Throwable} error details as an error
+	 * {@link MessageDialog}.
+	 * 
+	 * @param error
+	 *            Error.
+	 */
+	protected void messageError(Throwable error) {
+		// Obtain the stack trace
+		StringWriter buffer = new StringWriter();
+		error.printStackTrace(new PrintWriter(buffer));
+
+		// Display the stack trace
+		this.messageError(buffer.toString());
+	}
+
+	/**
+	 * Displays the message as a warning {@link MessageDialog}.
+	 * 
+	 * @param message
+	 *            Warning message
+	 */
+	protected void messageWarning(String message) {
+		MessageDialog.openWarning(this.getEditor().getEditorSite().getShell(),
+				"Office Floor", message);
 	}
 }

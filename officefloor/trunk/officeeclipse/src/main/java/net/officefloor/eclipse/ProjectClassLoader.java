@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -23,7 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.repository.ConfigurationContext;
+import net.officefloor.repository.ConfigurationItem;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -36,24 +39,55 @@ import org.eclipse.ui.IEditorPart;
 public class ProjectClassLoader extends URLClassLoader {
 
 	/**
-	 * Convience method to create the {@link ProjectClassLoader} from the input
-	 * {@link IEditorPart}.
+	 * Convenience method to create the {@link ProjectClassLoader} from the
+	 * input {@link IEditorPart}.
 	 * 
-	 * @param editor
+	 * @param editorPart
 	 *            {@link IEditorPart}.
 	 * @return {@link ProjectClassLoader}.
 	 * @throws OfficeFloorPluginFailure
 	 *             If fails to create {@link ProjectClassLoader}.
 	 */
-	public static ProjectClassLoader create(IEditorPart editor)
+	public static ProjectClassLoader create(IEditorPart editorPart)
 			throws OfficeFloorPluginFailure {
 
 		// Obtain the configuration context
-		ConfigurationContext context = new FileConfigurationItem(editor
+		ConfigurationContext context = new FileConfigurationItem(editorPart
 				.getEditorInput()).getContext();
 
 		// Return the class loader
 		return create(context);
+	}
+
+	/**
+	 * Convenience method to find a {@link ConfigurationItem} on the class path
+	 * of the project of the input {@link IEditorPart}.
+	 * 
+	 * @param editorPart
+	 *            {@link IEditorPart}.
+	 * @param path
+	 *            Path to {@link ConfigurationItem}.
+	 * @return {@link ConfigurationItem} or <code>null</code> if not found.
+	 */
+	public static ConfigurationItem findConfigurationItem(
+			IEditorPart editorPart, String path) {
+
+		// Create the class loader
+		ProjectClassLoader classLoader = create(editorPart);
+
+		// Obtain contents of resource at path
+		InputStream resource = classLoader.getResourceAsStream(path);
+		if (resource == null) {
+			// Not found
+			return null;
+		}
+
+		// Create the Project Configuration Context
+		ConfigurationContext context = new ProjectConfigurationContext(
+				editorPart.getEditorInput());
+
+		// Create and return the Configuration Item
+		return new InputStreamConfigurationItem(path, context, resource);
 	}
 
 	/**
@@ -70,7 +104,8 @@ public class ProjectClassLoader extends URLClassLoader {
 			throws OfficeFloorPluginFailure {
 
 		// Parent class loader is from office floor plugin
-		ClassLoader parentClassLoader = OfficeFloorPlugin.class.getClassLoader();
+		ClassLoader parentClassLoader = OfficeFloorPlugin.class
+				.getClassLoader();
 
 		// Create the list of URLs
 		List<URL> urls = new ArrayList<URL>();
@@ -118,5 +153,86 @@ public class ProjectClassLoader extends URLClassLoader {
 					"Failed to create URL from path '" + path + "' as "
 							+ ex.getMessage(), ex);
 		}
+	}
+
+	/**
+	 * {@link ConfigurationItem} for the {@link InputStream} of the resource.
+	 */
+	private static class InputStreamConfigurationItem implements ConfigurationItem {
+
+		/**
+		 * Path to the resource.
+		 */
+		private final String path;
+
+		/**
+		 * {@link ConfigurationContext}.
+		 */
+		private final ConfigurationContext context;
+
+		/**
+		 * {@link InputStream} to the resource.
+		 */
+		private final InputStream resource;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param path
+		 *            Path to the resource.
+		 * @param context
+		 *            {@link ConfigurationContext}.
+		 * @param resource
+		 *            {@link InputStream} to the resource.
+		 */
+		public InputStreamConfigurationItem(String path,
+				ConfigurationContext context, InputStream resource) {
+			this.path = path;
+			this.context = context;
+			this.resource = resource;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.repository.ConfigurationItem#getId()
+		 */
+		@Override
+		public String getId() {
+			return this.path;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.repository.ConfigurationItem#getContext()
+		 */
+		@Override
+		public ConfigurationContext getContext() {
+			return this.context;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.repository.ConfigurationItem#getConfiguration()
+		 */
+		@Override
+		public InputStream getConfiguration() throws Exception {
+			return this.resource;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.repository.ConfigurationItem#setConfiguration(java.io.InputStream)
+		 */
+		@Override
+		public void setConfiguration(InputStream configuration)
+				throws Exception {
+			throw new UnsupportedOperationException(
+					"Classpath resource may not be overridden");
+		}
+
 	}
 }

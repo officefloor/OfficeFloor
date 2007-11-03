@@ -31,8 +31,7 @@ public class DeskNewWizard extends AbstractNewWizard {
 	 * Initiate.
 	 */
 	public DeskNewWizard() {
-		super("New Desk", "Create a new Desk", "new_desk", "desk",
-				"<desk/>");
+		super("New Desk", "Create a new Desk", "new_desk", "desk", "<desk/>");
 	}
 
 }

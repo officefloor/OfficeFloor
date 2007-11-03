@@ -149,7 +149,7 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 				});
 
 		// Create the Figure Factory for flow links
-		FigureFactory linkFigureFactory = new FigureFactory<Object>() {
+		FigureFactory<Object> linkFigureFactory = new FigureFactory<Object>() {
 			public IFigure createFigure(Object model) {
 
 				// Obtain the link type

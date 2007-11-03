@@ -19,15 +19,16 @@ package net.officefloor.eclipse.room.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.dialog.input.ClasspathResourceSelectionPropertyInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
+import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.common.wrap.OfficeFloorWrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
@@ -37,7 +38,6 @@ import net.officefloor.model.room.ExternalManagedObjectModel;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.RoomModel.RoomEvent;
-import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.room.RoomLoader;
 
@@ -85,13 +85,24 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 				// Add the Sub Room
 				SubRoomAddBean bean = new SubRoomAddBean();
 				BeanDialog dialog = RoomEditPart.this.createBeanDialog(bean);
+				dialog
+						.registerPropertyInputBuilder("File",
+								new ClasspathResourceSelectionPropertyInput(
+										FileConfigurationItem.getFile(
+												RoomEditPart.this.getEditor()
+														.getEditorInput())
+												.getProject(), "desk", "room"));
 				if (dialog.populate()) {
 					try {
 						// Obtain the configuration item
-						ConfigurationContext context = new ProjectConfigurationContext(
-								RoomEditPart.this.getEditor().getEditorInput());
-						ConfigurationItem configItem = context
-								.getConfigurationItem(bean.file);
+						ConfigurationItem configItem = ProjectClassLoader
+								.findConfigurationItem(RoomEditPart.this
+										.getEditor(), bean.file);
+						if (configItem == null) {
+							RoomEditPart.this.messageError("Can not find '"
+									+ bean.file + "' on class path");
+							return;
+						}
 
 						// Create the sub room
 						RoomLoader roomLoader = new RoomLoader();
@@ -105,10 +116,7 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 						RoomEditPart.this.getCastedModel().addSubRoom(subRoom);
 
 					} catch (Exception ex) {
-						// TODO Provide dialog box of failure
-						// TODO provide via inheriting from AbstractEditPart
-						throw new OfficeFloorPluginFailure(
-								"TODO: provide dialog box of failure - " + ex);
+						RoomEditPart.this.messageError(ex);
 					}
 				}
 			}

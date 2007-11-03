@@ -16,7 +16,6 @@
  */
 package net.officefloor.eclipse.common.dialog;
 
-import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -36,16 +35,11 @@ public interface PropertyInput<C extends Control> {
 	/**
 	 * Builds the {@link Control}.
 	 * 
-	 * @param initialValue
-	 *            Initial value for the property.
-	 * @param listener
-	 *            To listen to changes of the property's value.
-	 * @param parent
-	 *            Parent {@link Composite} to add the {@link Control}.
+	 * @param context
+	 *            {@link PropertyInputContext}.
 	 * @return {@link Control} to input the value of the property.
 	 */
-	C buildControl(Object initialValue, VerifyListener listener,
-			Composite parent);
+	C buildControl(PropertyInputContext context);
 
 	/**
 	 * <p>
@@ -56,10 +50,10 @@ public interface PropertyInput<C extends Control> {
 	 * 
 	 * @param control
 	 *            {@link Control}.
-	 * @param e
-	 *            {@link VerifyEvent} given from the input {@link Control}.
+	 * @param context
+	 *            {@link PropertyInputContext}.
 	 * @return String value.
 	 */
-	String getValue(C control, VerifyEvent e);
+	String getValue(C control, PropertyInputContext context);
 
 }
