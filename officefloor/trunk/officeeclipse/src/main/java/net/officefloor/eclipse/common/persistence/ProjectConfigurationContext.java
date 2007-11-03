@@ -73,7 +73,7 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	}
 
 	/**
-	 * Convience constructor.
+	 * Convenience constructor.
 	 * 
 	 * @param editorInput
 	 *            {@link IEditorInput}.

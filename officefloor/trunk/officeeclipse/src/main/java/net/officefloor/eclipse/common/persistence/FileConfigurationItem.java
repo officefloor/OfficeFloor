@@ -51,7 +51,7 @@ public class FileConfigurationItem implements ConfigurationItem {
 	 *            {@link IEditorInput}.
 	 * @return {@link IFile} for the input {@link IEditorInput}.
 	 */
-	static IFile getFile(IEditorInput editorInput) {
+	public static IFile getFile(IEditorInput editorInput) {
 		return ((IFileEditorInput) editorInput).getFile();
 	}
 

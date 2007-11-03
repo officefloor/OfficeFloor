@@ -3,6 +3,10 @@
  */
 package net.officefloor.eclipse;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import junit.framework.TestCase;
 
 import org.eclipse.ui.IWorkbench;
@@ -34,6 +38,8 @@ public class EclipseMain extends TestCase {
 	 */
 	public void testMain() {
 
+		System.out.println("testMain");
+		
 		// Add listener to stop shutdown
 		PlatformUI.getWorkbench().addWorkbenchListener(
 				new IWorkbenchListener() {
@@ -49,6 +55,19 @@ public class EclipseMain extends TestCase {
 
 						// Stop shutdown on first unit test
 						if (this.isFirst) {
+
+							// Determine if wait for shutdown
+							if ("yes".equalsIgnoreCase(System
+									.getProperty("enter.stop"))) {
+								System.out.print("Press enter to exit ");
+								try {
+									new BufferedReader(new InputStreamReader(
+											System.in)).readLine();
+								} catch (IOException ex) {
+									ex.printStackTrace();
+								}
+							}
+
 							this.isFirst = false;
 							return false;
 						}

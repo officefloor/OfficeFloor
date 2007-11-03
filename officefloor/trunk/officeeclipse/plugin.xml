@@ -15,7 +15,7 @@
       <editor
             class="net.officefloor.eclipse.room.RoomEditor"
             default="true"
-            extensions="room.xml"
+            extensions="room"
             icon="icons/office.gif"
             id="net.officefloor.editors.room"
             name="Room Editor"/>
@@ -46,6 +46,13 @@
             icon="icons/office.gif"
             id="net.officefloor.eclipse.wizards.DeskNewWizard"
             name="Desk">
+      </wizard>
+      <wizard
+            category="net.officefloor.eclipse"
+            class="net.officefloor.eclipse.wizards.RoomNewWizard"
+            icon="icons/office.gif"
+            id="net.officefloor.eclipse.wizards.RoomNewWizard"
+            name="Room">
       </wizard>
    </extension>
 
