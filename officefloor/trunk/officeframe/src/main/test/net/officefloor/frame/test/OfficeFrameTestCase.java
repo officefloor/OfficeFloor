@@ -464,6 +464,26 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Asserts that properties on the input objects match for the specified
+	 * methods.
+	 * 
+	 * @param expected
+	 *            Expected item.
+	 * @param actual
+	 *            Actual item.
+	 * @param methods
+	 *            Method names to specify the properties on the item to match.
+	 */
+	public static <O> void assertProperties(O expected, O actual,
+			String... methods) {
+		// Match the properties
+		for (String method : methods) {
+			assertEquals("Incorrect property " + method, getProperty(expected,
+					method), getProperty(actual, method));
+		}
+	}
+
+	/**
 	 * Obtains the property on the Object.
 	 * 
 	 * @param object
