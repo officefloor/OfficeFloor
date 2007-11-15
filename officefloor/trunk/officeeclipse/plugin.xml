@@ -22,14 +22,14 @@
       <editor
             class="net.officefloor.eclipse.office.OfficeEditor"
             default="true"
-            extensions="office.xml"
+            extensions="office"
             icon="icons/office.gif"
             id="net.officefloor.editors.office"
             name="Office Editor"/>
       <editor
             class="net.officefloor.eclipse.officefloor.OfficeFloorEditor"
             default="true"
-            extensions="officefloor.xml"
+            extensions="officefloor"
             icon="icons/office.gif"
             id="net.officefloor.editors.officefloor"
             name="OfficeFloor Editor"/>
@@ -53,6 +53,13 @@
             icon="icons/office.gif"
             id="net.officefloor.eclipse.wizards.RoomNewWizard"
             name="Room">
+      </wizard>
+      <wizard
+            category="net.officefloor.eclipse"
+            class="net.officefloor.eclipse.wizards.OfficeNewWizard"
+            icon="icons/office.gif"
+            id="net.officefloor.eclipse.wizards.OfficeNewWizard"
+            name="Office">
       </wizard>
    </extension>
 

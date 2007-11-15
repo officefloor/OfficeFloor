@@ -19,7 +19,7 @@ package net.officefloor.eclipse.room.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.ProjectClassLoader;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.input.ClasspathResourceSelectionPropertyInput;
@@ -28,7 +28,6 @@ import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.common.wrap.OfficeFloorWrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
@@ -85,13 +84,9 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 				// Add the Sub Room
 				SubRoomAddBean bean = new SubRoomAddBean();
 				BeanDialog dialog = RoomEditPart.this.createBeanDialog(bean);
-				dialog
-						.registerPropertyInputBuilder("File",
-								new ClasspathResourceSelectionPropertyInput(
-										FileConfigurationItem.getFile(
-												RoomEditPart.this.getEditor()
-														.getEditorInput())
-												.getProject(), "desk", "room"));
+				dialog.registerPropertyInputBuilder("File",
+						new ClasspathResourceSelectionPropertyInput(
+								RoomEditPart.this.getEditor(), "desk", "room"));
 				if (dialog.populate()) {
 					try {
 						// Obtain the configuration item
@@ -197,7 +192,7 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart#createLayoutEditPolicy()
 	 */
-	protected OfficeFloorLayoutEditPolicy createLayoutEditPolicy() {
+	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
 		return new RoomLayoutEditPolicy();
 	}
 
@@ -221,6 +216,7 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
 	 */
+	@SuppressWarnings("unchecked")
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler> handlers) {
 		handlers.add(new PropertyChangeHandler<RoomEvent>(RoomEvent.values()) {
@@ -295,7 +291,7 @@ class RoomLayoutEditPolicy extends OfficeFloorLayoutEditPolicy<RoomModel> {
 	 * @see net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy#createCreateComand(P,
 	 *      java.lang.Object, org.eclipse.draw2d.geometry.Point)
 	 */
-	protected CreateCommand createCreateComand(RoomModel parentModel,
+	protected CreateCommand<?, ?> createCreateComand(RoomModel parentModel,
 			Object newModel, Point location) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");

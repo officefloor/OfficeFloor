@@ -17,11 +17,13 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.io.StringWriter;
 import java.util.List;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.dialog.input.ClasspathResourceSelectionPropertyInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
@@ -35,7 +37,10 @@ import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.office.OfficeModel.OfficeEvent;
+import net.officefloor.office.OfficeLoader;
+import net.officefloor.repository.ConfigurationItem;
 
 import org.eclipse.draw2d.geometry.Point;
 
@@ -52,7 +57,7 @@ public class OfficeEditPart extends
 	 * Adds a {@link AdministratorModel}.
 	 */
 	private WrappingModel<OfficeModel> addAdministrator;
-	
+
 	/**
 	 * Listing of {@link net.officefloor.model.office.ExternalTeamModel}
 	 * instances.
@@ -81,25 +86,25 @@ public class OfficeEditPart extends
 	protected void init() {
 
 		// Button to add Administrator
-		final ButtonEditPart addAdministratorButton = new ButtonEditPart("Add administrator") {
+		final ButtonEditPart addAdministratorButton = new ButtonEditPart(
+				"Add administrator") {
 			@Override
 			protected void handleButtonClick() {
 				// Add the Administrator
 				AdministratorModel bean = new AdministratorModel();
-				BeanDialog dialog = OfficeEditPart.this.createBeanDialog(bean, "getX", "getY");
+				BeanDialog dialog = OfficeEditPart.this.createBeanDialog(bean,
+						"getX", "getY");
 				if (dialog.populate()) {
 					try {
-						
+
 						// TODO Load the administrator
 
 						// Add the administrator
-						OfficeEditPart.this.getCastedModel().addAdministrator(bean);
+						OfficeEditPart.this.getCastedModel().addAdministrator(
+								bean);
 
 					} catch (Exception ex) {
-						// TODO Provide dialog box of failure
-						// TODO provide via inheriting from AbstractEditPart
-						throw new OfficeFloorPluginFailure(
-								"TODO: provide dialog box of failure - " + ex);
+						OfficeEditPart.this.messageError(ex);
 					}
 				}
 			}
@@ -112,10 +117,10 @@ public class OfficeEditPart extends
 				children.add(addAdministratorButton);
 			}
 		};
-		addAdministratorEditPart.setFigure(new FreeformWrapperFigure(new SectionFigure(
-				"Add administrator")));
-		this.addAdministrator = new WrappingModel<OfficeModel>(this.getCastedModel(),
-				addAdministratorEditPart, new Point(10, 10));
+		addAdministratorEditPart.setFigure(new FreeformWrapperFigure(
+				new SectionFigure("Add administrator")));
+		this.addAdministrator = new WrappingModel<OfficeModel>(this
+				.getCastedModel(), addAdministratorEditPart, new Point(10, 10));
 
 		// Button to add Team
 		final ButtonEditPart teamButton = new ButtonEditPart("Add team") {
@@ -145,20 +150,65 @@ public class OfficeEditPart extends
 		this.externalTeams = new WrappingModel<OfficeModel>(this
 				.getCastedModel(), teamEditPart, new Point(10, 100));
 
-		// TODO Button to add Room
+		// Button to add Room
+		final ButtonEditPart roomButton = new ButtonEditPart("Add Room") {
+			@Override
+			protected void handleButtonClick() {
+				// Add the room
+				OfficeRoomModel room = new OfficeRoomModel();
+				BeanDialog dialog = OfficeEditPart.this.createBeanDialog(room,
+						"X", "Y");
+				dialog.registerPropertyInputBuilder("Id",
+						new ClasspathResourceSelectionPropertyInput(
+								OfficeEditPart.this.getEditor(), "room"));
+				if (dialog.populate()) {
+					try {
+						// Obtain the room configuration
+						ProjectClassLoader classLoader = ProjectClassLoader
+								.create(OfficeEditPart.this.getEditor());
+						ConfigurationItem roomConfigItem = classLoader
+								.findConfigurationItem(room.getId());
+						if (roomConfigItem == null) {
+							OfficeEditPart.this
+									.messageError("Could not find Office Room at '"
+											+ room.getId() + "'");
+							return;
+						}
+
+						// Load the room
+						OfficeLoader officeLoader = new OfficeLoader();
+						OfficeRoomModel roomModel = officeLoader
+								.loadOfficeRoom(roomConfigItem, classLoader);
+
+						// Add the room to the office
+						OfficeEditPart.this.getCastedModel().setRoom(roomModel);
+
+					} catch (Exception ex) {
+						OfficeEditPart.this.messageError(ex);
+					}
+				}
+			}
+		};
 
 		// Add Room
 		WrappingEditPart roomEditPart = new OfficeFloorWrappingEditPart() {
 			@Override
 			protected void populateModelChildren(List children) {
-				children.add(OfficeEditPart.this.getCastedModel().getRoom());
-				// TODO room button
+				OfficeRoomModel room = OfficeEditPart.this.getCastedModel()
+						.getRoom();
+				if (room == null) {
+					// No room, provide button to add room
+					children.add(roomButton);
+				} else {
+					// Have room therefore add
+					children.add(room);
+				}
 			}
 		};
 		roomEditPart.setFigure(new FreeformWrapperFigure(new SectionFigure(
 				"Room")));
 		this.room = new WrappingModel<OfficeModel>(this.getCastedModel(),
-				roomEditPart, new Point(100, 10));
+				roomEditPart, new Point(120, 10));
 
 		// Button to add Managed Object
 		final ButtonEditPart moButton = new ButtonEditPart("Add MO") {
