@@ -176,6 +176,17 @@ public class RoomLoader {
 	 */
 	public void storeRoom(RoomModel room, ConfigurationItem configurationItem)
 			throws Exception {
+
+		// Ensure managed objects linked in (for new links)
+		for (ExternalManagedObjectModel extMo : room
+				.getExternalManagedObjects()) {
+			for (ManagedObjectToExternalManagedObjectModel link : extMo
+					.getSubRoomManagedObjects()) {
+				link.setName(extMo.getName());
+			}
+		}
+
+		// Stores the model
 		this.modelRepository.store(room, configurationItem);
 	}
 

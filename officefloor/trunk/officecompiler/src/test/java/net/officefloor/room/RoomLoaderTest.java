@@ -22,6 +22,7 @@ import net.officefloor.desk.DeskLoader;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.room.ExternalFlowModel;
 import net.officefloor.model.room.ExternalManagedObjectModel;
+import net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel;
 import net.officefloor.model.room.OutputFlowToInputFlowModel;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
@@ -93,22 +94,27 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 						null, null, 200, 30));
 
 		// Validate the sub room one
-		assertList(new String[] { "getName", "getIsPublic" }, room
-				.getSubRooms().get(0).getInputFlows(),
+		SubRoomModel subRoomOne = room.getSubRooms().get(0);
+		assertList(new String[] { "getName", "getIsPublic" }, subRoomOne
+				.getInputFlows(),
 				new SubRoomInputFlowModel("input", true, null));
-		assertList(new String[] { "getName" }, room.getSubRooms().get(0)
-				.getOutputFlows(), new SubRoomOutputFlowModel("output", null,
-				null));
+		assertList(new String[] { "getName" }, subRoomOne.getOutputFlows(),
+				new SubRoomOutputFlowModel("output", null, null));
 		OutputFlowToInputFlowModel outputToInput = room.getSubRooms().get(0)
 				.getOutputFlows().get(0).getInput();
-		assertEquals("Incorrect sub-room", "2", outputToInput.getSubRoomName());
-		assertEquals("Incorrect input flow", "input", outputToInput
-				.getInputFlowName());
-		assertEquals("Incorrect link type", DeskLoader.SEQUENTIAL_LINK_TYPE,
-				outputToInput.getLinkType());
-		assertList(new String[] { "getName", "getObjectType" }, room
-				.getSubRooms().get(0).getManagedObjects(),
-				new SubRoomManagedObjectModel("mo", "java.lang.String", null));
+		assertProperties(new OutputFlowToInputFlowModel("2", "input",
+				DeskLoader.SEQUENTIAL_LINK_TYPE, null, null), outputToInput,
+				"getSubRoomName", "getInputFlowName", "getLinkType");
+		SubRoomManagedObjectModel subRoomOneMo = subRoomOne.getManagedObjects()
+				.get(0);
+		assertList(new String[] { "getName", "getObjectType",
+				"getExternalManagedObject" }, subRoomOne.getManagedObjects(),
+				new SubRoomManagedObjectModel("mo", "java.lang.String",
+						subRoomOneMo.getExternalManagedObject()));
+		assertProperties(new ManagedObjectToExternalManagedObjectModel("mo",
+				subRoomOneMo, room.getExternalManagedObjects().get(0)),
+				subRoomOneMo.getExternalManagedObject(), "getName",
+				"getManagedObject", "getExternalManagedObject");
 	}
 
 	/**
@@ -120,12 +126,16 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		RoomModel room = this.roomLoader.loadRoom(this.configurationItem);
 
 		// Store the Room
-		FileSystemConfigurationItem tempFile = new FileSystemConfigurationItem(
-				File.createTempFile("TestRoom.room.xml", null), null);
-		this.roomLoader.storeRoom(room, tempFile);
+		File tempFile = File.createTempFile("TestRoom.room.xml", null);
+		FileSystemConfigurationItem tempConfigItem = new FileSystemConfigurationItem(
+				tempFile, null);
+		this.roomLoader.storeRoom(room, tempConfigItem);
+
+		// TODO remove
+		System.out.println("Stored:\n" + this.getFileContents(tempFile));
 
 		// Reload the Room
-		RoomModel reloadedRoom = this.roomLoader.loadRoom(tempFile);
+		RoomModel reloadedRoom = this.roomLoader.loadRoom(tempConfigItem);
 
 		// Validate round trip
 		assertGraph(room, reloadedRoom);

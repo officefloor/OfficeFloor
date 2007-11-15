@@ -32,7 +32,9 @@ import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.office.PropertyModel;
+import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
 import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 
 /**
@@ -65,7 +67,6 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 		// Obtain the configuration
 		this.configurationItem = new FileSystemConfigurationItem(this.findFile(
 				this.getClass(), "TestOffice.office.xml"), null);
-
 	}
 
 	/**
@@ -183,11 +184,44 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 		FileSystemConfigurationItem tempFile = new FileSystemConfigurationItem(
 				file, null);
 		this.officeLoader.storeOffice(office, tempFile);
-		
+
 		// Reload the Office
 		OfficeModel reloadedOffice = this.officeLoader.loadOffice(tempFile);
 
 		// Validate round trip
 		assertGraph(office, reloadedOffice, "getAdministrators");
+	}
+
+	/**
+	 * Ensures recursively loads the room, its sub-rooms and desks.
+	 */
+	public void testLoadOfficeRoom() throws Exception {
+
+		final String PARENT_ROOM_FILE_NAME = "TestRoom.room.xml";
+
+		// Obtain the parent room file
+		File parentRoomFile = this.findFile(this.getClass(),
+				PARENT_ROOM_FILE_NAME);
+
+		// Obtain the configuration of the room
+		ConfigurationContext context = new FileSystemConfigurationContext(
+				parentRoomFile.getParentFile());
+		ConfigurationItem roomConfigItem = context
+				.getConfigurationItem(PARENT_ROOM_FILE_NAME);
+
+		// Load the office room
+		OfficeRoomModel actualRoom = this.officeLoader.loadOfficeRoom(
+				roomConfigItem, this.getClass().getClassLoader());
+
+		// Create the expected room
+		OfficeDeskModel[] desks = new OfficeDeskModel[] { new OfficeDeskModel(
+				"TestDesk.desk.xml", new FlowItemModel[] {}) };
+		OfficeRoomModel expectedRoom = new OfficeRoomModel(
+				PARENT_ROOM_FILE_NAME,
+				new OfficeRoomModel[] { new OfficeRoomModel(
+						"TestSubRoom.room.xml", null, desks) }, desks);
+
+		// Validate the room
+		assertGraph(expectedRoom, actualRoom);
 	}
 }
