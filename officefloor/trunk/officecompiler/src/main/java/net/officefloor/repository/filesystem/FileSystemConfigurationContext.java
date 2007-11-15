@@ -88,7 +88,7 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 		File file = new File(this.rootDir, id);
 
 		// Return the configuration item
-		return new FileSystemConfigurationItem(file, this);
+		return new FileSystemConfigurationItem(id, file, this);
 	}
 
 	/*
@@ -109,7 +109,7 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 		FileSystemConfigurationItem.writeConfiguration(file, configuration);
 
 		// Create the configuration item
-		return new FileSystemConfigurationItem(file, this);
+		return new FileSystemConfigurationItem(id, file, this);
 	}
 
 }

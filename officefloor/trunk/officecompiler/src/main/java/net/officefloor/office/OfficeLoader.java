@@ -19,6 +19,8 @@ package net.officefloor.office;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.desk.DeskLoader;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
 import net.officefloor.model.office.DutyFlowModel;
@@ -33,8 +35,11 @@ import net.officefloor.model.office.FlowItemToTeamModel;
 import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
+import net.officefloor.model.room.RoomModel;
+import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.ModelRepository;
+import net.officefloor.room.RoomLoader;
 import net.officefloor.util.DoubleKeyMap;
 
 /**
@@ -96,8 +101,8 @@ public class OfficeLoader {
 			}
 		}
 
-		// Load the Room and its sub rooms
-		this.loadRoom(office.getRoom(), teams, duties);
+		// Link in the Room and its sub rooms
+		this.linkInRoom(office.getRoom(), teams, duties);
 
 		// Create the registry of managed objects
 		Map<String, ExternalManagedObjectModel> managedObjects = new HashMap<String, ExternalManagedObjectModel>();
@@ -158,7 +163,123 @@ public class OfficeLoader {
 	 */
 	public void storeOffice(OfficeModel office, ConfigurationItem configuration)
 			throws Exception {
+
+		// Ensure teams linked in (for new links)
+		for (ExternalTeamModel extTeam : office.getExternalTeams()) {
+			for (FlowItemToTeamModel flowItem : extTeam.getFlowItems()) {
+				flowItem.setTeamName(extTeam.getName());
+			}
+		}
+
+		// Store the office
 		this.modelRepository.store(office, configuration);
+	}
+
+	/**
+	 * Loads the {@link OfficeRoomModel}.
+	 * 
+	 * @param configuration
+	 *            {@link ConfigurationItem} for the {@link OfficeRoomModel}.
+	 * @param classLoader
+	 *            {@link ClassLoader} for loading the sub {@link DeskModel}
+	 *            instances.
+	 * @return {@link OfficeRoomModel}.
+	 * @throws Exception
+	 *             If fails to load the {@link OfficeRoomModel}.
+	 */
+	public OfficeRoomModel loadOfficeRoom(ConfigurationItem configuration,
+			ClassLoader classLoader) throws Exception {
+
+		// Create the loaders
+		RoomLoader roomLoader = new RoomLoader();
+		DeskLoader deskLoader = new DeskLoader(classLoader);
+
+		// Load the room model
+		RoomModel room = roomLoader.loadRoom(configuration);
+
+		// Create the office room
+		OfficeRoomModel officeRoom = new OfficeRoomModel();
+
+		// Synchronise room
+		RoomToOfficeRoomSynchroniser.synchroniseRoomOntoOfficeRoom(
+				configuration.getId(), room, officeRoom);
+
+		// Recursively load the sub rooms/desks
+		this.recursiveLoadSubRooms(officeRoom, roomLoader, deskLoader,
+				configuration.getContext());
+
+		// Return the office room
+		return officeRoom;
+	}
+
+	/**
+	 * Recursively loads the sub rooms of the input {@link OfficeRoomModel}.
+	 * 
+	 * @param room
+	 *            Parent {@link OfficeRoomModel}.
+	 * @param roomLoader
+	 *            {@link RoomLoader}.
+	 * @param deskLoader
+	 *            {@link DeskModel}.
+	 * @param context
+	 *            {@link ConfigurationContext}.
+	 * @throws Exception
+	 *             If fails to load the sub rooms/desks.
+	 */
+	private void recursiveLoadSubRooms(OfficeRoomModel room,
+			RoomLoader roomLoader, DeskLoader deskLoader,
+			ConfigurationContext context) throws Exception {
+
+		// Load the sub rooms
+		for (OfficeRoomModel subRoom : room.getSubRooms()) {
+
+			// Obtain the configuration item for the sub room
+			String subRoomId = subRoom.getId();
+			ConfigurationItem configItem = context
+					.getConfigurationItem(subRoomId);
+
+			// Ensure have configuration for sub room
+			if (configItem == null) {
+				// TODO provide error on room
+				throw new UnsupportedOperationException(
+						"TODO provide error on room if not find sub-room");
+			}
+
+			// Load the room model
+			RoomModel actualRoom = roomLoader.loadRoom(configItem);
+
+			// Synchronise room
+			RoomToOfficeRoomSynchroniser.synchroniseRoomOntoOfficeRoom(
+					subRoomId, actualRoom, subRoom);
+
+			// Recursive load the further sub rooms
+			for (OfficeRoomModel furtherSubRoom : subRoom.getSubRooms()) {
+				this.recursiveLoadSubRooms(furtherSubRoom, roomLoader,
+						deskLoader, context);
+			}
+		}
+
+		// Load the desks
+		for (OfficeDeskModel desk : room.getDesks()) {
+
+			// Obtain the configuration item for the desk
+			String deskId = desk.getId();
+			ConfigurationItem configItem = context.getConfigurationItem(deskId);
+
+			// Ensure have configuration for desk
+			if (configItem == null) {
+				// TODO provide error on room
+				throw new UnsupportedOperationException(
+						"TODO provide error on room if not find desk");
+			}
+
+			// Load the desk model
+			DeskModel actualDesk = deskLoader.loadDesk(configItem);
+
+			// Synchronise desk
+			DeskToOfficeDeskSynchroniser.synchroniseDeskOntoOfficeDesk(deskId,
+					actualDesk, desk);
+		}
 	}
 
 	/**
@@ -171,7 +292,7 @@ public class OfficeLoader {
 	 * @param duties
 	 *            Registry of {@link DutyModel} entries.
 	 */
-	private void loadRoom(OfficeRoomModel room,
+	private void linkInRoom(OfficeRoomModel room,
 			Map<String, ExternalTeamModel> teams,
 			DoubleKeyMap<String, String, DutyModel> duties) {
 
@@ -180,9 +301,9 @@ public class OfficeLoader {
 			return;
 		}
 
-		// Recursively load sub rooms
+		// Recursively link in sub rooms
 		for (OfficeRoomModel subRoom : room.getSubRooms()) {
-			this.loadRoom(subRoom, teams, duties);
+			this.linkInRoom(subRoom, teams, duties);
 		}
 
 		// Load the desks of the room

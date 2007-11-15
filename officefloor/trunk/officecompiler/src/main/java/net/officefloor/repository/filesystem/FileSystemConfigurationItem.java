@@ -79,10 +79,24 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	 */
 	public FileSystemConfigurationItem(File file,
 			ConfigurationContext configurationContext) throws Exception {
+		this(file.getCanonicalPath(), file, configurationContext);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param id
+	 *            Id (allows for relative path, rather than full file path).
+	 * @param file
+	 *            File containing the configuration.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
+	 */
+	protected FileSystemConfigurationItem(String id, File file,
+			ConfigurationContext configurationContext) {
+		this.id = id;
 		this.file = file;
 		this.configurationContext = configurationContext;
-
-		this.id = this.file.getCanonicalPath();
 	}
 
 	/**
