@@ -23,6 +23,7 @@ import java.util.List;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.dialog.PropertyInput;
 import net.officefloor.eclipse.common.dialog.PropertyInputContext;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -41,6 +42,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -67,10 +69,28 @@ public class ClasspathResourceSelectionPropertyInput implements
 	 * 
 	 * @param root
 	 *            Root of the tree.
+	 * @param extensions
+	 *            Valid extensions.
 	 */
 	public ClasspathResourceSelectionPropertyInput(IProject root,
 			String... extensions) {
 		this.root = root;
+		this.extensions = extensions;
+	}
+
+	/**
+	 * Convenience constructor.
+	 * 
+	 * @param editor
+	 *            {@link IEditorPart}.
+	 * @param extensions
+	 *            Valid extensions.
+	 */
+	public ClasspathResourceSelectionPropertyInput(IEditorPart editor,
+			String... extensions) {
+		// Obtain the project of the editor
+		this.root = ProjectConfigurationContext.getProject(editor
+				.getEditorInput());
 		this.extensions = extensions;
 	}
 

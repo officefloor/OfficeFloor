@@ -21,7 +21,7 @@ import java.util.List;
 
 import net.officefloor.desk.DeskLoader;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.ProjectClassLoader;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;

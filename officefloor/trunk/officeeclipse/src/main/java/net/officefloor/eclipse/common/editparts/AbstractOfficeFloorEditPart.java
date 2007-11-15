@@ -23,7 +23,7 @@ import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.eclipse.ProjectClassLoader;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;

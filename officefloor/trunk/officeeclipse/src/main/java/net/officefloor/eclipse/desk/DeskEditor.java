@@ -21,7 +21,7 @@ import java.util.Map;
 import net.officefloor.LoaderContext;
 import net.officefloor.desk.DeskLoader;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.ProjectClassLoader;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.commands.TagFactory;
 import net.officefloor.eclipse.common.editparts.FigureFactory;

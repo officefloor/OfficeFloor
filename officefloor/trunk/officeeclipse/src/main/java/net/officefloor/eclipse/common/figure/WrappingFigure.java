@@ -99,4 +99,15 @@ public class WrappingFigure extends Figure {
 		this.childContainer.add(figure, constraint, index);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.draw2d.Figure#remove(org.eclipse.draw2d.IFigure)
+	 */
+	@Override
+	public void remove(IFigure figure) {
+		// Remove from child container
+		this.childContainer.remove(figure);
+	}
+
 }

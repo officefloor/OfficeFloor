@@ -60,6 +60,17 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	protected final IProgressMonitor monitor;
 
 	/**
+	 * Obtains the {@link IProject} from the input {@link IEditorInput}.
+	 * 
+	 * @param editorInput
+	 *            {@link IEditorInput}.
+	 * @return {@link IProject} for the input {@link IEditorInput}.
+	 */
+	public static IProject getProject(IEditorInput editorInput) {
+		return FileConfigurationItem.getFile(editorInput).getProject();
+	}
+
+	/**
 	 * Initiate with the {@link IProject} providing context.
 	 * 
 	 * @param project
@@ -82,7 +93,7 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	 */
 	public ProjectConfigurationContext(IEditorInput editorInput)
 			throws OfficeFloorPluginFailure {
-		this(FileConfigurationItem.getFile(editorInput).getProject(), null);
+		this(getProject(editorInput), null);
 	}
 
 	/**
@@ -117,6 +128,15 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 			// Propagate
 			throw new OfficeFloorPluginFailure(ex);
 		}
+	}
+
+	/**
+	 * Obtain the {@link IProject}.
+	 * 
+	 * @return {@link IProject}.
+	 */
+	public IProject getProject() {
+		return this.project;
 	}
 
 	/*
