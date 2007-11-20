@@ -19,7 +19,9 @@ package net.officefloor.office;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeDeskModel;
+import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomModel;
@@ -99,6 +101,50 @@ public class RoomToOfficeRoomSynchroniser {
 		// Remove no longer existing rooms
 		for (OfficeRoomModel oldRoom : existingRooms.values()) {
 			officeRoom.removeSubRoom(oldRoom);
+		}
+	}
+
+	/**
+	 * Synchronises the {@link RoomModel} onto the {@link OfficeModel}.
+	 * 
+	 * @param room
+	 *            {@link RoomModel}.
+	 * @param officeRoom
+	 *            {@link OfficeRoomModel} for the input {@link RoomModel}.
+	 * @param office
+	 *            {@link OfficeModel}.
+	 */
+	public static void synchroniseRoomOntoOffice(RoomModel room,
+			OfficeRoomModel officeRoom, OfficeModel office) {
+
+		// Set the room on the office
+		office.setRoom(officeRoom);
+
+		// Create the map of existing managed objects
+		Map<String, ExternalManagedObjectModel> existingMos = new HashMap<String, ExternalManagedObjectModel>();
+		for (ExternalManagedObjectModel existingMo : office
+				.getExternalManagedObjects()) {
+			existingMos.put(existingMo.getName(), existingMo);
+		}
+
+		// Synchronise the managed objects
+		for (net.officefloor.model.room.ExternalManagedObjectModel mo : room
+				.getExternalManagedObjects()) {
+			String moName = mo.getName();
+			if (existingMos.containsKey(moName)) {
+				// Remove managed object (so not removed later)
+				existingMos.remove(moName);
+			} else {
+				// Add the new managed object
+				ExternalManagedObjectModel newMo = new ExternalManagedObjectModel(
+						moName, mo.getObjectType(), null);
+				office.addExternalManagedObject(newMo);
+			}
+		}
+
+		// Remove no longer existing managed objects
+		for (ExternalManagedObjectModel oldMo : existingMos.values()) {
+			office.removeExternalManagedObject(oldMo);
 		}
 	}
 

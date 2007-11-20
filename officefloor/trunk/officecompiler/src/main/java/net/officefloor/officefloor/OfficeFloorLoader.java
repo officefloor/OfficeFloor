@@ -19,6 +19,7 @@ package net.officefloor.officefloor;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -28,6 +29,7 @@ import net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourc
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
 import net.officefloor.model.officefloor.TeamModel;
+import net.officefloor.office.OfficeLoader;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.ModelRepository;
 
@@ -160,6 +162,44 @@ public class OfficeFloorLoader {
 	 */
 	public void storeOfficeFloor(OfficeFloorModel officeFloor,
 			ConfigurationItem configurationItem) throws Exception {
+		
+		// Ensure the team are linked
+		for (TeamModel teamModel : officeFloor.getTeams()) {
+			for (OfficeTeamToTeamModel conn : teamModel.getOfficeTeams()) {
+				conn.setTeamId(teamModel.getId());
+			}
+		}
+		
+		// Store the model
 		this.modelRepository.store(officeFloor, configurationItem);
 	}
+
+	/**
+	 * Loads the {@link OfficeFloorOfficeModel} from the input
+	 * {@link ConfigurationItem} for a {@link OfficeModel}.
+	 * 
+	 * @param configurationItem
+	 *            {@link OfficeModel} {@link ConfigurationItem}.
+	 * @throws Exception
+	 *             If fails to load the {@link OfficeFloorOfficeModel}.
+	 */
+	public OfficeFloorOfficeModel loadOfficeFloorOffice(
+			ConfigurationItem configurationItem) throws Exception {
+
+		// Load the Office
+		OfficeLoader officeLoader = new OfficeLoader();
+		OfficeModel office = officeLoader.loadOffice(configurationItem);
+
+		// Create the office floor office
+		OfficeFloorOfficeModel officeFloorOffice = new OfficeFloorOfficeModel();
+
+		// Synchronise the office onto the office floor office
+		OfficeToOfficeFloorOfficeSynchroniser
+				.synchroniseOfficeOntoOfficeFloorOffice(configurationItem
+						.getId(), office, officeFloorOffice);
+
+		// Return the office floor office
+		return officeFloorOffice;
+	}
+
 }

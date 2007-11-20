@@ -19,9 +19,9 @@ package net.officefloor.compile;
 import java.util.Properties;
 
 import net.officefloor.LoaderContext;
-import net.officefloor.TeamFactory;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.TeamFactory;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TeamModel;
 
