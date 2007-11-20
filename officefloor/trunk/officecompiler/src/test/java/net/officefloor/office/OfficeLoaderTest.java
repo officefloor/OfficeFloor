@@ -32,10 +32,12 @@ import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.office.PropertyModel;
+import net.officefloor.model.room.RoomModel;
 import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
 import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
+import net.officefloor.room.RoomLoader;
 
 /**
  * Tests the {@link net.officefloor.office.OfficeLoader}.
@@ -209,9 +211,14 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 		ConfigurationItem roomConfigItem = context
 				.getConfigurationItem(PARENT_ROOM_FILE_NAME);
 
+		// Load the raw room
+		RoomLoader roomLoader = new RoomLoader();
+		RoomModel rawRoom = roomLoader.loadRoom(roomConfigItem);
+
 		// Load the office room
 		OfficeRoomModel actualRoom = this.officeLoader.loadOfficeRoom(
-				roomConfigItem, this.getClass().getClassLoader());
+				roomConfigItem.getId(), rawRoom, context, this.getClass()
+						.getClassLoader());
 
 		// Create the expected room
 		OfficeDeskModel[] desks = new OfficeDeskModel[] { new OfficeDeskModel(

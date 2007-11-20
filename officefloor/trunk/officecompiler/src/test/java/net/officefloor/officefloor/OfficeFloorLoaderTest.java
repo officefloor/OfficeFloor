@@ -28,7 +28,9 @@ import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TeamModel;
+import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
 import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 
 /**
@@ -141,4 +143,37 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		assertGraph(officeFloor, reloadedOfficeFloor, "getAdministrators");
 	}
 
+	/**
+	 * Ensures correctly loads the office.
+	 */
+	public void testLoadOfficeFloorOffice() throws Exception {
+
+		final String OFFICE_FILE_NAME = "TestOffice.office.xml";
+
+		// Obtain the office file
+		File parentOfficeFile = this
+				.findFile(this.getClass(), OFFICE_FILE_NAME);
+
+		// Obtain the configuration of the office
+		ConfigurationContext context = new FileSystemConfigurationContext(
+				parentOfficeFile.getParentFile());
+		ConfigurationItem officeConfigItem = context
+				.getConfigurationItem(OFFICE_FILE_NAME);
+
+		// Load the office
+		OfficeFloorOfficeModel actualOffice = this.officeFloorLoader
+				.loadOfficeFloorOffice(officeConfigItem);
+
+		// Create the expected office
+		OfficeFloorOfficeModel expectedOffice = new OfficeFloorOfficeModel(
+				OFFICE_FILE_NAME,
+				new OfficeManagedObjectModel[] { new OfficeManagedObjectModel(
+						"MO", null, null) }, new OfficeTeamModel[] {
+						new OfficeTeamModel("TEAM ONE", null),
+						new OfficeTeamModel("TEAM TWO", null) }, null);
+
+		// Validate the office
+		assertGraph(expectedOffice, actualOffice);
+	}
+	
 }
