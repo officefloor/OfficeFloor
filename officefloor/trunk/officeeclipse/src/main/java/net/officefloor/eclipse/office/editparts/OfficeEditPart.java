@@ -17,7 +17,6 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
-import java.io.StringWriter;
 import java.util.List;
 
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
@@ -34,13 +33,15 @@ import net.officefloor.eclipse.common.wrap.WrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
 import net.officefloor.eclipse.desk.figure.SectionFigure;
 import net.officefloor.model.office.AdministratorModel;
-import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.office.OfficeModel.OfficeEvent;
+import net.officefloor.model.room.RoomModel;
 import net.officefloor.office.OfficeLoader;
+import net.officefloor.office.RoomToOfficeRoomSynchroniser;
 import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.room.RoomLoader;
 
 import org.eclipse.draw2d.geometry.Point;
 
@@ -176,12 +177,19 @@ public class OfficeEditPart extends
 						}
 
 						// Load the room
-						OfficeLoader officeLoader = new OfficeLoader();
-						OfficeRoomModel roomModel = officeLoader
-								.loadOfficeRoom(roomConfigItem, classLoader);
+						RoomLoader roomLoader = new RoomLoader();
+						RoomModel rawRoom = roomLoader.loadRoom(roomConfigItem);
 
-						// Add the room to the office
-						OfficeEditPart.this.getCastedModel().setRoom(roomModel);
+						// Load the office room
+						OfficeLoader officeLoader = new OfficeLoader();
+						room = officeLoader.loadOfficeRoom(roomConfigItem
+								.getId(), rawRoom, roomConfigItem.getContext(),
+								classLoader);
+
+						// Synchronise the room onto the office
+						RoomToOfficeRoomSynchroniser.synchroniseRoomOntoOffice(
+								rawRoom, room, OfficeEditPart.this
+										.getCastedModel());
 
 					} catch (Exception ex) {
 						OfficeEditPart.this.messageError(ex);
@@ -210,32 +218,16 @@ public class OfficeEditPart extends
 		this.room = new WrappingModel<OfficeModel>(this.getCastedModel(),
 				roomEditPart, new Point(120, 10));
 
-		// Button to add Managed Object
-		final ButtonEditPart moButton = new ButtonEditPart("Add MO") {
-			@Override
-			protected void handleButtonClick() {
-				// Add the managed object
-				ExternalManagedObjectModel mo = new ExternalManagedObjectModel();
-				BeanDialog dialog = OfficeEditPart.this.createBeanDialog(mo,
-						"Object Type", "X", "Y");
-				if (dialog.populate()) {
-					OfficeEditPart.this.getCastedModel()
-							.addExternalManagedObject(mo);
-				}
-			}
-		};
-
 		// Add Managed Objects
 		WrappingEditPart moEditPart = new OfficeFloorWrappingEditPart() {
 			@Override
 			protected void populateModelChildren(List children) {
 				children.addAll(OfficeEditPart.this.getCastedModel()
 						.getExternalManagedObjects());
-				children.add(moButton);
 			}
 		};
 		moEditPart.setFigure(new FreeformWrapperFigure(new SectionFigure(
-				"Add MO")));
+				"MO")));
 		this.externalManagedObjects = new WrappingModel<OfficeModel>(this
 				.getCastedModel(), moEditPart, new Point(500, 10));
 	}

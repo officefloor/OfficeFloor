@@ -29,6 +29,7 @@ import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IEditorPart;
 
 /**
@@ -80,6 +81,26 @@ public class ProjectClassLoader extends URLClassLoader {
 		// Obtain the configuration context
 		ConfigurationContext context = new ProjectConfigurationContext(
 				editorPart.getEditorInput());
+
+		// Return the class loader
+		return create(context);
+	}
+
+	/**
+	 * Convenience method to create the {@link ProjectClassLoader} from an
+	 * {@link IProject}.
+	 * 
+	 * @param project
+	 *            {@link IProject}.
+	 * @return {@link ProjectClassLoader}.
+	 * @throws OfficeFloorPluginFailure
+	 *             If fails to create {@link ProjectClassLoader}.
+	 */
+	public static ProjectClassLoader create(IProject project)
+			throws OfficeFloorPluginFailure {
+
+		// Obtain the configuration context
+		ConfigurationContext context = new ProjectConfigurationContext(project);
 
 		// Return the class loader
 		return create(context);

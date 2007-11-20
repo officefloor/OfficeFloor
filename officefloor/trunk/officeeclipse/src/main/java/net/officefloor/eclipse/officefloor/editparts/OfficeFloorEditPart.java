@@ -19,13 +19,18 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.dialog.TeamCreateDialog;
+import net.officefloor.eclipse.common.dialog.input.ClasspathResourceSelectionPropertyInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.common.wrap.OfficeFloorWrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
@@ -35,7 +40,10 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel.OfficeFloorEvent;
+import net.officefloor.officefloor.OfficeFloorLoader;
+import net.officefloor.repository.ConfigurationItem;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.geometry.Point;
 
 /**
@@ -81,11 +89,41 @@ public class OfficeFloorEditPart extends
 				OfficeFloorOfficeModel office = new OfficeFloorOfficeModel();
 				BeanDialog dialog = OfficeFloorEditPart.this.createBeanDialog(
 						office, "X", "Y");
+				dialog
+						.registerPropertyInputBuilder("Id",
+								new ClasspathResourceSelectionPropertyInput(
+										OfficeFloorEditPart.this.getEditor(),
+										"office"));
 				if (dialog.populate()) {
+					try {
+						// Obtain the office configuration
+						ProjectClassLoader classLoader = ProjectClassLoader
+								.create(OfficeFloorEditPart.this.getEditor());
+						ConfigurationItem officeConfigItem = classLoader
+								.findConfigurationItem(office.getId());
+						if (officeConfigItem == null) {
+							OfficeFloorEditPart.this
+									.messageError("Could not find Office at '"
+											+ office.getId() + "'");
+							return;
+						}
 
-					// TODO populate properties
+						// Load the Office
+						OfficeFloorLoader officeFloorLoader = new OfficeFloorLoader();
+						office = officeFloorLoader
+								.loadOfficeFloorOffice(officeConfigItem);
 
-					OfficeFloorEditPart.this.getCastedModel().addOffice(office);
+						// Set initial location of the office
+						office.setX(200);
+						office.setY(200);
+
+						// Add the Office
+						OfficeFloorEditPart.this.getCastedModel().addOffice(
+								office);
+
+					} catch (Exception ex) {
+						OfficeFloorEditPart.this.messageError(ex);
+					}
 				}
 			}
 		};
@@ -106,15 +144,22 @@ public class OfficeFloorEditPart extends
 		final ButtonEditPart teamButton = new ButtonEditPart("Add Team") {
 			@Override
 			protected void handleButtonClick() {
-				// Add the Team
-				TeamModel team = new TeamModel();
-				BeanDialog dialog = OfficeFloorEditPart.this.createBeanDialog(
-						team, "X", "Y");
-				if (dialog.populate()) {
+				try {
+					// Create the Team
+					AbstractOfficeFloorEditor editor = OfficeFloorEditPart.this
+							.getEditor();
+					IProject project = ProjectConfigurationContext
+							.getProject(editor.getEditorInput());
+					TeamCreateDialog dialog = new TeamCreateDialog(editor
+							.getSite().getShell(), project);
+					TeamModel team = dialog.createTeam();
 
-					// TODO populate properties
-
-					OfficeFloorEditPart.this.getCastedModel().addTeam(team);
+					// Add team if created
+					if (team != null) {
+						OfficeFloorEditPart.this.getCastedModel().addTeam(team);
+					}
+				} catch (Exception ex) {
+					OfficeFloorEditPart.this.messageError(ex);
 				}
 			}
 		};

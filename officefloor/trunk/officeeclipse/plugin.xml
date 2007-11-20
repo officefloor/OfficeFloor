@@ -61,6 +61,13 @@
             id="net.officefloor.eclipse.wizards.OfficeNewWizard"
             name="Office">
       </wizard>
+      <wizard
+            category="net.officefloor.eclipse"
+            class="net.officefloor.eclipse.wizards.OfficeFloorNewWizard"
+            icon="icons/office.gif"
+            id="net.officefloor.eclipse.wizards.OfficeFloorNewWizard"
+            name="Office Floor">
+      </wizard>
    </extension>
 
 </plugin>
