@@ -80,7 +80,10 @@ public class OfficeTeamEditPart extends
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		models.add(this.getCastedModel().getTeam());
+		OfficeTeamToTeamModel conn = this.getCastedModel().getTeam();
+		if (conn != null) {
+			models.add(conn);
+		}
 	}
 
 	/*

@@ -80,7 +80,11 @@ public class OfficeManagedObjectEditPart extends
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		models.add(this.getCastedModel().getManagedObjectSource());
+		OfficeManagedObjectToManagedObjectSourceModel conn = this
+				.getCastedModel().getManagedObjectSource();
+		if (conn != null) {
+			models.add(conn);
+		}
 	}
 
 	/*
