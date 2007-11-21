@@ -115,4 +115,12 @@ public class SubTypeList {
 		}
 	}
 
+	/**
+	 * Obtains the underlying {@link List}.
+	 * 
+	 * @return Underlying {@link List}.
+	 */
+	public List getList() {
+		return this.subTypeList;
+	}
 }

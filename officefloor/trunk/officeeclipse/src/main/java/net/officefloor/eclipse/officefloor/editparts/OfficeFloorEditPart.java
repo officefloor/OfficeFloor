@@ -23,6 +23,7 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.dialog.ManagedObjectSourceCreateDialog;
 import net.officefloor.eclipse.common.dialog.TeamCreateDialog;
 import net.officefloor.eclipse.common.dialog.input.ClasspathResourceSelectionPropertyInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
@@ -182,16 +183,24 @@ public class OfficeFloorEditPart extends
 		final ButtonEditPart mosButton = new ButtonEditPart("Add MO") {
 			@Override
 			protected void handleButtonClick() {
-				// Add the Managed Object Source
-				ManagedObjectSourceModel mos = new ManagedObjectSourceModel();
-				BeanDialog dialog = OfficeFloorEditPart.this.createBeanDialog(
-						mos, "Managing Office", "X", "Y");
-				if (dialog.populate()) {
+				try {
+					// Create the Managed Object Source
+					AbstractOfficeFloorEditor editor = OfficeFloorEditPart.this
+							.getEditor();
+					IProject project = ProjectConfigurationContext
+							.getProject(editor.getEditorInput());
+					ManagedObjectSourceCreateDialog dialog = new ManagedObjectSourceCreateDialog(
+							editor.getSite().getShell(), project);
+					ManagedObjectSourceModel managedObjectSource = dialog
+							.createManagedObjectSource();
 
-					// TODO populate properties
-
-					OfficeFloorEditPart.this.getCastedModel()
-							.addManagedObjectSource(mos);
+					// Add managed object source if created
+					if (managedObjectSource != null) {
+						OfficeFloorEditPart.this.getCastedModel()
+								.addManagedObjectSource(managedObjectSource);
+					}
+				} catch (Exception ex) {
+					OfficeFloorEditPart.this.messageError(ex);
 				}
 			}
 		};
