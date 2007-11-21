@@ -153,11 +153,27 @@ public class BeanListPopulateTable<B> {
 	 */
 	public void addBean(B bean) {
 		// Add to list
-		BeanListPopulateTable.this.beans.add(bean);
+		this.beans.add(bean);
 
 		// Add to viewer
-		if (BeanListPopulateTable.this.tableViewer != null) {
-			BeanListPopulateTable.this.tableViewer.add(bean);
+		if (this.tableViewer != null) {
+			this.tableViewer.add(bean);
+		}
+	}
+
+	/**
+	 * Removes a bean.
+	 * 
+	 * @param bean
+	 *            Bean.
+	 */
+	public void removeBean(B bean) {
+		// Remove from list
+		this.beans.remove(bean);
+
+		// Remove from viewer
+		if (this.tableViewer != null) {
+			this.tableViewer.remove(bean);
 		}
 	}
 
