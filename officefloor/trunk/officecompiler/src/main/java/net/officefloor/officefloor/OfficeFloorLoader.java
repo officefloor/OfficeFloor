@@ -163,10 +163,17 @@ public class OfficeFloorLoader {
 	public void storeOfficeFloor(OfficeFloorModel officeFloor,
 			ConfigurationItem configurationItem) throws Exception {
 		
-		// Ensure the team are linked
+		// Ensure the teams are linked
 		for (TeamModel teamModel : officeFloor.getTeams()) {
 			for (OfficeTeamToTeamModel conn : teamModel.getOfficeTeams()) {
 				conn.setTeamId(teamModel.getId());
+			}
+		}
+		
+		// Ensure the managed object sources are linked
+		for (ManagedObjectSourceModel managedObjectSource : officeFloor.getManagedObjectSources()) {
+			for (OfficeManagedObjectToManagedObjectSourceModel conn : managedObjectSource.getOfficeManagedObjects()) {
+				conn.setManagedObjectSourceId(managedObjectSource.getId());
 			}
 		}
 		
