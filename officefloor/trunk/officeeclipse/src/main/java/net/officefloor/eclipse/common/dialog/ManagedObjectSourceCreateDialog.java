@@ -24,6 +24,7 @@ import java.util.Properties;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.widgets.BeanListPopulateTable;
 import net.officefloor.eclipse.common.widgets.SubTypeList;
+import net.officefloor.frame.impl.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
@@ -166,31 +167,10 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	 */
 	protected void populateProperties() {
 
-		// Ensure managed object source provided
-		String managedObjectSourceClassName = this.managedObjectSourceList
-				.getSubTypeClassName();
-		if ((managedObjectSourceClassName == null)
-				|| (managedObjectSourceClassName.trim().length() == 0)) {
-			this.errorText.setText("Select a managed object source");
-			return;
-		}
-
 		// Attempt to create an instance of the Managed Object Source
-		ManagedObjectSource managedObjectSource;
-		try {
-			ProjectClassLoader classLoader = ProjectClassLoader
-					.create(this.project);
-			Class<?> managedObjectSourceClass = classLoader
-					.loadClass(managedObjectSourceClassName);
-			Object instance = managedObjectSourceClass.newInstance();
-			if (!(instance instanceof ManagedObjectSource)) {
-				throw new Exception(managedObjectSourceClassName
-						+ " must be an instance of "
-						+ ManagedObjectSource.class.getName());
-			}
-			managedObjectSource = (ManagedObjectSource) instance;
-		} catch (Exception ex) {
-			this.errorText.setText(ex.getMessage());
+		ManagedObjectSource managedObjectSource = this
+				.createManagedObjectSourceInstance();
+		if (managedObjectSource == null) {
 			return;
 		}
 
@@ -235,11 +215,88 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	@Override
 	protected void okPressed() {
 
-		// TODO validate input
+		// Ensure managed object source name provided
+		String managedObjectSourceName = this.managedObjectSourceName.getText();
+		if ((managedObjectSourceName == null)
+				|| (managedObjectSourceName.trim().length() == 0)) {
+			this.errorText.setText("Enter managed object source name");
+			return;
+		}
 
-		// TODO create and specify the managed object source model
+		// Attempt to create the Managed Object Source
+		ManagedObjectSource managedObjectSourceInstance = this
+				.createManagedObjectSourceInstance();
+		if (managedObjectSourceInstance == null) {
+			return;
+		}
+
+		// Create the list of properties
+		List<PropertyModel> propertyModels = this.propertiesTable.getBeans();
+		Properties properties = new Properties();
+		for (PropertyModel propertyModel : propertyModels) {
+			String name = propertyModel.getName();
+			String value = propertyModel.getValue();
+			properties.setProperty(name, value);
+		}
+
+		// Attempt to initiate the Managed Object Source
+		try {
+			// TODO provide other resources for correct loading (no NPEs)
+			managedObjectSourceInstance
+					.init(new ManagedObjectSourceContextImpl("test",
+							properties, null, null, null, null));
+		} catch (Exception ex) {
+			this.errorText.setText(ex.getMessage());
+			return;
+		}
+
+		// Specify the managed object source
+		this.managedObjectSource = new ManagedObjectSourceModel(
+				managedObjectSourceName, managedObjectSourceInstance.getClass()
+						.getName(), null, propertyModels
+						.toArray(new PropertyModel[0]), null);
 
 		// Successful
 		super.okPressed();
+	}
+
+	/**
+	 * Creates an instance of {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ManagedObjectSource} or <code>null</code> if not
+	 *         created.
+	 */
+	private ManagedObjectSource createManagedObjectSourceInstance() {
+
+		// Ensure managed object source provided
+		String managedObjectSourceClassName = this.managedObjectSourceList
+				.getSubTypeClassName();
+		if ((managedObjectSourceClassName == null)
+				|| (managedObjectSourceClassName.trim().length() == 0)) {
+			this.errorText.setText("Select a managed object source");
+			return null;
+		}
+
+		// Attempt to create an instance of the Managed Object Source
+		try {
+			ProjectClassLoader classLoader = ProjectClassLoader
+					.create(this.project);
+			Class<?> managedObjectSourceClass = classLoader
+					.loadClass(managedObjectSourceClassName);
+			Object instance = managedObjectSourceClass.newInstance();
+			if (!(instance instanceof ManagedObjectSource)) {
+				throw new Exception(managedObjectSourceClassName
+						+ " must be an instance of "
+						+ ManagedObjectSource.class.getName());
+			}
+			ManagedObjectSource managedObjectSource = (ManagedObjectSource) instance;
+
+			// Return the managed object source
+			return managedObjectSource;
+
+		} catch (Exception ex) {
+			this.errorText.setText(ex.getMessage());
+			return null;
+		}
 	}
 }
