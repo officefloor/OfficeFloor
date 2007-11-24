@@ -22,7 +22,9 @@ Require-Bundle: net.officefloor.frame,
  org.eclipse.jface.text,
  org.eclipse.ui.editors,
  net.officefloor.eclipse.plugin,
- org.junit
+ org.junit,
+ org.eclipse.debug.ui,
+ org.eclipse.jdt.debug.ui
 Eclipse-LazyStart: true
 Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.common,
