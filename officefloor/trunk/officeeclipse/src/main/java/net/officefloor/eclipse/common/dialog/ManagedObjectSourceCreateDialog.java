@@ -205,6 +205,9 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 		for (PropertyModel oldProperty : existingProperties.values()) {
 			this.propertiesTable.removeBean(oldProperty);
 		}
+
+		// No errors if at this point
+		this.errorText.setText("");
 	}
 
 	/*
@@ -295,7 +298,8 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 			return managedObjectSource;
 
 		} catch (Exception ex) {
-			this.errorText.setText(ex.getMessage());
+			this.errorText.setText(ex.getMessage() + " ["
+					+ ex.getClass().getSimpleName() + "]");
 			return null;
 		}
 	}
