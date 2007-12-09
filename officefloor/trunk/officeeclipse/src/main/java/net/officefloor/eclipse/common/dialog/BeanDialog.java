@@ -318,8 +318,8 @@ public class BeanDialog extends Dialog {
 				return;
 			}
 
-			// Specify the value on the property
-			property.value = value;
+			// Ensure value specified on property
+			property.setValue(value);
 		}
 
 		// Ensure all properties are valid
@@ -585,6 +585,19 @@ public class BeanDialog extends Dialog {
 		public void populateBean() throws Exception {
 			this.mutator.invoke(BeanDialog.this.bean,
 					new Object[] { this.value });
+		}
+
+		/**
+		 * <p>
+		 * Specifies the value.
+		 * <p>
+		 * Handles if value is correctly specified.
+		 * 
+		 * @param value
+		 *            Value.
+		 */
+		public void setValue(String value) {
+			this.notifyValueChanged(value);
 		}
 
 		/*

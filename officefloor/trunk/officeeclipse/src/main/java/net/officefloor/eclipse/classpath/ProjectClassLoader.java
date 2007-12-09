@@ -118,6 +118,22 @@ public class ProjectClassLoader extends URLClassLoader {
 	 */
 	public static ProjectClassLoader create(ConfigurationContext context)
 			throws OfficeFloorPluginFailure {
+		return create(context.getId(), context.getClasspath());
+	}
+
+	/**
+	 * Initiates from the specified class path.
+	 * 
+	 * @param id
+	 *            Id of the {@link ProjectClassLoader}.
+	 * @param classpath
+	 *            Class path.
+	 * @return {@link ProjectClassLoader}.
+	 * @throws OfficeFloorPluginFailure
+	 *             If fails to create {@link ProjectClassLoader}.
+	 */
+	public static ProjectClassLoader create(String id, String[] classpath)
+			throws OfficeFloorPluginFailure {
 
 		// Parent class loader is from office floor plugin
 		ClassLoader parentClassLoader = OfficeFloorPlugin.class
@@ -125,13 +141,13 @@ public class ProjectClassLoader extends URLClassLoader {
 
 		// Create the list of URLs
 		List<URL> urls = new ArrayList<URL>();
-		for (String path : context.getClasspath()) {
+		for (String path : classpath) {
 			urls.add(createUrl(path));
 		}
 
 		// Return the created class loader
 		return new ProjectClassLoader(urls.toArray(new URL[0]),
-				parentClassLoader, context.getId());
+				parentClassLoader, id);
 	}
 
 	/**

@@ -248,10 +248,13 @@ public class ClasspathResourceSelectionPropertyInput implements
 								.getChildren()) {
 							if (javaElement instanceof IPackageFragment) {
 								IPackageFragment packageFragment = (IPackageFragment) javaElement;
+								// Obtain the package children
+								Object[] packageChildren = packageFragment
+										.getNonJavaResources();
+
 								// Only include if have files not filtered out
 								if (ClasspathResourceSelectionPropertyInput.this
-										.filterResources(packageFragment
-												.getChildren()).length > 0) {
+										.filterResources(packageChildren).length > 0) {
 									results.add(packageFragment);
 								}
 							}
