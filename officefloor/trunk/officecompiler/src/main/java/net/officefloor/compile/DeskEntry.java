@@ -50,7 +50,7 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 
 		// Load the desk model
 		DeskModel deskModel = new DeskLoader(context.getLoaderContext(),
-				context.getModelRepository()).loadDesk(configurationItem);
+				context.getModelRepository()).loadDeskAndSynchronise(configurationItem);
 
 		// Create the desk entry
 		DeskEntry deskEntry = new DeskEntry(deskId, deskModel, roomEntry);

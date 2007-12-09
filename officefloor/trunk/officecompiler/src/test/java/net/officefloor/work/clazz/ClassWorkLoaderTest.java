@@ -79,7 +79,7 @@ public class ClassWorkLoaderTest extends OfficeFrameTestCase {
 		TaskObjectModel taskObject = task.getObjects().get(0);
 		assertNull("Incorrect object managed object key", taskObject
 				.getManagedObjectKey());
-		assertEquals("Incorrect object type", Object.class.getName(),
+		assertEquals("Incorrect object type", String.class.getName(),
 				taskObject.getObjectType());
 		assertEquals("Incorrect number of flows", 1, task.getFlows().size());
 		TaskFlowModel taskFlow = task.getFlows().get(0);

@@ -125,9 +125,9 @@ public class TaskEntry<W extends Work> extends
 	public void build() throws Exception {
 
 		// Obtain task and its details
-		TaskModel task = this.deskTask.getTask();
+		TaskModel<?, ?> task = this.deskTask.getTask();
 		TaskFactory taskFactory = task.getTaskFactory();
-
+		
 		// Load details of task
 		this.getBuilder().setTaskFactory(taskFactory);
 
@@ -151,5 +151,12 @@ public class TaskEntry<W extends Work> extends
 		// Link team into office
 		String teamId = officeTeam.getTeam().getTeam().getId();
 		officeEntry.getBuilder().registerTeam(teamName, teamId);
+
+		// Link in the managed objects
+		int index = 0;
+		for (DeskTaskObjectModel taskObject : this.deskTask.getObjects()) {
+			this.getBuilder().linkManagedObject(index++,
+					taskObject.getManagedObject().getName());
+		}
 	}
 }

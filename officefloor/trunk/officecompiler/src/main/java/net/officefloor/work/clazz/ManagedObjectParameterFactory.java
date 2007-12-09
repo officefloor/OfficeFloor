@@ -48,7 +48,7 @@ public class ManagedObjectParameterFactory implements ParameterFactory {
 	 * 
 	 * @see net.officefloor.work.clazz.ParameterFactory#createParameter(net.officefloor.frame.api.execute.TaskContext)
 	 */
-	public Object createParameter(TaskContext context) {
+	public Object createParameter(TaskContext<?, ?, ?, ?> context) {
 		return context.getObject(this.managedObjectIndex);
 	}
 

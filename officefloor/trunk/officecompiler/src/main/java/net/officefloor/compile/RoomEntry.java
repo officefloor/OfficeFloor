@@ -200,7 +200,7 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	 */
 	public SubRoomModel getDesk(String deskId) throws Exception {
 		for (SubRoomModel subRoom : this.getModel().getSubRooms()) {
-			if (deskId.equals(subRoom.getRoom())) {
+			if (deskId.equals(subRoom.getDesk())) {
 				return subRoom;
 			}
 		}

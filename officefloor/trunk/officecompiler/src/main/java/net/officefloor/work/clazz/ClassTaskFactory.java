@@ -18,8 +18,8 @@ package net.officefloor.work.clazz;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -28,8 +28,8 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel
  */
-public class ClassTaskFactory<P extends Object, M extends Enum<M>, F extends Enum<F>>
-		implements TaskFactory<P, ClassWork, M, F> {
+public class ClassTaskFactory implements
+		TaskFactory<Object, ClassWork, Indexed, Indexed> {
 
 	/**
 	 * Method to invoke for this task.
@@ -39,7 +39,7 @@ public class ClassTaskFactory<P extends Object, M extends Enum<M>, F extends Enu
 	/**
 	 * Parameters.
 	 */
-	private final ParameterFactory<P, ClassWork, M, F>[] parameters;
+	private final ParameterFactory[] parameters;
 
 	/**
 	 * Initiate.
@@ -49,10 +49,14 @@ public class ClassTaskFactory<P extends Object, M extends Enum<M>, F extends Enu
 	 * @param parameters
 	 *            Parameters.
 	 */
-	public ClassTaskFactory(Method method,
-			ParameterFactory<P, ClassWork, M, F>[] parameters) {
+	public ClassTaskFactory(Method method, ParameterFactory[] parameters) {
 		this.method = method;
 		this.parameters = parameters;
+
+		// TODO remove
+		if (this.parameters.length > 0) {
+			this.parameters[0] = new ManagedObjectParameterFactory(0);
+		}
 	}
 
 	/*
@@ -60,8 +64,8 @@ public class ClassTaskFactory<P extends Object, M extends Enum<M>, F extends Enu
 	 * 
 	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
 	 */
-	public Task<P, ClassWork, M, F> createTask(ClassWork work) {
-		return new ClassTask<P, M, F>(work, this.method, this.parameters);
+	public ClassTask createTask(ClassWork work) {
+		return new ClassTask(work, this.method, this.parameters);
 	}
 
 }

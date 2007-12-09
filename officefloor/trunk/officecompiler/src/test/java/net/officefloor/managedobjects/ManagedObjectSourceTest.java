@@ -56,7 +56,7 @@ public class ManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		// Create the Office Floor
 		OfficeFloor officeFloor = new OfficeFloorCompiler().compileOfficeFloor(
-				configuration, OfficeFrame.getInstance().getMetaDataFactory(),
+				configuration, OfficeFrame.getInstance().getBuilderFactory(),
 				new LoaderContext(this.getClass().getClassLoader()));
 
 		// Open the Office Floor

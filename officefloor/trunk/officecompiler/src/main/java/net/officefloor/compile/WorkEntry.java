@@ -34,6 +34,7 @@ import net.officefloor.model.officefloor.OfficeManagedObjectModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.work.WorkModel;
+import net.officefloor.util.OFCU;
 
 /**
  * {@link net.officefloor.frame.api.execute.Work} entry for the
@@ -63,7 +64,8 @@ public class WorkEntry<W extends Work> extends
 			OfficeFloorCompilerContext context) throws Exception {
 
 		// Obtain the work (and its details)
-		WorkModel work = deskWork.getWork();
+		WorkModel work = OFCU.get(deskWork.getWork(),
+				"No work on desk work ${0}", deskWork.getId());
 		Class<W> typeOfWork = work.getTypeOfWork();
 
 		// Create the work builder
@@ -148,6 +150,16 @@ public class WorkEntry<W extends Work> extends
 	}
 
 	/**
+	 * Obtains the registry of the {@link TaskEntry} instances for this
+	 * {@link WorkEntry}.
+	 * 
+	 * @return {@link TaskEntry} registry.
+	 */
+	public Map<String, TaskEntry<W>> getTaskRegistry() {
+		return this.tasks;
+	}
+
+	/**
 	 * Obtains the {@link DeskEntry} for this {@link WorkEntry}.
 	 * 
 	 * @return {@link DeskEntry} for this {@link WorkEntry}.
@@ -185,9 +197,11 @@ public class WorkEntry<W extends Work> extends
 		officeEntry.getBuilder().addWork(this.getId(), this.getBuilder());
 
 		// Obtain the work (and its details)
-		WorkModel work = this.getModel().getWork();
+		DeskWorkModel deskWork = this.getModel();
+		WorkModel work = deskWork.getWork();
 		WorkFactory<W> workFactory = (WorkFactory<W>) work.getWorkFactory();
-		FlowItemModel initialFlowItem = this.getModel().getInitialFlowItem()
+		FlowItemModel initialFlowItem = OFCU.get(deskWork.getInitialFlowItem(),
+				"No initial flow for work ${0}", deskWork.getId())
 				.getInitialFlowItem();
 
 		// Load details of work
@@ -201,7 +215,10 @@ public class WorkEntry<W extends Work> extends
 					.getObjects()) {
 
 				// Register the external managed object
-				externalManagedObjects.add(taskObject.getManagedObject()
+				externalManagedObjects.add(OFCU.get(
+						taskObject.getManagedObject(),
+						"No managed object for task ${0} object ${1}",
+						task.getId(), taskObject.getObjectType())
 						.getManagedObject());
 			}
 		}
@@ -267,8 +284,8 @@ public class WorkEntry<W extends Work> extends
 					.getExternalManagedObject().getName();
 
 			// Obtain parent room of room or office
+			officeEntry = roomEntry.getOffice(); // obtain before changing
 			roomEntry = roomEntry.getParentRoom();
-			officeEntry = roomEntry.getOffice();
 		}
 
 		// Obtain the office floor of the office
@@ -289,6 +306,9 @@ public class WorkEntry<W extends Work> extends
 			throw new Exception("Can not find managed object '"
 					+ externalMoName + "' for office " + office.getId());
 		}
+		
+		// TODO remove
+		officeMo.setScope("process");
 
 		// Build managed object based on its scope
 		if ("process".equals(officeMo.getScope())) {
@@ -304,8 +324,9 @@ public class WorkEntry<W extends Work> extends
 					externalMoName);
 
 		} else {
-			throw new Exception("Unknown managed object scope '"
-					+ officeMo.getScope() + "'");
+			throw new Exception("Unknown scope '" + officeMo.getScope()
+					+ "' for managed object '" + externalMoName
+					+ "' of office '" + office.getId() + "'");
 		}
 
 		// Register the managed object to the office

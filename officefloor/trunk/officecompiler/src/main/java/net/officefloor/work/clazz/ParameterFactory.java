@@ -17,7 +17,6 @@
 package net.officefloor.work.clazz;
 
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.execute.Work;
 
 /**
  * Creates the parameter for the
@@ -25,7 +24,7 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel
  */
-public interface ParameterFactory<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface ParameterFactory {
 
 	/**
 	 * Creates the parameter from the {@link TaskContext}.
@@ -34,5 +33,5 @@ public interface ParameterFactory<P extends Object, W extends Work, M extends En
 	 *            {@link TaskContext}.
 	 * @return Parameter.
 	 */
-	Object createParameter(TaskContext<P, W, M, F> context);
+	Object createParameter(TaskContext<?, ?, ?, ?> context);
 }

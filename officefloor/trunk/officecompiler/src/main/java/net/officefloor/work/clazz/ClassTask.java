@@ -18,6 +18,7 @@ package net.officefloor.work.clazz;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
@@ -28,8 +29,7 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel
  */
-class ClassTask<P extends Object, M extends Enum<M>, F extends Enum<F>>
-		implements Task<P, ClassWork, M, F> {
+class ClassTask implements Task<Object, ClassWork, Indexed, Indexed> {
 
 	/**
 	 * {@link Work}.
@@ -44,7 +44,7 @@ class ClassTask<P extends Object, M extends Enum<M>, F extends Enum<F>>
 	/**
 	 * Parameters.
 	 */
-	protected final ParameterFactory<P, ClassWork, M, F>[] parameters;
+	protected final ParameterFactory[] parameters;
 
 	/**
 	 * Initiate.
@@ -53,7 +53,7 @@ class ClassTask<P extends Object, M extends Enum<M>, F extends Enum<F>>
 	 *            Method to invoke for this {@link Task}.
 	 */
 	public ClassTask(ClassWork work, Method method,
-			ParameterFactory<P, ClassWork, M, F>[] parameters) {
+			ParameterFactory[] parameters) {
 		this.work = work;
 		this.method = method;
 		this.parameters = parameters;
@@ -64,7 +64,8 @@ class ClassTask<P extends Object, M extends Enum<M>, F extends Enum<F>>
 	 * 
 	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
 	 */
-	public Object doTask(TaskContext<P, ClassWork, M, F> context)
+	public Object doTask(
+			TaskContext<Object, ClassWork, Indexed, Indexed> context)
 			throws Exception {
 
 		// Create the listing of parameters

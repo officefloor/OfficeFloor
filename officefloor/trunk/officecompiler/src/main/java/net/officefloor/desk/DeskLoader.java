@@ -17,6 +17,8 @@
 package net.officefloor.desk;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.LoaderContext;
@@ -108,14 +110,23 @@ public class DeskLoader {
 	}
 
 	/**
-	 * Convience constructor.
+	 * Initiate.
+	 * 
+	 * @param loaderContext
+	 *            {@link LoaderContext} for loading classes of {@link WorkModel}.
+	 */
+	public DeskLoader(LoaderContext loaderContext) {
+		this(loaderContext, new ModelRepository());
+	}
+
+	/**
+	 * Convenience constructor.
 	 * 
 	 * @param classLoader
 	 *            {@link java.lang.ClassLoader}.
 	 */
 	public DeskLoader(ClassLoader classLoader) {
-		this.loaderContext = new LoaderContext(classLoader);
-		this.modelRepository = new ModelRepository();
+		this(new LoaderContext(classLoader));
 	}
 
 	/**
@@ -127,8 +138,7 @@ public class DeskLoader {
 	 * @throws Exception
 	 *             If fails.
 	 */
-	public DeskModel loadDesk(ConfigurationItem configuration)
-			throws Exception {
+	public DeskModel loadDesk(ConfigurationItem configuration) throws Exception {
 
 		// Load the desk from the configuration
 		DeskModel desk = this.modelRepository.retrieve(new DeskModel(),
@@ -253,18 +263,20 @@ public class DeskLoader {
 	}
 
 	/**
-	 * Attaches the synchronisers to the desk to keep it synchronised with
-	 * underlying work.
+	 * Loads the {@link DeskModel} from the configuration attaching the
+	 * synchronisers.
 	 * 
-	 * @param desk
-	 *            {@link DeskModel}.
 	 * @param configuration
-	 *            {@link ConfigurationItem} of the {@link DeskModel}.
+	 *            {@link ConfigurationItem}.
+	 * @return Configured {@link DeskModel}.
 	 * @throws Exception
-	 *             If fails
+	 *             If fails.
 	 */
-	public void attachSynchronisers(DeskModel desk,
-			ConfigurationItem configuration) throws Exception {
+	public DeskModel loadDeskAndSynchronise(ConfigurationItem configuration)
+			throws Exception {
+
+		// Load the desk model
+		DeskModel desk = this.loadDesk(configuration);
 
 		// Obtain the context
 		ConfigurationContext context = configuration.getContext();
@@ -275,28 +287,18 @@ public class DeskLoader {
 		}
 
 		// Load the flow for the desk
+		List<FlowItemModel> removeFlowItems = new LinkedList<FlowItemModel>();
 		for (FlowItemModel flowItem : desk.getFlowItems()) {
-			this.loadFlowItem(flowItem, desk);
+			if (!this.loadFlowItem(flowItem, desk)) {
+				// Add flow item to remove
+				removeFlowItems.add(flowItem);
+			}
 		}
-	}
 
-	/**
-	 * Loads the {@link DeskModel} from the configuration attaching the
-	 * synchronisers.
-	 * 
-	 * @param configuration
-	 *            {@link ConfigurationItem}.
-	 * @return Configured {@link DeskModel}.
-	 * @throws Exception
-	 *             If fails.
-	 */
-	public DeskModel loadDeskAndSynchronise(ConfigurationItem configuration) throws Exception {
-
-		// Load the desk model
-		DeskModel desk = this.loadDesk(configuration);
-
-		// Attach synchronisers
-		this.attachSynchronisers(desk, configuration);
+		// Remove no longer existing flows
+		for (FlowItemModel flowItem : removeFlowItems) {
+			desk.removeFlowItem(flowItem);
+		}
 
 		// Return the desk model
 		return desk;
@@ -372,8 +374,10 @@ public class DeskLoader {
 	 *            {@link FlowItemModel}.
 	 * @param desk
 	 *            {@link DeskModel}.
+	 * @return <code>true</code> if {@link FlowItemModel} should exist on
+	 *         work.
 	 */
-	private void loadFlowItem(FlowItemModel flowItem, DeskModel desk)
+	private boolean loadFlowItem(FlowItemModel flowItem, DeskModel desk)
 			throws Exception {
 
 		// Obtain the work for the flow item
@@ -386,7 +390,7 @@ public class DeskLoader {
 		}
 		if (work == null) {
 			// Work not found therefore do not load
-			return;
+			return false;
 		}
 
 		// Obtain the task for the flow item
@@ -398,12 +402,15 @@ public class DeskLoader {
 		}
 		if (task == null) {
 			// Task not found therefore do not load
-			return;
+			return false;
 		}
 
 		// Synchronise task to flow item
 		TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task.getTask(),
 				flowItem);
+
+		// Should keep flow item
+		return true;
 	}
 
 }

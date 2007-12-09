@@ -2,7 +2,7 @@
 	<managed-object-sources>
 	</managed-object-sources>
 	<team-instances>
-		<team-instance id="TEAM-ID" team-factory="net.officefloor.team.PassiveTeamFactory"/>
+		<team-instance id="TEAM-ID" team-factory="net.officefloor.frame.impl.spi.team.PassiveTeamFactory"/>
 	</team-instances>
 	<offices>
 		<office id="TestOffice.office.xml">

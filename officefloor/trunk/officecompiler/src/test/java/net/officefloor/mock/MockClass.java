@@ -25,7 +25,7 @@ import net.officefloor.work.clazz.Flow;
  */
 public class MockClass {
 
-	public Object taskMethod(Object parameter, Flow flow) {
+	public Object taskMethod(String parameter, Flow flow) {
 		return null;
 	}
 
