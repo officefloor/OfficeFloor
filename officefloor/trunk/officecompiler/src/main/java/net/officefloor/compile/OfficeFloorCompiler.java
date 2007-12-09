@@ -81,6 +81,29 @@ public class OfficeFloorCompiler {
 		OfficeFloorEntry officeFloorEntry = OfficeFloorEntry.loadOfficeFloor(
 				configuration, context);
 
+		// TODO remove
+		System.out.println("Offices");
+		for (String officeId : context.getOfficeRegistry().keySet()) {
+			System.out.println("   " + officeId);
+		}
+		System.out.println("Work");
+		for (String workId : context.getWorkRegistry().keySet()) {
+			System.out.print("   " + workId + " [");
+			for (String taskId : context.getWorkRegistry().get(workId)
+					.getTaskRegistry().keySet()) {
+				System.out.print(" " + taskId);				
+			}
+			System.out.println(" ]");
+		}
+		System.out.println("Managed Objects");
+		for (String moId : context.getManagedObjectSourceRegistry().keySet()) {
+			System.out.println("   " + moId);
+		}
+		System.out.println("Teams");
+		for (String teamId : context.getTeamRegistry().keySet()) {
+			System.out.println("   " + teamId);
+		}
+
 		// Build the office floor
 		for (WorkEntry<?> workEntry : context.getWorkRegistry().values()) {
 			workEntry.build();

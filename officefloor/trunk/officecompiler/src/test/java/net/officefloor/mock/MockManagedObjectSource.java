@@ -18,6 +18,9 @@ package net.officefloor.mock;
 
 import java.util.Properties;
 
+import javax.xml.ws.handler.Handler;
+
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
@@ -35,7 +38,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
  * @author Daniel
  */
 public class MockManagedObjectSource implements ManagedObjectSource,
-		ManagedObjectSourceMetaData, ManagedObject {
+		ManagedObjectSourceMetaData<None, None>, ManagedObject {
 
 	/**
 	 * Properties.
@@ -88,7 +91,7 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
 	 */
-	public ManagedObjectSourceMetaData getMetaData() {
+	public ManagedObjectSourceMetaData<None, None> getMetaData() {
 		return this;
 	}
 
@@ -97,7 +100,7 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
-	public void start(ManagedObjectExecuteContext context) throws Exception {
+	public void start(ManagedObjectExecuteContext<?> context) throws Exception {
 		// Nothing currently for starting
 	}
 
@@ -137,7 +140,7 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
 	 */
-	public Class getManagedObjectClass() {
+	public Class<ManagedObject> getManagedObjectClass() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}
@@ -147,7 +150,7 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getObjectClass()
 	 */
-	public Class getObjectClass() {
+	public Class<?> getObjectClass() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}
@@ -157,7 +160,7 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyKeys()
 	 */
-	public Class getDependencyKeys() {
+	public Class<None> getDependencyKeys() {
 		// No dependencies
 		return null;
 	}
@@ -167,7 +170,7 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyMetaData(D)
 	 */
-	public ManagedObjectDependencyMetaData getDependencyMetaData(Enum key) {
+	public ManagedObjectDependencyMetaData getDependencyMetaData(None key) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}
@@ -177,7 +180,7 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerKeys()
 	 */
-	public Class getHandlerKeys() {
+	public Class<None> getHandlerKeys() {
 		// No handlers
 		return null;
 	}
@@ -187,7 +190,8 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
 	 */
-	public Class getHandlerType(Enum key) {
+	@SuppressWarnings("unchecked")
+	public Class<Handler<?>> getHandlerType(None key) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}
@@ -197,7 +201,7 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
 	 */
-	public ManagedObjectExtensionInterfaceMetaData[] getExtensionInterfacesMetaData() {
+	public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}

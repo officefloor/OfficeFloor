@@ -56,7 +56,7 @@ public class OfficeFloorCompilerTest extends OfficeFrameTestCase {
 		// Compile the Office Floor
 		OfficeFloorCompiler compiler = new OfficeFloorCompiler();
 		OfficeFloor officeFloor = compiler.compileOfficeFloor(configItem,
-				OfficeFrame.getInstance().getMetaDataFactory(),
+				OfficeFrame.getInstance().getBuilderFactory(),
 				new LoaderContext(this.getClass().getClassLoader()));
 
 		// Open the office floor

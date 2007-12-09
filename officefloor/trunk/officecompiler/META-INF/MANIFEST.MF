@@ -7,6 +7,7 @@ Bundle-Vendor: Daniel Sagenschneider
 Eclipse-LazyStart: true
 Export-Package: net.officefloor,
  net.officefloor.desk,
+ net.officefloor.main,
  net.officefloor.office,
  net.officefloor.officefloor,
  net.officefloor.repository,

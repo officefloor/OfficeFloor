@@ -42,14 +42,14 @@ public class TaskToFlowItemSynchroniser {
 
 		// Specify the Task onto the Flow Item
 		flowItem.setTask(task);
-		
+
 		// Obtain the listing of flow item outputs
 		FlowItemOutputModel[] outputs = flowItem.getOutputs().toArray(
 				new FlowItemOutputModel[0]);
 
 		// Merge the flows
 		int outputIndex = 0;
-		for (TaskFlowModel flow : task.getFlows()) {
+		for (TaskFlowModel<?> flow : task.getFlows()) {
 
 			// Obtain the Id of the flow item output
 			String flowItemOutputId = DeskLoader.getFlowItemOutputId(flow);

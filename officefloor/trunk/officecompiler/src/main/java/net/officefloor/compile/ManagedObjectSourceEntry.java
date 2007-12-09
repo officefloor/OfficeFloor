@@ -18,8 +18,10 @@ package net.officefloor.compile;
 
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.PropertyModel;
+import net.officefloor.util.OFCU;
 
 /**
  * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
@@ -28,7 +30,7 @@ import net.officefloor.model.officefloor.PropertyModel;
  * @author Daniel
  */
 public class ManagedObjectSourceEntry extends
-		AbstractEntry<ManagedObjectBuilder, ManagedObjectSourceModel> {
+		AbstractEntry<ManagedObjectBuilder<?>, ManagedObjectSourceModel> {
 
 	/**
 	 * Loads the {@link ManagedObjectSourceEntry}.
@@ -48,7 +50,7 @@ public class ManagedObjectSourceEntry extends
 			OfficeFloorCompilerContext context) {
 
 		// Create the builder
-		ManagedObjectBuilder builder = context.getBuilderFactory()
+		ManagedObjectBuilder<?> builder = context.getBuilderFactory()
 				.createManagedObjectBuilder();
 
 		// Create the entry
@@ -79,7 +81,7 @@ public class ManagedObjectSourceEntry extends
 	 * @param model
 	 *            {@link ManagedObjectSourceModel}.
 	 */
-	public ManagedObjectSourceEntry(String id, ManagedObjectBuilder builder,
+	public ManagedObjectSourceEntry(String id, ManagedObjectBuilder<?> builder,
 			ManagedObjectSourceModel model, OfficeFloorEntry officeFloorEntry) {
 		super(id, builder, model);
 		this.officeFloorEntry = officeFloorEntry;
@@ -103,9 +105,12 @@ public class ManagedObjectSourceEntry extends
 
 		// Configure attributes
 		this.getBuilder().setManagedObjectSourceClass(
-				builderUtil.obtainClass(this.getModel().getSource()));
+				(Class<ManagedObjectSource>) builderUtil.obtainClass(this
+						.getModel().getSource()));
 		this.getBuilder().setManagingOffice(
-				this.getModel().getManagingOffice().getManagingOfficeName());
+				OFCU.get(this.getModel().getManagingOffice(),
+						"No managing office for managed object source ${0}",
+						this.getModel().getId()).getManagingOfficeName());
 
 		// Configure properties
 		for (PropertyModel property : this.getModel().getProperties()) {

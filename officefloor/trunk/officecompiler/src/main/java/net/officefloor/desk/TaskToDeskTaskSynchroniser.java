@@ -49,21 +49,25 @@ public class TaskToDeskTaskSynchroniser {
 		for (DeskTaskObjectModel model : deskTask.getObjects()) {
 			model.setTaskObject(null);
 		}
-		
+
 		// Load objects onto target
-		for (TaskObjectModel object : task.getObjects()) {
+		for (TaskObjectModel<?> object : task.getObjects()) {
+			
 			// Find first matching desk object
 			DeskTaskObjectModel deskObject = null;
 			for (DeskTaskObjectModel model : deskTask.getObjects()) {
+				
 				// Ensure desk task object not already linked to object
 				if (model.getTaskObject() != null) {
-					// Match to object type (or first null)
-					String taskObjectType = object.getObjectType();
-					if ((taskObjectType == null)
-							|| (taskObjectType.equals(model.getObjectType()))) {
-						deskObject = model;
-						break;
-					}
+					continue;
+				}
+				
+				// Match to object type (or first null)
+				String taskObjectType = object.getObjectType();
+				if ((taskObjectType == null)
+						|| (taskObjectType.equals(model.getObjectType()))) {
+					deskObject = model;
+					break;
 				}
 			}
 
