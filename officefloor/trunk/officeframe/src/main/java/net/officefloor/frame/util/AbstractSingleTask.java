@@ -53,7 +53,7 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	public WorkBuilder registerWork(String workName, OfficeBuilder officeBuilder)
 			throws BuildException {
 		// Create and register the work builder
-		WorkBuilder work = OfficeFrame.getInstance().getMetaDataFactory()
+		WorkBuilder work = OfficeFrame.getInstance().getBuilderFactory()
 				.createWorkBuilder(this.getClass());
 		officeBuilder.addWork(workName, work);
 

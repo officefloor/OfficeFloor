@@ -99,7 +99,7 @@ public abstract class OfficeFrame {
 	 * 
 	 * @return {@link BuilderFactory}.
 	 */
-	public abstract BuilderFactory getMetaDataFactory();
+	public abstract BuilderFactory getBuilderFactory();
 
 	/**
 	 * Registers the {@link OfficeFloorBuilder} on this {@link OfficeFrame}.

@@ -17,12 +17,9 @@
 package net.officefloor.frame.api.build;
 
 /**
- * {@link java.lang.Enum} indicating the:<il>
- * <li> {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances</li>
- * <li>{@link net.officefloor.frame.internal.structure.Flow} instances</li>
- * </il> will be specified by index.
+ * {@link Enum} specifying no enumerations.
  * 
  * @author Daniel
  */
-public enum Indexed {
+public enum None {
 }

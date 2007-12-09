@@ -186,7 +186,7 @@ public class ManagedObjectSourceContextImpl implements
 		}
 
 		// Create the clean up work
-		WorkBuilder<W> workBuilder = this.getOfficeFrame().getMetaDataFactory()
+		WorkBuilder<W> workBuilder = this.getOfficeFrame().getBuilderFactory()
 				.createWorkBuilder(typeOfWork);
 
 		// Name the clean up work
