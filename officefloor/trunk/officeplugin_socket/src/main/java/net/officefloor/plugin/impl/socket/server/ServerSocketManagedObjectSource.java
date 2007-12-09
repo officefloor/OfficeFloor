@@ -129,7 +129,7 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 				new InetSocketAddress(port), connectionManager,
 				messageSegmentPool);
 		WorkBuilder<ServerSocketAccepter> accepterWork = context
-				.getOfficeFrame().getMetaDataFactory().createWorkBuilder(
+				.getOfficeFrame().getBuilderFactory().createWorkBuilder(
 						ServerSocketAccepter.class);
 		officeBuilder.addWork(prefix + "Accepter", accepterWork);
 
@@ -145,7 +145,7 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 
 		// Register the listener of connections
 		WorkBuilder<ConnectionManager> listenerWork = context.getOfficeFrame()
-				.getMetaDataFactory()
+				.getBuilderFactory()
 				.createWorkBuilder(ConnectionManager.class);
 		officeBuilder.addWork(prefix + "Listener", listenerWork);
 

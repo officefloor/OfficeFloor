@@ -92,7 +92,7 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase imp
 
 		// Obtain the builder factory
 		BuilderFactory builderFactory = OfficeFrame.getInstance()
-				.getMetaDataFactory();
+				.getBuilderFactory();
 
 		// Create the Office Floor
 		OfficeFloorBuilder officeFloorBuilder = builderFactory
