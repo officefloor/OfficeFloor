@@ -76,8 +76,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Initiate for constructing office
 		this.officeFloorBuilder = OfficeFrame.getInstance()
-				.getMetaDataFactory().createOfficeFloorBuilder();
-		this.officeBuilder = OfficeFrame.getInstance().getMetaDataFactory()
+				.getBuilderFactory().createOfficeFloorBuilder();
+		this.officeBuilder = OfficeFrame.getInstance().getBuilderFactory()
 				.createOfficeBuilder();
 	}
 
@@ -120,7 +120,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Create the Work Builder
 		WorkBuilder<W> workBuilder = OfficeFrame.getInstance()
-				.getMetaDataFactory().createWorkBuilder(typeOfWork);
+				.getBuilderFactory().createWorkBuilder(typeOfWork);
 
 		// Construct the work
 		workBuilder.setWorkFactory(workFactory);
@@ -228,7 +228,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Create the Managed Object Builder
 		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame
-				.getInstance().getMetaDataFactory()
+				.getInstance().getBuilderFactory()
 				.createManagedObjectBuilder();
 
 		// Register the Managed Object Source class
@@ -264,7 +264,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Create the Managed Object Builder
 		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame
-				.getInstance().getMetaDataFactory()
+				.getInstance().getBuilderFactory()
 				.createManagedObjectBuilder();
 
 		// Bind Managed Object
@@ -359,7 +359,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Create the Administrator Builder
 		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
-				.getInstance().getMetaDataFactory()
+				.getInstance().getBuilderFactory()
 				.createAdministratorBuilder();
 
 		// Bind the Administrator
@@ -394,7 +394,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Create the Administrator Builder
 		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
-				.getInstance().getMetaDataFactory()
+				.getInstance().getBuilderFactory()
 				.createAdministratorBuilder();
 
 		// Configure the administrator
@@ -427,8 +427,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Initiate for constructing another office
 		this.officeFloorBuilder = OfficeFrame.getInstance()
-				.getMetaDataFactory().createOfficeFloorBuilder();
-		this.officeBuilder = OfficeFrame.getInstance().getMetaDataFactory()
+				.getBuilderFactory().createOfficeFloorBuilder();
+		this.officeBuilder = OfficeFrame.getInstance().getBuilderFactory()
 				.createOfficeBuilder();
 
 		// Return the Office Floor

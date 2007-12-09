@@ -60,7 +60,7 @@ public class OfficeFrameImpl extends OfficeFrame {
 	 * 
 	 * @see net.officefloor.frame.api.construct.OfficeFloor#getMetaDataFactory()
 	 */
-	public BuilderFactory getMetaDataFactory() {
+	public BuilderFactory getBuilderFactory() {
 		return this.metaDataFactory;
 	}
 
