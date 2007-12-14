@@ -17,6 +17,8 @@
 package net.officefloor.eclipse.launch;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.model.office.OfficeModel;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -25,9 +27,12 @@ import org.eclipse.debug.internal.ui.DebugUIPlugin;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 /**
@@ -41,6 +46,16 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 	 * Configuration file.
 	 */
 	private Text configurationFile;
+
+	/**
+	 * Name of {@link OfficeModel} to invoke.
+	 */
+	private Text officeName;
+
+	/**
+	 * Name of {@link WorkManager} to invoke.
+	 */
+	private Text workName;
 
 	/*
 	 * (non-Javadoc)
@@ -62,11 +77,37 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 
 		// Create the composite
 		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout());
+		composite.setLayout(new GridLayout(2, false));
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+		// Listen to changes
+		ModifyListener dirtyListener = new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent arg0) {
+				OfficeFloorMainTab.this.updateLaunchConfigurationDialog();
+			}
+		};
+
 		// Specifies the configuration file
+		new Label(composite, SWT.NONE).setText("Office Floor");
 		this.configurationFile = new Text(composite, SWT.NONE);
+		this.configurationFile.setLayoutData(new GridData(
+				GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
+		this.configurationFile.addModifyListener(dirtyListener);
+
+		// Specifies the office to invoke
+		new Label(composite, SWT.NONE).setText("Office");
+		this.officeName = new Text(composite, SWT.NONE);
+		this.officeName.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL));
+		this.officeName.addModifyListener(dirtyListener);
+
+		// Specifies the work manager to invoke
+		new Label(composite, SWT.NONE).setText("Work");
+		this.workName = new Text(composite, SWT.NONE);
+		this.workName.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL));
+		this.workName.addModifyListener(dirtyListener);
 
 		// Specify the composite
 		this.setControl(composite);
@@ -81,8 +122,13 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 	@SuppressWarnings("restriction")
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
+			// Obtain the values
 			this.configurationFile.setText(configuration.getAttribute(
 					OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE, ""));
+			this.officeName.setText(configuration.getAttribute(
+					OfficeFloorLauncher.ATTR_OFFICE_NAME, ""));
+			this.workName.setText(configuration.getAttribute(
+					OfficeFloorLauncher.ATTR_WORK_NAME, ""));
 		} catch (CoreException ex) {
 			DebugUIPlugin.log(ex.getStatus());
 		}
@@ -97,6 +143,10 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE,
 				this.configurationFile.getText());
+		configuration.setAttribute(OfficeFloorLauncher.ATTR_OFFICE_NAME,
+				this.officeName.getText());
+		configuration.setAttribute(OfficeFloorLauncher.ATTR_WORK_NAME,
+				this.workName.getText());
 	}
 
 	/*
@@ -106,7 +156,7 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 	 */
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		// TODO Implement
+		// No defaults
 	}
 
 }
