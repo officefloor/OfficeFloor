@@ -47,12 +47,6 @@ public class RawProcessManagedObjectRegistry {
 			Map<String, RawManagedObjectMetaData> managedObjects)
 			throws ConfigurationException {
 
-		// TODO remove
-		System.out.println("OfficeFloor managed object Ids:");
-		for (String key : managedObjects.keySet()) {
-			System.out.println("    '" + key + "'");
-		}
-
 		// Create the listing of process managed objects
 		int currentIndex = 0;
 		Map<String, RawProcessManagedObjectMetaData> processManagedObjectRegistry = new HashMap<String, RawProcessManagedObjectMetaData>();

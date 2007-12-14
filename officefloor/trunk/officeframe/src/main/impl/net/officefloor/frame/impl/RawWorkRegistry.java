@@ -78,12 +78,10 @@ public class RawWorkRegistry {
 				.getWorkConfiguration()) {
 
 			// Create the Work meta-data
-			workRegistry
-					.put(workConfig.getWorkName(), RawWorkMetaData
-							.createRawWorkMetaData(workConfig, officeResources,
-									rawAdminRegistry,
-									rawAssetRegistry,
-									defaultParentEscalationProcedure));
+			workRegistry.put(workConfig.getWorkName(), RawWorkMetaData
+					.createRawWorkMetaData(workConfig, officeResources,
+							rawAdminRegistry, rawAssetRegistry,
+							defaultParentEscalationProcedure));
 		}
 
 		// Create the work registry
@@ -191,8 +189,10 @@ public class RawWorkRegistry {
 			OfficeConfiguration officeConfiguration)
 			throws ConfigurationException {
 
-		// Display structure
-		System.out.println("Work Structure");
+		// TODO remove (display structure)
+		System.out.println("[" + this.getClass().getName() + " (todo remove):");
+		System.out.println("Work Structure for office "
+				+ officeConfiguration.getOfficeName());
 		for (String workName : this.workRegistry.keySet()) {
 			System.out.print("    " + workName + " [");
 			for (String taskName : this.workRegistry.get(workName)
@@ -201,6 +201,7 @@ public class RawWorkRegistry {
 			}
 			System.out.println(" ]");
 		}
+		System.out.println(":" + this.getClass().getName() + "]");
 
 		// Iterate over the work
 		for (WorkConfiguration workConfig : officeConfiguration
