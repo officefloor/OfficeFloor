@@ -82,6 +82,7 @@ public class OfficeFloorCompiler {
 				configuration, context);
 
 		// TODO remove
+		System.out.println("[" + this.getClass().getName() + " (todo remove):");
 		System.out.println("Offices");
 		for (String officeId : context.getOfficeRegistry().keySet()) {
 			System.out.println("   " + officeId);
@@ -91,7 +92,7 @@ public class OfficeFloorCompiler {
 			System.out.print("   " + workId + " [");
 			for (String taskId : context.getWorkRegistry().get(workId)
 					.getTaskRegistry().keySet()) {
-				System.out.print(" " + taskId);				
+				System.out.print(" " + taskId);
 			}
 			System.out.println(" ]");
 		}
@@ -103,6 +104,7 @@ public class OfficeFloorCompiler {
 		for (String teamId : context.getTeamRegistry().keySet()) {
 			System.out.println("   " + teamId);
 		}
+		System.out.println(":" + this.getClass().getName() + "]");
 
 		// Build the office floor
 		for (WorkEntry<?> workEntry : context.getWorkRegistry().values()) {

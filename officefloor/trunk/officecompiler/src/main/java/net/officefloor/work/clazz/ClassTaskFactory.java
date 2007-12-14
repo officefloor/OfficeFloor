@@ -17,10 +17,13 @@
 package net.officefloor.work.clazz;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.model.desk.DeskTaskModel;
+import net.officefloor.model.desk.DeskTaskObjectModel;
+import net.officefloor.work.CompilerAwareTaskFactory;
 
 /**
  * {@link net.officefloor.frame.api.build.TaskFactory} to invoke the method on
@@ -29,7 +32,7 @@ import net.officefloor.frame.api.execute.Work;
  * @author Daniel
  */
 public class ClassTaskFactory implements
-		TaskFactory<Object, ClassWork, Indexed, Indexed> {
+		CompilerAwareTaskFactory<Object, ClassWork, Indexed, Indexed> {
 
 	/**
 	 * Method to invoke for this task.
@@ -52,10 +55,42 @@ public class ClassTaskFactory implements
 	public ClassTaskFactory(Method method, ParameterFactory[] parameters) {
 		this.method = method;
 		this.parameters = parameters;
+	}
 
-		// TODO remove
-		if (this.parameters.length > 0) {
-			this.parameters[0] = new ManagedObjectParameterFactory(0);
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.work.CompilerAwareTaskFactory#initialiseTaskFactory(net.officefloor.model.desk.DeskTaskModel)
+	 */
+	@Override
+	public void initialiseTaskFactory(DeskTaskModel task) throws Exception {
+
+		// Ensure matching configuration
+		List<DeskTaskObjectModel> objects = task.getObjects();
+		if (objects.size() != this.parameters.length) {
+			throw new IllegalArgumentException(
+					"Incorrect configuration as have " + this.parameters.length
+							+ " parameters but configration for only "
+							+ objects.size());
+		}
+
+		// Load the parameter factories
+		int moIndex = 0;
+		for (int i = 0; i < this.parameters.length; i++) {
+
+			// Obtain the corresponding object
+			DeskTaskObjectModel object = objects.get(i);
+
+			// Create the appropriate parameter factory
+			ParameterFactory parameterFactory;
+			if (object.getIsParameter()) {
+				parameterFactory = new ParameterParameterFactory();
+			} else {
+				parameterFactory = new ManagedObjectParameterFactory(moIndex++);
+			}
+
+			// Specify the parameter factory
+			this.parameters[i] = parameterFactory;
 		}
 	}
 

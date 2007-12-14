@@ -25,6 +25,7 @@ import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.work.TaskModel;
+import net.officefloor.work.CompilerAwareTaskFactory;
 
 /**
  * {@link net.officefloor.frame.api.execute.Task} for the
@@ -127,7 +128,13 @@ public class TaskEntry<W extends Work> extends
 		// Obtain task and its details
 		TaskModel<?, ?> task = this.deskTask.getTask();
 		TaskFactory taskFactory = task.getTaskFactory();
-		
+
+		// Initiate the task factory if necessary
+		if (taskFactory instanceof CompilerAwareTaskFactory) {
+			((CompilerAwareTaskFactory) taskFactory)
+					.initialiseTaskFactory(this.deskTask);
+		}
+
 		// Load details of task
 		this.getBuilder().setTaskFactory(taskFactory);
 
