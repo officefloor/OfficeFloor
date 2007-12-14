@@ -73,6 +73,15 @@ public class OfficeFloorLaunchConfigurationDelegate extends
 		// Program and VM arguments
 		String programArguments = configuration.getAttribute(
 				OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE, "");
+		String officeName = configuration.getAttribute(
+				OfficeFloorLauncher.ATTR_OFFICE_NAME, "");
+		if ((officeName != null) && (officeName.trim().length() > 0)) {
+			String workName = configuration.getAttribute(
+					OfficeFloorLauncher.ATTR_WORK_NAME, "");
+
+			// Flag to invoke work (within office)
+			programArguments += " " + officeName + " " + workName;
+		}
 		String vmAguments = this.getVMArguments(configuration);
 		ExecutionArguments executionArguments = new ExecutionArguments(
 				vmAguments, programArguments);

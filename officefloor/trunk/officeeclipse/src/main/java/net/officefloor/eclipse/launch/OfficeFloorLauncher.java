@@ -19,6 +19,8 @@ package net.officefloor.eclipse.launch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.model.office.OfficeModel;
 
 /**
  * Launches the {@link OfficeFloor}.
@@ -32,4 +34,16 @@ public class OfficeFloorLauncher {
 	 * configuration file.
 	 */
 	public static final String ATTR_OFFICE_FLOOR_FILE = "net.officefloor.file";
+
+	/**
+	 * {@link ILaunchConfiguration} attribute to specify the name of the
+	 * {@link OfficeModel} to invoke when launching.
+	 */
+	public static final String ATTR_OFFICE_NAME = "net.officefloor.office";
+
+	/**
+	 * {@link ILaunchConfiguration} attribute to specify the name of the
+	 * {@link WorkManager} to invoke when launching.
+	 */
+	public static final String ATTR_WORK_NAME = "net.officefloor.work";
 }
