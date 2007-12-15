@@ -19,7 +19,7 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.officefloor.figure.OfficeFigure;
@@ -35,7 +35,7 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel
  */
 public class OfficeEditPart extends
-		AbstractOfficeFloorEditPart<OfficeFloorOfficeModel> {
+		AbstractOfficeFloorNodeEditPart<OfficeFloorOfficeModel> {
 
 	/*
 	 * (non-Javadoc)
@@ -55,6 +55,10 @@ public class OfficeEditPart extends
 				case REMOVE_MANAGED_OBJECT:
 				case ADD_TEAM:
 				case REMOVE_TEAM:
+					OfficeEditPart.this.refreshChildren();
+					break;
+				case ADD_RESPONSIBLE_MANAGED_OBJECT:
+				case REMOVE_RESPONSIBLE_MANAGED_OBJECT:
 					OfficeEditPart.this.refreshTargetConnections();
 					break;
 				}
@@ -82,6 +86,26 @@ public class OfficeEditPart extends
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getTeams());
 		childModels.addAll(this.getCastedModel().getManagedObjects());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		// Never a source
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		models.addAll(this.getCastedModel().getResponsibleManagedObjects());
 	}
 
 }

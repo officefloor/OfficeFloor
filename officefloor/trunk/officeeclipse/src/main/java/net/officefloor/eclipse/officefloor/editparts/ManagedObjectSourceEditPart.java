@@ -19,15 +19,20 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel.ManagedObjectSourceEvent;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -36,7 +41,7 @@ import org.eclipse.draw2d.Label;
  * @author Daniel
  */
 public class ManagedObjectSourceEditPart extends
-		AbstractOfficeFloorNodeEditPart<ManagedObjectSourceModel> {
+		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectSourceModel> {
 
 	/*
 	 * (non-Javadoc)
@@ -83,21 +88,58 @@ public class ManagedObjectSourceEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
-	 */
-	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Never a source
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeManagedObjects());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 */
+	@Override
+	protected ConnectionModelFactory createConnectionModelFactory() {
+		return new ConnectionModelFactory() {
+			@Override
+			public ConnectionModel createConnection(Object source,
+					Object target, CreateConnectionRequest request) {
+				// Create the connection
+				ManagedObjectSourceToOfficeFloorOfficeModel conn = new ManagedObjectSourceToOfficeFloorOfficeModel();
+				conn.setManagedObjectSource((ManagedObjectSourceModel) source);
+				conn.setManagingOffice((OfficeFloorOfficeModel) target);
+				conn.connect();
+
+				// Return the connection
+				return conn;
+			}
+		};
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetTypes(List<Class> types) {
+		types.add(OfficeFloorOfficeModel.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		ManagedObjectSourceToOfficeFloorOfficeModel conn = this
+				.getCastedModel().getManagingOffice();
+		if (conn != null) {
+			models.add(conn);
+		}
 	}
 
 }
