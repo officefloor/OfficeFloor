@@ -216,8 +216,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public synchronized static <O> void assertGraph(O expectedRoot,
 			O actualRoot, String... ignoreMethodNames) throws Exception {
-		assertGraph(expectedRoot, actualRoot, new HashSet<Object>(), "<root>",
-				ignoreMethodNames);
+		assertGraph(expectedRoot, actualRoot, new HashMap<Object, Integer>(),
+				"<root>", ignoreMethodNames);
 	}
 
 	/**
@@ -244,22 +244,31 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <O> void assertGraph(O expectedRoot, O actualRoot,
-			Set<Object> checkedObjects, String path, String[] ignoreMethodNames)
-			throws Exception {
+			Map<Object, Integer> checkedObjects, String path,
+			String[] ignoreMethodNames) throws Exception {
 
 		// Reset
 		isAssetGraphExceptionLogged = false;
 
 		try {
 
-			// Ensure not already checked
-			if (checkedObjects.contains(expectedRoot)) {
-				// Already checked
-				return;
-			}
+			// Ensure checked only twice
+			// (allows checking bi-directional references)
+			if (checkedObjects.containsKey(expectedRoot)) {
+				// Ensure only check twice at most
+				int timesChecked = checkedObjects.get(expectedRoot).intValue();
+				timesChecked++; // another check
+				if (timesChecked > 2) {
+					// Already checked twice
+					return;
+				}
 
-			// Add to checked (as about to check)
-			checkedObjects.add(expectedRoot);
+				// Specify another check of object
+				checkedObjects.put(expectedRoot, new Integer(timesChecked));
+			} else {
+				// First time accessed, therefore flag first time
+				checkedObjects.put(expectedRoot, new Integer(1));
+			}
 
 			// Ensure matches
 			if ((expectedRoot == null) && (actualRoot == null)) {
@@ -377,8 +386,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <O> void assertGraphCollection(Collection<O> expected,
-			Collection<O> actual, Set<Object> checkedObjects, String path,
-			String[] ignoreMethodNames) throws Exception {
+			Collection<O> actual, Map<Object, Integer> checkedObjects,
+			String path, String[] ignoreMethodNames) throws Exception {
 
 		// Validate the size
 		assertEquals("Path " + path + " incorrect size", expected.size(),
