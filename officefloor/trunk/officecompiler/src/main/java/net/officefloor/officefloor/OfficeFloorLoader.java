@@ -91,7 +91,7 @@ public class OfficeFloorLoader {
 					.getManagingOffice();
 			if (conn != null) {
 				OfficeFloorOfficeModel office = offices.get(conn
-						.getManagingOffice());
+						.getManagingOfficeName());
 				if (office != null) {
 					conn.setManagedObjectSource(mos);
 					conn.setManagingOffice(office);
@@ -162,21 +162,31 @@ public class OfficeFloorLoader {
 	 */
 	public void storeOfficeFloor(OfficeFloorModel officeFloor,
 			ConfigurationItem configurationItem) throws Exception {
-		
+
 		// Ensure the teams are linked
 		for (TeamModel teamModel : officeFloor.getTeams()) {
 			for (OfficeTeamToTeamModel conn : teamModel.getOfficeTeams()) {
 				conn.setTeamId(teamModel.getId());
 			}
 		}
-		
+
 		// Ensure the managed object sources are linked
-		for (ManagedObjectSourceModel managedObjectSource : officeFloor.getManagedObjectSources()) {
-			for (OfficeManagedObjectToManagedObjectSourceModel conn : managedObjectSource.getOfficeManagedObjects()) {
+		for (ManagedObjectSourceModel managedObjectSource : officeFloor
+				.getManagedObjectSources()) {
+			for (OfficeManagedObjectToManagedObjectSourceModel conn : managedObjectSource
+					.getOfficeManagedObjects()) {
 				conn.setManagedObjectSourceId(managedObjectSource.getId());
 			}
 		}
-		
+
+		// Ensure the responsible offices are linked
+		for (OfficeFloorOfficeModel office : officeFloor.getOffices()) {
+			for (ManagedObjectSourceToOfficeFloorOfficeModel conn : office
+					.getResponsibleManagedObjects()) {
+				conn.setManagingOfficeName(office.getId());
+			}
+		}
+
 		// Store the model
 		this.modelRepository.store(officeFloor, configurationItem);
 	}
