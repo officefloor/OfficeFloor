@@ -20,6 +20,7 @@ import java.io.File;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
@@ -109,6 +110,10 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 				"process", null));
 		assertList(new String[] { "getTeamName" }, office.getTeams(),
 				new OfficeTeamModel("TEAM-NAME", null));
+		assertList(new String[] { "getManagingOfficeName" }, officeFloor
+				.getOffices().get(0).getResponsibleManagedObjects(),
+				new ManagedObjectSourceToOfficeFloorOfficeModel("OFFICE", null,
+						null));
 
 		// Validate connections of office
 		OfficeManagedObjectToManagedObjectSourceModel moToMos = office
@@ -175,5 +180,5 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		// Validate the office
 		assertGraph(expectedOffice, actualOffice);
 	}
-	
+
 }
