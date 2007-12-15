@@ -27,6 +27,7 @@ import net.officefloor.eclipse.officefloor.editparts.OfficeManagedObjectEditPart
 import net.officefloor.eclipse.officefloor.editparts.OfficeTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.TeamEditPart;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
@@ -70,6 +71,8 @@ public class OfficeFloorEditor extends
 		map.put(OfficeTeamToTeamModel.class,
 				OfficeFloorConnectionEditPart.class);
 		map.put(OfficeManagedObjectToManagedObjectSourceModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(ManagedObjectSourceToOfficeFloorOfficeModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 
