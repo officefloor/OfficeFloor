@@ -16,12 +16,8 @@
  */
 package net.officefloor.model.generate;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.util.Properties;
 
 /**
  * Generates the OfficeFloor model.
@@ -35,37 +31,30 @@ public class GenerateOfficeFloorModel {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		// Load the properties to generate the model
-		File propertyFileLocation = new File(new File(System
-				.getProperty("user.home")), new File("officefloor",
-				"model-generator.properties").getPath());
-		if (!propertyFileLocation.exists()) {
-			throw new FileNotFoundException(
-					"Can not find model generator property file : "
-							+ propertyFileLocation.getAbsolutePath());
+		// Model Project directory should be the only argument
+		if (args.length == 0) {
+			throw new IllegalArgumentException(
+					"Must provide location of model project directory as first argument");
 		}
-		Properties properties = new Properties();
-		properties.load(new FileInputStream(propertyFileLocation));
 
-		// Obtain model project directory
-		final String MODEL_PROJECT_DIR_PROPERTY_NAME = "model.project.dir";
-		String modelProjectDir = properties
-				.getProperty(MODEL_PROJECT_DIR_PROPERTY_NAME);
-		if (modelProjectDir == null) {
-			throw new IllegalStateException("Property '"
-					+ MODEL_PROJECT_DIR_PROPERTY_NAME
-					+ "' must be specified in property file: "
-					+ propertyFileLocation.getAbsolutePath());
-		}
+		// Obtain model project directory file
+		File modelProjectDir = new File(args[0]);
 
 		// Ensure the model project directory exists
-		if (!(new File(modelProjectDir).exists())) {
+		if (!(modelProjectDir.exists())) {
 			throw new FileNotFoundException(
 					"Model project directory not exist - " + modelProjectDir);
 		}
 
 		// Obtain the raw directory
 		File rawDir = new File(modelProjectDir, "src/raw");
+
+		// Ensure the raw directory exists
+		if (!(rawDir.exists())) {
+			throw new IllegalStateException(
+					"Raw directory not found within model project directory - "
+							+ modelProjectDir.getAbsolutePath());
+		}
 
 		// Obtain the output directory
 		File outputDir = new File(modelProjectDir, "src/auto");
@@ -74,11 +63,6 @@ public class GenerateOfficeFloorModel {
 		System.out.println("Generating all objects");
 		System.out.println("    Raw: " + rawDir.getAbsolutePath());
 		System.out.println("    Output: " + outputDir.getAbsolutePath());
-		System.out.println();
-		System.out.print("Press [enter] to continue ... ");
-
-		// Wait for confirmation to continue
-		new BufferedReader(new InputStreamReader(System.in)).readLine();
 
 		// Generate all objects
 		new GraphGenerator().generate(rawDir, outputDir);
