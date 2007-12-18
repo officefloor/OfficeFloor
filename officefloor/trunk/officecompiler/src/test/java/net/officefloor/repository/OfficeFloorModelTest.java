@@ -50,7 +50,7 @@ public class OfficeFloorModelTest extends AbstractModelTestCase {
 						new PropertyModel[] { new PropertyModel("PROP NAME",
 								"PROP VALUE") }, null) },
 				new OfficeFloorOfficeModel[] { new OfficeFloorOfficeModel(
-						"OFFICE",
+						"OFFICE", "office",
 						new OfficeManagedObjectModel[] { new OfficeManagedObjectModel(
 								"MO-NAME", "work", null) }, new OfficeTeamModel[0],
 						null) });

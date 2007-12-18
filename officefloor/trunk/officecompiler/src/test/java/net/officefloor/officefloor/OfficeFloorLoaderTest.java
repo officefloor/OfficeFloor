@@ -101,9 +101,9 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 				"team prop name", "team prop value"));
 
 		// Validate the offices
-		assertList(new String[] { "getId", "getX", "getY" }, officeFloor
-				.getOffices(), new OfficeFloorOfficeModel("OFFICE", null, null,
-				null, 100, 20));
+		assertList(new String[] { "getId", "getName", "getX", "getY" },
+				officeFloor.getOffices(), new OfficeFloorOfficeModel("OFFICE",
+						"office", null, null, null, 100, 20));
 		OfficeFloorOfficeModel office = officeFloor.getOffices().get(0);
 		assertList(new String[] { "getManagedObjectName", "getScope" }, office
 				.getManagedObjects(), new OfficeManagedObjectModel("MO-NAME",
@@ -171,7 +171,7 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 
 		// Create the expected office
 		OfficeFloorOfficeModel expectedOffice = new OfficeFloorOfficeModel(
-				OFFICE_FILE_NAME,
+				OFFICE_FILE_NAME, null,
 				new OfficeManagedObjectModel[] { new OfficeManagedObjectModel(
 						"MO", null, null) }, new OfficeTeamModel[] {
 						new OfficeTeamModel("TEAM ONE", null),
