@@ -57,14 +57,12 @@ public class GraphGenerator {
 			}
 
 			// Clear the directory
-			System.out.println("Clearing output directory");
 			for (File child : outputDir.listFiles()) {
 				this.deleteFile(child);
 			}
 		}
 
 		// Generate the objects
-		System.out.println("Generating objects");
 		ConfigurationContext context = new FileSystemConfigurationContext(
 				outputDir);
 		this.generate(rawDir, context, "");
@@ -77,7 +75,6 @@ public class GraphGenerator {
 			String relativeDir) throws Exception {
 
 		// Recurse generating the objects
-		System.out.println("    " + relativeDir);
 		for (File child : rawDir.listFiles()) {
 			if (child.isDirectory()) {
 				this.generate(child, context, relativeDir + "/"
@@ -115,7 +112,6 @@ public class GraphGenerator {
 		model.setPackageName(packageName);
 
 		// Generate the model
-		System.out.println("    Model: " + name + " [" + packageName + "]");
 		new ModelGenerator(model, this.general).generateModel(context);
 	}
 
@@ -135,7 +131,6 @@ public class GraphGenerator {
 		}
 
 		// Remove the file
-		System.out.println("    deleting: " + file.getCanonicalPath());
 		file.delete();
 	}
 
