@@ -44,6 +44,7 @@
 		<item type="net.officefloor.model.officefloor.OfficeFloorOfficeModel" element="office">
 			<attributes>
 				<attribute method="getId" attribute="id"/>
+				<attribute method="getName" attribute="name"/>
 				<attribute method="getX" attribute="x"/>
 				<attribute method="getY" attribute="y"/>
 			</attributes>

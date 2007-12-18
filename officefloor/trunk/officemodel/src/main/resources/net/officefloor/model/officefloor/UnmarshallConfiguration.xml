@@ -24,6 +24,7 @@
 	<!-- OFFICES -->
 	<object method="addOffice" node="office" class="net.officefloor.model.officefloor.OfficeFloorOfficeModel">
 		<value method="setId" node="office@id"/>
+		<value method="setName" node="office@name"/>
 		<value method="setX" node="office@x"/>
 		<value method="setY" node="office@y"/>
 		<object method="addManagedObject" node="managed-object" class="net.officefloor.model.officefloor.OfficeManagedObjectModel">
