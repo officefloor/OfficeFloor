@@ -87,9 +87,9 @@ public class OfficeFloorEditPart extends
 			@Override
 			protected void handleButtonClick() {
 				// Add the Office
-				OfficeFloorOfficeModel office = new OfficeFloorOfficeModel();
+				OfficeFloorOfficeModel officeBean = new OfficeFloorOfficeModel();
 				BeanDialog dialog = OfficeFloorEditPart.this.createBeanDialog(
-						office, "X", "Y");
+						officeBean, "X", "Y");
 				dialog
 						.registerPropertyInputBuilder("Id",
 								new ClasspathResourceSelectionPropertyInput(
@@ -101,18 +101,21 @@ public class OfficeFloorEditPart extends
 						ProjectClassLoader classLoader = ProjectClassLoader
 								.create(OfficeFloorEditPart.this.getEditor());
 						ConfigurationItem officeConfigItem = classLoader
-								.findConfigurationItem(office.getId());
+								.findConfigurationItem(officeBean.getId());
 						if (officeConfigItem == null) {
 							OfficeFloorEditPart.this
 									.messageError("Could not find Office at '"
-											+ office.getId() + "'");
+											+ officeBean.getId() + "'");
 							return;
 						}
 
 						// Load the Office
 						OfficeFloorLoader officeFloorLoader = new OfficeFloorLoader();
-						office = officeFloorLoader
+						OfficeFloorOfficeModel office = officeFloorLoader
 								.loadOfficeFloorOffice(officeConfigItem);
+						
+						// Specify name of office
+						office.setName(officeBean.getName());
 
 						// Set initial location of the office
 						office.setX(200);

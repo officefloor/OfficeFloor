@@ -74,7 +74,7 @@ public class OfficeEditPart extends
 	@Override
 	protected IFigure createFigure() {
 		return new FreeformWrapperFigure(new OfficeFigure(this.getCastedModel()
-				.getId()));
+				.getName()));
 	}
 
 	/*
