@@ -63,7 +63,7 @@ public class OfficeFloorCompilerTest extends OfficeFrameTestCase {
 		officeFloor.openOfficeFloor();
 
 		// Invoke the work
-		Office office = officeFloor.getOffice("TestOffice.office.xml");
+		Office office = officeFloor.getOffice("office");
 		WorkManager workManager = office.getWorkManager("work");
 		workManager.invokeWork(null);
 

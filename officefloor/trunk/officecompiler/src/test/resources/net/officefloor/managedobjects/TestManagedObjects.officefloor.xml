@@ -1,14 +1,14 @@
 <office-floor>
 	<managed-object-sources>
 		<managed-object-source id="MO-ID" source="net.officefloor.mock.MockManagedObjectSource">
-			<managing-office name="TestOffice.office.xml"/>
+			<managing-office name="office"/>
 			<properties>
 				<property name="PROPERTY" value="TEST PROPERTY"/>
 			</properties>
 		</managed-object-source>
 	</managed-object-sources>
 	<offices>
-		<office id="TestOffice.office.xml">
+		<office id="TestOffice.office.xml" name="office">
 			<managed-objects>
 				<managed-object name="MO-NAME">
 					<managed-object-source id="MO-ID"/>
