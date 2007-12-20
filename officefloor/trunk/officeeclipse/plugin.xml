@@ -10,13 +10,13 @@
     <extension point="org.eclipse.ui.newWizards">
         <category id="net.officefloor.eclipse" name="Office Floor">
       </category>
-        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizards.DeskNewWizard" icon="icons/office.gif" id="net.officefloor.eclipse.wizards.DeskNewWizard" name="Desk">
+        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizards.DeskNewWizard" icon="icons/desk.gif" id="net.officefloor.eclipse.wizards.DeskNewWizard" name="Desk">
       </wizard>
-        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizards.RoomNewWizard" icon="icons/office.gif" id="net.officefloor.eclipse.wizards.RoomNewWizard" name="Room">
+        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizards.RoomNewWizard" icon="icons/room.gif" id="net.officefloor.eclipse.wizards.RoomNewWizard" name="Room">
       </wizard>
         <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizards.OfficeNewWizard" icon="icons/office.gif" id="net.officefloor.eclipse.wizards.OfficeNewWizard" name="Office">
       </wizard>
-        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizards.OfficeFloorNewWizard" icon="icons/office.gif" id="net.officefloor.eclipse.wizards.OfficeFloorNewWizard" name="Office Floor">
+        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizards.OfficeFloorNewWizard" icon="icons/officefloor.gif" id="net.officefloor.eclipse.wizards.OfficeFloorNewWizard" name="Office Floor">
       </wizard>
     </extension>
     <extension point="org.eclipse.debug.core.launchConfigurationTypes">
@@ -24,7 +24,7 @@
       </launchConfigurationType>
     </extension>
     <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
-        <launchConfigurationTypeImage configTypeID="net.officefloor.eclipse.launch.configurationtype.officeFloor" icon="icons/office.gif" id="net.officefloor.eclipse.launch.icon.officeFloor">
+        <launchConfigurationTypeImage configTypeID="net.officefloor.eclipse.launch.configurationtype.officeFloor" icon="icons/officefloor.gif" id="net.officefloor.eclipse.launch.icon.officeFloor">
       </launchConfigurationTypeImage>
     </extension>
     <extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
@@ -32,7 +32,7 @@
       </launchConfigurationTabGroup>
     </extension>
     <extension point="org.eclipse.debug.ui.launchShortcuts">
-        <shortcut class="net.officefloor.eclipse.launch.OfficeFloorLaunchShortcut" icon="icons/office.gif" id="net.officefloor.eclipse.launch.shortcut.officeFloor" label="Office Floor" modes="run,debug">
+        <shortcut class="net.officefloor.eclipse.launch.OfficeFloorLaunchShortcut" icon="icons/officefloor.gif" id="net.officefloor.eclipse.launch.shortcut.officeFloor" label="Office Floor" modes="run,debug">
             <configurationType id="net.officefloor.eclipse.launch.configurationtype.officeFloor">
          </configurationType>
             <contextualLaunch>
@@ -40,18 +40,9 @@
                     <with variable="selection">
                         <count value="1"/>
                         <iterate>
-                            <and>
-                                <adapt type="org.eclipse.jdt.core.IJavaElement">
-                                    <test property="org.eclipse.jdt.core.isInJavaProject"/>
-                                </adapt>
-                                <or>
-                                    <test property="org.eclipse.jdt.launching.hasMain"/>
-                                    <test property="org.eclipse.jdt.launching.isContainer"/>
-                                    <test property="org.eclipse.jdt.launching.isPackageFragment"/>
-                                    <test property="org.eclipse.jdt.launching.isPackageFragmentRoot"/>
-                                    <test property="org.eclipse.jdt.launching.isFile"/>
-                                </or>
-                            </and>
+                            <adapt type="org.eclipse.core.resources.IResource">
+                                <test property="org.eclipse.core.resources.name" value="*.officefloor"/>
+                            </adapt>
                         </iterate>
                     </with>
                 </enablement>
