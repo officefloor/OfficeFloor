@@ -70,7 +70,7 @@ public class OfficeFloorEntry extends
 
 		// Build the Offices
 		for (OfficeFloorOfficeModel office : officeFloorModel.getOffices()) {
-			OfficeEntry.loadOffice(office.getId(), context
+			OfficeEntry.loadOffice(office.getName(), context
 					.getConfigurationContext().getConfigurationItem(
 							office.getId()), officeFloorEntry, context);
 		}
@@ -107,9 +107,11 @@ public class OfficeFloorEntry extends
 			throws Exception {
 
 		// Obtain the Office
-		for (OfficeFloorOfficeModel office : this.getModel().getOffices()) {
-			if (id.equals(office.getId())) {
-				return office;
+		if (id != null) {
+			for (OfficeFloorOfficeModel office : this.getModel().getOffices()) {
+				if (id.equals(office.getName())) {
+					return office;
+				}
 			}
 		}
 

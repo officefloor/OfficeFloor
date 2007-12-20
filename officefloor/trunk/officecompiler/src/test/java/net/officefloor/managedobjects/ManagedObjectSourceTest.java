@@ -65,7 +65,7 @@ public class ManagedObjectSourceTest extends OfficeFrameTestCase {
 		// Obtain the Managed Object
 		// TODO obtain managed object externally by name rather than Id
 		ManagedObject managedObject = officeFloor.getOffice(
-				"TestOffice.office.xml").getManagedObject("MO-ID");
+				"office").getManagedObject("MO-ID");
 
 		// Downcast to validate
 		MockManagedObjectSource mock = (MockManagedObjectSource) managedObject;

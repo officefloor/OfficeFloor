@@ -81,7 +81,7 @@ public class OfficeFloorLoader {
 		// Create the registry of offices
 		Map<String, OfficeFloorOfficeModel> offices = new HashMap<String, OfficeFloorOfficeModel>();
 		for (OfficeFloorOfficeModel office : officeFloor.getOffices()) {
-			offices.put(office.getId(), office);
+			offices.put(office.getName(), office);
 		}
 
 		// Connect the managed object source to its managing office
@@ -183,7 +183,7 @@ public class OfficeFloorLoader {
 		for (OfficeFloorOfficeModel office : officeFloor.getOffices()) {
 			for (ManagedObjectSourceToOfficeFloorOfficeModel conn : office
 					.getResponsibleManagedObjects()) {
-				conn.setManagingOfficeName(office.getId());
+				conn.setManagingOfficeName(office.getName());
 			}
 		}
 
