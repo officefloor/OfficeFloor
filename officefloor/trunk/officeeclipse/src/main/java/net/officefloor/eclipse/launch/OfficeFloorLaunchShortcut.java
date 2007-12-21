@@ -95,33 +95,42 @@ public class OfficeFloorLaunchShortcut implements ILaunchShortcut {
 			ILaunchManager launchManager = DebugPlugin.getDefault()
 					.getLaunchManager();
 
-			// Create unique configuration name
+			// Create launch configuration type
+			ILaunchConfigurationType launchConfigType = launchManager
+					.getLaunchConfigurationType(OfficeFloorLauncher.ID_OFFICE_FLOOR_CONFIGURATION_TYPE);
+
+			// Find existing launch configuration
 			String resourceName = resource.getName();
 			String extension = resource.getFileExtension();
 			if (extension != null) {
 				// Ignore extension
 				resourceName = resourceName.replace("." + extension, "");
 			}
-			String uniqueConfigName = launchManager
-					.generateUniqueLaunchConfigurationNameFrom(resourceName);
+			ILaunchConfiguration launchConfig = null;
+			for (ILaunchConfiguration existingConfig : launchManager
+					.getLaunchConfigurations(launchConfigType)) {
+				if (resourceName.equalsIgnoreCase(existingConfig.getName())) {
+					launchConfig = existingConfig;
+				}
+			}
 
-			// Create the launch configuration
-			ILaunchConfigurationType launchConfigType = launchManager
-					.getLaunchConfigurationType(OfficeFloorLauncher.ID_OFFICE_FLOOR_CONFIGURATION_TYPE);
-			ILaunchConfigurationWorkingCopy launchConfigWorkingCopy = launchConfigType
-					.newInstance(null, uniqueConfigName);
+			// Create launch configuration if not one existing by same name
+			if (launchConfig == null) {
+				// Ensure unique configuration name for launch
+				String uniqueConfigName = launchManager
+						.generateUniqueLaunchConfigurationNameFrom(resourceName);
 
-			// Configure the launch configuration (include project for defaults)
-			launchConfigWorkingCopy.setAttribute(
-					OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE,
-					officeFloorLaunchPath);
-			launchConfigWorkingCopy.setAttribute(
-					IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
-					resource.getProject().getName());
-
-			// Save launch configuration
-			ILaunchConfiguration launchConfig = launchConfigWorkingCopy
-					.doSave();
+				// Create launch configuration (include project for defaults)
+				ILaunchConfigurationWorkingCopy launchConfigWorkingCopy = launchConfigType
+						.newInstance(null, uniqueConfigName);
+				launchConfigWorkingCopy.setAttribute(
+						OfficeFloorLauncher.ATTR_OFFICE_FLOOR_FILE,
+						officeFloorLaunchPath);
+				launchConfigWorkingCopy.setAttribute(
+						IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
+						resource.getProject().getName());
+				launchConfig = launchConfigWorkingCopy.doSave();
+			}
 
 			// Launch
 			DebugUITools.launch(launchConfig, mode);
