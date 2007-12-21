@@ -192,9 +192,24 @@ public class WorkEntry<W extends Work> extends
 	@SuppressWarnings("unchecked")
 	public void build() throws Exception {
 
+		// Create the canonical work name
+		String canonicalWorkName = this.getId();
+		final String SEPARATOR = ".";
+		DeskEntry desk = this.getDeskEntry();
+		canonicalWorkName = desk.getDeskName() + SEPARATOR + canonicalWorkName;
+		RoomEntry roomEntry = desk.getParentRoom();
+		while (roomEntry != null) {
+			if (roomEntry.getParentRoom() != null) {
+				// Not top room so include
+				canonicalWorkName = roomEntry.getRoomName() + SEPARATOR
+						+ canonicalWorkName;
+			}
+			roomEntry = roomEntry.getParentRoom();
+		}
+
 		// Register this work with its office
 		OfficeEntry officeEntry = this.getOfficeEntry();
-		officeEntry.getBuilder().addWork(this.getId(), this.getBuilder());
+		officeEntry.getBuilder().addWork(canonicalWorkName, this.getBuilder());
 
 		// Obtain the work (and its details)
 		DeskWorkModel deskWork = this.getModel();
@@ -306,7 +321,7 @@ public class WorkEntry<W extends Work> extends
 			throw new Exception("Can not find managed object '"
 					+ externalMoName + "' for office " + office.getId());
 		}
-		
+
 		// TODO remove
 		officeMo.setScope("process");
 

@@ -45,12 +45,15 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	public static RoomEntry loadRoom(ConfigurationItem configurationItem,
 			OfficeEntry officeEntry, OfficeFloorCompilerContext context)
 			throws Exception {
-		return loadRoom(configurationItem, null, officeEntry, context);
+		return loadRoom("OFFICE ROOM", configurationItem, null, officeEntry,
+				context);
 	}
 
 	/**
 	 * Loads the {@link RoomEntry} parented by another {@link RoomEntry}.
 	 * 
+	 * @param roomName
+	 *            Name of the {@link RoomModel}.
 	 * @param configurationItem
 	 *            {@link ConfigurationItem} containing the {@link RoomModel}.
 	 * @param parentRoomEntry
@@ -63,9 +66,10 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	 * @throws Exception
 	 *             If fails.
 	 */
-	private static RoomEntry loadRoom(ConfigurationItem configurationItem,
-			RoomEntry parentRoomEntry, OfficeEntry parentOfficeEntry,
-			OfficeFloorCompilerContext context) throws Exception {
+	private static RoomEntry loadRoom(String roomName,
+			ConfigurationItem configurationItem, RoomEntry parentRoomEntry,
+			OfficeEntry parentOfficeEntry, OfficeFloorCompilerContext context)
+			throws Exception {
 
 		// Load the room
 		RoomModel roomModel = new RoomLoader(context.getModelRepository())
@@ -77,25 +81,27 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 			roomEntry = new RoomEntry(configurationItem.getId(), roomModel,
 					parentOfficeEntry);
 		} else {
-			roomEntry = new RoomEntry(configurationItem.getId(), roomModel,
-					parentRoomEntry);
+			roomEntry = new RoomEntry(configurationItem.getId(), roomName,
+					roomModel, parentRoomEntry);
 		}
 
 		// Register the sub rooms / desks
 		for (SubRoomModel subRoom : roomModel.getSubRooms()) {
 			// Check if sub room
+			String subRoomName = subRoom.getId();
 			String subRoomId = subRoom.getRoom();
 			String deskId = subRoom.getDesk();
 			if (subRoomId != null) {
 				// Sub Room
-				RoomEntry.loadRoom(context.getConfigurationContext()
-						.getConfigurationItem(subRoomId), roomEntry, null,
-						context);
+				RoomEntry.loadRoom(subRoomName, context
+						.getConfigurationContext().getConfigurationItem(
+								subRoomId), roomEntry, null, context);
 
 			} else if (deskId != null) {
 				// Desk
-				DeskEntry.loadDesk(deskId, context.getConfigurationContext()
-						.getConfigurationItem(deskId), roomEntry, context);
+				DeskEntry.loadDesk(deskId, subRoomName,
+						context.getConfigurationContext().getConfigurationItem(
+								deskId), roomEntry, context);
 
 			} else {
 				// Unknown sub room type
@@ -107,6 +113,11 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 		// Return the room entry
 		return roomEntry;
 	}
+
+	/**
+	 * Name of the {@link RoomModel}.
+	 */
+	private final String roomName;
 
 	/**
 	 * Parent {@link RoomEntry}.
@@ -130,6 +141,7 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	 */
 	public RoomEntry(String roomId, RoomModel room, OfficeEntry office) {
 		super(roomId, null, room);
+		this.roomName = "OFFICE ROOM";
 		this.parentRoom = null;
 		this.office = office;
 	}
@@ -139,15 +151,28 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	 * 
 	 * @param roomId
 	 *            Id of the {@link RoomModel}.
+	 * @param roomName
+	 *            Name of the {@link RoomModel}.
 	 * @param room
 	 *            {@link RoomModel}.
 	 * @param parentRoom
 	 *            Parent {@link RoomEntry}.
 	 */
-	public RoomEntry(String roomId, RoomModel room, RoomEntry parentRoom) {
+	public RoomEntry(String roomId, String roomName, RoomModel room,
+			RoomEntry parentRoom) {
 		super(roomId, null, room);
+		this.roomName = roomName;
 		this.parentRoom = parentRoom;
 		this.office = null;
+	}
+
+	/**
+	 * Obtains the name of the {@link RoomModel}.
+	 * 
+	 * @return Name of the {@link RoomModel}.
+	 */
+	public String getRoomName() {
+		return this.roomName;
 	}
 
 	/**
