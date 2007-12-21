@@ -34,6 +34,8 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	 * 
 	 * @param deskId
 	 *            Id of the {@link DeskModel}.
+	 * @param deskName
+	 *            Name of the {@link DeskModel}.
 	 * @param configurationItem
 	 *            {@link ConfigurationItem}.
 	 * @param roomEntry
@@ -44,16 +46,18 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	 * @throws Exception
 	 *             If fails.
 	 */
-	public static DeskEntry loadDesk(String deskId,
+	public static DeskEntry loadDesk(String deskId, String deskName,
 			ConfigurationItem configurationItem, RoomEntry roomEntry,
 			OfficeFloorCompilerContext context) throws Exception {
 
 		// Load the desk model
 		DeskModel deskModel = new DeskLoader(context.getLoaderContext(),
-				context.getModelRepository()).loadDeskAndSynchronise(configurationItem);
+				context.getModelRepository())
+				.loadDeskAndSynchronise(configurationItem);
 
 		// Create the desk entry
-		DeskEntry deskEntry = new DeskEntry(deskId, deskModel, roomEntry);
+		DeskEntry deskEntry = new DeskEntry(deskId, deskName, deskModel,
+				roomEntry);
 
 		// Load the work
 		for (DeskWorkModel deskWork : deskModel.getWorks()) {
@@ -65,6 +69,11 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	}
 
 	/**
+	 * Name of the {@link DeskModel}.
+	 */
+	private final String deskName;
+
+	/**
 	 * Parent {@link RoomEntry}.
 	 */
 	private final RoomEntry parentRoom;
@@ -74,14 +83,27 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	 * 
 	 * @param deskId
 	 *            Id of the {@link DeskModel}.
+	 * @param Name
+	 *            of the {@link DeskModel}.
 	 * @param desk
 	 *            {@link DeskModel}.
 	 * @param parentRoom
 	 *            Parent {@link RoomEntry}.
 	 */
-	public DeskEntry(String deskId, DeskModel desk, RoomEntry parentRoom) {
+	public DeskEntry(String deskId, String deskName, DeskModel desk,
+			RoomEntry parentRoom) {
 		super(deskId, null, desk);
+		this.deskName = deskName;
 		this.parentRoom = parentRoom;
+	}
+
+	/**
+	 * Obtains the name of the {@link DeskModel}.
+	 * 
+	 * @return Name of the {@link DeskModel}.
+	 */
+	public String getDeskName() {
+		return this.deskName;
 	}
 
 	/**

@@ -64,7 +64,7 @@ public class OfficeFloorCompilerTest extends OfficeFrameTestCase {
 
 		// Invoke the work
 		Office office = officeFloor.getOffice("office");
-		WorkManager workManager = office.getWorkManager("work");
+		WorkManager workManager = office.getWorkManager("1.work");
 		workManager.invokeWork(null);
 
 		// Close the office floor
