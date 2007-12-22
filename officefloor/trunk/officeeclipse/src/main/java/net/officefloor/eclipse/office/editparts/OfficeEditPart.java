@@ -183,7 +183,7 @@ public class OfficeEditPart extends
 						// Load the office room
 						OfficeLoader officeLoader = new OfficeLoader();
 						room = officeLoader.loadOfficeRoom(roomConfigItem
-								.getId(), rawRoom, roomConfigItem.getContext(),
+								.getId(), "OFFICE ROOM", rawRoom, roomConfigItem.getContext(),
 								classLoader);
 
 						// Synchronise the room onto the office
