@@ -23,17 +23,20 @@
 	<object method="getRoom" element="room">
 		<attributes>
 			<attribute method="getId" attribute="id"/>
+			<attribute method="getName" attribute="name"/>
 		</attributes>
 		<collection method="getSubRooms" id="SUBROOMS">
 			<item type="net.officefloor.model.office.OfficeRoomModel" element="room">
 				<attributes>
 					<attribute method="getId" attribute="id"/>
+					<attribute method="getName" attribute="name"/>
 				</attributes>
 				<reference id="SUBROOMS" method="getSubRooms"/>
 				<collection method="getDesks" id="SUBDESKS">
 					<item type="net.officefloor.model.office.OfficeDeskModel" element="desk">
 						<attributes>
 							<attribute method="getId" attribute="id"/>
+							<attribute method="getName" attribute="name"/>
 						</attributes>
 						<collection method="getFlowItems">
 							<item type="net.officefloor.model.office.FlowItemModel" element="flow-item">

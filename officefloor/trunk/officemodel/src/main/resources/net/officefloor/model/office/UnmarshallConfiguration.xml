@@ -12,10 +12,12 @@
 	<!-- ROOM -->
 	<object method="setRoom" node="room" class="net.officefloor.model.office.OfficeRoomModel" id="ROOM">
 		<value method="setId" node="room@id"/>
+		<value method="setName" node="room@name"/>
 		<reference id="ROOM" method="addSubRoom"/>
 		<!-- DESK -->
 		<object method="addDesk" node="desk" class="net.officefloor.model.office.OfficeDeskModel">
 			<value method="setId" node="desk@id"/>
+			<value method="setName" node="desk@name"/>
 			<object method="addFlowItem" node="flow-item" class="net.officefloor.model.office.FlowItemModel">
 				<value method="setId" node="flow-item@id"/>
 				<value method="setName" node="flow-item@name"/>
