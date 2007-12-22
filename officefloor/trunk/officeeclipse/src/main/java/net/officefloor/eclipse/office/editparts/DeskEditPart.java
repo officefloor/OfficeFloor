@@ -70,7 +70,7 @@ public class DeskEditPart extends AbstractOfficeFloorEditPart<OfficeDeskModel> {
 	protected IFigure createFigure() {
 		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
 				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(this.getCastedModel().getId()));
+		figure.addDecorate(new ListItemFigure(this.getCastedModel().getName()));
 		figure.addChildContainerFigure();
 		return figure;
 	}
