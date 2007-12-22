@@ -97,15 +97,20 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 		// Top level room
 		assertEquals("Incorrect room id", "Room.room.xml", office.getRoom()
 				.getId());
+		assertEquals("Incorrect room name", "OFFICE ROOM", office.getRoom()
+				.getName());
 
 		// Second level Rooms
-		assertList(new String[] { "getId" }, office.getRoom().getSubRooms(),
-				new OfficeRoomModel("SubRoomOne.room.xml", null, null),
-				new OfficeRoomModel("SubRoomTwo.room.xml", null, null));
+		assertList(new String[] { "getId", "getName" }, office.getRoom()
+				.getSubRooms(), new OfficeRoomModel("SubRoomOne.room.xml",
+				"RoomA", null, null), new OfficeRoomModel(
+				"SubRoomTwo.room.xml", "RoomB", null, null));
 
 		// Second level Desk
+		assertList(new String[] { "getId", "getName" }, office.getRoom()
+				.getDesks(),
+				new OfficeDeskModel("Desk.desk.xml", "DeskC", null));
 		OfficeDeskModel desk = office.getRoom().getDesks().get(0);
-		assertEquals("Incorrect desk id", "Desk.desk.xml", desk.getId());
 		assertList(
 				new String[] { "getId", "getName" },
 				desk.getFlowItems(),
@@ -113,15 +118,16 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 				new FlowItemModel("4", "FLOW ITEM TWO", null, null, null, null));
 
 		// Third level Room
-		assertList(new String[] { "getId" }, office.getRoom().getSubRooms()
-				.get(0).getSubRooms(), new OfficeRoomModel(
-				"SubSubRoom.room.xml", null, null));
+		assertList(new String[] { "getId", "getName" }, office.getRoom()
+				.getSubRooms().get(0).getSubRooms(), new OfficeRoomModel(
+				"SubSubRoom.room.xml", "SubRoomA", null, null));
 
 		// Third level Desk
+		assertList(new String[] { "getId", "getName" }, office.getRoom()
+				.getSubRooms().get(0).getDesks(), new OfficeDeskModel(
+				"SubDesk.desk.xml", "SubDeskA", null));
 		OfficeDeskModel subDesk = office.getRoom().getSubRooms().get(0)
 				.getDesks().get(0);
-		assertEquals("Incorrect sub desk id", "SubDesk.desk.xml", subDesk
-				.getId());
 		assertList(new String[] { "getId", "getName" }, subDesk.getFlowItems(),
 				new FlowItemModel("1", "FI1", null, null, null, null),
 				new FlowItemModel("2", "FI2", null, null, null, null));
@@ -217,16 +223,16 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 
 		// Load the office room
 		OfficeRoomModel actualRoom = this.officeLoader.loadOfficeRoom(
-				roomConfigItem.getId(), rawRoom, context, this.getClass()
-						.getClassLoader());
+				roomConfigItem.getId(), "OFFICE ROOM", rawRoom, context, this
+						.getClass().getClassLoader());
 
 		// Create the expected room
 		OfficeDeskModel[] desks = new OfficeDeskModel[] { new OfficeDeskModel(
-				"TestDesk.desk.xml", new FlowItemModel[] {}) };
+				"TestDesk.desk.xml", "1", new FlowItemModel[] {}) };
 		OfficeRoomModel expectedRoom = new OfficeRoomModel(
-				PARENT_ROOM_FILE_NAME,
+				PARENT_ROOM_FILE_NAME, "OFFICE ROOM",
 				new OfficeRoomModel[] { new OfficeRoomModel(
-						"TestSubRoom.room.xml", null, desks) }, desks);
+						"TestSubRoom.room.xml", "2", null, desks) }, desks);
 
 		// Validate the room
 		assertGraph(expectedRoom, actualRoom);
