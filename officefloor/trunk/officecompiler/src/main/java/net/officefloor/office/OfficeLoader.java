@@ -180,6 +180,8 @@ public class OfficeLoader {
 	 * 
 	 * @param rawRoomId
 	 *            Id of the top level {@link RoomModel}.
+	 * @param Name
+	 *            of the top level {@link RoomModel}.
 	 * @param rawRoom
 	 *            Top level {@link RoomModel}.
 	 * @param context
@@ -191,9 +193,9 @@ public class OfficeLoader {
 	 * @throws Exception
 	 *             If fails to load the {@link OfficeRoomModel}.
 	 */
-	public OfficeRoomModel loadOfficeRoom(String rawRoomId, RoomModel rawRoom,
-			ConfigurationContext context, ClassLoader classLoader)
-			throws Exception {
+	public OfficeRoomModel loadOfficeRoom(String rawRoomId, String rawRoomName,
+			RoomModel rawRoom, ConfigurationContext context,
+			ClassLoader classLoader) throws Exception {
 
 		// Create the loaders
 		RoomLoader roomLoader = new RoomLoader();
@@ -204,7 +206,7 @@ public class OfficeLoader {
 
 		// Synchronise room
 		RoomToOfficeRoomSynchroniser.synchroniseRoomOntoOfficeRoom(rawRoomId,
-				rawRoom, officeRoom);
+				rawRoomName, rawRoom, officeRoom);
 
 		// Recursively load the sub rooms/desks
 		this.recursiveLoadSubRooms(officeRoom, roomLoader, deskLoader, context);
@@ -251,7 +253,7 @@ public class OfficeLoader {
 
 			// Synchronise room
 			RoomToOfficeRoomSynchroniser.synchroniseRoomOntoOfficeRoom(
-					subRoomId, actualRoom, subRoom);
+					subRoomId, subRoom.getName(), actualRoom, subRoom);
 
 			// Recursive load the further sub rooms
 			for (OfficeRoomModel furtherSubRoom : subRoom.getSubRooms()) {

@@ -38,16 +38,19 @@ public class RoomToOfficeRoomSynchroniser {
 	 * 
 	 * @param roomId
 	 *            Id of the {@link RoomModel}.
+	 * @param roomName
+	 *            Name of the {@link RoomModel}.
 	 * @param room
 	 *            {@link RoomModel}.
 	 * @param officeRoom
 	 *            {@link OfficeRoomModel}.
 	 */
 	public static void synchroniseRoomOntoOfficeRoom(String roomId,
-			RoomModel room, OfficeRoomModel officeRoom) {
+			String roomName, RoomModel room, OfficeRoomModel officeRoom) {
 
-		// Specify the Id on the room
+		// Specify the details of the room
 		officeRoom.setId(roomId);
+		officeRoom.setName(roomName);
 
 		// Create the map of existing sub desks
 		Map<String, OfficeDeskModel> existingDesks = new HashMap<String, OfficeDeskModel>();
@@ -64,6 +67,9 @@ public class RoomToOfficeRoomSynchroniser {
 		// Synchronise the sub rooms
 		for (SubRoomModel subRoom : room.getSubRooms()) {
 
+			// Obtain the sub room name
+			String subRoomName = subRoom.getId();
+
 			// Determine if a desk
 			String subDeskId = subRoom.getDesk();
 			if (subDeskId != null) {
@@ -73,7 +79,7 @@ public class RoomToOfficeRoomSynchroniser {
 				} else {
 					// Add the desk as not existing
 					OfficeDeskModel newDesk = new OfficeDeskModel(subDeskId,
-							null);
+							subRoomName, null);
 					officeRoom.addDesk(newDesk);
 				}
 			} else {
@@ -86,7 +92,7 @@ public class RoomToOfficeRoomSynchroniser {
 					} else {
 						// Add the room as not existing
 						OfficeRoomModel newRoom = new OfficeRoomModel(
-								subRoomId, null, null);
+								subRoomId, subRoomName, null, null);
 						officeRoom.addSubRoom(newRoom);
 					}
 				}

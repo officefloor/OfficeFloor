@@ -6,10 +6,10 @@
 	<managed-objects>
 		<managed-object name="MO" object-type="java.lang.String"/>
 	</managed-objects>
-	<room id="Room.room.xml">
-		<room id="SubRoomOne.room.xml">
-			<room id="SubSubRoom.room.xml"/>
-			<desk id="SubDesk.desk.xml">
+	<room id="Room.room.xml" name="OFFICE ROOM">
+		<room id="SubRoomOne.room.xml" name="RoomA">
+			<room id="SubSubRoom.room.xml" name="SubRoomA"/>
+			<desk id="SubDesk.desk.xml" name="SubDeskA">
 				<flow-item id="1" name="FI1">
 					<team name="TEAM ONE"/>
 					<pre-admin administrator="1" duty="KeyOne"/>
@@ -22,8 +22,8 @@
 				</flow-item>
 			</desk>
 		</room>
-		<room id="SubRoomTwo.room.xml"/>
-		<desk id="Desk.desk.xml">
+		<room id="SubRoomTwo.room.xml" name="RoomB"/>
+		<desk id="Desk.desk.xml" name="DeskC">
 			<flow-item id="3" name="FLOW ITEM ONE">
 				<team name="TEAM ONE"/>
 				<pre-admin administrator="1" duty="KeyOne"/>
