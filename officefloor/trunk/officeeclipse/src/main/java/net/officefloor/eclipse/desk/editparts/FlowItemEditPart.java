@@ -22,8 +22,11 @@ import java.util.List;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.desk.figure.FlowItemFigure;
+import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
@@ -38,7 +41,8 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel
  */
 public class FlowItemEditPart extends
-		AbstractOfficeFloorNodeEditPart<FlowItemModel> {
+		AbstractOfficeFloorNodeEditPart<FlowItemModel> implements
+		RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -125,6 +129,31 @@ public class FlowItemEditPart extends
 				}
 			}
 		});
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+		// Disconnect and remove the flow item
+		RemoveConnectionsAction<FlowItemModel> flowItem = this.getCastedModel().removeConnections();
+		DeskModel desk = (DeskModel) this.getParent().getModel();
+		desk.removeFlowItem(flowItem.getModel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement FlowItemEditPart.undelete");
 	}
 
 }
