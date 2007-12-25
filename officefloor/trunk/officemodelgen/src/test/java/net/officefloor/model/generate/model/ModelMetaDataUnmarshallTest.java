@@ -63,7 +63,7 @@ public class ModelMetaDataUnmarshallTest extends OfficeFrameTestCase {
 
 		};
 
-		// Unmarshall the model
+		// Unmarshal the model
 		ModelRepository repository = new ModelRepository();
 		ModelMetaData model = repository.retrieve(new ModelMetaData(),
 				configuration);
@@ -79,6 +79,7 @@ public class ModelMetaDataUnmarshallTest extends OfficeFrameTestCase {
 		FieldMetaData field = model.getFields().get(0);
 		assertEquals("Incorrect field name", "Field One", field.getName());
 		assertEquals("Incorrect field type", "String", field.getType());
+		assertTrue("Incorrect field cascade", field.isCascadeRemove());
 		assertEquals("Incorrect field description", "Test field", field
 				.getDescription());
 		assertEquals("Incorrect field end-field", "Link One", field
@@ -87,8 +88,8 @@ public class ModelMetaDataUnmarshallTest extends OfficeFrameTestCase {
 		ListMetaData list = model.getLists().get(0);
 		assertEquals("Incorrect list name", "List One", list.getName());
 		assertEquals("Incorrect list type", "ImportOne", list.getType());
+		assertTrue("Incorrect list cascade", list.isCascadeRemove());
 		assertEquals("Incorrect list description", "Test list", list
 				.getDescription());
-
 	}
 }

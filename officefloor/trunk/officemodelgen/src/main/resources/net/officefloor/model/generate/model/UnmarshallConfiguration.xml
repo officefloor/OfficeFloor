@@ -10,6 +10,7 @@
 	<object method="addField" node="field" class="net.officefloor.model.generate.model.FieldMetaData">
 		<value method="setName" node="field@name"/>
 		<value method="setType" node="field@type"/>
+		<value method="setCascadeRemove" node="field@cascade-remove"/>
 		<value method="setDescription" node="field@description"/>
 		<value method="setEndField" node="field@end-field"/>
 		<value method="setEndList" node="field@end-list"/>
@@ -18,6 +19,7 @@
 	<object method="addList" node="list" class="net.officefloor.model.generate.model.ListMetaData">
 		<value method="setName" node="list@name"/>
 		<value method="setType" node="list@type"/>
+		<value method="setCascadeRemove" node="list@cascade-remove"/>
 		<value method="setPlural" node="list@plural"/>
 		<value method="setDescription" node="list@description"/>
 	</object>

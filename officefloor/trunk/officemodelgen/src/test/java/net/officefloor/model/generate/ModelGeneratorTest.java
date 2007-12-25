@@ -43,7 +43,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 	public void testModelGeneration() throws Exception {
 
 		// Create the generic model
-		GenericMetaData general = new GenericMetaData("License");
+		GraphNodeMetaData general = new GraphNodeMetaData("License", null);
 
 		// Create the model meta-data
 		ModelMetaData metaData = new ModelMetaData("Class", "net.officefloor",
@@ -68,21 +68,12 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 		// Validate file name
 		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java",
 				item.getId());
-
+		
 		// Validate content
 		String content = this.getFileContents(this.findFile(this.getClass(),
-				"ModelExpectedContent.txt"));
-		BufferedReader actual = new BufferedReader(new StringReader(content));
-		BufferedReader expected = new BufferedReader(new StringReader(
+				"Model_ModelExpectedContent.txt"));
+		assertContents(new StringReader(content), new StringReader(
 				context.modelText));
-		String actualLine, expectedLine;
-		int lineNumber = 1;
-		while ((actualLine = actual.readLine()) != null) {
-			expectedLine = expected.readLine();
-			assertEquals("Incorrect line " + lineNumber, actualLine,
-					expectedLine);
-			lineNumber++;
-		}
 	}
 
 	/**
@@ -91,7 +82,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 	public void testConnectionGeneration() throws Exception {
 
 		// Create the generic model
-		GenericMetaData general = new GenericMetaData("License");
+		GraphNodeMetaData general = new GraphNodeMetaData("License", null);
 
 		// Create the model meta-data
 		ModelMetaData metaData = new ModelMetaData("Class", "net.officefloor",
@@ -113,7 +104,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 
 		// Validate content
 		String content = this.getFileContents(this.findFile(this.getClass(),
-				"ConnectionExpectedContent.txt"));
+				"Model_ConnectionExpectedContent.txt"));
 		BufferedReader actual = new BufferedReader(new StringReader(content));
 		BufferedReader expected = new BufferedReader(new StringReader(
 				context.modelText));

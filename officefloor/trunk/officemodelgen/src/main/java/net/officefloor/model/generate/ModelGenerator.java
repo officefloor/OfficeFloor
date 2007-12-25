@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.model.generate.model.AbstractPropertyMetaData;
@@ -44,7 +45,7 @@ public class ModelGenerator {
 	/**
 	 * Generic meta-data for creating the Model.
 	 */
-	private final GenericMetaData general;
+	private final GraphNodeMetaData graphNode;
 
 	/**
 	 * Writer to output the model.
@@ -56,12 +57,12 @@ public class ModelGenerator {
 	 * 
 	 * @param metaData
 	 *            Meta-data of the Model.
-	 * @param general
-	 *            Generic meta-data for creating the Model.
+	 * @param graphNode
+	 *            {@link GraphNodeMetaData} for creating the Model.
 	 */
-	public ModelGenerator(ModelMetaData metaData, GenericMetaData general) {
+	public ModelGenerator(ModelMetaData metaData, GraphNodeMetaData graphNode) {
 		this.metaData = metaData;
-		this.general = general;
+		this.graphNode = graphNode;
 	}
 
 	/**
@@ -100,9 +101,9 @@ public class ModelGenerator {
 	/**
 	 * Header.
 	 */
-	private void header() {
+	private void header() throws Exception {
 		writeLine("/*");
-		writeLine(" * " + this.general.getLicense());
+		writeLine(" * " + this.graphNode.getLicense());
 		writeLine(" */");
 		writeLine("package " + this.metaData.getPackageName() + ";");
 	}
@@ -110,7 +111,7 @@ public class ModelGenerator {
 	/**
 	 * Imports.
 	 */
-	private void imports() {
+	private void imports() throws Exception {
 		// Only import lists if have lists
 		if (this.metaData.getLists().size() > 0) {
 			writeLine("import java.util.List;");
@@ -125,13 +126,15 @@ public class ModelGenerator {
 		writeLine("import net.officefloor.model.AbstractModel;");
 		if (this.metaData.isConnectionModel()) {
 			writeLine("import net.officefloor.model.ConnectionModel;");
+		} else {
+			writeLine("import net.officefloor.model.RemoveConnectionsAction;");
 		}
 	}
 
 	/**
 	 * Class definition.
 	 */
-	private void classDefinition() {
+	private void classDefinition() throws Exception {
 		// Class signature
 		writeLine("public class "
 				+ this.metaData.getClassName()
@@ -153,9 +156,11 @@ public class ModelGenerator {
 		this.fields();
 		writeLine();
 		this.lists();
+		writeLine();
 		if (this.metaData.isConnectionModel()) {
-			writeLine();
 			this.connectionMethods();
+		} else {
+			this.removeConnectionMethod();
 		}
 
 		// Close class
@@ -166,7 +171,7 @@ public class ModelGenerator {
 	 * Events.
 	 */
 	@SuppressWarnings("unchecked")
-	private void events() {
+	private void events() throws Exception {
 		writeLine("    public static enum " + this.metaData.getEventName()
 				+ " {");
 		write("    ");
@@ -187,7 +192,7 @@ public class ModelGenerator {
 	/**
 	 * Default constructor.
 	 */
-	private void defaultConstructor() {
+	private void defaultConstructor() throws Exception {
 		writeLine("    /**");
 		writeLine("     * Default constructor.");
 		writeLine("     */");
@@ -199,7 +204,7 @@ public class ModelGenerator {
 	 * Convenience constructor.
 	 */
 	@SuppressWarnings("unchecked")
-	private void convenienceConstructor() {
+	private void convenienceConstructor() throws Exception {
 		writeLine("    /**");
 		writeLine("     * Convenience constructor.");
 		writeLine("     */");
@@ -245,7 +250,7 @@ public class ModelGenerator {
 	 * Convenience constructor.
 	 */
 	@SuppressWarnings("unchecked")
-	private void convenienceXyConstructor() {
+	private void convenienceXyConstructor() throws Exception {
 		writeLine("    /**");
 		writeLine("     * Convenience constructor allowing XY initialising.");
 		writeLine("     */");
@@ -299,7 +304,7 @@ public class ModelGenerator {
 	 * Fields.
 	 */
 	@SuppressWarnings("unchecked")
-	private void fields() {
+	private void fields() throws Exception {
 		writeListing("", new WriteAction() {
 			protected void writeField(FieldMetaData field) {
 				// Description
@@ -342,7 +347,7 @@ public class ModelGenerator {
 	 * Lists.
 	 */
 	@SuppressWarnings("unchecked")
-	private void lists() {
+	private void lists() throws Exception {
 		writeListing("", new WriteAction() {
 			protected void writeList(ListMetaData list) {
 				// Description
@@ -393,7 +398,7 @@ public class ModelGenerator {
 	 * Connection methods.
 	 */
 	@SuppressWarnings("unchecked")
-	private void connectionMethods() {
+	private void connectionMethods() throws Exception {
 		// Is remove
 		writeLine("    /*");
 		writeLine("     * ConnectionModel");
@@ -432,6 +437,79 @@ public class ModelGenerator {
 		writeLine();
 	}
 
+	/**
+	 * Remove connection method.
+	 */
+	@SuppressWarnings("unchecked")
+	public void removeConnectionMethod() throws Exception {
+		// Method signature
+		writeLine("    /**");
+		writeLine("     * Remove Connections.");
+		writeLine("     */");
+		writeLine("    public RemoveConnectionsAction<"
+				+ this.metaData.getClassName() + "> removeConnections() {");
+
+		// Create the action for return
+		writeLine("        RemoveConnectionsAction<"
+				+ this.metaData.getClassName()
+				+ "> _action = new RemoveConnectionsAction<"
+				+ this.metaData.getClassName() + ">(this);");
+
+		// Create the listing of properties
+		List<AbstractPropertyMetaData> allProperties = new LinkedList<AbstractPropertyMetaData>();
+		allProperties.addAll(this.metaData.getFields());
+		allProperties.addAll(this.metaData.getLists());
+
+		// Disconnect connections
+		this.writeListing("", new WriteAction() {
+			@Override
+			protected void writeProperty(AbstractPropertyMetaData property)
+					throws Exception {
+				// Obtain the type meta-data
+				ModelMetaData typeMetaData = ModelGenerator.this.graphNode
+						.getModelMetaData(property.getType());
+				if (typeMetaData != null) {
+					// Remove connection
+					if (typeMetaData.isConnectionModel()) {
+						writeLine("        _action.disconnect(this."
+								+ property.getPropertyName() + ");");
+					}
+				}
+			}
+		}, allProperties);
+
+		// Cascade remove connections
+		this.writeListing("", new WriteAction() {
+
+			@Override
+			protected void writeField(FieldMetaData field) throws Exception {
+				if (field.isCascadeRemove()) {
+					writeLine("        if (this." + field.getPropertyName()
+							+ " != null) {");
+					writeLine("            _action.addCascadeModel(this."
+							+ field.getPropertyName()
+							+ ".removeConnections());");
+					writeLine("        }");
+				}
+			}
+
+			@Override
+			protected void writeList(ListMetaData list) throws Exception {
+				if (list.isCascadeRemove()) {
+					writeLine("        for (" + list.getType()
+							+ " _cascade : this." + list.getPropertyName()
+							+ ") {");
+					writeLine("            _action.addCascadeModel(_cascade.removeConnections());");
+					writeLine("        }");
+				}
+			}
+		}, allProperties);
+
+		// Return and close method
+		writeLine("        return _action;");
+		writeLine("    }");
+	}
+
 	/*
 	 * ========================================================================
 	 * Write methods
@@ -442,7 +520,8 @@ public class ModelGenerator {
 	 * Writes the listing of objects.
 	 */
 	private void writeListing(String separator, WriteAction action,
-			List<? extends AbstractPropertyMetaData>... properties) {
+			List<? extends AbstractPropertyMetaData>... properties)
+			throws Exception {
 
 		// Flag first
 		boolean isFirst = true;
@@ -470,8 +549,11 @@ public class ModelGenerator {
 		 * 
 		 * @param property
 		 *            Property.
+		 * @throws Exception
+		 *             If fails.
 		 */
-		protected void writeProperty(AbstractPropertyMetaData property) {
+		protected void writeProperty(AbstractPropertyMetaData property)
+				throws Exception {
 			if (property instanceof FieldMetaData) {
 				writeField((FieldMetaData) property);
 			} else if (property instanceof ListMetaData) {
@@ -487,8 +569,10 @@ public class ModelGenerator {
 		 * 
 		 * @param field
 		 *            Field.
+		 * @throws Exception
+		 *             If fails.
 		 */
-		protected void writeField(FieldMetaData field) {
+		protected void writeField(FieldMetaData field) throws Exception {
 		}
 
 		/**
@@ -496,8 +580,10 @@ public class ModelGenerator {
 		 * 
 		 * @param list
 		 *            List.
+		 * @throws Exception
+		 *             If fails.
 		 */
-		protected void writeList(ListMetaData list) {
+		protected void writeList(ListMetaData list) throws Exception {
 		}
 	}
 

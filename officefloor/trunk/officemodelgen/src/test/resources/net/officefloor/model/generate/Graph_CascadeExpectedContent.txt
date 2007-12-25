@@ -1,0 +1,48 @@
+/*
+ * 
+ */
+package graph.test;
+
+import net.officefloor.model.AbstractModel;
+import net.officefloor.model.RemoveConnectionsAction;
+
+public class CascadeModel extends AbstractModel {
+
+    public static enum CascadeEvent {
+    
+    }
+
+    /**
+     * Default constructor.
+     */
+    public CascadeModel() {
+    }
+
+    /**
+     * Convenience constructor.
+     */
+    public CascadeModel(
+          ) {
+    }
+
+    /**
+     * Convenience constructor allowing XY initialising.
+     */
+    public CascadeModel(
+          , int x
+    , int y
+    ) {
+        this.setX(x);
+        this.setY(y);
+    }
+
+
+
+    /**
+     * Remove Connections.
+     */
+    public RemoveConnectionsAction<CascadeModel> removeConnections() {
+        RemoveConnectionsAction<CascadeModel> _action = new RemoveConnectionsAction<CascadeModel>(this);
+        return _action;
+    }
+}

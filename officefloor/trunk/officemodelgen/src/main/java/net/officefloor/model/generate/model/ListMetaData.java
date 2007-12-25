@@ -16,7 +16,7 @@
  */
 package net.officefloor.model.generate.model;
 
-import net.officefloor.model.generate.GenericMetaData;
+import net.officefloor.model.generate.GraphNodeMetaData;
 
 /**
  * List meta-data.
@@ -54,7 +54,7 @@ public class ListMetaData extends AbstractPropertyMetaData {
 		if (plural == null) {
 			return this.getCamelCaseName() + "s";
 		} else {
-			return GenericMetaData.camelCase(plural);
+			return GraphNodeMetaData.camelCase(plural);
 		}
 	}
 
