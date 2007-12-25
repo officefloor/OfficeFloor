@@ -6,5 +6,5 @@
 	<field type="String" name="configuration"/>
 	<field type="WorkModel" name="work"/>
 	<field type="DeskWorkToFlowItemModel" name="initial flow item"/>
-	<list type="DeskTaskModel" name="task"/>
+	<list type="DeskTaskModel" name="task" cascade-remove="true"/>
 </model>

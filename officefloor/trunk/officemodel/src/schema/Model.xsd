@@ -21,6 +21,7 @@
 		<xs:complexType>
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="type" type="xs:string" use="required"/>
+            <xs:attribute name="cascade-remove" type="xs:string" use="optional"/>
 			<xs:attribute name="description" type="xs:string" use="optional"/>
 			<xs:attribute name="end-field" type="xs:string" use="optional"/>
 			<xs:attribute name="end-list" type="xs:string" use="optional"/>
@@ -31,6 +32,7 @@
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="type" type="xs:string" use="required"/>
 			<xs:attribute name="plural" type="xs:string" use="optional"/>
+            <xs:attribute name="cascade-remove" type="xs:string" use="optional"/>
 			<xs:attribute name="description" type="xs:string" use="optional"/>
 		</xs:complexType>
 	</xs:element>

@@ -3,6 +3,6 @@
 	<import>net.officefloor.model.work.TaskModel</import>
 	<field type="String" name="name"/>
 	<field type="TaskModel" name="task"/>
-	<list type="DeskTaskObjectModel" name="object"/>
+	<list type="DeskTaskObjectModel" name="object" cascade-remove="true"/>
 	<list type="DeskTaskToFlowItemModel" name="flow item"/>
 </model>
