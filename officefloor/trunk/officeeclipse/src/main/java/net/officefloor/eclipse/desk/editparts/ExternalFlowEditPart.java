@@ -21,6 +21,9 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalFlowModel.ExternalFlowEvent;
 
@@ -36,7 +39,8 @@ import org.eclipse.draw2d.geometry.Rectangle;
  * @author Daniel
  */
 public class ExternalFlowEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalFlowModel> {
+		AbstractOfficeFloorNodeEditPart<ExternalFlowModel> implements
+		RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -90,6 +94,32 @@ public class ExternalFlowEditPart extends
 				}
 			}
 		});
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+		// Disconnect and remove the external flow
+		RemoveConnectionsAction<ExternalFlowModel> flow = this.getCastedModel()
+				.removeConnections();
+		DeskModel desk = (DeskModel) this.getParent().getParent().getModel();
+		desk.removeExternalFlow(flow.getModel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement ExternalFlowEditPart.undelete");
 	}
 
 }
