@@ -16,7 +16,7 @@
  */
 package net.officefloor.model.generate.model;
 
-import net.officefloor.model.generate.GenericMetaData;
+import net.officefloor.model.generate.GraphNodeMetaData;
 
 /**
  * Field meta-data.
@@ -53,9 +53,9 @@ public class FieldMetaData extends AbstractPropertyMetaData {
 	 */
 	public String getEndPointConnect() {
 		if (this.endField != null) {
-			return "set" + GenericMetaData.camelCase(this.endField) + "(this)";
+			return "set" + GraphNodeMetaData.camelCase(this.endField) + "(this)";
 		} else if (this.endList != null) {
-			return "add" + GenericMetaData.camelCase(this.endList) + "(this)";
+			return "add" + GraphNodeMetaData.camelCase(this.endList) + "(this)";
 		} else {
 			// No connection
 			return null;
@@ -67,9 +67,9 @@ public class FieldMetaData extends AbstractPropertyMetaData {
 	 */
 	public String getEndPointRemove() {
 		if (this.endField != null) {
-			return "set" + GenericMetaData.camelCase(this.endField) + "(null)";
+			return "set" + GraphNodeMetaData.camelCase(this.endField) + "(null)";
 		} else if (this.endList != null) {
-			return "remove" + GenericMetaData.camelCase(this.endList)
+			return "remove" + GraphNodeMetaData.camelCase(this.endList)
 					+ "(this)";
 		} else {
 			// No connection

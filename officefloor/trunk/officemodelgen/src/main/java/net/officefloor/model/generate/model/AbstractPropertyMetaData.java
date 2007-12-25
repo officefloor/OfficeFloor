@@ -16,7 +16,7 @@
  */
 package net.officefloor.model.generate.model;
 
-import net.officefloor.model.generate.GenericMetaData;
+import net.officefloor.model.generate.GraphNodeMetaData;
 
 /**
  * Abstract property meta-data.
@@ -51,21 +51,21 @@ public abstract class AbstractPropertyMetaData {
 	 * Obtains the capitalised name.
 	 */
 	public String getCapitalisedName() {
-		return GenericMetaData.capitalise(this.name);
+		return GraphNodeMetaData.capitalise(this.name);
 	}
 
 	/**
 	 * Obtains the camel case name.
 	 */
 	public String getCamelCaseName() {
-		return GenericMetaData.camelCase(this.name);
+		return GraphNodeMetaData.camelCase(this.name);
 	}
 
 	/**
 	 * Obtains the property name.
 	 */
 	public String getPropertyName() {
-		return GenericMetaData.propertyCase(this.name);
+		return GraphNodeMetaData.propertyCase(this.name);
 	}
 
 	/**
@@ -93,6 +93,23 @@ public abstract class AbstractPropertyMetaData {
 	public void setType(String type) {
 		this.type = type;
 	}
+	
+	/**
+	 * Flag indicating to cascade remove.
+	 */
+	private String cascadeRemove;
+	
+	public String getCascadeRemove() {
+		return this.cascadeRemove;
+	}
+	
+	public void setCascadeRemove(String cascadeRemove) {
+		this.cascadeRemove = cascadeRemove;
+	}
+	
+	public boolean isCascadeRemove() {
+		return new Boolean(this.cascadeRemove).booleanValue();
+	}
 
 	/**
 	 * Description.
@@ -102,7 +119,7 @@ public abstract class AbstractPropertyMetaData {
 	public String getDescription() {
 		if (this.description == null) {
 			// Construct description from name
-			return GenericMetaData.titleCase(this.name) + ".";
+			return GraphNodeMetaData.titleCase(this.name) + ".";
 		} else {
 			return this.description;
 		}
