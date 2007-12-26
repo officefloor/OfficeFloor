@@ -23,6 +23,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.work.TaskModel;
 import net.officefloor.work.CompilerAwareTaskFactory;
@@ -73,6 +74,9 @@ public class TaskEntry<W extends Work> extends
 		TaskEntry<W> taskEntry = new TaskEntry<W>(taskBuilder, flowItem,
 				deskTask, workEntry);
 
+		// Register the task entry
+		context.getTaskRegistry().put(flowItem, taskEntry);
+
 		// Return the task entry
 		return taskEntry;
 	}
@@ -119,11 +123,14 @@ public class TaskEntry<W extends Work> extends
 	/**
 	 * Builds the {@link net.officefloor.frame.api.execute.Task}.
 	 * 
+	 * @param compilerContext
+	 *            {@link OfficeFloorCompilerContext}.
 	 * @throws Exception
 	 *             If fails.
 	 */
 	@SuppressWarnings("unchecked")
-	public void build() throws Exception {
+	public void build(OfficeFloorCompilerContext compilerContext)
+			throws Exception {
 
 		// Obtain task and its details
 		TaskModel<?, ?> task = this.deskTask.getTask();
@@ -162,8 +169,35 @@ public class TaskEntry<W extends Work> extends
 		// Link in the managed objects
 		int index = 0;
 		for (DeskTaskObjectModel taskObject : this.deskTask.getObjects()) {
+
+			// Do not include parameters
+			if (taskObject.getIsParameter()) {
+				continue;
+			}
+
+			// Link in the managed object
 			this.getBuilder().linkManagedObject(index++,
 					taskObject.getManagedObject().getName());
+		}
+
+		// Specify the next flow (from same desk)
+		FlowItemModel flowItem = this.getModel();
+		FlowItemToNextFlowItemModel nextFlowItem = flowItem.getNext();
+		if (nextFlowItem != null) {
+			// Obtain the task entry for the next flow item
+			TaskEntry<?> nextTask = compilerContext.getTaskRegistry().get(
+					nextFlowItem.getNext());
+
+			// Register the next task
+			if (this.workEntry == nextTask.workEntry) {
+				// Same work
+				this.getBuilder().setNextTaskInFlow(nextTask.getId());
+			} else {
+				// Different work
+				this.getBuilder().setNextTaskInFlow(
+						nextTask.workEntry.getCanonicalWorkName(),
+						nextTask.getId());
+			}
 		}
 	}
 }

@@ -108,7 +108,7 @@ public class OfficeFloorCompiler {
 
 		// Build the office floor
 		for (WorkEntry<?> workEntry : context.getWorkRegistry().values()) {
-			workEntry.build();
+			workEntry.build(context);
 		}
 		for (OfficeEntry officeEntry : context.getOfficeRegistry().values()) {
 			officeEntry.build();

@@ -184,14 +184,12 @@ public class WorkEntry<W extends Work> extends
 	}
 
 	/**
-	 * Builds the remaining aspects of the {@link Work}.
+	 * Creates the canonical work name that this {@link WorkModel} is registered
+	 * under.
 	 * 
-	 * @throws Exception
-	 *             If fails.
+	 * @return Canonical work name.
 	 */
-	@SuppressWarnings("unchecked")
-	public void build() throws Exception {
-
+	public String getCanonicalWorkName() {
 		// Create the canonical work name
 		String canonicalWorkName = this.getId();
 		final String SEPARATOR = ".";
@@ -206,6 +204,25 @@ public class WorkEntry<W extends Work> extends
 			}
 			roomEntry = roomEntry.getParentRoom();
 		}
+
+		// Return the canonical work name
+		return canonicalWorkName;
+	}
+
+	/**
+	 * Builds the remaining aspects of the {@link Work}.
+	 * 
+	 * @param compilerContext
+	 *            {@link OfficeFloorCompilerContext}.
+	 * @throws Exception
+	 *             If fails.
+	 */
+	@SuppressWarnings("unchecked")
+	public void build(OfficeFloorCompilerContext compilerContext)
+			throws Exception {
+
+		// Create the canonical work name
+		String canonicalWorkName = this.getCanonicalWorkName();
 
 		// Register this work with its office
 		OfficeEntry officeEntry = this.getOfficeEntry();
@@ -229,6 +246,11 @@ public class WorkEntry<W extends Work> extends
 			for (DeskTaskObjectModel taskObject : task.getDeskTaskModel()
 					.getObjects()) {
 
+				// Do not include parameters
+				if (taskObject.getIsParameter()) {
+					continue;
+				}
+
 				// Register the external managed object
 				externalManagedObjects.add(OFCU.get(
 						taskObject.getManagedObject(),
@@ -245,7 +267,7 @@ public class WorkEntry<W extends Work> extends
 
 		// Build the tasks
 		for (TaskEntry taskEntry : this.tasks.values()) {
-			taskEntry.build();
+			taskEntry.build(compilerContext);
 		}
 	}
 

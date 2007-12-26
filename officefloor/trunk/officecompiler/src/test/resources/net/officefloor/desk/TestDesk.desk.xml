@@ -37,6 +37,7 @@
 		</flow-item>
 		<flow-item id="2" x="10" y="20" public="false" work="work"
 			task="noLongerExists">
+			<next-flow id="1"/>
 			<output id="FIRST_FLOW">
 				<external-flow name="flow" link="Asynchronous" />
 			</output>
