@@ -19,20 +19,24 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.desk.figure.FlowItemFigure;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel.FlowItemEvent;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -41,7 +45,7 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel
  */
 public class FlowItemEditPart extends
-		AbstractOfficeFloorNodeEditPart<FlowItemModel> implements
+		AbstractOfficeFloorSourceNodeEditPart<FlowItemModel> implements
 		RemovableEditPart {
 
 	/*
@@ -81,10 +85,47 @@ public class FlowItemEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
+		types.add(FlowItemModel.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 */
+	@Override
+	protected ConnectionModelFactory createConnectionModelFactory() {
+		return new ConnectionModelFactory() {
+			@Override
+			public ConnectionModel createConnection(Object source,
+					Object target, CreateConnectionRequest request) {
+				// Create the connection
+				FlowItemToNextFlowItemModel conn = new FlowItemToNextFlowItemModel();
+				conn.setPrevious((FlowItemModel) source);
+				conn.setNext((FlowItemModel) target);
+				conn.connect();
+
+				// Return the connection
+				return conn;
+			}
+		};
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
 	 */
 	protected void populateConnectionSourceModels(List<Object> models) {
-		// Not a source
+		// Add flow to next flow
+		FlowItemToNextFlowItemModel next = this.getCastedModel().getNext();
+		if (next != null) {
+			models.add(next);
+		}
 	}
 
 	/*
@@ -107,6 +148,9 @@ public class FlowItemEditPart extends
 
 		// Add flow inputs
 		models.addAll(this.getCastedModel().getInputs());
+
+		// Add flow previous
+		models.addAll(this.getCastedModel().getPreviouss());
 	}
 
 	/*
@@ -121,9 +165,15 @@ public class FlowItemEditPart extends
 			protected void handlePropertyChange(FlowItemEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
+				case CHANGE_NEXT:
+					FlowItemEditPart.this.refreshSourceConnections();
+					break;
+				case CHANGE_DESK_WORK:
+				case CHANGE_DESK_TASK:
 				case ADD_INPUT:
 				case REMOVE_INPUT:
-				case CHANGE_DESK_TASK:
+				case ADD_PREVIOUS:
+				case REMOVE_PREVIOUS:
 					FlowItemEditPart.this.refreshTargetConnections();
 					break;
 				}
@@ -139,7 +189,8 @@ public class FlowItemEditPart extends
 	@Override
 	public void delete() {
 		// Disconnect and remove the flow item
-		RemoveConnectionsAction<FlowItemModel> flowItem = this.getCastedModel().removeConnections();
+		RemoveConnectionsAction<FlowItemModel> flowItem = this.getCastedModel()
+				.removeConnections();
 		DeskModel desk = (DeskModel) this.getParent().getModel();
 		desk.removeFlowItem(flowItem.getModel());
 	}
