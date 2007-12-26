@@ -69,7 +69,7 @@ public class ExternalFlowEditPart extends
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<ExternalFlowEvent>(
 				ExternalFlowEvent.values()) {
 			@Override

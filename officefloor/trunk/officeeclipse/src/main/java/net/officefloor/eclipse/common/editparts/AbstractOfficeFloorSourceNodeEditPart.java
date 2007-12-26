@@ -46,7 +46,7 @@ public abstract class AbstractOfficeFloorSourceNodeEditPart<M extends Model>
 				.createConnectionModelFactory();
 
 		// Create the list of target types
-		List<Class> targetTypes = new LinkedList<Class>();
+		List<Class<?>> targetTypes = new LinkedList<Class<?>>();
 		this.populateConnectionTargetTypes(targetTypes);
 
 		// Return the graphical node edit policy
@@ -68,6 +68,6 @@ public abstract class AbstractOfficeFloorSourceNodeEditPart<M extends Model>
 	 * @param types
 	 *            List of types to be populated.
 	 */
-	protected abstract void populateConnectionTargetTypes(List<Class> types);
+	protected abstract void populateConnectionTargetTypes(List<Class<?>> types);
 
 }

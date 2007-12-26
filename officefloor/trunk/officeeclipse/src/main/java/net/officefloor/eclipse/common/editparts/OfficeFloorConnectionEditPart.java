@@ -41,7 +41,7 @@ public class OfficeFloorConnectionEditPart<M extends ConnectionModel> extends
 	/**
 	 * Registry of {@link FigureFactory} by the model types.
 	 */
-	private static final Map<Class, FigureFactory> factories = new HashMap<Class, FigureFactory>();
+	private static final Map<Class<?>, FigureFactory<?>> factories = new HashMap<Class<?>, FigureFactory<?>>();
 
 	/**
 	 * Registers the {@link FigureFactory} for the model type.
@@ -51,8 +51,8 @@ public class OfficeFloorConnectionEditPart<M extends ConnectionModel> extends
 	 * @param figureFactory
 	 *            {@link FigureFactory}.
 	 */
-	public synchronized static void registerFigureFactory(Class modelType,
-			FigureFactory figureFactory) {
+	public synchronized static void registerFigureFactory(Class<?> modelType,
+			FigureFactory<?> figureFactory) {
 		factories.put(modelType, figureFactory);
 	}
 

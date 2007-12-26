@@ -73,14 +73,14 @@ public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
 	 * 
 	 * @return {@link LayoutEditPolicy} to be installed.
 	 */
-	protected abstract OfficeFloorLayoutEditPolicy createLayoutEditPolicy();
+	protected abstract OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy();
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#getModelChildren()
 	 */
-	protected List getModelChildren() {
+	protected List<?> getModelChildren() {
 		// Create the list of model children
 		List<Object> models = new LinkedList<Object>();
 

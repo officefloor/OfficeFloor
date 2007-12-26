@@ -104,7 +104,7 @@ public class FlowItemOutputEditPart extends
 	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
 	 */
-	protected void populateConnectionTargetTypes(List<Class> types) {
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(FlowItemModel.class);
 		types.add(ExternalFlowModel.class);
 	}
@@ -145,7 +145,7 @@ public class FlowItemOutputEditPart extends
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<FlowItemOutputEvent>(
 				FlowItemOutputEvent.values()) {
 			protected void handlePropertyChange(FlowItemOutputEvent property,

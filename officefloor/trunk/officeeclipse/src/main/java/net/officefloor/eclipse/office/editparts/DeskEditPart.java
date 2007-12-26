@@ -45,7 +45,7 @@ public class DeskEditPart extends AbstractOfficeFloorEditPart<OfficeDeskModel> {
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<OfficeDeskEvent>(OfficeDeskEvent
 				.values()) {
 			@Override

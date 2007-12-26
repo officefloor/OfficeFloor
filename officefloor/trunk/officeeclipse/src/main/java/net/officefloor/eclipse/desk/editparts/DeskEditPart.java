@@ -181,7 +181,7 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart#createLayoutEditPolicy()
 	 */
-	protected OfficeFloorLayoutEditPolicy createLayoutEditPolicy() {
+	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
 		return new DeskLayoutEditPolicy();
 	}
 
@@ -206,7 +206,7 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<DeskEvent>(DeskEvent.values()) {
 			protected void handlePropertyChange(DeskEvent property,
 					PropertyChangeEvent evt) {
@@ -247,7 +247,7 @@ class DeskLayoutEditPolicy extends OfficeFloorLayoutEditPolicy<DeskModel> {
 	 * @see net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy#createCreateComand(P,
 	 *      java.lang.Object, org.eclipse.draw2d.geometry.Point)
 	 */
-	protected CreateCommand createCreateComand(DeskModel parentModel,
+	protected CreateCommand<?, ?> createCreateComand(DeskModel parentModel,
 			Object newModel, Point location) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");

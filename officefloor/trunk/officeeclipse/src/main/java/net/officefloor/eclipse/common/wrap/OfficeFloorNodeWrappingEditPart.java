@@ -30,7 +30,7 @@ import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
  * @author Daniel
  */
 public abstract class OfficeFloorNodeWrappingEditPart extends
-		AbstractOfficeFloorNodeEditPart<WrappingModel> implements
+		AbstractOfficeFloorNodeEditPart<WrappingModel<?>> implements
 		WrappingEditPart {
 
 	/**
@@ -55,7 +55,7 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		// Defaultly no property change handlers
 	}
 

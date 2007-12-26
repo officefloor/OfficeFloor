@@ -35,7 +35,7 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart
+public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
 		implements Model, ModelEditPart, ActionListener {
 
 	/**
@@ -90,7 +90,8 @@ public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart
 	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
 	 */
-	protected void populatePropertyChangeHandlers(List handlers) {
+	protected void populatePropertyChangeHandlers(
+			List<PropertyChangeHandler<?>> handlers) {
 		// No property change handling
 	}
 

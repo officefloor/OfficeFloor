@@ -41,7 +41,7 @@ public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 	/**
 	 * List of target types allowable.
 	 */
-	protected final List<Class> targetTypes;
+	protected final List<Class<?>> targetTypes;
 
 	/**
 	 * Indicates details of how the {@link org.eclipse.gef.EditPolicy} may
@@ -56,7 +56,7 @@ public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 	 *            List of types which may be a target of a connection.
 	 */
 	public ConnectionGraphicalNodeEditPolicy(
-			ConnectionModelFactory connectionFactory, List<Class> targetTypes) {
+			ConnectionModelFactory connectionFactory, List<Class<?>> targetTypes) {
 		// Store state
 		this.connectionFactory = connectionFactory;
 		this.targetTypes = targetTypes;

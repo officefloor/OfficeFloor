@@ -69,7 +69,7 @@ public class ExternalTeamEditPart extends
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<ExternalTeamEvent>(
 				ExternalTeamEvent.values()) {
 			@Override

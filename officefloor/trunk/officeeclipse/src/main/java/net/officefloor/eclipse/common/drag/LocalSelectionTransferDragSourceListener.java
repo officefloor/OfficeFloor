@@ -16,7 +16,6 @@
  */
 package net.officefloor.eclipse.common.drag;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -49,7 +48,6 @@ public class LocalSelectionTransferDragSourceListener extends DragSourceAdapter
 	public LocalSelectionTransferDragSourceListener(
 			ISelectionProvider selectionProvider) {
 		// Store state
-		Assert.isNotNull(selectionProvider);
 		this.selectionProvider = selectionProvider;
 	}
 

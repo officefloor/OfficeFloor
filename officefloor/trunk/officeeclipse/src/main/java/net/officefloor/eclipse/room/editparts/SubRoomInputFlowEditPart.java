@@ -64,7 +64,7 @@ public class SubRoomInputFlowEditPart extends
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<SubRoomInputFlowEvent>(
 				SubRoomInputFlowEvent.values()) {
 			@Override
