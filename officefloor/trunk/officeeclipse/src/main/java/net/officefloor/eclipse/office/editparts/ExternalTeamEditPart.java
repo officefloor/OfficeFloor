@@ -19,15 +19,18 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
+import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.office.ExternalTeamModel;
+import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.ExternalTeamModel.ExternalTeamEvent;
+
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.geometry.Rectangle;
-
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.model.office.ExternalTeamModel;
-import net.officefloor.model.office.ExternalTeamModel.ExternalTeamEvent;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -36,7 +39,8 @@ import net.officefloor.model.office.ExternalTeamModel.ExternalTeamEvent;
  * @author Daniel
  */
 public class ExternalTeamEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalTeamModel> {
+		AbstractOfficeFloorNodeEditPart<ExternalTeamModel> implements
+		RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -95,6 +99,33 @@ public class ExternalTeamEditPart extends
 
 		// Return figure
 		return figure;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+		// Disconnect and remove the Team
+		RemoveConnectionsAction<ExternalTeamModel> team = this.getCastedModel()
+				.removeConnections();
+		OfficeModel office = (OfficeModel) this.getParent().getParent()
+				.getModel();
+		office.removeExternalTeam(team.getModel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement ExternalTeamEditPart.undelete");
 	}
 
 }

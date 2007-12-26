@@ -19,15 +19,18 @@ package net.officefloor.eclipse.room.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
+import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.room.ExternalManagedObjectModel;
+import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.room.ExternalManagedObjectModel.ExternalManagedObjectEvent;
+
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
-
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.ExternalManagedObjectModel.ExternalManagedObjectEvent;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -36,7 +39,8 @@ import net.officefloor.model.room.ExternalManagedObjectModel.ExternalManagedObje
  * @author Daniel
  */
 public class ExternalManagedObjectEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel> {
+		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel> implements
+		RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -91,6 +95,31 @@ public class ExternalManagedObjectEditPart extends
 
 		// Return figure
 		return figure;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+		RemoveConnectionsAction<ExternalManagedObjectModel> mo = this
+				.getCastedModel().removeConnections();
+		RoomModel room = (RoomModel) this.getParent().getParent().getModel();
+		room.removeExternalManagedObject(mo.getModel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement ExternalManagedObjectEditPart.undelete");
 	}
 
 }

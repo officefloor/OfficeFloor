@@ -21,6 +21,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.common.figure.IndentFigure;
@@ -28,9 +29,11 @@ import net.officefloor.eclipse.common.figure.ListFigure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
 import net.officefloor.eclipse.common.figure.WrappingFigure;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.AdministratorModel.AdministratorEvent;
 
 import org.eclipse.draw2d.ColorConstants;
@@ -44,7 +47,8 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class AdministratorEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<AdministratorModel> {
+		AbstractOfficeFloorSourceNodeEditPart<AdministratorModel> implements
+		RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -158,6 +162,32 @@ public class AdministratorEditPart extends
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Never a target
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+		// Disconnect and remove Administrator
+		RemoveConnectionsAction<AdministratorModel> administrator = this
+				.getCastedModel().removeConnections();
+		OfficeModel office = (OfficeModel) this.getParent().getModel();
+		office.removeAdministrator(administrator.getModel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement AdministratorEditPart.undelete");
 	}
 
 }

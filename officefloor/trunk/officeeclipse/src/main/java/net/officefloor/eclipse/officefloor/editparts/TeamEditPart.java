@@ -21,6 +21,9 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.model.officefloor.TeamModel.TeamEvent;
 
@@ -35,7 +38,8 @@ import org.eclipse.draw2d.Label;
  * 
  * @author Daniel
  */
-public class TeamEditPart extends AbstractOfficeFloorNodeEditPart<TeamModel> {
+public class TeamEditPart extends AbstractOfficeFloorNodeEditPart<TeamModel>
+		implements RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -93,6 +97,33 @@ public class TeamEditPart extends AbstractOfficeFloorNodeEditPart<TeamModel> {
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeTeams());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+		// Disconnect and remove Team
+		RemoveConnectionsAction<TeamModel> team = this.getCastedModel()
+				.removeConnections();
+		OfficeFloorModel officeFloor = (OfficeFloorModel) this.getParent()
+				.getParent().getModel();
+		officeFloor.removeTeam(team.getModel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement TeamEditPart.undelete");
 	}
 
 }

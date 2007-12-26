@@ -21,10 +21,13 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel.ManagedObjectSourceEvent;
 
@@ -41,7 +44,8 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class ManagedObjectSourceEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectSourceModel> {
+		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectSourceModel>
+		implements RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -140,6 +144,33 @@ public class ManagedObjectSourceEditPart extends
 		if (conn != null) {
 			models.add(conn);
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+		// Disconnect and remove managed object source
+		RemoveConnectionsAction<ManagedObjectSourceModel> mos = this
+				.getCastedModel().removeConnections();
+		OfficeFloorModel officeFloor = (OfficeFloorModel) this.getParent()
+				.getParent().getModel();
+		officeFloor.removeManagedObjectSource(mos.getModel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement ManagedObjectSourceEditPart.undelete");
 	}
 
 }

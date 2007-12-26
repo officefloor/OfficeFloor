@@ -17,14 +17,19 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.figure.IndentFigure;
 import net.officefloor.eclipse.common.figure.ListFigure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
 import net.officefloor.eclipse.common.figure.WrappingFigure;
+import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.office.OfficeRoomModel.OfficeRoomEvent;
 
@@ -36,7 +41,8 @@ import org.eclipse.draw2d.IFigure;
  * 
  * @author Daniel
  */
-public class RoomEditPart extends AbstractOfficeFloorEditPart<OfficeRoomModel> {
+public class RoomEditPart extends AbstractOfficeFloorEditPart<OfficeRoomModel>
+		implements RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -86,6 +92,46 @@ public class RoomEditPart extends AbstractOfficeFloorEditPart<OfficeRoomModel> {
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getSubRooms());
 		childModels.addAll(this.getCastedModel().getDesks());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+
+		// Only allow top level room to be removed
+		if (!"OFFICE ROOM".equals(this.getCastedModel().getName())) {
+			return;
+		}
+
+		// Top level therefore disconnect and remove the room
+		RemoveConnectionsAction<OfficeRoomModel> room = this.getCastedModel()
+				.removeConnections();
+		OfficeModel office = (OfficeModel) this.getParent().getParent()
+				.getModel();
+		office.setRoom(null);
+
+		// Remove the external managed objects
+		for (ExternalManagedObjectModel mo : new ArrayList<ExternalManagedObjectModel>(
+				office.getExternalManagedObjects())) {
+			room.addCascadeModel(mo.removeConnections());
+			office.removeExternalManagedObject(mo);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement RoomEditPart.undelete");
 	}
 
 }

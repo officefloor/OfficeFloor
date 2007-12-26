@@ -21,8 +21,11 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.officefloor.figure.OfficeFigure;
+import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel.OfficeFloorOfficeEvent;
 
@@ -35,7 +38,8 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel
  */
 public class OfficeEditPart extends
-		AbstractOfficeFloorNodeEditPart<OfficeFloorOfficeModel> {
+		AbstractOfficeFloorNodeEditPart<OfficeFloorOfficeModel> implements
+		RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -106,6 +110,33 @@ public class OfficeEditPart extends
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getResponsibleManagedObjects());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+		// Disconnect and remove Office
+		RemoveConnectionsAction<OfficeFloorOfficeModel> office = this
+				.getCastedModel().removeConnections();
+		OfficeFloorModel officeFloor = (OfficeFloorModel) this.getParent()
+				.getModel();
+		officeFloor.removeOffice(office.getModel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeEditPart.undelete");
 	}
 
 }
