@@ -2,7 +2,7 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="String" name="id"/>
 	<field type="String" name="source"/>
-	<list type="PropertyModel" name="property" plural="properties"/>
+	<list type="PropertyModel" name="property" plural="properties" cascade-remove="true"/>
 	<list type="AdministratorToManagedObjectModel" name="managed object"/>
-	<list type="DutyModel" name="duty" plural="duties"/>
+	<list type="DutyModel" name="duty" plural="duties" cascade-remove="true"/>
 </model>

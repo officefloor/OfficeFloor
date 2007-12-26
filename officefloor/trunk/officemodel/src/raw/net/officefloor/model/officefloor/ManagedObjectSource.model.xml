@@ -3,6 +3,6 @@
 	<field type="String" name="id"/>
 	<field type="String" name="source"/>
 	<field type="ManagedObjectSourceToOfficeFloorOfficeModel" name="managing office"/>
-	<list type="PropertyModel" name="property" plural="properties"/>
+	<list type="PropertyModel" name="property" plural="properties" cascade-remove="true"/>
 	<list type="OfficeManagedObjectToManagedObjectSourceModel" name="office managed object"/>
 </model>

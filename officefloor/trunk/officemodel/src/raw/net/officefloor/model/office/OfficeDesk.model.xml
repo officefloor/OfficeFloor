@@ -2,5 +2,5 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="String" name="id"/>
 	<field type="String" name="name"/>
-	<list type="FlowItemModel" name="flow item"/>
+	<list type="FlowItemModel" name="flow item" cascade-remove="true"/>
 </model>

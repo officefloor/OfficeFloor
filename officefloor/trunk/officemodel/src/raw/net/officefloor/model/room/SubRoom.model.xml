@@ -3,8 +3,8 @@
 	<field type="String" name="id"/>
 	<field type="String" name="desk"/>
 	<field type="String" name="room"/>
-	<list type="SubRoomManagedObjectModel" name="managed object"/>
-	<list type="SubRoomInputFlowModel" name="input flow"/>
-	<list type="SubRoomOutputFlowModel" name="output flow"/>	
-	<list type="SubRoomEscalationModel" name="escalation"/>	
+	<list type="SubRoomManagedObjectModel" name="managed object" cascade-remove="true"/>
+	<list type="SubRoomInputFlowModel" name="input flow" cascade-remove="true"/>
+	<list type="SubRoomOutputFlowModel" name="output flow" cascade-remove="true"/>	
+	<list type="SubRoomEscalationModel" name="escalation" cascade-remove="true"/>	
 </model>
