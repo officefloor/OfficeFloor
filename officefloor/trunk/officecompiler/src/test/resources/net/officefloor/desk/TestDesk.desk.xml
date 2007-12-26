@@ -20,6 +20,8 @@
 				<task-object object-type="java.lang.Integer">
 					<external-managed-object name="mo" />
 				</task-object>
+				<task-object object-type="java.lang.String"
+					parameter="true" />
 			</task>
 		</work>
 	</works>
