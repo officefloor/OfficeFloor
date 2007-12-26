@@ -52,6 +52,10 @@
 		<value method="setIsPublic" node="flow-item@public" />
 		<value method="setWorkName" node="flow-item@work" />
 		<value method="setTaskName" node="flow-item@task" />
+		<object method="setNext" node="next-flow"
+			class="net.officefloor.model.desk.FlowItemToNextFlowItemModel">
+			<value method="setId" node="next-flow@id" />
+		</object>
 		<object method="addOutput" node="output"
 			class="net.officefloor.model.desk.FlowItemOutputModel">
 			<value method="setId" node="output@id" />
