@@ -28,7 +28,8 @@ import net.officefloor.work.clazz.Flow;
  */
 public class MockWork {
 
-	public Object taskMethodOne(Object parameter, Flow flow, Connection connection) {
+	public Object taskMethodOne(Object parameter, Flow<?> flow,
+			Connection connection) {
 		return null;
 	}
 
@@ -36,7 +37,7 @@ public class MockWork {
 		return null;
 	}
 
-	public Object taskMethodThree(Flow flowOne, Flow flowTwo) {
+	public Object taskMethodThree(Flow<?> flowOne, Flow<?> flowTwo) {
 		return null;
 	}
 
