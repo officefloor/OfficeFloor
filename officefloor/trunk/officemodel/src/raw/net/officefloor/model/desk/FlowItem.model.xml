@@ -8,6 +8,8 @@
 	<field type="TaskModel" name="task"/>
 	<field type="DeskWorkToFlowItemModel" name="desk work"/>
 	<field type="DeskTaskToFlowItemModel" name="desk task"/>
+    <field type="FlowItemToNextFlowItemModel" name="next"/>
+    <list type="FlowItemToNextFlowItemModel" name="previous"/>
 	<list type="FlowItemOutputModel" name="output" cascade-remove="true"/>
 	<list type="FlowItemOutputToFlowItemModel" name="input"/>
 </model>

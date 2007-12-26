@@ -83,6 +83,11 @@
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
+			<object method="getNext" element="next-flow">
+				<attributes>
+					<attribute method="getId" attribute="id" />
+				</attributes>
+			</object>
 			<collection method="getOutputs">
 				<item
 					type="net.officefloor.model.desk.FlowItemOutputModel"

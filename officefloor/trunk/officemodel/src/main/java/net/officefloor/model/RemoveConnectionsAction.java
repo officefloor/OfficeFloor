@@ -29,6 +29,11 @@ import java.util.List;
 public class RemoveConnectionsAction<M extends Model> {
 
 	/**
+	 * Method name on the models to remove the connections.
+	 */
+	public static final String REMOVE_CONNECTIONS_METHOD_NAME = "removeConnections";
+
+	/**
 	 * {@link Model} for which {@link ConnectionModel} instances are being
 	 * removed.
 	 */
