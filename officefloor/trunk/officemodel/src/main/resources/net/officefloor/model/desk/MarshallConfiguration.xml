@@ -53,6 +53,8 @@
 							<attributes>
 								<attribute method="getObjectType"
 									attribute="object-type" />
+								<attribute method="getIsParameter"
+									attribute="parameter" />
 							</attributes>
 							<object method="getManagedObject">
 								<object method="getManagedObject"

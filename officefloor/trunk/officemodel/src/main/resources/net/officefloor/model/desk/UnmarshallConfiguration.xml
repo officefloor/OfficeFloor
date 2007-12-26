@@ -32,6 +32,8 @@
 				class="net.officefloor.model.desk.DeskTaskObjectModel">
 				<value method="setObjectType"
 					node="task-object@object-type" />
+				<value method="setIsParameter"
+					node="task-object@parameter" />
 				<object method="setManagedObject"
 					node="external-managed-object"
 					class="net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel">
