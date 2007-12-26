@@ -131,7 +131,15 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// Validate task objects
 		assertList(new String[] { "getObjectType", "getIsParameter" }, desk
 				.getWorks().get(0).getTasks().get(0).getObjects(),
-				new DeskTaskObjectModel("java.lang.String", false, null, null));
+				new DeskTaskObjectModel(String.class.getName(), false, null,
+						null));
+		if (!isSynchronised) {
+			assertList(new String[] { "getObjectType", "getIsParameter" }, desk
+					.getWorks().get(0).getTasks().get(1).getObjects(),
+					new DeskTaskObjectModel(Integer.class.getName(), false,
+							null, null), new DeskTaskObjectModel(String.class
+							.getName(), true, null, null));
+		}
 
 		// Validate task object to external managed object connections
 		assertEquals("Incorrect external managed object name (for taskMethod)",
