@@ -144,7 +144,7 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 		// Lock to ensure only one activation
 		synchronized (this.threadState.getThreadLock()) {
 
-			// Determine if already queued or comlete
+			// Determine if already queued or complete
 			if (this.isQueuedWithTeam
 					|| (this.containerState == TaskContainerState.COMPLETED)) {
 				return;
@@ -445,6 +445,8 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 						TaskContainer taskContainer = this
 								.getNextTaskNodeToExecute();
 						if (taskContainer != null) {
+							// Same thread, same lock to active so ok
+							// Different thread, should be creating it so ok
 							taskContainer.activateTask();
 						}
 
@@ -791,7 +793,7 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 
 	/**
 	 * Parallel {@link TaskNode} that must be complete before this
-	 * {@link TaskNode} may complate.
+	 * {@link TaskNode} may complete.
 	 */
 	protected TaskNode parallelNode;
 
