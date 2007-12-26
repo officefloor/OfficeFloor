@@ -23,6 +23,7 @@ import java.util.List;
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
+import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
@@ -155,14 +156,24 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// Validate flow items
 		List<FlowItemModel> flowItems = new LinkedList<FlowItemModel>();
 		flowItems.add(new FlowItemModel("1", true, "work", "taskMethod", null,
-				null, null, null, null, 100, 200));
+				null, null, null, null, null, null, 100, 200));
 		if (!isSynchronised) {
 			flowItems.add(new FlowItemModel("2", false, "work",
-					"noLongerExists", null, null, null, null, null, 10, 20));
+					"noLongerExists", null, null, null, null, null, null, null,
+					10, 20));
 		}
 		assertList(new String[] { "getId", "getWorkName", "getTaskName",
 				"getX", "getY" }, desk.getFlowItems(), flowItems
 				.toArray(new FlowItemModel[0]));
+
+		// Validate next flow
+		if (!isSynchronised) {
+			FlowItemModel flowItem = desk.getFlowItems().get(1);
+			assertEquals("Incorrect next flow id", "1", flowItem.getNext()
+					.getId());
+			assertEquals("Incorrect previous flow", flowItem.getNext(), desk
+					.getFlowItems().get(0).getPreviouss().get(0));
+		}
 
 		// Validate outputs of first flow item
 		FlowItemModel flowItemOne = desk.getFlowItems().get(0);
@@ -249,7 +260,8 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		DeskModel reloadedDesk = this.deskLoader.loadDesk(tempFile);
 
 		// Validate round trip
-		assertGraph(desk, reloadedDesk);
+		assertGraph(desk, reloadedDesk,
+				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
 
 }

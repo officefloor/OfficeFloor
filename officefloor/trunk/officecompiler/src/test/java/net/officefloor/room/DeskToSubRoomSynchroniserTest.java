@@ -45,11 +45,11 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 		desk.addExternalManagedObject(new ExternalManagedObjectModel("MO-TWO",
 				"java.sql.Connection", null));
 		desk.addFlowItem(new FlowItemModel("IF-ONE", true, "work", "task",
-				null, null, null, null, null));
+				null, null, null, null, null, null, null));
 		desk.addFlowItem(new FlowItemModel("IF-TWO", false, "work", "task",
-				null, null, null, null, null));
+				null, null, null, null, null, null, null));
 		desk.addFlowItem(new FlowItemModel("IF-THREE", true, "work", "task",
-				null, null, null, null, null));
+				null, null, null, null, null, null, null));
 		desk.addExternalFlow(new ExternalFlowModel("OF-ONE", null));
 		desk.addExternalFlow(new ExternalFlowModel("OF-TWO", null));
 

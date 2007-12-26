@@ -19,6 +19,7 @@ package net.officefloor.office;
 import java.io.File;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
 import net.officefloor.model.office.DutyFlowModel;
@@ -197,7 +198,8 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 		OfficeModel reloadedOffice = this.officeLoader.loadOffice(tempFile);
 
 		// Validate round trip
-		assertGraph(office, reloadedOffice, "getAdministrators");
+		assertGraph(office, reloadedOffice, "getAdministrators",
+				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
 
 	/**

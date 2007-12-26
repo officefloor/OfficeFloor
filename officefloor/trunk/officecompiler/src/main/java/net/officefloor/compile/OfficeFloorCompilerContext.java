@@ -21,6 +21,7 @@ import java.util.Map;
 
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.BuilderFactory;
+import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ModelRepository;
 
@@ -56,6 +57,11 @@ public class OfficeFloorCompilerContext {
 	 * Registry of the {@link WorkEntry}.
 	 */
 	private final Map<String, WorkEntry<?>> workRegistry = new HashMap<String, WorkEntry<?>>();
+
+	/**
+	 * Registry of the {@link TaskEntry}.
+	 */
+	private final Map<FlowItemModel, TaskEntry<?>> taskRegistry = new HashMap<FlowItemModel, TaskEntry<?>>();
 
 	/**
 	 * Registry of the {@link OfficeEntry}.
@@ -137,6 +143,15 @@ public class OfficeFloorCompilerContext {
 	 */
 	public Map<String, WorkEntry<?>> getWorkRegistry() {
 		return this.workRegistry;
+	}
+
+	/**
+	 * Obtains the registry of {@link TaskEntry} instances.
+	 * 
+	 * @return Registry of {@link TaskEntry} instances.
+	 */
+	public Map<FlowItemModel, TaskEntry<?>> getTaskRegistry() {
+		return this.taskRegistry;
 	}
 
 	/**

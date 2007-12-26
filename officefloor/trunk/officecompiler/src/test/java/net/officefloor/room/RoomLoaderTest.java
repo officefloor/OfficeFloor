@@ -20,6 +20,7 @@ import java.io.File;
 
 import net.officefloor.desk.DeskLoader;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.room.ExternalFlowModel;
 import net.officefloor.model.room.ExternalManagedObjectModel;
 import net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel;
@@ -138,6 +139,7 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		RoomModel reloadedRoom = this.roomLoader.loadRoom(tempConfigItem);
 
 		// Validate round trip
-		assertGraph(room, reloadedRoom);
+		assertGraph(room, reloadedRoom,
+				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
 }

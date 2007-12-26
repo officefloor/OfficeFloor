@@ -35,6 +35,7 @@ import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
+import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.WorkModel;
 import net.officefloor.repository.ConfigurationContext;
@@ -238,6 +239,22 @@ public class DeskLoader {
 			}
 		}
 
+		// Connect the flow item to its next flow item
+		for (FlowItemModel previous : desk.getFlowItems()) {
+			// Obtain the connection
+			FlowItemToNextFlowItemModel conn = previous.getNext();
+			if (conn != null) {
+				// Obtain the flow item
+				FlowItemModel next = flowItems.get(conn.getId());
+				if (next != null) {
+					// Connect
+					conn.setPrevious(previous);
+					conn.setNext(next);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the set of tasks
 		DoubleKeyMap<String, String, DeskTaskModel> taskRegistry = new DoubleKeyMap<String, String, DeskTaskModel>();
 		for (DeskWorkModel deskWork : desk.getWorks()) {
@@ -316,6 +333,23 @@ public class DeskLoader {
 	 */
 	public void storeDesk(DeskModel desk, ConfigurationItem configuration)
 			throws Exception {
+
+		// Specify next flows for storing
+		for (FlowItemModel previous : desk.getFlowItems()) {
+			FlowItemToNextFlowItemModel conn = previous.getNext();
+			if (conn != null) {
+				conn.setId(conn.getNext().getId());
+			}
+		}
+
+		// Specify initial flow for work
+		for (DeskWorkModel work : desk.getWorks()) {
+			DeskWorkToFlowItemModel conn = work.getInitialFlowItem();
+			if (conn != null) {
+				conn.setFlowItemId(conn.getInitialFlowItem().getId());
+			}
+		}
+
 		// Stores the desk
 		this.modelRepository.store(desk, configuration);
 	}
