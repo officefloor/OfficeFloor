@@ -158,7 +158,7 @@ public class OfficeEditPart extends
 				// Add the room
 				OfficeRoomModel room = new OfficeRoomModel();
 				BeanDialog dialog = OfficeEditPart.this.createBeanDialog(room,
-						"X", "Y");
+						"Name", "X", "Y");
 				dialog.registerPropertyInputBuilder("Id",
 						new ClasspathResourceSelectionPropertyInput(
 								OfficeEditPart.this.getEditor(), "room"));

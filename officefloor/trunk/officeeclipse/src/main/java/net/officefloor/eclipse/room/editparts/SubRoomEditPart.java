@@ -19,14 +19,17 @@ package net.officefloor.eclipse.room.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import org.eclipse.draw2d.IFigure;
-
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.room.figure.SubRoomFigure;
+import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomModel.SubRoomEvent;
+
+import org.eclipse.draw2d.IFigure;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -34,7 +37,8 @@ import net.officefloor.model.room.SubRoomModel.SubRoomEvent;
  * 
  * @author Daniel
  */
-public class SubRoomEditPart extends AbstractOfficeFloorEditPart<SubRoomModel> {
+public class SubRoomEditPart extends AbstractOfficeFloorEditPart<SubRoomModel>
+		implements RemovableEditPart {
 
 	/*
 	 * (non-Javadoc)
@@ -78,6 +82,32 @@ public class SubRoomEditPart extends AbstractOfficeFloorEditPart<SubRoomModel> {
 		childModels.addAll(this.getCastedModel().getInputFlows());
 		childModels.addAll(this.getCastedModel().getManagedObjects());
 		childModels.addAll(this.getCastedModel().getOutputFlows());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	 */
+	@Override
+	public void delete() {
+		// Disconnect and remove the sub room
+		RemoveConnectionsAction<SubRoomModel> subRoom = this.getCastedModel()
+				.removeConnections();
+		RoomModel room = (RoomModel) this.getParent().getModel();
+		room.removeSubRoom(subRoom.getModel());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 */
+	@Override
+	public void undelete() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement SubRoomEditPart.undelete");
 	}
 
 }

@@ -24,9 +24,11 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.officefloor.figure.OfficeManagedObjectFigure;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourceModel;
