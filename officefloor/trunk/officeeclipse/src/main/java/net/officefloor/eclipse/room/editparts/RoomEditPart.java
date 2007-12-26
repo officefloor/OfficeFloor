@@ -218,7 +218,7 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 	 */
 	@SuppressWarnings("unchecked")
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<RoomEvent>(RoomEvent.values()) {
 			protected void handlePropertyChange(RoomEvent property,
 					PropertyChangeEvent evt) {

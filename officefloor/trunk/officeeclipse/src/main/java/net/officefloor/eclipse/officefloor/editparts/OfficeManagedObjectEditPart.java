@@ -19,20 +19,18 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.requests.CreateConnectionRequest;
-
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.officefloor.figure.OfficeManagedObjectFigure;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel.OfficeManagedObjectEvent;
+
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -71,7 +69,7 @@ public class OfficeManagedObjectEditPart extends
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
-	protected void populateConnectionTargetTypes(List<Class> types) {
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(ManagedObjectSourceModel.class);
 	}
 
@@ -106,7 +104,7 @@ public class OfficeManagedObjectEditPart extends
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<OfficeManagedObjectEvent>(
 				OfficeManagedObjectEvent.values()) {
 			@Override

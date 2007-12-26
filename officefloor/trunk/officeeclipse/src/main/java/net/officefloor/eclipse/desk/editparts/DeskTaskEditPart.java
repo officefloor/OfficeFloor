@@ -110,7 +110,7 @@ public class DeskTaskEditPart extends
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<DeskTaskEvent>(DeskTaskEvent
 				.values()) {
 			protected void handlePropertyChange(DeskTaskEvent property,
@@ -148,7 +148,7 @@ public class DeskTaskEditPart extends
 	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
 	 */
-	protected void populateConnectionTargetTypes(List<Class> types) {
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(FlowItemModel.class);
 	}
 

@@ -57,7 +57,7 @@ public class AdministratorEditPart extends
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<AdministratorEvent>(
 				AdministratorEvent.values()) {
 			@Override
@@ -140,7 +140,7 @@ public class AdministratorEditPart extends
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
-	protected void populateConnectionTargetTypes(List<Class> types) {
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(ExternalManagedObjectModel.class);
 	}
 

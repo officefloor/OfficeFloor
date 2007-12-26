@@ -85,7 +85,7 @@ public abstract class OfficeFloorLayoutEditPolicy<P> extends XYLayoutEditPolicy 
 		Rectangle rectangle = (Rectangle) constraint;
 
 		// Obtain the edit part and its positional model
-		AbstractOfficeFloorEditPart editPart = (AbstractOfficeFloorEditPart) child;
+		AbstractOfficeFloorEditPart<?> editPart = (AbstractOfficeFloorEditPart<?>) child;
 
 		// Return the move command
 		return new MovePositionalModelCommand(editPart, rectangle.getLocation());
@@ -114,7 +114,7 @@ public abstract class OfficeFloorLayoutEditPolicy<P> extends XYLayoutEditPolicy 
 	 * @return Command to create the new model within the model.
 	 * @see #loadLocation(Object, Point)
 	 */
-	protected abstract CreateCommand createCreateComand(P parentModel,
+	protected abstract CreateCommand<?, ?> createCreateComand(P parentModel,
 			Object newModel, Point location);
 
 	/**

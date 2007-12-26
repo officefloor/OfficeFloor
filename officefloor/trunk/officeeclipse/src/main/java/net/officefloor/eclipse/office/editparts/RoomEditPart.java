@@ -51,7 +51,7 @@ public class RoomEditPart extends AbstractOfficeFloorEditPart<OfficeRoomModel>
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<OfficeRoomEvent>(OfficeRoomEvent
 				.values()) {
 			@Override

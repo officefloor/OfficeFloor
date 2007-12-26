@@ -35,8 +35,9 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public abstract class CheckBoxEditPart extends AbstractOfficeFloorEditPart
-		implements Model, ModelEditPart, ActionListener {
+public abstract class CheckBoxEditPart extends
+		AbstractOfficeFloorEditPart<Model> implements Model, ModelEditPart,
+		ActionListener {
 
 	/**
 	 * {@link CheckBox}.
@@ -78,7 +79,8 @@ public abstract class CheckBoxEditPart extends AbstractOfficeFloorEditPart
 	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
 	 */
-	protected void populatePropertyChangeHandlers(List handlers) {
+	protected void populatePropertyChangeHandlers(
+			List<PropertyChangeHandler<?>> handlers) {
 		// No property change handlers
 	}
 

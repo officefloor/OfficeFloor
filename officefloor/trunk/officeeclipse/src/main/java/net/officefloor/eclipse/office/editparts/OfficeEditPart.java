@@ -183,8 +183,8 @@ public class OfficeEditPart extends
 						// Load the office room
 						OfficeLoader officeLoader = new OfficeLoader();
 						room = officeLoader.loadOfficeRoom(roomConfigItem
-								.getId(), "OFFICE ROOM", rawRoom, roomConfigItem.getContext(),
-								classLoader);
+								.getId(), "OFFICE ROOM", rawRoom,
+								roomConfigItem.getContext(), classLoader);
 
 						// Synchronise the room onto the office
 						RoomToOfficeRoomSynchroniser.synchroniseRoomOntoOffice(
@@ -226,8 +226,8 @@ public class OfficeEditPart extends
 						.getExternalManagedObjects());
 			}
 		};
-		moEditPart.setFigure(new FreeformWrapperFigure(new SectionFigure(
-				"MO")));
+		moEditPart
+				.setFigure(new FreeformWrapperFigure(new SectionFigure("MO")));
 		this.externalManagedObjects = new WrappingModel<OfficeModel>(this
 				.getCastedModel(), moEditPart, new Point(500, 10));
 	}
@@ -238,7 +238,7 @@ public class OfficeEditPart extends
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart#createLayoutEditPolicy()
 	 */
 	@Override
-	protected OfficeFloorLayoutEditPolicy createLayoutEditPolicy() {
+	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
 		return new OfficeLayoutEditPolicy();
 	}
 
@@ -266,7 +266,7 @@ public class OfficeEditPart extends
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<OfficeEvent>(OfficeEvent
 				.values()) {
 			@Override
@@ -308,7 +308,7 @@ class OfficeLayoutEditPolicy extends OfficeFloorLayoutEditPolicy<OfficeModel> {
 	 *      java.lang.Object, org.eclipse.draw2d.geometry.Point)
 	 */
 	@Override
-	protected CreateCommand createCreateComand(OfficeModel parentModel,
+	protected CreateCommand<?, ?> createCreateComand(OfficeModel parentModel,
 			Object newModel, Point location) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");

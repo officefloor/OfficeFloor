@@ -94,7 +94,7 @@ public class SubRoomOutputFlowEditPart extends
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
-	protected void populateConnectionTargetTypes(List<Class> types) {
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(SubRoomInputFlowModel.class);
 		types.add(ExternalFlowModel.class);
 	}
@@ -135,7 +135,7 @@ public class SubRoomOutputFlowEditPart extends
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<SubRoomOutputFlowEvent>(
 				SubRoomOutputFlowEvent.values()) {
 			@Override

@@ -61,7 +61,7 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model>
 	@SuppressWarnings( { "unchecked" })
 	protected GraphicalNodeEditPolicy createGraphicalNodeEditPolicy() {
 		return new ConnectionGraphicalNodeEditPolicy(null,
-				(List<Class>) Collections.EMPTY_LIST);
+				(List<Class<?>>) Collections.EMPTY_LIST);
 	}
 
 	/*
@@ -69,7 +69,7 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model>
 	 * 
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#getModelSourceConnections()
 	 */
-	protected List getModelSourceConnections() {
+	protected List<?> getModelSourceConnections() {
 		// Create list of connections
 		List<Object> connections = new LinkedList<Object>();
 
@@ -94,7 +94,7 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model>
 	 * 
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#getModelTargetConnections()
 	 */
-	protected List getModelTargetConnections() {
+	protected List<?> getModelTargetConnections() {
 		// Create list of connections
 		List<Object> connections = new LinkedList<Object>();
 

@@ -23,6 +23,7 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 
 /**
  * Abstract {@link net.officefloor.eclipse.common.wrap.WrappingEditPart}.
@@ -30,7 +31,8 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
  * @author Daniel
  */
 public abstract class OfficeFloorWrappingEditPart extends
-		AbstractOfficeFloorEditPart<WrappingModel> implements WrappingEditPart {
+		AbstractOfficeFloorEditPart<WrappingModel<?>> implements
+		WrappingEditPart {
 
 	/**
 	 * Allow default construction.
@@ -76,7 +78,8 @@ public abstract class OfficeFloorWrappingEditPart extends
 	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
 	 */
-	protected void populatePropertyChangeHandlers(List handlers) {
+	protected void populatePropertyChangeHandlers(
+			List<PropertyChangeHandler<?>> handlers) {
 		// Defaultly no property change handlers
 	}
 
@@ -85,8 +88,8 @@ public abstract class OfficeFloorWrappingEditPart extends
 	 * 
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#getModelChildren()
 	 */
-	protected List getModelChildren() {
-		List modelChildren = new LinkedList();
+	protected List<?> getModelChildren() {
+		List<Object> modelChildren = new LinkedList<Object>();
 		this.populateModelChildren(modelChildren);
 		return modelChildren;
 	}
@@ -97,7 +100,7 @@ public abstract class OfficeFloorWrappingEditPart extends
 	 * @param children
 	 *            Model children.
 	 */
-	protected void populateModelChildren(List children) {
+	protected void populateModelChildren(List<Object> children) {
 		// Defaultly no children
 	}
 

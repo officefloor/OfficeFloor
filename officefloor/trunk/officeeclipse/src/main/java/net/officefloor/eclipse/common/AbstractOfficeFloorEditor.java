@@ -379,7 +379,7 @@ public abstract class AbstractOfficeFloorEditor<T> extends
 		/**
 		 * Editor.
 		 */
-		protected final AbstractOfficeFloorEditor editor;
+		protected final AbstractOfficeFloorEditor<?> editor;
 
 		/**
 		 * Initiate with the {@link EditPartFactory} being wrapped.
@@ -390,7 +390,7 @@ public abstract class AbstractOfficeFloorEditor<T> extends
 		 *            Editor.
 		 */
 		public WrappingEditPartFactory(EditPartFactory editPartFactory,
-				AbstractOfficeFloorEditor editor) {
+				AbstractOfficeFloorEditor<?> editor) {
 			// Store state
 			this.editPartFactory = editPartFactory;
 			this.editor = editor;
@@ -409,7 +409,7 @@ public abstract class AbstractOfficeFloorEditor<T> extends
 
 			// Enrich the edit part
 			if (editPart instanceof AbstractOfficeFloorEditPart) {
-				AbstractOfficeFloorEditPart officeFloorEditPart = (AbstractOfficeFloorEditPart) editPart;
+				AbstractOfficeFloorEditPart<?> officeFloorEditPart = (AbstractOfficeFloorEditPart<?>) editPart;
 
 				// Specify details on edit part
 				officeFloorEditPart.setOfficeFloorEditor(this.editor);

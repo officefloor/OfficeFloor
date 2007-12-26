@@ -65,7 +65,7 @@ public abstract class CreateCommand<P, M> extends Command {
 	 *            New Model
 	 * @return this.
 	 */
-	public CreateCommand init(P parent, M newModel) {
+	public CreateCommand<P, M> init(P parent, M newModel) {
 		// Store state
 		this.setParent(parent);
 		this.setNewModel(newModel);

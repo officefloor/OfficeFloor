@@ -115,7 +115,7 @@ public class FlowItemEditPart extends
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<FlowItemEvent>(FlowItemEvent
 				.values()) {
 			protected void handlePropertyChange(FlowItemEvent property,

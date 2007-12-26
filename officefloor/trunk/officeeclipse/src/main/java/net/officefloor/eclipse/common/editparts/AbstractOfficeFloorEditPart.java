@@ -60,12 +60,12 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	/**
 	 * Editor containing this.
 	 */
-	private AbstractOfficeFloorEditor editor = null;
+	private AbstractOfficeFloorEditor<?> editor = null;
 
 	/**
 	 * Listing of the {@link PropertyChangeHandler} instances.
 	 */
-	protected final List<PropertyChangeHandler> propertyChangeHandlers = new LinkedList<PropertyChangeHandler>();
+	protected final List<PropertyChangeHandler<?>> propertyChangeHandlers = new LinkedList<PropertyChangeHandler<?>>();
 
 	/**
 	 * Initiates the Edit Part.
@@ -82,7 +82,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	 * @param editor
 	 *            Editor containing this.
 	 */
-	public void setOfficeFloorEditor(AbstractOfficeFloorEditor editor) {
+	public void setOfficeFloorEditor(AbstractOfficeFloorEditor<?> editor) {
 		this.editor = editor;
 	}
 
@@ -91,7 +91,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	 * 
 	 * @return Editor for this.
 	 */
-	public AbstractOfficeFloorEditor getEditor() {
+	public AbstractOfficeFloorEditor<?> getEditor() {
 		return this.editor;
 	}
 
@@ -141,7 +141,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	 */
 	public void propertyChange(PropertyChangeEvent evt) {
 		// Handle property change
-		for (PropertyChangeHandler handler : this.propertyChangeHandlers) {
+		for (PropertyChangeHandler<?> handler : this.propertyChangeHandlers) {
 			handler.propertyChange(evt);
 		}
 	}
@@ -153,14 +153,14 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	 *            List of {@link PropertyChangeHandler} to be populated.
 	 */
 	protected abstract void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers);
+			List<PropertyChangeHandler<?>> handlers);
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.eclipse.gef.editparts.AbstractEditPart#getModelChildren()
 	 */
-	protected List getModelChildren() {
+	protected List<?> getModelChildren() {
 		// Create the list of model children
 		List<Object> models = new LinkedList<Object>();
 
@@ -172,7 +172,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	}
 
 	/**
-	 * Override to populdate the children of this model.
+	 * Override to populate the children of this model.
 	 * 
 	 * @param childModels
 	 *            List to be populated with the children models.

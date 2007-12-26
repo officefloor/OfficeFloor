@@ -229,7 +229,7 @@ public class OfficeFloorEditPart extends
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart#createLayoutEditPolicy()
 	 */
 	@Override
-	protected OfficeFloorLayoutEditPolicy createLayoutEditPolicy() {
+	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
 		return new OfficeFloorOfficeFloorLayoutEditPolicy();
 	}
 
@@ -256,7 +256,7 @@ public class OfficeFloorEditPart extends
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler> handlers) {
+			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<OfficeFloorEvent>(
 				OfficeFloorEvent.values()) {
 			@Override
@@ -297,7 +297,7 @@ class OfficeFloorOfficeFloorLayoutEditPolicy extends
 	 *      java.lang.Object, org.eclipse.draw2d.geometry.Point)
 	 */
 	@Override
-	protected CreateCommand createCreateComand(OfficeFloorModel parentModel,
+	protected CreateCommand<?, ?> createCreateComand(OfficeFloorModel parentModel,
 			Object newModel, Point location) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");

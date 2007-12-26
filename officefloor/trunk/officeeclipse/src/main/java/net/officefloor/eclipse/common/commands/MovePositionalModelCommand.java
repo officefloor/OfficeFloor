@@ -31,7 +31,7 @@ public class MovePositionalModelCommand extends Command {
 	/**
 	 * Edit part to be moved.
 	 */
-	protected final AbstractOfficeFloorEditPart editPart;
+	protected final AbstractOfficeFloorEditPart<?> editPart;
 
 	/**
 	 * New position for the figure.
@@ -51,7 +51,7 @@ public class MovePositionalModelCommand extends Command {
 	 * @param location
 	 *            Location to move the edit part.
 	 */
-	public MovePositionalModelCommand(AbstractOfficeFloorEditPart editPart,
+	public MovePositionalModelCommand(AbstractOfficeFloorEditPart<?> editPart,
 			Point location) {
 		super("Move");
 
