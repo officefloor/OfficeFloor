@@ -19,6 +19,7 @@ package net.officefloor.eclipse.desk.figure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
 
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.ToolbarLayout;
 
@@ -34,15 +35,18 @@ public class DeskTaskObjectFigure extends Figure {
 	 * 
 	 * @param objectName
 	 *            Name of object.
+	 * @param figureForIsParameter
+	 *            {@link IFigure} to indicate if a parameter.
 	 */
-	public DeskTaskObjectFigure(String objectName) {
+	public DeskTaskObjectFigure(String objectName, IFigure figureForIsParameter) {
 		this.setLayoutManager(new ToolbarLayout());
 
-		// Tooltip being full type name
+		// Tool tip being full type name
 		this.setToolTip(new Label(objectName));
 
 		// Display only short name
 		this.add(new ListItemFigure(this.getShortTypeName(objectName)));
+		this.add(figureForIsParameter);
 	}
 
 	/**

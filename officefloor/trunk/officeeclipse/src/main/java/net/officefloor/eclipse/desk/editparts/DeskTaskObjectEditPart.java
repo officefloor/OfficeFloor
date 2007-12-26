@@ -20,6 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
+import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.desk.figure.DeskTaskObjectFigure;
@@ -47,7 +48,20 @@ public class DeskTaskObjectEditPart extends
 	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
 	 */
 	protected IFigure createFigure() {
-		return new DeskTaskObjectFigure(this.getCastedModel().getObjectType());
+
+		// Create the check box to indicate if a parameter
+		CheckBoxEditPart parameterCheckBox = new CheckBoxEditPart(this
+				.getCastedModel().getIsParameter()) {
+			protected void checkBoxStateChanged(boolean isChecked) {
+				// Specify if parameter
+				DeskTaskObjectEditPart.this.getCastedModel().setIsParameter(
+						isChecked);
+			}
+		};
+
+		// Create and return the figure
+		return new DeskTaskObjectFigure(this.getCastedModel().getObjectType(),
+				parameterCheckBox.getFigure());
 	}
 
 	/*
@@ -113,9 +127,6 @@ public class DeskTaskObjectEditPart extends
 				switch (property) {
 				case CHANGE_MANAGED_OBJECT:
 					DeskTaskObjectEditPart.this.refreshSourceConnections();
-					break;
-				case CHANGE_IS_PARAMETER:
-					DeskTaskObjectEditPart.this.refresh();
 					break;
 				}
 			}
