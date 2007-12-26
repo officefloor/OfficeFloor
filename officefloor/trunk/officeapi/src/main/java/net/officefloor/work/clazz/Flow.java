@@ -22,7 +22,7 @@ package net.officefloor.work.clazz;
  * 
  * @author Daniel
  */
-public interface Flow {
+public interface Flow<P> {
 
 	/**
 	 * Invokes the {@link net.officefloor.frame.internal.structure.Flow}.
@@ -30,6 +30,6 @@ public interface Flow {
 	 * @param parameter
 	 *            Parameter.
 	 */
-	void invoke(Object parameter);
+	void invoke(P parameter);
 
 }
