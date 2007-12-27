@@ -256,10 +256,9 @@ public class OfficeLoader {
 					subRoomId, subRoom.getName(), actualRoom, subRoom);
 
 			// Recursive load the further sub rooms
-			for (OfficeRoomModel furtherSubRoom : subRoom.getSubRooms()) {
-				this.recursiveLoadSubRooms(furtherSubRoom, roomLoader,
-						deskLoader, context);
-			}
+			this
+					.recursiveLoadSubRooms(subRoom, roomLoader, deskLoader,
+							context);
 		}
 
 		// Load the desks
