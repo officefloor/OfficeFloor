@@ -47,6 +47,7 @@ import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
+import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.ModelRepository;
@@ -237,6 +238,8 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 		map.put(DeskWorkToFlowItemModel.class,
 				OfficeFloorConnectionEditPart.class);
 		map.put(FlowItemToNextFlowItemModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(FlowItemToNextExternalFlowModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 

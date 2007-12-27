@@ -73,6 +73,7 @@ public class ExternalFlowEditPart extends
 	 */
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOutputs());
+		models.addAll(this.getCastedModel().getPreviousFlowItems());
 	}
 
 	/*
@@ -89,6 +90,8 @@ public class ExternalFlowEditPart extends
 				switch (property) {
 				case ADD_OUTPUT:
 				case REMOVE_OUTPUT:
+				case ADD_PREVIOUS_FLOW_ITEM:
+				case REMOVE_PREVIOUS_FLOW_ITEM:
 					ExternalFlowEditPart.this.refreshTargetConnections();
 					break;
 				}

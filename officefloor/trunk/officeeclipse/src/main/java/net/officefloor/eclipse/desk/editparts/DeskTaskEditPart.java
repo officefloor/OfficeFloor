@@ -66,7 +66,7 @@ public class DeskTaskEditPart extends
 				String flowItemName = work.getId() + "-" + task.getName();
 				FlowItemModel flowItem = new FlowItemModel(flowItemName, false,
 						work.getId(), task.getName(), task.getTask(), null,
-						null, null, null, null, null);
+						null, null, null, null, null, null);
 				flowItem.setX(300);
 				flowItem.setY(100);
 
