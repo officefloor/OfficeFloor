@@ -156,23 +156,31 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// Validate flow items
 		List<FlowItemModel> flowItems = new LinkedList<FlowItemModel>();
 		flowItems.add(new FlowItemModel("1", true, "work", "taskMethod", null,
-				null, null, null, null, null, null, 100, 200));
+				null, null, null, null, null, null, null, 100, 200));
 		if (!isSynchronised) {
 			flowItems.add(new FlowItemModel("2", false, "work",
 					"noLongerExists", null, null, null, null, null, null, null,
-					10, 20));
+					null, 10, 20));
 		}
 		assertList(new String[] { "getId", "getWorkName", "getTaskName",
 				"getX", "getY" }, desk.getFlowItems(), flowItems
 				.toArray(new FlowItemModel[0]));
 
+		// Validate next external flow
+		FlowItemModel flowItem = desk.getFlowItems().get(0);
+		assertEquals("Incorrect next external flow", "flow", flowItem
+				.getNextExternalFlow().getExternalFlowName());
+		assertEquals("Incorrect previous flow of external flow", flowItem
+				.getNextExternalFlow(), desk.getExternalFlows().get(0)
+				.getPreviousFlowItems().get(0));
+
 		// Validate next flow
 		if (!isSynchronised) {
-			FlowItemModel flowItem = desk.getFlowItems().get(1);
-			assertEquals("Incorrect next flow id", "1", flowItem.getNext()
-					.getId());
-			assertEquals("Incorrect previous flow", flowItem.getNext(), desk
-					.getFlowItems().get(0).getPreviouss().get(0));
+			flowItem = desk.getFlowItems().get(1);
+			assertEquals("Incorrect next flow id", "1", flowItem
+					.getNextFlowItem().getId());
+			assertEquals("Incorrect previous flow", flowItem.getNextFlowItem(),
+					desk.getFlowItems().get(0).getPreviousFlowItems().get(0));
 		}
 
 		// Validate outputs of first flow item
@@ -233,7 +241,7 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate external flows
 		assertList(new String[] { "getName" }, desk.getExternalFlows(),
-				new ExternalFlowModel("flow", null));
+				new ExternalFlowModel("flow", null, null));
 
 		// Validate external flow connections to flow items
 		assertList(new String[] { "getName", "getLinkType" }, desk

@@ -186,6 +186,26 @@ public class RoomLoader {
 			}
 		}
 
+		// Create the map of inputs to its sub room
+		Map<SubRoomInputFlowModel, SubRoomModel> inputToRoom = new HashMap<SubRoomInputFlowModel, SubRoomModel>();
+		for (SubRoomModel subRoom : room.getSubRooms()) {
+			for (SubRoomInputFlowModel input : subRoom.getInputFlows()) {
+				inputToRoom.put(input, subRoom);
+			}
+		}
+
+		// Ensure output flow items linked to input flow items
+		for (SubRoomModel subRoom : room.getSubRooms()) {
+			for (SubRoomOutputFlowModel output : subRoom.getOutputFlows()) {
+				OutputFlowToInputFlowModel conn = output.getInput();
+				if (conn != null) {
+					SubRoomInputFlowModel input = conn.getInput();
+					conn.setSubRoomName(inputToRoom.get(input).getId());
+					conn.setInputFlowName(input.getName());
+				}
+			}
+		}
+
 		// Stores the model
 		this.modelRepository.store(room, configurationItem);
 	}

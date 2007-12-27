@@ -35,6 +35,7 @@ import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
+import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.WorkModel;
@@ -199,6 +200,23 @@ public class DeskLoader {
 			}
 		}
 
+		// Connect the flow item to next external flow
+		for (FlowItemModel flow : desk.getFlowItems()) {
+			// Obtain the connection
+			FlowItemToNextExternalFlowModel conn = flow.getNextExternalFlow();
+			if (conn != null) {
+				// Obtain the external flow
+				ExternalFlowModel extFlow = externalFlows.get(conn
+						.getExternalFlowName());
+				if (extFlow != null) {
+					// Connect
+					conn.setPreviousFlowItem(flow);
+					conn.setNextExternalFlow(extFlow);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the set of flows
 		Map<String, FlowItemModel> flowItems = new HashMap<String, FlowItemModel>();
 		for (FlowItemModel flowItem : desk.getFlowItems()) {
@@ -242,14 +260,14 @@ public class DeskLoader {
 		// Connect the flow item to its next flow item
 		for (FlowItemModel previous : desk.getFlowItems()) {
 			// Obtain the connection
-			FlowItemToNextFlowItemModel conn = previous.getNext();
+			FlowItemToNextFlowItemModel conn = previous.getNextFlowItem();
 			if (conn != null) {
 				// Obtain the flow item
 				FlowItemModel next = flowItems.get(conn.getId());
 				if (next != null) {
 					// Connect
-					conn.setPrevious(previous);
-					conn.setNext(next);
+					conn.setPreviousFlowItem(previous);
+					conn.setNextFlowItem(next);
 					conn.connect();
 				}
 			}
@@ -334,11 +352,20 @@ public class DeskLoader {
 	public void storeDesk(DeskModel desk, ConfigurationItem configuration)
 			throws Exception {
 
-		// Specify next flows for storing
+		// Specify next flows
 		for (FlowItemModel previous : desk.getFlowItems()) {
-			FlowItemToNextFlowItemModel conn = previous.getNext();
+			FlowItemToNextFlowItemModel conn = previous.getNextFlowItem();
 			if (conn != null) {
-				conn.setId(conn.getNext().getId());
+				conn.setId(conn.getNextFlowItem().getId());
+			}
+		}
+
+		// Specify next external flow
+		for (FlowItemModel previous : desk.getFlowItems()) {
+			FlowItemToNextExternalFlowModel conn = previous
+					.getNextExternalFlow();
+			if (conn != null) {
+				conn.setExternalFlowName(conn.getNextExternalFlow().getName());
 			}
 		}
 
