@@ -228,9 +228,12 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 				roomConfigItem.getId(), "OFFICE ROOM", rawRoom, context, this
 						.getClass().getClassLoader());
 
-		// Create the expected room
+		// Create the expected office room
+		FlowItemModel[] flowItems = new FlowItemModel[] {
+				new FlowItemModel("1", "taskMethod", null, null, null, null),
+				new FlowItemModel("2", "noLongerExists", null, null, null, null) };
 		OfficeDeskModel[] desks = new OfficeDeskModel[] { new OfficeDeskModel(
-				"TestDesk.desk.xml", "1", new FlowItemModel[] {}) };
+				"TestDesk.desk.xml", "1", flowItems) };
 		OfficeRoomModel expectedRoom = new OfficeRoomModel(
 				PARENT_ROOM_FILE_NAME, "OFFICE ROOM",
 				new OfficeRoomModel[] { new OfficeRoomModel(
