@@ -2,4 +2,5 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="String" name="name"/>
 	<list type="FlowItemOutputToExternalFlowModel" name="output"/>
+	<list type="FlowItemToNextExternalFlowModel" name="previous flow item"/>
 </model>

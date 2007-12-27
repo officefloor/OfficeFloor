@@ -83,9 +83,16 @@
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
-			<object method="getNext" element="next-flow">
+			<object method="getNextFlowItem" element="next-flow">
 				<attributes>
 					<attribute method="getId" attribute="id" />
+				</attributes>
+			</object>
+			<object method="getNextExternalFlow"
+				element="next-external-flow">
+				<attributes>
+					<attribute method="getExternalFlowName"
+						attribute="name" />
 				</attributes>
 			</object>
 			<collection method="getOutputs">
