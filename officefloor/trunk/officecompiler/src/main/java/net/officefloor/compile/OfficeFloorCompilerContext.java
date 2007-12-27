@@ -54,14 +54,24 @@ public class OfficeFloorCompilerContext {
 	private final LoaderContext loaderContext;
 
 	/**
+	 * Registry of the {@link TaskEntry}.
+	 */
+	private final Map<FlowItemModel, TaskEntry<?>> taskRegistry = new HashMap<FlowItemModel, TaskEntry<?>>();
+
+	/**
 	 * Registry of the {@link WorkEntry}.
 	 */
 	private final Map<String, WorkEntry<?>> workRegistry = new HashMap<String, WorkEntry<?>>();
 
 	/**
-	 * Registry of the {@link TaskEntry}.
+	 * Registry of the {@link DeskEntry}.
 	 */
-	private final Map<FlowItemModel, TaskEntry<?>> taskRegistry = new HashMap<FlowItemModel, TaskEntry<?>>();
+	private final Map<String, DeskEntry> deskRegistry = new HashMap<String, DeskEntry>();
+
+	/**
+	 * Registry of the {@link RoomEntry}.
+	 */
+	private final Map<String, RoomEntry> roomEntry = new HashMap<String, RoomEntry>();
 
 	/**
 	 * Registry of the {@link OfficeEntry}.
@@ -137,6 +147,15 @@ public class OfficeFloorCompilerContext {
 	}
 
 	/**
+	 * Obtains the registry of {@link TaskEntry} instances.
+	 * 
+	 * @return Registry of {@link TaskEntry} instances.
+	 */
+	public Map<FlowItemModel, TaskEntry<?>> getTaskRegistry() {
+		return this.taskRegistry;
+	}
+
+	/**
 	 * Obtains the registry of {@link WorkEntry} instances.
 	 * 
 	 * @return Registry of {@link WorkEntry} instances.
@@ -146,12 +165,21 @@ public class OfficeFloorCompilerContext {
 	}
 
 	/**
-	 * Obtains the registry of {@link TaskEntry} instances.
+	 * Obtains the registry of {@link DeskEntry} instances.
 	 * 
-	 * @return Registry of {@link TaskEntry} instances.
+	 * @return Registry of {@link DeskEntry} instances.
 	 */
-	public Map<FlowItemModel, TaskEntry<?>> getTaskRegistry() {
-		return this.taskRegistry;
+	public Map<String, DeskEntry> getDeskRegistry() {
+		return this.deskRegistry;
+	}
+
+	/**
+	 * Obtains the registry of {@link RoomEntry} instances.
+	 * 
+	 * @return Registry of {@link RoomEntry} instances.
+	 */
+	public Map<String, RoomEntry> getRoomEntry() {
+		return this.roomEntry;
 	}
 
 	/**

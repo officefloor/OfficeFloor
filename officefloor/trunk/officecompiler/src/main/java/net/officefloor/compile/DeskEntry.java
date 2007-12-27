@@ -16,6 +16,9 @@
  */
 package net.officefloor.compile;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.officefloor.desk.DeskLoader;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
@@ -64,6 +67,9 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 			WorkEntry.loadWork(deskWork, deskEntry, context);
 		}
 
+		// Register the desk entry
+		context.getDeskRegistry().put(deskEntry.getId(), deskEntry);
+
 		// Return the desk entry
 		return deskEntry;
 	}
@@ -77,6 +83,11 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	 * Parent {@link RoomEntry}.
 	 */
 	private final RoomEntry parentRoom;
+
+	/**
+	 * Registry of {@link WorkEntry} instances by name.
+	 */
+	private final Map<String, WorkEntry<?>> workEntries = new HashMap<String, WorkEntry<?>>();
 
 	/**
 	 * Initiate.
@@ -115,4 +126,34 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 		return this.parentRoom;
 	}
 
+	/**
+	 * Registers the {@link WorkEntry} of this {@link DeskEntry} by its name.
+	 * 
+	 * @param workName
+	 *            Name of the {@link WorkEntry}.
+	 * @param workEntry
+	 *            {@link WorkEntry}.
+	 */
+	public void registerWorkEntry(String workName, WorkEntry<?> workEntry) {
+		this.workEntries.put(workName, workEntry);
+	}
+
+	/**
+	 * Obtains the {@link WorkEntry} by its name.
+	 * 
+	 * @param workName
+	 *            Name of the {@link WorkEntry}.
+	 * @return {@link WorkEntry}.
+	 * @throws Exception
+	 *             If no {@link WorkEntry} by the name.
+	 */
+	public WorkEntry<?> getWorkEntry(String workName) throws Exception {
+		WorkEntry<?> workEntry = this.workEntries.get(workName);
+		if (workEntry == null) {
+			throw new Exception("No work '" + workName + "' on desk '"
+					+ this.getId() + "'");
+		}
+		return workEntry;
+	}
+	
 }

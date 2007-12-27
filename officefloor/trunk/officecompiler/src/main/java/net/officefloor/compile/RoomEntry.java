@@ -18,6 +18,7 @@ package net.officefloor.compile;
 
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomModel;
+import net.officefloor.model.room.SubRoomOutputFlowModel;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.room.RoomLoader;
 
@@ -110,6 +111,9 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 			}
 		}
 
+		// Register the room entry
+		context.getRoomEntry().put(roomEntry.getId(), roomEntry);
+
 		// Return the room entry
 		return roomEntry;
 	}
@@ -194,44 +198,53 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	}
 
 	/**
-	 * Obtains the {@link SubRoomModel} for the input room id.
+	 * Obtains the {@link SubRoomModel} for the input sub room name.
 	 * 
-	 * @param roomId
-	 *            Room Id.
+	 * @param subRoomName
+	 *            Name of the sub room.
 	 * @return {@link SubRoomModel}.
 	 * @throws Exception
 	 *             If sub room does not exist.
 	 */
-	public SubRoomModel getSubRoom(String roomId) throws Exception {
+	public SubRoomModel getSubRoom(String subRoomName) throws Exception {
 		for (SubRoomModel subRoom : this.getModel().getSubRooms()) {
-			if (roomId.equals(subRoom.getRoom())) {
+			if (subRoomName.equals(subRoom.getId())) {
 				return subRoom;
 			}
 		}
 
 		// Not found if here
-		throw new Exception("Unknown sub room '" + roomId + "' on room '"
+		throw new Exception("Unknown sub room '" + subRoomName + "' on room '"
 				+ this.getId() + "'");
 	}
 
 	/**
-	 * Obtains the {@link SubRoomModel} for the input desk id.
+	 * Obtains the {@link SubRoomOutputFlowModel} on the room.
 	 * 
-	 * @param deskId
-	 *            Desk Id.
-	 * @return {@link SubRoomModel}.
+	 * @param subRoomName
+	 *            Name of the sub room.
+	 * @param outputFlowName
+	 *            Output flow name on the sub room.
+	 * @return {@link SubRoomOutputFlowModel}.
 	 * @throws Exception
-	 *             If desk does not exist.
+	 *             If output flow does not exist.
 	 */
-	public SubRoomModel getDesk(String deskId) throws Exception {
-		for (SubRoomModel subRoom : this.getModel().getSubRooms()) {
-			if (deskId.equals(subRoom.getDesk())) {
-				return subRoom;
+	public SubRoomOutputFlowModel getSubRoomOutputFlow(String subRoomName,
+			String outputFlowName) throws Exception {
+
+		// Obtain the sub room
+		SubRoomModel subRoom = this.getSubRoom(subRoomName);
+
+		// Obtain the output flow
+		for (SubRoomOutputFlowModel outputFlow : subRoom.getOutputFlows()) {
+			if (outputFlowName.equals(outputFlow.getName())) {
+				return outputFlow;
 			}
 		}
 
 		// Not found if here
-		throw new Exception("Unknown desk '" + deskId + "' on room '"
+		throw new Exception("Unknown output flow '" + outputFlowName
+				+ "' on sub room '" + subRoomName + "' of room '"
 				+ this.getId() + "'");
 	}
 

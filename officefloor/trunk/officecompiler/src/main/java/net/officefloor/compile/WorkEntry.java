@@ -103,6 +103,9 @@ public class WorkEntry<W extends Work> extends
 			}
 		}
 
+		// Register the work entry with the desk
+		deskEntry.registerWorkEntry(deskWork.getId(), workEntry);
+
 		// Return the work entry
 		return workEntry;
 	}
@@ -285,8 +288,8 @@ public class WorkEntry<W extends Work> extends
 		// Obtain the external managed object name
 		String externalMoName = deskMo.getName();
 
-		// Obtain desk room Id
-		String deskRoomId = this.deskEntry.getId();
+		// Obtain desk room name
+		String deskRoomName = this.deskEntry.getDeskName();
 
 		// Obtain the office external managed object
 		OfficeEntry officeEntry = null;
@@ -297,10 +300,10 @@ public class WorkEntry<W extends Work> extends
 			// Obtain the sub room for the desk/room
 			SubRoomModel subRoom = null;
 			if (isDesk) {
-				subRoom = roomEntry.getDesk(deskRoomId);
+				subRoom = roomEntry.getSubRoom(deskRoomName);
 				isDesk = false; // no longer a desk
 			} else {
-				subRoom = roomEntry.getSubRoom(deskRoomId);
+				subRoom = roomEntry.getSubRoom(deskRoomName);
 			}
 
 			// Obtain the sub room managed object
@@ -312,7 +315,7 @@ public class WorkEntry<W extends Work> extends
 			}
 			if (subRoomMo == null) {
 				throw new Exception("Can not find managed object '"
-						+ externalMoName + "' for sub room '" + deskRoomId
+						+ externalMoName + "' for sub room '" + deskRoomName
 						+ "'");
 			}
 
