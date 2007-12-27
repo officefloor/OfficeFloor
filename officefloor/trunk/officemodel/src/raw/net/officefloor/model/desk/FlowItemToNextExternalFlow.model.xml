@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="String" name="id" />
+	<field type="String" name="external flow name" />
 	<field type="FlowItemModel" name="previous flow item"
-		end-field="next flow item" />
-	<field type="FlowItemModel" name="next flow item"
+		end-field="next external flow" />
+	<field type="ExternalFlowModel" name="next external flow"
 		end-list="previous flow item" />
 </model>
