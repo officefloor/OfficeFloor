@@ -206,6 +206,17 @@ public class RoomLoader {
 			}
 		}
 
+		// Ensure output flow items linked to external flows
+		for (SubRoomModel subRoom : room.getSubRooms()) {
+			for (SubRoomOutputFlowModel output : subRoom.getOutputFlows()) {
+				OutputFlowToExternalFlowModel conn = output.getExternalFlow();
+				if (conn != null) {
+					ExternalFlowModel externalFlow = conn.getExternalFlow();
+					conn.setExternalFlowName(externalFlow.getName());
+				}
+			}
+		}
+
 		// Stores the model
 		this.modelRepository.store(room, configurationItem);
 	}
