@@ -19,6 +19,7 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
@@ -31,7 +32,9 @@ import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
+import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel.FlowItemEvent;
 
@@ -90,6 +93,7 @@ public class FlowItemEditPart extends
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(FlowItemModel.class);
+		types.add(ExternalFlowModel.class);
 	}
 
 	/*
@@ -103,14 +107,31 @@ public class FlowItemEditPart extends
 			@Override
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
-				// Create the connection
-				FlowItemToNextFlowItemModel conn = new FlowItemToNextFlowItemModel();
-				conn.setPrevious((FlowItemModel) source);
-				conn.setNext((FlowItemModel) target);
-				conn.connect();
+				ConnectionModel returnConn;
+				if (target instanceof FlowItemModel) {
+					// Create the connection to flow item
+					FlowItemToNextFlowItemModel conn = new FlowItemToNextFlowItemModel();
+					conn.setPreviousFlowItem((FlowItemModel) source);
+					conn.setNextFlowItem((FlowItemModel) target);
+					conn.connect();
+					returnConn = conn;
+
+				} else if (target instanceof ExternalFlowModel) {
+					// Create the connection to external flow
+					FlowItemToNextExternalFlowModel conn = new FlowItemToNextExternalFlowModel();
+					conn.setPreviousFlowItem((FlowItemModel) source);
+					conn.setNextExternalFlow((ExternalFlowModel) target);
+					conn.connect();
+					returnConn = conn;
+
+				} else {
+					// Unknown target
+					throw new OfficeFloorPluginFailure("Unknown target type "
+							+ target.getClass().getName());
+				}
 
 				// Return the connection
-				return conn;
+				return returnConn;
 			}
 		};
 	}
@@ -122,9 +143,17 @@ public class FlowItemEditPart extends
 	 */
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Add flow to next flow
-		FlowItemToNextFlowItemModel next = this.getCastedModel().getNext();
-		if (next != null) {
-			models.add(next);
+		FlowItemToNextFlowItemModel nextFlowItem = this.getCastedModel()
+				.getNextFlowItem();
+		if (nextFlowItem != null) {
+			models.add(nextFlowItem);
+		}
+
+		// Add flow to next external flow
+		FlowItemToNextExternalFlowModel nextExternalFlow = this
+				.getCastedModel().getNextExternalFlow();
+		if (nextExternalFlow != null) {
+			models.add(nextExternalFlow);
 		}
 	}
 
@@ -150,7 +179,7 @@ public class FlowItemEditPart extends
 		models.addAll(this.getCastedModel().getInputs());
 
 		// Add flow previous
-		models.addAll(this.getCastedModel().getPreviouss());
+		models.addAll(this.getCastedModel().getPreviousFlowItems());
 	}
 
 	/*
@@ -165,15 +194,16 @@ public class FlowItemEditPart extends
 			protected void handlePropertyChange(FlowItemEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case CHANGE_NEXT:
+				case CHANGE_NEXT_FLOW_ITEM:
+				case CHANGE_NEXT_EXTERNAL_FLOW:
 					FlowItemEditPart.this.refreshSourceConnections();
 					break;
 				case CHANGE_DESK_WORK:
 				case CHANGE_DESK_TASK:
 				case ADD_INPUT:
 				case REMOVE_INPUT:
-				case ADD_PREVIOUS:
-				case REMOVE_PREVIOUS:
+				case ADD_PREVIOUS_FLOW_ITEM:
+				case REMOVE_PREVIOUS_FLOW_ITEM:
 					FlowItemEditPart.this.refreshTargetConnections();
 					break;
 				}
