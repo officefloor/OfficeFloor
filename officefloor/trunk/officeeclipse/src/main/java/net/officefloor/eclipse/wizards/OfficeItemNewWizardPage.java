@@ -97,7 +97,7 @@ public class OfficeItemNewWizardPage extends WizardPage {
 		this.extension = extension;
 		if (initialItemName == null) {
 			this.initialItemName = "new." + this.extension;
-		} else if (initialItemName.endsWith(this.extension)) {
+		} else if (initialItemName.endsWith("." + this.extension)) {
 			this.initialItemName = initialItemName;
 		} else {
 			this.initialItemName = initialItemName + "." + this.extension;
