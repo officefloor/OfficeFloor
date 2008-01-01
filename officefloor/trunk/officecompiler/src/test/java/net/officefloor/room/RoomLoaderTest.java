@@ -18,7 +18,6 @@ package net.officefloor.room;
 
 import java.io.File;
 
-import net.officefloor.desk.DeskLoader;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.room.ExternalFlowModel;
@@ -103,9 +102,8 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 				new SubRoomOutputFlowModel("output", null, null));
 		OutputFlowToInputFlowModel outputToInput = room.getSubRooms().get(0)
 				.getOutputFlows().get(0).getInput();
-		assertProperties(new OutputFlowToInputFlowModel("2", "input",
-				DeskLoader.SEQUENTIAL_LINK_TYPE, null, null), outputToInput,
-				"getSubRoomName", "getInputFlowName", "getLinkType");
+		assertProperties(new OutputFlowToInputFlowModel("2", "input", null,
+				null), outputToInput, "getSubRoomName", "getInputFlowName");
 		SubRoomManagedObjectModel subRoomOneMo = subRoomOne.getManagedObjects()
 				.get(0);
 		assertList(new String[] { "getName", "getObjectType",
@@ -131,9 +129,6 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		FileSystemConfigurationItem tempConfigItem = new FileSystemConfigurationItem(
 				tempFile, null);
 		this.roomLoader.storeRoom(room, tempConfigItem);
-
-		// TODO remove
-		System.out.println("Stored:\n" + this.getFileContents(tempFile));
 
 		// Reload the Room
 		RoomModel reloadedRoom = this.roomLoader.loadRoom(tempConfigItem);
