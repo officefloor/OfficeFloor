@@ -57,10 +57,6 @@ public class ManagedObjectSourceEntry extends
 		ManagedObjectSourceEntry mosEntry = new ManagedObjectSourceEntry(
 				configuration.getId(), builder, configuration, officeFloorEntry);
 
-		// Register the managed object source
-		context.getManagedObjectSourceRegistry()
-				.put(mosEntry.getId(), mosEntry);
-
 		// Return the entry
 		return mosEntry;
 	}

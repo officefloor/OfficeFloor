@@ -20,6 +20,14 @@ import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.model.desk.DeskTaskModel;
+import net.officefloor.model.desk.DeskTaskToFlowItemModel;
+import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.office.OfficeRoomModel;
+import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.ModelRepository;
 
@@ -83,41 +91,62 @@ public class OfficeFloorCompiler {
 
 		// TODO remove
 		System.out.println("[" + this.getClass().getName() + " (todo remove):");
-		System.out.println("Offices");
-		for (String officeId : context.getOfficeRegistry().keySet()) {
-			System.out.println("   " + officeId);
-		}
-		System.out.println("Work");
-		for (String workId : context.getWorkRegistry().keySet()) {
-			System.out.print("   " + workId + " [");
-			for (String taskId : context.getWorkRegistry().get(workId)
-					.getTaskRegistry().keySet()) {
-				System.out.print(" " + taskId);
+		for (OfficeFloorOfficeModel officeModel : officeFloorEntry.getModel()
+				.getOffices()) {
+			System.out.println(officeModel.getName());
+			OfficeEntry officeEntry = officeFloorEntry
+					.getOfficeEntry(officeModel);
+
+			OfficeRoomModel officeRoom = officeEntry.getModel().getRoom();
+			RoomEntry roomEntry = officeEntry.getRoomEntry(officeRoom);
+			for (DeskEntry deskEntry : roomEntry.getDeskEntries()) {
+				for (DeskWorkModel workModel : deskEntry.getModel().getWorks()) {
+					WorkEntry<?> workEntry = deskEntry.getWorkEntry(workModel);
+					System.out.print("   " + workEntry.getCanonicalWorkName()
+							+ " [");
+					for (DeskTaskModel taskModel : workEntry.getModel()
+							.getTasks()) {
+						for (DeskTaskToFlowItemModel taskToFlow : taskModel
+								.getFlowItems()) {
+							FlowItemModel flowItemModel = taskToFlow
+									.getFlowItem();
+							TaskEntry<?> taskEntry = workEntry
+									.getTaskEntry(flowItemModel);
+							System.out
+									.print(" " + taskEntry.getModel().getId());
+						}
+					}
+					System.out.println(" ]");
+				}
 			}
-			System.out.println(" ]");
 		}
-		System.out.println("Managed Objects");
-		for (String moId : context.getManagedObjectSourceRegistry().keySet()) {
-			System.out.println("   " + moId);
+		System.out.print("Managed Object Sources:");
+		for (ManagedObjectSourceModel mosModel : officeFloorEntry.getModel()
+				.getManagedObjectSources()) {
+			ManagedObjectSourceEntry mosEntry = officeFloorEntry
+					.getManagedObjectSourceEntry(mosModel);
+			System.out.print(" " + mosEntry.getModel().getId());
 		}
-		System.out.println("Teams");
-		for (String teamId : context.getTeamRegistry().keySet()) {
-			System.out.println("   " + teamId);
+		System.out.println();
+		System.out.print("Teams:");
+		for (TeamModel teamModel : officeFloorEntry.getModel().getTeams()) {
+			TeamEntry teamEntry = officeFloorEntry.getTeamEntry(teamModel);
+			System.out.print(" " + teamEntry.getId());
 		}
-		System.out.println(":" + this.getClass().getName() + "]");
+		System.out.println();
 
 		// Build the office floor
-		for (WorkEntry<?> workEntry : context.getWorkRegistry().values()) {
-			workEntry.build(context);
+		for (WorkEntry<?> workEntry : officeFloorEntry.getWorkEntries()) {
+			workEntry.build();
 		}
-		for (OfficeEntry officeEntry : context.getOfficeRegistry().values()) {
+		for (OfficeEntry officeEntry : officeFloorEntry.getOfficeEntries()) {
 			officeEntry.build();
 		}
-		for (ManagedObjectSourceEntry mosEntry : context
-				.getManagedObjectSourceRegistry().values()) {
+		for (ManagedObjectSourceEntry mosEntry : officeFloorEntry
+				.getManagedObjectSourceEntries()) {
 			mosEntry.build(builderContext);
 		}
-		for (TeamEntry teamEntry : context.getTeamRegistry().values()) {
+		for (TeamEntry teamEntry : officeFloorEntry.getTeamEntries()) {
 			teamEntry.build(builderContext);
 		}
 

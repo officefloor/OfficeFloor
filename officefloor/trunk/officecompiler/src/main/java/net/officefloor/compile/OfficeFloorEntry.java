@@ -16,7 +16,13 @@
  */
 package net.officefloor.compile;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.office.ExternalTeamModel;
+import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
@@ -59,25 +65,47 @@ public class OfficeFloorEntry extends
 		// Load the Managed Object Source instances
 		for (ManagedObjectSourceModel mosModel : officeFloorModel
 				.getManagedObjectSources()) {
-			ManagedObjectSourceEntry.loadManagedObjectSource(mosModel,
-					officeFloorEntry, context);
+			ManagedObjectSourceEntry mosEntry = ManagedObjectSourceEntry
+					.loadManagedObjectSource(mosModel, officeFloorEntry,
+							context);
+			officeFloorEntry.managedObjectSourceMap.put(mosModel, mosEntry);
 		}
 
-		// Build the Team instances
+		// Load the Team instances
 		for (TeamModel teamModel : officeFloorModel.getTeams()) {
-			TeamEntry.loadTeam(teamModel, officeFloorEntry, context);
+			TeamEntry teamEntry = TeamEntry.loadTeam(teamModel,
+					officeFloorEntry, context);
+			officeFloorEntry.teamMap.put(teamModel, teamEntry);
 		}
 
-		// Build the Offices
-		for (OfficeFloorOfficeModel office : officeFloorModel.getOffices()) {
-			OfficeEntry.loadOffice(office.getName(), context
-					.getConfigurationContext().getConfigurationItem(
-							office.getId()), officeFloorEntry, context);
+		// Load the Offices
+		for (OfficeFloorOfficeModel officeModel : officeFloorModel.getOffices()) {
+			OfficeEntry officeEntry = OfficeEntry.loadOffice(officeModel
+					.getName(), context.getConfigurationContext()
+					.getConfigurationItem(officeModel.getId()),
+					officeFloorEntry, context);
+			officeFloorEntry.officeMap.put(officeModel, officeEntry);
 		}
 
 		// Return the Office Floor entry
 		return officeFloorEntry;
 	}
+
+	/**
+	 * {@link ManagedObjectSourceModel} to {@link ManagedObjectSourceEntry}
+	 * mapping.
+	 */
+	private final ModelEntryMap<ManagedObjectSourceModel, ManagedObjectSourceEntry> managedObjectSourceMap = new ModelEntryMap<ManagedObjectSourceModel, ManagedObjectSourceEntry>();
+
+	/**
+	 * {@link TeamModel} to {@link TeamEntry} mapping.
+	 */
+	private final ModelEntryMap<TeamModel, TeamEntry> teamMap = new ModelEntryMap<TeamModel, TeamEntry>();
+
+	/**
+	 * {@link OfficeFloorOfficeModel} to {@link OfficeEntry} mapping.
+	 */
+	private final ModelEntryMap<OfficeFloorOfficeModel, OfficeEntry> officeMap = new ModelEntryMap<OfficeFloorOfficeModel, OfficeEntry>();
 
 	/**
 	 * Initiate.
@@ -95,48 +123,55 @@ public class OfficeFloorEntry extends
 	}
 
 	/**
-	 * Obtains the {@link OfficeFloorOfficeModel} by the input Id.
+	 * Obtains the {@link OfficeFloorOfficeModel} for the {@link OfficeEntry}.
 	 * 
-	 * @param id
-	 *            Id of the {@link OfficeFloorOfficeModel}.
+	 * @param officeEntry
+	 *            {@link OfficeEntry}.
 	 * @return {@link OfficeFloorOfficeModel}.
 	 * @throws Exception
 	 *             If not found.
 	 */
-	public OfficeFloorOfficeModel getOfficeFloorOfficeModel(String id)
+	public OfficeFloorOfficeModel getOfficeFloorOfficeModel(
+			OfficeEntry officeEntry) throws Exception {
+		return this.getModel(officeEntry, this.officeMap, "Unknown office '"
+				+ officeEntry.getId() + "' for the office floor "
+				+ this.getId());
+	}
+
+	/**
+	 * Obtains the {@link OfficeEntry} for the {@link OfficeFloorOfficeModel}.
+	 * 
+	 * @param officeModel
+	 *            {@link OfficeFloorOfficeModel}.
+	 * @return {@link OfficeEntry}.
+	 * @throws Exception
+	 *             If not found.
+	 */
+	public OfficeEntry getOfficeEntry(OfficeFloorOfficeModel officeModel)
 			throws Exception {
-
-		// Obtain the Office
-		if (id != null) {
-			for (OfficeFloorOfficeModel office : this.getModel().getOffices()) {
-				if (id.equals(office.getName())) {
-					return office;
-				}
-			}
-		}
-
-		// Not exist if here
-		throw new Exception("Unknown office '" + id + "' for the office floor "
+		return this.getEntry(officeModel, this.officeMap, "Unknown office '"
+				+ officeModel.getName() + "' for the office floor "
 				+ this.getId());
 	}
 
 	/**
 	 * Obtains the {@link OfficeTeamModel}.
 	 * 
-	 * @param officeId
-	 *            Id of the {@link net.officefloor.frame.api.manage.Office}.
+	 * @param officeEntry
+	 *            {@link OfficeEntry}.
 	 * @param teamName
-	 *            Name of the {@link net.officefloor.frame.spi.team.Team}.
+	 *            Name of the {@link ExternalTeamModel} on the
+	 *            {@link OfficeModel}.
 	 * @return {@link OfficeTeamModel}.
 	 * @throws Exception
 	 *             If not found.
 	 */
-	public OfficeTeamModel getOfficeTeamModel(String officeId, String teamName)
-			throws Exception {
+	public OfficeTeamModel getOfficeTeamModel(OfficeEntry officeEntry,
+			String teamName) throws Exception {
 
 		// Obtain the Office
 		OfficeFloorOfficeModel office = this
-				.getOfficeFloorOfficeModel(officeId);
+				.getOfficeFloorOfficeModel(officeEntry);
 
 		// Obtain the Team from the Office
 		for (OfficeTeamModel team : office.getTeams()) {
@@ -147,6 +182,118 @@ public class OfficeFloorEntry extends
 
 		// Not exist if here
 		throw new Exception("Unknown team '" + teamName + "' for office '"
-				+ officeId + "'");
+				+ office.getName() + "' of office floor " + this.getId());
+	}
+
+	/**
+	 * Obtains the {@link ManagedObjectSourceEntry} for the
+	 * {@link ManagedObjectSourceModel}.
+	 * 
+	 * @param mosModel
+	 *            {@link ManagedObjectSourceModel}.
+	 * @return {@link ManagedObjectSourceEntry}.
+	 * @throws Exception
+	 *             If not found.
+	 */
+	public ManagedObjectSourceEntry getManagedObjectSourceEntry(
+			ManagedObjectSourceModel mosModel) throws Exception {
+		return this.getEntry(mosModel, this.managedObjectSourceMap,
+				"No managed object source '" + mosModel.getId()
+						+ "' on office floor " + this.getId());
+	}
+
+	/**
+	 * Obtains the {@link TeamEntry} for the {@link TeamModel}.
+	 * 
+	 * @param teamModel
+	 *            {@link TeamModel}.
+	 * @return {@link TeamEntry}.
+	 * @throws Exception
+	 *             If not found.
+	 */
+	public TeamEntry getTeamEntry(TeamModel teamModel) throws Exception {
+		return this.getEntry(teamModel, this.teamMap, "No team '"
+				+ teamModel.getId() + "' on office floor " + this.getId());
+	}
+
+	/**
+	 * Obtains the {@link OfficeEntry} instances of this
+	 * {@link OfficeFloorEntry}.
+	 * 
+	 * @return Listing of all the {@link OfficeEntry} instances of this
+	 *         {@link OfficeFloorEntry}.
+	 * @throws Exception
+	 *             If failure in obtaining the listing.
+	 */
+	public OfficeEntry[] getOfficeEntries() throws Exception {
+		List<OfficeEntry> officeEntries = new LinkedList<OfficeEntry>();
+		for (OfficeFloorOfficeModel officeModel : this.getModel().getOffices()) {
+			OfficeEntry officeEntry = this.getOfficeEntry(officeModel);
+			officeEntries.add(officeEntry);
+		}
+		return officeEntries.toArray(new OfficeEntry[0]);
+	}
+
+	/**
+	 * Obtains all the {@link WorkEntry} instances of this
+	 * {@link OfficeFloorEntry}.
+	 * 
+	 * @return Listing of all the {@link WorkEntry} instances of this
+	 *         {@link OfficeFloorEntry}.
+	 * @throws Exception
+	 *             If failure in obtaining the listing.
+	 */
+	public WorkEntry<?>[] getWorkEntries() throws Exception {
+		List<WorkEntry<?>> workEntries = new LinkedList<WorkEntry<?>>();
+		for (OfficeEntry officeEntry : this.getOfficeEntries()) {
+			RoomEntry roomEntry = officeEntry.getRoomEntry(officeEntry
+					.getModel().getRoom());
+			for (DeskEntry deskEntry : roomEntry.getDeskEntries()) {
+				for (DeskWorkModel workModel : deskEntry.getModel().getWorks()) {
+					WorkEntry<?> workEntry = deskEntry.getWorkEntry(workModel);
+					workEntries.add(workEntry);
+				}
+			}
+		}
+		return workEntries.toArray(new WorkEntry<?>[0]);
+	}
+
+	/**
+	 * Obtains all the {@link ManagedObjectSourceEntry} instances of this
+	 * {@link OfficeFloorEntry}.
+	 * 
+	 * @return Listing of all the {@link ManagedObjectSourceEntry} instances of
+	 *         this {@link OfficeFloorEntry}.
+	 * @throws Exception
+	 *             If failure in obtaining the listing.
+	 */
+	public ManagedObjectSourceEntry[] getManagedObjectSourceEntries()
+			throws Exception {
+		List<ManagedObjectSourceEntry> mosEntries = new LinkedList<ManagedObjectSourceEntry>();
+		for (ManagedObjectSourceModel mosModel : this.getModel()
+				.getManagedObjectSources()) {
+			ManagedObjectSourceEntry mosEntry = this
+					.getManagedObjectSourceEntry(mosModel);
+			mosEntries.add(mosEntry);
+		}
+		return mosEntries.toArray(new ManagedObjectSourceEntry[0]);
+	}
+
+	/**
+	 * Obtains all the {@link TeamEntry} instances of this
+	 * {@link OfficeFloorEntry}.
+	 * 
+	 * @return Listing of all the {@link TeamEntry} instances of this
+	 *         {@link OfficeFloorEntry}.
+	 * @throws Exception
+	 *             If failure in obtaining the listing.
+	 */
+	public TeamEntry[] getTeamEntries() throws Exception {
+		List<TeamEntry> teamEntries = new LinkedList<TeamEntry>();
+		for (TeamModel teamModel : this.getModel().getTeams()) {
+			TeamEntry teamEntry = this.getTeamEntry(teamModel);
+			teamEntries.add(teamEntry);
+		}
+		return teamEntries.toArray(new TeamEntry[0]);
 	}
 }

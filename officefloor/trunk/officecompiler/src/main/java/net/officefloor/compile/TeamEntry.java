@@ -52,9 +52,6 @@ public class TeamEntry extends AbstractEntry<OfficeFloorBuilder, TeamModel> {
 		TeamEntry team = new TeamEntry(configuration.getId(), configuration,
 				officeFloorEntry);
 
-		// Register the team entry
-		context.getTeamRegistry().put(team.getId(), team);
-
 		// Return the team entry
 		return team;
 	}

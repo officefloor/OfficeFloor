@@ -16,12 +16,8 @@
  */
 package net.officefloor.compile;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.BuilderFactory;
-import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ModelRepository;
 
@@ -30,6 +26,10 @@ import net.officefloor.repository.ModelRepository;
  * {@link net.officefloor.frame.api.manage.OfficeFloor}.
  * 
  * @author Daniel
+ */
+/**
+ * @author Daniel
+ *
  */
 public class OfficeFloorCompilerContext {
 
@@ -52,41 +52,6 @@ public class OfficeFloorCompilerContext {
 	 * {@link LoaderContext}.
 	 */
 	private final LoaderContext loaderContext;
-
-	/**
-	 * Registry of the {@link TaskEntry}.
-	 */
-	private final Map<FlowItemModel, TaskEntry<?>> taskRegistry = new HashMap<FlowItemModel, TaskEntry<?>>();
-
-	/**
-	 * Registry of the {@link WorkEntry}.
-	 */
-	private final Map<String, WorkEntry<?>> workRegistry = new HashMap<String, WorkEntry<?>>();
-
-	/**
-	 * Registry of the {@link DeskEntry}.
-	 */
-	private final Map<String, DeskEntry> deskRegistry = new HashMap<String, DeskEntry>();
-
-	/**
-	 * Registry of the {@link RoomEntry}.
-	 */
-	private final Map<String, RoomEntry> roomEntry = new HashMap<String, RoomEntry>();
-
-	/**
-	 * Registry of the {@link OfficeEntry}.
-	 */
-	private final Map<String, OfficeEntry> officeRegistry = new HashMap<String, OfficeEntry>();
-
-	/**
-	 * Registry of the {@link ManagedObjectSourceEntry}.
-	 */
-	private final Map<String, ManagedObjectSourceEntry> mosRegistry = new HashMap<String, ManagedObjectSourceEntry>();
-
-	/**
-	 * Registry of the {@link TeamEntry}.
-	 */
-	private final Map<String, TeamEntry> teamRegistry = new HashMap<String, TeamEntry>();
 
 	/**
 	 * Initiate.
@@ -146,66 +111,4 @@ public class OfficeFloorCompilerContext {
 		return this.loaderContext;
 	}
 
-	/**
-	 * Obtains the registry of {@link TaskEntry} instances.
-	 * 
-	 * @return Registry of {@link TaskEntry} instances.
-	 */
-	public Map<FlowItemModel, TaskEntry<?>> getTaskRegistry() {
-		return this.taskRegistry;
-	}
-
-	/**
-	 * Obtains the registry of {@link WorkEntry} instances.
-	 * 
-	 * @return Registry of {@link WorkEntry} instances.
-	 */
-	public Map<String, WorkEntry<?>> getWorkRegistry() {
-		return this.workRegistry;
-	}
-
-	/**
-	 * Obtains the registry of {@link DeskEntry} instances.
-	 * 
-	 * @return Registry of {@link DeskEntry} instances.
-	 */
-	public Map<String, DeskEntry> getDeskRegistry() {
-		return this.deskRegistry;
-	}
-
-	/**
-	 * Obtains the registry of {@link RoomEntry} instances.
-	 * 
-	 * @return Registry of {@link RoomEntry} instances.
-	 */
-	public Map<String, RoomEntry> getRoomEntry() {
-		return this.roomEntry;
-	}
-
-	/**
-	 * Obtains the registry of {@link OfficeEntry} instances.
-	 * 
-	 * @return Registry of {@link OfficeEntry} instances.
-	 */
-	public Map<String, OfficeEntry> getOfficeRegistry() {
-		return this.officeRegistry;
-	}
-
-	/**
-	 * Obtains the registry of {@link ManagedObjectSourceEntry} instances.
-	 * 
-	 * @return Registry of {@link ManagedObjectSourceEntry} instances.
-	 */
-	public Map<String, ManagedObjectSourceEntry> getManagedObjectSourceRegistry() {
-		return this.mosRegistry;
-	}
-
-	/**
-	 * Obtains the registry of {@link TeamEntry} instances.
-	 * 
-	 * @return Registry of {@link TeamEntry} instances.
-	 */
-	public Map<String, TeamEntry> getTeamRegistry() {
-		return this.teamRegistry;
-	}
 }
