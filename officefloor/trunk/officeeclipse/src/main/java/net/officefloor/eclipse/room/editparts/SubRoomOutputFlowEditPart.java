@@ -56,15 +56,11 @@ public class SubRoomOutputFlowEditPart extends
 
 				// TODO Handle always only connected to one type
 
-				// Obtain the type of link
-				String linkType = (String) request.getNewObject();
-
 				if (target instanceof SubRoomInputFlowModel) {
 					// Create the flow connection
 					OutputFlowToInputFlowModel conn = new OutputFlowToInputFlowModel();
 					conn.setOutput((SubRoomOutputFlowModel) source);
 					conn.setInput((SubRoomInputFlowModel) target);
-					conn.setLinkType(linkType);
 					conn.connect();
 					return conn;
 
@@ -73,7 +69,6 @@ public class SubRoomOutputFlowEditPart extends
 					OutputFlowToExternalFlowModel conn = new OutputFlowToExternalFlowModel();
 					conn.setOutput((SubRoomOutputFlowModel) source);
 					conn.setExternalFlow((ExternalFlowModel) target);
-					conn.setLinkType(linkType);
 					conn.connect();
 					return conn;
 
