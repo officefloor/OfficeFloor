@@ -16,12 +16,10 @@
  */
 package net.officefloor.compile;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import net.officefloor.desk.DeskLoader;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.repository.ConfigurationItem;
 
 /**
@@ -64,11 +62,10 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 
 		// Load the work
 		for (DeskWorkModel deskWork : deskModel.getWorks()) {
-			WorkEntry.loadWork(deskWork, deskEntry, context);
+			WorkEntry<?> workEntry = WorkEntry.loadWork(deskWork, deskEntry,
+					context);
+			deskEntry.workMap.put(deskWork, workEntry);
 		}
-
-		// Register the desk entry
-		context.getDeskRegistry().put(deskEntry.getId(), deskEntry);
 
 		// Return the desk entry
 		return deskEntry;
@@ -85,9 +82,14 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	private final RoomEntry parentRoom;
 
 	/**
-	 * Registry of {@link WorkEntry} instances by name.
+	 * {@link DeskWorkModel} to {@link DeskEntry} map.
 	 */
-	private final Map<String, WorkEntry<?>> workEntries = new HashMap<String, WorkEntry<?>>();
+	private final ModelEntryMap<DeskWorkModel, WorkEntry<?>> workMap = new ModelEntryMap<DeskWorkModel, WorkEntry<?>>();
+
+	/**
+	 * {@link FlowItemModel} to {@link TaskEntry} map.
+	 */
+	private final ModelEntryMap<FlowItemModel, TaskEntry<?>> taskMap = new ModelEntryMap<FlowItemModel, TaskEntry<?>>();
 
 	/**
 	 * Initiate.
@@ -127,33 +129,69 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	}
 
 	/**
-	 * Registers the {@link WorkEntry} of this {@link DeskEntry} by its name.
+	 * Obtains the {@link DeskWorkModel} for the name of the
+	 * {@link DeskWorkModel}.
 	 * 
 	 * @param workName
-	 *            Name of the {@link WorkEntry}.
-	 * @param workEntry
-	 *            {@link WorkEntry}.
+	 *            Name of the {@link DeskWorkModel}.
+	 * @return {@link DeskWorkModel}.
+	 * @throws Exception
+	 *             If not found.
 	 */
-	public void registerWorkEntry(String workName, WorkEntry<?> workEntry) {
-		this.workEntries.put(workName, workEntry);
+	public DeskWorkModel getWorkModel(String workName) throws Exception {
+
+		// Obtain the work model
+		for (DeskWorkModel workModel : this.getModel().getWorks()) {
+			if (workName.equals(workModel.getId())) {
+				return workModel;
+			}
+		}
+
+		// If here not found
+		throw new Exception("No work '" + workName + "' on desk "
+				+ this.getId());
 	}
 
 	/**
-	 * Obtains the {@link WorkEntry} by its name.
+	 * Obtains the {@link WorkEntry} for the {@link DeskWorkModel}.
 	 * 
-	 * @param workName
-	 *            Name of the {@link WorkEntry}.
+	 * @param workModel
+	 *            {@link DeskWorkModel}.
 	 * @return {@link WorkEntry}.
 	 * @throws Exception
-	 *             If no {@link WorkEntry} by the name.
+	 *             If not found.
 	 */
-	public WorkEntry<?> getWorkEntry(String workName) throws Exception {
-		WorkEntry<?> workEntry = this.workEntries.get(workName);
-		if (workEntry == null) {
-			throw new Exception("No work '" + workName + "' on desk '"
-					+ this.getId() + "'");
-		}
-		return workEntry;
+	public WorkEntry<?> getWorkEntry(DeskWorkModel workModel) throws Exception {
+		return this.getEntry(workModel, this.workMap, "No work '"
+				+ workModel.getId() + "' on desk " + this.getId());
 	}
-	
+
+	/**
+	 * Obtains the {@link TaskEntry} for the {@link FlowItemModel}.
+	 * 
+	 * @param flowItemModel
+	 *            {@link FlowItemModel}.
+	 * @return {@link TaskEntry}.
+	 * @throws Exception
+	 *             If not found.
+	 */
+	public TaskEntry<?> getTaskEntry(FlowItemModel flowItemModel)
+			throws Exception {
+		return this.getEntry(flowItemModel, this.taskMap, "No flow item '"
+				+ flowItemModel.getId() + "' on desk " + this.getId());
+	}
+
+	/**
+	 * Registers the {@link TaskEntry} with this {@link DeskEntry}.
+	 * 
+	 * @param flowItemModel
+	 *            {@link FlowItemModel}.
+	 * @param taskEntry
+	 *            {@link TaskEntry}.
+	 */
+	protected void registerTask(FlowItemModel flowItemModel,
+			TaskEntry<?> taskEntry) {
+		this.taskMap.put(flowItemModel, taskEntry);
+	}
+
 }

@@ -18,6 +18,8 @@ package net.officefloor.compile;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,9 +78,6 @@ public class WorkEntry<W extends Work> extends
 		WorkEntry<W> workEntry = new WorkEntry<W>(deskWork.getId(), deskWork,
 				builder, deskEntry);
 
-		// Register the work entry
-		context.getWorkRegistry().put(workEntry.getId(), workEntry);
-
 		// Create the registry of Desk Task instances
 		Map<String, DeskTaskModel> tasks = new HashMap<String, DeskTaskModel>();
 		for (DeskTaskModel task : deskWork.getTasks()) {
@@ -97,14 +96,10 @@ public class WorkEntry<W extends Work> extends
 				// Load the task entry
 				TaskEntry taskEntry = TaskEntry.loadTask(flowItem, deskTask,
 						workEntry, context);
-
-				// Register the task entry with the work entry
-				workEntry.registerTask(flowItem.getId(), taskEntry);
+				workEntry.taskMap.put(flowItem, taskEntry);
+				workEntry.tasks.add(taskEntry);
 			}
 		}
-
-		// Register the work entry with the desk
-		deskEntry.registerWorkEntry(deskWork.getId(), workEntry);
 
 		// Return the work entry
 		return workEntry;
@@ -116,9 +111,14 @@ public class WorkEntry<W extends Work> extends
 	private final DeskEntry deskEntry;
 
 	/**
+	 * {@link FlowItemModel} to {@link TaskEntry} map.
+	 */
+	private final ModelEntryMap<FlowItemModel, TaskEntry<?>> taskMap = new ModelEntryMap<FlowItemModel, TaskEntry<?>>();
+
+	/**
 	 * {@link TaskEntry} instances of this {@link WorkEntry}.
 	 */
-	private final Map<String, TaskEntry<W>> tasks = new HashMap<String, TaskEntry<W>>();
+	private final List<TaskEntry<W>> tasks = new LinkedList<TaskEntry<W>>();
 
 	/**
 	 * Initiate.
@@ -138,28 +138,6 @@ public class WorkEntry<W extends Work> extends
 			WorkBuilder<W> builder, DeskEntry deskEntry) {
 		super(workId, builder, workModel);
 		this.deskEntry = deskEntry;
-	}
-
-	/**
-	 * Registers the {@link TaskEntry}.
-	 * 
-	 * @param taskName
-	 *            Name of the {@link net.officefloor.frame.api.execute.Task}.
-	 * @param taskEntry
-	 *            {@link TaskEntry}.
-	 */
-	public void registerTask(String taskName, TaskEntry<W> taskEntry) {
-		this.tasks.put(taskName, taskEntry);
-	}
-
-	/**
-	 * Obtains the registry of the {@link TaskEntry} instances for this
-	 * {@link WorkEntry}.
-	 * 
-	 * @return {@link TaskEntry} registry.
-	 */
-	public Map<String, TaskEntry<W>> getTaskRegistry() {
-		return this.tasks;
 	}
 
 	/**
@@ -213,16 +191,30 @@ public class WorkEntry<W extends Work> extends
 	}
 
 	/**
+	 * Obtains the {@link TaskEntry} for the {@link FlowItemModel}.
+	 * 
+	 * @param flowItemModel
+	 *            {@link FlowItemModel}.
+	 * @return {@link TaskEntry}.
+	 * @throws Exception
+	 *             If not found.
+	 */
+	public TaskEntry<?> getTaskEntry(FlowItemModel flowItemModel)
+			throws Exception {
+		return this.getEntry(flowItemModel, this.taskMap, "No task '"
+				+ flowItemModel.getId() + "' on work "
+				+ this.getModel().getId() + " of desk "
+				+ this.deskEntry.getId());
+	}
+
+	/**
 	 * Builds the remaining aspects of the {@link Work}.
 	 * 
-	 * @param compilerContext
-	 *            {@link OfficeFloorCompilerContext}.
 	 * @throws Exception
 	 *             If fails.
 	 */
 	@SuppressWarnings("unchecked")
-	public void build(OfficeFloorCompilerContext compilerContext)
-			throws Exception {
+	public void build() throws Exception {
 
 		// Create the canonical work name
 		String canonicalWorkName = this.getCanonicalWorkName();
@@ -245,7 +237,7 @@ public class WorkEntry<W extends Work> extends
 
 		// Create the listing of external managed objects
 		Set<ExternalManagedObjectModel> externalManagedObjects = new HashSet<ExternalManagedObjectModel>();
-		for (TaskEntry task : this.tasks.values()) {
+		for (TaskEntry task : this.tasks) {
 			for (DeskTaskObjectModel taskObject : task.getDeskTaskModel()
 					.getObjects()) {
 
@@ -269,8 +261,8 @@ public class WorkEntry<W extends Work> extends
 		}
 
 		// Build the tasks
-		for (TaskEntry taskEntry : this.tasks.values()) {
-			taskEntry.build(compilerContext);
+		for (TaskEntry taskEntry : this.tasks) {
+			taskEntry.build();
 		}
 	}
 
@@ -288,36 +280,20 @@ public class WorkEntry<W extends Work> extends
 		// Obtain the external managed object name
 		String externalMoName = deskMo.getName();
 
-		// Obtain desk room name
-		String deskRoomName = this.deskEntry.getDeskName();
+		// Obtain the desk sub room
+		SubRoomModel subRoom = this.deskEntry.getParentRoom().getSubRoom(
+				this.deskEntry);
+
+		// Obtain the room containing the desk
+		RoomEntry roomEntry = this.deskEntry.getParentRoom();
 
 		// Obtain the office external managed object
 		OfficeEntry officeEntry = null;
-		boolean isDesk = true;
-		RoomEntry roomEntry = this.deskEntry.getParentRoom();
 		while (roomEntry != null) {
 
-			// Obtain the sub room for the desk/room
-			SubRoomModel subRoom = null;
-			if (isDesk) {
-				subRoom = roomEntry.getSubRoom(deskRoomName);
-				isDesk = false; // no longer a desk
-			} else {
-				subRoom = roomEntry.getSubRoom(deskRoomName);
-			}
-
-			// Obtain the sub room managed object
-			SubRoomManagedObjectModel subRoomMo = null;
-			for (SubRoomManagedObjectModel srMo : subRoom.getManagedObjects()) {
-				if (externalMoName.equals(srMo.getName())) {
-					subRoomMo = srMo;
-				}
-			}
-			if (subRoomMo == null) {
-				throw new Exception("Can not find managed object '"
-						+ externalMoName + "' for sub room '" + deskRoomName
-						+ "'");
-			}
+			// Obtain the external managed object name on the desk sub room
+			SubRoomManagedObjectModel subRoomMo = roomEntry
+					.getSubRoomManagedObject(subRoom, externalMoName);
 
 			// Obtain the external managed object name for the room
 			externalMoName = subRoomMo.getExternalManagedObject()
@@ -333,7 +309,7 @@ public class WorkEntry<W extends Work> extends
 
 		// Obtain office from office floor
 		OfficeFloorOfficeModel office = officeFloorEntry
-				.getOfficeFloorOfficeModel(officeEntry.getId());
+				.getOfficeFloorOfficeModel(officeEntry);
 
 		// Obtain office managed object
 		OfficeManagedObjectModel officeMo = null;

@@ -17,8 +17,6 @@
 package net.officefloor.compile;
 
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.model.office.FlowItemModel;
-import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
@@ -65,14 +63,13 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 		OfficeEntry officeEntry = new OfficeEntry(officeId, builder, model,
 				officeFloorEntry);
 
-		// Register the office entry
-		context.getOfficeRegistry().put(officeEntry.getId(), officeEntry);
-
 		// Load the Room of the Office
 		OfficeRoomModel room = model.getRoom();
 		if (room != null) {
-			RoomEntry.loadRoom(context.getConfigurationContext()
-					.getConfigurationItem(room.getId()), officeEntry, context);
+			RoomEntry roomEntry = RoomEntry.loadRoom(context
+					.getConfigurationContext().getConfigurationItem(
+							room.getId()), officeEntry, context);
+			officeEntry.roomMap.put(room, roomEntry);
 		}
 
 		// Return the office entry
@@ -83,6 +80,11 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 	 * {@link OfficeFloorEntry}.
 	 */
 	private final OfficeFloorEntry officeFloorEntry;
+
+	/**
+	 * {@link OfficeRoomModel} to {@link RoomEntry} map.
+	 */
+	private final ModelEntryMap<OfficeRoomModel, RoomEntry> roomMap = new ModelEntryMap<OfficeRoomModel, RoomEntry>();
 
 	/**
 	 * Initiate.
@@ -112,82 +114,17 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 	}
 
 	/**
-	 * Obtains {@link OfficeDeskModel} by the input desk id.
+	 * Obtains the {@link RoomEntry} for the {@link OfficeRoomModel}.
 	 * 
-	 * @param deskId
-	 *            Id of the {@link OfficeDeskModel}.
-	 * @return {@link OfficeDeskModel}.
-	 */
-	public OfficeDeskModel getOfficeDeskModel(String deskId) {
-		return this.getOfficeDeskModel(deskId, this.getModel().getRoom());
-	}
-
-	/**
-	 * Obtains the {@link FlowItemModel}.
-	 * 
-	 * @param deskId
-	 *            Id of the {@link OfficeDeskModel} containing the
-	 *            {@link FlowItemModel}.
-	 * @param flowItemId
-	 *            Id of the {@link FlowItemModel}.
-	 * @return {@link FlowItemModel}.
+	 * @param officeRoom
+	 *            {@link OfficeRoomModel}.
+	 * @return {@link RoomEntry}.
 	 * @throws Exception
 	 *             If not found.
 	 */
-	public FlowItemModel getFlowItemModel(String deskId, String flowItemId)
-			throws Exception {
-		// Obtain the desk model
-		OfficeDeskModel desk = this.getOfficeDeskModel(deskId, this.getModel()
-				.getRoom());
-
-		// Obtain the flow item
-		if (desk != null) {
-			for (FlowItemModel flowItem : desk.getFlowItems()) {
-				if (flowItemId.equals(flowItem.getId())) {
-					return flowItem;
-				}
-			}
-		}
-
-		// Not found if here
-		throw new Exception("Can not find flow item '" + flowItemId
-				+ "' of desk '" + deskId + "'");
-	}
-
-	/**
-	 * Recursive method to obtain the {@link OfficeDeskModel}.
-	 * 
-	 * @param deskId
-	 *            Id of the {@link OfficeDeskModel}.
-	 * @param room
-	 *            {@link OfficeRoomModel}.
-	 * @return {@link OfficeDeskModel} or <code>null</code> if not found.
-	 */
-	private OfficeDeskModel getOfficeDeskModel(String deskId,
-			OfficeRoomModel room) {
-
-		// Ensure have room
-		if (room == null) {
-			return null;
-		}
-
-		// Search desks of this room
-		for (OfficeDeskModel desk : room.getDesks()) {
-			if (deskId.equals(desk.getId())) {
-				return desk;
-			}
-		}
-
-		// Search sub rooms
-		for (OfficeRoomModel subRoom : room.getSubRooms()) {
-			OfficeDeskModel desk = this.getOfficeDeskModel(deskId, subRoom);
-			if (desk != null) {
-				return desk;
-			}
-		}
-
-		// Not found within this room
-		return null;
+	public RoomEntry getRoomEntry(OfficeRoomModel officeRoom) throws Exception {
+		return this.getEntry(officeRoom, this.roomMap, "No room '"
+				+ officeRoom.getName() + "' on office " + this.getId());
 	}
 
 	/**
@@ -200,7 +137,7 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 
 		// Obtain the office of the office floor
 		OfficeFloorOfficeModel office = this.officeFloorEntry
-				.getOfficeFloorOfficeModel(this.getId());
+				.getOfficeFloorOfficeModel(this);
 
 		// Register the managed objects
 		for (OfficeManagedObjectModel mo : office.getManagedObjects()) {
