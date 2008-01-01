@@ -23,6 +23,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
@@ -246,12 +247,16 @@ public class OfficeFloorEntry extends
 	public WorkEntry<?>[] getWorkEntries() throws Exception {
 		List<WorkEntry<?>> workEntries = new LinkedList<WorkEntry<?>>();
 		for (OfficeEntry officeEntry : this.getOfficeEntries()) {
-			RoomEntry roomEntry = officeEntry.getRoomEntry(officeEntry
-					.getModel().getRoom());
-			for (DeskEntry deskEntry : roomEntry.getDeskEntries()) {
-				for (DeskWorkModel workModel : deskEntry.getModel().getWorks()) {
-					WorkEntry<?> workEntry = deskEntry.getWorkEntry(workModel);
-					workEntries.add(workEntry);
+			OfficeRoomModel officeRoom = officeEntry.getModel().getRoom();
+			if (officeRoom != null) {
+				RoomEntry roomEntry = officeEntry.getRoomEntry(officeRoom);
+				for (DeskEntry deskEntry : roomEntry.getDeskEntries()) {
+					for (DeskWorkModel workModel : deskEntry.getModel()
+							.getWorks()) {
+						WorkEntry<?> workEntry = deskEntry
+								.getWorkEntry(workModel);
+						workEntries.add(workEntry);
+					}
 				}
 			}
 		}

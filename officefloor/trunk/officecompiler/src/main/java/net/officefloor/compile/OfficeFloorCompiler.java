@@ -98,25 +98,29 @@ public class OfficeFloorCompiler {
 					.getOfficeEntry(officeModel);
 
 			OfficeRoomModel officeRoom = officeEntry.getModel().getRoom();
-			RoomEntry roomEntry = officeEntry.getRoomEntry(officeRoom);
-			for (DeskEntry deskEntry : roomEntry.getDeskEntries()) {
-				for (DeskWorkModel workModel : deskEntry.getModel().getWorks()) {
-					WorkEntry<?> workEntry = deskEntry.getWorkEntry(workModel);
-					System.out.print("   " + workEntry.getCanonicalWorkName()
-							+ " [");
-					for (DeskTaskModel taskModel : workEntry.getModel()
-							.getTasks()) {
-						for (DeskTaskToFlowItemModel taskToFlow : taskModel
-								.getFlowItems()) {
-							FlowItemModel flowItemModel = taskToFlow
-									.getFlowItem();
-							TaskEntry<?> taskEntry = workEntry
-									.getTaskEntry(flowItemModel);
-							System.out
-									.print(" " + taskEntry.getModel().getId());
+			if (officeRoom != null) {
+				RoomEntry roomEntry = officeEntry.getRoomEntry(officeRoom);
+				for (DeskEntry deskEntry : roomEntry.getDeskEntries()) {
+					for (DeskWorkModel workModel : deskEntry.getModel()
+							.getWorks()) {
+						WorkEntry<?> workEntry = deskEntry
+								.getWorkEntry(workModel);
+						System.out.print("   "
+								+ workEntry.getCanonicalWorkName() + " [");
+						for (DeskTaskModel taskModel : workEntry.getModel()
+								.getTasks()) {
+							for (DeskTaskToFlowItemModel taskToFlow : taskModel
+									.getFlowItems()) {
+								FlowItemModel flowItemModel = taskToFlow
+										.getFlowItem();
+								TaskEntry<?> taskEntry = workEntry
+										.getTaskEntry(flowItemModel);
+								System.out.print(" "
+										+ taskEntry.getModel().getId());
+							}
 						}
+						System.out.println(" ]");
 					}
-					System.out.println(" ]");
 				}
 			}
 		}
