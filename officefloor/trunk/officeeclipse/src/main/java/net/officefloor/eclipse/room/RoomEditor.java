@@ -18,10 +18,7 @@ package net.officefloor.eclipse.room;
 
 import java.util.Map;
 
-import net.officefloor.desk.DeskLoader;
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.commands.TagFactory;
 import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.room.editparts.ExternalFlowEditPart;
@@ -46,13 +43,9 @@ import net.officefloor.repository.ModelRepository;
 import net.officefloor.room.RoomLoader;
 
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.PolygonDecoration;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.palette.ConnectionCreationToolEntry;
-import org.eclipse.gef.palette.PaletteGroup;
 
 /**
  * Editor for the {@link net.officefloor.model.room.RoomModel}.
@@ -147,77 +140,6 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 						return figure;
 					}
 				});
-
-		// Create the Figure Factory for flow links
-		FigureFactory<Object> linkFigureFactory = new FigureFactory<Object>() {
-			public IFigure createFigure(Object model) {
-
-				// Obtain the link type
-				String linkType;
-				if (model instanceof OutputFlowToInputFlowModel) {
-					linkType = ((OutputFlowToInputFlowModel) model)
-							.getLinkType();
-				} else if (model instanceof OutputFlowToExternalFlowModel) {
-					linkType = ((OutputFlowToExternalFlowModel) model)
-							.getLinkType();
-				} else {
-					// Unknown model type
-					throw new OfficeFloorPluginFailure("Unknown model type: "
-							+ model.getClass().getName());
-				}
-
-				// Create link
-				if (DeskLoader.SEQUENTIAL_LINK_TYPE.equals(linkType)) {
-					PolylineConnection figure = new PolylineConnection();
-					figure.setTargetDecoration(new PolygonDecoration());
-					return figure;
-
-				} else if (DeskLoader.PARALLEL_LINK_TYPE.equals(linkType)) {
-					PolylineConnection figure = new PolylineConnection();
-					figure.setTargetDecoration(new PolygonDecoration());
-					figure.setSourceDecoration(new PolygonDecoration());
-					return figure;
-
-				} else if (DeskLoader.ASYNCHRONOUS_LINK_TYPE.equals(linkType)) {
-					PolylineConnection figure = new PolylineConnection();
-					figure.setTargetDecoration(new PolygonDecoration());
-					figure.setLineStyle(Graphics.LINE_DASH);
-					return figure;
-
-				} else {
-					PolylineConnection figure = new PolylineConnection();
-					figure.setForegroundColor(ColorConstants.red);
-					return figure;
-				}
-			}
-		};
-
-		// Room Output to Room Input
-		OfficeFloorConnectionEditPart.registerFigureFactory(
-				OutputFlowToInputFlowModel.class, linkFigureFactory);
-
-		// Room Output to External Flow Item
-		OfficeFloorConnectionEditPart.registerFigureFactory(
-				OutputFlowToExternalFlowModel.class, linkFigureFactory);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#initialisePaletteRoot()
-	 */
-	protected void initialisePaletteRoot() {
-		// Add the link group
-		PaletteGroup linkGroup = new PaletteGroup("Links");
-		linkGroup.add(new ConnectionCreationToolEntry("Sequential",
-				"sequential", new TagFactory(DeskLoader.SEQUENTIAL_LINK_TYPE),
-				null, null));
-		linkGroup.add(new ConnectionCreationToolEntry("Parallel", "parallel",
-				new TagFactory(DeskLoader.PARALLEL_LINK_TYPE), null, null));
-		linkGroup.add(new ConnectionCreationToolEntry("Asynchronous",
-				"asynchronous", new TagFactory(
-						DeskLoader.ASYNCHRONOUS_LINK_TYPE), null, null));
-		this.paletteRoot.add(linkGroup);
 	}
 
 }
