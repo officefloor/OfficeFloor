@@ -25,11 +25,9 @@
 			<object method="setInput" node="input" class="net.officefloor.model.room.OutputFlowToInputFlowModel">
 				<value method="setSubRoomName" node="input@sub-room"/>
 				<value method="setInputFlowName" node="input@name"/>
-				<value method="setLinkType" node="input@link"/>
 			</object>
 			<object method="setExternalFlow" node="external-flow" class="net.officefloor.model.room.OutputFlowToExternalFlowModel">
 				<value method="setExternalFlowName" node="external-flow@name"/>
-				<value method="setLinkType" node="external-flow@link"/>			
 			</object>
 		</object>
 		<object method="addManagedObject" node="managed-object" class="net.officefloor.model.room.SubRoomManagedObjectModel">

@@ -2,7 +2,6 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="String" name="sub room name"/>
 	<field type="String" name="input flow name"/>
-	<field type="String" name="link type"/>
 	<field type="SubRoomOutputFlowModel" name="output" end-field="input"/>
 	<field type="SubRoomInputFlowModel" name="input" end-list="output"/>
 </model>
