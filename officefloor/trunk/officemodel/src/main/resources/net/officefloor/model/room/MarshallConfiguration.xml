@@ -46,13 +46,11 @@
 						<attributes>
 							<attribute method="getSubRoomName" attribute="sub-room"/>
 							<attribute method="getInputFlowName" attribute="name"/>
-							<attribute method="getLinkType" attribute="link"/>
 						</attributes>
 					</object>
 					<object method="getExternalFlow" element="external-flow">
 						<attributes>
 							<attribute method="getExternalFlowName" attribute="name"/>
-							<attribute method="getLinkType" attribute="link"/>
 						</attributes>
 					</object>
 				</item>
