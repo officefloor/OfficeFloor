@@ -377,6 +377,28 @@ public class DeskLoader {
 			}
 		}
 
+		// Specify flow links
+		for (FlowItemModel flowItem : desk.getFlowItems()) {
+			for (FlowItemOutputModel flowItemOutput : flowItem.getOutputs()) {
+				FlowItemOutputToFlowItemModel conn = flowItemOutput
+						.getFlowItem();
+				if (conn != null) {
+					conn.setId(conn.getFlowItem().getId());
+				}
+			}
+		}
+
+		// Specify flow external links
+		for (FlowItemModel flowItem : desk.getFlowItems()) {
+			for (FlowItemOutputModel flowItemOutput : flowItem.getOutputs()) {
+				FlowItemOutputToExternalFlowModel conn = flowItemOutput
+						.getExternalFlow();
+				if (conn != null) {
+					conn.setName(conn.getExternalFlow().getName());
+				}
+			}
+		}
+
 		// Stores the desk
 		this.modelRepository.store(desk, configuration);
 	}

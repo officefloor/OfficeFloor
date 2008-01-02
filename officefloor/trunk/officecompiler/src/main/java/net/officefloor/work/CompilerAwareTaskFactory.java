@@ -17,8 +17,9 @@
 package net.officefloor.work;
 
 import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.DeskTaskModel;
+import net.officefloor.model.desk.FlowItemModel;
 
 /**
  * {@link TaskFactory} that is compiler aware.
@@ -32,9 +33,11 @@ public interface CompilerAwareTaskFactory<P extends Object, W extends Work, M ex
 	 * Initialises the {@link TaskFactory}.
 	 * 
 	 * @param task
-	 *            {@link DeskTaskModel} for the {@link TaskFactory}.
+	 *            {@link FlowItemModel} for the {@link TaskFactory}. A
+	 *            {@link FlowItemModel} is a particular instantiation of a
+	 *            {@link Task}.
 	 * @throws Exception
 	 *             If fails to initialise the {@link TaskFactory}.
 	 */
-	void initialiseTaskFactory(DeskTaskModel task) throws Exception;
+	void initialiseTaskFactory(FlowItemModel task) throws Exception;
 }

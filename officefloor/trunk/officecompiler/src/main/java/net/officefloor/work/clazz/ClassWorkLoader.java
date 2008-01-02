@@ -61,26 +61,37 @@ public class ClassWorkLoader implements WorkLoader {
 				// Obtain from the method signature
 				Class<?>[] paramTypes = method.getParameterTypes();
 
+				// Create to populate later
+				ParameterFactory[] parameters = new ParameterFactory[paramTypes.length];
+
 				// Create the listing of task objects and flows
 				List<TaskObjectModel> objects = new LinkedList<TaskObjectModel>();
 				List<TaskFlowModel> flows = new LinkedList<TaskFlowModel>();
 				int flowIndex = 0;
-				for (Class<?> paramType : paramTypes) {
+				for (int i = 0; i < paramTypes.length; i++) {
+					// Obtain the param type
+					Class<?> paramType = paramTypes[i];
+
 					// Determine if a flow
 					if ((Flow.class.isAssignableFrom(paramType))
 							|| (Flow.class.getName()
 									.equals(paramType.getName()))) {
-						flows
-								.add(new TaskFlowModel<Indexed>(null,
-										flowIndex++));
+						// Add as flow
+						flows.add(new TaskFlowModel<Indexed>(null, flowIndex));
+
+						// Specify the flow parameter factory
+						parameters[i] = new FlowParameterFactory(flowIndex);
+
+						// Increment for next flow
+						flowIndex++;
 					} else {
+						// Add as object
 						objects.add(new TaskObjectModel<Indexed>(null,
 								paramType.getName()));
+
+						// Object parameter factories added via Task Factory
 					}
 				}
-
-				// Create to populate later
-				ParameterFactory[] parameters = new ParameterFactory[paramTypes.length];
 
 				// Create the Task
 				TaskObjectModel[] objectArray = objects

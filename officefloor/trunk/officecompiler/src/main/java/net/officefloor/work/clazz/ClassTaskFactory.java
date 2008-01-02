@@ -17,12 +17,14 @@
 package net.officefloor.work.clazz;
 
 import java.lang.reflect.Method;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
+import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.work.CompilerAwareTaskFactory;
 
 /**
@@ -60,26 +62,44 @@ public class ClassTaskFactory implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.work.CompilerAwareTaskFactory#initialiseTaskFactory(net.officefloor.model.desk.DeskTaskModel)
+	 * @see net.officefloor.work.CompilerAwareTaskFactory#initialiseTaskFactory(net.officefloor.model.desk.FlowItemModel)
 	 */
 	@Override
-	public void initialiseTaskFactory(DeskTaskModel task) throws Exception {
+	public void initialiseTaskFactory(FlowItemModel task) throws Exception {
+
+		// Create the indexes of objects
+		List<Integer> objectIndexList = new LinkedList<Integer>();
+		for (int i = 0; i < this.parameters.length; i++) {
+			if (this.parameters[i] == null) {
+				// Object as not specified.
+				// Configuration indicates if parameter or managed object.
+				objectIndexList.add(new Integer(i));
+			}
+		}
+		Integer[] objectIndexes = objectIndexList.toArray(new Integer[0]);
 
 		// Ensure matching configuration
-		List<DeskTaskObjectModel> objects = task.getObjects();
-		if (objects.size() != this.parameters.length) {
+		List<FlowItemOutputModel> flowList = task.getOutputs();
+		List<DeskTaskObjectModel> objectList = task.getDeskTask().getTask()
+				.getObjects();
+		if ((objectList.size() + flowList.size()) != this.parameters.length) {
 			throw new IllegalArgumentException(
 					"Incorrect configuration as have " + this.parameters.length
 							+ " parameters but configration for only "
-							+ objects.size());
+							+ (objectList.size() + flowList.size()));
 		}
+		DeskTaskObjectModel[] objects = objectList
+				.toArray(new DeskTaskObjectModel[0]);
 
 		// Load the parameter factories
 		int moIndex = 0;
-		for (int i = 0; i < this.parameters.length; i++) {
+		for (int i = 0; i < objectIndexes.length; i++) {
 
-			// Obtain the corresponding object
-			DeskTaskObjectModel object = objects.get(i);
+			// Obtain the task object
+			DeskTaskObjectModel object = objects[i];
+
+			// Obtain the parameter index
+			int paramIndex = objectIndexes[i].intValue();
 
 			// Create the appropriate parameter factory
 			ParameterFactory parameterFactory;
@@ -89,8 +109,14 @@ public class ClassTaskFactory implements
 				parameterFactory = new ManagedObjectParameterFactory(moIndex++);
 			}
 
+			// Ensure parameter is not already specified
+			if (this.parameters[paramIndex] != null) {
+				throw new IllegalStateException("Object parameter "
+						+ paramIndex + " should not be specified");
+			}
+
 			// Specify the parameter factory
-			this.parameters[i] = parameterFactory;
+			this.parameters[paramIndex] = parameterFactory;
 		}
 	}
 
