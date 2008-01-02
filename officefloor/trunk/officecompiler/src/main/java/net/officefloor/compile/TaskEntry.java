@@ -22,11 +22,18 @@ import java.util.LinkedList;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.FlowItemOutputModel;
+import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
+import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.model.office.ExternalTeamModel;
@@ -238,20 +245,20 @@ public class TaskEntry<W extends Work> extends
 
 		// Initiate the task factory if necessary
 		if (taskFactory instanceof CompilerAwareTaskFactory) {
-			((CompilerAwareTaskFactory) taskFactory)
-					.initialiseTaskFactory(this.deskTask);
+			((CompilerAwareTaskFactory) taskFactory).initialiseTaskFactory(this
+					.getModel());
 		}
 
 		// Load details of task
 		this.getBuilder().setTaskFactory(taskFactory);
 
-		// Obtain the office
-		OfficeEntry officeEntry = this.workEntry.getOfficeEntry();
-
 		// Set team for flow item
 		ExternalTeamModel team = this.getOfficeTeamModel();
 		String teamName = team.getName();
 		this.getBuilder().setTeam(teamName);
+
+		// Obtain the office
+		OfficeEntry officeEntry = this.workEntry.getOfficeEntry();
 
 		// Obtain the office floor team instance
 		OfficeFloorEntry officeFloorEntry = officeEntry.getOfficeFloorEntry();
@@ -276,137 +283,280 @@ public class TaskEntry<W extends Work> extends
 					taskObject.getManagedObject().getName());
 		}
 
+		// Specify the linked flows
+		int flowIndex = 0;
+		for (FlowItemOutputModel flowItemOutput : this.getModel().getOutputs()) {
+
+			// Make the flow index accessible to anonymous class
+			final int accessibleFlowIndex = flowIndex;
+
+			// Flag as must be linked
+			boolean isLinked = false;
+
+			// Obtain the linked flow (from same desk)
+			FlowItemOutputToFlowItemModel linkedFlowItem = flowItemOutput
+					.getFlowItem();
+			if (linkedFlowItem != null) {
+
+				// Obtain the flow instigation strategy
+				final FlowInstigationStrategyEnum strategy = FlowInstigationStrategyEnum
+						.valueOf(linkedFlowItem.getLinkType());
+
+				// Link in the flow
+				this.linkFlow(linkedFlowItem.getFlowItem(), new FlowLinker() {
+					@Override
+					public void linkFlow(String workName, String taskName) {
+						if (workName == null) {
+							// On same work
+							TaskEntry.this.getBuilder().linkFlow(
+									accessibleFlowIndex, taskName, strategy);
+						} else {
+							// Different work
+							TaskEntry.this.getBuilder().linkFlow(
+									accessibleFlowIndex, workName, taskName,
+									strategy);
+						}
+					}
+				});
+
+				// Linked
+				isLinked = true;
+			}
+
+			// Obtain the linked flow (from another desk)
+			FlowItemOutputToExternalFlowModel linkedExternalFlow = flowItemOutput
+					.getExternalFlow();
+			if (linkedExternalFlow != null) {
+
+				// Obtain the flow instigation strategy
+				final FlowInstigationStrategyEnum strategy = FlowInstigationStrategyEnum
+						.valueOf(linkedFlowItem.getLinkType());
+
+				// Link in the flow
+				this.linkFlow(linkedExternalFlow.getExternalFlow(),
+						new FlowLinker() {
+							@Override
+							public void linkFlow(String workName,
+									String taskName) {
+								TaskEntry.this.getBuilder().linkFlow(
+										accessibleFlowIndex, workName,
+										taskName, strategy);
+							}
+						});
+
+				// Linked
+				isLinked = true;
+			}
+
+			// Ensure linked
+			if (!isLinked) {
+				throw new Exception("Flow item output "
+						+ flowItemOutput.getId() + " on flow item "
+						+ this.getId() + " not linked to a flow");
+			}
+
+			// Increment flow index for next iteration
+			flowIndex++;
+		}
+
 		// Specify the next flow (from same desk)
 		FlowItemToNextFlowItemModel nextFlowItem = this.getModel()
 				.getNextFlowItem();
 		if (nextFlowItem != null) {
-			// Obtain the task entry for the next flow item
-			FlowItemModel flowItem = nextFlowItem.getNextFlowItem();
-			TaskEntry<?> nextTask = this.workEntry.getDeskEntry().getTaskEntry(
-					flowItem);
-
-			// Register the next task
-			if (this.workEntry == nextTask.workEntry) {
-				// Same work
-				this.getBuilder().setNextTaskInFlow(nextTask.getId());
-			} else {
-				// Different work
-				this.getBuilder().setNextTaskInFlow(
-						nextTask.workEntry.getCanonicalWorkName(),
-						nextTask.getId());
-			}
+			// Link flow
+			this.linkFlow(nextFlowItem.getNextFlowItem(), new FlowLinker() {
+				@Override
+				public void linkFlow(String workName, String taskName) {
+					if (workName == null) {
+						// On same work
+						TaskEntry.this.getBuilder().setNextTaskInFlow(taskName);
+					} else {
+						// Different work
+						TaskEntry.this.getBuilder().setNextTaskInFlow(workName,
+								taskName);
+					}
+				}
+			});
 		}
 
 		// Specify the next flow (from another desk)
 		FlowItemToNextExternalFlowModel nextExternalFlow = this.getModel()
 				.getNextExternalFlow();
 		if (nextExternalFlow != null) {
+			// Link the flow
+			this.linkFlow(nextExternalFlow.getNextExternalFlow(),
+					new FlowLinker() {
+						@Override
+						public void linkFlow(String workName, String taskName) {
+							// Register the next flow
+							TaskEntry.this.getBuilder().setNextTaskInFlow(
+									workName, taskName);
+						}
+					});
+		}
+	}
 
-			// Obtain the external flow name
-			String externalFlowName = nextExternalFlow.getNextExternalFlow()
-					.getName();
+	/**
+	 * Interface called to link flows.
+	 */
+	private interface FlowLinker {
 
-			// Obtain the desk containing the external flow name
-			DeskEntry deskEntry = this.workEntry.getDeskEntry();
+		/**
+		 * Invoked to link the flow.
+		 * 
+		 * @param workName
+		 *            Name of the {@link Work}. <code>null</code> if same
+		 *            work as this {@link TaskEntry}.
+		 * @param taskName
+		 *            Name of the {@link Task}.
+		 */
+		void linkFlow(String workName, String taskName);
+	}
 
-			// Obtain room containing the desk
-			RoomEntry roomEntry = deskEntry.getParentRoom();
+	/**
+	 * Links to {@link FlowItemModel} in same {@link DeskModel}.
+	 * 
+	 * @param targetFlowItem
+	 *            Target {@link FlowItemModel}.
+	 * @param flowLinker
+	 *            {@link FlowLinker}.
+	 * @throws Exception
+	 *             If fails to link.
+	 */
+	private void linkFlow(FlowItemModel targetFlowItem, FlowLinker flowLinker)
+			throws Exception {
 
-			// Obtain the desk sub room
-			SubRoomModel subRoom = roomEntry.getSubRoom(deskEntry);
+		// Obtain the task entry for the target flow item
+		TaskEntry<?> nextTask = this.workEntry.getDeskEntry().getTaskEntry(
+				targetFlowItem);
 
-			// Loop until reached room which starts linking down
-			SubRoomOutputFlowModel outputFlow = null;
-			while (externalFlowName != null) {
+		// Register the next task
+		if (this.workEntry == nextTask.workEntry) {
+			// Same work
+			flowLinker.linkFlow(null, nextTask.getId());
+		} else {
+			// Different work
+			flowLinker.linkFlow(nextTask.workEntry.getCanonicalWorkName(),
+					nextTask.getId());
+		}
+	}
 
-				// Obtain the output flow within the room
-				outputFlow = roomEntry.getSubRoomOutputFlow(subRoom,
-						externalFlowName);
+	/**
+	 * Links {@link ExternalFlowModel} in another {@link DeskModel}.
+	 * 
+	 * @param targetExternalFlow
+	 *            Target {@link ExternalFlowModel}.
+	 * @param flowLinker
+	 *            {@link FlowLinker}.
+	 * @throws Exception
+	 *             If fails to link.
+	 */
+	private void linkFlow(ExternalFlowModel targetExternalFlow,
+			FlowLinker flowLinker) throws Exception {
 
-				// Follow flow
-				OutputFlowToExternalFlowModel extConn = outputFlow
-						.getExternalFlow();
-				if (extConn != null) {
-					// External flow (set details to find)
-					externalFlowName = extConn.getExternalFlow().getName();
+		// Obtain the external flow name
+		String externalFlowName = targetExternalFlow.getName();
 
-					// Obtain parent room to follow external flow
-					subRoom = roomEntry.getParentRoom().getSubRoom(roomEntry);
-					roomEntry = roomEntry.getParentRoom();
+		// Obtain the desk containing the external flow name
+		DeskEntry deskEntry = this.workEntry.getDeskEntry();
 
-				} else {
-					// No longer going to external flow
-					externalFlowName = null;
-				}
+		// Obtain room containing the desk
+		RoomEntry roomEntry = deskEntry.getParentRoom();
+
+		// Obtain the desk sub room
+		SubRoomModel subRoom = roomEntry.getSubRoom(deskEntry);
+
+		// Loop until reached room which starts linking down
+		SubRoomOutputFlowModel outputFlow = null;
+		while (externalFlowName != null) {
+
+			// Obtain the output flow within the room
+			outputFlow = roomEntry.getSubRoomOutputFlow(subRoom,
+					externalFlowName);
+
+			// Follow flow
+			OutputFlowToExternalFlowModel extConn = outputFlow
+					.getExternalFlow();
+			if (extConn != null) {
+				// External flow (set details to find)
+				externalFlowName = extConn.getExternalFlow().getName();
+
+				// Obtain parent room to follow external flow
+				subRoom = roomEntry.getParentRoom().getSubRoom(roomEntry);
+				roomEntry = roomEntry.getParentRoom();
+
+			} else {
+				// No longer going to external flow
+				externalFlowName = null;
 			}
+		}
 
-			// Linking to another room
-			OutputFlowToInputFlowModel inConn = outputFlow.getInput();
-			String subRoomName = inConn.getSubRoomName();
-			String inputFlowName = inConn.getInput().getName();
+		// Linking to another room
+		OutputFlowToInputFlowModel inConn = outputFlow.getInput();
+		String subRoomName = inConn.getSubRoomName();
+		String inputFlowName = inConn.getInput().getName();
 
-			// Find the desk
-			deskEntry = null; // reset to find
-			while (deskEntry == null) {
+		// Find the desk
+		deskEntry = null; // reset to find
+		while (deskEntry == null) {
+
+			// Obtain the sub room
+			subRoom = roomEntry.getSubRoom(subRoomName);
+
+			// Obtain sub entry
+			String entryId = subRoom.getRoom();
+			if (entryId != null) {
+				// Entry is a room
+
+				// Obtain the sub room entry
+				roomEntry = roomEntry.getRoomEntry(subRoom);
+
+				// TODO reduce coupling of room hierarchy.
+				// Decode the sub room and input flow
+				subRoomName = inputFlowName.split("-")[0];
+				inputFlowName = inputFlowName.substring(subRoomName.length()
+						+ "-".length());
 
 				// Obtain the sub room
 				subRoom = roomEntry.getSubRoom(subRoomName);
 
-				// Obtain sub entry
-				String entryId = subRoom.getRoom();
-				if (entryId != null) {
-					// Entry is a room
-
-					// Obtain the sub room entry
-					roomEntry = roomEntry.getRoomEntry(subRoom);
-
-					// TODO reduce coupling of room hierarchy.
-					// Decode the sub room and input flow
-					subRoomName = inputFlowName.split("-")[0];
-					inputFlowName = inputFlowName.substring(subRoomName
-							.length()
-							+ "-".length());
-
-					// Obtain the sub room
-					subRoom = roomEntry.getSubRoom(subRoomName);
-
-					// Obtain the input flow
-					SubRoomInputFlowModel inputFlow = null;
-					for (SubRoomInputFlowModel iF : subRoom.getInputFlows()) {
-						if (inputFlowName.equals(iF.getName())) {
-							inputFlow = iF;
-						}
-					}
-
-					// Obtain the input flow of the sub room
-					inputFlowName = inputFlow.getName();
-
-				} else {
-					// Entry is a desk
-					deskEntry = roomEntry.getDeskEntry(subRoom);
-					if (deskEntry == null) {
-						throw new Exception("No desk '" + subRoom.getId()
-								+ "' on room " + roomEntry.getId());
+				// Obtain the input flow
+				SubRoomInputFlowModel inputFlow = null;
+				for (SubRoomInputFlowModel iF : subRoom.getInputFlows()) {
+					if (inputFlowName.equals(iF.getName())) {
+						inputFlow = iF;
 					}
 				}
-			}
 
-			// Obtain the flow item on the desk
-			FlowItemModel flowItem = null;
-			for (FlowItemModel fi : deskEntry.getModel().getFlowItems()) {
-				if (inputFlowName.equals(fi.getId())) {
-					flowItem = fi;
+				// Obtain the input flow of the sub room
+				inputFlowName = inputFlow.getName();
+
+			} else {
+				// Entry is a desk
+				deskEntry = roomEntry.getDeskEntry(subRoom);
+				if (deskEntry == null) {
+					throw new Exception("No desk '" + subRoom.getId()
+							+ "' on room " + roomEntry.getId());
 				}
 			}
-
-			// Obtain the work entry
-			DeskWorkModel workModel = deskEntry.getWorkModel(flowItem
-					.getWorkName());
-			WorkEntry<?> workEntry = deskEntry.getWorkEntry(workModel);
-			String workName = workEntry.getCanonicalWorkName();
-
-			// Register the next flow
-			this.getBuilder().setNextTaskInFlow(workName, inputFlowName);
 		}
+
+		// Obtain the flow item on the desk
+		FlowItemModel flowItem = null;
+		for (FlowItemModel fi : deskEntry.getModel().getFlowItems()) {
+			if (inputFlowName.equals(fi.getId())) {
+				flowItem = fi;
+			}
+		}
+
+		// Obtain the work entry
+		DeskWorkModel workModel = deskEntry
+				.getWorkModel(flowItem.getWorkName());
+		WorkEntry<?> workEntry = deskEntry.getWorkEntry(workModel);
+		String workName = workEntry.getCanonicalWorkName();
+
+		// Link the flow
+		flowLinker.linkFlow(workName, inputFlowName);
 	}
+
 }
