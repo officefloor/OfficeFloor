@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model class-suffix="&lt;M extends Enum&lt;M&gt;, F extends Enum&lt;F&gt;&gt;" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<import>net.officefloor.frame.api.build.TaskFactory</import>
+	<import>net.officefloor.model.task.TaskFactoryManufacturer</import>
 	<field type="String" name="task name"/>
-	<field type="TaskFactory" name="task factory"/>
+	<field type="TaskFactoryManufacturer" name="task factory manufacturer"/>
 	<field type="Class&lt;M&gt;" name="managed object keys"/>
 	<field type="Class&lt;F&gt;" name="flow keys"/>
 	<list type="TaskObjectModel&lt;M&gt;" name="object"/>
