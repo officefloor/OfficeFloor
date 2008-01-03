@@ -17,7 +17,9 @@
 package net.officefloor.eclipse.desk.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.desk.DeskLoader;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
@@ -38,6 +40,7 @@ import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.DeskModel.DeskEvent;
 import net.officefloor.work.clazz.ClassWorkLoader;
 
@@ -67,6 +70,43 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	 * instances.
 	 */
 	private WrappingModel<DeskModel> externalFlowItems;
+
+	/**
+	 * Obtains the unique {@link FlowItemModel} id for the input
+	 * {@link FlowItemModel}.
+	 * 
+	 * @param flowItem
+	 *            {@link FlowItemModel}.
+	 * @return Unique {@link FlowItemModel} id.
+	 */
+	public String getUniqueFlowItemId(FlowItemModel flowItem) {
+
+		// Create the set of existing flow items
+		Map<String, FlowItemModel> existingFlowItems = new HashMap<String, FlowItemModel>();
+		for (FlowItemModel existingFlowItem : this.getCastedModel()
+				.getFlowItems()) {
+			existingFlowItems.put(existingFlowItem.getId(), existingFlowItem);
+		}
+
+		// Obtain the unique id
+		String suffix = "";
+		int index = 0;
+		for (;;) {
+			// Try for uniqueness
+			String uniqueIdAttempt = flowItem.getTaskName() + suffix;
+
+			// Determine if unique (not registered or same flow item)
+			FlowItemModel existingFlowItem = existingFlowItems
+					.get(uniqueIdAttempt);
+			if ((existingFlowItem == null) || (existingFlowItem == flowItem)) {
+				return uniqueIdAttempt;
+			}
+
+			// Setup for next attempt
+			index++;
+			suffix = String.valueOf(index);
+		}
+	}
 
 	/*
 	 * (non-Javadoc)

@@ -61,24 +61,28 @@ public class DeskTaskEditPart extends
 						.getParent();
 				DeskWorkModel work = workEditPart.getCastedModel();
 
-				// Create the flow item for this task
-				DeskTaskModel task = DeskTaskEditPart.this.getCastedModel();
-				String flowItemName = work.getId() + "-" + task.getName();
-				FlowItemModel flowItem = new FlowItemModel(flowItemName, false,
-						work.getId(), task.getName(), task.getTask(), null,
-						null, null, null, null, null, null);
-				flowItem.setX(300);
-				flowItem.setY(100);
-
-				// Ensure synchronised to the task
-				TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task
-						.getTask(), flowItem);
-
 				// Obtain the desk
 				// Note parent is work listing then desk
 				DeskEditPart deskEditPart = (DeskEditPart) workEditPart
 						.getParent().getParent();
 				DeskModel desk = deskEditPart.getCastedModel();
+
+				// Create the flow item for this task
+				DeskTaskModel task = DeskTaskEditPart.this.getCastedModel();
+				FlowItemModel flowItem = new FlowItemModel(task.getName(),
+						false, work.getId(), task.getName(), task.getTask(),
+						null, null, null, null, null, null, null);
+				flowItem.setId(deskEditPart.getUniqueFlowItemId(flowItem));
+				flowItem.setX(300);
+				flowItem.setY(100);
+
+				// Ensure synchronised to the task
+				try {
+					TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task
+							.getTask(), flowItem);
+				} catch (Exception ex) {
+					DeskTaskEditPart.this.messageError(ex);
+				}
 
 				// Add the flow item to the desk
 				desk.addFlowItem(flowItem);
