@@ -171,6 +171,11 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 	 */
 	protected FlowAsset flowAsset = null;
 
+	/**
+	 * Parameter for the next {@link Task}.
+	 */
+	private Object nextTaskParameter;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -212,9 +217,6 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 							.getCheckManagedObjects();
 					break;
 				}
-
-				// Parameter of task for next task
-				Object taskOutputParameter = null;
 
 				// Process based on state of container
 				switch (this.containerState) {
@@ -297,7 +299,7 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 					this.flowAsset = null;
 
 					// Execute the task
-					taskOutputParameter = this.task.doTask(this);
+					this.nextTaskParameter = this.task.doTask(this);
 
 					// Determine if to wait on flow
 					if (this.flowAsset != null) {
@@ -371,7 +373,8 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 							TaskContainer taskContainer = this.flow
 									.createTaskContainer(nextTaskMetaData,
 											this.parallelOwner,
-											taskOutputParameter, this.workLink);
+											this.nextTaskParameter,
+											this.workLink);
 
 							// Load for sequential execution
 							this
