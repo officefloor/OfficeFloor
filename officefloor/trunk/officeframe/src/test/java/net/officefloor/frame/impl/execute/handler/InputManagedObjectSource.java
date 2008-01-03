@@ -89,10 +89,3 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	}
 
 }
-
-/**
- * Listing of handlers.
- */
-enum Handlers {
-	INPUT
-}
