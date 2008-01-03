@@ -27,6 +27,7 @@ import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.repository.ConfigurationItem;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
@@ -41,7 +42,10 @@ import org.eclipse.gef.palette.SelectionToolEntry;
 import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.util.TransferDropTargetListener;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorInput;
 
 /**
@@ -126,12 +130,50 @@ public abstract class AbstractOfficeFloorEditor<T> extends
 				.createEditPartFactory(), this));
 		viewer.setContents(this.getCastedModel());
 
-		// Specify if capble of dropping items into editor
+		// Specify if capable of dropping items into editor
 		if (this.isDragTarget()) {
 			viewer
 					.addDropTargetListener((TransferDropTargetListener) new LocalSelectionTransferDragTargetListener(
 							viewer));
 		}
+
+		// Initialise the context menu
+		this.initialiseContextMenu();
+	}
+
+	/**
+	 * Initialises the context menu.
+	 */
+	protected void initialiseContextMenu() {
+
+		// TODO populate the Actions to menu manager
+		// (do not add context menu if no actions)
+		// (provide awareness of model by obtaining the listing of selections as
+		// IEditParts and then obtaining the models from them)
+		// (class registered under indicates if applicable to action)
+
+		// Create the context menu
+		ContextMenuProvider menuProvider = new ContextMenuProvider(this
+				.getGraphicalViewer()) {
+			@Override
+			public void buildContextMenu(IMenuManager menuManager) {
+				menuManager.add(new Action("TODO implement context menu in "
+						+ AbstractOfficeFloorEditor.class.getSimpleName()) {
+					@Override
+					public void run() {
+						System.out.println("TODO implement context menu in "
+								+ AbstractOfficeFloorEditor.class
+										.getSimpleName());
+					}
+				});
+			}
+		};
+		Menu menu = menuProvider.createContextMenu(this.getGraphicalControl());
+
+		// Register the context menu
+		this.getGraphicalControl().setMenu(menu);
+		this.getEditorSite().registerContextMenu(menuProvider,
+				this.getGraphicalViewer());
 	}
 
 	/**
