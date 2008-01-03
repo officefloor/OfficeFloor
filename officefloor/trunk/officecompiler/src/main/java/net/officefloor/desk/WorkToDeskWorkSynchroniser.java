@@ -62,6 +62,8 @@ public class WorkToDeskWorkSynchroniser {
 			}
 		}
 		for (DeskTaskModel deskTask : tasksToRemove) {
+			// Remove connections and task
+			deskTask.removeConnections();
 			deskWork.removeTask(deskTask);
 		}
 

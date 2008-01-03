@@ -34,6 +34,7 @@ import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
+import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.repository.ModelRepository;
 import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.work.clazz.ClassWorkLoader;
@@ -126,6 +127,7 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		if (!isSynchronised) {
 			tasks.add(new DeskTaskModel("noLongerExists", null, null, null));
 		}
+		tasks.add(new DeskTaskModel("anotherMethod", null, null, null));
 		assertList(new String[] { "getName" }, desk.getWorks().get(0)
 				.getTasks(), tasks.toArray(new DeskTaskModel[0]));
 
@@ -157,8 +159,10 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		List<FlowItemModel> flowItems = new LinkedList<FlowItemModel>();
 		flowItems.add(new FlowItemModel("1", true, "work", "taskMethod", null,
 				null, null, null, null, null, null, null, 100, 200));
+		flowItems.add(new FlowItemModel("2", false, "work", "anotherMethod",
+				null, null, null, null, null, null, null, null, 50, 500));
 		if (!isSynchronised) {
-			flowItems.add(new FlowItemModel("2", false, "work",
+			flowItems.add(new FlowItemModel("3", false, "work",
 					"noLongerExists", null, null, null, null, null, null, null,
 					null, 10, 20));
 		}
@@ -176,7 +180,7 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate next flow
 		if (!isSynchronised) {
-			flowItem = desk.getFlowItems().get(1);
+			flowItem = desk.getFlowItems().get(2);
 			assertEquals("Incorrect next flow id", "1", flowItem
 					.getNextFlowItem().getId());
 			assertEquals("Incorrect previous flow", flowItem.getNextFlowItem(),
@@ -187,9 +191,8 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		FlowItemModel flowItemOne = desk.getFlowItems().get(0);
 		List<FlowItemOutputModel> flowItemOuputs = new LinkedList<FlowItemOutputModel>();
 		flowItemOuputs.add(new FlowItemOutputModel("0", null, null, null));
-		if (!isSynchronised) {
-			flowItemOuputs.add(new FlowItemOutputModel("1", null, null, null));
-		}
+		flowItemOuputs.add(new FlowItemOutputModel("1", null, null, null));
+		flowItemOuputs.add(new FlowItemOutputModel("2", null, null, null));
 		assertList(new String[] { "getId" }, flowItemOne.getOutputs(),
 				flowItemOuputs.toArray(new FlowItemOutputModel[0]));
 
@@ -197,15 +200,21 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect link type (sequential)",
 				DeskLoader.SEQUENTIAL_LINK_TYPE, flowItemOne.getOutputs()
 						.get(0).getExternalFlow().getLinkType());
+		assertEquals("Incorrect link type (parallel)",
+				DeskLoader.PARALLEL_LINK_TYPE, flowItemOne.getOutputs().get(1)
+						.getFlowItem().getLinkType());
 		if (!isSynchronised) {
-			assertEquals("Incorrect link type (parallel)",
-					DeskLoader.PARALLEL_LINK_TYPE, flowItemOne.getOutputs()
-							.get(1).getFlowItem().getLinkType());
+			assertProperties(new FlowItemOutputToFlowItemModel("3", null, null,
+					DeskLoader.ASYNCHRONOUS_LINK_TYPE), flowItemOne
+					.getOutputs().get(2).getFlowItem(), "getId", "getLinkType");
+		} else {
+			assertNull("Should lose link to non-existant task", flowItemOne
+					.getOutputs().get(2).getFlowItem());
 		}
 
 		// Validate outputs on second flow item
 		if (!isSynchronised) {
-			FlowItemModel flowItemTwo = desk.getFlowItems().get(1);
+			FlowItemModel flowItemTwo = desk.getFlowItems().get(2);
 			assertList(new String[] { "getId" }, flowItemTwo.getOutputs(),
 					new FlowItemOutputModel("FIRST_FLOW", null, null, null),
 					new FlowItemOutputModel("SECOND_FLOW", null, null, null));
@@ -229,11 +238,16 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 				"mo", "java.lang.String", null));
 
 		// Validate external managed object connections to work tasks
-		assertList(
-				new String[] { "getName" },
-				desk.getExternalManagedObjects().get(0).getTaskObjects(),
-				new DeskTaskObjectToExternalManagedObjectModel("mo", null, null),
-				new DeskTaskObjectToExternalManagedObjectModel("mo", null, null));
+		List<DeskTaskObjectToExternalManagedObjectModel> taskObjects = new LinkedList<DeskTaskObjectToExternalManagedObjectModel>();
+		taskObjects.add(new DeskTaskObjectToExternalManagedObjectModel("mo",
+				null, null));
+		if (!isSynchronised) {
+			taskObjects.add(new DeskTaskObjectToExternalManagedObjectModel(
+					"mo", null, null));
+		}
+		assertList(new String[] { "getName" }, desk.getExternalManagedObjects()
+				.get(0).getTaskObjects(), taskObjects
+				.toArray(new DeskTaskObjectToExternalManagedObjectModel[0]));
 
 		// ----------------------------------------
 		// Validate the External Flows
@@ -244,11 +258,16 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 				new ExternalFlowModel("flow", null, null));
 
 		// Validate external flow connections to flow items
+		List<FlowItemOutputToExternalFlowModel> externalFlowLinks = new LinkedList<FlowItemOutputToExternalFlowModel>();
+		externalFlowLinks.add(new FlowItemOutputToExternalFlowModel("flow",
+				null, null, "Sequential"));
+		if (!isSynchronised) {
+			externalFlowLinks.add(new FlowItemOutputToExternalFlowModel("flow",
+					null, null, "Asynchronous"));
+		}
 		assertList(new String[] { "getName", "getLinkType" }, desk
-				.getExternalFlows().get(0).getOutputs(),
-				new FlowItemOutputToExternalFlowModel("flow", null, null,
-						"Sequential"), new FlowItemOutputToExternalFlowModel(
-						"flow", null, null, "Asynchronous"));
+				.getExternalFlows().get(0).getOutputs(), externalFlowLinks
+				.toArray(new FlowItemOutputToExternalFlowModel[0]));
 	}
 
 	/**

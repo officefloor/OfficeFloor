@@ -16,9 +16,9 @@
  */
 package net.officefloor.desk;
 
-import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.task.TaskFactoryManufacturer;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
@@ -34,13 +34,13 @@ public class TaskToFlowItemSynchroniserTest extends OfficeFrameTestCase {
 	 * Ensure synchronises.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testTaskToFlowItemSynchroniser() {
+	public void testTaskToFlowItemSynchroniser() throws Exception {
 
 		// Create the Task
-		TaskFlowModel taskFlowOne = new TaskFlowModel();
-		TaskFlowModel taskFlowTwo = new TaskFlowModel();
+		TaskFlowModel taskFlowOne = new TaskFlowModel(null, 1);
+		TaskFlowModel taskFlowTwo = new TaskFlowModel(null, 2);
 		TaskModel task = new TaskModel("TASK", this
-				.createMock(TaskFactory.class), null, null,
+				.createMock(TaskFactoryManufacturer.class), null, null,
 				new TaskObjectModel[0], new TaskFlowModel[] { taskFlowOne,
 						taskFlowTwo });
 
@@ -60,7 +60,7 @@ public class TaskToFlowItemSynchroniserTest extends OfficeFrameTestCase {
 				.getOutputs().get(1).getTaskFlow());
 
 		// Add task flow
-		TaskFlowModel taskFlowThree = new TaskFlowModel();
+		TaskFlowModel taskFlowThree = new TaskFlowModel(null, 3);
 		task.addFlow(taskFlowThree);
 
 		// Synchronise again the task to the flow item

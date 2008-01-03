@@ -16,6 +16,11 @@
  */
 package net.officefloor.desk;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.work.TaskFlowModel;
@@ -36,29 +41,50 @@ public class TaskToFlowItemSynchroniser {
 	 *            {@link TaskModel}.
 	 * @param flowItem
 	 *            {@link FlowItemModel}.
+	 * @throws Exception
+	 *             If fail to synchronise.
 	 */
 	public static void synchroniseTaskOntoFlowItem(TaskModel<?, ?> task,
-			FlowItemModel flowItem) {
+			FlowItemModel flowItem) throws Exception {
+
+		// Ensure the flow outputs have unique names
+		Set<String> flowOutputNames = new HashSet<String>();
+		for (TaskFlowModel<?> flow : task.getFlows()) {
+
+			// Obtain the id of the flow item output
+			String flowItemOutputId = DeskLoader.getFlowItemOutputId(flow);
+
+			// Ensure not already registered
+			if (flowOutputNames.contains(flowItemOutputId)) {
+				throw new Exception("Flow output '" + flowItemOutputId
+						+ "' is not unique on task " + task.getTaskName());
+			}
+
+			// Add the id
+			flowOutputNames.add(flowItemOutputId);
+		}
 
 		// Specify the Task onto the Flow Item
 		flowItem.setTask(task);
 
-		// Obtain the listing of flow item outputs
-		FlowItemOutputModel[] outputs = flowItem.getOutputs().toArray(
-				new FlowItemOutputModel[0]);
+		// Create the map of existing flow item outputs by id
+		Map<String, FlowItemOutputModel> existingOutputs = new HashMap<String, FlowItemOutputModel>();
+		for (FlowItemOutputModel output : flowItem.getOutputs()) {
+			existingOutputs.put(output.getId(), output);
+		}
 
 		// Merge the flows
-		int outputIndex = 0;
 		for (TaskFlowModel<?> flow : task.getFlows()) {
 
 			// Obtain the Id of the flow item output
 			String flowItemOutputId = DeskLoader.getFlowItemOutputId(flow);
 
-			// Determine if load to existing output
-			if (outputIndex < (outputs.length - 1)) {
-				FlowItemOutputModel output = outputs[outputIndex++];
-				output.setId(flowItemOutputId);
-				output.setTaskFlow(flow);
+			// Determine if already existing on flow item
+			if (existingOutputs.containsKey(flowItemOutputId)) {
+				// Remove from existing, so not remove later
+				existingOutputs.remove(flowItemOutputId);
+
+				// No further changes for flow item output
 				continue;
 			}
 
@@ -68,8 +94,13 @@ public class TaskToFlowItemSynchroniser {
 		}
 
 		// Remove any additional flows
-		for (int i = outputIndex; i < outputs.length; i++) {
-			flowItem.removeOutput(outputs[i]);
+		for (FlowItemOutputModel output : existingOutputs.values()) {
+
+			// Remove connections for output
+			output.removeConnections();
+
+			// Remove the output
+			flowItem.removeOutput(output);
 		}
 	}
 

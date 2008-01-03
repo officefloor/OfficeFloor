@@ -23,6 +23,7 @@
 				<task-object object-type="java.lang.String"
 					parameter="true" />
 			</task>
+			<task name="anotherMethod"></task>
 		</work>
 	</works>
 	<flow-items>
@@ -35,8 +36,14 @@
 			<output id="1">
 				<flow-item id="2" link="Parallel" />
 			</output>
+			<output id="2">
+				<flow-item id="3" link="Asynchronous" />
+			</output>
 		</flow-item>
-		<flow-item id="2" x="10" y="20" public="false" work="work"
+		<flow-item id="2" x="50" y="500" public="false" work="work"
+			task="anotherMethod">
+		</flow-item>
+		<flow-item id="3" x="10" y="20" public="false" work="work"
 			task="noLongerExists">
 			<next-flow id="1" />
 			<output id="FIRST_FLOW">
