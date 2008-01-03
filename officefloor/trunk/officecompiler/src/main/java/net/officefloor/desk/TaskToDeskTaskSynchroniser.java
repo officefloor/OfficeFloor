@@ -90,6 +90,8 @@ public class TaskToDeskTaskSynchroniser {
 			}
 		}
 		for (DeskTaskObjectModel model : unused) {
+			// Remove connections as task
+			model.removeConnections();
 			deskTask.removeObject(model);
 		}
 	}

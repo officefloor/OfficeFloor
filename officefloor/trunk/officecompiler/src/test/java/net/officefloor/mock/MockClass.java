@@ -25,8 +25,12 @@ import net.officefloor.work.clazz.Flow;
  */
 public class MockClass {
 
-	public Object taskMethod(String parameter, Flow<?> flow) {
+	public Object taskMethod(String parameter, Flow<?> flowSequential,
+			Flow<Object> flowParallel, Flow<String> flowAsynchronous) {
 		return null;
+	}
+
+	public void anotherMethod() {
 	}
 
 	Object nonTaskMethod(Object parameter) {

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.LoaderContext;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
@@ -79,6 +80,31 @@ public class DeskLoader {
 	private final ModelRepository modelRepository;
 
 	/**
+	 * Obtains the {@link FlowInstigationStrategyEnum} for the input link type.
+	 * 
+	 * @param linkType
+	 *            Link type.
+	 * @return {@link FlowInstigationStrategyEnum}.
+	 * @throws Exception
+	 *             If unknown link type.
+	 */
+	public static FlowInstigationStrategyEnum getFlowInstigationStrategyEnum(
+			String linkType) throws Exception {
+		if (SEQUENTIAL_LINK_TYPE.equals(linkType)) {
+			return FlowInstigationStrategyEnum.SEQUENTIAL;
+		} else if (PARALLEL_LINK_TYPE.equals(linkType)) {
+			return FlowInstigationStrategyEnum.PARALLEL;
+		} else if (ASYNCHRONOUS_LINK_TYPE.equals(linkType)) {
+			return FlowInstigationStrategyEnum.ASYNCHRONOUS;
+		} else {
+			// Unknown strategy
+			throw new Exception(
+					"Unknown flow instigation strategy for link type '"
+							+ linkType + "'");
+		}
+	}
+
+	/**
 	 * Obtains the Id for the input {@link FlowItemModel}.
 	 * 
 	 * @param flowItem
@@ -86,7 +112,7 @@ public class DeskLoader {
 	 * @return Id of the input {@link FlowItemModel}.
 	 */
 	public static String getFlowItemOutputId(TaskFlowModel<?> taskFlow) {
-		// Enum takes priority over index
+		// Enumeration takes priority over index
 		Enum<?> enumValue = taskFlow.getFlowKey();
 		if (enumValue != null) {
 			return enumValue.toString();
@@ -332,6 +358,8 @@ public class DeskLoader {
 
 		// Remove no longer existing flows
 		for (FlowItemModel flowItem : removeFlowItems) {
+			// Remove connection and flow
+			flowItem.removeConnections();
 			desk.removeFlowItem(flowItem);
 		}
 

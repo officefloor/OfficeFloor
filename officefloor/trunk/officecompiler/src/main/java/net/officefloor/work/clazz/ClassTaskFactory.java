@@ -78,18 +78,27 @@ public class ClassTaskFactory implements
 		}
 		Integer[] objectIndexes = objectIndexList.toArray(new Integer[0]);
 
-		// Ensure matching configuration
-		List<FlowItemOutputModel> flowList = task.getOutputs();
+		// Ensure matching object configuration
 		List<DeskTaskObjectModel> objectList = task.getDeskTask().getTask()
 				.getObjects();
-		if ((objectList.size() + flowList.size()) != this.parameters.length) {
-			throw new IllegalArgumentException(
-					"Incorrect configuration as have " + this.parameters.length
-							+ " parameters but configration for only "
-							+ (objectList.size() + flowList.size()));
+		if (objectList.size() != objectIndexes.length) {
+			throw new Exception("Incorrect configuration as expect "
+					+ objectIndexes.length
+					+ " objects but provided configuration for "
+					+ objectList.size() + " objects");
 		}
 		DeskTaskObjectModel[] objects = objectList
 				.toArray(new DeskTaskObjectModel[0]);
+
+		// Ensure matching flow configuration (parameters after objects)
+		List<FlowItemOutputModel> flowList = task.getOutputs();
+		int flowOutputCount = this.parameters.length - objectIndexes.length;
+		if (flowList.size() != flowOutputCount) {
+			throw new Exception("Incorrect configuration as expect "
+					+ flowOutputCount
+					+ " flow outputs but provided configuration for "
+					+ flowList.size() + " flow outputs");
+		}
 
 		// Load the parameter factories
 		int moIndex = 0;

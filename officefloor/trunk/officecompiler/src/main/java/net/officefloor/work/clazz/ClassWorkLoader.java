@@ -98,8 +98,8 @@ public class ClassWorkLoader implements WorkLoader {
 						.toArray(new TaskObjectModel[0]);
 				TaskFlowModel[] flowArray = flows.toArray(new TaskFlowModel[0]);
 				TaskModel task = new TaskModel<Indexed, Indexed>(method
-						.getName(), new ClassTaskFactory(method, parameters),
-						null, null, objectArray, flowArray);
+						.getName(), new ClassTaskFactoryManufacturer(method,
+						parameters), null, null, objectArray, flowArray);
 
 				// Add task to listing
 				tasks.add(task);

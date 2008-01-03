@@ -17,6 +17,7 @@
 package net.officefloor.work.clazz;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
 import net.officefloor.model.work.TaskFlowModel;
@@ -68,21 +69,49 @@ public class ClassWorkLoaderTest extends OfficeFrameTestCase {
 		ClassWork classWork = (ClassWork) work.getWorkFactory().createWork();
 		assertTrue("Must create work ",
 				classWork.getObject() instanceof MockClass);
-		assertEquals("Incorrect number of tasks", 1, work.getTasks().size());
-		TaskModel<Indexed, Indexed> task = work.getTasks().get(0);
-		assertEquals("Incorrect task name", "taskMethod", task.getTaskName());
-		ClassTask classTask = (ClassTask) task.getTaskFactory().createTask(
-				classWork);
-		assertEquals("Incorrect task method", "taskMethod", classTask.method
+		assertEquals("Incorrect number of tasks", 2, work.getTasks().size());
+
+		// Obtain the tasks
+		TaskModel<Indexed, Indexed> taskOne = null;
+		TaskModel<Indexed, Indexed> taskTwo = null;
+		for (TaskModel<Indexed, Indexed> task : work.getTasks()) {
+			if ("anotherMethod".equals(task.getTaskName())) {
+				taskOne = task;
+			} else if ("taskMethod".equals(task.getTaskName())) {
+				taskTwo = task;
+			}
+		}
+
+		// Verify the first task
+		assertEquals("Incorrect task name", "anotherMethod", taskOne
+				.getTaskName());
+		TaskFactory taskFactoryOne = taskOne.getTaskFactoryManufacturer()
+				.createTaskFactory();
+		ClassTask classTaskOne = (ClassTask) taskFactoryOne
+				.createTask(classWork);
+		assertEquals("Incorrect task method", "anotherMethod",
+				classTaskOne.method.getName());
+		assertEquals("Incorrect number of objects", 0, taskOne.getObjects()
+				.size());
+		assertEquals("Incorrect number of flows", 0, taskOne.getFlows().size());
+
+		// Verify the first task
+		assertEquals("Incorrect task name", "taskMethod", taskTwo.getTaskName());
+		TaskFactory taskFactoryTwo = taskTwo.getTaskFactoryManufacturer()
+				.createTaskFactory();
+		ClassTask classTaskTwo = (ClassTask) taskFactoryTwo
+				.createTask(classWork);
+		assertEquals("Incorrect task method", "taskMethod", classTaskTwo.method
 				.getName());
-		assertEquals("Incorrect number of objects", 1, task.getObjects().size());
-		TaskObjectModel taskObject = task.getObjects().get(0);
+		assertEquals("Incorrect number of objects", 1, taskTwo.getObjects()
+				.size());
+		TaskObjectModel taskObject = taskTwo.getObjects().get(0);
 		assertNull("Incorrect object managed object key", taskObject
 				.getManagedObjectKey());
 		assertEquals("Incorrect object type", String.class.getName(),
 				taskObject.getObjectType());
-		assertEquals("Incorrect number of flows", 1, task.getFlows().size());
-		TaskFlowModel taskFlow = task.getFlows().get(0);
+		assertEquals("Incorrect number of flows", 3, taskTwo.getFlows().size());
+		TaskFlowModel taskFlow = taskTwo.getFlows().get(0);
 		assertNull("Incorrect flow key", taskFlow.getFlowKey());
 		assertEquals("Incorrect flow index", 0, taskFlow.getFlowIndex());
 	}

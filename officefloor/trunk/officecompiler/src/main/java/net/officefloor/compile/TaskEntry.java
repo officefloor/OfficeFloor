@@ -19,6 +19,7 @@ package net.officefloor.compile;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import net.officefloor.desk.DeskLoader;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
@@ -241,7 +242,8 @@ public class TaskEntry<W extends Work> extends
 
 		// Obtain task and its details
 		TaskModel<?, ?> task = this.deskTask.getTask();
-		TaskFactory taskFactory = task.getTaskFactory();
+		TaskFactory taskFactory = task.getTaskFactoryManufacturer()
+				.createTaskFactory();
 
 		// Initiate the task factory if necessary
 		if (taskFactory instanceof CompilerAwareTaskFactory) {
@@ -299,8 +301,9 @@ public class TaskEntry<W extends Work> extends
 			if (linkedFlowItem != null) {
 
 				// Obtain the flow instigation strategy
-				final FlowInstigationStrategyEnum strategy = FlowInstigationStrategyEnum
-						.valueOf(linkedFlowItem.getLinkType());
+				final FlowInstigationStrategyEnum strategy = DeskLoader
+						.getFlowInstigationStrategyEnum(linkedFlowItem
+								.getLinkType());
 
 				// Link in the flow
 				this.linkFlow(linkedFlowItem.getFlowItem(), new FlowLinker() {
@@ -329,8 +332,9 @@ public class TaskEntry<W extends Work> extends
 			if (linkedExternalFlow != null) {
 
 				// Obtain the flow instigation strategy
-				final FlowInstigationStrategyEnum strategy = FlowInstigationStrategyEnum
-						.valueOf(linkedFlowItem.getLinkType());
+				final FlowInstigationStrategyEnum strategy = DeskLoader
+						.getFlowInstigationStrategyEnum(linkedFlowItem
+								.getLinkType());
 
 				// Link in the flow
 				this.linkFlow(linkedExternalFlow.getExternalFlow(),
