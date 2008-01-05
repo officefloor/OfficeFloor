@@ -11,5 +11,6 @@ Export-Package: net.officefloor.model,
  net.officefloor.model.office,
  net.officefloor.model.officefloor,
  net.officefloor.model.room,
+ net.officefloor.model.task,
  net.officefloor.model.work
 Require-Bundle: net.officefloor.frame
