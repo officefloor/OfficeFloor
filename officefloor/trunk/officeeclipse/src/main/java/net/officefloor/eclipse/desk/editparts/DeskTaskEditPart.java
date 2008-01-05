@@ -124,6 +124,10 @@ public class DeskTaskEditPart extends
 				case REMOVE_FLOW_ITEM:
 					DeskTaskEditPart.this.refreshSourceConnections();
 					break;
+				case ADD_OBJECT:
+				case REMOVE_OBJECT:
+					DeskTaskEditPart.this.refreshChildren();
+					break;
 				}
 			}
 		});
