@@ -131,6 +131,10 @@ public class DeskWorkEditPart extends
 				case CHANGE_INITIAL_FLOW_ITEM:
 					DeskWorkEditPart.this.refreshSourceConnections();
 					break;
+				case ADD_TASK:
+				case REMOVE_TASK:
+					DeskWorkEditPart.this.refreshChildren();
+					break;
 				}
 			}
 		});
