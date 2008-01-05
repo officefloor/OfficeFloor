@@ -78,7 +78,10 @@ public class RefreshWorkCommand extends
 							.getConfigurationContext());
 				} catch (Throwable ex) {
 
-					// TODO implement
+					// TODO implement, provide message error (or error)
+					// (extend Command to provide method invoked from execute to
+					// throw exception and handle by message box and possibly
+					// eclipse error)
 					System.err.println("Failed refreshing the work");
 					ex.printStackTrace();
 					throw new UnsupportedOperationException(
