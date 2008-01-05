@@ -16,9 +16,11 @@
  */
 package net.officefloor.eclipse.room;
 
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.common.action.CommandFactory;
 import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.room.editparts.ExternalFlowEditPart;
@@ -140,6 +142,16 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 						return figure;
 					}
 				});
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateCommandFactories(java.util.List)
+	 */
+	@Override
+	protected void populateCommandFactories(List<CommandFactory<RoomModel>> list) {
+		// No comments yet
 	}
 
 }

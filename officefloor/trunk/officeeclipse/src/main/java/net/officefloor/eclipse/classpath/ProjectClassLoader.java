@@ -168,6 +168,15 @@ public class ProjectClassLoader extends URLClassLoader {
 	}
 
 	/**
+	 * Obtains the {@link ConfigurationContext}.
+	 * 
+	 * @return {@link ConfigurationContext}.
+	 */
+	public ConfigurationContext getConfigurationContext() {
+		return this.configurationContext;
+	}
+
+	/**
 	 * Finds the {@link ConfigurationItem}.
 	 * 
 	 * @param path
