@@ -16,9 +16,11 @@
  */
 package net.officefloor.eclipse.office;
 
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.common.action.CommandFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
 import net.officefloor.eclipse.office.editparts.DeskEditPart;
@@ -128,5 +130,16 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel> {
 	 */
 	private OfficeLoader getOfficeLoader() {
 		return new OfficeLoader();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateCommandFactories(java.util.List)
+	 */
+	@Override
+	protected void populateCommandFactories(
+			List<CommandFactory<OfficeModel>> list) {
+		// No commands yet
 	}
 }

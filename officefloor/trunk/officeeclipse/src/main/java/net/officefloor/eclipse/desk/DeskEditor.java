@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse.desk;
 
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.LoaderContext;
@@ -23,9 +24,12 @@ import net.officefloor.desk.DeskLoader;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.common.action.CommandFactory;
 import net.officefloor.eclipse.common.commands.TagFactory;
 import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
+import net.officefloor.eclipse.desk.commands.RefreshWorkCommand;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
@@ -260,6 +264,17 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 				"asynchronous", new TagFactory(
 						DeskLoader.ASYNCHRONOUS_LINK_TYPE), null, null));
 		this.paletteRoot.add(linkGroup);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateCommandFactories(java.util.List)
+	 */
+	@Override
+	protected void populateCommandFactories(List<CommandFactory<DeskModel>> list) {
+		list.add(new RefreshWorkCommand("Refresh Work",
+				ProjectConfigurationContext.getProject(this.getEditorInput())));
 	}
 
 }

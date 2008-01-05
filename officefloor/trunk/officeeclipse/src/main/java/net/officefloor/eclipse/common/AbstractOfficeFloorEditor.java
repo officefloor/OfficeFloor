@@ -17,13 +17,19 @@
 package net.officefloor.eclipse.common;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.common.action.CommandAction;
+import net.officefloor.eclipse.common.action.CommandFactory;
 import net.officefloor.eclipse.common.drag.LocalSelectionTransferDragTargetListener;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.model.Model;
 import net.officefloor.repository.ConfigurationItem;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,9 +48,10 @@ import org.eclipse.gef.palette.SelectionToolEntry;
 import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.util.TransferDropTargetListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorInput;
 
@@ -54,7 +61,7 @@ import org.eclipse.ui.IEditorInput;
  * 
  * @author Daniel
  */
-public abstract class AbstractOfficeFloorEditor<T> extends
+public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 		GraphicalEditorWithFlyoutPalette implements EditPartFactory {
 
 	/**
@@ -66,6 +73,12 @@ public abstract class AbstractOfficeFloorEditor<T> extends
 	 * Map of model type to {@link EditPart} type.
 	 */
 	protected Map<Class<?>, Class<? extends EditPart>> modelTypeToeditPartTypeMap = new HashMap<Class<?>, Class<? extends EditPart>>();
+
+	/**
+	 * Listing of the {@link CommandFactory} instances for the context
+	 * {@link Menu}.
+	 */
+	private CommandFactory<T>[] commandFactories;
 
 	/**
 	 * {@link PaletteRoot}.
@@ -144,28 +157,100 @@ public abstract class AbstractOfficeFloorEditor<T> extends
 	/**
 	 * Initialises the context menu.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void initialiseContextMenu() {
 
-		// TODO populate the Actions to menu manager
-		// (do not add context menu if no actions)
-		// (provide awareness of model by obtaining the listing of selections as
-		// IEditParts and then obtaining the models from them)
-		// (class registered under indicates if applicable to action)
+		// Obtain the listing of command factories
+		List<CommandFactory<T>> commandFactoryList = new LinkedList<CommandFactory<T>>();
+		this.populateCommandFactories(commandFactoryList);
+		this.commandFactories = commandFactoryList
+				.toArray(new CommandFactory[0]);
+
+		// Ensure have command factories
+		if (this.commandFactories.length == 0) {
+			// No command factories therefore do not provide context menu
+			return;
+		}
 
 		// Create the context menu
 		ContextMenuProvider menuProvider = new ContextMenuProvider(this
 				.getGraphicalViewer()) {
 			@Override
 			public void buildContextMenu(IMenuManager menuManager) {
-				menuManager.add(new Action("TODO implement context menu in "
-						+ AbstractOfficeFloorEditor.class.getSimpleName()) {
-					@Override
-					public void run() {
-						System.out.println("TODO implement context menu in "
-								+ AbstractOfficeFloorEditor.class
-										.getSimpleName());
+
+				// Obtain the selected models
+				EditPart rootEditPart = null;
+				T rootModel = null;
+				List<Model> selectedModelList = new LinkedList<Model>();
+				ISelection selection = AbstractOfficeFloorEditor.this
+						.getGraphicalViewer().getSelection();
+				IStructuredSelection structuredSelection = (IStructuredSelection) selection;
+				for (Iterator<?> iterator = structuredSelection.iterator(); iterator
+						.hasNext();) {
+					Object selectedItem = iterator.next();
+
+					// Obtain the edit parts and models
+					EditPart editPart = (EditPart) selectedItem;
+					Model model = (Model) editPart.getModel();
+
+					// Add to listing
+					selectedModelList.add(model);
+
+					// Specify the root edit part from first edit part
+					if (rootEditPart == null) {
+
+						// Obtain the parent edit part
+						// (Ignore ScaleableRootEditPart)
+						while (editPart.getParent().getParent() != null) {
+							editPart = editPart.getParent();
+						}
+
+						// Specify the root model
+						rootEditPart = editPart;
+						rootModel = (T) rootEditPart.getModel();
 					}
-				});
+				}
+				Model[] selectedModels = selectedModelList
+						.toArray(new Model[0]);
+
+				// Ensure have root model and models
+				if ((rootModel == null) || (selectedModels.length == 0)) {
+					// Nothing selected, therefore add no actions
+					return;
+				}
+
+				// Add the appropriate actions
+				for (CommandFactory<T> commandFactory : AbstractOfficeFloorEditor.this.commandFactories) {
+
+					// Determine if handles all model types selected
+					boolean isHandled = true;
+					for (Model model : selectedModels) {
+						boolean isAssignable = false;
+						for (Class<? extends Model> handledModelType : commandFactory
+								.getModelTypes()) {
+							if (handledModelType.isAssignableFrom(model
+									.getClass())) {
+								isAssignable = true;
+							}
+						}
+						if (!isAssignable) {
+							isHandled = false;
+						}
+					}
+
+					// Add if handles all model types
+					if (isHandled) {
+						// Create the commands to run
+						Command[] commands = commandFactory.createCommands(
+								selectedModels, rootModel);
+
+						// Add action for the commands to the menu
+						menuManager.add(new CommandAction(commandFactory
+								.getActionText(),
+								AbstractOfficeFloorEditor.this
+										.getCommandStack(), commands));
+					}
+				}
 			}
 		};
 		Menu menu = menuProvider.createContextMenu(this.getGraphicalControl());
@@ -175,6 +260,15 @@ public abstract class AbstractOfficeFloorEditor<T> extends
 		this.getEditorSite().registerContextMenu(menuProvider,
 				this.getGraphicalViewer());
 	}
+
+	/**
+	 * Populates the listing of {@link CommandFactory} instances.
+	 * 
+	 * @param list
+	 *            Listing to add {@link CommandFactory} instances.
+	 */
+	protected abstract void populateCommandFactories(
+			List<CommandFactory<T>> list);
 
 	/**
 	 * Allow to override to specify another {@link EditPartFactory}.

@@ -16,9 +16,11 @@
  */
 package net.officefloor.eclipse.officefloor;
 
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.common.action.CommandFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectSourceEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeEditPart;
@@ -116,5 +118,16 @@ public class OfficeFloorEditor extends
 	 */
 	private OfficeFloorLoader getOfficeFloorLoader() {
 		return new OfficeFloorLoader();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateCommandFactories(java.util.List)
+	 */
+	@Override
+	protected void populateCommandFactories(
+			List<CommandFactory<OfficeFloorModel>> list) {
+		// No commands yet
 	}
 }
