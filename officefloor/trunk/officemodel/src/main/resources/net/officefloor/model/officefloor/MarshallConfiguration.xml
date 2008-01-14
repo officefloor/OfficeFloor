@@ -1,22 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<marshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../plugin/xml/src/schema/TreeXmlMarshaller.xsd" type="net.officefloor.model.officefloor.OfficeFloorModel" element="office-floor">
+<marshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../../../../../plugin/xml/src/schema/TreeXmlMarshaller.xsd"
+	type="net.officefloor.model.officefloor.OfficeFloorModel"
+	element="office-floor">
 	<!-- MANAGED OBJECTS -->
-	<collection method="getManagedObjectSources" element="managed-object-sources">
-		<item type="net.officefloor.model.officefloor.ManagedObjectSourceModel" element="managed-object-source">
+	<collection method="getManagedObjectSources"
+		element="managed-object-sources">
+		<item
+			type="net.officefloor.model.officefloor.ManagedObjectSourceModel"
+			element="managed-object-source">
 			<attributes>
-				<attribute method="getId" attribute="id"/>
-				<attribute method="getSource" attribute="source"/>
+				<attribute method="getId" attribute="id" />
+				<attribute method="getSource" attribute="source" />
 			</attributes>
-			<object method="getManagingOffice" element="managing-office">
+			<object method="getManagingOffice"
+				element="managing-office">
 				<attributes>
-					<attribute method="getManagingOfficeName" attribute="name"/>
+					<attribute method="getManagingOfficeName"
+						attribute="name" />
 				</attributes>
 			</object>
 			<collection method="getProperties" element="properties">
-				<item type="net.officefloor.model.officefloor.PropertyModel" element="property">
+				<item
+					type="net.officefloor.model.officefloor.PropertyModel"
+					element="property">
 					<attributes>
-						<attribute method="getName" attribute="name"/>
-						<attribute method="getValue" attribute="value"/>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
 					</attributes>
 				</item>
 			</collection>
@@ -24,16 +34,20 @@
 	</collection>
 	<!-- TEAMS -->
 	<collection method="getTeams" element="team-instances">
-		<item type="net.officefloor.model.officefloor.TeamModel" element="team-instance">
+		<item type="net.officefloor.model.officefloor.TeamModel"
+			element="team-instance">
 			<attributes>
-				<attribute method="getId" attribute="id"/>
-				<attribute method="getTeamFactory" attribute="team-factory"/>
+				<attribute method="getId" attribute="id" />
+				<attribute method="getTeamFactory"
+					attribute="team-factory" />
 			</attributes>
 			<collection method="getProperties" element="properties">
-				<item type="net.officefloor.model.officefloor.PropertyModel" element="property">
+				<item
+					type="net.officefloor.model.officefloor.PropertyModel"
+					element="property">
 					<attributes>
-						<attribute method="getName" attribute="name"/>
-						<attribute method="getValue" attribute="value"/>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
 					</attributes>
 				</item>
 			</collection>
@@ -41,34 +55,45 @@
 	</collection>
 	<!-- OFFICES -->
 	<collection method="getOffices" element="offices">
-		<item type="net.officefloor.model.officefloor.OfficeFloorOfficeModel" element="office">
+		<item
+			type="net.officefloor.model.officefloor.OfficeFloorOfficeModel"
+			element="office">
 			<attributes>
-				<attribute method="getId" attribute="id"/>
-				<attribute method="getName" attribute="name"/>
-				<attribute method="getX" attribute="x"/>
-				<attribute method="getY" attribute="y"/>
+				<attribute method="getId" attribute="id" />
+				<attribute method="getName" attribute="name" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
 			</attributes>
-			<collection method="getManagedObjects" element="managed-objects">
-				<item type="net.officefloor.model.officefloor.OfficeManagedObjectModel" element="managed-object">
+			<collection method="getManagedObjects"
+				element="managed-objects">
+				<item
+					type="net.officefloor.model.officefloor.OfficeManagedObjectModel"
+					element="managed-object">
 					<attributes>
-						<attribute method="getManagedObjectName" attribute="name"/>
-						<attribute method="getScope" attribute="scope"/>
+						<attribute method="getManagedObjectName"
+							attribute="name" />
 					</attributes>
-					<object method="getManagedObjectSource" element="managed-object-source">
+					<object method="getManagedObjectSource"
+						element="managed-object-source">
 						<attributes>
-							<attribute method="getManagedObjectSourceId" attribute="id"/>
+							<attribute method="getManagedObjectSourceId"
+								attribute="id" />
 						</attributes>
 					</object>
 				</item>
 			</collection>
 			<collection method="getTeams" element="teams">
-				<item type="net.officefloor.model.officefloor.OfficeTeamModel" element="team">
+				<item
+					type="net.officefloor.model.officefloor.OfficeTeamModel"
+					element="team">
 					<attributes>
-						<attribute method="getTeamName" attribute="name"/>
+						<attribute method="getTeamName"
+							attribute="name" />
 					</attributes>
 					<object method="getTeam" element="team-instance">
 						<attributes>
-							<attribute method="getTeamId" attribute="id"/>
+							<attribute method="getTeamId"
+								attribute="id" />
 						</attributes>
 					</object>
 				</item>

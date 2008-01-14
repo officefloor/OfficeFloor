@@ -16,6 +16,7 @@
 			<attributes>
 				<attribute method="getName" attribute="name"/>
 				<attribute method="getObjectType" attribute="object-type"/>
+				<attribute method="getScope" attribute="scope"/>
 			</attributes>
 		</item>
 	</collection>

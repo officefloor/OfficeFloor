@@ -8,6 +8,7 @@
 	<object method="addExternalManagedObject" node="managed-object" class="net.officefloor.model.office.ExternalManagedObjectModel">
 		<value method="setName" node="managed-object@name"/>
 		<value method="setObjectType" node="managed-object@object-type"/>
+		<value method="setScope" node="managed-object@scope"/>
 	</object>
 	<!-- ROOM -->
 	<object method="setRoom" node="room" class="net.officefloor.model.office.OfficeRoomModel" id="ROOM">
