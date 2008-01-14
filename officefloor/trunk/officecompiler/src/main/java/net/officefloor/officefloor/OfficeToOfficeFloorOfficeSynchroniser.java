@@ -66,7 +66,7 @@ public class OfficeToOfficeFloorOfficeSynchroniser {
 			} else {
 				// Create the new managed object
 				OfficeManagedObjectModel newMo = new OfficeManagedObjectModel(
-						moName, null, null);
+						moName, null);
 				officeFloorOffice.addManagedObject(newMo);
 			}
 		}

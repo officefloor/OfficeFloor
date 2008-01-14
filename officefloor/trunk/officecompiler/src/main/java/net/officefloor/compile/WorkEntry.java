@@ -26,6 +26,7 @@ import java.util.Set;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.DeskWorkModel;
@@ -46,6 +47,22 @@ import net.officefloor.util.OFCU;
  */
 public class WorkEntry<W extends Work> extends
 		AbstractEntry<WorkBuilder<W>, DeskWorkModel> {
+
+	/**
+	 * Process scope for the {@link ManagedObject}.
+	 */
+	public static final String MANAGED_OBJECT_SCOPE_PROCESS = "process";
+
+	/**
+	 * Work scope for the {@link ManagedObject}.
+	 */
+	public static final String MANAGED_OBJECT_SCOPE_WORK = "work";
+
+	/**
+	 * Listing of all {@link ManagedObject} scopes.
+	 */
+	public static final String[] MANAGED_OBJECT_SCOPES = new String[] {
+			MANAGED_OBJECT_SCOPE_PROCESS, MANAGED_OBJECT_SCOPE_WORK };
 
 	/**
 	 * Loads the {@link WorkEntry}.
@@ -304,45 +321,56 @@ public class WorkEntry<W extends Work> extends
 			roomEntry = roomEntry.getParentRoom();
 		}
 
-		// Obtain the office floor of the office
+		// Obtain the office within the office floor
 		OfficeFloorEntry officeFloorEntry = officeEntry.getOfficeFloorEntry();
-
-		// Obtain office from office floor
 		OfficeFloorOfficeModel office = officeFloorEntry
 				.getOfficeFloorOfficeModel(officeEntry);
 
-		// Obtain office managed object
-		OfficeManagedObjectModel officeMo = null;
-		for (OfficeManagedObjectModel mo : office.getManagedObjects()) {
-			if (externalMoName.equals(mo.getManagedObjectName())) {
-				officeMo = mo;
+		// Obtain the office external managed object
+		net.officefloor.model.office.ExternalManagedObjectModel officeExtMo = null;
+		for (net.officefloor.model.office.ExternalManagedObjectModel mo : officeEntry
+				.getModel().getExternalManagedObjects()) {
+			if (externalMoName.equals(mo.getName())) {
+				officeExtMo = mo;
 			}
 		}
-		if (officeMo == null) {
-			throw new Exception("Can not find managed object '"
-					+ externalMoName + "' for office " + office.getId());
+		if (officeExtMo == null) {
+			throw new Exception("Can not find external managed object '"
+					+ externalMoName + "' of office " + officeEntry.getId());
 		}
 
-		// TODO remove
-		officeMo.setScope("process");
+		// TODO remove (scope on office)
+		officeExtMo.setScope("process");
 
 		// Build managed object based on its scope
-		if ("process".equals(officeMo.getScope())) {
+		if (MANAGED_OBJECT_SCOPE_PROCESS.equals(officeExtMo.getScope())) {
 			// Register the process managed object to this work
 			officeEntry.getBuilder().addProcessManagedObject(
 					"p:" + externalMoName, externalMoName);
 			this.getBuilder().registerProcessManagedObject(deskMo.getName(),
 					"p:" + externalMoName);
 
-		} else if ("work".equals(officeMo.getScope())) {
+		} else if (MANAGED_OBJECT_SCOPE_WORK.equals(officeExtMo.getScope())) {
 			// Register the work managed object to this work
 			this.getBuilder().addWorkManagedObject(deskMo.getName(),
 					externalMoName);
 
 		} else {
-			throw new Exception("Unknown scope '" + officeMo.getScope()
+			throw new Exception("Unknown scope '" + officeExtMo.getScope()
 					+ "' for managed object '" + externalMoName
 					+ "' of office '" + office.getId() + "'");
+		}
+
+		// Obtain office floor managed object
+		OfficeManagedObjectModel officeMo = null;
+		for (OfficeManagedObjectModel mo : office.getManagedObjects()) {
+			if (officeExtMo.getName().equals(mo.getManagedObjectName())) {
+				officeMo = mo;
+			}
+		}
+		if (officeMo == null) {
+			throw new Exception("Can not find managed object '"
+					+ externalMoName + "' for office " + office.getId());
 		}
 
 		// Register the managed object to the office
