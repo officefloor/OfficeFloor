@@ -52,7 +52,7 @@ public class OfficeFloorModelTest extends AbstractModelTestCase {
 				new OfficeFloorOfficeModel[] { new OfficeFloorOfficeModel(
 						"OFFICE", "office",
 						new OfficeManagedObjectModel[] { new OfficeManagedObjectModel(
-								"MO-NAME", "work", null) }, new OfficeTeamModel[0],
+								"MO-NAME", null) }, new OfficeTeamModel[0],
 						null) });
 
 		// Configuration Item

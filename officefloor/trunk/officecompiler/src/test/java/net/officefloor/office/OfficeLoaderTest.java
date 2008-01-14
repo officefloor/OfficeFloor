@@ -18,6 +18,7 @@ package net.officefloor.office;
 
 import java.io.File;
 
+import net.officefloor.compile.WorkEntry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.office.AdministratorModel;
@@ -91,9 +92,10 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 						"TEAM TWO", null));
 
 		// Managed Objects
-		assertList(new String[] { "getName", "getObjectType" }, office
-				.getExternalManagedObjects(), new ExternalManagedObjectModel(
-				"MO", "java.lang.String", null));
+		assertList(new String[] { "getName", "getObjectType", "getScope" },
+				office.getExternalManagedObjects(),
+				new ExternalManagedObjectModel("MO", "java.lang.String",
+						WorkEntry.MANAGED_OBJECT_SCOPE_PROCESS, null));
 
 		// Top level room
 		assertEquals("Incorrect room id", "Room.room.xml", office.getRoom()

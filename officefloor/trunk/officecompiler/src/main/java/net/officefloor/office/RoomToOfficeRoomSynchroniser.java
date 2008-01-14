@@ -19,6 +19,7 @@ package net.officefloor.office;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.WorkEntry;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
@@ -141,9 +142,10 @@ public class RoomToOfficeRoomSynchroniser {
 				// Remove managed object (so not removed later)
 				existingMos.remove(moName);
 			} else {
-				// Add the new managed object
+				// Add the new managed object (default to work scope)
 				ExternalManagedObjectModel newMo = new ExternalManagedObjectModel(
-						moName, mo.getObjectType(), null);
+						moName, mo.getObjectType(),
+						WorkEntry.MANAGED_OBJECT_SCOPE_WORK, null);
 				office.addExternalManagedObject(newMo);
 			}
 		}
