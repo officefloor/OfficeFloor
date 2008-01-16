@@ -339,9 +339,6 @@ public class WorkEntry<W extends Work> extends
 					+ externalMoName + "' of office " + officeEntry.getId());
 		}
 
-		// TODO remove (scope on office)
-		officeExtMo.setScope("process");
-
 		// Build managed object based on its scope
 		if (MANAGED_OBJECT_SCOPE_PROCESS.equals(officeExtMo.getScope())) {
 			// Register the process managed object to this work
