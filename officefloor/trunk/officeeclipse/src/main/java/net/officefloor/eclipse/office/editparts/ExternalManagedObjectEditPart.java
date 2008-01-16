@@ -19,15 +19,20 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FlowLayout;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
-
+import net.officefloor.compile.WorkEntry;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectModel.ExternalManagedObjectEvent;
+
+import org.eclipse.draw2d.ActionEvent;
+import org.eclipse.draw2d.ActionListener;
+import org.eclipse.draw2d.Clickable;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.FlowLayout;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -89,13 +94,68 @@ public class ExternalManagedObjectEditPart extends
 	 */
 	@Override
 	protected IFigure createFigure() {
-		Label figure = new Label(this.getCastedModel().getName());
+		Figure figure = new Figure();
 		figure.setBackgroundColor(ColorConstants.lightGray);
 		figure.setOpaque(true);
 		figure.setLayoutManager(new FlowLayout(true));
 
+		// Name of external managed object
+		Label name = new Label(this.getCastedModel().getName());
+		figure.add(name);
+
+		// Scope of external managed object
+		String scopeName = this.getCastedModel().getScope();
+		if (scopeName == null) {
+			scopeName = "not specified";
+		}
+		final Label scope = new Label(scopeName);
+		scope.setBackgroundColor(ColorConstants.lightBlue);
+		scope.setOpaque(true);
+		Clickable clickableScope = new Clickable(scope);
+		clickableScope.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				// Obtain the next scope
+				String nextScope = ExternalManagedObjectEditPart.this
+						.getNextExternalManagedObjectScope(scope.getText());
+
+				// Change scope on model
+				ExternalManagedObjectEditPart.this.getCastedModel().setScope(
+						nextScope);
+
+				// Change scope on figure
+				scope.setText(nextScope);
+			}
+		});
+		figure.add(clickableScope);
+
 		// Return figure
 		return figure;
+	}
+
+	/**
+	 * Obtains the next scope for the {@link ExternalManagedObjectModel}.
+	 * 
+	 * @param currentScope
+	 *            Current scope (may be <code>null</code>).
+	 * @return Next scope.
+	 */
+	protected String getNextExternalManagedObjectScope(String currentScope) {
+
+		// Find the index of the current scope
+		int currentScopeIndex = -1;
+		for (int i = 0; i < WorkEntry.MANAGED_OBJECT_SCOPES.length; i++) {
+			if (WorkEntry.MANAGED_OBJECT_SCOPES[i].equals(currentScope)) {
+				currentScopeIndex = i;
+			}
+		}
+
+		// Move to the next scope (and cycle back to first if necessary)
+		int nextScopeIndex = (currentScopeIndex + 1)
+				% WorkEntry.MANAGED_OBJECT_SCOPES.length;
+
+		// Return the next scope
+		return WorkEntry.MANAGED_OBJECT_SCOPES[nextScopeIndex];
 	}
 
 }
