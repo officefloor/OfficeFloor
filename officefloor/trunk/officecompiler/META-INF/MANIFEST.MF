@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0
 Bundle-Vendor: Daniel Sagenschneider
 Eclipse-LazyStart: true
 Export-Package: net.officefloor,
+ net.officefloor.compile,
  net.officefloor.desk,
  net.officefloor.main,
  net.officefloor.office,
