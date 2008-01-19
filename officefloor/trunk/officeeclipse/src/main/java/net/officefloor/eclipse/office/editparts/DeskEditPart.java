@@ -19,8 +19,6 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import org.eclipse.draw2d.IFigure;
-
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.figure.IndentFigure;
@@ -29,6 +27,8 @@ import net.officefloor.eclipse.common.figure.ListItemFigure;
 import net.officefloor.eclipse.common.figure.WrappingFigure;
 import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeDeskModel.OfficeDeskEvent;
+
+import org.eclipse.draw2d.IFigure;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
