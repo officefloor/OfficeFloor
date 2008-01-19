@@ -16,7 +16,6 @@
  */
 package net.officefloor.work.clazz;
 
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
@@ -60,7 +59,7 @@ public class ClassWorkLoaderTest extends OfficeFrameTestCase {
 		};
 
 		// Load the work
-		WorkModel work = new ClassWorkLoader().loadWork(context);
+		WorkModel<ClassWork> work = new ClassWorkLoader().loadWork(context);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -72,9 +71,9 @@ public class ClassWorkLoaderTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of tasks", 2, work.getTasks().size());
 
 		// Obtain the tasks
-		TaskModel<Indexed, Indexed> taskOne = null;
-		TaskModel<Indexed, Indexed> taskTwo = null;
-		for (TaskModel<Indexed, Indexed> task : work.getTasks()) {
+		TaskModel<?, ?> taskOne = null;
+		TaskModel<?, ?> taskTwo = null;
+		for (TaskModel<?, ?> task : work.getTasks()) {
 			if ("anotherMethod".equals(task.getTaskName())) {
 				taskOne = task;
 			} else if ("taskMethod".equals(task.getTaskName())) {

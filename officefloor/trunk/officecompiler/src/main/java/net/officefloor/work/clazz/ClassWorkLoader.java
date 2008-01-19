@@ -42,14 +42,15 @@ public class ClassWorkLoader implements WorkLoader {
 	 * @see net.officefloor.work.WorkLoader#loadWork(net.officefloor.work.WorkLoaderContext)
 	 */
 	@SuppressWarnings("unchecked")
-	public WorkModel loadWork(WorkLoaderContext context) throws Exception {
+	public WorkModel<ClassWork> loadWork(WorkLoaderContext context)
+			throws Exception {
 
 		// Obtain the class
-		Class clazz = context.getClassLoader().loadClass(
+		Class<?> clazz = context.getClassLoader().loadClass(
 				context.getConfiguration());
 
 		// Obtain the listing of tasks
-		List<TaskModel> tasks = new LinkedList<TaskModel>();
+		List<TaskModel<?, ?>> tasks = new LinkedList<TaskModel<?, ?>>();
 		for (Method method : clazz.getMethods()) {
 			if (Modifier.isPublic(method.getModifiers())) {
 
@@ -65,8 +66,8 @@ public class ClassWorkLoader implements WorkLoader {
 				ParameterFactory[] parameters = new ParameterFactory[paramTypes.length];
 
 				// Create the listing of task objects and flows
-				List<TaskObjectModel> objects = new LinkedList<TaskObjectModel>();
-				List<TaskFlowModel> flows = new LinkedList<TaskFlowModel>();
+				List<TaskObjectModel<?>> objects = new LinkedList<TaskObjectModel<?>>();
+				List<TaskFlowModel<?>> flows = new LinkedList<TaskFlowModel<?>>();
 				int flowIndex = 0;
 				for (int i = 0; i < paramTypes.length; i++) {
 					// Obtain the param type
@@ -94,10 +95,11 @@ public class ClassWorkLoader implements WorkLoader {
 				}
 
 				// Create the Task
-				TaskObjectModel[] objectArray = objects
+				TaskObjectModel<Indexed>[] objectArray = objects
 						.toArray(new TaskObjectModel[0]);
-				TaskFlowModel[] flowArray = flows.toArray(new TaskFlowModel[0]);
-				TaskModel task = new TaskModel<Indexed, Indexed>(method
+				TaskFlowModel<Indexed>[] flowArray = flows
+						.toArray(new TaskFlowModel[0]);
+				TaskModel<?, ?> task = new TaskModel<Indexed, Indexed>(method
 						.getName(), new ClassTaskFactoryManufacturer(method,
 						parameters), null, null, objectArray, flowArray);
 
@@ -107,9 +109,9 @@ public class ClassWorkLoader implements WorkLoader {
 		}
 
 		// Create the Work Model
-		TaskModel[] taskArray = tasks.toArray(new TaskModel[0]);
-		WorkModel work = new WorkModel(ClassWork.class, new ClassWorkFactory(
-				clazz), taskArray);
+		TaskModel<?, ?>[] taskArray = tasks.toArray(new TaskModel[0]);
+		WorkModel<ClassWork> work = new WorkModel<ClassWork>(ClassWork.class,
+				new ClassWorkFactory(clazz), taskArray);
 
 		// Return the work model
 		return work;

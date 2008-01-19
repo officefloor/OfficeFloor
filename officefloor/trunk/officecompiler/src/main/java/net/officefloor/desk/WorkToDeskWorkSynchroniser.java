@@ -42,7 +42,7 @@ public class WorkToDeskWorkSynchroniser {
 	 * @param deskWork
 	 *            {@link DeskWorkModel}.
 	 */
-	public static void synchroniseWorkOntoDeskWork(WorkModel work,
+	public static void synchroniseWorkOntoDeskWork(WorkModel<?> work,
 			DeskWorkModel deskWork) {
 
 		// Load work onto the desk work
