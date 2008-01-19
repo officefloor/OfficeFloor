@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+<model class-suffix="&lt;W extends Work&gt;" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+    <import>net.officefloor.frame.api.execute.Work</import>
 	<import>net.officefloor.frame.api.build.WorkFactory</import>
-	<field type="Class" name="type of work"/>
-	<field type="WorkFactory&lt;?&gt;" name="work factory"/>
-	<list type="TaskModel" name="task"/>
+	<field type="Class&lt;W&gt;" name="type of work"/>
+	<field type="WorkFactory&lt;W&gt;" name="work factory"/>
+	<list type="TaskModel&lt;?,?&gt;" name="task"/>
 </model>

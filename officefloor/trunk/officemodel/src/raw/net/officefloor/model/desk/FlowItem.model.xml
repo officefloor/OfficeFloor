@@ -5,7 +5,7 @@
 	<field type="boolean" name="is public"/>
 	<field type="String" name="work name"/>
 	<field type="String" name="task name"/>
-	<field type="TaskModel" name="task"/>
+	<field type="TaskModel&lt;?,?&gt;" name="task"/>
 	<field type="DeskWorkToFlowItemModel" name="desk work"/>
 	<field type="DeskTaskToFlowItemModel" name="desk task"/>
     <field type="FlowItemToNextExternalFlowModel" name="next external flow"/>
