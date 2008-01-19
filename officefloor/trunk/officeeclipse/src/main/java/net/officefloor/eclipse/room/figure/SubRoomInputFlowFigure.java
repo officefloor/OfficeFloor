@@ -39,7 +39,7 @@ public class SubRoomInputFlowFigure extends Figure {
 	 *            {@link Figure} to handle whether public.
 	 */
 	public SubRoomInputFlowFigure(String name, IFigure figureForIsPublic) {
-		this.setLayoutManager(new ToolbarLayout());
+		this.setLayoutManager(new ToolbarLayout(true));
 		this.setBackgroundColor(ColorConstants.lightBlue);
 		this.setOpaque(true);
 		this.setSize(60, 20);

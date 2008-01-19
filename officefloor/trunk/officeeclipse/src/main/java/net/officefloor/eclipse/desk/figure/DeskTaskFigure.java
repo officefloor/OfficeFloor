@@ -23,6 +23,7 @@ import net.officefloor.eclipse.common.figure.WrappingFigure;
 
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.ToolbarLayout;
 
 /**
  * {@link Figure} for the {@link net.officefloor.model.desk.DeskTaskModel}.
@@ -43,8 +44,11 @@ public class DeskTaskFigure extends WrappingFigure {
 		super(new ListFigure());
 
 		// Add name of task and ability to add as flow item
-		this.addDecorate(new ListItemFigure(taskName));
-		this.addDecorate(addAsFlowItem);
+		Figure taskHeader = new Figure();
+		taskHeader.setLayoutManager(new ToolbarLayout(true));
+		taskHeader.add(new ListItemFigure(taskName));
+		taskHeader.add(addAsFlowItem);
+		this.addDecorate(taskHeader);
 
 		// Indent all objects of tasks
 		this.addDecorate(new IndentFigure(10, this.getChildContainerFigure()));

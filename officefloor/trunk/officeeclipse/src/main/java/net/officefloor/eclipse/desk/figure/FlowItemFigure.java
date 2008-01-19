@@ -53,8 +53,11 @@ public class FlowItemFigure extends Figure {
 		this.setSize(60, 20);
 
 		// All adding
-		super.add(new ListItemFigure(flowId), null, -1);
-		super.add(figureForIsPublic, null, -1);
+		Figure flowItemHeader = new Figure();
+		flowItemHeader.setLayoutManager(new ToolbarLayout(true));
+		flowItemHeader.add(new ListItemFigure(flowId));
+		flowItemHeader.add(figureForIsPublic);
+		super.add(flowItemHeader, null, -1);
 		super.add(new IndentFigure(10, this.outputs), null, -1);
 	}
 

@@ -36,6 +36,7 @@ import net.officefloor.model.office.FlowItemToTeamModel;
 import net.officefloor.model.office.FlowItemModel.FlowItemEvent;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.ToolbarLayout;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
@@ -142,9 +143,11 @@ public class FlowItemEditPart extends
 	 */
 	@Override
 	protected IFigure createFigure() {
+		
 		// Create the figure
 		WrappingFigure figure = new WrappingFigure(new ListFigure());
 		figure.addDecorate(new ListItemFigure(this.getCastedModel().getId()));
+		figure.setLayoutManager(new ToolbarLayout(true));
 		figure.addChildContainerFigure();
 
 		// Return the figure

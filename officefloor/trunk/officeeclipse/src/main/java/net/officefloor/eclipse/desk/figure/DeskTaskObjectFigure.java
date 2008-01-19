@@ -39,7 +39,7 @@ public class DeskTaskObjectFigure extends Figure {
 	 *            {@link IFigure} to indicate if a parameter.
 	 */
 	public DeskTaskObjectFigure(String objectName, IFigure figureForIsParameter) {
-		this.setLayoutManager(new ToolbarLayout());
+		this.setLayoutManager(new ToolbarLayout(true));
 
 		// Tool tip being full type name
 		this.setToolTip(new Label(objectName));

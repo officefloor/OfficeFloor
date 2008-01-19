@@ -53,7 +53,7 @@ public class DeskTaskEditPart extends
 	protected IFigure createFigure() {
 		// Button to add as flow item
 		final ButtonEditPart addAsFlowItem = new ButtonEditPart(
-				"Add as Flow Item") {
+				"Create") {
 			protected void handleButtonClick() {
 
 				// Obtain the work
