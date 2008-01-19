@@ -2,7 +2,7 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<import>net.officefloor.model.work.TaskModel</import>
 	<field type="String" name="name"/>
-	<field type="TaskModel" name="task"/>
+	<field type="TaskModel&lt;?,?&gt;" name="task"/>
 	<list type="DeskTaskObjectModel" name="object" cascade-remove="true"/>
 	<list type="DeskTaskToFlowItemModel" name="flow item"/>
 </model>

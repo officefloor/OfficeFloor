@@ -3,6 +3,6 @@
 	<import>net.officefloor.model.work.TaskObjectModel</import>
 	<field type="String" name="object type"/>
 	<field type="boolean" name="is parameter"/>
-	<field type="TaskObjectModel" name="task object"/>
+	<field type="TaskObjectModel&lt;?&gt;" name="task object"/>
 	<field type="DeskTaskObjectToExternalManagedObjectModel" name="managed object"/>
 </model>

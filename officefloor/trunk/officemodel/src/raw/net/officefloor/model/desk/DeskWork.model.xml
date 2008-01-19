@@ -4,7 +4,7 @@
 	<field type="String" name="id"/>
 	<field type="String" name="loader"/>
 	<field type="String" name="configuration"/>
-	<field type="WorkModel" name="work"/>
+	<field type="WorkModel&lt;?&gt;" name="work"/>
 	<field type="DeskWorkToFlowItemModel" name="initial flow item"/>
 	<list type="DeskTaskModel" name="task" cascade-remove="true"/>
 </model>
