@@ -111,6 +111,7 @@ public class OneModel extends AbstractModel {
     /**
      * Remove Connections.
      */
+    @SuppressWarnings("unchecked")
     public RemoveConnectionsAction<OneModel> removeConnections() {
         RemoveConnectionsAction<OneModel> _action = new RemoveConnectionsAction<OneModel>(this);
         _action.disconnect(this.twoField);
