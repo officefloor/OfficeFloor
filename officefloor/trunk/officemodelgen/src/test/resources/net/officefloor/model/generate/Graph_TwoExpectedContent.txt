@@ -73,6 +73,7 @@ public class TwoModel extends AbstractModel {
     /**
      * Remove Connections.
      */
+    @SuppressWarnings("unchecked")
     public RemoveConnectionsAction<TwoModel> removeConnections() {
         RemoveConnectionsAction<TwoModel> _action = new RemoveConnectionsAction<TwoModel>(this);
         _action.disconnect(this.oneList);
