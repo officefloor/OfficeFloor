@@ -34,6 +34,6 @@ public interface WorkLoader {
 	 * @throws Exception
 	 *             If fails.
 	 */
-	WorkModel loadWork(WorkLoaderContext context) throws Exception;
+	WorkModel<?> loadWork(WorkLoaderContext context) throws Exception;
 
 }

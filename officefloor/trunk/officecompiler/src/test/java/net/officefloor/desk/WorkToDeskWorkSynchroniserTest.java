@@ -37,7 +37,7 @@ public class WorkToDeskWorkSynchroniserTest extends OfficeFrameTestCase {
 	public void testWorkToDeskWorkSynchronise() {
 
 		// Create the work
-		WorkModel work = new WorkModel(null, null, new TaskModel[] {
+		WorkModel<?> work = new WorkModel(null, null, new TaskModel[] {
 				new TaskModel("taskOne", null, null, null, null, null),
 				new TaskModel("taskTwo", null, null, null, null, null),
 				new TaskModel("taskThree", null, null, null, null, null) });

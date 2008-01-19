@@ -470,7 +470,7 @@ public class DeskLoader {
 			};
 
 			// Load the work model
-			WorkModel workModel = workLoader.loadWork(workLoaderContext);
+			WorkModel<?> workModel = workLoader.loadWork(workLoaderContext);
 
 			// Synchronise the work
 			WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
