@@ -244,7 +244,7 @@ public class TaskEntry<W extends Work> extends
 		TaskModel<?, ?> task = this.deskTask.getTask();
 		TaskFactory taskFactory = task.getTaskFactoryManufacturer()
 				.createTaskFactory();
-
+		
 		// Initiate the task factory if necessary
 		if (taskFactory instanceof CompilerAwareTaskFactory) {
 			((CompilerAwareTaskFactory) taskFactory).initialiseTaskFactory(this
