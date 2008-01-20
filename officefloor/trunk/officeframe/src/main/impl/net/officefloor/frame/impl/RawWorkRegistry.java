@@ -20,18 +20,22 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.EscalationImpl;
+import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.TaskMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
@@ -56,8 +60,8 @@ public class RawWorkRegistry {
 	 *            Registry of the {@link RawAdministratorMetaData}.
 	 * @param rawAssetRegistry
 	 *            {@link RawAssetManagerRegistry}.
-	 * @param defaultParentEscalationProcedure
-	 *            Default {@link ParentEscalationProcedure}.
+	 * @param topLevelEscalationProcedure
+	 *            Top level {@link EscalationProcedure}.
 	 * @return Registry of {@link WorkMetaData} defining the
 	 *         {@link net.officefloor.frame.api.execute.Work} items to be
 	 *         carried out by the Office.
@@ -69,8 +73,7 @@ public class RawWorkRegistry {
 			RawOfficeResourceRegistry officeResources,
 			RawAdministratorRegistry rawAdminRegistry,
 			RawAssetManagerRegistry rawAssetRegistry,
-			ParentEscalationProcedure defaultParentEscalationProcedure)
-			throws Exception {
+			EscalationProcedure topLevelEscalationProcedure) throws Exception {
 
 		// Create the registry of Work meta-data
 		Map<String, RawWorkMetaData> workRegistry = new HashMap<String, RawWorkMetaData>();
@@ -80,8 +83,7 @@ public class RawWorkRegistry {
 			// Create the Work meta-data
 			workRegistry.put(workConfig.getWorkName(), RawWorkMetaData
 					.createRawWorkMetaData(workConfig, officeResources,
-							rawAdminRegistry, rawAssetRegistry,
-							defaultParentEscalationProcedure));
+							rawAdminRegistry, rawAssetRegistry));
 		}
 
 		// Create the work registry
@@ -89,7 +91,7 @@ public class RawWorkRegistry {
 
 		// Link the Tasks together for the Office
 		rawWorkRegistry.loadRemainingTaskState(rawAssetRegistry,
-				officeConfiguration);
+				officeConfiguration, topLevelEscalationProcedure);
 
 		// Return the work configuration
 		return rawWorkRegistry;
@@ -180,13 +182,16 @@ public class RawWorkRegistry {
 	 * @param officeConfiguration
 	 *            {@link OfficeConfiguration} containing the configurations for
 	 *            the {@link TaskMetaData} instances.
+	 * @param topLevelEscalationProcedure
+	 *            Top level {@link EscalationProcedure}.
 	 * @throws ConfigurationException
 	 *             If failure in configuration.
 	 */
 	@SuppressWarnings("unchecked")
 	private <W extends Work> void loadRemainingTaskState(
 			RawAssetManagerRegistry rawAssetRegistry,
-			OfficeConfiguration officeConfiguration)
+			OfficeConfiguration officeConfiguration,
+			EscalationProcedure topLevelEscalationProcedure)
 			throws ConfigurationException {
 
 		// TODO remove (display structure)
@@ -264,9 +269,46 @@ public class RawWorkRegistry {
 									workName, taskName), flowManager);
 				}
 
+				// Obtain the parent escalation procedure
+				EscalationProcedure parentEscalationProcedure = taskConfig
+						.getParentEscalationProcedure();
+				if (parentEscalationProcedure == null) {
+					// Non specified, therefore use default parent escalation
+					parentEscalationProcedure = topLevelEscalationProcedure;
+				}
+
+				// Obtain specific escalation for this task
+				EscalationConfiguration[] escalationConfigs = taskConfig
+						.getEscalations();
+				Escalation[] escalations = new Escalation[escalationConfigs.length];
+				for (int i = 0; i < escalations.length; i++) {
+
+					// Obtain the escalation configuration
+					EscalationConfiguration escalationConfig = escalationConfigs[i];
+
+					// Obtain the flow strategy for the escalation
+					FlowInstigationStrategyEnum strategy = (escalationConfig
+							.isResetThreadState() ? FlowInstigationStrategyEnum.SEQUENTIAL
+							: FlowInstigationStrategyEnum.PARALLEL);
+
+					// Obtain the flow meta-data to handle the escalation
+					FlowMetaData<?> escalationFlowMetaData = new FlowMetaDataImpl(
+							strategy,
+							locateTaskMetaData(escalationConfig
+									.getTaskNodeReference(), workName, taskName),
+							null);
+
+					// Create the escalation
+					escalations[i] = new EscalationImpl(escalationConfig
+							.getTypeOfCause(), escalationConfig
+							.isResetThreadState(), escalationFlowMetaData);
+				}
+				EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
+						parentEscalationProcedure, escalations);
+
 				// Load remaining state to task
 				taskMetaData.loadRemainingState(workMetaData, flowMetaData,
-						nextTaskInFlow);
+						nextTaskInFlow, escalationProcedure);
 			}
 		}
 	}

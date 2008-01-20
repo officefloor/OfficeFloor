@@ -23,18 +23,18 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.escalate.EscalationPoint;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.EscalationLevelImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
-import net.officefloor.frame.internal.structure.EscalationLevel;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
+import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Implementation of the {@link net.officefloor.frame.api.build.TaskBuilder}.
@@ -50,10 +50,10 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	protected final String taskName;
 
 	/**
-	 * {@link ParentEscalationProcedure} for the resulting
+	 * Parent {@link EscalationProcedure} for the resulting
 	 * {@link net.officefloor.frame.api.execute.Task}.
 	 */
-	protected final ParentEscalationProcedure parentEscalationProcedure;
+	protected final EscalationProcedure parentEscalationProcedure;
 
 	/**
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
@@ -84,12 +84,11 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	protected TaskNodeReference nextTaskInFlow;
 
 	/**
-	 * Listing of {@link EscalationLevel} instances to form the
-	 * {@link net.officefloor.frame.internal.structure.EscalationProcedure} for
-	 * the resulting {@link net.officefloor.frame.api.execute.Task} of this
+	 * Listing of {@link EscalationConfiguration} instances to form the
+	 * {@link EscalationProcedure} for the resulting {@link Task} of this
 	 * {@link TaskBuilder}.
 	 */
-	protected List<EscalationLevel<?>> escalationLevels = new LinkedList<EscalationLevel<?>>();
+	protected List<EscalationConfiguration> escalations = new LinkedList<EscalationConfiguration>();
 
 	/**
 	 * Listing of task administration duties to do before executing the
@@ -109,11 +108,11 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 * @param taskName
 	 *            Name of this {@link net.officefloor.frame.api.execute.Task}.
 	 * @param parentEscalationProcedure
-	 *            {@link ParentEscalationProcedure} for the
+	 *            {@link EscalationProcedure} for the
 	 *            {@link net.officefloor.frame.api.execute.Task}.
 	 */
 	public TaskBuilderImpl(String taskName,
-			ParentEscalationProcedure parentEscalationProcedure) {
+			EscalationProcedure parentEscalationProcedure) {
 		// Store state
 		this.taskName = taskName;
 		this.parentEscalationProcedure = parentEscalationProcedure;
@@ -259,12 +258,27 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.api.build.TaskBuilder#addEscalation(java.lang.Class,
-	 *      net.officefloor.frame.api.escalate.EscalationPoint)
+	 *      boolean, java.lang.String)
 	 */
-	public <E extends Throwable> void addEscalation(Class<E> typeOfCause,
-			EscalationPoint<E> escalationPoint) {
-		this.escalationLevels.add(new EscalationLevelImpl<E>(typeOfCause,
-				escalationPoint));
+	@Override
+	public void addEscalation(Class<? extends Throwable> typeOfCause,
+			boolean isResetThreadState, String taskName) {
+		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
+				isResetThreadState, new TaskNodeReferenceImpl(taskName)));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.api.build.TaskBuilder#addEscalation(java.lang.Class,
+	 *      boolean, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public void addEscalation(Class<? extends Throwable> typeOfCause,
+			boolean isResetThreadState, String workName, String taskName) {
+		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
+				isResetThreadState, new TaskNodeReferenceImpl(workName,
+						taskName)));
 	}
 
 	/*
@@ -357,19 +371,9 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.configuration.TaskConfiguration#getEscalationLevels()
-	 */
-	@SuppressWarnings("unchecked")
-	public EscalationLevel<Throwable>[] getEscalationLevels() {
-		return this.escalationLevels.toArray(new EscalationLevel[0]);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see net.officefloor.frame.internal.configuration.TaskConfiguration#getParentEscalationProcedure()
 	 */
-	public ParentEscalationProcedure getParentEscalationProcedure() {
+	public EscalationProcedure getParentEscalationProcedure() {
 		return this.parentEscalationProcedure;
 	}
 
@@ -389,6 +393,17 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 */
 	public TaskDutyConfiguration<?>[] getPostTaskAdministratorDutyConfiguration() {
 		return this.postTaskDuties.toArray(new TaskDutyConfiguration[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.TaskConfiguration#getEscalations()
+	 */
+	@Override
+	public EscalationConfiguration[] getEscalations()
+			throws ConfigurationException {
+		return this.escalations.toArray(new EscalationConfiguration[0]);
 	}
 
 }
@@ -532,6 +547,75 @@ class FlowConfigurationImpl implements FlowConfiguration {
 	 */
 	public TaskNodeReference getInitialTask() throws ConfigurationException {
 		return this.taskNodeRef;
+	}
+
+}
+
+/**
+ * Implementation of the {@link EscalationConfiguration}.
+ */
+class EscalationConfigurationImpl implements EscalationConfiguration {
+
+	/**
+	 * Type of cause.
+	 */
+	private final Class<? extends Throwable> typeOfCause;
+
+	/**
+	 * Flag indicating to reset the {@link ThreadState}.
+	 */
+	private final boolean isResetThreadState;
+
+	/**
+	 * {@link TaskNodeReference}.
+	 */
+	private final TaskNodeReference taskNodeReference;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param typeOfCause
+	 *            Type of cause.
+	 * @param isResetThreadState
+	 *            Flag indicating to reset the {@link ThreadState}.
+	 * @param taskNodeReference
+	 *            {@link TaskNodeReference}.
+	 */
+	public EscalationConfigurationImpl(Class<? extends Throwable> typeOfCause,
+			boolean isResetThreadState, TaskNodeReference taskNodeReference) {
+		this.typeOfCause = typeOfCause;
+		this.isResetThreadState = isResetThreadState;
+		this.taskNodeReference = taskNodeReference;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.EscalationConfiguration#getTypeOfCause()
+	 */
+	@Override
+	public Class<? extends Throwable> getTypeOfCause() {
+		return this.typeOfCause;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.EscalationConfiguration#isResetThreadState()
+	 */
+	@Override
+	public boolean isResetThreadState() {
+		return this.isResetThreadState;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.EscalationConfiguration#getTaskNodeReference()
+	 */
+	@Override
+	public TaskNodeReference getTaskNodeReference() {
+		return this.taskNodeReference;
 	}
 
 }

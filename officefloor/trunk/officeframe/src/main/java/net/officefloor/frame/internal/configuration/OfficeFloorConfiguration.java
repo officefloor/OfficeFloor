@@ -18,6 +18,8 @@ package net.officefloor.frame.internal.configuration;
 
 import java.util.Map;
 
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -60,5 +62,13 @@ public interface OfficeFloorConfiguration {
 	 */
 	OfficeConfiguration[] getOfficeConfiguration()
 			throws ConfigurationException;
+
+	/**
+	 * Obtains the {@link EscalationProcedure} for the {@link OfficeFloor}.
+	 * 
+	 * @return {@link EscalationProcedure} for the {@link OfficeFloor}. May be
+	 *         <code>null</code>.
+	 */
+	EscalationProcedure getEscalationProcedure();
 
 }

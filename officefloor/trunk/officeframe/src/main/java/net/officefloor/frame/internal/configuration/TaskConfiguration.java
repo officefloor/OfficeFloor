@@ -18,8 +18,7 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.EscalationLevel;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 
 /**
  * Configuration of a {@link net.officefloor.frame.api.execute.Task}.
@@ -101,26 +100,25 @@ public interface TaskConfiguration<P extends Object, W extends Work, M extends E
 			throws ConfigurationException;
 
 	/**
-	 * Obtains the {@link EscalationLevel} instances in escalation order. Index
-	 * 0 being first, index 1 second and so forth.
+	 * Obtains the {@link EscalationConfiguration} instances in escalation
+	 * order. Index 0 being first, index 1 second and so forth.
 	 * 
-	 * @return {@link EscalationLevel} instances.
+	 * @return {@link EscalationConfiguration} instances.
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	EscalationLevel<Throwable>[] getEscalationLevels()
-			throws ConfigurationException;
+	EscalationConfiguration[] getEscalations() throws ConfigurationException;
 
 	/**
-	 * Obtains the {@link ParentEscalationProcedure} for the
+	 * Obtains the {@link EscalationProcedure} for the
 	 * {@link net.officefloor.frame.api.execute.Task}.
 	 * 
-	 * @return {@link ParentEscalationProcedure} for the
+	 * @return Parent {@link EscalationProcedure} for the
 	 *         {@link net.officefloor.frame.api.execute.Task}.
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	ParentEscalationProcedure getParentEscalationProcedure()
+	EscalationProcedure getParentEscalationProcedure()
 			throws ConfigurationException;
 
 	/**

@@ -110,7 +110,7 @@ public class AbstractLinkedListEntry<E extends LinkedListEntry<E>> implements
 
 		// Determine if last entry
 		if (this.next == null) {
-			// Last enry
+			// Last entry
 			this.linkedList.setTail(this.prev);
 		} else {
 			// Middle entry

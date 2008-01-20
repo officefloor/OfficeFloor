@@ -27,6 +27,7 @@ import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -51,6 +52,11 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	 * Registry of {@link OfficeBuilderImpl} instances by their name.
 	 */
 	private final Map<String, OfficeBuilderImpl> offices = new HashMap<String, OfficeBuilderImpl>();
+
+	/**
+	 * {@link EscalationProcedure}.
+	 */
+	private EscalationProcedure escalationProcedure = null;
 
 	/*
 	 * ====================================================================
@@ -117,6 +123,17 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	}
 
 	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.api.build.OfficeFloorBuilder#setEscalationProcedure(net.officefloor.frame.internal.structure.EscalationProcedure)
+	 */
+	@Override
+	public void setEscalationProcedure(EscalationProcedure escalationProcedure)
+			throws BuildException {
+		this.escalationProcedure = escalationProcedure;
+	}
+
+	/*
 	 * ====================================================================
 	 * OfficeFloorConfiguration
 	 * ====================================================================
@@ -150,6 +167,16 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	public OfficeConfiguration[] getOfficeConfiguration()
 			throws ConfigurationException {
 		return this.offices.values().toArray(new OfficeConfiguration[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.OfficeFloorConfiguration#getEscalationProcedure()
+	 */
+	@Override
+	public EscalationProcedure getEscalationProcedure() {
+		return this.escalationProcedure;
 	}
 
 }

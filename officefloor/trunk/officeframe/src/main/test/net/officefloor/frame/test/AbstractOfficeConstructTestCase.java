@@ -16,6 +16,9 @@
  */
 package net.officefloor.frame.test;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.BuildException;
@@ -27,12 +30,12 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.escalate.EscalationContext;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.OfficeFrameImpl;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
+import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
@@ -48,7 +51,7 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel
  */
 public abstract class AbstractOfficeConstructTestCase extends
-		OfficeFrameTestCase implements ParentEscalationProcedure {
+		OfficeFrameTestCase {
 
 	/**
 	 * {@link OfficeFloorBuilder}.
@@ -65,6 +68,11 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 */
 	private WorkBuilder<?> workBuilder;
 
+	/**
+	 * {@link ParentEscalationProcedure}.
+	 */
+	protected volatile Throwable exception = null;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -75,26 +83,45 @@ public abstract class AbstractOfficeConstructTestCase extends
 		((OfficeFrameImpl) OfficeFrameImpl.getInstance()).clearOfficeFloors();
 
 		// Initiate for constructing office
-		this.officeFloorBuilder = OfficeFrame.getInstance()
-				.getBuilderFactory().createOfficeFloorBuilder();
+		this.officeFloorBuilder = OfficeFrame.getInstance().getBuilderFactory()
+				.createOfficeFloorBuilder();
 		this.officeBuilder = OfficeFrame.getInstance().getBuilderFactory()
 				.createOfficeBuilder();
+
+		// Specify exception handling of the office floor
+		this.officeFloorBuilder
+				.setEscalationProcedure(new EscalationProcedureImpl(
+						new PassiveTeam()) {
+					@Override
+					protected void handleTopLevelEscalation(Throwable cause) {
+						// Specify for exception to be thrown
+						AbstractOfficeConstructTestCase.this.exception = cause;
+					}
+				});
 	}
 
-	/**
-	 * Handle failure.
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#tearDown()
 	 */
-	public <E extends Throwable> void escalate(EscalationContext<E> context) {
+	protected void tearDown() throws Exception {
+		// Return if no failure
+		if (this.exception == null) {
+			return;
+		}
 
-		// Obtain the failure
-		Throwable cause = context.getException();
-
-		// Ensure have failure
-		assertNotNull("Must have the cause on escalation", cause);
-
-		// Fail
-		fail("Escalated [" + cause.getClass().getSimpleName() + "] "
-				+ cause.getMessage());
+		// Propagate failure
+		if (this.exception instanceof Exception) {
+			throw (Exception) this.exception;
+		} else if (this.exception instanceof Error) {
+			throw (Error) this.exception;
+		} else {
+			StringWriter buffer = new StringWriter();
+			this.exception.printStackTrace(new PrintWriter(buffer));
+			fail("Unknown failure " + this.exception.getClass().getName()
+					+ ": " + buffer.toString());
+		}
 	}
 
 	/**
@@ -222,14 +249,14 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to register a
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
-	protected <S extends ManagedObjectSource> ManagedObjectBuilder<?> constructManagedObject(
-			String managedObjectName, Class<S> managedObjectSourceClass,
+	protected ManagedObjectBuilder<?> constructManagedObject(
+			String managedObjectName,
+			Class<? extends ManagedObjectSource> managedObjectSourceClass,
 			String managingOffice) throws BuildException {
 
 		// Create the Managed Object Builder
 		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame
-				.getInstance().getBuilderFactory()
-				.createManagedObjectBuilder();
+				.getInstance().getBuilderFactory().createManagedObjectBuilder();
 
 		// Register the Managed Object Source class
 		managedObjectBuilder
@@ -264,8 +291,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Create the Managed Object Builder
 		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame
-				.getInstance().getBuilderFactory()
-				.createManagedObjectBuilder();
+				.getInstance().getBuilderFactory().createManagedObjectBuilder();
 
 		// Bind Managed Object
 		MockManagedObjectSource.bindManagedObject(managedObjectBuilder,
@@ -359,8 +385,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Create the Administrator Builder
 		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
-				.getInstance().getBuilderFactory()
-				.createAdministratorBuilder();
+				.getInstance().getBuilderFactory().createAdministratorBuilder();
 
 		// Bind the Administrator
 		MockAdministratorSource.bindAdministrator(adminBuilder, adminName,
@@ -394,8 +419,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Create the Administrator Builder
 		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
-				.getInstance().getBuilderFactory()
-				.createAdministratorBuilder();
+				.getInstance().getBuilderFactory().createAdministratorBuilder();
 
 		// Configure the administrator
 		adminBuilder.setAdministratorSourceClass(adminSource);
@@ -426,8 +450,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 						this.officeFloorBuilder);
 
 		// Initiate for constructing another office
-		this.officeFloorBuilder = OfficeFrame.getInstance()
-				.getBuilderFactory().createOfficeFloorBuilder();
+		this.officeFloorBuilder = OfficeFrame.getInstance().getBuilderFactory()
+				.createOfficeFloorBuilder();
 		this.officeBuilder = OfficeFrame.getInstance().getBuilderFactory()
 				.createOfficeBuilder();
 
