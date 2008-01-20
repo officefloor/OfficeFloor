@@ -25,14 +25,13 @@ package net.officefloor.frame.internal.structure;
 public interface EscalationProcedure {
 
 	/**
-	 * Initiates the escalation procedure for the
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * Obtains the {@link Escalation} for the cause within this
+	 * {@link EscalationProcedure}.
 	 * 
 	 * @param cause
-	 *            Cause of the escalation.
-	 * @param threadState
-	 *            {@link ThreadState} of thread requiring the escalation.
+	 *            Cause.
+	 * @return {@link Escalation} for the cause.
 	 */
-	void escalate(Throwable cause, ThreadState threadState);
+	Escalation getEscalation(Throwable cause);
 
 }

@@ -47,13 +47,6 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	protected final Team team;
 
 	/**
-	 * {@link EscalationProcedure} for exceptions of the
-	 * {@link net.officefloor.frame.api.execute.Task} of this
-	 * {@link TaskMetaData}.
-	 */
-	protected final EscalationProcedure escalationProcedure;
-
-	/**
 	 * Indexes identifying the
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
 	 * that must be ready before the
@@ -125,6 +118,13 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	protected TaskMetaData<?, ?, ?, ?> nextTaskInFlow;
 
 	/**
+	 * {@link EscalationProcedure} for exceptions of the
+	 * {@link net.officefloor.frame.api.execute.Task} of this
+	 * {@link TaskMetaData}.
+	 */
+	protected EscalationProcedure escalationProcedure;
+
+	/**
 	 * Initiate with details of the meta-data for the
 	 * {@link net.officefloor.frame.api.execute.Task}.
 	 * 
@@ -168,7 +168,6 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 *            {@link net.officefloor.frame.api.execute.Task}.
 	 */
 	public TaskMetaDataImpl(TaskFactory<P, W, M, F> taskFactory, Team team,
-			EscalationProcedure escalationProcedure,
 			int[] requiredManagedObjects, int[] checkManagedObjects,
 			int[] taskToWorkMoTranslations,
 			TaskDutyAssociation<?>[] preTaskDuties,
@@ -176,7 +175,6 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 		// Store state
 		this.taskFactory = taskFactory;
 		this.team = team;
-		this.escalationProcedure = escalationProcedure;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.checkManagedObjects = checkManagedObjects;
 		this.taskToWorkMoTranslations = taskToWorkMoTranslations;
@@ -199,12 +197,19 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 *            {@link TaskMetaData} of the next
 	 *            {@link net.officefloor.frame.api.execute.Task} within the
 	 *            {@link net.officefloor.frame.internal.structure.Flow}.
+	 * @param escalationProcedure
+	 *            {@link EscalationProcedure} for exceptions of the
+	 *            {@link net.officefloor.frame.api.execute.Task} of this
+	 *            {@link TaskMetaData}.
 	 */
 	public void loadRemainingState(WorkMetaData<W> workMetaData,
-			FlowMetaData<?>[] flowMetaData, TaskMetaData<?, ?, ?, ?> nextTaskInFlow) {
+			FlowMetaData<?>[] flowMetaData,
+			TaskMetaData<?, ?, ?, ?> nextTaskInFlow,
+			EscalationProcedure escalationProcedure) {
 		this.workMetaData = workMetaData;
 		this.flowMetaData = flowMetaData;
 		this.nextTaskInFlow = nextTaskInFlow;
+		this.escalationProcedure = escalationProcedure;
 	}
 
 	/*

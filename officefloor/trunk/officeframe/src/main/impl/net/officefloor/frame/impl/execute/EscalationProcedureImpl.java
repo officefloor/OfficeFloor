@@ -16,11 +16,22 @@
  */
 package net.officefloor.frame.impl.execute;
 
-import net.officefloor.frame.api.escalate.EscalationContext;
-import net.officefloor.frame.internal.structure.EscalationLevel;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.WorkContext;
+import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
-import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Implementation of the
@@ -28,38 +39,79 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel
  */
-public class EscalationProcedureImpl implements EscalationProcedure,
-		EscalationContext<Throwable> {
+public class EscalationProcedureImpl implements EscalationProcedure {
 
 	/**
-	 * Levels in order for escalation.
+	 * Parent {@link EscalationProcedure} to be taken if the provided
+	 * {@link Escalation} instances for this {@link EscalationProcedure} do not
+	 * handle the escalation.
 	 */
-	protected final EscalationLevel<Throwable>[] escalationLevels;
+	protected final EscalationProcedure parentEscalationProcedure;
 
 	/**
-	 * {@link ParentEscalationProcedure} to be taken if the provided
-	 * {@link EscalationLevel} instances for this {@link EscalationProcedure} do
-	 * not handle the escalation or they themselves cause escalations.
+	 * {@link Escalation} instances in order for this procedure.
 	 */
-	protected final ParentEscalationProcedure parentEscalationProcedure;
+	protected final Escalation[] escalations;
 
 	/**
-	 * Initiate with escalation details.
+	 * Initiate with {@link Escalation} details.
 	 * 
-	 * @param escalationLevels
-	 *            {@link EscalationLevel} instances in order to be taken.
 	 * @param parentEscalationProcedure
-	 *            {@link ParentEscalationProcedure} to be taken if the
-	 *            {@link EscalationLevel} instances for this
-	 *            {@link EscalationProcedure} do not handle the escalation or
-	 *            they themselves cause escalations.
+	 *            {@link EscalationProcedure} to be taken if the
+	 *            {@link Escalation} instances for this
+	 *            {@link EscalationProcedure} do not handle the escalation.
+	 * @param escalations
+	 *            {@link Escalation} instances in order to be taken for this
+	 *            procedure.
 	 */
 	public EscalationProcedureImpl(
-			EscalationLevel<Throwable>[] escalationLevels,
-			ParentEscalationProcedure parentEscalationProcedure) {
+			EscalationProcedure parentEscalationProcedure,
+			Escalation... escalations) {
 		// Store state
-		this.escalationLevels = escalationLevels;
 		this.parentEscalationProcedure = parentEscalationProcedure;
+		this.escalations = escalations;
+	}
+
+	/**
+	 * Initiate top level {@link EscalationProcedure}.
+	 * 
+	 * @param team
+	 *            {@link Team} to execute the catch all {@link Task}.
+	 */
+	public EscalationProcedureImpl(Team team) {
+		// No parent as providing catch all escalation
+		this.parentEscalationProcedure = null;
+
+		// Create the catch all escalation
+		TaskMetaDataImpl<Throwable, Work, None, None> catchAllTask = new TaskMetaDataImpl<Throwable, Work, None, None>(
+				new CatchAllEscalationTaskFactory(), team, new int[0],
+				new int[0], new int[0], new TaskDutyAssociation[0],
+				new TaskDutyAssociation[0]);
+		FlowMetaData<Work> catchAllFlow = new FlowMetaDataImpl<Work>(
+				FlowInstigationStrategyEnum.SEQUENTIAL, catchAllTask, null);
+		WorkMetaData<Work> workMetaData = new WorkMetaDataImpl<Work>(-1,
+				new CatchAllEscalationWorkFactory(),
+				new ManagedObjectMetaData[0], new AdministratorMetaData[0],
+				catchAllFlow);
+		catchAllTask.loadRemainingState(workMetaData, new FlowMetaData[0],
+				null, this);
+		Escalation catchAllEscalation = new EscalationImpl(Throwable.class,
+				true, catchAllFlow);
+
+		// Provide catch all escalation
+		this.escalations = new Escalation[] { catchAllEscalation };
+	}
+
+	/**
+	 * Invoked by the catch all {@link Escalation}.
+	 * 
+	 * @param exception
+	 *            Cause of the escalation.
+	 */
+	protected void handleTopLevelEscalation(Throwable cause) {
+		// Default implementation is to write exception to stderr
+		System.err.println("Office Floor top level failure: ");
+		cause.printStackTrace();
 	}
 
 	/*
@@ -68,94 +120,109 @@ public class EscalationProcedureImpl implements EscalationProcedure,
 	 * ====================================================================
 	 */
 
-	/**
-	 * Cause of the escalation.
-	 */
-	protected Throwable cause;
-
-	/**
-	 * {@link ThreadState} of thread requiring the escalation.
-	 */
-	protected ThreadState threadState;
-
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.EscalationProcedure#escalate(java.lang.Throwable,
-	 *      net.officefloor.frame.internal.structure.ThreadState)
+	 * @see net.officefloor.frame.internal.structure.EscalationProcedure#getEscalation(java.lang.Throwable)
 	 */
-	public void escalate(Throwable cause, ThreadState threadState) {
-		// Only one escalation per work at one time
-		synchronized (threadState.getThreadLock()) {
-			// Store state
-			this.cause = cause;
-			this.threadState = threadState;
+	@Override
+	public Escalation getEscalation(Throwable cause) {
 
-			boolean isHandled = false;
-			try {
-				// Find escalation level to handle escalation
-				int i = 0;
-				while ((!isHandled) && (i++ < this.escalationLevels.length)) {
-
-					// Obtain the current level
-					EscalationLevel<Throwable> level = this.escalationLevels[i];
-
-					// Check if this level will handle escalation
-					if (level.getTypeOfCause().isInstance(cause)) {
-
-						// This level will handle escalation
-						level.escalate(this);
-
-						// Escalation handled
-						isHandled = true;
-					}
-				}
-			} catch (Throwable ex) {
-				// This escalation procedure caused further escalations
-
-				// Set focus to new escalation to be handled
-				this.cause = ex;
+		// Find the first matching escalation
+		for (Escalation escalation : this.escalations) {
+			if (escalation.getTypeOfCause().isInstance(cause)) {
+				// Use first matching
+				return escalation;
 			}
+		}
 
-			// Have parent procedure handle escalation if not handled
-			if (!isHandled) {
-				if (this.parentEscalationProcedure != null) {
-					this.parentEscalationProcedure.escalate(this);
-				} else {
-					// No parent escalation therefore do best handling
-					System.err.println(this.cause.getMessage());
-					this.cause.printStackTrace(System.err);
-				}
-			}
+		// Not found so ask parent for escalation
+		return this.parentEscalationProcedure.getEscalation(cause);
+	}
 
-			// Unset state as escalation complete
-			this.cause = null;
-			this.threadState = null;
+	/**
+	 * {@link TaskFactory} for the top level {@link Escalation}.
+	 */
+	private class CatchAllEscalationTaskFactory implements
+			TaskFactory<Throwable, Work, None, None>,
+			Task<Throwable, Work, None, None> {
+
+		/*
+		 * ===========================================================================
+		 * TaskFactory
+		 * ===========================================================================
+		 */
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor.frame.api.execute.Work)
+		 */
+		@Override
+		public Task<Throwable, Work, None, None> createTask(Work work) {
+			return this;
+		}
+
+		/*
+		 * ===========================================================================
+		 * Task
+		 * ===========================================================================
+		 */
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+		 */
+		@Override
+		public Object doTask(TaskContext<Throwable, Work, None, None> context) {
+
+			// Handle exception
+			EscalationProcedureImpl.this.handleTopLevelEscalation(context
+					.getParameter());
+
+			// No return
+			return null;
 		}
 	}
 
-	/*
-	 * ====================================================================
-	 * EscalationContext
-	 * ====================================================================
+	/**
+	 * {@link WorkFactory} for the top level {@link Escalation}.
 	 */
+	private static class CatchAllEscalationWorkFactory implements
+			WorkFactory<Work>, Work {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.escalate.EscalationContext#getException()
-	 */
-	public Throwable getException() {
-		return this.cause;
-	}
+		/*
+		 * ===========================================================================
+		 * WorkFactory
+		 * ===========================================================================
+		 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.escalate.EscalationContext#getThreadState()
-	 */
-	public ThreadState getThreadState() {
-		return this.threadState;
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
+		 */
+		@Override
+		public Work createWork() {
+			return this;
+		}
+
+		/*
+		 * ===========================================================================
+		 * Work
+		 * ===========================================================================
+		 */
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
+		 */
+		@Override
+		public void setWorkContext(WorkContext context) throws Exception {
+			// Do nothing
+		}
 	}
 
 }

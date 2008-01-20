@@ -22,14 +22,12 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeScope;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.escalate.EscalationContext;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
@@ -48,45 +46,7 @@ import net.officefloor.frame.test.TypeMatcher;
  * 
  * @author Daniel
  */
-public class OfficeConstructTest extends AbstractOfficeConstructTestCase
-		implements ParentEscalationProcedure {
-
-	/**
-	 * {@link ParentEscalationProcedure}.
-	 */
-	protected Throwable parentEscalationException = null;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.ParentEscalationProcedure#escalate(net.officefloor.frame.api.escalate.EscalationContext)
-	 */
-	public <E extends Throwable> void escalate(EscalationContext<E> context) {
-		this.parentEscalationException = context.getException();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#tearDown()
-	 */
-	protected void tearDown() throws Exception {
-		// Return if no failure
-		if (this.parentEscalationException == null) {
-			return;
-		}
-
-		// Propagate failure
-		if (this.parentEscalationException instanceof Exception) {
-			throw (Exception) this.parentEscalationException;
-		} else if (this.parentEscalationException instanceof Error) {
-			throw (Error) this.parentEscalationException;
-		} else {
-			fail("Unknown failure "
-					+ this.parentEscalationException.getClass().getName()
-					+ ": " + this.parentEscalationException.getMessage());
-		}
-	}
+public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensures able to construct an {@link OfficeBuilder}.

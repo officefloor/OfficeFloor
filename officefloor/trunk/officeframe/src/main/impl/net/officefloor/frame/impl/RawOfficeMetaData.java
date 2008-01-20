@@ -20,13 +20,14 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.FlowMetaDataImpl;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -39,9 +40,17 @@ public class RawOfficeMetaData {
 	/**
 	 * Creates the {@link Office} for the input {@link OfficeBuilder}.
 	 * 
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder}.
-	 * @return {@link Office}.
+	 * @param officeConfiguration
+	 *            {@link OfficeConfiguration}.
+	 * @param teamRegistry
+	 *            Registry of the {@link Team} instances.
+	 * @param rawMosRegistry
+	 *            {@link RawManagedObjectRegistry}.
+	 * @param rawAssetRegistry
+	 *            {@link RawAssetManagerRegistry}.
+	 * @param officeFloorEscalationProcedure
+	 *            {@link OfficeFloor} {@link EscalationProcedure}.
+	 * @return {@link RawOfficeMetaData}.
 	 * @throws Exception
 	 *             If fails.
 	 */
@@ -50,10 +59,9 @@ public class RawOfficeMetaData {
 			OfficeConfiguration officeConfiguration,
 			Map<String, Team> teamRegistry,
 			RawManagedObjectRegistry rawMosRegistry,
-			RawAssetManagerRegistry rawAssetRegistry) throws Exception {
-
-		// TODO provide the default parent escalation procedure
-		ParentEscalationProcedure defaultParentEscalationProcedure = null;
+			RawAssetManagerRegistry rawAssetRegistry,
+			EscalationProcedure officeFloorEscalationProcedure)
+			throws Exception {
 
 		// Obtain the Office Name
 		String officeName = officeConfiguration.getOfficeName();
@@ -74,7 +82,7 @@ public class RawOfficeMetaData {
 		// Create the registry of Work
 		RawWorkRegistry workRegistry = RawWorkRegistry.createWorkRegistry(
 				officeConfiguration, officeResources, rawAdminRegistry,
-				rawAssetRegistry, defaultParentEscalationProcedure);
+				rawAssetRegistry, officeFloorEscalationProcedure);
 
 		// Create the listing of start up flows
 		TaskNodeReference[] startupRefs = officeConfiguration.getStartupTasks();

@@ -27,8 +27,11 @@ import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.issue.OfficeIssuesListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.BuilderFactoryImpl;
+import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -115,6 +118,14 @@ public class OfficeFrameImpl extends OfficeFrame {
 		// Obtain the registry of teams
 		Map<String, Team> teamRegistry = officeFloorConfig.getTeamRegistry();
 
+		// Obtain the office floor escalation procedure
+		EscalationProcedure officeFloorEscalationProcedure = officeFloorConfig
+				.getEscalationProcedure();
+		if (officeFloorEscalationProcedure == null) {
+			officeFloorEscalationProcedure = new EscalationProcedureImpl(
+					new PassiveTeam());
+		}
+
 		// Create the Offices
 		Map<String, RawOfficeMetaData> rawOffices = new HashMap<String, RawOfficeMetaData>();
 		Map<String, OfficeImpl> offices = new HashMap<String, OfficeImpl>();
@@ -126,7 +137,7 @@ public class OfficeFrameImpl extends OfficeFrame {
 			// Create the office
 			RawOfficeMetaData rawOfficeMetaData = RawOfficeMetaData
 					.createOffice(officeConfig, teamRegistry, rawMosRegistry,
-							rawAssetRegistry);
+							rawAssetRegistry, officeFloorEscalationProcedure);
 
 			// Register the office
 			rawOffices.put(officeName, rawOfficeMetaData);

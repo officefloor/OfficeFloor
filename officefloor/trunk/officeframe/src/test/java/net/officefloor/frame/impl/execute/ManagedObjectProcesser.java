@@ -21,7 +21,7 @@ package net.officefloor.frame.impl.execute;
  * 
  * @author Daniel
  */
-public interface ManagedObjectProcesser<O extends Object> {
+public interface ManagedObjectProcesser<O> {
 
 	/**
 	 * Process the object of the

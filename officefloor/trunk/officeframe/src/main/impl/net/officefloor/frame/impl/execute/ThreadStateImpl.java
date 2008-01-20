@@ -99,7 +99,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	public ThreadStateImpl(ProcessState processState, FlowMetaData<?> flowMetaData) {
 		this.processState = processState;
 
-		// Create the thread monitor (if requird)
+		// Create the thread monitor (if required)
 		AssetManager flowManager = flowMetaData.getFlowManager();
 		if (flowManager == null) {
 			this.threadMonitor = null;

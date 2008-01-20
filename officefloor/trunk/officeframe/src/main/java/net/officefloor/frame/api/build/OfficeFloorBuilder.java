@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -40,8 +41,8 @@ public interface OfficeFloorBuilder {
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	void addManagedObject(String id, ManagedObjectBuilder<?> managedObjectBuilder)
-			throws BuildException;
+	void addManagedObject(String id,
+			ManagedObjectBuilder<?> managedObjectBuilder) throws BuildException;
 
 	/**
 	 * Adds a {@link Team} which will execute
@@ -68,4 +69,14 @@ public interface OfficeFloorBuilder {
 	void addOffice(String id, OfficeBuilder officeBuilder)
 			throws BuildException;
 
+	/**
+	 * Specifies the {@link EscalationProcedure} for issues of the offices.
+	 * 
+	 * @param escalationProcedure
+	 *            {@link EscalationProcedure}.
+	 * @throws BuildException
+	 *             Indicate failure in building.
+	 */
+	void setEscalationProcedure(EscalationProcedure escalationProcedure)
+			throws BuildException;
 }

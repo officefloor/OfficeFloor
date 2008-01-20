@@ -21,7 +21,6 @@ import java.util.Map;
 
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 
 /**
@@ -42,8 +41,6 @@ public class RawTaskRegistry {
 	 *            {@link net.officefloor.frame.api.manage.Office}.
 	 * @param workAdminRegistry
 	 *            Registry of the {@link RawWorkAdministratorMetaData}.
-	 * @param defaultParentEscalationProcedure
-	 *            Default {@link ParentEscalationProcedure}.
 	 * @return Registry of {@link TaskMetaData} for the
 	 *         {@link net.officefloor.frame.api.execute.Work}.
 	 * @throws Exception
@@ -53,9 +50,7 @@ public class RawTaskRegistry {
 			WorkConfiguration<?> workConfig,
 			RawOfficeResourceRegistry officeResources,
 			RawWorkManagedObjectRegistry workMoRegistry,
-			RawWorkAdministratorRegistry workAdminRegistry,
-			ParentEscalationProcedure defaultParentEscalationProcedure)
-			throws Exception {
+			RawWorkAdministratorRegistry workAdminRegistry) throws Exception {
 
 		// Create the Task registry
 		Map<String, RawTaskMetaData> taskRegistry = new HashMap<String, RawTaskMetaData>();
@@ -63,8 +58,7 @@ public class RawTaskRegistry {
 				.getTaskConfiguration()) {
 			taskRegistry.put(taskConfiguration.getTaskName(), RawTaskMetaData
 					.createRawTaskMetaData(taskConfiguration, officeResources,
-							workMoRegistry, workAdminRegistry,
-							defaultParentEscalationProcedure));
+							workMoRegistry, workAdminRegistry));
 		}
 
 		// Return Task registry

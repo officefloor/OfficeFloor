@@ -25,7 +25,6 @@ import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
@@ -60,9 +59,7 @@ public class RawWorkMetaData {
 			WorkConfiguration<?> workConfig,
 			RawOfficeResourceRegistry officeResources,
 			RawAdministratorRegistry rawAdminRegistry,
-			RawAssetManagerRegistry rawAssetRegistry,
-			ParentEscalationProcedure defaultParentEscalationProcedure)
-			throws Exception {
+			RawAssetManagerRegistry rawAssetRegistry) throws Exception {
 
 		// Obtain the work name
 		String workName = workConfig.getWorkName();
@@ -86,8 +83,7 @@ public class RawWorkMetaData {
 
 		// Create the registry of the Task meta-data for the Work
 		RawTaskRegistry taskRegistry = RawTaskRegistry.createTaskRegistry(
-				workConfig, officeResources, wmoRegistry, wadminRegistry,
-				defaultParentEscalationProcedure);
+				workConfig, officeResources, wmoRegistry, wadminRegistry);
 
 		// Obtain the initial Task meta-data
 		String initialTaskName = workConfig.getInitialTaskName();

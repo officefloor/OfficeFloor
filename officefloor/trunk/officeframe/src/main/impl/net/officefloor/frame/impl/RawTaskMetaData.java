@@ -21,14 +21,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.TaskMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.ParentEscalationProcedure;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.spi.team.Team;
 
@@ -51,8 +48,6 @@ public class RawTaskMetaData {
 	 *            {@link RawWorkManagedObjectRegistry}.
 	 * @param workAdminRegistry
 	 *            {@link RawWorkAdministratorRegistry}.
-	 * @param defaultParentEscalationProcedure
-	 *            Default {@link ParentEscalationProcedure}.
 	 * @return {@link RawTaskMetaData}.
 	 * @throws Exception
 	 *             If fails to create registry.
@@ -62,9 +57,7 @@ public class RawTaskMetaData {
 			TaskConfiguration taskConfiguration,
 			RawOfficeResourceRegistry officeResources,
 			RawWorkManagedObjectRegistry workMoRegistry,
-			RawWorkAdministratorRegistry workAdminRegistry,
-			ParentEscalationProcedure defaultParentEscalationProcedure)
-			throws Exception {
+			RawWorkAdministratorRegistry workAdminRegistry) throws Exception {
 
 		// Obtain the Team for the Task
 		String teamId = taskConfiguration.getTeamId();
@@ -72,19 +65,6 @@ public class RawTaskMetaData {
 		if (team == null) {
 			throw new ConfigurationException("Unknown team '" + teamId + "'");
 		}
-
-		// Obtain the parent escalation procedure
-		ParentEscalationProcedure parentEscalationProcedure = taskConfiguration
-				.getParentEscalationProcedure();
-		if (parentEscalationProcedure == null) {
-			// Non specified, therefore use default parent escalation
-			parentEscalationProcedure = defaultParentEscalationProcedure;
-		}
-
-		// Obtain the Escalation Procedure
-		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
-				taskConfiguration.getEscalationLevels(),
-				parentEscalationProcedure);
 
 		// Obtain the managed object index translations
 		TaskManagedObjectConfiguration[] tmoNamed = taskConfiguration
@@ -146,9 +126,9 @@ public class RawTaskMetaData {
 
 		// Register the Task meta-data
 		return new RawTaskMetaData(new TaskMetaDataImpl(taskConfiguration
-				.getTaskFactory(), team, escalationProcedure,
-				requiredManagedObjects, checkManagedObjects,
-				tmoToWmoTranslation, preTaskAdmin, postTaskAdmin));
+				.getTaskFactory(), team, requiredManagedObjects,
+				checkManagedObjects, tmoToWmoTranslation, preTaskAdmin,
+				postTaskAdmin));
 	}
 
 	/**

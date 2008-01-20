@@ -229,6 +229,22 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to reuse.
+	 */
+	public void testAddRemoveAddRemove() {
+		TestLinkedListEntry first = new TestLinkedListEntry(this.linkedList);
+		this.validateList(first);
+		first.removeFromLinkedList();
+		this.validateList();
+		TestLinkedListEntry second = new TestLinkedListEntry(this.linkedList);
+		this.validateList(second);
+		// Ensure last entry removed called again
+		this.isLastEntryRemoved = false;
+		second.removeFromLinkedList();
+		this.validateList();
+	}
+
+	/**
 	 * Validate purge empty list.
 	 */
 	public void testPurgeEmptyList() {

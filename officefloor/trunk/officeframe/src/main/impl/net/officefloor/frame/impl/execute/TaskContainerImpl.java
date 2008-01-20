@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorContext;
+import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -437,20 +438,31 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 
 				} else {
 					try {
+
 						// Start escalation
 						this.threadState.escalationStart(this, this.flow);
 
-						// Escalate
-						this.taskMetaData.getEscalationProcedure().escalate(
-								escalationCause, this.threadState);
+						// Obtain the escalation
+						Escalation escalation = this.taskMetaData
+								.getEscalationProcedure().getEscalation(
+										escalationCause);
 
-						// Assign the next task of flow to its team
-						TaskContainer taskContainer = this
-								.getNextTaskNodeToExecute();
-						if (taskContainer != null) {
-							// Same thread, same lock to active so ok
-							// Different thread, should be creating it so ok
-							taskContainer.activateTask();
+						// Do the escalation
+						if (escalation.isResetThreadState()) {
+							// TODO clear thread state
+							// TODO load flow as next sequential task
+						} else {
+							// TODO load flow as parallel
+							// TODO return and allow for escalation completion
+
+							// Assign the next task of flow to its team
+							TaskContainer taskContainer = this
+									.getNextTaskNodeToExecute();
+							if (taskContainer != null) {
+								// Same thread, same lock to active so ok
+								// Different thread, should be creating it so ok
+								taskContainer.activateTask();
+							}
 						}
 
 					} finally {

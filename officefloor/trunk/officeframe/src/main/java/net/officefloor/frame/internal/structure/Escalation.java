@@ -14,31 +14,41 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.api.escalate;
+package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.api.execute.Task;
 
 /**
- * Context to handle escalation.
+ * Escalation for a {@link Task} issue.
  * 
  * @author Daniel
  */
-public interface EscalationContext<E extends Throwable> {
+public interface Escalation {
 
 	/**
-	 * Obtains the {@link Exception} that has caused the escalation.
+	 * Obtains the type of cause handled by this {@link Escalation}.
 	 * 
-	 * @return {@link Exception} that has caused the escalation.
+	 * @return Type of cause handled by this {@link Escalation}.
 	 */
-	E getException();
+	Class<? extends Throwable> getTypeOfCause();
 
 	/**
-	 * Obtains the {@link ThreadState} of the thread requiring the escalation
-	 * handling.
+	 * <p>
+	 * Indicates to reset the {@link ThreadState} as the escalation flow will
+	 * replace the current flow.
+	 * <p>
+	 * <code>false</code> indicates that the {@link ThreadState} should
+	 * continue after escalation.
 	 * 
-	 * @return {@link ThreadState} of the thread requiring the escalation
-	 *         handling.
+	 * @return <code>true</code> to reset the {@link ThreadState}.
 	 */
-	ThreadState getThreadState();
+	boolean isResetThreadState();
+
+	/**
+	 * Obtains the {@link FlowMetaData} of the escalation.
+	 * 
+	 * @return {@link FlowMetaData} of the escalation.
+	 */
+	FlowMetaData<?> getFlowMetaData();
 
 }

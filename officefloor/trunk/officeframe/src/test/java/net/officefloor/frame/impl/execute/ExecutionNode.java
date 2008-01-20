@@ -20,21 +20,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.Assert;
-import junit.framework.AssertionFailedError;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.AssetManagerImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -54,7 +51,7 @@ import org.easymock.internal.AlwaysMatcher;
 public class ExecutionNode<W extends Work> implements
 		TaskMetaData<Object, W, Indexed, Indexed>,
 		TaskFactory<Object, W, Indexed, Indexed>,
-		Task<Object, W, Indexed, Indexed>, EscalationProcedure {
+		Task<Object, W, Indexed, Indexed> {
 
 	/**
 	 * Test case utilising this {@link ExecutionNode} to test execution of a
@@ -134,7 +131,7 @@ public class ExecutionNode<W extends Work> implements
 	 *            {@link ManagedObjectProcesser} to process the
 	 *            {@link ManagedObject}.
 	 */
-	public <O extends Object> void processManagedObject(int workMoIndex,
+	public <O> void processManagedObject(int workMoIndex,
 			O objectOfManagedObject, ManagedObjectProcesser<O> processer) {
 
 		ManagedObjectSource source;
@@ -352,7 +349,7 @@ public class ExecutionNode<W extends Work> implements
 	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getEscalationProcedure()
 	 */
 	public EscalationProcedure getEscalationProcedure() {
-		return this;
+		return new EscalationProcedureImpl(this.getTeam());
 	}
 
 	/*
@@ -446,50 +443,6 @@ public class ExecutionNode<W extends Work> implements
 		return this.taskReturnValue;
 	}
 
-	/*
-	 * ====================================================================
-	 * EscalationProcedure
-	 * ====================================================================
-	 */
-
-	/**
-	 * Index to tie stack trace to failure.
-	 */
-	private static int escalationIndex = 1;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.EscalationProcedure#escalate(java.lang.Throwable,
-	 *      net.officefloor.frame.internal.structure.ThreadState)
-	 */
-	public void escalate(Throwable cause, ThreadState threadState) {
-		// Determine if escalate Assertion failure
-		if (cause instanceof AssertionError) {
-			throw (AssertionError) cause;
-		} else if (cause instanceof AssertionFailedError) {
-			throw (AssertionFailedError) cause;
-		} else if (cause != null) {
-
-			// Output stack trace to find location of failure
-			System.err.println("Escalated failure");
-			cause.printStackTrace();
-
-			// Output failure
-			String msg = "Escalated failure (" + (escalationIndex++) + "): "
-					+ cause.getMessage() + " ["
-					+ cause.getClass().getSimpleName() + "]";
-			System.err.println(msg);
-			cause.printStackTrace(System.err);
-
-			// Propagate failure
-			Assert.fail(msg);
-
-		} else {
-			Assert.fail("Null escalation failure");
-		}
-	}
-
 }
 
 /**
@@ -516,7 +469,7 @@ interface TaskProcessItem<W extends Work> {
  * {@link TaskProcessItem} to process a
  * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
  */
-class ManagedObjectTaskProcessItem<W extends Work, O extends Object> implements
+class ManagedObjectTaskProcessItem<W extends Work, O> implements
 		TaskProcessItem<W> {
 
 	/**
@@ -641,7 +594,8 @@ class FlowTaskProcessItem<W extends Work> implements TaskProcessItem<W>,
 	 *            {@link AbstractTaskNodeTestCase}.
 	 */
 	public FlowTaskProcessItem(FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData<?, W, ?, ?> taskMetaData, AbstractTaskNodeTestCase<W> testCase) {
+			TaskMetaData<?, W, ?, ?> taskMetaData,
+			AbstractTaskNodeTestCase<W> testCase) {
 		this.instigationStrategy = instigationStrategy;
 		this.taskMetaData = taskMetaData;
 		this.testCase = testCase;
