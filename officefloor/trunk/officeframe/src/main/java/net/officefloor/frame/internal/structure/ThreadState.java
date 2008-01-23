@@ -17,7 +17,6 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.spi.team.TaskContainer;
 
 /**
  * State of a thread within a Process.
@@ -81,21 +80,19 @@ public interface ThreadState extends FlowFuture {
 	/**
 	 * Flags that escalation is about to happen on this {@link ThreadState}.
 	 * 
-	 * @param task
-	 *            {@link TaskContainer} causing the escalation.
-	 * @param flow
-	 *            {@link Flow} that the {@link TaskContainer} is bound.
+	 * @param currentTaskNode
+	 *            Current {@link TaskNode} being executed.
+	 * @param isResetThreadState
+	 *            Flag indicating to reset the {@link ThreadState}.
 	 */
-	void escalationStart(TaskContainer task, Flow flow);
+	void escalationStart(TaskNode currentTaskNode, boolean isResetThreadState);
 
 	/**
 	 * Flags that escalation has complete on this {@link ThreadState}.
 	 * 
-	 * @param task
-	 *            {@link TaskContainer} causing the escalation.
-	 * @param flow
-	 *            {@link Flow} that the {@link TaskContainer} is bound.
+	 * @param currentTaskNode
+	 *            Current {@link TaskNode} being executed.
 	 */
-	void escalationComplete(TaskContainer task, Flow flow);
+	void escalationComplete(TaskNode currentTaskNode);
 
 }

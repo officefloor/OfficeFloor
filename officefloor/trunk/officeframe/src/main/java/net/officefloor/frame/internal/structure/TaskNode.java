@@ -77,4 +77,9 @@ public interface TaskNode {
 	 */
 	TaskNode getNextNode();
 
+	/**
+	 * Clears the {@link TaskNode} instances linked to this {@link TaskNode}.
+	 */
+	void clearNodes();
+	
 }

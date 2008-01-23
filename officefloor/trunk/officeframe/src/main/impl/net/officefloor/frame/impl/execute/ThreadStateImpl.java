@@ -24,6 +24,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskNode;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.ThreadWorkLink;
 import net.officefloor.frame.spi.team.TaskContainer;
@@ -41,16 +42,14 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 */
 	protected final LinkedList<Flow> flows = new AbstractLinkedList<Flow>() {
 		public void lastLinkedListEntryRemoved() {
-			// Flow (thread) complete
-			isFlowComplete = true;
 
-			// Wake up all tasks waiting on this thread
-			if (threadMonitor != null) {
-				threadMonitor.notifyTasks();
+			// Do nothing if reseting the state
+			if (ThreadStateImpl.this.isResetingState) {
+				return;
 			}
 
-			// Thread complete
-			processState.threadComplete(null);
+			// Complete the thread
+			ThreadStateImpl.this.completeThread();
 		}
 	};
 
@@ -75,6 +74,11 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	protected final AssetMonitor threadMonitor;
 
 	/**
+	 * Flag indicating reseting the state.
+	 */
+	private boolean isResetingState = false;
+
+	/**
 	 * Failure of the {@link ThreadState}.
 	 */
 	protected Throwable failure = null;
@@ -96,7 +100,8 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} for this {@link ThreadState}.
 	 */
-	public ThreadStateImpl(ProcessState processState, FlowMetaData<?> flowMetaData) {
+	public ThreadStateImpl(ProcessState processState,
+			FlowMetaData<?> flowMetaData) {
 		this.processState = processState;
 
 		// Create the thread monitor (if required)
@@ -107,6 +112,22 @@ public class ThreadStateImpl implements ThreadState, Asset {
 			this.threadMonitor = flowManager.createAssetMonitor(this, this
 					.getThreadLock());
 		}
+	}
+
+	/**
+	 * Completes this {@link ThreadState}.
+	 */
+	protected void completeThread() {
+		// Flow (thread) complete
+		isFlowComplete = true;
+
+		// Wake up all tasks waiting on this thread
+		if (threadMonitor != null) {
+			threadMonitor.notifyTasks();
+		}
+
+		// Thread complete
+		processState.threadComplete(null);
 	}
 
 	/*
@@ -170,31 +191,50 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ThreadState#escalationStart(net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.Flow)
-	 */
-	public void escalationStart(TaskContainer task, Flow flow) {
-		// TODO: destroy existing flows (and work)
-		// TODO: clear the flows (and work)
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.ThreadState#escalationComplete(net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.Flow)
-	 */
-	public void escalationComplete(TaskContainer task, Flow flow) {
-		// TODO: Determine whether thread is complete
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see net.officefloor.frame.internal.structure.ThreadState#getProcessState()
 	 */
 	public ProcessState getProcessState() {
 		return this.processState;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.structure.ThreadState#escalationStart(net.officefloor.frame.internal.structure.TaskNode,
+	 *      boolean)
+	 */
+	@Override
+	public void escalationStart(TaskNode currentTaskNode,
+			boolean isResetThreadState) {
+		// Determine if reset thread state
+		if (isResetThreadState) {
+			try {
+				this.isResetingState = true;
+				currentTaskNode.clearNodes();
+			} finally {
+				this.isResetingState = false;
+			}
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.structure.ThreadState#escalationComplete(net.officefloor.frame.internal.structure.TaskNode)
+	 */
+	@Override
+	public void escalationComplete(TaskNode currentTaskNode) {
+
+		// Determine if thread is complete
+		if ((currentTaskNode.getNextNode() != null)
+				|| (currentTaskNode.getParallelNode() != null)
+				|| (currentTaskNode.getParallelNode() != null)) {
+			// Thread still active, therefore do nothing
+			return;
+		}
+
+		// Thread finished, therefore complete
+		this.completeThread();
 	}
 
 	/*
