@@ -32,7 +32,9 @@ import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.OfficeFrameImpl;
 import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -72,6 +74,11 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * {@link ParentEscalationProcedure}.
 	 */
 	protected volatile Throwable exception = null;
+
+	/**
+	 * {@link OfficeFloor}.
+	 */
+	private OfficeFloor officeFloor = null;
 
 	/*
 	 * (non-Javadoc)
@@ -187,6 +194,26 @@ public abstract class AbstractOfficeConstructTestCase extends
 		// Return the constructed work
 		return this.constructWork(workName, workFactory, typeOfWork,
 				initialTaskName);
+	}
+
+	/**
+	 * Constructs the {@link ReflectiveWorkBuilder}.
+	 * 
+	 * @param workObject
+	 *            Work object.
+	 * @param workName
+	 *            Work name.
+	 * @param initialTaskName
+	 *            Initial task name.
+	 * @return {@link ReflectiveWorkBuilder}.
+	 * @throws BuildException
+	 *             If fails to build.
+	 */
+	protected ReflectiveWorkBuilder constructWork(Object workObject,
+			String workName, String initialTaskName) throws BuildException {
+		// Return the created work builder
+		return new ReflectiveWorkBuilder(workName, workObject,
+				this.officeBuilder, initialTaskName);
 	}
 
 	/**
@@ -436,18 +463,19 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to create the
 	 * {@link net.officefloor.frame.api.manage.OfficeFloor}.
 	 * 
+	 * @param officeName
+	 *            Name of the office.
 	 * @return {@link net.officefloor.frame.api.manage.OfficeFloor}.
 	 */
-	protected OfficeFloor constructOfficeFloor(String officeFloorName)
+	protected OfficeFloor constructOfficeFloor(String officeName)
 			throws Exception {
 
 		// Construct the Office
-		this.officeFloorBuilder.addOffice(officeFloorName, this.officeBuilder);
+		this.officeFloorBuilder.addOffice(officeName, this.officeBuilder);
 
 		// Construct the Office Floor
-		OfficeFloor officeFloor = OfficeFrame.getInstance()
-				.registerOfficeFloor("of-" + officeFloorName,
-						this.officeFloorBuilder);
+		this.officeFloor = OfficeFrame.getInstance().registerOfficeFloor(
+				"of-" + officeName, this.officeFloorBuilder);
 
 		// Initiate for constructing another office
 		this.officeFloorBuilder = OfficeFrame.getInstance().getBuilderFactory()
@@ -456,7 +484,38 @@ public abstract class AbstractOfficeConstructTestCase extends
 				.createOfficeBuilder();
 
 		// Return the Office Floor
-		return officeFloor;
+		return this.officeFloor;
+	}
+
+	/**
+	 * Facade method to invoke work of an office. It will create the office
+	 * floor if necessary.
+	 * 
+	 * @param officeName
+	 *            Name of the office.
+	 * @param workName
+	 *            Name of the work to invoke.
+	 * @param parameter
+	 *            Parameter.
+	 * @throws Exception
+	 *             If fails to construct office or work invocation failure.
+	 */
+	protected void invokeWork(String officeName, String workName,
+			Object parameter) throws Exception {
+
+		// Determine if required to construct work
+		if (this.officeFloor == null) {
+			// Construct the office floor
+			this.officeFloor = this.constructOfficeFloor(officeName);
+
+			// Open the office floor
+			this.officeFloor.openOfficeFloor();
+		}
+
+		// Invoke the work
+		Office office = this.officeFloor.getOffice(officeName);
+		WorkManager workManager = office.getWorkManager(workName);
+		workManager.invokeWork(parameter);
 	}
 
 }

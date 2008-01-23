@@ -16,7 +16,6 @@
  */
 package net.officefloor.frame.impl.execute;
 
-import junit.framework.AssertionFailedError;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -120,6 +119,22 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 				this.workLink.getWorkContainer().getWork(this.threadState));
 	}
 
+	/**
+	 * Completes this {@link Task}.
+	 */
+	private void completeTask() {
+
+		// Do nothing if already complete
+		if (this.containerState == TaskContainerState.COMPLETED) {
+			return;
+		}
+
+		// Complete the task
+		this.containerState = TaskContainerState.COMPLETED;
+		this.flow.taskContainerComplete(this);
+		this.workLink.unregisterTask(this);
+	}
+
 	/*
 	 * ====================================================================
 	 * TaskContainer
@@ -131,6 +146,13 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 	 * {@link Team} to be executed.
 	 */
 	protected boolean isQueuedWithTeam = false;
+
+	/**
+	 * Flag indicating if this {@link Task} is active. Passive teams will try to
+	 * re-enter active tasks. On doing so, they should not run the {@link Task}
+	 * but return and allow earlier invocation to complete.
+	 */
+	private boolean isActive = false;
 
 	/*
 	 * (non-Javadoc)
@@ -145,17 +167,17 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 		// Lock to ensure only one activation
 		synchronized (this.threadState.getThreadLock()) {
 
-			// Determine if already queued or complete
-			if (this.isQueuedWithTeam
+			// Determine if already queued, active or complete
+			if (this.isQueuedWithTeam || this.isActive
 					|| (this.containerState == TaskContainerState.COMPLETED)) {
 				return;
 			}
 
-			// Activate this Task
-			this.taskMetaData.getTeam().assignTask(this);
-
 			// Flag that queued
 			this.isQueuedWithTeam = true;
+
+			// Activate this Task
+			this.taskMetaData.getTeam().assignTask(this);
 		}
 	}
 
@@ -189,306 +211,346 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 
 		// This should only be executed by one thread at a time
 		synchronized (this.threadState.getThreadLock()) {
-
-			// Flag no longer queued with team as now executing
-			this.isQueuedWithTeam = false;
-
-			// Escalation cause
-			Throwable escalationCause = null;
 			try {
-				// Handle failure on thread
-				// (possibly from waiting for a managed object)
-				escalationCause = this.threadState.getFailure();
-				if (escalationCause != null) {
-					throw escalationCause;
-				}
+				// Flag this task now active
+				this.isActive = true;
 
-				// Obtain the managed object indexes required/to check
-				int[] managedObjectIndexes;
-				switch (this.containerState) {
-				case LOAD_MANAGED_OBJECTS:
-				case ENSURE_MANAGED_OBJECTS_LOADED:
-					// Obtain required managed objects
-					managedObjectIndexes = this.taskMetaData
-							.getRequiredManagedObjects();
-					break;
-				default:
-					// Obtain the check managed objects
-					managedObjectIndexes = this.taskMetaData
-							.getCheckManagedObjects();
-					break;
-				}
+				// Flag no longer queued with team as now executing
+				this.isQueuedWithTeam = false;
 
-				// Process based on state of container
-				switch (this.containerState) {
-				case LOAD_MANAGED_OBJECTS:
-
-					// Load the managed objects
-					boolean isAllLoaded = this.workLink.getWorkContainer()
-							.loadManagedObjects(managedObjectIndexes,
-									executionContext, this);
-
-					// Flag Managed Objects are being loaded
-					this.containerState = TaskContainerState.ENSURE_MANAGED_OBJECTS_LOADED;
-
-					// Determine if required managed objects are loaded
-					if (!isAllLoaded) {
-						// Will be woken when loaded
-						return true;
+				// Escalation cause
+				Throwable escalationCause = null;
+				try {
+					// Handle failure on thread
+					// (possibly from waiting for a managed object)
+					escalationCause = this.threadState.getFailure();
+					if (escalationCause != null) {
+						throw escalationCause;
 					}
 
-				case ENSURE_MANAGED_OBJECTS_LOADED:
-
-					// Determine if all the managed objects are loaded (/ready)
-					if (!this.workLink.getWorkContainer()
-							.isManagedObjectsReady(managedObjectIndexes,
-									executionContext, this)) {
-						// Will be woken when ready
-						return true;
+					// Obtain the managed object indexes required/to check
+					int[] managedObjectIndexes;
+					switch (this.containerState) {
+					case LOAD_MANAGED_OBJECTS:
+					case ENSURE_MANAGED_OBJECTS_LOADED:
+						// Obtain required managed objects
+						managedObjectIndexes = this.taskMetaData
+								.getRequiredManagedObjects();
+						break;
+					default:
+						// Obtain the check managed objects
+						managedObjectIndexes = this.taskMetaData
+								.getCheckManagedObjects();
+						break;
 					}
 
-					// Coordinate the managed objects
-					this.workLink.getWorkContainer().coordinateManagedObjects(
-							managedObjectIndexes, executionContext, this);
+					// Process based on state of container
+					switch (this.containerState) {
+					case LOAD_MANAGED_OBJECTS:
 
-					// Flag Managed Objects are loaded
-					this.containerState = TaskContainerState.DO_PRE_TASK_ADMINISTRATION;
+						// Load the managed objects
+						boolean isAllLoaded = this.workLink.getWorkContainer()
+								.loadManagedObjects(managedObjectIndexes,
+										executionContext, this);
 
-				case DO_PRE_TASK_ADMINISTRATION:
+						// Flag Managed Objects are being loaded
+						this.containerState = TaskContainerState.ENSURE_MANAGED_OBJECTS_LOADED;
 
-					// Determine if managed objects are ready
-					if (!this.workLink.getWorkContainer()
-							.isManagedObjectsReady(managedObjectIndexes,
-									executionContext, this)) {
-						// Will be woken when ready
-						return true;
-					}
-
-					// Undertake the pre task administration
-					for (TaskDutyAssociation<?> duty : this.taskMetaData
-							.getPreAdministrationMetaData()) {
-						this.workLink.getWorkContainer()
-								.administerManagedObjects(duty, this);
-					}
-
-					// Flag pre task administration complete
-					this.containerState = TaskContainerState.DO_TASK;
-
-					// Determine if parallel task from administration
-					TaskContainer preAdminParallelTask = this
-							.getParallelTaskNodeToExecute();
-					if (preAdminParallelTask != null) {
-						// Execute the parallel task
-						preAdminParallelTask.activateTask();
-
-						// This task is complete (for now)
-						return true;
-					}
-
-				case DO_TASK:
-
-					// Determine if managed objects are ready
-					if (!this.workLink.getWorkContainer()
-							.isManagedObjectsReady(managedObjectIndexes,
-									executionContext, this)) {
-						// Will be woken when ready
-						return true;
-					}
-
-					// Flag task to be defaultly complete and not waiting
-					this.isComplete = true;
-					this.flowAsset = null;
-
-					// Execute the task
-					this.nextTaskParameter = this.task.doTask(this);
-
-					// Determine if to wait on flow
-					if (this.flowAsset != null) {
-						if (this.flowAsset.waitOnFlow(this)) {
-							// Waiting on the flow
+						// Determine if required managed objects are loaded
+						if (!isAllLoaded) {
+							// Will be woken when loaded
 							return true;
 						}
-					}
 
-					// Indicate if task completed
-					if (!this.isComplete) {
+					case ENSURE_MANAGED_OBJECTS_LOADED:
 
-						// Determine if parallel task to execute
-						TaskContainer parallelTask = this
+						// Determine if managed objects are loaded (/ready)
+						if (!this.workLink.getWorkContainer()
+								.isManagedObjectsReady(managedObjectIndexes,
+										executionContext, this)) {
+							// Will be woken when ready
+							return true;
+						}
+
+						// Coordinate the managed objects
+						this.workLink.getWorkContainer()
+								.coordinateManagedObjects(managedObjectIndexes,
+										executionContext, this);
+
+						// Flag Managed Objects are loaded
+						this.containerState = TaskContainerState.DO_PRE_TASK_ADMINISTRATION;
+
+					case DO_PRE_TASK_ADMINISTRATION:
+
+						// Determine if managed objects are ready
+						if (!this.workLink.getWorkContainer()
+								.isManagedObjectsReady(managedObjectIndexes,
+										executionContext, this)) {
+							// Will be woken when ready
+							return true;
+						}
+
+						// Undertake the pre task administration
+						for (TaskDutyAssociation<?> duty : this.taskMetaData
+								.getPreAdministrationMetaData()) {
+							this.workLink.getWorkContainer()
+									.administerManagedObjects(duty, this);
+						}
+
+						// Flag pre task administration complete
+						this.containerState = TaskContainerState.DO_TASK;
+
+						// Determine if parallel task from administration
+						TaskContainer preAdminParallelTask = this
 								.getParallelTaskNodeToExecute();
-						if (parallelTask != null) {
+						if (preAdminParallelTask != null) {
 							// Execute the parallel task
-							parallelTask.activateTask();
-
-							// This task is complete (for now)
-							return true;
-						} else {
-							// No parallel task but this task logic not complete
-							return false;
-						}
-					}
-
-					// Flag task completed
-					this.containerState = TaskContainerState.DO_POST_TASK_ADMINISTRATION;
-
-				case DO_POST_TASK_ADMINISTRATION:
-
-					// Determine if managed objects are ready
-					if (!this.workLink.getWorkContainer()
-							.isManagedObjectsReady(managedObjectIndexes,
-									executionContext, this)) {
-						// Will be woken when ready
-						return true;
-					}
-
-					// Undertake the post task administration
-					for (TaskDutyAssociation<?> duty : this.taskMetaData
-							.getPostAdministrationMetaData()) {
-						this.workLink.getWorkContainer()
-								.administerManagedObjects(duty, this);
-					}
-
-					// Flag post task administration complete
-					this.containerState = TaskContainerState.ACTIVATE_NEXT_TASK_IN_FLOW;
-
-					// Determine if parallel task from administration
-					TaskContainer postAdminParallelTask = this
-							.getParallelTaskNodeToExecute();
-					if (postAdminParallelTask != null) {
-						// Execute the parallel task
-						postAdminParallelTask.activateTask();
-
-						// This task is complete (for now)
-						return true;
-					}
-
-				case ACTIVATE_NEXT_TASK_IN_FLOW:
-
-					// Possibly load the next task in the flow
-					if (this.getNextNode() == null) {
-						// No sequential node, therefore load next task in flow
-						TaskMetaData<?, ?, ?, ?> nextTaskMetaData = this.taskMetaData
-								.getNextTaskInFlow();
-						if (nextTaskMetaData != null) {
-							// Create next task
-							TaskContainer taskContainer = this.flow
-									.createTaskContainer(nextTaskMetaData,
-											this.parallelOwner,
-											this.nextTaskParameter,
-											this.workLink);
-
-							// Load for sequential execution
-							this
-									.loadSequentialTaskNode((TaskNode) taskContainer);
-						}
-					}
-
-					// Assign the next task of flow to its team
-					TaskContainer taskContainer = this
-							.getNextTaskNodeToExecute();
-					if (taskContainer != null) {
-						taskContainer.activateTask();
-					}
-
-					// Flag this task complete
-					this.containerState = TaskContainerState.COMPLETED;
-
-					// Do completion work (only once)
-					break;
-
-				case COMPLETED:
-					// Already complete, thus return immediately
-					return true;
-				}
-
-			} catch (ExecutionError ex) {
-
-				// Failure immediately completes this task
-				this.containerState = TaskContainerState.COMPLETED;
-
-				// Handle the execution error
-				switch (ex.getErrorType()) {
-				case MANAGED_OBJECT_ASYNC_OPERATION_TIMED_OUT:
-				case MANAGED_OBJECT_FAILED_PROVIDING_OBJECT:
-				case MANAGED_OBJECT_NOT_LOADED:
-				case MANAGED_OBJECT_SOURCING_FAILURE:
-				default:
-					// Flag for escalation
-					escalationCause = ex.getCause();
-					if (escalationCause == null) {
-						escalationCause = ex;
-					}
-				}
-
-			} catch (Throwable ex) {
-
-				// Failure immediately completes this task
-				this.containerState = TaskContainerState.COMPLETED;
-
-				// Flag for escalation
-				escalationCause = ex;
-			}
-
-			// Handle escalation
-			try {
-				if (escalationCause == null) {
-					// No escalation, task complete
-					this.flow.taskContainerComplete(this);
-					this.workLink.unregisterTask(this);
-
-				} else {
-					try {
-
-						// Start escalation
-						this.threadState.escalationStart(this, this.flow);
-
-						// Obtain the escalation
-						Escalation escalation = this.taskMetaData
-								.getEscalationProcedure().getEscalation(
-										escalationCause);
-
-						// Do the escalation
-						if (escalation.isResetThreadState()) {
-							// TODO clear thread state
-							// TODO load flow as next sequential task
-						} else {
-							// TODO load flow as parallel
-							// TODO return and allow for escalation completion
-
-							// Assign the next task of flow to its team
-							TaskContainer taskContainer = this
-									.getNextTaskNodeToExecute();
-							if (taskContainer != null) {
-								// Same thread, same lock to active so ok
-								// Different thread, should be creating it so ok
-								taskContainer.activateTask();
+							preAdminParallelTask.activateTask();
+							if (this
+									.isTaskContainerNotComplete(preAdminParallelTask)) {
+								// This task is complete (for now)
+								return true;
 							}
 						}
 
-					} finally {
-						// Escalation complete
-						this.threadState.escalationComplete(this, this.flow);
+					case DO_TASK:
+
+						// Determine if managed objects are ready
+						if (!this.workLink.getWorkContainer()
+								.isManagedObjectsReady(managedObjectIndexes,
+										executionContext, this)) {
+							// Will be woken when ready
+							return true;
+						}
+
+						// Flag task to be defaultly complete and not waiting
+						this.isComplete = true;
+						this.flowAsset = null;
+
+						// Execute the task
+						this.nextTaskParameter = this.task.doTask(this);
+
+						// Determine if to wait on flow
+						if (this.flowAsset != null) {
+							if (this.flowAsset.waitOnFlow(this)) {
+								// Waiting on the flow
+								return true;
+							}
+						}
+
+						// Indicate if task completed
+						if (!this.isComplete) {
+
+							// Determine if parallel task to execute
+							TaskContainer parallelTask = this
+									.getParallelTaskNodeToExecute();
+							if (parallelTask != null) {
+								// Execute the parallel task
+								parallelTask.activateTask();
+								if (this
+										.isTaskContainerNotComplete(parallelTask)) {
+									// This task is complete (for now)
+									return true;
+								}
+							} else {
+								// Task logic not complete
+								return false;
+							}
+						}
+
+						// Flag task completed
+						this.containerState = TaskContainerState.DO_POST_TASK_ADMINISTRATION;
+
+					case DO_POST_TASK_ADMINISTRATION:
+
+						// Determine if managed objects are ready
+						if (!this.workLink.getWorkContainer()
+								.isManagedObjectsReady(managedObjectIndexes,
+										executionContext, this)) {
+							// Will be woken when ready
+							return true;
+						}
+
+						// Undertake the post task administration
+						for (TaskDutyAssociation<?> duty : this.taskMetaData
+								.getPostAdministrationMetaData()) {
+							this.workLink.getWorkContainer()
+									.administerManagedObjects(duty, this);
+						}
+
+						// Flag post task administration complete
+						this.containerState = TaskContainerState.ACTIVATE_NEXT_TASK_IN_FLOW;
+
+						// Determine if parallel task from administration
+						TaskContainer postAdminParallelTask = this
+								.getParallelTaskNodeToExecute();
+						if (postAdminParallelTask != null) {
+							// Execute the parallel task
+							postAdminParallelTask.activateTask();
+							if (this
+									.isTaskContainerNotComplete(postAdminParallelTask)) {
+								// This task is complete (for now)
+								return true;
+							}
+						}
+
+					case ACTIVATE_NEXT_TASK_IN_FLOW:
+
+						// Possibly load the next task in the flow
+						if (this.getNextNode() == null) {
+							// No sequential node, load next task of flow
+							TaskMetaData<?, ?, ?, ?> nextTaskMetaData = this.taskMetaData
+									.getNextTaskInFlow();
+							if (nextTaskMetaData != null) {
+								// Create next task
+								TaskContainer taskContainer = this.flow
+										.createTaskContainer(nextTaskMetaData,
+												this.parallelOwner,
+												this.nextTaskParameter,
+												this.workLink);
+
+								// Load for sequential execution
+								this
+										.loadSequentialTaskNode((TaskNode) taskContainer);
+							}
+						}
+
+						// Assign the next task of flow to its team
+						TaskContainer taskContainer = this
+								.getNextTaskNodeToExecute();
+						if (taskContainer != null) {
+							taskContainer.activateTask();
+						}
+
+						// Complete the task
+						this.completeTask();
+
+					case COMPLETED:
+						// Already complete, thus return immediately
+						return true;
+
+					case FAILED:
+					case HANDLING_FAILURE:
+						// Carry on to handle the failure
+						break;
 					}
-				}
-			} catch (Throwable ex) {
+				} catch (ExecutionError ex) {
 
-				// TODO: remove handle unittest building
-				// (replace with top level escalation)
-				if (ex instanceof AssertionError) {
-					throw (AssertionError) ex;
-				} else if (ex instanceof AssertionFailedError) {
-					throw (AssertionFailedError) ex;
-				} else {
-					System.err.print("TaskContainerImpl failure: ");
-					ex.printStackTrace();
+					// Task failed
+					this.containerState = TaskContainerState.FAILED;
+
+					// Handle the execution error
+					switch (ex.getErrorType()) {
+					case MANAGED_OBJECT_ASYNC_OPERATION_TIMED_OUT:
+					case MANAGED_OBJECT_FAILED_PROVIDING_OBJECT:
+					case MANAGED_OBJECT_NOT_LOADED:
+					case MANAGED_OBJECT_SOURCING_FAILURE:
+					default:
+						// Flag for escalation
+						escalationCause = ex.getCause();
+						if (escalationCause == null) {
+							escalationCause = ex;
+						}
+					}
+
+				} catch (Throwable ex) {
+
+					// Task failed
+					this.containerState = TaskContainerState.FAILED;
+
+					// Flag for escalation
+					escalationCause = ex;
+				}
+
+				try {
+					// Handle completion/failure
+					switch (this.containerState) {
+					case FAILED:
+						// Obtain the escalation to handle the failure
+						Escalation escalation = this.taskMetaData
+								.getEscalationProcedure().getEscalation(
+										escalationCause);
+						try {
+							// Start escalation
+							this.threadState.escalationStart(this, escalation
+									.isResetThreadState());
+
+							// Do the escalation
+							if (escalation.isResetThreadState()) {
+								// Create and load the sequential flow
+								this.createSequentialFlow(escalation
+										.getFlowMetaData(), escalationCause);
+
+							} else {
+								// Flag handling failure
+								this.containerState = TaskContainerState.HANDLING_FAILURE;
+
+								// Create, load and execute as parallel flow
+								this.createParallelFlow(escalation
+										.getFlowMetaData(), escalationCause);
+								TaskContainer parallelTask = this
+										.getNextTaskNodeToExecute();
+								parallelTask.activateTask();
+								if (this
+										.isTaskContainerNotComplete(parallelTask)) {
+									// Will be reactivated after handling
+									return true;
+								}
+							}
+						} finally {
+							// Escalation complete
+							this.threadState.escalationComplete(this);
+						}
+
+					case HANDLING_FAILURE:
+						// Assign the next task of flow to its team
+						TaskContainer taskContainer = this
+								.getNextTaskNodeToExecute();
+						if (taskContainer != null) {
+							// Same thread, same lock to active so ok
+							// Different thread, should be creating it so ok
+							taskContainer.activateTask();
+						}
+
+					case COMPLETED:
+						// Complete the task (includes specify completion state)
+						this.completeTask();
+					}
+
+				} catch (Throwable ex) {
+					// Should not receive failure here.
+					// If so likely something has corrupted - eg OOM.
 					System.err
-							.println("TODO: implement handling TaskContainer failures");
+							.println("FAILURE: please restart office floor as it has likely become corrupt");
+					ex.printStackTrace();
 				}
-			}
 
-			// Now complete
-			return true;
+				// Now complete
+				return true;
+
+			} finally {
+				// Task no longer active
+				this.isActive = false;
+			}
 		}
+	}
+
+	/**
+	 * <p>
+	 * Indicates if the input {@link TaskContainer} is complete.
+	 * <p>
+	 * Passive teams may complete the {@link TaskContainer} immediately on
+	 * {@link Team#assignTask(TaskContainer)} and hence processing of this
+	 * {@link TaskContainer} should continue.
+	 * 
+	 * @param taskContainer
+	 *            {@link TaskContainer} to check if complete.
+	 * @return <code>true</code> if the {@link TaskContainer} is not complete
+	 *         and this {@link TaskContainer} should release the
+	 *         {@link ThreadState#getThreadLock()} lock to allow it to complete.
+	 */
+	private boolean isTaskContainerNotComplete(TaskContainer taskContainer) {
+		return ((TaskContainerImpl<?, ?, ?, ?, ?>) taskContainer).containerState != TaskContainerState.COMPLETED;
 	}
 
 	/**
@@ -684,58 +746,109 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 		// Obtain the Flow meta-data
 		FlowMetaData<?> flowMetaData = this.taskMetaData.getFlow(flowIndex);
 
-		// Obtain the task meta-data for instigating the flow
-		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
-				.getInitialTaskMetaData();
-
 		// Instigate the flow
 		switch (flowMetaData.getInstigationStrategy()) {
 		case ASYNCHRONOUS:
-			// Create thread to execute asynchronously
-			Flow asyncFlow = this.threadState.getProcessState().createThread(
-					flowMetaData);
-
-			// Create task for execution
-			TaskContainer asyncTask = asyncFlow.createTaskContainer(
-					initTaskMetaData, null, parameter, this.workLink);
-
-			// Asynchronously instigate the task
-			asyncTask.activateTask();
-
-			// Specify the thread flow future
-			return asyncFlow.getThreadState();
+			return this.createAsynchronousFlow(flowMetaData, parameter);
 
 		case PARALLEL:
-			// Create a flow for execution
-			Flow parallelFlow = this.threadState.createFlow(flowMetaData);
-
-			// Create the Task Container
-			TaskContainer parallelTaskContainer = parallelFlow
-					.createTaskContainer(initTaskMetaData, this, parameter,
-							this.workLink);
-
-			// Load the parallel node
-			this.loadParallelTaskNode((TaskNode) parallelTaskContainer);
-
-			// Return the flow future
-			return parallelFlow;
+			return this.createParallelFlow(flowMetaData, parameter);
 
 		case SEQUENTIAL:
-			// Create the Task Container
-			TaskContainer sequentialTaskContainer = this.flow
-					.createTaskContainer(initTaskMetaData, this.parallelOwner,
-							parameter, this.workLink);
-
-			// Load the sequential node
-			this.loadSequentialTaskNode((TaskNode) sequentialTaskContainer);
-
-			// Return the flow future
-			return this.flow;
+			return this.createSequentialFlow(flowMetaData, parameter);
 
 		default:
 			// Unknown instigation strategy
 			throw new IllegalStateException("Unknown instigation strategy");
 		}
+	}
+
+	/**
+	 * Creates an asynchronous {@link Flow} from the input {@link FlowMetaData}.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData}.
+	 * @param parameter
+	 *            Parameter.
+	 * @return Asynchronous {@link FlowFuture}.
+	 */
+	private FlowFuture createAsynchronousFlow(FlowMetaData<?> flowMetaData,
+			Object parameter) {
+
+		// Obtain the task meta-data for instigating the flow
+		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
+				.getInitialTaskMetaData();
+
+		// Create thread to execute asynchronously
+		Flow asyncFlow = this.threadState.getProcessState().createThread(
+				flowMetaData);
+
+		// Create task for execution
+		TaskContainer asyncTask = asyncFlow.createTaskContainer(
+				initTaskMetaData, null, parameter, this.workLink);
+
+		// Asynchronously instigate the task
+		asyncTask.activateTask();
+
+		// Specify the thread flow future
+		return asyncFlow.getThreadState();
+	}
+
+	/**
+	 * Creates a parallel {@link Flow} from the input {@link FlowMetaData}.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData}.
+	 * @param parameter
+	 *            Parameter.
+	 * @return Parallel {@link Flow}.
+	 */
+	private FlowFuture createParallelFlow(FlowMetaData<?> flowMetaData,
+			Object parameter) {
+
+		// Obtain the task meta-data for instigating the flow
+		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
+				.getInitialTaskMetaData();
+
+		// Create a flow for execution
+		Flow parallelFlow = this.threadState.createFlow(flowMetaData);
+
+		// Create the Task Container
+		TaskContainer parallelTaskContainer = parallelFlow.createTaskContainer(
+				initTaskMetaData, this, parameter, this.workLink);
+
+		// Load the parallel node
+		this.loadParallelTaskNode((TaskNode) parallelTaskContainer);
+
+		// Return the flow future
+		return parallelFlow;
+	}
+
+	/**
+	 * Creates a sequential {@link Flow} from the input {@link FlowMetaData}.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData}.
+	 * @param parameter
+	 *            Parameter.
+	 * @return Sequential {@link Flow}.
+	 */
+	private FlowFuture createSequentialFlow(FlowMetaData<?> flowMetaData,
+			Object parameter) {
+
+		// Obtain the task meta-data for instigating the flow
+		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
+				.getInitialTaskMetaData();
+
+		// Create the Task Container
+		TaskContainer sequentialTaskContainer = this.flow.createTaskContainer(
+				initTaskMetaData, this.parallelOwner, parameter, this.workLink);
+
+		// Load the sequential node
+		this.loadSequentialTaskNode((TaskNode) sequentialTaskContainer);
+
+		// Return the flow future
+		return this.flow;
 	}
 
 	/**
@@ -872,6 +985,37 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 	}
 
 	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.structure.TaskNode#clearNodes()
+	 */
+	@Override
+	public void clearNodes() {
+
+		// Complete this task
+		this.completeTask();
+
+		// Unset the linked nodes
+		TaskNode parallel = this.getParallelNode();
+		this.setParallelNode(null);
+		TaskNode owner = this.getParallelOwner();
+		this.setParallelOwner(null);
+		TaskNode sequential = this.getNextNode();
+		this.setNextNode(null);
+
+		// Clear the linked nodes
+		if (parallel != null) {
+			parallel.clearNodes();
+		}
+		if (owner != null) {
+			owner.clearNodes();
+		}
+		if (sequential != null) {
+			sequential.clearNodes();
+		}
+	}
+
+	/*
 	 * ====================================================================
 	 * AdministratorContext
 	 * 
@@ -931,9 +1075,20 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 		ACTIVATE_NEXT_TASK_IN_FLOW,
 
 		/**
+		 * Failure in executing.
+		 */
+		FAILED,
+
+		/**
+		 * Currently handling the failure.
+		 */
+		HANDLING_FAILURE,
+
+		/**
 		 * {@link TaskContainer} has completed.
 		 */
-		COMPLETED
+		COMPLETED,
+
 	}
 
 }
