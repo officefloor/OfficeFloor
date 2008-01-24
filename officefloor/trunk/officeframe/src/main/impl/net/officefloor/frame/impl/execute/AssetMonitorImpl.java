@@ -53,7 +53,7 @@ public class AssetMonitorImpl extends AbstractLinkedListEntry<AssetMonitor>
 	protected AssetMonitorState state = AssetMonitorState.WAITING;
 
 	/**
-	 * Posible failure of {@link Asset}.
+	 * Possible failure of {@link Asset}.
 	 */
 	protected Throwable failure = null;
 
@@ -63,17 +63,10 @@ public class AssetMonitorImpl extends AbstractLinkedListEntry<AssetMonitor>
 	protected final LinkedList<MonitoredTask> tasks = new AbstractLinkedList<MonitoredTask>() {
 		public void lastLinkedListEntryRemoved() {
 			// Unregister from the Asset Group
-			unregisterTaskMonitor();
+			AssetMonitorImpl.this.assetManager
+					.unregisterAssetMonitor(AssetMonitorImpl.this);
 		}
 	};
-
-	/**
-	 * Invoked by the {@link #tasks} to unregister this {@link AssetMonitor}
-	 * from being monitored.
-	 */
-	protected void unregisterTaskMonitor() {
-		this.assetManager.unregisterAssetMonitor(this);
-	}
 
 	/**
 	 * Initiate.
@@ -119,7 +112,7 @@ public class AssetMonitorImpl extends AbstractLinkedListEntry<AssetMonitor>
 	 * 
 	 * @see net.officefloor.frame.internal.structure.TaskMonitor#wait(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void wait(TaskContainer taskContainer) {
+	public boolean wait(TaskContainer taskContainer) {
 
 		// Create the monitored item for the task container
 		MonitoredTask monitoredTask = new MonitoredTask(taskContainer,
@@ -163,6 +156,9 @@ public class AssetMonitorImpl extends AbstractLinkedListEntry<AssetMonitor>
 				wakeupTask.activateTask();
 			}
 		}
+
+		// Return whether waiting
+		return (wakeupTask == null);
 	}
 
 	/*

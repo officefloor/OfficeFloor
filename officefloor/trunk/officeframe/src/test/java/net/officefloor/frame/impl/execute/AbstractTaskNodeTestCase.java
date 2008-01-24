@@ -372,8 +372,12 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		TaskContainer initialTaskContainer = flow.createTaskContainer(this
 				.getInitialNode(), null, null, workLink);
 
-		// Execute the task tree
-		initialTaskContainer.doTask(new MockExecutionContext());
+		// Execute the task tree (until complete)
+		boolean isComplete;
+		do {
+			ExecutionContext context = new MockExecutionContext();
+			isComplete = initialTaskContainer.doTask(context);
+		} while (!isComplete);
 
 		// Verify functionality on mock objects
 		this.verifyMockObjects();

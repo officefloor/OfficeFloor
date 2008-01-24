@@ -21,7 +21,7 @@ package net.officefloor.frame.test;
  * 
  * @author Daniel
  */
-public interface ReflectiveFlow<P> {
+public interface ReflectiveFlow {
 
 	/**
 	 * Invokes the flow.
@@ -29,6 +29,6 @@ public interface ReflectiveFlow<P> {
 	 * @param parameter
 	 *            Parameter to the flow.
 	 */
-	void doFlow(P parameter);
-	
+	void doFlow(Object parameter);
+
 }

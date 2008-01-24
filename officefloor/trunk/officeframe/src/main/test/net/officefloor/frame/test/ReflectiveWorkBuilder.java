@@ -42,6 +42,11 @@ public class ReflectiveWorkBuilder implements Work,
 		WorkFactory<ReflectiveWorkBuilder> {
 
 	/**
+	 * {@link AbstractOfficeConstructTestCase}.
+	 */
+	private final AbstractOfficeConstructTestCase testCase;
+
+	/**
 	 * {@link Work} object to invoke reflectively.
 	 */
 	private final Object workObject;
@@ -54,6 +59,8 @@ public class ReflectiveWorkBuilder implements Work,
 	/**
 	 * Initiate.
 	 * 
+	 * @param testCase
+	 *            {@link AbstractOfficeConstructTestCase}.
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 * @param workObject
@@ -65,9 +72,10 @@ public class ReflectiveWorkBuilder implements Work,
 	 * @throws BuildException
 	 *             If fails to initiate.
 	 */
-	public ReflectiveWorkBuilder(String workName, Object workObject,
-			OfficeBuilder officeBuilder, String initialTaskName)
-			throws BuildException {
+	public ReflectiveWorkBuilder(AbstractOfficeConstructTestCase testCase,
+			String workName, Object workObject, OfficeBuilder officeBuilder,
+			String initialTaskName) throws BuildException {
+		this.testCase = testCase;
 		this.workObject = workObject;
 
 		// Create and initiate the work builder
@@ -366,6 +374,10 @@ public class ReflectiveWorkBuilder implements Work,
 						.createParamater(context);
 			}
 
+			// Record invoking method
+			ReflectiveWorkBuilder.this.testCase
+					.recordReflectiveTaskMethodInvoked(this.method.getName());
+
 			// Invoke the method on work object to get return
 			try {
 				return this.method.invoke(
@@ -439,8 +451,7 @@ public class ReflectiveWorkBuilder implements Work,
 	/**
 	 * {@link ParameterFactory} to obtain the flow.
 	 */
-	private static class ReflectiveFlowParameterFactory implements
-			ParameterFactory {
+	private class ReflectiveFlowParameterFactory implements ParameterFactory {
 
 		/**
 		 * Index of the flow.
@@ -465,7 +476,7 @@ public class ReflectiveWorkBuilder implements Work,
 		@Override
 		public Object createParamater(
 				final TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context) {
-			return new ReflectiveFlow<Object>() {
+			return new ReflectiveFlow() {
 				@Override
 				public void doFlow(Object parameter) {
 					// Invoke the flow

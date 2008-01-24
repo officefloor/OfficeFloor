@@ -16,9 +16,6 @@
  */
 package net.officefloor.frame.api.construct;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -84,12 +81,7 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 				workObject.handledFailure);
 
 		// Validate appropriate methods called
-		assertEquals("Incorrect number of methods invoked",
-				expectedInvokedMethods.length, workObject.invokedMethods.size());
-		for (int i = 0; i < expectedInvokedMethods.length; i++) {
-			assertEquals("Method invocation " + i + " incorrect",
-					expectedInvokedMethods[i], workObject.invokedMethods.get(i));
-		}
+		this.validateReflectiveMethodOrder(expectedInvokedMethods);
 	}
 
 	/**
@@ -99,37 +91,20 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 
 		public final Throwable failure;
 
-		public boolean isSecondInvoked = false;
-
 		public Throwable handledFailure = null;
-
-		public List<String> invokedMethods = new LinkedList<String>();
 
 		public EscalationWorkObject(Throwable failure) {
 			this.failure = failure;
 		}
 
 		public void first() throws Throwable {
-			// TODO remove
-			System.out.println("first");
-			
-			this.invokedMethods.add("first");
 			throw failure;
 		}
 
 		public void second() {
-			// TODO remove
-			System.out.println("second");
-			
-			this.invokedMethods.add("second");
-			this.isSecondInvoked = true;
 		}
 
 		public void handleEscalation(Throwable handledfailure) {
-			// TODO remove
-			System.out.println("handleEscalation");
-			
-			this.invokedMethods.add("handleEscalation");
 			this.handledFailure = handledfailure;
 		}
 	}

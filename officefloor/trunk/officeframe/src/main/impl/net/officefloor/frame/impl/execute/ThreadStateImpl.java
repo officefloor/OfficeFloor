@@ -271,11 +271,9 @@ public class ThreadStateImpl implements ThreadState, Asset {
 			return false;
 		}
 
-		// Have task wait on this thread
-		this.threadMonitor.wait(taskContainer);
-
-		// Waiting
-		return true;
+		// Return whether task is waiting on this thread.
+		// Note: thread may already be complete.
+		return this.threadMonitor.wait(taskContainer);
 	}
 
 	/*

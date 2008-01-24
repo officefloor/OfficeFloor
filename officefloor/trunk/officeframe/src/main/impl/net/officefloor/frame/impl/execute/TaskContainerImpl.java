@@ -307,7 +307,7 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 							// Execute the parallel task
 							preAdminParallelTask.activateTask();
 							if (this
-									.isTaskContainerNotComplete(preAdminParallelTask)) {
+									.isParallelTaskNotComplete(preAdminParallelTask)) {
 								// This task is complete (for now)
 								return true;
 							}
@@ -348,9 +348,12 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 								// Execute the parallel task
 								parallelTask.activateTask();
 								if (this
-										.isTaskContainerNotComplete(parallelTask)) {
+										.isParallelTaskNotComplete(parallelTask)) {
 									// This task is complete (for now)
 									return true;
+								} else {
+									// Parallel task completed, re-run this task
+									return false;
 								}
 							} else {
 								// Task logic not complete
@@ -388,7 +391,7 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 							// Execute the parallel task
 							postAdminParallelTask.activateTask();
 							if (this
-									.isTaskContainerNotComplete(postAdminParallelTask)) {
+									.isParallelTaskNotComplete(postAdminParallelTask)) {
 								// This task is complete (for now)
 								return true;
 							}
@@ -492,7 +495,7 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 										.getNextTaskNodeToExecute();
 								parallelTask.activateTask();
 								if (this
-										.isTaskContainerNotComplete(parallelTask)) {
+										.isParallelTaskNotComplete(parallelTask)) {
 									// Will be reactivated after handling
 									return true;
 								}
@@ -537,20 +540,48 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 
 	/**
 	 * <p>
-	 * Indicates if the input {@link TaskContainer} is complete.
+	 * Indicates if the input parallel {@link TaskContainer} is complete.
 	 * <p>
-	 * Passive teams may complete the {@link TaskContainer} immediately on
+	 * Passive teams may complete the {@link TaskNode} immediately on
 	 * {@link Team#assignTask(TaskContainer)} and hence processing of this
-	 * {@link TaskContainer} should continue.
+	 * {@link TaskNode} should continue.
 	 * 
-	 * @param taskContainer
-	 *            {@link TaskContainer} to check if complete.
-	 * @return <code>true</code> if the {@link TaskContainer} is not complete
-	 *         and this {@link TaskContainer} should release the
+	 * @param parallelTask
+	 *            Parallel {@link TaskNode} to check if complete.
+	 * @return <code>true</code> if the {@link TaskNode} is not complete and
+	 *         this {@link TaskNode} should release the
 	 *         {@link ThreadState#getThreadLock()} lock to allow it to complete.
 	 */
-	private boolean isTaskContainerNotComplete(TaskContainer taskContainer) {
-		return ((TaskContainerImpl<?, ?, ?, ?, ?>) taskContainer).containerState != TaskContainerState.COMPLETED;
+	private boolean isParallelTaskNotComplete(TaskContainer parallelTask) {
+
+		// Downcast to implementation
+		TaskContainerImpl<?, ?, ?, ?, ?> impl = (TaskContainerImpl<?, ?, ?, ?, ?>) parallelTask;
+
+		// Determine if input task not is complete
+		if (impl.containerState != TaskContainerState.COMPLETED) {
+			// Not complete
+			return true;
+		}
+
+		// Also must check sequential and parallel nodes. Parallel node may
+		// create these in its process and potentially either passively complete
+		// them or hand them off to another team.
+		boolean isNotComplete = false;
+		TaskContainer sequentialNode = (TaskContainer) impl.getNextNode();
+		if (sequentialNode != null) {
+			isNotComplete |= this.isParallelTaskNotComplete(sequentialNode);
+		}
+		if (!isNotComplete) {
+			TaskContainer parallelParallelNode = (TaskContainer) impl
+					.getParallelNode();
+			if (parallelParallelNode != null) {
+				isNotComplete |= this
+						.isParallelTaskNotComplete(parallelParallelNode);
+			}
+		}
+
+		// Return if is not complete
+		return isNotComplete;
 	}
 
 	/**
