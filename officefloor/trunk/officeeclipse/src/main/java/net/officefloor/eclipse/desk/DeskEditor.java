@@ -37,6 +37,7 @@ import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
+import net.officefloor.eclipse.desk.editparts.FlowItemEscalationEditPart;
 import net.officefloor.eclipse.desk.editparts.FlowItemOutputEditPart;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
@@ -47,6 +48,7 @@ import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
@@ -228,6 +230,9 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 		map.put(DeskTaskObjectModel.class, DeskTaskObjectEditPart.class);
 		map.put(FlowItemModel.class, FlowItemEditPart.class);
 		map.put(FlowItemOutputModel.class, FlowItemOutputEditPart.class);
+		map
+				.put(FlowItemEscalationModel.class,
+						FlowItemEscalationEditPart.class);
 		map.put(ExternalFlowModel.class, ExternalFlowEditPart.class);
 
 		// Connections

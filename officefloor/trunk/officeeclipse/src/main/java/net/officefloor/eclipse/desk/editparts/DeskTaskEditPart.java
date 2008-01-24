@@ -52,8 +52,7 @@ public class DeskTaskEditPart extends
 	 */
 	protected IFigure createFigure() {
 		// Button to add as flow item
-		final ButtonEditPart addAsFlowItem = new ButtonEditPart(
-				"Create") {
+		final ButtonEditPart addAsFlowItem = new ButtonEditPart("Create") {
 			protected void handleButtonClick() {
 
 				// Obtain the work
@@ -71,7 +70,7 @@ public class DeskTaskEditPart extends
 				DeskTaskModel task = DeskTaskEditPart.this.getCastedModel();
 				FlowItemModel flowItem = new FlowItemModel(task.getName(),
 						false, work.getId(), task.getName(), task.getTask(),
-						null, null, null, null, null, null, null);
+						null, null, null, null, null, null, null, null);
 				flowItem.setId(deskEditPart.getUniqueFlowItemId(flowItem));
 				flowItem.setX(300);
 				flowItem.setY(100);
