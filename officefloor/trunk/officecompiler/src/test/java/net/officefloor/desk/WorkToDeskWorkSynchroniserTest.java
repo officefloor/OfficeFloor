@@ -37,10 +37,14 @@ public class WorkToDeskWorkSynchroniserTest extends OfficeFrameTestCase {
 	public void testWorkToDeskWorkSynchronise() {
 
 		// Create the work
-		WorkModel<?> work = new WorkModel(null, null, new TaskModel[] {
-				new TaskModel("taskOne", null, null, null, null, null),
-				new TaskModel("taskTwo", null, null, null, null, null),
-				new TaskModel("taskThree", null, null, null, null, null) });
+		WorkModel<?> work = new WorkModel(null, null,
+				new TaskModel[] {
+						new TaskModel("taskOne", null, null, null, null, null,
+								null),
+						new TaskModel("taskTwo", null, null, null, null, null,
+								null),
+						new TaskModel("taskThree", null, null, null, null,
+								null, null) });
 
 		// Create the desk work
 		DeskWorkModel deskWork = new DeskWorkModel("work", "loader",
@@ -67,7 +71,8 @@ public class WorkToDeskWorkSynchroniserTest extends OfficeFrameTestCase {
 				new DeskTaskModel());
 
 		// Add another task
-		work.addTask(new TaskModel("taskFour", null, null, null, null, null));
+		work.addTask(new TaskModel("taskFour", null, null, null, null, null,
+				null));
 
 		// Synchronise the work again
 		WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(work, deskWork);

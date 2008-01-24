@@ -17,6 +17,8 @@
 package net.officefloor.desk;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -31,6 +33,7 @@ import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
@@ -121,6 +124,10 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect initial flow item id", "1", desk.getWorks()
 				.get(0).getInitialFlowItem().getFlowItemId());
 
+		// ----------------------------------------
+		// Validate the Tasks
+		// ----------------------------------------
+
 		// Validate tasks
 		List<DeskTaskModel> tasks = new LinkedList<DeskTaskModel>();
 		tasks.add(new DeskTaskModel("taskMethod", null, null, null));
@@ -155,16 +162,20 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 							.get(0).getManagedObject().getName());
 		}
 
+		// ----------------------------------------
+		// Validate the Flow Items
+		// ----------------------------------------
+
 		// Validate flow items
 		List<FlowItemModel> flowItems = new LinkedList<FlowItemModel>();
 		flowItems.add(new FlowItemModel("1", true, "work", "taskMethod", null,
-				null, null, null, null, null, null, null, 100, 200));
+				null, null, null, null, null, null, null, null, 100, 200));
 		flowItems.add(new FlowItemModel("2", false, "work", "anotherMethod",
-				null, null, null, null, null, null, null, null, 50, 500));
+				null, null, null, null, null, null, null, null, null, 50, 500));
 		if (!isSynchronised) {
 			flowItems.add(new FlowItemModel("3", false, "work",
 					"noLongerExists", null, null, null, null, null, null, null,
-					null, 10, 20));
+					null, null, 10, 20));
 		}
 		assertList(new String[] { "getId", "getWorkName", "getTaskName",
 				"getX", "getY" }, desk.getFlowItems(), flowItems
@@ -189,12 +200,10 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate outputs of first flow item
 		FlowItemModel flowItemOne = desk.getFlowItems().get(0);
-		List<FlowItemOutputModel> flowItemOuputs = new LinkedList<FlowItemOutputModel>();
-		flowItemOuputs.add(new FlowItemOutputModel("0", null, null, null));
-		flowItemOuputs.add(new FlowItemOutputModel("1", null, null, null));
-		flowItemOuputs.add(new FlowItemOutputModel("2", null, null, null));
 		assertList(new String[] { "getId" }, flowItemOne.getOutputs(),
-				flowItemOuputs.toArray(new FlowItemOutputModel[0]));
+				new FlowItemOutputModel("0", null, null, null),
+				new FlowItemOutputModel("1", null, null, null),
+				new FlowItemOutputModel("2", null, null, null));
 
 		// Validate link types of the first flow item
 		assertEquals("Incorrect link type (sequential)",
@@ -212,20 +221,53 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 					.getOutputs().get(2).getFlowItem());
 		}
 
-		// Validate outputs on second flow item
+		// Validate escalations of first flow item
+		List<FlowItemEscalationModel> flowItemOneEscalations = new LinkedList<FlowItemEscalationModel>();
+		flowItemOneEscalations.add(new FlowItemEscalationModel(
+				IOException.class.getName(), null));
 		if (!isSynchronised) {
-			FlowItemModel flowItemTwo = desk.getFlowItems().get(2);
-			assertList(new String[] { "getId" }, flowItemTwo.getOutputs(),
+			flowItemOneEscalations.add(new FlowItemEscalationModel(
+					NullPointerException.class.getName(), null));
+		}
+		assertList(new String[] { "getEscalationType" }, flowItemOne
+				.getEscalations(), flowItemOneEscalations
+				.toArray(new FlowItemEscalationModel[0]));
+
+		// Validate outputs of second flow item
+		FlowItemModel flowItemTwo = desk.getFlowItems().get(1);
+		assertEquals("Incorrect number of outputs on second flow", 0,
+				flowItemTwo.getOutputs().size());
+
+		// Validate escalations of second flow item
+		List<FlowItemEscalationModel> flowItemTwoEscalations = new LinkedList<FlowItemEscalationModel>();
+		if (isSynchronised) {
+			flowItemTwoEscalations.add(new FlowItemEscalationModel(
+					SQLException.class.getName(), null));
+		}
+		assertList(new String[] { "getEscalationType" }, flowItemTwo
+				.getEscalations(), flowItemTwoEscalations
+				.toArray(new FlowItemEscalationModel[0]));
+
+		if (!isSynchronised) {
+			// Validate outputs on third flow item
+			FlowItemModel flowItemThree = desk.getFlowItems().get(2);
+			assertList(new String[] { "getId" }, flowItemThree.getOutputs(),
 					new FlowItemOutputModel("FIRST_FLOW", null, null, null),
 					new FlowItemOutputModel("SECOND_FLOW", null, null, null));
 
 			// Validate link types of the second flow item
 			assertEquals("Incorrect link type (asynchronous)",
-					DeskLoader.ASYNCHRONOUS_LINK_TYPE, flowItemTwo.getOutputs()
-							.get(0).getExternalFlow().getLinkType());
+					DeskLoader.ASYNCHRONOUS_LINK_TYPE, flowItemThree
+							.getOutputs().get(0).getExternalFlow()
+							.getLinkType());
 			assertEquals("Incorrect link type (parallel)",
-					DeskLoader.PARALLEL_LINK_TYPE, flowItemTwo.getOutputs()
+					DeskLoader.PARALLEL_LINK_TYPE, flowItemThree.getOutputs()
 							.get(1).getFlowItem().getLinkType());
+
+			// Validate escalations of third flow item
+			assertList(new String[] { "getEscalationType" }, flowItemThree
+					.getEscalations(), new FlowItemEscalationModel(
+					SQLException.class.getName(), null));
 		}
 
 		// ----------------------------------------

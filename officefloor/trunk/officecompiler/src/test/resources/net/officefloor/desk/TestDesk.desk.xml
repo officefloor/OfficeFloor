@@ -39,6 +39,8 @@
 			<output id="2">
 				<flow-item id="3" link="Asynchronous" />
 			</output>
+			<escalation escalation-type="java.io.IOException" />
+            <escalation escalation-type="java.lang.NullPointerException" />
 		</flow-item>
 		<flow-item id="2" x="50" y="500" public="false" work="work"
 			task="anotherMethod">
@@ -52,6 +54,7 @@
 			<output id="SECOND_FLOW">
 				<flow-item id="1" link="Parallel" />
 			</output>
+			<escalation escalation-type="java.sql.SQLException" />
 		</flow-item>
 	</flow-items>
 </desk>
