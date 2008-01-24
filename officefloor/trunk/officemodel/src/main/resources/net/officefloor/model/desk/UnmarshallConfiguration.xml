@@ -75,5 +75,10 @@
 				<value method="setLinkType" node="flow-item@link" />
 			</object>
 		</object>
+		<object method="addEscalation" node="escalation"
+			class="net.officefloor.model.desk.FlowItemEscalationModel">
+			<value method="setEscalationType"
+				node="escalation@escalation-type" />
+		</object>
 	</object>
 </unmarshall>
