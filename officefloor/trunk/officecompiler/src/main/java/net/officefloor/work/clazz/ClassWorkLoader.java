@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.model.work.TaskEscalationModel;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
@@ -70,7 +71,7 @@ public class ClassWorkLoader implements WorkLoader {
 				List<TaskFlowModel<?>> flows = new LinkedList<TaskFlowModel<?>>();
 				int flowIndex = 0;
 				for (int i = 0; i < paramTypes.length; i++) {
-					// Obtain the param type
+					// Obtain the parameter type
 					Class<?> paramType = paramTypes[i];
 
 					// Determine if a flow
@@ -94,14 +95,28 @@ public class ClassWorkLoader implements WorkLoader {
 					}
 				}
 
+				// Create the listing of escalations
+				List<TaskEscalationModel> escalations = new LinkedList<TaskEscalationModel>();
+				for (Class<?> escalationType : method.getExceptionTypes()) {
+					// Create the escalation
+					TaskEscalationModel escalation = new TaskEscalationModel(
+							escalationType.getName());
+
+					// Add the escalation
+					escalations.add(escalation);
+				}
+
 				// Create the Task
 				TaskObjectModel<Indexed>[] objectArray = objects
 						.toArray(new TaskObjectModel[0]);
 				TaskFlowModel<Indexed>[] flowArray = flows
 						.toArray(new TaskFlowModel[0]);
+				TaskEscalationModel[] escalationArray = escalations
+						.toArray(new TaskEscalationModel[0]);
 				TaskModel<?, ?> task = new TaskModel<Indexed, Indexed>(method
 						.getName(), new ClassTaskFactoryManufacturer(method,
-						parameters), null, null, objectArray, flowArray);
+						parameters), null, null, objectArray, flowArray,
+						escalationArray);
 
 				// Add task to listing
 				tasks.add(task);

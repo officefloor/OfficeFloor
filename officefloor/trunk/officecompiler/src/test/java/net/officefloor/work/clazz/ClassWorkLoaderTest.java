@@ -16,6 +16,9 @@
  */
 package net.officefloor.work.clazz;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
@@ -93,8 +96,12 @@ public class ClassWorkLoaderTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect number of objects", 0, taskOne.getObjects()
 				.size());
 		assertEquals("Incorrect number of flows", 0, taskOne.getFlows().size());
+		assertEquals("Incorrect number of escalations", 1, taskOne
+				.getEscalations().size());
+		assertEquals("Incorrect escalation", SQLException.class.getName(),
+				taskOne.getEscalations().get(0).getEscalationType());
 
-		// Verify the first task
+		// Verify the second task
 		assertEquals("Incorrect task name", "taskMethod", taskTwo.getTaskName());
 		TaskFactory taskFactoryTwo = taskTwo.getTaskFactoryManufacturer()
 				.createTaskFactory();
@@ -113,6 +120,10 @@ public class ClassWorkLoaderTest extends OfficeFrameTestCase {
 		TaskFlowModel taskFlow = taskTwo.getFlows().get(0);
 		assertNull("Incorrect flow key", taskFlow.getFlowKey());
 		assertEquals("Incorrect flow index", 0, taskFlow.getFlowIndex());
+		assertEquals("Incorrect number of escalations", 1, taskTwo
+				.getEscalations().size());
+		assertEquals("Incorrect escalation", IOException.class.getName(),
+				taskTwo.getEscalations().get(0).getEscalationType());
 	}
 
 }

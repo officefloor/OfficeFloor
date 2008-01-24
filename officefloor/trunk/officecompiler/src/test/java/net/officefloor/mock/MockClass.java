@@ -16,6 +16,9 @@
  */
 package net.officefloor.mock;
 
+import java.io.IOException;
+import java.sql.SQLException;
+
 import net.officefloor.work.clazz.Flow;
 
 /**
@@ -26,11 +29,12 @@ import net.officefloor.work.clazz.Flow;
 public class MockClass {
 
 	public Object taskMethod(String parameter, Flow<?> flowSequential,
-			Flow<Object> flowParallel, Flow<String> flowAsynchronous) {
+			Flow<Object> flowParallel, Flow<String> flowAsynchronous)
+			throws IOException {
 		return null;
 	}
 
-	public void anotherMethod() {
+	public void anotherMethod() throws SQLException {
 	}
 
 	Object nonTaskMethod(Object parameter) {

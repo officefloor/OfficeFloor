@@ -21,8 +21,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
+import net.officefloor.model.work.TaskEscalationModel;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
 
@@ -101,6 +103,42 @@ public class TaskToFlowItemSynchroniser {
 
 			// Remove the output
 			flowItem.removeOutput(output);
+		}
+
+		// Create the map of existing flow item escalations by type
+		Map<String, FlowItemEscalationModel> existingEscalations = new HashMap<String, FlowItemEscalationModel>();
+		for (FlowItemEscalationModel escalation : flowItem.getEscalations()) {
+			existingEscalations.put(escalation.getEscalationType(), escalation);
+		}
+
+		// Merge the escalations
+		for (TaskEscalationModel escalation : task.getEscalations()) {
+
+			// Obtain the type of the flow item escalation
+			String escalationType = escalation.getEscalationType();
+
+			// Determine if already existing on flow item
+			if (existingEscalations.containsKey(escalationType)) {
+				// Remove from existing, so not remove later
+				existingEscalations.remove(escalationType);
+
+				// No further changes for flow item escalation
+				continue;
+			}
+
+			// Create a new escalation
+			flowItem.addEscalation(new FlowItemEscalationModel(escalationType,
+					escalation));
+		}
+
+		// Remove any additional escalations
+		for (FlowItemEscalationModel escalation : existingEscalations.values()) {
+
+			// Remove connections for escalation
+			escalation.removeConnections();
+
+			// Remove the escalation
+			flowItem.removeEscalation(escalation);
 		}
 	}
 

@@ -19,7 +19,6 @@ package net.officefloor.desk;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.task.TaskFactoryManufacturer;
-import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
 
@@ -42,12 +41,10 @@ public class TaskToDeskTaskSynchroniserTest extends OfficeFrameTestCase {
 				"java.lang.String");
 		TaskObjectModel taskObjectTwo = new TaskObjectModel(null,
 				"java.lang.Integer");
-		TaskFlowModel taskFlowOne = new TaskFlowModel(null, 0);
-		TaskFlowModel taskFlowTwo = new TaskFlowModel(null, 1);
 		TaskModel task = new TaskModel("TASK", this
 				.createMock(TaskFactoryManufacturer.class), null, null,
-				new TaskObjectModel[] { taskObjectOne, taskObjectTwo },
-				new TaskFlowModel[] { taskFlowOne, taskFlowTwo });
+				new TaskObjectModel[] { taskObjectOne, taskObjectTwo }, null,
+				null);
 
 		// Create the Flow Item
 		DeskTaskModel deskTask = new DeskTaskModel();
