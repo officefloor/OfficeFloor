@@ -7,4 +7,5 @@
 	<field type="Class&lt;F&gt;" name="flow keys"/>
 	<list type="TaskObjectModel&lt;M&gt;" name="object"/>
 	<list type="TaskFlowModel&lt;F&gt;" name="flow"/>
+	<list type="TaskEscalationModel" name="escalation"/>
 </model>

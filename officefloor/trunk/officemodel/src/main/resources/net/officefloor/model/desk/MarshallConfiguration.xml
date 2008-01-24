@@ -120,6 +120,16 @@
 					</object>
 				</item>
 			</collection>
+			<collection method="getEscalations">
+				<item
+					type="net.officefloor.model.desk.FlowItemEscalationModel"
+					element="escalation">
+					<attributes>
+						<attribute method="getEscalationType"
+							attribute="escalation-type" />
+					</attributes>
+				</item>
+			</collection>
 		</item>
 	</collection>
 </marshall>

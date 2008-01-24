@@ -13,4 +13,5 @@
     <list type="FlowItemToNextFlowItemModel" name="previous flow item"/>
 	<list type="FlowItemOutputModel" name="output" cascade-remove="true"/>
 	<list type="FlowItemOutputToFlowItemModel" name="input"/>
+	<list type="FlowItemEscalationModel" name="escalation" cascade-remove="true"/>
 </model>
