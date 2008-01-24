@@ -83,6 +83,7 @@ public class FlowItemEditPart extends
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getOutputs());
+		childModels.addAll(this.getCastedModel().getEscalations());
 	}
 
 	/*
@@ -205,6 +206,12 @@ public class FlowItemEditPart extends
 				case ADD_PREVIOUS_FLOW_ITEM:
 				case REMOVE_PREVIOUS_FLOW_ITEM:
 					FlowItemEditPart.this.refreshTargetConnections();
+					break;
+				case ADD_OUTPUT:
+				case REMOVE_OUTPUT:
+				case ADD_ESCALATION:
+				case REMOVE_ESCALATION:
+					FlowItemEditPart.this.refreshChildren();
 					break;
 				}
 			}
