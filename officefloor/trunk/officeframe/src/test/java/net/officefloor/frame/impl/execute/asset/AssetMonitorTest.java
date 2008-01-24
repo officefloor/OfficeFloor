@@ -74,12 +74,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 				this.assetGroup, this.monitors);
 	}
 
-	public void testTODO() {
-		// TODO: redo the locking in this test
-	}
-	
 	/**
-	 * Ensure correct items are returend.
+	 * Ensure correct items are returned.
 	 */
 	public void testGetters() {
 		assertEquals("Incorrect lock object", this.lock, this.assetMonitor

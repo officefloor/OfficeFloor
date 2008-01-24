@@ -18,6 +18,8 @@ package net.officefloor.frame.test;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.AdministratorBuilder;
@@ -45,6 +47,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Abstract {@link junit.framework.TestCase} for construction testing of an
@@ -69,6 +72,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * {@link WorkBuilder}.
 	 */
 	private WorkBuilder<?> workBuilder;
+
+	/**
+	 * List of method names in order they are invoked by the
+	 * {@link ReflectiveTaskBuilder} instances for the test.
+	 */
+	private List<String> reflectiveTaskInvokedMethods = new LinkedList<String>();
 
 	/**
 	 * {@link ParentEscalationProcedure}.
@@ -212,8 +221,46 @@ public abstract class AbstractOfficeConstructTestCase extends
 	protected ReflectiveWorkBuilder constructWork(Object workObject,
 			String workName, String initialTaskName) throws BuildException {
 		// Return the created work builder
-		return new ReflectiveWorkBuilder(workName, workObject,
+		return new ReflectiveWorkBuilder(this, workName, workObject,
 				this.officeBuilder, initialTaskName);
+	}
+
+	/**
+	 * Invoked by the {@link ReflectiveTaskBuilder} when it executes the method.
+	 * 
+	 * @param methodName
+	 *            Name of method being invoked.
+	 */
+	protected synchronized void recordReflectiveTaskMethodInvoked(
+			String methodName) {
+		this.reflectiveTaskInvokedMethods.add(methodName);
+	}
+
+	/**
+	 * Validates the order the {@link ReflectiveTaskBuilder} invoked the
+	 * methods.
+	 * 
+	 * @param methodNames
+	 *            Order that the reflective methods should be invoked.
+	 */
+	protected synchronized void validateReflectiveMethodOrder(
+			String... methodNames) {
+
+		// Create expected method calls
+		StringBuilder actualMethods = new StringBuilder();
+		for (String methodName : methodNames) {
+			actualMethods.append(methodName.trim() + " ");
+		}
+
+		// Create the actual method calls
+		StringBuilder expectedMethods = new StringBuilder();
+		for (String methodName : this.reflectiveTaskInvokedMethods) {
+			expectedMethods.append(methodName.trim() + " ");
+		}
+
+		// Validate appropriate methods called
+		assertEquals("Incorrect methods invoked [ " + actualMethods.toString()
+				+ "]", actualMethods.toString(), expectedMethods.toString());
 	}
 
 	/**

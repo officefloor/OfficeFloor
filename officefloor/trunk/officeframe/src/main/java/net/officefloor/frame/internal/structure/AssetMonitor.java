@@ -50,7 +50,7 @@ public interface AssetMonitor extends LinkedListEntry<AssetMonitor> {
 	 *            {@link TaskContainer} to be notified on waking up the
 	 *            {@link ThreadState}.
 	 */
-	void wait(TaskContainer taskContainer);
+	boolean wait(TaskContainer taskContainer);
 
 	/**
 	 * Wakes up all the {@link ThreadState} instances waiting on this
