@@ -17,11 +17,16 @@
 package net.officefloor.eclipse.desk.commands;
 
 import net.officefloor.desk.DeskLoader;
+import net.officefloor.desk.TaskToFlowItemSynchroniser;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.action.AbstractSingleCommandFactory;
 import net.officefloor.eclipse.common.action.CommandFactory;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.DeskTaskModel;
+import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.work.TaskModel;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.gef.commands.Command;
@@ -65,17 +70,38 @@ public class RefreshWorkCommand extends
 		return new Command() {
 			@Override
 			public void execute() {
-				// Create the Project class loader
-				ProjectClassLoader projectClassLoader = ProjectClassLoader
-						.create(RefreshWorkCommand.this.project);
-
-				// Create the desk loader
-				DeskLoader deskLoader = new DeskLoader(projectClassLoader);
-
-				// Load the work (which does the synchronising)
 				try {
+					// Create the Project class loader
+					ProjectClassLoader projectClassLoader = ProjectClassLoader
+							.create(RefreshWorkCommand.this.project);
+
+					// Create the desk loader
+					DeskLoader deskLoader = new DeskLoader(projectClassLoader);
+
+					// Load the work (which does the synchronising)
 					deskLoader.loadWork(model, projectClassLoader
 							.getConfigurationContext());
+
+					// Synchronise the tasks onto flow items
+					for (DeskTaskModel deskTaskModel : model.getTasks()) {
+
+						// Obtain the task model
+						TaskModel<?, ?> taskModel = deskTaskModel.getTask();
+						if (taskModel == null) {
+							// No task model so can not synchronise
+							continue;
+						}
+
+						// Synchronise the flow items
+						for (DeskTaskToFlowItemModel taskToFlow : deskTaskModel
+								.getFlowItems()) {
+							FlowItemModel flowItem = taskToFlow.getFlowItem();
+							TaskToFlowItemSynchroniser
+									.synchroniseTaskOntoFlowItem(taskModel,
+											flowItem);
+						}
+					}
+
 				} catch (Throwable ex) {
 
 					// TODO implement, provide message error (or error)
