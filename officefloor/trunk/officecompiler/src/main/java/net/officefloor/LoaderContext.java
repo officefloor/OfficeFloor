@@ -52,21 +52,14 @@ public class LoaderContext {
 	 * @throws Exception
 	 *             If fails.
 	 */
-	@SuppressWarnings("unchecked")
 	public <O> O createInstance(Class<O> type, String className)
 			throws Exception {
 
 		// Obtain the instance of the class
-		Class clazz = obtainClass(className);
-
-		// Ensure is of appropriate type
-		if (!type.isAssignableFrom(clazz)) {
-			throw new IllegalStateException("Class '" + className
-					+ "' must be assignable to type " + type.getName());
-		}
+		Class<? extends O> clazz = this.obtainClass(className, type);
 
 		// Return a new instance of the class
-		return (O) clazz.newInstance();
+		return clazz.newInstance();
 	}
 
 	/**
@@ -79,7 +72,47 @@ public class LoaderContext {
 	 *             If fails.
 	 */
 	public Class<?> obtainClass(String className) throws Exception {
-		return this.classLoader.loadClass(className);
+
+		// Obtain the class
+		Class<?> clazz;
+		try {
+			clazz = this.classLoader.loadClass(className);
+		} catch (ClassNotFoundException ex) {
+			throw new Exception("Unknown type '" + className + "'");
+		}
+
+		return clazz;
+	}
+
+	/**
+	 * Creates the {@link Class} of the <code>typeName</code> that must be a
+	 * sub-type of <code>superType</code>.
+	 * 
+	 * @param typeName
+	 *            Type name of the {@link Class} to return.
+	 * @param superType
+	 *            Super type that the returned {@link Class} must be assignable
+	 *            to.
+	 * @return {@link Class} of <code>typeName</code>.
+	 * @throws Exception
+	 *             If fails to obtain the {@link Class}.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> Class<? extends T> obtainClass(String typeName,
+			Class<T> superType) throws Exception {
+
+		// Obtain the class
+		Class<?> clazz = this.obtainClass(typeName);
+
+		// Ensure the class is of appropriate type
+		if (!superType.isAssignableFrom(clazz)) {
+			throw new Exception("Type '" + typeName
+					+ "' is not assignable to super type "
+					+ superType.getName());
+		}
+
+		// Return as appropriate type
+		return (Class<? extends T>) clazz;
 	}
 
 	/**

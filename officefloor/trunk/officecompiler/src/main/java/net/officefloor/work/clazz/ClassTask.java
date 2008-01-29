@@ -16,6 +16,7 @@
  */
 package net.officefloor.work.clazz;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -66,7 +67,7 @@ class ClassTask implements Task<Object, ClassWork, Indexed, Indexed> {
 	 */
 	public Object doTask(
 			TaskContext<Object, ClassWork, Indexed, Indexed> context)
-			throws Exception {
+			throws Throwable {
 
 		// Create the listing of parameters
 		Object[] params = new Object[this.parameters.length];
@@ -75,7 +76,12 @@ class ClassTask implements Task<Object, ClassWork, Indexed, Indexed> {
 		}
 
 		// Invoke the task
-		return this.method.invoke(this.work.getObject(), params);
+		try {
+			return this.method.invoke(this.work.getObject(), params);
+		} catch (InvocationTargetException ex) {
+			// Propagate failure of task
+			throw ex.getCause();
+		}
 	}
 
 }
