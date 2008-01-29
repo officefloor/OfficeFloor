@@ -31,11 +31,11 @@ public interface Task<P extends Object, W extends Work, M extends Enum<M>, F ext
 	 * @return Parameter for the next {@link Task}. This allows stringing
 	 *         {@link Task} instances together into a
 	 *         {@link net.officefloor.frame.internal.structure.Flow}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             Indicating failure of the {@link Task}. A thrown
-	 *             {@link Exception} will also flag this {@link Task} and all
+	 *             {@link Throwable} will also flag this {@link Task} and all
 	 *             its next and parallel {@link Task} instances to not execute.
 	 */
-	Object doTask(TaskContext<P, W, M, F> context) throws Exception;
+	Object doTask(TaskContext<P, W, M, F> context) throws Throwable;
 
 }
