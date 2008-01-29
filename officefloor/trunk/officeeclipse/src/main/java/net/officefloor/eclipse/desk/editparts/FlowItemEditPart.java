@@ -179,6 +179,9 @@ public class FlowItemEditPart extends
 		// Add flow inputs
 		models.addAll(this.getCastedModel().getInputs());
 
+		// Add handled escalations
+		models.addAll(this.getCastedModel().getHandledEscalations());
+
 		// Add flow previous
 		models.addAll(this.getCastedModel().getPreviousFlowItems());
 	}
@@ -203,6 +206,8 @@ public class FlowItemEditPart extends
 				case CHANGE_DESK_TASK:
 				case ADD_INPUT:
 				case REMOVE_INPUT:
+				case ADD_HANDLED_ESCALATION:
+				case REMOVE_HANDLED_ESCALATION:
 				case ADD_PREVIOUS_FLOW_ITEM:
 				case REMOVE_PREVIOUS_FLOW_ITEM:
 					FlowItemEditPart.this.refreshTargetConnections();
