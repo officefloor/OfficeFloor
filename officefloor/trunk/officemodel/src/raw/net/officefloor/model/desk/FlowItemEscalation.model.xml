@@ -3,4 +3,5 @@
 	<import>net.officefloor.model.work.TaskEscalationModel</import>
 	<field type="String" name="escalation type"/>
 	<field type="TaskEscalationModel" name="task escalation"/>
+    <field type="FlowItemEscalationToFlowItemModel" name="escalation handler"/>
 </model>
