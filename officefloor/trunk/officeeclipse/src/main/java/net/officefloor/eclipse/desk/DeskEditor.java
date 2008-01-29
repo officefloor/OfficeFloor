@@ -130,7 +130,7 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 				new FigureFactory<DeskWorkToFlowItemModel>() {
 					public IFigure createFigure(DeskWorkToFlowItemModel model) {
 						PolylineConnection figure = new PolylineConnection();
-						figure.setForegroundColor(ColorConstants.darkBlue);
+						figure.setForegroundColor(ColorConstants.lightBlue);
 						return figure;
 					}
 				});
@@ -155,7 +155,7 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 				new FigureFactory<DeskTaskToFlowItemModel>() {
 					public IFigure createFigure(DeskTaskToFlowItemModel model) {
 						PolylineConnection figure = new PolylineConnection();
-						figure.setForegroundColor(ColorConstants.darkBlue);
+						figure.setForegroundColor(ColorConstants.lightGray);
 						figure.setLineStyle(Graphics.LINE_DASH);
 						return figure;
 					}
