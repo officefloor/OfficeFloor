@@ -32,6 +32,8 @@ import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.FlowItemEscalationModel;
+import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
@@ -267,6 +269,25 @@ public class DeskLoader {
 			}
 		}
 
+		// Connect the escalation to flow item
+		for (FlowItemModel flow : desk.getFlowItems()) {
+			for (FlowItemEscalationModel escalation : flow.getEscalations()) {
+				// Obtain the connection
+				FlowItemEscalationToFlowItemModel conn = escalation
+						.getEscalationHandler();
+				if (conn != null) {
+					// Obtain the handling flow
+					FlowItemModel flowItem = flowItems.get(conn.getId());
+					if (flowItem != null) {
+						// Connect
+						conn.setEscalation(escalation);
+						conn.setHandler(flowItem);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Connect the work to initial flow item
 		for (DeskWorkModel deskWork : desk.getWorks()) {
 			// Obtain the connection
@@ -423,6 +444,18 @@ public class DeskLoader {
 						.getExternalFlow();
 				if (conn != null) {
 					conn.setName(conn.getExternalFlow().getName());
+				}
+			}
+		}
+
+		// Specify escalation handlers
+		for (FlowItemModel flowItem : desk.getFlowItems()) {
+			for (FlowItemEscalationModel flowItemEscalation : flowItem
+					.getEscalations()) {
+				FlowItemEscalationToFlowItemModel conn = flowItemEscalation
+						.getEscalationHandler();
+				if (conn != null) {
+					conn.setId(conn.getHandler().getId());
 				}
 			}
 		}

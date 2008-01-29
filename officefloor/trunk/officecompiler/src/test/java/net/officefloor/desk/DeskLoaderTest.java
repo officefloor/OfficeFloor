@@ -168,14 +168,17 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate flow items
 		List<FlowItemModel> flowItems = new LinkedList<FlowItemModel>();
-		flowItems.add(new FlowItemModel("1", true, "work", "taskMethod", null,
-				null, null, null, null, null, null, null, null, 100, 200));
+		flowItems
+				.add(new FlowItemModel("1", true, "work", "taskMethod", null,
+						null, null, null, null, null, null, null, null, null,
+						100, 200));
 		flowItems.add(new FlowItemModel("2", false, "work", "anotherMethod",
-				null, null, null, null, null, null, null, null, null, 50, 500));
+				null, null, null, null, null, null, null, null, null, null, 50,
+				500));
 		if (!isSynchronised) {
 			flowItems.add(new FlowItemModel("3", false, "work",
 					"noLongerExists", null, null, null, null, null, null, null,
-					null, null, 10, 20));
+					null, null, null, 10, 20));
 		}
 		assertList(new String[] { "getId", "getWorkName", "getTaskName",
 				"getX", "getY" }, desk.getFlowItems(), flowItems
@@ -224,14 +227,18 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// Validate escalations of first flow item
 		List<FlowItemEscalationModel> flowItemOneEscalations = new LinkedList<FlowItemEscalationModel>();
 		flowItemOneEscalations.add(new FlowItemEscalationModel(
-				IOException.class.getName(), null));
+				IOException.class.getName(), null, null));
 		if (!isSynchronised) {
 			flowItemOneEscalations.add(new FlowItemEscalationModel(
-					NullPointerException.class.getName(), null));
+					NullPointerException.class.getName(), null, null));
 		}
 		assertList(new String[] { "getEscalationType" }, flowItemOne
 				.getEscalations(), flowItemOneEscalations
 				.toArray(new FlowItemEscalationModel[0]));
+
+		// Validate handler on first flow escalation
+		assertNotNull("No handler for escalation", flowItemOne.getEscalations()
+				.get(0).getEscalationHandler());
 
 		// Validate outputs of second flow item
 		FlowItemModel flowItemTwo = desk.getFlowItems().get(1);
@@ -242,11 +249,16 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		List<FlowItemEscalationModel> flowItemTwoEscalations = new LinkedList<FlowItemEscalationModel>();
 		if (isSynchronised) {
 			flowItemTwoEscalations.add(new FlowItemEscalationModel(
-					SQLException.class.getName(), null));
+					SQLException.class.getName(), null, null));
 		}
 		assertList(new String[] { "getEscalationType" }, flowItemTwo
 				.getEscalations(), flowItemTwoEscalations
 				.toArray(new FlowItemEscalationModel[0]));
+
+		// Validate escalation handling of second flow item
+		assertEquals("Incorrect escalation being handled", flowItemOne
+				.getEscalations().get(0), flowItemTwo.getHandledEscalations()
+				.get(0).getEscalation());
 
 		if (!isSynchronised) {
 			// Validate outputs on third flow item
@@ -267,7 +279,7 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 			// Validate escalations of third flow item
 			assertList(new String[] { "getEscalationType" }, flowItemThree
 					.getEscalations(), new FlowItemEscalationModel(
-					SQLException.class.getName(), null));
+					SQLException.class.getName(), null, null));
 		}
 
 		// ----------------------------------------

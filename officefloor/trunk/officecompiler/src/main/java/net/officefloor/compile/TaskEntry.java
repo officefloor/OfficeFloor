@@ -19,6 +19,7 @@ package net.officefloor.compile;
 import java.util.Deque;
 import java.util.LinkedList;
 
+import net.officefloor.LoaderContext;
 import net.officefloor.desk.DeskLoader;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -26,11 +27,14 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalFlowModel;
+import net.officefloor.model.desk.FlowItemEscalationModel;
+import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
@@ -48,6 +52,7 @@ import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel;
 import net.officefloor.model.work.TaskModel;
+import net.officefloor.util.OFCU;
 import net.officefloor.work.CompilerAwareTaskFactory;
 
 /**
@@ -94,7 +99,7 @@ public class TaskEntry<W extends Work> extends
 
 		// Create the task entry
 		TaskEntry<W> taskEntry = new TaskEntry<W>(taskBuilder, flowItem,
-				deskTask, workEntry);
+				deskTask, workEntry, context.getLoaderContext());
 
 		// Register the task entry
 		workEntry.getDeskEntry().registerTask(flowItem, taskEntry);
@@ -114,6 +119,11 @@ public class TaskEntry<W extends Work> extends
 	private final WorkEntry<W> workEntry;
 
 	/**
+	 * {@link LoaderContext} for loading necessary classes.
+	 */
+	private final LoaderContext loaderContext;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param builder
@@ -124,13 +134,16 @@ public class TaskEntry<W extends Work> extends
 	 *            {@link DeskTaskModel}.
 	 * @param workEntry
 	 *            {@link WorkEntry} for this {@link TaskEntry}.
+	 * @param loaderContext
+	 *            {@link LoaderContext}.
 	 */
 	public TaskEntry(TaskBuilder<Object, W, Indexed, Indexed> builder,
 			FlowItemModel flowItem, DeskTaskModel deskTask,
-			WorkEntry<W> workEntry) {
+			WorkEntry<W> workEntry, LoaderContext loaderContext) {
 		super(flowItem.getId(), builder, flowItem);
 		this.deskTask = deskTask;
 		this.workEntry = workEntry;
+		this.loaderContext = loaderContext;
 	}
 
 	/**
@@ -223,9 +236,16 @@ public class TaskEntry<W extends Work> extends
 				officeFlowItem = of;
 			}
 		}
+		if (officeFlowItem == null) {
+			throw new Exception("No corresponding flow item "
+					+ this.getModel().getId() + " on office desk "
+					+ officeDesk.getName() + " of office "
+					+ officeEntry.getId());
+		}
 
 		// Obtain the external office team
-		ExternalTeamModel officeTeam = officeFlowItem.getTeam().getTeam();
+		ExternalTeamModel officeTeam = OFCU.get(officeFlowItem.getTeam(),
+				"No team for ${0}", officeFlowItem.getName()).getTeam();
 
 		// Return the external office team
 		return officeTeam;
@@ -244,7 +264,7 @@ public class TaskEntry<W extends Work> extends
 		TaskModel<?, ?> task = this.deskTask.getTask();
 		TaskFactory taskFactory = task.getTaskFactoryManufacturer()
 				.createTaskFactory();
-		
+
 		// Initiate the task factory if necessary
 		if (taskFactory instanceof CompilerAwareTaskFactory) {
 			((CompilerAwareTaskFactory) taskFactory).initialiseTaskFactory(this
@@ -272,6 +292,22 @@ public class TaskEntry<W extends Work> extends
 		officeEntry.getBuilder().registerTeam(teamName, teamId);
 
 		// Link in the managed objects
+		this.linkManagedObjects();
+
+		// Link in the flows
+		this.linkFlows();
+
+		// Link in the next flow
+		this.linkNextFlow();
+
+		// Link in the escalations
+		this.linkEscalations();
+	}
+
+	/**
+	 * Links in the {@link ManagedObject} instances.
+	 */
+	private void linkManagedObjects() {
 		int index = 0;
 		for (DeskTaskObjectModel taskObject : this.deskTask.getObjects()) {
 
@@ -284,6 +320,15 @@ public class TaskEntry<W extends Work> extends
 			this.getBuilder().linkManagedObject(index++,
 					taskObject.getManagedObject().getName());
 		}
+	}
+
+	/**
+	 * Links in the flows.
+	 * 
+	 * @throws Exception
+	 *             If fails to link the flows.
+	 */
+	private void linkFlows() throws Exception {
 
 		// Specify the linked flows
 		int flowIndex = 0;
@@ -362,6 +407,15 @@ public class TaskEntry<W extends Work> extends
 			// Increment flow index for next iteration
 			flowIndex++;
 		}
+	}
+
+	/**
+	 * Links in the next flow.
+	 * 
+	 * @throws Exception
+	 *             If fails to link in next flow.
+	 */
+	private void linkNextFlow() throws Exception {
 
 		// Specify the next flow (from same desk)
 		FlowItemToNextFlowItemModel nextFlowItem = this.getModel()
@@ -397,6 +451,61 @@ public class TaskEntry<W extends Work> extends
 									workName, taskName);
 						}
 					});
+		}
+	}
+
+	/**
+	 * Links in the escalations.
+	 * 
+	 * @throws Exception
+	 *             If fails to link in handling of escalations.
+	 */
+	private void linkEscalations() throws Exception {
+
+		// Link in handling of each escalation
+		for (FlowItemEscalationModel flowItemEscalation : this.getModel()
+				.getEscalations()) {
+
+			// Flag as must be linked
+			boolean isLinked = false;
+
+			// Obtain the handling (from same desk)
+			FlowItemEscalationToFlowItemModel handlingFlowItem = flowItemEscalation
+					.getEscalationHandler();
+			if (handlingFlowItem != null) {
+
+				// Obtain the escalation type
+				String escalationTypeName = flowItemEscalation
+						.getEscalationType();
+				final Class<? extends Throwable> escalationType = this.loaderContext
+						.obtainClass(escalationTypeName, Throwable.class);
+
+				// Link in the flow
+				this.linkFlow(handlingFlowItem.getHandler(), new FlowLinker() {
+					@Override
+					public void linkFlow(String workName, String taskName) {
+						if (workName == null) {
+							// Handled by same work
+							TaskEntry.this.getBuilder().addEscalation(
+									escalationType, true, taskName);
+						} else {
+							// Handled by another work
+							TaskEntry.this.getBuilder().addEscalation(
+									escalationType, true, workName, taskName);
+						}
+					}
+				});
+
+				// Linked
+				isLinked = true;
+			}
+
+			// Ensure linked
+			if (!isLinked) {
+				throw new Exception("Escalation "
+						+ flowItemEscalation.getEscalationType()
+						+ " on flow item " + this.getId() + " not handled");
+			}
 		}
 	}
 
