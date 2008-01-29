@@ -128,6 +128,12 @@
 						<attribute method="getEscalationType"
 							attribute="escalation-type" />
 					</attributes>
+					<object method="getEscalationHandler"
+						element="flow-item">
+						<attributes>
+							<attribute method="getId" attribute="id" />
+						</attributes>
+					</object>
 				</item>
 			</collection>
 		</item>

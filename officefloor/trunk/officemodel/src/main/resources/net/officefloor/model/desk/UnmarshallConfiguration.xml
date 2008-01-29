@@ -79,6 +79,10 @@
 			class="net.officefloor.model.desk.FlowItemEscalationModel">
 			<value method="setEscalationType"
 				node="escalation@escalation-type" />
+			<object method="setEscalationHandler" node="flow-item"
+				class="net.officefloor.model.desk.FlowItemEscalationToFlowItemModel">
+				<value method="setId" node="flow-item@id" />
+			</object>
 		</object>
 	</object>
 </unmarshall>
