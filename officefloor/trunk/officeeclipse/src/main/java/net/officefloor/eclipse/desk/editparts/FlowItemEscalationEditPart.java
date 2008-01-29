@@ -19,15 +19,20 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.desk.figure.FlowItemOutputFigure;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
+import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
+import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemEscalationModel.FlowItemEscalationEvent;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link FlowItemEscalationModel}.
@@ -35,7 +40,7 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class FlowItemEscalationEditPart extends
-		AbstractOfficeFloorEditPart<FlowItemEscalationModel> {
+		AbstractOfficeFloorSourceNodeEditPart<FlowItemEscalationModel> {
 
 	/*
 	 * (non-Javadoc)
@@ -50,7 +55,11 @@ public class FlowItemEscalationEditPart extends
 			@Override
 			protected void handlePropertyChange(
 					FlowItemEscalationEvent property, PropertyChangeEvent evt) {
-				// TODO provide connection handling
+				switch (property) {
+				case CHANGE_ESCALATION_HANDLER:
+					FlowItemEscalationEditPart.this.refreshSourceConnections();
+					break;
+				}
 			}
 		});
 	}
@@ -76,6 +85,62 @@ public class FlowItemEscalationEditPart extends
 
 		// Return the figure
 		return figure;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 */
+	@Override
+	protected ConnectionModelFactory createConnectionModelFactory() {
+		return new ConnectionModelFactory() {
+			@Override
+			public ConnectionModel createConnection(Object source,
+					Object target, CreateConnectionRequest request) {
+				// Create the flow connection
+				FlowItemEscalationToFlowItemModel conn = new FlowItemEscalationToFlowItemModel();
+				conn.setEscalation((FlowItemEscalationModel) source);
+				conn.setHandler((FlowItemModel) target);
+				conn.connect();
+				return conn;
+			}
+		};
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
+		types.add(FlowItemModel.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		// Flow
+		FlowItemEscalationToFlowItemModel flow = this.getCastedModel()
+				.getEscalationHandler();
+		if (flow != null) {
+			models.add(flow);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		// Not a target
 	}
 
 }

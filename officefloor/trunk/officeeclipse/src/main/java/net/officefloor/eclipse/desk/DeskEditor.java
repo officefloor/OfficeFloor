@@ -49,6 +49,7 @@ import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
+import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
@@ -211,6 +212,19 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 		// Flow Item Output to External Flow Item
 		OfficeFloorConnectionEditPart.registerFigureFactory(
 				FlowItemOutputToExternalFlowModel.class, linkFigureFactory);
+
+		// Escalation handling
+		OfficeFloorConnectionEditPart.registerFigureFactory(
+				FlowItemEscalationToFlowItemModel.class,
+				new FigureFactory<FlowItemEscalationToFlowItemModel>() {
+					public IFigure createFigure(
+							FlowItemEscalationToFlowItemModel model) {
+						PolylineConnection figure = new PolylineConnection();
+						figure.setTargetDecoration(new PolygonDecoration());
+						figure.setForegroundColor(ColorConstants.lightGray);
+						return figure;
+					}
+				});
 	}
 
 	/*
@@ -249,6 +263,8 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 		map.put(FlowItemToNextFlowItemModel.class,
 				OfficeFloorConnectionEditPart.class);
 		map.put(FlowItemToNextExternalFlowModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(FlowItemEscalationToFlowItemModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 
