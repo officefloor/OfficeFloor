@@ -52,7 +52,7 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 	 * Ensures able to construct an {@link OfficeBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testConstructOffice() throws Exception {
+	public void testConstructOffice() throws Throwable {
 
 		// Managed Object One
 		ManagedObject moOne = this.createMock(ManagedObject.class);
