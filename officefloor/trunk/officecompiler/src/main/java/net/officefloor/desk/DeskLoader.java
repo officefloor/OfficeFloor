@@ -490,6 +490,18 @@ public class DeskLoader {
 			}
 		}
 
+		// Specify external escalations
+		for (FlowItemModel flowItem : desk.getFlowItems()) {
+			for (FlowItemEscalationModel flowItemEscalation : flowItem
+					.getEscalations()) {
+				FlowItemEscalationToExternalEscalationModel conn = flowItemEscalation
+						.getExternalEscalation();
+				if (conn != null) {
+					conn.setName(conn.getExternalEscalation().getName());
+				}
+			}
+		}
+
 		// Stores the desk
 		this.modelRepository.store(desk, configuration);
 	}
