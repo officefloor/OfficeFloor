@@ -24,6 +24,18 @@
 			</attributes>
 		</item>
 	</collection>
+	<!-- EXTERNAL ESCALATIONS -->
+	<collection method="getExternalEscalations"
+		element="external-escalations">
+		<item type="net.officefloor.model.desk.ExternalEscalationModel"
+			element="external-escalation">
+			<attributes>
+				<attribute method="getName" attribute="name" />
+				<attribute method="getEscalationType"
+					attribute="escalation-type" />
+			</attributes>
+		</item>
+	</collection>
 	<!-- WORKS -->
 	<collection method="getWorks" element="works">
 		<item type="net.officefloor.model.desk.DeskWorkModel"
@@ -132,6 +144,13 @@
 						element="flow-item">
 						<attributes>
 							<attribute method="getId" attribute="id" />
+						</attributes>
+					</object>
+					<object method="getExternalEscalation"
+						element="external-escalation">
+						<attributes>
+							<attribute method="getName"
+								attribute="name" />
 						</attributes>
 					</object>
 				</item>
