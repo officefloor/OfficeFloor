@@ -34,6 +34,7 @@ import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
+import net.officefloor.eclipse.desk.editparts.ExternalEscalationEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
@@ -46,9 +47,11 @@ import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
+import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
+import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
@@ -213,7 +216,7 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 		OfficeFloorConnectionEditPart.registerFigureFactory(
 				FlowItemOutputToExternalFlowModel.class, linkFigureFactory);
 
-		// Escalation handling
+		// Escalation to flow item handling
 		OfficeFloorConnectionEditPart.registerFigureFactory(
 				FlowItemEscalationToFlowItemModel.class,
 				new FigureFactory<FlowItemEscalationToFlowItemModel>() {
@@ -225,6 +228,23 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 						return figure;
 					}
 				});
+
+		// Escalation to external escalation
+		OfficeFloorConnectionEditPart
+				.registerFigureFactory(
+						FlowItemEscalationToExternalEscalationModel.class,
+						new FigureFactory<FlowItemEscalationToExternalEscalationModel>() {
+							@Override
+							public IFigure createFigure(
+									FlowItemEscalationToExternalEscalationModel model) {
+								PolylineConnection figure = new PolylineConnection();
+								figure
+										.setTargetDecoration(new PolygonDecoration());
+								figure
+										.setForegroundColor(ColorConstants.lightGray);
+								return figure;
+							}
+						});
 	}
 
 	/*
@@ -248,6 +268,9 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 				.put(FlowItemEscalationModel.class,
 						FlowItemEscalationEditPart.class);
 		map.put(ExternalFlowModel.class, ExternalFlowEditPart.class);
+		map
+				.put(ExternalEscalationModel.class,
+						ExternalEscalationEditPart.class);
 
 		// Connections
 		map.put(DeskTaskObjectToExternalManagedObjectModel.class,
@@ -265,6 +288,8 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 		map.put(FlowItemToNextExternalFlowModel.class,
 				OfficeFloorConnectionEditPart.class);
 		map.put(FlowItemEscalationToFlowItemModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(FlowItemEscalationToExternalEscalationModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 
