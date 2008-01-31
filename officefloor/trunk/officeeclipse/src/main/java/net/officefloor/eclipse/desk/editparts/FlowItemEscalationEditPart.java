@@ -19,12 +19,15 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.desk.figure.FlowItemOutputFigure;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
+import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemEscalationModel.FlowItemEscalationEvent;
@@ -57,6 +60,7 @@ public class FlowItemEscalationEditPart extends
 					FlowItemEscalationEvent property, PropertyChangeEvent evt) {
 				switch (property) {
 				case CHANGE_ESCALATION_HANDLER:
+				case CHANGE_EXTERNAL_ESCALATION:
 					FlowItemEscalationEditPart.this.refreshSourceConnections();
 					break;
 				}
@@ -98,12 +102,29 @@ public class FlowItemEscalationEditPart extends
 			@Override
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
-				// Create the flow connection
-				FlowItemEscalationToFlowItemModel conn = new FlowItemEscalationToFlowItemModel();
-				conn.setEscalation((FlowItemEscalationModel) source);
-				conn.setHandler((FlowItemModel) target);
-				conn.connect();
-				return conn;
+
+				if (target instanceof FlowItemModel) {
+					// Create the flow connection
+					FlowItemEscalationToFlowItemModel conn = new FlowItemEscalationToFlowItemModel();
+					conn.setEscalation((FlowItemEscalationModel) source);
+					conn.setHandler((FlowItemModel) target);
+					conn.connect();
+					return conn;
+
+				} else if (target instanceof ExternalEscalationModel) {
+					// Create the external escalation connection
+					FlowItemEscalationToExternalEscalationModel conn = new FlowItemEscalationToExternalEscalationModel();
+					conn.setEscalation((FlowItemEscalationModel) source);
+					conn
+							.setExternalEscalation((ExternalEscalationModel) target);
+					conn.connect();
+					return conn;
+
+				} else {
+					// Unknown type
+					throw new OfficeFloorPluginFailure("Unknown target model "
+							+ target.getClass().getName());
+				}
 			}
 		};
 	}
@@ -116,6 +137,7 @@ public class FlowItemEscalationEditPart extends
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(FlowItemModel.class);
+		types.add(ExternalEscalationModel.class);
 	}
 
 	/*
@@ -130,6 +152,13 @@ public class FlowItemEscalationEditPart extends
 				.getEscalationHandler();
 		if (flow != null) {
 			models.add(flow);
+		}
+
+		// External escalation
+		FlowItemEscalationToExternalEscalationModel escalation = this
+				.getCastedModel().getExternalEscalation();
+		if (escalation != null) {
+			models.add(escalation);
 		}
 	}
 

@@ -38,6 +38,7 @@ import net.officefloor.eclipse.common.wrap.WrappingModel;
 import net.officefloor.eclipse.desk.figure.SectionFigure;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
@@ -70,6 +71,11 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	 * instances.
 	 */
 	private WrappingModel<DeskModel> externalFlowItems;
+
+	/**
+	 * Listing of {@link ExternalEscalationModel} instances.
+	 */
+	private WrappingModel<DeskModel> externalEscalations;
 
 	/**
 	 * Obtains the unique {@link FlowItemModel} id for the input
@@ -214,6 +220,36 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 				new SectionFigure("Flow Items")));
 		this.externalFlowItems = new WrappingModel<DeskModel>(this
 				.getCastedModel(), flowItemsEditPart, new Point(510, 10));
+
+		// Button to add External Escalation
+		final ButtonEditPart extEscalationButton = new ButtonEditPart(
+				"Add Ext Escalation") {
+			@Override
+			protected void handleButtonClick() {
+				// Add the populated External Escalation
+				ExternalEscalationModel escalation = new ExternalEscalationModel();
+				BeanDialog dialog = DeskEditPart.this.createBeanDialog(
+						escalation, "Escalation Type", "X", "Y");
+				if (dialog.populate()) {
+					DeskEditPart.this.getCastedModel().addExternalEscalation(
+							escalation);
+				}
+			}
+		};
+
+		// External escalations
+		WrappingEditPart escalationsEditPart = new OfficeFloorWrappingEditPart() {
+			@Override
+			protected void populateModelChildren(List<Object> children) {
+				children.addAll(DeskEditPart.this.getCastedModel()
+						.getExternalEscalations());
+				children.add(extEscalationButton);
+			}
+		};
+		escalationsEditPart.setFigure(new FreeformWrapperFigure(
+				new SectionFigure("Escalations")));
+		this.externalEscalations = new WrappingModel<DeskModel>(this
+				.getCastedModel(), escalationsEditPart, new Point(510, 300));
 	}
 
 	/*
@@ -235,6 +271,7 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 		childModels.add(this.externalManagedObjects);
 		childModels.add(this.works);
 		childModels.add(this.externalFlowItems);
+		childModels.add(this.externalEscalations);
 
 		// Add the flow items
 		childModels.addAll(this.getCastedModel().getFlowItems());
@@ -263,6 +300,11 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 				case ADD_EXTERNAL_FLOW:
 				case REMOVE_EXTERNAL_FLOW:
 					DeskEditPart.this.externalFlowItems.getEditPart().refresh();
+					break;
+				case ADD_EXTERNAL_ESCALATION:
+				case REMOVE_EXTERNAL_ESCALATION:
+					DeskEditPart.this.externalEscalations.getEditPart()
+							.refresh();
 					break;
 				case ADD_FLOW_ITEM:
 				case REMOVE_FLOW_ITEM:
