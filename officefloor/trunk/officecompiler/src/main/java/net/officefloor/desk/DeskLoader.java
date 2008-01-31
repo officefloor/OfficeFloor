@@ -30,9 +30,11 @@ import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
+import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
+import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
@@ -282,6 +284,34 @@ public class DeskLoader {
 						// Connect
 						conn.setEscalation(escalation);
 						conn.setHandler(flowItem);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Create the set of external escalations
+		Map<String, ExternalEscalationModel> externalEscalations = new HashMap<String, ExternalEscalationModel>();
+		for (ExternalEscalationModel externalEscalation : desk
+				.getExternalEscalations()) {
+			externalEscalations.put(externalEscalation.getName(),
+					externalEscalation);
+		}
+
+		// Connect the escalation to external escalation
+		for (FlowItemModel flow : desk.getFlowItems()) {
+			for (FlowItemEscalationModel escalation : flow.getEscalations()) {
+				// Obtain the connection
+				FlowItemEscalationToExternalEscalationModel conn = escalation
+						.getExternalEscalation();
+				if (conn != null) {
+					// Obtain the external escalation
+					ExternalEscalationModel externalEscalation = externalEscalations
+							.get(conn.getName());
+					if (externalEscalation != null) {
+						// Connect
+						conn.setEscalation(escalation);
+						conn.setExternalEscalation(externalEscalation);
 						conn.connect();
 					}
 				}

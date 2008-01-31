@@ -6,6 +6,10 @@
 	<external-flows>
 		<external-flow name="flow" />
 	</external-flows>
+	<external-escalations>
+		<external-escalation name="escalation"
+			escalation-type="java.sql.SQLException" />
+	</external-escalations>
 	<works>
 		<work id="work"
 			loader="net.officefloor.work.clazz.ClassWorkLoader"
@@ -23,7 +27,7 @@
 				<task-object object-type="java.lang.String"
 					parameter="true" />
 			</task>
-			<task name="anotherMethod"></task>
+			<task name="anotherMethod" />
 		</work>
 	</works>
 	<flow-items>
@@ -57,7 +61,9 @@
 			<output id="SECOND_FLOW">
 				<flow-item id="1" link="Parallel" />
 			</output>
-			<escalation escalation-type="java.sql.SQLException" />
+			<escalation escalation-type="java.sql.SQLException">
+				<external-escalation name="escalation" />
+			</escalation>
 		</flow-item>
 	</flow-items>
 </desk>
