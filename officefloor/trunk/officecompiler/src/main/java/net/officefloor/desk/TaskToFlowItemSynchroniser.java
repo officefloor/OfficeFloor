@@ -128,7 +128,7 @@ public class TaskToFlowItemSynchroniser {
 
 			// Create a new escalation
 			flowItem.addEscalation(new FlowItemEscalationModel(escalationType,
-					escalation, null));
+					escalation, null, null));
 		}
 
 		// Remove any additional escalations

@@ -31,9 +31,11 @@ import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
+import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
@@ -227,10 +229,10 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// Validate escalations of first flow item
 		List<FlowItemEscalationModel> flowItemOneEscalations = new LinkedList<FlowItemEscalationModel>();
 		flowItemOneEscalations.add(new FlowItemEscalationModel(
-				IOException.class.getName(), null, null));
+				IOException.class.getName(), null, null, null));
 		if (!isSynchronised) {
 			flowItemOneEscalations.add(new FlowItemEscalationModel(
-					NullPointerException.class.getName(), null, null));
+					NullPointerException.class.getName(), null, null, null));
 		}
 		assertList(new String[] { "getEscalationType" }, flowItemOne
 				.getEscalations(), flowItemOneEscalations
@@ -249,7 +251,7 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		List<FlowItemEscalationModel> flowItemTwoEscalations = new LinkedList<FlowItemEscalationModel>();
 		if (isSynchronised) {
 			flowItemTwoEscalations.add(new FlowItemEscalationModel(
-					SQLException.class.getName(), null, null));
+					SQLException.class.getName(), null, null, null));
 		}
 		assertList(new String[] { "getEscalationType" }, flowItemTwo
 				.getEscalations(), flowItemTwoEscalations
@@ -279,7 +281,14 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 			// Validate escalations of third flow item
 			assertList(new String[] { "getEscalationType" }, flowItemThree
 					.getEscalations(), new FlowItemEscalationModel(
-					SQLException.class.getName(), null, null));
+					SQLException.class.getName(), null, null, null));
+
+			// Validate external escalation connection
+			assertProperties(new FlowItemEscalationToExternalEscalationModel(
+					"escalation", null, desk.getExternalEscalations().get(0)),
+					flowItemThree.getEscalations().get(0)
+							.getExternalEscalation(), "getName",
+					"getExternalEscalation");
 		}
 
 		// ----------------------------------------
@@ -322,6 +331,27 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getName", "getLinkType" }, desk
 				.getExternalFlows().get(0).getOutputs(), externalFlowLinks
 				.toArray(new FlowItemOutputToExternalFlowModel[0]));
+
+		// ----------------------------------------
+		// Validate the External Escalations
+		// ----------------------------------------
+
+		// Validate external escalations
+		assertList(new String[] { "getName", "getEscalationType" }, desk
+				.getExternalEscalations(), new ExternalEscalationModel(
+				"escalation", SQLException.class.getName(), null));
+
+		// Validate external escalation connection to flow item escalations
+		if (isSynchronised) {
+			assertEquals("Incorrect external escalation connection number", 0,
+					desk.getExternalEscalations().get(0)
+							.getHandledEscalations().size());
+		} else {
+			assertList(new String[] { "getName" }, desk
+					.getExternalEscalations().get(0).getHandledEscalations(),
+					new FlowItemEscalationToExternalEscalationModel(
+							"escalation", null, null));
+		}
 	}
 
 	/**
@@ -333,8 +363,9 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		DeskModel desk = this.deskLoader.loadDesk(this.configurationItem);
 
 		// Store the Desk
+		File tmpFile = File.createTempFile("TestDesk.desk.xml", null);
 		FileSystemConfigurationItem tempFile = new FileSystemConfigurationItem(
-				File.createTempFile("TestDesk.desk.xml", null), null);
+				tmpFile, null);
 		this.deskLoader.storeDesk(desk, tempFile);
 
 		// Reload the Desk
@@ -344,5 +375,4 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		assertGraph(desk, reloadedDesk,
 				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
-
 }
