@@ -20,12 +20,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.room.EscalationToExternalEscalationModel;
+import net.officefloor.model.room.EscalationToInputFlowModel;
+import net.officefloor.model.room.ExternalEscalationModel;
 import net.officefloor.model.room.ExternalFlowModel;
 import net.officefloor.model.room.ExternalManagedObjectModel;
 import net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel;
 import net.officefloor.model.room.OutputFlowToExternalFlowModel;
 import net.officefloor.model.room.OutputFlowToInputFlowModel;
 import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
@@ -109,6 +113,24 @@ public class RoomLoader {
 			}
 		}
 
+		// Connect the escalations to inputs
+		for (SubRoomModel subRoom : room.getSubRooms()) {
+			for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
+				EscalationToInputFlowModel conn = escalation.getInputFlow();
+				if (conn != null) {
+					// Obtain the input
+					SubRoomInputFlowModel input = inputs.get(conn
+							.getSubRoomName(), conn.getInputFlowName());
+					if (input != null) {
+						// Connect
+						conn.setEscalation(escalation);
+						conn.setInputFlow(input);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Create the registry of external flows
 		Map<String, ExternalFlowModel> externalFlows = new HashMap<String, ExternalFlowModel>();
 		for (ExternalFlowModel externalFlow : room.getExternalFlows()) {
@@ -153,6 +175,33 @@ public class RoomLoader {
 						// Connect
 						conn.setManagedObject(mo);
 						conn.setExternalManagedObject(extMo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Create the registry of external escalations
+		Map<String, ExternalEscalationModel> externalEscalations = new HashMap<String, ExternalEscalationModel>();
+		for (ExternalEscalationModel externalEscalation : room
+				.getExternalEscalations()) {
+			externalEscalations.put(externalEscalation.getName(),
+					externalEscalation);
+		}
+
+		// Connect the escalations to external escalations
+		for (SubRoomModel subRoom : room.getSubRooms()) {
+			for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
+				EscalationToExternalEscalationModel conn = escalation
+						.getExternalEscalation();
+				if (conn != null) {
+					// Obtain the external escalation
+					ExternalEscalationModel extEscalation = externalEscalations
+							.get(conn.getName());
+					if (extEscalation != null) {
+						// Connect
+						conn.setEscalation(escalation);
+						conn.setExternalEscalation(extEscalation);
 						conn.connect();
 					}
 				}
