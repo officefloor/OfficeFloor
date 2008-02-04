@@ -17,14 +17,20 @@
 package net.officefloor.room;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.room.EscalationToInputFlowModel;
+import net.officefloor.model.room.ExternalEscalationModel;
 import net.officefloor.model.room.ExternalFlowModel;
 import net.officefloor.model.room.ExternalManagedObjectModel;
 import net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel;
+import net.officefloor.model.room.OutputFlowToExternalFlowModel;
 import net.officefloor.model.room.OutputFlowToInputFlowModel;
 import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
@@ -72,18 +78,9 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		// Load the Room
 		RoomModel room = this.roomLoader.loadRoom(this.configurationItem);
 
-		// ----------------------------------------
+		// ===================================
 		// Validate the Room
-		// ----------------------------------------
-
-		// Validate the external managed objects
-		assertList(new String[] { "getName", "getObjectType" }, room
-				.getExternalManagedObjects(), new ExternalManagedObjectModel(
-				"mo", "java.lang.String", null));
-
-		// Validate the external flows
-		assertList(new String[] { "getName" }, room.getExternalFlows(),
-				new ExternalFlowModel("flow", null));
+		// ===================================
 
 		// Validate the sub rooms
 		assertList(
@@ -93,17 +90,26 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 				new SubRoomModel("2", null, "TestSubRoom.room.xml", null, null,
 						null, null, 200, 30));
 
+		// ===================================
 		// Validate the sub room one
+		// ===================================
+
 		SubRoomModel subRoomOne = room.getSubRooms().get(0);
+
+		// Validate input flows
 		assertList(new String[] { "getName", "getIsPublic" }, subRoomOne
-				.getInputFlows(),
-				new SubRoomInputFlowModel("input", true, null));
+				.getInputFlows(), new SubRoomInputFlowModel("input", true,
+				null, null));
+
+		// Validate output flows
 		assertList(new String[] { "getName" }, subRoomOne.getOutputFlows(),
 				new SubRoomOutputFlowModel("output", null, null));
-		OutputFlowToInputFlowModel outputToInput = room.getSubRooms().get(0)
-				.getOutputFlows().get(0).getInput();
+		OutputFlowToInputFlowModel outputToInput = subRoomOne.getOutputFlows()
+				.get(0).getInput();
 		assertProperties(new OutputFlowToInputFlowModel("2", "input", null,
 				null), outputToInput, "getSubRoomName", "getInputFlowName");
+
+		// Validate managed objects
 		SubRoomManagedObjectModel subRoomOneMo = subRoomOne.getManagedObjects()
 				.get(0);
 		assertList(new String[] { "getName", "getObjectType",
@@ -114,6 +120,81 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 				subRoomOneMo, room.getExternalManagedObjects().get(0)),
 				subRoomOneMo.getExternalManagedObject(), "getName",
 				"getManagedObject", "getExternalManagedObject");
+
+		// Validate escalations
+		assertList(new String[] { "getName", "getEscalationType" }, subRoomOne
+				.getEscalations(), new SubRoomEscalationModel("escalation",
+				SQLException.class.getName(), null, null));
+
+		// ===================================
+		// Validate the sub room two
+		// ===================================
+
+		SubRoomModel subRoomTwo = room.getSubRooms().get(1);
+
+		// Validate input flows
+		assertList(new String[] { "getName", "getIsPublic" }, subRoomTwo
+				.getInputFlows(), new SubRoomInputFlowModel("input", false,
+				null, null));
+
+		// Validate output flows
+		assertList(new String[] { "getName" }, subRoomTwo.getOutputFlows(),
+				new SubRoomOutputFlowModel("output", null, null));
+		OutputFlowToExternalFlowModel outputToExternalFlow = subRoomTwo
+				.getOutputFlows().get(0).getExternalFlow();
+		assertProperties(new OutputFlowToExternalFlowModel("flow", null, null),
+				outputToExternalFlow, "getExternalFlowName");
+
+		// Validate managed objects
+		assertList(new String[] { "getName", "getObjectType",
+				"getExternalManagedObject" }, subRoomTwo.getManagedObjects(),
+				new SubRoomManagedObjectModel("mo", "java.lang.String", null));
+
+		// Validate escalations
+		assertList(new String[] { "getName", "getEscalationType" }, subRoomTwo
+				.getEscalations(), new SubRoomEscalationModel("escalation",
+				IOException.class.getName(), null, null));
+		EscalationToInputFlowModel expectedEscalationToInput = subRoomOne
+				.getInputFlows().get(0).getEscalations().get(0);
+		EscalationToInputFlowModel actualEscalationToInput = subRoomTwo
+				.getEscalations().get(0).getInputFlow();
+		assertEquals("Incorrect escalation being handled",
+				expectedEscalationToInput, actualEscalationToInput);
+
+		// ===================================
+		// Validate the external managed objects
+		// ===================================
+
+		assertList(new String[] { "getName", "getObjectType" }, room
+				.getExternalManagedObjects(), new ExternalManagedObjectModel(
+				"mo", "java.lang.String", null));
+		assertEquals("Incorrect sub room mo", subRoomOne.getManagedObjects()
+				.get(0), room.getExternalManagedObjects().get(0)
+				.getSubRoomManagedObjects().get(0).getManagedObject());
+
+		// ===================================
+		// Validate the external flows
+		// ===================================
+
+		assertList(new String[] { "getName" }, room.getExternalFlows(),
+				new ExternalFlowModel("flow", null));
+		assertEquals("Incorrect sub room output", subRoomTwo.getOutputFlows()
+				.get(0), room.getExternalFlows().get(0).getOutputs().get(0)
+				.getOutput());
+
+		// ===================================
+		// Validate the external escalations
+		// ===================================
+
+		assertList(new String[] { "getName", "getEscalationType" }, room
+				.getExternalEscalations(), new ExternalEscalationModel(
+				"escalation", SQLException.class.getName(), null));
+		SubRoomEscalationModel expectedEscalation = subRoomOne.getEscalations()
+				.get(0);
+		SubRoomEscalationModel actualEscalation = room.getExternalEscalations()
+				.get(0).getSubRoomEscalations().get(0).getEscalation();
+		assertEquals("Incorrect sub room escalation", expectedEscalation,
+				actualEscalation);
 	}
 
 	/**
@@ -129,7 +210,7 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		FileSystemConfigurationItem tempConfigItem = new FileSystemConfigurationItem(
 				tempFile, null);
 		this.roomLoader.storeRoom(room, tempConfigItem);
-
+		
 		// Reload the Room
 		RoomModel reloadedRoom = this.roomLoader.loadRoom(tempConfigItem);
 

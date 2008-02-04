@@ -20,9 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
@@ -93,9 +95,9 @@ public class DeskToSubRoomSynchroniser {
 			// Obtain the input flow
 			SubRoomInputFlowModel inFlow = existingInputFlows.get(flow.getId());
 			if (inFlow == null) {
-				// Not exist therefore create and add
-				inFlow = new SubRoomInputFlowModel(flow.getId(), flow
-						.getIsPublic(), null);
+				// Not exist therefore create and add (defaultly not public)
+				inFlow = new SubRoomInputFlowModel(flow.getId(), false, null,
+						null);
 				subRoom.addInputFlow(inFlow);
 			}
 
@@ -125,11 +127,44 @@ public class DeskToSubRoomSynchroniser {
 				outFlow = new SubRoomOutputFlowModel(flow.getName(), null, null);
 				subRoom.addOutputFlow(outFlow);
 			}
+
+			// Remove from existing list
+			existingOutputFlows.remove(outFlow.getName());
 		}
 
 		// Remove no longer existing output flows
 		for (SubRoomOutputFlowModel outFlow : existingOutputFlows.values()) {
 			subRoom.removeOutputFlow(outFlow);
+		}
+
+		// Create the map of existing escalations to their names
+		Map<String, SubRoomEscalationModel> existingEscalations = new HashMap<String, SubRoomEscalationModel>();
+		for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
+			existingEscalations.put(escalation.getName(), escalation);
+		}
+
+		// Add escalations as per desk
+		for (ExternalEscalationModel extEscalation : desk
+				.getExternalEscalations()) {
+
+			// Obtain the escalation
+			SubRoomEscalationModel escalation = existingEscalations
+					.get(extEscalation.getName());
+			if (escalation == null) {
+				// Not exist therefore create and add
+				escalation = new SubRoomEscalationModel(
+						extEscalation.getName(), extEscalation
+								.getEscalationType(), null, null);
+				subRoom.addEscalation(escalation);
+			}
+
+			// Remove from existing list
+			existingEscalations.remove(extEscalation.getName());
+		}
+
+		// Remove no longer existing escalations
+		for (SubRoomEscalationModel escalation : existingEscalations.values()) {
+			subRoom.removeEscalation(escalation);
 		}
 	}
 

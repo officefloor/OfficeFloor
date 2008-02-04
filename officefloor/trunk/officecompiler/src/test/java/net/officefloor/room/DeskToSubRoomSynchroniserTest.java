@@ -16,13 +16,21 @@
  */
 package net.officefloor.room;
 
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.room.SubRoomEscalationModel;
+import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
+import net.officefloor.model.room.SubRoomOutputFlowModel;
 
 /**
  * Tests the {@link net.officefloor.room.DeskToSubRoomSynchroniser}.
@@ -52,6 +60,10 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 				null, null, null, null, null, null, null, null, null, null));
 		desk.addExternalFlow(new ExternalFlowModel("OF-ONE", null, null));
 		desk.addExternalFlow(new ExternalFlowModel("OF-TWO", null, null));
+		desk.addExternalEscalation(new ExternalEscalationModel("ES-ONE",
+				SQLException.class.getName(), null));
+		desk.addExternalEscalation(new ExternalEscalationModel("ES-TWO",
+				IOException.class.getName(), null));
 
 		// Create the SubRoom
 		SubRoomModel subRoom = new SubRoomModel();
@@ -60,31 +72,94 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 		DeskToSubRoomSynchroniser.synchroniseDeskOntoSubRoom(desk, subRoom);
 
 		// Validate managed objects
-		assertEquals("Incorrect mo count", 2, subRoom.getManagedObjects()
-				.size());
-		SubRoomManagedObjectModel moOne = subRoom.getManagedObjects().get(0);
-		assertEquals("Incorrect mo one name", "MO-ONE", moOne.getName());
-		assertEquals("Incorrect mo one type", "java.lang.String", moOne
-				.getObjectType());
-		SubRoomManagedObjectModel moTwo = subRoom.getManagedObjects().get(1);
-		assertEquals("Incorrect mo two name", "MO-TWO", moTwo.getName());
-		assertEquals("Incorrect mo two type", "java.sql.Connection", moTwo
-				.getObjectType());
+		assertList(new String[] { "getName", "getObjectType" }, subRoom
+				.getManagedObjects(), new SubRoomManagedObjectModel("MO-ONE",
+				String.class.getName(), null), new SubRoomManagedObjectModel(
+				"MO-TWO", Connection.class.getName(), null));
 
 		// Validate input flow items
-		assertEquals("Incorrect input flow count", 2, subRoom.getInputFlows()
-				.size());
-		assertEquals("Incorrect if one", "IF-ONE", subRoom.getInputFlows().get(
-				0).getName());
-		assertEquals("Incorrect if two", "IF-THREE", subRoom.getInputFlows()
-				.get(1).getName());
+		assertList(new String[] { "getName", "getIsPublic" }, subRoom
+				.getInputFlows(), new SubRoomInputFlowModel("IF-ONE", false,
+				null, null), new SubRoomInputFlowModel("IF-THREE", false, null,
+				null));
 
 		// Validate output flow items
-		assertEquals("Incorrect output flow count", 2, subRoom.getOutputFlows()
-				.size());
-		assertEquals("Incorrect of one", "OF-ONE", subRoom.getOutputFlows()
-				.get(0).getName());
-		assertEquals("Incorrect of two", "OF-TWO", subRoom.getOutputFlows()
-				.get(1).getName());
+		assertList(new String[] { "getName" }, subRoom.getOutputFlows(),
+				new SubRoomOutputFlowModel("OF-ONE", null, null),
+				new SubRoomOutputFlowModel("OF-TWO", null, null));
+
+		// Validate the escalations
+		assertList(new String[] { "getName", "getEscalationType" }, subRoom
+				.getEscalations(), new SubRoomEscalationModel("ES-ONE",
+				SQLException.class.getName(), null, null),
+				new SubRoomEscalationModel("ES-TWO", IOException.class
+						.getName(), null, null));
+
+		// Remove one of each from desk
+		desk.removeExternalManagedObject(desk.getExternalManagedObjects()
+				.get(1));
+		desk.removeFlowItem(desk.getFlowItems().get(2));
+		desk.removeExternalFlow(desk.getExternalFlows().get(1));
+		desk.removeExternalEscalation(desk.getExternalEscalations().get(1));
+
+		// Synchronise again
+		DeskToSubRoomSynchroniser.synchroniseDeskOntoSubRoom(desk, subRoom);
+
+		// Validate managed objects
+		assertList(new String[] { "getName", "getObjectType" }, subRoom
+				.getManagedObjects(), new SubRoomManagedObjectModel("MO-ONE",
+				String.class.getName(), null));
+
+		// Validate input flow items
+		assertList(new String[] { "getName", "getIsPublic" }, subRoom
+				.getInputFlows(), new SubRoomInputFlowModel("IF-ONE", false,
+				null, null));
+
+		// Validate output flow items
+		assertList(new String[] { "getName" }, subRoom.getOutputFlows(),
+				new SubRoomOutputFlowModel("OF-ONE", null, null));
+
+		// Validate the escalations
+		assertList(new String[] { "getName", "getEscalationType" }, subRoom
+				.getEscalations(), new SubRoomEscalationModel("ES-ONE",
+				SQLException.class.getName(), null, null));
+
+		// Add one of each to desk
+		desk.addExternalManagedObject(new ExternalManagedObjectModel(
+				"MO-THREE", "java.lang.Integer", null));
+		desk.addFlowItem(new FlowItemModel("IF-FOUR", false, "work", "task",
+				null, null, null, null, null, null, null, null, null, null));
+		desk.addFlowItem(new FlowItemModel("IF-FIVE", true, "work", "task",
+				null, null, null, null, null, null, null, null, null, null));
+		desk.addExternalFlow(new ExternalFlowModel("OF-THREE", null, null));
+		desk.addExternalEscalation(new ExternalEscalationModel("ES-THREE",
+				"java.lang.NullPointerException", null));
+
+		// Synchronise again
+		DeskToSubRoomSynchroniser.synchroniseDeskOntoSubRoom(desk, subRoom);
+
+		// Validate managed objects
+		assertList(new String[] { "getName", "getObjectType" }, subRoom
+				.getManagedObjects(), new SubRoomManagedObjectModel("MO-ONE",
+				String.class.getName(), null), new SubRoomManagedObjectModel(
+				"MO-THREE", Integer.class.getName(), null));
+
+		// Validate input flow items
+		assertList(new String[] { "getName", "getIsPublic" }, subRoom
+				.getInputFlows(), new SubRoomInputFlowModel("IF-ONE", false,
+				null, null), new SubRoomInputFlowModel("IF-FIVE", false, null,
+				null));
+
+		// Validate output flow items
+		assertList(new String[] { "getName" }, subRoom.getOutputFlows(),
+				new SubRoomOutputFlowModel("OF-ONE", null, null),
+				new SubRoomOutputFlowModel("OF-THREE", null, null));
+
+		// Validate the escalations
+		assertList(new String[] { "getName", "getEscalationType" }, subRoom
+				.getEscalations(), new SubRoomEscalationModel("ES-ONE",
+				SQLException.class.getName(), null, null),
+				new SubRoomEscalationModel("ES-THREE",
+						NullPointerException.class.getName(), null, null));
 	}
 }
