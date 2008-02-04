@@ -2,7 +2,7 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="String" name="name" />
-	<field type="boolean" name="is public" />
-	<list type="OutputFlowToInputFlowModel" name="output" />
-	<list type="EscalationToInputFlowModel" name="escalation" />
+	<field type="String" name="escalation type" />
+	<list type="EscalationToExternalEscalationModel"
+		name="sub room escalation" />
 </model>
