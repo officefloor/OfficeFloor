@@ -48,6 +48,11 @@ public class SubRoomFigure extends Figure {
 	private ListFigure outputFlows;
 
 	/**
+	 * Listing of escalations.
+	 */
+	private ListFigure escalations;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param subRoomId
@@ -63,12 +68,14 @@ public class SubRoomFigure extends Figure {
 		this.inputFlows = new ListFigure();
 		this.managedObjects = new ListFigure();
 		this.outputFlows = new ListFigure();
+		this.escalations = new ListFigure();
 
 		// Decorate the sub room
 		super.add(new Label(subRoomId), null, -1);
 		super.add(this.inputFlows, null, -1);
 		super.add(this.managedObjects, null, -1);
 		super.add(this.outputFlows, null, -1);
+		super.add(this.escalations, null, -1);
 	}
 
 	/*
@@ -85,6 +92,8 @@ public class SubRoomFigure extends Figure {
 			this.managedObjects.add(figure);
 		} else if (figure instanceof SubRoomOutputFlowFigure) {
 			this.outputFlows.add(figure);
+		} else if (figure instanceof SubRoomEscalationFigure) {
+			this.escalations.add(figure);
 		} else {
 			throw new IllegalArgumentException("Unknown figure '"
 					+ figure.getClass().getName() + "' for adding to "

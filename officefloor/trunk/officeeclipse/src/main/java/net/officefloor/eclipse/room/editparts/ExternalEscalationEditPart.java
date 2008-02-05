@@ -20,22 +20,23 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.room.figure.SubRoomInputFlowFigure;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomInputFlowModel.SubRoomInputFlowEvent;
+import net.officefloor.model.room.ExternalEscalationModel;
+import net.officefloor.model.room.ExternalEscalationModel.ExternalEscalationEvent;
 
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.EditPart;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.room.SubRoomInputFlowModel}.
+ * {@link EditPart} for the {@link ExternalEscalationModel}.
  * 
  * @author Daniel
  */
-public class SubRoomInputFlowEditPart extends
-		AbstractOfficeFloorNodeEditPart<SubRoomInputFlowModel> {
+public class ExternalEscalationEditPart extends
+		AbstractOfficeFloorNodeEditPart<ExternalEscalationModel> {
 
 	/*
 	 * (non-Javadoc)
@@ -44,7 +45,7 @@ public class SubRoomInputFlowEditPart extends
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		// Not a source
+		// Never a target
 	}
 
 	/*
@@ -54,8 +55,7 @@ public class SubRoomInputFlowEditPart extends
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getOutputs());
-		models.addAll(this.getCastedModel().getEscalations());
+		models.addAll(this.getCastedModel().getSubRoomEscalations());
 	}
 
 	/*
@@ -66,17 +66,15 @@ public class SubRoomInputFlowEditPart extends
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<SubRoomInputFlowEvent>(
-				SubRoomInputFlowEvent.values()) {
+		handlers.add(new PropertyChangeHandler<ExternalEscalationEvent>(
+				ExternalEscalationEvent.values()) {
 			@Override
-			protected void handlePropertyChange(SubRoomInputFlowEvent property,
-					PropertyChangeEvent evt) {
+			protected void handlePropertyChange(
+					ExternalEscalationEvent property, PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_OUTPUT:
-				case REMOVE_OUTPUT:
-				case ADD_ESCALATION:
-				case REMOVE_ESCALATION:
-					SubRoomInputFlowEditPart.this.refreshTargetConnections();
+				case ADD_SUB_ROOM_ESCALATION:
+				case REMOVE_SUB_ROOM_ESCALATION:
+					ExternalEscalationEditPart.this.refreshTargetConnections();
 					break;
 				}
 			}
@@ -90,20 +88,13 @@ public class SubRoomInputFlowEditPart extends
 	 */
 	@Override
 	protected IFigure createFigure() {
+		Label figure = new Label(this.getCastedModel().getName());
+		figure.setBackgroundColor(ColorConstants.lightGray);
+		figure.setOpaque(true);
+		figure.setBounds(new Rectangle(140, 30, 120, 20));
 
-		// Create the check box to indicate if public
-		CheckBoxEditPart publicCheckBox = new CheckBoxEditPart(
-				SubRoomInputFlowEditPart.this.getCastedModel().getIsPublic()) {
-			protected void checkBoxStateChanged(boolean isChecked) {
-				// Specify if public
-				SubRoomInputFlowEditPart.this.getCastedModel().setIsPublic(
-						isChecked);
-			}
-		};
-
-		// Return the figure for the Sub Room Input Flow
-		return new SubRoomInputFlowFigure(this.getCastedModel().getName(),
-				publicCheckBox.getFigure());
+		// Return figure
+		return figure;
 	}
 
 }

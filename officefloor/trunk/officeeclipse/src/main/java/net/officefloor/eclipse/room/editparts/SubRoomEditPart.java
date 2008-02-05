@@ -54,7 +54,15 @@ public class SubRoomEditPart extends AbstractOfficeFloorEditPart<SubRoomModel>
 			protected void handlePropertyChange(SubRoomEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				default:
+				case ADD_INPUT_FLOW:
+				case REMOVE_INPUT_FLOW:
+				case ADD_MANAGED_OBJECT:
+				case REMOVE_MANAGED_OBJECT:
+				case ADD_OUTPUT_FLOW:
+				case REMOVE_OUTPUT_FLOW:
+				case ADD_ESCALATION:
+				case REMOVE_ESCALATION:
+					SubRoomEditPart.this.refreshChildren();
 					break;
 				}
 			}
@@ -82,6 +90,7 @@ public class SubRoomEditPart extends AbstractOfficeFloorEditPart<SubRoomModel>
 		childModels.addAll(this.getCastedModel().getInputFlows());
 		childModels.addAll(this.getCastedModel().getManagedObjects());
 		childModels.addAll(this.getCastedModel().getOutputFlows());
+		childModels.addAll(this.getCastedModel().getEscalations());
 	}
 
 	/*

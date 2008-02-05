@@ -32,6 +32,7 @@ import net.officefloor.eclipse.common.wrap.OfficeFloorWrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
 import net.officefloor.eclipse.desk.figure.SectionFigure;
+import net.officefloor.model.room.ExternalEscalationModel;
 import net.officefloor.model.room.ExternalFlowModel;
 import net.officefloor.model.room.ExternalManagedObjectModel;
 import net.officefloor.model.room.RoomModel;
@@ -61,6 +62,11 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 	 * instances.
 	 */
 	private WrappingModel<RoomModel> externalOuputFlows;
+
+	/**
+	 * Listing of {@link ExternalEscalationModel} instances.
+	 */
+	private WrappingModel<RoomModel> externalEscalations;
 
 	/**
 	 * Button to add a {@link RoomModel} or
@@ -185,6 +191,36 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 				"Ext Flows")));
 		this.externalOuputFlows = new WrappingModel<RoomModel>(this
 				.getCastedModel(), extFlowEditPart, new Point(510, 10));
+
+		// Button to add external escalations
+		final ButtonEditPart extEscalationButton = new ButtonEditPart(
+				"Add Escalation") {
+			@Override
+			protected void handleButtonClick() {
+				// Add the populated External Escalation
+				ExternalEscalationModel escalation = new ExternalEscalationModel();
+				BeanDialog dialog = RoomEditPart.this.createBeanDialog(
+						escalation, "Escalation Type", "X", "Y");
+				if (dialog.populate()) {
+					RoomEditPart.this.getCastedModel().addExternalEscalation(
+							escalation);
+				}
+			}
+		};
+
+		// External Escalation
+		WrappingEditPart extEscalationEditPart = new OfficeFloorWrappingEditPart() {
+			@Override
+			protected void populateModelChildren(List<Object> children) {
+				children.addAll(RoomEditPart.this.getCastedModel()
+						.getExternalEscalations());
+				children.add(extEscalationButton);
+			}
+		};
+		extEscalationEditPart.setFigure(new FreeformWrapperFigure(
+				new SectionFigure("Ext Escalations")));
+		this.externalEscalations = new WrappingModel<RoomModel>(this
+				.getCastedModel(), extEscalationEditPart, new Point(510, 300));
 	}
 
 	/*
@@ -205,6 +241,7 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 		// Add the static children
 		childModels.add(this.externalManagedObjects);
 		childModels.add(this.externalOuputFlows);
+		childModels.add(this.externalEscalations);
 		childModels.add(this.roomDesk);
 
 		// Add the sub rooms
@@ -231,6 +268,11 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 				case ADD_EXTERNAL_MANAGED_OBJECT:
 				case REMOVE_EXTERNAL_MANAGED_OBJECT:
 					RoomEditPart.this.externalManagedObjects.getEditPart()
+							.refresh();
+					break;
+				case ADD_EXTERNAL_ESCALATION:
+				case REMOVE_EXTERNAL_ESCALATION:
+					RoomEditPart.this.externalEscalations.getEditPart()
 							.refresh();
 					break;
 				case ADD_SUB_ROOM:
