@@ -34,6 +34,7 @@ import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel;
+import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.ModelRepository;
 import net.officefloor.util.DoubleKeyMap;
@@ -266,6 +267,29 @@ public class RoomLoader {
 			}
 		}
 
+		// Ensure escalations linked to input flow items
+		for (SubRoomModel subRoom : room.getSubRooms()) {
+			for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
+				EscalationToInputFlowModel conn = escalation.getInputFlow();
+				if (conn != null) {
+					SubRoomInputFlowModel input = conn.getInputFlow();
+					conn.setSubRoomName(inputToRoom.get(input).getId());
+					conn.setInputFlowName(input.getName());
+				}
+			}
+		}
+
+		// Ensure escalations linked to external escalations
+		for (SubRoomModel subRoom : room.getSubRooms()) {
+			for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
+				EscalationToExternalEscalationModel conn = escalation
+						.getExternalEscalation();
+				if (conn != null) {
+					conn.setName(conn.getExternalEscalation().getName());
+				}
+			}
+		}
+
 		// Stores the model
 		this.modelRepository.store(room, configurationItem);
 	}
@@ -283,6 +307,49 @@ public class RoomLoader {
 	 */
 	public SubRoomModel loadSubRoom(ConfigurationItem configurationItem)
 			throws Exception {
+		// Return the loaded sub room
+		return this.loadSubRoom(new SubRoomModel(), configurationItem);
+	}
+
+	/**
+	 * <p>
+	 * Loads the {@link SubRoomModel} from the {@link ConfigurationContext}.
+	 * <p>
+	 * Utilises the location on the {@link SubRoomModel}.
+	 * 
+	 * @param subRoom
+	 *            {@link SubRoomModel}.
+	 * @param context
+	 *            {@link ConfigurationContext}.
+	 * @throws Exception
+	 *             If fails to load the {@link SubRoomModel}.
+	 */
+	public void loadSubRoom(SubRoomModel subRoom, ConfigurationContext context)
+			throws Exception {
+
+		// Obtain the configuration
+		String configurationLocation = (subRoom.getDesk() == null ? subRoom
+				.getRoom() : subRoom.getDesk());
+		ConfigurationItem configurationItem = context
+				.getConfigurationItem(configurationLocation);
+
+		// Load the sub room
+		this.loadSubRoom(subRoom, configurationItem);
+	}
+
+	/**
+	 * Loads the {@link SubRoomModel}.
+	 * 
+	 * @param subRoom
+	 *            {@link SubRoomModel}.
+	 * @param configurationItem
+	 *            {@link ConfigurationItem} for the {@link SubRoomModel}.
+	 * @return Loaded {@link SubRoomModel}.
+	 * @throws Exception
+	 *             If fails to load the {@link SubRoomModel}.
+	 */
+	private SubRoomModel loadSubRoom(SubRoomModel subRoom,
+			ConfigurationItem configurationItem) throws Exception {
 
 		// Ensure the sub room models registered
 		synchronized (this) {
@@ -295,11 +362,10 @@ public class RoomLoader {
 			}
 		}
 
-		// Unmarshall the desk/room model
+		// Unmarshal the desk/room model
 		Object model = this.modelRepository.retrieve(configurationItem);
 
 		// Handle based on model type
-		SubRoomModel subRoom = new SubRoomModel();
 		if (model instanceof DeskModel) {
 			// Synchronise the desk onto the model
 			DeskModel desk = (DeskModel) model;

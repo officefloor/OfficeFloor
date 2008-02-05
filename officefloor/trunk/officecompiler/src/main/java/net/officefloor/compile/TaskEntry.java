@@ -32,8 +32,10 @@ import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
+import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
@@ -46,8 +48,11 @@ import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
+import net.officefloor.model.room.EscalationToExternalEscalationModel;
+import net.officefloor.model.room.EscalationToInputFlowModel;
 import net.officefloor.model.room.OutputFlowToExternalFlowModel;
 import net.officefloor.model.room.OutputFlowToInputFlowModel;
+import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel;
@@ -469,19 +474,45 @@ public class TaskEntry<W extends Work> extends
 			// Flag as must be linked
 			boolean isLinked = false;
 
+			// Obtain the escalation type
+			String escalationTypeName = flowItemEscalation.getEscalationType();
+			final Class<? extends Throwable> escalationType = this.loaderContext
+					.obtainClass(escalationTypeName, Throwable.class);
+
 			// Obtain the handling (from same desk)
 			FlowItemEscalationToFlowItemModel handlingFlowItem = flowItemEscalation
 					.getEscalationHandler();
 			if (handlingFlowItem != null) {
 
-				// Obtain the escalation type
-				String escalationTypeName = flowItemEscalation
-						.getEscalationType();
-				final Class<? extends Throwable> escalationType = this.loaderContext
-						.obtainClass(escalationTypeName, Throwable.class);
-
 				// Link in the flow
 				this.linkFlow(handlingFlowItem.getHandler(), new FlowLinker() {
+					@Override
+					public void linkFlow(String workName, String taskName) {
+						if (workName == null) {
+							// Handled by same work
+							TaskEntry.this.getBuilder().addEscalation(
+									escalationType, true, taskName);
+						} else {
+							// Handled by another work
+							TaskEntry.this.getBuilder().addEscalation(
+									escalationType, true, workName, taskName);
+						}
+					}
+				});
+
+				// Linked
+				isLinked = true;
+			}
+
+			// Obtain the handlig (from another desk)
+			FlowItemEscalationToExternalEscalationModel externalEscalation = flowItemEscalation
+					.getExternalEscalation();
+			if (externalEscalation != null) {
+
+				// Link in the external handling
+				ExternalEscalationModel escalation = externalEscalation
+						.getExternalEscalation();
+				this.linkFlow(escalation, new FlowLinker() {
 					@Override
 					public void linkFlow(String workName, String taskName) {
 						if (workName == null) {
@@ -609,12 +640,99 @@ public class TaskEntry<W extends Work> extends
 		String subRoomName = inConn.getSubRoomName();
 		String inputFlowName = inConn.getInput().getName();
 
+		// Link in the flow
+		this.linkFlow(roomEntry, subRoomName, inputFlowName, flowLinker);
+	}
+
+	/**
+	 * Links {@link ExternalEscalationModel} in another {@link DeskModel}.
+	 * 
+	 * @param targetExternalEscalation
+	 *            Target {@link ExternalEscalationModel}.
+	 * @param flowLinker
+	 *            {@link FlowLinker}.
+	 * @throws Exception
+	 *             If fails to link.
+	 */
+	private void linkFlow(ExternalEscalationModel targetExternalEscalation,
+			FlowLinker flowLinker) throws Exception {
+
+		// Obtain the external escalation name
+		String externalEscalationName = targetExternalEscalation.getName();
+
+		// Obtain the desk containing the external escalation name
+		DeskEntry deskEntry = this.workEntry.getDeskEntry();
+
+		// Obtain room containing the desk
+		RoomEntry roomEntry = deskEntry.getParentRoom();
+
+		// Obtain the desk sub room
+		SubRoomModel subRoom = roomEntry.getSubRoom(deskEntry);
+
+		// Loop until reached room which starts linking down
+		SubRoomEscalationModel escalation = null;
+		while (externalEscalationName != null) {
+
+			// Obtain the escalation within the room
+			escalation = roomEntry.getSubRoomEscalation(subRoom,
+					externalEscalationName);
+
+			// Follow escalation
+			EscalationToExternalEscalationModel extConn = escalation
+					.getExternalEscalation();
+			if (extConn != null) {
+				// External escalation (set details to find)
+				externalEscalationName = extConn.getExternalEscalation()
+						.getName();
+
+				// Determine if handled by top level escalation
+				if (roomEntry.getParentRoom() == null) {
+					// Handled by top level escalation
+					return;
+				}
+
+				// Obtain parent room to follow external escalation
+				subRoom = roomEntry.getParentRoom().getSubRoom(roomEntry);
+				roomEntry = roomEntry.getParentRoom();
+
+			} else {
+				// No longer going to external escalation
+				externalEscalationName = null;
+			}
+		}
+
+		// Linking to another room
+		EscalationToInputFlowModel inConn = escalation.getInputFlow();
+		String subRoomName = inConn.getSubRoomName();
+		String inputFlowName = inConn.getInputFlow().getName();
+
+		// Link in the flow
+		this.linkFlow(roomEntry, subRoomName, inputFlowName, flowLinker);
+	}
+
+	/**
+	 * Links in the flow by searching down through rooms to desk.
+	 * 
+	 * @param roomEntry
+	 *            {@link RoomEntry}.
+	 * @param subRoomName
+	 *            Name of the {@link SubRoomModel}.
+	 * @param inputFlowName
+	 *            Name of the input flow on the {@link SubRoomModel}.
+	 * @param flowLinker
+	 *            {@link FlowLinker}.
+	 * @throws Exception
+	 *             If fails to link.
+	 */
+	private void linkFlow(RoomEntry roomEntry, String subRoomName,
+			String inputFlowName, FlowLinker flowLinker) throws Exception {
+
 		// Find the desk
-		deskEntry = null; // reset to find
+		DeskEntry deskEntry = null;
 		while (deskEntry == null) {
 
 			// Obtain the sub room
-			subRoom = roomEntry.getSubRoom(subRoomName);
+			SubRoomModel subRoom = roomEntry.getSubRoom(subRoomName);
 
 			// Obtain sub entry
 			String entryId = subRoom.getRoom();
