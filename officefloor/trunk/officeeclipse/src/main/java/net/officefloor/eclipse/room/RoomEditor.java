@@ -23,19 +23,27 @@ import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.CommandFactory;
 import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
+import net.officefloor.eclipse.room.commands.RefreshSubRoomCommand;
+import net.officefloor.eclipse.room.editparts.ExternalEscalationEditPart;
 import net.officefloor.eclipse.room.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.room.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.room.editparts.RoomEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomEditPart;
+import net.officefloor.eclipse.room.editparts.SubRoomEscalationEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomInputFlowEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomManagedObjectEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomOutputFlowEditPart;
+import net.officefloor.model.room.EscalationToExternalEscalationModel;
+import net.officefloor.model.room.EscalationToInputFlowModel;
+import net.officefloor.model.room.ExternalEscalationModel;
 import net.officefloor.model.room.ExternalFlowModel;
 import net.officefloor.model.room.ExternalManagedObjectModel;
 import net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel;
 import net.officefloor.model.room.OutputFlowToExternalFlowModel;
 import net.officefloor.model.room.OutputFlowToInputFlowModel;
 import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
@@ -68,11 +76,15 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 		map.put(ExternalManagedObjectModel.class,
 				ExternalManagedObjectEditPart.class);
 		map.put(ExternalFlowModel.class, ExternalFlowEditPart.class);
+		map
+				.put(ExternalEscalationModel.class,
+						ExternalEscalationEditPart.class);
 		map.put(SubRoomModel.class, SubRoomEditPart.class);
 		map.put(SubRoomInputFlowModel.class, SubRoomInputFlowEditPart.class);
 		map.put(SubRoomManagedObjectModel.class,
 				SubRoomManagedObjectEditPart.class);
 		map.put(SubRoomOutputFlowModel.class, SubRoomOutputFlowEditPart.class);
+		map.put(SubRoomEscalationModel.class, SubRoomEscalationEditPart.class);
 
 		// Connections
 		map.put(ManagedObjectToExternalManagedObjectModel.class,
@@ -80,6 +92,10 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 		map.put(OutputFlowToExternalFlowModel.class,
 				OfficeFloorConnectionEditPart.class);
 		map.put(OutputFlowToInputFlowModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(EscalationToInputFlowModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(EscalationToExternalEscalationModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 
@@ -151,7 +167,8 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 	 */
 	@Override
 	protected void populateCommandFactories(List<CommandFactory<RoomModel>> list) {
-		// No comments yet
+		list.add(new RefreshSubRoomCommand("Refresh sub room",
+				ProjectConfigurationContext.getProject(this.getEditorInput())));
 	}
 
 }
