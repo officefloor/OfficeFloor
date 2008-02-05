@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel;
@@ -339,6 +340,33 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 
 		// Not found if here
 		throw new Exception("Unknown output flow '" + outputFlowName
+				+ "' on sub room '" + subRoom.getId() + "' of room '"
+				+ this.getId() + "'");
+	}
+
+	/**
+	 * Obtains the {@link SubRoomEscalationModel} on the {@link SubRoomModel}.
+	 * 
+	 * @param subRoom
+	 *            {@link SubRoomModel}.
+	 * @param escalationName
+	 *            Escalation name on the sub room.
+	 * @return {@link SubRoomEscalationModel}.
+	 * @throws Exception
+	 *             If escalation does not exist.
+	 */
+	public SubRoomEscalationModel getSubRoomEscalation(SubRoomModel subRoom,
+			String escalationName) throws Exception {
+
+		// Obtain the escalation
+		for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
+			if (escalationName.equals(escalation.getName())) {
+				return escalation;
+			}
+		}
+
+		// Not found if here
+		throw new Exception("Unknown escalation '" + escalationName
 				+ "' on sub room '" + subRoom.getId() + "' of room '"
 				+ this.getId() + "'");
 	}
