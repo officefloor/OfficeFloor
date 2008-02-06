@@ -22,6 +22,8 @@ import java.util.Map;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.CommandFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
+import net.officefloor.eclipse.office.commands.RefreshOfficeRoomCommand;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
 import net.officefloor.eclipse.office.editparts.DeskEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
@@ -140,6 +142,7 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel> {
 	@Override
 	protected void populateCommandFactories(
 			List<CommandFactory<OfficeModel>> list) {
-		// No commands yet
+		list.add(new RefreshOfficeRoomCommand("Refresh room",
+				ProjectConfigurationContext.getProject(this.getEditorInput())));
 	}
 }
