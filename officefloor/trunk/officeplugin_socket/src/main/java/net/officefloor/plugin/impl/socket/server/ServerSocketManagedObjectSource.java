@@ -145,8 +145,7 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 
 		// Register the listener of connections
 		WorkBuilder<ConnectionManager> listenerWork = context.getOfficeFrame()
-				.getBuilderFactory()
-				.createWorkBuilder(ConnectionManager.class);
+				.getBuilderFactory().createWorkBuilder(ConnectionManager.class);
 		officeBuilder.addWork(prefix + "Listener", listenerWork);
 
 		// Configure the listener of connections
@@ -211,8 +210,8 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
 	 */
 	@SuppressWarnings("unchecked")
-	public <MO extends ManagedObject> Class<MO> getManagedObjectClass() {
-		return (Class<MO>) AsynchronousManagedObject.class;
+	public Class<? extends ManagedObject> getManagedObjectClass() {
+		return AsynchronousManagedObject.class;
 	}
 
 	/*
@@ -260,7 +259,7 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
 	 */
 	@SuppressWarnings("unchecked")
-	public <HT extends Handler<?>> Class<HT> getHandlerType(H key) {
+	public Class<? extends Handler<?>> getHandlerType(H key) {
 		// Return handler type
 		ServerSocketHandlersEnum handleKey = (ServerSocketHandlersEnum) (Enum) key;
 		switch (handleKey) {
