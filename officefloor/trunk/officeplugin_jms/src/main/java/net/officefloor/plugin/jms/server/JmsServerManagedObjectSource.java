@@ -289,8 +289,8 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
 	 */
 	@SuppressWarnings("unchecked")
-	public <MO extends ManagedObject> Class<MO> getManagedObjectClass() {
-		return (Class<MO>) JmsServerManagedObject.class;
+	public Class<? extends ManagedObject> getManagedObjectClass() {
+		return JmsServerManagedObject.class;
 	}
 
 	/*
@@ -338,7 +338,7 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
 	 */
-	public <HT extends Handler<?>> Class<HT> getHandlerType(H key) {
+	public Class<? extends Handler<?>> getHandlerType(H key) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}
