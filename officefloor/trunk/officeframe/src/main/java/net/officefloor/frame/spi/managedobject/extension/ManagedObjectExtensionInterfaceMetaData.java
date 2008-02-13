@@ -22,7 +22,7 @@ package net.officefloor.frame.spi.managedobject.extension;
  * 
  * @author Daniel
  */
-public interface ManagedObjectExtensionInterfaceMetaData<I extends Object> {
+public interface ManagedObjectExtensionInterfaceMetaData<I> {
 
 	/**
 	 * Obtains the type of extension interface.

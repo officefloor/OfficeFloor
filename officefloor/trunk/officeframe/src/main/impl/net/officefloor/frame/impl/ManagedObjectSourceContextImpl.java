@@ -27,6 +27,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 
 /**
@@ -133,6 +134,47 @@ public class ManagedObjectSourceContextImpl implements
 	 */
 	public Properties getProperties() {
 		return this.properties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getProperty(java.lang.String)
+	 */
+	@Override
+	public String getProperty(String name)
+			throws ManagedObjectSourceUnknownPropertyError {
+		// Obtain the value
+		String value = this.getProperty(name, null);
+
+		// Ensure have a value
+		if (value == null) {
+			throw new ManagedObjectSourceUnknownPropertyError(
+					"Unknown property '" + name + "'", name);
+		}
+
+		// Return the value
+		return value;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getProperty(java.lang.String,
+	 *      java.lang.String)
+	 */
+	@Override
+	public String getProperty(String name, String defaultValue) {
+		// Obtain the value
+		String value = this.properties.getProperty(name);
+
+		// Default value if not specified
+		if (value == null) {
+			value = defaultValue;
+		}
+
+		// Return the value
+		return value;
 	}
 
 	/*

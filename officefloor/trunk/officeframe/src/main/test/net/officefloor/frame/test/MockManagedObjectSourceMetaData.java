@@ -129,7 +129,7 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
 	 */
 	@SuppressWarnings("unchecked")
-	public <MO extends ManagedObject> Class<MO> getManagedObjectClass() {
+	public Class<? extends ManagedObject> getManagedObjectClass() {
 		return this.managedObjectClass;
 	}
 
@@ -175,8 +175,8 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
 	 */
 	@SuppressWarnings("unchecked")
-	public <HT extends Handler<?>> Class<HT> getHandlerType(H key) {
-		return (Class<HT>) this.handlerMetaData.get(key);
+	public Class<? extends Handler<?>> getHandlerType(H key) {
+		return (Class) this.handlerMetaData.get(key);
 	}
 
 	/*

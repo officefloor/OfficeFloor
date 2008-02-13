@@ -27,6 +27,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 
 /**
@@ -110,7 +111,49 @@ public class ManagedObjectSourceLoader {
 		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getProperties()
 		 */
 		public Properties getProperties() {
-			return properties;
+			return ManagedObjectSourceLoader.this.properties;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getProperty(java.lang.String)
+		 */
+		@Override
+		public String getProperty(String name)
+				throws ManagedObjectSourceUnknownPropertyError {
+			// Obtain the value
+			String value = this.getProperty(name, null);
+
+			// Ensure have a value
+			if (value == null) {
+				throw new ManagedObjectSourceUnknownPropertyError(
+						"Unknown property '" + name + "'", name);
+			}
+
+			// Return the value
+			return value;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getProperty(java.lang.String,
+		 *      java.lang.String)
+		 */
+		@Override
+		public String getProperty(String name, String defaultValue) {
+			// Obtain the value
+			String value = ManagedObjectSourceLoader.this.properties
+					.getProperty(name);
+
+			// Default value if not specified
+			if (value == null) {
+				value = defaultValue;
+			}
+
+			// Return the value
+			return value;
 		}
 
 		/*
@@ -119,7 +162,7 @@ public class ManagedObjectSourceLoader {
 		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getResourceLocator()
 		 */
 		public ResourceLocator getResourceLocator() {
-			return resourceLocator;
+			return ManagedObjectSourceLoader.this.resourceLocator;
 		}
 
 		/*
@@ -168,7 +211,8 @@ public class ManagedObjectSourceLoader {
 	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
-	private class LoadExecuteContext<H extends Enum<H>> implements ManagedObjectExecuteContext<H> {
+	private class LoadExecuteContext<H extends Enum<H>> implements
+			ManagedObjectExecuteContext<H> {
 
 		/*
 		 * (non-Javadoc)

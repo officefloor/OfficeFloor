@@ -1,0 +1,67 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.frame.spi.managedobject.source.impl;
+
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+
+/**
+ * <p>
+ * Abstract {@link ManagedObjectSource} that allows synchronous sourcing of a
+ * {@link ManagedObject}.
+ * <p>
+ * For asynchronous sourcing of a {@link ManagedObject} use
+ * {@link AbstractAsyncManagedObjectSource}.
+ * 
+ * @see AbstractAsyncManagedObjectSource
+ * 
+ * @author Daniel
+ */
+public abstract class AbstractManagedObjectSource extends
+		AbstractAsyncManagedObjectSource {
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
+	 */
+	@Override
+	public void sourceManagedObject(ManagedObjectUser user) {
+		try {
+			// Obtain the managed object
+			ManagedObject managedObject = this.getManagedObject();
+
+			// Provide the managed object to the user
+			user.setManagedObject(managedObject);
+
+		} catch (Throwable ex) {
+			// Flag error in retrieving
+			user.setFailure(ex);
+		}
+	}
+
+	/**
+	 * Synchronously obtains the {@link ManagedObject}.
+	 * 
+	 * @return {@link ManagedObject}.
+	 * @throws Throwable
+	 *             If fails to obtain the {@link ManagedObject}.
+	 */
+	protected abstract ManagedObject getManagedObject() throws Throwable;
+
+}
