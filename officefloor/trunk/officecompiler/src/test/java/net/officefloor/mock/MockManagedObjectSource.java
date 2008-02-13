@@ -18,9 +18,8 @@ package net.officefloor.mock;
 
 import java.util.Properties;
 
-import javax.xml.ws.handler.Handler;
-
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
@@ -191,7 +190,7 @@ public class MockManagedObjectSource implements ManagedObjectSource,
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
 	 */
 	@SuppressWarnings("unchecked")
-	public Class<Handler<?>> getHandlerType(None key) {
+	public Class<? extends Handler<?>> getHandlerType(None key) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}
