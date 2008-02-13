@@ -388,8 +388,8 @@ public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends E
 	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getManagedObjectClass()
 	 */
 	@SuppressWarnings("unchecked")
-	public <MO extends ManagedObject> Class<MO> getManagedObjectClass() {
-		return (Class<MO>) TreeXmlMarshallerManagedObject.class;
+	public Class<? extends ManagedObject> getManagedObjectClass() {
+		return TreeXmlMarshallerManagedObject.class;
 	}
 
 	/*
@@ -436,7 +436,7 @@ public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends E
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
 	 */
-	public <HT extends Handler<?>> Class<HT> getHandlerType(H key) {
+	public Class<? extends Handler<?>> getHandlerType(H key) {
 		// No dependencies
 		return null;
 	}

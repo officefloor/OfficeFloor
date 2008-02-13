@@ -198,8 +198,8 @@ public class FlatXmlUnmarshallerManagedObjectSource<D extends Enum<D>, H extends
 	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getManagedObjectClass()
 	 */
 	@SuppressWarnings("unchecked")
-	public <MO extends ManagedObject> Class<MO> getManagedObjectClass() {
-		return (Class<MO>) ManagedObject.class;
+	public Class<? extends ManagedObject> getManagedObjectClass() {
+		return ManagedObject.class;
 	}
 
 	/*
@@ -243,7 +243,7 @@ public class FlatXmlUnmarshallerManagedObjectSource<D extends Enum<D>, H extends
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
 	 */
-	public <HT extends Handler<?>> Class<HT> getHandlerType(H key) {
+	public Class<? extends Handler<?>> getHandlerType(H key) {
 		return null;
 	}
 
