@@ -49,7 +49,7 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * @return {@link Class} of the {@link ManagedObject} returned from the
 	 *         {@link #getManagedObject()}.
 	 */
-	<MO extends ManagedObject> Class<MO> getManagedObjectClass();
+	Class<? extends ManagedObject> getManagedObjectClass();
 
 	/**
 	 * <p>
@@ -125,7 +125,7 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 *         {@link net.officefloor.frame.api.execute.Handler} for the
 	 *         specified key must implement.
 	 */
-	<HT extends Handler<?>> Class<HT> getHandlerType(H key);
+	Class<? extends Handler<?>> getHandlerType(H key);
 
 	/**
 	 * Obtains the meta-data regarding the extension interfaces that this

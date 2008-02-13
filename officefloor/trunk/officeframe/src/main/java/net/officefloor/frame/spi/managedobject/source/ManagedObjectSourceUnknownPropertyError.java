@@ -16,35 +16,44 @@
  */
 package net.officefloor.frame.spi.managedobject.source;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-
 /**
- * User interested in using the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * <p>
+ * Indicates a property was not configured within the
+ * {@link ManagedObjectSourceContext}.
+ * <p>
+ * This is a serious error as the {@link ManagedObjectSource} is requiring this
+ * property to initialise and subsequently start.
  * 
  * @author Daniel
  */
-public interface ManagedObjectUser {
+public class ManagedObjectSourceUnknownPropertyError extends Error {
 
 	/**
-	 * <p>
-	 * Specifies the {@link ManagedObject} to be used.
-	 * <p>
-	 * This will be called by the
-	 * {@link ManagedObjectSource#sourceManagedObject(ManagedObjectUser) method
-	 * to provide the {@link ManagedObject} to this {@link ManagedObjectUser}.
-	 * 
-	 * @param managedObject
-	 *            {@link ManagedObject} to be used.
+	 * Name of the unknown property.
 	 */
-	void setManagedObject(ManagedObject managedObject);
+	private final String unknownPropertyName;
 
 	/**
-	 * <p>
-	 * Indicates failure to obtain the {@link ManagedObject}.
+	 * Initiate.
 	 * 
-	 * @param cause
-	 *            Cause of the failure.
+	 * @param message
+	 *            Message.
+	 * @param unknownPropertyName
+	 *            Name of the unknown property.
 	 */
-	void setFailure(Throwable cause);
+	public ManagedObjectSourceUnknownPropertyError(String message,
+			String unknownPropertyName) {
+		super(message);
+		this.unknownPropertyName = unknownPropertyName;
+	}
+
+	/**
+	 * Obtains the name of the unknown property.
+	 * 
+	 * @return Name of the unknown property.
+	 */
+	public String getUnkonwnPropertyName() {
+		return this.unknownPropertyName;
+	}
+
 }

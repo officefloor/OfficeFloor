@@ -34,6 +34,30 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
 public interface ManagedObjectSourceContext {
 
 	/**
+	 * Obtains a required property value.
+	 * 
+	 * @param name
+	 *            Name of the property.
+	 * @return Value of the property.
+	 * @throws ManagedObjectSourceUnknownPropertyError
+	 *             If property was not configured. Let this propagate as the
+	 *             framework will handle it.
+	 */
+	String getProperty(String name)
+			throws ManagedObjectSourceUnknownPropertyError;
+
+	/**
+	 * Obtains the property value or subsequently the default value.
+	 * 
+	 * @param name
+	 *            Name of the property.
+	 * @param defaultValue
+	 *            Default value if property not specified.
+	 * @return Value of the property or the the default value if not specified.
+	 */
+	String getProperty(String name, String defaultValue);
+
+	/**
 	 * Properties to configure the {@link ManagedObjectSource}.
 	 * 
 	 * @return Properties specific for the {@link ManagedObjectSource}.
