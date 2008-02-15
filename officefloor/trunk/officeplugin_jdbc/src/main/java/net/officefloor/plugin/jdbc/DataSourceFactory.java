@@ -20,38 +20,26 @@ import javax.sql.XADataSource;
 public interface DataSourceFactory {
 
 	/**
-	 * Initialise with properties to create the data sources.
-	 * 
-	 * @param properties
-	 *            Properties to configure the data sources.
-	 * @throws Exception
-	 *             If fails to initialise.
-	 */
-	void init(Properties properties) throws Exception;
-
-	/**
 	 * Creates a {@link ConnectionPoolDataSource}.
 	 * 
+	 * @param properties
+	 *            Properties to configure the data source.
 	 * @return Configured {@link ConnectionPoolDataSource}.
 	 * @throws Exception
 	 *             If fail to create {@link ConnectionPoolDataSource}.
 	 */
-	ConnectionPoolDataSource createConnectionPoolDataSource() throws Exception;
+	ConnectionPoolDataSource createConnectionPoolDataSource(
+			Properties properties) throws Exception;
 
 	/**
 	 * Creates a {@link XADataSource}.
 	 * 
+	 * @param properties
+	 *            Properties to configure the data source.
 	 * @return Configured {@link XADataSource}.
 	 * @throws Exception
 	 *             If fail to create {@link XADataSource}.
 	 */
-	XADataSource createXADataSource() throws Exception;
+	XADataSource createXADataSource(Properties properties) throws Exception;
 
-	/**
-	 * Obtains the timeout on connections created from the
-	 * {@link javax.sql.DataSource}.
-	 * 
-	 * @return Timeout in milli-seconds of timeout on connections.
-	 */
-	long getConnectionTimeout();
 }

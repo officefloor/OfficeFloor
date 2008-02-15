@@ -23,6 +23,7 @@ import javax.sql.XADataSource;
 
 import net.officefloor.plugin.jdbc.DataSourceFactory;
 
+import com.mysql.jdbc.Driver;
 import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 
 /**
@@ -32,31 +33,16 @@ import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
  */
 public class MySqlDataSourceFactory implements DataSourceFactory {
 
-	/**
-	 * Properties.
-	 */
-	protected Properties properties;
-
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.jdbc.DataSourceFactory#init(java.util.Properties)
+	 * @see net.officefloor.plugin.jdbc.DataSourceFactory#createConnectionPoolDataSource(java.util.Properties)
 	 */
-	public void init(Properties properties) throws Exception {
+	public ConnectionPoolDataSource createConnectionPoolDataSource(
+			Properties properties) throws Exception {
+
 		// Load mysql driver
-		Class.forName("com.mysql.jdbc.Driver");
-
-		// Record the properties
-		this.properties = properties;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.jdbc.DataSourceFactory#createConnectionPoolDataSource()
-	 */
-	public ConnectionPoolDataSource createConnectionPoolDataSource()
-			throws Exception {
+		Class.forName(Driver.class.getName());
 
 		// Obtain the configuration details
 		String server = properties.getProperty("server");
@@ -86,19 +72,10 @@ public class MySqlDataSourceFactory implements DataSourceFactory {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.jdbc.DataSourceFactory#createXADataSource()
+	 * @see net.officefloor.plugin.jdbc.DataSourceFactory#createXADataSource(java.util.Properties)
 	 */
-	public XADataSource createXADataSource() throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.jdbc.DataSourceFactory#getConnectionTimeout()
-	 */
-	public long getConnectionTimeout() {
+	public XADataSource createXADataSource(Properties properties)
+			throws Exception {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}

@@ -22,10 +22,12 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.pool.PassiveManagedObjectPool;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
@@ -58,7 +60,7 @@ public class JdbcManagedObjectSourceTest extends
 	public void testDbInteration() throws Exception {
 
 		// Configure the JDBC managed object
-		ManagedObjectBuilder moBuilder = this.constructManagedObject("JDBC",
+		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("JDBC",
 				JdbcManagedObjectSource.class, "TEST");
 
 		// Bind the Mock Data Source Factory
@@ -70,8 +72,9 @@ public class JdbcManagedObjectSourceTest extends
 		moBuilder.setManagedObjectPool(new PassiveManagedObjectPool(1));
 
 		// Create the task to use the connection
-		AbstractSingleTask task = new AbstractSingleTask() {
-			public Object doTask(TaskContext context) throws Exception {
+		AbstractSingleTask<?, ?, ?, ?> task = new AbstractSingleTask<Object, Work, None, None>() {
+			public Object doTask(TaskContext<Object, Work, None, None> context)
+					throws Exception {
 				// Obtain the Connection
 				Connection connection = (Connection) context.getObject(0);
 
@@ -89,14 +92,14 @@ public class JdbcManagedObjectSourceTest extends
 
 		// Configure the Office
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
-		
+
 		// Configure the Work
-		WorkBuilder workBuilder = task.registerWork("work", officeBuilder);
+		WorkBuilder<?> workBuilder = task.registerWork("work", officeBuilder);
 		workBuilder.addWorkManagedObject("mo", "JDBC");
 
 		// Configure the Task
-		TaskBuilder taskBuilder = task
-				.registerTask("task", "team", workBuilder);
+		TaskBuilder<?, ?, ?, ?> taskBuilder = task.registerTask("task", "team",
+				workBuilder);
 		taskBuilder.linkManagedObject(0, "mo");
 
 		// Configure the Team

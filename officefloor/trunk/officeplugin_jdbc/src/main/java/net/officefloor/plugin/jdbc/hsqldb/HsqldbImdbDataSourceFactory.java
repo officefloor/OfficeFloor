@@ -14,59 +14,50 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.plugin.jdbc;
+package net.officefloor.plugin.jdbc.hsqldb;
 
 import java.util.Properties;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.XADataSource;
 
-import net.officefloor.frame.api.build.BuildException;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import org.apache.commons.dbcp.cpdsadapter.DriverAdapterCPDS;
+import org.hsqldb.jdbcDriver;
+
+import net.officefloor.plugin.jdbc.DataSourceFactory;
 
 /**
- * Mock {@link net.officefloor.plugin.jdbc.DataSourceFactory} for testing.
+ * <p>
+ * {@link DataSourceFactory} for HSQLDB IMDB.
+ * <p>
+ * As HSQLDB do not provide a {@link ConnectionPoolDataSource} implementation,
+ * the {@link DriverAdapterCPDS} is used to provide this.
  * 
  * @author Daniel
  */
-public class MockDataSourceFactory implements DataSourceFactory {
-
-	/**
-	 * {@link ConnectionPoolDataSource}.
-	 */
-	private static ConnectionPoolDataSource connectionPoolDataSource = null;
-
-	/**
-	 * Binds the {@link ConnectionPoolDataSource} for use in testing.
-	 * 
-	 * @param dataSource
-	 *            {@link ConnectionPoolDataSource} for use in testing.
-	 * @param builder
-	 *            {@link ManagedObjectBuilder} for the
-	 *            {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
-	 * @throws BuildException
-	 *             If fails.
-	 */
-	public static void bind(ConnectionPoolDataSource dataSource,
-			ManagedObjectBuilder<?> builder) throws BuildException {
-		// Bind the data source
-		connectionPoolDataSource = dataSource;
-
-		// Register with builder
-		builder.addProperty(
-				JdbcManagedObjectSource.DATA_SOURCE_FACTORY_CLASS_PROPERTY,
-				MockDataSourceFactory.class.getName());
-	}
+public class HsqldbImdbDataSourceFactory implements DataSourceFactory {
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.plugin.jdbc.DataSourceFactory#createConnectionPoolDataSource(java.util.Properties)
 	 */
+	@Override
 	public ConnectionPoolDataSource createConnectionPoolDataSource(
 			Properties properties) throws Exception {
-		// Return the connection pool data source
-		return connectionPoolDataSource;
+
+		// Obtain the name of the database
+		String name = properties.getProperty("hsqldb.database.name");
+
+		// Create and initialise the connection pool of HSQLDB
+		DriverAdapterCPDS dataSource = new DriverAdapterCPDS();
+		dataSource.setDriver(jdbcDriver.class.getName());
+		dataSource.setUrl("jdbc:hsqldb:mem:" + name);
+		dataSource.setUser("sa");
+		dataSource.setPassword("");
+
+		// Return the data source
+		return dataSource;
 	}
 
 	/*
@@ -74,10 +65,12 @@ public class MockDataSourceFactory implements DataSourceFactory {
 	 * 
 	 * @see net.officefloor.plugin.jdbc.DataSourceFactory#createXADataSource(java.util.Properties)
 	 */
+	@Override
 	public XADataSource createXADataSource(Properties properties)
 			throws Exception {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement HsqldbImdbDataSourceFactory.createXADataSource");
 	}
 
 }
