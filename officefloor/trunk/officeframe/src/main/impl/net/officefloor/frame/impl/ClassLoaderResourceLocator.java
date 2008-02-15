@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
  * 
  * @author Daniel
  */
-class ClassLoaderResourceLocator implements ResourceLocator {
+public class ClassLoaderResourceLocator implements ResourceLocator {
 
 	/**
 	 * {@link java.lang.ClassLoader} to locate resources.
