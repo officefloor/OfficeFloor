@@ -710,6 +710,20 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Obtains the file location of the input file located in the package of the
+	 * input class.
+	 * 
+	 * @param packageClass
+	 *            Class to obtain the relative path from for its package.
+	 * @param fileName
+	 *            Name of the file within the package directory.
+	 * @return Path to the file.
+	 */
+	public String getFileLocation(Class<?> packageClass, String fileName) {
+		return this.getPackageRelativePath(packageClass) + "/" + fileName;
+	}
+
+	/**
 	 * Copies the contents of the <code>source</code> directory to the
 	 * <code>target</code> directory.
 	 * 

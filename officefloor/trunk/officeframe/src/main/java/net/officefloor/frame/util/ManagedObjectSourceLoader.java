@@ -16,6 +16,13 @@
  */
 package net.officefloor.frame.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.frame.api.OfficeFrame;
@@ -24,6 +31,8 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.construct.WorkBuilderImpl;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
@@ -45,9 +54,83 @@ public class ManagedObjectSourceLoader {
 	private final Properties properties = new Properties();
 
 	/**
-	 * {@link ResourceLocator}.
+	 * {@link ResourceLocator}. Defaults to use the system class loader to find
+	 * resources and if not on class path goes looking as a {@link File}.
 	 */
-	private ResourceLocator resourceLocator = null;
+	private ResourceLocator resourceLocator = new ResourceLocator() {
+
+		@Override
+		public InputStream locateInputStream(String name) {
+
+			// Find first by system class loader
+			InputStream inputStream = ClassLoader
+					.getSystemResourceAsStream(name);
+			if (inputStream != null) {
+				return inputStream;
+			}
+
+			// Find by file paths
+			File file = this.getFile(name);
+			if (file != null) {
+				try {
+					return new FileInputStream(file);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+
+			// File not found
+			return null;
+		}
+
+		@Override
+		public URL locateURL(String name) {
+			// Only find by class path
+			return ClassLoader.getSystemResource(name);
+		}
+
+		/**
+		 * Obtains the {@link File} for the name.
+		 * 
+		 * @param name
+		 *            Name of the file.
+		 * @return {@link File} or <code>null</code> if not found.
+		 */
+		private File getFile(String name) {
+
+			// Obtain the current directory
+			File currentDirectory = new File(".");
+
+			// Create the listing of paths to find the file
+			List<File> paths = new LinkedList<File>();
+
+			// Absolute and relative
+			paths.add(new File(name));
+			paths.add(new File(currentDirectory, name));
+
+			// Maven locations to be searched
+			paths.add(new File(
+					new File(currentDirectory, "target/test-classes"), name));
+			paths.add(new File(new File(currentDirectory, "target/classes"),
+					name));
+			paths.add(new File(new File(currentDirectory, "target"), name));
+
+			// Obtain the file
+			for (File path : paths) {
+				if (path.exists()) {
+					return path;
+				}
+			}
+
+			// File not found if here
+			return null;
+		}
+	};
+
+	/**
+	 * {@link WorkBuilderImpl} containing the recycle details.
+	 */
+	private WorkBuilderImpl<? extends Work> recycle = null;
 
 	/**
 	 * Default constructor.
@@ -98,6 +181,24 @@ public class ManagedObjectSourceLoader {
 
 		// Return the loaded managed object source
 		return moSource;
+	}
+
+	/**
+	 * Recycle the {@link ManagedObject}.
+	 * 
+	 * @param managedObject
+	 *            {@link ManagedObject} to be recycled.
+	 */
+	public void recycleManagedObject(ManagedObject managedObject) {
+
+		// Ensure able to recycle
+		if (this.recycle == null) {
+			return;
+		}
+
+		// TODO implement
+		throw new UnsupportedOperationException(
+				"TODO implement recycling managed object in stand alone");
 	}
 
 	/**
@@ -170,10 +271,22 @@ public class ManagedObjectSourceLoader {
 		 * 
 		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getRecycleWorkBuilder(java.lang.Class)
 		 */
+		@SuppressWarnings("unchecked")
 		public <W extends Work> WorkBuilder<W> getRecycleWorkBuilder(
 				Class<W> typeOfWork) {
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException("TODO implement");
+
+			// May only provide one recycler per loader
+			if (ManagedObjectSourceLoader.this.recycle != null) {
+				throw new IllegalStateException(
+						"May only have one recycler per loader");
+			}
+
+			// Create the work builder for recycling
+			ManagedObjectSourceLoader.this.recycle = new WorkBuilderImpl<W>(
+					typeOfWork);
+
+			// Return the work builder
+			return (WorkBuilder<W>) ManagedObjectSourceLoader.this.recycle;
 		}
 
 		/*

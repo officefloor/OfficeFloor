@@ -197,8 +197,11 @@ public abstract class AbstractAsyncManagedObjectSource implements
 	 * 
 	 * @param context
 	 *            Meta-data.
+	 * @throws Exception
+	 *             If fails to load the meta-data.
 	 */
-	protected abstract void loadMetaData(MetaDataContext context);
+	protected abstract void loadMetaData(MetaDataContext context)
+			throws Exception;
 
 	/**
 	 * Context for the {@link ManagedObjectSource#getMetaData()}.
