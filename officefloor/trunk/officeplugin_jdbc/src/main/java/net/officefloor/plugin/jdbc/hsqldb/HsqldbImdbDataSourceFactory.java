@@ -25,6 +25,7 @@ import org.apache.commons.dbcp.cpdsadapter.DriverAdapterCPDS;
 import org.hsqldb.jdbcDriver;
 
 import net.officefloor.plugin.jdbc.DataSourceFactory;
+import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
 
 /**
  * <p>
@@ -37,6 +38,12 @@ import net.officefloor.plugin.jdbc.DataSourceFactory;
  */
 public class HsqldbImdbDataSourceFactory implements DataSourceFactory {
 
+	/**
+	 * Database name of the HSQLDB.
+	 */
+	public static final String HSQLDB_DATABASE_NAME = JdbcManagedObjectSource.JDBC_MANAGED_OBJECT_SOURCE_PREFIX
+			+ ".hsqldb.database.name";
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -47,7 +54,7 @@ public class HsqldbImdbDataSourceFactory implements DataSourceFactory {
 			Properties properties) throws Exception {
 
 		// Obtain the name of the database
-		String name = properties.getProperty("hsqldb.database.name");
+		String name = properties.getProperty(HSQLDB_DATABASE_NAME);
 
 		// Create and initialise the connection pool of HSQLDB
 		DriverAdapterCPDS dataSource = new DriverAdapterCPDS();

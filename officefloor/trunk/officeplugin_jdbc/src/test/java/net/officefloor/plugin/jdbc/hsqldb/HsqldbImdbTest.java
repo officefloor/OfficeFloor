@@ -36,13 +36,15 @@ public class HsqldbImdbTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures appropriately initialises the IMDB.
 	 */
-	public void testImdbInitialise() throws Exception {
+	public void testImdbViaDataSourceFactory() throws Exception {
 
 		// Load the managed object source
 		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
 		loader.addProperty(
 				JdbcManagedObjectSource.DATA_SOURCE_FACTORY_CLASS_PROPERTY,
 				HsqldbImdbDataSourceFactory.class.getName());
+		loader.addProperty(HsqldbImdbDataSourceFactory.HSQLDB_DATABASE_NAME,
+				"Test");
 		loader
 				.addProperty(
 						JdbcManagedObjectSource.DATA_SOURCE_INITIALISE_SCRIPT,
@@ -50,6 +52,43 @@ public class HsqldbImdbTest extends OfficeFrameTestCase {
 								"HsqldbImdbTest.sql"));
 		JdbcManagedObjectSource managedObjectSource = loader
 				.loadManagedObjectSource(JdbcManagedObjectSource.class);
+
+		// Do the test
+		this.doTest(managedObjectSource);
+	}
+
+	/**
+	 * Ensures appropriately initialises the IMDB.
+	 * 
+	 * @throws Exception
+	 */
+	public void testImdbManagedObjectSource() throws Exception {
+
+		// Load the managed object source
+		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
+		loader.addProperty(HsqldbImdbDataSourceFactory.HSQLDB_DATABASE_NAME,
+				"Test");
+		loader
+				.addProperty(
+						JdbcManagedObjectSource.DATA_SOURCE_INITIALISE_SCRIPT,
+						this.getFileLocation(this.getClass(),
+								"HsqldbImdbTest.sql"));
+		JdbcManagedObjectSource managedObjectSource = loader
+				.loadManagedObjectSource(ImdbManagedObjectSource.class);
+
+		// DO the test
+		this.doTest(managedObjectSource);
+	}
+
+	/**
+	 * Does the test.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link JdbcManagedObjectSource} to provide the
+	 *            {@link Connection}.
+	 */
+	protected void doTest(JdbcManagedObjectSource managedObjectSource)
+			throws Exception {
 
 		// Obtain the Jdbc Managed Object
 		JdbcManagedObject managedObject = (JdbcManagedObject) ManagedObjectUserStandAlone
@@ -66,7 +105,8 @@ public class HsqldbImdbTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect product name", "Test", resultSet
 				.getString("PRODUCT_NAME"));
 
-		// Close connection
+		// Shutdown the IMDB
+		connection.createStatement().execute("SHUTDOWN");
 		connection.close();
 	}
 
