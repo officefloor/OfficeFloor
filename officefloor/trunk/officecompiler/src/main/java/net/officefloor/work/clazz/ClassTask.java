@@ -81,6 +81,35 @@ class ClassTask implements Task<Object, ClassWork, Indexed, Indexed> {
 		} catch (InvocationTargetException ex) {
 			// Propagate failure of task
 			throw ex.getCause();
+		} catch (IllegalArgumentException ex) {
+			// Provide detail of illegal argument
+			StringBuilder message = new StringBuilder();
+			message.append("Task failure invoking ");
+			message.append(this.method.getName());
+			message.append("(");
+			boolean isFirst = true;
+			for (Class<?> parameterType : this.method.getParameterTypes()) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					message.append(", ");
+				}
+				message.append(parameterType.getName());
+			}
+			message.append(") with arguments ");
+			isFirst = true;
+			for (Object parameter : params) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					message.append(", ");
+				}
+				message.append(parameter == null ? "null" : parameter
+						.getClass().getName());
+			}
+
+			// Propagate illegal argument issue
+			throw new IllegalArgumentException(message.toString());
 		}
 	}
 
