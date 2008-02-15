@@ -24,10 +24,16 @@ import java.util.Properties;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.widgets.BeanListPopulateTable;
 import net.officefloor.eclipse.common.widgets.SubTypeList;
+import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.impl.ClassLoaderResourceLocator;
 import net.officefloor.frame.impl.ManagedObjectSourceContextImpl;
+import net.officefloor.frame.impl.OfficeFrameImpl;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.PropertyModel;
@@ -244,12 +250,38 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 
 		// Attempt to initiate the Managed Object Source
 		try {
-			// TODO provide other resources for correct loading (no NPEs)
+			// Obtain the class loader for the project
+			ClassLoader projectClassLoader = ProjectClassLoader
+					.create(this.project);
+			ResourceLocator projectResourceLoader = new ClassLoaderResourceLocator(
+					projectClassLoader);
+
+			// Create an office frame to capture additional configuration
+			OfficeFrame officeFrame = new OfficeFrameImpl();
+
+			// Create the managed object builder
+			ManagedObjectBuilder<?> managedObjectBuilder = officeFrame
+					.getBuilderFactory().createManagedObjectBuilder();
+
+			// Create the office builder
+			OfficeBuilder officeBuilder = officeFrame.getBuilderFactory()
+					.createOfficeBuilder();
+
+			// Initialise managed object to obtain addition configuration
 			managedObjectSourceInstance
 					.init(new ManagedObjectSourceContextImpl("test",
-							properties, null, null, null, null));
-		} catch (Exception ex) {
-			this.errorText.setText(ex.getMessage());
+							properties, projectResourceLoader,
+							managedObjectBuilder, officeBuilder, officeFrame));
+
+			// TODO handle addition configuration from managed object
+
+		} catch (Throwable ex) {
+
+			// TODO remove
+			ex.printStackTrace();
+
+			this.errorText.setText(ex.getClass().getSimpleName() + ": "
+					+ ex.getMessage());
 			return;
 		}
 
