@@ -67,11 +67,10 @@ public class MysqlTest extends OfficeFrameTestCase {
 		// Create the mysql data source
 		Properties properties = this.loadConnectionProperties(new Properties());
 		DataSourceFactory factory = new MySqlDataSourceFactory();
-		factory.init(properties);
 
 		// Create the data source
 		ConnectionPoolDataSource dataSource = factory
-				.createConnectionPoolDataSource();
+				.createConnectionPoolDataSource(properties);
 
 		// Obtain a connection
 		PooledConnection pooledConnection;
@@ -105,11 +104,10 @@ public class MysqlTest extends OfficeFrameTestCase {
 		// Create the mysql data source
 		Properties properties = this.loadConnectionProperties(new Properties());
 		DataSourceFactory factory = new MySqlDataSourceFactory();
-		factory.init(properties);
 
 		// Create the data source
 		ConnectionPoolDataSource dataSource = factory
-				.createConnectionPoolDataSource();
+				.createConnectionPoolDataSource(properties);
 
 		// Obtain a connection
 		PooledConnection pooledConnection;

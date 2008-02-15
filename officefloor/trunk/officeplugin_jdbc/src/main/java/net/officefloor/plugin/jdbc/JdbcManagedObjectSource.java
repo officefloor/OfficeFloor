@@ -3,19 +3,21 @@
  */
 package net.officefloor.plugin.jdbc;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
@@ -23,13 +25,17 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
  * 
  * @author Daniel
  */
-public class JdbcManagedObjectSource implements ManagedObjectSource,
-		ManagedObjectSourceMetaData {
+public class JdbcManagedObjectSource extends AbstractManagedObjectSource {
 
 	/**
 	 * Property name to obtain the class of the {@link DataSourceFactory}.
 	 */
 	public static final String DATA_SOURCE_FACTORY_CLASS_PROPERTY = "net.officefloor.plugin.jdbc.datasourcefactory";
+
+	/**
+	 * Property name to specify the initialise script for the {@link DataSource}.
+	 */
+	public static final String DATA_SOURCE_INITIALISE_SCRIPT = "net.officefloor.plugin.jdbc.datasource.initialise.script";
 
 	/**
 	 * {@link ConnectionPoolDataSource}.
@@ -64,155 +70,142 @@ public class JdbcManagedObjectSource implements ManagedObjectSource,
 		DataSourceFactory dataSourceFactory = (DataSourceFactory) Class
 				.forName(className).newInstance();
 
-		// Initiate the data source factory
-		dataSourceFactory.init(properties);
-
 		// Return the configured data source factory
 		return dataSourceFactory;
 	}
 
 	/*
 	 * ====================================================================
-	 * ManagedObjectSource
+	 * AbstractManagedObjectSource
 	 * ====================================================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getSpecification()
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
 	 */
-	public ManagedObjectSourceSpecification getSpecification() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		// Ensure data source factory is provided
+		context.addProperty(DATA_SOURCE_FACTORY_CLASS_PROPERTY,
+				"DataSourceFactory");
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
-	public void init(ManagedObjectSourceContext context) throws Exception {
+	@Override
+	protected void loadMetaData(MetaDataContext context) throws Exception {
+
+		// Obtain the properties
+		Properties properties = context.getManagedObjectSourceContext()
+				.getProperties();
+
 		// Obtain the Data Source Factory
-		DataSourceFactory sourceFactory = this.getDataSourceFactory(context
-				.getProperties());
+		DataSourceFactory sourceFactory = this.getDataSourceFactory(properties);
 
 		// Create the data source
-		this.poolDataSource = sourceFactory.createConnectionPoolDataSource();
+		this.poolDataSource = sourceFactory
+				.createConnectionPoolDataSource(properties);
 
 		// Create the recycle task
-		new RecycleJdbcTask().registerAsRecycleTask(context, "jdbc.recycle");
+		new RecycleJdbcTask().registerAsRecycleTask(context
+				.getManagedObjectSourceContext(), "jdbc.recycle");
+
+		// Specify the meta-data
+		context.setObjectClass(Connection.class);
+		context.setManagedObjectClass(JdbcManagedObject.class);
+
+		// Initialise data source if required
+		this.initialiseDataSource(context);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource#getManagedObject()
 	 */
-	public ManagedObjectSourceMetaData getMetaData() {
-		return this;
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
+		// Obtain the pooled connection
+		PooledConnection pooledConnection = this.poolDataSource
+				.getPooledConnection();
+
+		// Return the JDBC managed object
+		return new JdbcManagedObject(pooledConnection);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Initialises the {@link DataSource}.
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
+	 * @param context
+	 *            {@link MetaDataContext}.
+	 * @throws Exception
+	 *             If fails to initialise {@link DataSource}.
 	 */
-	public void start(ManagedObjectExecuteContext context) throws Exception {
-		// No starting
-	}
+	protected void initialiseDataSource(MetaDataContext context)
+			throws Exception {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
-	 */
-	public void sourceManagedObject(ManagedObjectUser user) {
-		try {
-			// Obtain the pooled connection
+		// Determine if required to initialise the data source
+		String initialiseScript = context.getManagedObjectSourceContext()
+				.getProperty(DATA_SOURCE_INITIALISE_SCRIPT, null);
+		if (initialiseScript != null) {
+
+			// Obtain access to the initialise script contents
+			InputStream initialiseScriptInputStream = context
+					.getManagedObjectSourceContext().getResourceLocator()
+					.locateInputStream(initialiseScript);
+			if (initialiseScriptInputStream == null) {
+				throw new Exception("Can not find initialise script '"
+						+ initialiseScript + "'");
+			}
+
+			// Read the statements for the initialise script
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					initialiseScriptInputStream));
+			List<String> statements = new LinkedList<String>();
+			StringBuilder currentStatement = new StringBuilder();
+			String line;
+			do {
+				// Obtain the line
+				line = reader.readLine();
+
+				// Add line to current statement
+				if (line != null) {
+					currentStatement.append(line);
+					currentStatement.append("\n");
+				}
+
+				// Determine if statement complete
+				if ((line == null) || (line.trim().endsWith(";"))) {
+					// Statement complete
+					String statementText = currentStatement.toString();
+					if (statementText.trim().length() > 0) {
+						// Add the statement
+						statements.add(statementText);
+					}
+
+					// Reset the statement for next
+					currentStatement = new StringBuilder();
+				}
+
+			} while (line != null);
+			reader.close();
+
+			// Run the statements to initialise data source
 			PooledConnection pooledConnection = this.poolDataSource
 					.getPooledConnection();
-
-			// Return the jdbc mo
-			user.setManagedObject(new JdbcManagedObject(pooledConnection));
-
-		} catch (Throwable ex) {
-			user.setFailure(ex);
+			Connection connection = pooledConnection.getConnection();
+			for (String sql : statements) {
+				Statement statement = connection.createStatement();
+				statement.execute(sql);
+				statement.close();
+			}
+			pooledConnection.close();
 		}
 	}
 
-	/*
-	 * ====================================================================
-	 * ManagedObjectSourceMetaData
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
-	 */
-	public Class getManagedObjectClass() {
-		return JdbcManagedObject.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getObjectClass()
-	 */
-	public Class getObjectClass() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyKeys()
-	 */
-	public Class getDependencyKeys() {
-		// No dependencies
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyMetaData(D)
-	 */
-	public ManagedObjectDependencyMetaData getDependencyMetaData(Enum key) {
-		// No dependencies
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerKeys()
-	 */
-	public Class getHandlerKeys() {
-		// No handlers
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
-	 */
-	public Class getHandlerType(Enum key) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
-	 */
-	public ManagedObjectExtensionInterfaceMetaData[] getExtensionInterfacesMetaData() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
 }
