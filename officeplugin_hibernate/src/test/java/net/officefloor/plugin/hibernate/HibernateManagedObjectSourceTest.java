@@ -49,7 +49,7 @@ public class HibernateManagedObjectSourceTest extends
 	public void testHibernate() throws Exception {
 
 		// Configure the Hibernate managed object
-		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject(
+		ManagedObjectBuilder moBuilder = this.constructManagedObject(
 				"Hibernate", HibernateManagedObjectSource.class, "TEST");
 		moBuilder.addProperty("configuration",
 				"net/officefloor/plugin/hibernate/hibernate.cfg.xml");
