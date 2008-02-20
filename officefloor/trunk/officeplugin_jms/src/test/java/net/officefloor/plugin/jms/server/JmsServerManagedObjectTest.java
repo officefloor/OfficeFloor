@@ -21,6 +21,10 @@ import javax.jms.TextMessage;
 import net.officefloor.admin.transaction.TransactionAdministratorSource;
 import net.officefloor.admin.transaction.TransactionDutiesEnum;
 import net.officefloor.frame.api.build.AdministrationBuilder;
+import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowNodesEnhancer;
+import net.officefloor.frame.api.build.FlowNodesEnhancerContext;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeScope;
@@ -116,10 +120,26 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		taskBuilder.linkPostTaskAdministration("transaction",
 				TransactionDutiesEnum.COMMIT);
 
+		// Obtain the on message task to link it to task processing result
+		this.getOfficeBuilder().addFlowNodesEnhancer(new FlowNodesEnhancer() {
+			@Override
+			public void enhanceFlowNodes(FlowNodesEnhancerContext context)
+					throws BuildException {
+				// Obtain the JMS flow node
+				FlowNodeBuilder<?> flowNodeBuilder = context
+						.getFlowNodeBuilder("of-JMS_SERVER",
+								"jms.server.onmessage", "onmessage");
+
+				// Flag its next task
+				flowNodeBuilder.setNextTaskInFlow("work", "task");
+			}
+		});
+
 		// Configure the teams
 		Team team = new OnePersonTeam(10);
 		this.constructTeam("jms.server.recycle", team);
-		this.constructTeam("jms.server.onmessage", team);
+		this.constructTeam("of-JMS_SERVER.jms.server.recycle", team);
+		this.constructTeam("of-JMS_SERVER.jms.server.onmessage", team);
 
 		// Open the Office Floor
 		OfficeFloor officeFloor = this.constructOfficeFloor("TEST");

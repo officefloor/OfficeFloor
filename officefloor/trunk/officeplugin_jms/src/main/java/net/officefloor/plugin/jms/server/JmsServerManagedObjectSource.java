@@ -33,8 +33,7 @@ import net.officefloor.admin.transaction.Transaction;
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -46,6 +45,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectExtensionInterfaceMetaDataImpl;
 import net.officefloor.plugin.jms.AbstractManagedObjectSource;
@@ -187,7 +187,6 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
 	 */
-	@SuppressWarnings("unchecked")
 	public void init(ManagedObjectSourceContext context) throws Exception {
 
 		// Obtain the properties
@@ -212,16 +211,16 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 				.getProperty(JMS_MAX_SERVER_SESSION));
 
 		// Register the OnMessageTask
-		TaskBuilder<?, ?, ?, ?> onMessageTask = new OnMessageTask()
+		ManagedObjectTaskBuilder<?> onMessageTask = new OnMessageTask()
 				.registerTask("jms.server.onmessage", "onmessage",
-						"jms.server.onmessage", context.getOfficeBuilder());
+						"jms.server.onmessage", context);
 		onMessageTask.setNextTaskInFlow(properties
 				.getProperty(JMS_ON_MESSAGE_WORK), properties
 				.getProperty(JMS_ON_MESSAGE_TASK));
 
 		// Register the handler (and link OnMessageTask)
-		ManagedObjectBuilder managedObjectBuilder = context
-				.getManagedObjectBuilder();
+		ManagedObjectHandlerBuilder<JmsServerHandlersEnum> managedObjectBuilder = context
+				.getHandlerBuilder(JmsServerHandlersEnum.class);
 		HandlerBuilder<Indexed> handler = managedObjectBuilder
 				.registerHandler(JmsServerHandlersEnum.JMS_SERVER_HANDLER);
 		handler.setHandlerFactory(this);
