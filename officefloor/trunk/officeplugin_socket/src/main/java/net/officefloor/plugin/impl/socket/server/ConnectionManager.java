@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
@@ -38,7 +39,7 @@ import net.officefloor.plugin.socket.server.spi.Connection;
  * @author Daniel
  */
 class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
-		TaskFactory<Object, ConnectionManager, Indexed, Indexed> {
+		TaskFactory<Object, ConnectionManager, None, Indexed> {
 
 	/**
 	 * {@link ServerSocketManagedObjectSource}.
@@ -130,7 +131,7 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 	 * 
 	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
 	 */
-	public Task<Object, ConnectionManager, Indexed, Indexed> createTask(
+	public Task<Object, ConnectionManager, None, Indexed> createTask(
 			ConnectionManager work) {
 		// Return a new socket listener
 		return new SocketListener(this.moSource, this.maxConnPerListener);

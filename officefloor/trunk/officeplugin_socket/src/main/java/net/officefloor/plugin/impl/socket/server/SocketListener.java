@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.spi.Connection;
@@ -41,7 +42,7 @@ import net.officefloor.plugin.socket.server.spi.WriteMessage;
  * @author Daniel
  */
 class SocketListener implements
-		Task<Object, ConnectionManager, Indexed, Indexed>, ReadContext,
+		Task<Object, ConnectionManager, None, Indexed>, ReadContext,
 		WriteContext {
 
 	/**
@@ -134,7 +135,7 @@ class SocketListener implements
 	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
 	 */
 	public Object doTask(
-			TaskContext<Object, ConnectionManager, Indexed, Indexed> context)
+			TaskContext<Object, ConnectionManager, None, Indexed> context)
 			throws Exception {
 
 		// Flag to loop forever
