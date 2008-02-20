@@ -24,6 +24,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
@@ -40,8 +41,8 @@ import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
  */
 class ServerSocketAccepter implements Work,
 		WorkFactory<ServerSocketAccepter>,
-		Task<Object, ServerSocketAccepter, Indexed, Indexed>,
-		TaskFactory<Object, ServerSocketAccepter, Indexed, Indexed> {
+		Task<Object, ServerSocketAccepter, None, Indexed>,
+		TaskFactory<Object, ServerSocketAccepter, None, Indexed> {
 
 	/**
 	 * {@link ServerSocketChannel} to listen for connections.
@@ -134,7 +135,7 @@ class ServerSocketAccepter implements Work,
 	 * 
 	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
 	 */
-	public Task<Object, ServerSocketAccepter, Indexed, Indexed> createTask(
+	public Task<Object, ServerSocketAccepter, None, Indexed> createTask(
 			ServerSocketAccepter work) {
 		// Return this
 		return work;
@@ -147,7 +148,7 @@ class ServerSocketAccepter implements Work,
 	 */
 	@SuppressWarnings("unchecked")
 	public Object doTask(
-			TaskContext<Object, ServerSocketAccepter, Indexed, Indexed> context)
+			TaskContext<Object, ServerSocketAccepter, None, Indexed> context)
 			throws Exception {
 
 		// Loop accepting connections

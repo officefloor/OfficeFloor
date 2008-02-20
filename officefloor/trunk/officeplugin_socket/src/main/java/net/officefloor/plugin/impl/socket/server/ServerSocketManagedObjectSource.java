@@ -20,9 +20,6 @@ import java.net.InetSocketAddress;
 import java.util.Properties;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
@@ -35,7 +32,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectSourcePropertyImpl;
 import net.officefloor.plugin.socket.server.spi.Server;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
@@ -114,9 +113,6 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 		// Create prefix name
 		String prefix = "serversocket." + port + ".";
 
-		// Create the server socket input
-		OfficeBuilder officeBuilder = context.getOfficeBuilder();
-
 		// Create the message segment pool
 		MessageSegmentPool messageSegmentPool = new MessageSegmentPool();
 
@@ -128,36 +124,29 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 		this.serverSocketAccepter = new ServerSocketAccepter(
 				new InetSocketAddress(port), connectionManager,
 				messageSegmentPool);
-		WorkBuilder<ServerSocketAccepter> accepterWork = context
-				.getOfficeFrame().getBuilderFactory().createWorkBuilder(
-						ServerSocketAccepter.class);
-		officeBuilder.addWork(prefix + "Accepter", accepterWork);
+		ManagedObjectWorkBuilder<ServerSocketAccepter> accepterWork = context
+				.addWork(prefix + "Accepter", ServerSocketAccepter.class);
 
 		// Configure the accepter of connections
 		accepterWork.setWorkFactory(this.serverSocketAccepter);
-		accepterWork.setInitialTask("Accepter");
-		TaskBuilder<Object, ServerSocketAccepter, Indexed, Indexed> accepterTask = accepterWork
-				.addTask("Accepter", Object.class);
-		accepterTask.setTaskFactory(this.serverSocketAccepter);
+		ManagedObjectTaskBuilder<Indexed> accepterTask = accepterWork.addTask(
+				"Accepter", Object.class, this.serverSocketAccepter);
 		accepterTask.setTeam(prefix + "Accepter.TEAM");
 		accepterTask.linkFlow(0, (prefix + "Listener"), "Listener",
 				FlowInstigationStrategyEnum.ASYNCHRONOUS);
 
 		// Register the listener of connections
-		WorkBuilder<ConnectionManager> listenerWork = context.getOfficeFrame()
-				.getBuilderFactory().createWorkBuilder(ConnectionManager.class);
-		officeBuilder.addWork(prefix + "Listener", listenerWork);
+		ManagedObjectWorkBuilder<ConnectionManager> listenerWork = context
+				.addWork(prefix + "Listener", ConnectionManager.class);
 
 		// Configure the listener of connections
 		listenerWork.setWorkFactory(connectionManager);
-		listenerWork.setInitialTask("Listener");
-		TaskBuilder<Object, ConnectionManager, Indexed, Indexed> listenerTask = listenerWork
-				.addTask("Listener", Object.class);
-		listenerTask.setTaskFactory(connectionManager);
+		ManagedObjectTaskBuilder<Indexed> listenerTask = listenerWork.addTask(
+				"Listener", Object.class, connectionManager);
 		listenerTask.setTeam(prefix + "Listener.TEAM");
 
 		// Flag to start accepter on server start up
-		officeBuilder.addStartupTask(prefix + "Accepter", "Accepter");
+		context.addStartupTask(prefix + "Accepter", "Accepter");
 	}
 
 	/*

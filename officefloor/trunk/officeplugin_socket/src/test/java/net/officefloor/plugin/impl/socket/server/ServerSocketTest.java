@@ -53,9 +53,9 @@ import net.officefloor.plugin.socket.server.spi.WriteMessageListener;
  * 
  * @author Daniel
  */
-public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase implements
-		HandlerFactory<F>, ServerSocketHandler<F>, ConnectionHandler,
-		WriteMessageListener, Server {
+public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
+		implements HandlerFactory<F>, ServerSocketHandler<F>,
+		ConnectionHandler, WriteMessageListener, Server {
 
 	/**
 	 * First request message.
@@ -111,6 +111,7 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase imp
 
 		// Register the handler
 		HandlerBuilder handlerBuilder = serverSocketBuilder
+				.getManagedObjectHandlerBuilder(ServerSocketHandlersEnum.class)
 				.registerHandler(ServerSocketHandlersEnum.SERVER_SOCKET_HANDLER);
 		handlerBuilder.setHandlerFactory(this);
 
@@ -122,9 +123,9 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase imp
 		// Create the Office
 		OfficeBuilder officeBuilder = builderFactory.createOfficeBuilder();
 		officeBuilder.registerManagedObject("O-MO", "MO");
-		officeBuilder.registerTeam("serversocket.12345.Accepter.TEAM",
+		officeBuilder.registerTeam("MO.serversocket.12345.Accepter.TEAM",
 				"ACCEPTER_TEAM");
-		officeBuilder.registerTeam("serversocket.12345.Listener.TEAM",
+		officeBuilder.registerTeam("MO.serversocket.12345.Listener.TEAM",
 				"LISTENER_TEAM");
 		officeBuilder.addProcessManagedObject("P-MO", "O-MO");
 		officeFloorBuilder.addOffice("OFFICE", officeBuilder);
