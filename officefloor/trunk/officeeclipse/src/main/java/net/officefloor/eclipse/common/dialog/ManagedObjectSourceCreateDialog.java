@@ -24,17 +24,11 @@ import java.util.Properties;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.widgets.BeanListPopulateTable;
 import net.officefloor.eclipse.common.widgets.SubTypeList;
-import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.impl.ClassLoaderResourceLocator;
-import net.officefloor.frame.impl.ManagedObjectSourceContextImpl;
-import net.officefloor.frame.impl.OfficeFrameImpl;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.managedobjectsource.ManagedObjectSourceLoader;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.PropertyModel;
 
@@ -223,73 +217,54 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	 */
 	@Override
 	protected void okPressed() {
-
-		// Ensure managed object source name provided
-		String managedObjectSourceName = this.managedObjectSourceName.getText();
-		if ((managedObjectSourceName == null)
-				|| (managedObjectSourceName.trim().length() == 0)) {
-			this.errorText.setText("Enter managed object source name");
-			return;
-		}
-
-		// Attempt to create the Managed Object Source
-		ManagedObjectSource managedObjectSourceInstance = this
-				.createManagedObjectSourceInstance();
-		if (managedObjectSourceInstance == null) {
-			return;
-		}
-
-		// Create the list of properties
-		List<PropertyModel> propertyModels = this.propertiesTable.getBeans();
-		Properties properties = new Properties();
-		for (PropertyModel propertyModel : propertyModels) {
-			String name = propertyModel.getName();
-			String value = propertyModel.getValue();
-			properties.setProperty(name, value);
-		}
-
-		// Attempt to initiate the Managed Object Source
 		try {
+
+			// Ensure managed object source name provided
+			String managedObjectSourceName = this.managedObjectSourceName
+					.getText();
+			if ((managedObjectSourceName == null)
+					|| (managedObjectSourceName.trim().length() == 0)) {
+				this.errorText.setText("Enter managed object source name");
+				return;
+			}
+
+			// Attempt to create the Managed Object Source
+			ManagedObjectSource managedObjectSourceInstance = this
+					.createManagedObjectSourceInstance();
+			if (managedObjectSourceInstance == null) {
+				return;
+			}
+
+			// Create the list of properties
+			List<PropertyModel> propertyModels = this.propertiesTable
+					.getBeans();
+			Properties properties = new Properties();
+			for (PropertyModel propertyModel : propertyModels) {
+				String name = propertyModel.getName();
+				String value = propertyModel.getValue();
+				properties.setProperty(name, value);
+			}
+
 			// Obtain the class loader for the project
 			ClassLoader projectClassLoader = ProjectClassLoader
 					.create(this.project);
-			ResourceLocator projectResourceLoader = new ClassLoaderResourceLocator(
-					projectClassLoader);
 
-			// Create an office frame to capture additional configuration
-			OfficeFrame officeFrame = new OfficeFrameImpl();
-
-			// Create the managed object builder
-			ManagedObjectBuilder<?> managedObjectBuilder = officeFrame
-					.getBuilderFactory().createManagedObjectBuilder();
-
-			// Create the office builder
-			OfficeBuilder officeBuilder = officeFrame.getBuilderFactory()
-					.createOfficeBuilder();
-
-			// Initialise managed object to obtain addition configuration
-			managedObjectSourceInstance
-					.init(new ManagedObjectSourceContextImpl("test",
-							properties, projectResourceLoader,
-							managedObjectBuilder, officeBuilder, officeFrame));
-
-			// TODO handle addition configuration from managed object
+			// Load and specify the managed object source model
+			ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
+			this.managedObjectSource = loader.loadManagedObjectSource(
+					managedObjectSourceName, managedObjectSourceInstance,
+					properties, projectClassLoader);
 
 		} catch (Throwable ex) {
 
 			// TODO remove
 			ex.printStackTrace();
 
+			// Failed, report error and do not close dialog
 			this.errorText.setText(ex.getClass().getSimpleName() + ": "
 					+ ex.getMessage());
 			return;
 		}
-
-		// Specify the managed object source
-		this.managedObjectSource = new ManagedObjectSourceModel(
-				managedObjectSourceName, managedObjectSourceInstance.getClass()
-						.getName(), null, propertyModels
-						.toArray(new PropertyModel[0]), null);
 
 		// Successful
 		super.okPressed();
