@@ -22,13 +22,18 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.BuilderFactory;
+import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowNodesEnhancer;
+import net.officefloor.frame.api.build.FlowNodesEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.issue.OfficeIssuesListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.BuilderFactoryImpl;
 import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -115,6 +120,21 @@ public class OfficeFrameImpl extends OfficeFrame {
 				.createRawManagedObjectMetaDataRegistry(officeFloorConfig,
 						rawAssetRegistry, this);
 
+		// Enhance the flow nodes of the offices
+		for (OfficeConfiguration officeConfig : officeFloorConfig
+				.getOfficeConfiguration()) {
+
+			// Create the flow node enhancer context
+			FlowNodesEnhancerContext flowNodesEnhancerContext = new FlowNodesEnhancerContextImpl(
+					officeConfig);
+
+			// Enhance the office flow nodes
+			for (FlowNodesEnhancer flowNodesEnhancer : officeConfig
+					.getFlowNodesEnhancers()) {
+				flowNodesEnhancer.enhanceFlowNodes(flowNodesEnhancerContext);
+			}
+		}
+
 		// Obtain the registry of teams
 		Map<String, Team> teamRegistry = officeFloorConfig.getTeamRegistry();
 
@@ -157,4 +177,56 @@ public class OfficeFrameImpl extends OfficeFrame {
 		return new OfficeFloorImpl(teams, offices);
 	}
 
+	/**
+	 * {@link FlowNodesEnhancerContext} implementation.
+	 */
+	private class FlowNodesEnhancerContextImpl implements
+			FlowNodesEnhancerContext {
+
+		/**
+		 * {@link OfficeConfiguration}.
+		 */
+		private final OfficeConfiguration officeConfig;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param officeConfig
+		 *            {@link OfficeConfiguration}.
+		 */
+		public FlowNodesEnhancerContextImpl(OfficeConfiguration officeConfig) {
+			this.officeConfig = officeConfig;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.api.build.FlowNodesEnhancerContext#getFlowNodeBuilder(java.lang.String,
+		 *      java.lang.String)
+		 */
+		@Override
+		public FlowNodeBuilder<?> getFlowNodeBuilder(String workName,
+				String taskName) throws BuildException {
+			return this.getFlowNodeBuilder(null, workName, taskName);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.api.build.FlowNodesEnhancerContext#getFlowNodeBuilder(java.lang.String,
+		 *      java.lang.String, java.lang.String)
+		 */
+		@Override
+		public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace,
+				String workName, String taskName) throws BuildException {
+			try {
+				return this.officeConfig.getFlowNodeBuilder(namespace,
+						workName, taskName);
+			} catch (ConfigurationException ex) {
+				// Propagate
+				throw new BuildException(ex.getMessage());
+			}
+		}
+
+	}
 }

@@ -24,6 +24,8 @@ import java.util.Map;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowNodesEnhancer;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Work;
@@ -42,6 +44,19 @@ import net.officefloor.frame.internal.configuration.WorkConfiguration;
  * @author Daniel
  */
 public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
+
+	/**
+	 * Obtains the name with the added namespace.
+	 * 
+	 * @param namespace
+	 *            Namespace.
+	 * @param name
+	 *            Name.
+	 * @return Name including the namespace.
+	 */
+	public static String getNamespacedName(String namespace, String name) {
+		return (namespace == null ? "" : namespace + ".") + name;
+	}
 
 	/**
 	 * Listing of {@link net.officefloor.frame.spi.team.Team} name translations
@@ -66,6 +81,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * Listing of registered {@link WorkBuilder} instances.
 	 */
 	private final Map<String, WorkBuilderImpl<?>> works = new HashMap<String, WorkBuilderImpl<?>>();
+
+	/**
+	 * Listing of registered {@link FlowNodesEnhancer} instances.
+	 */
+	private final List<FlowNodesEnhancer> flowNodesEnhancers = new LinkedList<FlowNodesEnhancer>();
 
 	/**
 	 * Registry of the {@link AdministratorBuilderImpl} instances by their Id.
@@ -167,6 +187,18 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see net.officefloor.frame.api.build.OfficeBuilder#addFlowNodesEnhancer(net.officefloor.frame.api.build.FlowNodesEnhancer)
+	 */
+	@Override
+	public void addFlowNodesEnhancer(FlowNodesEnhancer flowNodesEnhancer)
+			throws BuildException {
+		// Add the flow nodes enhancer
+		this.flowNodesEnhancers.add(flowNodesEnhancer);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see net.officefloor.frame.api.build.OfficeBuilder#addTaskAdministrator(java.lang.String,
 	 *      net.officefloor.frame.api.build.TaskAdministratorBuilder)
 	 */
@@ -253,6 +285,39 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	public <W extends Work> WorkConfiguration<W>[] getWorkConfiguration()
 			throws ConfigurationException {
 		return this.works.values().toArray(new WorkConfiguration[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.OfficeConfiguration#getFlowNodesEnhancers()
+	 */
+	@Override
+	public FlowNodesEnhancer[] getFlowNodesEnhancers()
+			throws ConfigurationException {
+		return this.flowNodesEnhancers.toArray(new FlowNodesEnhancer[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.OfficeConfiguration#getFlowNodeBuilder(java.lang.String,
+	 *      java.lang.String, java.lang.String)
+	 */
+	@Override
+	public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace,
+			String workName, String taskName) throws ConfigurationException {
+		
+		// Obtain the work builder
+		String namespacedWorkName = getNamespacedName(namespace, workName);
+		WorkBuilderImpl<?> workBuilder = this.works.get(namespacedWorkName);
+		if (workBuilder == null) {
+			throw new ConfigurationException("No work '" + namespacedWorkName
+					+ "'");
+		}
+
+		// Obtain the task builder (flow node builder)
+		return workBuilder.getTaskBuilder(namespace, taskName);
 	}
 
 	/*

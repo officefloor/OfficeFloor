@@ -17,6 +17,7 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -97,8 +98,8 @@ public interface OfficeBuilder {
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	void addAdministrator(String id, AdministratorBuilder<?> administratorBuilder)
-			throws BuildException;
+	void addAdministrator(String id,
+			AdministratorBuilder<?> administratorBuilder) throws BuildException;
 
 	/**
 	 * Adds {@link Work} to be done within this {@link OfficeBuilder}.
@@ -111,6 +112,17 @@ public interface OfficeBuilder {
 	 *             Indicate failure in building.
 	 */
 	void addWork(String name, WorkBuilder<?> workBuilder) throws BuildException;
+
+	/**
+	 * Adds {@link FlowNodesEnhancer} for flow nodes of this {@link Office}.
+	 * 
+	 * @param flowNodesEnhancer
+	 *            {@link FlowNodesEnhancer}.
+	 * @throws BuildException
+	 *             Indicate failure in building.
+	 */
+	void addFlowNodesEnhancer(FlowNodesEnhancer flowNodesEnhancer)
+			throws BuildException;
 
 	/**
 	 * Adds a {@link net.officefloor.frame.api.execute.Task} to invoke on start

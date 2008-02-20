@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
  * 
  * @author Daniel
  */
-public interface ManagedObjectBuilder<H extends Enum<H>> {
+public interface ManagedObjectBuilder {
 
 	/**
 	 * Specifies the {@link Class} of the {@link ManagedObjectSource}.
@@ -85,34 +85,15 @@ public interface ManagedObjectBuilder<H extends Enum<H>> {
 	void setManagingOffice(String officeName) throws BuildException;
 
 	/**
-	 * Creates a {@link HandlerBuilder} for a {@link Handler} of the
-	 * {@link ManagedObjectSource}.
+	 * Obtains the {@link ManagedObjectHandlerBuilder}.
 	 * 
-	 * @param F
-	 *            {@link Enum} listing the
-	 *            {@link net.officefloor.frame.internal.structure.Flow}
-	 *            instances for the {@link Handler}.
-	 * @param key
-	 *            Key identifying the {@link Handler}.
-	 * @param flowListingEnum
-	 *            Type providing the listing the
-	 *            {@link net.officefloor.frame.internal.structure.ProcessState}
-	 *            instances for the {@link Handler}.
+	 * @param handlerKeys
+	 *            {@link Enum} providing the keys for each {@link Handler}.
+	 * @return {@link ManagedObjectHandlerBuilder}.
 	 * @throws BuildException
-	 *             Indicate failure in building.
+	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
 	 */
-	<F extends Enum<F>> HandlerBuilder<F> registerHandler(H key,
-			Class<F> processListingEnum) throws BuildException;
-
-	/**
-	 * Creates a {@link HandlerBuilder} for a {@link Handler} of the
-	 * {@link ManagedObjectSource}.
-	 * 
-	 * @param key
-	 *            Key identifying the {@link Handler}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
-	 */
-	HandlerBuilder<Indexed> registerHandler(H key) throws BuildException;
-
+	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
+			Class<H> handlerKeys) throws BuildException;
+	
 }

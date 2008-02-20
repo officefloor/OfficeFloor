@@ -108,6 +108,34 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 		this.workName = name;
 	}
 
+	/**
+	 * Obtains the {@link TaskBuilder}.
+	 * 
+	 * @param namespace
+	 *            Namespace to identify the {@link TaskBuilder}.
+	 * @param taskName
+	 *            Name of the {@link TaskBuilder}.
+	 * @return {@link TaskBuilder}.
+	 * @throws ConfigurationException
+	 *             If can not find the {@link TaskBuilder}.
+	 */
+	protected TaskBuilder<?, W, ?, ?> getTaskBuilder(String namespace,
+			String taskName) throws ConfigurationException {
+
+		// Obtain the task builder
+		String namespacedTaskName = OfficeBuilderImpl.getNamespacedName(
+				namespace, taskName);
+		TaskBuilderImpl<?, W, ?, ?> taskBuilder = this.tasks
+				.get(namespacedTaskName);
+		if (taskBuilder == null) {
+			throw new ConfigurationException("No task '" + namespacedTaskName
+					+ "' on work " + this.workName);
+		}
+
+		// Return the task builder
+		return taskBuilder;
+	}
+
 	/*
 	 * ====================================================================
 	 * WorkBuilder
@@ -199,7 +227,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 
 		// Create the Task Builder
 		TaskBuilderImpl<P, W, M, F> taskBuilder = new TaskBuilderImpl<P, W, M, F>(
-				taskName, null);
+				taskName, null, managedObjectListingEnum, flowListingEnum);
 
 		// Register the Task
 		this.tasks.put(taskName, taskBuilder);

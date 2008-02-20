@@ -28,15 +28,13 @@ import java.util.Properties;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.impl.construct.WorkBuilderImpl;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 
 /**
@@ -136,7 +134,6 @@ public class ManagedObjectSourceLoader {
 	 * Default constructor.
 	 */
 	public ManagedObjectSourceLoader() {
-		super();
 	}
 
 	/**
@@ -173,8 +170,21 @@ public class ManagedObjectSourceLoader {
 		// Create a new instance of the managed object source
 		MS moSource = managedObjectSourceClass.newInstance();
 
+		final String MANAGED_OBJECT_SOURCE_NAME = "mos";
+
+		// Create necessary builders
+		OfficeFrame officeFrame = OfficeFrame.getInstance();
+		OfficeBuilder officeBuilder = officeFrame.getBuilderFactory()
+				.createOfficeBuilder();
+		ManagedObjectBuilder managedObjectBuilder = officeFrame
+				.getBuilderFactory().createManagedObjectBuilder();
+
 		// Initialise the managed object source
-		moSource.init(new LoadSourceContext());
+		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(
+				MANAGED_OBJECT_SOURCE_NAME, this.properties,
+				this.resourceLocator, managedObjectBuilder, officeBuilder,
+				officeFrame);
+		moSource.init(sourceContext);
 
 		// Start the managed object source
 		moSource.start(new LoadExecuteContext());
@@ -199,126 +209,6 @@ public class ManagedObjectSourceLoader {
 		// TODO implement
 		throw new UnsupportedOperationException(
 				"TODO implement recycling managed object in stand alone");
-	}
-
-	/**
-	 * {@link ManagedObjectSourceContext}.
-	 */
-	private class LoadSourceContext implements ManagedObjectSourceContext {
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getProperties()
-		 */
-		public Properties getProperties() {
-			return ManagedObjectSourceLoader.this.properties;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getProperty(java.lang.String)
-		 */
-		@Override
-		public String getProperty(String name)
-				throws ManagedObjectSourceUnknownPropertyError {
-			// Obtain the value
-			String value = this.getProperty(name, null);
-
-			// Ensure have a value
-			if (value == null) {
-				throw new ManagedObjectSourceUnknownPropertyError(
-						"Unknown property '" + name + "'", name);
-			}
-
-			// Return the value
-			return value;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getProperty(java.lang.String,
-		 *      java.lang.String)
-		 */
-		@Override
-		public String getProperty(String name, String defaultValue) {
-			// Obtain the value
-			String value = ManagedObjectSourceLoader.this.properties
-					.getProperty(name);
-
-			// Default value if not specified
-			if (value == null) {
-				value = defaultValue;
-			}
-
-			// Return the value
-			return value;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getResourceLocator()
-		 */
-		public ResourceLocator getResourceLocator() {
-			return ManagedObjectSourceLoader.this.resourceLocator;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getRecycleWorkBuilder(java.lang.Class)
-		 */
-		@SuppressWarnings("unchecked")
-		public <W extends Work> WorkBuilder<W> getRecycleWorkBuilder(
-				Class<W> typeOfWork) {
-
-			// May only provide one recycler per loader
-			if (ManagedObjectSourceLoader.this.recycle != null) {
-				throw new IllegalStateException(
-						"May only have one recycler per loader");
-			}
-
-			// Create the work builder for recycling
-			ManagedObjectSourceLoader.this.recycle = new WorkBuilderImpl<W>(
-					typeOfWork);
-
-			// Return the work builder
-			return (WorkBuilder<W>) ManagedObjectSourceLoader.this.recycle;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getManagedObjectBuilder()
-		 */
-		public ManagedObjectBuilder<?> getManagedObjectBuilder() {
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException("TODO implement");
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getOfficeBuilder()
-		 */
-		public OfficeBuilder getOfficeBuilder() {
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException("TODO implement");
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getOfficeFrame()
-		 */
-		public OfficeFrame getOfficeFrame() {
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException("TODO implement");
-		}
-
 	}
 
 	/**

@@ -30,12 +30,12 @@ import net.officefloor.frame.impl.execute.HandlerContextImpl;
 import net.officefloor.frame.impl.execute.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
+import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -261,7 +261,7 @@ public class RawManagedObjectRegistry {
 							.get(key);
 
 					// Create the process links
-					TaskNodeReference[] processLinkConfig = handlerConfig
+					HandlerFlowConfiguration<?>[] processLinkConfig = handlerConfig
 							.getLinkedProcessConfiguration();
 					FlowMetaData<?>[] processLinks = new FlowMetaData[processLinkConfig.length];
 					for (int i = 0; i < processLinks.length; i++) {
@@ -272,8 +272,8 @@ public class RawManagedObjectRegistry {
 						FlowMetaData<?> processLink = new FlowMetaDataImpl(
 								FlowInstigationStrategyEnum.ASYNCHRONOUS,
 								rawWorkRegistry
-										.getTaskMetaData(processLinkConfig[i]),
-								null);
+										.getTaskMetaData(processLinkConfig[i]
+												.getTaskNodeReference()), null);
 
 						// Load the process link
 						processLinks[i] = processLink;

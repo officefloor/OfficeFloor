@@ -18,9 +18,15 @@ package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Meta-data of the {@link net.officefloor.frame.api.execute.Work}.
+ * Meta-data of the {@link Work}.
  * 
  * @author Daniel
  */
@@ -37,19 +43,15 @@ public interface WorkBuilder<W extends Work> {
 	void setWorkFactory(WorkFactory<W> factory) throws BuildException;
 
 	/**
-	 * Links a {@link net.officefloor.frame.internal.structure.ProcessState}
-	 * bound {@link net.officefloor.frame.spi.managedobject.ManagedObject} to
-	 * this {@link Work}.
+	 * Links a {@link ProcessState} bound {@link ManagedObject} to this
+	 * {@link Work}.
 	 * 
 	 * @param workManagedObjectName
-	 *            Name of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            to be referenced locally by this {@link Work}.
+	 *            Name of the {@link ManagedObject} to be referenced locally by
+	 *            this {@link Work}.
 	 * @param linkName
-	 *            Link name identifying the
-	 *            {@link net.officefloor.frame.internal.structure.ProcessState}
-	 *            bound
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            Link name identifying the {@link ProcessState} bound
+	 *            {@link ManagedObject}.
 	 * @throws BuildException
 	 *             Build failure.
 	 */
@@ -58,17 +60,14 @@ public interface WorkBuilder<W extends Work> {
 
 	/**
 	 * Registers the translation of the key to the Id of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link ManagedObject}.
 	 * 
 	 * @param workManagedObjectName
-	 *            Name of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            to be referenced locally by this {@link Work}.
+	 *            Name of the {@link ManagedObject} to be referenced locally by
+	 *            this {@link Work}.
 	 * @param managedObjectName
-	 *            Name of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            referenced locally within the
-	 *            {@link net.officefloor.frame.api.manage.Office}.
+	 *            Name of the {@link ManagedObject} referenced locally within
+	 *            the {@link Office}.
 	 * @throws BuildException
 	 *             Build failure.
 	 */
@@ -76,17 +75,14 @@ public interface WorkBuilder<W extends Work> {
 			String managedObjectName) throws BuildException;
 
 	/**
-	 * Registers the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} to
-	 * administor the resulting {@link Work}.
+	 * Registers the {@link Administrator} to administor the resulting
+	 * {@link Work}.
 	 * 
 	 * @param workAdministratorName
-	 *            Name of the
-	 *            {@link net.officefloor.frame.spi.administration.Administrator}
-	 *            to be referenced locally by this {@link Work}.
+	 *            Name of the {@link Administrator} to be referenced locally by
+	 *            this {@link Work}.
 	 * @param administratorId
-	 *            Id of the
-	 *            {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
+	 *            Id of the {@link AdministratorSource}.
 	 * @throws BuildException
 	 *             Build failure.
 	 */
@@ -94,11 +90,10 @@ public interface WorkBuilder<W extends Work> {
 			String administratorId) throws BuildException;
 
 	/**
-	 * Specifies the initial {@link net.officefloor.frame.api.execute.Task} of
-	 * the {@link net.officefloor.frame.api.execute.Work}.
+	 * Specifies the initial {@link Task} of the {@link Work}.
 	 * 
 	 * @param initialTask
-	 *            Initial {@link net.officefloor.frame.api.execute.Task}.
+	 *            Initial {@link Task}.
 	 * @throws BuildException
 	 *             Build failure.
 	 */
@@ -108,28 +103,15 @@ public interface WorkBuilder<W extends Work> {
 	 * Creates the {@link TaskBuilder} to build a {@link Task} for this
 	 * {@link Work}.
 	 * 
-	 * @param P
-	 *            Type of the parameter to the {@link Task}.
-	 * @param M
-	 *            {@link Enum} providing the listing of
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            instances.
-	 * @param F
-	 *            {@link Enum} providing hte listing of
-	 *            {@link net.officefloor.frame.internal.structure.Flow}
-	 *            instances.
 	 * @param taskName
 	 *            Name of task local to this {@link Work}.
 	 * @param parameterType
 	 *            Type of parameter to the {@link Task}.
 	 * @param managedObjectListingEnum
-	 *            {@link Enum} providing the listing of
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
+	 *            {@link Enum} providing the listing of {@link ManagedObject}
 	 *            instances.
 	 * @param flowListingEnum
-	 *            {@link Enum} providing hte listing of
-	 *            {@link net.officefloor.frame.internal.structure.Flow}
-	 *            instances.
+	 *            {@link Enum} providing the listing of {@link Flow} instances.
 	 * @return Specific {@link TaskBuilder}.
 	 */
 	<P extends Object, M extends Enum<M>, F extends Enum<F>> TaskBuilder<P, W, M, F> addTask(
@@ -140,8 +122,6 @@ public interface WorkBuilder<W extends Work> {
 	 * Creates the {@link TaskBuilder} to build a {@link Task} for this
 	 * {@link Work}.
 	 * 
-	 * @param P
-	 *            Type of the parameter to the {@link Task}.
 	 * @param taskName
 	 *            Name of task local to this {@link Work}.
 	 * @param parameterType

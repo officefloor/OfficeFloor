@@ -30,19 +30,16 @@ public interface HandlerBuilder<F extends Enum<F>> {
 	 * 
 	 * @param factory
 	 *            {@link HandlerFactory}.
+	 * @throws BuildException
+	 *             If failure to specify factory.
 	 */
-	void setHandlerFactory(HandlerFactory<F> factory);
+	void setHandlerFactory(HandlerFactory<F> factory) throws BuildException;
 
 	/**
 	 * Links in a {@link net.officefloor.frame.internal.structure.ProcessState}
 	 * by specifying the first {@link net.officefloor.frame.api.execute.Task} of
 	 * the {@link net.officefloor.frame.internal.structure.ProcessState}.
 	 * 
-	 * @param F
-	 *            {@link Enum} type for the listing of
-	 *            {@link net.officefloor.frame.internal.structure.ProcessState}
-	 *            instances to link to this
-	 *            {@link net.officefloor.frame.api.execute.Handler}.
 	 * @param key
 	 *            Key identifying the
 	 *            {@link net.officefloor.frame.internal.structure.ProcessState}.
@@ -51,8 +48,11 @@ public interface HandlerBuilder<F extends Enum<F>> {
 	 *            {@link net.officefloor.frame.api.execute.Task} resides on.
 	 * @param taskName
 	 *            Name of {@link net.officefloor.frame.api.execute.Task}.
+	 * @throws BuildException
+	 *             If failure to link process.
 	 */
-	void linkProcess(F key, String workName, String taskName);
+	void linkProcess(F key, String workName, String taskName)
+			throws BuildException;
 
 	/**
 	 * Links in a {@link net.officefloor.frame.internal.structure.ProcessState}
@@ -67,7 +67,10 @@ public interface HandlerBuilder<F extends Enum<F>> {
 	 *            {@link net.officefloor.frame.api.execute.Task} resides on.
 	 * @param taskName
 	 *            Name of {@link net.officefloor.frame.api.execute.Task}.
+	 * @throws BuildException
+	 *             If failure to link process.
 	 */
-	void linkProcess(int processIndex, String workName, String taskName);
+	void linkProcess(int processIndex, String workName, String taskName)
+			throws BuildException;
 
 }

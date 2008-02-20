@@ -41,8 +41,8 @@ public interface OfficeFloorBuilder {
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	void addManagedObject(String id,
-			ManagedObjectBuilder<?> managedObjectBuilder) throws BuildException;
+	void addManagedObject(String id, ManagedObjectBuilder managedObjectBuilder)
+			throws BuildException;
 
 	/**
 	 * Adds a {@link Team} which will execute

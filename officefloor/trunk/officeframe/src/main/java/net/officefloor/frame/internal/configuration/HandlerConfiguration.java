@@ -48,10 +48,10 @@ public interface HandlerConfiguration<H extends Enum<H>, F extends Enum<F>> {
 	 * Obtains the configuration for the processes invoked by the
 	 * {@link net.officefloor.frame.api.execute.Handler}.
 	 * 
-	 * @return {@link TaskNodeReference} specifying the first
+	 * @return {@link HandlerFlowConfiguration} specifying the first
 	 *         {@link net.officefloor.frame.api.execute.Task} of the linked
 	 *         process.
 	 */
-	TaskNodeReference[] getLinkedProcessConfiguration();
+	HandlerFlowConfiguration<F>[] getLinkedProcessConfiguration();
 
 }
