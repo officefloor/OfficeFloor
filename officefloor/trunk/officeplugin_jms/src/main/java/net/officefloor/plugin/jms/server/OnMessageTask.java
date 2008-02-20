@@ -18,7 +18,10 @@ package net.officefloor.plugin.jms.server;
 
 import javax.jms.Message;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
@@ -26,18 +29,20 @@ import net.officefloor.frame.util.AbstractSingleTask;
  * 
  * @author Daniel
  */
-class OnMessageTask extends AbstractSingleTask {
+class OnMessageTask extends
+		AbstractSingleTask<JmsServerManagedObject<?, ?>, Work, None, Indexed> {
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
 	 */
-	public Object doTask(TaskContext context) throws Exception {
+	public Object doTask(
+			TaskContext<JmsServerManagedObject<?, ?>, Work, None, Indexed> context)
+			throws Exception {
 
 		// Obtain the JMS Server Managed Object
-		JmsServerManagedObject mo = (JmsServerManagedObject) context
-				.getParameter();
+		JmsServerManagedObject<?, ?> mo = context.getParameter();
 
 		// Run the session to source the managed object
 		mo.getSession().run();
