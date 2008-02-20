@@ -20,6 +20,7 @@ import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.util.OFCU;
 
@@ -30,7 +31,7 @@ import net.officefloor.util.OFCU;
  * @author Daniel
  */
 public class ManagedObjectSourceEntry extends
-		AbstractEntry<ManagedObjectBuilder<?>, ManagedObjectSourceModel> {
+		AbstractEntry<ManagedObjectBuilder, ManagedObjectSourceModel> {
 
 	/**
 	 * Loads the {@link ManagedObjectSourceEntry}.
@@ -50,7 +51,7 @@ public class ManagedObjectSourceEntry extends
 			OfficeFloorCompilerContext context) {
 
 		// Create the builder
-		ManagedObjectBuilder<?> builder = context.getBuilderFactory()
+		ManagedObjectBuilder builder = context.getBuilderFactory()
 				.createManagedObjectBuilder();
 
 		// Create the entry
@@ -77,7 +78,7 @@ public class ManagedObjectSourceEntry extends
 	 * @param model
 	 *            {@link ManagedObjectSourceModel}.
 	 */
-	public ManagedObjectSourceEntry(String id, ManagedObjectBuilder<?> builder,
+	public ManagedObjectSourceEntry(String id, ManagedObjectBuilder builder,
 			ManagedObjectSourceModel model, OfficeFloorEntry officeFloorEntry) {
 		super(id, builder, model);
 		this.officeFloorEntry = officeFloorEntry;
@@ -99,20 +100,31 @@ public class ManagedObjectSourceEntry extends
 	@SuppressWarnings("unchecked")
 	public void build(LoaderContext builderUtil) throws Exception {
 
+		// Obtain the managing office of this managed object source
+		OfficeFloorOfficeModel managingOffice = OFCU.get(
+				this.getModel().getManagingOffice(),
+				"No managing office for managed object source ${0}",
+				this.getModel().getId()).getManagingOffice();
+
 		// Configure attributes
 		this.getBuilder().setManagedObjectSourceClass(
 				(Class<ManagedObjectSource>) builderUtil.obtainClass(this
 						.getModel().getSource()));
-		this.getBuilder().setManagingOffice(
-				OFCU.get(this.getModel().getManagingOffice(),
-						"No managing office for managed object source ${0}",
-						this.getModel().getId()).getManagingOfficeName());
+		this.getBuilder().setManagingOffice(managingOffice.getName());
 
 		// Configure properties
 		for (PropertyModel property : this.getModel().getProperties()) {
 			this.getBuilder().addProperty(property.getName(),
 					property.getValue());
 		}
+
+		// Provide flow node enhancing on the office
+		OfficeEntry managingOfficeEntry = this.getOfficeFloorEntry()
+				.getOfficeEntry(managingOffice);
+		// TODO provide the flow node enhancing
+		System.err.println("TODO " + this.getClass().getName()
+				+ " - implement flow node enhancing (" + managingOfficeEntry + ")");
+		// managingOfficeEntry.getBuilder().registerTeam("Imdb.jdbc.recycle", "Team");
 
 		// Register managed object source with the office floor
 		this.officeFloorEntry.getBuilder().addManagedObject(this.getId(),

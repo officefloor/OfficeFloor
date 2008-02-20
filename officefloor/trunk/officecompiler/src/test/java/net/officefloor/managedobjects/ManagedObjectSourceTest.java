@@ -21,6 +21,7 @@ import java.io.File;
 import net.officefloor.LoaderContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -55,17 +56,20 @@ public class ManagedObjectSourceTest extends OfficeFrameTestCase {
 				.getConfigurationItem(officeFloorConfigFile.getName());
 
 		// Create the Office Floor
+		BuilderFactory builderFactory = OfficeFrame.getInstance()
+				.getBuilderFactory();
+		LoaderContext loaderContext = new LoaderContext(this.getClass()
+				.getClassLoader());
 		OfficeFloor officeFloor = new OfficeFloorCompiler().compileOfficeFloor(
-				configuration, OfficeFrame.getInstance().getBuilderFactory(),
-				new LoaderContext(this.getClass().getClassLoader()));
+				configuration, builderFactory, loaderContext);
 
 		// Open the Office Floor
 		officeFloor.openOfficeFloor();
 
 		// Obtain the Managed Object
 		// TODO obtain managed object externally by name rather than Id
-		ManagedObject managedObject = officeFloor.getOffice(
-				"office").getManagedObject("MO-ID");
+		ManagedObject managedObject = officeFloor.getOffice("office")
+				.getManagedObject("MO-ID");
 
 		// Downcast to validate
 		MockManagedObjectSource mock = (MockManagedObjectSource) managedObject;

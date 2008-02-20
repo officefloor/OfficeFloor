@@ -21,11 +21,13 @@ import java.util.LinkedList;
 
 import net.officefloor.LoaderContext;
 import net.officefloor.desk.DeskLoader;
+import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.desk.DeskModel;
@@ -311,8 +313,11 @@ public class TaskEntry<W extends Work> extends
 
 	/**
 	 * Links in the {@link ManagedObject} instances.
+	 * 
+	 * @throws BuildException
+	 *             If fails to link in the {@link ManagedObject} instances.
 	 */
-	private void linkManagedObjects() {
+	private void linkManagedObjects() throws BuildException {
 		int index = 0;
 		for (DeskTaskObjectModel taskObject : this.deskTask.getObjects()) {
 
@@ -358,7 +363,8 @@ public class TaskEntry<W extends Work> extends
 				// Link in the flow
 				this.linkFlow(linkedFlowItem.getFlowItem(), new FlowLinker() {
 					@Override
-					public void linkFlow(String workName, String taskName) {
+					public void linkFlow(String workName, String taskName)
+							throws BuildException {
 						if (workName == null) {
 							// On same work
 							TaskEntry.this.getBuilder().linkFlow(
@@ -391,7 +397,7 @@ public class TaskEntry<W extends Work> extends
 						new FlowLinker() {
 							@Override
 							public void linkFlow(String workName,
-									String taskName) {
+									String taskName) throws BuildException {
 								TaskEntry.this.getBuilder().linkFlow(
 										accessibleFlowIndex, workName,
 										taskName, strategy);
@@ -553,8 +559,10 @@ public class TaskEntry<W extends Work> extends
 		 *            work as this {@link TaskEntry}.
 		 * @param taskName
 		 *            Name of the {@link Task}.
+		 * @throws BuildException
+		 *             If fails to link in {@link Flow}.
 		 */
-		void linkFlow(String workName, String taskName);
+		void linkFlow(String workName, String taskName) throws BuildException;
 	}
 
 	/**
