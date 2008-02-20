@@ -301,9 +301,11 @@ public class ReflectiveWorkBuilder implements Work,
 		 *            Task name.
 		 * @param strategy
 		 *            {@link FlowInstigationStrategyEnum}.
+		 * @throws BuildException
+		 *             If fails to build the flow.
 		 */
 		public void buildFlow(String taskName,
-				FlowInstigationStrategyEnum strategy) {
+				FlowInstigationStrategyEnum strategy) throws BuildException {
 			this.buildFlow(null, taskName, strategy);
 		}
 
@@ -316,9 +318,11 @@ public class ReflectiveWorkBuilder implements Work,
 		 *            Task name.
 		 * @param strategy
 		 *            {@link FlowInstigationStrategyEnum}.
+		 * @throws BuildException
+		 *             If fails to build the flow.
 		 */
 		public void buildFlow(String workName, String taskName,
-				FlowInstigationStrategyEnum strategy) {
+				FlowInstigationStrategyEnum strategy) throws BuildException {
 			// Link in the flow and allow for invocation
 			if (workName != null) {
 				this.taskBuilder.linkFlow(this.flowIndex, workName, taskName,

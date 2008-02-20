@@ -323,13 +323,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to register a
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
-	protected ManagedObjectBuilder<?> constructManagedObject(
+	protected ManagedObjectBuilder constructManagedObject(
 			String managedObjectName,
 			Class<? extends ManagedObjectSource> managedObjectSourceClass,
 			String managingOffice) throws BuildException {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame
+		ManagedObjectBuilder managedObjectBuilder = OfficeFrame
 				.getInstance().getBuilderFactory().createManagedObjectBuilder();
 
 		// Register the Managed Object Source class
@@ -364,7 +364,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 			throws BuildException {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame
+		ManagedObjectBuilder managedObjectBuilder = OfficeFrame
 				.getInstance().getBuilderFactory().createManagedObjectBuilder();
 
 		// Bind Managed Object

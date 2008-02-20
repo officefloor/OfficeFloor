@@ -16,41 +16,36 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
- * Configuration for a {@link Flow}.
+ * Configuration of a {@link Flow} for a {@link Handler}.
  * 
  * @author Daniel
  */
-public interface FlowConfiguration {
+public interface HandlerFlowConfiguration<F extends Enum<F>> {
 
 	/**
-	 * Obtains the name of this {@link Flow}.
+	 * Obtains the name to identify this flow.
 	 * 
-	 * @return Name of this {@link Flow}.
+	 * @return Name identifying this flow.
 	 */
 	String getFlowName();
 
 	/**
-	 * Obtains the strategy to instigate this {@link Flow}.
+	 * Obtains the key for this flow.
 	 * 
-	 * @return Strategy to instigate this {@link Flow}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Key for this flow. May be <code>null</code> if not using
+	 *         {@link Enum}.
 	 */
-	FlowInstigationStrategyEnum getInstigationStrategy()
-			throws ConfigurationException;
+	F getFlowKey();
 
 	/**
-	 * Obtains the reference to the initial {@link Task} of this {@link Flow}.
+	 * Obtains the {@link TaskNodeReference} for this flow.
 	 * 
-	 * @return Reference to the initial {@link Task} of this {@link Flow}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return {@link TaskNodeReference} to the flow.
 	 */
-	TaskNodeReference getInitialTask() throws ConfigurationException;
+	TaskNodeReference getTaskNodeReference();
 
 }

@@ -41,7 +41,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	/**
 	 * Registry of the {@link ManagedObjectBuilderImpl} instances by their Id.
 	 */
-	private final Map<String, ManagedObjectBuilderImpl<?>> mangedObjects = new HashMap<String, ManagedObjectBuilderImpl<?>>();
+	private final Map<String, ManagedObjectBuilderImpl> mangedObjects = new HashMap<String, ManagedObjectBuilderImpl>();
 
 	/**
 	 * Registry of the {@link Team} instances by their name.
@@ -71,7 +71,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	 *      net.officefloor.frame.api.build.ManagedObjectBuilder)
 	 */
 	public void addManagedObject(String id,
-			ManagedObjectBuilder<?> managedObjectBuilder) throws BuildException {
+			ManagedObjectBuilder managedObjectBuilder) throws BuildException {
 
 		// Ensure is correct type
 		if (!(managedObjectBuilder instanceof ManagedObjectBuilderImpl)) {
@@ -81,7 +81,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 		}
 
 		// Specify the Id
-		ManagedObjectBuilderImpl<?> impl = (ManagedObjectBuilderImpl<?>) managedObjectBuilder;
+		ManagedObjectBuilderImpl impl = (ManagedObjectBuilderImpl) managedObjectBuilder;
 		impl.setManagedObjectName(id);
 
 		// Add

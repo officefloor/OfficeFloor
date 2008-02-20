@@ -63,7 +63,7 @@ public class MockManagedObjectSource implements ManagedObjectSource {
 	 * @throws BuildException
 	 *             If bind fails.
 	 */
-	public static void bindManagedObject(ManagedObjectBuilder<?> metaData,
+	public static void bindManagedObject(ManagedObjectBuilder metaData,
 			String name, ManagedObject managedObject,
 			ManagedObjectSourceMetaData<?, ?> sourceMetaData) throws BuildException {
 

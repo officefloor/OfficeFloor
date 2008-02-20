@@ -90,7 +90,7 @@ public class RawManagedObjectMetaData {
 		}
 
 		// Obtain the managed object builder
-		ManagedObjectBuilder<?> managedObjectBuilder = (ManagedObjectBuilder<?>) mosConfig;
+		ManagedObjectBuilder managedObjectBuilder = (ManagedObjectBuilder) mosConfig;
 
 		// Create the context for the Managed Object Source
 		ManagedObjectSourceContextImpl context = new ManagedObjectSourceContextImpl(

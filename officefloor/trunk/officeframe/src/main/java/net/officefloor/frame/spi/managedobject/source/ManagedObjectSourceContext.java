@@ -18,16 +18,18 @@ package net.officefloor.frame.spi.managedobject.source;
 
 import java.util.Properties;
 
-import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
 /**
- * Context for a
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+ * Context for a {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -78,57 +80,67 @@ public interface ManagedObjectSourceContext {
 	ResourceLocator getResourceLocator();
 
 	/**
+	 * Obtains the {@link ManagedObjectHandlerBuilder}.
+	 * 
+	 * @param handlerKeys
+	 *            {@link Enum} providing the keys for each {@link Handler}.
+	 * @return {@link ManagedObjectHandlerBuilder}.
+	 * @throws BuildException
+	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
+	 */
+	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
+			Class<H> handlerKeys) throws BuildException;
+
+	/**
 	 * <p>
 	 * Invoking this method during the
 	 * {@link ManagedObjectSource#init(ManagedObjectSourceContext)} will create
-	 * recycle functionality for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} to be
-	 * returned to a {@link ManagedObjectPool}.
+	 * recycle functionality for the {@link ManagedObject} to be returned to a
+	 * {@link ManagedObjectPool}.
 	 * <p>
-	 * The initial {@link net.officefloor.frame.api.execute.Task} will be used
-	 * as the recycle starting point for this
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * The initial {@link Task} will be used as the recycle starting point for
+	 * this {@link ManagedObject}.
 	 * 
-	 * @param W
-	 *            Type of the {@link Work}.
 	 * @param typeOfWork
 	 *            {@link Class} of the {@link Work}.
-	 * @return {@link WorkBuilder} to recycle this
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * @return {@link WorkBuilder} to recycle this {@link ManagedObject}.
+	 * @throws BuildException
+	 *             If fails to obtain the recycle
+	 *             {@link ManagedObjectWorkBuilder}.
 	 */
-	<W extends Work> WorkBuilder<W> getRecycleWorkBuilder(Class<W> typeOfWork);
+	<W extends Work> ManagedObjectWorkBuilder<W> getRecycleWork(
+			Class<W> typeOfWork) throws BuildException;
+
+	/**
+	 * Adds {@link ManagedObjectWorkBuilder} for {@link Work} of the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param typeOfWork
+	 *            Type of the {@link Work}.
+	 * @param factory
+	 *            {@link WorkFactory}.
+	 * @return {@link ManagedObjectWorkBuilder}.
+	 * @throws BuildException
+	 *             If fails to add the {@link Work}.
+	 */
+	<W extends Work> ManagedObjectWorkBuilder<W> addWork(String workName,
+			Class<W> typeOfWork) throws BuildException;
 
 	/**
 	 * <p>
-	 * Obtains the {@link ManagedObjectBuilder} that built this
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Adds a {@link Task} to invoke on start up of the {@link Office}.
 	 * <p>
-	 * It is available to allow the {@link ManagedObjectSource} to provide
-	 * configuration.
+	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ManagedObjectBuilder}.
+	 * @param workName
+	 *            Name of {@link Work} containing the {@link Task}.
+	 * @param taskName
+	 *            Name of {@link Task} on the {@link Work}.
+	 * @throws BuildException
+	 *             If fails to register startup {@link Task}.
 	 */
-	ManagedObjectBuilder<?> getManagedObjectBuilder();
-
-	/**
-	 * Obtains the {@link OfficeBuilder} building the office that the
-	 * {@link ManagedObjectSource} is being used within.
-	 * 
-	 * @return {@link OfficeBuilder}.
-	 */
-	OfficeBuilder getOfficeBuilder();
-
-	/**
-	 * <p>
-	 * Obtains the {@link OfficeFrame}.
-	 * <p>
-	 * If another Office is to be registered, a
-	 * {@link net.officefloor.frame.spi.team.Team} should be registered with the
-	 * {@link #getOfficeBuilder()} {@link OfficeBuilder} to start/stop the
-	 * created office.
-	 * 
-	 * @return {@link OfficeFrame}.
-	 */
-	OfficeFrame getOfficeFrame();
+	void addStartupTask(String workName, String taskName) throws BuildException;
 
 }

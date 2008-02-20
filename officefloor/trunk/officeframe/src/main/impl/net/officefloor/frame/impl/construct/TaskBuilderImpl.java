@@ -21,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
@@ -33,11 +35,15 @@ import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.TaskNode;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Implementation of the {@link net.officefloor.frame.api.build.TaskBuilder}.
+ * Implementation of the {@link TaskBuilder}.
  * 
  * @author Daniel
  */
@@ -45,25 +51,32 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 		implements TaskBuilder<P, W, M, F>, TaskConfiguration<P, W, M, F> {
 
 	/**
-	 * Name of this {@link net.officefloor.frame.api.execute.Task}.
+	 * Name of this {@link Task}.
 	 */
 	protected final String taskName;
 
 	/**
-	 * Parent {@link EscalationProcedure} for the resulting
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * Parent {@link EscalationProcedure} for the resulting {@link Task}.
 	 */
 	protected final EscalationProcedure parentEscalationProcedure;
 
 	/**
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * to be linked to this {@link net.officefloor.frame.api.execute.Task}.
+	 * {@link Enum} specifying the keys for the {@link ManagedObject} instances.
+	 */
+	private final Class<? extends Enum<?>> managedObjectKeys;
+
+	/**
+	 * {@link ManagedObject} instances to be linked to this {@link Task}.
 	 */
 	protected final Map<Integer, TaskManagedObjectConfigurationImpl> managedObjects;
 
 	/**
-	 * {@link net.officefloor.frame.internal.structure.Flow} instances to be
-	 * linked to this {@link net.officefloor.frame.api.execute.Task}.
+	 * {@link Enum} specifying the keys for the {@link Flow} instances.
+	 */
+	protected final Class<? extends Enum<?>> flowKeys;
+
+	/**
+	 * {@link Flow} instances to be linked to this {@link Task}.
 	 */
 	protected final Map<Integer, FlowConfigurationImpl> flows;
 
@@ -73,13 +86,12 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	protected TaskFactory<P, W, M, F> taskFactory;
 
 	/**
-	 * {@link net.officefloor.frame.spi.team.Team}.
+	 * {@link Team}.
 	 */
 	protected String teamName;
 
 	/**
-	 * Next {@link net.officefloor.frame.internal.structure.TaskNode} within the
-	 * {@link net.officefloor.frame.internal.structure.Flow}.
+	 * Next {@link TaskNode} within the {@link Flow}.
 	 */
 	protected TaskNodeReference nextTaskInFlow;
 
@@ -92,13 +104,13 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 
 	/**
 	 * Listing of task administration duties to do before executing the
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * {@link Task}.
 	 */
 	protected List<TaskDutyConfigurationImpl<?>> preTaskDuties = new LinkedList<TaskDutyConfigurationImpl<?>>();
 
 	/**
 	 * Listing of task administration duties to do after executing the
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * {@link Task}.
 	 */
 	protected List<TaskDutyConfigurationImpl<?>> postTaskDuties = new LinkedList<TaskDutyConfigurationImpl<?>>();
 
@@ -106,18 +118,59 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 * Initiate.
 	 * 
 	 * @param taskName
-	 *            Name of this {@link net.officefloor.frame.api.execute.Task}.
+	 *            Name of this {@link Task}.
 	 * @param parentEscalationProcedure
-	 *            {@link EscalationProcedure} for the
-	 *            {@link net.officefloor.frame.api.execute.Task}.
+	 *            Parent {@link EscalationProcedure} for the {@link Task}.
 	 */
 	public TaskBuilderImpl(String taskName,
 			EscalationProcedure parentEscalationProcedure) {
-		// Store state
+		this(taskName, parentEscalationProcedure, null, null);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param taskName
+	 *            Name of this {@link Task}.
+	 * @param parentEscalationProcedure
+	 *            Parent {@link EscalationProcedure} for this {@link Task}.
+	 * @param managedObjectKeys
+	 *            {@link Enum} specifying the keys for the {@link ManagedObject}
+	 *            instances.
+	 * @param flowKeys
+	 *            {@link Enum} specifying the keys for the {@link Flow}
+	 *            instances.
+	 */
+	@SuppressWarnings("unchecked")
+	public TaskBuilderImpl(String taskName,
+			EscalationProcedure parentEscalationProcedure,
+			Class<M> managedObjectKeys, Class<F> flowKeys) {
 		this.taskName = taskName;
 		this.parentEscalationProcedure = parentEscalationProcedure;
+		this.managedObjectKeys = (managedObjectKeys == null ? Indexed.class
+				: managedObjectKeys);
 		this.managedObjects = new HashMap<Integer, TaskManagedObjectConfigurationImpl>();
+		this.flowKeys = (flowKeys == null ? Indexed.class : flowKeys);
 		this.flows = new HashMap<Integer, FlowConfigurationImpl>();
+
+		// Load managed objects if enum keyed
+		if (this.managedObjectKeys != Indexed.class) {
+			for (Enum managedObjectKey : this.managedObjectKeys
+					.getEnumConstants()) {
+				this.managedObjects.put(
+						new Integer(managedObjectKey.ordinal()),
+						new TaskManagedObjectConfigurationImpl(null));
+			}
+		}
+
+		// Load flows if enum keyed
+		if (this.flowKeys != Indexed.class) {
+			for (Enum flowKey : this.flowKeys.getEnumConstants()) {
+				this.flows.put(new Integer(flowKey.ordinal()),
+						new FlowConfigurationImpl(flowKey.name(),
+								FlowInstigationStrategyEnum.SEQUENTIAL, null));
+			}
+		}
 	}
 
 	/*
@@ -169,8 +222,11 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 * @see net.officefloor.frame.api.build.TaskBuilder#linkManagedObject(M,
 	 *      java.lang.String)
 	 */
-	public void linkManagedObject(M key, String workManagedObjectName) {
-		this.linkManagedObject(key.ordinal(), workManagedObjectName);
+	public void linkManagedObject(M key, String workManagedObjectName)
+			throws BuildException {
+		this
+				.linkManagedObject(key.ordinal(), key.name(),
+						workManagedObjectName);
 	}
 
 	/*
@@ -180,7 +236,38 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 *      java.lang.String)
 	 */
 	public void linkManagedObject(int managedObjectIndex,
-			String workManagedObjectName) {
+			String workManagedObjectName) throws BuildException {
+		this.linkManagedObject(managedObjectIndex, String
+				.valueOf(managedObjectIndex), workManagedObjectName);
+	}
+
+	/**
+	 * Links in a {@link ManagedObject}.
+	 * 
+	 * @param managedObjectIndex
+	 *            Index of the {@link ManagedObject}.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @param workManagedObjectName
+	 *            Work name of the {@link ManagedObject}.
+	 * @throws BuildException
+	 *             If fails to link the {@link ManagedObject}.
+	 */
+	private void linkManagedObject(int managedObjectIndex,
+			String managedObjectName, String workManagedObjectName)
+			throws BuildException {
+
+		// Ensure index of a managed key
+		if (this.managedObjectKeys != Indexed.class) {
+			if (!this.managedObjects
+					.containsKey(new Integer(managedObjectIndex))) {
+				throw new BuildException("Index " + managedObjectKeys
+						+ " does not align to enum on "
+						+ this.managedObjectKeys.getName());
+			}
+		}
+
+		// Register the managed object
 		this.managedObjects.put(new Integer(managedObjectIndex),
 				new TaskManagedObjectConfigurationImpl(workManagedObjectName));
 	}
@@ -216,8 +303,8 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 *      java.lang.String)
 	 */
 	public void linkFlow(F key, String taskName,
-			FlowInstigationStrategyEnum strategy) {
-		this.linkFlow(key.ordinal(), null, taskName, strategy);
+			FlowInstigationStrategyEnum strategy) throws BuildException {
+		this.linkFlow(key.ordinal(), key.name(), null, taskName, strategy);
 	}
 
 	/*
@@ -227,8 +314,9 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 *      java.lang.String)
 	 */
 	public void linkFlow(int flowIndex, String taskName,
-			FlowInstigationStrategyEnum strategy) {
-		this.linkFlow(flowIndex, null, taskName, strategy);
+			FlowInstigationStrategyEnum strategy) throws BuildException {
+		this.linkFlow(flowIndex, String.valueOf(flowIndex), null, taskName,
+				strategy);
 	}
 
 	/*
@@ -238,8 +326,8 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 *      java.lang.String, java.lang.String)
 	 */
 	public void linkFlow(F key, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy) {
-		this.linkFlow(key.ordinal(), workName, taskName, strategy);
+			FlowInstigationStrategyEnum strategy) throws BuildException {
+		this.linkFlow(key.ordinal(), key.name(), workName, taskName, strategy);
 	}
 
 	/*
@@ -249,9 +337,50 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 *      java.lang.String, java.lang.String)
 	 */
 	public void linkFlow(int flowIndex, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy) {
-		this.flows.put(new Integer(flowIndex), new FlowConfigurationImpl(
-				strategy, new TaskNodeReferenceImpl(workName, taskName)));
+			FlowInstigationStrategyEnum strategy) throws BuildException {
+		this.linkFlow(flowIndex, String.valueOf(flowIndex), workName, taskName,
+				strategy);
+	}
+
+	/**
+	 * Links in a {@link Flow}.
+	 * 
+	 * @param flowIndex
+	 *            Index of the {@link Flow}.
+	 * @param flowName
+	 *            Name of the {@link Flow}.
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param strategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 * @throws BuildException
+	 *             If fails to link {@lik Flow}.
+	 */
+	private void linkFlow(int flowIndex, String flowName, String workName,
+			String taskName, FlowInstigationStrategyEnum strategy)
+			throws BuildException {
+
+		// Ensure index of a flow key
+		if (this.flowKeys != Indexed.class) {
+			if (!this.flows.containsKey(new Integer(flowIndex))) {
+				throw new BuildException("Index " + flowIndex
+						+ " does not align to enum on "
+						+ this.flowKeys.getName());
+			}
+		}
+
+		// Create the task node reference (no task name, no reference)
+		TaskNodeReferenceImpl taskNode = (taskName == null ? null
+				: new TaskNodeReferenceImpl(workName, taskName));
+
+		// Create the flow configuration
+		FlowConfigurationImpl flow = new FlowConfigurationImpl(flowName,
+				strategy, taskNode);
+
+		// Register the flow
+		this.flows.put(new Integer(flowIndex), flow);
 	}
 
 	/*
@@ -498,10 +627,14 @@ class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 }
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.internal.configuration.FlowConfiguration}.
+ * Implementation of the {@link FlowConfiguration}.
  */
 class FlowConfigurationImpl implements FlowConfiguration {
+
+	/**
+	 * Name of the {@link Flow}.
+	 */
+	protected final String flowName;
 
 	/**
 	 * {@link FlowInstigationStrategyEnum}.
@@ -509,25 +642,35 @@ class FlowConfigurationImpl implements FlowConfiguration {
 	protected final FlowInstigationStrategyEnum strategy;
 
 	/**
-	 * Reference to the initial {@link net.officefloor.frame.api.execute.Task}
-	 * of this {@link net.officefloor.frame.internal.structure.Flow}.
+	 * Reference to the initial {@link Task} of this {@link Flow}.
 	 */
 	protected final TaskNodeReference taskNodeRef;
 
 	/**
 	 * Initiate.
 	 * 
+	 * @param flowName
+	 *            Name of this {@link Flow}.
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param taskNodeRef
-	 *            Reference to the initial
-	 *            {@link net.officefloor.frame.api.execute.Task} of this
-	 *            {@link net.officefloor.frame.internal.structure.Flow}.
+	 *            Reference to the initial {@link Task} of this {@link Flow}.
 	 */
-	public FlowConfigurationImpl(FlowInstigationStrategyEnum strategy,
-			TaskNodeReference taskNodeRef) {
+	public FlowConfigurationImpl(String flowName,
+			FlowInstigationStrategyEnum strategy, TaskNodeReference taskNodeRef) {
+		this.flowName = flowName;
 		this.strategy = strategy;
 		this.taskNodeRef = taskNodeRef;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.FlowConfiguration#getFlowName()
+	 */
+	@Override
+	public String getFlowName() {
+		return this.flowName;
 	}
 
 	/*

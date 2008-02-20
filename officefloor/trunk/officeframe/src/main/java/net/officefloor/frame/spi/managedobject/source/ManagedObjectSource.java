@@ -9,11 +9,9 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * <p>
- * Source to obtain a particular type of
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Source to obtain a particular type of {@link ManagedObject}.
  * <p>
- * Implemented by the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}provider.
+ * Implemented by the {@link ManagedObject} provider.
  * 
  * @author Daniel
  */
@@ -32,12 +30,12 @@ public interface ManagedObjectSource {
 	ManagedObjectSourceSpecification getSpecification();
 
 	/**
-	 * Called only once after the {@link ManagedObjectSource}is instantiated.
+	 * Called only once after the {@link ManagedObjectSource} is instantiated.
 	 * 
 	 * @param context
 	 *            {@link ManagedObjectSourceContext} to use in initialising.
 	 * @throws Exception
-	 *             Should the {@link ManagedObjectSource}fail to configure
+	 *             Should the {@link ManagedObjectSource} fail to configure
 	 *             itself from the input properties.
 	 */
 	void init(ManagedObjectSourceContext context) throws Exception;

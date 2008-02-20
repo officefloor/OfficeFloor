@@ -18,6 +18,7 @@ package net.officefloor.frame.impl.execute.handler;
 
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.AbstractMockHandler;
@@ -48,7 +49,9 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 		this.getOfficeBuilder().addProcessManagedObject("P-INPUT", "INPUT");
 
 		// Provide handler for input managed object
-		HandlerBuilder handlerBuilder = moBuilder
+		ManagedObjectHandlerBuilder<Handlers> moHandlerBuilder = moBuilder
+				.getManagedObjectHandlerBuilder(Handlers.class);
+		HandlerBuilder handlerBuilder = moHandlerBuilder
 				.registerHandler(Handlers.INPUT);
 		handlerBuilder.setHandlerFactory(new MockHandler());
 		handlerBuilder.linkProcess(0, "WORK", "TASK");

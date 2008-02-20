@@ -16,8 +16,14 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.FlowNodesEnhancer;
+import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Configuration of an Office.
@@ -74,7 +80,38 @@ public interface OfficeConfiguration {
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	<W extends Work> WorkConfiguration<W>[] getWorkConfiguration() throws ConfigurationException;
+	<W extends Work> WorkConfiguration<W>[] getWorkConfiguration()
+			throws ConfigurationException;
+
+	/**
+	 * Obtains the {@link FlowNodesEnhancer} instances for this {@link Office}.
+	 * 
+	 * @return Listing of the {@link FlowNodesEnhancer} for this {@link Office}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	FlowNodesEnhancer[] getFlowNodesEnhancers() throws ConfigurationException;
+
+	/**
+	 * <p>
+	 * Obtains a {@link FlowNodeBuilder} registered with this
+	 * {@link OfficeBuilder}.
+	 * <p>
+	 * This enables addition configuration of {@link Task} instances registered
+	 * by a {@link ManagedObjectSource}.
+	 * 
+	 * @param namespace
+	 *            Namespace. Likely the {@link ManagedObjectSource} name.
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @return {@link TaskBuilder}.
+	 * @throws ConfigurationException
+	 *             If can not find the {@link FlowNodeBuilder}.
+	 */
+	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName,
+			String taskName) throws ConfigurationException;
 
 	/**
 	 * Obtains the configuration of the
