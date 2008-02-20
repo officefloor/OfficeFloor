@@ -48,7 +48,7 @@ public class MockDataSourceFactory implements DataSourceFactory {
 	 *             If fails.
 	 */
 	public static void bind(ConnectionPoolDataSource dataSource,
-			ManagedObjectBuilder<?> builder) throws BuildException {
+			ManagedObjectBuilder builder) throws BuildException {
 		// Bind the data source
 		connectionPoolDataSource = dataSource;
 

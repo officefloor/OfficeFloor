@@ -60,7 +60,7 @@ public class JdbcManagedObjectSourceTest extends
 	public void testDbInteration() throws Exception {
 
 		// Configure the JDBC managed object
-		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("JDBC",
+		ManagedObjectBuilder moBuilder = this.constructManagedObject("JDBC",
 				JdbcManagedObjectSource.class, "TEST");
 
 		// Bind the Mock Data Source Factory
@@ -105,7 +105,7 @@ public class JdbcManagedObjectSourceTest extends
 		// Configure the Team
 		Team team = new OnePersonTeam(10);
 		this.constructTeam("team", team);
-		this.constructTeam("jdbc.recycle", team);
+		this.constructTeam("of-JDBC.jdbc.recycle", team);
 
 		// ---------------------
 		// Record running
