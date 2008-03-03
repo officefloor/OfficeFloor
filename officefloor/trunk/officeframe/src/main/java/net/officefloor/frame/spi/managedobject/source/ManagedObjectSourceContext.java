@@ -19,7 +19,7 @@ package net.officefloor.frame.spi.managedobject.source;
 import java.util.Properties;
 
 import net.officefloor.frame.api.build.BuildException;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlersBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Handler;
@@ -80,15 +80,15 @@ public interface ManagedObjectSourceContext {
 	ResourceLocator getResourceLocator();
 
 	/**
-	 * Obtains the {@link ManagedObjectHandlerBuilder}.
+	 * Obtains the {@link ManagedObjectHandlersBuilder}.
 	 * 
 	 * @param handlerKeys
 	 *            {@link Enum} providing the keys for each {@link Handler}.
-	 * @return {@link ManagedObjectHandlerBuilder}.
+	 * @return {@link ManagedObjectHandlersBuilder}.
 	 * @throws BuildException
-	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
+	 *             If fails to obtain {@link ManagedObjectHandlersBuilder}.
 	 */
-	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
+	<H extends Enum<H>> ManagedObjectHandlersBuilder<H> getHandlerBuilder(
 			Class<H> handlerKeys) throws BuildException;
 
 	/**

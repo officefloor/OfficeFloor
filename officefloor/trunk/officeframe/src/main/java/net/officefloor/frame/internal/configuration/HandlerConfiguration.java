@@ -17,6 +17,7 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.HandlerFactory;
+import net.officefloor.frame.api.execute.Handler;
 
 /**
  * Configuration of a {@link net.officefloor.frame.api.execute.Handler}.
@@ -35,6 +36,13 @@ public interface HandlerConfiguration<H extends Enum<H>, F extends Enum<F>> {
 	 *         {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
 	 */
 	H getHandlerKey();
+
+	/**
+	 * Obtains the type that the {@link Handler} must implement.
+	 * 
+	 * @return Type that the {@link Handler} must implement.
+	 */
+	Class<? extends Handler<F>> getHandlerType();
 
 	/**
 	 * Obtains the {@link HandlerFactory} for the

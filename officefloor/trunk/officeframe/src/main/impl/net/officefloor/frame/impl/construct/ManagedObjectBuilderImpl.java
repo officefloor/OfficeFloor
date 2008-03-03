@@ -25,6 +25,7 @@ import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlersBuilder;
 import net.officefloor.frame.api.build.OfficeScope;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
@@ -81,9 +82,9 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	private long defaultTimeout = 0;
 
 	/**
-	 * {@link ManagedObjectHandlerBuilder} implementation.
+	 * {@link ManagedObjectHandlersBuilder} implementation.
 	 */
-	private ManagedObjectHandlerBuilderImpl<?> handlers = null;
+	private ManagedObjectHandlersBuilderImpl<?> handlers = null;
 
 	/**
 	 * Specifies the name for this
@@ -157,14 +158,14 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
+	public <H extends Enum<H>> ManagedObjectHandlersBuilder<H> getManagedObjectHandlerBuilder(
 			Class<H> handlerKeys) throws BuildException {
 
 		// Create the managed object handler builder
-		this.handlers = new ManagedObjectHandlerBuilderImpl<H>(handlerKeys);
+		this.handlers = new ManagedObjectHandlersBuilderImpl<H>(handlerKeys);
 
 		// Return the builder
-		return (ManagedObjectHandlerBuilder<H>) this.handlers;
+		return (ManagedObjectHandlersBuilder<H>) this.handlers;
 	}
 
 	/*
@@ -243,17 +244,18 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	 * 
 	 * @see net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration#getHandlerConfiguration()
 	 */
-	public HandlerConfiguration<?, ?>[] getHandlerConfiguration() {
+	public HandlerConfiguration<?, ?>[] getHandlerConfiguration()
+			throws ConfigurationException {
 		// Return the handler configuration
 		return (this.handlers == null ? new HandlerConfiguration<?, ?>[0]
 				: this.handlers.getHandlerConfiguration());
 	}
 
 	/**
-	 * {@link ManagedObjectHandlerBuilder} implementation.
+	 * {@link ManagedObjectHandlersBuilder} implementation.
 	 */
-	protected class ManagedObjectHandlerBuilderImpl<H extends Enum<H>>
-			implements ManagedObjectHandlerBuilder<H> {
+	protected class ManagedObjectHandlersBuilderImpl<H extends Enum<H>>
+			implements ManagedObjectHandlersBuilder<H> {
 
 		/**
 		 * {@link Enum} specifying the handler keys.
@@ -266,13 +268,18 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 		private final Map<H, HandlerBuilderImpl<H, ?>> handlers;
 
 		/**
+		 * Type that the {@link Handler} must implement.
+		 */
+		private Class<? extends Handler<?>> handlerType = null;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param handlerKeys
 		 *            {@link Enum} providing the keys for the {@link Handler}
 		 *            instances.
 		 */
-		public ManagedObjectHandlerBuilderImpl(Class<H> handlerKeys) {
+		public ManagedObjectHandlersBuilderImpl(Class<H> handlerKeys) {
 			this.handlerKeys = handlerKeys;
 			this.handlers = new EnumMap<H, HandlerBuilderImpl<H, ?>>(
 					handlerKeys);
@@ -282,8 +289,12 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 		 * Obtains the {@link HandlerConfiguration} instances.
 		 * 
 		 * @return {@link HandlerConfiguration} instances.
+		 * @throws ConfigurationException
+		 *             If fails to obtain the {@link HandlerConfiguration}.
 		 */
-		public HandlerConfiguration<?, ?>[] getHandlerConfiguration() {
+		@SuppressWarnings("unchecked")
+		public HandlerConfiguration<?, ?>[] getHandlerConfiguration()
+				throws ConfigurationException {
 
 			// Create the listing of handler configurations
 			H[] handlerKeys = this.handlerKeys.getEnumConstants();
@@ -293,6 +304,19 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 				// Obtain the handler configuration
 				HandlerConfiguration<H, ?> handlerConfiguration = this.handlers
 						.get(handlerKey);
+				if (handlerConfiguration == null) {
+
+					// No handler provided, therefore ensure type is specified
+					if (this.handlerType == null) {
+						throw new ConfigurationException(
+								"No handler type provided for handler "
+										+ handlerKey.name());
+					}
+
+					// Ensure handler configuration available
+					handlerConfiguration = new HandlerBuilderImpl(handlerKey,
+							Indexed.class, this.handlerType);
+				}
 
 				// Provide at ordinal position for the key
 				handlerConfigurations[handlerKey.ordinal()] = handlerConfiguration;
@@ -303,43 +327,108 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.build.ManagedObjectBuilder#registerHandler(java.lang.String,
-		 *      java.lang.Class)
+		 * ======================================================================
+		 * ManagedObjectHandlersBuilder
+		 * ======================================================================
 		 */
-		public <F extends Enum<F>> HandlerBuilder<F> registerHandler(H key,
-				Class<F> processListingEnum) throws BuildException {
-
-			// Create the handler builder
-			HandlerBuilderImpl<H, F> handlerBuilder = new HandlerBuilderImpl<H, F>(
-					key, processListingEnum);
-
-			// Register the handler
-			this.handlers.put(key, handlerBuilder);
-
-			// Return the builder
-			return handlerBuilder;
-		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.build.ManagedObjectBuilder#registerHandler(java.lang.String)
+		 * @see net.officefloor.frame.api.build.ManagedObjectHandlersBuilder#registerHandler(java.lang.Enum)
 		 */
-		public HandlerBuilder<Indexed> registerHandler(H key)
+		@Override
+		public ManagedObjectHandlerBuilder registerHandler(H key)
 				throws BuildException {
-
-			// Create the handler builder
-			HandlerBuilderImpl<H, Indexed> handlerBuilder = new HandlerBuilderImpl<H, Indexed>(
-					key, null);
-
-			// Register the handler
-			this.handlers.put(key, handlerBuilder);
-
-			// Return the builder
-			return handlerBuilder;
+			return new ManagedObjectHandlerBuilderImpl(key);
 		}
+
+		/**
+		 * {@link ManagedObjectHandlerBuilder} implementation.
+		 */
+		protected class ManagedObjectHandlerBuilderImpl implements
+				ManagedObjectHandlerBuilder {
+
+			/**
+			 * Key identifying the {@link Handler}.
+			 */
+			private final H handlerKey;
+
+			/**
+			 * Initiate.
+			 * 
+			 * @param handlerKey
+			 *            Key identifying the {@link Handler}.
+			 */
+			public ManagedObjectHandlerBuilderImpl(H handlerKey) {
+				this.handlerKey = handlerKey;
+			}
+
+			/*
+			 * ======================================================================
+			 * ManagedObjectHandlerBuilder
+			 * ======================================================================
+			 */
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see net.officefloor.frame.api.build.ManagedObjectHandlerBuilder#setHandlerType(java.lang.Class)
+			 */
+			@Override
+			public <HT extends Handler<?>> void setHandlerType(
+					Class<HT> handlerType) throws BuildException {
+				// Specify the handler type
+				ManagedObjectHandlersBuilderImpl.this.handlerType = handlerType;
+			}
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see net.officefloor.frame.api.build.ManagedObjectHandlerBuilder#getHandlerBuilder(java.lang.Class)
+			 */
+			@Override
+			@SuppressWarnings("unchecked")
+			public <F extends Enum<F>> HandlerBuilder<F> getHandlerBuilder(
+					Class<F> processListingEnum) throws BuildException {
+
+				// Create the handler builder
+				HandlerBuilderImpl<H, F> handlerBuilder = new HandlerBuilderImpl(
+						this.handlerKey, processListingEnum,
+						ManagedObjectHandlersBuilderImpl.this.handlerType);
+
+				// Register the handler
+				ManagedObjectHandlersBuilderImpl.this.handlers.put(
+						this.handlerKey, handlerBuilder);
+
+				// Return the builder
+				return handlerBuilder;
+			}
+
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see net.officefloor.frame.api.build.ManagedObjectHandlerBuilder#getHandlerBuilder()
+			 */
+			@Override
+			@SuppressWarnings("unchecked")
+			public HandlerBuilder<Indexed> getHandlerBuilder()
+					throws BuildException {
+
+				// Create the handler builder
+				HandlerBuilderImpl<H, Indexed> handlerBuilder = new HandlerBuilderImpl(
+						this.handlerKey, null,
+						ManagedObjectHandlersBuilderImpl.this.handlerType);
+
+				// Register the handler
+				ManagedObjectHandlersBuilderImpl.this.handlers.put(
+						this.handlerKey, handlerBuilder);
+
+				// Return the builder
+				return handlerBuilder;
+			}
+		}
+
 	}
 
 }
