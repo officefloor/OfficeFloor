@@ -30,6 +30,40 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getHandlers" element="handlers">
+				<item
+					type="net.officefloor.model.officefloor.ManagedObjectHandlerModel"
+					element="handler">
+					<attributes>
+						<attribute method="getHandlerKey"
+							attribute="key" />
+						<attribute method="getHandlerType"
+							attribute="type" />
+					</attributes>
+				</item>
+			</collection>
+			<collection method="getTasks" element="tasks">
+				<item
+					type="net.officefloor.model.officefloor.ManagedObjectTaskModel"
+					element="task">
+					<attributes>
+						<attribute method="getWorkName"
+							attribute="work" />
+						<attribute method="getTaskName"
+							attribute="task" />
+					</attributes>
+					<collection method="getFlows" element="flows">
+						<item
+							type="net.officefloor.model.officefloor.ManagedObjectTaskFlowModel"
+							element="flow">
+							<attributes>
+								<attribute method="getFlowId"
+									attribute="id" />
+							</attributes>
+						</item>
+					</collection>
+				</item>
+			</collection>
 		</item>
 	</collection>
 	<!-- TEAMS -->
@@ -96,6 +130,18 @@
 								attribute="id" />
 						</attributes>
 					</object>
+				</item>
+			</collection>
+			<collection method="getTasks" element="tasks">
+				<item
+					type="net.officefloor.model.officefloor.OfficeTaskModel"
+					element="task">
+					<attributes>
+						<attribute method="getWorkName"
+							attribute="work" />
+						<attribute method="getTaskName"
+							attribute="task" />
+					</attributes>
 				</item>
 			</collection>
 		</item>
