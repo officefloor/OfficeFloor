@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="String" name="id"/>
-    <field type="String" name="name"/>
-	<list type="OfficeManagedObjectModel" name="managed object" cascade-remove="true"/>
-	<list type="OfficeTeamModel" name="team" cascade-remove="true"/>
-	<list type="ManagedObjectSourceToOfficeFloorOfficeModel" name="responsible managed object"/>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field type="String" name="id" />
+	<field type="String" name="name" />
+	<list type="OfficeManagedObjectModel" name="managed object"
+		cascade-remove="true" />
+	<list type="OfficeTeamModel" name="team" cascade-remove="true" />
+	<list type="OfficeTaskModel" name="task" cascade-remove="true" />
+	<list type="ManagedObjectSourceToOfficeFloorOfficeModel"
+		name="responsible managed object" />
 </model>

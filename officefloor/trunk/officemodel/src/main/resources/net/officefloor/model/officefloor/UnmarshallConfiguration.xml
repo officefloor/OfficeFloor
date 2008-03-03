@@ -18,6 +18,20 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="addHandler" node="handler"
+			class="net.officefloor.model.officefloor.ManagedObjectHandlerModel">
+			<value method="setHandlerKey" node="handler@key" />
+			<value method="setHandlerType" node="handler@type" />
+		</object>
+		<object method="addTask" node="task"
+			class="net.officefloor.model.officefloor.ManagedObjectTaskModel">
+			<value method="setWorkName" node="task@work" />
+			<value method="setTaskName" node="task@task" />
+			<object method="addFlow" node="flow"
+				class="net.officefloor.model.officefloor.ManagedObjectTaskFlowModel">
+				<value method="setFlowId" node="flow@id" />
+			</object>
+		</object>
 	</object>
 	<!-- TEAMS -->
 	<object method="addTeam" node="team-instance"
@@ -56,6 +70,11 @@
 				class="net.officefloor.model.officefloor.OfficeTeamToTeamModel">
 				<value method="setTeamId" node="team-instance@id" />
 			</object>
+		</object>
+		<object method="addTask" node="task"
+			class="net.officefloor.model.officefloor.OfficeTaskModel">
+			<value method="setWorkName" node="task@work" />
+			<value method="setTaskName" node="task@task" />
 		</object>
 	</object>
 </unmarshall>
