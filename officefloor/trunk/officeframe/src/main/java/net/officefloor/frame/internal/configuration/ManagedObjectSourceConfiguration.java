@@ -89,7 +89,10 @@ public interface ManagedObjectSourceConfiguration {
 	 * {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link HandlerConfiguration} for the {@link ManagedObjectSource}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
 	 */
-	HandlerConfiguration<?, ?>[] getHandlerConfiguration();
+	HandlerConfiguration<?, ?>[] getHandlerConfiguration()
+			throws ConfigurationException;
 
 }

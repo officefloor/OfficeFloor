@@ -22,6 +22,7 @@ import java.util.Map;
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
@@ -45,6 +46,11 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 	protected final Class<F> processListingEnum;
 
 	/**
+	 * Type that the {@link Handler} must be implement.
+	 */
+	protected final Class<? extends Handler<F>> handlerType;
+
+	/**
 	 * Registry of {@link net.officefloor.frame.api.execute.Task} instances that
 	 * may be invoked from the {@link net.officefloor.frame.api.execute.Handler}.
 	 */
@@ -63,10 +69,14 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 	 * @param processListingEnum
 	 *            {@link Enum} specifying the keys to the flows from this
 	 *            handler. May be <code>null</code> if no flows.
+	 * @param handlerType
+	 *            Type that the {@link Handler} must implement.
 	 */
-	public HandlerBuilderImpl(H handlerKey, Class<F> processListingEnum) {
+	public HandlerBuilderImpl(H handlerKey, Class<F> processListingEnum,
+			Class<? extends Handler<F>> handlerType) {
 		this.handlerKey = handlerKey;
 		this.processListingEnum = processListingEnum;
+		this.handlerType = handlerType;
 		if (this.processListingEnum != null) {
 			// Load flow place holders
 			for (F flowKey : processListingEnum.getEnumConstants()) {
@@ -148,6 +158,16 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 	 */
 	public H getHandlerKey() {
 		return this.handlerKey;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.HandlerConfiguration#getHandlerType()
+	 */
+	@Override
+	public Class<? extends Handler<F>> getHandlerType() {
+		return this.handlerType;
 	}
 
 	/*
@@ -259,4 +279,5 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 		}
 
 	}
+
 }

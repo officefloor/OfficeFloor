@@ -44,10 +44,10 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
 public class RawManagedObjectMetaData {
 
 	/**
-	 * Prefix to the name of the {@link net.officefloor.frame.api.execute.Work}
-	 * to clean up the {@link ManagedObject}.
+	 * Name of the {@link net.officefloor.frame.api.execute.Work} to clean up
+	 * the {@link ManagedObject}.
 	 */
-	public static final String MANAGED_OBJECT_CLEAN_UP_WORK_PREFIX = "officeframe.managedobject.";
+	public static final String MANAGED_OBJECT_CLEAN_UP_WORK_NAME = "managedobjectcleanup";
 
 	/**
 	 * Creates a {@link RawManagedObjectMetaData}.

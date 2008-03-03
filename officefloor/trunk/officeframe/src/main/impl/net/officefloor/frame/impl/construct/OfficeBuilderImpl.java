@@ -55,6 +55,13 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * @return Name including the namespace.
 	 */
 	public static String getNamespacedName(String namespace, String name) {
+
+		// Null name indicates no name
+		if (name == null) {
+			return null;
+		}
+
+		// Return the namspaced name
 		return (namespace == null ? "" : namespace + ".") + name;
 	}
 
@@ -307,7 +314,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace,
 			String workName, String taskName) throws ConfigurationException {
-		
+
 		// Obtain the work builder
 		String namespacedWorkName = getNamespacedName(namespace, workName);
 		WorkBuilderImpl<?> workBuilder = this.works.get(namespacedWorkName);

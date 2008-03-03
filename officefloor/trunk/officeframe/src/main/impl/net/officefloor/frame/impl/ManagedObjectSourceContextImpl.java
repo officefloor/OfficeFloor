@@ -25,12 +25,14 @@ import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlersBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.OfficeBuilderImpl;
@@ -133,7 +135,7 @@ public class ManagedObjectSourceContextImpl implements
 	 * Obtains the name of the {@link Work} to recycle this
 	 * {@link ManagedObject}.
 	 * 
-	 * @return name of the {@link Work} to recycle this {@link ManagedObject} or
+	 * @return Name of the {@link Work} to recycle this {@link ManagedObject} or
 	 *         <code>null</code> if no recycling of this {@link ManagedObject}.
 	 */
 	public String getRecycleWorkName() {
@@ -211,10 +213,10 @@ public class ManagedObjectSourceContextImpl implements
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getHandlerBuilder(java.lang.Class)
 	 */
 	@Override
-	public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
+	public <H extends Enum<H>> ManagedObjectHandlersBuilder<H> getHandlerBuilder(
 			Class<H> handlerKeys) throws BuildException {
 		// Return the wrapped managed object hander builder
-		return new ManagedObjectHandlerBuilderWrapper<H>(
+		return new ManagedObjectHandlersBuilderWrapper<H>(
 				this.managedObjectBuilder
 						.getManagedObjectHandlerBuilder(handlerKeys));
 	}
@@ -258,11 +260,11 @@ public class ManagedObjectSourceContextImpl implements
 
 		// Name the recycle work
 		this.recycleWorkName = this.managedObjectName + "."
-				+ RawManagedObjectMetaData.MANAGED_OBJECT_CLEAN_UP_WORK_PREFIX;
+				+ RawManagedObjectMetaData.MANAGED_OBJECT_CLEAN_UP_WORK_NAME;
 
 		// Add and return the recycle work
 		return this.addWork(
-				RawManagedObjectMetaData.MANAGED_OBJECT_CLEAN_UP_WORK_PREFIX,
+				RawManagedObjectMetaData.MANAGED_OBJECT_CLEAN_UP_WORK_NAME,
 				typeOfWork);
 	}
 
@@ -293,16 +295,53 @@ public class ManagedObjectSourceContextImpl implements
 	}
 
 	/**
+	 * Wrapper for a delegate {@link ManagedObjectHandlersBuilder} that applies
+	 * the {@link ManagedObjectSource} instance's namespace.
+	 */
+	protected class ManagedObjectHandlersBuilderWrapper<H extends Enum<H>>
+			implements ManagedObjectHandlersBuilder<H> {
+
+		/**
+		 * Delegate {@link ManagedObjectHandlersBuilder}.
+		 */
+		private final ManagedObjectHandlersBuilder<H> delegate;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param delegate
+		 *            Delegate {@link ManagedObjectHandlersBuilder}.
+		 */
+		public ManagedObjectHandlersBuilderWrapper(
+				ManagedObjectHandlersBuilder<H> delegate) {
+			this.delegate = delegate;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.api.build.ManagedObjectHandlersBuilder#registerHandler(java.lang.Enum)
+		 */
+		@Override
+		public ManagedObjectHandlerBuilder registerHandler(H key)
+				throws BuildException {
+			return new ManagedObjectHandlerBuilderWrapper(this.delegate
+					.registerHandler(key));
+		}
+
+	}
+
+	/**
 	 * Wrapper for a delegate {@link ManagedObjectHandlerBuilder} that applies
 	 * the {@link ManagedObjectSource} instance's namespace.
 	 */
-	protected class ManagedObjectHandlerBuilderWrapper<H extends Enum<H>>
-			implements ManagedObjectHandlerBuilder<H> {
+	protected class ManagedObjectHandlerBuilderWrapper implements
+			ManagedObjectHandlerBuilder {
 
 		/**
 		 * Delegate {@link ManagedObjectHandlerBuilder}.
 		 */
-		private final ManagedObjectHandlerBuilder<H> delegate;
+		private final ManagedObjectHandlerBuilder delegate;
 
 		/**
 		 * Initiate.
@@ -311,35 +350,43 @@ public class ManagedObjectSourceContextImpl implements
 		 *            Delegate {@link ManagedObjectHandlerBuilder}.
 		 */
 		public ManagedObjectHandlerBuilderWrapper(
-				ManagedObjectHandlerBuilder<H> delegate) {
+				ManagedObjectHandlerBuilder delegate) {
 			this.delegate = delegate;
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.build.ManagedObjectHandlerBuilder#registerHandler(java.lang.Enum,
-		 *      java.lang.Class)
+		 * @see net.officefloor.frame.api.build.ManagedObjectHandlerBuilder#setHandlerType(java.lang.Class)
 		 */
 		@Override
-		public <F extends Enum<F>> HandlerBuilder<F> registerHandler(H key,
-				Class<F> processListingEnum) throws BuildException {
-			// Return the wrapped handler builder
-			return new HandlerBuilderWrapper<F>(this.delegate.registerHandler(
-					key, processListingEnum));
+		public <H extends Handler<?>> void setHandlerType(Class<H> handlerType)
+				throws BuildException {
+			this.delegate.setHandlerType(handlerType);
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.build.ManagedObjectHandlerBuilder#registerHandler(java.lang.Enum)
+		 * @see net.officefloor.frame.api.build.ManagedObjectHandlerBuilder#getHandlerBuilder(java.lang.Class)
 		 */
 		@Override
-		public HandlerBuilder<Indexed> registerHandler(H key)
+		public <F extends Enum<F>> HandlerBuilder<F> getHandlerBuilder(
+				Class<F> processListingEnum) throws BuildException {
+			return new HandlerBuilderWrapper<F>(this.delegate
+					.getHandlerBuilder(processListingEnum));
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.api.build.ManagedObjectHandlerBuilder#getHandlerBuilder()
+		 */
+		@Override
+		public HandlerBuilder<Indexed> getHandlerBuilder()
 				throws BuildException {
-			// Return the wrapped handler builder
 			return new HandlerBuilderWrapper<Indexed>(this.delegate
-					.registerHandler(key));
+					.getHandlerBuilder());
 		}
 	}
 
