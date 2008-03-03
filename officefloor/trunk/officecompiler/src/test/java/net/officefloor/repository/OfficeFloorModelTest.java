@@ -45,15 +45,17 @@ public class OfficeFloorModelTest extends AbstractModelTestCase {
 						new ManagedObjectSourceToOfficeFloorOfficeModel(
 								"OFFICE", null, null),
 						new PropertyModel[] { new PropertyModel(
-								"PROPERTY NAME", "PROPERTY VALUE") }, null) },
+								"PROPERTY NAME", "PROPERTY VALUE") }, null,
+						null, null, null) },
 				new TeamModel[] { new TeamModel("TEAM", "TEAM-FACTORY",
 						new PropertyModel[] { new PropertyModel("PROP NAME",
 								"PROP VALUE") }, null) },
 				new OfficeFloorOfficeModel[] { new OfficeFloorOfficeModel(
-						"OFFICE", "office",
+						"OFFICE",
+						"office",
 						new OfficeManagedObjectModel[] { new OfficeManagedObjectModel(
 								"MO-NAME", null) }, new OfficeTeamModel[0],
-						null) });
+						null, null) });
 
 		// Configuration Item
 		ConfigurationItem configItem = this.getConfigurationContext()

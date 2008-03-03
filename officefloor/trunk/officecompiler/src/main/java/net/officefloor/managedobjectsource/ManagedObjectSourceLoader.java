@@ -16,6 +16,7 @@
  */
 package net.officefloor.managedobjectsource;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -30,6 +31,7 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.issue.OfficeIssuesListener;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.ClassLoaderResourceLocator;
@@ -42,12 +44,17 @@ import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfigura
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
-import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
+import net.officefloor.model.officefloor.ManagedObjectHandlerFlowModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
+import net.officefloor.model.officefloor.ManagedObjectTaskModel;
+import net.officefloor.model.officefloor.ManagedObjectTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 
 /**
@@ -107,110 +114,118 @@ public class ManagedObjectSourceLoader {
 			propertyModels.add(new PropertyModel(propertyName, propertyValue));
 		}
 
-		// TODO handle managed object additional configuration
-		List<String> handlerFlows = new LinkedList<String>();
+		// Translate to configuration
 		ManagedObjectSourceConfiguration mosConfig = (ManagedObjectSourceConfiguration) managedObjectBuilder;
-		HandlerConfiguration<?, ?>[] handlerConfigs = mosConfig
-				.getHandlerConfiguration();
-		for (HandlerConfiguration<?, ?> handlerConfig : handlerConfigs) {
-			System.out.println("Handler " + handlerConfig.getHandlerKey());
-			for (HandlerFlowConfiguration<?> handlerFlow : handlerConfig
-					.getLinkedProcessConfiguration()) {
-				TaskNodeReference flowTask = handlerFlow.getTaskNodeReference();
-				System.out.println("  flow -> "
-						+ handlerFlow.getFlowName()
-						+ " "
-						+ (flowTask == null ? "[no task]" : flowTask
-								.getWorkName()
-								+ ":" + flowTask.getTaskName()));
 
-				// Add to handler flows if no task node referenced
-				if (flowTask == null) {
-					handlerFlows.add(handlerConfig.getHandlerKey().name() + "."
-							+ handlerFlow.getFlowName());
+		// Obtain the handler configuration
+		List<ManagedObjectHandlerModel> handlerModels = new LinkedList<ManagedObjectHandlerModel>();
+		for (HandlerConfiguration<?, ?> handlerConfig : mosConfig
+				.getHandlerConfiguration()) {
+
+			// Obtain the handler key name
+			String handlerKeyName = handlerConfig.getHandlerKey().name();
+
+			// Determine if handler is provided by managed object source
+			if (handlerConfig.getHandlerFactory() == null) {
+				// Handler to be specified
+				handlerModels.add(new ManagedObjectHandlerModel(handlerKeyName,
+						handlerConfig.getHandlerType().getName(), null));
+
+			} else {
+				// Hander specified only linking to be provided
+
+				// Create the listing of flows for the handler instance
+				List<ManagedObjectHandlerFlowModel> handlerFlows = new LinkedList<ManagedObjectHandlerFlowModel>();
+				for (HandlerFlowConfiguration<?> handlerFlow : handlerConfig
+						.getLinkedProcessConfiguration()) {
+					// Obtain the details of the handler flow
+					String flowName = handlerFlow.getFlowName();
+					TaskNodeReference taskFlow = handlerFlow
+							.getTaskNodeReference();
+					String workName = (taskFlow == null ? null : taskFlow
+							.getWorkName());
+					String taskName = (taskFlow == null ? null : taskFlow
+							.getTaskName());
+
+					// Create and register the flow for the handler
+					handlerFlows.add(new ManagedObjectHandlerFlowModel(
+							flowName, workName, taskName));
 				}
+
+				// Create the handler instance
+				ManagedObjectHandlerInstanceModel handlerInstance = new ManagedObjectHandlerInstanceModel(
+						new Boolean(true), handlerFlows
+								.toArray(new ManagedObjectHandlerFlowModel[0]));
+
+				// Create and register the handler model
+				ManagedObjectHandlerModel handlerModel = new ManagedObjectHandlerModel(
+						handlerKeyName, Handler.class.getName(),
+						handlerInstance);
+				handlerModels.add(handlerModel);
 			}
 		}
 
-		// TODO handle office additional configuration
-		List<String> flows = new LinkedList<String>();
-		List<String> tasks = new LinkedList<String>();
-		Set<String> teamNames = new HashSet<String>();
+		// Obtain the task configuration (including the teams)
 		OfficeConfiguration officeConfig = (OfficeConfiguration) officeBuilder;
-		WorkConfiguration<? extends Work>[] workConfigs = officeConfig
-				.getWorkConfiguration();
-		for (WorkConfiguration<? extends Work> workConfig : workConfigs) {
+		List<ManagedObjectTaskModel> taskModels = new LinkedList<ManagedObjectTaskModel>();
+		Set<String> teamNames = new HashSet<String>();
+		for (WorkConfiguration<? extends Work> workConfig : officeConfig
+				.getWorkConfiguration()) {
+
+			// Obtain the work name
 			String workName = workConfig.getWorkName();
 			for (TaskConfiguration<?, ? extends Work, ?, ?> taskConfig : workConfig
 					.getTaskConfiguration()) {
+
+				// Obtain details of the task
 				String taskName = taskConfig.getTaskName();
 				String teamName = taskConfig.getTeamId();
-				System.out.println(workName + ":" + taskName + " (team="
-						+ teamName + ")");
+
+				// Add team if specified
 				if (teamName != null) {
 					teamNames.add(teamName);
 				}
+
+				// Obtain the flows of the task
+				List<ManagedObjectTaskFlowModel> taskFlows = new LinkedList<ManagedObjectTaskFlowModel>();
 				for (FlowConfiguration flowConfig : taskConfig
 						.getFlowConfiguration()) {
+
+					// Obtain the flow details
 					String flowName = flowConfig.getFlowName();
 					TaskNodeReference initialTask = flowConfig.getInitialTask();
-					System.out.println("  flow "
-							+ flowName
-							+ " ["
-							+ flowConfig.getInstigationStrategy()
-							+ "] "
-							+ (initialTask == null ? "[no task]" : initialTask
-									.getWorkName()
-									+ ":" + initialTask.getTaskName()));
+					String flowWorkName = (initialTask == null ? null
+							: initialTask.getWorkName());
+					String flowTaskName = (initialTask == null ? null
+							: initialTask.getTaskName());
 
-					// Add to flows if no task node referenced
-					if (initialTask == null) {
-						flows.add(workName + "." + taskName + "." + flowName);
-					}
-				}
-				TaskManagedObjectConfiguration[] moConfigs = taskConfig
-						.getManagedObjectConfiguration();
-				for (TaskManagedObjectConfiguration moConfig : moConfigs) {
-					System.out.println("  mo->"
-							+ moConfig.getWorkManagedObjectName());
+					// Add the flow
+					taskFlows.add(new ManagedObjectTaskFlowModel(flowName,
+							flowWorkName, flowTaskName));
 				}
 
-				// Add task if no team designated
-				if (teamName == null) {
-					tasks.add(workName + "." + taskName);
-				}
+				// Add the task
+				taskModels.add(new ManagedObjectTaskModel(workName, taskName,
+						teamName, taskFlows
+								.toArray(new ManagedObjectTaskFlowModel[0])));
 			}
 		}
 
-		// TODO handle office frame additional configuration
-		for (String officeFloorName : officeFrame.officeFloors.keySet()) {
-			System.out.println("office floor: '" + officeFloorName + "'");
-		}
-
-		// TODO remove
-		System.out.println();
-		System.out.println("HANDLERS:");
-		for (String handlerFlow : handlerFlows) {
-			System.out.println("  " + handlerFlow);
-		}
-		System.out.println("FLOWS:");
-		for (String flow : flows) {
-			System.out.println("  " + flow);
-		}
-		System.out.println("TASKS:");
-		for (String task : tasks) {
-			System.out.println("  " + task);
-		}
-		System.out.println("TEAMS:");
-		for (String teamName : teamNames) {
-			System.out.println("  " + teamName);
+		// Create the listing of teams
+		String[] orderedTeamNames = teamNames.toArray(new String[0]);
+		Arrays.sort(orderedTeamNames);
+		ManagedObjectTeamModel[] teams = new ManagedObjectTeamModel[orderedTeamNames.length];
+		for (int i = 0; i < teams.length; i++) {
+			teams[i] = new ManagedObjectTeamModel(orderedTeamNames[i]);
 		}
 
 		// Create the managed object source model
 		ManagedObjectSourceModel managedObjectSourceModel = new ManagedObjectSourceModel(
 				managedObjectSourceName, managedObjectSource.getClass()
 						.getName(), null, propertyModels
-						.toArray(new PropertyModel[0]), null);
+						.toArray(new PropertyModel[0]), handlerModels
+						.toArray(new ManagedObjectHandlerModel[0]), taskModels
+						.toArray(new ManagedObjectTaskModel[0]), teams, null);
 
 		// Return the managed object source model
 		return managedObjectSourceModel;

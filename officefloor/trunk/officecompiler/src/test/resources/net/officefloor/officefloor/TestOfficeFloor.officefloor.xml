@@ -1,16 +1,29 @@
 <office-floor>
 	<managed-object-sources>
-		<managed-object-source id="MO-ID" source="net.officefloor.mo.TestManagedObjectSource">
-			<managing-office name="office"/>
+		<managed-object-source id="MO-ID"
+			source="net.officefloor.mo.TestManagedObjectSource">
+			<managing-office name="office" />
 			<properties>
-				<property name="mo prop name" value="mo prop value"/>
+				<property name="mo prop name" value="mo prop value" />
 			</properties>
+			<handlers>
+				<handler key="HANDLER_KEY"
+					type="net.example.ExampleHandler" />
+			</handlers>
+			<tasks>
+				<task work="work" task="task">
+					<flows>
+						<flow id="flow" />
+					</flows>
+				</task>
+			</tasks>
 		</managed-object-source>
 	</managed-object-sources>
 	<team-instances>
-		<team-instance id="TEAM-ID" team-factory="net.officefloor.team.TestTeamFactory">
+		<team-instance id="TEAM-ID"
+			team-factory="net.officefloor.team.TestTeamFactory">
 			<properties>
-				<property name="team prop name" value="team prop value"/>
+				<property name="team prop name" value="team prop value" />
 			</properties>
 		</team-instance>
 	</team-instances>
@@ -18,14 +31,17 @@
 		<office id="OFFICE" name="office" x="100" y="20">
 			<managed-objects>
 				<managed-object name="MO-NAME" scope="process">
-					<managed-object-source id="MO-ID"/>
+					<managed-object-source id="MO-ID" />
 				</managed-object>
 			</managed-objects>
 			<teams>
 				<team name="TEAM-NAME">
-					<team-instance id="TEAM-ID"/>
+					<team-instance id="TEAM-ID" />
 				</team>
 			</teams>
+			<tasks>
+				<task work="work.name" task="task.name" />
+			</tasks>
 		</office>
 	</offices>
 </office-floor>

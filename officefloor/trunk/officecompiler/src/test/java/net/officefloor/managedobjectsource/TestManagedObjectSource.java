@@ -17,9 +17,13 @@
 package net.officefloor.managedobjectsource;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 import net.officefloor.frame.api.build.HandlerBuilder;
+import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlersBuilder;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -63,11 +67,24 @@ public class TestManagedObjectSource extends AbstractManagedObjectSource {
 				.getManagedObjectSourceContext();
 
 		// Register handler with flows
-		ManagedObjectHandlerBuilder<HandlerKey> managedObjectHandlerBuilder = sourceContext
+		ManagedObjectHandlersBuilder<HandlerKey> managedObjectHandlerBuilder = sourceContext
 				.getHandlerBuilder(HandlerKey.class);
-		HandlerBuilder<HandlerFlowKey> handlerBuilder = managedObjectHandlerBuilder
-				.registerHandler(HandlerKey.HANDLER, HandlerFlowKey.class);
-		handlerBuilder.linkProcess(0, null, null);
+		ManagedObjectHandlerBuilder indirectHandlerBuilder = managedObjectHandlerBuilder
+				.registerHandler(HandlerKey.INDIRECT_HANDLER);
+		indirectHandlerBuilder.setHandlerType(Handler.class);
+		ManagedObjectHandlerBuilder addedHandlerBuilder = managedObjectHandlerBuilder
+				.registerHandler(HandlerKey.ADDED_HANDLER);
+		HandlerBuilder<Indexed> addedHandler = addedHandlerBuilder
+				.getHandlerBuilder();
+		addedHandler.setHandlerFactory(new HandlerFactory<Indexed>() {
+			@Override
+			public Handler<Indexed> createHandler() {
+				TestCase.fail("Should not create Handler");
+				return null;
+			}
+		});
+		addedHandler.linkProcess(0, null, null);
+		addedHandler.linkProcess(1, "handler-work", "handler-task");
 
 		// Register a task with the office
 		ManagedObjectWorkBuilder<Work> workBuilder = sourceContext.addWork(
@@ -109,7 +126,7 @@ public class TestManagedObjectSource extends AbstractManagedObjectSource {
 	 * Handler keys.
 	 */
 	public static enum HandlerKey {
-		HANDLER
+		INDIRECT_HANDLER, ADDED_HANDLER
 	}
 
 	/**
