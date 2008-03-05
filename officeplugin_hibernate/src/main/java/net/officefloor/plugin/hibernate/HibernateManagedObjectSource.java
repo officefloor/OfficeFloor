@@ -21,14 +21,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -40,8 +34,7 @@ import org.hibernate.cfg.Configuration;
  * 
  * @author Daniel
  */
-public class HibernateManagedObjectSource implements ManagedObjectSource,
-		ManagedObjectSourceMetaData {
+public class HibernateManagedObjectSource extends AbstractManagedObjectSource {
 
 	/**
 	 * {@link SessionFactory}.
@@ -56,32 +49,35 @@ public class HibernateManagedObjectSource implements ManagedObjectSource,
 
 	/*
 	 * ====================================================================
-	 * ManagedObjectSource
+	 * AbstractManagedObjectSource
 	 * ====================================================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getSpecification()
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
 	 */
-	public ManagedObjectSourceSpecification getSpecification() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		// No specification
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
-	public void init(ManagedObjectSourceContext context) throws Exception {
+	@Override
+	protected void loadMetaData(MetaDataContext context) throws Exception {
+
+		// Specify types
+		context.setObjectClass(Session.class);
+		context.setManagedObjectClass(HibernateManagedObject.class);
+
 		// Obtain location of configuration file
-		String configFilePath = context.getProperties().getProperty(
-				"configuration");
-		if (configFilePath == null) {
-			configFilePath = "hibernate.cfg.xml";
-		}
+		String configFilePath = context.getManagedObjectSourceContext()
+				.getProperty("configuration", "hibernate.cfg.xml");
 
 		// Create the dummy connection
 		this.dummyConnection = (Connection) Proxy.newProxyInstance(this
@@ -95,119 +91,33 @@ public class HibernateManagedObjectSource implements ManagedObjectSource,
 					}
 				});
 
+		// Require connection dependency
+		context.getDependencyLoader(HibernateDependenciesEnum.class)
+				.mapDependencyType(HibernateDependenciesEnum.CONNECTION,
+						Connection.class);
+
 		// Create the Session Factory
 		this.sessionFactory = new Configuration().configure(
-				context.getResourceLocator().locateURL(configFilePath))
-				.buildSessionFactory();
+				context.getManagedObjectSourceContext().getResourceLocator()
+						.locateURL(configFilePath)).buildSessionFactory();
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource#getManagedObject()
 	 */
-	public ManagedObjectSourceMetaData getMetaData() {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
-	 */
-	public void start(ManagedObjectExecuteContext context) throws Exception {
-		// Already started
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
-	 */
-	public void sourceManagedObject(ManagedObjectUser user) {
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
 		// Create the Session (tricking it to believe it has a user supplied
 		// connection)
 		Session session = this.sessionFactory.openSession(this.dummyConnection);
-		
+
 		// Create the Managed Object
 		HibernateManagedObject mo = new HibernateManagedObject(session);
 
-		// Specify the Managed Object
-		user.setManagedObject(mo);
-	}
-
-	/*
-	 * ====================================================================
-	 * ManagedObjectSourceMetaData
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
-	 */
-	public Class getManagedObjectClass() {
-		return HibernateManagedObject.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getObjectClass()
-	 */
-	public Class getObjectClass() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyKeys()
-	 */
-	public Class getDependencyKeys() {
-		return HibernateDependenciesEnum.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyMetaData(D)
-	 */
-	public ManagedObjectDependencyMetaData getDependencyMetaData(Enum key) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerKeys()
-	 */
-	public Class getHandlerKeys() {
-		// No handlers
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
-	 */
-	public Class getHandlerType(Enum key) {
-		// No handlers
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
-	 */
-	public ManagedObjectExtensionInterfaceMetaData[] getExtensionInterfacesMetaData() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+		// Return the Managed Object
+		return mo;
 	}
 
 	/**
@@ -220,4 +130,5 @@ public class HibernateManagedObjectSource implements ManagedObjectSource,
 		 */
 		CONNECTION
 	}
+
 }
