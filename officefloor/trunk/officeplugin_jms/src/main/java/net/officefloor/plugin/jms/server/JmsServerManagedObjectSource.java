@@ -38,18 +38,11 @@ import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectExtensionInterfaceMetaDataImpl;
-import net.officefloor.plugin.jms.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.jms.JmsAdminObjectFactory;
+import net.officefloor.plugin.jms.JmsUtil;
 
 /**
  * JMS Server
@@ -59,10 +52,8 @@ import net.officefloor.plugin.jms.JmsAdminObjectFactory;
  * 
  * @author Daniel
  */
-public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		extends AbstractManagedObjectSource implements ManagedObjectSource,
-		ManagedObjectSourceMetaData<D, H>, HandlerFactory<Indexed>,
-		Handler<Indexed>, ServerSessionPool {
+public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
+		implements HandlerFactory<Indexed>, Handler<Indexed>, ServerSessionPool {
 
 	/**
 	 * Property name to obtain the message selector.
@@ -120,7 +111,7 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 	/**
 	 * Pool of {@link ServerSession} instances.
 	 */
-	protected final List<JmsServerManagedObject<D, H>> serverSessionPool = new ArrayList<JmsServerManagedObject<D, H>>();
+	protected final List<JmsServerManagedObject> serverSessionPool = new ArrayList<JmsServerManagedObject>();
 
 	/**
 	 * Maximum number of {@link javax.jms.ServerSession} instances.
@@ -145,7 +136,7 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 	 *            {@link JmsServerManagedObject} to be returned to pool.
 	 */
 	protected void returnJmsServerManagedObject(
-			JmsServerManagedObject<D, H> jmsServerManagedObject) {
+			JmsServerManagedObject jmsServerManagedObject) {
 		synchronized (this.serverSessionPool) {
 			// Return to pool
 			this.serverSessionPool.add(jmsServerManagedObject);
@@ -161,7 +152,7 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 	 * @param managedObject
 	 *            {@link JmsServerManagedObject}.
 	 */
-	public void runSession(JmsServerManagedObject<D, H> managedObject) {
+	public void runSession(JmsServerManagedObject managedObject) {
 		// Invoke on message to run the session and process message
 		this.handlerContext.invokeProcess(0, managedObject, managedObject);
 	}
@@ -175,26 +166,31 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getSpecification()
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
 	 */
-	public ManagedObjectSourceSpecification getSpecification() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		// No specification
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
-	public void init(ManagedObjectSourceContext context) throws Exception {
+	@Override
+	protected void loadMetaData(MetaDataContext context) throws Exception {
+
+		// Specify object types
+		context.setManagedObjectClass(JmsServerManagedObject.class);
 
 		// Obtain the properties
-		Properties properties = context.getProperties();
+		Properties properties = context.getManagedObjectSourceContext()
+				.getProperties();
 
 		// Obtain the JMS admin object factory
-		JmsAdminObjectFactory jmsAdminObjectFactory = this
-				.getJmsAdminObjectFactory(context.getProperties());
+		JmsAdminObjectFactory jmsAdminObjectFactory = JmsUtil
+				.getJmsAdminObjectFactory(properties);
 
 		// Obtain the connection factory
 		this.connectionFactory = jmsAdminObjectFactory
@@ -210,34 +206,40 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 		this.maxSessions = Integer.parseInt(properties
 				.getProperty(JMS_MAX_SERVER_SESSION));
 
+		// Specify handler
+		context.getHandlerLoader(JmsServerHandlersEnum.class);
+
 		// Register the OnMessageTask
 		ManagedObjectTaskBuilder<?> onMessageTask = new OnMessageTask()
 				.registerTask("jms.server.onmessage", "onmessage",
-						"jms.server.onmessage", context);
+						"jms.server.onmessage", context
+								.getManagedObjectSourceContext());
 		onMessageTask.setNextTaskInFlow(properties
 				.getProperty(JMS_ON_MESSAGE_WORK), properties
 				.getProperty(JMS_ON_MESSAGE_TASK));
 
 		// Register the handler (and link OnMessageTask)
 		ManagedObjectHandlersBuilder<JmsServerHandlersEnum> managedObjectBuilder = context
-				.getHandlerBuilder(JmsServerHandlersEnum.class);
+				.getManagedObjectSourceContext().getHandlerBuilder(
+						JmsServerHandlersEnum.class);
 		HandlerBuilder<Indexed> handler = managedObjectBuilder.registerHandler(
 				JmsServerHandlersEnum.JMS_SERVER_HANDLER).getHandlerBuilder();
 		handler.setHandlerFactory(this);
 		handler.linkProcess(0, "jms.server.onmessage", "onmessage");
 
 		// Register the recycle task
-		new RecycleJmsServerTask(this).registerAsRecycleTask(context,
-				"jms.server.recycle");
-	}
+		new RecycleJmsServerTask(this).registerAsRecycleTask(context
+				.getManagedObjectSourceContext(), "jms.server.recycle");
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
-	 */
-	public ManagedObjectSourceMetaData<D, H> getMetaData() {
-		return this;
+		// Specify extension interfaces
+		context.addManagedObjectExtensionInterface(Transaction.class,
+				new ExtensionInterfaceFactory<Transaction>() {
+					public Transaction createExtensionInterface(
+							ManagedObject managedObject) {
+						// Return as Transaction
+						return (Transaction) managedObject;
+					}
+				});
 	}
 
 	/*
@@ -267,96 +269,14 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource#getManagedObject()
 	 */
-	public void sourceManagedObject(ManagedObjectUser user) {
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
 		// Can not source server managed object
 		throw new UnsupportedOperationException(
 				"Can not source a managed object from a "
 						+ this.getClass().getName());
-	}
-
-	/*
-	 * ====================================================================
-	 * ManagedObjectSourceMetaData
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
-	 */
-	@SuppressWarnings("unchecked")
-	public Class<? extends ManagedObject> getManagedObjectClass() {
-		return JmsServerManagedObject.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getObjectClass()
-	 */
-	public Class<?> getObjectClass() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyKeys()
-	 */
-	public Class<D> getDependencyKeys() {
-		// No dependencies
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyMetaData(D)
-	 */
-	public ManagedObjectDependencyMetaData getDependencyMetaData(D key) {
-		// No dependencies
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerKeys()
-	 */
-	@SuppressWarnings("unchecked")
-	public Class<H> getHandlerKeys() {
-		return (Class) JmsServerHandlersEnum.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
-	 */
-	public Class<? extends Handler<?>> getHandlerType(H key) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
-	 */
-	public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
-		return new ManagedObjectExtensionInterfaceMetaData[] { new ManagedObjectExtensionInterfaceMetaDataImpl<Transaction>(
-				Transaction.class,
-				new ExtensionInterfaceFactory<Transaction>() {
-					public Transaction createExtensionInterface(
-							ManagedObject managedObject) {
-						// Return as Transaction
-						return (Transaction) managedObject;
-					}
-				}) };
 	}
 
 	/*
@@ -423,15 +343,14 @@ public class JmsServerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
 				}
 			} else {
 				// Pool not full but prioritise taking from pool over creating
-				JmsServerManagedObject<D, H> serverMo;
+				JmsServerManagedObject serverMo;
 				if (!this.serverSessionPool.isEmpty()) {
 					// Source from pool
 					serverMo = this.serverSessionPool.remove(0);
 				} else {
 					// Create the server session (transacted)
-					serverMo = new JmsServerManagedObject<D, H>(this,
-							this.connection.createSession(true,
-									Session.SESSION_TRANSACTED));
+					serverMo = new JmsServerManagedObject(this, this.connection
+							.createSession(true, Session.SESSION_TRANSACTED));
 
 					// Increment the number of sessions
 					this.numberOfSessions++;

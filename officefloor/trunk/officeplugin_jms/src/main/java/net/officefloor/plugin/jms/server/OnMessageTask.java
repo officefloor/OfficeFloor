@@ -30,7 +30,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
  * @author Daniel
  */
 class OnMessageTask extends
-		AbstractSingleTask<JmsServerManagedObject<?, ?>, Work, None, Indexed> {
+		AbstractSingleTask<JmsServerManagedObject, Work, None, Indexed> {
 
 	/*
 	 * (non-Javadoc)
@@ -38,11 +38,11 @@ class OnMessageTask extends
 	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
 	 */
 	public Object doTask(
-			TaskContext<JmsServerManagedObject<?, ?>, Work, None, Indexed> context)
+			TaskContext<JmsServerManagedObject, Work, None, Indexed> context)
 			throws Exception {
 
 		// Obtain the JMS Server Managed Object
-		JmsServerManagedObject<?, ?> mo = context.getParameter();
+		JmsServerManagedObject mo = context.getParameter();
 
 		// Run the session to source the managed object
 		mo.getSession().run();

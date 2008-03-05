@@ -31,13 +31,13 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel
  */
-public class JmsServerManagedObject<D extends Enum<D>, H extends Enum<H>>
-		implements ManagedObject, ServerSession, MessageListener, Transaction {
+public class JmsServerManagedObject implements ManagedObject, ServerSession,
+		MessageListener, Transaction {
 
 	/**
 	 * {@link JmsServerManagedObjectSource}.
 	 */
-	protected final JmsServerManagedObjectSource<D, H> moSource;
+	protected final JmsServerManagedObjectSource moSource;
 
 	/**
 	 * {@link Session}.
@@ -64,9 +64,8 @@ public class JmsServerManagedObject<D extends Enum<D>, H extends Enum<H>>
 	 * @throws JMSException
 	 *             If fails to initiate.
 	 */
-	protected JmsServerManagedObject(
-			JmsServerManagedObjectSource<D, H> moSource, Session session)
-			throws JMSException {
+	protected JmsServerManagedObject(JmsServerManagedObjectSource moSource,
+			Session session) throws JMSException {
 		// Store state
 		this.moSource = moSource;
 		this.session = session;
