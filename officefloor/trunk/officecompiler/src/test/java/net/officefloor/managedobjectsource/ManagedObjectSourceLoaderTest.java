@@ -22,8 +22,8 @@ import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.impl.RawManagedObjectMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.managedobjectsource.TestManagedObjectSource.HandlerKey;
-import net.officefloor.model.officefloor.ManagedObjectHandlerFlowModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
@@ -79,12 +79,11 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 				.get(1).getHandlerInstance();
 		assertTrue("Handler instance is provide by managed object source",
 				handlerInstance.getIsManagedObjectSourceProvided());
-		assertList(
-				new String[] { "getFlowName", "getWorkName", "getTaskName" },
-				handlerInstance.getFlows(), new ManagedObjectHandlerFlowModel(
-						"0", null, null), new ManagedObjectHandlerFlowModel(
-						"1", MO_NAME + ".handler-work", MO_NAME
-								+ ".handler-task"));
+		assertList(new String[] { "getLinkProcessId", "getWorkName",
+				"getTaskName" }, handlerInstance.getLinkProcesses(),
+				new ManagedObjectHandlerLinkProcessModel("0", null, null),
+				new ManagedObjectHandlerLinkProcessModel("1", MO_NAME
+						+ ".handler-work", MO_NAME + ".handler-task"));
 
 		// Validate tasks
 		final String RECYCLE_WORK_NAME = MO_NAME + "."

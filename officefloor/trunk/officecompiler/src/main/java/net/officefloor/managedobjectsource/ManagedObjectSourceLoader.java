@@ -48,8 +48,8 @@ import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
-import net.officefloor.model.officefloor.ManagedObjectHandlerFlowModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
@@ -132,10 +132,10 @@ public class ManagedObjectSourceLoader {
 						handlerConfig.getHandlerType().getName(), null));
 
 			} else {
-				// Hander specified only linking to be provided
+				// Hander factory specified only linking to be provided
 
 				// Create the listing of flows for the handler instance
-				List<ManagedObjectHandlerFlowModel> handlerFlows = new LinkedList<ManagedObjectHandlerFlowModel>();
+				List<ManagedObjectHandlerLinkProcessModel> handlerFlows = new LinkedList<ManagedObjectHandlerLinkProcessModel>();
 				for (HandlerFlowConfiguration<?> handlerFlow : handlerConfig
 						.getLinkedProcessConfiguration()) {
 					// Obtain the details of the handler flow
@@ -148,14 +148,17 @@ public class ManagedObjectSourceLoader {
 							.getTaskName());
 
 					// Create and register the flow for the handler
-					handlerFlows.add(new ManagedObjectHandlerFlowModel(
+					handlerFlows.add(new ManagedObjectHandlerLinkProcessModel(
 							flowName, workName, taskName));
 				}
 
 				// Create the handler instance
 				ManagedObjectHandlerInstanceModel handlerInstance = new ManagedObjectHandlerInstanceModel(
-						new Boolean(true), handlerFlows
-								.toArray(new ManagedObjectHandlerFlowModel[0]));
+						new Boolean(true),
+						null,
+						null,
+						handlerFlows
+								.toArray(new ManagedObjectHandlerLinkProcessModel[0]));
 
 				// Create and register the handler model
 				ManagedObjectHandlerModel handlerModel = new ManagedObjectHandlerModel(

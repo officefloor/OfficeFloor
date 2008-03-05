@@ -20,6 +20,8 @@ import java.io.File;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
@@ -82,10 +84,8 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 				.loadOfficeFloor(this.configurationItem);
 
 		// ----------------------------------------
-		// Validate the Office Floor
-		// ----------------------------------------
-
 		// Validate the managed objects
+		// ----------------------------------------
 		assertList(new String[] { "getId", "getSource" }, officeFloor
 				.getManagedObjectSources(), new ManagedObjectSourceModel(
 				"MO-ID", "net.officefloor.mo.TestManagedObjectSource", null,
@@ -95,18 +95,39 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 						.getManagingOffice().getManagingOfficeName());
 		ManagedObjectSourceModel mos = officeFloor.getManagedObjectSources()
 				.get(0);
+
+		// Validate properties
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
 				new PropertyModel("mo prop name", "mo prop value"));
+
+		// Validate handlers
 		assertList(new String[] { "getHandlerKey", "getHandlerType" }, mos
 				.getHandlers(), new ManagedObjectHandlerModel("HANDLER_KEY",
 				"net.example.ExampleHandler", null));
+		ManagedObjectHandlerInstanceModel handlerInstance = mos.getHandlers()
+				.get(0).getHandlerInstance();
+		assertProperties(new ManagedObjectHandlerInstanceModel(false,
+				"net.officefloor.handler.example.ExampleHandlerLoader",
+				"net.example.ExampleHandler", null), handlerInstance,
+				"getLoader", "getConfiguration");
+		assertList(new String[] { "getLinkProcessId", "getWorkName",
+				"getTaskName" }, handlerInstance.getLinkProcesses(),
+				new ManagedObjectHandlerLinkProcessModel("0", "work.name",
+						"task.name"));
+
+		// Validate work
 		assertList(new String[] { "getWorkName", "getTaskName" }, mos
 				.getTasks(), new ManagedObjectTaskModel("work", "task", null,
 				null));
-		assertList(new String[] { "getFlowId" }, mos.getTasks().get(0)
-				.getFlows(), new ManagedObjectTaskFlowModel("flow", null, null));
+		assertList(
+				new String[] { "getFlowId", "getInitialWorkName",
+						"getInitialTaskName" },
+				mos.getTasks().get(0).getFlows(),
+				new ManagedObjectTaskFlowModel("flow", "work.name", "task.name"));
 
+		// ----------------------------------------
 		// Validate the teams
+		// ----------------------------------------
 		assertList(new String[] { "getId", "getTeamFactory" }, officeFloor
 				.getTeams(), new TeamModel("TEAM-ID",
 				"net.officefloor.team.TestTeamFactory", null, null));
@@ -114,7 +135,9 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 				.getTeams().get(0).getProperties(), new PropertyModel(
 				"team prop name", "team prop value"));
 
+		// ----------------------------------------
 		// Validate the offices
+		// ----------------------------------------
 		assertList(new String[] { "getId", "getName", "getX", "getY" },
 				officeFloor.getOffices(), new OfficeFloorOfficeModel("OFFICE",
 						"office", null, null, null, null, 100, 20));

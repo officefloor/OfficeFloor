@@ -14,26 +14,37 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work;
+package net.officefloor.handler;
 
-import net.officefloor.model.work.WorkModel;
+import net.officefloor.model.handler.HandlerModel;
+import net.officefloor.repository.ConfigurationContext;
 
 /**
- * Loads the {@link WorkModel}.
+ * Context for the {@link HandlerLoader}.
  * 
  * @author Daniel
  */
-public interface WorkLoader {
+public interface HandlerLoaderContext {
 
 	/**
-	 * Loads the {@link WorkModel} from configuration.
+	 * Obtains the configuration string.
 	 * 
-	 * @param context
-	 *            {@link WorkLoaderContext} to source details to load the
-	 *            {@link WorkModel}.
-	 * @throws Exception
-	 *             If fails.
+	 * @return Configuration string.
 	 */
-	WorkModel<?> loadWork(WorkLoaderContext context) throws Exception;
+	String getConfiguration();
+
+	/**
+	 * Obtains the {@link ConfigurationContext}.
+	 * 
+	 * @return {@link ConfigurationContext}.
+	 */
+	ConfigurationContext getConfigurationContext();
+
+	/**
+	 * Obtains the {@link ClassLoader} for loading the {@link HandlerModel}.
+	 * 
+	 * @return {@link ClassLoader} for loading the {@link HandlerModel}.
+	 */
+	ClassLoader getClassLoader();
 
 }
