@@ -35,11 +35,10 @@ public class TextJmsManagedObjectTest extends AbstractJmsManagedObjectTest {
 	public void testPublishTextMessage() throws Exception {
 
 		final String TEST_MSG = "test msg";
-		
+
 		// Create the JMS managed object source
 		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
-		loader.addProperty(
-				JmsManagedObjectSource.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
+		loader.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
 				TestJmsAdminObjectFactory.class.getName());
 		ManagedObjectSource moSource = loader
 				.loadManagedObjectSource(JmsManagedObjectSource.class);
@@ -50,17 +49,17 @@ public class TextJmsManagedObjectTest extends AbstractJmsManagedObjectTest {
 
 		// Obtain the producer
 		TextMessageProducer producer = (TextMessageProducer) mo.getObject();
-		
+
 		// Send the text
 		producer.send(TEST_MSG);
-		
+
 		// Commit the message to queue
 		Transaction transaction = (Transaction) mo;
 		transaction.commit();
-		
+
 		// Source text
 		String msg = this.popText(100);
-		
+
 		// Validate
 		assertEquals("Incorrect message", TEST_MSG, msg);
 	}

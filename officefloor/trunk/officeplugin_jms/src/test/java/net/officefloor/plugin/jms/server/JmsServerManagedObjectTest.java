@@ -36,6 +36,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.jms.AbstractJmsManagedObjectTest;
+import net.officefloor.plugin.jms.JmsUtil;
 import net.officefloor.plugin.jms.TestJmsAdminObjectFactory;
 
 /**
@@ -64,10 +65,8 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		// Configure the JMS Server Managed Object
 		ManagedObjectBuilder moBuilder = this.constructManagedObject(
 				"JMS_SERVER", JmsServerManagedObjectSource.class, "TEST");
-		moBuilder
-				.addProperty(
-						JmsServerManagedObjectSource.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
-						TestJmsAdminObjectFactory.class.getName());
+		moBuilder.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
+				TestJmsAdminObjectFactory.class.getName());
 		moBuilder.addProperty(
 				JmsServerManagedObjectSource.JMS_MAX_SERVER_SESSION, "2");
 

@@ -25,18 +25,12 @@ import java.util.Properties;
  * 
  * @author Daniel
  */
-public abstract class AbstractManagedObjectSource {
+public class JmsUtil {
 
 	/**
 	 * Property name to obtain the class of the {@link JmsAdminObjectFactory}.
 	 */
 	public static final String JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY = "net.officefloor.plugin.jms.adminobjectfactory";
-
-	/**
-	 * Default constructor as required.
-	 */
-	public AbstractManagedObjectSource() {
-	}
 
 	/**
 	 * <p>
@@ -52,7 +46,7 @@ public abstract class AbstractManagedObjectSource {
 	 * @throws Exception
 	 *             If fails to create the {@link JmsAdminObjectFactory}.
 	 */
-	protected JmsAdminObjectFactory getJmsAdminObjectFactory(
+	public static JmsAdminObjectFactory getJmsAdminObjectFactory(
 			Properties properties) throws Exception {
 
 		// Obtain the name of the JMS admin object factory
@@ -76,6 +70,12 @@ public abstract class AbstractManagedObjectSource {
 
 		// Return the configured JMS admin object factory
 		return jmsAdminObjectFactory;
+	}
+
+	/**
+	 * All access via static methods.
+	 */
+	private JmsUtil() {
 	}
 
 }
