@@ -2,5 +2,8 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="Boolean" name="is managed object source provided" />
-	<list type="ManagedObjectHandlerFlowModel" name="flow" />
+	<field type="String" name="loader" />
+	<field type="String" name="configuration" />
+	<list type="ManagedObjectHandlerLinkProcessModel" name="link process"
+		plural="link processes" cascade-remove="true" />
 </model>

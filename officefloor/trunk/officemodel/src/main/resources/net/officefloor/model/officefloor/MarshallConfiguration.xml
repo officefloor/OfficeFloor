@@ -40,6 +40,29 @@
 						<attribute method="getHandlerType"
 							attribute="type" />
 					</attributes>
+					<object method="getHandlerInstance"
+						element="handler-instance">
+						<attributes>
+							<attribute method="getLoader"
+								attribute="loader" />
+							<attribute method="getConfiguration"
+								attribute="configuration" />
+						</attributes>
+						<collection method="getLinkProcesses">
+							<item
+								type="net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel"
+								element="link-process">
+								<attributes>
+									<attribute method="getLinkProcessId"
+										attribute="id" />
+									<attribute method="getWorkName"
+										attribute="work" />
+									<attribute method="getTaskName"
+										attribute="task" />
+								</attributes>
+							</item>
+						</collection>
+					</object>
 				</item>
 			</collection>
 			<collection method="getTasks" element="tasks">
