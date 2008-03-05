@@ -14,26 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work;
+package net.officefloor.handler;
 
-import net.officefloor.model.work.WorkModel;
+import net.officefloor.model.handler.HandlerModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 
 /**
- * Loads the {@link WorkModel}.
+ * Loads the {@link ManagedObjectHandlerInstanceModel}.
  * 
  * @author Daniel
  */
-public interface WorkLoader {
+public interface HandlerLoader {
 
 	/**
-	 * Loads the {@link WorkModel} from configuration.
+	 * Loads the {@link HandlerModel} from configuration.
 	 * 
 	 * @param context
-	 *            {@link WorkLoaderContext} to source details to load the
-	 *            {@link WorkModel}.
+	 *            {@link HandlerLoaderContext} to source details to load the
+	 *            {@link HandlerModel}.
+	 * @return {@link HandlerModel}.
 	 * @throws Exception
 	 *             If fails.
 	 */
-	WorkModel<?> loadWork(WorkLoaderContext context) throws Exception;
+	HandlerModel<?> loadHandler(HandlerLoaderContext context) throws Exception;
 
 }

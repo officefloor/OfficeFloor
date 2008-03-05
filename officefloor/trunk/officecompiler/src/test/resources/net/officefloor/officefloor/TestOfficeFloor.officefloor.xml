@@ -8,12 +8,20 @@
 			</properties>
 			<handlers>
 				<handler key="HANDLER_KEY"
-					type="net.example.ExampleHandler" />
+					type="net.example.ExampleHandler">
+					<handler-instance
+						loader="net.officefloor.handler.example.ExampleHandlerLoader"
+						configuration="net.example.ExampleHandler">
+						<link-process id="0" work="work.name"
+							task="task.name" />
+					</handler-instance>
+				</handler>
 			</handlers>
 			<tasks>
 				<task work="work" task="task">
 					<flows>
-						<flow id="flow" />
+						<flow id="flow" work="work.name"
+							task="task.name" />
 					</flows>
 				</task>
 			</tasks>
