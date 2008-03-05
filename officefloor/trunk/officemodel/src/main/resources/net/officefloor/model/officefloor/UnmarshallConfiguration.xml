@@ -22,6 +22,22 @@
 			class="net.officefloor.model.officefloor.ManagedObjectHandlerModel">
 			<value method="setHandlerKey" node="handler@key" />
 			<value method="setHandlerType" node="handler@type" />
+			<object method="setHandlerInstance" node="handler-instance"
+				class="net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel">
+				<value method="setLoader"
+					node="handler-instance@loader" />
+				<value method="setConfiguration"
+					node="handler-instance@configuration" />
+				<object method="addLinkProcess" node="link-process"
+					class="net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel">
+					<value method="setLinkProcessId"
+						node="link-process@id" />
+					<value method="setWorkName"
+						node="link-process@work" />
+					<value method="setTaskName"
+						node="link-process@task" />
+				</object>
+			</object>
 		</object>
 		<object method="addTask" node="task"
 			class="net.officefloor.model.officefloor.ManagedObjectTaskModel">
@@ -30,6 +46,8 @@
 			<object method="addFlow" node="flow"
 				class="net.officefloor.model.officefloor.ManagedObjectTaskFlowModel">
 				<value method="setFlowId" node="flow@id" />
+				<value method="setInitialWorkName" node="flow@work" />
+				<value method="setInitialTaskName" node="flow@task" />
 			</object>
 		</object>
 	</object>
