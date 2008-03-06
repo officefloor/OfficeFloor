@@ -82,6 +82,10 @@
 							<attributes>
 								<attribute method="getFlowId"
 									attribute="id" />
+								<attribute method="getInitialWorkName"
+									attribute="work" />
+								<attribute method="getInitialTaskName"
+									attribute="task" />
 							</attributes>
 						</item>
 					</collection>
