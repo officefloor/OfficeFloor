@@ -39,7 +39,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel
  */
-public class TestManagedObjectSource extends AbstractManagedObjectSource {
+public class TestContextManagedObjectSource extends AbstractManagedObjectSource {
 
 	/*
 	 * (non-Javadoc)
@@ -59,13 +59,10 @@ public class TestManagedObjectSource extends AbstractManagedObjectSource {
 	@Override
 	protected void loadMetaData(MetaDataContext context) throws Exception {
 
-		// Provide meta-data
-		context.setObjectClass(Object.class);
-
 		// Obtain the managed object source context for additional configuration
 		ManagedObjectSourceContext sourceContext = context
 				.getManagedObjectSourceContext();
-
+		
 		// Register handler with flows
 		ManagedObjectHandlersBuilder<HandlerKey> managedObjectHandlerBuilder = sourceContext
 				.getHandlerBuilder(HandlerKey.class);

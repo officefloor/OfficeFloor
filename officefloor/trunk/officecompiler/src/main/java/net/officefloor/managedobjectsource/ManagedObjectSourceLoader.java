@@ -47,7 +47,9 @@ import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
+import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
@@ -82,6 +84,7 @@ public class ManagedObjectSourceLoader {
 	 *             from
 	 *             {@link ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)}.
 	 */
+	@SuppressWarnings("unchecked")
 	public ManagedObjectSourceModel loadManagedObjectSource(
 			String managedObjectSourceName,
 			ManagedObjectSource managedObjectSource, Properties properties,
@@ -114,57 +117,99 @@ public class ManagedObjectSourceLoader {
 			propertyModels.add(new PropertyModel(propertyName, propertyValue));
 		}
 
+		// Obtain the meta-data
+		ManagedObjectSourceMetaData mosMetaData = managedObjectSource
+				.getMetaData();
+
+		// Obtain the dependency configuration
+		List<ManagedObjectDependencyModel> dependencyModels = new LinkedList<ManagedObjectDependencyModel>();
+		Class<? extends Enum<?>> dependencyKeys = mosMetaData
+				.getDependencyKeys();
+		if (dependencyKeys != null) {
+			for (Enum dependencyKey : dependencyKeys.getEnumConstants()) {
+				// Obtain the dependency type
+				Class<?> dependencyType = mosMetaData.getDependencyMetaData(
+						dependencyKey).getType();
+
+				// Create and add the dependency model
+				dependencyModels.add(new ManagedObjectDependencyModel(
+						dependencyKey.name(), dependencyType.getName()));
+			}
+		}
+
 		// Translate to configuration
 		ManagedObjectSourceConfiguration mosConfig = (ManagedObjectSourceConfiguration) managedObjectBuilder;
 
 		// Obtain the handler configuration
 		List<ManagedObjectHandlerModel> handlerModels = new LinkedList<ManagedObjectHandlerModel>();
-		for (HandlerConfiguration<?, ?> handlerConfig : mosConfig
-				.getHandlerConfiguration()) {
+		HandlerConfiguration<?, ?>[] handlersConfig = mosConfig
+				.getHandlerConfiguration();
+		if (handlersConfig.length == 0) {
+			// No context loaded handlers, therefore look on meta-data
+			Class<? extends Enum<?>> handlerKeys = mosMetaData.getHandlerKeys();
+			if (handlerKeys != null) {
+				for (Enum handlerKey : handlerKeys.getEnumConstants()) {
+					// Obtain the type necessary for the handler
+					Class<?> handlerType = mosMetaData
+							.getHandlerType(handlerKey);
 
-			// Obtain the handler key name
-			String handlerKeyName = handlerConfig.getHandlerKey().name();
-
-			// Determine if handler is provided by managed object source
-			if (handlerConfig.getHandlerFactory() == null) {
-				// Handler to be specified
-				handlerModels.add(new ManagedObjectHandlerModel(handlerKeyName,
-						handlerConfig.getHandlerType().getName(), null));
-
-			} else {
-				// Hander factory specified only linking to be provided
-
-				// Create the listing of flows for the handler instance
-				List<ManagedObjectHandlerLinkProcessModel> handlerFlows = new LinkedList<ManagedObjectHandlerLinkProcessModel>();
-				for (HandlerFlowConfiguration<?> handlerFlow : handlerConfig
-						.getLinkedProcessConfiguration()) {
-					// Obtain the details of the handler flow
-					String flowName = handlerFlow.getFlowName();
-					TaskNodeReference taskFlow = handlerFlow
-							.getTaskNodeReference();
-					String workName = (taskFlow == null ? null : taskFlow
-							.getWorkName());
-					String taskName = (taskFlow == null ? null : taskFlow
-							.getTaskName());
-
-					// Create and register the flow for the handler
-					handlerFlows.add(new ManagedObjectHandlerLinkProcessModel(
-							flowName, workName, taskName));
+					// Handler to be specified
+					handlerModels.add(new ManagedObjectHandlerModel(handlerKey
+							.name(), handlerType.getName(), null));
 				}
+			}
 
-				// Create the handler instance
-				ManagedObjectHandlerInstanceModel handlerInstance = new ManagedObjectHandlerInstanceModel(
-						new Boolean(true),
-						null,
-						null,
+		} else {
+			// Use context loaded handler configuration
+			for (HandlerConfiguration<?, ?> handlerConfig : mosConfig
+					.getHandlerConfiguration()) {
+
+				// Obtain the handler key name
+				String handlerKeyName = handlerConfig.getHandlerKey().name();
+
+				// Determine if handler is provided by managed object source
+				if (handlerConfig.getHandlerFactory() == null) {
+					// Handler to be specified
+					handlerModels.add(new ManagedObjectHandlerModel(
+							handlerKeyName, handlerConfig.getHandlerType()
+									.getName(), null));
+
+				} else {
+					// Hander factory specified only linking to be provided
+
+					// Create the listing of flows for the handler instance
+					List<ManagedObjectHandlerLinkProcessModel> handlerFlows = new LinkedList<ManagedObjectHandlerLinkProcessModel>();
+					for (HandlerFlowConfiguration<?> handlerFlow : handlerConfig
+							.getLinkedProcessConfiguration()) {
+						// Obtain the details of the handler flow
+						String flowName = handlerFlow.getFlowName();
+						TaskNodeReference taskFlow = handlerFlow
+								.getTaskNodeReference();
+						String workName = (taskFlow == null ? null : taskFlow
+								.getWorkName());
+						String taskName = (taskFlow == null ? null : taskFlow
+								.getTaskName());
+
+						// Create and register the flow for the handler
 						handlerFlows
-								.toArray(new ManagedObjectHandlerLinkProcessModel[0]));
+								.add(new ManagedObjectHandlerLinkProcessModel(
+										flowName, workName, taskName));
+					}
 
-				// Create and register the handler model
-				ManagedObjectHandlerModel handlerModel = new ManagedObjectHandlerModel(
-						handlerKeyName, Handler.class.getName(),
-						handlerInstance);
-				handlerModels.add(handlerModel);
+					// Create the handler instance
+					ManagedObjectHandlerInstanceModel handlerInstance = new ManagedObjectHandlerInstanceModel(
+							new Boolean(true),
+							null,
+							null,
+							handlerFlows
+									.toArray(new ManagedObjectHandlerLinkProcessModel[0]));
+
+					// Create and register the handler model
+					ManagedObjectHandlerModel handlerModel = new ManagedObjectHandlerModel(
+							handlerKeyName, Handler.class.getName(),
+							handlerInstance);
+					handlerModels.add(handlerModel);
+				}
 			}
 		}
 
@@ -226,9 +271,10 @@ public class ManagedObjectSourceLoader {
 		ManagedObjectSourceModel managedObjectSourceModel = new ManagedObjectSourceModel(
 				managedObjectSourceName, managedObjectSource.getClass()
 						.getName(), null, propertyModels
-						.toArray(new PropertyModel[0]), handlerModels
-						.toArray(new ManagedObjectHandlerModel[0]), taskModels
-						.toArray(new ManagedObjectTaskModel[0]), teams, null);
+						.toArray(new PropertyModel[0]), dependencyModels
+						.toArray(new ManagedObjectDependencyModel[0]),
+				handlerModels.toArray(new ManagedObjectHandlerModel[0]),
+				taskModels.toArray(new ManagedObjectTaskModel[0]), teams, null);
 
 		// Return the managed object source model
 		return managedObjectSourceModel;
