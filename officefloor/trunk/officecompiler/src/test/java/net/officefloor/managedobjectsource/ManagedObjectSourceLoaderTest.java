@@ -16,12 +16,16 @@
  */
 package net.officefloor.managedobjectsource;
 
+import java.sql.Connection;
 import java.util.Properties;
 
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.impl.RawManagedObjectMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.managedobjectsource.TestManagedObjectSource.HandlerKey;
+import net.officefloor.managedobjectsource.TestContextManagedObjectSource.HandlerKey;
+import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
@@ -39,9 +43,50 @@ import net.officefloor.model.officefloor.PropertyModel;
 public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 
 	/**
-	 * Ensures loads.
+	 * Ensures loads the {@link ManagedObjectSourceModel} from the
+	 * {@link ManagedObjectSourceMetaData}.
 	 */
-	public void testLoadManagedObjectSource() throws Throwable {
+	public void testLoadManagedObjectSourceFromMetaData() throws Throwable {
+
+		// Create the loader
+		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
+
+		// Load the managed object source model
+		ManagedObjectSourceModel model = loader.loadManagedObjectSource("test",
+				new TestMetaDataManagedObjectSource(), new Properties(), this
+						.getClass().getClassLoader());
+
+		// --------------------------------------------
+		// Validate managed object source model
+		// --------------------------------------------
+		assertEquals("Incorrect managed object source class",
+				TestMetaDataManagedObjectSource.class.getName(), model
+						.getSource());
+
+		// Validate no properties
+		assertList(new String[] { "getName", "getValue" }, model
+				.getProperties());
+
+		// Validate dependencies
+		assertList(
+				new String[] { "getDependencyKey", "getDependencyType" },
+				model.getDependencies(),
+				new ManagedObjectDependencyModel(
+						TestMetaDataManagedObjectSource.DependencyKey.DEPENDENCY
+								.name(), Connection.class.getName()));
+
+		// Validate handlers
+		assertList(new String[] { "getHandlerKey", "getHandlerType" }, model
+				.getHandlers(), new ManagedObjectHandlerModel(
+				TestMetaDataManagedObjectSource.HandlerKey.HANDLER.name(),
+				Handler.class.getName(), null));
+	}
+
+	/**
+	 * Ensures loads the {@link ManagedObjectSourceModel} by configuration on
+	 * the {@link ManagedObjectSourceContext}.
+	 */
+	public void testLoadManagedObjectSourceFromContext() throws Throwable {
 
 		// Create the loader
 		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
@@ -53,14 +98,15 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 		// Load the managed object source model
 		final String MO_NAME = "test";
 		ManagedObjectSourceModel model = loader.loadManagedObjectSource(
-				MO_NAME, new TestManagedObjectSource(), properties, this
+				MO_NAME, new TestContextManagedObjectSource(), properties, this
 						.getClass().getClassLoader());
 
 		// --------------------------------------------
-		// Validate managed object source configuration
+		// Validate managed object source model
 		// --------------------------------------------
 		assertEquals("Incorrect managed object source class",
-				TestManagedObjectSource.class.getName(), model.getSource());
+				TestContextManagedObjectSource.class.getName(), model
+						.getSource());
 
 		// Validate properties
 		assertList(new String[] { "getName", "getValue" }, model

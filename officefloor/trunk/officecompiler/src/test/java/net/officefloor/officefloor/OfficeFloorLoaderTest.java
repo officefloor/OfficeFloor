@@ -17,9 +17,11 @@
 package net.officefloor.officefloor;
 
 import java.io.File;
+import java.sql.Connection;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
@@ -89,7 +91,7 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getId", "getSource" }, officeFloor
 				.getManagedObjectSources(), new ManagedObjectSourceModel(
 				"MO-ID", "net.officefloor.mo.TestManagedObjectSource", null,
-				null, null, null, null, null));
+				null, null, null, null, null, null));
 		assertEquals("Incorrect managed object managing office", "office",
 				officeFloor.getManagedObjectSources().get(0)
 						.getManagingOffice().getManagingOfficeName());
@@ -99,6 +101,11 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		// Validate properties
 		assertList(new String[] { "getName", "getValue" }, mos.getProperties(),
 				new PropertyModel("mo prop name", "mo prop value"));
+
+		// Validate dependencies
+		assertList(new String[] { "getDependencyKey", "getDependencyType" },
+				mos.getDependencies(), new ManagedObjectDependencyModel(
+						"DEPENDENCY_KEY", Connection.class.getName()));
 
 		// Validate handlers
 		assertList(new String[] { "getHandlerKey", "getHandlerType" }, mos

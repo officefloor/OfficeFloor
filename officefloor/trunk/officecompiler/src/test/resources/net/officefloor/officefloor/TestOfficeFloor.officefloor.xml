@@ -6,6 +6,10 @@
 			<properties>
 				<property name="mo prop name" value="mo prop value" />
 			</properties>
+			<dependencies>
+				<dependency key="DEPENDENCY_KEY"
+					type="java.sql.Connection" />
+			</dependencies>
 			<handlers>
 				<handler key="HANDLER_KEY"
 					type="net.example.ExampleHandler">
