@@ -30,6 +30,19 @@
 					</attributes>
 				</item>
 			</collection>
+			<collection method="getDependencies"
+				element="dependencies">
+				<item
+					type="net.officefloor.model.officefloor.ManagedObjectDependencyModel"
+					element="dependency">
+					<attributes>
+						<attribute method="getDependencyKey"
+							attribute="key" />
+						<attribute method="getDependencyType"
+							attribute="type" />
+					</attributes>
+				</item>
+			</collection>
 			<collection method="getHandlers" element="handlers">
 				<item
 					type="net.officefloor.model.officefloor.ManagedObjectHandlerModel"
