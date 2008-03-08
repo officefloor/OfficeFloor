@@ -23,6 +23,10 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEdi
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.common.figure.IndentFigure;
+import net.officefloor.eclipse.common.figure.ListFigure;
+import net.officefloor.eclipse.common.figure.ListItemFigure;
+import net.officefloor.eclipse.common.figure.WrappingFigure;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
@@ -32,9 +36,7 @@ import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel.ManagedObjectSourceEvent;
 
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
@@ -80,13 +82,23 @@ public class ManagedObjectSourceEditPart extends
 	 */
 	@Override
 	protected IFigure createFigure() {
-		Label figure = new Label(this.getCastedModel().getId());
+		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
+				new ListFigure()));
+		figure.addDecorate(new ListItemFigure(this.getCastedModel().getId()));
+		figure.addChildContainerFigure();
 		figure.setBackgroundColor(ColorConstants.lightGray);
 		figure.setOpaque(true);
-		figure.setLayoutManager(new FlowLayout(true));
-
-		// Return figure
 		return figure;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 */
+	@Override
+	protected void populateModelChildren(List<Object> childModels) {
+		childModels.addAll(this.getCastedModel().getHandlers());
 	}
 
 	/*

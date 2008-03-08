@@ -21,13 +21,16 @@ import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.officefloor.editparts.ManagedObjectHandlerEditPart;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectSourceEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.TeamEditPart;
+import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -40,6 +43,9 @@ import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.officefloor.OfficeFloorLoader;
 import net.officefloor.repository.ConfigurationItem;
 
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -49,6 +55,26 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeFloorEditor extends
 		AbstractOfficeFloorEditor<OfficeFloorModel> {
+
+	/**
+	 * Initialise the specialised {@link FigureFactory} for the model types.
+	 */
+	static {
+		// Managing Office of Managed Object
+		OfficeFloorConnectionEditPart
+				.registerFigureFactory(
+						ManagedObjectSourceToOfficeFloorOfficeModel.class,
+						new FigureFactory<ManagedObjectSourceToOfficeFloorOfficeModel>() {
+							@Override
+							public IFigure createFigure(
+									ManagedObjectSourceToOfficeFloorOfficeModel model) {
+								PolylineConnection figure = new PolylineConnection();
+								figure
+										.setForegroundColor(ColorConstants.lightGray);
+								return figure;
+							}
+						});
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -68,6 +94,8 @@ public class OfficeFloorEditor extends
 		map.put(OfficeTeamModel.class, OfficeTeamEditPart.class);
 		map.put(OfficeManagedObjectModel.class,
 				OfficeManagedObjectEditPart.class);
+		map.put(ManagedObjectHandlerModel.class,
+				ManagedObjectHandlerEditPart.class);
 
 		// Connections
 		map.put(OfficeTeamToTeamModel.class,
