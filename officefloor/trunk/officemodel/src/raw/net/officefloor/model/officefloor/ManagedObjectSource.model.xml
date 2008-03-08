@@ -7,6 +7,8 @@
 		name="managing office" />
 	<list type="PropertyModel" name="property" plural="properties"
 		cascade-remove="true" />
+	<list type="ManagedObjectDependencyModel" name="dependency"
+		plural="dependencies" cascade-remove="true" />
 	<list type="ManagedObjectHandlerModel" name="handler"
 		cascade-remove="true" />
 	<list type="ManagedObjectTaskModel" name="task"

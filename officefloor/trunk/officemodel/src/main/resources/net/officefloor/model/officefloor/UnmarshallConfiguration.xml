@@ -18,6 +18,11 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
+		<object method="addDependency" node="dependency"
+			class="net.officefloor.model.officefloor.ManagedObjectDependencyModel">
+			<value method="setDependencyKey" node="dependency@key" />
+			<value method="setDependencyType" node="dependency@type" />
+		</object>
 		<object method="addHandler" node="handler"
 			class="net.officefloor.model.officefloor.ManagedObjectHandlerModel">
 			<value method="setHandlerKey" node="handler@key" />
