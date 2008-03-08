@@ -299,7 +299,8 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 * @param type
 		 *            Type mapped to the handler.
 		 */
-		void mapHandlerType(H key, Class<? extends Handler<?>> type);
+		@SuppressWarnings("unchecked")
+		void mapHandlerType(H key, Class<? extends Handler> type);
 	}
 
 	/**
@@ -343,7 +344,8 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		/**
 		 * Handler for each handler key.
 		 */
-		private Map<H, Class<? extends Handler<?>>> handlerTypes = null;
+		@SuppressWarnings("unchecked")
+		private Map<H, Class<? extends Handler>> handlerTypes = null;
 
 		/**
 		 * {@link ManagedObjectExtensionInterfaceMetaData} instances.
@@ -427,7 +429,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 
 			// Specify details
 			this.handlerKeys = (Class<H>) keys;
-			this.handlerTypes = new EnumMap<H, Class<? extends Handler<?>>>(
+			this.handlerTypes = new EnumMap<H, Class<? extends Handler>>(
 					this.handlerKeys);
 
 			// Return this to allow loading handlers
@@ -479,7 +481,8 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 *      java.lang.Class)
 		 */
 		@Override
-		public void mapHandlerType(H key, Class<? extends Handler<?>> type) {
+		@SuppressWarnings("unchecked")
+		public void mapHandlerType(H key, Class<? extends Handler> type) {
 			this.handlerTypes.put(key, type);
 		}
 
@@ -546,7 +549,8 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(java.lang.Enum)
 		 */
 		@Override
-		public Class<? extends Handler<?>> getHandlerType(H key) {
+		@SuppressWarnings("unchecked")
+		public Class<? extends Handler> getHandlerType(H key) {
 			return this.handlerTypes.get(key);
 		}
 

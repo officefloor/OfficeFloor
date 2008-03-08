@@ -125,7 +125,8 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 *         {@link net.officefloor.frame.api.execute.Handler} for the
 	 *         specified key must implement.
 	 */
-	Class<? extends Handler<?>> getHandlerType(H key);
+	@SuppressWarnings("unchecked")
+	Class<? extends Handler> getHandlerType(H key);
 
 	/**
 	 * Obtains the meta-data regarding the extension interfaces that this
