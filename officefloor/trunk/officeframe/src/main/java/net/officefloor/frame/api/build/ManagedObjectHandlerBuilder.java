@@ -18,58 +18,40 @@ package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Meta-data about a particular {@link Handler} for a {@link ManagedObject}.
+ * Meta-data about a particular {@link Handler} for a
+ * {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectHandlerBuilder {
+public interface ManagedObjectHandlerBuilder<H extends Enum<H>> {
 
 	/**
-	 * <p>
-	 * Specifies the type of {@link Handler} required by the
-	 * {@link ManagedObjectSource}.
-	 * <p>
-	 * This method must be invoked by the {@link ManagedObjectSource}
-	 * implementation if a {@link Handler} implementation is not to be specified
-	 * by the {@link ManagedObjectSource}. Should the
-	 * {@link ManagedObjectSource} be providing the {@link Handler}
-	 * implementation this method need not be called.
-	 * <p>
-	 * The {@link Handler} type specified must be the type returned from the
-	 * {@link HandlerFactory} registered with the {@link HandlerBuilder}.
-	 * 
-	 * @param handlerType
-	 *            {@link Handler} type.
-	 * @throws BuildException
-	 *             Indicate failure in building.
-	 */
-	<H extends Handler<?>> void setHandlerType(Class<H> handlerType)
-			throws BuildException;
-
-	/**
-	 * Obtains the {@link HandlerBuilder} for a {@link Handler} of the
+	 * Obtains the {@link HandlerBuilder} to register a {@link Handler} for the
 	 * {@link ManagedObjectSource}.
 	 * 
+	 * @param handlerKey
+	 *            {@link Enum} key identifying the {@link Handler}.
 	 * @param flowListingEnum
 	 *            Type providing the listing of the {@link Flow} instances for
 	 *            the {@link Handler}.
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	<F extends Enum<F>> HandlerBuilder<F> getHandlerBuilder(
+	<F extends Enum<F>> HandlerBuilder<F> registerHandler(H handlerKey,
 			Class<F> processListingEnum) throws BuildException;
 
 	/**
-	 * Obtains the {@link HandlerBuilder} for a {@link Handler} of the
+	 * Obtains the {@link HandlerBuilder} to register a {@link Handler} for the
 	 * {@link ManagedObjectSource}.
 	 * 
+	 * @param handlerKey
+	 *            {@link Enum} key identifying the {@link Handler}.
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	HandlerBuilder<Indexed> getHandlerBuilder() throws BuildException;
+	HandlerBuilder<Indexed> registerHandler(H handlerKey) throws BuildException;
 
 }

@@ -19,12 +19,13 @@ package net.officefloor.frame.spi.managedobject.source;
 import java.util.Properties;
 
 import net.officefloor.frame.api.build.BuildException;
-import net.officefloor.frame.api.build.ManagedObjectHandlersBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
@@ -80,15 +81,17 @@ public interface ManagedObjectSourceContext {
 	ResourceLocator getResourceLocator();
 
 	/**
-	 * Obtains the {@link ManagedObjectHandlersBuilder}.
+	 * Obtains the {@link ManagedObjectHandlerBuilder}.
 	 * 
 	 * @param handlerKeys
 	 *            {@link Enum} providing the keys for each {@link Handler}.
-	 * @return {@link ManagedObjectHandlersBuilder}.
+	 *            This <b>MUST</b> be the same {@link Enum} returned from
+	 *            {@link ManagedObjectSourceMetaData#getHandlerKeys()}.
+	 * @return {@link ManagedObjectHandlerBuilder}.
 	 * @throws BuildException
-	 *             If fails to obtain {@link ManagedObjectHandlersBuilder}.
+	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
 	 */
-	<H extends Enum<H>> ManagedObjectHandlersBuilder<H> getHandlerBuilder(
+	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
 			Class<H> handlerKeys) throws BuildException;
 
 	/**

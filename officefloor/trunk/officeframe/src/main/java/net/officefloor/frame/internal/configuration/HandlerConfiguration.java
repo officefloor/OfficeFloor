@@ -18,35 +18,27 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Configuration of a {@link net.officefloor.frame.api.execute.Handler}.
+ * Configuration of a {@link Handler}.
  * 
  * @author Daniel
  */
 public interface HandlerConfiguration<H extends Enum<H>, F extends Enum<F>> {
 
 	/**
-	 * Obtains the key linking this
-	 * {@link net.officefloor.frame.api.execute.Handler} to the
-	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+	 * Obtains the key linking this {@link Handler} to the
+	 * {@link ManagedObjectSource}.
 	 * 
-	 * @return Key linking this
-	 *         {@link net.officefloor.frame.api.execute.Handler} to the
-	 *         {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+	 * @return Key linking this {@link Handler} to the
+	 *         {@link ManagedObjectSource}.
 	 */
 	H getHandlerKey();
 
 	/**
-	 * Obtains the type that the {@link Handler} must implement.
-	 * 
-	 * @return Type that the {@link Handler} must implement.
-	 */
-	Class<? extends Handler<F>> getHandlerType();
-
-	/**
-	 * Obtains the {@link HandlerFactory} for the
-	 * {@link net.officefloor.frame.api.execute.Handler}.
+	 * Obtains the {@link HandlerFactory} for the {@link Handler}.
 	 * 
 	 * @return {@link HandlerFactory}.
 	 */
@@ -54,11 +46,10 @@ public interface HandlerConfiguration<H extends Enum<H>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the configuration for the processes invoked by the
-	 * {@link net.officefloor.frame.api.execute.Handler}.
+	 * {@link Handler}.
 	 * 
 	 * @return {@link HandlerFlowConfiguration} specifying the first
-	 *         {@link net.officefloor.frame.api.execute.Task} of the linked
-	 *         process.
+	 *         {@link Task} of the linked process.
 	 */
 	HandlerFlowConfiguration<F>[] getLinkedProcessConfiguration();
 
