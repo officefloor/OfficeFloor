@@ -23,16 +23,28 @@ import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.CommandFactory;
 import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.officefloor.editparts.ManagedObjectDependencyEditPart;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectHandlerEditPart;
+import net.officefloor.eclipse.officefloor.editparts.ManagedObjectHandlerInstanceEditPart;
+import net.officefloor.eclipse.officefloor.editparts.ManagedObjectHandlerLinkProcessEditPart;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectSourceEditPart;
+import net.officefloor.eclipse.officefloor.editparts.ManagedObjectTaskEditPart;
+import net.officefloor.eclipse.officefloor.editparts.ManagedObjectTaskFlowEditPart;
+import net.officefloor.eclipse.officefloor.editparts.ManagedObjectTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeManagedObjectEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.TeamEditPart;
+import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
+import net.officefloor.model.officefloor.ManagedObjectTaskModel;
+import net.officefloor.model.officefloor.ManagedObjectTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
@@ -94,8 +106,18 @@ public class OfficeFloorEditor extends
 		map.put(OfficeTeamModel.class, OfficeTeamEditPart.class);
 		map.put(OfficeManagedObjectModel.class,
 				OfficeManagedObjectEditPart.class);
+		map.put(ManagedObjectDependencyModel.class,
+				ManagedObjectDependencyEditPart.class);
 		map.put(ManagedObjectHandlerModel.class,
 				ManagedObjectHandlerEditPart.class);
+		map.put(ManagedObjectHandlerInstanceModel.class,
+				ManagedObjectHandlerInstanceEditPart.class);
+		map.put(ManagedObjectHandlerLinkProcessModel.class,
+				ManagedObjectHandlerLinkProcessEditPart.class);
+		map.put(ManagedObjectTaskModel.class, ManagedObjectTaskEditPart.class);
+		map.put(ManagedObjectTaskFlowModel.class,
+				ManagedObjectTaskFlowEditPart.class);
+		map.put(ManagedObjectTeamModel.class, ManagedObjectTeamEditPart.class);
 
 		// Connections
 		map.put(OfficeTeamToTeamModel.class,

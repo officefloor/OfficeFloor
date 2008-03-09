@@ -21,25 +21,21 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.figure.IndentFigure;
-import net.officefloor.eclipse.common.figure.ListFigure;
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.eclipse.common.figure.WrappingFigure;
-import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerModel.ManagedObjectHandlerEvent;
+import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.ManagedObjectDependencyModel.ManagedObjectDependencyEvent;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the {@link ManagedObjectHandlerModel}.
+ * {@link EditPart} for the {@link ManagedObjectDependencyModel}.
  * 
  * @author Daniel
  */
-public class ManagedObjectHandlerEditPart extends
-		AbstractOfficeFloorEditPart<ManagedObjectHandlerModel> {
+public class ManagedObjectDependencyEditPart extends
+		AbstractOfficeFloorEditPart<ManagedObjectDependencyModel> {
 
 	/*
 	 * (non-Javadoc)
@@ -49,32 +45,17 @@ public class ManagedObjectHandlerEditPart extends
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ManagedObjectHandlerEvent>(
-				ManagedObjectHandlerEvent.values()) {
+		handlers.add(new PropertyChangeHandler<ManagedObjectDependencyEvent>(
+				ManagedObjectDependencyEvent.values()) {
 			@Override
 			protected void handlePropertyChange(
-					ManagedObjectHandlerEvent property, PropertyChangeEvent evt) {
+					ManagedObjectDependencyEvent property,
+					PropertyChangeEvent evt) {
 				switch (property) {
-				case CHANGE_HANDLER_INSTANCE:
-					ManagedObjectHandlerEditPart.this.refreshChildren();
-					break;
+				// TODO provide connection handling
 				}
 			}
 		});
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
-	 */
-	@Override
-	protected void populateModelChildren(List<Object> childModels) {
-		ManagedObjectHandlerInstanceModel handlerInstance = this
-				.getCastedModel().getHandlerInstance();
-		if (handlerInstance != null) {
-			childModels.add(handlerInstance);
-		}
 	}
 
 	/*
@@ -84,12 +65,11 @@ public class ManagedObjectHandlerEditPart extends
 	 */
 	@Override
 	protected IFigure createFigure() {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(this.getCastedModel()
-				.getHandlerKey()));
-		figure.addChildContainerFigure();
-		figure.setForegroundColor(ColorConstants.yellow);
+		// Create the figure
+		IFigure figure = new Label(this.getCastedModel().getDependencyKey());
+		figure.setForegroundColor(ColorConstants.white);
+
+		// Return the figure
 		return figure;
 	}
 

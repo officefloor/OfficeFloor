@@ -70,6 +70,16 @@ public class ManagedObjectSourceEditPart extends
 				case CHANGE_MANAGING_OFFICE:
 					ManagedObjectSourceEditPart.this.refreshSourceConnections();
 					break;
+				case ADD_DEPENDENCY:
+				case REMOVE_DEPENDENCY:
+				case ADD_HANDLER:
+				case REMOVE_HANDLER:
+				case ADD_TASK:
+				case REMOVE_TASK:
+				case ADD_TEAM:
+				case REMOVE_TEAM:
+					ManagedObjectSourceEditPart.this.refreshChildren();
+					break;
 				}
 			}
 		});
@@ -98,7 +108,10 @@ public class ManagedObjectSourceEditPart extends
 	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
+		childModels.addAll(this.getCastedModel().getDependencies());
 		childModels.addAll(this.getCastedModel().getHandlers());
+		childModels.addAll(this.getCastedModel().getTasks());
+		childModels.addAll(this.getCastedModel().getTeams());
 	}
 
 	/*
