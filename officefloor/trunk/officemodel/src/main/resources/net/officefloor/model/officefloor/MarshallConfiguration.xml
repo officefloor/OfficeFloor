@@ -104,6 +104,16 @@
 					</collection>
 				</item>
 			</collection>
+			<collection method="getTeams" element="teams">
+				<item
+					type="net.officefloor.model.officefloor.ManagedObjectTeamModel"
+					element="team">
+					<attributes>
+						<attribute method="getTeamName"
+							attribute="name" />
+					</attributes>
+				</item>
+			</collection>
 		</item>
 	</collection>
 	<!-- TEAMS -->
