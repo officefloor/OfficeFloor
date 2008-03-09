@@ -17,6 +17,8 @@
 package net.officefloor.managedobjectsource;
 
 import java.sql.Connection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import net.officefloor.frame.api.execute.Handler;
@@ -119,10 +121,14 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 				HandlerKey.INDIRECT_HANDLER.name(), Handler.class.getName(),
 				null), new ManagedObjectHandlerModel(HandlerKey.ADDED_HANDLER
 				.name(), Handler.class.getName(), null));
-		assertNull("Indirect handler should not have handler instance", model
-				.getHandlers().get(0).getHandlerInstance());
-		ManagedObjectHandlerInstanceModel handlerInstance = model.getHandlers()
-				.get(1).getHandlerInstance();
+		Map<String, ManagedObjectHandlerModel> handlers = new HashMap<String, ManagedObjectHandlerModel>();
+		for (ManagedObjectHandlerModel handler : model.getHandlers()) {
+			handlers.put(handler.getHandlerKey(), handler);
+		}
+		assertNull("Indirect handler should not have handler instance",
+				handlers.get("INDIRECT_HANDLER").getHandlerInstance());
+		ManagedObjectHandlerInstanceModel handlerInstance = handlers.get(
+				"ADDED_HANDLER").getHandlerInstance();
 		assertTrue("Handler instance is provide by managed object source",
 				handlerInstance.getIsManagedObjectSourceProvided());
 		assertList(new String[] { "getLinkProcessId", "getWorkName",
