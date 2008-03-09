@@ -25,21 +25,20 @@ import net.officefloor.eclipse.common.figure.IndentFigure;
 import net.officefloor.eclipse.common.figure.ListFigure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
 import net.officefloor.eclipse.common.figure.WrappingFigure;
-import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerModel.ManagedObjectHandlerEvent;
+import net.officefloor.model.officefloor.ManagedObjectTaskModel;
+import net.officefloor.model.officefloor.ManagedObjectTaskModel.ManagedObjectTaskEvent;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the {@link ManagedObjectHandlerModel}.
+ * {@link EditPart} for the {@link ManagedObjectTaskModel}.
  * 
  * @author Daniel
  */
-public class ManagedObjectHandlerEditPart extends
-		AbstractOfficeFloorEditPart<ManagedObjectHandlerModel> {
+public class ManagedObjectTaskEditPart extends
+		AbstractOfficeFloorEditPart<ManagedObjectTaskModel> {
 
 	/*
 	 * (non-Javadoc)
@@ -49,14 +48,15 @@ public class ManagedObjectHandlerEditPart extends
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ManagedObjectHandlerEvent>(
-				ManagedObjectHandlerEvent.values()) {
+		handlers.add(new PropertyChangeHandler<ManagedObjectTaskEvent>(
+				ManagedObjectTaskEvent.values()) {
 			@Override
 			protected void handlePropertyChange(
-					ManagedObjectHandlerEvent property, PropertyChangeEvent evt) {
+					ManagedObjectTaskEvent property, PropertyChangeEvent evt) {
 				switch (property) {
-				case CHANGE_HANDLER_INSTANCE:
-					ManagedObjectHandlerEditPart.this.refreshChildren();
+				case ADD_FLOW:
+				case REMOVE_FLOW:
+					ManagedObjectTaskEditPart.this.refreshChildren();
 					break;
 				}
 			}
@@ -66,31 +66,31 @@ public class ManagedObjectHandlerEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
 	 */
 	@Override
-	protected void populateModelChildren(List<Object> childModels) {
-		ManagedObjectHandlerInstanceModel handlerInstance = this
-				.getCastedModel().getHandlerInstance();
-		if (handlerInstance != null) {
-			childModels.add(handlerInstance);
-		}
+	protected IFigure createFigure() {
+		// Create the figure
+		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
+				new ListFigure()));
+		figure.addDecorate(new ListItemFigure(this.getCastedModel()
+				.getWorkName()
+				+ "." + this.getCastedModel().getTaskName()));
+		figure.addChildContainerFigure();
+		figure.setForegroundColor(ColorConstants.darkGreen);
+
+		// Return the figure
+		return figure;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
 	 */
 	@Override
-	protected IFigure createFigure() {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(this.getCastedModel()
-				.getHandlerKey()));
-		figure.addChildContainerFigure();
-		figure.setForegroundColor(ColorConstants.yellow);
-		return figure;
+	protected void populateModelChildren(List<Object> childModels) {
+		childModels.addAll(this.getCastedModel().getFlows());
 	}
 
 }
