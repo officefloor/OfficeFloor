@@ -29,6 +29,7 @@ import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskModel;
+import net.officefloor.model.officefloor.ManagedObjectTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
@@ -122,7 +123,7 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 				new ManagedObjectHandlerLinkProcessModel("0", "work.name",
 						"task.name"));
 
-		// Validate work
+		// Validate tasks
 		assertList(new String[] { "getWorkName", "getTaskName" }, mos
 				.getTasks(), new ManagedObjectTaskModel("work", "task", null,
 				null));
@@ -131,6 +132,10 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 						"getInitialTaskName" },
 				mos.getTasks().get(0).getFlows(),
 				new ManagedObjectTaskFlowModel("flow", "work.name", "task.name"));
+
+		// Validate teams
+		assertList(new String[] { "getTeamName" }, mos.getTeams(),
+				new ManagedObjectTeamModel("MO-TEAM-NAME"));
 
 		// ----------------------------------------
 		// Validate the teams

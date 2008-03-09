@@ -29,6 +29,9 @@
 					</flows>
 				</task>
 			</tasks>
+			<teams>
+				<team name="MO-TEAM-NAME" />
+			</teams>
 		</managed-object-source>
 	</managed-object-sources>
 	<team-instances>
