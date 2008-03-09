@@ -55,6 +55,10 @@
 				<value method="setInitialTaskName" node="flow@task" />
 			</object>
 		</object>
+		<object method="addTeam" node="team"
+			class="net.officefloor.model.officefloor.ManagedObjectTeamModel">
+			<value method="setTeamName" node="team@name" />
+		</object>
 	</object>
 	<!-- TEAMS -->
 	<object method="addTeam" node="team-instance"
