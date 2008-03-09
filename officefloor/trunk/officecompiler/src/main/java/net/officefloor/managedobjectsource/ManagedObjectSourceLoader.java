@@ -17,6 +17,7 @@
 package net.officefloor.managedobjectsource;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -31,7 +32,6 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.issue.OfficeIssuesListener;
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.ClassLoaderResourceLocator;
@@ -142,74 +142,71 @@ public class ManagedObjectSourceLoader {
 
 		// Obtain the handler configuration
 		List<ManagedObjectHandlerModel> handlerModels = new LinkedList<ManagedObjectHandlerModel>();
-		HandlerConfiguration<?, ?>[] handlersConfig = mosConfig
-				.getHandlerConfiguration();
-		if (handlersConfig.length == 0) {
-			// No context loaded handlers, therefore look on meta-data
-			Class<? extends Enum<?>> handlerKeys = mosMetaData.getHandlerKeys();
-			if (handlerKeys != null) {
-				for (Enum handlerKey : handlerKeys.getEnumConstants()) {
-					// Obtain the type necessary for the handler
-					Class<?> handlerType = mosMetaData
-							.getHandlerType(handlerKey);
+		Class<? extends Enum<?>> handlerKeys = mosMetaData.getHandlerKeys();
+		if (handlerKeys != null) {
 
-					// Handler to be specified
-					handlerModels.add(new ManagedObjectHandlerModel(handlerKey
-							.name(), handlerType.getName(), null));
-				}
-			}
-
-		} else {
-			// Use context loaded handler configuration
+			// Create the map of handler instances for handler keys
+			Map<Enum, ManagedObjectHandlerInstanceModel> handlerInstances = new EnumMap(
+					handlerKeys);
 			for (HandlerConfiguration<?, ?> handlerConfig : mosConfig
 					.getHandlerConfiguration()) {
 
-				// Obtain the handler key name
-				String handlerKeyName = handlerConfig.getHandlerKey().name();
-
-				// Determine if handler is provided by managed object source
+				// Must have handler factory for inclusion
 				if (handlerConfig.getHandlerFactory() == null) {
-					// Handler to be specified
-					handlerModels.add(new ManagedObjectHandlerModel(
-							handlerKeyName, handlerConfig.getHandlerType()
-									.getName(), null));
-
-				} else {
-					// Hander factory specified only linking to be provided
-
-					// Create the listing of flows for the handler instance
-					List<ManagedObjectHandlerLinkProcessModel> handlerFlows = new LinkedList<ManagedObjectHandlerLinkProcessModel>();
-					for (HandlerFlowConfiguration<?> handlerFlow : handlerConfig
-							.getLinkedProcessConfiguration()) {
-						// Obtain the details of the handler flow
-						String flowName = handlerFlow.getFlowName();
-						TaskNodeReference taskFlow = handlerFlow
-								.getTaskNodeReference();
-						String workName = (taskFlow == null ? null : taskFlow
-								.getWorkName());
-						String taskName = (taskFlow == null ? null : taskFlow
-								.getTaskName());
-
-						// Create and register the flow for the handler
-						handlerFlows
-								.add(new ManagedObjectHandlerLinkProcessModel(
-										flowName, workName, taskName));
-					}
-
-					// Create the handler instance
-					ManagedObjectHandlerInstanceModel handlerInstance = new ManagedObjectHandlerInstanceModel(
-							new Boolean(true),
-							null,
-							null,
-							handlerFlows
-									.toArray(new ManagedObjectHandlerLinkProcessModel[0]));
-
-					// Create and register the handler model
-					ManagedObjectHandlerModel handlerModel = new ManagedObjectHandlerModel(
-							handlerKeyName, Handler.class.getName(),
-							handlerInstance);
-					handlerModels.add(handlerModel);
+					continue;
 				}
+
+				// Create the listing of flows for the handler instance
+				List<ManagedObjectHandlerLinkProcessModel> handlerFlows = new LinkedList<ManagedObjectHandlerLinkProcessModel>();
+				for (HandlerFlowConfiguration<?> handlerFlow : handlerConfig
+						.getLinkedProcessConfiguration()) {
+					// Obtain the details of the handler flow
+					String flowName = handlerFlow.getFlowName();
+					TaskNodeReference taskFlow = handlerFlow
+							.getTaskNodeReference();
+					String workName = (taskFlow == null ? null : taskFlow
+							.getWorkName());
+					String taskName = (taskFlow == null ? null : taskFlow
+							.getTaskName());
+
+					// Create and register the flow for the handler
+					handlerFlows.add(new ManagedObjectHandlerLinkProcessModel(
+							flowName, workName, taskName));
+				}
+
+				// Create the handler instance
+				ManagedObjectHandlerInstanceModel handlerInstance = new ManagedObjectHandlerInstanceModel(
+						new Boolean(true),
+						null,
+						null,
+						handlerFlows
+								.toArray(new ManagedObjectHandlerLinkProcessModel[0]));
+
+				// Register the handler instance for corresponding handler key
+				handlerInstances.put(handlerConfig.getHandlerKey(),
+						handlerInstance);
+			}
+
+			// Create and register the handler models
+			for (Enum handlerKey : handlerKeys.getEnumConstants()) {
+
+				// Obtain the type necessary for the handler
+				Class<?> handlerType = mosMetaData.getHandlerType(handlerKey);
+				if (handlerType == null) {
+					throw new Exception("For handler key " + handlerKey.name()
+							+ " no type provided from "
+							+ ManagedObjectSourceMetaData.class.getSimpleName());
+				}
+
+				// Obtain the handler instance if provided
+				ManagedObjectHandlerInstanceModel handlerInstance = handlerInstances
+						.get(handlerKey);
+
+				// Create and register the handler model
+				ManagedObjectHandlerModel handlerModel = new ManagedObjectHandlerModel(
+						handlerKey.name(), handlerType.getName(),
+						handlerInstance);
+				handlerModels.add(handlerModel);
 			}
 		}
 

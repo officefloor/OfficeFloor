@@ -22,7 +22,6 @@ import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlersBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -62,21 +61,24 @@ public class TestContextManagedObjectSource extends AbstractManagedObjectSource 
 		// Obtain the managed object source context for additional configuration
 		ManagedObjectSourceContext sourceContext = context
 				.getManagedObjectSourceContext();
-		
-		// Register handler with flows
-		ManagedObjectHandlersBuilder<HandlerKey> managedObjectHandlerBuilder = sourceContext
+
+		// Ensure configuration for handlers available
+		HandlerLoader<HandlerKey> handlerLoader = context
+				.getHandlerLoader(HandlerKey.class);
+		handlerLoader
+				.mapHandlerType(HandlerKey.INDIRECT_HANDLER, Handler.class);
+		handlerLoader.mapHandlerType(HandlerKey.ADDED_HANDLER, Handler.class);
+
+		// Register added handler
+		// (INDIRECT not provided by this managed object source)
+		ManagedObjectHandlerBuilder<HandlerKey> managedObjectHandlerBuilder = sourceContext
 				.getHandlerBuilder(HandlerKey.class);
-		ManagedObjectHandlerBuilder indirectHandlerBuilder = managedObjectHandlerBuilder
-				.registerHandler(HandlerKey.INDIRECT_HANDLER);
-		indirectHandlerBuilder.setHandlerType(Handler.class);
-		ManagedObjectHandlerBuilder addedHandlerBuilder = managedObjectHandlerBuilder
+		HandlerBuilder<Indexed> addedHandler = managedObjectHandlerBuilder
 				.registerHandler(HandlerKey.ADDED_HANDLER);
-		HandlerBuilder<Indexed> addedHandler = addedHandlerBuilder
-				.getHandlerBuilder();
 		addedHandler.setHandlerFactory(new HandlerFactory<Indexed>() {
 			@Override
 			public Handler<Indexed> createHandler() {
-				TestCase.fail("Should not create Handler");
+				TestCase.fail("Handler should not be created");
 				return null;
 			}
 		});
