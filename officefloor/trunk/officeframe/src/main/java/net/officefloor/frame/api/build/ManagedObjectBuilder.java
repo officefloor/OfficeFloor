@@ -85,15 +85,15 @@ public interface ManagedObjectBuilder {
 	void setManagingOffice(String officeName) throws BuildException;
 
 	/**
-	 * Obtains the {@link ManagedObjectHandlersBuilder}.
+	 * Obtains the {@link ManagedObjectHandlerBuilder}.
 	 * 
 	 * @param handlerKeys
 	 *            {@link Enum} providing the keys for each {@link Handler}.
-	 * @return {@link ManagedObjectHandlersBuilder}.
+	 * @return {@link ManagedObjectHandlerBuilder}.
 	 * @throws BuildException
-	 *             If fails to obtain {@link ManagedObjectHandlersBuilder}.
+	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
 	 */
-	<H extends Enum<H>> ManagedObjectHandlersBuilder<H> getManagedObjectHandlerBuilder(
+	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
 			Class<H> handlerKeys) throws BuildException;
-	
+
 }
