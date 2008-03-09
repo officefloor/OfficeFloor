@@ -33,7 +33,7 @@ import net.officefloor.admin.transaction.Transaction;
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedObjectHandlersBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -219,11 +219,11 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 				.getProperty(JMS_ON_MESSAGE_TASK));
 
 		// Register the handler (and link OnMessageTask)
-		ManagedObjectHandlersBuilder<JmsServerHandlersEnum> managedObjectBuilder = context
+		ManagedObjectHandlerBuilder<JmsServerHandlersEnum> managedObjectBuilder = context
 				.getManagedObjectSourceContext().getHandlerBuilder(
 						JmsServerHandlersEnum.class);
-		HandlerBuilder<Indexed> handler = managedObjectBuilder.registerHandler(
-				JmsServerHandlersEnum.JMS_SERVER_HANDLER).getHandlerBuilder();
+		HandlerBuilder<Indexed> handler = managedObjectBuilder
+				.registerHandler(JmsServerHandlersEnum.JMS_SERVER_HANDLER);
 		handler.setHandlerFactory(this);
 		handler.linkProcess(0, "jms.server.onmessage", "onmessage");
 
