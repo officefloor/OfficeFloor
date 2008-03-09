@@ -112,8 +112,7 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 		// Register the handler
 		HandlerBuilder handlerBuilder = serverSocketBuilder
 				.getManagedObjectHandlerBuilder(ServerSocketHandlersEnum.class)
-				.registerHandler(ServerSocketHandlersEnum.SERVER_SOCKET_HANDLER)
-				.getHandlerBuilder();
+				.registerHandler(ServerSocketHandlersEnum.SERVER_SOCKET_HANDLER);
 		handlerBuilder.setHandlerFactory(this);
 
 		// Register the necessary teams
