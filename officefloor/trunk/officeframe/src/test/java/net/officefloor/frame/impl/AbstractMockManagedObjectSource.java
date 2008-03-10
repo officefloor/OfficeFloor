@@ -37,7 +37,7 @@ import net.officefloor.frame.test.MockManagedObjectSourceMetaData;
  * @author Daniel
  */
 public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		implements ManagedObjectSource {
+		implements ManagedObjectSource<D, H> {
 
 	/**
 	 * {@link ManagedObjectSourceContext}.
@@ -185,7 +185,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
 	 */
 	@SuppressWarnings("unchecked")
-	public final ManagedObjectSourceMetaData<?, ?> getMetaData() {
+	public final ManagedObjectSourceMetaData<D, H> getMetaData() {
 
 		// Create the listing of dependencies
 		final Class[] dependencyKeys = new Class[1];
@@ -217,10 +217,10 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
 	@SuppressWarnings("unchecked")
-	public final void start(ManagedObjectExecuteContext<?> context)
+	public final void start(ManagedObjectExecuteContext<H> context)
 			throws Exception {
 		// Specify context
-		this.executeContext = (ManagedObjectExecuteContext<H>) context;
+		this.executeContext = context;
 
 		// Start
 		this.start();

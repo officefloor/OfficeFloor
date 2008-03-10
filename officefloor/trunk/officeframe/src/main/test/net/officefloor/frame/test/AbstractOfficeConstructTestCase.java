@@ -323,6 +323,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to register a
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
+	@SuppressWarnings("unchecked")
 	protected ManagedObjectBuilder constructManagedObject(
 			String managedObjectName,
 			Class<? extends ManagedObjectSource> managedObjectSourceClass,

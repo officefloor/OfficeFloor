@@ -57,7 +57,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * {@link ManagedObjectSource} of the
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
-	private final ManagedObjectSource source;
+	private final ManagedObjectSource<?, ?> source;
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
@@ -163,7 +163,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            {@link AssetManager} to manage the asynchronous operations on
 	 *            the {@link ManagedObject} instances.
 	 */
-	public ManagedObjectMetaDataImpl(ManagedObjectSource source,
+	public ManagedObjectMetaDataImpl(ManagedObjectSource<?, ?> source,
 			ManagedObjectPool pool, AssetManager sourcingManager,
 			boolean isManagedObjectAsynchronous,
 			AssetManager operationsManager,
@@ -233,7 +233,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getManagedObjectSource()
 	 */
-	public ManagedObjectSource getManagedObjectSource() {
+	public ManagedObjectSource<?, ?> getManagedObjectSource() {
 		return this.source;
 	}
 

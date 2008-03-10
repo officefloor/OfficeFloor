@@ -56,7 +56,7 @@ public class OfficeImpl implements Office {
 	/**
 	 * Registry of {@link ManagedObjectSource} instances by their name.
 	 */
-	protected final Map<String, ManagedObjectSource> managedObjectSources;
+	protected final Map<String, ManagedObjectSource<?, ?>> managedObjectSources;
 
 	/**
 	 * {@link ManagedObjectMetaData} instances for the {@link ProcessState}
@@ -95,7 +95,7 @@ public class OfficeImpl implements Office {
 	 */
 	@SuppressWarnings("unchecked")
 	public OfficeImpl(Map<String, WorkMetaData<?>> workMetaData,
-			Map<String, ManagedObjectSource> managedObjectSources,
+			Map<String, ManagedObjectSource<?, ?>> managedObjectSources,
 			ManagedObjectMetaData[] processStateManagedObjectMetaData,
 			AdministratorMetaData[] processStateAdministratorMetaData,
 			FlowMetaData[] startupFlows) {
@@ -236,7 +236,7 @@ public class OfficeImpl implements Office {
 		final Throwable[] loadFailureCause = new Throwable[1];
 
 		// Obtain the managed object source
-		ManagedObjectSource source = this.managedObjectSources
+		ManagedObjectSource<?, ?> source = this.managedObjectSources
 				.get(managedObjectId);
 		if (source == null) {
 			throw new Exception("Unknown managed object '" + managedObjectId

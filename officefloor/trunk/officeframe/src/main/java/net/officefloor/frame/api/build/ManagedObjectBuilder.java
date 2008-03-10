@@ -37,6 +37,7 @@ public interface ManagedObjectBuilder {
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
+	@SuppressWarnings("unchecked")
 	<S extends ManagedObjectSource> void setManagedObjectSourceClass(
 			Class<S> managedObjectSourceClass) throws BuildException;
 

@@ -34,6 +34,6 @@ public interface ManagedObjectPoolContext {
 	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
 	 *         instances being pooled.
 	 */
-	ManagedObjectSource getManagedObjectSource();
+	ManagedObjectSource<?, ?> getManagedObjectSource();
 
 }

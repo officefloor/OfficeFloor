@@ -134,7 +134,7 @@ public class ExecutionNode<W extends Work> implements
 	public <O> void processManagedObject(int workMoIndex,
 			O objectOfManagedObject, ManagedObjectProcesser<O> processer) {
 
-		ManagedObjectSource source;
+		ManagedObjectSource<?, ?> source;
 		final ManagedObject mo;
 		boolean isAsynchronous;
 

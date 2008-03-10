@@ -64,7 +64,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * 
 	 * @return {@link ManagedObjectSource} for the {@link ManagedObject}.
 	 */
-	ManagedObjectSource getManagedObjectSource();
+	ManagedObjectSource<?, ?> getManagedObjectSource();
 
 	/**
 	 * Obtains the {@link ManagedObjectPool} for the {@link ManagedObject}.

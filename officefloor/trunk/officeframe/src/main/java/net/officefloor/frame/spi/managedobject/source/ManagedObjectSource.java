@@ -15,7 +15,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel
  */
-public interface ManagedObjectSource {
+public interface ManagedObjectSource<D extends Enum<D>, H extends Enum<H>> {
 
 	/**
 	 * <p>
@@ -55,7 +55,7 @@ public interface ManagedObjectSource {
 	 * 
 	 * @return Meta-data to describe this.
 	 */
-	ManagedObjectSourceMetaData<?, ?> getMetaData();
+	ManagedObjectSourceMetaData<D, H> getMetaData();
 
 	/**
 	 * Called once after {@link #init(ManagedObjectSourceContext)} to indicate
@@ -68,7 +68,7 @@ public interface ManagedObjectSource {
 	 *             Should the {@link ManagedObjectSource} fail to start
 	 *             execution.
 	 */
-	void start(ManagedObjectExecuteContext<?> context) throws Exception;
+	void start(ManagedObjectExecuteContext<H> context) throws Exception;
 
 	/**
 	 * Sources a {@link ManagedObject}from this {@link ManagedObjectSource}.

@@ -56,6 +56,7 @@ public interface ManagedObjectSourceConfiguration {
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
+	@SuppressWarnings("unchecked")
 	<MS extends ManagedObjectSource> Class<MS> getManagedObjectSourceClass()
 			throws ConfigurationException;
 
