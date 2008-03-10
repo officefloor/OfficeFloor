@@ -17,7 +17,6 @@ import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
@@ -148,10 +147,10 @@ public class JdbcManagedObjectSource extends AbstractManagedObjectSource {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)
 	 */
 	@Override
-	public void start(ManagedObjectExecuteContext<?> context) throws Exception {
+	protected void start(StartContext startContext) throws Exception {
 
 		// Obtain the Data Source Factory
 		DataSourceFactory sourceFactory = this
