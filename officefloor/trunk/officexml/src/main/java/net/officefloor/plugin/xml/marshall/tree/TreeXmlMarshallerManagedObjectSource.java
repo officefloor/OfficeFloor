@@ -46,7 +46,7 @@ import net.officefloor.plugin.xml.unmarshall.tree.XmlMappingType;
  * @author Daniel
  */
 public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		implements ManagedObjectSource, ManagedObjectSourceMetaData<D, H> {
+		implements ManagedObjectSource<D, H>, ManagedObjectSourceMetaData<D, H> {
 
 	/**
 	 * Property name to obtain the {@link java.io.InputStream} for configuring
@@ -362,7 +362,7 @@ public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends E
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
-	public void start(ManagedObjectExecuteContext<?> context) throws Exception {
+	public void start(ManagedObjectExecuteContext<H> context) throws Exception {
 		// No handlers necessary
 	}
 
