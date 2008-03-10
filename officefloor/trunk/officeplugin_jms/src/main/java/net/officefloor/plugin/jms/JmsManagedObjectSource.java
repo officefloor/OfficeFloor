@@ -9,7 +9,6 @@ import javax.jms.Destination;
 import javax.jms.Session;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
@@ -85,9 +84,10 @@ public class JmsManagedObjectSource extends AbstractManagedObjectSource {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)
 	 */
-	public void start(ManagedObjectExecuteContext<?> context) throws Exception {
+	@Override
+	protected void start(StartContext startContext) throws Exception {
 		// Start the connection
 		this.connection = this.connectionFactory.createConnection();
 		this.connection.start();
