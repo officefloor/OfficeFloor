@@ -77,7 +77,7 @@ public class RawManagedObjectMetaData {
 		String managedObjectName = mosConfig.getManagedObjectName();
 
 		// Create the instance of the managed object source
-		ManagedObjectSource managedObjectSource;
+		ManagedObjectSource<?, ?> managedObjectSource;
 		try {
 			managedObjectSource = mosConfig.getManagedObjectSourceClass()
 					.newInstance();
@@ -131,7 +131,7 @@ public class RawManagedObjectMetaData {
 	/**
 	 * {@link ManagedObjectSource}.
 	 */
-	private final ManagedObjectSource managedObjectSource;
+	private final ManagedObjectSource<?, ?> managedObjectSource;
 
 	/**
 	 * Default timeout for asynchronous operations on the {@link ManagedObject}.
@@ -187,7 +187,7 @@ public class RawManagedObjectMetaData {
 	 */
 	private RawManagedObjectMetaData(String managedObjectName,
 			ManagedObjectSourceConfiguration mosConfig,
-			ManagedObjectSource managedObjectSource,
+			ManagedObjectSource<?, ?> managedObjectSource,
 			AssetManager sourcingManager, long timeout,
 			ManagedObjectPool managedObjectPool, String recycleWorkName,
 			RawAssetManagerRegistry rawAssetRegistry) {
@@ -216,7 +216,7 @@ public class RawManagedObjectMetaData {
 	 * 
 	 * @return {@link ManagedObjectSource}.
 	 */
-	public ManagedObjectSource getManagedObjectSource() {
+	public ManagedObjectSource<?, ?> getManagedObjectSource() {
 		return this.managedObjectSource;
 	}
 

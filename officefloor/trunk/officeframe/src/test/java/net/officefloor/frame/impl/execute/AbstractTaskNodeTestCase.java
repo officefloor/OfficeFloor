@@ -97,7 +97,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} of the
 	 * {@link ProcessState}.
 	 */
-	private ManagedObjectSource processMoSource;
+	private ManagedObjectSource<?, ?> processMoSource;
 
 	/**
 	 * {@link AssetManager} for managing the sourcing of the
@@ -118,7 +118,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} of the
 	 * {@link Work}.
 	 */
-	private ManagedObjectSource workMoSource;
+	private ManagedObjectSource<?, ?> workMoSource;
 
 	/**
 	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} meta-data
@@ -210,7 +210,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * 
 	 * @return {@link ProcessState} bound {@link ManagedObjectSource}.
 	 */
-	protected ManagedObjectSource getProcessManagedObjectSource() {
+	protected ManagedObjectSource<?, ?> getProcessManagedObjectSource() {
 		return this.processMoSource;
 	}
 
@@ -219,7 +219,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * 
 	 * @return {@link Work} bound {@link ManagedObjectSource}.
 	 */
-	protected ManagedObjectSource getWorkManagedObjectSource() {
+	protected ManagedObjectSource<?, ?> getWorkManagedObjectSource() {
 		return this.workMoSource;
 	}
 

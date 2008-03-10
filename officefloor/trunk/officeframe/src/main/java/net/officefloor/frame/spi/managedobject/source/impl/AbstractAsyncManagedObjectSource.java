@@ -39,8 +39,15 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
  * 
  * @author Daniel
  */
-public abstract class AbstractAsyncManagedObjectSource implements
-		ManagedObjectSource {
+public abstract class AbstractAsyncManagedObjectSource
+		implements
+		ManagedObjectSource<AbstractAsyncManagedObjectSource.DummyKey, AbstractAsyncManagedObjectSource.DummyKey> {
+
+	/**
+	 * Dummy keys for the dependency and {@link Handler} instances.
+	 */
+	private static enum DummyKey {
+	}
 
 	/*
 	 * ================================================================
@@ -573,8 +580,9 @@ public abstract class AbstractAsyncManagedObjectSource implements
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
 	 */
 	@Override
-	public ManagedObjectSourceMetaData<?, ?> getMetaData() {
-		return this.metaData;
+	@SuppressWarnings("unchecked")
+	public ManagedObjectSourceMetaData<DummyKey, DummyKey> getMetaData() {
+		return (ManagedObjectSourceMetaData<DummyKey, DummyKey>) this.metaData;
 	}
 
 	/*
@@ -583,9 +591,59 @@ public abstract class AbstractAsyncManagedObjectSource implements
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
 	@Override
-	public void start(ManagedObjectExecuteContext<?> context) throws Exception {
-		// Do nothing by default.
-		// To be overridden to provide start functionality.
+	public void start(final ManagedObjectExecuteContext<DummyKey> context)
+			throws Exception {
+		// Invoke start
+		this.start(new StartContext() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public <H extends Enum<H>> ManagedObjectExecuteContext<H> getContext(
+					Class<H> handlerKeys) {
+
+				// Ensure the same handler keys
+				if (handlerKeys != AbstractAsyncManagedObjectSource.this
+						.getMetaData().getHandlerKeys()) {
+					throw new IllegalStateException(
+							"Incorrect handler keys [expecting "
+									+ AbstractAsyncManagedObjectSource.this
+											.getMetaData().getHandlerKeys()
+									+ ", actual " + handlerKeys + "]");
+				}
+
+				// Return the execute context
+				return (ManagedObjectExecuteContext<H>) context;
+			}
+		});
+	}
+
+	/**
+	 * Override to provide start functionality.
+	 * 
+	 * @param startContext
+	 *            {@link StartContext}.
+	 * @throws Exception
+	 *             If fails to start.
+	 */
+	protected void start(StartContext startContext) throws Exception {
+		// Do nothing by default
+	}
+
+	/**
+	 * Context for
+	 * {@link AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)}.
+	 */
+	public static interface StartContext {
+
+		/**
+		 * Obtains the {@link ManagedObjectExecuteContext}.
+		 * 
+		 * @param handlerKeys
+		 *            Keys for the {@link Handler} instances that <b>MUST</b>
+		 *            match {@link ManagedObjectSourceMetaData#getHandlerKeys()}.
+		 * @return {@link ManagedObjectExecuteContext}.
+		 */
+		<H extends Enum<H>> ManagedObjectExecuteContext<H> getContext(
+				Class<H> handlerKeys);
 	}
 
 	/**

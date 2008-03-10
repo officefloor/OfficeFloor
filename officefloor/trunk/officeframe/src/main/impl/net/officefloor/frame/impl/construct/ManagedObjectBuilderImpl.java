@@ -108,6 +108,7 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	 * 
 	 * @see net.officefloor.frame.api.construct.managedobject.ManagedObjectMetaData#setManagedObjectSourceClass(java.lang.Class)
 	 */
+	@SuppressWarnings("unchecked")
 	public <S extends ManagedObjectSource> void setManagedObjectSourceClass(
 			Class<S> managedObjectSourceClass) {
 		this.managedObjectSourceClass = managedObjectSourceClass;

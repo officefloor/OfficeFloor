@@ -319,9 +319,9 @@ public class RawManagedObjectRegistry {
 	 * 
 	 * @return Registry of {@link ManagedObjectSource} by thier names.
 	 */
-	public Map<String, ManagedObjectSource> createManagedObjectSourceRegistry() {
+	public Map<String, ManagedObjectSource<?, ?>> createManagedObjectSourceRegistry() {
 		// Create the registry of Managed Object Sources
-		Map<String, ManagedObjectSource> managedObjectSources = new HashMap<String, ManagedObjectSource>();
+		Map<String, ManagedObjectSource<?, ?>> managedObjectSources = new HashMap<String, ManagedObjectSource<?, ?>>();
 		for (String managedObjectId : this.rawMosRegistry.keySet()) {
 			managedObjectSources.put(managedObjectId, this.rawMosRegistry.get(
 					managedObjectId).getManagedObjectSource());

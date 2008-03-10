@@ -39,8 +39,8 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser {
 	 * @throws Exception
 	 *             If fails to source object.
 	 */
-	public static ManagedObject sourceManagedObject(ManagedObjectSource source)
-			throws Exception {
+	public static ManagedObject sourceManagedObject(
+			ManagedObjectSource<?, ?> source) throws Exception {
 
 		// Create a new user
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
