@@ -46,7 +46,7 @@ import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
  * @author Daniel
  */
 public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		implements ManagedObjectSource, ManagedObjectSourceMetaData<D, H> {
+		implements ManagedObjectSource<D, H>, ManagedObjectSourceMetaData<D, H> {
 
 	/**
 	 * {@link ServerSocketAccepter} listening for connections.
