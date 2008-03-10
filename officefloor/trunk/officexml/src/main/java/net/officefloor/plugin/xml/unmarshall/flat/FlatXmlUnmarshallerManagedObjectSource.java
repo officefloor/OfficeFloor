@@ -47,7 +47,7 @@ import net.officefloor.plugin.xml.unmarshall.translate.TranslatorRegistry;
  * @author Daniel
  */
 public class FlatXmlUnmarshallerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		implements ManagedObjectSource, ManagedObjectSourceMetaData<D, H> {
+		implements ManagedObjectSource<D, H>, ManagedObjectSourceMetaData<D, H> {
 
 	/**
 	 * Property name of the {@link Class}of the target object.
@@ -166,7 +166,7 @@ public class FlatXmlUnmarshallerManagedObjectSource<D extends Enum<D>, H extends
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
-	public void start(ManagedObjectExecuteContext<?> context) throws Exception {
+	public void start(ManagedObjectExecuteContext<H> context) throws Exception {
 		// No handlers
 	}
 
