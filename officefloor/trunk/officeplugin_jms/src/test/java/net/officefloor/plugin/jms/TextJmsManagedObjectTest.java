@@ -40,7 +40,7 @@ public class TextJmsManagedObjectTest extends AbstractJmsManagedObjectTest {
 		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
 		loader.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
 				TestJmsAdminObjectFactory.class.getName());
-		ManagedObjectSource moSource = loader
+		ManagedObjectSource<?, ?> moSource = loader
 				.loadManagedObjectSource(JmsManagedObjectSource.class);
 
 		// Create the JMS managed object
