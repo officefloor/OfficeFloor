@@ -132,6 +132,10 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		// ------------------------------------
 
 		// MANAGED OBJECT ONE (INIT)
+		// No handlers so no need as process managed object
+		moOneMetaData.getHandlerKeys();
+		this.control(moOneMetaData).setReturnValue(null);
+		// Load as work scoped managed object
 		// Dependency keys (no dependencies)
 		moOneMetaData.getDependencyKeys();
 		this.control(moOneMetaData).setReturnValue(null);
@@ -141,7 +145,7 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 
 		// MANAGED OBJECT TWO (INIT)
 		// Initialised via mock implementation
-		
+
 		// ADMINISTRATOR ONE
 		// Obtain the extension interface for administering
 		adminOneMetaData.getExtensionInterface();
@@ -217,7 +221,7 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		// Obtain the Object
 		moOne.getObject();
 		this.control(moOne).setReturnValue(object);
-		
+
 		// MANAGED OBJECT TWO
 		// Obtain the Object
 		moTwo.getObject();

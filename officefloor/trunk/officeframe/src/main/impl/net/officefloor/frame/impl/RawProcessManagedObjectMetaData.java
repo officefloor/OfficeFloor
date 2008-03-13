@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
@@ -52,6 +53,8 @@ public class RawProcessManagedObjectMetaData {
 	 *            instances for the
 	 *            {@link net.officefloor.frame.api.manage.Office}.
 	 * @return {@link RawProcessManagedObjectMetaData}.
+	 * @throws ConfigurationException
+	 *             If fails to create.
 	 */
 	@SuppressWarnings("unchecked")
 	public static RawProcessManagedObjectMetaData createRawProcessManagedObjectMetaData(
@@ -111,6 +114,49 @@ public class RawProcessManagedObjectMetaData {
 	}
 
 	/**
+	 * Creates the {@link RawProcessManagedObjectMetaData} that is managed by
+	 * the {@link Office} but not used by the {@link Office}.
+	 * 
+	 * @param mos
+	 *            {@link RawManagedObjectMetaData}.
+	 * @param processManagedObjectIndex
+	 *            Index for the
+	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
+	 *            within the
+	 *            {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * @return {@link RawProcessManagedObjectMetaData}.
+	 * @throws ConfigurationException
+	 *             If fails to create.
+	 */
+	@SuppressWarnings("unchecked")
+	public static RawProcessManagedObjectMetaData createRawProcessManagedObjectMetaData(
+			RawManagedObjectMetaData rawMoMetaData,
+			int processManagedObjectIndex) throws ConfigurationException {
+
+		// Obtain the dependency keys for the managed object
+		Class<?> dependencyKeys = (Class<?>) rawMoMetaData
+				.getManagedObjectSource().getMetaData().getDependencyKeys();
+		if (dependencyKeys != null) {
+			throw new ConfigurationException("Managed Object "
+					+ rawMoMetaData.getManagedObjectName()
+					+ " not used by the office can not have dependencies");
+		}
+
+		// Initiate the dependency details
+		Map<Enum, Integer> dependencyMapping = Collections.EMPTY_MAP;
+		String[] dependencyIds = new String[0];
+
+		// Create the managed object meta-data
+		ManagedObjectMetaData moMetaData = rawMoMetaData
+				.createManagedObjectMetaData(rawMoMetaData.getDefaultTimeout(),
+						dependencyMapping);
+
+		// Create the raw managed object meta-data
+		return new RawProcessManagedObjectMetaData(null, moMetaData,
+				processManagedObjectIndex, dependencyIds, dependencyMapping);
+	}
+
+	/**
 	 * {@link ManagedObjectConfiguration}.
 	 */
 	private final ManagedObjectConfiguration moConfig;
@@ -158,22 +204,13 @@ public class RawProcessManagedObjectMetaData {
 	 */
 	private RawProcessManagedObjectMetaData(
 			ManagedObjectConfiguration moConfig,
-			ManagedObjectMetaData<?> metaData, int index, String[] dependencyIds,
-			Map<?, ?> dependencyMap) {
+			ManagedObjectMetaData<?> metaData, int index,
+			String[] dependencyIds, Map<?, ?> dependencyMap) {
 		this.moConfig = moConfig;
 		this.metaData = metaData;
 		this.index = index;
 		this.dependencyIds = dependencyIds;
 		this.dependencyMap = dependencyMap;
-	}
-
-	/**
-	 * Obtains the {@link ManagedObjectConfiguration}.
-	 * 
-	 * @return {@link ManagedObjectConfiguration}.
-	 */
-	public ManagedObjectConfiguration getManagedObjectConfiguration() {
-		return this.moConfig;
 	}
 
 	/**
@@ -220,6 +257,11 @@ public class RawProcessManagedObjectMetaData {
 	@SuppressWarnings("unchecked")
 	public void loadDependencyMappings(
 			RawProcessManagedObjectRegistry moRegistry) {
+
+		// Determine if should have dependencies
+		if (this.moConfig == null) {
+			return;
+		}
 
 		// Load the dependencies
 		for (ManagedObjectDependencyConfiguration moDependencyConfig : this.moConfig

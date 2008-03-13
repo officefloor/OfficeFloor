@@ -141,6 +141,15 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/**
+	 * Obtains the {@link OfficeFloorBuilder}.
+	 * 
+	 * @return {@link OfficeFloorBuilder}.
+	 */
+	protected OfficeFloorBuilder getOfficeFloorBuilder() {
+		return this.officeFloorBuilder;
+	}
+
+	/**
 	 * Obtains the {@link OfficeBuilder}.
 	 * 
 	 * @return {@link OfficeBuilder}.
@@ -330,8 +339,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 			String managingOffice) throws BuildException {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder managedObjectBuilder = OfficeFrame
-				.getInstance().getBuilderFactory().createManagedObjectBuilder();
+		ManagedObjectBuilder managedObjectBuilder = OfficeFrame.getInstance()
+				.getBuilderFactory().createManagedObjectBuilder();
 
 		// Register the Managed Object Source class
 		managedObjectBuilder
@@ -365,8 +374,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 			throws BuildException {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder managedObjectBuilder = OfficeFrame
-				.getInstance().getBuilderFactory().createManagedObjectBuilder();
+		ManagedObjectBuilder managedObjectBuilder = OfficeFrame.getInstance()
+				.getBuilderFactory().createManagedObjectBuilder();
 
 		// Bind Managed Object
 		MockManagedObjectSource.bindManagedObject(managedObjectBuilder,
