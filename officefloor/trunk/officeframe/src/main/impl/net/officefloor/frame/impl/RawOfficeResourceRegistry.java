@@ -17,6 +17,8 @@
 package net.officefloor.frame.impl;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.internal.configuration.ConfigurationException;
@@ -51,7 +53,7 @@ public class RawOfficeResourceRegistry {
 			RawManagedObjectRegistry rawMoRegistry,
 			Map<String, Team> teamRegistry) throws ConfigurationException {
 
-		// Create the registry of managed objects
+		// Create the registry of managed objects used by the office
 		Map<String, RawManagedObjectMetaData> managedObjects = new HashMap<String, RawManagedObjectMetaData>();
 		for (LinkedManagedObjectConfiguration moConfig : officeConfiguration
 				.getRegisteredManagedObjects()) {
@@ -67,10 +69,28 @@ public class RawOfficeResourceRegistry {
 			managedObjects.put(moConfig.getManagedObjectName(), rawMoMetaData);
 		}
 
+		// Create the listing of managed objects managed by the office
+		String officeName = officeConfiguration.getOfficeName();
+		List<RawManagedObjectMetaData> officeManagedObjects = new LinkedList<RawManagedObjectMetaData>();
+		for (RawManagedObjectMetaData rawMoMetaData : rawMoRegistry
+				.getAllRawManagedObjectMetaData()) {
+
+			// Ensure managed by the office
+			if (!officeName.equals(rawMoMetaData
+					.getManagedObjectSourceConfiguration()
+					.getManagingOfficeName())) {
+				continue;
+			}
+
+			// Add as managed object
+			officeManagedObjects.add(rawMoMetaData);
+		}
+
 		// Create the process managed object registry
 		RawProcessManagedObjectRegistry processMoRegistry = RawProcessManagedObjectRegistry
 				.createProcessStateManagedObjectRegistry(officeConfiguration,
-						managedObjects);
+						managedObjects, officeManagedObjects
+								.toArray(new RawManagedObjectMetaData[0]));
 
 		// Create the registry of teams
 		Map<String, Team> teams = new HashMap<String, Team>();

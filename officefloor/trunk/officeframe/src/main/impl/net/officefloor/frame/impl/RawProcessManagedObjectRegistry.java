@@ -17,14 +17,18 @@
 package net.officefloor.frame.impl;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Registry of the {@link net.officefloor.frame.internal.structure.ProcessState}
@@ -44,23 +48,72 @@ public class RawProcessManagedObjectRegistry {
 	@SuppressWarnings("unchecked")
 	public static RawProcessManagedObjectRegistry createProcessStateManagedObjectRegistry(
 			OfficeConfiguration officeConfiguration,
-			Map<String, RawManagedObjectMetaData> managedObjects)
+			Map<String, RawManagedObjectMetaData> managedObjects,
+			RawManagedObjectMetaData[] officeManagedObjects)
 			throws ConfigurationException {
 
 		// Create the listing of process managed objects
 		int currentIndex = 0;
-		Map<String, RawProcessManagedObjectMetaData> processManagedObjectRegistry = new HashMap<String, RawProcessManagedObjectMetaData>();
+		Map<String, RawProcessManagedObjectMetaData> officeManagedObjectRegistry = new HashMap<String, RawProcessManagedObjectMetaData>();
+		Map<RawManagedObjectMetaData, RawProcessManagedObjectMetaData> processManagedObjectRegistry = new HashMap<RawManagedObjectMetaData, RawProcessManagedObjectMetaData>();
 		List<ManagedObjectMetaData> processManagedObjectList = new LinkedList<ManagedObjectMetaData>();
+
+		// Track the managed objects used by the office
+		Set<RawManagedObjectMetaData> addedMos = new HashSet<RawManagedObjectMetaData>();
+
+		// Add Managed Objects used by the Office
 		for (ManagedObjectConfiguration moConfig : officeConfiguration
 				.getManagedObjectConfiguration()) {
+
+			// Obtains the managed object source id
+			String mosId = moConfig.getManagedObjectId();
+
+			// Obtain the corresponding raw managed object meta-data
+			RawManagedObjectMetaData rawMoMetaData = managedObjects.get(mosId);
+			if (rawMoMetaData == null) {
+				throw new ConfigurationException(
+						"Can not find raw managed object meta-data for the process managed object "
+								+ mosId);
+			}
 
 			// Create the raw process managed object meta-data
 			RawProcessManagedObjectMetaData rawProcessMoMetaData = RawProcessManagedObjectMetaData
 					.createRawProcessManagedObjectMetaData(moConfig,
 							currentIndex++, managedObjects);
 
+			// Indicate added
+			addedMos.add(rawMoMetaData);
+			
 			// Register the managed object
-			processManagedObjectRegistry.put(moConfig.getManagedObjectName(),
+			officeManagedObjectRegistry.put(moConfig.getManagedObjectName(),
+					rawProcessMoMetaData);
+			processManagedObjectRegistry.put(rawMoMetaData,
+					rawProcessMoMetaData);
+			processManagedObjectList.add(rawProcessMoMetaData
+					.getManagedObjectMetaData());
+		}
+
+		// Add Managed Objects invoking tasks within the Office
+		for (RawManagedObjectMetaData rawMoMetaData : officeManagedObjects) {
+
+			// Ignore if already provided to office as process managed object
+			if (addedMos.contains(rawMoMetaData)) {
+				continue;
+			}
+
+			// Do not include additionally if does not have handlers
+			if (rawMoMetaData.getManagedObjectSource().getMetaData()
+					.getHandlerKeys() == null) {
+				continue;
+			}
+			
+			// Create the raw process managed object meta-data
+			RawProcessManagedObjectMetaData rawProcessMoMetaData = RawProcessManagedObjectMetaData
+					.createRawProcessManagedObjectMetaData(rawMoMetaData,
+							currentIndex++);
+
+			// Register the managed object
+			processManagedObjectRegistry.put(rawMoMetaData,
 					rawProcessMoMetaData);
 			processManagedObjectList.add(rawProcessMoMetaData
 					.getManagedObjectMetaData());
@@ -69,7 +122,7 @@ public class RawProcessManagedObjectRegistry {
 		// Return the process managed object meta-data
 		RawProcessManagedObjectRegistry rawProcessMoRegistry = new RawProcessManagedObjectRegistry(
 				processManagedObjectList.toArray(new ManagedObjectMetaData[0]),
-				processManagedObjectRegistry);
+				officeManagedObjectRegistry, processManagedObjectRegistry);
 
 		// Load dependencies indexes (all must be process bound)
 		for (RawProcessManagedObjectMetaData rawProcessMoMetaData : processManagedObjectRegistry
@@ -88,9 +141,16 @@ public class RawProcessManagedObjectRegistry {
 	private final ManagedObjectMetaData<?>[] metaData;
 
 	/**
-	 * Registry of {@link RawProcessManagedObjectMetaData} by their names.
+	 * Registry of {@link RawProcessManagedObjectMetaData} by the name of it
+	 * within the {@link Office}.
 	 */
-	private final Map<String, RawProcessManagedObjectMetaData> registry;
+	private final Map<String, RawProcessManagedObjectMetaData> officeRegistry;
+
+	/**
+	 * Registry of {@link RawProcessManagedObjectMetaData} by its
+	 * {@link RawManagedObjectMetaData}.
+	 */
+	private final Map<RawManagedObjectMetaData, RawProcessManagedObjectMetaData> rawRegistry;
 
 	/**
 	 * Initiate.
@@ -98,14 +158,20 @@ public class RawProcessManagedObjectRegistry {
 	 * @param metaData
 	 *            {@link net.officefloor.frame.internal.structure.ProcessState}
 	 *            {@link ManagedObjectMetaData}.
-	 * @param registry
-	 *            Registry of {@link RawProcessManagedObjectMetaData} by their
-	 *            names.
+	 * @param officeRegistry
+	 *            Registry of {@link RawProcessManagedObjectMetaData} by the
+	 *            name of it within the {@link Office}.
+	 * @param rawRegistry
+	 *            Registry of {@link RawProcessManagedObjectMetaData} by its
+	 *            {@link RawManagedObjectMetaData}.
 	 */
-	private RawProcessManagedObjectRegistry(ManagedObjectMetaData<?>[] metaData,
-			Map<String, RawProcessManagedObjectMetaData> registry) {
+	private RawProcessManagedObjectRegistry(
+			ManagedObjectMetaData<?>[] metaData,
+			Map<String, RawProcessManagedObjectMetaData> officeRegistry,
+			Map<RawManagedObjectMetaData, RawProcessManagedObjectMetaData> rawRegistry) {
 		this.metaData = metaData;
-		this.registry = registry;
+		this.officeRegistry = officeRegistry;
+		this.rawRegistry = rawRegistry;
 	}
 
 	/**
@@ -121,17 +187,31 @@ public class RawProcessManagedObjectRegistry {
 
 	/**
 	 * Obtains the {@link RawProcessManagedObjectMetaData} for the specified
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link RawManagedObjectMetaData}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * @param rawMoMetaData
+	 *            {@link RawManagedObjectMetaData} of the
+	 *            {@link RawProcessManagedObjectMetaData}.
 	 * @return {@link RawProcessManagedObjectMetaData} for the specified
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *         {@link ManagedObject}.
 	 */
 	public RawProcessManagedObjectMetaData getRawProcessManagedObjectMetaData(
-			String managedObjectName) {
-		return this.registry.get(managedObjectName);
+			RawManagedObjectMetaData rawMoMetaData) {
+		return this.rawRegistry.get(rawMoMetaData);
+	}
+
+	/**
+	 * Obtains the {@link RawProcessManagedObjectMetaData} by the name of it
+	 * within the {@link Office}.
+	 * 
+	 * @param officeManagedObjectName
+	 *            Name of the {@link RawManagedObjectMetaData} within the
+	 *            {@link Office}.
+	 * @return {@link RawProcessManagedObjectMetaData}.
+	 */
+	public RawProcessManagedObjectMetaData getRawProcessManagedObjectMetaData(
+			String officeManagedObjectName) {
+		return this.officeRegistry.get(officeManagedObjectName);
 	}
 
 }

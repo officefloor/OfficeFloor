@@ -32,7 +32,6 @@ import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectConfiguration;
-import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -132,6 +131,16 @@ public class RawManagedObjectRegistry {
 	}
 
 	/**
+	 * Obtains the listing of all {@link RawManagedObjectMetaData} instances.
+	 * 
+	 * @return Listing of all {@link RawManagedObjectMetaData} instances.
+	 */
+	public RawManagedObjectMetaData[] getAllRawManagedObjectMetaData() {
+		return this.rawMosRegistry.values().toArray(
+				new RawManagedObjectMetaData[0]);
+	}
+
+	/**
 	 * Loads the remaining state of the
 	 * {@link net.officefloor.frame.internal.structure.ManagedObjectMetaData}.
 	 * 
@@ -209,34 +218,12 @@ public class RawManagedObjectRegistry {
 							linkedMoConfig.getManagedObjectName());
 				}
 
-				// Obtain the managed object name (local to office)
-				String localManagedObjectName = moNameTrans.get(mosConfig
-						.getManagedObjectName());
-				if (localManagedObjectName == null) {
-					throw new ConfigurationException("Managed Object '"
-							+ mosConfig.getManagedObjectName()
-							+ "' must be process bound within office "
-							+ rawOfficeMetaData.getOfficeName());
-				}
-
-				// Find process managed object name
-				String processManagedObjectName = null;
-				for (ManagedObjectConfiguration moConfig : rawOfficeMetaData
-						.getOfficeConfiguration()
-						.getManagedObjectConfiguration()) {
-					if (localManagedObjectName.equals(moConfig
-							.getManagedObjectId())) {
-						processManagedObjectName = moConfig
-								.getManagedObjectName();
-					}
-				}
-
 				// Obtain the process managed object meta-data
 				RawProcessManagedObjectMetaData processMoMetaData = rawProcessMoRegistry
-						.getRawProcessManagedObjectMetaData(processManagedObjectName);
+						.getRawProcessManagedObjectMetaData(rmo);
 				if (processMoMetaData == null) {
 					throw new ConfigurationException("Managed Object '"
-							+ localManagedObjectName
+							+ rmo.getManagedObjectName()
 							+ "' not found as process bound for office "
 							+ rawOfficeMetaData.getOfficeName());
 				}
@@ -259,6 +246,12 @@ public class RawManagedObjectRegistry {
 					// Obtain the handle configuration
 					HandlerConfiguration handlerConfig = (HandlerConfiguration) handlerConfigs
 							.get(key);
+					if (handlerConfig == null) {
+						throw new ConfigurationException("No handler for key "
+								+ key + " of managed object "
+								+ rmo.getManagedObjectName() + " of office "
+								+ rawOfficeMetaData.getOfficeName());
+					}
 
 					// Create the process links
 					HandlerFlowConfiguration<?>[] processLinkConfig = handlerConfig
@@ -315,9 +308,9 @@ public class RawManagedObjectRegistry {
 	}
 
 	/**
-	 * Creates the registry of {@link ManagedObjectSource} by thier names.
+	 * Creates the registry of {@link ManagedObjectSource} by their names.
 	 * 
-	 * @return Registry of {@link ManagedObjectSource} by thier names.
+	 * @return Registry of {@link ManagedObjectSource} by their names.
 	 */
 	public Map<String, ManagedObjectSource<?, ?>> createManagedObjectSourceRegistry() {
 		// Create the registry of Managed Object Sources
