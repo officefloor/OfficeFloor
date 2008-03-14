@@ -1,16 +1,15 @@
 <office-floor>
-	<managed-object-sources>
-	</managed-object-sources>
+	<managed-object-sources />
 	<team-instances>
-		<team-instance id="TEAM-ID" team-factory="net.officefloor.frame.impl.spi.team.PassiveTeamFactory"/>
+		<team-instance id="TEAM-ID"
+			team-factory="net.officefloor.frame.impl.spi.team.PassiveTeamFactory" />
 	</team-instances>
 	<offices>
 		<office id="TestOffice.office.xml" name="office">
-			<managed-objects>
-			</managed-objects>
+			<managed-objects />
 			<teams>
 				<team name="TEAM-NAME">
-					<team-instance id="TEAM-ID"/>
+					<team-instance id="TEAM-ID" />
 				</team>
 			</teams>
 		</office>

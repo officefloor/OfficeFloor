@@ -1,11 +1,12 @@
 <office>
 	<teams>
-		<team name="TEAM ONE"/>
-		<team name="TEAM TWO"/>
+		<team name="TEAM ONE" />
+		<team name="TEAM TWO" />
 	</teams>
 	<managed-objects>
-		<managed-object name="MO" object-type="java.lang.String"/>
+		<managed-object name="MO-NAME" object-type="java.lang.String"
+			scope="process" />
 	</managed-objects>
-    <!-- room -->
-	<administrators/>
+	<!-- room -->
+	<administrators />
 </office>

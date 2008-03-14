@@ -22,10 +22,12 @@ import net.officefloor.LoaderContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.BuilderFactory;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.OfficeFrameImpl;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.mock.MockManagedObjectSource;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
 
@@ -38,10 +40,25 @@ import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
 public class ManagedObjectSourceTest extends OfficeFrameTestCase {
 
 	/**
-	 * Configures a
-	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+	 * {@link OfficeFloor}.
 	 */
-	public void testConfigureManagedObjectSource() throws Exception {
+	private OfficeFloor officeFloor;
+
+	/**
+	 * {@link TestManagedObjectSource} for verifying loaded correctly.
+	 */
+	private TestManagedObjectSource mos;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#setUp()
+	 */
+	@Override
+	protected void setUp() throws Exception {
+
+		// Clear the previous office floors
+		((OfficeFrameImpl) OfficeFrame.getInstance()).clearOfficeFloors();
 
 		// Obtain the office floor configuration file
 		File officeFloorConfigFile = this.findFile(this.getClass(),
@@ -60,24 +77,50 @@ public class ManagedObjectSourceTest extends OfficeFrameTestCase {
 				.getBuilderFactory();
 		LoaderContext loaderContext = new LoaderContext(this.getClass()
 				.getClassLoader());
-		OfficeFloor officeFloor = new OfficeFloorCompiler().compileOfficeFloor(
+		this.officeFloor = new OfficeFloorCompiler().compileOfficeFloor(
 				configuration, builderFactory, loaderContext);
 
 		// Open the Office Floor
-		officeFloor.openOfficeFloor();
+		this.officeFloor.openOfficeFloor();
 
 		// Obtain the Managed Object
 		// TODO obtain managed object externally by name rather than Id
-		ManagedObject managedObject = officeFloor.getOffice("office")
+		ManagedObject managedObject = this.officeFloor.getOffice("office")
 				.getManagedObject("MO-ID");
 
-		// Downcast to validate
-		MockManagedObjectSource mock = (MockManagedObjectSource) managedObject;
-		assertEquals("Incorrect property", "TEST PROPERTY", mock
-				.getProperties().getProperty("PROPERTY"));
-
-		// Close the Office Floor
-		officeFloor.closeOfficeFloor();
+		// Obtain the object (downcast for use)
+		this.mos = (TestManagedObjectSource) managedObject.getObject();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#tearDown()
+	 */
+	@Override
+	protected void tearDown() throws Exception {
+		// Close the office floor if created
+		if (this.officeFloor != null) {
+			this.officeFloor.closeOfficeFloor();
+		}
+	}
+
+	/**
+	 * Ensures properties are made available.
+	 */
+	public void testProperties() throws Exception {
+		// Validate the properties
+		assertEquals("Incorrect property", "TEST PROPERTY", this.mos.properties
+				.getProperty("PROPERTY"));
+	}
+
+	/**
+	 * Ensure correctly invokes {@link ManagedObjectSource} added
+	 * {@link Handler}.
+	 */
+	public void testManagedObjectSourceAddedHandler() throws Exception {
+		// Ensure added handler is available
+		assertEquals("Incorrect handler", "ADDED", this.mos.addedHandler
+				.getHandlerId());
+	}
 }

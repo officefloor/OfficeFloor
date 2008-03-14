@@ -143,7 +143,8 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 		for (OfficeManagedObjectModel mo : office.getManagedObjects()) {
 			String managedObjectId = mo.getManagedObjectSource()
 					.getManagedObjectSourceId();
-			this.getBuilder().registerManagedObject(mo.getManagedObjectName(),
+			String managedObjectName = mo.getManagedObjectName();
+			this.getBuilder().registerManagedObject(managedObjectName,
 					managedObjectId);
 		}
 
