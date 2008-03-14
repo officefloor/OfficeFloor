@@ -225,12 +225,13 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		OfficeFloorOfficeModel expectedOffice = new OfficeFloorOfficeModel(
 				OFFICE_FILE_NAME, null,
 				new OfficeManagedObjectModel[] { new OfficeManagedObjectModel(
-						"MO", null) }, new OfficeTeamModel[] {
+						"MO-NAME", null) }, new OfficeTeamModel[] {
 						new OfficeTeamModel("TEAM ONE", null),
 						new OfficeTeamModel("TEAM TWO", null) }, null, null);
 
 		// Validate the office
-		assertGraph(expectedOffice, actualOffice);
+		assertGraph(expectedOffice, actualOffice,
+				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
 
 }

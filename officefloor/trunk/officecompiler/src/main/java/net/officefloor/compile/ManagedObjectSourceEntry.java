@@ -17,6 +17,9 @@
 package net.officefloor.compile;
 
 import net.officefloor.LoaderContext;
+import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.build.FlowNodesEnhancer;
+import net.officefloor.frame.api.build.FlowNodesEnhancerContext;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
@@ -123,8 +126,23 @@ public class ManagedObjectSourceEntry extends
 				.getOfficeEntry(managingOffice);
 		// TODO provide the flow node enhancing
 		System.err.println("TODO " + this.getClass().getName()
-				+ " - implement flow node enhancing (" + managingOfficeEntry + ")");
-		// managingOfficeEntry.getBuilder().registerTeam("Imdb.jdbc.recycle", "Team");
+				+ " - implement flow node enhancing (" + managingOfficeEntry
+				+ ")");
+		// managingOfficeEntry.getBuilder().registerTeam("Imdb.jdbc.recycle",
+		// "Team");
+
+		// Enhance with addition configuration of Managed Object Source
+		managingOfficeEntry.getBuilder().addFlowNodesEnhancer(
+				new FlowNodesEnhancer() {
+					@Override
+					public void enhanceFlowNodes(
+							FlowNodesEnhancerContext context)
+							throws BuildException {
+						// TODO implement
+						System.err
+								.println("TODO implement flow node enhancement");
+					}
+				});
 
 		// Register managed object source with the office floor
 		this.officeFloorEntry.getBuilder().addManagedObject(this.getId(),

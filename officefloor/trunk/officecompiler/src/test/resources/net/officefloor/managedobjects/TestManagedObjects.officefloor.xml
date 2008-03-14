@@ -1,19 +1,18 @@
 <office-floor>
 	<managed-object-sources>
-		<managed-object-source id="MO-ID" source="net.officefloor.mock.MockManagedObjectSource">
-			<managing-office name="office"/>
+		<managed-object-source id="MO-ID"
+			source="net.officefloor.managedobjects.TestManagedObjectSource">
+			<managing-office name="office" />
 			<properties>
-				<property name="PROPERTY" value="TEST PROPERTY"/>
+				<property name="PROPERTY" value="TEST PROPERTY" />
 			</properties>
 		</managed-object-source>
 	</managed-object-sources>
+	<team-instances>
+		<team-instance id="TEAM-ID"
+			team-factory="net.officefloor.frame.impl.spi.team.PassiveTeamFactory" />
+	</team-instances>
 	<offices>
-		<office id="TestOffice.office.xml" name="office">
-			<managed-objects>
-				<managed-object name="MO-NAME">
-					<managed-object-source id="MO-ID"/>
-				</managed-object>
-			</managed-objects>
-		</office>
+		<office id="TestOffice.office.xml" name="office" />
 	</offices>
 </office-floor>
