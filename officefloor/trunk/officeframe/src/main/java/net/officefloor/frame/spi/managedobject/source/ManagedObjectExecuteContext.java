@@ -35,6 +35,7 @@ public interface ManagedObjectExecuteContext<H extends Enum<H>> {
 	 *            Key identifying the {@link Handler} to return.
 	 * @return {@link Handler} for the key.
 	 */
-	Handler<?> getHandler(H key);
+	@SuppressWarnings("unchecked")
+	Handler getHandler(H key);
 
 }
