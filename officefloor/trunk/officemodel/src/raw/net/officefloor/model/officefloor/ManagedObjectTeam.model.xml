@@ -2,4 +2,5 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="String" name="team name" />
+	<field type="ManagedObjectTeamToTeamModel" name="team" />
 </model>
