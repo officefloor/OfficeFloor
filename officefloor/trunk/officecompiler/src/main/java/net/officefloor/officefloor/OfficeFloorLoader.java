@@ -22,6 +22,8 @@ import java.util.Map;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.ManagedObjectTeamModel;
+import net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
@@ -84,22 +86,6 @@ public class OfficeFloorLoader {
 			offices.put(office.getName(), office);
 		}
 
-		// Connect the managed object source to its managing office
-		for (ManagedObjectSourceModel mos : officeFloor
-				.getManagedObjectSources()) {
-			ManagedObjectSourceToOfficeFloorOfficeModel conn = mos
-					.getManagingOffice();
-			if (conn != null) {
-				OfficeFloorOfficeModel office = offices.get(conn
-						.getManagingOfficeName());
-				if (office != null) {
-					conn.setManagedObjectSource(mos);
-					conn.setManagingOffice(office);
-					conn.connect();
-				}
-			}
-		}
-
 		// Create the registry of managed object sources
 		Map<String, ManagedObjectSourceModel> mosRegistry = new HashMap<String, ManagedObjectSourceModel>();
 		for (ManagedObjectSourceModel mos : officeFloor
@@ -113,7 +99,7 @@ public class OfficeFloorLoader {
 			teams.put(team.getId(), team);
 		}
 
-		// Connect the office to managed object sources and teams
+		// Connect the office connections
 		for (OfficeFloorOfficeModel office : officeFloor.getOffices()) {
 
 			// Connect the managed object sources
@@ -145,6 +131,37 @@ public class OfficeFloorLoader {
 			}
 		}
 
+		// Connect the managed object source connections
+		for (ManagedObjectSourceModel mos : officeFloor
+				.getManagedObjectSources()) {
+
+			// Connect the managing offices
+			ManagedObjectSourceToOfficeFloorOfficeModel conn = mos
+					.getManagingOffice();
+			if (conn != null) {
+				OfficeFloorOfficeModel office = offices.get(conn
+						.getManagingOfficeName());
+				if (office != null) {
+					conn.setManagedObjectSource(mos);
+					conn.setManagingOffice(office);
+					conn.connect();
+				}
+			}
+
+			// Connect the teams
+			for (ManagedObjectTeamModel moTeam : mos.getTeams()) {
+				ManagedObjectTeamToTeamModel teamConn = moTeam.getTeam();
+				if (teamConn != null) {
+					TeamModel team = teams.get(teamConn.getTeamId());
+					if (team != null) {
+						teamConn.setManagedObjectTeam(moTeam);
+						teamConn.setTeam(team);
+						teamConn.connect();
+					}
+				}
+			}
+		}
+
 		// Return the office floor
 		return officeFloor;
 	}
@@ -166,6 +183,10 @@ public class OfficeFloorLoader {
 		// Ensure the teams are linked
 		for (TeamModel teamModel : officeFloor.getTeams()) {
 			for (OfficeTeamToTeamModel conn : teamModel.getOfficeTeams()) {
+				conn.setTeamId(teamModel.getId());
+			}
+			for (ManagedObjectTeamToTeamModel conn : teamModel
+					.getManagedObjectTeams()) {
 				conn.setTeamId(teamModel.getId());
 			}
 		}

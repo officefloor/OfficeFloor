@@ -106,9 +106,9 @@ public class ManagedObjectSourceLoader {
 				.createOfficeBuilder();
 
 		// Initialise managed object to obtain addition configuration
-		managedObjectSource.init(new ManagedObjectSourceContextImpl(
-				managedObjectSourceName, properties, projectResourceLoader,
-				managedObjectBuilder, officeBuilder, officeFrame));
+		managedObjectSource.init(new ManagedObjectSourceContextImpl(null,
+				properties, projectResourceLoader, managedObjectBuilder,
+				officeBuilder, officeFrame));
 
 		// Create the properties for the managed object source
 		List<PropertyModel> propertyModels = new LinkedList<PropertyModel>();
@@ -261,7 +261,7 @@ public class ManagedObjectSourceLoader {
 		Arrays.sort(orderedTeamNames);
 		ManagedObjectTeamModel[] teams = new ManagedObjectTeamModel[orderedTeamNames.length];
 		for (int i = 0; i < teams.length; i++) {
-			teams[i] = new ManagedObjectTeamModel(orderedTeamNames[i]);
+			teams[i] = new ManagedObjectTeamModel(orderedTeamNames[i], null);
 		}
 
 		// Create the managed object source model

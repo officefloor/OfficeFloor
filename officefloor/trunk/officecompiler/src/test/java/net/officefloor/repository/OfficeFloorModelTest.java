@@ -49,7 +49,7 @@ public class OfficeFloorModelTest extends AbstractModelTestCase {
 						null, null, null, null) },
 				new TeamModel[] { new TeamModel("TEAM", "TEAM-FACTORY",
 						new PropertyModel[] { new PropertyModel("PROP NAME",
-								"PROP VALUE") }, null) },
+								"PROP VALUE") }, null, null) },
 				new OfficeFloorOfficeModel[] { new OfficeFloorOfficeModel(
 						"OFFICE",
 						"office",

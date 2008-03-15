@@ -22,7 +22,7 @@
 				</handler>
 			</handlers>
 			<tasks>
-				<task work="work" task="task">
+				<task work="work" task="task" team="MO-TEAM-NAME">
 					<flows>
 						<flow id="flow" work="work.name"
 							task="task.name" />
@@ -30,7 +30,9 @@
 				</task>
 			</tasks>
 			<teams>
-				<team name="MO-TEAM-NAME" />
+				<team name="MO-TEAM-NAME">
+					<team-instance name="TEAM-ID" />
+				</team>
 			</teams>
 		</managed-object-source>
 	</managed-object-sources>
