@@ -21,10 +21,13 @@ import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.FlowNodesEnhancer;
 import net.officefloor.frame.api.build.FlowNodesEnhancerContext;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.impl.construct.OfficeBuilderImpl;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.ManagedObjectTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.PropertyModel;
+import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.util.OFCU;
 
 /**
@@ -124,12 +127,19 @@ public class ManagedObjectSourceEntry extends
 		// Provide flow node enhancing on the office
 		OfficeEntry managingOfficeEntry = this.getOfficeFloorEntry()
 				.getOfficeEntry(managingOffice);
-		// TODO provide the flow node enhancing
-		System.err.println("TODO " + this.getClass().getName()
-				+ " - implement flow node enhancing (" + managingOfficeEntry
-				+ ")");
-		// managingOfficeEntry.getBuilder().registerTeam("Imdb.jdbc.recycle",
-		// "Team");
+
+		// Register the teams
+		for (ManagedObjectTeamModel moTeam : this.getModel().getTeams()) {
+
+			// Obtain the managed object name
+			String managedObjectTeamName = OfficeBuilderImpl.getNamespacedName(
+					this.getId(), moTeam.getTeamName());
+
+			// Register the team
+			TeamModel team = moTeam.getTeam().getTeam();
+			managingOfficeEntry.getBuilder().registerTeam(
+					managedObjectTeamName, team.getId());
+		}
 
 		// Enhance with addition configuration of Managed Object Source
 		managingOfficeEntry.getBuilder().addFlowNodesEnhancer(

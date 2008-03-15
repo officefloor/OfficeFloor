@@ -98,9 +98,8 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 		properties.setProperty("property name", "property value");
 
 		// Load the managed object source model
-		final String MO_NAME = "test";
-		ManagedObjectSourceModel model = loader.loadManagedObjectSource(
-				MO_NAME, new TestContextManagedObjectSource(), properties, this
+		ManagedObjectSourceModel model = loader.loadManagedObjectSource("test",
+				new TestContextManagedObjectSource(), properties, this
 						.getClass().getClassLoader());
 
 		// --------------------------------------------
@@ -134,35 +133,29 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getLinkProcessId", "getWorkName",
 				"getTaskName" }, handlerInstance.getLinkProcesses(),
 				new ManagedObjectHandlerLinkProcessModel("0", null, null),
-				new ManagedObjectHandlerLinkProcessModel("1", MO_NAME
-						+ ".handler-work", MO_NAME + ".handler-task"));
+				new ManagedObjectHandlerLinkProcessModel("1", "handler-work",
+						"handler-task"));
 
 		// Validate tasks
-		final String RECYCLE_WORK_NAME = MO_NAME + "."
-				+ RawManagedObjectMetaData.MANAGED_OBJECT_CLEAN_UP_WORK_NAME;
-		assertList(
-				new String[] { "getWorkName", "getTaskName", "getTeamName" },
-				model.getTasks(),
-				new ManagedObjectTaskModel(RECYCLE_WORK_NAME, MO_NAME
-						+ ".RECYCLE TASK ONE", null, null),
-				new ManagedObjectTaskModel(RECYCLE_WORK_NAME, MO_NAME
-						+ ".RECYCLE TASK TWO", MO_NAME + ".Recycle Team", null),
-				new ManagedObjectTaskModel(MO_NAME + ".WORK",
-						MO_NAME + ".TASK", null, null));
+		final String RECYCLE_WORK_NAME = RawManagedObjectMetaData.MANAGED_OBJECT_CLEAN_UP_WORK_NAME;
+		assertList("getTaskName", new String[] { "getWorkName", "getTaskName",
+				"getTeamName" }, model.getTasks(), new ManagedObjectTaskModel(
+				RECYCLE_WORK_NAME, "RECYCLE TASK ONE", null, null),
+				new ManagedObjectTaskModel(RECYCLE_WORK_NAME,
+						"RECYCLE TASK TWO", "Recycle Team", null),
+				new ManagedObjectTaskModel("WORK", "TASK", null, null));
 
 		// Validate task flows
 		assertList(new String[] { "getFlowId", "getInitialWorkName",
 				"getInitialTaskName" }, model.getTasks().get(0).getFlows(),
-				new ManagedObjectTaskFlowModel("0", null, MO_NAME
-						+ ".RECYCLE TASK TWO"), new ManagedObjectTaskFlowModel(
-						"1", null, null));
+				new ManagedObjectTaskFlowModel("0", null, "RECYCLE TASK TWO"),
+				new ManagedObjectTaskFlowModel("1", null, null));
 		assertList(new String[] { "getFlowId", "getInitialWorkName",
 				"getInitialTaskName" }, model.getTasks().get(1).getFlows(),
-				new ManagedObjectTaskFlowModel("0", null, MO_NAME
-						+ ".RECYCLE TASK ONE"));
+				new ManagedObjectTaskFlowModel("0", null, "RECYCLE TASK ONE"));
 
 		// Validate teams
 		assertList(new String[] { "getTeamName" }, model.getTeams(),
-				new ManagedObjectTeamModel(MO_NAME + ".Recycle Team"));
+				new ManagedObjectTeamModel("Recycle Team", null));
 	}
 }

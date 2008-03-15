@@ -30,6 +30,7 @@ import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeM
 import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamModel;
+import net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
@@ -124,9 +125,10 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 						"task.name"));
 
 		// Validate tasks
-		assertList(new String[] { "getWorkName", "getTaskName" }, mos
-				.getTasks(), new ManagedObjectTaskModel("work", "task", null,
-				null));
+		assertList(
+				new String[] { "getWorkName", "getTaskName", "getTeamName" },
+				mos.getTasks(), new ManagedObjectTaskModel("work", "task",
+						"MO-TEAM-NAME", null));
 		assertList(
 				new String[] { "getFlowId", "getInitialWorkName",
 						"getInitialTaskName" },
@@ -135,14 +137,19 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 
 		// Validate teams
 		assertList(new String[] { "getTeamName" }, mos.getTeams(),
-				new ManagedObjectTeamModel("MO-TEAM-NAME"));
+				new ManagedObjectTeamModel("MO-TEAM-NAME", null));
+		ManagedObjectTeamToTeamModel moTeamToTeam = mos.getTeams().get(0)
+				.getTeam();
+		assertProperties(new ManagedObjectTeamToTeamModel("TEAM-ID", mos
+				.getTeams().get(0), officeFloor.getTeams().get(0)),
+				moTeamToTeam, "getTeamId", "getManagedObjectTeam", "getTeam");
 
 		// ----------------------------------------
 		// Validate the teams
 		// ----------------------------------------
 		assertList(new String[] { "getId", "getTeamFactory" }, officeFloor
 				.getTeams(), new TeamModel("TEAM-ID",
-				"net.officefloor.team.TestTeamFactory", null, null));
+				"net.officefloor.team.TestTeamFactory", null, null, null));
 		assertList(new String[] { "getName", "getValue" }, officeFloor
 				.getTeams().get(0).getProperties(), new PropertyModel(
 				"team prop name", "team prop value"));
