@@ -19,15 +19,20 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamModel;
+import net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel;
+import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamModel.ManagedObjectTeamEvent;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link ManagedObjectTeamEditPart}.
@@ -35,7 +40,7 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class ManagedObjectTeamEditPart extends
-		AbstractOfficeFloorEditPart<ManagedObjectTeamModel> {
+		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTeamModel> {
 
 	/*
 	 * (non-Javadoc)
@@ -51,7 +56,9 @@ public class ManagedObjectTeamEditPart extends
 			protected void handlePropertyChange(
 					ManagedObjectTeamEvent property, PropertyChangeEvent evt) {
 				switch (property) {
-
+				case CHANGE_TEAM:
+					ManagedObjectTeamEditPart.this.refreshSourceConnections();
+					break;
 				}
 			}
 		});
@@ -70,6 +77,62 @@ public class ManagedObjectTeamEditPart extends
 
 		// Return the figure
 		return figure;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 */
+	@Override
+	protected ConnectionModelFactory createConnectionModelFactory() {
+		return new ConnectionModelFactory() {
+			@Override
+			public ConnectionModel createConnection(Object source,
+					Object target, CreateConnectionRequest request) {
+				// Create the connection
+				ManagedObjectTeamToTeamModel conn = new ManagedObjectTeamToTeamModel();
+				conn.setManagedObjectTeam((ManagedObjectTeamModel) source);
+				conn.setTeam((TeamModel) target);
+				conn.connect();
+
+				// Return the connection
+				return conn;
+			}
+		};
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
+		types.add(TeamModel.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		ManagedObjectTeamToTeamModel model = this.getCastedModel().getTeam();
+		if (model != null) {
+			models.add(model);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		// Never a target
 	}
 
 }

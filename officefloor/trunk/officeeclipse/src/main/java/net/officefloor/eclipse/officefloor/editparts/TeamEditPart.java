@@ -56,6 +56,8 @@ public class TeamEditPart extends AbstractOfficeFloorNodeEditPart<TeamModel>
 				switch (property) {
 				case ADD_OFFICE_TEAM:
 				case REMOVE_OFFICE_TEAM:
+				case ADD_MANAGED_OBJECT_TEAM:
+				case REMOVE_MANAGED_OBJECT_TEAM:
 					TeamEditPart.this.refreshTargetConnections();
 					break;
 				}
@@ -97,6 +99,7 @@ public class TeamEditPart extends AbstractOfficeFloorNodeEditPart<TeamModel>
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getOfficeTeams());
+		models.addAll(this.getCastedModel().getManagedObjectTeams());
 	}
 
 	/*
