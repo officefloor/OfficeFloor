@@ -87,6 +87,8 @@
 							attribute="work" />
 						<attribute method="getTaskName"
 							attribute="task" />
+						<attribute method="getTeamName"
+							attribute="team" />
 					</attributes>
 					<collection method="getFlows" element="flows">
 						<item
@@ -112,6 +114,12 @@
 						<attribute method="getTeamName"
 							attribute="name" />
 					</attributes>
+					<object method="getTeam" element="team-instance">
+						<attributes>
+							<attribute method="getTeamId"
+								attribute="name" />
+						</attributes>
+					</object>
 				</item>
 			</collection>
 		</item>
