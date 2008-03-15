@@ -75,7 +75,10 @@ public class ManagedObjectTaskEditPart extends
 				new ListFigure()));
 		figure.addDecorate(new ListItemFigure(this.getCastedModel()
 				.getWorkName()
-				+ "." + this.getCastedModel().getTaskName()));
+				+ "."
+				+ this.getCastedModel().getTaskName()
+				+ (this.getCastedModel().getTeamName() == null ? "" : " ("
+						+ this.getCastedModel().getTeamName() + ")")));
 		figure.addChildContainerFigure();
 		figure.setForegroundColor(ColorConstants.darkGreen);
 

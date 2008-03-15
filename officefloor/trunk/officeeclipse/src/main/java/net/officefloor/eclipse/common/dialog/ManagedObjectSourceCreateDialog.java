@@ -168,7 +168,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	protected void populateProperties() {
 
 		// Attempt to create an instance of the Managed Object Source
-		ManagedObjectSource managedObjectSource = this
+		ManagedObjectSource<?, ?> managedObjectSource = this
 				.createManagedObjectSourceInstance();
 		if (managedObjectSource == null) {
 			return;
@@ -229,7 +229,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 			}
 
 			// Attempt to create the Managed Object Source
-			ManagedObjectSource managedObjectSourceInstance = this
+			ManagedObjectSource<?, ?> managedObjectSourceInstance = this
 					.createManagedObjectSourceInstance();
 			if (managedObjectSourceInstance == null) {
 				return;
@@ -276,7 +276,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	 * @return {@link ManagedObjectSource} or <code>null</code> if not
 	 *         created.
 	 */
-	private ManagedObjectSource createManagedObjectSourceInstance() {
+	private ManagedObjectSource<?, ?> createManagedObjectSourceInstance() {
 
 		// Ensure managed object source provided
 		String managedObjectSourceClassName = this.managedObjectSourceList
@@ -299,7 +299,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 						+ " must be an instance of "
 						+ ManagedObjectSource.class.getName());
 			}
-			ManagedObjectSource managedObjectSource = (ManagedObjectSource) instance;
+			ManagedObjectSource<?, ?> managedObjectSource = (ManagedObjectSource<?, ?>) instance;
 
 			// Return the managed object source
 			return managedObjectSource;

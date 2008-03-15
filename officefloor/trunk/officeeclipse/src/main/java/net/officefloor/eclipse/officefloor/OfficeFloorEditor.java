@@ -45,6 +45,7 @@ import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeM
 import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamModel;
+import net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
@@ -125,6 +126,8 @@ public class OfficeFloorEditor extends
 		map.put(OfficeManagedObjectToManagedObjectSourceModel.class,
 				OfficeFloorConnectionEditPart.class);
 		map.put(ManagedObjectSourceToOfficeFloorOfficeModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(ManagedObjectTeamToTeamModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 

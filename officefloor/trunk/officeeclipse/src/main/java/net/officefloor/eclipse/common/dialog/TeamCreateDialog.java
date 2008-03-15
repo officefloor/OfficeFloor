@@ -211,7 +211,7 @@ public class TeamCreateDialog extends Dialog {
 
 		// Team configuration valid (as at this point)
 		this.team = new TeamModel(teamName, teamFactoryClassName,
-				propertyModels, null);
+				propertyModels, null, null);
 
 		// Successful
 		super.okPressed();
