@@ -19,6 +19,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -495,6 +497,43 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				}
 			}
 		}, list, expectedItems);
+	}
+
+	/**
+	 * Asserts that properties on items within list match after the list is
+	 * sorted.
+	 * 
+	 * @param sortMethod
+	 *            Name of method on the items to sort the list by to ensure
+	 *            match in order.
+	 * @param methods
+	 *            Method names to specify the properties on the items to match.
+	 * @param list
+	 *            List to be checked.
+	 * @param expectedItems
+	 *            Items expected in the list.
+	 */
+	public static <O> void assertList(final String sortMethod,
+			String[] methods, List<O> list, O... expectedItems) {
+
+		// Sort the list
+		Collections.sort(list, new Comparator<O>() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public int compare(O a, O b) {
+
+				// Obtain the property values
+				Object valueA = getProperty(a, sortMethod);
+				Object valueB = getProperty(b, sortMethod);
+
+				// Return the comparison
+				Comparable comparableA = (Comparable) valueA;
+				return comparableA.compareTo(valueB);
+			}
+		});
+
+		// Assert the list
+		assertList(methods, list, expectedItems);
 	}
 
 	/**

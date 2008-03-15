@@ -257,8 +257,8 @@ public class ManagedObjectSourceContextImpl implements
 		}
 
 		// Name the recycle work
-		this.recycleWorkName = this.managedObjectName + "."
-				+ RawManagedObjectMetaData.MANAGED_OBJECT_CLEAN_UP_WORK_NAME;
+		this.recycleWorkName = this
+				.getNamespacedName(RawManagedObjectMetaData.MANAGED_OBJECT_CLEAN_UP_WORK_NAME);
 
 		// Add and return the recycle work
 		return this.addWork(
