@@ -18,6 +18,7 @@ import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -497,6 +498,21 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				}
 			}
 		}, list, expectedItems);
+	}
+
+	/**
+	 * Asserts that properties on items within the array match.
+	 * 
+	 * @param methods
+	 *            Method names to specify the properties on the items to match.
+	 * @param array
+	 *            Array to be checked.
+	 * @param expectedItems
+	 *            Items expected in the array.
+	 */
+	public static <O> void assertList(final String[] methods, O[] array,
+			O... expectedItems) {
+		assertList(methods, Arrays.asList(array), expectedItems);
 	}
 
 	/**
