@@ -16,37 +16,28 @@
  */
 package net.officefloor.plugin.filingcabinet;
 
-import java.sql.Types;
-
 /**
- * Provides additional awareness of a database.
+ * Tests the {@link TableGenerator}.
  * 
  * @author Daniel
  */
-public interface DatabaseAwareness {
+public class TableGeneratorTest extends AbstractGeneratorTest {
 
 	/**
-	 * Obtains the java {@link Class} for the input {@link Types}.
-	 * 
-	 * @param sqlType
-	 *            Type from {@link Types}.
-	 * @return Java {@link Class} for the input sqlType.
-	 * @throws If
-	 *             fails to determine the {@link Class} for the {@link Types}.
+	 * Ensures the appropriate classes get generated.
 	 */
-	Class<?> getJavaType(int sqlType) throws Exception;
+	public void testGenerateTable() throws Exception {
+		// Output the listing of tables
+		for (TableMetaData table : this.generator.getTableMetaData()) {
 
-	/**
-	 * Indicates if the input table is a system table.
-	 * 
-	 * @param catalogName
-	 *            Catalog name.
-	 * @param schemaName
-	 *            Schema name.
-	 * @param tableName
-	 *            Table name.
-	 * @return <code>true</code> if a system table.
-	 */
-	boolean isSystemTable(String catalogName, String schemaName,
-			String tableName);
+			// Ignore information schema
+			if ("INFORMATION_SCHEMA".equals(table.getSchemaName())) {
+				continue;
+			}
+
+			// TODO provide configuration context
+			TableGenerator generator = new TableGenerator(table);
+			generator.generate(null);
+		}
+	}
 }

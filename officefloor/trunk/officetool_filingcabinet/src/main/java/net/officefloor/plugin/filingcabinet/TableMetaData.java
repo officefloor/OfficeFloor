@@ -16,6 +16,9 @@
  */
 package net.officefloor.plugin.filingcabinet;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +63,11 @@ public class TableMetaData {
 	 * Cross references.
 	 */
 	private CrossReferenceMetaData[] crossReferences;
+
+	/**
+	 * Accesses on this table.
+	 */
+	private final Map<AccessMetaData, AccessMetaData> accesses = new HashMap<AccessMetaData, AccessMetaData>();
 
 	/**
 	 * Initiate.
@@ -108,6 +116,42 @@ public class TableMetaData {
 			// Create and set the index meta-data
 			this.indexes[i] = new IndexMetaData(this, indexName, this
 					.getColumnsByName(indexColumnNames), isUnique);
+		}
+
+		// Load the access meta-data
+		List<IndexMetaData> allIndexes = new LinkedList<IndexMetaData>();
+		allIndexes.add(this.primaryKey);
+		allIndexes.addAll(Arrays.asList(this.indexes));
+		for (IndexMetaData index : allIndexes) {
+			// Load the access
+			for (int c = 1; c <= index.getColumns().length; c++) {
+
+				// Determine if override to be non-unique
+				boolean isUnique = (c == index.getColumns().length);
+				isUnique &= index.isUnique();
+
+				// Create the listing of columns
+				ColumnMetaData[] accessColumns = new ColumnMetaData[c];
+				for (int i = 0; i < accessColumns.length; i++) {
+					accessColumns[i] = index.getColumns()[i];
+				}
+
+				// Create the access
+				AccessMetaData access = new AccessMetaData(this, "Access",
+						accessColumns, isUnique);
+
+				// Determine if access is already registered
+				if (isUnique) {
+					// Override to indicate unique access
+					this.accesses.put(access, access);
+				} else {
+					// Determine contains access
+					if (!this.accesses.containsKey(access)) {
+						// Add as not yet provided
+						this.accesses.put(access, access);
+					}
+				}
+			}
 		}
 	}
 
@@ -226,6 +270,33 @@ public class TableMetaData {
 	 */
 	public CrossReferenceMetaData[] getCrossReferences() {
 		return this.crossReferences;
+	}
+
+	/**
+	 * Obtains the {@link AccessMetaData} instances to access this table.
+	 * 
+	 * @return {@link AccessMetaData} instances to access this table.
+	 */
+	public AccessMetaData[] getAccesses() {
+		return this.accesses.keySet().toArray(new AccessMetaData[0]);
+	}
+
+	/**
+	 * Obtains the {@link AccessMetaData} for the {@link ColumnMetaData}
+	 * combination.
+	 * 
+	 * @param columns
+	 *            {@link ColumnMetaData} instances in order.
+	 * @return {@link AccessMetaData}.
+	 */
+	public AccessMetaData getAccess(ColumnMetaData... columns) {
+
+		// Create the access key
+		AccessMetaData key = new AccessMetaData(this, "Key", columns, false);
+
+		// Obtain and return the access
+		AccessMetaData access = this.accesses.get(key);
+		return access;
 	}
 
 	/**
