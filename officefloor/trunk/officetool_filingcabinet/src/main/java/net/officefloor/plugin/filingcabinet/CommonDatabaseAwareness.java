@@ -83,4 +83,16 @@ public class CommonDatabaseAwareness implements DatabaseAwareness {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.filingcabinet.DatabaseAwareness#isSystemTable(java.lang.String,
+	 *      java.lang.String, java.lang.String)
+	 */
+	@Override
+	public boolean isSystemTable(String catalogName, String schemaName,
+			String tableName) {
+		return ("INFORMATION_SCHEMA".equals(schemaName));
+	}
+
 }

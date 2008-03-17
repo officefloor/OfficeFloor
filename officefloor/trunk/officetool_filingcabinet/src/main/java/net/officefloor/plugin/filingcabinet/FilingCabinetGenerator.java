@@ -60,6 +60,13 @@ public class FilingCabinetGenerator {
 			String schemaName = tableResultSet.getString("TABLE_SCHEM");
 			String tableName = tableResultSet.getString("TABLE_NAME");
 
+			// Ignore system tables of the database
+			if (databaseAwareness.isSystemTable(catalogName, schemaName,
+					tableName)) {
+				// Ignore this as is a system table
+				continue;
+			}
+
 			// Obtain the column meta-data
 			List<ColumnMetaData> columns = new LinkedList<ColumnMetaData>();
 			ResultSet columnResultSet = databaseMetaData.getColumns(
