@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tool for the filing cabinet
+Bundle-SymbolicName: net.officefloor.tool.filingcabinet
+Bundle-Version: 1.0.0
+Export-Package: net.officefloor.plugin.filingcabinet

@@ -1,4 +1,4 @@
-package public_.productprice;
+package net.officefloor.packageprefix.public_.productprice;
 
 public class ProductPriceIndexProductIdQuantity {
 

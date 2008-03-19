@@ -30,6 +30,11 @@ import java.util.Map;
 public class TableMetaData {
 
 	/**
+	 * Prefix of the package name.
+	 */
+	private final String packagePrefix;
+
+	/**
 	 * Catalog name.
 	 */
 	private final String catalogName;
@@ -72,6 +77,8 @@ public class TableMetaData {
 	/**
 	 * Initiate.
 	 * 
+	 * @param packagePrefix
+	 *            Prefix of the package name.
 	 * @param catalogName
 	 *            Catalog name.
 	 * @param schemaName
@@ -87,11 +94,12 @@ public class TableMetaData {
 	 * @param indexUniqueness
 	 *            Provides whether index is unique
 	 */
-	public TableMetaData(String catalogName, String schemaName,
-			String tableName, ColumnMetaData[] columns,
+	public TableMetaData(String packagePrefix, String catalogName,
+			String schemaName, String tableName, ColumnMetaData[] columns,
 			String[] primaryKeyColumnNames,
 			Map<String, List<String>> indexNameAndColumnNames,
 			Map<String, Boolean> indexUniqueness) {
+		this.packagePrefix = packagePrefix;
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;
 		this.tableName = tableName;
@@ -158,6 +166,8 @@ public class TableMetaData {
 	/**
 	 * Initiate the {@link TableMetaData} as a key into a {@link Map}.
 	 * 
+	 * @param packagePrefix
+	 *            Prefix of the package name.
 	 * @param catalogName
 	 *            Catalog name.
 	 * @param schemaName
@@ -165,8 +175,9 @@ public class TableMetaData {
 	 * @param tableName
 	 *            Table name.
 	 */
-	protected TableMetaData(String catalogName, String schemaName,
-			String tableName) {
+	protected TableMetaData(String packagePrefix, String catalogName,
+			String schemaName, String tableName) {
+		this.packagePrefix = packagePrefix;
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;
 		this.tableName = tableName;
@@ -235,8 +246,8 @@ public class TableMetaData {
 	 * @return Package name of this table.
 	 */
 	public String getPackageName() {
-		return FilingCabinetUtil.getPackageName(this.catalogName,
-				this.schemaName, this.tableName);
+		return FilingCabinetUtil.getPackageName(this.packagePrefix,
+				this.catalogName, this.schemaName, this.tableName);
 	}
 
 	/**

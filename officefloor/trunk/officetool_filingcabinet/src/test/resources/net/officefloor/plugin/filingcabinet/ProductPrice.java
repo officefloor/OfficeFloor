@@ -1,9 +1,9 @@
-package public_.productprice;
+package net.officefloor.packageprefix.public_.productprice;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import public_.product.Product;
-import public_.purchaseorderlineitem.PurchaseOrderLineItem;
+import net.officefloor.packageprefix.public_.product.Product;
+import net.officefloor.packageprefix.public_.purchaseorderlineitem.PurchaseOrderLineItem;
 
 public class ProductPrice {
 
