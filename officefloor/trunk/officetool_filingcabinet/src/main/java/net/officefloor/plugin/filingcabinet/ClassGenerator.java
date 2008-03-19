@@ -63,6 +63,11 @@ public class ClassGenerator {
 	private final Set<String> implementingInterfaceNames = new HashSet<String>();
 
 	/**
+	 * Constructors.
+	 */
+	private final Set<String> constructors = new HashSet<String>();
+
+	/**
 	 * Mapping of field name to field declaration.
 	 */
 	private final Map<String, String> fields = new HashMap<String, String>();
@@ -142,6 +147,49 @@ public class ClassGenerator {
 	}
 
 	/**
+	 * Adds a constructor.
+	 * 
+	 * @param columns
+	 *            Listing of {@link ColumnMetaData} instances specifying the
+	 *            fields to initialise.
+	 */
+	public void addConstructor(ColumnMetaData... columns) {
+
+		StringBuilder segment = new StringBuilder();
+
+		// Determine if default constructor
+		if (columns.length == 0) {
+			// Default constructor
+			this.writeDocumentation(segment, 1, "Default constructor.");
+			this.writeIndent(segment, 1).append(
+					"public " + this.className + "() {\n");
+			this.writeIndent(segment, 1).append("}\n\n");
+		} else {
+			// Initialise from fields
+			this.writeDocumentation(segment, 1, "Initialise.");
+			this.writeIndent(segment, 1).append(
+					"public " + this.className + "(");
+			boolean isFirst = true;
+			for (ColumnMetaData column : columns) {
+				segment.append(isFirst ? "" : ", ");
+				isFirst = false;
+				String columnType = this.addImport(column.getJavaType());
+				segment.append(columnType + " " + column.getFieldName());
+			}
+			segment.append(") {\n");
+			for (ColumnMetaData column : columns) {
+				this.writeIndent(segment, 2).append(
+						"this." + column.getFieldName() + " = "
+								+ column.getFieldName() + ";\n");
+			}
+			this.writeIndent(segment, 1).append("}\n\n");
+		}
+
+		// Add the constructor
+		this.constructors.add(segment.toString());
+	}
+
+	/**
 	 * Adds a field.
 	 * 
 	 * @param type
@@ -164,8 +212,8 @@ public class ClassGenerator {
 		// Obtain the field declaration
 		StringBuilder segment = new StringBuilder();
 		this.writeDocumentation(segment, 1, documentation);
-		this.writeIndent(segment, 1);
-		segment.append("private " + type + " " + fieldName + ";\n\n");
+		this.writeIndent(segment, 1).append(
+				"private " + type + " " + fieldName + ";\n\n");
 
 		// Add the field declaration
 		this.fields.put(fieldName, segment.toString());
@@ -608,6 +656,11 @@ public class ClassGenerator {
 		for (String fieldName : this.sort(this.fields.keySet())) {
 			String fieldDeclaration = this.fields.get(fieldName);
 			code.append(fieldDeclaration);
+		}
+
+		// Write the constructors
+		for (String constructor : this.sort(this.constructors)) {
+			code.append(constructor);
 		}
 
 		// Write the properties

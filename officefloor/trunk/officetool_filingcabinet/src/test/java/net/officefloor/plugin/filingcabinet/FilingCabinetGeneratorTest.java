@@ -37,52 +37,55 @@ public class FilingCabinetGeneratorTest extends AbstractGeneratorTest {
 		}
 
 		// Validate Purchase table
-		TableMetaData purchasePriceTable = tables
-				.get("public_.purchaseprice.PurchasePrice");
+		TableMetaData lineItemTable = tables
+				.get("public_.purchaseorderlineitem.PurchaseOrderLineItem");
 
 		// Expected columns of the purchase table
 		final String[] COLUMN_PROPERTIES = new String[] { "getColumnName",
 				"getSqlType", "getJavaType", "isNullable" };
-		ColumnMetaData purchasePriceId = new ColumnMetaData(
-				"PURCHASE_PRICE_ID", 4, Integer.class, false);
-		ColumnMetaData accountId = new ColumnMetaData("ACCOUNT_ID", 4,
+		ColumnMetaData purchaseOrderId = new ColumnMetaData(
+				"PURCHASE_ORDER_ID", 4, Integer.class, false);
+		ColumnMetaData lineNumber = new ColumnMetaData("LINE_NUMBER", 4,
 				Integer.class, false);
 		ColumnMetaData productId = new ColumnMetaData("PRODUCT_ID", 4,
 				Integer.class, false);
-		ColumnMetaData price = new ColumnMetaData("PRICE", 7, Float.class,
-				false);
+		ColumnMetaData quantity = new ColumnMetaData("QUANTITY", 4,
+				Integer.class, false);
+		ColumnMetaData priceAdjustment = new ColumnMetaData("PRICE_ADJUSTMENT",
+				7, Float.class, true);
 		ColumnMetaData comments = new ColumnMetaData("COMMENTS", 12,
 				String.class, true);
 
 		// Ensure columns are correct
-		assertList(COLUMN_PROPERTIES, purchasePriceTable.getColumns(),
-				purchasePriceId, accountId, productId, price, comments);
+		assertList(COLUMN_PROPERTIES, lineItemTable.getColumns(),
+				purchaseOrderId, lineNumber, productId, quantity,
+				priceAdjustment, comments);
 
 		// Ensure primary key is correct
-		assertList(COLUMN_PROPERTIES, purchasePriceTable.getPrimaryKey()
-				.getColumns(), purchasePriceId);
+		assertList(COLUMN_PROPERTIES, lineItemTable.getPrimaryKey()
+				.getColumns(), purchaseOrderId, lineNumber);
 
 		// Ensure indexes are correct
-		assertEquals("Incorrect number of indexes", 1, purchasePriceTable
+		assertEquals("Incorrect number of indexes", 2, lineItemTable
 				.getIndexes().length);
-		assertList(COLUMN_PROPERTIES, purchasePriceTable.getIndexes()[0]
-				.getColumns(), accountId, productId);
+		assertList(COLUMN_PROPERTIES, lineItemTable.getIndexes()[0]
+				.getColumns(), productId, quantity);
 
 		// Ensure cross references are correct
-		assertEquals("Incorrect number of cross references", 1,
-				purchasePriceTable.getCrossReferences().length);
-		CrossReferenceMetaData crossRef = purchasePriceTable
-				.getCrossReferences()[0];
-		assertEquals("Incorrect primary table", "public_.purchase.Purchase",
-				crossRef.getPrimaryTable().getFullyQualifiedClassName());
+		assertEquals("Incorrect number of cross references", 2, lineItemTable
+				.getCrossReferences().length);
+		CrossReferenceMetaData crossRef = lineItemTable.getCrossReferences()[0];
+		assertEquals("Incorrect primary table",
+				"public_.productprice.ProductPrice", crossRef.getPrimaryTable()
+						.getFullyQualifiedClassName());
 		assertList(COLUMN_PROPERTIES, crossRef.getPrimaryColumns(),
-				new ColumnMetaData("ACCOUNT_ID", 4, Integer.class, false),
-				new ColumnMetaData("PRODUCT_ID", 4, Integer.class, false));
+				new ColumnMetaData("PRODUCT_ID", 4, Integer.class, false),
+				new ColumnMetaData("QUANTITY", 4, Integer.class, false));
 		assertEquals("Incorrect cross reference table",
-				"public_.purchaseprice.PurchasePrice", crossRef
+				"public_.purchaseorderlineitem.PurchaseOrderLineItem", crossRef
 						.getForeignTable().getFullyQualifiedClassName());
-		assertList(COLUMN_PROPERTIES, crossRef.getForeignColumns(), accountId,
-				productId);
+		assertList(COLUMN_PROPERTIES, crossRef.getForeignColumns(), productId,
+				quantity);
 	}
 
 	/**

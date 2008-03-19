@@ -16,6 +16,9 @@
  */
 package net.officefloor.plugin.filingcabinet;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
 import net.officefloor.repository.ConfigurationContext;
 
 /**
@@ -51,9 +54,16 @@ public class TableGenerator {
 	public void generate(ConfigurationContext configurationContext)
 			throws Exception {
 
-		// Write the table bean
-		ClassGenerator tableBean = new ClassGenerator(this.table
-				.getSimpleClassName(), this.table.getPackageName());
+		// Obtain the directory of the package
+		String packagePath = this.table.getPackageName();
+		if (packagePath != null) {
+			packagePath = packagePath.replace('.', '/') + "/";
+		}
+
+		// Configure the table bean
+		String tableBeanClassName = this.table.getSimpleClassName();
+		ClassGenerator tableBean = new ClassGenerator(tableBeanClassName,
+				this.table.getPackageName());
 		for (ColumnMetaData column : this.table.getColumns()) {
 			tableBean.addProperty(column);
 		}
@@ -68,10 +78,16 @@ public class TableGenerator {
 		}
 		tableBean.addLoad(this.table);
 
-		// Write the message bean
-		ClassGenerator tableRepository = new ClassGenerator(this.table
-				.getSimpleClassName()
-				+ "Repository", this.table.getPackageName());
+		// Write the table bean
+		configurationContext.createConfigurationItem(packagePath
+				+ tableBeanClassName + ".java", this.getInputStream(tableBean
+				.generate()));
+
+		// Configure the table repository
+		String tableRepositoryClassName = this.table.getSimpleClassName()
+				+ "Repository";
+		ClassGenerator tableRepository = new ClassGenerator(
+				tableRepositoryClassName, this.table.getPackageName());
 		tableRepository.addRetrieve(this.table);
 		tableRepository.addRetrieveList(this.table);
 		for (AccessMetaData access : this.table.getAccesses()) {
@@ -95,9 +111,49 @@ public class TableGenerator {
 			}
 		}
 
-		// Return the contents
-		System.out.println("TABLE BEAN:\n" + tableBean.generate());
-		System.out.println("TABLE REPOSITORY:\n" + tableRepository.generate());
+		// Write the table repository
+		configurationContext.createConfigurationItem(packagePath
+				+ tableRepositoryClassName + ".java", this
+				.getInputStream(tableRepository.generate()));
+
+		// Configure and write the index beans
+		for (AccessMetaData access : this.table.getAccesses()) {
+
+			// Ignore access with only a single column.
+			// (Input is type and no wrapper/container class necessary)
+			if (access.getColumns().length == 1) {
+				continue;
+			}
+
+			StringBuilder indexClassName = new StringBuilder();
+			indexClassName.append(this.table.getSimpleClassName() + "Index");
+			for (ColumnMetaData column : access.getColumns()) {
+				indexClassName.append(FilingCabinetUtil
+						.getSimpleClassName(column.getColumnName()));
+			}
+			ClassGenerator indexBean = new ClassGenerator(indexClassName
+					.toString(), this.table.getPackageName());
+			indexBean.addConstructor(access.getColumns());
+			for (ColumnMetaData column : access.getColumns()) {
+				indexBean.addProperty(column);
+			}
+
+			// Write the index bean
+			configurationContext.createConfigurationItem(packagePath
+					+ indexClassName.toString() + ".java", this
+					.getInputStream(indexBean.generate()));
+		}
+	}
+
+	/**
+	 * Obtains an {@link InputStream} to the content.
+	 * 
+	 * @param content
+	 *            Content for the {@link InputStream}.
+	 * @return {@link InputStream}.
+	 */
+	private InputStream getInputStream(String content) {
+		return new ByteArrayInputStream(content.getBytes());
 	}
 
 }

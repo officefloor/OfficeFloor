@@ -93,7 +93,7 @@ public class FilingCabinetGenerator {
 			columnResultSet.close();
 
 			// Obtain the primary keys
-			List<String> primaryKey = new LinkedList<String>();
+			Map<Integer, String> unorderedPrimaryKey = new HashMap<Integer, String>();
 			String primaryKeyName = "";
 			ResultSet primaryKeyResultSet = databaseMetaData.getPrimaryKeys(
 					catalogName, schemaName, tableName);
@@ -101,18 +101,20 @@ public class FilingCabinetGenerator {
 
 				// Obtain the name of the primary key
 				primaryKeyName = primaryKeyResultSet.getString("PK_NAME");
+				int keySeq = primaryKeyResultSet.getInt("KEY_SEQ");
 
 				// Obtain the details of the column of the primary key
 				String columnName = primaryKeyResultSet
 						.getString("COLUMN_NAME");
 
 				// Add the column of the primary key
-				primaryKey.add(columnName);
+				unorderedPrimaryKey.put(new Integer(keySeq), columnName);
 			}
 			primaryKeyResultSet.close();
+			List<String> primaryKey = this.getSortedList(unorderedPrimaryKey);
 
 			// Obtain the indexes
-			Map<String, List<String>> indexColumns = new HashMap<String, List<String>>();
+			Map<String, Map<Integer, String>> unorderedIndexColumns = new HashMap<String, Map<Integer, String>>();
 			Map<String, Boolean> indexUniqueness = new HashMap<String, Boolean>();
 			ResultSet indexResultSet = databaseMetaData.getIndexInfo(
 					catalogName, schemaName, tableName, false, false);
@@ -129,19 +131,25 @@ public class FilingCabinetGenerator {
 				// Obtain the remaining details of the index
 				String columnName = indexResultSet.getString("COLUMN_NAME");
 				boolean isUnique = !indexResultSet.getBoolean("NON_UNIQUE");
+				int ordinalPosition = indexResultSet.getInt("ORDINAL_POSITION");
 
 				// Indicate whether the index is unique
 				indexUniqueness.put(indexName, new Boolean(isUnique));
 
 				// Add the index details for this row
-				List<String> indexColumnNames = indexColumns.get(indexName);
+				Map<Integer, String> indexColumnNames = unorderedIndexColumns
+						.get(indexName);
 				if (indexColumnNames == null) {
-					indexColumnNames = new LinkedList<String>();
-					indexColumns.put(indexName, indexColumnNames);
+					indexColumnNames = new HashMap<Integer, String>();
+					unorderedIndexColumns.put(indexName, indexColumnNames);
 				}
-				indexColumnNames.add(columnName);
+				indexColumnNames.put(new Integer(ordinalPosition), columnName);
 			}
 			indexResultSet.close();
+
+			// Order the columns of the indexes
+			Map<String, List<String>> indexColumns = this
+					.getSortedList(unorderedIndexColumns);
 
 			// Create the table
 			TableMetaData tableMetaData = new TableMetaData(catalogName,
@@ -153,16 +161,15 @@ public class FilingCabinetGenerator {
 			// Register the table
 			this.tables.put(tableMetaData.getFullyQualifiedClassName(),
 					tableMetaData);
-
 		}
 		tableResultSet.close();
 
 		// Obtain the listing of cross references
 		Set<String> foreignKeyNames = new HashSet<String>();
 		Map<String, TableMetaData> primaryTables = new HashMap<String, TableMetaData>();
-		Map<String, List<String>> primaryColumns = new HashMap<String, List<String>>();
+		Map<String, Map<Integer, String>> unorderedPrimaryColumns = new HashMap<String, Map<Integer, String>>();
 		Map<String, TableMetaData> foreignTables = new HashMap<String, TableMetaData>();
-		Map<String, List<String>> foreignColumns = new HashMap<String, List<String>>();
+		Map<String, Map<Integer, String>> unorderedForeignColumns = new HashMap<String, Map<Integer, String>>();
 		ResultSet crossReferenceResultSet = databaseMetaData.getCrossReference(
 				null, null, null, null, null, null);
 		while (crossReferenceResultSet.next()) {
@@ -186,6 +193,7 @@ public class FilingCabinetGenerator {
 					.getString("FKTABLE_NAME");
 			String foreignColumnName = crossReferenceResultSet
 					.getString("FKCOLUMN_NAME");
+			int keySeq = crossReferenceResultSet.getInt("KEY_SEQ");
 
 			// Add the foreign key name
 			foreignKeyNames.add(foreignKeyName);
@@ -193,15 +201,23 @@ public class FilingCabinetGenerator {
 			// Add the primary detail
 			this.addCrossReferenceEndPointDetails(foreignKeyName,
 					primaryCatalogName, primarySchemaName, primaryTableName,
-					primaryColumnName, primaryTables, primaryColumns);
+					primaryColumnName, keySeq, primaryTables,
+					unorderedPrimaryColumns);
 
 			// Add the second detail
 			this.addCrossReferenceEndPointDetails(foreignKeyName,
 					foreignCatalogName, foreignSchemaName, foreignTableName,
-					foreignColumnName, foreignTables, foreignColumns);
+					foreignColumnName, keySeq, foreignTables,
+					unorderedForeignColumns);
 
 		}
 		crossReferenceResultSet.close();
+
+		// Order the columns of the cross references
+		Map<String, List<String>> primaryColumns = this
+				.getSortedList(unorderedPrimaryColumns);
+		Map<String, List<String>> foreignColumns = this
+				.getSortedList(unorderedForeignColumns);
 
 		// Load the cross references
 		List<CrossReferenceMetaData> crossReferences = new LinkedList<CrossReferenceMetaData>();
@@ -247,6 +263,48 @@ public class FilingCabinetGenerator {
 	}
 
 	/**
+	 * Obtains the map of where the values have been sorted.
+	 * 
+	 * @param unorderedMap
+	 *            Map of unordered list.
+	 * @return Map of sorted list.
+	 */
+	public <K, T> Map<K, List<T>> getSortedList(
+			Map<K, Map<Integer, T>> unorderedMap) {
+		Map<K, List<T>> sortedMap = new HashMap<K, List<T>>();
+		for (K key : unorderedMap.keySet()) {
+			Map<Integer, T> unorderedList = unorderedMap.get(key);
+			List<T> sortedList = this.getSortedList(unorderedList);
+			sortedMap.put(key, sortedList);
+		}
+		return sortedMap;
+	}
+
+	/**
+	 * Obtains the unordered items in sorted order.
+	 * 
+	 * @param unorderedItems
+	 *            Unordered items.
+	 * @return Items sorted.
+	 */
+	private <T> List<T> getSortedList(Map<Integer, T> unorderedItems) {
+		List<T> sortedItems = new LinkedList<T>();
+		int index = 1;
+		for (;;) {
+
+			// Obtain the next item
+			T item = unorderedItems.get(new Integer(index++));
+			if (item == null) {
+				// At end of list, therefore return list
+				return sortedItems;
+			}
+
+			// Add item in sorted ordered
+			sortedItems.add(item);
+		}
+	}
+
+	/**
 	 * Adds the cross reference information.
 	 * 
 	 * @param foreignKeyName
@@ -259,15 +317,17 @@ public class FilingCabinetGenerator {
 	 *            Table name.
 	 * @param columnName
 	 *            Column name.
+	 * @param keySeq
+	 *            Key sequence of the column.
 	 * @param tables
 	 *            Map of {@link TableMetaData} to foreign key names.
 	 * @param columns
-	 *            Map of column names by foreign key name.
+	 *            Map of column names and index by foreign key name.
 	 */
 	private void addCrossReferenceEndPointDetails(String foreignKeyName,
 			String catalogName, String schemaName, String tableName,
-			String columnName, Map<String, TableMetaData> tables,
-			Map<String, List<String>> columns) {
+			String columnName, int keySeq, Map<String, TableMetaData> tables,
+			Map<String, Map<Integer, String>> columns) {
 
 		// Register table under the foreign key
 		TableMetaData table = this.tables.get(new TableMetaData(catalogName,
@@ -279,11 +339,12 @@ public class FilingCabinetGenerator {
 		tables.put(foreignKeyName, table);
 
 		// Add the column
-		List<String> columnList = columns.get(foreignKeyName);
+		Map<Integer, String> columnList = columns.get(foreignKeyName);
 		if (columnList == null) {
-			columnList = new LinkedList<String>();
+			columnList = new HashMap<Integer, String>();
 			columns.put(foreignKeyName, columnList);
 		}
-		columnList.add(columnName);
+		columnList.put(new Integer(keySeq), columnName);
 	}
+
 }

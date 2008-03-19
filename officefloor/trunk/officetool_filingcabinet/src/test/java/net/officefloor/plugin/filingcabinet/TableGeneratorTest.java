@@ -16,6 +16,11 @@
  */
 package net.officefloor.plugin.filingcabinet;
 
+import java.io.File;
+
+import net.officefloor.repository.ConfigurationContext;
+import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
+
 /**
  * Tests the {@link TableGenerator}.
  * 
@@ -27,6 +32,15 @@ public class TableGeneratorTest extends AbstractGeneratorTest {
 	 * Ensures the appropriate classes get generated.
 	 */
 	public void testGenerateTable() throws Exception {
+
+		// Create the configuration context
+		String tmpPath = System.getProperty("java.io.tmpdir");
+		File targetDir = new File(tmpPath, this.getClass().getSimpleName());
+		targetDir.mkdir();
+		clearDirectory(targetDir);
+		ConfigurationContext configurationContext = new FileSystemConfigurationContext(
+				targetDir);
+
 		// Output the listing of tables
 		for (TableMetaData table : this.generator.getTableMetaData()) {
 
@@ -35,9 +49,20 @@ public class TableGeneratorTest extends AbstractGeneratorTest {
 				continue;
 			}
 
-			// TODO provide configuration context
+			// Generate the table
 			TableGenerator generator = new TableGenerator(table);
-			generator.generate(null);
+			generator.generate(configurationContext);
 		}
+
+		// Validate the generated content
+		assertContents(this.findFile(this.getClass(), "ProductPrice.java"),
+				new File(targetDir, "public_/productprice/ProductPrice.java"));
+		assertContents(this.findFile(this.getClass(),
+				"ProductPriceIndexProductIdQuantity.java"), new File(targetDir,
+				"public_/productprice/ProductPriceIndexProductIdQuantity.java"));
+		assertContents(this.findFile(this.getClass(),
+				"ProductPriceRepository.java"), new File(targetDir,
+				"public_/productprice/ProductPriceRepository.java"));
 	}
+
 }
