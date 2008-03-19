@@ -37,8 +37,8 @@ public class FilingCabinetGeneratorTest extends AbstractGeneratorTest {
 		}
 
 		// Validate Purchase table
-		TableMetaData lineItemTable = tables
-				.get("public_.purchaseorderlineitem.PurchaseOrderLineItem");
+		TableMetaData lineItemTable = tables.get(PACKAGE_PREFIX
+				+ ".public_.purchaseorderlineitem.PurchaseOrderLineItem");
 
 		// Expected columns of the purchase table
 		final String[] COLUMN_PROPERTIES = new String[] { "getColumnName",
@@ -75,15 +75,15 @@ public class FilingCabinetGeneratorTest extends AbstractGeneratorTest {
 		assertEquals("Incorrect number of cross references", 2, lineItemTable
 				.getCrossReferences().length);
 		CrossReferenceMetaData crossRef = lineItemTable.getCrossReferences()[0];
-		assertEquals("Incorrect primary table",
-				"public_.productprice.ProductPrice", crossRef.getPrimaryTable()
-						.getFullyQualifiedClassName());
+		assertEquals("Incorrect primary table", PACKAGE_PREFIX
+				+ ".public_.productprice.ProductPrice", crossRef
+				.getPrimaryTable().getFullyQualifiedClassName());
 		assertList(COLUMN_PROPERTIES, crossRef.getPrimaryColumns(),
 				new ColumnMetaData("PRODUCT_ID", 4, Integer.class, false),
 				new ColumnMetaData("QUANTITY", 4, Integer.class, false));
-		assertEquals("Incorrect cross reference table",
-				"public_.purchaseorderlineitem.PurchaseOrderLineItem", crossRef
-						.getForeignTable().getFullyQualifiedClassName());
+		assertEquals("Incorrect cross reference table", PACKAGE_PREFIX
+				+ ".public_.purchaseorderlineitem.PurchaseOrderLineItem",
+				crossRef.getForeignTable().getFullyQualifiedClassName());
 		assertList(COLUMN_PROPERTIES, crossRef.getForeignColumns(), productId,
 				quantity);
 	}

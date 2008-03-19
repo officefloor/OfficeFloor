@@ -38,6 +38,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public abstract class AbstractGeneratorTest extends OfficeFrameTestCase {
 
 	/**
+	 * Package prefix.
+	 */
+	public static String PACKAGE_PREFIX = "net.officefloor.packageprefix";
+
+	/**
 	 * {@link Connection}.
 	 */
 	protected Connection connection;
@@ -107,7 +112,7 @@ public abstract class AbstractGeneratorTest extends OfficeFrameTestCase {
 		DatabaseAwareness databaseAwareness = new CommonDatabaseAwareness();
 
 		// Load the meta data
-		this.generator = new FilingCabinetGenerator();
+		this.generator = new FilingCabinetGenerator(PACKAGE_PREFIX);
 		this.generator.loadMetaData(databaseMetaData, databaseAwareness);
 	}
 

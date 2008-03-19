@@ -54,15 +54,19 @@ public class TableGeneratorTest extends AbstractGeneratorTest {
 			generator.generate(configurationContext);
 		}
 
+		// Obtain the package path
+		File packagePath = new File(new File(targetDir, PACKAGE_PREFIX.replace(
+				'.', '/')), "public_/productprice");
+
 		// Validate the generated content
 		assertContents(this.findFile(this.getClass(), "ProductPrice.java"),
-				new File(targetDir, "public_/productprice/ProductPrice.java"));
+				new File(packagePath, "ProductPrice.java"));
 		assertContents(this.findFile(this.getClass(),
-				"ProductPriceIndexProductIdQuantity.java"), new File(targetDir,
-				"public_/productprice/ProductPriceIndexProductIdQuantity.java"));
+				"ProductPriceIndexProductIdQuantity.java"), new File(
+				packagePath, "ProductPriceIndexProductIdQuantity.java"));
 		assertContents(this.findFile(this.getClass(),
-				"ProductPriceRepository.java"), new File(targetDir,
-				"public_/productprice/ProductPriceRepository.java"));
+				"ProductPriceRepository.java"), new File(packagePath,
+				"ProductPriceRepository.java"));
 	}
 
 }

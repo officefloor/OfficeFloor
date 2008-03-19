@@ -35,7 +35,22 @@ public class FilingCabinetGenerator {
 	/**
 	 * {@link TableMetaData} by the fully qualified class name of the table.
 	 */
-	private Map<String, TableMetaData> tables = new HashMap<String, TableMetaData>();
+	private final Map<String, TableMetaData> tables = new HashMap<String, TableMetaData>();
+
+	/**
+	 * Package prefix.
+	 */
+	private final String packagePrefix;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param packagePrefix
+	 *            Package prefix. Use <code>null</code> if no prefix.
+	 */
+	public FilingCabinetGenerator(String packagePrefix) {
+		this.packagePrefix = packagePrefix;
+	}
 
 	/**
 	 * Loads the meta-data from the input {@link DatabaseMetaData}.
@@ -152,8 +167,8 @@ public class FilingCabinetGenerator {
 					.getSortedList(unorderedIndexColumns);
 
 			// Create the table
-			TableMetaData tableMetaData = new TableMetaData(catalogName,
-					schemaName, tableName, columns
+			TableMetaData tableMetaData = new TableMetaData(this.packagePrefix,
+					catalogName, schemaName, tableName, columns
 							.toArray(new ColumnMetaData[0]), primaryKey
 							.toArray(new String[0]), indexColumns,
 					indexUniqueness);
@@ -330,8 +345,9 @@ public class FilingCabinetGenerator {
 			Map<String, Map<Integer, String>> columns) {
 
 		// Register table under the foreign key
-		TableMetaData table = this.tables.get(new TableMetaData(catalogName,
-				schemaName, tableName).getFullyQualifiedClassName());
+		TableMetaData table = this.tables.get(new TableMetaData(
+				this.packagePrefix, catalogName, schemaName, tableName)
+				.getFullyQualifiedClassName());
 		if (table == null) {
 			throw new IllegalStateException("Can not find table '" + tableName
 					+ "' of foreign key " + foreignKeyName);
