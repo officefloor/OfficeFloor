@@ -413,6 +413,21 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Asserts the contents of the input {@link File} instances are the same.
+	 * 
+	 * @param expected
+	 *            Expected file.
+	 * @param actual
+	 *            Actual file.
+	 * @throws IOException
+	 *             If fails to read contents.
+	 */
+	public static void assertContents(File expected, File actual)
+			throws IOException {
+		assertContents(new FileReader(expected), new FileReader(actual));
+	}
+
+	/**
 	 * Asserts the contents of the input {@link Reader} instances are the same.
 	 * 
 	 * @param expected
@@ -776,6 +791,53 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public String getFileLocation(Class<?> packageClass, String fileName) {
 		return this.getPackageRelativePath(packageClass) + "/" + fileName;
+	}
+
+	/**
+	 * Creates the input directory.
+	 * 
+	 * @param directory
+	 *            Directory to be cleared.
+	 */
+	public void clearDirectory(File directory) {
+
+		// Ensure have a directory
+		if (directory == null) {
+			return;
+		}
+
+		// Clear only if directory
+		if (directory.isDirectory()) {
+			// Clear the directory
+			for (File child : directory.listFiles()) {
+				deleteDirectory(child);
+			}
+		}
+	}
+
+	/**
+	 * Deletes the input directory.
+	 * 
+	 * @param directory
+	 *            Directory to be deleted.
+	 */
+	public void deleteDirectory(File directory) {
+
+		// Ensure have a directory
+		if (directory == null) {
+			return;
+		}
+
+		// Determine if directory
+		if (directory.isDirectory()) {
+			// Recursively delete children of directory
+			for (File child : directory.listFiles()) {
+				deleteDirectory(child);
+			}
+		}
+
+		// Delete the directory (or file)
+		assertTrue("Failed deleting " + directory.getPath(), directory.delete());
 	}
 
 	/**
