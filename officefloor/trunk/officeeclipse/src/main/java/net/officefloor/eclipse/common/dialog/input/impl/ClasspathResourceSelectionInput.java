@@ -14,15 +14,15 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.dialog.input;
+package net.officefloor.eclipse.common.dialog.input.impl;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.common.dialog.PropertyInput;
-import net.officefloor.eclipse.common.dialog.PropertyInputContext;
+import net.officefloor.eclipse.common.dialog.input.Input;
+import net.officefloor.eclipse.common.dialog.input.InputContext;
 import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 
 import org.eclipse.core.resources.IContainer;
@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.IEditorPart;
@@ -47,12 +48,11 @@ import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 /**
- * {@link PropertyInput} that utilises a {@link SelectResourcesBlock}.
+ * {@link Input} that utilises a {@link SelectResourcesBlock}.
  * 
  * @author Daniel
  */
-public class ClasspathResourceSelectionPropertyInput implements
-		PropertyInput<Tree> {
+public class ClasspathResourceSelectionInput implements Input<Tree> {
 
 	/**
 	 * Root of tree.
@@ -72,7 +72,7 @@ public class ClasspathResourceSelectionPropertyInput implements
 	 * @param extensions
 	 *            Valid extensions.
 	 */
-	public ClasspathResourceSelectionPropertyInput(IProject root,
+	public ClasspathResourceSelectionInput(IProject root,
 			String... extensions) {
 		this.root = root;
 		this.extensions = extensions;
@@ -86,7 +86,7 @@ public class ClasspathResourceSelectionPropertyInput implements
 	 * @param extensions
 	 *            Valid extensions.
 	 */
-	public ClasspathResourceSelectionPropertyInput(IEditorPart editor,
+	public ClasspathResourceSelectionInput(IEditorPart editor,
 			String... extensions) {
 		// Obtain the project of the editor
 		this.root = ProjectConfigurationContext.getProject(editor
@@ -100,13 +100,17 @@ public class ClasspathResourceSelectionPropertyInput implements
 	 * @see net.officefloor.eclipse.common.dialog.PropertyInput#buildControl(net.officefloor.eclipse.common.dialog.PropertyInputContext)
 	 */
 	@Override
-	public Tree buildControl(PropertyInputContext context) {
+	public Tree buildControl(InputContext context) {
 
 		// Create the tree
 		Tree tree = new Tree(context.getParent(), SWT.NONE);
+		GridData gridData = new GridData(GridData.FILL_BOTH);
+		gridData.heightHint = 150;	// hint on height
+		tree.setLayoutData(gridData);
 
 		// Create the Tree selection
 		TreeViewer treeViewer = new TreeViewer(tree);
+		treeViewer.setAutoExpandLevel(2);
 		treeViewer.setContentProvider(this.getResourceProvider(IResource.ROOT
 				| IResource.PROJECT | IResource.FOLDER | IResource.FILE));
 		treeViewer.setLabelProvider(WorkbenchLabelProvider
@@ -124,7 +128,7 @@ public class ClasspathResourceSelectionPropertyInput implements
 	 *      net.officefloor.eclipse.common.dialog.PropertyInputContext)
 	 */
 	@Override
-	public String getValue(Tree control, PropertyInputContext context) {
+	public String getValue(Tree control, InputContext context) {
 
 		// Obtain the selection from the tree
 		TreeItem[] treeItems = control.getSelection();
@@ -188,23 +192,16 @@ public class ClasspathResourceSelectionPropertyInput implements
 
 							// Obtain the Class Path for Java Project
 							IJavaProject javaProject = JavaCore.create(project);
-							IClasspathEntry[] classPath = javaProject
-									.getResolvedClasspath(true);
 
-							// Create the list for tree root
+							// Obtain appropriate fragment roots
 							List<Object> results = new LinkedList<Object>();
-							for (IClasspathEntry entry : classPath) {
-								// Add the Package Fragment Root for class path
-								// entry
-								IPath entryPath = entry.getPath();
-								IPackageFragmentRoot sourcePackageFragmentRoot = javaProject
-										.findPackageFragmentRoot(entryPath);
-								if (sourcePackageFragmentRoot != null) {
-									results.add(sourcePackageFragmentRoot);
+							for (IPackageFragmentRoot fragmentRoot : this
+									.getPackageFragmentRoots(javaProject)) {
+								if (this
+										.containsFilteredResources(fragmentRoot)) {
+									results.add(fragmentRoot);
 								}
 							}
-
-							// Return the class path roots
 							return results.toArray();
 						}
 
@@ -240,43 +237,28 @@ public class ClasspathResourceSelectionPropertyInput implements
 					// Package Fragment Root
 					if (o instanceof IPackageFragmentRoot) {
 						IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) o;
-						List<Object> results = new LinkedList<Object>();
 
-						// Include only Package Fragments containing relevant
-						// files
+						// Include Package Fragments containing relevant files
+						List<Object> results = new LinkedList<Object>();
 						for (IJavaElement javaElement : packageFragmentRoot
 								.getChildren()) {
 							if (javaElement instanceof IPackageFragment) {
 								IPackageFragment packageFragment = (IPackageFragment) javaElement;
-								// Obtain the package children
-								Object[] packageChildren = packageFragment
-										.getNonJavaResources();
 
 								// Only include if have files not filtered out
-								if (ClasspathResourceSelectionPropertyInput.this
-										.filterResources(packageChildren).length > 0) {
+								if (this
+										.containsFilteredResources(packageFragment)) {
 									results.add(packageFragment);
 								}
 							}
 						}
-
-						// Add files matching that directly under root
-						results
-								.addAll(Arrays
-										.asList(ClasspathResourceSelectionPropertyInput.this
-												.filterResources(packageFragmentRoot
-														.getNonJavaResources())));
-
-						// Return the Package Fragment Root list
 						return results.toArray();
 					}
 
 					// Package Fragment
 					if (o instanceof IPackageFragment) {
 						IPackageFragment packageFragment = (IPackageFragment) o;
-						return ClasspathResourceSelectionPropertyInput.this
-								.filterResources(packageFragment
-										.getNonJavaResources());
+						return this.getFilteredResources(packageFragment);
 					}
 
 					// Unknown type, therefore return empty
@@ -285,6 +267,117 @@ public class ClasspathResourceSelectionPropertyInput implements
 				} catch (Exception ex) {
 					// Propagate failure
 					throw new OfficeFloorPluginFailure(ex);
+				}
+			}
+
+			/**
+			 * Obtains the {@link IPackageFragmentRoot} instances.
+			 * 
+			 * @param javaProject
+			 *            {@link IJavaProject}.
+			 * @return {@link IPackageFragmentRoot} instances.
+			 * @throws Exception
+			 *             If fails.
+			 */
+			private IPackageFragmentRoot[] getPackageFragmentRoots(
+					IJavaProject javaProject) throws Exception {
+				IClasspathEntry[] classPath = javaProject
+						.getResolvedClasspath(true);
+				List<IPackageFragmentRoot> fragmentRoots = new LinkedList<IPackageFragmentRoot>();
+				for (IClasspathEntry entry : classPath) {
+					// Add the Package Fragment Root
+					IPath entryPath = entry.getPath();
+					IPackageFragmentRoot fragmentRoot = javaProject
+							.findPackageFragmentRoot(entryPath);
+					fragmentRoots.add(fragmentRoot);
+				}
+				return fragmentRoots.toArray(new IPackageFragmentRoot[0]);
+			}
+
+			/**
+			 * Indicates if the input {@link IJavaElement} contains filtered
+			 * descendant non-java resources.
+			 * 
+			 * @param javaElement
+			 *            {@link IJavaElement}.
+			 * @return <code>true</code> if contains filtered descendant
+			 *         non-java resources.
+			 * @throws Exception
+			 *             If fails.
+			 */
+			private boolean containsFilteredResources(IJavaElement javaElement)
+					throws Exception {
+				return (this.getFilteredResources(javaElement).length > 0);
+			}
+
+			/**
+			 * Obtains the filtered descendant non-java resources.
+			 * 
+			 * @param javaElement
+			 *            {@link IJavaElement}.
+			 * @return Filtered non-java descendant resources.
+			 * @throws Exception
+			 *             If fails.
+			 */
+			private Object[] getFilteredResources(IJavaElement javaElement)
+					throws Exception {
+				return ClasspathResourceSelectionInput.this
+						.filterResources(this.getNonJavaResources(javaElement));
+			}
+
+			/**
+			 * Obtains the descendant non-java resources.
+			 * 
+			 * @param javaElement
+			 *            {@link IJavaElement}.
+			 * @return Non-java descendant resources.
+			 * @throws Exception
+			 *             If fails.
+			 */
+			private Object[] getNonJavaResources(IJavaElement javaElement)
+					throws Exception {
+				List<Object> list = new LinkedList<Object>();
+				this.loadDescendantNonJavaResources(list, javaElement);
+				return list.toArray();
+			}
+
+			/**
+			 * Obtains the descendant non-java resources.
+			 * 
+			 * @param list
+			 *            List to be populated.
+			 * @param javaElement
+			 *            {@link IJavaElement}.
+			 * @throws Exception
+			 *             If fails.
+			 */
+			private void loadDescendantNonJavaResources(List<Object> list,
+					IJavaElement javaElement) throws Exception {
+				if (javaElement instanceof IJavaProject) {
+					// Load fragment roots of the java project
+					IJavaProject javaProject = (IJavaProject) javaElement;
+					IClasspathEntry[] classPath = javaProject
+							.getResolvedClasspath(true);
+					for (IClasspathEntry entry : classPath) {
+						// Add the Package Fragment Root
+						IPath entryPath = entry.getPath();
+						IPackageFragmentRoot sourcePackageFragmentRoot = javaProject
+								.findPackageFragmentRoot(entryPath);
+						this.loadDescendantNonJavaResources(list,
+								sourcePackageFragmentRoot);
+					}
+
+				} else if (javaElement instanceof IPackageFragmentRoot) {
+					// Load fragments of fragment root
+					IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
+					for (IJavaElement child : packageFragmentRoot.getChildren()) {
+						this.loadDescendantNonJavaResources(list, child);
+					}
+				} else if (javaElement instanceof IPackageFragment) {
+					// Load non-java elements of fragment
+					IPackageFragment packageFragment = (IPackageFragment) javaElement;
+					list.addAll(Arrays.asList(packageFragment
+							.getNonJavaResources()));
 				}
 			}
 		};

@@ -14,23 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.dialog;
+package net.officefloor.eclipse.common.dialog.input;
 
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * Context for the {@link PropertyInput}.
+ * Context for the {@link Input}.
  * 
  * @author Daniel
  */
-public interface PropertyInputContext {
-
-	/**
-	 * Obtains the initial value of the property.
-	 * 
-	 * @return Initial value of the property.
-	 */
-	Object getInitialValue();
+public interface InputContext {
 
 	/**
 	 * Obtains the {@link Composite}.
@@ -38,6 +31,13 @@ public interface PropertyInputContext {
 	 * @return {@link Composite}.
 	 */
 	Composite getParent();
+
+	/**
+	 * Obtains the initial value.
+	 * 
+	 * @return Initial value.
+	 */
+	Object getInitialValue();
 
 	/**
 	 * Obtains the attribute for the name.
@@ -60,14 +60,21 @@ public interface PropertyInputContext {
 
 	/**
 	 * <p>
-	 * Invoked by the {@link PropertyInput} of the value changing.
+	 * Invoked by the {@link Input} on the value changing.
 	 * <p>
-	 * This allows for validation of the property value to determine if value is
-	 * valid.
+	 * This allows for validation of the value to determine if value is valid.
 	 * 
 	 * @param value
-	 *            New value of the property.
+	 *            New value.
 	 */
-	void notifyValueChanged(String value);
+	void notifyValueChanged(Object value);
+
+	/**
+	 * Invoked by the {@link Input} to indicate invalid.
+	 * 
+	 * @param message
+	 *            Reason invalid.
+	 */
+	void notifyValueInvalid(String message);
 
 }

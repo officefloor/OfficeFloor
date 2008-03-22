@@ -14,46 +14,43 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.dialog;
+package net.officefloor.eclipse.common.dialog.input;
 
-import org.eclipse.swt.events.VerifyListener;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 /**
  * <p>
- * Builder to create the {@link org.eclipse.swt.widgets.Control} for inputting
- * the value of the property.
+ * Builder to create the {@link Control} for inputting the value.
  * <p>
- * It also provides means to obtain the String value from the resulting built
- * {@link org.eclipse.swt.widgets.Control}.
+ * It also provides means to obtain the value from the resulting built
+ * {@link Control}.
  * 
  * @author Daniel
  */
-public interface PropertyInput<C extends Control> {
+public interface Input<C extends Control> {
 
 	/**
 	 * Builds the {@link Control}.
 	 * 
 	 * @param context
-	 *            {@link PropertyInputContext}.
-	 * @return {@link Control} to input the value of the property.
+	 *            {@link InputContext}.
+	 * @return {@link Control} to input the value.
 	 */
-	C buildControl(PropertyInputContext context);
+	C buildControl(InputContext context);
 
 	/**
 	 * <p>
-	 * Obtains the String value from the input {@link Control}.
+	 * Obtains the value from the input {@link Control}.
 	 * <p>
 	 * The input {@link Control} will be the one created by
-	 * {@link #buildControl(Object, VerifyListener, Composite)}.
+	 * {@link #buildControl(InputContext)}.
 	 * 
 	 * @param control
 	 *            {@link Control}.
 	 * @param context
-	 *            {@link PropertyInputContext}.
-	 * @return String value.
+	 *            {@link InputContext}.
+	 * @return Value.
 	 */
-	String getValue(C control, PropertyInputContext context);
+	Object getValue(C control, InputContext context);
 
 }

@@ -16,11 +16,14 @@
  */
 package net.officefloor.eclipse.common.dialog;
 
+import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.widgets.BeanListPopulateTable;
-import net.officefloor.eclipse.common.widgets.SubTypeList;
+import net.officefloor.eclipse.common.dialog.input.Input;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
+import net.officefloor.eclipse.common.dialog.input.impl.SubTypeSelectionInput;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamFactory;
 import net.officefloor.model.officefloor.PropertyModel;
@@ -62,12 +65,17 @@ public class TeamCreateDialog extends Dialog {
 	/**
 	 * List to obtain the {@link TeamFactory} class name.
 	 */
-	private SubTypeList teamFactoryList;
+	private InputHandler<String> teamFactoryList;
 
 	/**
-	 * Table for the properties to create the {@link Team}.
+	 * {@link Input} for the properties to create the {@link Team}.
 	 */
-	private BeanListPopulateTable<PropertyModel> propertiesTable;
+	private BeanListInput<PropertyModel> propertiesInput;
+
+	/**
+	 * {@link InputHandler} for properties to create the {@link Team}.
+	 */
+	private InputHandler<List<PropertyModel>> propertiesHandler;
 
 	/**
 	 * Reports errors.
@@ -119,16 +127,17 @@ public class TeamCreateDialog extends Dialog {
 
 		// Enter the team factory
 		new Label(composite, SWT.WRAP).setText("Team Factory");
-		this.teamFactoryList = new SubTypeList(composite, this.project,
-				TeamFactory.class.getName());
+		this.teamFactoryList = new InputHandler<String>(composite,
+				new SubTypeSelectionInput(this.project, TeamFactory.class.getName()));
 
 		// Enter the properties
 		new Label(composite, SWT.WRAP).setText("Properties");
-		this.propertiesTable = new BeanListPopulateTable<PropertyModel>(
-				composite, PropertyModel.class);
-		this.propertiesTable.addProperty("name", 1);
-		this.propertiesTable.addProperty("value", 2);
-		this.propertiesTable.generate();
+		this.propertiesInput = new BeanListInput<PropertyModel>(
+				PropertyModel.class);
+		this.propertiesInput.addProperty("name", 1);
+		this.propertiesInput.addProperty("value", 2);
+		this.propertiesHandler = new InputHandler<List<PropertyModel>>(
+				composite, this.propertiesInput);
 
 		// Error text
 		this.errorText = new Label(composite, SWT.WRAP);
@@ -159,8 +168,7 @@ public class TeamCreateDialog extends Dialog {
 		}
 
 		// Ensure team factory provided
-		String teamFactoryClassName = this.teamFactoryList
-				.getSubTypeClassName();
+		String teamFactoryClassName = this.teamFactoryList.getTrySafeValue();
 		if ((teamFactoryClassName == null)
 				|| (teamFactoryClassName.trim().length() == 0)) {
 			this.errorText.setText("Select a team factory");
@@ -168,8 +176,8 @@ public class TeamCreateDialog extends Dialog {
 		}
 
 		// Obtain the properties to create the team
-		PropertyModel[] propertyModels = this.propertiesTable.getBeans()
-				.toArray(new PropertyModel[0]);
+		PropertyModel[] propertyModels = this.propertiesHandler
+				.getTrySafeValue().toArray(new PropertyModel[0]);
 		Properties properties = new Properties();
 		for (PropertyModel property : propertyModels) {
 			properties.setProperty(property.getName(), property.getValue());

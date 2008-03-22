@@ -38,6 +38,11 @@
 			<artifactId>officecompiler</artifactId>
 			<version>${office_version}</version>
 		</dependency>
+        <dependency>
+            <groupId>net.officefloor</groupId>
+            <artifactId>officetool_filingcabinet</artifactId>
+            <version>${office_version}</version>
+        </dependency>
 
 		<!-- Eclipse Dependencies -->
 		<dependency>

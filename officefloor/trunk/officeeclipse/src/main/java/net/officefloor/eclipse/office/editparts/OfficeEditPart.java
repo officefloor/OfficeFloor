@@ -22,7 +22,7 @@ import java.util.List;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.ClasspathResourceSelectionPropertyInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathResourceSelectionInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
@@ -159,8 +159,8 @@ public class OfficeEditPart extends
 				OfficeRoomModel room = new OfficeRoomModel();
 				BeanDialog dialog = OfficeEditPart.this.createBeanDialog(room,
 						"Name", "X", "Y");
-				dialog.registerPropertyInputBuilder("Id",
-						new ClasspathResourceSelectionPropertyInput(
+				dialog.registerPropertyInput("Id",
+						new ClasspathResourceSelectionInput(
 								OfficeEditPart.this.getEditor(), "room"));
 				if (dialog.populate()) {
 					try {

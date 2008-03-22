@@ -22,12 +22,14 @@ import java.util.Map;
 import java.util.Properties;
 
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.widgets.BeanListPopulateTable;
-import net.officefloor.eclipse.common.widgets.SubTypeList;
+import net.officefloor.eclipse.common.dialog.input.Input;
+import net.officefloor.eclipse.common.dialog.input.InputAdapter;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
+import net.officefloor.eclipse.common.dialog.input.impl.SubTypeSelectionInput;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.managedobjectsource.ManagedObjectSourceLoader;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.PropertyModel;
@@ -36,8 +38,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -70,12 +70,19 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	/**
 	 * List of {@link ManagedObjectSource} instances.
 	 */
-	private SubTypeList managedObjectSourceList;
+	private InputHandler<String> managedObjectSourceList;
 
 	/**
-	 * Table for the properties to create the {@link Team}.
+	 * {@link Input} for the properties to create the
+	 * {@link ManagedObjectSource}.
 	 */
-	private BeanListPopulateTable<PropertyModel> propertiesTable;
+	private BeanListInput<PropertyModel> propertiesInput;
+
+	/**
+	 * {@link InputHandler} for the properties to create the
+	 * {@link ManagedObjectSource}.
+	 */
+	private InputHandler<List<PropertyModel>> propertiesHandler;
 
 	/**
 	 * Reports errors.
@@ -129,12 +136,11 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 
 		// Enter the managed object source
 		new Label(composite, SWT.WRAP).setText("Managed Object Source");
-		this.managedObjectSourceList = new SubTypeList(composite, this.project,
-				ManagedObjectSource.class.getName());
-		this.managedObjectSourceList.getList().addSelectionListener(
-				new SelectionAdapter() {
+		this.managedObjectSourceList = new InputHandler<String>(composite,
+				new SubTypeSelectionInput(this.project, ManagedObjectSource.class
+						.getName()), new InputAdapter() {
 					@Override
-					public void widgetSelected(SelectionEvent e) {
+					public void notifyValueChanged(Object value) {
 						// Populate the properties
 						ManagedObjectSourceCreateDialog.this
 								.populateProperties();
@@ -143,11 +149,12 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 
 		// Enter the properties
 		new Label(composite, SWT.WRAP).setText("Properties");
-		this.propertiesTable = new BeanListPopulateTable<PropertyModel>(
-				composite, PropertyModel.class);
-		this.propertiesTable.addProperty("name", 1);
-		this.propertiesTable.addProperty("value", 2);
-		this.propertiesTable.generate();
+		this.propertiesInput = new BeanListInput<PropertyModel>(
+				PropertyModel.class);
+		this.propertiesInput.addProperty("name", 1);
+		this.propertiesInput.addProperty("value", 2);
+		this.propertiesHandler = new InputHandler<List<PropertyModel>>(
+				composite, this.propertiesInput);
 
 		// Error text
 		this.errorText = new Label(composite, SWT.WRAP);
@@ -175,8 +182,8 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 		}
 
 		// Obtain the list of existing property names
-		List<PropertyModel> existingPropertyList = this.propertiesTable
-				.getBeans();
+		List<PropertyModel> existingPropertyList = this.propertiesHandler
+				.getTrySafeValue();
 		Map<String, PropertyModel> existingProperties = new HashMap<String, PropertyModel>(
 				existingPropertyList.size());
 		for (PropertyModel existingProperty : existingPropertyList) {
@@ -197,13 +204,13 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 			} else {
 				// Add property
 				PropertyModel property = new PropertyModel(propertyName, "");
-				this.propertiesTable.addBean(property);
+				this.propertiesInput.addBean(property);
 			}
 		}
 
 		// Remove no longer existing properties
 		for (PropertyModel oldProperty : existingProperties.values()) {
-			this.propertiesTable.removeBean(oldProperty);
+			this.propertiesInput.removeBean(oldProperty);
 		}
 
 		// No errors if at this point
@@ -236,8 +243,8 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 			}
 
 			// Create the list of properties
-			List<PropertyModel> propertyModels = this.propertiesTable
-					.getBeans();
+			List<PropertyModel> propertyModels = this.propertiesHandler
+					.getTrySafeValue();
 			Properties properties = new Properties();
 			for (PropertyModel propertyModel : propertyModels) {
 				String name = propertyModel.getName();
@@ -280,7 +287,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 
 		// Ensure managed object source provided
 		String managedObjectSourceClassName = this.managedObjectSourceList
-				.getSubTypeClassName();
+				.getTrySafeValue();
 		if ((managedObjectSourceClassName == null)
 				|| (managedObjectSourceClassName.trim().length() == 0)) {
 			this.errorText.setText("Select a managed object source");

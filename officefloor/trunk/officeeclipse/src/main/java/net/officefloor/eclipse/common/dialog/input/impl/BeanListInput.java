@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.widgets;
+package net.officefloor.eclipse.common.dialog.input.impl;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.common.dialog.input.Input;
+import net.officefloor.eclipse.common.dialog.input.InputContext;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnPixelData;
@@ -42,7 +44,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -52,17 +53,12 @@ import org.eclipse.swt.widgets.TableItem;
  * 
  * @author Daniel
  */
-public class BeanListPopulateTable<B> {
+public class BeanListInput<B> implements Input<Table> {
 
 	/**
 	 * Marker to indicate a bean.
 	 */
 	private static final String BEAN_MARKER = "-";
-
-	/**
-	 * {@link Table}.
-	 */
-	private final Table table;
 
 	/**
 	 * Type of the bean.
@@ -80,14 +76,19 @@ public class BeanListPopulateTable<B> {
 	private final Map<String, BeanProperty> beanProperties = new HashMap<String, BeanProperty>();
 
 	/**
-	 * {@link TableLayout}.
-	 */
-	private final TableLayout layout;
-
-	/**
 	 * Beans to be populated.
 	 */
 	private final List<B> beans = new LinkedList<B>();
+
+	/**
+	 * {@link Table}.
+	 */
+	private Table table;
+
+	/**
+	 * {@link TableLayout}.
+	 */
+	private TableLayout layout;
 
 	/**
 	 * {@link TableViewer}.
@@ -97,36 +98,21 @@ public class BeanListPopulateTable<B> {
 	/**
 	 * Initiate.
 	 * 
-	 * @param parent
-	 *            Parent {@link Composite}.
 	 * @param beanType
 	 *            Type of the bean.
 	 */
-	public BeanListPopulateTable(Composite parent, Class<B> beanType) {
+	public BeanListInput(Class<B> beanType) {
 		this.beanType = beanType;
 
-		// Create the table
-		this.table = new Table(parent, (SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL
-				| SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.HIDE_SELECTION));
-
-		// Initiate the table
-		GridData gridData = new GridData(GridData.GRAB_HORIZONTAL
-				| GridData.HORIZONTAL_ALIGN_FILL);
-		gridData.heightHint = 100;
-		this.table.setLayoutData(gridData);
-		this.layout = new TableLayout();
-		this.table.setLayout(this.layout);
-		this.table.setHeaderVisible(true);
-		this.table.setLinesVisible(true);
-
-		// Add the bean marker
-		this.layout.addColumnData(new ColumnPixelData(10));
-		new TableColumn(this.table, SWT.CENTER);
+		// Bean marker always the first column
 		this.beanPropertyOrder.add(BEAN_MARKER);
 	}
 
 	/**
+	 * <p>
 	 * Adds property to be populated on the bean.
+	 * <p>
+	 * This may NOT be called after {@link #buildControl(InputContext)}.
 	 * 
 	 * @param propertyName
 	 *            Name of the property on the bean.
@@ -135,14 +121,16 @@ public class BeanListPopulateTable<B> {
 	 */
 	public void addProperty(String propertyName, int weight) {
 
-		// Add the table column for the property
-		this.layout.addColumnData(new ColumnWeightData(weight));
-		TableColumn column = new TableColumn(this.table, SWT.LEFT);
-		column.setText(propertyName);
+		// Ensure properties are not added after building control
+		if (this.tableViewer != null) {
+			throw new OfficeFloorPluginFailure(
+					"Can not add properties after building table");
+		}
 
-		// Create and add the property
+		// Add the property
 		this.beanPropertyOrder.add(propertyName);
-		this.beanProperties.put(propertyName, new BeanProperty(propertyName));
+		this.beanProperties.put(propertyName, new BeanProperty(propertyName,
+				weight));
 	}
 
 	/**
@@ -177,18 +165,47 @@ public class BeanListPopulateTable<B> {
 		}
 	}
 
-	/**
-	 * <p>
-	 * Generates the necessary functionality to populate the list of beans.
-	 * <p>
-	 * This is to be called after all properties are added via
-	 * {@link #addProperty(String, int)}.
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.dialog.input.Input#buildControl(net.officefloor.eclipse.common.dialog.input.InputContext)
 	 */
-	public void generate() throws OfficeFloorPluginFailure {
+	@Override
+	public Table buildControl(InputContext context) {
 
-		// Ensure viewer not already created
-		if (this.tableViewer != null) {
-			throw new OfficeFloorPluginFailure("TableViewer already created");
+		// Create the table
+		this.table = new Table(context.getParent(),
+				(SWT.SINGLE | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
+						| SWT.FULL_SELECTION | SWT.HIDE_SELECTION));
+
+		// Initiate the table
+		GridData gridData = new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL);
+		gridData.heightHint = 100;
+		this.table.setLayoutData(gridData);
+		this.layout = new TableLayout();
+		this.table.setLayout(this.layout);
+		this.table.setHeaderVisible(true);
+		this.table.setLinesVisible(true);
+
+		// Add the property columns
+		for (String propertyName : this.beanPropertyOrder) {
+
+			// Determine if a bean marker
+			if (BEAN_MARKER.equals(propertyName)) {
+				// Add the bean marker column
+				this.layout.addColumnData(new ColumnPixelData(10));
+				new TableColumn(this.table, SWT.CENTER);
+			} else {
+				// Obtain the property
+				BeanProperty property = this.beanProperties.get(propertyName);
+
+				// Add the table column for the property
+				this.layout.addColumnData(new ColumnWeightData(property
+						.getWeight()));
+				TableColumn column = new TableColumn(this.table, SWT.LEFT);
+				column.setText(propertyName);
+			}
 		}
 
 		// Create the Table Viewer
@@ -231,10 +248,10 @@ public class BeanListPopulateTable<B> {
 			public void widgetSelected(SelectionEvent e) {
 				try {
 					// Create a new instance of the bean
-					B bean = BeanListPopulateTable.this.beanType.newInstance();
+					B bean = BeanListInput.this.beanType.newInstance();
 
 					// Add the bean
-					BeanListPopulateTable.this.addBean(bean);
+					BeanListInput.this.addBean(bean);
 
 				} catch (Exception ex) {
 					throw new OfficeFloorPluginFailure(ex);
@@ -255,25 +272,29 @@ public class BeanListPopulateTable<B> {
 			public void widgetSelected(SelectionEvent e) {
 
 				// Obtain the first bean selected
-				B bean = (B) ((IStructuredSelection) BeanListPopulateTable.this.tableViewer
+				B bean = (B) ((IStructuredSelection) BeanListInput.this.tableViewer
 						.getSelection()).getFirstElement();
 
 				// Remove the bean
-				BeanListPopulateTable.this.beans.remove(bean);
+				BeanListInput.this.beans.remove(bean);
 
 				// Remove from view
-				BeanListPopulateTable.this.tableViewer.remove(bean);
+				BeanListInput.this.tableViewer.remove(bean);
 			}
 		});
+
+		// Return the table
+		return this.table;
 	}
 
-	/**
-	 * Obtains the beans.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @return Beans.
+	 * @see net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse.swt.widgets.Control,
+	 *      net.officefloor.eclipse.common.dialog.input.InputContext)
 	 */
-	@SuppressWarnings("unchecked")
-	public List<B> getBeans() {
+	@Override
+	public List<B> getValue(Table control, InputContext context) {
 		return this.beans;
 	}
 
@@ -286,6 +307,11 @@ public class BeanListPopulateTable<B> {
 		 * Name of the property.
 		 */
 		public final String name;
+
+		/**
+		 * Weight of the column width for this property.
+		 */
+		private final int weight;
 
 		/**
 		 * Access {@link Method}.
@@ -302,9 +328,13 @@ public class BeanListPopulateTable<B> {
 		 * 
 		 * @param name
 		 *            Property Name.
+		 * @param weight
+		 *            Weight of the column width for this property.
 		 */
-		public BeanProperty(String name) throws OfficeFloorPluginFailure {
+		public BeanProperty(String name, int weight)
+				throws OfficeFloorPluginFailure {
 			this.name = name;
+			this.weight = weight;
 
 			// Transform name to method name
 			String methodName = name.replace(" ", "");
@@ -313,13 +343,22 @@ public class BeanListPopulateTable<B> {
 
 			try {
 				// Find the accessor and mutator methods
-				this.accessor = BeanListPopulateTable.this.beanType
+				this.accessor = BeanListInput.this.beanType
 						.getMethod("get" + methodName);
-				this.mutator = BeanListPopulateTable.this.beanType.getMethod(
+				this.mutator = BeanListInput.this.beanType.getMethod(
 						"set" + methodName, new Class[] { String.class });
 			} catch (NoSuchMethodException ex) {
 				throw new OfficeFloorPluginFailure(ex);
 			}
+		}
+
+		/**
+		 * Obtains the weight of the column width for this property.
+		 * 
+		 * @return Weight of the column width for this property.
+		 */
+		public int getWeight() {
+			return this.weight;
 		}
 
 		/**
@@ -389,7 +428,7 @@ public class BeanListPopulateTable<B> {
 		public Object getValue(Object element, String property) {
 
 			// Obtain the bean property
-			BeanProperty beanProperty = BeanListPopulateTable.this.beanProperties
+			BeanProperty beanProperty = BeanListInput.this.beanProperties
 					.get(property);
 
 			// Obtain the property value
@@ -416,7 +455,7 @@ public class BeanListPopulateTable<B> {
 			}
 
 			// Obtain the bean property
-			BeanProperty beanProperty = BeanListPopulateTable.this.beanProperties
+			BeanProperty beanProperty = BeanListInput.this.beanProperties
 					.get(property);
 
 			// Set the property
@@ -424,7 +463,7 @@ public class BeanListPopulateTable<B> {
 			beanProperty.setValue(bean, value.toString());
 
 			// Update the view with changes
-			BeanListPopulateTable.this.tableViewer.update(bean,
+			BeanListInput.this.tableViewer.update(bean,
 					new String[] { property });
 		}
 	}
@@ -457,7 +496,7 @@ public class BeanListPopulateTable<B> {
 		public String getColumnText(Object element, int columnIndex) {
 
 			// Obtain the property name for the column
-			String propertyName = BeanListPopulateTable.this.beanPropertyOrder
+			String propertyName = BeanListInput.this.beanPropertyOrder
 					.get(columnIndex);
 
 			// Return the marker if the marker column
@@ -466,7 +505,7 @@ public class BeanListPopulateTable<B> {
 			}
 
 			// Obtain the bean property
-			BeanProperty beanProperty = BeanListPopulateTable.this.beanProperties
+			BeanProperty beanProperty = BeanListInput.this.beanProperties
 					.get(propertyName);
 
 			// Obtain the value
@@ -491,7 +530,7 @@ public class BeanListPopulateTable<B> {
 		@Override
 		public Object[] getElements(Object inputElement) {
 			// Return the beans
-			return BeanListPopulateTable.this.beans.toArray();
+			return BeanListInput.this.beans.toArray();
 		}
 
 		/*
@@ -515,4 +554,5 @@ public class BeanListPopulateTable<B> {
 			// Do nothing
 		}
 	}
+
 }

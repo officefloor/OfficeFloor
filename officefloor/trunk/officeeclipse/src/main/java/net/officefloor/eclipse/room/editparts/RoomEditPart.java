@@ -22,7 +22,7 @@ import java.util.List;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.ClasspathResourceSelectionPropertyInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathResourceSelectionInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
@@ -90,8 +90,8 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 				// Add the Sub Room
 				SubRoomAddBean bean = new SubRoomAddBean();
 				BeanDialog dialog = RoomEditPart.this.createBeanDialog(bean);
-				dialog.registerPropertyInputBuilder("File",
-						new ClasspathResourceSelectionPropertyInput(
+				dialog.registerPropertyInput("File",
+						new ClasspathResourceSelectionInput(
 								RoomEditPart.this.getEditor(), "desk", "room"));
 				if (dialog.populate()) {
 					try {

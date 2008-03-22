@@ -25,7 +25,7 @@ import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.ManagedObjectSourceCreateDialog;
 import net.officefloor.eclipse.common.dialog.TeamCreateDialog;
-import net.officefloor.eclipse.common.dialog.input.ClasspathResourceSelectionPropertyInput;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathResourceSelectionInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
@@ -91,8 +91,8 @@ public class OfficeFloorEditPart extends
 				BeanDialog dialog = OfficeFloorEditPart.this.createBeanDialog(
 						officeBean, "X", "Y");
 				dialog
-						.registerPropertyInputBuilder("Id",
-								new ClasspathResourceSelectionPropertyInput(
+						.registerPropertyInput("Id",
+								new ClasspathResourceSelectionInput(
 										OfficeFloorEditPart.this.getEditor(),
 										"office"));
 				if (dialog.populate()) {
@@ -113,7 +113,7 @@ public class OfficeFloorEditPart extends
 						OfficeFloorLoader officeFloorLoader = new OfficeFloorLoader();
 						OfficeFloorOfficeModel office = officeFloorLoader
 								.loadOfficeFloorOffice(officeConfigItem);
-						
+
 						// Specify name of office
 						office.setName(officeBean.getName());
 
@@ -297,8 +297,8 @@ class OfficeFloorOfficeFloorLayoutEditPolicy extends
 	 *      java.lang.Object, org.eclipse.draw2d.geometry.Point)
 	 */
 	@Override
-	protected CreateCommand<?, ?> createCreateComand(OfficeFloorModel parentModel,
-			Object newModel, Point location) {
+	protected CreateCommand<?, ?> createCreateComand(
+			OfficeFloorModel parentModel, Object newModel, Point location) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}

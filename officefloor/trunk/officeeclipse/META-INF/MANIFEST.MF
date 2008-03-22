@@ -24,7 +24,8 @@ Require-Bundle: net.officefloor.frame,
  net.officefloor.eclipse.plugin,
  org.junit,
  org.eclipse.debug.ui,
- org.eclipse.jdt.debug.ui
+ org.eclipse.jdt.debug.ui,
+ net.officefloor.tool.filingcabinet
 Eclipse-LazyStart: true
 Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.common,
