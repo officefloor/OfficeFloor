@@ -14,11 +14,13 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.widgets;
+package net.officefloor.eclipse.common.dialog.input.impl;
 
 import java.util.LinkedList;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.common.dialog.input.Input;
+import net.officefloor.eclipse.common.dialog.input.InputContext;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.Flags;
@@ -27,7 +29,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.List;
 
 /**
@@ -35,29 +38,27 @@ import org.eclipse.swt.widgets.List;
  * 
  * @author Daniel
  */
-public class SubTypeList {
+public class SubTypeSelectionInput implements Input<List> {
 
 	/**
-	 * List of the sub types.
+	 * Listing sub {@link IType} instances.
 	 */
-	private final List subTypeList;
+	private final IType[] subTypes;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param parent
-	 *            Parent {@link Composite}.
 	 * @param project
 	 *            {@link IProject}.
 	 * @param superClassName
 	 *            Super class name.
 	 */
-	public SubTypeList(Composite parent, IProject project, String superClassName)
+	public SubTypeSelectionInput(IProject project, String superClassName)
 			throws OfficeFloorPluginFailure {
 		try {
 
-			// Ensure team factory on the class path
-			// (necessary to check able to create the team)
+			// Ensure class on the class path
+			// (necessary to check able to create the class)
 			IJavaProject javaProject = JavaCore.create(project);
 			IType superType = javaProject.findType(superClassName);
 			if (superType == null) {
@@ -70,7 +71,7 @@ public class SubTypeList {
 			IType[] allTypes = hierarchy.getAllClasses();
 
 			// Trim the list to non-abstract implementations
-			java.util.List<IType> subTypes = new LinkedList<IType>();
+			LinkedList<IType> subTypes = new LinkedList<IType>();
 			for (IType type : allTypes) {
 
 				// Ignore object
@@ -86,26 +87,54 @@ public class SubTypeList {
 				// Include type
 				subTypes.add(type);
 			}
-
-			// Create the list of the sub types
-			this.subTypeList = new List(parent, SWT.SINGLE | SWT.BORDER);
-			for (IType type : subTypes) {
-				this.subTypeList.add(type.getFullyQualifiedName());
-			}
+			this.subTypes = subTypes.toArray(new IType[0]);
 
 		} catch (Exception ex) {
 			throw new OfficeFloorPluginFailure(ex);
 		}
 	}
 
-	/**
-	 * Obtains the class name of the selected sub type.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @return Class name of the selected sub type.
+	 * @see net.officefloor.eclipse.common.dialog.input.Input#buildControl(net.officefloor.eclipse.common.dialog.input.InputContext)
 	 */
-	public String getSubTypeClassName() {
-		// Obtain the sub type selected
-		String[] selection = this.subTypeList.getSelection();
+	@Override
+	public List buildControl(final InputContext context) {
+		// Create the list of the sub types
+		final List subTypeList = new List(context.getParent(), SWT.SINGLE
+				| SWT.BORDER);
+		for (IType type : subTypes) {
+			subTypeList.add(type.getFullyQualifiedName());
+		}
+
+		// Add listener for changes
+		subTypeList.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// Obtain the value
+				String value = SubTypeSelectionInput.this.getValue(subTypeList,
+						context);
+
+				// Indicate value changed
+				context.notifyValueChanged(value);
+			}
+		});
+
+		// Return the list
+		return subTypeList;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse.swt.widgets.Control,
+	 *      net.officefloor.eclipse.common.dialog.input.InputContext)
+	 */
+	@Override
+	public String getValue(List control, InputContext context) {
+		// Obtain the name of the sub type selected
+		String[] selection = control.getSelection();
 		if (selection.length == 0) {
 			// Nothing selected
 			return null;
@@ -113,14 +142,5 @@ public class SubTypeList {
 			// First selected
 			return selection[0];
 		}
-	}
-
-	/**
-	 * Obtains the underlying {@link List}.
-	 * 
-	 * @return Underlying {@link List}.
-	 */
-	public List getList() {
-		return this.subTypeList;
 	}
 }

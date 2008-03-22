@@ -14,25 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.dialog;
+package net.officefloor.eclipse.common.dialog.input;
 
 /**
- * Translates the property String value to the necessary Object value.
+ * Listener for the {@link Input}.
  * 
  * @author Daniel
  */
-public interface PropertyTranslator {
+public interface InputListener {
 
 	/**
-	 * Translates the property String value to the Object value.
+	 * Invoked to notify value has changed.
 	 * 
 	 * @param value
-	 *            String value.
-	 * @return Object value.
-	 * @throws InvalidPropertyValueException
-	 *             If property value is invalid and can not be converted from
-	 *             String value to Object value.
+	 *            New value.
 	 */
-	Object translate(String value) throws InvalidPropertyValueException;
+	void notifyValueChanged(Object value);
 
+	/**
+	 * Invoked to notify value is invalid.
+	 * 
+	 * @param message
+	 *            Reason value is invalid.
+	 */
+	void notifyValueInvalid(String message);
 }

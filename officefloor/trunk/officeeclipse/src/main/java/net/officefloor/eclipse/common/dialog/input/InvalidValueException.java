@@ -14,14 +14,14 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.dialog;
+package net.officefloor.eclipse.common.dialog.input;
 
 /**
  * Indicates the property value is invalid.
  * 
  * @author Daniel
  */
-public class InvalidPropertyValueException extends Exception {
+public class InvalidValueException extends Exception {
 
 	/**
 	 * Only allow message that is displayed back to the user.
@@ -29,7 +29,7 @@ public class InvalidPropertyValueException extends Exception {
 	 * @param message
 	 *            Message that is to be displayed back to the user.
 	 */
-	public InvalidPropertyValueException(String message) {
+	public InvalidValueException(String message) {
 		super(message);
 	}
 

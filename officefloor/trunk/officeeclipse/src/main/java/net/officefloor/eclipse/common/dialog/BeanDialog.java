@@ -16,15 +16,22 @@
  */
 package net.officefloor.eclipse.common.dialog;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.common.dialog.input.Input;
+import net.officefloor.eclipse.common.dialog.input.InputContext;
+import net.officefloor.eclipse.common.dialog.input.InputListener;
+import net.officefloor.eclipse.common.dialog.input.InvalidValueException;
+import net.officefloor.eclipse.common.dialog.input.PropertyInputHandler;
+import net.officefloor.eclipse.common.dialog.input.ValueTranslator;
+import net.officefloor.eclipse.common.dialog.input.ValueTranslatorRegistry;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.dialogs.Dialog;
@@ -57,24 +64,24 @@ public class BeanDialog extends Dialog {
 	private final String[] ignoreProperties;
 
 	/**
-	 * Properties of the bean to be populated.
+	 * {@link ValueTranslatorRegistry}.
 	 */
-	private final List<BeanProperty<?>> properties = new LinkedList<BeanProperty<?>>();;
+	private final ValueTranslatorRegistry valueTranslatorRegistry;
 
 	/**
-	 * Registry of property name to specialised {@link PropertyInput}.
+	 * Registry of property name to specialised {@link Input}.
 	 */
-	private final Map<String, PropertyInput<?>> builders = new HashMap<String, PropertyInput<?>>();
+	private final Map<String, Input<?>> specialisedInputs = new HashMap<String, Input<?>>();
 
 	/**
-	 * Registry of {@link PropertyTranslator} instances by property name.
+	 * Registry of {@link ValueTranslator} instances by property name.
 	 */
-	private final Map<String, PropertyTranslator> namedTranslators = new HashMap<String, PropertyTranslator>();
+	private final Map<String, ValueTranslator> namedTranslators = new HashMap<String, ValueTranslator>();
 
 	/**
-	 * Registry of {@link PropertyTranslator} instances by property type.
+	 * Listing of {@link BeanProperty} instances.
 	 */
-	private final Map<Class<?>, PropertyTranslator> typedTranslators = new HashMap<Class<?>, PropertyTranslator>();
+	private List<BeanProperty> beanProperties;
 
 	/**
 	 * Flag indicating if the bean was populated.
@@ -94,38 +101,12 @@ public class BeanDialog extends Dialog {
 	 * @param ignoreProperties
 	 *            Properties to not populate.
 	 */
-	public BeanDialog(Shell parentShell, Object bean,
-			final ClassLoader classLoader, String... ignoreProperties) {
+	public BeanDialog(Shell parentShell, Object bean, ClassLoader classLoader,
+			String... ignoreProperties) {
 		super(parentShell);
 		this.bean = bean;
 		this.ignoreProperties = ignoreProperties;
-
-		// Register typed translators
-		this.typedTranslators.put(String.class, new PropertyTranslator() {
-			public Object translate(String value)
-					throws InvalidPropertyValueException {
-				return value;
-			}
-		});
-		this.typedTranslators.put(Class.class, new PropertyTranslator() {
-			public Object translate(String value)
-					throws InvalidPropertyValueException {
-				try {
-					return classLoader.loadClass(value);
-				} catch (ClassNotFoundException ex) {
-					throw new InvalidPropertyValueException(
-							"Can not find class");
-				}
-			}
-		});
-		PropertyTranslator intTranslator = new PropertyTranslator() {
-			public Object translate(String value)
-					throws InvalidPropertyValueException {
-				return Integer.parseInt(value);
-			}
-		};
-		this.typedTranslators.put(int.class, intTranslator);
-		this.typedTranslators.put(Integer.class, intTranslator);
+		this.valueTranslatorRegistry = new ValueTranslatorRegistry(classLoader);
 	}
 
 	/**
@@ -143,46 +124,32 @@ public class BeanDialog extends Dialog {
 	}
 
 	/**
-	 * Registers a specialised {@link PropertyInput} for the property name.
+	 * Registers a specialised {@link Input} for the property name.
 	 * 
 	 * @param propertyName
 	 *            Name of property.
 	 * @param builder
-	 *            Specialised {@link PropertyInput}.
+	 *            Specialised {@link Input}.
 	 */
-	public void registerPropertyInputBuilder(String propertyName,
-			PropertyInput<?> builder) {
-		this.builders.put(propertyName, builder);
+	public void registerPropertyInput(String propertyName, Input<?> input) {
+		this.specialisedInputs.put(propertyName, input);
 	}
 
 	/**
 	 * <p>
-	 * Registers a {@link PropertyTranslator} for the property name.
+	 * Registers a {@link ValueTranslator} for the property name.
 	 * <p>
-	 * Named {@link PropertyTranslator} instances override typed
-	 * {@link PropertyTranslator} instances.
+	 * Named {@link ValueTranslator} instances override typed
+	 * {@link ValueTranslator} instances.
 	 * 
 	 * @param propertyName
 	 *            Name of property.
 	 * @param translator
-	 *            {@link PropertyTranslator}.
+	 *            {@link ValueTranslator}.
 	 */
-	public void registerPropertyTranslator(String propertyName,
-			PropertyTranslator translator) {
+	public void registerPropertyValueTranslator(String propertyName,
+			ValueTranslator translator) {
 		this.namedTranslators.put(propertyName, translator);
-	}
-
-	/**
-	 * Registers a {@link PropertyTranslator} for the property type.
-	 * 
-	 * @param propertyType
-	 *            Type of property.
-	 * @param translator
-	 *            {@link PropertyTranslator}.
-	 */
-	public void registerPropertyTranslator(Class<?> propertyType,
-			PropertyTranslator translator) {
-		this.typedTranslators.put(propertyType, translator);
 	}
 
 	/**
@@ -199,75 +166,39 @@ public class BeanDialog extends Dialog {
 	 * 
 	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
-	@SuppressWarnings("unchecked")
 	protected Control createDialogArea(Composite parent) {
 
-		// Create the map of property accessors and mutators
-		Map<String, Method> accessors = new HashMap<String, Method>();
-		Map<String, List<Method>> mutatorOptions = new HashMap<String, List<Method>>();
+		// Create the set of properties (public mutators)
+		Set<String> properties = new HashSet<String>();
 		for (Method method : bean.getClass().getMethods()) {
 			String methodName = method.getName();
 
-			// Ignore non-public methods
-			if (!Modifier.isPublic(method.getModifiers())) {
-				continue;
-			}
-
-			// Determine if accessor
-			if ((!Void.TYPE.equals(method.getReturnType()))
-					&& (methodName.startsWith("get"))
-					&& (method.getParameterTypes().length == 0)) {
-				// Accessor (via property name)
-				accessors.put(this.getPropertyName(methodName), method);
-				continue;
-			}
-
 			// Determine if mutator
-			if ((Void.TYPE.equals(method.getReturnType()))
+			if ((Modifier.isPublic(method.getModifiers()))
+					&& (Void.TYPE.equals(method.getReturnType()))
 					&& (methodName.startsWith("set"))
 					&& (method.getParameterTypes().length == 1)) {
-				// Mutator (via property name)
-				String propertyName = this.getPropertyName(methodName);
-				List<Method> propertyMutators = mutatorOptions
-						.get(propertyName);
-				if (propertyMutators == null) {
-					propertyMutators = new LinkedList<Method>();
-					mutatorOptions.put(propertyName, propertyMutators);
-				}
-				propertyMutators.add(method);
-				continue;
+				// Add mutator as property
+				String propertyName = this.getPropertyName(method.getName());
+				properties.add(propertyName);
 			}
+		}
+
+		// Remove any ignore properties
+		for (String ignoreProperty : this.ignoreProperties) {
+			properties.remove(ignoreProperty);
 		}
 
 		// Create the composite
 		Composite composite = (Composite) super.createDialogArea(parent);
 
-		// Create the list of properties to populate for the bean
-		for (String propertyName : mutatorOptions.keySet()) {
-
-			// Determine if not populate
-			boolean isIgnore = false;
-			for (String ignoreProperty : this.ignoreProperties) {
-				if (propertyName.equals(ignoreProperty)) {
-					isIgnore = true;
-				}
-			}
-			if (isIgnore) {
-				// Do not add the property
-				continue;
-			}
-
-			// Add the property
-			this.properties.add(this.createBeanProperty(propertyName,
-					accessors, mutatorOptions, composite));
-		}
-
 		// Populate the list of properties
-		for (BeanProperty<?> property : this.properties) {
+		this.beanProperties = new ArrayList<BeanProperty>(properties.size());
+		for (String propertyName : properties) {
 
 			// Label the property
 			Label label = new Label(composite, SWT.WRAP);
-			label.setText(property.name);
+			label.setText(propertyName);
 			GridData data = new GridData(GridData.GRAB_HORIZONTAL
 					| GridData.GRAB_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL
 					| GridData.VERTICAL_ALIGN_CENTER);
@@ -275,10 +206,23 @@ public class BeanDialog extends Dialog {
 			label.setLayoutData(data);
 			label.setFont(parent.getFont());
 
-			// Obtain the control to input the property value
-			Control inputControl = property.inputBuilder.buildControl(property);
-			inputControl.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-					| GridData.HORIZONTAL_ALIGN_FILL));
+			// Create the property input handler
+			Input<?> input = this.specialisedInputs.get(propertyName);
+			if (input == null) {
+				input = new DefaultPropertyInput();
+			}
+			ValueTranslator translator = this.namedTranslators
+					.get(propertyName);
+			PropertyInputHandler inputHandler = new PropertyInputHandler(
+					composite, input, propertyName, this.bean,
+					this.valueTranslatorRegistry, translator);
+
+			// Format the control for the property (if not done)
+			if (inputHandler.getControl().getLayoutData() == null) {
+				inputHandler.getControl().setLayoutData(
+						new GridData(GridData.GRAB_HORIZONTAL
+								| GridData.HORIZONTAL_ALIGN_FILL));
+			}
 
 			// Position for invalid property notification
 			Label errorText = new Label(composite, SWT.WRAP);
@@ -289,8 +233,10 @@ public class BeanDialog extends Dialog {
 					SWT.COLOR_WIDGET_BACKGROUND));
 			errorText.setForeground(ColorConstants.red);
 
-			// Load the bean property with state
-			property.state = new PropertyState(inputControl, errorText);
+			// Create and add the bean property
+			BeanProperty beanProperty = new BeanProperty(inputHandler,
+					errorText);
+			this.beanProperties.add(beanProperty);
 		}
 
 		// Return the composite as the control
@@ -306,160 +252,25 @@ public class BeanDialog extends Dialog {
 	protected void okPressed() {
 
 		// Ensure all properties are populated
-		for (BeanProperty property : this.properties) {
+		for (BeanProperty property : this.beanProperties) {
 
-			// Obtain the value
-			String value = property.inputBuilder.getValue(
-					property.state.inputControl, property);
-
-			// Ensure the value is not blank
-			if ((value == null) || (value.trim().length() == 0)) {
-				property.state.flagInvalid("Must populate");
-				return;
-			}
-
-			// Ensure value specified on property
-			property.setValue(value);
-		}
-
-		// Ensure all properties are valid
-		for (BeanProperty property : this.properties) {
-			if (!property.state.isValid) {
-				return;
-			}
-		}
-
-		// Populate the properties on the bean
-		for (BeanProperty property : this.properties) {
+			// Populate the property onto the bean
 			try {
-				property.populateBean();
-			} catch (Exception ex) {
-				property.state.flagInvalid(ex.getMessage());
+				if (!property.inputHandler.populatePropertyOnBean()) {
+					// Value must be provided
+					property.notifyValueInvalid("Must populate");
+					return;
+				}
+			} catch (InvalidValueException ex) {
+				// Must be valid before return
+				property.notifyValueInvalid(ex.getMessage());
 				return;
 			}
 		}
 
-		// Properties populated, handle ok
+		// Properties populated
 		this.isPopulated = true;
 		super.okPressed();
-	}
-
-	/**
-	 * Creates the {@link BeanProperty}.
-	 * 
-	 * @param propertyName
-	 *            Name of the property.
-	 * @param accessors
-	 *            Accessors of the bean.
-	 * @param mutatorOptions
-	 *            Mutator options of the bean. The appropriate mutator is
-	 *            selected based on the accessor.
-	 * @param parent
-	 *            Parent {@link Composite}.
-	 * @return {@link BeanProperty} for the property.
-	 */
-	@SuppressWarnings("unchecked")
-	private BeanProperty<?> createBeanProperty(String propertyName,
-			Map<String, Method> accessors,
-			Map<String, List<Method>> mutatorOptions, Composite parent) {
-
-		// Obtain the accessor details
-		Class<?> propertyType = null;
-		String initialValue = null;
-		Method accessor = accessors.get(propertyName);
-		if (accessor != null) {
-
-			// Obtain the type of the property
-			propertyType = accessor.getReturnType();
-			if (Void.TYPE.equals(propertyType)) {
-				propertyType = null;
-			}
-
-			try {
-				// Obtain the initial value
-				Object propertyValue = accessor
-						.invoke(this.bean, new Object[0]);
-				if (propertyValue != null) {
-					if (propertyValue instanceof String) {
-						initialValue = (String) propertyValue;
-					} else {
-						initialValue = propertyValue.toString();
-					}
-				}
-			} catch (IllegalArgumentException ex) {
-				throw new OfficeFloorPluginFailure(ex);
-			} catch (IllegalAccessException ex) {
-				throw new OfficeFloorPluginFailure(ex);
-			} catch (InvocationTargetException ex) {
-				throw new OfficeFloorPluginFailure(ex.getCause());
-			}
-		}
-
-		// Obtain the mutator details
-		Method mutator = null;
-		List<Method> mutators = mutatorOptions.get(propertyName);
-		if ((mutators == null) || (mutators.size() == 0)) {
-			throw new OfficeFloorPluginFailure("No mutator for property '"
-					+ propertyName + "' of bean "
-					+ this.bean.getClass().getName());
-		} else if (mutators.size() == 1) {
-			mutator = mutators.get(0);
-		} else {
-			// Select appropriate mutator (match accessor)
-			if (propertyType != null) {
-				for (Method method : mutators) {
-					if (propertyType.equals(method.getParameterTypes()[0])) {
-						mutator = method;
-					}
-				}
-			}
-
-			// No match by accessor then try for String mutator
-			if (mutator == null) {
-				for (Method method : mutators) {
-					if (String.class.equals(method.getParameterTypes()[0])) {
-						mutator = method;
-					}
-				}
-			}
-		}
-
-		if (mutator != null) {
-			// Ensure have the property type
-			if (propertyType == null) {
-				propertyType = mutator.getParameterTypes()[0];
-			}
-		} else {
-			// Must have mutator
-			throw new OfficeFloorPluginFailure(
-					"Can not determine mutator for propety '" + propertyName
-							+ "' from options");
-		}
-
-		// Obtain the property input builder
-		PropertyInput<?> inputBuilder = this.builders.get(propertyName);
-		if (inputBuilder == null) {
-			inputBuilder = new DefaultPropertyInput();
-		}
-
-		// Obtain the property transformer (by name then type)
-		PropertyTranslator translator = this.namedTranslators.get(propertyName);
-		if (translator == null) {
-			translator = this.typedTranslators.get(propertyType);
-		}
-		if (translator == null) {
-			// Must have translator
-			throw new OfficeFloorPluginFailure(
-					"Can not obtain translator for property '"
-							+ propertyName
-							+ "' of type "
-							+ (propertyType == null ? "null" : propertyType
-									.getName()));
-		}
-
-		// Return the bean property
-		return new BeanProperty(propertyName, mutator, inputBuilder,
-				translator, parent, initialValue);
 	}
 
 	/**
@@ -488,7 +299,7 @@ public class BeanDialog extends Dialog {
 				propertyName.append(' ');
 			}
 
-			// Append the charachter
+			// Append the character
 			propertyName.append(currentChar);
 		}
 
@@ -497,296 +308,125 @@ public class BeanDialog extends Dialog {
 	}
 
 	/**
-	 * Property of the bean.
+	 * Manages property on the bean.
 	 */
-	private class BeanProperty<C extends Control> implements
-			PropertyInputContext {
+	private class BeanProperty implements InputListener {
 
 		/**
-		 * Name of the property.
+		 * {@link PropertyInputHandler} for this property.
 		 */
-		public final String name;
+		public final PropertyInputHandler inputHandler;
 
 		/**
-		 * Mutator to specify the property.
+		 * {@link Label} to report errors for this property.
 		 */
-		public final Method mutator;
-
-		/**
-		 * {@link PropertyInput} to build the {@link Control} to input the value
-		 * for the property.
-		 */
-		public final PropertyInput<C> inputBuilder;
-
-		/**
-		 * {@link PropertyTranslator} to translate the String value to the
-		 * necessary Object value.
-		 */
-		public final PropertyTranslator translator;
-
-		/**
-		 * Parent {@link Composite}.
-		 */
-		private final Composite parent;
-
-		/**
-		 * Attributes.
-		 */
-		private final Map<String, Object> attributes = new HashMap<String, Object>();
-
-		/**
-		 * Initial value.
-		 */
-		private final Object initialValue;
-
-		/**
-		 * Value for the property.
-		 */
-		public Object value;
-
-		/**
-		 * {@link PropertyState} for this property.
-		 */
-		public PropertyState<C> state = null;
+		public final Label errorText;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param name
-		 *            Name of property.
-		 * @param mutator
-		 *            Mutator to load the property to the bean.
-		 * @param inputBuilder
-		 *            {@link PropertyInput} to build the {@link Control} to
-		 *            input the value for the property.
-		 * @param translator
-		 *            {@link PropertyTranslator} to translate the String value
-		 *            to the necessary Object value.
-		 * @param parent
-		 *            Parent {@link Composite}.
-		 * @param initialValue
-		 *            Initial value.
+		 * @param inputHandler
+		 *            {@link PropertyInputHandler} for this property.
+		 * @param errorText
+		 *            {@link Label} to report errors for this property.
 		 */
-		public BeanProperty(String name, Method mutator,
-				PropertyInput<C> inputBuilder, PropertyTranslator translator,
-				Composite parent, Object initialValue) {
-			this.name = name;
-			this.mutator = mutator;
-			this.inputBuilder = inputBuilder;
-			this.translator = translator;
-			this.parent = parent;
-			this.initialValue = initialValue;
-			this.value = initialValue;
-		}
+		public BeanProperty(PropertyInputHandler inputHandler, Label errorText) {
+			this.inputHandler = inputHandler;
+			this.errorText = errorText;
 
-		/**
-		 * Populates the bean with the property.
-		 */
-		public void populateBean() throws Exception {
-			this.mutator.invoke(BeanDialog.this.bean,
-					new Object[] { this.value });
-		}
-
-		/**
-		 * <p>
-		 * Specifies the value.
-		 * <p>
-		 * Handles if value is correctly specified.
-		 * 
-		 * @param value
-		 *            Value.
-		 */
-		public void setValue(String value) {
-			this.notifyValueChanged(value);
+			// Specify this as listener
+			this.inputHandler.setInputListener(this);
 		}
 
 		/*
-		 * ========================================================================
-		 * VerifyListener
-		 * ========================================================================
+		 * ==========================================================
+		 * InputListener
+		 * ==========================================================
 		 */
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.eclipse.common.dialog.PropertyInputContext#getInitialValue()
+		 * @see net.officefloor.eclipse.common.dialog.input.InputListener#notifyValueChanged(java.lang.Object)
 		 */
 		@Override
-		public Object getInitialValue() {
-			return this.initialValue;
+		public void notifyValueChanged(Object value) {
+			// Value valid
+			this.errorText.setText("");
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.eclipse.common.dialog.PropertyInputContext#getParent()
+		 * @see net.officefloor.eclipse.common.dialog.input.InputListener#notifyValueInvalid(java.lang.String)
 		 */
 		@Override
-		public Composite getParent() {
-			return this.parent;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.eclipse.common.dialog.PropertyInputContext#notifyValueChanged(java.lang.String)
-		 */
-		@Override
-		public void notifyValueChanged(String value) {
-			try {
-				// Obtain the property String value
-				String stringValue = this.inputBuilder.getValue(
-						this.state.inputControl, this);
-
-				// Attempt to transform the value
-				this.value = this.translator.translate(stringValue);
-
-				// Value is valid
-				this.state.flagValid();
-
-			} catch (InvalidPropertyValueException ex) {
-				// Value is invalid
-				this.state.flagInvalid(ex.getMessage());
-			} catch (NumberFormatException ex) {
-				// Invalid number
-				this.state.flagInvalid("Invalid number");
-			}
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.eclipse.common.dialog.PropertyInputContext#getAttribute(java.lang.String)
-		 */
-		@Override
-		public Object getAttribute(String name) {
-			return this.attributes.get(name);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.eclipse.common.dialog.PropertyInputContext#setAttribute(java.lang.String,
-		 *      java.lang.Object)
-		 */
-		@Override
-		public void setAttribute(String name, Object value) {
-			this.attributes.put(name, value);
+		public void notifyValueInvalid(String message) {
+			// Indicate error
+			this.errorText.setText(message);
 		}
 	}
 
 	/**
-	 * Maintains state of the property.
+	 * Default {@link Input} implementation.
 	 */
-	private class PropertyState<C extends Control> {
+	private class DefaultPropertyInput implements Input<Text> {
 
-		/**
-		 * Defaultly valid.
-		 */
-		public boolean isValid = true;
-
-		/**
-		 * Input {@link Control}.
-		 */
-		public final C inputControl;
-
-		/**
-		 * {@link Label} to report errors.
-		 */
-		private final Label errorText;
-
-		/**
-		 * Initiate.
+		/*
+		 * (non-Javadoc)
 		 * 
-		 * @param inputControl
-		 *            Input {@link Control}.
-		 * @param errorText
-		 *            {@link Label} to report errors.
+		 * @see net.officefloor.eclipse.common.dialog.PropertyInput#buildControl(net.officefloor.eclipse.common.dialog.PropertyInputContext)
 		 */
-		public PropertyState(C inputControl, Label errorText) {
-			this.inputControl = inputControl;
-			this.errorText = errorText;
-		}
+		@Override
+		public Text buildControl(final InputContext context) {
 
-		/**
-		 * Specifies the property is valid.
-		 */
-		public void flagValid() {
-			this.isValid = true;
-			this.errorText.setText("");
-		}
-
-		/**
-		 * Specifies an error for the property.
-		 * 
-		 * @param message
-		 *            Error message.
-		 */
-		public void flagInvalid(String message) {
-			this.isValid = false;
-			this.errorText.setText(message);
-		}
-	}
-}
-
-/**
- * Default {@link net.officefloor.eclipse.common.dialog.PropertyInput}
- * implementation.
- */
-class DefaultPropertyInput implements PropertyInput<Text> {
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.dialog.PropertyInput#buildControl(net.officefloor.eclipse.common.dialog.PropertyInputContext)
-	 */
-	@Override
-	public Text buildControl(final PropertyInputContext context) {
-
-		// Obtain initial value as string
-		Object initialValue = context.getInitialValue();
-		String value = "";
-		if (initialValue != null) {
-			value = initialValue.toString();
-		}
-
-		// Defaultly text input
-		Composite parent = context.getParent();
-		final Text text = new Text(parent, SWT.SINGLE | SWT.BORDER);
-		text.setText(value);
-		text.addVerifyListener(new VerifyListener() {
-			@Override
-			public void verifyText(VerifyEvent e) {
-				// Obtain the value
-				String value;
-				String current = text.getText();
-				if ((e.character == SWT.DEL) || (e.character == '\b')) {
-					if (current.length() == 0) {
-						value = "";
-					} else {
-						// Delete the last character
-						value = current.substring(0, (current.length() - 1));
-					}
-				} else {
-					value = current + e.text;
-				}
-
-				// Provide value to context for validation
-				context.notifyValueChanged(value);
+			// Obtain initial value as string
+			Object initialValue = context.getInitialValue();
+			String value = "";
+			if (initialValue != null) {
+				value = initialValue.toString();
 			}
-		});
-		return text;
+
+			// Defaultly text input
+			Composite parent = context.getParent();
+			final Text text = new Text(parent, SWT.SINGLE | SWT.BORDER);
+			text.setText(value);
+			text.addVerifyListener(new VerifyListener() {
+				@Override
+				public void verifyText(VerifyEvent e) {
+					// Obtain the value
+					String value;
+					String current = text.getText();
+					if ((e.character == SWT.DEL) || (e.character == '\b')) {
+						if (current.length() == 0) {
+							value = "";
+						} else {
+							// Delete the last character
+							value = current
+									.substring(0, (current.length() - 1));
+						}
+					} else {
+						value = current + e.text;
+					}
+
+					// Provide value to context for validation
+					context.notifyValueChanged(value);
+				}
+			});
+			return text;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.eclipse.common.dialog.PropertyInput#getValue(org.eclipse.swt.widgets.Control,
+		 *      net.officefloor.eclipse.common.dialog.PropertyInputContext)
+		 */
+		@Override
+		public String getValue(Text control, InputContext context) {
+			// Return the value
+			return control.getText();
+		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.dialog.PropertyInput#getValue(org.eclipse.swt.widgets.Control,
-	 *      net.officefloor.eclipse.common.dialog.PropertyInputContext)
-	 */
-	@Override
-	public String getValue(Text control, PropertyInputContext context) {
-		// Return the value
-		return control.getText();
-	}
 }
