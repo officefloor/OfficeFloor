@@ -38,18 +38,30 @@
 			<artifactId>officecompiler</artifactId>
 			<version>${office_version}</version>
 		</dependency>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officetool_filingcabinet</artifactId>
-            <version>${office_version}</version>
-        </dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officetool_filingcabinet</artifactId>
+			<version>${office_version}</version>
+		</dependency>
 
-		<!-- Eclipse Dependencies -->
+		<!-- Eclipse CORE -->
 		<dependency>
 			<groupId>org.eclipse.core</groupId>
 			<artifactId>org.eclipse.core.runtime</artifactId>
 			<version>${eclipse_version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse.core</groupId>
+			<artifactId>org.eclipse.core.resources</artifactId>
+			<version>${eclipse_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.core</groupId>
+			<artifactId>org.eclipse.core.expressions</artifactId>
+			<version>${eclipse_version}</version>
+		</dependency>
+
+		<!-- Eclipse UI -->
 		<dependency>
 			<groupId>org.eclipse.ui</groupId>
 			<artifactId>org.eclipse.ui</artifactId>
@@ -58,11 +70,6 @@
 		<dependency>
 			<groupId>org.eclipse.ui</groupId>
 			<artifactId>org.eclipse.ui.workbench</artifactId>
-			<version>${eclipse_version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.core</groupId>
-			<artifactId>org.eclipse.core.resources</artifactId>
 			<version>${eclipse_version}</version>
 		</dependency>
 		<dependency>
@@ -75,11 +82,15 @@
 			<artifactId>org.eclipse.ui.ide</artifactId>
 			<version>${eclipse_version}</version>
 		</dependency>
+
+		<!-- Eclipse GEF -->
 		<dependency>
 			<groupId>org.eclipse.gef</groupId>
 			<artifactId>org.eclipse.gef</artifactId>
 			<version>${eclipse_version}</version>
 		</dependency>
+
+		<!-- Eclipse JDT -->
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>org.eclipse.jdt.core</artifactId>
@@ -90,11 +101,20 @@
 			<artifactId>org.eclipse.jdt.launching</artifactId>
 			<version>${eclipse_version}</version>
 		</dependency>
+        <dependency>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>org.eclipse.jdt.debug.ui</artifactId>
+            <version>${eclipse_version}</version>
+        </dependency>
+
+		<!-- Eclipse DEBUG -->
 		<dependency>
-			<groupId>org.eclipse.core</groupId>
-			<artifactId>org.eclipse.core.expressions</artifactId>
+			<groupId>org.eclipse.debug</groupId>
+			<artifactId>org.eclipse.debug.ui</artifactId>
 			<version>${eclipse_version}</version>
 		</dependency>
+
+		<!-- Eclipse SWT -->
 		<dependency>
 			<groupId>org.eclipse.swt</groupId>
 			<artifactId>org.eclipse.swt</artifactId>
@@ -107,6 +127,8 @@
 			</artifactId>
 			<version>${eclipse_version}</version>
 		</dependency>
+
+		<!-- Eclipse DRAW2D -->
 		<dependency>
 			<groupId>org.eclipse.draw2d</groupId>
 			<artifactId>org.eclipse.draw2d</artifactId>
