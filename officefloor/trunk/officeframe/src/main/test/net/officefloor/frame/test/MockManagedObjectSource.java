@@ -79,7 +79,7 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 		// Create the Managed Object Source State
 		ManagedObjectSourceState state = new ManagedObjectSourceState();
 		state.managedObject = managedObject;
-		state.managedObjectSourceMetaData = (ManagedObjectSourceMetaData<None, None>) sourceMetaData;
+		state.managedObjectSourceMetaData = sourceMetaData;
 
 		// Bind the managed object in registry
 		REGISTRY.put(name, state);
@@ -134,6 +134,7 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
 	 */
+	@SuppressWarnings("unchecked")
 	public ManagedObjectSourceMetaData<None, None> getMetaData() {
 		return this.managedObjectSourceState.managedObjectSourceMetaData;
 	}
@@ -157,22 +158,23 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 		user.setManagedObject(this.managedObjectSourceState.managedObject);
 	}
 
-}
-
-/**
- * State of the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
- */
-class ManagedObjectSourceState {
-
 	/**
-	 * {@link ManagedObject}.
+	 * State of the
+	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
 	 */
-	ManagedObject managedObject;
+	private static class ManagedObjectSourceState {
 
-	/**
-	 * {@link ManagedObject}.
-	 */
-	ManagedObjectSourceMetaData<None, None> managedObjectSourceMetaData;
+		/**
+		 * {@link ManagedObject}.
+		 */
+		public ManagedObject managedObject;
+
+		/**
+		 * {@link ManagedObject}.
+		 */
+		@SuppressWarnings("unchecked")
+		public ManagedObjectSourceMetaData managedObjectSourceMetaData;
+
+	}
 
 }

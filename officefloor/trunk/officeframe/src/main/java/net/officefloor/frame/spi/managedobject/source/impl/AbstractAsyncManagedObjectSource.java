@@ -39,15 +39,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
  * 
  * @author Daniel
  */
-public abstract class AbstractAsyncManagedObjectSource
-		implements
-		ManagedObjectSource<AbstractAsyncManagedObjectSource.DummyKey, AbstractAsyncManagedObjectSource.DummyKey> {
-
-	/**
-	 * Dummy keys for the dependency and {@link Handler} instances.
-	 */
-	private static enum DummyKey {
-	}
+@SuppressWarnings("unchecked")
+public abstract class AbstractAsyncManagedObjectSource implements
+		ManagedObjectSource {
 
 	/*
 	 * ================================================================
@@ -181,7 +175,7 @@ public abstract class AbstractAsyncManagedObjectSource
 	/**
 	 * {@link ManagedObjectSourceMetaData}.
 	 */
-	private MetaData<?, ?> metaData = null;
+	private MetaData metaData = null;
 
 	/*
 	 * (non-Javadoc)
@@ -189,7 +183,6 @@ public abstract class AbstractAsyncManagedObjectSource
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
 	public void init(ManagedObjectSourceContext context) throws Exception {
 
 		// Create the meta-data
@@ -306,7 +299,6 @@ public abstract class AbstractAsyncManagedObjectSource
 		 * @param type
 		 *            Type mapped to the handler.
 		 */
-		@SuppressWarnings("unchecked")
 		void mapHandlerType(H key, Class<? extends Handler> type);
 	}
 
@@ -351,7 +343,6 @@ public abstract class AbstractAsyncManagedObjectSource
 		/**
 		 * Handler for each handler key.
 		 */
-		@SuppressWarnings("unchecked")
 		private Map<H, Class<? extends Handler>> handlerTypes = null;
 
 		/**
@@ -412,7 +403,6 @@ public abstract class AbstractAsyncManagedObjectSource
 		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#getDependencyLoader(java.lang.Class)
 		 */
 		@Override
-		@SuppressWarnings("unchecked")
 		public <T extends Enum<T>> DependencyLoader<T> getDependencyLoader(
 				Class<T> keys) {
 
@@ -430,7 +420,6 @@ public abstract class AbstractAsyncManagedObjectSource
 		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#getHandlerLoader(java.lang.Class)
 		 */
 		@Override
-		@SuppressWarnings("unchecked")
 		public <T extends Enum<T>> HandlerLoader<T> getHandlerLoader(
 				Class<T> keys) {
 
@@ -488,7 +477,6 @@ public abstract class AbstractAsyncManagedObjectSource
 		 *      java.lang.Class)
 		 */
 		@Override
-		@SuppressWarnings("unchecked")
 		public void mapHandlerType(H key, Class<? extends Handler> type) {
 			this.handlerTypes.put(key, type);
 		}
@@ -556,7 +544,6 @@ public abstract class AbstractAsyncManagedObjectSource
 		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(java.lang.Enum)
 		 */
 		@Override
-		@SuppressWarnings("unchecked")
 		public Class<? extends Handler> getHandlerType(H key) {
 			return this.handlerTypes.get(key);
 		}
@@ -580,9 +567,8 @@ public abstract class AbstractAsyncManagedObjectSource
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public ManagedObjectSourceMetaData<DummyKey, DummyKey> getMetaData() {
-		return (ManagedObjectSourceMetaData<DummyKey, DummyKey>) this.metaData;
+	public ManagedObjectSourceMetaData getMetaData() {
+		return this.metaData;
 	}
 
 	/*
@@ -591,12 +577,11 @@ public abstract class AbstractAsyncManagedObjectSource
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
 	@Override
-	public void start(final ManagedObjectExecuteContext<DummyKey> context)
+	public void start(final ManagedObjectExecuteContext context)
 			throws Exception {
 		// Invoke start
 		this.start(new StartContext() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public <H extends Enum<H>> ManagedObjectExecuteContext<H> getContext(
 					Class<H> handlerKeys) {
 
