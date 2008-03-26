@@ -22,7 +22,10 @@ import java.util.List;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathResourceSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
+import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
+import net.officefloor.eclipse.common.dialog.input.filter.FileExtensionInputFilter;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
@@ -41,6 +44,7 @@ import net.officefloor.model.room.RoomModel.RoomEvent;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.room.RoomLoader;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.draw2d.geometry.Point;
 
 /**
@@ -91,17 +95,22 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 				SubRoomAddBean bean = new SubRoomAddBean();
 				BeanDialog dialog = RoomEditPart.this.createBeanDialog(bean);
 				dialog.registerPropertyInput("File",
-						new ClasspathResourceSelectionInput(
-								RoomEditPart.this.getEditor(), "desk", "room"));
+						new ClasspathSelectionInput(RoomEditPart.this
+								.getEditor(), new ClasspathFilter(IFile.class,
+								new FileExtensionInputFilter("desk", "room"))));
 				if (dialog.populate()) {
 					try {
+						// Obtain the class path location
+						String classPathLocation = ClasspathUtil
+								.getClassPathLocation(bean.file);
+
 						// Obtain the configuration item
 						ConfigurationItem configItem = ProjectClassLoader
 								.findConfigurationItem(RoomEditPart.this
-										.getEditor(), bean.file);
+										.getEditor(), classPathLocation);
 						if (configItem == null) {
 							RoomEditPart.this.messageError("Can not find '"
-									+ bean.file + "' on class path");
+									+ classPathLocation + "' on class path");
 							return;
 						}
 

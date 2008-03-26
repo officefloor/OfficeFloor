@@ -57,7 +57,7 @@
          <action
                label="Filing Cabinet"
                icon="icons/officefloor.gif"
-               class="net.officefloor.eclipse.windowaction.FilingCabinetAction"
+               class="net.officefloor.eclipse.tool.filingcabinet.FilingCabinetAction"
                menubarPath="officefloorMenu/officefloorGroup"
                toolbarPath="officefloorGroup"
                id="net.officefloor.eclipse.actions.FilingCabinetAction">

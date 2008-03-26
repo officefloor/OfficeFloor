@@ -22,7 +22,10 @@ import java.util.List;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathResourceSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
+import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
+import net.officefloor.eclipse.common.dialog.input.filter.FileExtensionInputFilter;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
@@ -43,6 +46,7 @@ import net.officefloor.office.RoomToOfficeRoomSynchroniser;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.room.RoomLoader;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.draw2d.geometry.Point;
 
 /**
@@ -159,11 +163,16 @@ public class OfficeEditPart extends
 				OfficeRoomModel room = new OfficeRoomModel();
 				BeanDialog dialog = OfficeEditPart.this.createBeanDialog(room,
 						"Name", "X", "Y");
-				dialog.registerPropertyInput("Id",
-						new ClasspathResourceSelectionInput(
-								OfficeEditPart.this.getEditor(), "room"));
+				dialog.registerPropertyInput("Id", new ClasspathSelectionInput(
+						OfficeEditPart.this.getEditor(), new ClasspathFilter(
+								IFile.class, new FileExtensionInputFilter(
+										"room"))));
 				if (dialog.populate()) {
 					try {
+						// Obtain the class path location
+						String classPathLocation = ClasspathUtil
+								.getClassPathLocation(room.getId());
+
 						// Obtain the room configuration
 						ProjectClassLoader classLoader = ProjectClassLoader
 								.create(OfficeEditPart.this.getEditor());
@@ -172,7 +181,7 @@ public class OfficeEditPart extends
 						if (roomConfigItem == null) {
 							OfficeEditPart.this
 									.messageError("Could not find Office Room at '"
-											+ room.getId() + "'");
+											+ classPathLocation + "'");
 							return;
 						}
 

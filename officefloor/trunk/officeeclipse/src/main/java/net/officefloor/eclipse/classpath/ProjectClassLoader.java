@@ -41,6 +41,12 @@ import org.eclipse.ui.IEditorPart;
 public class ProjectClassLoader extends URLClassLoader {
 
 	/**
+	 * Default {@link ClassLoader}.
+	 */
+	public static final ClassLoader DEFAULT_CLASS_LOADER = OfficeFloorPlugin.class
+			.getClassLoader();
+
+	/**
 	 * {@link ConfigurationContext}.
 	 */
 	private final ConfigurationContext configurationContext;
@@ -98,12 +104,28 @@ public class ProjectClassLoader extends URLClassLoader {
 	 */
 	public static ProjectClassLoader create(IProject project)
 			throws OfficeFloorPluginFailure {
+		return create(project, null);
+	}
+
+	/**
+	 * Initiates from the {@link IProject} with the parent {@link ClassLoader}.
+	 * 
+	 * @param project
+	 *            {@link IProject}.
+	 * @param parentClassLoader
+	 *            Parent {@link ClassLoader}.
+	 * @return {@link ProjectClassLoader}.
+	 * @throws OfficeFloorPluginFailure
+	 *             If fails to create {@link ProjectClassLoader}.
+	 */
+	public static ProjectClassLoader create(IProject project,
+			ClassLoader parentClassLoader) throws OfficeFloorPluginFailure {
 
 		// Obtain the configuration context
 		ConfigurationContext context = new ProjectConfigurationContext(project);
 
-		// Return the class loader
-		return create(context);
+		// Return created class loader
+		return create(context, parentClassLoader);
 	}
 
 	/**
@@ -111,14 +133,38 @@ public class ProjectClassLoader extends URLClassLoader {
 	 * 
 	 * @param context
 	 *            {@link ConfigurationContext}.
-	 * @return {@link OfficeFloorClassLoader} for the input
-	 *         {@link ConfigurationContext}.
+	 * @return {@link ProjectClassLoader}.
 	 * @throws OfficeFloorPluginFailure
 	 *             If fails to create {@link ProjectClassLoader}.
 	 */
 	public static ProjectClassLoader create(ConfigurationContext context)
 			throws OfficeFloorPluginFailure {
-		return create(context.getId(), context.getClasspath());
+		return create(context, null);
+	}
+
+	/**
+	 * Initiates from the {@link ConfigurationContext} using the parent
+	 * {@link ClassLoader}.
+	 * 
+	 * @param context
+	 *            {@link ConfigurationContext}.
+	 * @param parentClassLoader
+	 *            Parent {@link ClassLoader}.
+	 * @return {@link ProjectClassLoader}.
+	 * @throws OfficeFloorPluginFailure
+	 *             If fails to create {@link ProjectClassLoader}.
+	 */
+	public static ProjectClassLoader create(ConfigurationContext context,
+			ClassLoader parentClassLoader) throws OfficeFloorPluginFailure {
+
+		// Default parent class loader from office floor plugin
+		if (parentClassLoader == null) {
+			parentClassLoader = DEFAULT_CLASS_LOADER;
+		}
+
+		// Return the class loader
+		return create(context.getId(), context.getClasspath(),
+				parentClassLoader);
 	}
 
 	/**
@@ -128,16 +174,14 @@ public class ProjectClassLoader extends URLClassLoader {
 	 *            Id of the {@link ProjectClassLoader}.
 	 * @param classpath
 	 *            Class path.
+	 * @param parentClassLoader
+	 *            Parent {@link ClassLoader}.
 	 * @return {@link ProjectClassLoader}.
 	 * @throws OfficeFloorPluginFailure
 	 *             If fails to create {@link ProjectClassLoader}.
 	 */
-	public static ProjectClassLoader create(String id, String[] classpath)
-			throws OfficeFloorPluginFailure {
-
-		// Parent class loader is from office floor plugin
-		ClassLoader parentClassLoader = OfficeFloorPlugin.class
-				.getClassLoader();
+	public static ProjectClassLoader create(String id, String[] classpath,
+			ClassLoader parentClassLoader) throws OfficeFloorPluginFailure {
 
 		// Create the list of URLs
 		List<URL> urls = new ArrayList<URL>();
@@ -223,9 +267,9 @@ public class ProjectClassLoader extends URLClassLoader {
 	protected static URL createUrl(String path) throws OfficeFloorPluginFailure {
 		try {
 			if (path.endsWith(".jar") || (path.endsWith(".zip"))) {
-				return new URL("file", "localhost", path);
+				return new URL("file", null, path);
 			} else {
-				return new URL("file", "localhost", path + "/");
+				return new URL("file", null, path + "/");
 			}
 		} catch (MalformedURLException ex) {
 			// Propagate
