@@ -14,11 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.windowaction;
+package net.officefloor.eclipse.tool.filingcabinet;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import net.officefloor.eclipse.bootstrap.Bootstrap;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
+import net.officefloor.eclipse.common.dialog.input.filter.AlwaysIncludeInputFilter;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.plugin.filingcabinet.FilingCabinetGenerator;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -60,9 +77,74 @@ public class FilingCabinetAction implements IWorkbenchWindowActionDelegate {
 	 */
 	@Override
 	public void run(IAction action) {
-		MessageDialog.openInformation(this.window.getShell(), "Office Floor",
-				"TODO do Filing Cabinet generation");
+		try {
+			// Populate the bean to generate the file
+			FilingCabinetBean bean = new FilingCabinetBean();
 
+			// TODO remove
+			bean.setDatabasePassword("TODO remove");
+			bean.setDatabaseDriver("com.mysql.jdbc.Driver");
+			bean.setDatabaseUrl("jdbc:mysql://localhost/officefloor");
+			bean.setDatabaseUserName("root");
+
+			BeanDialog dialog = new BeanDialog(this.window.getShell(), bean);
+			dialog.registerPropertyInput("Location",
+					new ClasspathSelectionInput(new ClasspathFilter(
+							IPackageFragment.class,
+							new AlwaysIncludeInputFilter())));
+			if (!dialog.populate()) {
+				// Cancelled
+				return;
+			}
+
+			// Obtain the package fragment
+			IResource resource = ResourcesPlugin.getWorkspace().getRoot()
+					.findMember(new Path(bean.getLocation()));
+			IJavaElement javaElement = JavaCore.create(resource);
+			IPackageFragment fragment = (IPackageFragment) javaElement;
+
+			// Obtain the package name
+			String packageName = fragment.getElementName();
+
+			// Obtain the package fragment root
+			IPackageFragmentRoot fragmentRoot = null;
+			do {
+				// Specify if fragment root
+				if (javaElement instanceof IPackageFragmentRoot) {
+					fragmentRoot = (IPackageFragmentRoot) javaElement;
+				}
+
+				// Search upwards
+				javaElement = javaElement.getParent();
+
+			} while (fragmentRoot == null);
+
+			// Obtain the directory for the package fragment root
+			File rootDir = fragmentRoot.getResource().getRawLocation().toFile();
+
+			// Obtain the class loader for the particular project
+			IProject project = fragmentRoot.getJavaProject().getProject();
+			ClassLoader classLoader = ProjectClassLoader.create(project);
+
+			// Create the arguments
+			Map<String, String> arguments = new HashMap<String, String>();
+			arguments.put("driver", bean.getDatabaseDriver());
+			arguments.put("url", bean.getDatabaseUrl());
+			arguments.put("username", bean.getDatabaseUserName());
+			arguments.put("password", bean.getDatabasePassword());
+			arguments.put("location", rootDir.getAbsolutePath());
+			arguments.put("package", packageName);
+
+			// Bootstrap the filing cabinet
+			Bootstrap.bootstrap(FilingCabinetBootable.class.getName(),
+					arguments, classLoader);
+
+		} catch (Throwable ex) {
+			// Indicate error
+			MessageDialog.openError(this.window.getShell(), "Filing Cabinet",
+					ex.getMessage() + " [" + ex.getClass().getSimpleName()
+							+ "]");
+		}
 	}
 
 	/*
@@ -96,11 +178,6 @@ public class FilingCabinetAction implements IWorkbenchWindowActionDelegate {
 		// Package fragment selected
 		this.packageFragment = (IPackageFragment) selectedItem;
 		this.changeSelection(action, this.packageFragment);
-
-		// TODO remove
-		MessageDialog.openInformation(this.window.getShell(), "Office Floor",
-				"IPackageFragment selected");
-
 	}
 
 	/**
