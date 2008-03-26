@@ -25,7 +25,10 @@ import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.ManagedObjectSourceCreateDialog;
 import net.officefloor.eclipse.common.dialog.TeamCreateDialog;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathResourceSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
+import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
+import net.officefloor.eclipse.common.dialog.input.filter.FileExtensionInputFilter;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
@@ -44,6 +47,7 @@ import net.officefloor.model.officefloor.OfficeFloorModel.OfficeFloorEvent;
 import net.officefloor.officefloor.OfficeFloorLoader;
 import net.officefloor.repository.ConfigurationItem;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.geometry.Point;
 
@@ -90,22 +94,25 @@ public class OfficeFloorEditPart extends
 				OfficeFloorOfficeModel officeBean = new OfficeFloorOfficeModel();
 				BeanDialog dialog = OfficeFloorEditPart.this.createBeanDialog(
 						officeBean, "X", "Y");
-				dialog
-						.registerPropertyInput("Id",
-								new ClasspathResourceSelectionInput(
-										OfficeFloorEditPart.this.getEditor(),
-										"office"));
+				dialog.registerPropertyInput("Id", new ClasspathSelectionInput(
+						OfficeFloorEditPart.this.getEditor(), new ClasspathFilter(
+								IFile.class, new FileExtensionInputFilter(
+										"office"))));
 				if (dialog.populate()) {
 					try {
+						// Obtain the class path location
+						String classPathLocation = ClasspathUtil
+								.getClassPathLocation(officeBean.getId());
+						
 						// Obtain the office configuration
 						ProjectClassLoader classLoader = ProjectClassLoader
 								.create(OfficeFloorEditPart.this.getEditor());
 						ConfigurationItem officeConfigItem = classLoader
-								.findConfigurationItem(officeBean.getId());
+								.findConfigurationItem(classPathLocation);
 						if (officeConfigItem == null) {
 							OfficeFloorEditPart.this
 									.messageError("Could not find Office at '"
-											+ officeBean.getId() + "'");
+											+ classPathLocation + "'");
 							return;
 						}
 

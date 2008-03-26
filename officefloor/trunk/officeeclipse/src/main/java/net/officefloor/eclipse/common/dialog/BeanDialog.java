@@ -96,8 +96,8 @@ public class BeanDialog extends Dialog {
 	 * @param bean
 	 *            Bean to be populated.
 	 * @param classLoader
-	 *            {@link java.lang.ClassLoader} to use to validate specified
-	 *            classes are available.
+	 *            {@link ClassLoader} to use to validate specified classes are
+	 *            available.
 	 * @param ignoreProperties
 	 *            Properties to not populate.
 	 */
@@ -107,6 +107,21 @@ public class BeanDialog extends Dialog {
 		this.bean = bean;
 		this.ignoreProperties = ignoreProperties;
 		this.valueTranslatorRegistry = new ValueTranslatorRegistry(classLoader);
+	}
+
+	/**
+	 * Initiate without the ability to load {@link Class} instances.
+	 * 
+	 * @param parentShell
+	 *            Parent shell.
+	 * @param bean
+	 *            Bean to be populated.
+	 * @param ignoreProperties
+	 *            Properties to not populate.
+	 */
+	public BeanDialog(Shell parentShell, Object bean,
+			String... ignoreProperties) {
+		this(parentShell, bean, null, ignoreProperties);
 	}
 
 	/**
@@ -188,6 +203,9 @@ public class BeanDialog extends Dialog {
 		for (String ignoreProperty : this.ignoreProperties) {
 			properties.remove(ignoreProperty);
 		}
+
+		// Specify the title of the dialog
+		parent.getShell().setText(this.bean.getClass().getSimpleName());
 
 		// Create the composite
 		Composite composite = (Composite) super.createDialogArea(parent);

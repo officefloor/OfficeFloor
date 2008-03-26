@@ -102,16 +102,31 @@ public class ValueTranslatorRegistry {
 		this.translators.putAll(staticTranslators);
 
 		// Add instance specific translators
-		this.translators.put(Class.class, new AbstractValueTranslator() {
-			public Object translateNotNull(String value)
-					throws InvalidValueException {
-				try {
-					return classLoader.loadClass(value);
-				} catch (ClassNotFoundException ex) {
-					throw new InvalidValueException("Can not find class");
+		if (classLoader == null) {
+			// Disallow class creation
+			this.translators.put(Class.class, new ValueTranslator() {
+				@Override
+				public Object translate(Object inputValue)
+						throws InvalidValueException {
+					throw new UnsupportedOperationException(
+							"Unable to create classes as no ClassLoader provided to "
+									+ ValueTranslatorRegistry.class
+											.getSimpleName());
 				}
-			}
-		});
+			});
+		} else {
+			// Allow class creation
+			this.translators.put(Class.class, new AbstractValueTranslator() {
+				public Object translateNotNull(String value)
+						throws InvalidValueException {
+					try {
+						return classLoader.loadClass(value);
+					} catch (ClassNotFoundException ex) {
+						throw new InvalidValueException("Can not find class");
+					}
+				}
+			});
+		}
 	}
 
 	/**

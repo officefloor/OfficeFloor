@@ -72,9 +72,12 @@ public class PropertyInputHandler {
 			ValueTranslator translator) {
 		this.bean = bean;
 
-		// Obtain the set and get method names
+		// Transform property name to use as method name
 		String methodSuffix = propertyName.substring(0, 1).toUpperCase()
 				+ propertyName.substring(1);
+		methodSuffix = methodSuffix.replace(" ", "");
+
+		// Obtain the set and get method names
 		String setMethodName = "set" + methodSuffix;
 		String getMethodName = "get" + methodSuffix;
 
@@ -204,7 +207,8 @@ public class PropertyInputHandler {
 	/**
 	 * Populates the value on the property of the bean.
 	 * 
-	 * @return <code>true</code> if non-null value populated.
+	 * @return <code>true</code> if non-null value populated (or if
+	 *         {@link String} that is not empty).
 	 * @throws InvalidValueException
 	 *             If invalid value or failure populating the property value.
 	 */
@@ -225,6 +229,14 @@ public class PropertyInputHandler {
 			// Indicate failure to specify value
 			throw new InvalidValueException(ex.getMessage() + " ["
 					+ ex.getClass().getSimpleName() + "]");
+		}
+
+		// Check for empty string
+		if (value instanceof String) {
+			String text = (String) value;
+			if (text.trim().length() == 0) {
+				return false;
+			}
 		}
 
 		// Return whether a value was populated
