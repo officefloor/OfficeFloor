@@ -80,13 +80,6 @@ public class FilingCabinetAction implements IWorkbenchWindowActionDelegate {
 		try {
 			// Populate the bean to generate the file
 			FilingCabinetBean bean = new FilingCabinetBean();
-
-			// TODO remove
-			bean.setDatabasePassword("TODO remove");
-			bean.setDatabaseDriver("com.mysql.jdbc.Driver");
-			bean.setDatabaseUrl("jdbc:mysql://localhost/officefloor");
-			bean.setDatabaseUserName("root");
-
 			BeanDialog dialog = new BeanDialog(this.window.getShell(), bean);
 			dialog.registerPropertyInput("Location",
 					new ClasspathSelectionInput(new ClasspathFilter(
@@ -138,6 +131,9 @@ public class FilingCabinetAction implements IWorkbenchWindowActionDelegate {
 			// Bootstrap the filing cabinet
 			Bootstrap.bootstrap(FilingCabinetBootable.class.getName(),
 					arguments, classLoader);
+
+			// Refresh the project (make generated files visible)
+			project.refreshLocal(IResource.DEPTH_INFINITE, null);
 
 		} catch (Throwable ex) {
 			// Indicate error
