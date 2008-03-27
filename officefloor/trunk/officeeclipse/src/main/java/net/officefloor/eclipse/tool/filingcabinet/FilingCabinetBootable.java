@@ -16,6 +16,9 @@
  */
 package net.officefloor.eclipse.tool.filingcabinet;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Map;
@@ -23,6 +26,10 @@ import java.util.Map;
 import net.officefloor.eclipse.bootstrap.Bootable;
 import net.officefloor.plugin.filingcabinet.CommonDatabaseAwareness;
 import net.officefloor.plugin.filingcabinet.FilingCabinetGenerator;
+import net.officefloor.plugin.filingcabinet.TableGenerator;
+import net.officefloor.plugin.filingcabinet.TableMetaData;
+import net.officefloor.repository.ConfigurationContext;
+import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
 
 /**
  * Main for the {@link FilingCabinetGenerator}.
@@ -45,6 +52,18 @@ public class FilingCabinetBootable implements Bootable {
 		String password = arguments.get("password");
 		String packageName = arguments.get("package");
 
+		// Ensure have the location
+		File location = new File(arguments.get("location"));
+		if (!location.isDirectory()) {
+			throw new FileNotFoundException("Can not find directory "
+					+ location);
+		}
+
+		// Ensure the directory is writable
+		if (!location.canWrite()) {
+			throw new IOException("Can not write to directory " + location);
+		}
+
 		// Load the database driver
 		this.getClass().getClassLoader().loadClass(driverClassName)
 				.newInstance();
@@ -53,11 +72,17 @@ public class FilingCabinetBootable implements Bootable {
 		Connection connection = DriverManager.getConnection(url, userName,
 				password);
 
+		// Create the configuration context to write the files
+		ConfigurationContext configurationContext = new FileSystemConfigurationContext(
+				location);
+
 		// Generate the filing cabinet files
 		FilingCabinetGenerator filingCabinetGenerator = new FilingCabinetGenerator(
 				packageName);
 		filingCabinetGenerator.loadMetaData(connection.getMetaData(),
 				new CommonDatabaseAwareness());
+		for (TableMetaData table : filingCabinetGenerator.getTableMetaData()) {
+			new TableGenerator(table).generate(configurationContext);
+		}
 	}
-
 }
