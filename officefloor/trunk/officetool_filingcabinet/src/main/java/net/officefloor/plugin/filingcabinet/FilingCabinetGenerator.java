@@ -185,48 +185,64 @@ public class FilingCabinetGenerator {
 		Map<String, Map<Integer, String>> unorderedPrimaryColumns = new HashMap<String, Map<Integer, String>>();
 		Map<String, TableMetaData> foreignTables = new HashMap<String, TableMetaData>();
 		Map<String, Map<Integer, String>> unorderedForeignColumns = new HashMap<String, Map<Integer, String>>();
-		ResultSet crossReferenceResultSet = databaseMetaData.getCrossReference(
-				null, null, null, null, null, null);
-		while (crossReferenceResultSet.next()) {
 
-			// Obtain details of cross reference
-			String foreignKeyName = crossReferenceResultSet
-					.getString("FK_NAME");
-			String primaryCatalogName = crossReferenceResultSet
-					.getString("PKTABLE_CAT");
-			String primarySchemaName = crossReferenceResultSet
-					.getString("PKTABLE_SCHEM");
-			String primaryTableName = crossReferenceResultSet
-					.getString("PKTABLE_NAME");
-			String primaryColumnName = crossReferenceResultSet
-					.getString("PKCOLUMN_NAME");
-			String foreignCatalogName = crossReferenceResultSet
-					.getString("FKTABLE_CAT");
-			String foreignSchemaName = crossReferenceResultSet
-					.getString("FKTABLE_SCHEM");
-			String foreignTableName = crossReferenceResultSet
-					.getString("FKTABLE_NAME");
-			String foreignColumnName = crossReferenceResultSet
-					.getString("FKCOLUMN_NAME");
-			int keySeq = crossReferenceResultSet.getInt("KEY_SEQ");
+		// Load cross references for each table
+		for (TableMetaData table : this.tables.values()) {
 
-			// Add the foreign key name
-			foreignKeyNames.add(foreignKeyName);
+			try {
 
-			// Add the primary detail
-			this.addCrossReferenceEndPointDetails(foreignKeyName,
-					primaryCatalogName, primarySchemaName, primaryTableName,
-					primaryColumnName, keySeq, primaryTables,
-					unorderedPrimaryColumns);
+				// Load for current table
+				ResultSet crossReferenceResultSet = databaseMetaData
+						.getImportedKeys(table.getCatalogName(), table
+								.getSchemaName(), table.getTableName());
+				while (crossReferenceResultSet.next()) {
 
-			// Add the second detail
-			this.addCrossReferenceEndPointDetails(foreignKeyName,
-					foreignCatalogName, foreignSchemaName, foreignTableName,
-					foreignColumnName, keySeq, foreignTables,
-					unorderedForeignColumns);
+					// Obtain details of cross reference
+					String foreignKeyName = crossReferenceResultSet
+							.getString("FK_NAME");
+					String primaryCatalogName = crossReferenceResultSet
+							.getString("PKTABLE_CAT");
+					String primarySchemaName = crossReferenceResultSet
+							.getString("PKTABLE_SCHEM");
+					String primaryTableName = crossReferenceResultSet
+							.getString("PKTABLE_NAME");
+					String primaryColumnName = crossReferenceResultSet
+							.getString("PKCOLUMN_NAME");
+					String foreignCatalogName = crossReferenceResultSet
+							.getString("FKTABLE_CAT");
+					String foreignSchemaName = crossReferenceResultSet
+							.getString("FKTABLE_SCHEM");
+					String foreignTableName = crossReferenceResultSet
+							.getString("FKTABLE_NAME");
+					String foreignColumnName = crossReferenceResultSet
+							.getString("FKCOLUMN_NAME");
+					int keySeq = crossReferenceResultSet.getInt("KEY_SEQ");
 
+					// Add the foreign key name
+					foreignKeyNames.add(foreignKeyName);
+
+					// Add the primary detail
+					this.addCrossReferenceEndPointDetails(foreignKeyName,
+							primaryCatalogName, primarySchemaName,
+							primaryTableName, primaryColumnName, keySeq,
+							primaryTables, unorderedPrimaryColumns);
+
+					// Add the second detail
+					this.addCrossReferenceEndPointDetails(foreignKeyName,
+							foreignCatalogName, foreignSchemaName,
+							foreignTableName, foreignColumnName, keySeq,
+							foreignTables, unorderedForeignColumns);
+
+				}
+				crossReferenceResultSet.close();
+
+			} catch (Exception ex) {
+				System.err.println("CROSS REFERENCES FOR TABLE FAILED");
+				System.err.println("  " + table.getFullyQualifiedClassName()
+						+ " [" + table.getTableName() + "]");
+				ex.printStackTrace();
+			}
 		}
-		crossReferenceResultSet.close();
 
 		// Order the columns of the cross references
 		Map<String, List<String>> primaryColumns = this
