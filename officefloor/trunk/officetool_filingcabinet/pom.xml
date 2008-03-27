@@ -36,6 +36,11 @@
 			<artifactId>hsqldb</artifactId>
 			<version>1.8.0.7</version>
 		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.0.4</version>
+		</dependency>
 	</dependencies>
 </project>
 
