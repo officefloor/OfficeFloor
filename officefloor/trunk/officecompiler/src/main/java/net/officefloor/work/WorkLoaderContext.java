@@ -16,35 +16,62 @@
  */
 package net.officefloor.work;
 
+import java.util.Properties;
+
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.model.work.WorkModel;
 import net.officefloor.repository.ConfigurationContext;
 
 /**
- * Context for loading the {@link net.officefloor.model.work.WorkModel}.
+ * Context for loading a {@link WorkModel}.
  * 
  * @author Daniel
  */
 public interface WorkLoaderContext {
 
 	/**
-	 * Obtains the configuration string.
+	 * Obtains a required property value.
 	 * 
-	 * @return Configuration string.
+	 * @param name
+	 *            Name of the property.
+	 * @return Value of the property.
+	 * @throws WorkUnknownPropertyError
+	 *             If property was not configured. Let this propagate as the
+	 *             framework will handle it.
 	 */
-	String getConfiguration();
+	String getProperty(String name) throws WorkUnknownPropertyError;
+
+	/**
+	 * Obtains the property value or subsequently the default value.
+	 * 
+	 * @param name
+	 *            Name of the property.
+	 * @param defaultValue
+	 *            Default value if property not specified.
+	 * @return Value of the property or the the default value if not specified.
+	 */
+	String getProperty(String name, String defaultValue);
+
+	/**
+	 * Properties to configure the {@link Work}.
+	 * 
+	 * @return Properties specific for the {@link Work}.
+	 */
+	Properties getProperties();
 
 	/**
 	 * Obtains the {@link ConfigurationContext}.
 	 * 
 	 * @return {@link ConfigurationContext}.
 	 */
+	@Deprecated
 	ConfigurationContext getConfigurationContext();
 
 	/**
-	 * Obtains the {@link java.lang.ClassLoader} for loading the
-	 * {@link net.officefloor.model.work.WorkModel}.
+	 * Obtains the {@link ClassLoader} for loading the {@link WorkModel}.
 	 * 
-	 * @return {@link java.lang.ClassLoader} for loading the
-	 *         {@link net.officefloor.model.work.WorkModel}.
+	 * @return {@link ClassLoader} for loading the {@link WorkModel}.
 	 */
 	ClassLoader getClassLoader();
+
 }

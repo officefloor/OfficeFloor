@@ -47,10 +47,11 @@ public class WorkToDeskWorkSynchroniserTest extends OfficeFrameTestCase {
 								null, null) });
 
 		// Create the desk work
-		DeskWorkModel deskWork = new DeskWorkModel("work", "loader",
-				"configuration", null, null, new DeskTaskModel[] {
+		DeskWorkModel deskWork = new DeskWorkModel("work", "loader", null,
+				null, new DeskTaskModel[] {
 						new DeskTaskModel("taskTwo", null, null, null),
-						new DeskTaskModel("taskNotExist", null, null, null) });
+						new DeskTaskModel("taskNotExist", null, null, null) },
+				null);
 
 		// Synchronise the work
 		WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(work, deskWork);

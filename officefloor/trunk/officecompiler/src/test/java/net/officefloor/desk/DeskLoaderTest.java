@@ -40,6 +40,7 @@ import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
+import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.repository.ModelRepository;
 import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.work.clazz.ClassWorkLoader;
@@ -78,7 +79,7 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure loads the {@link net.officefloor.model.desk.DeskModel}.
+	 * Ensure loads the {@link DeskModel}.
 	 */
 	public void testLoadDesk() throws Exception {
 
@@ -117,14 +118,20 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 
 		// Validate work
-		assertList(new String[] { "getId", "getLoader", "getConfiguration" },
-				desk.getWorks(), new DeskWorkModel("work",
-						ClassWorkLoader.class.getName(), MockClass.class
-								.getName(), null, null, null));
+		assertList(new String[] { "getId", "getLoader" }, desk.getWorks(),
+				new DeskWorkModel("work", ClassWorkLoader.class.getName(),
+						null, null, null, null));
+
+		// Validate properties of work
+		DeskWorkModel work = desk.getWorks().get(0);
+		assertList(new String[] { "getName", "getValue" },
+				work.getProperties(), new PropertyModel(
+						ClassWorkLoader.CLASS_NAME_PROPERTY_NAME,
+						MockClass.class.getName()));
 
 		// Validate initial flow item
-		assertEquals("Incorrect initial flow item id", "1", desk.getWorks()
-				.get(0).getInitialFlowItem().getFlowItemId());
+		assertEquals("Incorrect initial flow item id", "1", work
+				.getInitialFlowItem().getFlowItemId());
 
 		// ----------------------------------------
 		// Validate the Tasks

@@ -18,7 +18,9 @@ package net.officefloor.work.clazz;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Properties;
 
+import net.officefloor.desk.WorkLoaderContextImpl;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
@@ -26,7 +28,6 @@ import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
 import net.officefloor.model.work.WorkModel;
-import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.work.WorkLoaderContext;
 
 /**
@@ -46,21 +47,12 @@ public class ClassWorkLoaderTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Create the work loader context
-		WorkLoaderContext context = new WorkLoaderContext() {
-
-			public String getConfiguration() {
-				return MockClass.class.getName();
-			}
-
-			public ConfigurationContext getConfigurationContext() {
-				return null;
-			}
-
-			public ClassLoader getClassLoader() {
-				return this.getClass().getClassLoader();
-			}
-		};
-
+		Properties properties = new Properties();
+		properties.setProperty(ClassWorkLoader.CLASS_NAME_PROPERTY_NAME,
+				MockClass.class.getName());
+		WorkLoaderContext context = new WorkLoaderContextImpl(properties, this
+				.getClass().getClassLoader());
+		
 		// Load the work
 		WorkModel<ClassWork> work = new ClassWorkLoader().loadWork(context);
 

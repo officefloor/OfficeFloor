@@ -1,16 +1,16 @@
 <desk>
-	<external-managed-objects></external-managed-objects>
-	<external-flows></external-flows>
 	<works>
 		<work id="work"
-			loader="net.officefloor.work.clazz.ClassWorkLoader"
-			configuration="net.officefloor.compile.MockWorkFunctionality">
+			loader="net.officefloor.work.clazz.ClassWorkLoader">
 			<initial-flow-item id="1" />
-			<task name="taskOne"></task>
+			<properties>
+				<property name="class.name"
+					value="net.officefloor.compile.MockWorkFunctionality" />
+			</properties>
+			<task name="taskOne" />
 		</work>
 	</works>
 	<flow-items>
-		<flow-item id="1" public="false" work="work" task="taskOne">
-		</flow-item>
+		<flow-item id="1" public="false" work="work" task="taskOne" />
 	</flow-items>
 </desk>

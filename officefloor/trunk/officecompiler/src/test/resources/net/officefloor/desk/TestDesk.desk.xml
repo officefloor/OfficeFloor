@@ -12,9 +12,12 @@
 	</external-escalations>
 	<works>
 		<work id="work"
-			loader="net.officefloor.work.clazz.ClassWorkLoader"
-			configuration="net.officefloor.mock.MockClass">
+			loader="net.officefloor.work.clazz.ClassWorkLoader">
 			<initial-flow-item id="1" />
+			<properties>
+				<property name="class.name"
+					value="net.officefloor.mock.MockClass" />
+			</properties>
 			<task name="taskMethod">
 				<task-object object-type="java.lang.String">
 					<external-managed-object name="mo" />

@@ -16,36 +16,21 @@
  */
 package net.officefloor.work;
 
-import net.officefloor.model.work.WorkModel;
+import net.officefloor.frame.api.execute.Work;
 
 /**
- * Loads the {@link WorkModel}.
+ * Provides the specification of the {@link Work} to be loaded by the particular
+ * {@link WorkLoader}.
  * 
  * @author Daniel
  */
-public interface WorkLoader {
+public interface WorkSpecification {
 
 	/**
-	 * <p>
-	 * Obtains the {@link WorkSpecification} for this {@link WorkLoader}.
-	 * <p>
-	 * This enables the {@link WorkLoaderContext} to be populated with the
-	 * necessary details as per this {@link WorkSpecification} in loading the
-	 * {@link WorkModel}.
+	 * Obtains the specification of the properties for the {@link Work}.
 	 * 
-	 * @return {@link WorkSpecification}.
+	 * @return Property specification.
 	 */
-	WorkSpecification getSpecification();
-
-	/**
-	 * Loads the {@link WorkModel} from configuration.
-	 * 
-	 * @param context
-	 *            {@link WorkLoaderContext} to source details to load the
-	 *            {@link WorkModel}.
-	 * @throws Exception
-	 *             If fails.
-	 */
-	WorkModel<?> loadWork(WorkLoaderContext context) throws Exception;
+	WorkProperty[] getProperties();
 
 }
