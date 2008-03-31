@@ -43,9 +43,16 @@
 			<attributes>
 				<attribute method="getId" attribute="id" />
 				<attribute method="getLoader" attribute="loader" />
-				<attribute method="getConfiguration"
-					attribute="configuration" />
 			</attributes>
+			<collection method="getProperties" element="properties">
+				<item type="net.officefloor.model.desk.PropertyModel"
+					element="property">
+					<attributes>
+						<attribute method="getName" attribute="name" />
+						<attribute method="getValue" attribute="value" />
+					</attributes>
+				</item>
+			</collection>
 			<object method="getInitialFlowItem"
 				element="initial-flow-item">
 				<attributes>
