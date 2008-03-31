@@ -21,11 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.desk.DeskLoader;
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.dialog.DeskWorkCreateDialog;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
@@ -43,8 +42,8 @@ import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.DeskModel.DeskEvent;
-import net.officefloor.work.clazz.ClassWorkLoader;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.geometry.Point;
 
 /**
@@ -153,30 +152,20 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 		// Button to add Work
 		final ButtonEditPart workButton = new ButtonEditPart("Add Work") {
 			protected void handleButtonClick() {
-				// Add the populated DeskWork
-				DeskWorkModel work = new DeskWorkModel();
-				work.setLoader(ClassWorkLoader.class.getName());
-				BeanDialog dialog = DeskEditPart.this.createBeanDialog(work,
-						"Work", "Initial Flow Item", "X", "Y");
-				if (dialog.populate()) {
-
-					// Obtain the class loader to load the work
-					ProjectClassLoader classLoader = ProjectClassLoader
-							.create(DeskEditPart.this.getEditor());
-
-					try {
-						// Load the work
-						new DeskLoader(classLoader).loadWork(work,
-								new ProjectConfigurationContext(
-										DeskEditPart.this.getEditor()
-												.getEditorInput()));
-
-					} catch (Exception ex) {
-						throw new OfficeFloorPluginFailure(ex);
-					}
+				try {
+					// Add the Desk Work
+					AbstractOfficeFloorEditor editor = DeskEditPart.this
+							.getEditor();
+					IProject project = ProjectConfigurationContext
+							.getProject(editor.getEditorInput());
+					DeskWorkModel deskWork = new DeskWorkCreateDialog(editor
+							.getSite().getShell(), project).createDeskWork();
 
 					// Add the work
-					DeskEditPart.this.getCastedModel().addWork(work);
+					DeskEditPart.this.getCastedModel().addWork(deskWork);
+
+				} catch (Exception ex) {
+					DeskEditPart.this.messageError(ex);
 				}
 			}
 		};

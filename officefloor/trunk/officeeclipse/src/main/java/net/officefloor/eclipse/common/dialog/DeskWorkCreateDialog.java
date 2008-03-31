@@ -21,18 +21,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import net.officefloor.desk.DeskLoader;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
 import net.officefloor.eclipse.common.dialog.input.impl.SubTypeSelectionInput;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.managedobjectsource.ManagedObjectSourceLoader;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
-import net.officefloor.model.officefloor.PropertyModel;
+import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.work.WorkModel;
+import net.officefloor.work.WorkLoader;
+import net.officefloor.work.WorkProperty;
+import net.officefloor.work.WorkSpecification;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
@@ -46,11 +47,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * {@link Dialog} to create a {@link ManagedObjectSourceModel}.
+ * {@link Dialog} to create a {@link DeskWorkModel}.
  * 
  * @author Daniel
  */
-public class ManagedObjectSourceCreateDialog extends Dialog {
+public class DeskWorkCreateDialog extends Dialog {
 
 	/**
 	 * {@link IProject}.
@@ -58,29 +59,27 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	private final IProject project;
 
 	/**
-	 * {@link ManagedObjectSourceModel}.
+	 * {@link DeskWorkModel} to create.
 	 */
-	private ManagedObjectSourceModel managedObjectSource = null;
+	private DeskWorkModel deskWorkModel = null;
 
 	/**
-	 * Name of the {@link ManagedObjectSourceModel}.
+	 * {@link Text} to get the {@link DeskWorkModel} name.
 	 */
-	private Text managedObjectSourceName;
+	private Text workName;
 
 	/**
-	 * List of {@link ManagedObjectSource} instances.
+	 * List to obtain the {@link WorkLoader} class name.
 	 */
-	private InputHandler<String> managedObjectSourceList;
+	private InputHandler<String> workLoaderList;
 
 	/**
-	 * {@link Input} for the properties to create the
-	 * {@link ManagedObjectSource}.
+	 * {@link Input} for the properties to create the {@link WorkModel}.
 	 */
 	private BeanListInput<PropertyModel> propertiesInput;
 
 	/**
-	 * {@link InputHandler} for the properties to create the
-	 * {@link ManagedObjectSource}.
+	 * {@link InputHandler} for properties to create the {@link WorkModel}.
 	 */
 	private InputHandler<List<PropertyModel>> propertiesHandler;
 
@@ -97,25 +96,24 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	 * @param project
 	 *            {@link IProject}.
 	 */
-	public ManagedObjectSourceCreateDialog(Shell parentShell, IProject project) {
+	public DeskWorkCreateDialog(Shell parentShell, IProject project) {
 		super(parentShell);
 		this.project = project;
 	}
 
 	/**
-	 * Creates the {@link ManagedObjectSourceModel}.
+	 * Creates the {@link WorkModel}.
 	 * 
-	 * @return {@link ManagedObjectSourceModel} or <code>null</code> if not
-	 *         created.
+	 * @return {@link WorkModel}.
 	 */
-	public ManagedObjectSourceModel createManagedObjectSource() {
+	public DeskWorkModel createDeskWork() throws Exception {
 
 		// Block to open
 		this.setBlockOnOpen(true);
 		this.open();
 
-		// Return the created team
-		return this.managedObjectSource;
+		// Return the created work
+		return this.deskWorkModel;
 	}
 
 	/*
@@ -129,22 +127,18 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 		// Create parent composite
 		Composite composite = (Composite) super.createDialogArea(parent);
 
-		// Enter managed object source name
+		// Enter work name
 		new Label(composite, SWT.WRAP).setText("Name");
-		this.managedObjectSourceName = new Text(composite, SWT.SINGLE
-				| SWT.BORDER);
+		this.workName = new Text(composite, SWT.SINGLE | SWT.BORDER);
 
-		// Enter the managed object source
-		new Label(composite, SWT.WRAP).setText("Managed Object Source");
-		this.managedObjectSourceList = new InputHandler<String>(composite,
-				new SubTypeSelectionInput(this.project,
-						ManagedObjectSource.class.getName()),
-				new InputAdapter() {
+		// Enter the work loader
+		new Label(composite, SWT.WRAP).setText("Work Loader");
+		this.workLoaderList = new InputHandler<String>(composite,
+				new SubTypeSelectionInput(this.project, WorkLoader.class
+						.getName()), new InputAdapter() {
 					@Override
 					public void notifyValueChanged(Object value) {
-						// Populate the properties
-						ManagedObjectSourceCreateDialog.this
-								.populateProperties();
+						DeskWorkCreateDialog.this.populateProperties();
 					}
 				});
 
@@ -175,10 +169,9 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	 */
 	protected void populateProperties() {
 
-		// Attempt to create an instance of the Managed Object Source
-		ManagedObjectSource<?, ?> managedObjectSource = this
-				.createManagedObjectSourceInstance();
-		if (managedObjectSource == null) {
+		// Attempt to create an instance of the Work Loader
+		WorkLoader workLoader = this.createWorkLoaderInstance();
+		if (workLoader == null) {
 			return;
 		}
 
@@ -193,12 +186,11 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 		}
 
 		// Synchronise the properties
-		ManagedObjectSourceSpecification specification = managedObjectSource
-				.getSpecification();
-		ManagedObjectSourceProperty[] mosProperties = (specification == null ? new ManagedObjectSourceProperty[0]
+		WorkSpecification specification = workLoader.getSpecification();
+		WorkProperty[] workProperties = (specification == null ? new WorkProperty[0]
 				: specification.getProperties());
-		for (ManagedObjectSourceProperty mosProperty : mosProperties) {
-			String propertyName = mosProperty.getName();
+		for (WorkProperty workProperty : workProperties) {
+			String propertyName = workProperty.getName();
 			if (existingProperties.containsKey(propertyName)) {
 				// Remove (so not removed later)
 				existingProperties.remove(propertyName);
@@ -227,19 +219,16 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	protected void okPressed() {
 		try {
 
-			// Ensure managed object source name provided
-			String managedObjectSourceName = this.managedObjectSourceName
-					.getText();
-			if ((managedObjectSourceName == null)
-					|| (managedObjectSourceName.trim().length() == 0)) {
-				this.errorText.setText("Enter managed object source name");
+			// Ensure work name provided
+			String workName = this.workName.getText();
+			if ((workName == null) || (workName.trim().length() == 0)) {
+				this.errorText.setText("Enter work name");
 				return;
 			}
 
-			// Attempt to create the Managed Object Source
-			ManagedObjectSource<?, ?> managedObjectSourceInstance = this
-					.createManagedObjectSourceInstance();
-			if (managedObjectSourceInstance == null) {
+			// Attempt to create the Work Loader
+			WorkLoader workLoaderInstance = this.createWorkLoaderInstance();
+			if (workLoaderInstance == null) {
 				return;
 			}
 
@@ -254,14 +243,18 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 			}
 
 			// Obtain the class loader for the project
-			ClassLoader projectClassLoader = ProjectClassLoader
+			ProjectClassLoader classLoader = ProjectClassLoader
 					.create(this.project);
 
-			// Load and specify the managed object source model
-			ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
-			this.managedObjectSource = loader.loadManagedObjectSource(
-					managedObjectSourceName, managedObjectSourceInstance,
-					properties, projectClassLoader);
+			// Load the desk work model
+			DeskWorkModel work = new DeskWorkModel(workName, workLoaderInstance
+					.getClass().getName(), null, null, null, propertyModels
+					.toArray(new PropertyModel[0]));
+			new DeskLoader(classLoader).loadWork(work, classLoader
+					.getConfigurationContext());
+
+			// Specify the desk work model for return
+			this.deskWorkModel = work;
 
 		} catch (Throwable ex) {
 			// Failed, report error and do not close dialog
@@ -275,38 +268,36 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	}
 
 	/**
-	 * Creates an instance of {@link ManagedObjectSource}.
+	 * Creates the {@link WorkLoader} instance.
 	 * 
-	 * @return {@link ManagedObjectSource} or <code>null</code> if not
-	 *         created.
+	 * @return {@link WorkLoader} instance.
 	 */
-	private ManagedObjectSource<?, ?> createManagedObjectSourceInstance() {
+	private WorkLoader createWorkLoaderInstance() {
 
-		// Ensure managed object source provided
-		String managedObjectSourceClassName = this.managedObjectSourceList
-				.getTrySafeValue();
-		if ((managedObjectSourceClassName == null)
-				|| (managedObjectSourceClassName.trim().length() == 0)) {
-			this.errorText.setText("Select a managed object source");
+		// Ensure the work loader selected
+		String workLoaderClassName = this.workLoaderList.getTrySafeValue();
+		if ((workLoaderClassName == null)
+				|| (workLoaderClassName.trim().length() == 0)) {
+			this.errorText.setText("Select a Work Loader");
 			return null;
 		}
 
-		// Attempt to create an instance of the Managed Object Source
+		// Attempt to create an instance of the Work Loader
 		try {
 			ProjectClassLoader classLoader = ProjectClassLoader
 					.create(this.project);
-			Class<?> managedObjectSourceClass = classLoader
-					.loadClass(managedObjectSourceClassName);
-			Object instance = managedObjectSourceClass.newInstance();
-			if (!(instance instanceof ManagedObjectSource)) {
-				throw new Exception(managedObjectSourceClassName
+			Class<?> workLoaderClass = classLoader
+					.loadClass(workLoaderClassName);
+			Object instance = workLoaderClass.newInstance();
+			if (!(instance instanceof WorkLoader)) {
+				throw new Exception(workLoaderClassName
 						+ " must be an instance of "
-						+ ManagedObjectSource.class.getName());
+						+ WorkLoader.class.getName());
 			}
-			ManagedObjectSource<?, ?> managedObjectSource = (ManagedObjectSource<?, ?>) instance;
+			WorkLoader workLoader = (WorkLoader) instance;
 
-			// Return the managed object source
-			return managedObjectSource;
+			// Return the work loader
+			return workLoader;
 
 		} catch (Exception ex) {
 			this.errorText.setText(ex.getMessage() + " ["
@@ -314,4 +305,5 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 			return null;
 		}
 	}
+
 }
