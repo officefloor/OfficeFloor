@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -42,6 +43,7 @@ import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
+import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.WorkModel;
 import net.officefloor.repository.ConfigurationContext;
@@ -514,8 +516,8 @@ public class DeskLoader {
 	 * @param context
 	 *            {@link ConfigurationContext}.
 	 */
-	public void loadWork(final DeskWorkModel work,
-			final ConfigurationContext context) throws Exception {
+	public void loadWork(final DeskWorkModel work, ConfigurationContext context)
+			throws Exception {
 
 		// Obtain the name of the loader
 		String loaderClassName = work.getLoader();
@@ -525,24 +527,20 @@ public class DeskLoader {
 			WorkLoader workLoader = this.loaderContext.createInstance(
 					WorkLoader.class, loaderClassName);
 
+			// Create the listing of properties
+			Properties properties = new Properties();
+			for (PropertyModel property : work.getProperties()) {
+				String name = property.getName();
+				String value = property.getValue();
+				properties.setProperty(name, value);
+			}
+
 			// Obtain the class loader
-			final ClassLoader classLoader = this.loaderContext.getClassLoader();
+			ClassLoader classLoader = this.loaderContext.getClassLoader();
 
 			// Create the work loader context
-			WorkLoaderContext workLoaderContext = new WorkLoaderContext() {
-
-				public String getConfiguration() {
-					return work.getConfiguration();
-				}
-
-				public ConfigurationContext getConfigurationContext() {
-					return context;
-				}
-
-				public ClassLoader getClassLoader() {
-					return classLoader;
-				}
-			};
+			WorkLoaderContext workLoaderContext = new WorkLoaderContextImpl(
+					properties, classLoader);
 
 			// Load the work model
 			WorkModel<?> workModel = workLoader.loadWork(workLoaderContext);

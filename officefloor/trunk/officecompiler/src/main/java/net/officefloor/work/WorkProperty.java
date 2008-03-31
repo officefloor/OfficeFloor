@@ -16,36 +16,26 @@
  */
 package net.officefloor.work;
 
-import net.officefloor.model.work.WorkModel;
-
 /**
- * Loads the {@link WorkModel}.
+ * Property of the {@link WorkSpecification}.
  * 
  * @author Daniel
  */
-public interface WorkLoader {
+public interface WorkProperty {
 
 	/**
-	 * <p>
-	 * Obtains the {@link WorkSpecification} for this {@link WorkLoader}.
-	 * <p>
-	 * This enables the {@link WorkLoaderContext} to be populated with the
-	 * necessary details as per this {@link WorkSpecification} in loading the
-	 * {@link WorkModel}.
+	 * Obtains the name of the property.
 	 * 
-	 * @return {@link WorkSpecification}.
+	 * @return Name of the property.
 	 */
-	WorkSpecification getSpecification();
+	String getName();
 
 	/**
-	 * Loads the {@link WorkModel} from configuration.
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
 	 * 
-	 * @param context
-	 *            {@link WorkLoaderContext} to source details to load the
-	 *            {@link WorkModel}.
-	 * @throws Exception
-	 *             If fails.
+	 * @return Display name of property.
 	 */
-	WorkModel<?> loadWork(WorkLoaderContext context) throws Exception;
+	String getLabel();
 
 }

@@ -16,36 +16,44 @@
  */
 package net.officefloor.work;
 
-import net.officefloor.model.work.WorkModel;
-
 /**
- * Loads the {@link WorkModel}.
+ * <p>
+ * Indicates a property was not configured within the
+ * {@link ManagedObjectSourceContext}.
+ * <p>
+ * This is a serious error as the {@link ManagedObjectSource} is requiring this
+ * property to initialise and subsequently start.
  * 
  * @author Daniel
  */
-public interface WorkLoader {
+public class WorkUnknownPropertyError extends Error {
 
 	/**
-	 * <p>
-	 * Obtains the {@link WorkSpecification} for this {@link WorkLoader}.
-	 * <p>
-	 * This enables the {@link WorkLoaderContext} to be populated with the
-	 * necessary details as per this {@link WorkSpecification} in loading the
-	 * {@link WorkModel}.
-	 * 
-	 * @return {@link WorkSpecification}.
+	 * Name of the unknown property.
 	 */
-	WorkSpecification getSpecification();
+	private final String unknownPropertyName;
 
 	/**
-	 * Loads the {@link WorkModel} from configuration.
+	 * Initiate.
 	 * 
-	 * @param context
-	 *            {@link WorkLoaderContext} to source details to load the
-	 *            {@link WorkModel}.
-	 * @throws Exception
-	 *             If fails.
+	 * @param message
+	 *            Message.
+	 * @param unknownPropertyName
+	 *            Name of the unknown property.
 	 */
-	WorkModel<?> loadWork(WorkLoaderContext context) throws Exception;
+	public WorkUnknownPropertyError(String message,
+			String unknownPropertyName) {
+		super(message);
+		this.unknownPropertyName = unknownPropertyName;
+	}
+
+	/**
+	 * Obtains the name of the unknown property.
+	 * 
+	 * @return Name of the unknown property.
+	 */
+	public String getUnkonwnPropertyName() {
+		return this.unknownPropertyName;
+	}
 
 }
