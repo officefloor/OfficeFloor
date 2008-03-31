@@ -223,6 +223,14 @@ public class XmlContext {
 						String loadObjectClassName = focusMetaData
 								.getLoadObjectClassName();
 
+						// Ensure the load object class name specified
+						if (loadObjectClassName == null) {
+							throw new XmlMarshallException(
+									"Must provide class attribute value for load method "
+											+ loadMethodName + " [element "
+											+ elementName + "]");
+						}
+
 						// Obtain the Class of the load object
 						Class<?> loadedObjectType;
 						try {
