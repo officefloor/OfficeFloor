@@ -27,7 +27,11 @@
 		class="net.officefloor.model.desk.DeskWorkModel">
 		<value method="setId" node="work@id" />
 		<value method="setLoader" node="work@loader" />
-		<value method="setConfiguration" node="work@configuration" />
+		<object method="addProperty" node="property"
+			class="net.officefloor.model.desk.PropertyModel">
+			<value method="setName" node="property@name" />
+			<value method="setValue" node="property@value" />
+		</object>
 		<object method="setInitialFlowItem" node="initial-flow-item"
 			class="net.officefloor.model.desk.DeskWorkToFlowItemModel">
 			<value method="setFlowItemId" node="initial-flow-item@id" />
