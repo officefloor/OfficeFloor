@@ -154,8 +154,10 @@ public class DeskWorkCreateDialog extends Dialog {
 		// Error text
 		this.errorText = new Label(composite, SWT.WRAP);
 		this.errorText.setText("");
-		this.errorText.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
-				| GridData.HORIZONTAL_ALIGN_FILL));
+		GridData errorGridData = new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL);
+		errorGridData.heightHint = 60;
+		this.errorText.setLayoutData(errorGridData);
 		this.errorText.setBackground(errorText.getDisplay().getSystemColor(
 				SWT.COLOR_WIDGET_BACKGROUND));
 		this.errorText.setForeground(ColorConstants.red);
@@ -256,9 +258,15 @@ public class DeskWorkCreateDialog extends Dialog {
 			// Specify the desk work model for return
 			this.deskWorkModel = work;
 
+		} catch (NoClassDefFoundError ex) {
+			// Indicated class missing on class path
+			this.errorText.setText(ex.getClass().getSimpleName() + ":\n"
+					+ ex.getMessage() + "\nPlease ensure on class path");
+			return;
+
 		} catch (Throwable ex) {
 			// Failed, report error and do not close dialog
-			this.errorText.setText(ex.getClass().getSimpleName() + ": "
+			this.errorText.setText(ex.getClass().getSimpleName() + ":\n"
 					+ ex.getMessage());
 			return;
 		}
@@ -299,7 +307,7 @@ public class DeskWorkCreateDialog extends Dialog {
 			// Return the work loader
 			return workLoader;
 
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			this.errorText.setText(ex.getMessage() + " ["
 					+ ex.getClass().getSimpleName() + "]");
 			return null;
