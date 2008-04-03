@@ -160,6 +160,10 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 							.getProject(editor.getEditorInput());
 					DeskWorkModel deskWork = new DeskWorkCreateDialog(editor
 							.getSite().getShell(), project).createDeskWork();
+					if (deskWork == null) {
+						// Cancelled creation of work
+						return;
+					}
 
 					// Add the work
 					DeskEditPart.this.getCastedModel().addWork(deskWork);
