@@ -95,6 +95,11 @@ public class OfficeEditPart extends
 				"Add administrator") {
 			@Override
 			protected void handleButtonClick() {
+
+				// TODO remove
+				OfficeEditPart.this
+						.messageWarning("TODO implement adding an administrator");
+
 				// Add the Administrator
 				AdministratorModel bean = new AdministratorModel();
 				BeanDialog dialog = OfficeEditPart.this.createBeanDialog(bean,
@@ -177,7 +182,7 @@ public class OfficeEditPart extends
 						ProjectClassLoader classLoader = ProjectClassLoader
 								.create(OfficeEditPart.this.getEditor());
 						ConfigurationItem roomConfigItem = classLoader
-								.findConfigurationItem(room.getId());
+								.findConfigurationItem(classPathLocation);
 						if (roomConfigItem == null) {
 							OfficeEditPart.this
 									.messageError("Could not find Office Room at '"
