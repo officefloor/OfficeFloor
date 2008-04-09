@@ -25,8 +25,8 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.FlowNodesEnhancer;
-import net.officefloor.frame.api.build.FlowNodesEnhancerContext;
+import net.officefloor.frame.api.build.OfficeEnhancer;
+import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.issue.OfficeIssuesListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -124,14 +124,14 @@ public class OfficeFrameImpl extends OfficeFrame {
 		for (OfficeConfiguration officeConfig : officeFloorConfig
 				.getOfficeConfiguration()) {
 
-			// Create the flow node enhancer context
-			FlowNodesEnhancerContext flowNodesEnhancerContext = new FlowNodesEnhancerContextImpl(
+			// Create the office enhancer context
+			OfficeEnhancerContext flowNodesEnhancerContext = new OfficeEnhancerContextImpl(
 					officeConfig);
 
-			// Enhance the office flow nodes
-			for (FlowNodesEnhancer flowNodesEnhancer : officeConfig
-					.getFlowNodesEnhancers()) {
-				flowNodesEnhancer.enhanceFlowNodes(flowNodesEnhancerContext);
+			// Enhance the office
+			for (OfficeEnhancer officeEnhancer : officeConfig
+					.getOfficeEnhancers()) {
+				officeEnhancer.enhanceOffice(flowNodesEnhancerContext);
 			}
 		}
 
@@ -178,10 +178,10 @@ public class OfficeFrameImpl extends OfficeFrame {
 	}
 
 	/**
-	 * {@link FlowNodesEnhancerContext} implementation.
+	 * {@link OfficeEnhancerContext} implementation.
 	 */
-	private class FlowNodesEnhancerContextImpl implements
-			FlowNodesEnhancerContext {
+	private class OfficeEnhancerContextImpl implements
+			OfficeEnhancerContext {
 
 		/**
 		 * {@link OfficeConfiguration}.
@@ -194,7 +194,7 @@ public class OfficeFrameImpl extends OfficeFrame {
 		 * @param officeConfig
 		 *            {@link OfficeConfiguration}.
 		 */
-		public FlowNodesEnhancerContextImpl(OfficeConfiguration officeConfig) {
+		public OfficeEnhancerContextImpl(OfficeConfiguration officeConfig) {
 			this.officeConfig = officeConfig;
 		}
 

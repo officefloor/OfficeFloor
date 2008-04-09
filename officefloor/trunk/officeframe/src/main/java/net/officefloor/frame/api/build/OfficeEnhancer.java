@@ -16,29 +16,33 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>
- * Enables enhancing the flow nodes of an {@link Office}.
+ * Enables enhancing the {@link Office}.
  * <p>
- * This enables linking in the {@link Task} instances created by the
- * {@link ManagedObjectSource}.
+ * This enables:<il>
+ * <li>linking in the {@link Task} instances created by the
+ * {@link ManagedObjectSource}</li>
+ * <li>providing {@link Handler} instances for a {@link ManagedObjectSource}</li>
+ * <li>linking in {@link Task} instances for the {@link Handler} instances</li>
+ * </il>
  * 
  * @author Daniel
  */
-public interface FlowNodesEnhancer {
+public interface OfficeEnhancer {
 
 	/**
-	 * Enhances the flow nodes of the {@link Office}.
+	 * Enhances the {@link Office}.
 	 * 
 	 * @param context
-	 *            {@link FlowNodesEnhancerContext}.
+	 *            {@link OfficeEnhancerContext}.
 	 * @throws BuildException
-	 *             If failure in enhancing the flow nodes.
+	 *             If failure in enhancing.
 	 */
-	void enhanceFlowNodes(FlowNodesEnhancerContext context)
-			throws BuildException;
+	void enhanceOffice(OfficeEnhancerContext context) throws BuildException;
 }

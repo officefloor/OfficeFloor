@@ -17,7 +17,7 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.FlowNodesEnhancer;
+import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.execute.Task;
@@ -84,13 +84,13 @@ public interface OfficeConfiguration {
 			throws ConfigurationException;
 
 	/**
-	 * Obtains the {@link FlowNodesEnhancer} instances for this {@link Office}.
+	 * Obtains the {@link OfficeEnhancer} instances for this {@link Office}.
 	 * 
-	 * @return Listing of the {@link FlowNodesEnhancer} for this {@link Office}.
+	 * @return Listing of the {@link OfficeEnhancer} for this {@link Office}.
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	FlowNodesEnhancer[] getFlowNodesEnhancers() throws ConfigurationException;
+	OfficeEnhancer[] getOfficeEnhancers() throws ConfigurationException;
 
 	/**
 	 * <p>
