@@ -25,7 +25,7 @@ import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.FlowNodesEnhancer;
+import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Work;
@@ -90,9 +90,9 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final Map<String, WorkBuilderImpl<?>> works = new HashMap<String, WorkBuilderImpl<?>>();
 
 	/**
-	 * Listing of registered {@link FlowNodesEnhancer} instances.
+	 * Listing of registered {@link OfficeEnhancer} instances.
 	 */
-	private final List<FlowNodesEnhancer> flowNodesEnhancers = new LinkedList<FlowNodesEnhancer>();
+	private final List<OfficeEnhancer> officeEnhancers = new LinkedList<OfficeEnhancer>();
 
 	/**
 	 * Registry of the {@link AdministratorBuilderImpl} instances by their Id.
@@ -194,13 +194,13 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.build.OfficeBuilder#addFlowNodesEnhancer(net.officefloor.frame.api.build.FlowNodesEnhancer)
+	 * @see net.officefloor.frame.api.build.OfficeBuilder#addOfficeEnhancer(net.officefloor.frame.api.build.OfficeEnhancer)
 	 */
 	@Override
-	public void addFlowNodesEnhancer(FlowNodesEnhancer flowNodesEnhancer)
+	public void addOfficeEnhancer(OfficeEnhancer officeEnhancer)
 			throws BuildException {
-		// Add the flow nodes enhancer
-		this.flowNodesEnhancers.add(flowNodesEnhancer);
+		// Add the office enhancer
+		this.officeEnhancers.add(officeEnhancer);
 	}
 
 	/*
@@ -297,12 +297,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.configuration.OfficeConfiguration#getFlowNodesEnhancers()
+	 * @see net.officefloor.frame.internal.configuration.OfficeConfiguration#getOfficeEnhancers()
 	 */
 	@Override
-	public FlowNodesEnhancer[] getFlowNodesEnhancers()
-			throws ConfigurationException {
-		return this.flowNodesEnhancers.toArray(new FlowNodesEnhancer[0]);
+	public OfficeEnhancer[] getOfficeEnhancers() throws ConfigurationException {
+		return this.officeEnhancers.toArray(new OfficeEnhancer[0]);
 	}
 
 	/*

@@ -329,8 +329,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/**
-	 * Facade method to register a
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Facade method to register a {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected ManagedObjectBuilder constructManagedObject(
@@ -352,7 +351,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 		// Obtain office floor id for managed object
 		String managedObjectId = "of-" + managedObjectName;
 
-		// Register the Managed Object with the current Office
+		// Register the Managed Object with the current Office Floor
 		this.officeFloorBuilder.addManagedObject(managedObjectId,
 				managedObjectBuilder);
 

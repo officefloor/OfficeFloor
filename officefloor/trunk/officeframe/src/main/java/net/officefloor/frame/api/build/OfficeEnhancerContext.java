@@ -21,11 +21,11 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Context for the {@link FlowNodesEnhancer}.
+ * Context for the {@link OfficeEnhancer}.
  * 
  * @author Daniel
  */
-public interface FlowNodesEnhancerContext {
+public interface OfficeEnhancerContext {
 
 	/**
 	 * Obtains the {@link FlowNodeBuilder} registered under the input

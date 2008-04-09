@@ -18,6 +18,7 @@ package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -114,15 +115,18 @@ public interface OfficeBuilder {
 	void addWork(String name, WorkBuilder<?> workBuilder) throws BuildException;
 
 	/**
-	 * Adds {@link FlowNodesEnhancer} for flow nodes of this {@link Office}.
+	 * <p>
+	 * Adds {@link OfficeEnhancer} for this {@link Office}.
+	 * <p>
+	 * This enables enhancing the {@link Office} after the
+	 * {@link ManagedObjectSource} instances are registered.
 	 * 
-	 * @param flowNodesEnhancer
-	 *            {@link FlowNodesEnhancer}.
+	 * @param officeEnhancer
+	 *            {@link OfficeEnhancer}.
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	void addFlowNodesEnhancer(FlowNodesEnhancer flowNodesEnhancer)
-			throws BuildException;
+	void addOfficeEnhancer(OfficeEnhancer officeEnhancer) throws BuildException;
 
 	/**
 	 * Adds a {@link net.officefloor.frame.api.execute.Task} to invoke on start
