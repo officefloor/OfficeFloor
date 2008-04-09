@@ -23,8 +23,8 @@ import net.officefloor.admin.transaction.TransactionDutiesEnum;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.FlowNodesEnhancer;
-import net.officefloor.frame.api.build.FlowNodesEnhancerContext;
+import net.officefloor.frame.api.build.OfficeEnhancer;
+import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeScope;
@@ -120,9 +120,9 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 				TransactionDutiesEnum.COMMIT);
 
 		// Obtain the on message task to link it to task processing result
-		this.getOfficeBuilder().addFlowNodesEnhancer(new FlowNodesEnhancer() {
+		this.getOfficeBuilder().addOfficeEnhancer(new OfficeEnhancer() {
 			@Override
-			public void enhanceFlowNodes(FlowNodesEnhancerContext context)
+			public void enhanceOffice(OfficeEnhancerContext context)
 					throws BuildException {
 				// Obtain the JMS flow node
 				FlowNodeBuilder<?> flowNodeBuilder = context
