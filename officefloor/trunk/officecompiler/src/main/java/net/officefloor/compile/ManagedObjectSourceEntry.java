@@ -18,8 +18,8 @@ package net.officefloor.compile;
 
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.BuildException;
-import net.officefloor.frame.api.build.FlowNodesEnhancer;
-import net.officefloor.frame.api.build.FlowNodesEnhancerContext;
+import net.officefloor.frame.api.build.OfficeEnhancer;
+import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.impl.construct.OfficeBuilderImpl;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -142,15 +142,15 @@ public class ManagedObjectSourceEntry extends
 		}
 
 		// Enhance with addition configuration of Managed Object Source
-		managingOfficeEntry.getBuilder().addFlowNodesEnhancer(
-				new FlowNodesEnhancer() {
+		managingOfficeEntry.getBuilder().addOfficeEnhancer(
+				new OfficeEnhancer() {
 					@Override
-					public void enhanceFlowNodes(
-							FlowNodesEnhancerContext context)
+					public void enhanceOffice(
+							OfficeEnhancerContext context)
 							throws BuildException {
 						// TODO implement
 						System.err
-								.println("TODO implement flow node enhancement");
+								.println("TODO implement office enhancement");
 					}
 				});
 
