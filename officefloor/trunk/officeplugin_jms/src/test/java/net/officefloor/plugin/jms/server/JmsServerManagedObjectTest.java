@@ -70,12 +70,6 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		moBuilder.addProperty(
 				JmsServerManagedObjectSource.JMS_MAX_SERVER_SESSION, "2");
 
-		// Configure task to process message
-		moBuilder.addProperty(JmsServerManagedObjectSource.JMS_ON_MESSAGE_WORK,
-				"work");
-		moBuilder.addProperty(JmsServerManagedObjectSource.JMS_ON_MESSAGE_TASK,
-				"task");
-
 		// Configure the administrator to commit
 		this.constructAdministrator("TRANSACTION",
 				TransactionAdministratorSource.class, OfficeScope.WORK);
