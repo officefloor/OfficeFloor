@@ -67,18 +67,6 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 	public static final String JMS_MAX_SERVER_SESSION = "net.officefloor.plugin.jms.max.sessions";
 
 	/**
-	 * Name of {@link net.officefloor.frame.api.execute.Work} to process the
-	 * {@link javax.jms.Message}.
-	 */
-	public static final String JMS_ON_MESSAGE_WORK = "net.officefloor.plugin.jms.onmessage.work";
-
-	/**
-	 * Name of {@link net.officefloor.frame.api.execute.Task} to process the
-	 * {@link javax.jms.Message}.
-	 */
-	public static final String JMS_ON_MESSAGE_TASK = "net.officefloor.plugin.jms.onmessage.task";
-
-	/**
 	 * Connection Factory for the JMS connection.
 	 */
 	protected ConnectionFactory connectionFactory;
@@ -214,9 +202,7 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 				.registerTask("jms.server.onmessage", "onmessage",
 						"jms.server.onmessage", context
 								.getManagedObjectSourceContext());
-		onMessageTask.setNextTaskInFlow(properties
-				.getProperty(JMS_ON_MESSAGE_WORK), properties
-				.getProperty(JMS_ON_MESSAGE_TASK));
+		onMessageTask.setNextTaskInFlow(null, null); // must enhance
 
 		// Register the handler (and link OnMessageTask)
 		ManagedObjectHandlerBuilder<JmsServerHandlersEnum> managedObjectBuilder = context
