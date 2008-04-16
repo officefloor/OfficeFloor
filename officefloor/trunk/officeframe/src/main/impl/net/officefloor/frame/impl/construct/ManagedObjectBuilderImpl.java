@@ -27,14 +27,16 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeScope;
 import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
 /**
- * Implements the {@link net.officefloor.frame.api.build.ManagedObjectBuilder}.
+ * Implements the {@link ManagedObjectBuilder}.
  * 
  * @author Daniel
  */
@@ -42,13 +44,12 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 		ManagedObjectSourceConfiguration {
 
 	/**
-	 * Name of {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Name of {@link ManagedObject}.
 	 */
 	private String managedObjectName;
 
 	/**
-	 * Name of {@link net.officefloor.frame.api.manage.Office} managing this
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Name of {@link Office} managing this {@link ManagedObject}.
 	 */
 	private String managingOfficeName;
 
@@ -64,8 +65,7 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	private Properties properties = new Properties();
 
 	/**
-	 * {@link OfficeScope} for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link OfficeScope} for the {@link ManagedObject}.
 	 */
 	private OfficeScope managedObjectScope = OfficeScope.WORK;
 
@@ -75,8 +75,7 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	private ManagedObjectPool pool;
 
 	/**
-	 * Default timeout for asynchronous operations on the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Default timeout for asynchronous operations on the {@link ManagedObject}.
 	 */
 	private long defaultTimeout = 0;
 
@@ -86,12 +85,10 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	private ManagedObjectHandlerBuilderImpl<?> handlersBuilder = null;
 
 	/**
-	 * Specifies the name for this
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Specifies the name for this {@link ManagedObject}.
 	 * 
 	 * @param name
-	 *            Name for this
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            Name for this {@link ManagedObject}.
 	 */
 	protected void setManagedObjectName(String name) {
 		this.managedObjectName = name;
@@ -161,8 +158,22 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
 			Class<H> handlerKeys) throws BuildException {
 
-		// Create the managed object handler builder
-		this.handlersBuilder = new ManagedObjectHandlerBuilderImpl<H>(handlerKeys);
+		// Ensure managed object handler builder available and correct
+		if (this.handlersBuilder == null) {
+			// Create the managed object handler builder
+			this.handlersBuilder = new ManagedObjectHandlerBuilderImpl<H>(
+					handlerKeys);
+		} else {
+			// Ensure correct managed object handler provided
+			if (this.handlersBuilder.handlerKeys != handlerKeys) {
+				// Incorrect handler as keys do not match
+				throw new BuildException(
+						"Managed Object handler already registered with keys "
+								+ this.handlersBuilder.handlerKeys.getName()
+								+ " [attemtping with keys "
+								+ handlerKeys.getName() + "]");
+			}
+		}
 
 		// Return the builder
 		return (ManagedObjectHandlerBuilder<H>) this.handlersBuilder;
@@ -237,6 +248,21 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	 */
 	public long getDefaultTimeout() {
 		return this.defaultTimeout;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration#getHandlerBuilder(java.lang.Class)
+	 */
+	@Override
+	public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
+			Class<H> handlerKeys) throws ConfigurationException {
+		try {
+			return this.getManagedObjectHandlerBuilder(handlerKeys);
+		} catch (BuildException ex) {
+			throw new ConfigurationException(ex.getMessage());
+		}
 	}
 
 	/*
@@ -326,18 +352,24 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 		 * @see net.officefloor.frame.api.build.ManagedObjectHandlersBuilder#registerHandler(java.lang.Enum)
 		 */
 		@Override
+		@SuppressWarnings("unchecked")
 		public HandlerBuilder<Indexed> registerHandler(H handlerKey)
 				throws BuildException {
 
-			// Create the handler builder
-			HandlerBuilderImpl<H, Indexed> handlerBuilder = new HandlerBuilderImpl<H, Indexed>(
-					handlerKey, null);
+			// Obtain the handler builder
+			HandlerBuilderImpl<H, ?> handlerBuilder = this.handlers
+					.get(handlerKey);
+			if (handlerBuilder == null) {
+				// Create the handler builder
+				handlerBuilder = new HandlerBuilderImpl<H, Indexed>(handlerKey,
+						null);
 
-			// Register the handler
-			this.handlers.put(handlerKey, handlerBuilder);
+				// Register the handler
+				this.handlers.put(handlerKey, handlerBuilder);
+			}
 
 			// Return the builder
-			return handlerBuilder;
+			return (HandlerBuilder<Indexed>) handlerBuilder;
 		}
 
 		/*
@@ -347,19 +379,25 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 		 *      java.lang.Class)
 		 */
 		@Override
+		@SuppressWarnings("unchecked")
 		public <F extends Enum<F>> HandlerBuilder<F> registerHandler(
 				H handlerKey, Class<F> processListingEnum)
 				throws BuildException {
 
-			// Create the handler builder
-			HandlerBuilderImpl<H, F> handlerBuilder = new HandlerBuilderImpl<H, F>(
-					handlerKey, processListingEnum);
+			// Obtain the handler builder
+			HandlerBuilderImpl<H, ?> handlerBuilder = this.handlers
+					.get(handlerKey);
+			if (handlerBuilder == null) {
+				// Create the handler builder
+				handlerBuilder = new HandlerBuilderImpl<H, F>(handlerKey,
+						processListingEnum);
 
-			// Register the handler
-			this.handlers.put(handlerKey, handlerBuilder);
+				// Register the handler
+				this.handlers.put(handlerKey, handlerBuilder);
+			}
 
 			// Return the builder
-			return handlerBuilder;
+			return (HandlerBuilder<F>) handlerBuilder;
 		}
 
 	}

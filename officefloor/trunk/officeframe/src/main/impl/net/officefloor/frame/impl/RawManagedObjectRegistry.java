@@ -35,6 +35,7 @@ import net.officefloor.frame.internal.configuration.LinkedManagedObjectConfigura
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
+import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -261,12 +262,27 @@ public class RawManagedObjectRegistry {
 
 						// No flow manager required as can not access its future
 
+						// Ensure task node reference provided
+						TaskNodeReference taskNodeRef = processLinkConfig[i]
+								.getTaskNodeReference();
+						if ((taskNodeRef.getWorkName() == null)
+								|| (taskNodeRef.getTaskName() == null)) {
+							throw new ConfigurationException(
+									"Task not linked in for process link "
+											+ processLinkConfig[i]
+													.getFlowName()
+											+ " for handler " + key
+											+ " of managed object "
+											+ rmo.getManagedObjectName()
+											+ " of office "
+											+ rawOfficeMetaData.getOfficeName());
+						}
+
 						// Create the current flow meta-data
 						FlowMetaData<?> processLink = new FlowMetaDataImpl(
 								FlowInstigationStrategyEnum.ASYNCHRONOUS,
-								rawWorkRegistry
-										.getTaskMetaData(processLinkConfig[i]
-												.getTaskNodeReference()), null);
+								rawWorkRegistry.getTaskMetaData(taskNodeRef),
+								null);
 
 						// Load the process link
 						processLinks[i] = processLink;

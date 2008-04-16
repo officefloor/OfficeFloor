@@ -25,6 +25,7 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
@@ -34,6 +35,7 @@ import net.officefloor.frame.impl.construct.BuilderFactoryImpl;
 import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
+import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -120,21 +122,6 @@ public class OfficeFrameImpl extends OfficeFrame {
 				.createRawManagedObjectMetaDataRegistry(officeFloorConfig,
 						rawAssetRegistry, this);
 
-		// Enhance the flow nodes of the offices
-		for (OfficeConfiguration officeConfig : officeFloorConfig
-				.getOfficeConfiguration()) {
-
-			// Create the office enhancer context
-			OfficeEnhancerContext flowNodesEnhancerContext = new OfficeEnhancerContextImpl(
-					officeConfig);
-
-			// Enhance the office
-			for (OfficeEnhancer officeEnhancer : officeConfig
-					.getOfficeEnhancers()) {
-				officeEnhancer.enhanceOffice(flowNodesEnhancerContext);
-			}
-		}
-
 		// Obtain the registry of teams
 		Map<String, Team> teamRegistry = officeFloorConfig.getTeamRegistry();
 
@@ -153,6 +140,14 @@ public class OfficeFrameImpl extends OfficeFrame {
 				.getOfficeConfiguration()) {
 			// Obtain the Office name
 			String officeName = officeConfig.getOfficeName();
+
+			// Enhance the office
+			OfficeEnhancerContext flowNodesEnhancerContext = new OfficeEnhancerContextImpl(
+					officeConfig, officeFloorConfig);
+			for (OfficeEnhancer officeEnhancer : officeConfig
+					.getOfficeEnhancers()) {
+				officeEnhancer.enhanceOffice(flowNodesEnhancerContext);
+			}
 
 			// Create the office
 			RawOfficeMetaData rawOfficeMetaData = RawOfficeMetaData
@@ -180,8 +175,7 @@ public class OfficeFrameImpl extends OfficeFrame {
 	/**
 	 * {@link OfficeEnhancerContext} implementation.
 	 */
-	private class OfficeEnhancerContextImpl implements
-			OfficeEnhancerContext {
+	private class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 
 		/**
 		 * {@link OfficeConfiguration}.
@@ -189,13 +183,22 @@ public class OfficeFrameImpl extends OfficeFrame {
 		private final OfficeConfiguration officeConfig;
 
 		/**
+		 * {@link OfficeFloorConfiguration}.
+		 */
+		private final OfficeFloorConfiguration officeFloorConfig;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param officeConfig
 		 *            {@link OfficeConfiguration}.
+		 * @param officeFloorConfig
+		 *            {@link OfficeFloorConfiguration}.
 		 */
-		public OfficeEnhancerContextImpl(OfficeConfiguration officeConfig) {
+		public OfficeEnhancerContextImpl(OfficeConfiguration officeConfig,
+				OfficeFloorConfiguration officeFloorConfig) {
 			this.officeConfig = officeConfig;
+			this.officeFloorConfig = officeFloorConfig;
 		}
 
 		/*
@@ -220,10 +223,49 @@ public class OfficeFrameImpl extends OfficeFrame {
 		public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace,
 				String workName, String taskName) throws BuildException {
 			try {
+				// Obtain the flow node builder
 				return this.officeConfig.getFlowNodeBuilder(namespace,
 						workName, taskName);
 			} catch (ConfigurationException ex) {
 				// Propagate
+				throw new BuildException(ex.getMessage());
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.api.build.OfficeEnhancerContext#getManagedObjectHandlerBuilder(java.lang.String,
+		 *      java.lang.Class)
+		 */
+		@Override
+		public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
+				String managedObjectId, Class<H> handlerKeys)
+				throws BuildException {
+			try {
+
+				// Obtain the managed object source
+				ManagedObjectSourceConfiguration mosConfig = null;
+				for (ManagedObjectSourceConfiguration mos : this.officeFloorConfig
+						.getManagedObjectSourceConfiguration()) {
+					if (managedObjectId.equals(mos.getManagedObjectName())) {
+						mosConfig = mos;
+					}
+				}
+				if (mosConfig == null) {
+					throw new BuildException(
+							"Can not find managed object source by id '"
+									+ managedObjectId + "'");
+				}
+
+				// Obtain the managed object handler builder
+				ManagedObjectHandlerBuilder<H> handlerBuilder = mosConfig
+						.getHandlerBuilder(handlerKeys);
+
+				// Return the managed object handler builder
+				return handlerBuilder;
+
+			} catch (ConfigurationException ex) {
 				throw new BuildException(ex.getMessage());
 			}
 		}

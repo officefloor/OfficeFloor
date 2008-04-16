@@ -18,12 +18,15 @@ package net.officefloor.frame.internal.configuration;
 
 import java.util.Properties;
 
+import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
 /**
- * Configuration of a
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+ * Configuration of a {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -37,22 +40,18 @@ public interface ManagedObjectSourceConfiguration {
 	String getManagedObjectName();
 
 	/**
-	 * Obtains the name of the {@link net.officefloor.frame.api.manage.Office}
-	 * responsible for managing this
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Obtains the name of the {@link Office} responsible for managing this
+	 * {@link ManagedObject}.
 	 * 
-	 * @return Name of the {@link net.officefloor.frame.api.manage.Office}
-	 *         responsible for managing this
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * @return Name of the {@link Office} responsible for managing this
+	 *         {@link ManagedObject}.
 	 */
 	String getManagingOfficeName();
 
 	/**
-	 * Obtains the {@link Class} of the
-	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+	 * Obtains the {@link Class} of the {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link Class} of the
-	 *         {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+	 * @return {@link Class} of the {@link ManagedObjectSource}.
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
@@ -78,12 +77,24 @@ public interface ManagedObjectSourceConfiguration {
 
 	/**
 	 * Obtains the default timeout for asynchronous operations on the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link ManagedObject}.
 	 * 
 	 * @return Default timeout for asynchronous operations on the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *         {@link ManagedObject}.
 	 */
 	long getDefaultTimeout();
+
+	/**
+	 * Obtains the {@link ManagedObjectHandlerBuilder} to allow enhancing.
+	 * 
+	 * {@link Enum} providing the keys for each {@link Handler}.
+	 * 
+	 * @return {@link ManagedObjectHandlerBuilder}.
+	 * @throws ConfigurationException
+	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
+	 */
+	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
+			Class<H> handlerKeys) throws ConfigurationException;
 
 	/**
 	 * Obtains the {@link HandlerConfiguration} for the
