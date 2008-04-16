@@ -16,9 +16,13 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 
 /**
  * Context for the {@link OfficeEnhancer}.
@@ -60,5 +64,27 @@ public interface OfficeEnhancerContext {
 	 */
 	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName,
 			String taskName) throws BuildException;
+
+	/**
+	 * <p>
+	 * Obtains the {@link ManagedObjectHandlerBuilder} for the input
+	 * {@link ManagedObject} id.
+	 * <p>
+	 * It is anticipated that the {@link ManagedObjectSource} is being managed
+	 * by the {@link Office} that this {@link OfficeEnhancer} was added.
+	 * 
+	 * @param managedObjectId
+	 *            Id of the {@link ManagedObjectSource} registered with the
+	 *            {@link OfficeFloorBuilder}.
+	 * @param handlerKeys
+	 *            {@link Enum} specifying the {@link Handler} instances. This
+	 *            MUST match the {@link Enum} from the
+	 *            {@link ManagedObjectSourceMetaData#getHandlerKeys()}.
+	 * @return {@link ManagedObjectHandlerBuilder}.
+	 * @throws BuildException
+	 *             If fails to obtain the {@link ManagedObjectHandlerBuilder}.
+	 */
+	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
+			String managedObjectId, Class<H> handlerKeys) throws BuildException;
 
 }
