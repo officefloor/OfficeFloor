@@ -14,36 +14,29 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.plugin.socket.server.spi;
+package net.officefloor.plugin.impl.socket.server;
 
-import java.net.ServerSocket;
-
-import net.officefloor.frame.api.execute.Handler;
+import java.io.IOException;
+import java.nio.channels.Selector;
 
 /**
  * <p>
- * Handler for a {@link ServerSocket}.
+ * Factory for the creation of the {@link Selector}.
  * <p>
- * Required to be implemented by the handler provider.
+ * This wraps {@link Selector#open()}.
  * 
  * @author Daniel
  */
-public interface ServerSocketHandler<F extends Enum<F>> extends Handler<F> {
+public class SelectorFactory {
 
 	/**
-	 * Creates the {@link Server} to handle {@link ReadMessage} instances.
+	 * Creates the {@link Selector}.
 	 * 
-	 * @return {@link Server} to handle {@link ReadMessage} instances.
+	 * @return New {@link Selector}.
+	 * @throws IOException
+	 *             If fails to create the {@link Selector}.
 	 */
-	Server createServer();
-
-	/**
-	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
-	 * 
-	 * @param connection
-	 *            A new {@link Connection} requiring handling.
-	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
-	 */
-	ConnectionHandler createConnectionHandler(Connection connection);
-
+	public Selector createSelector() throws IOException {
+		return Selector.open();
+	}
 }

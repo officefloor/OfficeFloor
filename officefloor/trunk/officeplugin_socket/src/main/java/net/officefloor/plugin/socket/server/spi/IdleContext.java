@@ -16,34 +16,33 @@
  */
 package net.officefloor.plugin.socket.server.spi;
 
-import java.net.ServerSocket;
-
-import net.officefloor.frame.api.execute.Handler;
-
 /**
- * <p>
- * Handler for a {@link ServerSocket}.
- * <p>
- * Required to be implemented by the handler provider.
+ * Context for handling {@link Connection} being idle.
  * 
  * @author Daniel
  */
-public interface ServerSocketHandler<F extends Enum<F>> extends Handler<F> {
+public interface IdleContext {
 
 	/**
-	 * Creates the {@link Server} to handle {@link ReadMessage} instances.
+	 * <p>
+	 * Obtains the current time in milliseconds.
+	 * <p>
+	 * This should return similar to {@link System#currentTimeMillis()} but is
+	 * provided to cache time for multiple quick operations that require only
+	 * estimates of time.
+	 * <p>
+	 * Note CPU operations should be in the nano-seconds.
 	 * 
-	 * @return {@link Server} to handle {@link ReadMessage} instances.
+	 * @return Time measured in milliseconds.
 	 */
-	Server createServer();
+	long getTime();
 
 	/**
-	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
+	 * Flags to close the {@link Connection}.
 	 * 
-	 * @param connection
-	 *            A new {@link Connection} requiring handling.
-	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
+	 * @param isClose
+	 *            <code>true</code> to close the {@link Connection}.
 	 */
-	ConnectionHandler createConnectionHandler(Connection connection);
+	void setCloseConnection(boolean isClose);
 
 }

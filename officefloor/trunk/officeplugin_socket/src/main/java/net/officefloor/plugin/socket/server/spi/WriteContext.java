@@ -16,6 +16,7 @@
  */
 package net.officefloor.plugin.socket.server.spi;
 
+
 /**
  * Context for handling a potential write.
  * 
@@ -23,15 +24,6 @@ package net.officefloor.plugin.socket.server.spi;
  */
 public interface WriteContext {
 
-	/**
-	 * Obtains the {@link WriteMessage} that is to be written to the
-	 * {@link java.nio.channels.SocketChannel}.
-	 * 
-	 * @return {@link WriteMessage} that is to be written to the
-	 *         {@link java.nio.channels.SocketChannel}.
-	 */
-	WriteMessage getWriteMessage();
-	
 	/**
 	 * Flags to close the {@link Connection}.
 	 * 

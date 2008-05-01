@@ -18,6 +18,8 @@ package net.officefloor.plugin.impl.socket.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -31,6 +33,9 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.execute.WorkContext;
+import net.officefloor.plugin.impl.socket.server.messagesegment.DirectBufferMessageSegmentPool;
+import net.officefloor.plugin.socket.server.spi.Message;
+import net.officefloor.plugin.socket.server.spi.MessageSegment;
 import net.officefloor.plugin.socket.server.spi.Server;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
 
@@ -39,20 +44,14 @@ import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
  * 
  * @author Daniel
  */
-class ServerSocketAccepter implements Work,
-		WorkFactory<ServerSocketAccepter>,
+class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 		Task<Object, ServerSocketAccepter, None, Indexed>,
 		TaskFactory<Object, ServerSocketAccepter, None, Indexed> {
 
 	/**
-	 * {@link ServerSocketChannel} to listen for connections.
+	 * {@link InetSocketAddress}.
 	 */
-	private final ServerSocketChannel channel;
-
-	/**
-	 * {@link Selector} to aid in listening for connections.
-	 */
-	private final Selector selector;
+	private final InetSocketAddress serverSocketAddress;
 
 	/**
 	 * {@link ConnectionManager}.
@@ -60,9 +59,25 @@ class ServerSocketAccepter implements Work,
 	private final ConnectionManager connectionManager;
 
 	/**
+	 * Recommended number of {@link MessageSegment} instances per
+	 * {@link Message}.
+	 */
+	private final int recommendedSegmentCount;
+
+	/**
 	 * {@link MessageSegmentPool}.
 	 */
 	private final MessageSegmentPool messageSegmentPool;
+
+	/**
+	 * {@link ServerSocketChannel} to listen for connections.
+	 */
+	private ServerSocketChannel channel;
+
+	/**
+	 * {@link Selector} to aid in listening for connections.
+	 */
+	private Selector selector;
 
 	/**
 	 * {@link ServerSocketHandler}.
@@ -78,38 +93,45 @@ class ServerSocketAccepter implements Work,
 	 *            {@link InetSocketAddress} to listen for connections.
 	 * @param connectionManager
 	 *            {@link ConnectionManager}.
+	 * @param recommendedSegmentCount
+	 *            Recommended number of {@link MessageSegment} instances per
+	 *            {@link Message}.
 	 * @param messageSegmentPool
-	 *            {@link MessageSegmentPool}.
+	 *            {@link DirectBufferMessageSegmentPool}.
 	 * @throws IOException
-	 *             If fails to set up the {@link java.net.ServerSocket}.
+	 *             If fails to set up the {@link ServerSocket}.
 	 */
 	ServerSocketAccepter(InetSocketAddress serverSocketAddress,
-			ConnectionManager connectionManager,
+			ConnectionManager connectionManager, int recommendedSegmentCount,
 			MessageSegmentPool messageSegmentPool) throws IOException {
-
-		// Store state
+		this.serverSocketAddress = serverSocketAddress;
 		this.connectionManager = connectionManager;
+		this.recommendedSegmentCount = recommendedSegmentCount;
 		this.messageSegmentPool = messageSegmentPool;
+	}
+
+	/**
+	 * Binds to the {@link ServerSocketChannel} and starts listening for
+	 * connections.
+	 * 
+	 * @param serverSocketHandler
+	 *            {@link ServerSocketHandler}.
+	 * @throws IOException
+	 *             If fails to bind.
+	 */
+	void bind(ServerSocketHandler<?> serverSocketHandler) throws IOException {
+
+		// Store reference to the server socket handler
+		this.serverSocketHandler = serverSocketHandler;
 
 		// Bind to the socket to start listening
 		this.channel = ServerSocketChannel.open();
 		this.channel.configureBlocking(false);
-		this.channel.socket().bind(serverSocketAddress);
+		this.channel.socket().bind(this.serverSocketAddress);
 
 		// Register the channel with the selector
 		this.selector = Selector.open();
 		this.channel.register(this.selector, this.channel.validOps());
-	}
-
-	/**
-	 * Specify the {@link ServerSocketHandler}.
-	 * 
-	 * @param serverSocketHandler
-	 *            {@link ServerSocketHandler}.
-	 */
-	synchronized void setServerSocketHandler(
-			ServerSocketHandler<?> serverSocketHandler) {
-		this.serverSocketHandler = serverSocketHandler;
 	}
 
 	/*
@@ -181,7 +203,10 @@ class ServerSocketAccepter implements Work,
 
 							// Create the connection (registering itself)
 							ConnectionImpl<?> connection = new ConnectionImpl(
-									socketChannel, this.serverSocketHandler,
+									new NonblockingSocketChannelImpl(
+											socketChannel),
+									this.serverSocketHandler,
+									this.recommendedSegmentCount,
 									this.messageSegmentPool);
 
 							// Register the connection for management
@@ -192,6 +217,71 @@ class ServerSocketAccepter implements Work,
 				}
 			}
 		}
+	}
+
+	/**
+	 * Implementation of the {@link NonblockingSocketChannel}.
+	 */
+	private static class NonblockingSocketChannelImpl implements
+			NonblockingSocketChannel {
+
+		/**
+		 * {@link SocketChannel}.
+		 */
+		private final SocketChannel socketChannel;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param socketChannel
+		 *            {@link SocketChannel}.
+		 */
+		public NonblockingSocketChannelImpl(SocketChannel socketChannel) {
+			this.socketChannel = socketChannel;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#register(java.nio.channels.Selector,
+		 *      int, java.lang.Object)
+		 */
+		@Override
+		public SelectionKey register(Selector selector, int ops,
+				Object attachment) throws IOException {
+			return this.socketChannel.register(selector, ops, attachment);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#read(java.nio.ByteBuffer)
+		 */
+		@Override
+		public int read(ByteBuffer buffer) throws IOException {
+			return this.socketChannel.read(buffer);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#write(java.nio.ByteBuffer)
+		 */
+		@Override
+		public int write(ByteBuffer data) throws IOException {
+			return this.socketChannel.write(data);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#close()
+		 */
+		@Override
+		public void close() throws IOException {
+			this.socketChannel.close();
+		}
+
 	}
 
 }

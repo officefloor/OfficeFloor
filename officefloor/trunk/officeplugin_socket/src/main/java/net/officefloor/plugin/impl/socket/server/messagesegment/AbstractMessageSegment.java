@@ -14,19 +14,19 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.plugin.impl.socket.server;
+package net.officefloor.plugin.impl.socket.server.messagesegment;
 
 import java.nio.ByteBuffer;
 
+import net.officefloor.plugin.impl.socket.server.PooledMessageSegment;
 import net.officefloor.plugin.socket.server.spi.MessageSegment;
 
 /**
- * Abstract implementation of
- * {@link net.officefloor.plugin.socket.server.spi.MessageSegment}.
+ * Abstract implementation of {@link MessageSegment}.
  * 
  * @author Daniel
  */
-abstract class AbstractMessageSegment implements MessageSegment {
+abstract class AbstractMessageSegment implements PooledMessageSegment {
 
 	/**
 	 * {@link ByteBuffer} for this {@link MessageSegment}.
@@ -54,26 +54,6 @@ abstract class AbstractMessageSegment implements MessageSegment {
 	}
 
 	/**
-	 * Specifies the next {@link MessageSegment}.
-	 * 
-	 * @param next
-	 *            Next {@link MessageSegment}.
-	 */
-	void setNextSegment(AbstractMessageSegment next) {
-		this.next = next;
-	}
-
-	/**
-	 * Specifies the previous {@link MessageSegment}.
-	 * 
-	 * @param prev
-	 *            Previous {@link MessageSegment}.
-	 */
-	void setPrevSegment(AbstractMessageSegment prev) {
-		this.prev = prev;
-	}
-
-	/**
 	 * Indicates if this {@link MessageSegment} can be pooled.
 	 * 
 	 * @return <code>true</code> if this {@link MessageSegment} can be pooled.
@@ -82,7 +62,7 @@ abstract class AbstractMessageSegment implements MessageSegment {
 
 	/*
 	 * ====================================================================
-	 * MessageSegment
+	 * PooledMessageSegment
 	 * ====================================================================
 	 */
 
@@ -111,6 +91,26 @@ abstract class AbstractMessageSegment implements MessageSegment {
 	 */
 	public AbstractMessageSegment getPrevSegment() {
 		return this.prev;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.impl.socket.server.PooledMessageSegment#setNextSegment(net.officefloor.plugin.impl.socket.server.PooledMessageSegment)
+	 */
+	@Override
+	public void setNextSegment(PooledMessageSegment next) {
+		this.next = (AbstractMessageSegment) next;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.impl.socket.server.PooledMessageSegment#setPreviousSegment(net.officefloor.plugin.impl.socket.server.PooledMessageSegment)
+	 */
+	@Override
+	public void setPreviousSegment(PooledMessageSegment previous) {
+		this.prev = (AbstractMessageSegment) previous;
 	}
 
 }

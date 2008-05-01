@@ -17,11 +17,48 @@
 package net.officefloor.plugin.socket.server.spi;
 
 /**
- * {@link net.officefloor.plugin.socket.server.spi.Message} for reading from the
- * client.
+ * {@link Message} for reading from the client.
  * 
  * @author Daniel
  */
 public interface ReadMessage extends Message {
+
+	/**
+	 * Reads data from the {@link ReadMessage} into the input buffer.
+	 * 
+	 * @param buffer
+	 *            Buffer to load the data.
+	 * @return Number of bytes loaded to the buffer.
+	 */
+	int read(byte[] buffer);
+
+	/**
+	 * Reads data from the connection into the input buffer, starting at the
+	 * offset for length bytes.
+	 * 
+	 * @param buffer
+	 *            Buffer to load the data.
+	 * @param offset
+	 *            Offset into the buffer to start loading the data.
+	 * @param length
+	 *            Number of bytes to load into the buffer.
+	 * @return Number of bytes loaded to the buffer.
+	 */
+	int read(byte[] buffer, int offset, int length);
+
+	/**
+	 * Indicates if data is available to be read from this {@link ReadMessage}.
+	 * 
+	 * @return <code>true</code> if data is available.
+	 */
+	boolean isDataAvailable();
+
+	/**
+	 * Obtains the next {@link ReadMessage}.
+	 * 
+	 * @return Next {@link ReadMessage} or <code>null</code> if no further
+	 *         {@link ReadMessage} instances.
+	 */
+	ReadMessage getNextReadMessage();
 
 }

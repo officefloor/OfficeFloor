@@ -16,29 +16,25 @@
  */
 package net.officefloor.plugin.impl.socket.server;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
-import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.BuilderFactory;
-import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource;
-import net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource.ServerSocketHandlersEnum;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
+import net.officefloor.plugin.socket.server.spi.IdleContext;
 import net.officefloor.plugin.socket.server.spi.ReadContext;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
 import net.officefloor.plugin.socket.server.spi.Server;
@@ -48,34 +44,31 @@ import net.officefloor.plugin.socket.server.spi.WriteMessage;
 import net.officefloor.plugin.socket.server.spi.WriteMessageListener;
 
 /**
- * Tests the
- * {@link net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource}.
+ * Tests the {@link ServerSocketManagedObjectSource}.
  * 
  * @author Daniel
  */
-public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
-		implements HandlerFactory<F>, ServerSocketHandler<F>,
+public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
+		HandlerFactory<Indexed>, ServerSocketHandler<Indexed>,
 		ConnectionHandler, WriteMessageListener, Server {
 
 	/**
-	 * First request message.
+	 * Request message.
 	 */
-	protected static final byte[] FIRST_REQUEST_MSG = new byte[] { 1, 2, 3, 4,
-			5 };
+	protected static final byte[] REQUEST_MSG = new byte[] { 1, 2, 3, 4, 5 };
 
 	/**
-	 * Second request message.
+	 * Response message.
 	 */
-	protected static final byte[] FIRST_RESPONSE_MSG = new byte[] { 6, 7, 8, 9,
-			10 };
+	protected static final byte[] RESPONSE_MSG = new byte[] { 6, 7, 8, 9, 10 };
 
 	/**
 	 * {@link ReadMessage} to be processed by the {@link Server}.
 	 */
-	protected volatile ReadMessage readMessage;
+	protected volatile ReadMessageImpl readMessage;
 
 	/**
-	 * {@link WriteMessage} sent by the {@link Server}.
+	 * {@link WriteMessage} created to write the response.
 	 */
 	protected volatile WriteMessage writeMessage;
 
@@ -90,49 +83,31 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 	@SuppressWarnings("unchecked")
 	public void testSendingMessage() throws Exception {
 
-		// Obtain the builder factory
-		BuilderFactory builderFactory = OfficeFrame.getInstance()
-				.getBuilderFactory();
-
-		// Create the Office Floor
-		OfficeFloorBuilder officeFloorBuilder = builderFactory
-				.createOfficeFloorBuilder();
-
 		// Register the Server Socket Managed Object
-		ManagedObjectBuilder serverSocketBuilder = builderFactory
-				.createManagedObjectBuilder();
-		officeFloorBuilder.addManagedObject("MO", serverSocketBuilder);
-
-		// Configure the Server Socket Managed Object
-		serverSocketBuilder
-				.setManagedObjectSourceClass(ServerSocketManagedObjectSource.class);
+		ManagedObjectBuilder serverSocketBuilder = this.constructManagedObject(
+				"MO", ServerSocketManagedObjectSource.class, "OFFICE");
 		serverSocketBuilder.addProperty("port", "12345");
-		serverSocketBuilder.setManagingOffice("OFFICE");
+		serverSocketBuilder.addProperty("message_size", "2");
+		serverSocketBuilder.addProperty("buffer_size", "16");
+		serverSocketBuilder.setDefaultTimeout(3000);
 
-		// Register the handler
-		HandlerBuilder handlerBuilder = serverSocketBuilder
-				.getManagedObjectHandlerBuilder(ServerSocketHandlersEnum.class)
-				.registerHandler(ServerSocketHandlersEnum.SERVER_SOCKET_HANDLER);
-		handlerBuilder.setHandlerFactory(this);
+		// Register the handler of the Server Socket
+		serverSocketBuilder.getManagedObjectHandlerBuilder(
+				ServerSocketHandlerEnum.class).registerHandler(
+				ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER)
+				.setHandlerFactory(this);
 
 		// Register the necessary teams
-		officeFloorBuilder.addTeam("ACCEPTER_TEAM", new OnePersonTeam(100));
-		officeFloorBuilder.addTeam("LISTENER_TEAM", new WorkerPerTaskTeam(
-				"Listener"));
-
-		// Create the Office
-		OfficeBuilder officeBuilder = builderFactory.createOfficeBuilder();
-		officeBuilder.registerManagedObject("O-MO", "MO");
-		officeBuilder.registerTeam("MO.serversocket.12345.Accepter.TEAM",
-				"ACCEPTER_TEAM");
-		officeBuilder.registerTeam("MO.serversocket.12345.Listener.TEAM",
-				"LISTENER_TEAM");
-		officeBuilder.addProcessManagedObject("P-MO", "O-MO");
-		officeFloorBuilder.addOffice("OFFICE", officeBuilder);
+		this.constructTeam("ACCEPTER_TEAM", new OnePersonTeam(100));
+		this.constructTeam("LISTENER_TEAM", new WorkerPerTaskTeam("Listener"));
+		OfficeBuilder officeBuilder = this.getOfficeBuilder();
+		officeBuilder.registerTeam("of-MO.serversocket.12345.Accepter.TEAM",
+				"of-ACCEPTER_TEAM");
+		officeBuilder.registerTeam("of-MO.serversocket.12345.Listener.TEAM",
+				"of-LISTENER_TEAM");
 
 		// Create the Office Floor
-		OfficeFloor officeFloor = OfficeFrame.getInstance()
-				.registerOfficeFloor("OF-TEST", officeFloorBuilder);
+		OfficeFloor officeFloor = this.constructOfficeFloor("OFFICE");
 
 		// Open the Office Floor
 		officeFloor.openOfficeFloor();
@@ -143,23 +118,23 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 				new InetSocketAddress(InetAddress.getLocalHost(), 12345), 100);
 
 		// Write a message
-		socket.getOutputStream().write(FIRST_REQUEST_MSG);
+		socket.getOutputStream().write(REQUEST_MSG);
 
-		// Wait for the response
-		while (this.writeMessage == null) {
-			this.sleep(1);
+		// Read the response
+		byte[] buffer = new byte[RESPONSE_MSG.length];
+		socket.getInputStream().read(buffer);
+		for (int i = 0; i < buffer.length; i++) {
+			assertEquals("Incorrect response byte " + i, RESPONSE_MSG[i],
+					buffer[i]);
 		}
 
-		// Validate message being processed
-		assertNotNull("ReadMessage not being processed", this.readMessage);
+		// Ensure the connection is closed
+		assertEquals("Connection should be closed", -1, socket.getInputStream()
+				.read());
 
-		// Read a response
-		InputStream inputStream = socket.getInputStream();
-		assertTrue("No response", (inputStream.available() > 0));
-
-		// Ensure the write message is same as one written
-		assertSame("Written message not same as write message",
-				this.writeMessage, this.writtenMessage);
+		// Ensure the write and written message are the same
+		assertEquals("Incorrect written message", this.writeMessage,
+				this.writtenMessage);
 
 		// Close the Office
 		officeFloor.closeOfficeFloor();
@@ -176,7 +151,7 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 	 * 
 	 * @see net.officefloor.frame.api.build.HandlerFactory#createHandler()
 	 */
-	public Handler<F> createHandler() {
+	public Handler<Indexed> createHandler() {
 		return this;
 	}
 
@@ -209,7 +184,8 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 	 * 
 	 * @see net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor.frame.api.execute.HandlerContext)
 	 */
-	public void setHandlerContext(HandlerContext<F> context) throws Exception {
+	public void setHandlerContext(HandlerContext<Indexed> context)
+			throws Exception {
 		// Do nothing with context
 	}
 
@@ -231,7 +207,7 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 
 		// Ensure data is on the message
 		assertEquals("Message missing data", message.getFirstSegment()
-				.getBuffer().position(), FIRST_REQUEST_MSG.length);
+				.getBuffer().position(), REQUEST_MSG.length);
 
 		// Ensure data on message is correct
 		byte[] data = new byte[10];
@@ -240,9 +216,9 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 		buffer.get(data, 0, buffer.limit());
 
 		// Validate message is correct
-		for (int i = 0; i < FIRST_REQUEST_MSG.length; i++) {
+		for (int i = 0; i < REQUEST_MSG.length; i++) {
 			assertEquals("Incorrect request message byte at " + i,
-					FIRST_REQUEST_MSG[i], data[i]);
+					REQUEST_MSG[i], data[i]);
 		}
 
 		// Flag the message read
@@ -255,26 +231,16 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleWrite(net.officefloor.plugin.socket.server.spi.WriteContext)
 	 */
 	public void handleWrite(WriteContext context) {
-
-		// Obtain the message
-		WriteMessage message = context.getWriteMessage();
-
-		// Determine if message is written
-		if (message.isWritten()) {
-			// Flag message written
-			this.writeMessage = message;
-
-			// Close connection
-			context.setCloseConnection(true);
-		}
+		// Message being written so close connection (once done)
+		context.setCloseConnection(true);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleIdleConnection(net.officefloor.plugin.socket.server.spi.Connection)
+	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleIdleConnection(net.officefloor.plugin.socket.server.spi.IdleContext)
 	 */
-	public void handleIdleConnection(Connection connection) {
+	public void handleIdleConnection(IdleContext context) {
 		System.out.println("Connection is idle");
 	}
 
@@ -290,6 +256,9 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 	 * @see net.officefloor.plugin.socket.server.spi.WriteMessageListener#messageWritten(net.officefloor.plugin.socket.server.spi.WriteMessage)
 	 */
 	public void messageWritten(WriteMessage message) {
+		// Ensure only written once
+		assertNull("Message should only be written once", this.writtenMessage);
+
 		// Flag message written
 		this.writtenMessage = message;
 	}
@@ -306,23 +275,18 @@ public class ServerSocketTest<F extends Enum<F>> extends OfficeFrameTestCase
 	 * @see net.officefloor.plugin.socket.server.spi.Server#startRequest(net.officefloor.plugin.socket.server.spi.ReadMessage)
 	 */
 	public void processReadMessage(ReadMessage message,
-			ConnectionHandler connectionHandler) {
+			ConnectionHandler connectionHandler) throws IOException {
 
 		// Ensure connection handler is this
 		assertSame("Incorrect connection handler", this, connectionHandler);
 
 		// Specify the read message
-		this.readMessage = message;
+		this.readMessage = (ReadMessageImpl) message;
 
 		// Create the write message to send a response
-		WriteMessage writeMessage = this.readMessage.getConnection()
+		this.writeMessage = this.readMessage.getConnection()
 				.createWriteMessage(this);
-
-		// Populate the write message
-		writeMessage.appendSegment().getBuffer().put(FIRST_RESPONSE_MSG);
-
-		// Write message
-		writeMessage.write();
+		this.writeMessage.appendSegment().getBuffer().put(RESPONSE_MSG);
+		this.writeMessage.write();
 	}
-
 }

@@ -16,10 +16,11 @@
  */
 package net.officefloor.plugin.socket.server.spi;
 
+import java.io.IOException;
+
 /**
  * <p>
- * {@link Server} to input
- * {@link net.officefloor.plugin.socket.server.spi.ReadMessage}.
+ * {@link Server} to input {@link ReadMessage}.
  * <p>
  * Required to be implemented by the handler provider.
  * 
@@ -35,8 +36,10 @@ public interface Server {
 	 * @param connectionHandler
 	 *            {@link ConnectionHandler} for the {@link Connection} of the
 	 *            {@link ReadMessage}.
+	 * @throws IOException
+	 *             If fails to process the {@link ReadMessage}.
 	 */
 	void processReadMessage(ReadMessage message,
-			ConnectionHandler connectionHandler);
+			ConnectionHandler connectionHandler) throws IOException;
 
 }

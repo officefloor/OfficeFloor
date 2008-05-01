@@ -20,16 +20,16 @@ import java.nio.ByteBuffer;
 
 /**
  * <p>
- * Segment of a {@link net.officefloor.plugin.socket.server.spi.Message}.
+ * Segment of a {@link Message}.
  * <p>
- * Provided by the Server Socket plugin.
+ * Provided by the Server Socket plug-in.
  * 
  * @author Daniel
  */
 public interface MessageSegment {
 
 	/**
-	 * Obtains the {@link java.nio.ByteBuffer} of this segment.
+	 * Obtains the {@link ByteBuffer} of this segment.
 	 * 
 	 * @return {@link ByteBuffer} of this segment.
 	 */

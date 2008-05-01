@@ -16,37 +16,37 @@
  */
 package net.officefloor.plugin.impl.socket.server;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Properties;
+import java.net.ServerSocket;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
-import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectSourcePropertyImpl;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.impl.socket.server.messagesegment.DirectBufferMessageSegmentPool;
+import net.officefloor.plugin.socket.server.spi.ReadMessage;
 import net.officefloor.plugin.socket.server.spi.Server;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
- * for a {@link java.net.ServerSocket}.
+ * <p>
+ * {@link ManagedObjectSource} for a {@link ServerSocket}.
+ * <p>
+ * This provides the functionality for the spi interfaces. Please consider using
+ * one of the {@link ManagedObjectSource} inheriting from this that provide a
+ * protocol specific api.
  * 
  * @author Daniel
  */
-public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		implements ManagedObjectSource<D, H>, ManagedObjectSourceMetaData<D, H> {
+public class ServerSocketManagedObjectSource extends
+		AbstractManagedObjectSource {
 
 	/**
 	 * {@link ServerSocketAccepter} listening for connections.
@@ -56,65 +56,102 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 	/**
 	 * {@link Server}.
 	 */
-	private Server server;
+	protected Server server;
 
 	/**
-	 * Processes the completely read
-	 * {@link net.officefloor.plugin.socket.server.spi.ReadMessage}.
+	 * {@link SelectorFactory}.
+	 */
+	private final SelectorFactory selectorFactory;
+
+	/**
+	 * Default constructor necessary as per {@link ManagedObjectSource}.
+	 */
+	public ServerSocketManagedObjectSource() {
+		this(new SelectorFactory());
+	}
+
+	/**
+	 * Allow for hooking in for testing.
+	 * 
+	 * @param selectorFactory
+	 *            {@link SelectorFactory}.
+	 */
+	ServerSocketManagedObjectSource(SelectorFactory selectorFactory) {
+		this.selectorFactory = selectorFactory;
+	}
+
+	/**
+	 * Obtains the {@link SelectorFactory}.
+	 * 
+	 * @return {@link SelectorFactory}.
+	 */
+	SelectorFactory getSelectorFactory() {
+		return this.selectorFactory;
+	}
+
+	/**
+	 * Processes the completely read {@link ReadMessage}.
 	 * 
 	 * @param readMessage
-	 *            {@link net.officefloor.plugin.socket.server.spi.ReadMessage}.
+	 *            {@link ReadMessage}.
+	 * @throws IOException
+	 *             If fails to process {@link ReadMessage}.
 	 */
-	public void processMessage(ReadMessageImpl readMessage) {
+	void processMessage(ReadMessageImpl readMessage) throws IOException {
 		// Process the message
-		this.server.processReadMessage(readMessage, readMessage.getConnection()
-				.getConnectionHandler());
+		this.server.processReadMessage(readMessage,
+				readMessage.stream.connection.connectionHandler);
 	}
 
 	/*
 	 * ====================================================================
-	 * ManagedObjectSource
+	 * AbstractManagedObjectSource
 	 * ====================================================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getSpecification()
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
 	 */
-	public ManagedObjectSourceSpecification getSpecification() {
-		// Provide specification
-		return new ManagedObjectSourceSpecification() {
-			public ManagedObjectSourceProperty[] getProperties() {
-				return new ManagedObjectSourceProperty[] {
-						new ManagedObjectSourcePropertyImpl("port", "port"),
-						new ManagedObjectSourcePropertyImpl("max_conn",
-								"max conn per listener") };
-			}
-		};
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty("port");
+		context.addProperty("buffer_size", "Buffer size");
+		context.addProperty("message_size", "Recommended segments per message");
+		context.addProperty("max_conn", "Maximum connextions per listener");
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
-	public void init(ManagedObjectSourceContext context) throws Exception {
+	@Override
+	protected void loadMetaData(MetaDataContext context) throws Exception {
 
-		Properties properties = context.getProperties();
+		// Provide meta-data
+		context.setManagedObjectClass(AsynchronousManagedObject.class);
 
-		// Obtain the port
-		int port = Integer.parseInt(properties.getProperty("port"));
+		// Obtain the managed object source context
+		ManagedObjectSourceContext mosContext = context
+				.getManagedObjectSourceContext();
 
-		// Obtain the maximum connections per listener
+		// Obtain the configuration
+		int port = Integer.parseInt(mosContext.getProperty("port"));
+		int bufferSize = Integer
+				.parseInt(mosContext.getProperty("buffer_size"));
+		int recommendedSegmentCount = Integer.parseInt(mosContext
+				.getProperty("message_size"));
 		int maxConn = Integer
-				.parseInt(properties.getProperty("max_conn", "63"));
+				.parseInt(mosContext.getProperty("max_conn", "63"));
 
 		// Create prefix name
 		String prefix = "serversocket." + port + ".";
 
 		// Create the message segment pool
-		MessageSegmentPool messageSegmentPool = new MessageSegmentPool();
+		DirectBufferMessageSegmentPool messageSegmentPool = new DirectBufferMessageSegmentPool(
+				bufferSize);
 
 		// Create the connection manager
 		ConnectionManager connectionManager = new ConnectionManager(this,
@@ -123,11 +160,9 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 		// Register the accepter of connections
 		this.serverSocketAccepter = new ServerSocketAccepter(
 				new InetSocketAddress(port), connectionManager,
-				messageSegmentPool);
-		ManagedObjectWorkBuilder<ServerSocketAccepter> accepterWork = context
+				recommendedSegmentCount, messageSegmentPool);
+		ManagedObjectWorkBuilder<ServerSocketAccepter> accepterWork = mosContext
 				.addWork(prefix + "Accepter", ServerSocketAccepter.class);
-
-		// Configure the accepter of connections
 		accepterWork.setWorkFactory(this.serverSocketAccepter);
 		ManagedObjectTaskBuilder<Indexed> accepterTask = accepterWork.addTask(
 				"Accepter", Object.class, this.serverSocketAccepter);
@@ -135,27 +170,47 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 		accepterTask.linkFlow(0, (prefix + "Listener"), "Listener",
 				FlowInstigationStrategyEnum.ASYNCHRONOUS);
 
-		// Register the listener of connections
-		ManagedObjectWorkBuilder<ConnectionManager> listenerWork = context
+		// Register the listening of connections
+		ManagedObjectWorkBuilder<ConnectionManager> listenerWork = mosContext
 				.addWork(prefix + "Listener", ConnectionManager.class);
-
-		// Configure the listener of connections
 		listenerWork.setWorkFactory(connectionManager);
 		ManagedObjectTaskBuilder<Indexed> listenerTask = listenerWork.addTask(
 				"Listener", Object.class, connectionManager);
 		listenerTask.setTeam(prefix + "Listener.TEAM");
 
 		// Flag to start accepter on server start up
-		context.addStartupTask(prefix + "Accepter", "Accepter");
+		mosContext.addStartupTask(prefix + "Accepter", "Accepter");
+
+		// Provide for linking in a Server Socket handler
+		context.getHandlerLoader(ServerSocketHandlerEnum.class).mapHandlerType(
+				ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER,
+				ServerSocketHandler.class);
+
+		// Register the server socket handler
+		this.registerServerSocketHandler(context);
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * <p>
+	 * Registers the {@link ServerSocketHandler}. By default specifies for a
+	 * {@link ServerSocketHandler} to be configured in.
+	 * <p>
+	 * A specific protocol {@link ServerSocketManagedObjectSource} should
+	 * override this method to provide a specific {@link ServerSocketHandler}.
+	 * <p>
+	 * Protocol specific overriding should at minimum provide:<il>
+	 * <li>Type of object</li>
+	 * <li>{@link ServerSocketHandler} implementation</li>
+	 * </il>
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
+	 * @param context
+	 *            {@link MetaDataContext}.
+	 * @throws Exception
+	 *             If fails.
 	 */
-	public ManagedObjectSourceMetaData<D, H> getMetaData() {
-		return this;
+	protected void registerServerSocketHandler(MetaDataContext context)
+			throws Exception {
+		// By default do not register
 	}
 
 	/*
@@ -167,117 +222,25 @@ public class ServerSocketManagedObjectSource<D extends Enum<D>, H extends Enum<H
 	public void start(ManagedObjectExecuteContext context) throws Exception {
 		// Obtain the handler
 		ServerSocketHandler serverSocketHandler = (ServerSocketHandler) context
-				.getHandler(ServerSocketHandlersEnum.SERVER_SOCKET_HANDLER);
+				.getHandler(ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER);
 
 		// Specify the server
 		this.server = serverSocketHandler.createServer();
 
-		// Load handler to accepter
-		this.serverSocketAccepter.setServerSocketHandler(serverSocketHandler);
+		// Bind to socket and start handling connections
+		this.serverSocketAccepter.bind(serverSocketHandler);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
+	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource#getManagedObject()
 	 */
-	public void sourceManagedObject(ManagedObjectUser user) {
-		// Should never be sourced as input
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
+		// Should never be directly used by a task
 		throw new IllegalStateException("Can not source managed object from a "
-				+ ServerSocketManagedObjectSource.class.getSimpleName());
-	}
-
-	/*
-	 * ====================================================================
-	 * ManagedObjectSource
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
-	 */
-	@SuppressWarnings("unchecked")
-	public Class<? extends ManagedObject> getManagedObjectClass() {
-		return AsynchronousManagedObject.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getObjectClass()
-	 */
-	public Class<?> getObjectClass() {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyKeys()
-	 */
-	public Class<D> getDependencyKeys() {
-		// No dependencies
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyMetaData(D)
-	 */
-	public ManagedObjectDependencyMetaData getDependencyMetaData(D key) {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerKeys()
-	 */
-	@SuppressWarnings("unchecked")
-	public Class<H> getHandlerKeys() {
-		return (Class) ServerSocketHandlersEnum.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
-	 */
-	@SuppressWarnings("unchecked")
-	public Class<? extends Handler<?>> getHandlerType(H key) {
-		// Return handler type
-		ServerSocketHandlersEnum handleKey = (ServerSocketHandlersEnum) (Enum) key;
-		switch (handleKey) {
-		case SERVER_SOCKET_HANDLER:
-			return (Class) ServerSocketHandler.class;
-		default:
-			return null;
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
-	 */
-	public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
-		// No extensions
-		return null;
-	}
-
-	/**
-	 * Provides the {@link net.officefloor.frame.api.execute.Handler} indexes.
-	 */
-	public static enum ServerSocketHandlersEnum {
-
-		/**
-		 * Handles the server socket.
-		 */
-		SERVER_SOCKET_HANDLER
+				+ this.getClass().getSimpleName());
 	}
 
 }

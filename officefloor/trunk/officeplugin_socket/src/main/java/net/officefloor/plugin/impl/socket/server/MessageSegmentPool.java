@@ -18,77 +18,22 @@ package net.officefloor.plugin.impl.socket.server;
 
 import java.nio.ByteBuffer;
 
+import net.officefloor.plugin.socket.server.spi.Message;
 import net.officefloor.plugin.socket.server.spi.MessageSegment;
 
 /**
- * Pool of {@link net.officefloor.plugin.socket.server.spi.MessageSegment}
- * instances.
+ * Pool of {@link PooledMessageSegment} instances.
  * 
  * @author Daniel
  */
-class MessageSegmentPool {
+public interface MessageSegmentPool {
 
 	/**
-	 * Head of the listing of {@link MessageSegment} listing.
-	 */
-	private PooledMessageSegment head = null;
-
-	/**
-	 * Tail of the listing of {@link MessageSegment} listing.
-	 */
-	private PooledMessageSegment tail = null;
-
-	/**
-	 * Obtains a {@link MessageSegment} from this {@link MessageSegmentPool}.
+	 * Obtains the {@link ByteBuffer} size of each {@link MessageSegment}.
 	 * 
-	 * @return {@link MessageSegment} from this {@link MessageSegmentPool}.
+	 * @return {@link ByteBuffer} size of each {@link MessageSegment}.
 	 */
-	MessageSegment getMessageSegment() {
-		// Determine if have pooled segments
-		PooledMessageSegment segment = null;
-		synchronized (this) {
-			if (this.head != null) {
-				// Remove the first segment
-				segment = this.head;
-				this.head = (PooledMessageSegment) segment.getNextSegment();
-
-				// Handle remaining references
-				if (this.head != null) {
-					// Flag not previous
-					this.head.setPrevSegment(null);
-				} else {
-					// No head, therefore no tail
-					this.tail = null;
-				}
-			}
-		}
-
-		// Determine if sourced a segment
-		if (segment != null) {
-			// Clean the sourced segment
-			segment.setNextSegment(null);
-			segment.setPrevSegment(null);
-			segment.getBuffer().clear();
-
-			// Return the sourced segment
-			return segment;
-		} else {
-			// Create a new segment
-			return this.createMessageSegment();
-		}
-	}
-
-	/**
-	 * Obtains a listing of {@link MessageSegment} instances.
-	 * 
-	 * @param number
-	 *            Number of {@link MessageSegment} instances.
-	 * @return Starting {@link MessageSegment} of the listing.
-	 */
-	synchronized MessageSegment getMessageSegments(int number) {
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
+	int getMessageSegmentBufferSize();
 
 	/**
 	 * <p>
@@ -96,69 +41,27 @@ class MessageSegmentPool {
 	 * <p>
 	 * Should the {@link MessageSegment} have next {@link MessageSegment}
 	 * instances, they are also returned to this {@link MessageSegmentPool}.
-	 * This aids returning
-	 * {@link net.officefloor.plugin.socket.server.spi.Message} instances in
-	 * bulk.
+	 * This aids returning {@link Message} instances in bulk.
 	 * 
 	 * @param segment
 	 *            Start {@link MessageSegment} listing to be returned to this
 	 *            {@link MessageSegmentPool}.
 	 */
-	void returnMessageSegment(AbstractMessageSegment segment) {
-
-		// Ensure have a segment
-		if (segment == null) {
-			return;
-		}
-
-		// Return to segments to pool
-		synchronized (this) {
-
-			// Handle if pool empty
-			if (this.head == null) {
-				// Obtain the first segment that is pooled
-				while ((segment != null) && (!segment.canPool())) {
-					segment = segment.getNextSegment();
-				}
-
-				// Determine if have pooled segment
-				if (segment != null) {
-					// Set as segment as first in list
-					this.head = (PooledMessageSegment) segment;
-
-					// Move to next segment in input list
-					segment = segment.getNextSegment();
-
-					// Initiate remaining list state
-					this.head.setPrevSegment(null);
-					this.tail = this.head;
-					this.tail.setNextSegment(null);
-				}
-			}
-
-			// Load to non-empty pool
-			while (segment != null) {
-				if (segment.canPool()) {
-					// Append the message segment to pool
-					segment.setPrevSegment(this.tail);
-					this.tail.setNextSegment(segment);
-					this.tail = (PooledMessageSegment) segment;
-				}
-			}
-
-			// Flag no more segments
-			this.tail.setNextSegment(null);
-		}
-	}
+	void returnMessageSegments(PooledMessageSegment segment);
 
 	/**
-	 * Creates a new {@link PooledMessageSegment}.
+	 * Obtains a {@link PooledMessageSegment}.
 	 * 
-	 * @return New {@link PooledMessageSegment}.
+	 * @return {@link PooledMessageSegment}.
 	 */
-	private PooledMessageSegment createMessageSegment() {
-		// TODO provide ability to specify the buffer sizes
-		return new PooledMessageSegment(ByteBuffer.allocateDirect(1024));
-	}
+	PooledMessageSegment getMessageSegment();
 
+	/**
+	 * Obtains a {@link PooledMessageSegment} for the input {@link ByteBuffer}.
+	 * 
+	 * @param buffer
+	 *            {@link ByteBuffer}.
+	 * @return {@link PooledMessageSegment}.
+	 */
+	PooledMessageSegment getMessageSegment(ByteBuffer buffer);
 }
