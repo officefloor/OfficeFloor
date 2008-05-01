@@ -303,6 +303,16 @@ public class RawManagedObjectMetaData {
 		boolean isAsynchronous = AsynchronousManagedObject.class
 				.isAssignableFrom(managedObjectClass);
 
+		// Determine timeout for managed object
+		long moTimeout = (timeout <= 0 ? this.timeout : timeout);
+		if (isAsynchronous && (moTimeout <= 0)) {
+			// Must have greater than zero timeout on being asynchronous
+			throw new ConfigurationException("Managed Object '"
+					+ this.managedObjectName
+					+ "' is asynchronous but with non-positive timeout ["
+					+ moTimeout + "]");
+		}
+
 		// Create the Operations Manager (if asynchronous)
 		AssetManager operationsManager = null;
 		if (isAsynchronous) {
@@ -320,7 +330,7 @@ public class RawManagedObjectMetaData {
 		ManagedObjectMetaDataImpl<D> metaData = new ManagedObjectMetaDataImpl<D>(
 				this.managedObjectSource, this.managedObjectPool,
 				this.sourcingManager, isAsynchronous, operationsManager,
-				isCoordinating, dependencyMapping, timeout);
+				isCoordinating, dependencyMapping, moTimeout);
 
 		// Register the meta-data
 		this.moMetaData.add(metaData);

@@ -21,6 +21,7 @@ import net.officefloor.frame.internal.structure.AssetReport;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
@@ -34,7 +35,7 @@ import net.officefloor.frame.spi.team.ExecutionContext;
 import net.officefloor.frame.spi.team.TaskContainer;
 
 /**
- * Container of a {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Container of a {@link ManagedObject}.
  * 
  * @author Daniel
  */
@@ -109,8 +110,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * @param lock
 	 *            Lock for managing the {@link ManagedObjectContainer}.
 	 */
-	public <D extends Enum<D>> ManagedObjectContainerImpl(ManagedObjectMetaData<D> metaData,
-			Object lock) {
+	public <D extends Enum<D>> ManagedObjectContainerImpl(
+			ManagedObjectMetaData<D> metaData, Object lock) {
 		// Store state
 		this.metaData = metaData;
 		this.lock = lock;
@@ -132,7 +133,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	/**
 	 * Allows loading the {@link ManagedObject} directly when creating a
-	 * {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * {@link ProcessState}.
 	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject}.
@@ -142,6 +143,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Flag managed object loaded
 			this.containerState = ManagedObjectContainerState.LOADING;
 			this.managedObject = managedObject;
+
+			// Provide listener if asynchronous managed object
+			if (this.metaData.isManagedObjectAsynchronous()) {
+				((AsynchronousManagedObject) this.managedObject)
+						.registerAsynchronousCompletionListener(this);
+			}
 
 			// Create the recycle task
 			this.recycleTask = this.metaData
@@ -266,9 +273,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 *      net.officefloor.frame.spi.team.TaskContainer)
 	 */
 	@SuppressWarnings("unchecked")
-	public void coordinateManagedObject(
-			WorkContainer workContainer, ExecutionContext executionContext,
-			TaskContainer taskContainer) {
+	public void coordinateManagedObject(WorkContainer workContainer,
+			ExecutionContext executionContext, TaskContainer taskContainer) {
 
 		// Determine if co-ordinating managed object
 		if (this.metaData.isCoordinatingManagedObject()) {
@@ -337,8 +343,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				if (startTime != NO_ASYNC_OPERATION) {
 
 					// Determine if asynchronous operation has timed out
-					if ((executionContext.getTime() - startTime) < this.metaData
-							.getTimeout()) {
+					long idleTime = executionContext.getTime() - startTime;
+					if (idleTime > this.metaData.getTimeout()) {
 						throw new ExecutionError(
 								ExecutionErrorEnum.MANAGED_OBJECT_ASYNC_OPERATION_TIMED_OUT);
 					}

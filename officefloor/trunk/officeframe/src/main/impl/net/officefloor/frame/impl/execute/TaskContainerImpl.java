@@ -225,6 +225,10 @@ public class TaskContainerImpl<P extends Object, W extends Work, M extends Enum<
 					// (possibly from waiting for a managed object)
 					escalationCause = this.threadState.getFailure();
 					if (escalationCause != null) {
+						// Clear failure on the thread, as escalating
+						this.threadState.setFailure(null);
+
+						// Escalate the failure on the thread
 						throw escalationCause;
 					}
 
