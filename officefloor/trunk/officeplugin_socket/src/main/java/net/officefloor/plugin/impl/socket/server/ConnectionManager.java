@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sun.corba.se.spi.activation.Server;
+
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
@@ -31,8 +33,7 @@ import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.plugin.socket.server.spi.Connection;
 
 /**
- * Manages the {@link net.officefloor.plugin.socket.server.spi.Connection}
- * instances with the {@link net.officefloor.plugin.socket.server.spi.Server}.
+ * Manages the {@link Connection} instances with the {@link Server}.
  * 
  * TODO handle cleaning up SocketListeners no longer listening to connections.
  * 
@@ -44,7 +45,7 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 	/**
 	 * {@link ServerSocketManagedObjectSource}.
 	 */
-	private final ServerSocketManagedObjectSource<?, ?> moSource;
+	private final ServerSocketManagedObjectSource moSource;
 
 	/**
 	 * Maximum number of {@link Connection} instances per {@link SocketListener}.
@@ -67,7 +68,7 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 	 * @throws IOException
 	 *             If fails creation.
 	 */
-	ConnectionManager(ServerSocketManagedObjectSource<?, ?> moSource,
+	ConnectionManager(ServerSocketManagedObjectSource moSource,
 			int maxConnPerListener) throws IOException {
 		this.moSource = moSource;
 		this.maxConnPerListener = maxConnPerListener;
@@ -79,9 +80,7 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 	 * @param connection
 	 *            {@link Connection} to be managed.
 	 * @param taskContext
-	 *            To invoke new
-	 *            {@link net.officefloor.plugin.impl.socket.server.SocketListener}
-	 *            instances.
+	 *            To invoke new {@link SocketListener} instances.
 	 * @throws IOException
 	 *             If fails registering the {@link Connection}.
 	 */

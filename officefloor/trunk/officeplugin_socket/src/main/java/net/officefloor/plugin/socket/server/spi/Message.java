@@ -20,6 +20,10 @@ package net.officefloor.plugin.socket.server.spi;
  * <p>
  * Represents a message to be communicated.
  * <p>
+ * <b>All changes to a {@link Message} or a {@link MessageSegment} must be done
+ * within a <code>synchronized</code> block on lock
+ * {@link Connection#getLock()}.</b>
+ * <p>
  * Provided by the Server Socket plugin.
  * 
  * @author Daniel

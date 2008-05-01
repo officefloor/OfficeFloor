@@ -14,36 +14,26 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.plugin.socket.server.spi;
+package net.officefloor.plugin.impl.socket.server;
 
-import java.net.ServerSocket;
-
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.plugin.socket.server.spi.WriteMessageListener;
 
 /**
- * <p>
- * Handler for a {@link ServerSocket}.
- * <p>
- * Required to be implemented by the handler provider.
+ * Creates a {@link AbstractMessage}.
  * 
  * @author Daniel
  */
-public interface ServerSocketHandler<F extends Enum<F>> extends Handler<F> {
+public interface MessageFactory<T extends AbstractMessage<T>> {
 
 	/**
-	 * Creates the {@link Server} to handle {@link ReadMessage} instances.
+	 * Creates the {@link AbstractMessage}.
 	 * 
-	 * @return {@link Server} to handle {@link ReadMessage} instances.
+	 * @param stream
+	 *            {@link Stream} of the {@link AbstractMessage}.
+	 * @param listener
+	 *            {@link WriteMessageListener}.
+	 * @return New {@link AbstractMessage}.
 	 */
-	Server createServer();
-
-	/**
-	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
-	 * 
-	 * @param connection
-	 *            A new {@link Connection} requiring handling.
-	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
-	 */
-	ConnectionHandler createConnectionHandler(Connection connection);
+	T createMessage(Stream<T> stream, WriteMessageListener listener);
 
 }

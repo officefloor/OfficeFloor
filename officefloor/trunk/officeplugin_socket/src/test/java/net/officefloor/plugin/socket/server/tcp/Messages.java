@@ -14,36 +14,38 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.plugin.socket.server.spi;
-
-import java.net.ServerSocket;
-
-import net.officefloor.frame.api.execute.Handler;
+package net.officefloor.plugin.socket.server.tcp;
 
 /**
- * <p>
- * Handler for a {@link ServerSocket}.
- * <p>
- * Required to be implemented by the handler provider.
+ * Provides translations of messages.
  * 
  * @author Daniel
  */
-public interface ServerSocketHandler<F extends Enum<F>> extends Handler<F> {
+public class Messages {
 
 	/**
-	 * Creates the {@link Server} to handle {@link ReadMessage} instances.
-	 * 
-	 * @return {@link Server} to handle {@link ReadMessage} instances.
+	 * Listing of messages.
 	 */
-	Server createServer();
+	private static final String[] messages = new String[] { "Hello World",
+			"Test", "OfficeFloor" };
 
 	/**
-	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
+	 * Obtains the number of messages.
 	 * 
-	 * @param connection
-	 *            A new {@link Connection} requiring handling.
-	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
+	 * @return Number of messages.
 	 */
-	ConnectionHandler createConnectionHandler(Connection connection);
+	public static int getSize() {
+		return messages.length;
+	}
 
+	/**
+	 * Obtains the particular message.
+	 * 
+	 * @param index
+	 *            Index for the message.
+	 * @return Message.
+	 */
+	public static String getMessage(int index) {
+		return messages[index];
+	}
 }

@@ -14,36 +14,43 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.plugin.socket.server.spi;
+package net.officefloor.plugin.impl.socket.server.messagesegment;
 
-import java.net.ServerSocket;
+import java.nio.ByteBuffer;
 
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.plugin.socket.server.spi.MessageSegment;
 
 /**
- * <p>
- * Handler for a {@link ServerSocket}.
- * <p>
- * Required to be implemented by the handler provider.
+ * {@link MessageSegment} used as an instance and then discarded. It therefore
+ * can not be pooled.
  * 
  * @author Daniel
  */
-public interface ServerSocketHandler<F extends Enum<F>> extends Handler<F> {
+public class InstanceMessageSegment extends AbstractMessageSegment {
 
 	/**
-	 * Creates the {@link Server} to handle {@link ReadMessage} instances.
+	 * Initiate.
 	 * 
-	 * @return {@link Server} to handle {@link ReadMessage} instances.
+	 * @param buffer
+	 *            {@link ByteBuffer}.
 	 */
-	Server createServer();
+	public InstanceMessageSegment(ByteBuffer buffer) {
+		super(buffer);
+	}
 
-	/**
-	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
-	 * 
-	 * @param connection
-	 *            A new {@link Connection} requiring handling.
-	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
+	/*
+	 * ====================================================================
+	 * AbstractMessageSegment
+	 * ====================================================================
 	 */
-	ConnectionHandler createConnectionHandler(Connection connection);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.impl.AbstractMessageSegment#canPool()
+	 */
+	boolean canPool() {
+		return false;
+	}
 
 }

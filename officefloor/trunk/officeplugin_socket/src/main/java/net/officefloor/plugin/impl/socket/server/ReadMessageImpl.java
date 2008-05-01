@@ -16,25 +16,69 @@
  */
 package net.officefloor.plugin.impl.socket.server;
 
-import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
 
 /**
- * Implementation of
- * {@link net.officefloor.plugin.socket.server.spi.ReadMessage}.
+ * Implementation of {@link ReadMessage}.
  * 
  * @author Daniel
  */
-class ReadMessageImpl extends AbstractMessage implements ReadMessage {
+class ReadMessageImpl extends AbstractMessage<ReadMessageImpl> implements
+		ReadMessage {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param connection
-	 *            {@link Connection}.
+	 * @param stream
+	 *            {@link Stream}.
 	 */
-	public ReadMessageImpl(ConnectionImpl<?> connection) {
-		super(connection);
+	ReadMessageImpl(Stream<ReadMessageImpl> stream) {
+		super(stream, null);
+	}
+
+	/*
+	 * ===================================================================
+	 * ReadMessage
+	 * ===================================================================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.ReadMessage#getNextReadMessage()
+	 */
+	@Override
+	public ReadMessage getNextReadMessage() {
+		return this.next;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.ReadMessage#isDataAvailable()
+	 */
+	@Override
+	public boolean isDataAvailable() {
+
+		// Ensure valid state
+		this.checkIOState();
+
+		// Ensure a segment available
+		if (this.tail == null) {
+			// No segments, so no data
+			return false;
+		}
+
+		// Determine if current message is last
+		if (this.tail == this.currentReadSegment) {
+			if (this.tail.getBuffer().position() == this.currentReadOffset) {
+				// Current segment is last with all data read, therefore no data
+				return false;
+			}
+		}
+
+		// Segments available that have not been fully read
+		return true;
 	}
 
 }

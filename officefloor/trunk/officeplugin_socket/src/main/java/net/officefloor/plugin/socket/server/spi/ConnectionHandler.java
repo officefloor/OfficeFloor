@@ -16,9 +16,11 @@
  */
 package net.officefloor.plugin.socket.server.spi;
 
+import java.nio.channels.SocketChannel;
+
 /**
  * <p>
- * Handler for a {@link net.officefloor.plugin.socket.server.spi.Connection}.
+ * Handler for a {@link Connection}.
  * <p>
  * Required to be implemented by the handler provider.
  * 
@@ -27,7 +29,7 @@ package net.officefloor.plugin.socket.server.spi;
 public interface ConnectionHandler {
 
 	/**
-	 * Handles a read from the {@link java.nio.channels.SocketChannel}.
+	 * Handles a read from the {@link SocketChannel}.
 	 * 
 	 * @param context
 	 *            {@link ReadContext}.
@@ -35,7 +37,7 @@ public interface ConnectionHandler {
 	void handleRead(ReadContext context);
 
 	/**
-	 * Handles a potential write to the {@link java.nio.channels.SocketChannel}.
+	 * Handles a potential write to the {@link SocketChannel}.
 	 * 
 	 * @param context
 	 *            {@link WriteContext}.
@@ -45,8 +47,9 @@ public interface ConnectionHandler {
 	/**
 	 * Handles a {@link Connection} being idled.
 	 * 
-	 * @param connection
-	 *            {@link Connection} that is idle.
+	 * @param context
+	 *            {@link IdleContext}.
 	 */
-	void handleIdleConnection(Connection connection);
+	void handleIdleConnection(IdleContext context);
+
 }

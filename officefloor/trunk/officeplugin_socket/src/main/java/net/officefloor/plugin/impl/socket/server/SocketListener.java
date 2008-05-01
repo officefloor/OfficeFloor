@@ -20,16 +20,17 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.spi.Connection;
+import net.officefloor.plugin.socket.server.spi.IdleContext;
 import net.officefloor.plugin.socket.server.spi.MessageSegment;
 import net.officefloor.plugin.socket.server.spi.ReadContext;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
@@ -41,12 +42,11 @@ import net.officefloor.plugin.socket.server.spi.WriteMessage;
  * 
  * @author Daniel
  */
-class SocketListener implements
-		Task<Object, ConnectionManager, None, Indexed>, ReadContext,
-		WriteContext {
+class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
+		ReadContext, WriteContext, IdleContext {
 
 	/**
-	 * Maximum number of {@link Communciation} instances that can be registered
+	 * Maximum number of {@link Connection} instances that can be registered
 	 * with this {@link SocketListener}.
 	 */
 	private final int maxConnections;
@@ -54,7 +54,7 @@ class SocketListener implements
 	/**
 	 * {@link ServerSocketManagedObjectSource}.
 	 */
-	private final ServerSocketManagedObjectSource<?, ?> moSource;
+	private final ServerSocketManagedObjectSource moSource;
 
 	/**
 	 * List of {@link InternalCommunication} just registered.
@@ -89,10 +89,10 @@ class SocketListener implements
 	 * @param moSource
 	 *            {@link ServerSocketManagedObjectSource}.
 	 * @param maxCommunications
-	 *            Maximum number of {@link Communciation} instances that can be
+	 *            Maximum number of {@link Connection} instances that can be
 	 *            registered with this {@link SocketListener}.
 	 */
-	SocketListener(ServerSocketManagedObjectSource<?, ?> moSource,
+	SocketListener(ServerSocketManagedObjectSource moSource,
 			int maxCommunications) {
 		this.moSource = moSource;
 		this.maxConnections = maxCommunications;
@@ -129,6 +129,14 @@ class SocketListener implements
 		return true;
 	}
 
+	/**
+	 * Wakes up the {@link Selector}.
+	 */
+	void wakeup() {
+		// Wakes up the selector
+		this.selector.wakeup();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -144,7 +152,7 @@ class SocketListener implements
 		// Determine if require initialising
 		if (!this.isInitialised) {
 			// Create the selector
-			this.selector = Selector.open();
+			this.selector = this.moSource.getSelectorFactory().createSelector();
 
 			// Obtain the Connection
 			ConnectionImpl<?> connection = (ConnectionImpl<?>) context
@@ -158,39 +166,28 @@ class SocketListener implements
 		}
 
 		// Listen to sockets
-		int selectCount = this.selector.select(1000);
+		this.selector.select(1000);
 
-		// Handle listening to connections
+		// Synchronizing at this point as may be removing connections altering
+		// counts that the registerConnection utilises.
 		synchronized (this) {
 
-			// Determine if require processing
-			if (selectCount == 0) {
+			// Reset current time (optimisation)
+			this.currentTime = -1;
 
-				// Handle idle connections
-				for (SelectionKey key : this.selector.keys()) {
-					// Obtain the connection
-					ConnectionImpl<?> connection = (ConnectionImpl<?>) key
-							.attachment();
+			// Obtain the selected keys
+			Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
 
-					// Handle the connection being idle
-					connection.getConnectionHandler().handleIdleConnection(
-							connection);
-				}
+			// Process all the connections
+			for (SelectionKey key : this.selector.keys()) {
 
-			} else {
-				// Process the selection keys
-				for (SelectionKey key : this.selector.selectedKeys()) {
+				// Obtain the connection
+				ConnectionImpl<?> connection = (ConnectionImpl<?>) key
+						.attachment();
 
-					// Obtain the connection
-					ConnectionImpl<?> connection = (ConnectionImpl<?>) key
-							.attachment();
-
-					// Ensure key is valid
-					if (!key.isValid()) {
-						// No longer valid, therefore close the connection
-						this.closeConnection(key, connection);
-
-					} else {
+				// Synchronize on connection to reduce locking
+				synchronized (connection) {
+					try {
 
 						// Interest Operations
 						int interestOps = 0;
@@ -198,64 +195,124 @@ class SocketListener implements
 						// Reset connection context
 						this.resetConnectionContext();
 
-						// Reading
-						if (key.isReadable()) {
-							// Read data from connection
-							switch (this.readData(connection)) {
-							case -1:
-								// Connection lost, therefore close connection
-								this.closeConnection(key, connection);
-							default:
-								// Handle completed read
-								if (this.completedReadMessage != null) {
-									// Process the read message
-									this.moSource
-											.processMessage(this.completedReadMessage);
+						// Determine if selected connection
+						boolean isActive = false; // idle
+						if (selectedKeys.contains(key)) {
+
+							// Ensure key is valid
+							if (!key.isValid()) {
+								// Invalid, terminate and stop processing
+								this.terminateConnection(key, connection);
+								continue;
+							}
+
+							// Reading
+							if (key.isReadable()) {
+								// Read data from connection
+								int bytesRead = this.readData(connection);
+								switch (bytesRead) {
+								case -1:
+									// Connection lost, therefore terminate and
+									// stop processing.
+									this.terminateConnection(key, connection);
+									continue;
+
+								default:
+									// Determine if active (ie something read)
+									isActive |= (bytesRead > 0);
+
+									// Handle completed read
+									if (this.completedReadMessage != null) {
+										// Process the read message
+										this.moSource
+												.processMessage(this.completedReadMessage);
+									}
+
+									// Determine if to continue reading
+									if (this.isContinueReading) {
+										// Flag to continue reading
+										interestOps |= SelectionKey.OP_READ;
+									}
+									break;
 								}
+							} else {
+								// Determine if maintain interest in reading
+								interestOps |= (key.interestOps() & SelectionKey.OP_READ);
+							}
 
-								// Determine if to continue reading
-								if (this.isContinueReading) {
-									// Flag to continue reading
-									interestOps |= SelectionKey.OP_READ;
+							// Writing
+							if (key.isWritable()) {
+								// Write data to connection
+								int bytesWritten = this.writeData(connection);
+								switch (bytesWritten) {
+								case -1:
+									// Connection lost, therefore terminate and
+									// stop processing.
+									this.terminateConnection(key, connection);
+									continue;
+
+								default:
+									// Determine if idle (ie something written)
+									isActive |= (bytesWritten > 0);
+
+									// Data on buffer on way to client.
+									// Do nothing more for writing.
+									break;
 								}
 							}
-						} else {
-							// Determine if maintain interest in reading
-							interestOps |= (key.interestOps() & SelectionKey.OP_READ);
 						}
 
-						// Writing
-						if (key.isWritable()) {
-							// Write data to connection
-							this.writeData(connection);
+						// Handle if connection was idle
+						if (!isActive) {
+							// Handle non-selected key (idle connection)
+							connection.connectionHandler
+									.handleIdleConnection(this);
 						}
 
-						// Handle continue with connection
-						if (this.isCloseConnection) {
-							// Close the connection
-							this.closeConnection(key, connection);
-
-						} else {
-							// Continue with connection
-
-							// Determine if require reading
-							if (connection.getFirstReadMessage() != null) {
-								// Flag to read message
-								interestOps |= SelectionKey.OP_READ;
-							}
-
-							// Determine if require writing
-							if (connection.getFirstWriteMessage() != null) {
-								// Flag to write message
-								interestOps |= SelectionKey.OP_WRITE;
-							}
-
-							// Determine if require changing interest ops
-							if (interestOps != key.interestOps()) {
-								// Change the interest
-								key.interestOps(interestOps);
-							}
+						// Determine if require reading
+						if (connection.readStream.getLastMessage() != null) {
+							// Flag to read message
+							interestOps |= SelectionKey.OP_READ;
 						}
+
+						// Determine if require writing
+						if (connection.writeStream.getFirstMessage() != null) {
+							// Flag to write message
+							interestOps |= SelectionKey.OP_WRITE;
+						}
+
+						// Handle closing connection
+						if (this.isCloseConnection || connection.isCancelled()) {
+							// Attempt to close connection
+							if (this.closeConnection(key, connection)) {
+								// Connection closed, so no further processing
+								continue;
+							}
+
+							// Ensure write messages are being written
+							WriteMessage activeWriteMessage = connection
+									.getActiveWriteMessage();
+							if (activeWriteMessage != null) {
+								activeWriteMessage.write();
+							}
+
+							// Connection closing, so write until closed
+							interestOps |= SelectionKey.OP_WRITE;
+						}
+
+						// Determine if require changing interest ops
+						if (interestOps != key.interestOps()) {
+							// Change the interest
+							key.interestOps(interestOps);
+						}
+
+					} catch (Exception ex) {
+						// Terminate connection on failure
+						this.terminateConnection(key, connection);
+
+						// TODO how to handle exception issues
+						System.err.println("TODO handle failure of connection");
+						ex.printStackTrace();
 					}
 				}
 			}
@@ -283,15 +340,48 @@ class SocketListener implements
 	 *            {@link SelectionKey} for the {@link Connection}.
 	 * @param connection
 	 *            {@link Connection} to close.
+	 * @return <code>true</code> {@link Connection} was closed.
 	 * @throws IOException
 	 *             If fails closing.
 	 */
-	private void closeConnection(SelectionKey key, ConnectionImpl<?> connection)
-			throws IOException {
-		// Cancel the key and then connection
-		key.cancel();
+	private boolean closeConnection(SelectionKey key,
+			ConnectionImpl<?> connection) throws IOException {
+
+		// Flag the connection to close
 		connection.cancel();
-		connection.getSocketChannel().close();
+
+		// Determine if all write messages are written
+		if (connection.getActiveWriteMessage() != null) {
+			// Active message, so do not yet terminate connection
+			return false;
+		}
+
+		// All messages written, so terminate the connection
+		this.terminateConnection(key, connection);
+
+		// Connection closed
+		return true;
+	}
+
+	/**
+	 * Terminates the {@link Connection} immediately.
+	 * 
+	 * @param key
+	 *            {@link SelectionKey} for the {@link Connection}.
+	 * @param connection
+	 *            {@link Connection} to close.
+	 * @throws IOException
+	 *             If fails closing.
+	 */
+	private void terminateConnection(SelectionKey key,
+			ConnectionImpl<?> connection) throws IOException {
+
+		// Flag connection as closed
+		connection.cancel();
+
+		// Cancel the key and close connection
+		key.cancel();
+		connection.socketChannel.close();
 
 		// Connection is also unregistered
 		this.registeredConnections--;
@@ -308,19 +398,22 @@ class SocketListener implements
 	private void listenToConnection(ConnectionImpl<?> connection)
 			throws IOException {
 
+		// Link connection into this socket listener
+		synchronized (connection.getLock()) {
+			connection.setSocketListener(this);
+		}
+
 		// On listening to a connection, always read a message
 		int operation = SelectionKey.OP_READ;
 
 		// Determine if writing message
-		WriteMessage writeMessage = connection.getFirstWriteMessage();
-		if (writeMessage != null) {
+		if (connection.writeStream.getFirstMessage() != null) {
 			// Also writing a message
 			operation = operation | SelectionKey.OP_WRITE;
 		}
 
 		// Register the socket to listen on the communication
-		connection.getSocketChannel().register(this.selector, operation,
-				connection);
+		connection.socketChannel.register(this.selector, operation, connection);
 	}
 
 	/**
@@ -332,42 +425,44 @@ class SocketListener implements
 	 * @throws IOException
 	 *             If fails to handle read.
 	 */
-	private int readData(ConnectionImpl<?> connection) throws IOException {
+	int readData(ConnectionImpl<?> connection) throws IOException {
 
-		// Obtain the socket channel
-		SocketChannel socketChannel = connection.getSocketChannel();
+		// Record the number of bytes read
+		int bytesRead = 0;
 
 		// Data to be read, therefore ensure have a read message
-		ReadMessageImpl message = connection.getFirstReadMessage();
+		ReadMessageImpl message = connection.readStream.getLastMessage();
 		if (message == null) {
-			message = connection.createReadMessage();
+			message = connection.readStream.appendMessage(null);
 		}
 
 		// Start appending to last segment
 		MessageSegment segment = message.getLastSegment();
 		if (segment == null) {
 			// No segments on read message, therefore append one
-			segment = message.appendSegment();
+			segment = message.appendMessageSegment(null);
 		}
 
 		// Read the data from the socket into the message
-		int bytesRead = 0;
+		boolean isConnectionClosed = false;
 		boolean isMoreData = true;
 		while (isMoreData) {
 
 			// Determine if require another segment
-			if (segment.getBuffer().position() == segment.getBuffer().limit()) {
-				segment = message.appendSegment();
+			if (segment.getBuffer().remaining() == 0) {
+				segment = message.appendMessageSegment(null);
 			}
 
 			// Read from socket into the buffer
-			int bytes = socketChannel.read(segment.getBuffer());
+			int bytesSize = connection.socketChannel.read(segment.getBuffer());
 
 			// Handle completion of reading
-			switch (bytes) {
+			switch (bytesSize) {
 			case -1:
 				// End of stream (connection lost)
-				return -1;
+				isConnectionClosed = true;
+				isMoreData = false;
+				break;
 
 			case 0:
 				// No data read thus finished
@@ -376,20 +471,21 @@ class SocketListener implements
 
 			default:
 				// Increment bytes read
-				bytesRead += bytes;
+				bytesRead += bytesSize;
 
 				// Determine if filled buffer and potentially more data
-				isMoreData = (segment.getBuffer().position() == segment
-						.getBuffer().limit());
+				isMoreData = (segment.getBuffer().remaining() == 0);
 			}
 		}
 
-		// Handle the read
+		// Handle the read (only if read data)
 		this.resetReadContext(message);
-		connection.getConnectionHandler().handleRead(this);
+		if (bytesRead > 0) {
+			connection.connectionHandler.handleRead(this);
+		}
 
-		// Return the number of bytes read
-		return bytesRead;
+		// Return the number of bytes read (or -1 if connection lost)
+		return (isConnectionClosed ? -1 : bytesRead);
 	}
 
 	/**
@@ -397,51 +493,111 @@ class SocketListener implements
 	 * 
 	 * @param connection
 	 *            {@link ConnectionImpl}.
+	 * @return Number of bytes written.
 	 * @throws IOException
 	 *             If fails to handle write.
 	 */
-	private void writeData(ConnectionImpl<?> connection) throws IOException {
+	int writeData(ConnectionImpl<?> connection) throws IOException {
 
-		// Handle write
-		WriteMessageImpl message = connection.getFirstWriteMessage();
+		// Record the number of bytes written
+		int bytesWritten = 0;
 
-		// Obtain the medium to communicate over
-		SocketChannel socketChannel = connection.getSocketChannel();
+		// Flags indicating to stop writing
+		boolean isConnectionLost = false;
+		boolean isWriteBufferFull = false;
 
-		// Write the segments
-		int segmentCount = message.getSegmentCount();
-		switch (segmentCount) {
-		case 0:
-			// Determine if write message
-			if (message.isFilled()) {
-				// As no segment, message written
-				message.written();
+		// Iterate over messages to write
+		WriteMessageImpl writeMessage = connection.writeStream
+				.getFirstMessage();
+		while (writeMessage != null) {
+
+			// Determine if message ready to be written
+			if (!writeMessage.isFilled()) {
+				// No data to write
+				break;
 			}
-			break;
 
-		case 1:
-			// Determine if write message
-			if (message.isFilled()) {
-				// Handle only a single segment
-				ByteBuffer buffer = message.getFirstSegment().getBuffer();
-				socketChannel.write(buffer);
+			// Obtain the starting point to write the data
+			MessageSegment messageSegment = writeMessage.currentMessageSegment;
+			if (messageSegment == null) {
+				// No current, so start at beginning of message
+				messageSegment = writeMessage.getFirstSegment();
+			}
+			int offset = writeMessage.currentMessageSegmentOffset;
 
-				// Determine if complete
-				if (buffer.position() == buffer.limit()) {
-					// Flag the message written
-					message.written();
+			// Write the segments
+			while (messageSegment != null) {
+
+				// Setup buffer to write contents
+				ByteBuffer buffer = messageSegment.getBuffer().duplicate();
+				buffer.flip();
+				if (offset > 0) {
+					// Only move position if an offset (as already 0)
+					buffer.position(offset);
 				}
-			}
-			break;
 
-		default:
-			// TODO Handle more than one segment
-			throw new UnsupportedOperationException("TODO implement");
+				// Write the data to the client
+				int bytesSize = connection.socketChannel.write(buffer);
+
+				// Handle completion of read
+				switch (bytesSize) {
+				case -1:
+					// Connection lost
+					isConnectionLost = true;
+					break;
+
+				default:
+					// Increment the number of bytes written
+					bytesWritten += bytesSize;
+
+					// Determine if message segment written
+					if (buffer.remaining() != 0) {
+						// Further data on segment (write buffer full)
+						isWriteBufferFull = true;
+
+						// Mark current position to continue writing later
+						offset += bytesSize;
+						writeMessage.currentMessageSegment = messageSegment;
+						writeMessage.currentMessageSegmentOffset = offset;
+
+						break;
+					}
+				}
+
+				// Determine if the write buffer is full or connection lost
+				if (isWriteBufferFull || isConnectionLost) {
+					// Stop writing segments
+					break;
+				}
+
+				// Setup to write the next segment
+				messageSegment = messageSegment.getNextSegment();
+				offset = 0;
+			}
+
+			// Determine if the write buffer is full or connection lost
+			if (isWriteBufferFull || isConnectionLost) {
+				// Stop writing messages
+				break;
+			}
+
+			// Obtain the next write message
+			WriteMessageImpl nextWriteMessage = (WriteMessageImpl) writeMessage.next;
+
+			// Flag message has been written, and remove
+			writeMessage.written();
+
+			// Set next write message for next iteration
+			writeMessage = nextWriteMessage;
 		}
 
-		// Handle the write
-		this.resetWriteContext(message);
-		connection.getConnectionHandler().handleWrite(this);
+		// Handle the write (only if bytes written)
+		if (bytesWritten > 0) {
+			connection.connectionHandler.handleWrite(this);
+		}
+
+		// Return the number of bytes written (or -1 if connection lost)
+		return (isConnectionLost ? -1 : bytesWritten);
 	}
 
 	/*
@@ -516,6 +672,37 @@ class SocketListener implements
 
 	/*
 	 * ====================================================================
+	 * IdleContext
+	 * 
+	 * IdleContext does not require thread-safety as should only be accessed by
+	 * the same Thread ever.
+	 * ====================================================================
+	 */
+
+	/**
+	 * <p>
+	 * Current time for {@link IdleContext}.
+	 * <p>
+	 * This is reset on run of this {@link Task}.
+	 */
+	private long currentTime = -1;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.IdleContext#getTime()
+	 */
+	@Override
+	public long getTime() {
+		// Lazy obtain the time
+		if (currentTime < 0) {
+			this.currentTime = System.currentTimeMillis();
+		}
+		return this.currentTime;
+	}
+
+	/*
+	 * ====================================================================
 	 * WriteContext
 	 * 
 	 * WriteContext does not require thread-safety as should only be accessed by
@@ -523,34 +710,10 @@ class SocketListener implements
 	 * ====================================================================
 	 */
 
-	/**
-	 * {@link WriteMessage}.
-	 */
-	private WriteMessage writeMessage = null;
-
-	/**
-	 * Resets the {@link ReadContext} for the input {@link ReadMessage}.
-	 * 
-	 * @param readMessage
-	 *            {@link ReadMessage}.
-	 */
-	private void resetWriteContext(WriteMessage writeMessage) {
-		// Reset the write context
-		this.writeMessage = writeMessage;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.WriteContext#getWriteMessage()
-	 */
-	public WriteMessage getWriteMessage() {
-		return this.writeMessage;
-	}
-
+	// No specific methods for WriteContext.
 	/*
 	 * ====================================================================
-	 * ReadContext & WriteContext overlap (ie Connection Context)
+	 * ReadContext, WriteContext & IdleContext overlap
 	 * 
 	 * Does not require thread-safety as should only be accessed by the same
 	 * Thread ever.
@@ -558,7 +721,7 @@ class SocketListener implements
 	 */
 
 	/**
-	 * Flag to indiate to close the {@link Connection}.
+	 * Flag to indicate to close the {@link Connection}.
 	 */
 	private boolean isCloseConnection = false;
 

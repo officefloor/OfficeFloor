@@ -19,12 +19,31 @@ package net.officefloor.plugin.socket.server.spi;
 import java.nio.ByteBuffer;
 
 /**
- * {@link net.officefloor.plugin.socket.server.spi.Message} to write to the
- * client.
+ * {@link Message} to write to the client.
  * 
  * @author Daniel
  */
 public interface WriteMessage extends Message {
+
+	/**
+	 * Appends the whole input data to this {@link Message}.
+	 * 
+	 * @param data
+	 *            Data.
+	 */
+	void append(byte[] data);
+
+	/**
+	 * Appends the specified input data to this {@link Message}.
+	 * 
+	 * @param data
+	 *            Data.
+	 * @param offset
+	 *            Offset from start of data to include.
+	 * @param length
+	 *            Bytes from the offset to include.
+	 */
+	void append(byte[] data, int offset, int length);
 
 	/**
 	 * Appends a single {@link MessageSegment} to this {@link Message}.
@@ -34,17 +53,11 @@ public interface WriteMessage extends Message {
 	MessageSegment appendSegment();
 
 	/**
-	 * Appends <code>number</code> of {@link MessageSegment} instances to this
-	 * {@link Message}.
-	 * 
-	 * @param number
-	 *            Number of {@link MessageSegment} instances to append.
-	 * @return First {@link MessageSegment} appended.
-	 */
-	MessageSegment appendSegments(int number);
-
-	/**
+	 * <p>
 	 * Appends a {@link MessageSegment} for the input {@link ByteBuffer}.
+	 * <p>
+	 * This allows for {@link ByteBuffer} optimises so that do not need to copy
+	 * bytes between {@link ByteBuffer} instances.
 	 * 
 	 * @param byteBuffer
 	 *            {@link ByteBuffer} to append to this {@link Message}.
@@ -53,8 +66,11 @@ public interface WriteMessage extends Message {
 	MessageSegment appendSegment(ByteBuffer byteBuffer);
 
 	/**
+	 * <p>
 	 * Flags that this {@link Message} is complete and can be written in full to
 	 * the client.
+	 * <p>
+	 * Once invoked, no further data can be added to this {@link WriteMessage}.
 	 */
 	void write();
 

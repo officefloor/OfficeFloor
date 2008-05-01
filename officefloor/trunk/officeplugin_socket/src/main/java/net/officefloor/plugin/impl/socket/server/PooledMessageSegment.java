@@ -16,39 +16,37 @@
  */
 package net.officefloor.plugin.impl.socket.server;
 
-import java.nio.ByteBuffer;
+import net.officefloor.plugin.socket.server.spi.MessageSegment;
 
 /**
- * {@link net.officefloor.plugin.socket.server.spi.MessageSegment} that should
- * be pooled.
+ * Pooled {@link MessageSegment}.
  * 
  * @author Daniel
  */
-class PooledMessageSegment extends AbstractMessageSegment {
+public interface PooledMessageSegment extends MessageSegment {
 
 	/**
-	 * Initiate.
+	 * <p>
+	 * Specifies the next {@link PooledMessageSegment} in the list.
+	 * <p>
+	 * This allows for creating a linked list of {@link PooledMessageSegment}
+	 * instances.
 	 * 
-	 * @param buffer
-	 *            {@link ByteBuffer}.
+	 * @param next
+	 *            Next {@link PooledMessageSegment}.
 	 */
-	public PooledMessageSegment(ByteBuffer buffer) {
-		super(buffer);
-	}
+	void setNextSegment(PooledMessageSegment next);
 
-	/*
-	 * ====================================================================
-	 * AbstractMessageSegment
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
+	/**
+	 * <p>
+	 * Specifies the previous {@link PooledMessageSegment} in the list.
+	 * <p>
+	 * This allows for creating a linked list of {@link PooledMessageSegment}
+	 * instances.
 	 * 
-	 * @see net.officefloor.plugin.socket.server.impl.AbstractMessageSegment#canPool()
+	 * @param previous
+	 *            Previous {@link MessageSegment}.
 	 */
-	boolean canPool() {
-		return true;
-	}
+	void setPreviousSegment(PooledMessageSegment previous);
 
 }

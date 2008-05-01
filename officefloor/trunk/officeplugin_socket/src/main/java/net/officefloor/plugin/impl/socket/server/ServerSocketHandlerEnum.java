@@ -14,36 +14,21 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.plugin.socket.server.spi;
-
-import java.net.ServerSocket;
+package net.officefloor.plugin.impl.socket.server;
 
 import net.officefloor.frame.api.execute.Handler;
 
 /**
- * <p>
- * Handler for a {@link ServerSocket}.
- * <p>
- * Required to be implemented by the handler provider.
+ * Provides the {@link Handler} indexes for the
+ * {@link ServerSocketManagedObjectSource}.
  * 
  * @author Daniel
  */
-public interface ServerSocketHandler<F extends Enum<F>> extends Handler<F> {
+public enum ServerSocketHandlerEnum {
 
 	/**
-	 * Creates the {@link Server} to handle {@link ReadMessage} instances.
-	 * 
-	 * @return {@link Server} to handle {@link ReadMessage} instances.
+	 * Handles the server socket.
 	 */
-	Server createServer();
-
-	/**
-	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
-	 * 
-	 * @param connection
-	 *            A new {@link Connection} requiring handling.
-	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
-	 */
-	ConnectionHandler createConnectionHandler(Connection connection);
+	SERVER_SOCKET_HANDLER
 
 }

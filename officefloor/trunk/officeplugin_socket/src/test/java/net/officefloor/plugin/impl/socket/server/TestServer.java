@@ -14,36 +14,37 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.plugin.socket.server.spi;
+package net.officefloor.plugin.impl.socket.server;
 
-import java.net.ServerSocket;
+import java.io.IOException;
 
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
+import net.officefloor.plugin.socket.server.spi.ReadMessage;
+import net.officefloor.plugin.socket.server.spi.Server;
 
 /**
- * <p>
- * Handler for a {@link ServerSocket}.
- * <p>
- * Required to be implemented by the handler provider.
+ * Test {@link Server}.
  * 
  * @author Daniel
  */
-public interface ServerSocketHandler<F extends Enum<F>> extends Handler<F> {
+public class TestServer implements Server {
 
-	/**
-	 * Creates the {@link Server} to handle {@link ReadMessage} instances.
-	 * 
-	 * @return {@link Server} to handle {@link ReadMessage} instances.
+	/*
+	 * ==========================================================================
+	 * Server
+	 * ==========================================================================
 	 */
-	Server createServer();
 
-	/**
-	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param connection
-	 *            A new {@link Connection} requiring handling.
-	 * @return {@link ConnectionHandler} to handle the new {@link Connection}.
+	 * @see net.officefloor.plugin.socket.server.spi.Server#processReadMessage(net.officefloor.plugin.socket.server.spi.ReadMessage,
+	 *      net.officefloor.plugin.socket.server.spi.ConnectionHandler)
 	 */
-	ConnectionHandler createConnectionHandler(Connection connection);
+	@Override
+	public void processReadMessage(ReadMessage message,
+			ConnectionHandler connectionHandler) throws IOException {
+		// Do nothing
+	}
 
 }

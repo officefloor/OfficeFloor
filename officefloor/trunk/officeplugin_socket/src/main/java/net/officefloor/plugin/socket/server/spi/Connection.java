@@ -16,31 +16,115 @@
  */
 package net.officefloor.plugin.socket.server.spi;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+
 /**
  * <p>
- * Connection with the {@link net.officefloor.plugin.socket.server.spi.Server}.
+ * Connection with the {@link Server}.
  * <p>
- * Provided by the Server Socket plugin.
+ * Provided by the Server Socket plug-in.
  * 
  * @author Daniel
  */
 public interface Connection {
 
 	/**
-	 * Creates a new {@link ReadMessage} to listen to the client.
+	 * Obtains the lock that must be <code>synchronized</code> on before
+	 * making any changes to the {@link Connection} or any of its
+	 * {@link Message} instances.
 	 * 
-	 * @return New {@link ReadMessage} to listen to the client.
+	 * @return Lock for this {@link Connection}.
 	 */
-	ReadMessage createReadMessage();
+	Object getLock();
 
 	/**
+	 * Obtains the first {@link ReadMessage} instance for this
+	 * {@link Connection}.
+	 * 
+	 * @return Listing of first {@link ReadMessage}.
+	 * @throws IOException
+	 *             If issue with {@link Connection} (closed).
+	 */
+	ReadMessage getFirstReadMessage() throws IOException;
+
+	/**
+	 * Reads the data from this {@link Connection}.
+	 * 
+	 * @param buffer
+	 *            Buffer to read data into.
+	 * @param offset
+	 *            Offset into buffer to start reading data.
+	 * @param length
+	 *            Number of bytes to read.
+	 * @return Number of bytes read.
+	 * @throws IOException
+	 *             If the {@link Connection} is closed.
+	 */
+	int read(byte[] buffer, int offset, int length) throws IOException;
+
+	/**
+	 * Obtains the active {@link WriteMessage} instance for this
+	 * {@link Connection}.
+	 * 
+	 * @return Active {@link WriteMessage} instance, or <code>null</code> if
+	 *         no active {@link WriteMessage}.
+	 * @throws IOException
+	 *             If issue with {@link Connection} (closed).
+	 */
+	WriteMessage getActiveWriteMessage() throws IOException;
+
+	/**
+	 * Writes the data to this {@link Connection}.
+	 * 
+	 * @param data
+	 *            Data to be written to this {@link Connection}.
+	 * @param offset
+	 *            Offset into data to start writing.
+	 * @param length
+	 *            Number of bytes to write.
+	 * @throws IOException
+	 *             If the {@link Connection} is closed.
+	 */
+	void write(byte[] data, int offset, int length) throws IOException;
+
+	/**
+	 * Writes the data within the {@link ByteBuffer} to this {@link Connection}.
+	 * 
+	 * @param buffer
+	 *            {@link ByteBuffer}.
+	 * @throws IOException
+	 *             If the {@link Connection} is closed.
+	 */
+	void write(ByteBuffer data) throws IOException;
+
+	/**
+	 * <p>
+	 * Flags to flush the writes to the client.
+	 * <p>
+	 * Unlike {@link OutputStream#flush()} this method does not block, it only
+	 * flags for the data written so far to be flushed to the client when
+	 * possible.
+	 */
+	void flush();
+
+	/**
+	 * <p>
 	 * Creates a new {@link WriteMessage} to send to the client.
+	 * <p>
+	 * This will call {@link WriteMessage#write()} on the active
+	 * {@link WriteMessage} and subsequently replaces the newly created
+	 * {@link WriteMessage} as the active {@link WriteMessage}.
 	 * 
 	 * @param listener
 	 *            {@link WriteMessageListener} for the new {@link WriteMessage}.
 	 *            May be <code>null</code> if no listening required.
 	 * @return New {@link WriteMessage} to send to the client.
+	 * @throws IOException
+	 *             If issue with {@link Connection} (closed).
 	 */
-	WriteMessage createWriteMessage(WriteMessageListener listener);
+	WriteMessage createWriteMessage(WriteMessageListener listener)
+			throws IOException;
 
 }

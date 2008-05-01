@@ -16,50 +16,59 @@
  */
 package net.officefloor.plugin.impl.socket.server;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
-import java.util.LinkedList;
-import java.util.List;
 
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
-import net.officefloor.plugin.socket.server.spi.ReadMessage;
+import net.officefloor.plugin.socket.server.spi.Message;
+import net.officefloor.plugin.socket.server.spi.MessageSegment;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
-import net.officefloor.plugin.socket.server.spi.WriteMessage;
 import net.officefloor.plugin.socket.server.spi.WriteMessageListener;
 
 /**
- * Implementation of a
- * {@link net.officefloor.plugin.socket.server.spi.Connection}.
+ * Implementation of a {@link Connection}.
  * 
  * @author Daniel
  */
 class ConnectionImpl<F extends Enum<F>> implements Connection {
 
 	/**
-	 * {@link SocketChannel} for this {@link Connection}.
+	 * {@link SocketChannel} of this {@link Connection}.
 	 */
-	private final SocketChannel socketChannel;
+	final NonblockingSocketChannel socketChannel;
 
 	/**
-	 * {@link ConnectionHandler} for this
-	 * {@link net.officefloor.plugin.socket.server.spi.Connection}.
+	 * {@link ConnectionHandler} for this {@link Connection}.
 	 */
-	private final ConnectionHandler handler;
+	final ConnectionHandler connectionHandler;
+
+	/**
+	 * Recommended {@link MessageSegment} count per {@link Message}.
+	 */
+	final int recommendedSegmentCount;
 
 	/**
 	 * {@link MessageSegmentPool}.
 	 */
-	private final MessageSegmentPool messageSegmentPool;
+	final MessageSegmentPool messageSegmentPool;
 
 	/**
-	 * List of {@link ReadMessage} instances for this {@link Connection}.
+	 * {@link Stream} of {@link ReadMessageImpl} instances.
 	 */
-	private final List<ReadMessageImpl> readMessages = new LinkedList<ReadMessageImpl>();
+	final Stream<ReadMessageImpl> readStream;
 
 	/**
-	 * List of {@link WriteMessage} instances for this {@link Connection}.
+	 * {@link Stream} of {@link WriteMessageImpl} instances.
 	 */
-	private final List<WriteMessageImpl> writeMessages = new LinkedList<WriteMessageImpl>();
+	final Stream<WriteMessageImpl> writeStream;
+
+	/**
+	 * {@link SocketListener} handling this {@link Connection}.
+	 */
+	private SocketListener socketListener;
 
 	/**
 	 * Flags if this {@link Connection} has been cancelled.
@@ -69,103 +78,105 @@ class ConnectionImpl<F extends Enum<F>> implements Connection {
 	/**
 	 * Initiate.
 	 * 
-	 * @param socketChannel
-	 *            {@link SocketChannel}.
+	 * @param nonblockingSocketChannel
+	 *            {@link NonblockingSocketChannel}.
 	 * @param serverSocketHandler
 	 *            {@link ServerSocketHandler}.
+	 * @param recommendedSegmentCount
+	 *            Recommended {@link MessageSegment} count per {@link Message}.
 	 * @param messageSegmentPool
 	 *            {@link MessageSegmentPool}.
 	 */
-	ConnectionImpl(SocketChannel socketChannel,
+	ConnectionImpl(NonblockingSocketChannel nonblockingSocketChannel,
 			ServerSocketHandler<F> serverSocketHandler,
-			MessageSegmentPool messageSegmentPool) {
+			int recommendedSegmentCount, MessageSegmentPool messageSegmentPool) {
 
 		// Store state
-		this.socketChannel = socketChannel;
+		this.socketChannel = nonblockingSocketChannel;
+		this.recommendedSegmentCount = recommendedSegmentCount;
 		this.messageSegmentPool = messageSegmentPool;
 
+		// Create the streams
+		this.readStream = new Stream<ReadMessageImpl>(this,
+				new MessageFactory<ReadMessageImpl>() {
+					@Override
+					public ReadMessageImpl createMessage(
+							Stream<ReadMessageImpl> stream,
+							WriteMessageListener listener) {
+						return new ReadMessageImpl(stream);
+					}
+				});
+		this.writeStream = new Stream<WriteMessageImpl>(this,
+				new MessageFactory<WriteMessageImpl>() {
+					@Override
+					public WriteMessageImpl createMessage(
+							Stream<WriteMessageImpl> stream,
+							WriteMessageListener listener) {
+						return new WriteMessageImpl(stream, listener);
+					}
+				});
+
 		// Create the handler for this connection
-		this.handler = serverSocketHandler.createConnectionHandler(this);
+		this.connectionHandler = serverSocketHandler
+				.createConnectionHandler(this);
 	}
 
 	/**
-	 * Obtains the {@link SocketChannel} for this {@link Connection}.
+	 * Specifies the {@link SocketListener} handling this {@link Connection}.
 	 * 
-	 * @return {@link SocketChannel} for this {@link Connection}.
+	 * @param socketListener
+	 *            {@link SocketListener} handling this {@link Connection}.
 	 */
-	SocketChannel getSocketChannel() {
-		return this.socketChannel;
+	void setSocketListener(SocketListener socketListener) {
+		this.socketListener = socketListener;
 	}
 
 	/**
-	 * Obtains the {@link ConnectionHandler}.
-	 * 
-	 * @return {@link ConnectionHandler} for this {@link Connection}.
+	 * <p>
+	 * Wakes up the {@link SocketListener}.
+	 * <p>
+	 * This allows to start writing data back to the client immediately rather
+	 * than having to wait for the {@link SocketListener} to wake up to process
+	 * the writes.
 	 */
-	ConnectionHandler getConnectionHandler() {
-		return this.handler;
-	}
-
-	/**
-	 * Obtains the {@link MessageSegmentPool}.
-	 * 
-	 * @return {@link MessageSegmentPool}.
-	 */
-	MessageSegmentPool getMessageSegmentPool() {
-		return this.messageSegmentPool;
-	}
-
-	/**
-	 * Obtains the first
-	 * {@link net.officefloor.plugin.socket.server.spi.WriteMessage} to write.
-	 * 
-	 * @return First
-	 *         {@link net.officefloor.plugin.socket.server.spi.WriteMessage} to
-	 *         write.
-	 */
-	synchronized WriteMessageImpl getFirstWriteMessage() {
-		// Return the first write message
-		if (this.writeMessages.size() == 0) {
-			// No write message
-			return null;
-		} else {
-			// Return first write message
-			return this.writeMessages.get(0);
+	void wakeupSocketListener() {
+		if (this.socketListener != null) {
+			this.socketListener.wakeup();
 		}
 	}
 
 	/**
-	 * Removes the input {@link WriteMessage} from the {@link Connection}.
+	 * Ensures the state of the {@link Connection} is valid for further I/O
+	 * operations.
 	 * 
-	 * @param writeMessage
-	 *            {@link WriteMessage} to remove from this {@link Connection}.
+	 * @throws IOException
+	 *             Indicate the state is not valid.
 	 */
-	synchronized void removeWriteMessage(WriteMessageImpl writeMessage) {
-		this.writeMessages.remove(writeMessage);
-	}
-
-	/**
-	 * Obtains the first {@link ReadMessage} to read.
-	 * 
-	 * @return {@link ReadMessage}.
-	 */
-	synchronized ReadMessageImpl getFirstReadMessage() {
-		// Return the first read message
-		if (this.readMessages.size() == 0) {
-			// No read message
-			return null;
-		} else {
-			// Return first read message
-			return this.readMessages.get(0);
+	void checkIOState() throws IOException {
+		if (this.isCancelled) {
+			throw new ClosedChannelException();
 		}
 	}
 
 	/**
 	 * Cancels this {@link Connection}.
 	 */
-	synchronized void cancel() {
+	void cancel() {
 		// Flag the connection as cancelled
 		this.isCancelled = true;
+
+		// Wakeup socket listener to process closing
+		this.wakeupSocketListener();
+	}
+
+	/**
+	 * Indicates if this {@link Connection} has been flagged for closing.
+	 * 
+	 * @return <code>true</code> if this {@link Connection} flagged for
+	 *         closing.
+	 */
+	boolean isCancelled() {
+		return this.isCancelled;
 	}
 
 	/*
@@ -177,24 +188,78 @@ class ConnectionImpl<F extends Enum<F>> implements Connection {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Connection#createReadMessage()
+	 * @see net.officefloor.plugin.socket.server.spi.Connection#getLock()
 	 */
-	public ReadMessageImpl createReadMessage() {
-		// Create the read message
-		ReadMessageImpl readMessage = new ReadMessageImpl(this);
+	@Override
+	public Object getLock() {
+		return this;
+	}
 
-		synchronized (this) {
-			// Ensure connection is not cancelled
-			if (this.isCancelled) {
-				throw new IllegalStateException("Connection has been cancelled");
-			}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.Connection#getFirstReadMessage()
+	 */
+	@Override
+	public ReadMessageImpl getFirstReadMessage() {
+		return this.readStream.getFirstMessage();
+	}
 
-			// Append to listing of messages to read
-			this.readMessages.add(readMessage);
-		}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.Connection#read(byte[],
+	 *      int, int)
+	 */
+	@Override
+	public int read(byte[] buffer, int offset, int length) throws IOException {
+		// Read data from the read stream
+		return this.readStream.read(buffer, offset, length);
+	}
 
-		// Return the read message
-		return readMessage;
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.Connection#getActiveWriteMessage()
+	 */
+	@Override
+	public WriteMessageImpl getActiveWriteMessage() {
+		// Last write message is the active write message
+		return this.writeStream.getLastMessage();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.Connection#write(byte[],
+	 *      int, int)
+	 */
+	@Override
+	public void write(byte[] data, int offset, int length) throws IOException {
+		// Write data to the write stream
+		this.writeStream.write(data, offset, length);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.Connection#write(java.nio.ByteBuffer)
+	 */
+	@Override
+	public void write(ByteBuffer data) throws IOException {
+		// Append data to the write stream
+		this.writeStream.write(data);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.Connection#flush()
+	 */
+	@Override
+	public void flush() {
+		// Flush write stream
+		this.writeStream.flush();
 	}
 
 	/*
@@ -202,21 +267,24 @@ class ConnectionImpl<F extends Enum<F>> implements Connection {
 	 * 
 	 * @see net.officefloor.plugin.socket.server.spi.Connection#createWriteMessage()
 	 */
-	public WriteMessageImpl createWriteMessage(WriteMessageListener listener) {
-		// Create the write message
-		WriteMessageImpl writeMessage = new WriteMessageImpl(this, listener);
+	@Override
+	public WriteMessageImpl createWriteMessage(WriteMessageListener listener)
+			throws IOException {
 
-		synchronized (this) {
-			// Ensure connection is not cancelled
-			if (this.isCancelled) {
-				throw new IllegalStateException("Connection has been cancelled");
-			}
+		// Ensure connection is not cancelled
+		this.checkIOState();
 
-			// Append to listing of messages to write
-			this.writeMessages.add(writeMessage);
+		// Write the (to now be previous) active message
+		WriteMessageImpl activeMessage = this.getActiveWriteMessage();
+		if (activeMessage != null) {
+			activeMessage.write();
 		}
 
-		// Return the write message
+		// Create the write message
+		WriteMessageImpl writeMessage = this.writeStream
+				.appendMessage(listener);
+
+		// Return the created write message
 		return writeMessage;
 	}
 
