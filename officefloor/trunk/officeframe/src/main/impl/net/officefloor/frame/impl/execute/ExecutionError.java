@@ -35,6 +35,7 @@ public class ExecutionError extends Error {
 	 *            {@link ExecutionErrorEnum}.
 	 */
 	public ExecutionError(ExecutionErrorEnum errorType) {
+		super(errorType.toString());
 		this.errorType = errorType;
 	}
 
@@ -47,7 +48,7 @@ public class ExecutionError extends Error {
 	 *            Cause.
 	 */
 	public ExecutionError(ExecutionErrorEnum errorType, Throwable cause) {
-		super(cause);
+		super(errorType.toString(), cause);
 		this.errorType = errorType;
 	}
 

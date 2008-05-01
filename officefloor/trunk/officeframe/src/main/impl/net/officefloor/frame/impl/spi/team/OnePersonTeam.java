@@ -76,7 +76,7 @@ public class OnePersonTeam implements Team {
 		this.person = new OnePerson(this.taskQueue, this.waitTime);
 
 		// Start the person working
-		new Thread(this.person).start();
+		new Thread(this.person, this.getClass().getSimpleName()).start();
 	}
 
 	/*
