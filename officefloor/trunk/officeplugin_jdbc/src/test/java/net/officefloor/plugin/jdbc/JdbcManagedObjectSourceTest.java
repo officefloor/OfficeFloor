@@ -33,7 +33,7 @@ import net.officefloor.frame.impl.spi.pool.PassiveManagedObjectPool;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.TypeMatcher;
+import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
