@@ -41,8 +41,7 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 
 /**
- * Tests the construction of an
- * {@link net.officefloor.frame.api.build.OfficeBuilder}.
+ * Tests the construction of an {@link OfficeBuilder}.
  * 
  * @author Daniel
  */
@@ -219,21 +218,19 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 
 		// MANAGED OBJECT ONE
 		// Obtain the Object
-		moOne.getObject();
-		this.control(moOne).setReturnValue(object);
+		this.recordReturn(moOne, moOne.getObject(), object);
 
 		// MANAGED OBJECT TWO
 		// Obtain the Object
-		moTwo.getObject();
-		this.control(moTwo).setReturnValue(object);
+		this.recordReturn(moTwo, moTwo.getObject(), object);
 
-		// PRE-TASK ADMINISTRATOR
+		// PRE-TASK ADMINISTRATION
 		// Managed Object Extension Interface
-		eiFactory.createExtensionInterface(moOne);
-		this.control(eiFactory).setReturnValue(ei);
+		this.recordReturn(eiFactory, eiFactory.createExtensionInterface(moOne),
+				ei);
 		// Obtain the duty
-		adminOne.getDuty(DutyOneEnum.DUTY_ONE);
-		this.control(adminOne).setReturnValue(duty);
+		this.recordReturn(adminOne, adminOne.getDuty(DutyOneEnum.DUTY_ONE),
+				duty);
 		// Do the duty
 		duty.doDuty(null);
 		this.control(duty)
@@ -241,17 +238,16 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 
 		// TASK
 		// Do the task
-		task.doTask(null);
-		this.control(task).setDefaultMatcher(new TypeMatcher(Job.class));
-		this.control(task).setReturnValue(null);
+		this.recordReturn(task, task.doTask(null), null, new TypeMatcher(
+				Job.class));
 
 		// POST-TASK ADMINISTRATOR
 		// Managed Object Extension Interface
-		eiFactory.createExtensionInterface(moOne);
-		this.control(eiFactory).setReturnValue(ei);
+		this.recordReturn(eiFactory, eiFactory.createExtensionInterface(moOne),
+				ei);
 		// Obtain the duty
-		adminTwo.getDuty(DutyTwoEnum.DUTY_TWO);
-		this.control(adminTwo).setReturnValue(duty);
+		this.recordReturn(adminTwo, adminTwo.getDuty(DutyTwoEnum.DUTY_TWO),
+				duty);
 		// Do the duty
 		duty.doDuty(null);
 		this.control(duty).setMatcher(new TypeMatcher(DutyContext.class));
@@ -275,13 +271,18 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		// Allow some time for processing to occur
 		Thread.sleep(100);
 
+		// Close the Office Floor
+		officeFloor.closeOfficeFloor();
+
 		// Close the Office
-		new Thread(new Runnable() {
-			public void run() {
-				// Close the Office Floor
-				officeFloor.closeOfficeFloor();
-			}
-		});
+		if (false) {
+			new Thread(new Runnable() {
+				public void run() {
+					// Close the Office Floor
+					officeFloor.closeOfficeFloor();
+				}
+			});
+		}
 
 		// Verify functionality
 		this.verifyMockObjects();

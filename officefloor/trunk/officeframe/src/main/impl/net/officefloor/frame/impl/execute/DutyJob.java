@@ -83,7 +83,7 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 */
 	@Override
 	protected Object executeJob(JobExecuteContext context) throws Throwable {
-
+		
 		// Administer the duty
 		this.workLink.getWorkContainer().administerManagedObjects(
 				this.taskDutyAssociation, this.administratorContext);

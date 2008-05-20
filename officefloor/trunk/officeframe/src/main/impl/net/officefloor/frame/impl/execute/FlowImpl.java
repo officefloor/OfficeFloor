@@ -107,7 +107,7 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 		}
 
 		// First and last job
-		Job[] firstLastJobs = new Job[2];
+		JobContainer<?, ?>[] firstLastJobs = new JobContainer<?, ?>[2];
 
 		// Load the pre-task administrator duty jobs
 		this.loadDutyJobs(firstLastJobs, taskMetaData
@@ -115,8 +115,8 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 				parallelNodeOwner);
 
 		// Load the task job
-		Job taskJob = new TaskJob(this.threadState, this, newWorkLink,
-				taskMetaData, parallelNodeOwner, parameter);
+		JobContainer<?, ?> taskJob = new TaskJob(this.threadState, this,
+				newWorkLink, taskMetaData, parallelNodeOwner, parameter);
 		this.loadJob(firstLastJobs, taskJob);
 
 		// Load the post-task administrator duty jobs
@@ -125,10 +125,10 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 				parallelNodeOwner);
 
 		// Register the jobs with the work
-		Job job = firstLastJobs[0];
+		JobContainer<?, ?> job = firstLastJobs[0];
 		while (job != null) {
 			newWorkLink.registerJob(job);
-			job = job.getNextJob();
+			job = (JobContainer<?, ?>) job.getNextNode();
 		}
 
 		// Increment the number of active task containers
@@ -142,7 +142,7 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 * Loads the {@link DutyJob} instances.
 	 * 
 	 * @param firstLastJobs
-	 *            First and last {@link Job} instances.
+	 *            First and last {@link JobNode} instances.
 	 * @param taskDutyAssociations
 	 *            {@link TaskDutyAssociation} instances for the {@link DutyJob}
 	 *            instances.
@@ -154,7 +154,7 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 *            Parallel owning {@link JobNode}.
 	 */
 	@SuppressWarnings("unchecked")
-	private void loadDutyJobs(Job[] firstLastJobs,
+	private void loadDutyJobs(JobContainer<?, ?>[] firstLastJobs,
 			TaskDutyAssociation<?>[] taskDutyAssociations,
 			WorkMetaData<?> workMetaData, ThreadWorkLink<?> threadWorkLink,
 			JobNode parallelNodeOwner) {
@@ -167,8 +167,9 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 					.getAdministratorIndex()];
 
 			// Create the duty job
-			Job dutyJob = new DutyJob(this.threadState, this, threadWorkLink,
-					adminMetaData, taskDutyAssociation, parallelNodeOwner);
+			JobContainer<?, ?> dutyJob = new DutyJob(this.threadState, this,
+					threadWorkLink, adminMetaData, taskDutyAssociation,
+					parallelNodeOwner);
 
 			// Load the duty job
 			this.loadJob(firstLastJobs, dutyJob);
@@ -182,16 +183,17 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 *            Array containing two elements, first and last {@link Job}
 	 *            instances.
 	 * @param newJob
-	 *            New {@link Job}.
+	 *            New {@link JobNode}.
 	 */
-	private void loadJob(Job[] firstLastJobs, Job newJob) {
+	private void loadJob(JobContainer<?, ?>[] firstLastJobs,
+			JobContainer<?, ?> newJob) {
 		if (firstLastJobs[0] == null) {
 			// First job
 			firstLastJobs[0] = newJob;
 			firstLastJobs[1] = newJob;
 		} else {
-			// Another job (append)
-			firstLastJobs[1].setNextJob(newJob);
+			// Another job (append for sequential execution)
+			firstLastJobs[1].setNextNode(newJob);
 			firstLastJobs[1] = newJob;
 		}
 	}
