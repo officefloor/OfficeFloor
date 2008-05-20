@@ -27,7 +27,7 @@ import net.officefloor.plugin.socket.server.spi.Server;
  * 
  * @author Daniel
  */
-public class TestServer implements Server {
+public class MockServer implements Server {
 
 	/*
 	 * ==========================================================================

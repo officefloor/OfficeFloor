@@ -27,7 +27,7 @@ import net.officefloor.frame.api.execute.TaskContext;
  * 
  * @author Daniel
  */
-public class TestTaskContext implements
+public class MockTaskContext implements
 		TaskContext<Object, ConnectionManager, None, Indexed> {
 
 	/**
@@ -41,7 +41,7 @@ public class TestTaskContext implements
 	 * @param parameter
 	 *            Parameter.
 	 */
-	public TestTaskContext(ConnectionImpl<Indexed> parameter) {
+	public MockTaskContext(ConnectionImpl<Indexed> parameter) {
 		this.parameter = parameter;
 	}
 
