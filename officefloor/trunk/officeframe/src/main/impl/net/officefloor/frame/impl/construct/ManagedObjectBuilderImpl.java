@@ -357,7 +357,7 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 				throws BuildException {
 
 			// Obtain the handler builder
-			HandlerBuilderImpl<H, ?> handlerBuilder = this.handlers
+			HandlerBuilderImpl handlerBuilder = this.handlers
 					.get(handlerKey);
 			if (handlerBuilder == null) {
 				// Create the handler builder

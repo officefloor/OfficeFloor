@@ -45,7 +45,7 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	/**
 	 * Count of active {@link Job} instances.
 	 */
-	protected int activeTaskCount = 0;
+	protected int activeJobCount = 0;
 
 	/**
 	 * Completion flag indicating if this {@link Flow} is complete.
@@ -127,12 +127,12 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 		// Register the jobs with the work
 		JobContainer<?, ?> job = firstLastJobs[0];
 		while (job != null) {
+			// Register the job and increment job count
 			newWorkLink.registerJob(job);
+			this.activeJobCount++;
+
 			job = (JobContainer<?, ?>) job.getNextNode();
 		}
-
-		// Increment the number of active task containers
-		this.activeTaskCount++;
 
 		// Return the starting job
 		return firstLastJobs[0];
@@ -206,10 +206,10 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 */
 	public void jobComplete(Job taskContainer, JobActivateSet notifySet) {
 		// Task container now inactive
-		this.activeTaskCount--;
+		this.activeJobCount--;
 
 		// Determine if flow is complete
-		if (this.activeTaskCount == 0) {
+		if (this.activeJobCount == 0) {
 			// Flow complete
 			this.isFlowComplete = true;
 			this.removeFromLinkedList(notifySet);
