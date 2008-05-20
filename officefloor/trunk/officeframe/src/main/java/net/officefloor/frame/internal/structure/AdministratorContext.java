@@ -18,9 +18,10 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.spi.administration.Administrator;
 
 /**
- * Context for an {@link net.officefloor.frame.spi.administration.Administrator}.
+ * Context for an {@link Administrator}.
  * 
  * @author Daniel
  */
@@ -34,7 +35,6 @@ public interface AdministratorContext {
 	ThreadState getThreadState();
 
 	/**
-	 * <p>
 	 * Instigates a flow to be run.
 	 * 
 	 * @param flowMetaData

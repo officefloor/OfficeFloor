@@ -17,6 +17,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Work;
 
 /**
  * State of a thread within a Process.
@@ -58,15 +59,13 @@ public interface ThreadState extends FlowFuture {
 	Flow createFlow(FlowMetaData<?> flowMetaData);
 
 	/**
-	 * Obtains the {@link LinkedList} of
-	 * {@link net.officefloor.frame.api.execute.Work} bound to this
+	 * Obtains the {@link LinkedList} of {@link Work} bound to this
 	 * {@link ThreadState}.
 	 * 
-	 * @return {@link LinkedList} of
-	 *         {@link net.officefloor.frame.api.execute.Work} bound to this
+	 * @return {@link LinkedList} of {@link Work} bound to this
 	 *         {@link ThreadState}.
 	 */
-	LinkedList<ThreadWorkLink<?>> getWorkList();
+	LinkedList<ThreadWorkLink<?>, Object> getWorkList();
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this
@@ -81,18 +80,23 @@ public interface ThreadState extends FlowFuture {
 	 * Flags that escalation is about to happen on this {@link ThreadState}.
 	 * 
 	 * @param currentTaskNode
-	 *            Current {@link TaskNode} being executed.
+	 *            Current {@link JobNode} being executed.
 	 * @param isResetThreadState
 	 *            Flag indicating to reset the {@link ThreadState}.
+	 * @param notifySet
+	 *            {@link JobActivateSet}.
 	 */
-	void escalationStart(TaskNode currentTaskNode, boolean isResetThreadState);
+	void escalationStart(JobNode currentTaskNode, boolean isResetThreadState,
+			JobActivateSet notifySet);
 
 	/**
 	 * Flags that escalation has complete on this {@link ThreadState}.
 	 * 
 	 * @param currentTaskNode
-	 *            Current {@link TaskNode} being executed.
+	 *            Current {@link JobNode} being executed.
+	 * @param notifySet
+	 *            {@link JobActivateSet}.
 	 */
-	void escalationComplete(TaskNode currentTaskNode);
+	void escalationComplete(JobNode currentTaskNode, JobActivateSet notifySet);
 
 }

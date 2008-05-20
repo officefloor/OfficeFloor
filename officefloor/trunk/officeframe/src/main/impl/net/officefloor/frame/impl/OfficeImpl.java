@@ -38,7 +38,7 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -115,7 +115,7 @@ public class OfficeImpl implements Office {
 	}
 
 	/**
-	 * Creates a {@link TaskContainer} within a new {@link ProcessState} for
+	 * Creates a {@link Job} within a new {@link ProcessState} for
 	 * this Office.
 	 * 
 	 * @param flowMetaData
@@ -131,10 +131,10 @@ public class OfficeImpl implements Office {
 	 *            Index of the input {@link ManagedObject} on the
 	 *            {@link ProcessState}. This value is only used if provided a
 	 *            {@link ManagedObject}.
-	 * @return {@link TaskContainer} within a new {@link ProcessState} for this
+	 * @return {@link Job} within a new {@link ProcessState} for this
 	 *         Office.
 	 */
-	public <W extends Work> TaskContainer createProcess(
+	public <W extends Work> Job createProcess(
 			FlowMetaData<W> flowMetaData, Object parameter,
 			ManagedObject managedObject, int processMoIndex) {
 
@@ -186,7 +186,7 @@ public class OfficeImpl implements Office {
 				workContainer);
 
 		// Create the Task Container for the initial Task
-		TaskContainer taskContainer = flow.createTaskContainer(taskMetaData,
+		Job taskContainer = flow.createJob(taskMetaData,
 				null, parameter, workLink);
 
 		// Return the Task Container
@@ -199,7 +199,7 @@ public class OfficeImpl implements Office {
 	void openOffice() {
 		// Invoke the start up flows
 		for (FlowMetaData<?> flowMetaData : this.startupFlows) {
-			this.createProcess(flowMetaData, null, null, 0).activateTask();
+			this.createProcess(flowMetaData, null, null, 0).activateJob();
 		}
 	}
 

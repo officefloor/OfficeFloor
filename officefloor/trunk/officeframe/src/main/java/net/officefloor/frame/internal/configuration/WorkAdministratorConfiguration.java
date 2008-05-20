@@ -16,43 +16,39 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Configuration of a
- * {@link net.officefloor.frame.spi.administration.Administrator} of a
- * {@link net.officefloor.frame.api.execute.Work} item.
+ * Configuration of a {@link Administrator} of a {@link Work} item.
  * 
  * @author Daniel
  */
 public interface WorkAdministratorConfiguration {
 
 	/**
-	 * Obtains the Id of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Obtains the Id of the {@link Administrator}.
 	 * 
-	 * @return Id of the
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * @return Id of the {@link Administrator}.
 	 */
 	String getAdministratorId();
 
 	/**
-	 * Obtains the name that the {@link net.officefloor.frame.api.execute.Work}
-	 * and its {@link net.officefloor.frame.api.execute.Task} refer to this
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Obtains the name that the {@link Work} and its {@link Task} refer to this
+	 * {@link Administrator}.
 	 * 
 	 * @return Local name.
 	 */
 	String getWorkAdministratorName();
 
 	/**
-	 * Obtains the names local to the
-	 * {@link net.officefloor.frame.api.execute.Work} of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * to be administerred.
+	 * Obtains the names local to the {@link Work} of the {@link ManagedObject}
+	 * instances to be administered.
 	 * 
-	 * @return Names local to the {@link net.officefloor.frame.api.execute.Work}
-	 *         of the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances to be administerred.
+	 * @return Names local to the {@link Work} of the {@link ManagedObject}
+	 *         instances to be administered.
 	 */
 	String[] getWorkManagedObjectNames();
 

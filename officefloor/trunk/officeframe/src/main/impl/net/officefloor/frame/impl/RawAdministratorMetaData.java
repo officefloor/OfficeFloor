@@ -24,13 +24,16 @@ import net.officefloor.frame.impl.execute.AdministratorMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Raw meta-data of the
- * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
+ * Raw meta-data of the {@link AdministratorSource}.
  * 
  * @author Daniel
  */
@@ -96,9 +99,7 @@ public class RawAdministratorMetaData {
 	protected final List<AdministratorMetaDataImpl<?, ?>> adminMetaData = new LinkedList<AdministratorMetaDataImpl<?, ?>>();
 
 	/**
-	 * Index of this
-	 * {@link net.officefloor.frame.spi.administration.Administrator} within the
-	 * {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * Index of this {@link Administrator} within the {@link ProcessState}.
 	 */
 	protected int processScopeIndex = -1;
 
@@ -114,7 +115,8 @@ public class RawAdministratorMetaData {
 	 */
 	private RawAdministratorMetaData(
 			AdministratorSourceConfiguration adminSourceConfig,
-			AdministratorSource<?, ?> administratorSource, OfficeScope adminScope) {
+			AdministratorSource<?, ?> administratorSource,
+			OfficeScope adminScope) {
 		this.adminSourceConfig = adminSourceConfig;
 		this.administratorSource = administratorSource;
 		this.adminScope = adminScope;
@@ -139,11 +141,9 @@ public class RawAdministratorMetaData {
 	}
 
 	/**
-	 * Obtains the {@link OfficeScope} of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Obtains the {@link OfficeScope} of the {@link Administrator}.
 	 * 
-	 * @return {@link OfficeScope} of the
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * @return {@link OfficeScope} of the {@link Administrator}.
 	 */
 	public OfficeScope getAdministratorScope() {
 		return this.adminScope;
@@ -160,7 +160,7 @@ public class RawAdministratorMetaData {
 
 	/**
 	 * Creates a new {@link AdministratorMetaData} proxied to the
-	 * {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * {@link ProcessState}.
 	 * 
 	 * @return New {@link AdministratorMetaData}.
 	 */
@@ -181,14 +181,21 @@ public class RawAdministratorMetaData {
 	 * Creates a new {@link AdministratorMetaData} to administer the input
 	 * extension interfaces.
 	 * 
+	 * @param eiMetaData
+	 *            {@link ExtensionInterfaceMetaData} instances.
+	 * @param team
+	 *            {@link Team}.
+	 * @param escalationProcedure
+	 *            {@link EscalationProcedure}.
 	 * @return New {@link AdministratorMetaData}.
 	 */
 	@SuppressWarnings("unchecked")
 	public AdministratorMetaData createAdministratorMetaData(
-			ExtensionInterfaceMetaData<?>[] eiMetaData) {
+			ExtensionInterfaceMetaData<?>[] eiMetaData, Team team,
+			EscalationProcedure escalationProcedure) {
 		// Create the administrator meta-data
 		AdministratorMetaDataImpl metaData = new AdministratorMetaDataImpl(
-				this.administratorSource, eiMetaData);
+				this.administratorSource, eiMetaData, team, escalationProcedure);
 
 		// Register the meta-data
 		this.adminMetaData.add(metaData);
@@ -198,29 +205,23 @@ public class RawAdministratorMetaData {
 	}
 
 	/**
-	 * Specifies the index of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} within the
-	 * {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * Specifies the index of the {@link Administrator} within the
+	 * {@link ProcessState}.
 	 * 
 	 * @param processStateIndex
-	 *            Index for the
-	 *            {@link net.officefloor.frame.spi.administration.Administrator}
-	 *            within the
-	 *            {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 *            Index for the {@link Administrator} within the
+	 *            {@link ProcessState}.
 	 */
 	public void setProcessStateIndex(int processStateIndex) {
 		this.processScopeIndex = processStateIndex;
 	}
 
 	/**
-	 * Obtains the index of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} within the
-	 * {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * Obtains the index of the {@link Administrator} within the
+	 * {@link ProcessState}.
 	 * 
-	 * @return Index of the
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}
-	 *         within the
-	 *         {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * @return Index of the {@link Administrator} within the
+	 *         {@link ProcessState}.
 	 */
 	public int getProcessStateIndex() {
 		return this.processScopeIndex;

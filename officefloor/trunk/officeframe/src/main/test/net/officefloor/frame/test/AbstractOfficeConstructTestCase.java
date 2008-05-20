@@ -41,6 +41,7 @@ import net.officefloor.frame.impl.OfficeFrameImpl;
 import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -458,13 +459,18 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            {@link Administrator}.
 	 * @param adminOneMetaData
 	 *            Meta-data for the {@link AdministratorSourceMetaData}.
+	 * @param adminScope
+	 *            {@link OfficeScope} for the {@link Administrator}.
+	 * @param teamName
+	 *            Name of {@link Team} for {@link Administrator} {@link Duty}
+	 *            instances.
 	 * @return {@link AdministratorBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <I extends Object, A extends Enum<A>> AdministratorBuilder<A> constructAdministrator(
 			String adminName, Administrator<I, A> adminOne,
 			AdministratorSourceMetaData<I, A> adminOneMetaData,
-			OfficeScope adminScope) throws BuildException {
+			OfficeScope adminScope, String teamName) throws BuildException {
 
 		// Create the Administrator Builder
 		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
@@ -476,6 +482,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Configure the administrator
 		adminBuilder.setAdministratorScope(adminScope);
+		adminBuilder.setTeam(teamName);
 
 		// Register the Administrator with the current Office
 		this.officeBuilder.addAdministrator(adminName, adminBuilder);
@@ -493,12 +500,15 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            {@link AdministratorSource} {@link Class}.
 	 * @param adminScope
 	 *            {@link OfficeScope} of the {@link Administrator}.
+	 * @param teamName
+	 *            Name of {@link Team} for {@link Administrator} {@link Duty}
+	 *            instances.
 	 * @return {@link AdministratorBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <I extends Object, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> constructAdministrator(
-			String adminName, Class<AS> adminSource, OfficeScope adminScope)
-			throws BuildException {
+			String adminName, Class<AS> adminSource, OfficeScope adminScope,
+			String teamName) throws BuildException {
 
 		// Create the Administrator Builder
 		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
@@ -507,6 +517,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 		// Configure the administrator
 		adminBuilder.setAdministratorSourceClass(adminSource);
 		adminBuilder.setAdministratorScope(adminScope);
+		adminBuilder.setTeam(teamName);
 
 		// Register the Administrator with the current Office
 		this.officeBuilder.addAdministrator(adminName, adminBuilder);

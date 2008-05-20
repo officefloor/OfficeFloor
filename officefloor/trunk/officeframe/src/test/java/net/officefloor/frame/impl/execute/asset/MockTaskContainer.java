@@ -17,16 +17,16 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Mock {@link net.officefloor.frame.spi.team.TaskContainer}.
+ * Mock {@link net.officefloor.frame.spi.team.Job}.
  * 
  * @author Daniel
  */
-class MockTaskContainer implements TaskContainer {
+class MockTaskContainer implements Job {
 
 	/**
 	 * {@link ThreadState}.
@@ -34,7 +34,7 @@ class MockTaskContainer implements TaskContainer {
 	protected final ThreadState threadState;
 
 	/**
-	 * Indicates if this {@link TaskContainer} was activated.
+	 * Indicates if this {@link Job} was activated.
 	 */
 	protected boolean isActive = false;
 
@@ -46,9 +46,9 @@ class MockTaskContainer implements TaskContainer {
 	}
 
 	/**
-	 * Indicates if this {@link TaskContainer} was activated.
+	 * Indicates if this {@link Job} was activated.
 	 * 
-	 * @return <code>true</code> if this {@link TaskContainer} was actived.
+	 * @return <code>true</code> if this {@link Job} was activated.
 	 */
 	public boolean isActivated() {
 		return this.isActive;
@@ -59,7 +59,7 @@ class MockTaskContainer implements TaskContainer {
 	 * 
 	 * @see net.officefloor.frame.spi.team.TaskContainer#activeTask()
 	 */
-	public void activateTask() {
+	public void activateJob() {
 		this.isActive = true;
 	}
 
@@ -68,7 +68,7 @@ class MockTaskContainer implements TaskContainer {
 	 * 
 	 * @see net.officefloor.frame.spi.team.TaskContainer#doTask(net.officefloor.frame.spi.team.ExecutionContext)
 	 */
-	public boolean doTask(ExecutionContext executionContext) {
+	public boolean doJob(JobContext executionContext) {
 		throw new IllegalStateException("Should not be executing tasks");
 	}
 
@@ -82,16 +82,16 @@ class MockTaskContainer implements TaskContainer {
 	}
 
 	/**
-	 * Next {@link TaskContainer}.
+	 * Next {@link Job}.
 	 */
-	protected TaskContainer nextTaskContainer = null;
+	protected Job nextTaskContainer = null;
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.spi.team.TaskContainer#setNextTask(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void setNextTask(TaskContainer task) {
+	public void setNextJob(Job task) {
 		this.nextTaskContainer = task;
 	}
 
@@ -100,7 +100,7 @@ class MockTaskContainer implements TaskContainer {
 	 * 
 	 * @see net.officefloor.frame.spi.team.TaskContainer#getNextTask()
 	 */
-	public TaskContainer getNextTask() {
+	public Job getNextJob() {
 		return this.nextTaskContainer;
 	}
 

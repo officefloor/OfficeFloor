@@ -19,11 +19,14 @@ package net.officefloor.frame.internal.configuration;
 import java.util.Properties;
 
 import net.officefloor.frame.api.build.OfficeScope;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Configuration of the
- * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
+ * Configuration of the {@link AdministratorSource}.
  * 
  * @author Daniel
  */
@@ -54,23 +57,29 @@ public interface AdministratorSourceConfiguration {
 	Properties getProperties();
 
 	/**
-	 * Obtains the {@link OfficeScope} for this
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Obtains the {@link OfficeScope} for this {@link Administrator}.
 	 * 
-	 * @return {@link OfficeScope} for this
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * @return {@link OfficeScope} for this {@link Administrator}.
 	 */
 	OfficeScope getAdministratorScope();
 
 	/**
-	 * Obtains the listing of {@link DutyConfiguration} for the
-	 * {@link net.officefloor.frame.spi.administration.Duty} instances of this
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Obtains the name of the {@link Team} linked to the {@link Office}
+	 * responsible for completing this {@link Duty} instances of this
+	 * {@link Administrator}.
 	 * 
-	 * @return Listing of {@link DutyConfiguration} for the
-	 *         {@link net.officefloor.frame.spi.administration.Duty} instances
-	 *         of this
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * @return Id of the {@link Team}.
+	 * @throws ConfigurationException
+	 *             If invalid configuration.
+	 */
+	String getTeamName() throws ConfigurationException;
+
+	/**
+	 * Obtains the listing of {@link DutyConfiguration} for the {@link Duty}
+	 * instances of this {@link Administrator}.
+	 * 
+	 * @return Listing of {@link DutyConfiguration} for the {@link Duty}
+	 *         instances of this {@link Administrator}.
 	 */
 	DutyConfiguration<?>[] getDutyConfiguration();
 

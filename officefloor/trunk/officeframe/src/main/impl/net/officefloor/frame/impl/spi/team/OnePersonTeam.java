@@ -16,8 +16,8 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -33,7 +33,7 @@ import net.officefloor.frame.spi.team.Team;
 public class OnePersonTeam implements Team {
 
 	/**
-	 * Time to wait in milliseconds for a {@link TaskContainer}.
+	 * Time to wait in milliseconds for a {@link Job}.
 	 */
 	protected final long waitTime;
 
@@ -51,7 +51,7 @@ public class OnePersonTeam implements Team {
 	 * Initiate.
 	 * 
 	 * @param waitTime
-	 *            Time to wait in milliseconds for a {@link TaskContainer}.
+	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
 	public OnePersonTeam(long waitTime) {
 		// Store state
@@ -84,7 +84,7 @@ public class OnePersonTeam implements Team {
 	 * 
 	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void assignTask(TaskContainer task) {
+	public void assignJob(Job task) {
 		this.taskQueue.enqueue(task);
 	}
 
@@ -113,7 +113,7 @@ public class OnePersonTeam implements Team {
 /**
  * The individual comprising the {@link Team}.
  */
-class OnePerson implements Runnable, ExecutionContext {
+class OnePerson implements Runnable, JobContext {
 
 	/**
 	 * {@link TaskQueue}.
@@ -121,7 +121,7 @@ class OnePerson implements Runnable, ExecutionContext {
 	protected final TaskQueue taskQueue;
 
 	/**
-	 * Time to wait in milliseconds for a {@link TaskContainer}.
+	 * Time to wait in milliseconds for a {@link Job}.
 	 */
 	protected final long waitTime;
 
@@ -146,7 +146,7 @@ class OnePerson implements Runnable, ExecutionContext {
 	 * @param taskQueue
 	 *            {@link TaskQueue}.
 	 * @param waitTime
-	 *            Time to wait in milliseconds for a {@link TaskContainer}.
+	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
 	public OnePerson(TaskQueue taskQueue, long waitTime) {
 		// Store state
@@ -167,7 +167,7 @@ class OnePerson implements Runnable, ExecutionContext {
 				this.time = System.currentTimeMillis();
 
 				// Obtain the next task
-				TaskContainer task = this.taskQueue
+				Job task = this.taskQueue
 						.dequeue(this, this.waitTime);
 
 				if (task == null) {
@@ -176,7 +176,7 @@ class OnePerson implements Runnable, ExecutionContext {
 
 				} else {
 					// Have task therefore execute it
-					if (!task.doTask(this)) {
+					if (!task.doJob(this)) {
 						// Task needs to be re-executed
 						this.taskQueue.enqueue(task);
 					}

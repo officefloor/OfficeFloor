@@ -31,6 +31,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
 
 /**
@@ -691,7 +692,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
-	 * Obtains the {@link MockControl}for the input mock object.
+	 * Obtains the {@link MockControl} for the input mock object.
 	 * 
 	 * @param mockObject
 	 *            Mock object of the {@link MockControl}.
@@ -699,6 +700,67 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public final MockControl control(Object mockObject) {
 		return this.registry.get(mockObject);
+	}
+
+	/**
+	 * Convenience method to record a method and its return on a mock object.
+	 * 
+	 * @param mockObject
+	 *            Mock object.
+	 * @param ignore
+	 *            Result of operation on the mock object. This is only provided
+	 *            to obtain correct return type for recording return.
+	 * @param recordedReturn
+	 *            Value that is recorded to be returned from the mock object.
+	 */
+	public final <T> void recordReturn(Object mockObject, T ignore,
+			T recordedReturn) {
+		// Obtain the control
+		MockControl control = this.control(mockObject);
+
+		// Handle primitive types
+		if (recordedReturn instanceof Boolean) {
+			control.setReturnValue(((Boolean) recordedReturn).booleanValue());
+		} else if (recordedReturn instanceof Character) {
+			control.setReturnValue(((Character) recordedReturn).charValue());
+		} else if (recordedReturn instanceof Short) {
+			control.setReturnValue(((Short) recordedReturn).shortValue());
+		} else if (recordedReturn instanceof Integer) {
+			control.setReturnValue(((Integer) recordedReturn).intValue());
+		} else if (recordedReturn instanceof Long) {
+			control.setReturnValue(((Long) recordedReturn).longValue());
+		} else if (recordedReturn instanceof Float) {
+			control.setReturnValue(((Float) recordedReturn).floatValue());
+		} else if (recordedReturn instanceof Double) {
+			control.setReturnValue(((Double) recordedReturn).doubleValue());
+		} else {
+			// Not primitive, so record as object
+			control.setReturnValue(recordedReturn);
+		}
+	}
+
+	/**
+	 * Convenience method to record a method, an {@link ArgumentsMatcher} and
+	 * return value.
+	 * 
+	 * @param mockObject
+	 *            Mock object.
+	 * @param ignore
+	 *            Result of operation on the mock object. This is only provided
+	 *            to obtain correct return type for recording return.
+	 * @param recordedReturn
+	 *            Value that is recorded to be returned from the mock object.
+	 * @param matcher
+	 *            {@link ArgumentsMatcher}.
+	 */
+	public final <T> void recordReturn(Object mockObject, T ignore,
+			T recordedReturn, ArgumentsMatcher matcher) {
+
+		// Record the arguments matcher
+		this.control(mockObject).setMatcher(matcher);
+
+		// Record the return
+		this.recordReturn(mockObject, ignore, recordedReturn);
 	}
 
 	/**

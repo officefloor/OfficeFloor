@@ -16,28 +16,24 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Builds the {@link net.officefloor.frame.spi.managedobject.ManagedObject}
- * instances should be administered.
+ * Builds the {@link ManagedObject} instances should be administered.
  * 
  * @author Daniel
  */
 public interface AdministrationBuilder {
 
 	/**
-	 * <p>
-	 * Specifies the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * to be administerred by this
-	 * {@link net.officefloor.frame.spi.administration.Duty} instances of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Specifies the {@link ManagedObject} instances to be administered by this
+	 * {@link Duty} instances of the {@link Administrator}.
 	 * 
 	 * @param workManagedObjectNames
-	 *            Names of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            instances local to the
-	 *            {@link net.officefloor.frame.api.execute.Work} listed in order
-	 *            to be administerred.
+	 *            Names of the {@link ManagedObject} instances local to the
+	 *            {@link Work} listed in order to be administered.
 	 * @throws BuildException
 	 *             Build failure.
 	 */

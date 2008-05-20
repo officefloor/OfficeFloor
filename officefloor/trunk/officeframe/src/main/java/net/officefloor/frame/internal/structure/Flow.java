@@ -17,44 +17,46 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Represents a sequence of {@link net.officefloor.frame.api.execute.Task}
- * instances that are completed one after another.
+ * Represents a sequence of {@link Job} instances that are completed one after
+ * another.
  * 
  * @author Daniel
  */
-public interface Flow extends FlowFuture, LinkedListEntry<Flow> {
+public interface Flow extends FlowFuture, LinkedListEntry<Flow, JobActivateSet> {
 
 	/**
-	 * Creates a new {@link TaskContainer} bound to this {@link Flow}.
+	 * Creates a new {@link Job} bound to this {@link Flow}.
 	 * 
 	 * @param taskMetaData
-	 *            {@link TaskMetaData} for the new {@link TaskContainer}.
+	 *            {@link TaskMetaData} for the new {@link Job}.
 	 * @param parallelNodeOwner
-	 *            {@link TaskNode} that is the parallel owner of the new
-	 *            {@link TaskContainer}.
+	 *            {@link JobNode} that is the parallel owner of the new
+	 *            {@link Job}.
 	 * @param parameter
-	 *            Parameter for the {@link TaskContainer}.
+	 *            Parameter for the {@link Job}.
 	 * @param currentWorkLink
 	 *            {@link ThreadWorkLink} for the {@link WorkContainer} that is
 	 *            currently in focus. In other words the {@link ThreadWorkLink}
-	 *            of the {@link TaskContainer} creating the new
-	 *            {@link TaskContainer}.
-	 * @return New configured {@link TaskContainer}.
+	 *            of the {@link Job} creating the new {@link Job}.
+	 * @return New configured {@link Job}.
 	 */
-	TaskContainer createTaskContainer(TaskMetaData<?, ?, ?, ?> taskMetaData,
-			TaskNode parallelNodeOwner, Object parameter,
+	Job createJob(TaskMetaData<?, ?, ?, ?> taskMetaData,
+			JobNode parallelNodeOwner, Object parameter,
 			ThreadWorkLink<?> currentWorkLink);
 
 	/**
-	 * Flags that the input {@link TaskContainer} has completed.
+	 * Flags that the input {@link Job} has completed.
 	 * 
-	 * @param taskContainer
-	 *            {@link TaskContainer} that has completed.
+	 * @param job
+	 *            {@link Job} that has completed.
+	 * @param notifySet
+	 *            {@link JobActivateSet} to add {@link Job} instances waiting on
+	 *            this {@link Flow}.
 	 */
-	void taskContainerComplete(TaskContainer taskContainer);
+	void jobComplete(Job job, JobActivateSet notifySet);
 
 	/**
 	 * Obtains the {@link ThreadState} that this {@link Flow} is bound.

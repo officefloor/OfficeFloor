@@ -22,7 +22,7 @@ import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 
 /**
  * Implementation of the {@link net.officefloor.frame.api.manage.WorkManager}.
@@ -67,11 +67,11 @@ public class WorkManagerImpl<W extends Work> implements WorkManager {
 				.getInitialFlowMetaData();
 
 		// Create the task within a new process
-		TaskContainer taskContainer = this.office.createProcess(flowMetaData,
+		Job taskContainer = this.office.createProcess(flowMetaData,
 				parameter, null, 0);
 
 		// Assign the Task to the Team
-		taskContainer.activateTask();
+		taskContainer.activateJob();
 
 		// Indicate when complete
 		return taskContainer.getThreadState();

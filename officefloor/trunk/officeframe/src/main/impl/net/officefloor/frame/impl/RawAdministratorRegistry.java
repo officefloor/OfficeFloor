@@ -139,7 +139,7 @@ public class RawAdministratorRegistry {
 					DutyConfiguration<?> dutyConfig = (DutyConfiguration<?>) dutyConfigs
 							.get(key);
 
-					// Create teh flow links
+					// Create the flow links
 					FlowMetaData<?>[] flowLinks;
 					if (dutyConfig == null) {
 						// No configuration, therefore default to link no flows

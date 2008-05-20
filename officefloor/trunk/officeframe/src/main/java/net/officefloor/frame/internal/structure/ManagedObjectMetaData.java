@@ -16,15 +16,19 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Meta-data of a {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Meta-data of a {@link ManagedObject}.
  * 
  * @author Daniel
  */
@@ -37,13 +41,21 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	static final int NON_PROCESS_INDEX = -1;
 
 	/**
+	 * Creates a new {@link ManagedObjectContainer}.
+	 * 
+	 * @param lock
+	 *            Lock for the {@link ManagedObjectContainer} to synchronize on.
+	 * @return New {@link ManagedObjectContainer}.
+	 */
+	ManagedObjectContainer createManagedObjectContainer(Object lock);
+
+	/**
 	 * <p>
 	 * Obtains the index of the {@link ManagedObject} within the
 	 * {@link ProcessState}.
 	 * <p>
 	 * Note that if this does not provide a value of {@link #NON_PROCESS_INDEX}
-	 * then the {@link ManagedObject} will be sourced only for the
-	 * {@link net.officefloor.frame.api.execute.Work}.
+	 * then the {@link ManagedObject} will be sourced only for the {@link Work}.
 	 * 
 	 * @return Index of the {@link ManagedObject} within the
 	 *         {@link ProcessState} or {@link #NON_PROCESS_INDEX}.
@@ -84,14 +96,13 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * <p>
 	 * Indicates if the {@link ManagedObject} implements
-	 * {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}.
+	 * {@link AsynchronousManagedObject}.
 	 * <p>
 	 * Should the {@link ManagedObject} implement
-	 * {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}
-	 * then it will require checking if ready.
+	 * {@link AsynchronousManagedObject} then it will require checking if ready.
 	 * 
 	 * @return <code>true</code> if the {@link ManagedObject} implements
-	 *         {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}.
+	 *         {@link AsynchronousManagedObject}.
 	 */
 	boolean isManagedObjectAsynchronous();
 
@@ -106,10 +117,10 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
-	 * {@link net.officefloor.frame.spi.managedobject.CoordinatingManagedObject}.
+	 * {@link CoordinatingManagedObject}.
 	 * 
 	 * @return <code>true</code> if the {@link ManagedObject} implements
-	 *         {@link net.officefloor.frame.spi.managedobject.CoordinatingManagedObject}.
+	 *         {@link CoordinatingManagedObject}.
 	 */
 	boolean isCoordinatingManagedObject();
 
@@ -124,21 +135,19 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 *            {@link ProcessState} bound {@link ManagedObject} instances.
 	 * @return {@link ObjectRegistry}.
 	 */
-	<W extends Work> ObjectRegistry<D> createObjectRegistry(WorkContainer<W> workContainer,
-			ThreadState threadState);
+	<W extends Work> ObjectRegistry<D> createObjectRegistry(
+			WorkContainer<W> workContainer, ThreadState threadState);
 
 	/**
-	 * Creates the {@link net.officefloor.frame.api.execute.Task} for the
-	 * recycling of the {@link ManagedObject}.
+	 * Creates the {@link Task} for the recycling of the {@link ManagedObject}.
 	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} to be recycled. Obtained by the
-	 *            {@link net.officefloor.frame.api.execute.TaskContext#getParameter()}
-	 *            within the {@link net.officefloor.frame.api.execute.Task}.
-	 * @return {@link net.officefloor.frame.api.execute.Task} for the recycling
-	 *         this {@link ManagedObject} or <code>null</code> if no recycling
-	 *         is required for this {@link ManagedObject}.
+	 *            {@link TaskContext#getParameter()} within the {@link Task}.
+	 * @return {@link Task} for the recycling this {@link ManagedObject} or
+	 *         <code>null</code> if no recycling is required for this
+	 *         {@link ManagedObject}.
 	 */
-	TaskContainer createRecycleTask(ManagedObject managedObject);
+	Job createRecycleTask(ManagedObject managedObject);
 
 }

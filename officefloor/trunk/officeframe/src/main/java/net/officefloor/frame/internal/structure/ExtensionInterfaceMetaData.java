@@ -16,6 +16,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 
 /**
@@ -26,23 +28,20 @@ import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFacto
 public interface ExtensionInterfaceMetaData<I extends Object> {
 
 	/**
-	 * Obtains the index to identify the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} within the
-	 * {@link net.officefloor.frame.api.execute.Work} to create the extension
-	 * interface from.
+	 * Obtains the index to identify the {@link ManagedObject} within the
+	 * {@link Work} to create the extension interface from.
 	 * 
-	 * @return Index to identify the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject} to
-	 *         create the extension interface from.
+	 * @return Index to identify the {@link ManagedObject} to create the
+	 *         extension interface from.
 	 */
 	int getManagedObjectIndex();
 
 	/**
 	 * Obtains the factory to create the Extension Interface for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link ManagedObject}.
 	 * 
 	 * @return Factory to create the Extension Interface for the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *         {@link ManagedObject}.
 	 */
 	ExtensionInterfaceFactory<I> getExtensionInterfaceFactory();
 

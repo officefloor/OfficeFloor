@@ -23,6 +23,7 @@ import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -31,12 +32,13 @@ import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Container of a {@link net.officefloor.frame.api.execute.Work} instance.
+ * Container of a {@link Work} instance.
  * 
  * @author Daniel
  */
@@ -54,14 +56,14 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	protected final WorkMetaData<W> workMetaData;
 
 	/**
-	 * {@link  ManagedObjectContainer} instances for the respective
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances.
+	 * {@link ManagedObjectContainer} instances for the respective
+	 * {@link ManagedObject} instances.
 	 */
 	protected final ManagedObjectContainer[] managedObjects;
 
 	/**
 	 * {@link AdministratorContainer} instances for the respective
-	 * {@link net.officefloor.frame.spi.administration.Administrator} instances.
+	 * {@link Administrator} instances.
 	 */
 	protected final AdministratorContainer<?, ?>[] administrators;
 
@@ -82,7 +84,6 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	@SuppressWarnings("unchecked")
 	public WorkContainerImpl(W work, WorkMetaData<W> workMetaData,
 			ProcessState processState) {
-		// Store state
 		this.work = work;
 		this.workMetaData = workMetaData;
 
@@ -95,19 +96,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 			// Obtain the current managed object meta-data
 			ManagedObjectMetaData moMetaData = moMetaDatas[i];
 
-			// Create the container for the Managed Object
-			ManagedObjectContainer managedObjectContainer;
-			int processStateManagedObjectIndex = moMetaData
-					.getProcessStateManagedObjectIndex();
-			if (processStateManagedObjectIndex == ManagedObjectMetaData.NON_PROCESS_INDEX) {
-				// Source specific to this work (locking on work scope)
-				managedObjectContainer = new ManagedObjectContainerImpl(
-						moMetaData, this);
-			} else {
-				// Source from process state
-				managedObjectContainer = new ManagedObjectContainerProxy(
-						processStateManagedObjectIndex);
-			}
+			// Create the container for the Managed Object (locking on work)
+			ManagedObjectContainer managedObjectContainer = moMetaData
+					.createManagedObjectContainer(this);
 
 			// Register the managed object
 			this.managedObjects[i] = managedObjectContainer;
@@ -123,18 +114,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 			AdministratorMetaData adminMetaData = adminMetaDatas[i];
 
 			// Create the container for the Administrator
-			AdministratorContainer administratorContainer;
-			int processStateAdministratorIndex = adminMetaData
-					.getProcessStateAdministratorIndex();
-			if (processStateAdministratorIndex == AdministratorMetaData.NON_PROCESS_INDEX) {
-				// Source specific to this work (locking on work scope)
-				administratorContainer = new AdministratorContainerImpl(
-						adminMetaData);
-			} else {
-				// Source from the process state
-				administratorContainer = new AdministratorContainerProxy(
-						processStateAdministratorIndex);
-			}
+			AdministratorContainer administratorContainer = adminMetaData
+					.createAdministratorContainer();
 
 			// Register the administrator
 			this.administrators[i] = administratorContainer;
@@ -168,11 +149,14 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#loadObject(int,
-	 *      net.officefloor.frame.internal.structure.ThreadState)
+	 * @see net.officefloor.frame.internal.structure.WorkContainer#loadManagedObjects(int[],
+	 *      net.officefloor.frame.spi.team.ExecutionContext,
+	 *      net.officefloor.frame.spi.team.TaskContainer,
+	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
 	public boolean loadManagedObjects(int[] managedObjectIndexes,
-			ExecutionContext executionContext, TaskContainer taskContainer) {
+			JobContext executionContext, Job taskContainer,
+			JobActivateSet notifySet) {
 
 		boolean isAllLoaded = true;
 
@@ -193,7 +177,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 						// Load the work scoped managed object
 						isAllLoaded &= this.managedObjects[moIndex]
 								.loadManagedObject(executionContext,
-										taskContainer);
+										taskContainer, notifySet);
 					}
 				}
 			}
@@ -209,7 +193,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 						// Load the process scoped managed object
 						isAllLoaded &= this.managedObjects[moIndex]
 								.loadManagedObject(executionContext,
-										taskContainer);
+										taskContainer, notifySet);
 					}
 				}
 			}
@@ -224,10 +208,12 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	 * 
 	 * @see net.officefloor.frame.internal.structure.WorkContainer#coordinateManagedObjects(int[],
 	 *      net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer)
+	 *      net.officefloor.frame.spi.team.TaskContainer,
+	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
 	public void coordinateManagedObjects(int[] managedObjectIndexes,
-			ExecutionContext executionContext, TaskContainer taskContainer) {
+			JobContext executionContext, Job taskContainer,
+			JobActivateSet notifySet) {
 
 		// Skip over if no required managed objects
 		if (managedObjectIndexes.length >= 0) {
@@ -245,7 +231,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() == ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Co-ordinate the work scoped managed object
 						this.managedObjects[moIndex].coordinateManagedObject(
-								this, executionContext, taskContainer);
+								this, executionContext, taskContainer,
+								notifySet);
 					}
 				}
 			}
@@ -260,7 +247,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() != ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Co-ordinate the process scoped managed object
 						this.managedObjects[moIndex].coordinateManagedObject(
-								this, executionContext, taskContainer);
+								this, executionContext, taskContainer,
+								notifySet);
 					}
 				}
 			}
@@ -270,12 +258,14 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#isManagedObjectReady(int,
+	 * @see net.officefloor.frame.internal.structure.WorkContainer#isManagedObjectsReady(int[],
 	 *      net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.internal.structure.ThreadState)
+	 *      net.officefloor.frame.spi.team.TaskContainer,
+	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
 	public boolean isManagedObjectsReady(int[] managedObjectIndexes,
-			ExecutionContext executionContext, TaskContainer taskContainer) {
+			JobContext executionContext, Job taskContainer,
+			JobActivateSet notifySet) {
 
 		// Skip over if no managed objects
 		if (managedObjectIndexes.length >= 0) {
@@ -293,7 +283,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() == ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Check the work scoped managed object
 						if (!this.managedObjects[moIndex].isManagedObjectReady(
-								executionContext, taskContainer)) {
+								executionContext, taskContainer, notifySet)) {
 							// Waiting on managed object to be ready
 							return false;
 						}
@@ -311,7 +301,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() != ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Check the process scoped managed object
 						if (!this.managedObjects[moIndex].isManagedObjectReady(
-								executionContext, taskContainer)) {
+								executionContext, taskContainer, notifySet)) {
 							// Waiting on managed object to be ready
 							return false;
 						}
@@ -331,15 +321,14 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	 *      net.officefloor.frame.internal.structure.AdministratorContext)
 	 */
 	@SuppressWarnings("unchecked")
-	public <A extends Enum<A>> void administerManagedObjects(
-			TaskDutyAssociation<A> duty, AdministratorContext adminContext)
-			throws Exception {
+	public void administerManagedObjects(TaskDutyAssociation<?> duty,
+			AdministratorContext adminContext) throws Exception {
 
 		// Obtain the thread state
 		ThreadState threadState = adminContext.getThreadState();
 
 		// Obtain the administrator container
-		AdministratorContainer<Object, A> container = (AdministratorContainer<Object, A>) this.administrators[duty
+		AdministratorContainer container = this.administrators[duty
 				.getAdministratorIndex()];
 
 		// Obtain the work managed object meta-data
@@ -375,7 +364,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 		}
 
 		// Obtain the process scoped extension interfaces
-		synchronized (threadState.getProcessState()) {
+		synchronized (threadState.getProcessState().getProcessLock()) {
 			for (int i = 0; i < eiMetaDatas.length; i++) {
 				// Obtain current ei meta-data
 				ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];

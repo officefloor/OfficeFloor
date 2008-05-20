@@ -16,8 +16,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.spi.administration.Duty;
+
 /**
- * Meta-data for a {@link net.officefloor.frame.spi.administration.Duty}.
+ * Meta-data for a {@link Duty}.
  * 
  * @author Daniel
  */

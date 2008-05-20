@@ -19,7 +19,7 @@ package net.officefloor.frame.api.construct;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.TaskNode;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
@@ -51,7 +51,7 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 	 * <p>
 	 * Does the parallel test with the input {@link Team}.
 	 * <p>
-	 * Given any type of team, the order of {@link TaskNode} execution should be
+	 * Given any type of team, the order of {@link JobNode} execution should be
 	 * the same.
 	 * 
 	 * @param team

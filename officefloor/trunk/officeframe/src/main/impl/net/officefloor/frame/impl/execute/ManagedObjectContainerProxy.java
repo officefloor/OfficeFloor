@@ -17,22 +17,20 @@
 package net.officefloor.frame.impl.execute;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 
 /**
  * <p>
- * Proxy for a
- * {@link net.officefloor.frame.internal.structure.ManagedObjectContainer}.
+ * Proxy for a {@link ManagedObjectContainer}.
  * <p>
- * This is used to contain
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances bound
- * to the process.
+ * This is used to contain {@link ManagedObject} instances bound to the process.
  * 
  * @author Daniel
  */
@@ -59,13 +57,15 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#loadManagedObject(net.officefloor.frame.internal.structure.ThreadState)
+	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#loadManagedObject(net.officefloor.frame.spi.team.ExecutionContext,
+	 *      net.officefloor.frame.spi.team.TaskContainer,
+	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
-	public boolean loadManagedObject(ExecutionContext executionContext,
-			TaskContainer taskContainer) {
+	public boolean loadManagedObject(JobContext executionContext,
+			Job taskContainer, JobActivateSet notifySet) {
 		return taskContainer.getThreadState().getProcessState()
 				.getManagedObjectContainer(this.index).loadManagedObject(
-						executionContext, taskContainer);
+						executionContext, taskContainer, notifySet);
 	}
 
 	/*
@@ -73,25 +73,30 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#coordinateManagedObject(net.officefloor.frame.internal.structure.WorkContainer,
 	 *      net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer)
+	 *      net.officefloor.frame.spi.team.TaskContainer,
+	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
-	public <W extends Work> void coordinateManagedObject(WorkContainer<W> workContainer,
-			ExecutionContext executionContext, TaskContainer taskContainer) {
+	public <W extends Work> void coordinateManagedObject(
+			WorkContainer<W> workContainer, JobContext executionContext,
+			Job taskContainer, JobActivateSet notifySet) {
 		taskContainer.getThreadState().getProcessState()
 				.getManagedObjectContainer(this.index).coordinateManagedObject(
-						workContainer, executionContext, taskContainer);
+						workContainer, executionContext, taskContainer,
+						notifySet);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#isManagedObjectReady(net.officefloor.frame.spi.team.ExecutionContext)
+	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#isManagedObjectReady(net.officefloor.frame.spi.team.ExecutionContext,
+	 *      net.officefloor.frame.spi.team.TaskContainer,
+	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
-	public boolean isManagedObjectReady(ExecutionContext executionContext,
-			TaskContainer taskContainer) {
+	public boolean isManagedObjectReady(JobContext executionContext,
+			Job taskContainer, JobActivateSet notifySet) {
 		return taskContainer.getThreadState().getProcessState()
 				.getManagedObjectContainer(this.index).isManagedObjectReady(
-						executionContext, taskContainer);
+						executionContext, taskContainer, notifySet);
 	}
 
 	/*

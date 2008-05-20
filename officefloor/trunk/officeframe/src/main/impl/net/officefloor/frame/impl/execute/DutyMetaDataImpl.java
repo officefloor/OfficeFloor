@@ -20,8 +20,7 @@ import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 
 /**
- * Implementation of
- * {@link net.officefloor.frame.internal.structure.DutyMetaData}.
+ * Implementation of {@link DutyMetaData}.
  * 
  * @author Daniel
  */

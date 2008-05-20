@@ -16,10 +16,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * {@link net.officefloor.frame.internal.structure.Flow} Asset.
+ * {@link Flow} Asset.
  * 
  * @author Daniel
  */
@@ -27,18 +27,20 @@ public interface FlowAsset {
 
 	/**
 	 * <p>
-	 * Flags for the input {@link TaskContainer} to wait on this {@link Flow}.
+	 * Flags for the input {@link Job} to wait on this {@link Flow}.
 	 * <p>
 	 * Note that may not wait on a {@link Flow} bound to the same
-	 * {@link ThreadState} as that of the {@link TaskContainer}. This would
+	 * {@link ThreadState} as that of the {@link Job}. This would
 	 * result on the {@link ThreadState} waiting on itself and subsequently no
 	 * progression of the {@link ThreadState}.
 	 * 
 	 * @param taskContainer
-	 *            {@link TaskContainer} to wait on this {@link Flow}.
+	 *            {@link Job} to wait on this {@link Flow}.
+	 * @param notifySet
+	 *            {@link JobActivateSet} should {@link Flow} be completed.
 	 * @return <code>true</code> if waiting on this {@link Flow}, otherwise
 	 *         <code>false</code> if not to wait.
 	 */
-	boolean waitOnFlow(TaskContainer taskContainer);
+	boolean waitOnFlow(Job taskContainer, JobActivateSet notifySet);
 
 }

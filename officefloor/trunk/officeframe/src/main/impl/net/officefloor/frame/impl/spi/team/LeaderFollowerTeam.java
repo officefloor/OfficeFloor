@@ -16,8 +16,8 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -52,7 +52,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	 *            Number of {@link TeamMember} instances within this
 	 *            {@link LeaderFollowerTeam}.
 	 * @param waitTime
-	 *            Time to wait in milliseconds for a {@link TaskContainer}.
+	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
 	public LeaderFollowerTeam(String teamName, int teamMemberCount,
 			long waitTime) {
@@ -91,7 +91,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	 * 
 	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void assignTask(TaskContainer task) {
+	public void assignJob(Job task) {
 		this.taskQueue.enqueue(task);
 	}
 
@@ -139,7 +139,7 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
  * 
  * @author Daniel
  */
-class TeamMember implements Runnable, ExecutionContext {
+class TeamMember implements Runnable, JobContext {
 
 	/**
 	 * Stack of the {@link TeamMember} instances.
@@ -147,12 +147,12 @@ class TeamMember implements Runnable, ExecutionContext {
 	protected final TeamMemberStack teamMemberStack;
 
 	/**
-	 * Queue of {@link TaskContainer} instances to execute.
+	 * Queue of {@link Job} instances to execute.
 	 */
 	protected final TaskQueue taskQueue;
 
 	/**
-	 * Time to wait in milliseconds for a {@link TaskContainer}.
+	 * Time to wait in milliseconds for a {@link Job}.
 	 */
 	protected final long waitTime;
 
@@ -183,9 +183,9 @@ class TeamMember implements Runnable, ExecutionContext {
 	 *            {@link TeamMemberStack} for the {@link TeamMember} instances
 	 *            of this {@link Team}.
 	 * @param taskQueue
-	 *            {@link TaskQueue} of {@link TaskContainer} instances.
+	 *            {@link TaskQueue} of {@link Job} instances.
 	 * @param waitTime
-	 *            Time to wait in milliseconds for a {@link TaskContainer}.
+	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
 	public TeamMember(TeamMemberStack teamMemberStack, TaskQueue taskQueue,
 			long waitTime) {
@@ -222,11 +222,11 @@ class TeamMember implements Runnable, ExecutionContext {
 					this.time = System.currentTimeMillis();
 
 					// Obtain the next Task
-					TaskContainer task = this.taskQueue.dequeue(this,
+					Job task = this.taskQueue.dequeue(this,
 							this.waitTime);
 					if (task != null) {
 						// Have task therefore execute it
-						if (!task.doTask(this)) {
+						if (!task.doJob(this)) {
 							// Task needs to be re-executed
 							this.taskQueue.enqueue(task);
 						}

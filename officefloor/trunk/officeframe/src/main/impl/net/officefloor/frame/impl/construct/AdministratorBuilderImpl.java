@@ -28,11 +28,13 @@ import net.officefloor.frame.api.build.OfficeScope;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.api.build.AdministratorBuilder}.
+ * Implementation of the {@link AdministratorBuilder}.
  * 
  * @author Daniel
  */
@@ -50,8 +52,7 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	protected final Properties properties = new Properties();
 
 	/**
-	 * Name of this
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Name of this {@link Administrator}.
 	 */
 	protected String administratorName;
 
@@ -62,18 +63,21 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	protected Class administratorSourceClass;
 
 	/**
-	 * Scope of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Scope of the {@link Administrator}.
 	 */
 	protected OfficeScope administratorScope = OfficeScope.WORK;
 
 	/**
-	 * Specifies the name for the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Name of the {@link Team} responsible for the {@link Duty} instances of
+	 * this {@link Administrator}.
+	 */
+	protected String teamName;
+
+	/**
+	 * Specifies the name for the {@link Administrator}.
 	 * 
 	 * @param name
-	 *            Name for the
-	 *            {@link net.officefloor.frame.spi.administration.Administrator}.
+	 *            Name for the {@link Administrator}.
 	 */
 	protected void setAdministratorName(String name) {
 		this.administratorName = name;
@@ -112,6 +116,16 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 */
 	public void addProperty(String name, String value) throws BuildException {
 		this.properties.setProperty(name, value);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.api.build.AdministratorBuilder#setTeam(java.lang.String)
+	 */
+	@Override
+	public void setTeam(String teamName) {
+		this.teamName = teamName;
 	}
 
 	/*
@@ -194,6 +208,16 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 */
 	public OfficeScope getAdministratorScope() {
 		return this.administratorScope;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration#getTeamName()
+	 */
+	@Override
+	public String getTeamName() throws ConfigurationException {
+		return this.teamName;
 	}
 
 	/*

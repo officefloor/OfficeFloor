@@ -16,9 +16,8 @@
  */
 package net.officefloor.frame.spi.team;
 
-
 /**
- * Team of workers to do the {@link net.officefloor.frame.api.execute.Task}.
+ * Team of workers to execute the assigned {@link Job} instances.
  * 
  * @author Daniel
  */
@@ -30,21 +29,21 @@ public interface Team {
 	void startWorking();
 
 	/**
-	 * Assigns a {@link TaskContainer} to be executed by this {@link Team}.
+	 * Assigns a {@link Job} to be executed by this {@link Team}.
 	 * 
 	 * @param task
-	 *            {@link TaskContainer}.
+	 *            {@link Job}.
 	 */
-	void assignTask(TaskContainer task);
+	void assignJob(Job task);
 
 	/**
 	 * <p>
 	 * Indicates for the {@link Team} to stop working.
-	 * </p>
 	 * <p>
 	 * This method should block and only return control when the {@link Team}
-	 * has stopped working.
-	 * </p>
+	 * has stopped working and is no longer assigned {@link Job} instances to
+	 * complete.
 	 */
 	void stopWorking();
+
 }

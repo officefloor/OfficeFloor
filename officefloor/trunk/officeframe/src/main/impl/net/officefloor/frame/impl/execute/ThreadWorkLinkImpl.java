@@ -20,16 +20,16 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.ThreadWorkLink;
 import net.officefloor.frame.internal.structure.WorkContainer;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Links a {@link net.officefloor.frame.internal.structure.ThreadState} to a
- * {@link net.officefloor.frame.internal.structure.WorkContainer}.
+ * Links a {@link ThreadState} to a {@link WorkContainer}.
  * 
  * @author Daniel
  */
 public class ThreadWorkLinkImpl<W extends Work> extends
-		AbstractLinkedListEntry<ThreadWorkLink<?>> implements ThreadWorkLink<W> {
+		AbstractLinkedListEntry<ThreadWorkLink<?>, Object> implements
+		ThreadWorkLink<W> {
 
 	/**
 	 * {@link ThreadState} of the link.
@@ -42,7 +42,7 @@ public class ThreadWorkLinkImpl<W extends Work> extends
 	protected final WorkContainer<W> workContainer;
 
 	/**
-	 * Count of active {@link TaskContainer} instances using the underlying
+	 * Count of active {@link Job} instances using the underlying
 	 * {@link WorkContainer}.
 	 */
 	protected int activeTaskCount = 0;
@@ -105,7 +105,7 @@ public class ThreadWorkLinkImpl<W extends Work> extends
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ThreadWorkLink#registerTask(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void registerTask(TaskContainer task) {
+	public void registerJob(Job task) {
 		// Another active task
 		this.activeTaskCount++;
 	}
@@ -115,7 +115,7 @@ public class ThreadWorkLinkImpl<W extends Work> extends
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ThreadWorkLink#unregisterTask(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void unregisterTask(TaskContainer task) {
+	public void unregisterJob(Job task) {
 		// Task now inactive
 		this.activeTaskCount--;
 

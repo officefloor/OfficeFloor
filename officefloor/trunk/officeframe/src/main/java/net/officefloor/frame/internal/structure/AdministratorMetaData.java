@@ -16,37 +16,44 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Meta-data of the
- * {@link net.officefloor.frame.spi.administration.Administrator}.
+ * Meta-data of the {@link Administrator}.
  * 
  * @author Daniel
  */
-public interface AdministratorMetaData<I extends Object, A extends Enum<A>> {
+public interface AdministratorMetaData<I extends Object, A extends Enum<A>>
+		extends JobMetaData {
 
 	/**
-	 * Index indicating the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} will not
-	 * be sourced from the {@link ProcessState}.
+	 * Index indicating the {@link Administrator} will not be sourced from the
+	 * {@link ProcessState}.
 	 */
 	static final int NON_PROCESS_INDEX = -1;
 
 	/**
+	 * Creates a new {@link AdministratorContainer} from this
+	 * {@link AdministratorMetaData}.
+	 * 
+	 * @return New {@link AdministratorContainer}.
+	 */
+	AdministratorContainer<I, A> createAdministratorContainer();
+
+	/**
 	 * <p>
-	 * Obtains the index of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} within the
+	 * Obtains the index of the {@link Administrator} within the
 	 * {@link ProcessState}.
 	 * <p>
 	 * Note that if this does not provide a value of {@link #NON_PROCESS_INDEX}
-	 * then the {@link net.officefloor.frame.spi.administration.Administrator}
-	 * will be sourced only for the
-	 * {@link net.officefloor.frame.api.execute.Work}.
+	 * then the {@link Administrator} will be sourced only for the {@link Work}.
 	 * 
-	 * @return Index of the
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}
-	 *         within the {@link ProcessState} or {@link #NON_PROCESS_INDEX}.
+	 * @return Index of the {@link Administrator} within the
+	 *         {@link ProcessState} or {@link #NON_PROCESS_INDEX}.
 	 */
 	int getProcessStateAdministratorIndex();
 
@@ -59,14 +66,11 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> {
 
 	/**
 	 * Obtains the {@link ExtensionInterfaceMetaData} over the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * to be administered by this
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * {@link ManagedObject} instances to be administered by this
+	 * {@link Administrator}.
 	 * 
-	 * @return {@link ExtensionInterfaceMetaData} over the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances to be administered by this
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * @return {@link ExtensionInterfaceMetaData} over the {@link ManagedObject}
+	 *         instances to be administered by this {@link Administrator}.
 	 */
 	ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData();
 
@@ -74,10 +78,8 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>> {
 	 * Obtains the {@link DutyMetaData} for the input key.
 	 * 
 	 * @param key
-	 *            Key specifying the
-	 *            {@link net.officefloor.frame.spi.administration.Duty}.
-	 * @return {@link DutyMetaData} for the specified
-	 *         {@link net.officefloor.frame.spi.administration.Duty}.
+	 *            Key specifying the {@link Duty}.
+	 * @return {@link DutyMetaData} for the specified {@link Duty}.
 	 */
 	DutyMetaData getDutyMetaData(A key);
 

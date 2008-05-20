@@ -21,7 +21,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel
  */
-public interface LinkedList<E extends LinkedListEntry<E>> {
+public interface LinkedList<E extends LinkedListEntry<E, R>, R> {
 
 	/**
 	 * Obtains the head of this {@link LinkedList}.
@@ -65,10 +65,12 @@ public interface LinkedList<E extends LinkedListEntry<E>> {
 	 * Purges all {@link LinkedListEntry} instances within this
 	 * {@link LinkedList}.
 	 * 
+	 * @param removeParameter
+	 *            Parameter for {@link #lastLinkedListEntryRemoved(Object)}.
 	 * @return Head of the {@link LinkedList} (before the purge) so that may
 	 *         action the {@link LinkedListEntry} instances.
 	 */
-	E purgeLinkedList();
+	E purgeLinkedList(R removeParameter);
 
 	/**
 	 * Creates a copy of this {@link LinkedList} returning the head of the copy.
@@ -80,6 +82,12 @@ public interface LinkedList<E extends LinkedListEntry<E>> {
 	/**
 	 * Invoked when the last {@link LinkedListEntry} is removed from this
 	 * {@link LinkedList}.
+	 * 
+	 * @param removeParameter
+	 *            Parameter from the
+	 *            {@link LinkedListEntry#removeFromLinkedList(Object)} causing
+	 *            this to be invoked.
 	 */
-	void lastLinkedListEntryRemoved();
+	void lastLinkedListEntryRemoved(R removeParameter);
+
 }

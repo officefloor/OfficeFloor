@@ -18,18 +18,20 @@ package net.officefloor.frame.impl;
 
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.WorkMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
- * Raw meta-data for the {@link net.officefloor.frame.api.execute.Work}.
+ * Raw meta-data for the {@link Work}.
  * 
  * @author Daniel
  */
@@ -46,10 +48,11 @@ public class RawWorkMetaData {
 	 * @param workConfig
 	 *            {@link WorkConfiguration}.
 	 * @param officeResources
-	 *            Resources of the
-	 *            {@link net.officefloor.frame.api.manage.Office}.
+	 *            Resources of the {@link Office}.
 	 * @param rawAdminRegistry
 	 *            {@link RawAdministratorRegistry}.
+	 * @param topLevelEscalationProcedure
+	 *            Top level {@link EscalationProcedure}.
 	 * @return {@link RawWorkMetaData}.
 	 * @throws Exception
 	 *             If fails to create registry.
@@ -59,7 +62,8 @@ public class RawWorkMetaData {
 			WorkConfiguration<?> workConfig,
 			RawOfficeResourceRegistry officeResources,
 			RawAdministratorRegistry rawAdminRegistry,
-			RawAssetManagerRegistry rawAssetRegistry) throws Exception {
+			RawAssetManagerRegistry rawAssetRegistry,
+			EscalationProcedure topLevelEscalationProcedure) throws Exception {
 
 		// Obtain the work name
 		String workName = workConfig.getWorkName();
@@ -79,7 +83,8 @@ public class RawWorkMetaData {
 		// Create the registry of the Work Administrator meta-data
 		RawWorkAdministratorRegistry wadminRegistry = RawWorkAdministratorRegistry
 				.createWorkAdministratorRegistry(workConfig, officeResources,
-						rawAdminRegistry, wmoRegistry);
+						rawAdminRegistry, wmoRegistry,
+						topLevelEscalationProcedure);
 
 		// Create the registry of the Task meta-data for the Work
 		RawTaskRegistry taskRegistry = RawTaskRegistry.createTaskRegistry(
