@@ -31,7 +31,7 @@ import junit.framework.TestCase;
  * 
  * @author Daniel
  */
-public class TestSelector extends Selector {
+public class MockSelector extends Selector {
 
 	/**
 	 * {@link SelectionKey}.
@@ -44,7 +44,7 @@ public class TestSelector extends Selector {
 	 * @param selectionKey
 	 *            {@link SelectionKey} to be returned.
 	 */
-	public TestSelector(SelectionKey selectionKey) {
+	public MockSelector(SelectionKey selectionKey) {
 		this.selectionKey = selectionKey;
 	}
 

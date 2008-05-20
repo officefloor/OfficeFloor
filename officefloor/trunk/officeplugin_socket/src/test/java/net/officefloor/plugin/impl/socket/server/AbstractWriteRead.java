@@ -39,22 +39,22 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	/**
 	 * Test {@link ConnectionHandler}.
 	 */
-	protected final TestConnectionHandler connectionHandler;
+	protected final MockConnectionHandler connectionHandler;
 
 	/**
 	 * Test {@link SelectionKey}.
 	 */
-	protected final TestSelectionKey selectionKey;
+	protected final MockSelectionKey selectionKey;
 
 	/**
 	 * Test {@link NonblockingSocketChannel}.
 	 */
-	protected final TestSocketChannel socketChannel;
+	protected final MockSocketChannel socketChannel;
 
 	/**
 	 * Test {@link Selector}.
 	 */
-	protected final TestSelector selector;
+	protected final MockSelector selector;
 
 	/**
 	 * {@link ServerSocketManagedObjectSource}.
@@ -80,22 +80,22 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	 * Initiate.
 	 */
 	protected AbstractWriteRead() {
-		this.connectionHandler = new TestConnectionHandler();
-		this.selectionKey = new TestSelectionKey();
-		this.socketChannel = new TestSocketChannel(this.selectionKey);
-		this.selector = new TestSelector(this.selectionKey);
+		this.connectionHandler = new MockConnectionHandler();
+		this.selectionKey = new MockSelectionKey();
+		this.socketChannel = new MockSocketChannel(this.selectionKey);
+		this.selector = new MockSelector(this.selectionKey);
 		this.mos = new ServerSocketManagedObjectSource(new SelectorFactory() {
 			@Override
 			public Selector createSelector() throws IOException {
 				return AbstractWriteRead.this.selector;
 			}
 		});
-		this.mos.server = new TestServer();
+		this.mos.server = new MockServer();
 		this.socketListener = new SocketListener(this.mos, 1);
 		this.connection = new ConnectionImpl<Indexed>(this.socketChannel,
-				new TestServerSocketHandler(this.connectionHandler), 10,
+				new MockServerSocketHandler(this.connectionHandler), 10,
 				new DirectBufferMessageSegmentPool(100));
-		this.taskContext = new TestTaskContext(this.connection);
+		this.taskContext = new MockTaskContext(this.connection);
 	}
 
 	/**

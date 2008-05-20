@@ -27,7 +27,7 @@ import junit.framework.TestCase;
  * 
  * @author Daniel
  */
-public class TestSelectionKey extends SelectionKey {
+public class MockSelectionKey extends SelectionKey {
 
 	/**
 	 * Ready and interested ops (ie always ready).

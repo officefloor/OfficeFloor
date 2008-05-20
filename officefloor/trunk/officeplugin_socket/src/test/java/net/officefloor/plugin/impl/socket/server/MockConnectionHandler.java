@@ -27,7 +27,7 @@ import net.officefloor.plugin.socket.server.spi.WriteContext;
  * 
  * @author Daniel
  */
-public class TestConnectionHandler implements ConnectionHandler {
+public class MockConnectionHandler implements ConnectionHandler {
 
 	/**
 	 * {@link ConnectionHandler}.

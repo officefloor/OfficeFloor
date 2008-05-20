@@ -29,7 +29,7 @@ import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
  * 
  * @author Daniel
  */
-public class TestServerSocketHandler implements ServerSocketHandler<Indexed> {
+public class MockServerSocketHandler implements ServerSocketHandler<Indexed> {
 
 	/**
 	 * {@link ConnectionHandler}.
@@ -42,7 +42,7 @@ public class TestServerSocketHandler implements ServerSocketHandler<Indexed> {
 	 * @param connectionHandler
 	 *            {@link ConnectionHandler}.
 	 */
-	public TestServerSocketHandler(ConnectionHandler connectionHandler) {
+	public MockServerSocketHandler(ConnectionHandler connectionHandler) {
 		this.connectionHandler = connectionHandler;
 	}
 

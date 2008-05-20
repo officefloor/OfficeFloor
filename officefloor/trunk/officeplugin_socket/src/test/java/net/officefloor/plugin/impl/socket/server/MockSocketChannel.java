@@ -30,7 +30,7 @@ import junit.framework.TestCase;
  * 
  * @author Daniel
  */
-public class TestSocketChannel implements NonblockingSocketChannel {
+public class MockSocketChannel implements NonblockingSocketChannel {
 
 	/**
 	 * {@link SelectionKey}.
@@ -53,7 +53,7 @@ public class TestSocketChannel implements NonblockingSocketChannel {
 	 * @param selectionKey
 	 *            {@link SelectionKey}.
 	 */
-	public TestSocketChannel(SelectionKey selectionKey) {
+	public MockSocketChannel(SelectionKey selectionKey) {
 		this.selectionKey = selectionKey;
 	}
 
