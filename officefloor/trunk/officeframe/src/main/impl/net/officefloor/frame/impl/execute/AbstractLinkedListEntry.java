@@ -20,17 +20,17 @@ import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.LinkedListEntry;
 
 /**
- * Abstract {@link net.officefloor.frame.internal.structure.LinkedListEntry}.
+ * Abstract {@link LinkedListEntry}.
  * 
  * @author Daniel
  */
-public class AbstractLinkedListEntry<E extends LinkedListEntry<E>> implements
-		LinkedListEntry<E> {
+public class AbstractLinkedListEntry<E extends LinkedListEntry<E, R>, R>
+		implements LinkedListEntry<E, R> {
 
 	/**
 	 * {@link LinkedList} that this is bound.
 	 */
-	private final LinkedList<E> linkedList;
+	private final LinkedList<E, R> linkedList;
 
 	/**
 	 * Previous entry in the linked list.
@@ -48,7 +48,7 @@ public class AbstractLinkedListEntry<E extends LinkedListEntry<E>> implements
 	 * @param linkedList
 	 *            {@link LinkedList} that this is bound.
 	 */
-	public AbstractLinkedListEntry(LinkedList<E> linkedList) {
+	public AbstractLinkedListEntry(LinkedList<E, R> linkedList) {
 		this.linkedList = linkedList;
 	}
 
@@ -91,10 +91,9 @@ public class AbstractLinkedListEntry<E extends LinkedListEntry<E>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedListEntry#removeFromLinkedList()
+	 * @see net.officefloor.frame.internal.structure.LinkedListEntry#removeFromLinkedList(java.lang.Object)
 	 */
-	@SuppressWarnings("unchecked")
-	public void removeFromLinkedList() {
+	public void removeFromLinkedList(R removeParameter) {
 		// Flag indicating if last entry in linked list
 		boolean isLast = true;
 
@@ -120,7 +119,7 @@ public class AbstractLinkedListEntry<E extends LinkedListEntry<E>> implements
 
 		// Flag if last entry
 		if (isLast) {
-			this.linkedList.lastLinkedListEntryRemoved();
+			this.linkedList.lastLinkedListEntryRemoved(removeParameter);
 		}
 	}
 

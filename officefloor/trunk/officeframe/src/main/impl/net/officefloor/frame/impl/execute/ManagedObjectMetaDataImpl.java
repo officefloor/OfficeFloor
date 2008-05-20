@@ -29,17 +29,17 @@ import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.pool.ManagedObjectPoolContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Meta-data of the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Meta-data of the {@link ManagedObject}.
  * 
  * @author Daniel
  */
@@ -54,14 +54,13 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private final int processStateManagedObjectIndex;
 
 	/**
-	 * {@link ManagedObjectSource} of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link ManagedObjectSource} of the {@link ManagedObject}.
 	 */
 	private final ManagedObjectSource<?, ?> source;
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
-	 * {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}.
+	 * {@link AsynchronousManagedObject}.
 	 */
 	private final boolean isManagedObjectAsynchronous;
 
@@ -72,19 +71,17 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 	/**
 	 * Indicates if the {@link ManagedObject} implements
-	 * {@link net.officefloor.frame.spi.managedobject.CoordinatingManagedObject}.
+	 * {@link CoordinatingManagedObject}.
 	 */
 	private final boolean isCoordinatingManagedObject;
 
 	/**
-	 * Mappings for dependencies of this
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Mappings for dependencies of this {@link ManagedObject}.
 	 */
 	private final Map<D, Integer> dependencyMapping;
 
 	/**
-	 * {@link ManagedObjectPool} of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link ManagedObjectPool} of the {@link ManagedObject}.
 	 */
 	private final ManagedObjectPool pool;
 
@@ -105,7 +102,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private final AssetManager operationsManager;
 
 	/**
-	 * {@link OfficeImpl} to create the {@link TaskContainer} instances.
+	 * {@link OfficeImpl} to create the {@link Job} instances.
 	 */
 	private OfficeImpl office;
 
@@ -123,7 +120,6 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            {@link ProcessState}.
 	 */
 	public ManagedObjectMetaDataImpl(int processStateManagedObjectIndex) {
-		// Store state
 		this.processStateManagedObjectIndex = processStateManagedObjectIndex;
 		this.source = null;
 		this.pool = null;
@@ -138,21 +134,17 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 	/**
 	 * Initiate with meta-data of the {@link ManagedObject} to source specific
-	 * to the {@link net.officefloor.frame.api.execute.Work}.
+	 * to the {@link Work}.
 	 * 
 	 * @param source
-	 *            {@link ManagedObjectSource} of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            {@link ManagedObjectSource} of the {@link ManagedObject}.
 	 * @param timeout
 	 *            Timeout of an asynchronous operation by the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            being managed.
+	 *            {@link ManagedObject} being managed.
 	 * @param dependencyMapping
-	 *            Mappings for dependencies of this
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            Mappings for dependencies of this {@link ManagedObject}.
 	 * @param pool
-	 *            {@link ManagedObjectPool} of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            {@link ManagedObjectPool} of the {@link ManagedObject}.
 	 * @param isManagedObjectAsynchronous
 	 *            <code>true</code> if the {@link ManagedObject} is
 	 *            {@link AsynchronousManagedObject}.
@@ -169,7 +161,6 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			AssetManager operationsManager,
 			boolean isCoordinatingManagedObject,
 			Map<D, Integer> dependencyMapping, long timeout) {
-		// Store state
 		this.processStateManagedObjectIndex = ManagedObjectMetaData.NON_PROCESS_INDEX;
 		this.source = source;
 		this.timeout = timeout;
@@ -213,8 +204,32 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#createManagedObjectContainer(java.lang.Object)
+	 */
+	@Override
+	public ManagedObjectContainer createManagedObjectContainer(Object lock) {
+		
+		// Create the container for the Managed Object
+		ManagedObjectContainer managedObjectContainer;
+		if (this.processStateManagedObjectIndex == ManagedObjectMetaData.NON_PROCESS_INDEX) {
+			// Source specific to this work (locking on input lock)
+			managedObjectContainer = new ManagedObjectContainerImpl(this, lock);
+		} else {
+			// Source from process state
+			managedObjectContainer = new ManagedObjectContainerProxy(
+					processStateManagedObjectIndex);
+		}
+
+		// Return the managed object container
+		return managedObjectContainer;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getProcessStateManagedObjectIndex()
 	 */
+	@Override
 	public int getProcessStateManagedObjectIndex() {
 		return this.processStateManagedObjectIndex;
 	}
@@ -224,6 +239,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getSourcingManager()
 	 */
+	@Override
 	public AssetManager getSourcingManager() {
 		return this.sourcingManager;
 	}
@@ -233,6 +249,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getManagedObjectSource()
 	 */
+	@Override
 	public ManagedObjectSource<?, ?> getManagedObjectSource() {
 		return this.source;
 	}
@@ -242,6 +259,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getManagedObjectPool()
 	 */
+	@Override
 	public ManagedObjectPool getManagedObjectPool() {
 		return this.pool;
 	}
@@ -251,6 +269,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getTimeout()
 	 */
+	@Override
 	public long getTimeout() {
 		return this.timeout;
 	}
@@ -260,6 +279,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#isManagedObjectAsynchronous()
 	 */
+	@Override
 	public boolean isManagedObjectAsynchronous() {
 		return this.isManagedObjectAsynchronous;
 	}
@@ -269,6 +289,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getOperationsManager()
 	 */
+	@Override
 	public AssetManager getOperationsManager() {
 		return this.operationsManager;
 	}
@@ -278,6 +299,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#isCoordinatingManagedObject()
 	 */
+	@Override
 	public boolean isCoordinatingManagedObject() {
 		return this.isCoordinatingManagedObject;
 	}
@@ -288,6 +310,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#createObjectRegistry(net.officefloor.frame.internal.structure.WorkContainer,
 	 *      net.officefloor.frame.internal.structure.ThreadState)
 	 */
+	@Override
 	public <W extends Work> ObjectRegistry<D> createObjectRegistry(
 			WorkContainer<W> workContainer, ThreadState threadState) {
 		return new ObjectRegistryImpl<D>(workContainer, this.dependencyMapping,
@@ -299,7 +322,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#createRecycleTask()
 	 */
-	public TaskContainer createRecycleTask(ManagedObject managedObject) {
+	@Override
+	public Job createRecycleTask(ManagedObject managedObject) {
 		if (this.recycleFlowMetaData == null) {
 			// No recycling for managed objects
 			return null;
@@ -309,7 +333,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 					managedObject);
 
 			// Create the recycle task
-			TaskContainer recycleTask = this.office.createProcess(
+			Job recycleTask = this.office.createProcess(
 					this.recycleFlowMetaData, parameter, null, -1);
 
 			// Listen to process completion (handle not being recycled)
@@ -359,6 +383,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		 * 
 		 * @see net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter#getManagedObject()
 		 */
+		@Override
 		public MO getManagedObject() {
 			return this.managedObject;
 		}
@@ -368,6 +393,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		 * 
 		 * @see net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter#reuseManagedObject(MO)
 		 */
+		@Override
 		public void reuseManagedObject(MO managedObject) {
 			// Return to pool
 			if (ManagedObjectMetaDataImpl.this.pool != null) {
@@ -390,6 +416,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		 * 
 		 * @see net.officefloor.frame.internal.structure.ProcessCompletionListener#processComplete()
 		 */
+		@Override
 		public void processComplete() {
 			if ((!this.isRecycled)
 					&& (ManagedObjectMetaDataImpl.this.pool != null)) {

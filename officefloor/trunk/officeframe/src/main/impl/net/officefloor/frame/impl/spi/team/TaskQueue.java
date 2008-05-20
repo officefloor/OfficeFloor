@@ -16,11 +16,11 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Queue of {@link net.officefloor.frame.spi.team.TaskContainer} instances.
+ * Queue of {@link net.officefloor.frame.spi.team.Job} instances.
  * 
  * @author Daniel
  */
@@ -32,22 +32,22 @@ class TaskQueue {
 	protected final Object lock = new Object();
 
 	/**
-	 * Head {@link TaskContainer} of the queue.
+	 * Head {@link Job} of the queue.
 	 */
-	protected TaskContainer head = null;
+	protected Job head = null;
 
 	/**
-	 * Tail {@link TaskContainer} of the queue.
+	 * Tail {@link Job} of the queue.
 	 */
-	protected TaskContainer tail = null;
+	protected Job tail = null;
 
 	/**
-	 * Thread-safe enqueues a {@link TaskContainer} to the queue.
+	 * Thread-safe enqueues a {@link Job} to the queue.
 	 * 
 	 * @param task
-	 *            {@link TaskContainer} to add to the queue.
+	 *            {@link Job} to add to the queue.
 	 */
-	public void enqueue(TaskContainer task) {
+	public void enqueue(Job task) {
 		synchronized (this.lock) {
 			if (this.head == null) {
 				// Empty list, therefore make first
@@ -59,38 +59,38 @@ class TaskQueue {
 
 			} else {
 				// Non-empty list, therefore make last
-				this.tail.setNextTask(task);
+				this.tail.setNextJob(task);
 				this.tail = task;
 			}
 
 			// Last Task so ensure not point to another Task
-			task.setNextTask(null);
+			task.setNextJob(null);
 		}
 	}
 
 	/**
-	 * Thread-safe dequeuing the next {@link TaskContainer} to execute.
+	 * Thread-safe dequeuing the next {@link Job} to execute.
 	 * 
 	 * @param executionContext
-	 *            {@link ExecutionContext} to determine if task is ready.
-	 * @return Next {@link TaskContainer} to execute.
+	 *            {@link JobContext} to determine if task is ready.
+	 * @return Next {@link Job} to execute.
 	 */
-	public TaskContainer dequeue(ExecutionContext executionContext) {
+	public Job dequeue(JobContext executionContext) {
 		synchronized (this.lock) {
 			return this.dequeue0(executionContext);
 		}
 	}
 
 	/**
-	 * Thread-safe dequeuing the next {@link TaskContainer} to execute. This
+	 * Thread-safe dequeuing the next {@link Job} to execute. This
 	 * will block for <code>timeout</code> milliseconds for a
-	 * {@link TaskContainer} to become available.
+	 * {@link Job} to become available.
 	 * 
 	 * @param executionContext
-	 *            {@link ExecutionContext} to determine if task is ready.
-	 * @return Next {@link TaskContainer} to execute.
+	 *            {@link JobContext} to determine if task is ready.
+	 * @return Next {@link Job} to execute.
 	 */
-	public TaskContainer dequeue(ExecutionContext executionContext, long timeout) {
+	public Job dequeue(JobContext executionContext, long timeout) {
 		synchronized (this.lock) {
 
 			// Wait on a Task to be in queue
@@ -102,7 +102,7 @@ class TaskQueue {
 	}
 
 	/**
-	 * Waits the input period of time for another {@link TaskContainer} to be
+	 * Waits the input period of time for another {@link Job} to be
 	 * added.
 	 * 
 	 * @param timeout
@@ -116,7 +116,7 @@ class TaskQueue {
 
 	/**
 	 * <p>
-	 * Waits the input period of time for another {@link TaskContainer} to be
+	 * Waits the input period of time for another {@link Job} to be
 	 * added.
 	 * </p>
 	 * <p>
@@ -138,13 +138,13 @@ class TaskQueue {
 	}
 
 	/**
-	 * Dequeues the next {@link TaskContainer} to execute.
+	 * Dequeues the next {@link Job} to execute.
 	 * 
 	 * @param executionContext
-	 *            {@link ExecutionContext} to determine if task is ready.
-	 * @return Next {@link TaskContainer} to execute.
+	 *            {@link JobContext} to determine if task is ready.
+	 * @return Next {@link Job} to execute.
 	 */
-	private TaskContainer dequeue0(ExecutionContext executionContext) {
+	private Job dequeue0(JobContext executionContext) {
 
 		// Check if contains any tasks
 		if (this.head == null) {
@@ -153,7 +153,7 @@ class TaskQueue {
 		}
 
 		// Obtain task to return
-		TaskContainer returnTask = this.head;
+		Job returnTask = this.head;
 
 		// Check if only task
 		if (this.head == this.tail) {
@@ -163,11 +163,11 @@ class TaskQueue {
 
 		} else {
 			// Further tasks
-			this.head = this.head.getNextTask();
+			this.head = this.head.getNextJob();
 		}
 
 		// Return task has no next task as about to be executed
-		returnTask.setNextTask(null);
+		returnTask.setNextJob(null);
 
 		// Return the return task
 		return returnTask;

@@ -16,8 +16,8 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -33,7 +33,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public class PassiveTeam implements Team, ExecutionContext {
+public class PassiveTeam implements Team, JobContext {
 
 	/**
 	 * Current time for execution.
@@ -65,7 +65,7 @@ public class PassiveTeam implements Team, ExecutionContext {
 	 * 
 	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void assignTask(TaskContainer task) {
+	public void assignJob(Job task) {
 		// Loop executing the Task until it is complete or stop working
 		do {
 
@@ -73,7 +73,7 @@ public class PassiveTeam implements Team, ExecutionContext {
 			this.time = System.currentTimeMillis();
 
 			// Attempt to complete the Task
-			if (task.doTask(this)) {
+			if (task.doJob(this)) {
 				// Task complete
 				return;
 			}

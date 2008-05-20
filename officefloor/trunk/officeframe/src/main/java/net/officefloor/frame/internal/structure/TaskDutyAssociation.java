@@ -16,34 +16,30 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
+
 /**
- * Meta-data for a {@link net.officefloor.frame.spi.administration.Duty} to
- * administer the {@link net.officefloor.frame.api.execute.Task}.
+ * Meta-data for a {@link Duty} to administer the {@link Task}.
  * 
  * @author Daniel
  */
 public interface TaskDutyAssociation<A extends Enum<A>> {
 
 	/**
-	 * Obtains index of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} within the
-	 * {@link net.officefloor.frame.api.execute.Work}.
+	 * Obtains index of the {@link Administrator} within the {@link Work}.
 	 * 
-	 * @return Index of the
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}
-	 *         within the {@link net.officefloor.frame.api.execute.Work}.
+	 * @return Index of the {@link Administrator} within the {@link Work}.
 	 */
 	int getAdministratorIndex();
 
 	/**
-	 * Obtains the key identifying the
-	 * {@link net.officefloor.frame.spi.administration.Duty} to be administered
-	 * by the {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Obtains the key identifying the {@link Duty} to be administered by the
+	 * {@link Administrator}.
 	 * 
-	 * @return Key identifying the
-	 *         {@link net.officefloor.frame.spi.administration.Duty} to be
-	 *         administered by the
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * @return Key identifying the {@link Duty} to be administered by the
+	 *         {@link Administrator}.
 	 */
 	A getDutyKey();
 

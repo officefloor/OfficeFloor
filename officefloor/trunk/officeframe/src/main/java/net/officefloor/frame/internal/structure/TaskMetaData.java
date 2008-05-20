@@ -17,19 +17,23 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Meta-data for the {@link net.officefloor.frame.api.execute.Task}.
+ * Meta-data for the {@link Task}.
  * 
  * @author Daniel
  */
-public interface TaskMetaData<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface TaskMetaData<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
+		extends JobMetaData {
 
 	/**
-	 * Obtains the {@link TaskFactory} to create the
-	 * {@link net.officefloor.frame.api.execute.Task} for this
+	 * Obtains the {@link TaskFactory} to create the {@link Task} for this
 	 * {@link TaskMetaData}.
 	 * 
 	 * @return {@link TaskFactory}
@@ -37,51 +41,22 @@ public interface TaskMetaData<P extends Object, W extends Work, M extends Enum<M
 	TaskFactory<P, W, M, F> getTaskFactory();
 
 	/**
-	 * Obtains the {@link Team} responsible for executing this
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * Obtains the indexes to the {@link ManagedObject} instances that are
+	 * {@link AsynchronousManagedObject} and require checking to be ready before
+	 * the {@link Task} may be executed.
 	 * 
-	 * @return {@link Team} responsible for executing this
-	 *         {@link net.officefloor.frame.api.execute.Task}.
+	 * @return Listing of indexes of {@link ManagedObject} instances.
 	 */
-	Team getTeam();
-
-	/**
-	 * Obtains the indexes to the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * that must be loaded before the
-	 * {@link net.officefloor.frame.api.execute.Task} may be executed.
-	 * 
-	 * @return Listing of indexes of
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances.
-	 */
-	int[] getRequiredManagedObjects();
-
-	/**
-	 * Obtains the indexes to the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * that are
-	 * {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}
-	 * and require checking to be ready before the
-	 * {@link net.officefloor.frame.api.execute.Task} may be executed.
-	 * 
-	 * @return Listing of indexes of
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances.
-	 */
+	@Deprecated
 	int[] getCheckManagedObjects();
 
 	/**
-	 * Translates the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} index of
-	 * the {@link net.officefloor.frame.api.execute.Task} to that of the
-	 * {@link Work}.
+	 * Translates the {@link ManagedObject} index of the {@link Task} to that of
+	 * the {@link Work}.
 	 * 
 	 * @param taskMoIndex
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            index of the {@link net.officefloor.frame.api.execute.Task}.
-	 * @return {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         index of the {@link Work}.
+	 *            {@link ManagedObject} index of the {@link Task}.
+	 * @return {@link ManagedObject} index of the {@link Work}.
 	 */
 	int translateManagedObjectIndexForWork(int taskMoIndex);
 
@@ -95,59 +70,27 @@ public interface TaskMetaData<P extends Object, W extends Work, M extends Enum<M
 	FlowMetaData<?> getFlow(int flowIndex);
 
 	/**
-	 * Obtains the {@link WorkMetaData} for this
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * Obtains the {@link WorkMetaData} for this {@link Task}.
 	 * 
-	 * @return {@link WorkMetaData} for this
-	 *         {@link net.officefloor.frame.api.execute.Task}.
+	 * @return {@link WorkMetaData} for this {@link Task}.
 	 */
 	WorkMetaData<W> getWorkMetaData();
 
 	/**
-	 * Obtains the {@link EscalationProcedure} for the
-	 * {@link net.officefloor.frame.api.execute.Task} of this
-	 * {@link TaskMetaData}.
+	 * Meta-data of the {@link Duty} to undertake before executing the
+	 * {@link Task}.
 	 * 
-	 * @return {@link EscalationProcedure} for the
-	 *         {@link net.officefloor.frame.api.execute.Task} of this
-	 *         {@link TaskMetaData}.
-	 */
-	EscalationProcedure getEscalationProcedure();
-
-	/**
-	 * Obtains the {@link TaskMetaData} of the next
-	 * {@link net.officefloor.frame.api.execute.Task} within {@link Flow} that
-	 * this {@link net.officefloor.frame.api.execute.Task} is involved within.
-	 * 
-	 * @param key
-	 *            Key of the {@link Flow}.
-	 * @return {@link TaskMetaData} of the first
-	 *         {@link net.officefloor.frame.api.execute.Task} within the
-	 *         specified {@link Flow}.
-	 */
-	TaskMetaData<?, ?, ?, ?> getNextTaskInFlow();
-
-	/**
-	 * Meta-data of the {@link net.officefloor.frame.spi.administration.Duty} to
-	 * undertake before executing the
-	 * {@link net.officefloor.frame.api.execute.Task}.
-	 * 
-	 * @return Listing of the
-	 *         {@link net.officefloor.frame.spi.administration.Duty} instances
-	 *         to undertake before executing the
-	 *         {@link net.officefloor.frame.api.execute.Task}.
+	 * @return Listing of the {@link Duty} instances to undertake before
+	 *         executing the {@link Task}.
 	 */
 	TaskDutyAssociation<?>[] getPreAdministrationMetaData();
 
 	/**
-	 * Meta-data of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} to
-	 * undertake after executing the
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * Meta-data of the {@link Administrator} to undertake after executing the
+	 * {@link Task}.
 	 * 
-	 * @return Listing the {@link net.officefloor.frame.spi.administration.Duty}
-	 *         instances to undertake after executing the
-	 *         {@link net.officefloor.frame.api.execute.Task}.
+	 * @return Listing the {@link Duty} instances to undertake after executing
+	 *         the {@link Task}.
 	 */
 	TaskDutyAssociation<?>[] getPostAdministrationMetaData();
 

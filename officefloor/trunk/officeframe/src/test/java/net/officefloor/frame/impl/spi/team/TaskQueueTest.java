@@ -17,8 +17,8 @@
 package net.officefloor.frame.impl.spi.team;
 
 import net.officefloor.frame.impl.spi.team.TaskQueue;
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -27,7 +27,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class TaskQueueTest extends OfficeFrameTestCase implements
-		ExecutionContext {
+		JobContext {
 
 	/**
 	 * {@link TaskQueue} to test.
@@ -66,7 +66,7 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 	 * Ensure able to dequeue <code>null</code> from empty queue.
 	 */
 	public void testEmptyDequeue() {
-		TaskContainer returnedTask = this.taskQueue.dequeue(this);
+		Job returnedTask = this.taskQueue.dequeue(this);
 
 		// Validate
 		assertNull("Incorrect task returned", returnedTask);
@@ -76,9 +76,9 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 	 * Ensure able to enqueue and dequeue a task.
 	 */
 	public void testSingleEnqueueDequeue() {
-		TaskContainer task = new MockTaskContainer();
+		Job task = new MockTaskContainer();
 		this.taskQueue.enqueue(task);
-		TaskContainer returnedTask = this.taskQueue.dequeue(this);
+		Job returnedTask = this.taskQueue.dequeue(this);
 
 		// Validate
 		assertSame("Incorrect task returned", task, returnedTask);
@@ -88,25 +88,25 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 	 * Ensure able to dequeue the head of queue if many tasks.
 	 */
 	public void testEnqueueDequeueHead() {
-		TaskContainer taskOne = new MockTaskContainer();
-		TaskContainer taskTwo = new MockTaskContainer();
+		Job taskOne = new MockTaskContainer();
+		Job taskTwo = new MockTaskContainer();
 		this.taskQueue.enqueue(taskOne);
 		this.taskQueue.enqueue(taskTwo);
 
 		// Validate state
 		assertSame("Incorrect head", this.taskQueue.head, taskOne);
 		assertSame("Incorrect tail", this.taskQueue.tail, taskTwo);
-		assertSame("Incorrect link", taskTwo, taskOne.getNextTask());
-		assertNull("Incorrect end", taskTwo.getNextTask());
+		assertSame("Incorrect link", taskTwo, taskOne.getNextJob());
+		assertNull("Incorrect end", taskTwo.getNextJob());
 
-		TaskContainer returnedTask = this.taskQueue.dequeue(this);
+		Job returnedTask = this.taskQueue.dequeue(this);
 
 		// Validate state
 		assertSame("Incorrect return", taskOne, returnedTask);
-		assertNull("Return not cleaned", taskOne.getNextTask());
+		assertNull("Return not cleaned", taskOne.getNextJob());
 		assertSame("Incorrect head", this.taskQueue.head, taskTwo);
 		assertSame("Incorrect tail", this.taskQueue.tail, taskTwo);
-		assertNull("Incorrect end", taskTwo.getNextTask());
+		assertNull("Incorrect end", taskTwo.getNextJob());
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 		}
 
 		// Create the Task
-		TaskContainer task = new MockTaskContainer();
+		Job task = new MockTaskContainer();
 
 		// Add the task
 		this.taskQueue.enqueue(task);
@@ -195,14 +195,14 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 	 */
 	public void testWaitForDequeue() {
 
-		final ExecutionContext context = this;
+		final JobContext context = this;
 		final long WAIT_TIME = 10000;
 
 		// Lock
 		final Object lock = new Object();
 
 		// Dequeued Task
-		final TaskContainer[] dequeuedTask = new TaskContainer[1];
+		final Job[] dequeuedTask = new Job[1];
 
 		// Wait until new thread is running
 		synchronized (lock) {
@@ -220,7 +220,7 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 					}
 
 					// Wait on task to be added
-					TaskContainer task = taskQueue.dequeue(context, WAIT_TIME);
+					Job task = taskQueue.dequeue(context, WAIT_TIME);
 
 					// Specify time waited
 					time = System.currentTimeMillis() - startTime;
@@ -253,7 +253,7 @@ public class TaskQueueTest extends OfficeFrameTestCase implements
 		}
 
 		// Create the Task
-		TaskContainer task = new MockTaskContainer();
+		Job task = new MockTaskContainer();
 
 		// Add the task
 		this.taskQueue.enqueue(task);

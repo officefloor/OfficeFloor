@@ -17,7 +17,7 @@
 package net.officefloor.frame.internal.configuration;
 
 /**
- * Reference to a {@link net.officefloor.frame.internal.structure.TaskNode}.
+ * Reference to a {@link net.officefloor.frame.internal.structure.JobNode}.
  * 
  * @author Daniel
  */

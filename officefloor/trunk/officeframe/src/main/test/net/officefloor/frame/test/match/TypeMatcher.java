@@ -14,14 +14,14 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.test;
+package net.officefloor.frame.test.match;
 
 import junit.framework.Assert;
 
 import org.easymock.AbstractMatcher;
 
 /**
- * {@link org.easymock.AbstractMatcher} that checks type of objects only.
+ * {@link AbstractMatcher} that checks type of objects only.
  * 
  * @author Daniel
  */

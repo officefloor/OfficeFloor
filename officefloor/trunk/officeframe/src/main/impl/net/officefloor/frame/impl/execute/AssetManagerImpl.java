@@ -24,8 +24,7 @@ import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.LinkedListItem;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.internal.structure.AssetManager}.
+ * Implementation of the {@link AssetManager}.
  * 
  * @author Daniel
  */
@@ -40,8 +39,9 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	 * {@link LinkedList} of {@link AssetMonitor} instances requiring
 	 * monitoring.
 	 */
-	protected final LinkedList<AssetMonitor> monitors = new AbstractLinkedList<AssetMonitor>() {
-		public void lastLinkedListEntryRemoved() {
+	protected final LinkedList<AssetMonitor, Object> monitors = new AbstractLinkedList<AssetMonitor, Object>() {
+		@Override
+		public void lastLinkedListEntryRemoved(Object removeParameter) {
 			// No action required
 		}
 	};
@@ -58,7 +58,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 
 	/*
 	 * ====================================================================
-	 * AssetGroup
+	 * AssetManager
 	 * ====================================================================
 	 */
 
@@ -75,7 +75,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetGroup#manageAssetGroup()
+	 * @see net.officefloor.frame.internal.structure.AssetManager#manageAssets()
 	 */
 	public void manageAssets() {
 
@@ -92,6 +92,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 		this.time = NO_TIME;
 
 		// Iterate over the monitors managing them
+		JobActivateSetImpl notifySet = new JobActivateSetImpl();
 		while (item != null) {
 
 			// Reset the Asset Report
@@ -118,7 +119,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 			if (this.failure != null) {
 				// Fail the Asset Monitor
 				// (manages own locks and unregisters from this)
-				monitor.failTasks(this.failure);
+				monitor.failTasks(notifySet, this.failure);
 			}
 
 			// TODO: provide asset group reporting
@@ -126,6 +127,9 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 			// Next iteration
 			item = item.getNext();
 		}
+
+		// Notify the failed tasks
+		notifySet.activateJobs();
 	}
 
 	/*
@@ -148,7 +152,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	public void unregisterAssetMonitor(AssetMonitor monitor) {
 		// Co-ordinate with managing
 		synchronized (this.monitors) {
-			monitor.removeFromLinkedList();
+			monitor.removeFromLinkedList(null);
 		}
 	}
 

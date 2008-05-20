@@ -16,9 +16,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.spi.team.Job;
+
 /**
- * {@link AssetManager} to manage
- * {@link net.officefloor.frame.internal.structure.Asset} instances.
+ * {@link AssetManager} to manage {@link Asset} instances.
  * 
  * @author Daniel
  */
@@ -30,9 +31,8 @@ public interface AssetManager {
 	 * @param lock
 	 *            Lock for synchronising the {@link Asset}.
 	 * @param asset
-	 *            {@link Asset} that
-	 *            {@link net.officefloor.frame.spi.team.TaskContainer} instances
-	 *            will wait on.
+	 *            {@link Asset} that {@link Job} instances will wait
+	 *            on.
 	 * @return {@link AssetMonitor} for the {@link Asset}.
 	 */
 	AssetMonitor createAssetMonitor(Asset asset, Object assetLock);

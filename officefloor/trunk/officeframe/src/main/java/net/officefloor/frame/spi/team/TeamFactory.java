@@ -18,9 +18,8 @@ package net.officefloor.frame.spi.team;
 
 import java.util.Properties;
 
-
 /**
- * Factory for the creation of a {@link net.officefloor.frame.spi.team.Team}.
+ * Factory for the creation of a {@link Team}.
  * 
  * @author Daniel
  */

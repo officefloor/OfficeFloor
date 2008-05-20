@@ -16,12 +16,14 @@
  */
 package net.officefloor.frame.api.execute;
 
+import net.officefloor.frame.internal.structure.Flow;
+
 /**
- * Task of the {@link net.officefloor.frame.api.execute.Work}.
+ * Task of the {@link Work}.
  * 
  * @author Daniel
  */
-public interface Task<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface Task<P, W extends Work, M extends Enum<M>, F extends Enum<F>> {
 
 	/**
 	 * Does the task.
@@ -29,8 +31,7 @@ public interface Task<P extends Object, W extends Work, M extends Enum<M>, F ext
 	 * @param context
 	 *            Context for the {@link Task}.
 	 * @return Parameter for the next {@link Task}. This allows stringing
-	 *         {@link Task} instances together into a
-	 *         {@link net.officefloor.frame.internal.structure.Flow}.
+	 *         {@link Task} instances together into a {@link Flow}.
 	 * @throws Throwable
 	 *             Indicating failure of the {@link Task}. A thrown
 	 *             {@link Throwable} will also flag this {@link Task} and all

@@ -18,11 +18,14 @@ package net.officefloor.frame.impl.construct;
 
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.WorkAdministratorConfiguration;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.api.build.AdministrationBuilder}.
+ * Implementation of the {@link AdministrationBuilder}.
  * 
  * @author Daniel
  */
@@ -30,21 +33,17 @@ public class AdministrationBuilderImpl implements AdministrationBuilder,
 		WorkAdministratorConfiguration {
 
 	/**
-	 * Name of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} local to
-	 * the {@link net.officefloor.frame.api.execute.Work}.
+	 * Name of the {@link Administrator} local to the {@link Work}.
 	 */
 	protected final String workAdminName;
 
 	/**
-	 * Id of the
-	 * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
+	 * Id of the {@link AdministratorSource}.
 	 */
 	protected final String administratorId;
 
 	/**
-	 * Order to administer the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances.
+	 * Order to administer the {@link ManagedObject} instances.
 	 */
 	protected String[] workManagedObjectNames;
 
@@ -52,12 +51,9 @@ public class AdministrationBuilderImpl implements AdministrationBuilder,
 	 * Initiate.
 	 * 
 	 * @param workAdminName
-	 *            Name of the
-	 *            {@link net.officefloor.frame.spi.administration.Administrator}
-	 *            local to the {@link net.officefloor.frame.api.execute.Work}.
+	 *            Name of the {@link Administrator} local to the {@link Work}.
 	 * @param administratorId
-	 *            Id of the
-	 *            {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
+	 *            Id of the {@link AdministratorSource}.
 	 */
 	public AdministrationBuilderImpl(String workAdminName,
 			String administratorId) {

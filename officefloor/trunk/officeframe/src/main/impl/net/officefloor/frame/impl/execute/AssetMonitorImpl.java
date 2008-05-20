@@ -19,21 +19,20 @@ package net.officefloor.frame.impl.execute;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.LinkedList;
-import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.internal.structure.AssetMonitor}.
+ * Implementation of the {@link AssetMonitor}.
  * 
  * @author Daniel
  */
-public class AssetMonitorImpl extends AbstractLinkedListEntry<AssetMonitor>
-		implements AssetMonitor {
+public class AssetMonitorImpl extends
+		AbstractLinkedListEntry<AssetMonitor, Object> implements AssetMonitor {
 
 	/**
-	 * {@link Asset} being managed.
+	 * {@link Asset} being monitored.
 	 */
 	protected final Asset asset;
 
@@ -48,20 +47,22 @@ public class AssetMonitorImpl extends AbstractLinkedListEntry<AssetMonitor>
 	protected final AssetManager assetManager;
 
 	/**
-	 * State of this {@link AssetMonitor}.
+	 * Flag indicating to permanently notify waiting {@link Job}
+	 * instances.
 	 */
-	protected AssetMonitorState state = AssetMonitorState.WAITING;
+	protected boolean isPermanentlyNotify = false;
 
 	/**
-	 * Possible failure of {@link Asset}.
+	 * Permanently failure of this {@link AssetMonitor}.
 	 */
 	protected Throwable failure = null;
 
 	/**
-	 * List of {@link TaskContainer} instances waiting on the {@link Asset}.
+	 * List of {@link Job} instances waiting on the {@link Asset}.
 	 */
-	protected final LinkedList<MonitoredTask> tasks = new AbstractLinkedList<MonitoredTask>() {
-		public void lastLinkedListEntryRemoved() {
+	protected final LinkedList<MonitoredTask, Object> tasks = new AbstractLinkedList<MonitoredTask, Object>() {
+		@Override
+		public void lastLinkedListEntryRemoved(Object removeParameter) {
 			// Unregister from the Asset Group
 			AssetMonitorImpl.this.assetManager
 					.unregisterAssetMonitor(AssetMonitorImpl.this);
@@ -82,12 +83,19 @@ public class AssetMonitorImpl extends AbstractLinkedListEntry<AssetMonitor>
 	 *            the {@link AssetManager}.
 	 */
 	public AssetMonitorImpl(Asset asset, Object assetLock,
-			AssetManager assetManager, LinkedList<AssetMonitor> taskMonitors) {
+			AssetManager assetManager,
+			LinkedList<AssetMonitor, Object> taskMonitors) {
 		super(taskMonitors);
 		this.asset = asset;
 		this.assetLock = assetLock;
 		this.assetManager = assetManager;
 	}
+
+	/*
+	 * =================================================================================
+	 * AssetMonitor
+	 * =================================================================================
+	 */
 
 	/*
 	 * (non-Javadoc)
@@ -110,22 +118,27 @@ public class AssetMonitorImpl extends AbstractLinkedListEntry<AssetMonitor>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMonitor#wait(net.officefloor.frame.spi.team.TaskContainer)
+	 * @see net.officefloor.frame.internal.structure.AssetMonitor#wait(net.officefloor.frame.spi.team.TaskContainer,
+	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
-	public boolean wait(TaskContainer taskContainer) {
-
+	@Override
+	public boolean wait(Job taskContainer, JobActivateSet notifySet) {
 		// Create the monitored item for the task container
 		MonitoredTask monitoredTask = new MonitoredTask(taskContainer,
 				this.tasks);
 
 		// Only allow one wait at a time
-		TaskContainer wakeupTask = null;
+		Job wakeupTask = null;
 		Throwable wakeupFailure = null;
-		synchronized (this) {
+		synchronized (this.assetLock) {
 
 			// Determine action based on state
-			switch (this.state) {
-			case WAITING:
+			if (this.isPermanentlyNotify) {
+				// Permanently notifying, therefore wake up immediately
+				wakeupTask = taskContainer;
+				wakeupFailure = this.failure;
+
+			} else {
 				// Determine if first Task
 				if (this.tasks.getHead() == null) {
 					// Require monitoring, therefore register for monitoring
@@ -134,134 +147,126 @@ public class AssetMonitorImpl extends AbstractLinkedListEntry<AssetMonitor>
 
 				// Add the monitored task
 				this.tasks.addLinkedListEntry(monitoredTask);
-				break;
-
-			default:
-				// No longer waiting, therefore wake up immediately
-				wakeupTask = taskContainer;
-				wakeupFailure = this.failure;
 			}
 		}
 
 		// Determine if wake up immediately
-		if (wakeupTask != null) {
-			ThreadState wakeupThread = wakeupTask.getThreadState();
-			synchronized (wakeupThread.getThreadLock()) {
-				// Specify failure if failure
-				if (wakeupFailure != null) {
-					wakeupThread.setFailure(wakeupFailure);
-				}
-
-				// Activate task immediately
-				wakeupTask.activateTask();
-			}
+		if (wakeupTask == null) {
+			// No task to wake up, therefore waiting
+			return true;
 		}
 
-		// Return whether waiting
-		return (wakeupTask == null);
+		// Have task to wake up (as permanent wake up)
+		if (wakeupFailure == null) {
+			notifySet.addNotifiedJob(wakeupTask);
+		} else {
+			notifySet.addFailedJob(wakeupTask, wakeupFailure);
+		}
+		return false;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMonitor#notifyTasks()
+	 * @see net.officefloor.frame.internal.structure.AssetMonitor#notifyTasks(net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
-	public void notifyTasks() {
-
-		// Head of the list of tasks to notify
-		MonitoredTask task;
-
-		synchronized (this) {
-			// Purge the list of tasks
-			task = this.tasks.purgeLinkedList();
-
-			// Flag woken
-			this.state = AssetMonitorState.WOKEN;
-		}
-
-		// Iterate over the tasks activating them
-		while (task != null) {
-			task.taskContainer.activateTask();
-			task = task.getNext();
-		}
+	@Override
+	public void notifyTasks(JobActivateSet notifySet) {
+		this.notify(notifySet, false, null);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMonitor#failTasks(java.lang.Throwable)
+	 * @see net.officefloor.frame.internal.structure.AssetMonitor#notifyPermanently(net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
-	public void failTasks(Throwable failure) {
+	@Override
+	public void notifyPermanently(JobActivateSet notifySet) {
+		this.notify(notifySet, true, null);
+	}
 
-		// Head of the list of tasks to notify
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.structure.AssetMonitor#failTasks(net.officefloor.frame.internal.structure.AssetNotifySet,
+	 *      java.lang.Throwable)
+	 */
+	@Override
+	public void failTasks(JobActivateSet notifySet, Throwable failure) {
+		this.notify(notifySet, false, failure);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.structure.AssetMonitor#failPermanently(net.officefloor.frame.internal.structure.AssetNotifySet,
+	 *      java.lang.Throwable)
+	 */
+	@Override
+	public void failPermanently(JobActivateSet notifySet, Throwable failure) {
+		this.notify(notifySet, true, failure);
+	}
+
+	/**
+	 * Purges the list of {@link MonitoredTask} instances, adding the
+	 * {@link Job} instances to the {@link JobActivateSet} with the
+	 * possible {@link Throwable} failure.
+	 * 
+	 * @param notifySet
+	 *            {@link JobActivateSet}.
+	 * @param isPermanentlyNotify
+	 *            Flags whether to set into permanently notify state.
+	 * @param failure
+	 *            Possible {@link Throwable} failure. May be <code>null</code>.
+	 */
+	private void notify(JobActivateSet notifySet, boolean isPermanentlyNotify,
+			Throwable failure) {
+
+		// Obtain the tasks to be notified
 		MonitoredTask task;
-
-		synchronized (this) {
+		synchronized (this.assetLock) {
 			// Purge the list of tasks
-			task = this.tasks.purgeLinkedList();
+			task = this.tasks.purgeLinkedList(null);
 
-			// Flag woken but failed
-			this.state = AssetMonitorState.WOKEN;
-			this.failure = failure;
+			// Flag permanently notify (and possible failure)
+			if (isPermanentlyNotify) {
+				this.isPermanentlyNotify = true;
+				this.failure = failure;
+			}
 		}
 
-		// Iterate over the tasks failing them
+		// Add the tasks for notifying
 		while (task != null) {
-			// Lock on the task's thread to specify failure
-			TaskContainer taskContainer = task.taskContainer;
-			ThreadState threadState = taskContainer.getThreadState();
-			synchronized (threadState.getThreadLock()) {
-				// Fail the task
-				threadState.setFailure(failure);
-
-				// Active the task to handle failure
-				taskContainer.activateTask();
+			if (failure == null) {
+				notifySet.addNotifiedJob(task.taskContainer);
+			} else {
+				notifySet.addFailedJob(task.taskContainer, failure);
 			}
-
-			// Next task
 			task = task.getNext();
 		}
 	}
 
 	/**
-	 * States of this {@link AssetMonitor}.
+	 * {@link Job} being monitored by the {@link AssetMonitor}.
 	 */
-	private enum AssetMonitorState {
+	private class MonitoredTask extends
+			AbstractLinkedListEntry<MonitoredTask, Object> {
 
 		/**
-		 * Initial state of waiting.
+		 * {@link Job} being monitored.
 		 */
-		WAITING,
+		protected final Job taskContainer;
 
 		/**
-		 * Indicates that has been woken.
+		 * Initiate.
+		 * 
+		 * @param linkedList
 		 */
-		WOKEN
-	}
-}
-
-/**
- * {@link net.officefloor.frame.spi.team.TaskContainer} being monitored by the
- * {@link net.officefloor.frame.internal.structure.AssetMonitor}.
- * 
- * @author Daniel
- */
-class MonitoredTask extends AbstractLinkedListEntry<MonitoredTask> {
-
-	/**
-	 * {@link TaskContainer} being monitored.
-	 */
-	protected final TaskContainer taskContainer;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param linkedList
-	 */
-	public MonitoredTask(TaskContainer taskContainer,
-			LinkedList<MonitoredTask> linkedList) {
-		super(linkedList);
-		this.taskContainer = taskContainer;
+		public MonitoredTask(Job taskContainer,
+				LinkedList<MonitoredTask, Object> linkedList) {
+			super(linkedList);
+			this.taskContainer = taskContainer;
+		}
 	}
 
 }

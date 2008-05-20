@@ -19,6 +19,7 @@ package net.officefloor.frame.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.EscalationImpl;
 import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
@@ -40,31 +41,28 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
- * Registry of {@link net.officefloor.frame.api.execute.Work}.
+ * Registry of {@link Work}.
  * 
  * @author Daniel
  */
 public class RawWorkRegistry {
 
 	/**
-	 * Creates the registry of {@link WorkMetaData} defining the
-	 * {@link net.officefloor.frame.api.execute.Work} items to be carried out by
-	 * the Office.
+	 * Creates the registry of {@link WorkMetaData} defining the {@link Work}
+	 * items to be carried out by the Office.
 	 * 
 	 * @param officeConfiguration
 	 *            Configuration of the Office.
 	 * @param officeResources
-	 *            Resources for the
-	 *            {@link net.officefloor.frame.api.manage.Office}.
+	 *            Resources for the {@link Office}.
 	 * @param rawAdminRegistry
 	 *            Registry of the {@link RawAdministratorMetaData}.
 	 * @param rawAssetRegistry
 	 *            {@link RawAssetManagerRegistry}.
 	 * @param topLevelEscalationProcedure
 	 *            Top level {@link EscalationProcedure}.
-	 * @return Registry of {@link WorkMetaData} defining the
-	 *         {@link net.officefloor.frame.api.execute.Work} items to be
-	 *         carried out by the Office.
+	 * @return Registry of {@link WorkMetaData} defining the {@link Work} items
+	 *         to be carried out by the Office.
 	 * @throws Exception
 	 *             If fails.
 	 */
@@ -83,7 +81,8 @@ public class RawWorkRegistry {
 			// Create the Work meta-data
 			workRegistry.put(workConfig.getWorkName(), RawWorkMetaData
 					.createRawWorkMetaData(workConfig, officeResources,
-							rawAdminRegistry, rawAssetRegistry));
+							rawAdminRegistry, rawAssetRegistry,
+							topLevelEscalationProcedure));
 		}
 
 		// Create the work registry
@@ -174,8 +173,7 @@ public class RawWorkRegistry {
 	}
 
 	/**
-	 * Loads the remaining state for the
-	 * {@link net.officefloor.frame.api.execute.Task} instances of the Office.
+	 * Loads the remaining state for the {@link Task} instances of the Office.
 	 * 
 	 * @param rawAssetRegistry
 	 *            {@link RawAssetManagerRegistry}.
@@ -346,12 +344,10 @@ public class RawWorkRegistry {
 	 * Locates the {@link TaskMetaData} within the Office.
 	 * 
 	 * @param workNameToLocate
-	 *            {@link Work} containing the
-	 *            {@link net.officefloor.frame.api.execute.Task} to find the
+	 *            {@link Work} containing the {@link Task} to find the
 	 *            {@link TaskMetaData}.
 	 * @param taskNameToLocate
-	 *            {@link net.officefloor.frame.api.execute.Task} to find the
-	 *            {@link TaskMetaData}.
+	 *            {@link Task} to find the {@link TaskMetaData}.
 	 * @param workNameInContext
 	 *            Work requesting the {@link TaskMetaData}.
 	 * @param taskNameInContext

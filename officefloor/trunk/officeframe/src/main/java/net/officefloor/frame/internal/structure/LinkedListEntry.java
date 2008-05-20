@@ -21,7 +21,7 @@ package net.officefloor.frame.internal.structure;
  * 
  * @author Daniel
  */
-public interface LinkedListEntry<E extends LinkedListEntry<E>> {
+public interface LinkedListEntry<E extends LinkedListEntry<E, R>, R> {
 
 	/**
 	 * Obtains the previous entry in the list.
@@ -55,6 +55,11 @@ public interface LinkedListEntry<E extends LinkedListEntry<E>> {
 
 	/**
 	 * Removes this {@link LinkedListEntry} from the {@link LinkedList}.
+	 * 
+	 * @param lastRemovedParameter
+	 *            Parameter for the
+	 *            {@link LinkedList#lastLinkedListEntryRemoved(Object)} should
+	 *            it be invoked.
 	 */
-	void removeFromLinkedList();
+	void removeFromLinkedList(R lastRemovedParameter);
 }

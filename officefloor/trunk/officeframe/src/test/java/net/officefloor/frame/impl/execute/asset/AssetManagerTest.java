@@ -17,6 +17,7 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.impl.execute.AssetManagerImpl;
+import net.officefloor.frame.impl.execute.JobActivateSetImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
@@ -45,7 +46,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	protected AssetMonitor assetMonitor;
 
 	/**
-	 * Mock {@link net.officefloor.frame.spi.team.TaskContainer}.
+	 * Mock {@link net.officefloor.frame.spi.team.Job}.
 	 */
 	protected MockTaskContainer taskContainer;
 
@@ -86,7 +87,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Wait on a Task
-		this.assetMonitor.wait(this.taskContainer);
+		this.assetMonitor.wait(this.taskContainer, new JobActivateSetImpl());
 
 		// Manage
 		this.assetManager.manageAssets();

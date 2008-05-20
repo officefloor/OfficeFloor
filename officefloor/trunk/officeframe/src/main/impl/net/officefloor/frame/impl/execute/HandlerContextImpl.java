@@ -20,7 +20,7 @@ import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.impl.OfficeImpl;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 
 /**
  * Implementation of the
@@ -94,11 +94,11 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
 
 		// Create the task in a new process
-		TaskContainer task = this.office.createProcess(flowMetaData, parameter,
+		Job task = this.office.createProcess(flowMetaData, parameter,
 				managedObject, this.processMoIndex);
 
 		// Activate the Task
-		task.activateTask();
+		task.activateJob();
 	}
 
 }

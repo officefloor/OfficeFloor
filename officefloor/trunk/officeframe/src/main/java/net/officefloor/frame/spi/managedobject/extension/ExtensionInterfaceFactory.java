@@ -19,8 +19,7 @@ package net.officefloor.frame.spi.managedobject.extension;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Creates a specific extension interface for the input
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Creates a specific extension interface for the input {@link ManagedObject}.
  * 
  * @author Daniel
  */

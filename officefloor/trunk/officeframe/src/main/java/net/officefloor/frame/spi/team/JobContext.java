@@ -16,13 +16,14 @@
  */
 package net.officefloor.frame.spi.team;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Context for the execution of a
- * {@link net.officefloor.frame.spi.team.TaskContainer}.
+ * Context for the execution of a {@link Job}.
  * 
  * @author Daniel
  */
-public interface ExecutionContext {
+public interface JobContext {
 
 	/**
 	 * <p>
@@ -31,8 +32,7 @@ public interface ExecutionContext {
 	 * This should return similar to {@link System#currentTimeMillis()} but is
 	 * provided to cache time for multiple quick operations that require only
 	 * estimates of time - such as check if asynchronous operations by the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * have not timed out.
+	 * {@link ManagedObject} instances have not timed out.
 	 * <p>
 	 * Note CPU operations should be in the nano-seconds.
 	 * 
@@ -42,12 +42,11 @@ public interface ExecutionContext {
 
 	/**
 	 * Indicates whether to continue execution. This provides a hint to allow a
-	 * {@link net.officefloor.frame.api.execute.Task} to be more responsive in
-	 * shutting down.
+	 * {@link Job} to be more responsive in shutting down.
 	 * 
 	 * @return <code>true</code> if should continue executing or
-	 *         <code>false</code> if execution has stopped and the
-	 *         {@link net.officefloor.frame.api.execute.Task} should stop.
+	 *         <code>false</code> if execution has stopped and the {@link Job}
+	 *         should stop.
 	 */
 	boolean continueExecution();
 

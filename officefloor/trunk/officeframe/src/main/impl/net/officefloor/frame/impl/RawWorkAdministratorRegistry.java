@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.ExtensionInterfaceMetaDataImpl;
 import net.officefloor.frame.impl.execute.TaskDutyAssociationImpl;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
@@ -28,38 +29,37 @@ import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.WorkAdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Registry of the
- * {@link net.officefloor.frame.impl.RawWorkAministratorMetaData}.
+ * Registry of the {@link RawWorkAministratorMetaData}.
  * 
  * @author Daniel
  */
 public class RawWorkAdministratorRegistry {
 
 	/**
-	 * Obtains the {@link AdministratorMetaData} registry for the
-	 * {@link net.officefloor.frame.api.execute.Work}.
+	 * Obtains the {@link AdministratorMetaData} registry for the {@link Work}.
 	 * 
 	 * @param workConfig
-	 *            Configuration of the
-	 *            {@link net.officefloor.frame.api.execute.Work}.
+	 *            Configuration of the {@link Work}.
 	 * @param rawAdminRegistry
 	 *            Registry of {@link RawAdministratorMetaData} instances for the
 	 *            Office.
 	 * @param processManagedObjects
-	 *            {@link ManagedObjectMetaData} for the
-	 *            {@link net.officefloor.frame.internal.structure.ProcessState}
-	 *            bound
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            instances.
-	 * @return {@link RawAdministratorMetaData} registry for the
-	 *         {@link net.officefloor.frame.api.execute.Work}.
+	 *            {@link ManagedObjectMetaData} for the {@link ProcessState}
+	 *            bound {@link ManagedObject} instances.
+	 * @param topLevelEscalationProcedure
+	 *            Top level {@link EscalationProcedure}.
+	 * @return {@link RawAdministratorMetaData} registry for the {@link Work}.
 	 * @throws ConfigurationException
 	 *             Indicates invalid configuration.
 	 */
@@ -68,7 +68,8 @@ public class RawWorkAdministratorRegistry {
 			WorkConfiguration workConfig,
 			RawOfficeResourceRegistry officeResources,
 			RawAdministratorRegistry rawAdminRegistry,
-			RawWorkManagedObjectRegistry workMoRegistry)
+			RawWorkManagedObjectRegistry workMoRegistry,
+			EscalationProcedure topLevelEscalationProcedure)
 			throws ConfigurationException {
 
 		// Create the listing of work bound administrators
@@ -164,9 +165,19 @@ public class RawWorkAdministratorRegistry {
 							eiFactory);
 				}
 
+				// Obtain the team responsible for the administration duties
+				String teamId = rawMetaData
+						.getAdministratorSourceConfiguration().getTeamName();
+				Team team = officeResources.getTeam(teamId);
+				if (team == null) {
+					throw new ConfigurationException("Team '" + team
+							+ "' not available for administrator '"
+							+ workAdminName + "'");
+				}
+
 				// Work scoped meta-data
-				adminMetaData = rawMetaData
-						.createAdministratorMetaData(eiMetaData);
+				adminMetaData = rawMetaData.createAdministratorMetaData(
+						eiMetaData, team, topLevelEscalationProcedure);
 
 				// Add to listing of work bound
 				workBoundRequiredListing.add(new RawWorkAdministratorMetaData(

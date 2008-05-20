@@ -16,15 +16,18 @@
  */
 package net.officefloor.frame.impl.execute.linkedlist;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.officefloor.frame.impl.execute.AbstractLinkedList;
 import net.officefloor.frame.impl.execute.AbstractLinkedListEntry;
 import net.officefloor.frame.internal.structure.LinkedList;
+import net.officefloor.frame.internal.structure.LinkedListEntry;
 import net.officefloor.frame.internal.structure.LinkedListItem;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link net.officefloor.frame.impl.execute.AbstractLinkedList} and
- * the {@link net.officefloor.frame.impl.execute.AbstractLinkedListEntry}.
+ * Tests the {@link AbstractLinkedList} and the {@link AbstractLinkedListEntry}.
  * 
  * @author Daniel
  */
@@ -33,18 +36,26 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 	/**
 	 * {@link AbstractLinkedList} to test.
 	 */
-	protected final LinkedList<TestLinkedListEntry> linkedList = new AbstractLinkedList<TestLinkedListEntry>() {
-		public void lastLinkedListEntryRemoved() {
-			isLastEntryRemoved = true;
+	protected final LinkedList<TestLinkedListEntry, Object> linkedList = new AbstractLinkedList<TestLinkedListEntry, Object>() {
+		@Override
+		public void lastLinkedListEntryRemoved(Object removeParameter) {
+			AbstractLinkedListTest.this.isLastEntryRemoved = true;
+			if (removeParameter != null) {
+				AbstractLinkedListTest.this.removeParameters
+						.add(removeParameter);
+			}
 		}
 	};
 
 	/**
-	 * Indicates if the last
-	 * {@link net.officefloor.frame.internal.structure.LinkedListEntry} was
-	 * removed.
+	 * Indicates if the last {@link LinkedListEntry} was removed.
 	 */
 	protected boolean isLastEntryRemoved = false;
+
+	/**
+	 * Remove parameters on removing the last entry.
+	 */
+	protected List<Object> removeParameters = new ArrayList<Object>(1);
 
 	/**
 	 * Flag indicating if expecting the last entry to be removed.
@@ -60,7 +71,7 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 	 * {@link AbstractLinkedListEntry} for testing.
 	 */
 	protected class TestLinkedListEntry extends
-			AbstractLinkedListEntry<TestLinkedListEntry> {
+			AbstractLinkedListEntry<TestLinkedListEntry, Object> {
 
 		/**
 		 * Unique Id for this entry.
@@ -68,7 +79,8 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 		protected final int id;
 
 		// Inherit constructor
-		public TestLinkedListEntry(LinkedList<TestLinkedListEntry> linkedList) {
+		public TestLinkedListEntry(
+				LinkedList<TestLinkedListEntry, Object> linkedList) {
 			super(linkedList);
 
 			// Assign Id
@@ -159,6 +171,22 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Validates the remove parameters.
+	 * 
+	 * @param expectedRemoveParameters
+	 *            Expected remove parameters.
+	 */
+	protected void validateRemoveParameters(Object... expectedRemoveParameters) {
+		// Ensure correct number
+		assertEquals("Incorrect number of remove parameters",
+				expectedRemoveParameters.length, this.removeParameters.size());
+		for (int i = 0; i < expectedRemoveParameters.length; i++) {
+			assertEquals("Incorrect remove parameter " + i,
+					expectedRemoveParameters[i], this.removeParameters.get(i));
+		}
+	}
+
+	/**
 	 * Ensure correctly adds an entry.
 	 */
 	public void testAddEntry() {
@@ -171,8 +199,9 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 	 */
 	public void testAddRemoveEntry() {
 		TestLinkedListEntry entry = new TestLinkedListEntry(this.linkedList);
-		entry.removeFromLinkedList();
+		entry.removeFromLinkedList("remove");
 		this.validateList();
+		this.validateRemoveParameters("remove");
 	}
 
 	/**
@@ -182,8 +211,9 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 		TestLinkedListEntry first = new TestLinkedListEntry(this.linkedList);
 		TestLinkedListEntry middle = new TestLinkedListEntry(this.linkedList);
 		TestLinkedListEntry last = new TestLinkedListEntry(this.linkedList);
-		first.removeFromLinkedList();
+		first.removeFromLinkedList("not last");
 		this.validateList(middle, last);
+		this.validateRemoveParameters();
 	}
 
 	/**
@@ -193,8 +223,9 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 		TestLinkedListEntry first = new TestLinkedListEntry(this.linkedList);
 		TestLinkedListEntry middle = new TestLinkedListEntry(this.linkedList);
 		TestLinkedListEntry last = new TestLinkedListEntry(this.linkedList);
-		middle.removeFromLinkedList();
+		middle.removeFromLinkedList("not last");
 		this.validateList(first, last);
+		this.validateRemoveParameters();
 	}
 
 	/**
@@ -204,8 +235,9 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 		TestLinkedListEntry first = new TestLinkedListEntry(this.linkedList);
 		TestLinkedListEntry middle = new TestLinkedListEntry(this.linkedList);
 		TestLinkedListEntry last = new TestLinkedListEntry(this.linkedList);
-		last.removeFromLinkedList();
+		last.removeFromLinkedList("not last");
 		this.validateList(first, middle);
+		this.validateRemoveParameters();
 	}
 
 	/**
@@ -216,16 +248,20 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 		TestLinkedListEntry middle = new TestLinkedListEntry(this.linkedList);
 		TestLinkedListEntry last = new TestLinkedListEntry(this.linkedList);
 		this.validateList(first, middle, last);
-		last.removeFromLinkedList();
+		last.removeFromLinkedList("not last");
 		this.validateList(first, middle);
+		this.validateRemoveParameters();
 		TestLinkedListEntry extra = new TestLinkedListEntry(this.linkedList);
 		this.validateList(first, middle, extra);
-		middle.removeFromLinkedList();
+		middle.removeFromLinkedList("not last");
 		this.validateList(first, extra);
-		extra.removeFromLinkedList();
+		this.validateRemoveParameters();
+		extra.removeFromLinkedList("not last");
 		this.validateList(first);
-		first.removeFromLinkedList();
+		this.validateRemoveParameters();
+		first.removeFromLinkedList("last");
 		this.validateList();
+		this.validateRemoveParameters("last");
 	}
 
 	/**
@@ -234,14 +270,16 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 	public void testAddRemoveAddRemove() {
 		TestLinkedListEntry first = new TestLinkedListEntry(this.linkedList);
 		this.validateList(first);
-		first.removeFromLinkedList();
+		first.removeFromLinkedList("one");
 		this.validateList();
+		this.validateRemoveParameters("one");
 		TestLinkedListEntry second = new TestLinkedListEntry(this.linkedList);
 		this.validateList(second);
 		// Ensure last entry removed called again
 		this.isLastEntryRemoved = false;
-		second.removeFromLinkedList();
+		second.removeFromLinkedList("two");
 		this.validateList();
+		this.validateRemoveParameters("one", "two");
 	}
 
 	/**
@@ -250,11 +288,12 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 	public void testPurgeEmptyList() {
 		// Purge the empty list expecting not return
 		assertNull("Should not return head of empty list", this.linkedList
-				.purgeLinkedList());
+				.purgeLinkedList("not removed"));
 
 		// Last entry removed should not be invoked
 		this.expectLastEntryRemoved = false;
 		this.validateList();
+		this.validateRemoveParameters();
 	}
 
 	/**
@@ -267,8 +306,9 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 		this.validateList(first, second);
 
 		// Purge the list
-		TestLinkedListEntry head = this.linkedList.purgeLinkedList();
+		TestLinkedListEntry head = this.linkedList.purgeLinkedList("removed");
 		this.validateList();
+		this.validateRemoveParameters("removed");
 
 		// Validate the returned list
 		assertEquals("Incorrect head of returned list", head, first);

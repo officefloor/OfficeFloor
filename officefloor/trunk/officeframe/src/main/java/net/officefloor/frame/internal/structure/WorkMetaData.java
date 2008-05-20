@@ -18,9 +18,10 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.administration.Administrator;
 
 /**
- * Meta-data for a {@link net.officefloor.frame.api.execute.Work} instance.
+ * Meta-data for a {@link Work} instance.
  * 
  * @author Daniel
  */
@@ -37,8 +38,7 @@ public interface WorkMetaData<W extends Work> {
 	/**
 	 * Obtain the {@link WorkFactory}.
 	 * 
-	 * @return {@link WorkFactory} of the
-	 *         {@link net.officefloor.frame.api.execute.Work}.
+	 * @return {@link WorkFactory} of the {@link Work}.
 	 */
 	WorkFactory<W> getWorkFactory();
 
@@ -52,24 +52,20 @@ public interface WorkMetaData<W extends Work> {
 	FlowMetaData<W> getInitialFlowMetaData();
 
 	/**
-	 * Obtains the meta-data of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * for the {@link Work}.
+	 * Obtains the meta-data of the {@link ManagedObject} instances for the
+	 * {@link Work}.
 	 * 
-	 * @return Meta-data of the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances for the {@link Work}.
+	 * @return Meta-data of the {@link ManagedObject} instances for the
+	 *         {@link Work}.
 	 */
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
 
 	/**
-	 * Obtains the meta-data of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} instances
-	 * for the {@link Work}.
+	 * Obtains the meta-data of the {@link Administrator} instances for the
+	 * {@link Work}.
 	 * 
-	 * @return Meta-data of the
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}
-	 *         instances for the {@link Work}.
+	 * @return Meta-data of the {@link Administrator} instances for the
+	 *         {@link Work}.
 	 */
 	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
 

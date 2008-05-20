@@ -16,22 +16,23 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Enables building a
- * {@link net.officefloor.frame.spi.administration.Administrator}.
+ * Enables building an {@link Administrator}.
  * 
  * @author Daniel
  */
 public interface AdministratorBuilder<A extends Enum<A>> {
 
 	/**
-	 * Specifies the {@link Class} of the
-	 * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
+	 * Specifies the {@link Class} of the {@link AdministratorSource}.
 	 * 
-	 * @param <S>
-	 *            {@link AdministratorSource} type.
 	 * @param administratorSourceClass
 	 *            {@link Class} of the {@link AdministratorSource}.
 	 * @throws BuildException
@@ -41,13 +42,11 @@ public interface AdministratorBuilder<A extends Enum<A>> {
 			Class<S> administratorSourceClass) throws BuildException;
 
 	/**
-	 * Specifies the scope of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}. Default
-	 * scope is {@link OfficeScope#WORK}.
+	 * Specifies the scope of the {@link Administrator}. Default scope is
+	 * {@link OfficeScope#WORK}.
 	 * 
 	 * @param scope
-	 *            Scope for the
-	 *            {@link net.officefloor.frame.spi.administration.Administrator}.
+	 *            Scope for the {@link Administrator}.
 	 */
 	void setAdministratorScope(OfficeScope scope);
 
@@ -64,23 +63,27 @@ public interface AdministratorBuilder<A extends Enum<A>> {
 	void addProperty(String name, String value) throws BuildException;
 
 	/**
-	 * Creates a {@link DutyBuilder} for a
-	 * {@link net.officefloor.frame.spi.administration.Duty} of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Name of the {@link Team} linked to the {@link Office} of this
+	 * {@link Administrator} which is responsible for doing to the {@link Duty}
+	 * instances of this {@link Administrator}.
+	 * 
+	 * @param teamName
+	 *            Name of {@link Team} for this {@link Administrator}.
+	 */
+	void setTeam(String teamName);
+
+	/**
+	 * Creates a {@link DutyBuilder} for a {@link Duty} of the
+	 * {@link Administrator}.
 	 * 
 	 * @param <F>
-	 *            {@link Enum} listing
-	 *            {@link net.officefloor.frame.internal.structure.Flow}
-	 *            instances to be instigated by the
-	 *            {@link net.officefloor.frame.spi.administration.Duty}.
+	 *            {@link Enum} listing {@link Flow} instances to be instigated
+	 *            by the {@link Duty}.
 	 * @param dutyKey
-	 *            Key identifying the
-	 *            {@link net.officefloor.frame.spi.administration.Duty}.
+	 *            Key identifying the {@link Duty}.
 	 * @param flowListingEnum
-	 *            {@link Enum} {@link Class} listing
-	 *            {@link net.officefloor.frame.internal.structure.Flow}
-	 *            instances to be instigated by the
-	 *            {@link net.officefloor.frame.spi.administration.Duty}.
+	 *            {@link Enum} {@link Class} listing {@link Flow} instances to
+	 *            be instigated by the {@link Duty}.
 	 * @return {@link DutyBuilder} for the specified duty.
 	 * @throws BuildException
 	 *             Build failure.
@@ -89,13 +92,11 @@ public interface AdministratorBuilder<A extends Enum<A>> {
 			Class<F> flowListingEnum) throws BuildException;
 
 	/**
-	 * Creates a {@link DutyBuilder} for a
-	 * {@link net.officefloor.frame.spi.administration.Duty} of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Creates a {@link DutyBuilder} for a {@link Duty} of the
+	 * {@link Administrator}.
 	 * 
 	 * @param dutyKey
-	 *            Key identifying the
-	 *            {@link net.officefloor.frame.spi.administration.Duty}.
+	 *            Key identifying the {@link Duty}.
 	 * @return {@link DutyBuilder} for the specified duty.
 	 * @throws BuildException
 	 *             Build failure.

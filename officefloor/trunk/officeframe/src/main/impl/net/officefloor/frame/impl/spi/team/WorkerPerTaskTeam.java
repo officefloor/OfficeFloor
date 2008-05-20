@@ -16,8 +16,8 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -63,7 +63,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	 * 
 	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void assignTask(TaskContainer task) {
+	public void assignJob(Job task) {
 		// Hire worker to execute the task
 		new Thread(this, new DedicatedWorker(task)).start();
 	}
@@ -80,14 +80,14 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 
 	/**
 	 * Worker dedicated to executing a
-	 * {@link net.officefloor.frame.spi.team.TaskContainer}.
+	 * {@link net.officefloor.frame.spi.team.Job}.
 	 */
-	protected class DedicatedWorker implements Runnable, ExecutionContext {
+	protected class DedicatedWorker implements Runnable, JobContext {
 
 		/**
-		 * {@link TaskContainer} to execute.
+		 * {@link Job} to execute.
 		 */
-		protected final TaskContainer taskContainer;
+		protected final Job taskContainer;
 
 		/**
 		 * Current time for execution.
@@ -98,9 +98,9 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 		 * Initiate worker.
 		 * 
 		 * @param taskContainer
-		 *            {@link TaskContainer} to execute.
+		 *            {@link Job} to execute.
 		 */
-		public DedicatedWorker(TaskContainer taskContainer) {
+		public DedicatedWorker(Job taskContainer) {
 			// Store state
 			this.taskContainer = taskContainer;
 		}
@@ -124,7 +124,7 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 				this.time = System.currentTimeMillis();
 
 				// Attempt to complete task
-				if (this.taskContainer.doTask(this)) {
+				if (this.taskContainer.doJob(this)) {
 					// Task complete
 					return;
 				}

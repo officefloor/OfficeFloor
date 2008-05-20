@@ -18,17 +18,17 @@ package net.officefloor.frame.impl.spi.team;
 
 import junit.framework.Assert;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
  * Mock implementation of the
- * {@link net.officefloor.frame.spi.team.TaskContainer} for testing.
+ * {@link net.officefloor.frame.spi.team.Job} for testing.
  * 
  * @author Daniel
  */
-class MockTaskContainer implements TaskContainer {
+class MockTaskContainer implements Job {
 
 	/**
 	 * Lock.
@@ -36,9 +36,9 @@ class MockTaskContainer implements TaskContainer {
 	protected final Object lock = new Object();
 
 	/**
-	 * Next {@link TaskContainer}.
+	 * Next {@link Job}.
 	 */
-	protected TaskContainer nextTask = null;
+	protected Job nextTask = null;
 
 	/**
 	 * {@link Team}.
@@ -46,7 +46,7 @@ class MockTaskContainer implements TaskContainer {
 	protected Team team;
 
 	/**
-	 * Number of invocations of {@link #doTask(ExecutionContext)}.
+	 * Number of invocations of {@link #doJob(JobContext)}.
 	 */
 	public volatile int doTaskInvocationCount;
 
@@ -66,7 +66,7 @@ class MockTaskContainer implements TaskContainer {
 	 *            {@link Team} to assign this.
 	 * @param waitTime
 	 *            Wait time in seconds to return if
-	 *            {@link #isTaskReady(ExecutionContext)} is not called.
+	 *            {@link #isTaskReady(JobContext)} is not called.
 	 */
 	public void assignTaskToTeam(Team team, int waitTime) {
 		synchronized (this.getLock()) {
@@ -74,7 +74,7 @@ class MockTaskContainer implements TaskContainer {
 			this.team = team;
 
 			// Assign task to team
-			this.team.assignTask(this);
+			this.team.assignJob(this);
 
 			// Wait on processing start
 			try {
@@ -90,7 +90,7 @@ class MockTaskContainer implements TaskContainer {
 	 * 
 	 * @see net.officefloor.frame.spi.team.TaskContainer#doTask(net.officefloor.frame.spi.team.ExecutionContext)
 	 */
-	public boolean doTask(ExecutionContext executionContext) {
+	public boolean doJob(JobContext executionContext) {
 
 		// Notify running
 		synchronized (this.lock) {
@@ -127,9 +127,9 @@ class MockTaskContainer implements TaskContainer {
 	 * 
 	 * @see net.officefloor.frame.spi.team.TaskContainer#activeTask()
 	 */
-	public void activateTask() {
+	public void activateJob() {
 		synchronized (this.getLock()) {
-			this.team.assignTask(this);
+			this.team.assignJob(this);
 		}
 	}
 
@@ -138,7 +138,7 @@ class MockTaskContainer implements TaskContainer {
 	 * 
 	 * @see net.officefloor.frame.spi.team.TaskContainer#setNextTask(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void setNextTask(TaskContainer task) {
+	public void setNextJob(Job task) {
 		this.nextTask = task;
 	}
 
@@ -147,7 +147,7 @@ class MockTaskContainer implements TaskContainer {
 	 * 
 	 * @see net.officefloor.frame.spi.team.TaskContainer#getNextTask()
 	 */
-	public TaskContainer getNextTask() {
+	public Job getNextJob() {
 		return this.nextTask;
 	}
 

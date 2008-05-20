@@ -21,12 +21,12 @@ import net.officefloor.frame.internal.structure.LinkedListEntry;
 import net.officefloor.frame.internal.structure.LinkedListItem;
 
 /**
- * Abstract {@link net.officefloor.frame.internal.structure.LinkedList}.
+ * Abstract {@link LinkedList}.
  * 
  * @author Daniel
  */
-public abstract class AbstractLinkedList<E extends LinkedListEntry<E>> implements
-		LinkedList<E> {
+public abstract class AbstractLinkedList<E extends LinkedListEntry<E, R>, R>
+		implements LinkedList<E, R> {
 
 	/**
 	 * Head of the {@link LinkedList}.
@@ -95,9 +95,9 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E>> implement
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedList#purgeLinkedList()
+	 * @see net.officefloor.frame.internal.structure.LinkedList#purgeLinkedList(java.lang.Object)
 	 */
-	public E purgeLinkedList() {
+	public E purgeLinkedList(R removeParameter) {
 		// Obtain the head of list
 		E entry = this.head;
 
@@ -107,7 +107,7 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E>> implement
 
 		// Determine if last entry removed
 		if (entry != null) {
-			this.lastLinkedListEntryRemoved();
+			this.lastLinkedListEntryRemoved(removeParameter);
 		}
 
 		// Return the head of the list
@@ -133,7 +133,7 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E>> implement
 		LinkedListItem<E> nextItem = null;
 		while (currentEntry != null) {
 			// Create item for entry
-			currentItem = new LinkedListItemImpl<E>(currentEntry, nextItem);
+			currentItem = new LinkedListItemImpl<E, R>(currentEntry, nextItem);
 
 			// Next iteration
 			nextItem = currentItem;
@@ -146,12 +146,11 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E>> implement
 }
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.internal.structure.LinkedListItem}.
+ * Implementation of the {@link LinkedListItem}.
  * 
  * @author Daniel
  */
-class LinkedListItemImpl<E extends LinkedListEntry<E>> implements
+class LinkedListItemImpl<E extends LinkedListEntry<E, R>, R> implements
 		LinkedListItem<E> {
 
 	/**

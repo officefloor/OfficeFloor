@@ -45,8 +45,8 @@ import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.team.ExecutionContext;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -369,14 +369,14 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				workContainer);
 
 		// Create the initial Task Container to execute
-		TaskContainer initialTaskContainer = flow.createTaskContainer(this
+		Job initialTaskContainer = flow.createJob(this
 				.getInitialNode(), null, null, workLink);
 
 		// Execute the task tree (until complete)
 		boolean isComplete;
 		do {
-			ExecutionContext context = new MockExecutionContext();
-			isComplete = initialTaskContainer.doTask(context);
+			JobContext context = new MockExecutionContext();
+			isComplete = initialTaskContainer.doJob(context);
 		} while (!isComplete);
 
 		// Verify functionality on mock objects
@@ -530,9 +530,9 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 * 
 	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
 	 */
-	public void assignTask(TaskContainer task) {
+	public void assignJob(Job task) {
 		// Passively execute
-		while (!task.doTask(new MockExecutionContext()))
+		while (!task.doJob(new MockExecutionContext()))
 			;
 	}
 
@@ -546,9 +546,9 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	}
 
 	/**
-	 * Mock {@link ExecutionContext}.
+	 * Mock {@link JobContext}.
 	 */
-	private class MockExecutionContext implements ExecutionContext {
+	private class MockExecutionContext implements JobContext {
 
 		/**
 		 * Time.

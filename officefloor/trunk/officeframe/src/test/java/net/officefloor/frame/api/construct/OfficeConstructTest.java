@@ -36,9 +36,9 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.test.TypeMatcher;
+import net.officefloor.frame.test.match.TypeMatcher;
 
 /**
  * Tests the construction of an
@@ -69,14 +69,14 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		AdministratorSourceMetaData adminOneMetaData = this
 				.createMock(AdministratorSourceMetaData.class);
 		this.constructAdministrator("a-one", adminOne, adminOneMetaData,
-				OfficeScope.WORK);
+				OfficeScope.WORK, "team-one");
 
 		// Administrator Two
 		Administrator adminTwo = this.createMock(Administrator.class);
 		AdministratorSourceMetaData adminTwoMetaData = this
 				.createMock(AdministratorSourceMetaData.class);
 		this.constructAdministrator("a-two", adminTwo, adminTwoMetaData,
-				OfficeScope.WORK);
+				OfficeScope.WORK, "team-one");
 
 		// Team
 		this.constructTeam("team-one", new PassiveTeam());
@@ -242,8 +242,7 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		// TASK
 		// Do the task
 		task.doTask(null);
-		this.control(task).setDefaultMatcher(
-				new TypeMatcher(TaskContainer.class));
+		this.control(task).setDefaultMatcher(new TypeMatcher(Job.class));
 		this.control(task).setReturnValue(null);
 
 		// POST-TASK ADMINISTRATOR

@@ -17,16 +17,15 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.team.TaskContainer;
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Links a {@link net.officefloor.frame.internal.structure.WorkContainer} to a
- * {@link net.officefloor.frame.internal.structure.ThreadState}.
+ * Links a {@link WorkContainer} to a {@link ThreadState}.
  * 
  * @author Daniel
  */
 public interface ThreadWorkLink<W extends Work> extends
-		LinkedListEntry<ThreadWorkLink<?>> {
+		LinkedListEntry<ThreadWorkLink<?>, Object> {
 
 	/**
 	 * Obtains the {@link WorkContainer} that is linked by this to the
@@ -56,23 +55,21 @@ public interface ThreadWorkLink<W extends Work> extends
 	ThreadWorkLink<W> createThreadWorkLink(ThreadState targetThread);
 
 	/**
-	 * Registers a {@link TaskContainer} to use the underlying
-	 * {@link WorkContainer} of this {@link ThreadWorkLink}.
+	 * Registers a {@link Job} to use the underlying {@link WorkContainer} of
+	 * this {@link ThreadWorkLink}.
 	 * 
-	 * @param task
-	 *            {@link TaskContainer} requiring to use the linked
-	 *            {@link WorkContainer}.
+	 * @param job
+	 *            {@link Job} requiring to use the linked {@link WorkContainer}.
 	 */
-	void registerTask(TaskContainer task);
+	void registerJob(Job job);
 
 	/**
-	 * Unregisters a {@link TaskContainer} after it has finishd using the
-	 * underlying {@link WorkContainer}.
+	 * Unregisters a {@link Job} after it has finished using the underlying
+	 * {@link WorkContainer}.
 	 * 
-	 * @param task
-	 *            {@link TaskContainer} that is finished with the
-	 *            {@link WorkContainer}.
+	 * @param job
+	 *            {@link Job} that is finished with the {@link WorkContainer}.
 	 */
-	void unregisterTask(TaskContainer task);
+	void unregisterJob(Job job);
 
 }
