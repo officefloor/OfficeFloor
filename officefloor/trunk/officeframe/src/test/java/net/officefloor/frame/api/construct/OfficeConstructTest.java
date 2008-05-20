@@ -274,16 +274,6 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		// Close the Office Floor
 		officeFloor.closeOfficeFloor();
 
-		// Close the Office
-		if (false) {
-			new Thread(new Runnable() {
-				public void run() {
-					// Close the Office Floor
-					officeFloor.closeOfficeFloor();
-				}
-			});
-		}
-
 		// Verify functionality
 		this.verifyMockObjects();
 	}
