@@ -72,7 +72,8 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 
 		// Configure the administrator to commit
 		this.constructAdministrator("TRANSACTION",
-				TransactionAdministratorSource.class, OfficeScope.WORK);
+				TransactionAdministratorSource.class, OfficeScope.WORK,
+				"worker");
 
 		// Create the process message task
 		AbstractSingleTask processTask = new AbstractSingleTask() {
@@ -130,6 +131,7 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 
 		// Configure the teams
 		Team team = new OnePersonTeam(10);
+		this.constructTeam("worker", team);
 		this.constructTeam("jms.server.recycle", team);
 		this.constructTeam("of-JMS_SERVER.jms.server.recycle", team);
 		this.constructTeam("of-JMS_SERVER.jms.server.onmessage", team);
