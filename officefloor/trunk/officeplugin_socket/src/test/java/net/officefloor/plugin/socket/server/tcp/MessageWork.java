@@ -50,6 +50,7 @@ public class MessageWork {
 			if (readSize == 0) {
 
 				// TODO remove
+				// Thread.sleep(100);
 				System.out.println(this.getClass().getSimpleName()
 						+ ": no data, wait for data");
 
