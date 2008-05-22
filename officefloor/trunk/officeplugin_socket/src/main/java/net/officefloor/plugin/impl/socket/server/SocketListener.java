@@ -110,6 +110,12 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	synchronized boolean registerConnection(ConnectionImpl<?> connection)
 			throws IOException {
 
+		// All connections complete so may not register
+		if (this.registeredConnections <= 0) {
+			// Can not register as complete
+			return false;
+		}
+
 		// Determine if space to register input connection
 		if (this.registeredConnections >= this.maxConnections) {
 			// Can not register connection
@@ -240,8 +246,8 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 								interestOps |= (key.interestOps() & SelectionKey.OP_READ);
 							}
 
-							// Writing
-							if (key.isWritable()) {
+							// Writing (or closed attempting to write remaining)
+							if (key.isWritable() || connection.isCancelled()) {
 								// Write data to connection
 								int bytesWritten = this.writeData(connection);
 								switch (bytesWritten) {
@@ -313,6 +319,11 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 						// TODO how to handle exception issues
 						System.err.println("TODO handle failure of connection");
 						ex.printStackTrace();
+					}
+
+					// Flag that complete if no further connections
+					if (this.registeredConnections <= 0) {
+						context.setComplete(true);
 					}
 				}
 			}
