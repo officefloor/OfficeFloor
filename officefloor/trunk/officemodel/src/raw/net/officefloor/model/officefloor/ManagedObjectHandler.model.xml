@@ -2,6 +2,7 @@
 <model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="String" name="handler key" />
+	<field type="String" name="handler key class" />
 	<field type="String" name="handler type" />
 	<field type="ManagedObjectHandlerInstanceModel" name="handler instance" />
 </model>

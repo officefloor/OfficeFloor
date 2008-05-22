@@ -26,6 +26,7 @@
 		<object method="addHandler" node="handler"
 			class="net.officefloor.model.officefloor.ManagedObjectHandlerModel">
 			<value method="setHandlerKey" node="handler@key" />
+			<value method="setHandlerKeyClass" node="handler@key-class" />
 			<value method="setHandlerType" node="handler@type" />
 			<object method="setHandlerInstance" node="handler-instance"
 				class="net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel">
