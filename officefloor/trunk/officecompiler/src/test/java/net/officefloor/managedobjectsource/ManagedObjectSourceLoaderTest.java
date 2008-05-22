@@ -78,10 +78,13 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 								.name(), Connection.class.getName()));
 
 		// Validate handlers
-		assertList(new String[] { "getHandlerKey", "getHandlerType" }, model
-				.getHandlers(), new ManagedObjectHandlerModel(
-				TestMetaDataManagedObjectSource.HandlerKey.HANDLER.name(),
-				Handler.class.getName(), null));
+		assertList(new String[] { "getHandlerKey", "getHandlerKeyClass",
+				"getHandlerType" }, model.getHandlers(),
+				new ManagedObjectHandlerModel(
+						TestMetaDataManagedObjectSource.HandlerKey.HANDLER
+								.name(),
+						TestMetaDataManagedObjectSource.HandlerKey.class
+								.getName(), Handler.class.getName(), null));
 	}
 
 	/**
@@ -115,11 +118,13 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 				"property value"));
 
 		// Validate handlers
-		assertList(new String[] { "getHandlerKey", "getHandlerType" }, model
-				.getHandlers(), new ManagedObjectHandlerModel(
-				HandlerKey.INDIRECT_HANDLER.name(), Handler.class.getName(),
-				null), new ManagedObjectHandlerModel(HandlerKey.ADDED_HANDLER
-				.name(), Handler.class.getName(), null));
+		assertList(new String[] { "getHandlerKey", "getHandlerKeyClass",
+				"getHandlerType" }, model.getHandlers(),
+				new ManagedObjectHandlerModel(HandlerKey.INDIRECT_HANDLER
+						.name(), HandlerKey.class.getName(), Handler.class
+						.getName(), null), new ManagedObjectHandlerModel(
+						HandlerKey.ADDED_HANDLER.name(), HandlerKey.class
+								.getName(), Handler.class.getName(), null));
 		Map<String, ManagedObjectHandlerModel> handlers = new HashMap<String, ManagedObjectHandlerModel>();
 		for (ManagedObjectHandlerModel handler : model.getHandlers()) {
 			handlers.put(handler.getHandlerKey(), handler);

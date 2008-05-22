@@ -18,9 +18,12 @@ package net.officefloor.compile;
 
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.build.HandlerBuilder;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.impl.construct.OfficeBuilderImpl;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
@@ -100,11 +103,10 @@ public class ManagedObjectSourceEntry extends
 	}
 
 	/**
-	 * Builds the
-	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+	 * Builds the {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
-	public void build(LoaderContext builderUtil) throws Exception {
+	public void build(final LoaderContext builderUtil) throws Exception {
 
 		// Obtain the managing office of this managed object source
 		OfficeFloorOfficeModel managingOffice = OFCU.get(
@@ -117,6 +119,13 @@ public class ManagedObjectSourceEntry extends
 				(Class<ManagedObjectSource>) builderUtil.obtainClass(this
 						.getModel().getSource()));
 		this.getBuilder().setManagingOffice(managingOffice.getName());
+
+		// TODO specify the default time out
+		System.err.println("TODO [" + this.getClass().getSimpleName()
+				+ "]: specify default timeout on "
+				+ this.getBuilder().getClass().getSimpleName()
+				+ " (currently being defaulted to 10 seconds)");
+		this.getBuilder().setDefaultTimeout(10000); // 10 seconds
 
 		// Configure properties
 		for (PropertyModel property : this.getModel().getProperties()) {
@@ -136,7 +145,9 @@ public class ManagedObjectSourceEntry extends
 					this.getId(), moTeam.getTeamName());
 
 			// Register the team
-			TeamModel team = moTeam.getTeam().getTeam();
+			TeamModel team = OFCU.get(moTeam.getTeam(),
+					"Team ${0} not specified for managed object ${1}",
+					moTeam.getTeamName(), this.getModel().getId()).getTeam();
 			managingOfficeEntry.getBuilder().registerTeam(
 					managedObjectTeamName, team.getId());
 		}
@@ -145,12 +156,40 @@ public class ManagedObjectSourceEntry extends
 		managingOfficeEntry.getBuilder().addOfficeEnhancer(
 				new OfficeEnhancer() {
 					@Override
-					public void enhanceOffice(
-							OfficeEnhancerContext context)
+					public void enhanceOffice(OfficeEnhancerContext context)
 							throws BuildException {
 						// TODO implement
-						System.err
-								.println("TODO implement office enhancement");
+						System.err.println("TODO implement office enhancement");
+
+						// TODO implement
+						System.err.println("TODO [" + this.getClass().getName()
+								+ "]: link in processes to tasks for handlers");
+						String handlerKeyClassName = getModel().getHandlers()
+								.get(0).getHandlerKeyClass();
+						Class handlerKeyClass;
+						try {
+							handlerKeyClass = builderUtil
+									.obtainClass(handlerKeyClassName);
+						} catch (Exception ex) {
+							throw new BuildException(OFCU.exMsg(ex));
+						}
+						ManagedObjectHandlerBuilder moHandlerBuilder = context
+								.getManagedObjectHandlerBuilder("tcp",
+										handlerKeyClass);
+						Enum handlerKey = null;
+						String handlerKeyName = getModel().getHandlers().get(0)
+								.getHandlerKey();
+						for (Object keyObject : handlerKeyClass
+								.getEnumConstants()) {
+							Enum key = (Enum) keyObject;
+							if (key.name().equals(handlerKeyName)) {
+								handlerKey = key;
+							}
+						}
+						HandlerBuilder<Indexed> handlerBuilder = moHandlerBuilder
+								.registerHandler(handlerKey);
+						handlerBuilder.linkProcess(0, "HelloWorld.HelloWorld",
+								"serviceHelloWorld");
 					}
 				});
 

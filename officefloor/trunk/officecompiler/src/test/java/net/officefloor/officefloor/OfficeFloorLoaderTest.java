@@ -110,9 +110,11 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 						"DEPENDENCY_KEY", Connection.class.getName()));
 
 		// Validate handlers
-		assertList(new String[] { "getHandlerKey", "getHandlerType" }, mos
-				.getHandlers(), new ManagedObjectHandlerModel("HANDLER_KEY",
-				"net.example.ExampleHandler", null));
+		assertList(new String[] { "getHandlerKey", "getHandlerKeyClass",
+				"getHandlerType" }, mos.getHandlers(),
+				new ManagedObjectHandlerModel("HANDLER_KEY",
+						"net.example.HandlerKey", "net.example.ExampleHandler",
+						null));
 		ManagedObjectHandlerInstanceModel handlerInstance = mos.getHandlers()
 				.get(0).getHandlerInstance();
 		assertProperties(new ManagedObjectHandlerInstanceModel(false,
