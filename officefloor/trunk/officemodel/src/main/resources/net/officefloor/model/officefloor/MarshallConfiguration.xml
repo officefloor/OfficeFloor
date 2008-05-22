@@ -50,6 +50,8 @@
 					<attributes>
 						<attribute method="getHandlerKey"
 							attribute="key" />
+						<attribute method="getHandlerKeyClass"
+							attribute="key-class" />
 						<attribute method="getHandlerType"
 							attribute="type" />
 					</attributes>
