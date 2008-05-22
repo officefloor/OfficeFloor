@@ -204,8 +204,8 @@ public class ManagedObjectSourceLoader {
 
 				// Create and register the handler model
 				ManagedObjectHandlerModel handlerModel = new ManagedObjectHandlerModel(
-						handlerKey.name(), handlerType.getName(),
-						handlerInstance);
+						handlerKey.name(), handlerKey.getClass().getName(),
+						handlerType.getName(), handlerInstance);
 				handlerModels.add(handlerModel);
 			}
 		}

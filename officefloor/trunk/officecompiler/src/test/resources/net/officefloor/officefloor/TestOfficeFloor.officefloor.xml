@@ -11,7 +11,7 @@
 					type="java.sql.Connection" />
 			</dependencies>
 			<handlers>
-				<handler key="HANDLER_KEY"
+				<handler key="HANDLER_KEY" key-class="net.example.HandlerKey"
 					type="net.example.ExampleHandler">
 					<handler-instance
 						loader="net.officefloor.handler.example.ExampleHandlerLoader"

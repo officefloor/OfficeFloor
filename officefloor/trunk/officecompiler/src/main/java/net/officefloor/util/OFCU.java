@@ -16,6 +16,9 @@
  */
 package net.officefloor.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.build.BuildException;
 
@@ -56,6 +59,20 @@ public class OFCU {
 
 		// Throw failure
 		throw new BuildException(message);
+	}
+
+	/**
+	 * Generates an stack trace message from the input {@link Throwable}.
+	 * 
+	 * @param ex
+	 *            {@link Throwable}.
+	 * @return Stack trace of message.
+	 */
+	public static String exMsg(Throwable ex) {
+		StringWriter buffer = new StringWriter();
+		buffer.append("propagation of another exception:\n   cause: ");
+		ex.printStackTrace(new PrintWriter(buffer));
+		return buffer.toString();
 	}
 
 	/**
