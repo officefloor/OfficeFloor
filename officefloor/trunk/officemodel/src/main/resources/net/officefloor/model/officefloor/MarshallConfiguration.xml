@@ -75,6 +75,15 @@
 									<attribute method="getTaskName"
 										attribute="task" />
 								</attributes>
+								<object method="getOfficeTask"
+									element="task">
+									<attributes>
+										<attribute method="getWorkName"
+											attribute="work" />
+										<attribute method="getTaskName"
+											attribute="task" />
+									</attributes>
+								</object>
 							</item>
 						</collection>
 					</object>
