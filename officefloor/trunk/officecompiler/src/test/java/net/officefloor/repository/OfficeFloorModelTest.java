@@ -41,7 +41,7 @@ public class OfficeFloorModelTest extends AbstractModelTestCase {
 		// Create the Office Floor Model
 		OfficeFloorModel of = new OfficeFloorModel(
 				new ManagedObjectSourceModel[] { new ManagedObjectSourceModel(
-						"MO-ID", "SOURCE",
+						"MO-ID", "SOURCE", "10",
 						new ManagedObjectSourceToOfficeFloorOfficeModel(
 								"OFFICE", null, null),
 						new PropertyModel[] { new PropertyModel(
@@ -74,6 +74,8 @@ public class OfficeFloorModelTest extends AbstractModelTestCase {
 		assertEquals("Incorrect Managed Object Id", "MO-ID", mos.getId());
 		assertEquals("Incorrect Managed Object Source", "SOURCE", mos
 				.getSource());
+		assertEquals("Incorrect Managed Object default timeout", "10", mos
+				.getDefaultTimeout());
 		assertEquals("Incorrect Managed Object managing Office", "OFFICE", mos
 				.getManagingOffice().getManagingOfficeName());
 		PropertyModel moProp = mos.getProperties().get(0);

@@ -90,10 +90,11 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the managed objects
 		// ----------------------------------------
-		assertList(new String[] { "getId", "getSource" }, officeFloor
-				.getManagedObjectSources(), new ManagedObjectSourceModel(
-				"MO-ID", "net.officefloor.mo.TestManagedObjectSource", null,
-				null, null, null, null, null, null));
+		assertList(new String[] { "getId", "getSource", "getDefaultTimeout" },
+				officeFloor.getManagedObjectSources(),
+				new ManagedObjectSourceModel("MO-ID",
+						"net.officefloor.mo.TestManagedObjectSource", "10",
+						null, null, null, null, null, null, null));
 		assertEquals("Incorrect managed object managing office", "office",
 				officeFloor.getManagedObjectSources().get(0)
 						.getManagingOffice().getManagingOfficeName());

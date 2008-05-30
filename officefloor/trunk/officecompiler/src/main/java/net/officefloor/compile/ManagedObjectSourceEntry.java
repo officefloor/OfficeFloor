@@ -24,6 +24,7 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.OfficeBuilderImpl;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
@@ -38,8 +39,7 @@ import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.util.OFCU;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
- * entry for the {@link net.officefloor.frame.api.manage.OfficeFloor}.
+ * {@link ManagedObjectSource} entry for the {@link OfficeFloor}.
  * 
  * @author Daniel
  */
@@ -124,12 +124,13 @@ public class ManagedObjectSourceEntry extends
 						.getModel().getSource()));
 		this.getBuilder().setManagingOffice(managingOffice.getName());
 
-		// TODO specify the default time out
-		System.err.println("TODO [" + this.getClass().getSimpleName()
-				+ "]: specify default timeout on "
-				+ this.getBuilder().getClass().getSimpleName()
-				+ " (currently being defaulted to 10 seconds)");
-		this.getBuilder().setDefaultTimeout(10000); // 10 seconds
+		// Specify the default timeout
+		String defaultTimeoutText = this.getModel().getDefaultTimeout();
+		if ((defaultTimeoutText != null)
+				&& (defaultTimeoutText.trim().length() > 0)) {
+			long defaultTimeout = Long.parseLong(defaultTimeoutText);
+			this.getBuilder().setDefaultTimeout(defaultTimeout);
+		}
 
 		// Configure properties
 		for (PropertyModel property : this.getModel().getProperties()) {

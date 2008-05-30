@@ -1,7 +1,7 @@
 <office-floor>
 	<managed-object-sources>
 		<managed-object-source id="MO-ID"
-			source="net.officefloor.mo.TestManagedObjectSource">
+			source="net.officefloor.mo.TestManagedObjectSource" timeout="10">
 			<managing-office name="office" />
 			<properties>
 				<property name="mo prop name" value="mo prop value" />
