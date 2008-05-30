@@ -12,6 +12,8 @@
 			<attributes>
 				<attribute method="getId" attribute="id" />
 				<attribute method="getSource" attribute="source" />
+				<attribute method="getDefaultTimeout"
+					attribute="timeout" />
 			</attributes>
 			<object method="getManagingOffice"
 				element="managing-office">

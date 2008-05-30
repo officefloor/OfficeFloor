@@ -3,6 +3,7 @@
 	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="String" name="id" />
 	<field type="String" name="source" />
+	<field type="String" name="default timeout" />
 	<field type="ManagedObjectSourceToOfficeFloorOfficeModel"
 		name="managing office" />
 	<list type="PropertyModel" name="property" plural="properties"
