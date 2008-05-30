@@ -3,4 +3,6 @@
 	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<field type="String" name="work name" />
 	<field type="String" name="task name" />
+	<list type="LinkProcessToOfficeTaskModel" name="link process"
+		plural="link processes" />
 </model>

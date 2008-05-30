@@ -42,6 +42,11 @@
 						node="link-process@work" />
 					<value method="setTaskName"
 						node="link-process@task" />
+					<object method="setOfficeTask" node="task"
+						class="net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel">
+						<value method="setWorkName" node="task@work" />
+						<value method="setTaskName" node="task@task" />
+					</object>
 				</object>
 			</object>
 		</object>
