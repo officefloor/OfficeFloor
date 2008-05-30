@@ -114,11 +114,10 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 				.getDesks(),
 				new OfficeDeskModel("Desk.desk.xml", "DeskC", null));
 		OfficeDeskModel desk = office.getRoom().getDesks().get(0);
-		assertList(
-				new String[] { "getId", "getName" },
-				desk.getFlowItems(),
-				new FlowItemModel("3", "FLOW ITEM ONE", null, null, null, null),
-				new FlowItemModel("4", "FLOW ITEM TWO", null, null, null, null));
+		assertList(new String[] { "getId", "getWorkName", "getTaskName" }, desk
+				.getFlowItems(), new FlowItemModel("3", "WorkC",
+				"FLOW ITEM ONE", null, null, null, null), new FlowItemModel(
+				"4", "WorkD", "FLOW ITEM TWO", null, null, null, null));
 
 		// Third level Room
 		assertList(new String[] { "getId", "getName" }, office.getRoom()
@@ -131,9 +130,10 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 				"SubDesk.desk.xml", "SubDeskA", null));
 		OfficeDeskModel subDesk = office.getRoom().getSubRooms().get(0)
 				.getDesks().get(0);
-		assertList(new String[] { "getId", "getName" }, subDesk.getFlowItems(),
-				new FlowItemModel("1", "FI1", null, null, null, null),
-				new FlowItemModel("2", "FI2", null, null, null, null));
+		assertList(new String[] { "getId", "getWorkName", "getTaskName" },
+				subDesk.getFlowItems(), new FlowItemModel("1", "WorkA", "FI1",
+						null, null, null, null), new FlowItemModel("2",
+						"WorkB", "FI2", null, null, null, null));
 
 		// Flow items of third level desk
 		FlowItemModel flowItemOne = subDesk.getFlowItems().get(0);
@@ -232,8 +232,10 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 
 		// Create the expected office room
 		FlowItemModel[] flowItems = new FlowItemModel[] {
-				new FlowItemModel("1", "taskMethod", null, null, null, null),
-				new FlowItemModel("2", "noLongerExists", null, null, null, null) };
+				new FlowItemModel("1", "workA", "taskMethod", null, null, null,
+						null),
+				new FlowItemModel("2", "workB", "noLongerExists", null, null,
+						null, null) };
 		OfficeDeskModel[] desks = new OfficeDeskModel[] { new OfficeDeskModel(
 				"TestDesk.desk.xml", "1", flowItems) };
 		OfficeRoomModel expectedRoom = new OfficeRoomModel(

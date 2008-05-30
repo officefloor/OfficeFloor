@@ -21,6 +21,7 @@ import java.sql.Connection;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
@@ -46,7 +47,7 @@ import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
 import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 
 /**
- * Tests loading the {@link net.officefloor.officefloor.OfficeFloorLoader}.
+ * Tests loading the {@link OfficeFloorLoader}.
  * 
  * @author Daniel
  */
@@ -78,8 +79,7 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure loads the
-	 * {@link net.officefloor.model.officefloor.OfficeFloorModel}.
+	 * Ensure loads the {@link OfficeFloorModel}.
 	 */
 	public void testLoadOfficeFloor() throws Exception {
 
@@ -123,8 +123,14 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 				"getLoader", "getConfiguration");
 		assertList(new String[] { "getLinkProcessId", "getWorkName",
 				"getTaskName" }, handlerInstance.getLinkProcesses(),
-				new ManagedObjectHandlerLinkProcessModel("0", "work.name",
-						"task.name"));
+				new ManagedObjectHandlerLinkProcessModel("0", "work", "task",
+						null), new ManagedObjectHandlerLinkProcessModel("1",
+						null, null, null));
+		assertNull("First link process task by managed object", handlerInstance
+				.getLinkProcesses().get(0).getOfficeTask());
+		assertProperties(new LinkProcessToOfficeTaskModel("work.name",
+				"task.name", null, null), handlerInstance.getLinkProcesses()
+				.get(1).getOfficeTask(), "getWorkName", "getTaskName");
 
 		// Validate tasks
 		assertList(
@@ -169,7 +175,11 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getTeamName" }, office.getTeams(),
 				new OfficeTeamModel("TEAM-NAME", null));
 		assertList(new String[] { "getWorkName", "getTaskName" }, office
-				.getTasks(), new OfficeTaskModel("work.name", "task.name"));
+				.getTasks(),
+				new OfficeTaskModel("work.name", "task.name", null));
+		assertEquals("Incorrect link process", handlerInstance
+				.getLinkProcesses().get(1), office.getTasks().get(0)
+				.getLinkProcesses().get(0).getLinkProcess());
 		assertList(new String[] { "getManagingOfficeName" }, officeFloor
 				.getOffices().get(0).getResponsibleManagedObjects(),
 				new ManagedObjectSourceToOfficeFloorOfficeModel("office", null,

@@ -252,14 +252,14 @@ public class TaskEntry<W extends Work> extends
 
 		// Obtain the external office team
 		ExternalTeamModel officeTeam = OFCU.get(officeFlowItem.getTeam(),
-				"No team for ${0}", officeFlowItem.getName()).getTeam();
+				"No team for ${0}", officeFlowItem.getTaskName()).getTeam();
 
 		// Return the external office team
 		return officeTeam;
 	}
 
 	/**
-	 * Builds the {@link net.officefloor.frame.api.execute.Task}.
+	 * Builds the {@link Task}.
 	 * 
 	 * @throws Exception
 	 *             If fails.

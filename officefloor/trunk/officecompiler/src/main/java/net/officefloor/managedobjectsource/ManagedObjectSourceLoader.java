@@ -82,7 +82,7 @@ public class ManagedObjectSourceLoader {
 	 *             If fails to load the {@link ManagedObjectSourceModel}. It is
 	 *             {@link Throwable} as {@link Error} instances may be thrown
 	 *             from
-	 *             {@link ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)}.
+	 *             {@link ManagedObjectSource#init(ManagedObjectSourceContext))}.
 	 */
 	@SuppressWarnings("unchecked")
 	public ManagedObjectSourceModel loadManagedObjectSource(
@@ -171,7 +171,7 @@ public class ManagedObjectSourceLoader {
 
 					// Create and register the flow for the handler
 					handlerFlows.add(new ManagedObjectHandlerLinkProcessModel(
-							flowName, workName, taskName));
+							flowName, workName, taskName, null));
 				}
 
 				// Create the handler instance
