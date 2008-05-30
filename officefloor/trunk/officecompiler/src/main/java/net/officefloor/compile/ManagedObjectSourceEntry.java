@@ -26,6 +26,10 @@ import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.impl.construct.OfficeBuilderImpl;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
@@ -159,37 +163,71 @@ public class ManagedObjectSourceEntry extends
 					public void enhanceOffice(OfficeEnhancerContext context)
 							throws BuildException {
 						// TODO implement
-						System.err.println("TODO implement office enhancement");
+						System.err.println("TODO ["
+								+ ManagedObjectSourceEntry.class
+										.getSimpleName()
+								+ "] implement office enhancement");
 
-						// TODO implement
-						System.err.println("TODO [" + this.getClass().getName()
-								+ "]: link in processes to tasks for handlers");
-						String handlerKeyClassName = getModel().getHandlers()
-								.get(0).getHandlerKeyClass();
-						Class handlerKeyClass;
-						try {
-							handlerKeyClass = builderUtil
-									.obtainClass(handlerKeyClassName);
-						} catch (Exception ex) {
-							throw new BuildException(OFCU.exMsg(ex));
-						}
-						ManagedObjectHandlerBuilder moHandlerBuilder = context
-								.getManagedObjectHandlerBuilder("tcp",
-										handlerKeyClass);
-						Enum handlerKey = null;
-						String handlerKeyName = getModel().getHandlers().get(0)
-								.getHandlerKey();
-						for (Object keyObject : handlerKeyClass
-								.getEnumConstants()) {
-							Enum key = (Enum) keyObject;
-							if (key.name().equals(handlerKeyName)) {
-								handlerKey = key;
+						// Obtain the managed object id
+						String managedObjectId = ManagedObjectSourceEntry.this
+								.getModel().getId();
+
+						// Load the tasks for the handler link processes
+						for (ManagedObjectHandlerModel handler : ManagedObjectSourceEntry.this
+								.getModel().getHandlers()) {
+
+							// Obtain the handler key class
+							Class handlerKeyClass;
+							try {
+								handlerKeyClass = builderUtil
+										.obtainClass(handler
+												.getHandlerKeyClass());
+							} catch (Exception ex) {
+								throw new BuildException(OFCU.exMsg(ex));
+							}
+
+							// Obtain the handler key
+							Enum handlerKey = null;
+							String handlerKeyName = handler.getHandlerKey();
+							for (Object keyObject : handlerKeyClass
+									.getEnumConstants()) {
+								Enum key = (Enum) keyObject;
+								if (key.name().equals(handlerKeyName)) {
+									handlerKey = key;
+								}
+							}
+
+							// Obtain the handler builder
+							ManagedObjectHandlerBuilder moHandlerBuilder = context
+									.getManagedObjectHandlerBuilder(
+											managedObjectId, handlerKeyClass);
+							HandlerBuilder<Indexed> handlerBuilder = moHandlerBuilder
+									.registerHandler(handlerKey);
+
+							// Link in the processes
+							ManagedObjectHandlerInstanceModel handlerInstance = handler
+									.getHandlerInstance();
+							if (handlerInstance != null) {
+								for (ManagedObjectHandlerLinkProcessModel linkProcess : handlerInstance
+										.getLinkProcesses()) {
+
+									// Obtain the index of the link process
+									int linkProcessIndex = Integer
+											.parseInt(linkProcess
+													.getLinkProcessId());
+
+									// Link in the starting task of the process
+									LinkProcessToOfficeTaskModel officeTask = linkProcess
+											.getOfficeTask();
+									if (officeTask != null) {
+										handlerBuilder.linkProcess(
+												linkProcessIndex, officeTask
+														.getWorkName(),
+												officeTask.getTaskName());
+									}
+								}
 							}
 						}
-						HandlerBuilder<Indexed> handlerBuilder = moHandlerBuilder
-								.registerHandler(handlerKey);
-						handlerBuilder.linkProcess(0, "HelloWorld.HelloWorld",
-								"serviceHelloWorld");
 					}
 				});
 

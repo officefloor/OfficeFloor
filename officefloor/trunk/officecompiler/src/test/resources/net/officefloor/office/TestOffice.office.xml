@@ -11,12 +11,12 @@
 		<room id="SubRoomOne.room.xml" name="RoomA">
 			<room id="SubSubRoom.room.xml" name="SubRoomA" />
 			<desk id="SubDesk.desk.xml" name="SubDeskA">
-				<flow-item id="1" name="FI1">
+				<flow-item id="1" work="WorkA" task="FI1">
 					<team name="TEAM ONE" />
 					<pre-admin administrator="1" duty="KeyOne" />
 					<pre-admin administrator="1" duty="KeyTwo" />
 				</flow-item>
-				<flow-item id="2" name="FI2">
+				<flow-item id="2" work="WorkB" task="FI2">
 					<team name="TEAM TWO" />
 					<post-admin administrator="1" duty="KeyOne" />
 					<post-admin administrator="1" duty="KeyTwo" />
@@ -25,12 +25,12 @@
 		</room>
 		<room id="SubRoomTwo.room.xml" name="RoomB" />
 		<desk id="Desk.desk.xml" name="DeskC">
-			<flow-item id="3" name="FLOW ITEM ONE">
+			<flow-item id="3" work="WorkC" task="FLOW ITEM ONE">
 				<team name="TEAM ONE" />
 				<pre-admin administrator="1" duty="KeyOne" />
 				<post-admin administrator="1" duty="KeyTwo" />
 			</flow-item>
-			<flow-item id="4" name="FLOW ITEM TWO" />
+			<flow-item id="4" work="WorkD" task="FLOW ITEM TWO" />
 		</desk>
 	</room>
 	<administrators>

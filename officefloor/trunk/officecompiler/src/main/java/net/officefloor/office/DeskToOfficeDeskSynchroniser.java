@@ -62,7 +62,8 @@ public class DeskToOfficeDeskSynchroniser {
 			} else {
 				// Add the flow item
 				FlowItemModel newFlowItem = new FlowItemModel(flowItemId,
-						flowItem.getTaskName(), null, null, null, null);
+						flowItem.getWorkName(), flowItem.getTaskName(), null,
+						null, null, null);
 				officeDesk.addFlowItem(newFlowItem);
 			}
 		}

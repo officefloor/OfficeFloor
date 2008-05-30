@@ -135,11 +135,12 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 				"ADDED_HANDLER").getHandlerInstance();
 		assertTrue("Handler instance is provide by managed object source",
 				handlerInstance.getIsManagedObjectSourceProvided());
-		assertList(new String[] { "getLinkProcessId", "getWorkName",
-				"getTaskName" }, handlerInstance.getLinkProcesses(),
-				new ManagedObjectHandlerLinkProcessModel("0", null, null),
+		assertList(
+				new String[] { "getLinkProcessId", "getWorkName", "getTaskName" },
+				handlerInstance.getLinkProcesses(),
+				new ManagedObjectHandlerLinkProcessModel("0", null, null, null),
 				new ManagedObjectHandlerLinkProcessModel("1", "handler-work",
-						"handler-task"));
+						"handler-task", null));
 
 		// Validate tasks
 		final String RECYCLE_WORK_NAME = RawManagedObjectMetaData.MANAGED_OBJECT_CLEAN_UP_WORK_NAME;

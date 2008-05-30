@@ -17,9 +17,19 @@
 package net.officefloor.officefloor;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.model.office.FlowItemModel;
+import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeRoomModel;
+import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamModel;
@@ -28,15 +38,18 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeTaskModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
 import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.office.OfficeLoader;
+import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.ModelRepository;
+import net.officefloor.util.DoubleKeyMap;
 
 /**
- * Loads the {@link net.officefloor.model.officefloor.OfficeFloorModel}.
+ * Loads the {@link OfficeFloorModel}.
  * 
  * @author Daniel
  */
@@ -135,6 +148,9 @@ public class OfficeFloorLoader {
 		for (ManagedObjectSourceModel mos : officeFloor
 				.getManagedObjectSources()) {
 
+			// Map of office tasks
+			DoubleKeyMap<String, String, OfficeTaskModel> officeTasks = new DoubleKeyMap<String, String, OfficeTaskModel>();
+
 			// Connect the managing offices
 			ManagedObjectSourceToOfficeFloorOfficeModel conn = mos
 					.getManagingOffice();
@@ -145,6 +161,12 @@ public class OfficeFloorLoader {
 					conn.setManagedObjectSource(mos);
 					conn.setManagingOffice(office);
 					conn.connect();
+
+					// Register the tasks of the office
+					for (OfficeTaskModel officeTask : office.getTasks()) {
+						officeTasks.put(officeTask.getWorkName(), officeTask
+								.getTaskName(), officeTask);
+					}
 				}
 			}
 
@@ -157,6 +179,29 @@ public class OfficeFloorLoader {
 						teamConn.setManagedObjectTeam(moTeam);
 						teamConn.setTeam(team);
 						teamConn.connect();
+					}
+				}
+			}
+
+			// Connect the handler link processes to office tasks
+			for (ManagedObjectHandlerModel handler : mos.getHandlers()) {
+				ManagedObjectHandlerInstanceModel handlerInstance = handler
+						.getHandlerInstance();
+				if (handlerInstance != null) {
+					for (ManagedObjectHandlerLinkProcessModel linkProcess : handlerInstance
+							.getLinkProcesses()) {
+						LinkProcessToOfficeTaskModel taskConn = linkProcess
+								.getOfficeTask();
+						if (taskConn != null) {
+							OfficeTaskModel officeTask = officeTasks.get(
+									taskConn.getWorkName(), taskConn
+											.getTaskName());
+							if (officeTask != null) {
+								taskConn.setLinkProcess(linkProcess);
+								taskConn.setOfficeTask(officeTask);
+								taskConn.connect();
+							}
+						}
 					}
 				}
 			}
@@ -200,6 +245,17 @@ public class OfficeFloorLoader {
 			}
 		}
 
+		// Ensure the tasks are linked
+		for (OfficeFloorOfficeModel office : officeFloor.getOffices()) {
+			for (OfficeTaskModel task : office.getTasks()) {
+				for (LinkProcessToOfficeTaskModel conn : task
+						.getLinkProcesses()) {
+					conn.setWorkName(task.getWorkName());
+					conn.setTaskName(task.getTaskName());
+				}
+			}
+		}
+
 		// Ensure the responsible offices are linked
 		for (OfficeFloorOfficeModel office : officeFloor.getOffices()) {
 			for (ManagedObjectSourceToOfficeFloorOfficeModel conn : office
@@ -238,6 +294,101 @@ public class OfficeFloorLoader {
 
 		// Return the office floor office
 		return officeFloorOffice;
+	}
+
+	/**
+	 * Loads the {@link OfficeTaskModel} instances.
+	 * 
+	 * @param office
+	 *            {@link OfficeFloorOfficeModel}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext} to find the configuration of the
+	 *            underlying {@link OfficeModel}.
+	 * @return Listing of {@link OfficeTaskModel} instances for the input
+	 *         {@link OfficeFloorOfficeModel}.
+	 * @throws Exception
+	 *             If fails to load the {@link OfficeTaskModel} instances.
+	 */
+	public OfficeTaskModel[] loadOfficeTasks(OfficeFloorOfficeModel office,
+			ConfigurationContext configurationContext) throws Exception {
+
+		// Obtain the configuration to the office
+		String officeLocation = office.getId();
+		ConfigurationItem officeConfiguration = configurationContext
+				.getConfigurationItem(officeLocation);
+
+		// Obtain the office
+		OfficeModel officeModel = new OfficeLoader()
+				.loadOffice(officeConfiguration);
+
+		// Obtain the list of tasks
+		List<OfficeTaskModel> tasks = new LinkedList<OfficeTaskModel>();
+		OfficeRoomModel room = officeModel.getRoom();
+		if (room != null) {
+			this.loadOfficeTasks(room, "", tasks);
+		}
+
+		// Return the tasks
+		return tasks.toArray(new OfficeTaskModel[0]);
+	}
+
+	/**
+	 * Loads the {@link OfficeTaskModel} instances of the
+	 * {@link OfficeRoomModel}.
+	 * 
+	 * @param room
+	 *            {@link OfficeRoomModel}.
+	 * @param workPrefix
+	 *            {@link Work} prefix name.
+	 * @param tasks
+	 *            Listing of {@link OfficeTaskModel} instances.
+	 */
+	private void loadOfficeTasks(OfficeRoomModel room, String workPrefix,
+			List<OfficeTaskModel> tasks) {
+
+		// Specify the work prefix
+		workPrefix = (workPrefix.length() == 0 ? "" : workPrefix + ".");
+
+		// Recursively load the tasks of the sub rooms
+		for (OfficeRoomModel subRoom : room.getSubRooms()) {
+			String workName = workPrefix + subRoom.getName();
+			this.loadOfficeTasks(subRoom, workName, tasks);
+		}
+
+		// Load the tasks of the desks
+		for (OfficeDeskModel desk : room.getDesks()) {
+			String workName = workPrefix + desk.getName();
+			this.loadOfficeTasks(desk, workName, tasks);
+		}
+	}
+
+	/**
+	 * Loads the {@link OfficeTaskModel} instances of the
+	 * {@link OfficeDeskModel}.
+	 * 
+	 * @param desk
+	 *            {@link OfficeDeskModel}.
+	 * @param workPrefix
+	 *            {@link Work} prefix name.
+	 * @param tasks
+	 *            Listing of {@link OfficeTaskModel} instances.
+	 */
+	private void loadOfficeTasks(OfficeDeskModel desk, String workPrefix,
+			List<OfficeTaskModel> tasks) {
+
+		// Specify the work prefix
+		workPrefix = (workPrefix.length() == 0 ? "" : workPrefix + ".");
+
+		// Load the tasks of the desk
+		for (FlowItemModel flowItem : desk.getFlowItems()) {
+
+			// Obtain initial task details of flow
+			String workName = workPrefix + flowItem.getWorkName();
+			String taskName = flowItem.getTaskName();
+
+			// Add the office task
+			tasks.add(new OfficeTaskModel(workName, taskName, null));
+		}
 	}
 
 }

@@ -43,7 +43,7 @@ import net.officefloor.room.RoomLoader;
 import net.officefloor.util.DoubleKeyMap;
 
 /**
- * Loads the {@link net.officefloor.model.office.OfficeModel}.
+ * Loads the {@link OfficeModel}.
  * 
  * @author Daniel
  */
