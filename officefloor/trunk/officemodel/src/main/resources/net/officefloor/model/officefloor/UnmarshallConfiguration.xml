@@ -8,6 +8,8 @@
 		class="net.officefloor.model.officefloor.ManagedObjectSourceModel">
 		<value method="setId" node="managed-object-source@id" />
 		<value method="setSource" node="managed-object-source@source" />
+		<value method="setDefaultTimeout"
+			node="managed-object-source@timeout" />
 		<object method="setManagingOffice" node="managing-office"
 			class="net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel">
 			<value method="setManagingOfficeName"
