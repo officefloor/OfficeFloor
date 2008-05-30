@@ -75,6 +75,8 @@ public class ManagedObjectSourceLoader {
 	 *            {@link ManagedObjectSource} instance.
 	 * @param properties
 	 *            {@link Properties} for the {@link ManagedObjectSource}.
+	 * @param defaultTimeout
+	 *            Default timeout for the {@link ManagedObjectSource}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @return {@link ManagedObjectSourceModel}.
@@ -88,7 +90,7 @@ public class ManagedObjectSourceLoader {
 	public ManagedObjectSourceModel loadManagedObjectSource(
 			String managedObjectSourceName,
 			ManagedObjectSource managedObjectSource, Properties properties,
-			ClassLoader classLoader) throws Throwable {
+			long defaultTimeout, ClassLoader classLoader) throws Throwable {
 
 		// Create the resource loader
 		ResourceLocator projectResourceLoader = new ClassLoaderResourceLocator(
@@ -267,8 +269,8 @@ public class ManagedObjectSourceLoader {
 		// Create the managed object source model
 		ManagedObjectSourceModel managedObjectSourceModel = new ManagedObjectSourceModel(
 				managedObjectSourceName, managedObjectSource.getClass()
-						.getName(), null, propertyModels
-						.toArray(new PropertyModel[0]), dependencyModels
+						.getName(), String.valueOf(defaultTimeout), null,
+				propertyModels.toArray(new PropertyModel[0]), dependencyModels
 						.toArray(new ManagedObjectDependencyModel[0]),
 				handlerModels.toArray(new ManagedObjectHandlerModel[0]),
 				taskModels.toArray(new ManagedObjectTaskModel[0]), teams, null);

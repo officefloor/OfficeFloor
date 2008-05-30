@@ -53,10 +53,13 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 		// Create the loader
 		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
 
+		// Default timeout
+		final long DEFAULT_TIMEOUT = 10;
+
 		// Load the managed object source model
 		ManagedObjectSourceModel model = loader.loadManagedObjectSource("test",
-				new TestMetaDataManagedObjectSource(), new Properties(), this
-						.getClass().getClassLoader());
+				new TestMetaDataManagedObjectSource(), new Properties(),
+				DEFAULT_TIMEOUT, this.getClass().getClassLoader());
 
 		// --------------------------------------------
 		// Validate managed object source model
@@ -64,6 +67,8 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect managed object source class",
 				TestMetaDataManagedObjectSource.class.getName(), model
 						.getSource());
+		assertEquals("Incorrect managed object default timeout", String
+				.valueOf(DEFAULT_TIMEOUT), model.getDefaultTimeout());
 
 		// Validate no properties
 		assertList(new String[] { "getName", "getValue" }, model
@@ -96,14 +101,17 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 		// Create the loader
 		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
 
+		// Default timeout
+		final long DEFAULT_TIMEOUT = 10;
+
 		// Provide the properties
 		Properties properties = new Properties();
 		properties.setProperty("property name", "property value");
 
 		// Load the managed object source model
 		ManagedObjectSourceModel model = loader.loadManagedObjectSource("test",
-				new TestContextManagedObjectSource(), properties, this
-						.getClass().getClassLoader());
+				new TestContextManagedObjectSource(), properties,
+				DEFAULT_TIMEOUT, this.getClass().getClassLoader());
 
 		// --------------------------------------------
 		// Validate managed object source model
@@ -111,6 +119,8 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect managed object source class",
 				TestContextManagedObjectSource.class.getName(), model
 						.getSource());
+		assertEquals("Incorrect managed object default timeout", String
+				.valueOf(DEFAULT_TIMEOUT), model.getDefaultTimeout());
 
 		// Validate properties
 		assertList(new String[] { "getName", "getValue" }, model
