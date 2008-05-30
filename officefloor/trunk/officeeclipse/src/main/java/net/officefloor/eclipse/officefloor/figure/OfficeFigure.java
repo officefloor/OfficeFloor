@@ -19,6 +19,7 @@ package net.officefloor.eclipse.officefloor.figure;
 import net.officefloor.eclipse.common.figure.IndentFigure;
 import net.officefloor.eclipse.common.figure.ListFigure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
+import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -26,8 +27,7 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.ToolbarLayout;
 
 /**
- * {@link org.eclipse.draw2d.Figure} for the
- * {@link net.officefloor.model.officefloor.OfficeFloorOfficeModel}.
+ * {@link Figure} for the {@link OfficeFloorOfficeModel}.
  * 
  * @author Daniel
  */
@@ -36,19 +36,23 @@ public class OfficeFigure extends Figure {
 	/**
 	 * Listing of teams.
 	 */
-	private ListFigure teams;
+	private final ListFigure teams;
 
 	/**
 	 * Listing of managed objects.
 	 */
-	private ListFigure managedObjects;
+	private final ListFigure managedObjects;
+
+	/**
+	 * Listing of tasks.
+	 */
+	private final ListFigure tasks;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param officeName
-	 *            Name of the
-	 *            {@link net.officefloor.model.officefloor.OfficeFloorOfficeModel}.
+	 *            Name of the {@link OfficeFloorOfficeModel}.
 	 */
 	public OfficeFigure(String officeName) {
 		this.setLayoutManager(new ToolbarLayout());
@@ -59,11 +63,13 @@ public class OfficeFigure extends Figure {
 		// Create the listing of figures
 		this.teams = new ListFigure();
 		this.managedObjects = new ListFigure();
+		this.tasks = new ListFigure();
 
 		// Decorate the office
 		super.add(new ListItemFigure(officeName), null, -1);
 		super.add(new IndentFigure(4, this.teams), null, -1);
 		super.add(new IndentFigure(4, this.managedObjects), null, -1);
+		super.add(new IndentFigure(4, this.tasks), null, -1);
 	}
 
 	/*
@@ -78,6 +84,8 @@ public class OfficeFigure extends Figure {
 			this.teams.add(figure);
 		} else if (figure instanceof OfficeManagedObjectFigure) {
 			this.managedObjects.add(figure);
+		} else if (figure instanceof OfficeTaskFigure) {
+			this.tasks.add(figure);
 		} else {
 			throw new IllegalArgumentException("Unknown figure '"
 					+ figure.getClass().getName() + "' for adding to "

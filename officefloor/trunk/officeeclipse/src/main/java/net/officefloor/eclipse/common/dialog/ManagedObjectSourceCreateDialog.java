@@ -114,7 +114,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 		this.setBlockOnOpen(true);
 		this.open();
 
-		// Return the created team
+		// Return the created managed object source
 		return this.managedObjectSource;
 	}
 

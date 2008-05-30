@@ -34,8 +34,10 @@ import net.officefloor.eclipse.officefloor.editparts.ManagedObjectTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeManagedObjectEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeTaskEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.TeamEditPart;
+import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
@@ -50,6 +52,7 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeTaskModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
 import net.officefloor.model.officefloor.TeamModel;
@@ -62,7 +65,7 @@ import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
 
 /**
- * Editor for the {@link net.officefloor.model.officefloor.OfficeFloorModel}.
+ * Editor for the {@link OfficeFloorModel}.
  * 
  * @author Daniel
  */
@@ -105,6 +108,7 @@ public class OfficeFloorEditor extends
 		map.put(TeamModel.class, TeamEditPart.class);
 		map.put(OfficeFloorOfficeModel.class, OfficeEditPart.class);
 		map.put(OfficeTeamModel.class, OfficeTeamEditPart.class);
+		map.put(OfficeTaskModel.class, OfficeTaskEditPart.class);
 		map.put(OfficeManagedObjectModel.class,
 				OfficeManagedObjectEditPart.class);
 		map.put(ManagedObjectDependencyModel.class,
@@ -128,6 +132,8 @@ public class OfficeFloorEditor extends
 		map.put(ManagedObjectSourceToOfficeFloorOfficeModel.class,
 				OfficeFloorConnectionEditPart.class);
 		map.put(ManagedObjectTeamToTeamModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(LinkProcessToOfficeTaskModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 

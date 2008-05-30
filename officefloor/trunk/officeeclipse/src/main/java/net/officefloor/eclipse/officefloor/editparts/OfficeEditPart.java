@@ -30,10 +30,10 @@ import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel.OfficeFloorOfficeEvent;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.gef.EditPart;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.officefloor.OfficeFloorOfficeModel}.
+ * {@link EditPart} for the {@link OfficeFloorOfficeModel}.
  * 
  * @author Daniel
  */
@@ -59,6 +59,8 @@ public class OfficeEditPart extends
 				case REMOVE_MANAGED_OBJECT:
 				case ADD_TEAM:
 				case REMOVE_TEAM:
+				case ADD_TASK:
+				case REMOVE_TASK:
 					OfficeEditPart.this.refreshChildren();
 					break;
 				case ADD_RESPONSIBLE_MANAGED_OBJECT:
@@ -90,6 +92,7 @@ public class OfficeEditPart extends
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getTeams());
 		childModels.addAll(this.getCastedModel().getManagedObjects());
+		childModels.addAll(this.getCastedModel().getTasks());
 	}
 
 	/*

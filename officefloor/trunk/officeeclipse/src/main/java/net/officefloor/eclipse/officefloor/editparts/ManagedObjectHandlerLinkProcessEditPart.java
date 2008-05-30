@@ -19,23 +19,33 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.dialog.OfficeTaskDialog;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
+import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
+import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.OfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel.ManagedObjectHandlerLinkProcessEvent;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link ManagedObjectHandlerLinkProcessModel}.
  * 
  * @author Daniel
  */
-public class ManagedObjectHandlerLinkProcessEditPart extends
-		AbstractOfficeFloorEditPart<ManagedObjectHandlerLinkProcessModel> {
+public class ManagedObjectHandlerLinkProcessEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectHandlerLinkProcessModel> {
 
 	/*
 	 * (non-Javadoc)
@@ -53,7 +63,10 @@ public class ManagedObjectHandlerLinkProcessEditPart extends
 							ManagedObjectHandlerLinkProcessEvent property,
 							PropertyChangeEvent evt) {
 						switch (property) {
-
+						case CHANGE_OFFICE_TASK:
+							ManagedObjectHandlerLinkProcessEditPart.this
+									.refreshSourceConnections();
+							break;
 						}
 					}
 				});
@@ -72,6 +85,108 @@ public class ManagedObjectHandlerLinkProcessEditPart extends
 
 		// Return the figure
 		return figure;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 */
+	@Override
+	protected ConnectionModelFactory createConnectionModelFactory() {
+		return new ConnectionModelFactory() {
+			@Override
+			public ConnectionModel createConnection(Object source,
+					Object target, CreateConnectionRequest request) {
+				try {
+
+					// Obtain the office task
+					OfficeTaskModel task;
+					if (target instanceof OfficeTaskModel) {
+						// Office task specified
+						task = (OfficeTaskModel) target;
+
+					} else if (target instanceof OfficeFloorOfficeModel) {
+						// Obtain the task from the office
+						OfficeFloorOfficeModel office = (OfficeFloorOfficeModel) target;
+
+						// Obtain the project
+						IProject project = ProjectConfigurationContext
+								.getProject(ManagedObjectHandlerLinkProcessEditPart.this
+										.getEditor().getEditorInput());
+
+						// Obtain the task of the office to link
+						OfficeTaskDialog dialog = new OfficeTaskDialog(
+								ManagedObjectHandlerLinkProcessEditPart.this
+										.getEditor().getEditorSite().getShell(),
+								office, project);
+						task = dialog.createOfficeTask();
+						if (task == null) {
+							// No task selected, so do not connect
+							return null;
+						}
+
+						// Add the task to the office, so may connect
+						office.addTask(task);
+
+					} else {
+						// Unknown type selected, so do not connect
+						return null;
+					}
+
+					// Create the connection to the task
+					LinkProcessToOfficeTaskModel conn = new LinkProcessToOfficeTaskModel();
+					conn
+							.setLinkProcess((ManagedObjectHandlerLinkProcessModel) source);
+					conn.setOfficeTask(task);
+					conn.connect();
+
+					// Return the connection
+					return conn;
+
+				} catch (Exception ex) {
+					// Indicate error and do no create connection
+					ManagedObjectHandlerLinkProcessEditPart.this
+							.messageError(ex);
+					return null;
+				}
+			}
+		};
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
+		types.add(OfficeTaskModel.class);
+		types.add(OfficeFloorOfficeModel.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		LinkProcessToOfficeTaskModel conn = this.getCastedModel()
+				.getOfficeTask();
+		if (conn != null) {
+			models.add(conn);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		// Never a target
 	}
 
 }
