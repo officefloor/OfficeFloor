@@ -27,6 +27,8 @@ import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
 import net.officefloor.eclipse.common.dialog.input.impl.SubTypeSelectionInput;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
@@ -83,6 +85,11 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	 * {@link ManagedObjectSource}.
 	 */
 	private InputHandler<List<PropertyModel>> propertiesHandler;
+
+	/**
+	 * Default timeout for the {@link ManagedObjectSourceModel}.
+	 */
+	private Text defaultTimeout;
 
 	/**
 	 * Reports errors.
@@ -156,6 +163,13 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 		this.propertiesInput.addProperty("value", 2);
 		this.propertiesHandler = new InputHandler<List<PropertyModel>>(
 				composite, this.propertiesInput);
+
+		// Ensure default timeout
+		new Label(composite, SWT.WRAP).setText("Default timeout");
+		this.defaultTimeout = new Text(composite, SWT.SINGLE | SWT.BORDER);
+		this.defaultTimeout.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL
+				| GridData.HORIZONTAL_ALIGN_FILL));
+		this.defaultTimeout.setText(String.valueOf(0));
 
 		// Error text
 		this.errorText = new Label(composite, SWT.WRAP);
@@ -243,6 +257,16 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 				return;
 			}
 
+			// Obtain the default timeout
+			long defaultTimeoutValue;
+			try {
+				defaultTimeoutValue = Long.parseLong(this.defaultTimeout
+						.getText());
+			} catch (NumberFormatException ex) {
+				this.errorText.setText("Default timeout is not numeric");
+				return;
+			}
+
 			// Create the list of properties
 			List<PropertyModel> propertyModels = this.propertiesHandler
 					.getTrySafeValue();
@@ -259,9 +283,26 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 
 			// Load and specify the managed object source model
 			ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
-			this.managedObjectSource = loader.loadManagedObjectSource(
-					managedObjectSourceName, managedObjectSourceInstance,
-					properties, projectClassLoader);
+			ManagedObjectSourceModel managedObjectSourceModel = loader
+					.loadManagedObjectSource(managedObjectSourceName,
+							managedObjectSourceInstance, properties,
+							defaultTimeoutValue, projectClassLoader);
+
+			// Ensure default timeout if asynchronous managed object
+			Class<?> managedObjectClass = managedObjectSourceInstance
+					.getMetaData().getManagedObjectClass();
+			if (AsynchronousManagedObject.class
+					.isAssignableFrom(managedObjectClass)) {
+				if (defaultTimeoutValue <= 0) {
+					this.errorText.setText("Must provide default timeout as "
+							+ ManagedObject.class.getSimpleName()
+							+ " is asynchronous");
+					return;
+				}
+			}
+
+			// Specify the model for return
+			this.managedObjectSource = managedObjectSourceModel;
 
 		} catch (Throwable ex) {
 			// Failed, report error and do not close dialog
