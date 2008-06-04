@@ -14,12 +14,13 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.plugin.jms;
+package net.officefloor.plugin.jms.activemq;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.plugin.jms.JmsAdminObjectFactory;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerService;
@@ -30,7 +31,7 @@ import org.apache.activemq.command.ActiveMQDestination;
  * 
  * @author Daniel
  */
-public class TestJmsAdminObjectFactory implements JmsAdminObjectFactory {
+public class VmJmsAdminObjectFactory implements JmsAdminObjectFactory {
 
 	/**
 	 * URL of the broker.

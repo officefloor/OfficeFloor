@@ -15,6 +15,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.plugin.jms.activemq.VmJmsAdminObjectFactory;
 
 /**
  * Abstract {@link junit.framework.TestCase} for testing JMS
@@ -49,10 +50,10 @@ public class AbstractJmsManagedObjectTest extends
 		super.setUp();
 
 		// Start the service
-		TestJmsAdminObjectFactory.start();
+		VmJmsAdminObjectFactory.start();
 
 		// Create the JMS admin object factory
-		JmsAdminObjectFactory factory = new TestJmsAdminObjectFactory();
+		JmsAdminObjectFactory factory = new VmJmsAdminObjectFactory();
 
 		// Create the connection and start it
 		this.connection = (QueueConnection) factory.createConnectionFactory()
@@ -76,7 +77,7 @@ public class AbstractJmsManagedObjectTest extends
 		super.tearDown();
 
 		// Stop the service
-		TestJmsAdminObjectFactory.stop();
+		VmJmsAdminObjectFactory.stop();
 	}
 
 	/**
