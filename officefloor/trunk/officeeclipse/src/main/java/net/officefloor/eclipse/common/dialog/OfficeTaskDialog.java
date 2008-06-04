@@ -16,7 +16,12 @@
  */
 package net.officefloor.eclipse.common.dialog;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeTaskModel;
@@ -27,6 +32,7 @@ import net.officefloor.repository.ConfigurationItem;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -41,6 +47,61 @@ import org.eclipse.swt.widgets.Shell;
  * @author Daniel
  */
 public class OfficeTaskDialog extends Dialog {
+
+	/**
+	 * Obtains the {@link OfficeTaskModel}.
+	 * 
+	 * @param target
+	 *            Either the {@link OfficeTaskModel} or the
+	 *            {@link OfficeFloorOfficeModel}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
+	 * @return {@link OfficeTaskModel} or <code>null</code> if none selected
+	 *         or issue in obtaining.
+	 */
+	public static OfficeTaskModel getOfficeTaskModel(Object target,
+			AbstractOfficeFloorEditor<?> editor) {
+
+		// Obtain the office task
+		OfficeTaskModel task = null;
+		try {
+			if (target instanceof OfficeTaskModel) {
+				// Office task specified
+				task = (OfficeTaskModel) target;
+
+			} else if (target instanceof OfficeFloorOfficeModel) {
+				// Obtain the task from the office
+				OfficeFloorOfficeModel office = (OfficeFloorOfficeModel) target;
+
+				// Obtain the project
+				IProject project = ProjectConfigurationContext
+						.getProject(editor.getEditorInput());
+
+				// Obtain the task of the office to link
+				OfficeTaskDialog dialog = new OfficeTaskDialog(editor
+						.getEditorSite().getShell(), office, project);
+				task = dialog.createOfficeTask();
+				if (task != null) {
+					// Add the task to the office, so may connect
+					office.addTask(task);
+				}
+			}
+		} catch (Exception ex) {
+			// No task should be returned
+			task = null;
+
+			// Obtain the stack trace
+			StringWriter buffer = new StringWriter();
+			ex.printStackTrace(new PrintWriter(buffer));
+
+			// Indicate error
+			MessageDialog.openError(editor.getEditorSite().getShell(),
+					"Office Floor", buffer.toString());
+		}
+
+		// Return the task
+		return task;
+	}
 
 	/**
 	 * Listing of {@link OfficeTaskModel} instances to choose from.
