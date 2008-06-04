@@ -21,6 +21,7 @@ import java.sql.Connection;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
 import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
@@ -138,11 +139,14 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 				new String[] { "getWorkName", "getTaskName", "getTeamName" },
 				mos.getTasks(), new ManagedObjectTaskModel("work", "task",
 						"MO-TEAM-NAME", null));
-		assertList(
-				new String[] { "getFlowId", "getInitialWorkName",
-						"getInitialTaskName" },
-				mos.getTasks().get(0).getFlows(),
-				new ManagedObjectTaskFlowModel("flow", "work.name", "task.name"));
+		assertList(new String[] { "getFlowId", "getInitialWorkName",
+				"getInitialTaskName" }, mos.getTasks().get(0).getFlows(),
+				new ManagedObjectTaskFlowModel("flow", "work.name",
+						"task.name", null), new ManagedObjectTaskFlowModel(
+						"linkedFlow", null, null, null));
+		assertProperties(new FlowTaskToOfficeTaskModel("work.name",
+				"task.name", null, null), mos.getTasks().get(0).getFlows().get(
+				1).getOfficeTask(), "getWorkName", "getTaskName");
 
 		// Validate teams
 		assertList(new String[] { "getTeamName" }, mos.getTeams(),
@@ -176,11 +180,14 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getTeamName" }, office.getTeams(),
 				new OfficeTeamModel("TEAM-NAME", null));
 		assertList(new String[] { "getWorkName", "getTaskName" }, office
-				.getTasks(),
-				new OfficeTaskModel("work.name", "task.name", null));
+				.getTasks(), new OfficeTaskModel("work.name", "task.name",
+				null, null));
 		assertEquals("Incorrect link process", handlerInstance
 				.getLinkProcesses().get(1), office.getTasks().get(0)
 				.getLinkProcesses().get(0).getLinkProcess());
+		assertEquals("Incorrect flow task", mos.getTasks().get(0).getFlows()
+				.get(1).getOfficeTask(), office.getTasks().get(0)
+				.getTaskFlows().get(0));
 		assertList(new String[] { "getManagingOfficeName" }, officeFloor
 				.getOffices().get(0).getResponsibleManagedObjects(),
 				new ManagedObjectSourceToOfficeFloorOfficeModel("office", null,

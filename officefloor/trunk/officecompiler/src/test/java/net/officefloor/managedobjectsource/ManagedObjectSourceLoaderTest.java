@@ -163,12 +163,14 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 
 		// Validate task flows
 		assertList(new String[] { "getFlowId", "getInitialWorkName",
-				"getInitialTaskName" }, model.getTasks().get(0).getFlows(),
-				new ManagedObjectTaskFlowModel("0", null, "RECYCLE TASK TWO"),
-				new ManagedObjectTaskFlowModel("1", null, null));
+				"getInitialTaskName", "getOfficeTask" }, model.getTasks()
+				.get(0).getFlows(), new ManagedObjectTaskFlowModel("0", null,
+				"RECYCLE TASK TWO", null), new ManagedObjectTaskFlowModel("1",
+				null, null, null));
 		assertList(new String[] { "getFlowId", "getInitialWorkName",
 				"getInitialTaskName" }, model.getTasks().get(1).getFlows(),
-				new ManagedObjectTaskFlowModel("0", null, "RECYCLE TASK ONE"));
+				new ManagedObjectTaskFlowModel("0", null, "RECYCLE TASK ONE",
+						null));
 
 		// Validate teams
 		assertList(new String[] { "getTeamName" }, model.getTeams(),

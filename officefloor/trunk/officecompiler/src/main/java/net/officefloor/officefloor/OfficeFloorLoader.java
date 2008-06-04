@@ -26,12 +26,15 @@ import net.officefloor.model.office.FlowItemModel;
 import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
+import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
 import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
+import net.officefloor.model.officefloor.ManagedObjectTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -205,6 +208,22 @@ public class OfficeFloorLoader {
 					}
 				}
 			}
+
+			// Connect the task flows to office tasks
+			for (ManagedObjectTaskModel task : mos.getTasks()) {
+				for (ManagedObjectTaskFlowModel flow : task.getFlows()) {
+					FlowTaskToOfficeTaskModel flowTask = flow.getOfficeTask();
+					if (flowTask != null) {
+						OfficeTaskModel officeTask = officeTasks.get(flowTask
+								.getWorkName(), flowTask.getTaskName());
+						if (officeTask != null) {
+							flowTask.setTaskFlow(flow);
+							flowTask.setOfficeTask(officeTask);
+							flowTask.connect();
+						}
+					}
+				}
+			}
 		}
 
 		// Return the office floor
@@ -250,6 +269,11 @@ public class OfficeFloorLoader {
 			for (OfficeTaskModel task : office.getTasks()) {
 				for (LinkProcessToOfficeTaskModel conn : task
 						.getLinkProcesses()) {
+					conn.setWorkName(task.getWorkName());
+					conn.setTaskName(task.getTaskName());
+				}
+
+				for (FlowTaskToOfficeTaskModel conn : task.getTaskFlows()) {
 					conn.setWorkName(task.getWorkName());
 					conn.setTaskName(task.getTaskName());
 				}
@@ -387,7 +411,7 @@ public class OfficeFloorLoader {
 			String taskName = flowItem.getTaskName();
 
 			// Add the office task
-			tasks.add(new OfficeTaskModel(workName, taskName, null));
+			tasks.add(new OfficeTaskModel(workName, taskName, null, null));
 		}
 	}
 
