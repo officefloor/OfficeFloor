@@ -18,13 +18,13 @@ package net.officefloor.plugin.jms.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionConsumer;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.ServerSession;
 import javax.jms.ServerSessionPool;
 import javax.jms.Session;
@@ -36,17 +36,19 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.jms.JmsAdminObjectFactory;
 import net.officefloor.plugin.jms.JmsUtil;
 
 /**
- * JMS Server
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+ * JMS Server {@link ManagedObjectSource}.
  * 
  * TODO stop the ConnectionConsumer
  * 
@@ -102,7 +104,7 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 	protected final List<JmsServerManagedObject> serverSessionPool = new ArrayList<JmsServerManagedObject>();
 
 	/**
-	 * Maximum number of {@link javax.jms.ServerSession} instances.
+	 * Maximum number of {@link ServerSession} instances.
 	 */
 	protected int maxSessions;
 
@@ -135,7 +137,7 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 	}
 
 	/**
-	 * Runs the {@link Session} to obtain the {@link javax.jms.Message}.
+	 * Runs the {@link Session} to obtain the {@link Message}.
 	 * 
 	 * @param managedObject
 	 *            {@link JmsServerManagedObject}.
@@ -159,6 +161,8 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		// No specification
+		context.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
+				"Admin Object Factory");
 	}
 
 	/*
@@ -172,13 +176,13 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 		// Specify object types
 		context.setManagedObjectClass(JmsServerManagedObject.class);
 
-		// Obtain the properties
-		Properties properties = context.getManagedObjectSourceContext()
-				.getProperties();
+		// Obtain the managed object source context
+		ManagedObjectSourceContext mosContext = context
+				.getManagedObjectSourceContext();
 
 		// Obtain the JMS admin object factory
 		JmsAdminObjectFactory jmsAdminObjectFactory = JmsUtil
-				.getJmsAdminObjectFactory(properties);
+				.getJmsAdminObjectFactory(mosContext);
 
 		// Obtain the connection factory
 		this.connectionFactory = jmsAdminObjectFactory
@@ -188,21 +192,22 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 		this.destination = jmsAdminObjectFactory.createDestination();
 
 		// Obtain the message selector
-		this.messageSelector = properties.getProperty(JMS_MESSAGE_SELECTOR);
+		this.messageSelector = mosContext.getProperty(JMS_MESSAGE_SELECTOR,
+				null);
 
 		// Obtains the maximum sessions
-		this.maxSessions = Integer.parseInt(properties
+		this.maxSessions = Integer.parseInt(mosContext
 				.getProperty(JMS_MAX_SERVER_SESSION));
 
 		// Specify handler
 		context.getHandlerLoader(JmsServerHandlersEnum.class);
 
-		// Register the OnMessageTask
+		// Register the OnMessageTask (plus task to process message)
 		ManagedObjectTaskBuilder<?> onMessageTask = new OnMessageTask()
 				.registerTask("jms.server.onmessage", "onmessage",
 						"jms.server.onmessage", context
 								.getManagedObjectSourceContext());
-		onMessageTask.setNextTaskInFlow(null, null); // must enhance
+		onMessageTask.linkFlow(0, null, FlowInstigationStrategyEnum.SEQUENTIAL);
 
 		// Register the handler (and link OnMessageTask)
 		ManagedObjectHandlerBuilder<JmsServerHandlersEnum> managedObjectBuilder = context
@@ -349,7 +354,7 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 	}
 
 	/**
-	 * Provides the {@link net.officefloor.frame.api.execute.Handler} indexes.
+	 * Provides the {@link Handler} indexes.
 	 */
 	public static enum JmsServerHandlersEnum {
 

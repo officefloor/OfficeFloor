@@ -16,7 +16,7 @@
  */
 package net.officefloor.plugin.jms;
 
-import java.util.Properties;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 
 /**
  * Provides abstract functionality for a
@@ -39,18 +39,18 @@ public class JmsUtil {
 	 * <p>
 	 * Separated out to allow overriding.
 	 * 
-	 * @param properties
-	 *            Properties to configure the {@link JmsAdminObjectFactory}.
+	 * @param context
+	 *            {@link ManagedObjectSourceContext}.
 	 * @return {@link JmsAdminObjectFactory} to create the JMS administered
 	 *         objects.
 	 * @throws Exception
 	 *             If fails to create the {@link JmsAdminObjectFactory}.
 	 */
 	public static JmsAdminObjectFactory getJmsAdminObjectFactory(
-			Properties properties) throws Exception {
+			ManagedObjectSourceContext context) throws Exception {
 
 		// Obtain the name of the JMS admin object factory
-		String className = properties
+		String className = context
 				.getProperty(JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY);
 
 		// Ensure have the class name
@@ -66,7 +66,7 @@ public class JmsUtil {
 				.forName(className).newInstance();
 
 		// Initiate the JMS admin object factory
-		jmsAdminObjectFactory.init(properties);
+		jmsAdminObjectFactory.init(context);
 
 		// Return the configured JMS admin object factory
 		return jmsAdminObjectFactory;

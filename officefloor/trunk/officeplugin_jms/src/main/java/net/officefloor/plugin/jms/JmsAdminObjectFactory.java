@@ -3,14 +3,14 @@
  */
 package net.officefloor.plugin.jms;
 
-import java.util.Properties;
-
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+
 /**
- * Factory for the creation of the {@link javax.jms.ConnectionFactory} and
- * {@link javax.jms.Destination} administered objects.
+ * Factory for the creation of the {@link ConnectionFactory} and
+ * {@link Destination} administered objects.
  * 
  * @author Daniel
  */
@@ -19,10 +19,10 @@ public interface JmsAdminObjectFactory {
 	/**
 	 * Enable configuration of JMS objects.
 	 * 
-	 * @param properties
-	 *            Properties to initialise the JMS objects.
+	 * @param context
+	 *            {@link ManagedObjectSourceContext}.
 	 */
-	void init(Properties properties);
+	void init(ManagedObjectSourceContext context);
 
 	/**
 	 * Creates the {@link ConnectionFactory} administered object.

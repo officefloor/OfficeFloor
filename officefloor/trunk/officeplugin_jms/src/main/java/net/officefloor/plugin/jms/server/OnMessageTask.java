@@ -25,7 +25,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
- * Handles obtaining the {@link javax.jms.Message}.
+ * Handles obtaining the {@link Message}.
  * 
  * @author Daniel
  */
@@ -44,14 +44,17 @@ class OnMessageTask extends
 		// Obtain the JMS Server Managed Object
 		JmsServerManagedObject mo = context.getParameter();
 
-		// Run the session to source the managed object
+		// Run the session to source the message
 		mo.getSession().run();
 
 		// Obtain the Message
 		Message message = mo.getMessage();
 
-		// Return Message for next task to process
-		return message;
+		// Process the message
+		context.doFlow(0, message);
+
+		// Not expected to have next task
+		return null;
 	}
 
 }

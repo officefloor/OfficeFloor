@@ -71,7 +71,7 @@ public class JmsManagedObjectSource extends AbstractManagedObjectSource {
 		// Obtain the JMS admin object factory
 		JmsAdminObjectFactory jmsAdminObjectFactory = JmsUtil
 				.getJmsAdminObjectFactory(context
-						.getManagedObjectSourceContext().getProperties());
+						.getManagedObjectSourceContext());
 
 		// Obtain the connection factory
 		this.connectionFactory = jmsAdminObjectFactory
