@@ -16,6 +16,8 @@
  */
 package net.officefloor.eclipse.common.dialog;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +41,12 @@ import net.officefloor.model.officefloor.PropertyModel;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -95,6 +101,16 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 	 * Reports errors.
 	 */
 	private Label errorText;
+
+	/**
+	 * {@link Button} to provide the error detail.
+	 */
+	private Button errorDetailButton;
+
+	/**
+	 * Detail of the error.
+	 */
+	private String errorDetail = null;
 
 	/**
 	 * Initiate.
@@ -180,6 +196,22 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 				SWT.COLOR_WIDGET_BACKGROUND));
 		this.errorText.setForeground(ColorConstants.red);
 
+		// Error detail
+		this.errorDetailButton = new Button(composite, SWT.PUSH | SWT.CENTER);
+		this.errorDetailButton.setText("Error Detail");
+		this.errorDetailButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// Obtain the error detail
+				String msg = ManagedObjectSourceCreateDialog.this.errorDetail;
+				if (msg == null) {
+					msg = "No error detail available";
+				}
+				MessageDialog.openError(ManagedObjectSourceCreateDialog.this
+						.getShell(), "Error Detail", msg);
+			}
+		});
+
 		// Return the composite
 		return composite;
 	}
@@ -229,7 +261,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 		}
 
 		// No errors if at this point
-		this.errorText.setText("");
+		this.clearError();
 	}
 
 	/*
@@ -246,7 +278,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 					.getText();
 			if ((managedObjectSourceName == null)
 					|| (managedObjectSourceName.trim().length() == 0)) {
-				this.errorText.setText("Enter managed object source name");
+				this.setError("Enter managed object source name", null);
 				return;
 			}
 
@@ -263,7 +295,9 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 				defaultTimeoutValue = Long.parseLong(this.defaultTimeout
 						.getText());
 			} catch (NumberFormatException ex) {
-				this.errorText.setText("Default timeout is not numeric");
+				this
+						.setError("Default timeout is not numeric", ex
+								.getMessage());
 				return;
 			}
 
@@ -294,9 +328,9 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 			if (AsynchronousManagedObject.class
 					.isAssignableFrom(managedObjectClass)) {
 				if (defaultTimeoutValue <= 0) {
-					this.errorText.setText("Must provide default timeout as "
+					this.setError("Must provide default timeout as "
 							+ ManagedObject.class.getSimpleName()
-							+ " is asynchronous");
+							+ " is asynchronous", null);
 					return;
 				}
 			}
@@ -306,8 +340,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 
 		} catch (Throwable ex) {
 			// Failed, report error and do not close dialog
-			this.errorText.setText(ex.getClass().getSimpleName() + ": "
-					+ ex.getMessage());
+			this.setError(ex);
 			return;
 		}
 
@@ -328,7 +361,7 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 				.getTrySafeValue();
 		if ((managedObjectSourceClassName == null)
 				|| (managedObjectSourceClassName.trim().length() == 0)) {
-			this.errorText.setText("Select a managed object source");
+			this.setError("Select a managed object source", null);
 			return null;
 		}
 
@@ -349,10 +382,58 @@ public class ManagedObjectSourceCreateDialog extends Dialog {
 			// Return the managed object source
 			return managedObjectSource;
 
-		} catch (Exception ex) {
-			this.errorText.setText(ex.getMessage() + " ["
-					+ ex.getClass().getSimpleName() + "]");
+		} catch (Throwable ex) {
+			this.setError(ex);
 			return null;
+		}
+	}
+
+	/**
+	 * Clears the error.
+	 */
+	private void clearError() {
+		this.setError(null, null);
+	}
+
+	/**
+	 * Specifies the error from a {@link Throwable}.
+	 * 
+	 * @param error
+	 *            {@link Throwable} error.
+	 */
+	private void setError(Throwable error) {
+
+		// Obtain the message as the error
+		String text = error.getClass().getSimpleName() + ": "
+				+ error.getMessage();
+
+		// Obtain the stack trace as detail
+		StringWriter stackTrace = new StringWriter();
+		error.printStackTrace(new PrintWriter(stackTrace));
+
+		// Specify the error
+		this.setError(text, stackTrace.toString());
+	}
+
+	/**
+	 * Specifies the error.
+	 * 
+	 * @param text
+	 *            Text of the error.
+	 * @param detail
+	 *            Detail of the error.
+	 */
+	private void setError(String text, String detail) {
+		if ((text == null) || (text.trim().length() == 0)) {
+			// No error
+			this.errorText.setText("");
+			this.errorDetail = null;
+			this.errorDetailButton.setVisible(false);
+		} else {
+			// Specify the error
+			this.errorText.setText(text);
+			this.errorDetail = detail;
+			this.errorDetailButton.setVisible(this.errorDetail != null);
 		}
 	}
 }

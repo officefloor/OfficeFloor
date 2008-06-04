@@ -19,15 +19,22 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.dialog.OfficeTaskDialog;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
+import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.OfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel.ManagedObjectTaskFlowEvent;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link ManagedObjectTaskFlowModel}.
@@ -35,7 +42,7 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class ManagedObjectTaskFlowEditPart extends
-		AbstractOfficeFloorEditPart<ManagedObjectTaskFlowModel> {
+		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTaskFlowModel> {
 
 	/*
 	 * (non-Javadoc)
@@ -51,7 +58,10 @@ public class ManagedObjectTaskFlowEditPart extends
 			protected void handlePropertyChange(
 					ManagedObjectTaskFlowEvent property, PropertyChangeEvent evt) {
 				switch (property) {
-
+				case CHANGE_OFFICE_TASK:
+					ManagedObjectTaskFlowEditPart.this
+							.refreshSourceConnections();
+					break;
 				}
 			}
 		});
@@ -64,12 +74,88 @@ public class ManagedObjectTaskFlowEditPart extends
 	 */
 	@Override
 	protected IFigure createFigure() {
+
+		// Determine if linked by managed object source to task
+		String linkTask = "";
+		String taskName = this.getCastedModel().getInitialTaskName();
+		if ((taskName != null) && (taskName.length() > 0)) {
+			// Linked to a task by managed object source
+			linkTask = " (" + this.getCastedModel().getInitialWorkName() + "."
+					+ taskName + ")";
+		}
+
 		// Create the figure
-		IFigure figure = new Label(this.getCastedModel().getFlowId());
+		IFigure figure = new Label(this.getCastedModel().getFlowId() + linkTask);
 		figure.setForegroundColor(ColorConstants.cyan);
 
 		// Return the figure
 		return figure;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 */
+	@Override
+	protected ConnectionModelFactory createConnectionModelFactory() {
+		return new ConnectionModelFactory() {
+			@Override
+			public ConnectionModel createConnection(Object source,
+					Object target, CreateConnectionRequest request) {
+
+				// Obtain the office task
+				OfficeTaskModel task = OfficeTaskDialog.getOfficeTaskModel(
+						target, ManagedObjectTaskFlowEditPart.this.getEditor());
+				if (task == null) {
+					// No task
+					return null;
+				}
+
+				// Create the connection to the task
+				FlowTaskToOfficeTaskModel conn = new FlowTaskToOfficeTaskModel();
+				conn.setTaskFlow((ManagedObjectTaskFlowModel) source);
+				conn.setOfficeTask(task);
+				conn.connect();
+
+				// Return the connection
+				return conn;
+			}
+		};
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetTypes(List<Class<?>> types) {
+		types.add(OfficeTaskModel.class);
+		types.add(OfficeFloorOfficeModel.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		FlowTaskToOfficeTaskModel conn = this.getCastedModel().getOfficeTask();
+		if (conn != null) {
+			models.add(conn);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		// Never a target
 	}
 
 }

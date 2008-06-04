@@ -37,6 +37,7 @@ import net.officefloor.eclipse.officefloor.editparts.OfficeManagedObjectEditPart
 import net.officefloor.eclipse.officefloor.editparts.OfficeTaskEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.TeamEditPart;
+import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
 import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
@@ -134,6 +135,8 @@ public class OfficeFloorEditor extends
 		map.put(ManagedObjectTeamToTeamModel.class,
 				OfficeFloorConnectionEditPart.class);
 		map.put(LinkProcessToOfficeTaskModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(FlowTaskToOfficeTaskModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 

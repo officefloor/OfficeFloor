@@ -52,6 +52,8 @@ public class OfficeTaskEditPart extends
 				switch (property) {
 				case ADD_LINK_PROCESS:
 				case REMOVE_LINK_PROCESS:
+				case ADD_TASK_FLOW:
+				case REMOVE_TASK_FLOW:
 					OfficeTaskEditPart.this.refreshTargetConnections();
 					break;
 				}
@@ -88,6 +90,7 @@ public class OfficeTaskEditPart extends
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getLinkProcesses());
+		models.addAll(this.getCastedModel().getTaskFlows());
 	}
 
 }
