@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.jms.AbstractJmsManagedObjectTest;
@@ -125,7 +126,8 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 								"jms.server.onmessage", "onmessage");
 
 				// Flag its next task
-				flowNodeBuilder.setNextTaskInFlow("work", "task");
+				flowNodeBuilder.linkFlow(0, "work", "task",
+						FlowInstigationStrategyEnum.SEQUENTIAL);
 			}
 		});
 

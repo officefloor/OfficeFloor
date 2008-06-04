@@ -3,11 +3,10 @@
  */
 package net.officefloor.plugin.jms.activemq;
 
-import java.util.Properties;
-
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.plugin.jms.JmsAdminObjectFactory;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -38,16 +37,16 @@ public class ActiveMqJmsAdminObjectFactory implements JmsAdminObjectFactory {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#init(java.util.Properties)
+	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
 	 */
-	public void init(Properties properties) {
+	public void init(ManagedObjectSourceContext context) {
 
 		// Create the connection factory
 		this.connectionFactory = new ActiveMQConnectionFactory();
-		this.connectionFactory.buildFromProperties(properties);
+		this.connectionFactory.buildFromProperties(context.getProperties());
 
 		// Obtain the destination URL
-		String destinationUrl = properties.getProperty(DESTINATION_PROPERTY);
+		String destinationUrl = context.getProperty(DESTINATION_PROPERTY);
 
 		// Create the destination
 		this.destination = ActiveMQDestination.createDestination(

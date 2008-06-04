@@ -26,8 +26,7 @@ import net.officefloor.admin.transaction.Transaction;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
- * for the JMS server.
+ * {@link ManagedObject} for the JMS server.
  * 
  * @author Daniel
  */
@@ -45,7 +44,7 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	protected final Session session;
 
 	/**
-	 * {@link Message} to be procssed.
+	 * {@link Message} to be processed.
 	 */
 	protected Message message = null;
 
@@ -80,7 +79,7 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	 * @throws JMSException
 	 *             If fails to reset.
 	 */
-	protected void reset() throws JMSException {
+	protected synchronized void reset() throws JMSException {
 		// Handle if not committed
 		if (!this.isCommitted) {
 
@@ -100,7 +99,7 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	 * 
 	 * @return {@link Message}.
 	 */
-	public Message getMessage() {
+	public synchronized Message getMessage() {
 		return this.message;
 	}
 
@@ -115,7 +114,7 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
 	 */
-	public Object getObject() throws Exception {
+	public synchronized Object getObject() throws Exception {
 		// Return the message being processed
 		return this.message;
 	}
@@ -156,7 +155,7 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	 * 
 	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
 	 */
-	public void onMessage(Message message) {
+	public synchronized void onMessage(Message message) {
 		// Store the message
 		this.message = message;
 	}
@@ -181,7 +180,7 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	 * 
 	 * @see net.officefloor.ei.transaction.Transaction#commit()
 	 */
-	public void commit() throws Exception {
+	public synchronized void commit() throws Exception {
 		// Commit the transaction
 		this.session.commit();
 
@@ -194,7 +193,7 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	 * 
 	 * @see net.officefloor.ei.transaction.Transaction#rollback()
 	 */
-	public void rollback() throws Exception {
+	public synchronized void rollback() throws Exception {
 		// Rollback the transaction
 		this.session.rollback();
 	}

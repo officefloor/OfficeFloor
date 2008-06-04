@@ -16,17 +16,17 @@
  */
 package net.officefloor.plugin.jms;
 
-import java.util.Properties;
-
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.broker.BrokerService;
 import org.apache.activemq.command.ActiveMQDestination;
 
 /**
- * {@link net.officefloor.plugin.jms.JmsAdminObjectFactory} for testing.
+ * {@link JmsAdminObjectFactory} for testing.
  * 
  * @author Daniel
  */
@@ -109,9 +109,9 @@ public class TestJmsAdminObjectFactory implements JmsAdminObjectFactory {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#init(java.util.Properties)
+	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
 	 */
-	public void init(Properties properties) {
+	public void init(ManagedObjectSourceContext context) {
 		// Do nothing
 	}
 
