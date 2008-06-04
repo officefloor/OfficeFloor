@@ -18,6 +18,7 @@ package net.officefloor.compile;
 
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -26,12 +27,16 @@ import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.OfficeBuilderImpl;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
 import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
+import net.officefloor.model.officefloor.ManagedObjectTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.PropertyModel;
@@ -226,6 +231,36 @@ public class ManagedObjectSourceEntry extends
 														.getWorkName(),
 												officeTask.getTaskName());
 									}
+								}
+							}
+						}
+
+						// Load the tasks for the managed object task flows
+						for (ManagedObjectTaskModel task : ManagedObjectSourceEntry.this
+								.getModel().getTasks()) {
+							for (ManagedObjectTaskFlowModel flow : task
+									.getFlows()) {
+								FlowTaskToOfficeTaskModel link = flow
+										.getOfficeTask();
+								if (link != null) {
+									FlowNodeBuilder<?> flowNodeBuilder = context
+											.getFlowNodeBuilder(
+													ManagedObjectSourceEntry.this
+															.getModel().getId(),
+													task.getWorkName(), task
+															.getTaskName());
+
+									// Obtain the flow index
+									int flowIndex = Integer.parseInt(flow
+											.getFlowId());
+
+									// Link in the task of the flow
+									flowNodeBuilder
+											.linkFlow(
+													flowIndex,
+													link.getWorkName(),
+													link.getTaskName(),
+													FlowInstigationStrategyEnum.SEQUENTIAL);
 								}
 							}
 						}

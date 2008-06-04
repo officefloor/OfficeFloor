@@ -29,6 +29,9 @@
 					<flows>
 						<flow id="flow" work="work.name"
 							task="task.name" />
+						<flow id="linkedFlow">
+							<task work="work.name" task="task.name" />
+						</flow>
 					</flows>
 				</task>
 			</tasks>

@@ -192,22 +192,31 @@ public class ManagedObjectSourceLoader {
 			// Create and register the handler models
 			for (Enum handlerKey : handlerKeys.getEnumConstants()) {
 
-				// Obtain the type necessary for the handler
-				Class<?> handlerType = mosMetaData.getHandlerType(handlerKey);
-				if (handlerType == null) {
-					throw new Exception("For handler key " + handlerKey.name()
-							+ " no type provided from "
-							+ ManagedObjectSourceMetaData.class.getSimpleName());
-				}
-
 				// Obtain the handler instance if provided
 				ManagedObjectHandlerInstanceModel handlerInstance = handlerInstances
 						.get(handlerKey);
 
+				// Obtain the type necessary for the handler
+				Class<?> handlerType = mosMetaData.getHandlerType(handlerKey);
+
+				// Ensure either handler instance or type of handler provided
+				String handlerTypeName = null;
+				if (handlerType != null) {
+					handlerTypeName = handlerType.getName();
+				} else {
+					if (handlerInstance == null) {
+						throw new Exception("For handler key "
+								+ handlerKey.name()
+								+ " no type provided from "
+								+ ManagedObjectSourceMetaData.class
+										.getSimpleName());
+					}
+				}
+
 				// Create and register the handler model
 				ManagedObjectHandlerModel handlerModel = new ManagedObjectHandlerModel(
 						handlerKey.name(), handlerKey.getClass().getName(),
-						handlerType.getName(), handlerInstance);
+						handlerTypeName, handlerInstance);
 				handlerModels.add(handlerModel);
 			}
 		}
@@ -248,7 +257,7 @@ public class ManagedObjectSourceLoader {
 
 					// Add the flow
 					taskFlows.add(new ManagedObjectTaskFlowModel(flowName,
-							flowWorkName, flowTaskName));
+							flowWorkName, flowTaskName, null));
 				}
 
 				// Add the task
