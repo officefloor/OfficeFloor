@@ -261,10 +261,22 @@ public class RawWorkRegistry {
 										+ taskName + "[" + i + "]");
 					}
 
+					// Ensure have initial task for flow
+					TaskNodeReference initialTask = flowConfigs[i]
+							.getInitialTask();
+					if (initialTask == null) {
+						throw new ConfigurationException(
+								"No task linked for flow "
+										+ flowConfigs[i].getFlowName()
+										+ " of work " + workName + " task "
+										+ taskName);
+					}
+
 					// Create the Flow meta-data
-					flowMetaData[i] = new FlowMetaDataImpl(strategy,
-							locateTaskMetaData(flowConfigs[i].getInitialTask(),
-									workName, taskName), flowManager);
+					flowMetaData[i] = new FlowMetaDataImpl(
+							strategy,
+							locateTaskMetaData(initialTask, workName, taskName),
+							flowManager);
 				}
 
 				// Obtain the parent escalation procedure
