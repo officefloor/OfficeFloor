@@ -21,6 +21,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.util.ManagedObjectSourceLoader;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+import net.officefloor.plugin.jms.activemq.VmJmsAdminObjectFactory;
 
 /**
  * Tests sending text messages.
@@ -39,7 +40,7 @@ public class TextJmsManagedObjectTest extends AbstractJmsManagedObjectTest {
 		// Create the JMS managed object source
 		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
 		loader.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
-				TestJmsAdminObjectFactory.class.getName());
+				VmJmsAdminObjectFactory.class.getName());
 		ManagedObjectSource<?, ?> moSource = loader
 				.loadManagedObjectSource(JmsManagedObjectSource.class);
 
