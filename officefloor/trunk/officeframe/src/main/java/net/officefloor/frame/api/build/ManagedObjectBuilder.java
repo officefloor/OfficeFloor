@@ -16,30 +16,17 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
 /**
- * Meta-data of a {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Builder of a {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectBuilder {
-
-	/**
-	 * Specifies the {@link Class} of the {@link ManagedObjectSource}.
-	 * 
-	 * @param <S>
-	 *            {@link ManagedObjectSource} type.
-	 * @param managedObjectSourceClass
-	 *            {@link Class} of the {@link ManagedObjectSource}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
-	 */
-	@SuppressWarnings("unchecked")
-	<S extends ManagedObjectSource> void setManagedObjectSourceClass(
-			Class<S> managedObjectSourceClass) throws BuildException;
+public interface ManagedObjectBuilder<H extends Enum<H>> {
 
 	/**
 	 * Specifies a property for the {@link ManagedObjectSource}.
@@ -54,18 +41,16 @@ public interface ManagedObjectBuilder {
 	void addProperty(String name, String value) throws BuildException;
 
 	/**
-	 * Specifies the {@link ManagedObjectPool} for this
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Specifies the {@link ManagedObjectPool} for this {@link ManagedObject}.
 	 * 
 	 * @param pool
-	 *            {@link ManagedObjectPool} for this
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            {@link ManagedObjectPool} for this {@link ManagedObject}.
 	 */
 	void setManagedObjectPool(ManagedObjectPool pool);
 
 	/**
 	 * Specifies the default timeout for asynchronous operations on the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link ManagedObject}.
 	 * 
 	 * @param timeout
 	 *            Default timeout.
@@ -75,11 +60,10 @@ public interface ManagedObjectBuilder {
 	void setDefaultTimeout(long timeout) throws BuildException;
 
 	/**
-	 * Specifies the {@link net.officefloor.frame.api.manage.Office} to manage
-	 * this {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Specifies the {@link Office} to manage this {@link ManagedObject}.
 	 * 
 	 * @param officeName
-	 *            Name of the {@link net.officefloor.frame.api.manage.Office}.
+	 *            Name of the {@link Office}.
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
@@ -89,12 +73,12 @@ public interface ManagedObjectBuilder {
 	 * Obtains the {@link ManagedObjectHandlerBuilder}.
 	 * 
 	 * @param handlerKeys
-	 *            {@link Enum} providing the keys for each {@link Handler}.
+	 *            {@link Enum} specifying the handler keys.
 	 * @return {@link ManagedObjectHandlerBuilder}.
 	 * @throws BuildException
 	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
 	 */
-	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
+	ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
 			Class<H> handlerKeys) throws BuildException;
 
 }

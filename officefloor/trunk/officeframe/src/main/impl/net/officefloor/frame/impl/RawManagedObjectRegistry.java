@@ -86,7 +86,7 @@ public class RawManagedObjectRegistry {
 
 		// Create the registry of raw Managed Object meta-data
 		Map<String, RawManagedObjectMetaData> mosdRepository = new HashMap<String, RawManagedObjectMetaData>();
-		for (ManagedObjectSourceConfiguration mosConfig : officeFloorConfiguration
+		for (ManagedObjectSourceConfiguration<?, ?> mosConfig : officeFloorConfiguration
 				.getManagedObjectSourceConfiguration()) {
 
 			// Obtain the Office Builder for the managing Office

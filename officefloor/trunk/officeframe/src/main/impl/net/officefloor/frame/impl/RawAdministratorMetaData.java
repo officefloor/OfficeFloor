@@ -54,7 +54,8 @@ public class RawAdministratorMetaData {
 		// Create the instance of the task administrator source
 		AdministratorSource<?, ?> source;
 		try {
-			source = asConfig.getAdministratorSourceClass().newInstance();
+			source = (AdministratorSource<?, ?>) asConfig
+					.getAdministratorSourceClass().newInstance();
 		} catch (InstantiationException ex) {
 			throw new ConfigurationException(ex.getClass().getName() + ": "
 					+ ex.getMessage());
@@ -80,7 +81,7 @@ public class RawAdministratorMetaData {
 	/**
 	 * {@link AdministratorSourceConfiguration}.
 	 */
-	protected final AdministratorSourceConfiguration adminSourceConfig;
+	protected final AdministratorSourceConfiguration<?, ?> adminSourceConfig;
 
 	/**
 	 * {@link AdministratorSource}.
@@ -114,7 +115,7 @@ public class RawAdministratorMetaData {
 	 *            {@link OfficeScope}.
 	 */
 	private RawAdministratorMetaData(
-			AdministratorSourceConfiguration adminSourceConfig,
+			AdministratorSourceConfiguration<?, ?> adminSourceConfig,
 			AdministratorSource<?, ?> administratorSource,
 			OfficeScope adminScope) {
 		this.adminSourceConfig = adminSourceConfig;
@@ -127,7 +128,7 @@ public class RawAdministratorMetaData {
 	 * 
 	 * @return {@link AdministratorSourceConfiguration}.
 	 */
-	public AdministratorSourceConfiguration getAdministratorSourceConfiguration() {
+	public AdministratorSourceConfiguration<?, ?> getAdministratorSourceConfiguration() {
 		return this.adminSourceConfig;
 	}
 

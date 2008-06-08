@@ -21,6 +21,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
@@ -51,7 +52,8 @@ public class MockAdministratorSource<I extends Object, A extends Enum<A>>
 	 * Convenience method to bind the {@link Administrator} instance to the
 	 * {@link AdministratorBuilder}.
 	 * 
-	 * @param builder
+	 * @param builderFactory
+	 *            {@link BuilderFactory} to create the
 	 *            {@link AdministratorBuilder} to bind the {@link Administrator}.
 	 * @param name
 	 *            Name to bind under.
@@ -62,13 +64,16 @@ public class MockAdministratorSource<I extends Object, A extends Enum<A>>
 	 * @throws BuildException
 	 *             If bind fails.
 	 */
-	public static void bindAdministrator(AdministratorBuilder<?> builder,
-			String name, Administrator<?, ?> administrator,
-			AdministratorSourceMetaData<?, ?> sourceMetaData)
+	@SuppressWarnings("unchecked")
+	public static <A extends Enum<A>> AdministratorBuilder<A> bindAdministrator(
+			BuilderFactory builderFactory, String name,
+			Administrator<?, A> administrator,
+			AdministratorSourceMetaData<?, A> sourceMetaData)
 			throws BuildException {
 
-		// Specify the task administrator source class
-		builder.setAdministratorSourceClass(MockAdministratorSource.class);
+		// Create the administrator builder
+		AdministratorBuilder<?> builder = builderFactory
+				.createAdministratorBuilder(MockAdministratorSource.class);
 
 		// Provide task administrator link to meta-data
 		builder.addProperty(TASK_ADMINISTRATOR_PROPERTY, name);
@@ -80,6 +85,9 @@ public class MockAdministratorSource<I extends Object, A extends Enum<A>>
 
 		// Bind the task administrator in registry
 		REGISTRY.put(name, state);
+
+		// Return the builder
+		return (AdministratorBuilder<A>) builder;
 	}
 
 	/**

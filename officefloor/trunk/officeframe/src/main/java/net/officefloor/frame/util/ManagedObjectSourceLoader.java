@@ -38,9 +38,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 
 /**
- * Loads
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
- * for stand-alone use.
+ * Loads {@link ManagedObjectSource} for stand-alone use.
  * 
  * @author Daniel
  */
@@ -164,7 +162,7 @@ public class ManagedObjectSourceLoader {
 	 * @return Loaded {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <MS extends ManagedObjectSource> MS loadManagedObjectSource(
+	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> MS loadManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Create a new instance of the managed object source
@@ -176,8 +174,9 @@ public class ManagedObjectSourceLoader {
 		OfficeFrame officeFrame = OfficeFrame.getInstance();
 		OfficeBuilder officeBuilder = officeFrame.getBuilderFactory()
 				.createOfficeBuilder();
-		ManagedObjectBuilder managedObjectBuilder = officeFrame
-				.getBuilderFactory().createManagedObjectBuilder();
+		ManagedObjectBuilder<H> managedObjectBuilder = officeFrame
+				.getBuilderFactory().createManagedObjectBuilder(
+						managedObjectSourceClass);
 
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(

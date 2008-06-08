@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public interface AdministratorSourceConfiguration {
+public interface AdministratorSourceConfiguration<A extends Enum<A>, AS extends AdministratorSource<?, A>> {
 
 	/**
 	 * Obtains the name of the {@link AdministratorSource}.
@@ -46,8 +46,7 @@ public interface AdministratorSourceConfiguration {
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	<AS extends AdministratorSource<?, ?>> Class<AS> getAdministratorSourceClass()
-			throws ConfigurationException;
+	Class<AS> getAdministratorSourceClass() throws ConfigurationException;
 
 	/**
 	 * Obtains the properties to initialise the {@link AdministratorSource}.
@@ -81,6 +80,6 @@ public interface AdministratorSourceConfiguration {
 	 * @return Listing of {@link DutyConfiguration} for the {@link Duty}
 	 *         instances of this {@link Administrator}.
 	 */
-	DutyConfiguration<?>[] getDutyConfiguration();
+	DutyConfiguration<A>[] getDutyConfiguration();
 
 }

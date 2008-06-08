@@ -20,10 +20,10 @@ import java.util.List;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Context in which the
- * {@link net.officefloor.frame.spi.administration.Administrator} executes.
+ * Context in which the {@link Administrator} executes.
  * 
  * @author Daniel
  */
@@ -32,9 +32,8 @@ public interface DutyContext<I extends Object, F extends Enum<F>> {
 	/**
 	 * Obtains the particular extension interfaces.
 	 * 
-	 * @return Extension interfaces for the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances to be administered.
+	 * @return Extension interfaces for the {@link ManagedObject} instances to
+	 *         be administered.
 	 */
 	List<I> getExtensionInterfaces();
 

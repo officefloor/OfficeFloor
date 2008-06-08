@@ -31,17 +31,6 @@ import net.officefloor.frame.spi.team.Team;
 public interface AdministratorBuilder<A extends Enum<A>> {
 
 	/**
-	 * Specifies the {@link Class} of the {@link AdministratorSource}.
-	 * 
-	 * @param administratorSourceClass
-	 *            {@link Class} of the {@link AdministratorSource}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
-	 */
-	<S extends AdministratorSource<?, ?>> void setAdministratorSourceClass(
-			Class<S> administratorSourceClass) throws BuildException;
-
-	/**
 	 * Specifies the scope of the {@link Administrator}. Default scope is
 	 * {@link OfficeScope#WORK}.
 	 * 

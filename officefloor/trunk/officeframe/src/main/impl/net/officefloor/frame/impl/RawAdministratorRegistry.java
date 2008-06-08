@@ -62,7 +62,7 @@ public class RawAdministratorRegistry {
 
 		// Create the registry of raw Administrator meta-data
 		Map<String, RawAdministratorMetaData> rasRegistry = new HashMap<String, RawAdministratorMetaData>();
-		for (AdministratorSourceConfiguration asConfig : officeConfiguration
+		for (AdministratorSourceConfiguration<?, ?> asConfig : officeConfiguration
 				.getAdministratorSourceConfiguration()) {
 			rasRegistry.put(asConfig.getAdministratorName(),
 					RawAdministratorMetaData
@@ -98,8 +98,8 @@ public class RawAdministratorRegistry {
 	 *             If fails configuration.
 	 */
 	@SuppressWarnings("unchecked")
-	public void loadRemainingAdministratorState(
-			RawWorkRegistry workRegistry) throws ConfigurationException {
+	public void loadRemainingAdministratorState(RawWorkRegistry workRegistry)
+			throws ConfigurationException {
 
 		// Iterate over the raw administrator objects
 		for (RawAdministratorMetaData radmin : this.rawAdminRegistry.values()) {

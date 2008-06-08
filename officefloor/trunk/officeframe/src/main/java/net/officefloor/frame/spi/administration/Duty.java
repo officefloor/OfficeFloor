@@ -16,17 +16,18 @@
  */
 package net.officefloor.frame.spi.administration;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * {@link Duty} to be undertaken to administer than
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances.
+ * {@link Duty} to be undertaken to administer than {@link ManagedObject}
+ * instances.
  * 
  * @author Daniel
  */
 public interface Duty<I extends Object, F extends Enum<F>> {
 
 	/**
-	 * Administers the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances.
+	 * Administers the {@link ManagedObject} instances.
 	 * 
 	 * @param context
 	 *            {@link DutyContext}.

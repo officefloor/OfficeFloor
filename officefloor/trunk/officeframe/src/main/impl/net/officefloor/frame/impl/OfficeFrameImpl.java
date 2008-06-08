@@ -239,17 +239,18 @@ public class OfficeFrameImpl extends OfficeFrame {
 		 *      java.lang.Class)
 		 */
 		@Override
+		@SuppressWarnings("unchecked")
 		public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
 				String managedObjectId, Class<H> handlerKeys)
 				throws BuildException {
 			try {
 
 				// Obtain the managed object source
-				ManagedObjectSourceConfiguration mosConfig = null;
-				for (ManagedObjectSourceConfiguration mos : this.officeFloorConfig
+				ManagedObjectSourceConfiguration<H, ?> mosConfig = null;
+				for (ManagedObjectSourceConfiguration<?, ?> mos : this.officeFloorConfig
 						.getManagedObjectSourceConfiguration()) {
 					if (managedObjectId.equals(mos.getManagedObjectName())) {
-						mosConfig = mos;
+						mosConfig = (ManagedObjectSourceConfiguration<H, ?>) mos;
 					}
 				}
 				if (mosConfig == null) {
