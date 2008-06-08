@@ -101,7 +101,8 @@ public class ManagedObjectSourceLoader {
 
 		// Create the managed object builder
 		ManagedObjectBuilder managedObjectBuilder = officeFrame
-				.getBuilderFactory().createManagedObjectBuilder();
+				.getBuilderFactory().createManagedObjectBuilder(
+						managedObjectSource.getClass());
 
 		// Create the office builder
 		OfficeBuilder officeBuilder = officeFrame.getBuilderFactory()

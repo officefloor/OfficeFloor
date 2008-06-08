@@ -49,7 +49,7 @@ import net.officefloor.util.OFCU;
  * @author Daniel
  */
 public class ManagedObjectSourceEntry extends
-		AbstractEntry<ManagedObjectBuilder, ManagedObjectSourceModel> {
+		AbstractEntry<ManagedObjectBuilder<?>, ManagedObjectSourceModel> {
 
 	/**
 	 * Loads the {@link ManagedObjectSourceEntry}.
@@ -62,15 +62,22 @@ public class ManagedObjectSourceEntry extends
 	 * @param context
 	 *            {@link OfficeFloorCompilerContext}.
 	 * @return {@link ManagedObjectSourceEntry}.
+	 * @throws Exception
+	 *             If fails.
 	 */
+	@SuppressWarnings("unchecked")
 	public static ManagedObjectSourceEntry loadManagedObjectSource(
 			ManagedObjectSourceModel configuration,
 			OfficeFloorEntry officeFloorEntry,
-			OfficeFloorCompilerContext context) {
+			OfficeFloorCompilerContext context) throws Exception {
+
+		// Obtain the managed object source class
+		Class managedObjectSourceClass = context.getLoaderContext()
+				.obtainClass(configuration.getSource());
 
 		// Create the builder
-		ManagedObjectBuilder builder = context.getBuilderFactory()
-				.createManagedObjectBuilder();
+		ManagedObjectBuilder<?> builder = context.getBuilderFactory()
+				.createManagedObjectBuilder(managedObjectSourceClass);
 
 		// Create the entry
 		ManagedObjectSourceEntry mosEntry = new ManagedObjectSourceEntry(
@@ -96,7 +103,7 @@ public class ManagedObjectSourceEntry extends
 	 * @param model
 	 *            {@link ManagedObjectSourceModel}.
 	 */
-	public ManagedObjectSourceEntry(String id, ManagedObjectBuilder builder,
+	public ManagedObjectSourceEntry(String id, ManagedObjectBuilder<?> builder,
 			ManagedObjectSourceModel model, OfficeFloorEntry officeFloorEntry) {
 		super(id, builder, model);
 		this.officeFloorEntry = officeFloorEntry;
@@ -124,9 +131,6 @@ public class ManagedObjectSourceEntry extends
 				this.getModel().getId()).getManagingOffice();
 
 		// Configure attributes
-		this.getBuilder().setManagedObjectSourceClass(
-				(Class<ManagedObjectSource>) builderUtil.obtainClass(this
-						.getModel().getSource()));
 		this.getBuilder().setManagingOffice(managingOffice.getName());
 
 		// Specify the default timeout
