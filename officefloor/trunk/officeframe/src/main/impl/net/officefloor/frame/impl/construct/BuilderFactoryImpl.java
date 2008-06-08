@@ -23,9 +23,11 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Implementation of the {@link net.officefloor.frame.api.build.BuilderFactory}.
+ * Implementation of the {@link BuilderFactory}.
  * 
  * @author Daniel
  */
@@ -61,21 +63,23 @@ public class BuilderFactoryImpl implements BuilderFactory {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.construct.MetaDataFactory#createManagedObjectBuilder(java.lang.Class)
+	 * @see net.officefloor.frame.api.build.BuilderFactory#createManagedObjectBuilder(java.lang.Class)
 	 */
-	@SuppressWarnings("unchecked")
-	public ManagedObjectBuilder createManagedObjectBuilder() {
-		return new ManagedObjectBuilderImpl();
+	@Override
+	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> createManagedObjectBuilder(
+			Class<MS> managedObjectSourceClass) {
+		return new ManagedObjectBuilderImpl<D, H, MS>(managedObjectSourceClass);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.build.BuilderFactory#createTaskAdministratorBuilder()
+	 * @see net.officefloor.frame.api.build.BuilderFactory#createAdministratorBuilder(java.lang.Class)
 	 */
-	@SuppressWarnings("unchecked")
-	public AdministratorBuilder<?> createAdministratorBuilder() {
-		return new AdministratorBuilderImpl();
+	@Override
+	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> createAdministratorBuilder(
+			Class<AS> administratorSourceClass) {
+		return new AdministratorBuilderImpl<I, A, AS>(administratorSourceClass);
 	}
 
 }

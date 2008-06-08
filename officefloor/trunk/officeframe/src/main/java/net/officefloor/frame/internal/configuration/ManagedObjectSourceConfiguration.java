@@ -30,7 +30,7 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
  * 
  * @author Daniel
  */
-public interface ManagedObjectSourceConfiguration {
+public interface ManagedObjectSourceConfiguration<H extends Enum<H>, MS extends ManagedObjectSource<?, H>> {
 
 	/**
 	 * Obtains the name of this {@link ManagedObjectSource}.
@@ -55,9 +55,7 @@ public interface ManagedObjectSourceConfiguration {
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	@SuppressWarnings("unchecked")
-	<MS extends ManagedObjectSource> Class<MS> getManagedObjectSourceClass()
-			throws ConfigurationException;
+	Class<MS> getManagedObjectSourceClass() throws ConfigurationException;
 
 	/**
 	 * Obtains the properties to initialise the {@link ManagedObjectSource}.
@@ -93,8 +91,8 @@ public interface ManagedObjectSourceConfiguration {
 	 * @throws ConfigurationException
 	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
 	 */
-	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
-			Class<H> handlerKeys) throws ConfigurationException;
+	ManagedObjectHandlerBuilder<H> getHandlerBuilder(Class<H> handlerKeys)
+			throws ConfigurationException;
 
 	/**
 	 * Obtains the {@link HandlerConfiguration} for the

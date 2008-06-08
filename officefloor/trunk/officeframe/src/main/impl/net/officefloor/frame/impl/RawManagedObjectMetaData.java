@@ -66,6 +66,7 @@ public class RawManagedObjectMetaData {
 	 * @throws Exception
 	 *             If fails to create meta-data.
 	 */
+	@SuppressWarnings("unchecked")
 	public static RawManagedObjectMetaData createRawManagedObjectMetaData(
 			ManagedObjectSourceConfiguration mosConfig,
 			ResourceLocator resourceLocator,
@@ -79,8 +80,8 @@ public class RawManagedObjectMetaData {
 		// Create the instance of the managed object source
 		ManagedObjectSource<?, ?> managedObjectSource;
 		try {
-			managedObjectSource = mosConfig.getManagedObjectSourceClass()
-					.newInstance();
+			managedObjectSource = (ManagedObjectSource<?, ?>) mosConfig
+					.getManagedObjectSourceClass().newInstance();
 		} catch (InstantiationException ex) {
 			throw new ConfigurationException(ex.getClass().getName() + ": "
 					+ ex.getMessage());
@@ -90,10 +91,10 @@ public class RawManagedObjectMetaData {
 		}
 
 		// Obtain the managed object builder
-		ManagedObjectBuilder managedObjectBuilder = (ManagedObjectBuilder) mosConfig;
+		ManagedObjectBuilder<?> managedObjectBuilder = (ManagedObjectBuilder<?>) mosConfig;
 
 		// Create the context for the Managed Object Source
-		ManagedObjectSourceContextImpl context = new ManagedObjectSourceContextImpl(
+		ManagedObjectSourceContextImpl<?> context = new ManagedObjectSourceContextImpl(
 				managedObjectName, mosConfig.getProperties(), resourceLocator,
 				managedObjectBuilder, officeBuilder, officeFrame);
 
@@ -126,7 +127,7 @@ public class RawManagedObjectMetaData {
 	/**
 	 * {@link ManagedObjectSourceConfiguration}.
 	 */
-	private final ManagedObjectSourceConfiguration mosConfig;
+	private final ManagedObjectSourceConfiguration<?, ?> mosConfig;
 
 	/**
 	 * {@link ManagedObjectSource}.
@@ -186,7 +187,7 @@ public class RawManagedObjectMetaData {
 	 *            {@link RawAssetManagerRegistry}.
 	 */
 	private RawManagedObjectMetaData(String managedObjectName,
-			ManagedObjectSourceConfiguration mosConfig,
+			ManagedObjectSourceConfiguration<?, ?> mosConfig,
 			ManagedObjectSource<?, ?> managedObjectSource,
 			AssetManager sourcingManager, long timeout,
 			ManagedObjectPool managedObjectPool, String recycleWorkName,
@@ -269,7 +270,7 @@ public class RawManagedObjectMetaData {
 	 * @return {@link ManagedObjectSourceConfiguration} for this
 	 *         {@link RawManagedObjectMetaData}.
 	 */
-	public ManagedObjectSourceConfiguration getManagedObjectSourceConfiguration() {
+	public ManagedObjectSourceConfiguration<?, ?> getManagedObjectSourceConfiguration() {
 		return this.mosConfig;
 	}
 

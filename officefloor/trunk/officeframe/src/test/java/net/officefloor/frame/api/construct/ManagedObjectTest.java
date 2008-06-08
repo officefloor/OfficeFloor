@@ -58,10 +58,9 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		final String MANAGING_OFFICE = "MANAGING_OFFICE";
 
 		// Create and register the managed object source
-		ManagedObjectBuilder managedObjectBuilder = OfficeFrame.getInstance()
-				.getBuilderFactory().createManagedObjectBuilder();
-		managedObjectBuilder
-				.setManagedObjectSourceClass(TestManagedObjectSource.class);
+		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame.getInstance()
+				.getBuilderFactory().createManagedObjectBuilder(
+						TestManagedObjectSource.class);
 		managedObjectBuilder.setManagingOffice(MANAGING_OFFICE);
 		this.getOfficeFloorBuilder().addManagedObject("MO",
 				managedObjectBuilder);

@@ -332,19 +332,14 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 */
-	@SuppressWarnings("unchecked")
-	protected ManagedObjectBuilder constructManagedObject(
-			String managedObjectName,
-			Class<? extends ManagedObjectSource> managedObjectSourceClass,
+	protected <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> constructManagedObject(
+			String managedObjectName, Class<MS> managedObjectSourceClass,
 			String managingOffice) throws BuildException {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder managedObjectBuilder = OfficeFrame.getInstance()
-				.getBuilderFactory().createManagedObjectBuilder();
-
-		// Register the Managed Object Source class
-		managedObjectBuilder
-				.setManagedObjectSourceClass(managedObjectSourceClass);
+		ManagedObjectBuilder<H> managedObjectBuilder = OfficeFrame
+				.getInstance().getBuilderFactory().createManagedObjectBuilder(
+						managedObjectSourceClass);
 
 		// Flag managing office
 		managedObjectBuilder.setManagingOffice(managingOffice);
@@ -365,21 +360,19 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/**
-	 * Facade method to register a
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Facade method to register a {@link ManagedObject}.
 	 */
-	protected void constructManagedObject(String managedObjectName,
-			ManagedObjectSourceMetaData<?, ?> metaData,
+	protected <D extends Enum<D>, H extends Enum<H>> ManagedObjectBuilder<H> constructManagedObject(
+			String managedObjectName,
+			ManagedObjectSourceMetaData<D, H> metaData,
 			ManagedObject managedObject, String managingOffice)
 			throws BuildException {
 
-		// Create the Managed Object Builder
-		ManagedObjectBuilder managedObjectBuilder = OfficeFrame.getInstance()
-				.getBuilderFactory().createManagedObjectBuilder();
-
 		// Bind Managed Object
-		MockManagedObjectSource.bindManagedObject(managedObjectBuilder,
-				managedObjectName, managedObject, metaData);
+		ManagedObjectBuilder<H> managedObjectBuilder = MockManagedObjectSource
+				.bindManagedObject(OfficeFrame.getInstance()
+						.getBuilderFactory(), managedObjectName, managedObject,
+						metaData);
 
 		// Flag managing office
 		managedObjectBuilder.setManagingOffice(managingOffice);
@@ -394,6 +387,9 @@ public abstract class AbstractOfficeConstructTestCase extends
 		// Link into the Office
 		this.officeBuilder.registerManagedObject(managedObjectName,
 				managedObjectId);
+
+		// Return the builder
+		return managedObjectBuilder;
 	}
 
 	/**
@@ -472,13 +468,11 @@ public abstract class AbstractOfficeConstructTestCase extends
 			AdministratorSourceMetaData<I, A> adminOneMetaData,
 			OfficeScope adminScope, String teamName) throws BuildException {
 
-		// Create the Administrator Builder
-		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
-				.getInstance().getBuilderFactory().createAdministratorBuilder();
-
 		// Bind the Administrator
-		MockAdministratorSource.bindAdministrator(adminBuilder, adminName,
-				adminOne, adminOneMetaData);
+		AdministratorBuilder<A> adminBuilder = MockAdministratorSource
+				.bindAdministrator(OfficeFrame.getInstance()
+						.getBuilderFactory(), adminName, adminOne,
+						adminOneMetaData);
 
 		// Configure the administrator
 		adminBuilder.setAdministratorScope(adminScope);
@@ -512,10 +506,10 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Create the Administrator Builder
 		AdministratorBuilder<A> adminBuilder = (AdministratorBuilder<A>) OfficeFrame
-				.getInstance().getBuilderFactory().createAdministratorBuilder();
+				.getInstance().getBuilderFactory().createAdministratorBuilder(
+						adminSource);
 
 		// Configure the administrator
-		adminBuilder.setAdministratorSourceClass(adminSource);
 		adminBuilder.setAdministratorScope(adminScope);
 		adminBuilder.setTeam(teamName);
 

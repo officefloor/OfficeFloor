@@ -19,8 +19,7 @@ package net.officefloor.frame.spi.administration.source;
 import java.util.Properties;
 
 /**
- * Context for initialising a
- * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
+ * Context for initialising a {@link AdministratorSource}.
  * 
  * @author Daniel
  */

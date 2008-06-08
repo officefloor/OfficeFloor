@@ -97,7 +97,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Registry of the {@link AdministratorBuilderImpl} instances by their Id.
 	 */
-	private final Map<String, AdministratorBuilderImpl<?>> administrators = new HashMap<String, AdministratorBuilderImpl<?>>();
+	private final Map<String, AdministratorBuilderImpl<?, ?, ?>> administrators = new HashMap<String, AdministratorBuilderImpl<?, ?, ?>>();
 
 	/**
 	 * List of start up {@link net.officefloor.frame.api.execute.Task} instances
@@ -220,7 +220,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 		}
 
 		// Specify the name
-		AdministratorBuilderImpl<?> impl = (AdministratorBuilderImpl<?>) builder;
+		AdministratorBuilderImpl<?, ?, ?> impl = (AdministratorBuilderImpl<?, ?, ?>) builder;
 		impl.setAdministratorName(id);
 
 		// Add
@@ -331,7 +331,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * 
 	 * @see net.officefloor.frame.internal.configuration.OfficeConfiguration#getAdministratorSourceConfiguration()
 	 */
-	public AdministratorSourceConfiguration[] getAdministratorSourceConfiguration()
+	public AdministratorSourceConfiguration<?, ?>[] getAdministratorSourceConfiguration()
 			throws ConfigurationException {
 		return this.administrators.values().toArray(
 				new AdministratorSourceConfiguration[0]);

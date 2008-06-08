@@ -16,17 +16,17 @@
  */
 package net.officefloor.frame.spi.administration;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Administrates {@link net.officefloor.frame.spi.managedobject.ManagedObject}
- * instances.
+ * Administrates {@link ManagedObject} instances.
  * 
  * @author Daniel
  */
 public interface Administrator<I extends Object, A extends Enum<A>> {
 
 	/**
-	 * {@link Duty} to be undertaken on the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} extension
+	 * {@link Duty} to be undertaken on the {@link ManagedObject} extension
 	 * interfaces.
 	 * 
 	 * @param key

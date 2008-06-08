@@ -38,7 +38,7 @@ public interface OfficeFloorConfiguration {
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	ManagedObjectSourceConfiguration[] getManagedObjectSourceConfiguration()
+	ManagedObjectSourceConfiguration<?, ?>[] getManagedObjectSourceConfiguration()
 			throws ConfigurationException;
 
 	/**

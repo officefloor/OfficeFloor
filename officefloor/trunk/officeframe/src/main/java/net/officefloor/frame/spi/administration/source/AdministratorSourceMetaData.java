@@ -16,31 +16,29 @@
  */
 package net.officefloor.frame.spi.administration.source;
 
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Meta-data of the
- * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
+ * Meta-data of the {@link AdministratorSource}.
  * 
  * @author Daniel
  */
 public interface AdministratorSourceMetaData<I extends Object, A extends Enum<A>> {
 
 	/**
-	 * Obtains the {@link Class} that the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} must
-	 * provide to be administrated by this.
+	 * Obtains the {@link Class} that the {@link ManagedObject} must provide to
+	 * be administrated by this.
 	 * 
-	 * @return Extension interface for the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * @return Extension interface for the {@link ManagedObject}.
 	 */
 	Class<I> getExtensionInterface();
 
 	/**
 	 * Obtains the {@link Enum} specifying the duties that this
-	 * {@link net.officefloor.frame.spi.administration.Administrator} may
-	 * undertake.
+	 * {@link Administrator} may undertake.
 	 * 
-	 * @return {@link Enum} specifying the duties of this
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}
+	 * @return {@link Enum} specifying the duties of this {@link Administrator}.
 	 */
 	Class<A> getAministratorDutyKeys();
 

@@ -40,8 +40,13 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
  * 
  * @author Daniel
  */
-public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
-		ManagedObjectSourceConfiguration {
+public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>>
+		implements ManagedObjectBuilder<H>, ManagedObjectSourceConfiguration<H, MS> {
+
+	/**
+	 * {@link Class} of the {@link ManagedObjectSource}.
+	 */
+	private final Class<MS> managedObjectSourceClass;
 
 	/**
 	 * Name of {@link ManagedObject}.
@@ -52,12 +57,6 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	 * Name of {@link Office} managing this {@link ManagedObject}.
 	 */
 	private String managingOfficeName;
-
-	/**
-	 * {@link Class} of the {@link ManagedObjectSource}.
-	 */
-	@SuppressWarnings("unchecked")
-	private Class managedObjectSourceClass;
 
 	/**
 	 * {@link Properties} for the {@link ManagedObjectSource}.
@@ -82,7 +81,18 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	/**
 	 * {@link ManagedObjectHandlerBuilder} implementation.
 	 */
-	private ManagedObjectHandlerBuilderImpl<?> handlersBuilder = null;
+	private ManagedObjectHandlerBuilderImpl handlersBuilder = null;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param managedObjectSourceClass
+	 *            {@link Class} of the {@link ManagedObjectSource}.
+	 */
+	public ManagedObjectBuilderImpl(
+			Class<MS> managedObjectSourceClass) {
+		this.managedObjectSourceClass = managedObjectSourceClass;
+	}
 
 	/**
 	 * Specifies the name for this {@link ManagedObject}.
@@ -99,17 +109,6 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	 * ManagedObjectBuilder
 	 * ====================================================================
 	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.construct.managedobject.ManagedObjectMetaData#setManagedObjectSourceClass(java.lang.Class)
-	 */
-	@SuppressWarnings("unchecked")
-	public <S extends ManagedObjectSource> void setManagedObjectSourceClass(
-			Class<S> managedObjectSourceClass) {
-		this.managedObjectSourceClass = managedObjectSourceClass;
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -153,15 +152,13 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	 * 
 	 * @see net.officefloor.frame.api.build.ManagedObjectBuilder#getManagedObjectHandlerBuilder(java.lang.Class)
 	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
+	public ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
 			Class<H> handlerKeys) throws BuildException {
 
 		// Ensure managed object handler builder available and correct
 		if (this.handlersBuilder == null) {
 			// Create the managed object handler builder
-			this.handlersBuilder = new ManagedObjectHandlerBuilderImpl<H>(
+			this.handlersBuilder = new ManagedObjectHandlerBuilderImpl(
 					handlerKeys);
 		} else {
 			// Ensure correct managed object handler provided
@@ -176,7 +173,7 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 		}
 
 		// Return the builder
-		return (ManagedObjectHandlerBuilder<H>) this.handlersBuilder;
+		return this.handlersBuilder;
 	}
 
 	/*
@@ -208,8 +205,7 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	 * 
 	 * @see net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration#getManagedObjectSourceClass()
 	 */
-	@SuppressWarnings("unchecked")
-	public <MS extends ManagedObjectSource> Class<MS> getManagedObjectSourceClass()
+	public Class<MS> getManagedObjectSourceClass()
 			throws ConfigurationException {
 		return this.managedObjectSourceClass;
 	}
@@ -256,8 +252,8 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	 * @see net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration#getHandlerBuilder(java.lang.Class)
 	 */
 	@Override
-	public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
-			Class<H> handlerKeys) throws ConfigurationException {
+	public ManagedObjectHandlerBuilder<H> getHandlerBuilder(Class<H> handlerKeys)
+			throws ConfigurationException {
 		try {
 			return this.getManagedObjectHandlerBuilder(handlerKeys);
 		} catch (BuildException ex) {
@@ -280,8 +276,8 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 	/**
 	 * {@link ManagedObjectHandlerBuilder} implementation.
 	 */
-	protected class ManagedObjectHandlerBuilderImpl<H extends Enum<H>>
-			implements ManagedObjectHandlerBuilder<H> {
+	protected class ManagedObjectHandlerBuilderImpl implements
+			ManagedObjectHandlerBuilder<H> {
 
 		/**
 		 * {@link Enum} specifying the handler keys.
@@ -357,8 +353,7 @@ public class ManagedObjectBuilderImpl implements ManagedObjectBuilder,
 				throws BuildException {
 
 			// Obtain the handler builder
-			HandlerBuilderImpl handlerBuilder = this.handlers
-					.get(handlerKey);
+			HandlerBuilderImpl handlerBuilder = this.handlers.get(handlerKey);
 			if (handlerBuilder == null) {
 				// Create the handler builder
 				handlerBuilder = new HandlerBuilderImpl<H, Indexed>(handlerKey,

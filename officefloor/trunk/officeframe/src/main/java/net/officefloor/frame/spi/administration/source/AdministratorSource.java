@@ -21,11 +21,9 @@ import net.officefloor.frame.spi.administration.DutyContext;
 
 /**
  * <p>
- * Source to obtain a particular type of
- * {@link net.officefloor.frame.spi.administration.Administrator}.
+ * Source to obtain a particular type of {@link Administrator}.
  * <p>
- * Implemented by the
- * {@link net.officefloor.frame.spi.administration.Administrator} provider.
+ * Implemented by the {@link Administrator} provider.
  * 
  * @author Daniel
  */

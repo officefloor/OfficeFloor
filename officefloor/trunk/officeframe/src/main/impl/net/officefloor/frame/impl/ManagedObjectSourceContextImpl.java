@@ -44,12 +44,11 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext}.
+ * Implementation of the {@link ManagedObjectSourceContext}.
  * 
  * @author Daniel
  */
-public class ManagedObjectSourceContextImpl implements
+public class ManagedObjectSourceContextImpl<H extends Enum<H>> implements
 		ManagedObjectSourceContext {
 
 	/**
@@ -70,7 +69,7 @@ public class ManagedObjectSourceContextImpl implements
 	/**
 	 * {@link ManagedObjectBuilder}.
 	 */
-	protected ManagedObjectBuilder managedObjectBuilder;
+	protected ManagedObjectBuilder<H> managedObjectBuilder;
 
 	/**
 	 * {@link OfficeBuilder} for the office using the
@@ -107,7 +106,7 @@ public class ManagedObjectSourceContextImpl implements
 	 */
 	public ManagedObjectSourceContextImpl(String managedObjectName,
 			Properties properties, ResourceLocator resourceLocator,
-			ManagedObjectBuilder managedObjectBuilder,
+			ManagedObjectBuilder<H> managedObjectBuilder,
 			OfficeBuilder officeBuilder, OfficeFrame officeFrame) {
 		this.managedObjectName = managedObjectName;
 		this.properties = properties;
@@ -211,12 +210,16 @@ public class ManagedObjectSourceContextImpl implements
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext#getHandlerBuilder(java.lang.Class)
 	 */
 	@Override
-	public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
-			Class<H> handlerKeys) throws BuildException {
+	@SuppressWarnings("unchecked")
+	public <HT extends Enum<HT>> ManagedObjectHandlerBuilder<HT> getHandlerBuilder(
+			Class<HT> handlerKeys) throws BuildException {
 		// Return the wrapped managed object hander builder
-		return new ManagedObjectHandlerBuilderWrapper<H>(
-				this.managedObjectBuilder
-						.getManagedObjectHandlerBuilder(handlerKeys));
+		Class<H> keys = (Class<H>) handlerKeys;
+		ManagedObjectHandlerBuilder<H> handlerBuilder = this.managedObjectBuilder
+				.getManagedObjectHandlerBuilder(keys);
+		ManagedObjectHandlerBuilderWrapper wrapper = new ManagedObjectHandlerBuilderWrapper(
+				handlerBuilder);
+		return (ManagedObjectHandlerBuilder<HT>) wrapper;
 	}
 
 	/*
@@ -296,8 +299,8 @@ public class ManagedObjectSourceContextImpl implements
 	 * Wrapper for a delegate {@link ManagedObjectHandlerBuilder} that applies
 	 * the {@link ManagedObjectSource} instance's namespace.
 	 */
-	protected class ManagedObjectHandlerBuilderWrapper<H extends Enum<H>>
-			implements ManagedObjectHandlerBuilder<H> {
+	protected class ManagedObjectHandlerBuilderWrapper implements
+			ManagedObjectHandlerBuilder<H> {
 
 		/**
 		 * Delegate {@link ManagedObjectHandlerBuilder}.

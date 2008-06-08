@@ -123,7 +123,7 @@ public interface OfficeConfiguration {
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
-	AdministratorSourceConfiguration[] getAdministratorSourceConfiguration()
+	AdministratorSourceConfiguration<?, ?>[] getAdministratorSourceConfiguration()
 			throws ConfigurationException;
 
 	/**

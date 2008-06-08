@@ -38,8 +38,14 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public class AdministratorBuilderImpl<A extends Enum<A>> implements
-		AdministratorBuilder<A>, AdministratorSourceConfiguration {
+public class AdministratorBuilderImpl<I, A extends Enum<A>, AS extends AdministratorSource<I, A>>
+		implements AdministratorBuilder<A>,
+		AdministratorSourceConfiguration<A, AS> {
+
+	/**
+	 * {@link Class} of the {@link AdministratorSource}.
+	 */
+	protected Class<AS> administratorSourceClass;
 
 	/**
 	 * Registry of {@link DutyBuilder} instances.
@@ -57,12 +63,6 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	protected String administratorName;
 
 	/**
-	 * {@link Class} of the {@link AdministratorSource}.
-	 */
-	@SuppressWarnings("unchecked")
-	protected Class administratorSourceClass;
-
-	/**
 	 * Scope of the {@link Administrator}.
 	 */
 	protected OfficeScope administratorScope = OfficeScope.WORK;
@@ -72,6 +72,16 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 * this {@link Administrator}.
 	 */
 	protected String teamName;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param administratorSourceClass
+	 *            {@link Class} of the {@link AdministratorSource}.
+	 */
+	public AdministratorBuilderImpl(Class<AS> administratorSourceClass) {
+		this.administratorSourceClass = administratorSourceClass;
+	}
 
 	/**
 	 * Specifies the name for the {@link Administrator}.
@@ -92,18 +102,9 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.build.TaskAdministratorBuilder#setTaskAdministratorSourceClass(java.lang.Class)
-	 */
-	public <S extends AdministratorSource<?, ?>> void setAdministratorSourceClass(
-			Class<S> administratorSourceClass) throws BuildException {
-		this.administratorSourceClass = administratorSourceClass;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see net.officefloor.frame.api.build.AdministratorBuilder#setAdministratorScope(net.officefloor.frame.api.build.ManagedObjectScope)
 	 */
+	@Override
 	public void setAdministratorScope(OfficeScope scope) {
 		this.administratorScope = scope;
 	}
@@ -111,9 +112,10 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.build.TaskAdministratorBuilder#addProperty(java.lang.String,
+	 * @see net.officefloor.frame.api.build.AdministratorBuilder#addProperty(java.lang.String,
 	 *      java.lang.String)
 	 */
+	@Override
 	public void addProperty(String name, String value) throws BuildException {
 		this.properties.setProperty(name, value);
 	}
@@ -134,6 +136,7 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 * @see net.officefloor.frame.api.build.AdministratorBuilder#registerDutyBuilder(A,
 	 *      java.lang.Class)
 	 */
+	@Override
 	public <F extends Enum<F>> DutyBuilder<F> registerDutyBuilder(A dutyKey,
 			Class<F> flowListingEnum) throws BuildException {
 
@@ -152,6 +155,7 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 * 
 	 * @see net.officefloor.frame.api.build.AdministratorBuilder#registerDutyBuilder(A)
 	 */
+	@Override
 	public DutyBuilder<Indexed> registerDutyBuilder(A dutyKey)
 			throws BuildException {
 
@@ -177,6 +181,7 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration#getAdministratorName()
 	 */
+	@Override
 	public String getAdministratorName() {
 		return this.administratorName;
 	}
@@ -184,10 +189,10 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.configuration.TaskAdministratorSourceConfiguration#getManagedObjectSourceClass()
+	 * @see net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration#getAdministratorSourceClass()
 	 */
-	@SuppressWarnings("unchecked")
-	public <TS extends AdministratorSource<?, ?>> Class<TS> getAdministratorSourceClass()
+	@Override
+	public Class<AS> getAdministratorSourceClass()
 			throws ConfigurationException {
 		return this.administratorSourceClass;
 	}
@@ -195,8 +200,9 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.configuration.TaskAdministratorSourceConfiguration#getProperties()
+	 * @see net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration#getProperties()
 	 */
+	@Override
 	public Properties getProperties() {
 		return this.properties;
 	}
@@ -206,6 +212,7 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration#getAdministratorScope()
 	 */
+	@Override
 	public OfficeScope getAdministratorScope() {
 		return this.administratorScope;
 	}
@@ -225,7 +232,9 @@ public class AdministratorBuilderImpl<A extends Enum<A>> implements
 	 * 
 	 * @see net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration#getDutyConfiguration()
 	 */
-	public DutyConfiguration<?>[] getDutyConfiguration() {
+	@Override
+	@SuppressWarnings("unchecked")
+	public DutyConfiguration<A>[] getDutyConfiguration() {
 		return this.duties.values().toArray(new DutyConfiguration[0]);
 	}
 

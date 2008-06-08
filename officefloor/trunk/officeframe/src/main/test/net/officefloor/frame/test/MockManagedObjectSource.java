@@ -19,7 +19,9 @@ package net.officefloor.frame.test;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -31,9 +33,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 
 /**
- * Mock implementation of the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
- * for testing.
+ * Mock implementation of the {@link ManagedObjectSource} for testing.
  * 
  * @author Daniel
  */
@@ -53,7 +53,8 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	 * Convenience method to bind the {@link ManagedObject} instance to the
 	 * {@link ManagedObjectBuilder}.
 	 * 
-	 * @param metaData
+	 * @param builderFactory
+	 *            {@link BuilderFactory} to obtain the
 	 *            {@link ManagedObjectBuilder} to bind the {@link ManagedObject}.
 	 * @param name
 	 *            Name to bind under.
@@ -65,16 +66,19 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	 *             If bind fails.
 	 */
 	@SuppressWarnings("unchecked")
-	public static void bindManagedObject(ManagedObjectBuilder metaData,
-			String name, ManagedObject managedObject,
-			ManagedObjectSourceMetaData<?, ?> sourceMetaData)
+	public static <H extends Enum<H>> ManagedObjectBuilder<H> bindManagedObject(
+			BuilderFactory builderFactory, String name,
+			ManagedObject managedObject,
+			ManagedObjectSourceMetaData<?, H> sourceMetaData)
 			throws BuildException {
 
-		// Specify the managed object source class
-		metaData.setManagedObjectSourceClass(MockManagedObjectSource.class);
+		// Create the Managed Object Builder
+		ManagedObjectBuilder<?> builder = OfficeFrame.getInstance()
+				.getBuilderFactory().createManagedObjectBuilder(
+						MockManagedObjectSource.class);
 
 		// Provide managed object link to meta-data
-		metaData.addProperty(MANAGED_OBJECT_PROPERTY, name);
+		builder.addProperty(MANAGED_OBJECT_PROPERTY, name);
 
 		// Create the Managed Object Source State
 		ManagedObjectSourceState state = new ManagedObjectSourceState();
@@ -83,6 +87,9 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 
 		// Bind the managed object in registry
 		REGISTRY.put(name, state);
+
+		// Return the builder
+		return (ManagedObjectBuilder<H>) builder;
 	}
 
 	/**

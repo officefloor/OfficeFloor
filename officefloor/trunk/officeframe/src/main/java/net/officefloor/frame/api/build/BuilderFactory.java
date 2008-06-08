@@ -17,6 +17,8 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Creates meta-data items.
@@ -53,15 +55,19 @@ public interface BuilderFactory {
 	/**
 	 * Creates the {@link ManagedObjectBuilder}.
 	 * 
+	 * @param managedObjectSourceClass
+	 *            {@link Class} of the {@link ManagedObjectSource}.
 	 * @return {@link ManagedObjectBuilder}.
 	 */
-	ManagedObjectBuilder createManagedObjectBuilder();
+	<D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> createManagedObjectBuilder(
+			Class<MS> managedObjectSourceClass);
 
 	/**
 	 * Creates the {@link AdministratorBuilder}.
 	 * 
 	 * @return {@link AdministratorBuilder}.
 	 */
-	AdministratorBuilder<?> createAdministratorBuilder();
+	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> createAdministratorBuilder(
+			Class<AS> administratorSourceClass);
 
 }
