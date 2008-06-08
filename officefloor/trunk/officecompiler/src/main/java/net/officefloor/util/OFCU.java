@@ -62,6 +62,37 @@ public class OFCU {
 	}
 
 	/**
+	 * Obtains the {@link Enum} key by name from the {@link Enum} {@link Class}.
+	 * 
+	 * @param enumClass
+	 *            {@link Enum} class.
+	 * @param enumName
+	 *            Name of {@link Enum} key.
+	 * @return {@link Enum} key or <code>null</code>.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T getEnum(Class<T> enumClass, String enumName) {
+
+		// Obtain the enumerations
+		T[] enums = enumClass.getEnumConstants();
+		if (enums == null) {
+			// Not an enumeration class
+			return null;
+		}
+
+		// Match by name
+		for (T enumObject : enums) {
+			Enum<?> enumKey = (Enum<?>) enumObject;
+			if (enumKey.name().equals(enumName)) {
+				return (T) enumKey;
+			}
+		}
+
+		// Not found
+		return null;
+	}
+
+	/**
 	 * Generates an stack trace message from the input {@link Throwable}.
 	 * 
 	 * @param ex
