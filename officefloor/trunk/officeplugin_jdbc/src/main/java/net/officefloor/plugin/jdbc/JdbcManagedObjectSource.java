@@ -16,16 +16,18 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
- * for JDBC.
+ * {@link ManagedObjectSource} for JDBC.
  * 
  * @author Daniel
  */
-public class JdbcManagedObjectSource extends AbstractManagedObjectSource {
+public class JdbcManagedObjectSource extends
+		AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * Property prefix for properties of this {@link JdbcManagedObjectSource}.
@@ -115,7 +117,8 @@ public class JdbcManagedObjectSource extends AbstractManagedObjectSource {
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
-	protected void loadMetaData(MetaDataContext context) throws Exception {
+	protected void loadMetaData(MetaDataContext<None, None> context)
+			throws Exception {
 
 		// Obtain the properties
 		this.properties = context.getManagedObjectSourceContext()
@@ -150,7 +153,7 @@ public class JdbcManagedObjectSource extends AbstractManagedObjectSource {
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)
 	 */
 	@Override
-	protected void start(StartContext startContext) throws Exception {
+	protected void start(StartContext<None> startContext) throws Exception {
 
 		// Obtain the Data Source Factory
 		DataSourceFactory sourceFactory = this
