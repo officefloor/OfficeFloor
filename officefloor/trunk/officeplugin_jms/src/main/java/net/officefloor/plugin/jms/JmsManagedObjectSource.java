@@ -8,16 +8,18 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.Session;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
- * JMS
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+ * JMS {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
-public class JmsManagedObjectSource extends AbstractManagedObjectSource {
+public class JmsManagedObjectSource extends
+		AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * Connection Factory for the JMS connection.
@@ -62,7 +64,8 @@ public class JmsManagedObjectSource extends AbstractManagedObjectSource {
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
-	protected void loadMetaData(MetaDataContext context) throws Exception {
+	protected void loadMetaData(MetaDataContext<None, None> context)
+			throws Exception {
 
 		// Specify types
 		context.setObjectClass(TextMessageProducer.class);
@@ -87,7 +90,7 @@ public class JmsManagedObjectSource extends AbstractManagedObjectSource {
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)
 	 */
 	@Override
-	protected void start(StartContext startContext) throws Exception {
+	protected void start(StartContext<None> startContext) throws Exception {
 		// Start the connection
 		this.connection = this.connectionFactory.createConnection();
 		this.connection.start();

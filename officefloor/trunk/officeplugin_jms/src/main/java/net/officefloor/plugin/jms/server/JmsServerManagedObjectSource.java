@@ -34,6 +34,7 @@ import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -54,7 +55,9 @@ import net.officefloor.plugin.jms.JmsUtil;
  * 
  * @author Daniel
  */
-public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
+public class JmsServerManagedObjectSource
+		extends
+		AbstractManagedObjectSource<None, JmsServerManagedObjectSource.JmsServerHandlersEnum>
 		implements HandlerFactory<Indexed>, Handler<Indexed>, ServerSessionPool {
 
 	/**
@@ -171,7 +174,9 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
-	protected void loadMetaData(MetaDataContext context) throws Exception {
+	protected void loadMetaData(
+			MetaDataContext<None, JmsServerHandlersEnum> context)
+			throws Exception {
 
 		// Specify object types
 		context.setManagedObjectClass(JmsServerManagedObject.class);
@@ -238,8 +243,8 @@ public class JmsServerManagedObjectSource extends AbstractManagedObjectSource
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
-	@SuppressWarnings("unchecked")
-	public void start(ManagedObjectExecuteContext context) throws Exception {
+	public void start(ManagedObjectExecuteContext<JmsServerHandlersEnum> context)
+			throws Exception {
 
 		// Obtain the handler (loads the handler context to this)
 		context.getHandler(JmsServerHandlersEnum.JMS_SERVER_HANDLER);
