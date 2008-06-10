@@ -14,46 +14,47 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.spi.managedobject.source.impl;
+package net.officefloor.frame.spi.administration.source.impl;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
+import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
 
 /**
- * Implementation of the {@link ManagedObjectSourceProperty}.
+ * {@link AdministratorSourceProperty} implementation.
  * 
  * @author Daniel
  */
-public class ManagedObjectSourcePropertyImpl implements
-		ManagedObjectSourceProperty {
+public class AdministratorSourcePropertyImpl implements
+		AdministratorSourceProperty {
 
 	/**
-	 * Name of property.
+	 * Label.
 	 */
-	protected final String name;
+	private final String label;
 
 	/**
-	 * Label of property.
+	 * Name.
 	 */
-	protected final String label;
+	private final String name;
 
 	/**
-	 * Initiate with name and label of property.
+	 * Initialise.
 	 * 
 	 * @param name
-	 *            Name of property.
+	 *            Name.
 	 * @param label
-	 *            Label of property.
+	 *            Label.
 	 */
-	public ManagedObjectSourcePropertyImpl(String name, String label) {
-		this.name = name;
+	public AdministratorSourcePropertyImpl(String name, String label) {
 		this.label = label;
+		this.name = name;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSourceProperty#getName()
+	 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceProperty#getName()
 	 */
+	@Override
 	public String getName() {
 		return this.name;
 	}
@@ -61,8 +62,9 @@ public class ManagedObjectSourcePropertyImpl implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSourceProperty#getLabel()
+	 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceProperty#getLabel()
 	 */
+	@Override
 	public String getLabel() {
 		return this.label;
 	}

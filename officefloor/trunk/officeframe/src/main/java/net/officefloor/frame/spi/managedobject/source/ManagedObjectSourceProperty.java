@@ -17,8 +17,7 @@
 package net.officefloor.frame.spi.managedobject.source;
 
 /**
- * Individual property of the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification}.
+ * Individual property of the {@link ManagedObjectSourceSpecification}.
  * 
  * @author Daniel
  */

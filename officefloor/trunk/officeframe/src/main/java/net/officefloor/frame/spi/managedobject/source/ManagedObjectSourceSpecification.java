@@ -17,15 +17,10 @@
 package net.officefloor.frame.spi.managedobject.source;
 
 /**
- * Specification of a
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}. This is
- * different to the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData} as
- * it specifies how to configure the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource} to then
- * obtain its
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData}
- * based on the configuration.
+ * Specification of a {@link ManagedObjectSource}. This is different to the
+ * {@link ManagedObjectSourceMetaData} as it specifies how to configure the
+ * {@link ManagedObjectSource} to then obtain its
+ * {@link ManagedObjectSourceMetaData} based on the configuration.
  * 
  * @author Daniel
  */

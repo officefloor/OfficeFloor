@@ -22,6 +22,7 @@ import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.api.execute.Task;
@@ -58,8 +59,8 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		final String MANAGING_OFFICE = "MANAGING_OFFICE";
 
 		// Create and register the managed object source
-		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame.getInstance()
-				.getBuilderFactory().createManagedObjectBuilder(
+		ManagedObjectBuilder<?> managedObjectBuilder = OfficeFrame
+				.getInstance().getBuilderFactory().createManagedObjectBuilder(
 						TestManagedObjectSource.class);
 		managedObjectBuilder.setManagingOffice(MANAGING_OFFICE);
 		this.getOfficeFloorBuilder().addManagedObject("MO",
@@ -80,7 +81,8 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 * Test {@link ManagedObjectSource}.
 	 */
 	public static class TestManagedObjectSource extends
-			AbstractManagedObjectSource implements ManagedObject {
+			AbstractManagedObjectSource<None, HandlerKey> implements
+			ManagedObject {
 
 		/**
 		 * Initiate.
@@ -106,7 +108,8 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 		 */
 		@Override
-		protected void loadMetaData(MetaDataContext context) throws Exception {
+		protected void loadMetaData(MetaDataContext<None, HandlerKey> context)
+				throws Exception {
 			// Load the handlers
 			HandlerLoader<HandlerKey> handlerLoader = context
 					.getHandlerLoader(HandlerKey.class);
@@ -127,7 +130,8 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)
 		 */
 		@Override
-		protected void start(StartContext startContext) throws Exception {
+		protected void start(StartContext<HandlerKey> startContext)
+				throws Exception {
 			// Specify the handler
 			handler = (TestHandler) startContext.getContext(HandlerKey.class)
 					.getHandler(HandlerKey.HANDLER);

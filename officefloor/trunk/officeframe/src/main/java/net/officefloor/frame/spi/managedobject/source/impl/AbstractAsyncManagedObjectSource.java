@@ -39,9 +39,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
  * 
  * @author Daniel
  */
-@SuppressWarnings("unchecked")
-public abstract class AbstractAsyncManagedObjectSource implements
-		ManagedObjectSource {
+public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
+		implements ManagedObjectSource<D, H> {
 
 	/*
 	 * ================================================================
@@ -108,7 +107,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 	/**
 	 * Specification for this {@link ManagedObjectSource}.
 	 */
-	private static class Specification implements SpecificationContext,
+	private class Specification implements SpecificationContext,
 			ManagedObjectSourceSpecification {
 
 		/**
@@ -200,13 +199,13 @@ public abstract class AbstractAsyncManagedObjectSource implements
 	 * @throws Exception
 	 *             If fails to load the meta-data.
 	 */
-	protected abstract void loadMetaData(MetaDataContext context)
+	protected abstract void loadMetaData(MetaDataContext<D, H> context)
 			throws Exception;
 
 	/**
 	 * Context for the {@link ManagedObjectSource#getMetaData()}.
 	 */
-	public static interface MetaDataContext {
+	public static interface MetaDataContext<D extends Enum<D>, H extends Enum<H>> {
 
 		/**
 		 * Obtains the {@link ManagedObjectSourceContext}.
@@ -243,8 +242,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 *            {@link Enum} specifying the dependency keys.
 		 * @return {@link DependencyLoader}.
 		 */
-		<D extends Enum<D>> DependencyLoader<D> getDependencyLoader(
-				Class<D> keys);
+		DependencyLoader<D> getDependencyLoader(Class<D> keys);
 
 		/**
 		 * <p>
@@ -256,7 +254,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 *            {@link Enum} specifying the handler keys.
 		 * @return {@link HandlerLoader}.
 		 */
-		<H extends Enum<H>> HandlerLoader<H> getHandlerLoader(Class<H> keys);
+		HandlerLoader<H> getHandlerLoader(Class<H> keys);
 
 		/**
 		 * Adds a {@link ManagedObjectExtensionInterfaceMetaData} instance.
@@ -299,14 +297,15 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 * @param type
 		 *            Type mapped to the handler.
 		 */
+		@SuppressWarnings("unchecked")
 		void mapHandlerType(H key, Class<? extends Handler> type);
 	}
 
 	/**
 	 * Meta-data for the {@link ManagedObjectSource}.
 	 */
-	private static class MetaData<D extends Enum<D>, H extends Enum<H>>
-			implements MetaDataContext, DependencyLoader<D>, HandlerLoader<H>,
+	private class MetaData implements MetaDataContext<D, H>,
+			DependencyLoader<D>, HandlerLoader<H>,
 			ManagedObjectSourceMetaData<D, H> {
 
 		/**
@@ -343,6 +342,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		/**
 		 * Handler for each handler key.
 		 */
+		@SuppressWarnings("unchecked")
 		private Map<H, Class<? extends Handler>> handlerTypes = null;
 
 		/**
@@ -403,15 +403,14 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#getDependencyLoader(java.lang.Class)
 		 */
 		@Override
-		public <T extends Enum<T>> DependencyLoader<T> getDependencyLoader(
-				Class<T> keys) {
+		public DependencyLoader<D> getDependencyLoader(Class<D> keys) {
 
 			// Specify details
-			this.dependencyKeys = (Class<D>) keys;
+			this.dependencyKeys = keys;
 			this.dependencyTypes = new EnumMap<D, Class<?>>(this.dependencyKeys);
 
 			// Return this to allow loading dependencies
-			return (DependencyLoader<T>) this;
+			return this;
 		}
 
 		/*
@@ -420,16 +419,16 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#getHandlerLoader(java.lang.Class)
 		 */
 		@Override
-		public <T extends Enum<T>> HandlerLoader<T> getHandlerLoader(
-				Class<T> keys) {
+		@SuppressWarnings("unchecked")
+		public HandlerLoader<H> getHandlerLoader(Class<H> keys) {
 
 			// Specify details
-			this.handlerKeys = (Class<H>) keys;
+			this.handlerKeys = keys;
 			this.handlerTypes = new EnumMap<H, Class<? extends Handler>>(
 					this.handlerKeys);
 
 			// Return this to allow loading handlers
-			return (HandlerLoader<T>) this;
+			return this;
 		}
 
 		/*
@@ -477,6 +476,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 *      java.lang.Class)
 		 */
 		@Override
+		@SuppressWarnings("unchecked")
 		public void mapHandlerType(H key, Class<? extends Handler> type) {
 			this.handlerTypes.put(key, type);
 		}
@@ -544,6 +544,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(java.lang.Enum)
 		 */
 		@Override
+		@SuppressWarnings("unchecked")
 		public Class<? extends Handler> getHandlerType(H key) {
 			return this.handlerTypes.get(key);
 		}
@@ -567,7 +568,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
 	 */
 	@Override
-	public ManagedObjectSourceMetaData getMetaData() {
+	public ManagedObjectSourceMetaData<D, H> getMetaData() {
 		return this.metaData;
 	}
 
@@ -577,12 +578,12 @@ public abstract class AbstractAsyncManagedObjectSource implements
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
 	@Override
-	public void start(final ManagedObjectExecuteContext context)
+	public void start(final ManagedObjectExecuteContext<H> context)
 			throws Exception {
 		// Invoke start
-		this.start(new StartContext() {
+		this.start(new StartContext<H>() {
 			@Override
-			public <H extends Enum<H>> ManagedObjectExecuteContext<H> getContext(
+			public ManagedObjectExecuteContext<H> getContext(
 					Class<H> handlerKeys) {
 
 				// Ensure the same handler keys
@@ -596,7 +597,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 				}
 
 				// Return the execute context
-				return (ManagedObjectExecuteContext<H>) context;
+				return context;
 			}
 		});
 	}
@@ -609,7 +610,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 	 * @throws Exception
 	 *             If fails to start.
 	 */
-	protected void start(StartContext startContext) throws Exception {
+	protected void start(StartContext<H> startContext) throws Exception {
 		// Do nothing by default
 	}
 
@@ -617,7 +618,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 	 * Context for
 	 * {@link AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)}.
 	 */
-	public static interface StartContext {
+	public static interface StartContext<H extends Enum<H>> {
 
 		/**
 		 * Obtains the {@link ManagedObjectExecuteContext}.
@@ -627,8 +628,7 @@ public abstract class AbstractAsyncManagedObjectSource implements
 		 *            match {@link ManagedObjectSourceMetaData#getHandlerKeys()}.
 		 * @return {@link ManagedObjectExecuteContext}.
 		 */
-		<H extends Enum<H>> ManagedObjectExecuteContext<H> getContext(
-				Class<H> handlerKeys);
+		ManagedObjectExecuteContext<H> getContext(Class<H> handlerKeys);
 	}
 
 	/**
