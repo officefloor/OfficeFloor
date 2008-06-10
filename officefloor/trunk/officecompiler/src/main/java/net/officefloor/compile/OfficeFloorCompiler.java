@@ -144,7 +144,7 @@ public class OfficeFloorCompiler {
 			workEntry.build();
 		}
 		for (OfficeEntry officeEntry : officeFloorEntry.getOfficeEntries()) {
-			officeEntry.build();
+			officeEntry.build(builderContext);
 		}
 		for (ManagedObjectSourceEntry mosEntry : officeFloorEntry
 				.getManagedObjectSourceEntries()) {

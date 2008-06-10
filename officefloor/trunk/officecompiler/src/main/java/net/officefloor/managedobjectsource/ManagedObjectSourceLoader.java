@@ -292,7 +292,7 @@ public class ManagedObjectSourceLoader {
 	/**
 	 * {@link OfficeFrame} for loading the {@link ManagedObjectSourceModel}.
 	 */
-	protected class LoaderOfficeFrame extends OfficeFrame {
+	private class LoaderOfficeFrame extends OfficeFrame {
 
 		/**
 		 * {@link BuilderFactory}.

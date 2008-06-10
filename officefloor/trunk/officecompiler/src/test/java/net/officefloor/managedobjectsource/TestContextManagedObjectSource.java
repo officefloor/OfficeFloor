@@ -22,6 +22,7 @@ import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -38,7 +39,9 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel
  */
-public class TestContextManagedObjectSource extends AbstractManagedObjectSource {
+public class TestContextManagedObjectSource
+		extends
+		AbstractManagedObjectSource<None, TestContextManagedObjectSource.HandlerKey> {
 
 	/*
 	 * (non-Javadoc)
@@ -56,7 +59,8 @@ public class TestContextManagedObjectSource extends AbstractManagedObjectSource 
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
-	protected void loadMetaData(MetaDataContext context) throws Exception {
+	protected void loadMetaData(MetaDataContext<None, HandlerKey> context)
+			throws Exception {
 
 		// Obtain the managed object source context for additional configuration
 		ManagedObjectSourceContext sourceContext = context
