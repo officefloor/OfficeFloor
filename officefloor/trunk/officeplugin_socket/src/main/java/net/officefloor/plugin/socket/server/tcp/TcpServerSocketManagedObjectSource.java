@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.tcp;
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -52,7 +53,8 @@ public class TcpServerSocketManagedObjectSource extends
 	 * @see net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource#registerServerSocketHandler(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
-	protected void registerServerSocketHandler(MetaDataContext context)
+	protected void registerServerSocketHandler(
+			MetaDataContext<None, ServerSocketHandlerEnum> context)
 			throws Exception {
 		ManagedObjectSourceContext mosContext = context
 				.getManagedObjectSourceContext();
