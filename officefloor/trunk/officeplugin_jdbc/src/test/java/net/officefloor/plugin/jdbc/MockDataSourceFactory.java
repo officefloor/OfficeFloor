@@ -23,9 +23,10 @@ import javax.sql.XADataSource;
 
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Mock {@link net.officefloor.plugin.jdbc.DataSourceFactory} for testing.
+ * Mock {@link DataSourceFactory} for testing.
  * 
  * @author Daniel
  */
@@ -43,12 +44,12 @@ public class MockDataSourceFactory implements DataSourceFactory {
 	 *            {@link ConnectionPoolDataSource} for use in testing.
 	 * @param builder
 	 *            {@link ManagedObjectBuilder} for the
-	 *            {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+	 *            {@link ManagedObjectSource}.
 	 * @throws BuildException
 	 *             If fails.
 	 */
 	public static void bind(ConnectionPoolDataSource dataSource,
-			ManagedObjectBuilder builder) throws BuildException {
+			ManagedObjectBuilder<?> builder) throws BuildException {
 		// Bind the data source
 		connectionPoolDataSource = dataSource;
 
