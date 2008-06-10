@@ -107,6 +107,8 @@
 			<attributes>
 				<attribute method="getId" attribute="id" />
 				<attribute method="getSource" attribute="source" />
+				<attribute method="getDutyKeyClass"
+					attribute="duty-keys" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>

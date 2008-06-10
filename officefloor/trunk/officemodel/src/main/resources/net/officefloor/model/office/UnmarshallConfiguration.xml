@@ -54,6 +54,7 @@
 		class="net.officefloor.model.office.AdministratorModel">
 		<value method="setId" node="administrator@id" />
 		<value method="setSource" node="administrator@source" />
+		<value method="setDutyKeyClass" node="administrator@duty-keys" />
 		<value method="setX" node="administrator@x" />
 		<value method="setY" node="administrator@y" />
 		<object method="addProperty" node="property"
