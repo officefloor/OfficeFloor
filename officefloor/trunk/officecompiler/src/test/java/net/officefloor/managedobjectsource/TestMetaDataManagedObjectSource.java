@@ -30,8 +30,9 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * 
  * @author Daniel
  */
-public class TestMetaDataManagedObjectSource extends
-		AbstractManagedObjectSource {
+public class TestMetaDataManagedObjectSource
+		extends
+		AbstractManagedObjectSource<TestMetaDataManagedObjectSource.DependencyKey, TestMetaDataManagedObjectSource.HandlerKey> {
 
 	/*
 	 * (non-Javadoc)
@@ -49,7 +50,9 @@ public class TestMetaDataManagedObjectSource extends
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
-	protected void loadMetaData(MetaDataContext context) throws Exception {
+	protected void loadMetaData(
+			MetaDataContext<DependencyKey, HandlerKey> context)
+			throws Exception {
 
 		// Load types
 		context.setObjectClass(Object.class);

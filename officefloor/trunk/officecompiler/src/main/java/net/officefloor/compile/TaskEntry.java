@@ -27,8 +27,10 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
@@ -45,7 +47,10 @@ import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
+import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalTeamModel;
+import net.officefloor.model.office.FlowItemToPostAdministratorDutyModel;
+import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
 import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
@@ -163,14 +168,16 @@ public class TaskEntry<W extends Work> extends
 	}
 
 	/**
-	 * Obtains the {@link ExternalTeamModel} of the {@link OfficeModel} for this
-	 * {@link TaskEntry}.
+	 * Obtains the {@link net.officefloor.model.office.FlowItemModel} of the
+	 * {@link Office} corresponding to this {@link TaskEntry}.
 	 * 
-	 * @return {@link ExternalTeamModel} for this {@link TaskEntry}.
+	 * @return {@link net.officefloor.model.office.FlowItemModel}.
 	 * @throws Exception
-	 *             If fail to find {@link ExternalTeamModel}.
+	 *             If fails to find
+	 *             {@link net.officefloor.model.office.FlowItemModel}.
 	 */
-	public ExternalTeamModel getOfficeTeamModel() throws Exception {
+	public net.officefloor.model.office.FlowItemModel getOfficeFlowItem()
+			throws Exception {
 
 		// Create the hierarchy of desk/room names
 		Deque<String> hierarchy = new LinkedList<String>();
@@ -250,6 +257,24 @@ public class TaskEntry<W extends Work> extends
 					+ officeEntry.getId());
 		}
 
+		// Return the office flow item
+		return officeFlowItem;
+	}
+
+	/**
+	 * Obtains the {@link ExternalTeamModel} of the {@link OfficeModel} for this
+	 * {@link TaskEntry}.
+	 * 
+	 * @return {@link ExternalTeamModel} for this {@link TaskEntry}.
+	 * @throws Exception
+	 *             If fail to find {@link ExternalTeamModel}.
+	 */
+	public ExternalTeamModel getOfficeTeamModel() throws Exception {
+
+		// Obtains the office flow item
+		net.officefloor.model.office.FlowItemModel officeFlowItem = this
+				.getOfficeFlowItem();
+
 		// Obtain the external office team
 		ExternalTeamModel officeTeam = OFCU.get(officeFlowItem.getTeam(),
 				"No team for ${0}", officeFlowItem.getTaskName()).getTeam();
@@ -309,6 +334,57 @@ public class TaskEntry<W extends Work> extends
 
 		// Link in the escalations
 		this.linkEscalations();
+
+		// Link the duties
+		net.officefloor.model.office.FlowItemModel officeFlowItem = this
+				.getOfficeFlowItem();
+		for (FlowItemToPreAdministratorDutyModel preTask : officeFlowItem
+				.getPreAdminDutys()) {
+			this.linkDuty(officeEntry, preTask.getDuty(), true);
+		}
+		for (FlowItemToPostAdministratorDutyModel postTask : officeFlowItem
+				.getPostAdminDutys()) {
+			this.linkDuty(officeEntry, postTask.getDuty(), false);
+		}
+	}
+
+	/**
+	 * Links in the {@link Duty} to this {@link Task}.
+	 * 
+	 * @param officeEntry
+	 *            {@link OfficeEntry} containing this {@link Task}.
+	 * @param duty
+	 *            {@link DutyModel} to link in.
+	 * @param isPreNotPost
+	 *            Flag indicating whether a pre/post {@link Task}. {@link Duty}.
+	 * @throws BuildException
+	 *             If fails to link in {@link Duty}.
+	 */
+	@SuppressWarnings("unchecked")
+	private void linkDuty(OfficeEntry officeEntry, DutyModel duty,
+			boolean isPreNotPost) throws BuildException {
+
+		// Obtain the administrator for the duty
+		AdministratorEntry<?> adminEntry = officeEntry.getAdministrator(duty);
+
+		// Obtain the corresponding duty key
+		Enum dutyKey = OFCU.getEnum(adminEntry.getDutyKeys(), duty.getKey());
+
+		// Obtain the work name of the administrator
+		String administratorId = adminEntry.getModel().getId();
+		String workAdministratorName = "work:" + administratorId;
+
+		// Link the administrator and subsequent duty
+		this.workEntry.getBuilder().registerAdministration(
+				workAdministratorName, administratorId);
+		if (isPreNotPost) {
+			// Pre-task duty
+			this.getBuilder().linkPreTaskAdministration(workAdministratorName,
+					dutyKey);
+		} else {
+			this.getBuilder().linkPostTaskAdministration(workAdministratorName,
+					dutyKey);
+		}
 	}
 
 	/**

@@ -56,7 +56,7 @@ public class LoaderContext {
 			throws Exception {
 
 		// Obtain the instance of the class
-		Class<? extends O> clazz = this.obtainClass(className, type);
+		Class<O> clazz = this.obtainClass(className, type);
 
 		// Return a new instance of the class
 		return clazz.newInstance();
@@ -98,7 +98,7 @@ public class LoaderContext {
 	 *             If fails to obtain the {@link Class}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> Class<? extends T> obtainClass(String typeName,
+	public <T> Class<T> obtainClass(String typeName,
 			Class<T> superType) throws Exception {
 
 		// Obtain the class
@@ -112,7 +112,7 @@ public class LoaderContext {
 		}
 
 		// Return as appropriate type
-		return (Class<? extends T>) clazz;
+		return (Class<T>) clazz;
 	}
 
 	/**

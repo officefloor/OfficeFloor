@@ -158,10 +158,12 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 						"KeyTwo", null, null));
 
 		// Administrator
-		assertList(new String[] { "getId", "getSource", "getX", "getY" },
-				office.getAdministrators(), new AdministratorModel("1",
-						"net.officefloor.admin.TestAdminSource", null, null,
-						null, 100, 200));
+		assertList(new String[] { "getId", "getSource", "getDutyKeyClass",
+				"getX", "getY" }, office.getAdministrators(),
+				new AdministratorModel("1",
+						"net.officefloor.admin.TestAdminSource",
+						"net.officefloor.duty.DutyKey", null, null, null, 100,
+						200));
 		AdministratorModel administrator = office.getAdministrators().get(0);
 		assertList(new String[] { "getName", "getValue" }, administrator
 				.getProperties(), new PropertyModel("prop name", "prop value"));
@@ -200,7 +202,7 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 		OfficeModel reloadedOffice = this.officeLoader.loadOffice(tempFile);
 
 		// Validate round trip
-		assertGraph(office, reloadedOffice, "getAdministrators",
+		assertGraph(office, reloadedOffice,
 				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
 

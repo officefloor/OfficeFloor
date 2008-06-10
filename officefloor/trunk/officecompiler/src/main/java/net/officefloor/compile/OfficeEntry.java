@@ -16,28 +16,21 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.frame.api.build.AdministratorBuilder;
-import net.officefloor.frame.api.build.DutyBuilder;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.model.office.AdministratorModel;
-import net.officefloor.model.office.DutyFlowModel;
 import net.officefloor.model.office.DutyModel;
-import net.officefloor.model.office.FlowItemModel;
-import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
-import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.office.OfficeLoader;
 import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.util.OFCU;
 
 /**
  * {@link OfficeModel} entry for the {@link Office}.
@@ -85,110 +78,12 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 			officeEntry.roomMap.put(room, roomEntry);
 		}
 
-		// ----------------------------------------------------
-		// TODO Load the Administrators of the Office
-		// Create AdministratorEntry and DutyEntry to build below
-		// ----------------------------------------------------
-		System.err.println("TODO [" + OfficeEntry.class.getSimpleName()
-				+ "]: provide AdministratorEntry for administrators");
+		// Load the Administrators of the Office
 		for (AdministratorModel admin : model.getAdministrators()) {
-
-			// Obtain the duty key class
-			Class<AdministratorSource> adminSourceClass = (Class<AdministratorSource>) Class
-					.forName(admin.getSource());
-
-			// Create the admin builder
-			AdministratorBuilder adminBuilder = context.getBuilderFactory()
-					.createAdministratorBuilder(adminSourceClass);
-
-			// Load administrator details
-			for (PropertyModel property : admin.getProperties()) {
-				adminBuilder.addProperty(property.getName(), property
-						.getValue());
-			}
-
-			
-			Class<Enum<?>> dutyKeyClass = null; // admin.getDutyKeyClass();
-
-			// Load the duties
-			for (Enum dutyKey : dutyKeyClass.getEnumConstants()) {
-
-				// Find the corresponding duty
-				DutyModel duty = null;
-				for (DutyModel dutyModel : admin.getDuties()) {
-					if (dutyKey.name().equals(dutyModel.getKey())) {
-						duty = dutyModel;
-					}
-				}
-
-				// Obtain duty builder based on whether have flow keys
-				String flowKeysClassName = duty.getFlowKeys();
-				DutyBuilder dutyBuilder;
-				if (flowKeysClassName != null) {
-					Class flowKeysClass = Class.forName(flowKeysClassName);
-					dutyBuilder = adminBuilder.registerDutyBuilder(dutyKey,
-							flowKeysClass);
-
-					// Link in the flows
-					for (DutyFlowModel dutyFlow : duty.getFlows()) {
-						Enum flowKey = (Enum) OFCU.getEnum(flowKeysClass, duty
-								.getKey());
-						FlowItemModel flowItem = dutyFlow.getFlowItem()
-								.getFlowItem();
-						dutyBuilder.linkFlow(flowKey, flowItem.getWorkName(),
-								flowItem.getTaskName());
-					}
-
-				} else {
-					dutyBuilder = adminBuilder.registerDutyBuilder(dutyKey);
-
-					// Link in the flows
-					for (DutyFlowModel dutyFlow : duty.getFlows()) {
-						int index = Integer.parseInt(dutyFlow.getKey());
-						FlowItemModel flowItem = dutyFlow.getFlowItem()
-								.getFlowItem();
-						dutyBuilder.linkFlow(index, flowItem.getWorkName(),
-								flowItem.getTaskName());
-					}
-				}
-			}
-
-			// Register the administrator
-			builder.addAdministrator(admin.getId(), adminBuilder);
+			AdministratorEntry<?> adminEntry = AdministratorEntry
+					.loadAdministrator(admin, officeEntry, context);
+			officeEntry.administrators.add(adminEntry);
 		}
-
-		// ----------------------------------------------------
-		// TaskEntry for administration
-		// TODO remove and put in task entry
-		// ----------------------------------------------------
-		System.err.println("TODO [" + OfficeEntry.class.getSimpleName()
-				+ "]: move to TaskEntry to link in pre/post duties");
-		TaskEntry<Work> taskEntry = null;
-		TaskBuilder<Object, Work, ?, ?> taskBuilder = null;
-		net.officefloor.model.desk.FlowItemModel deskFlowItem = null;
-		// TODO obtain office flow item for desk flow item
-		FlowItemModel officeFlowItem = new FlowItemModel();
-		for (FlowItemToPreAdministratorDutyModel link : officeFlowItem
-				.getPreAdminDutys()) {
-			DutyModel duty = link.getDuty();
-
-			// TODO class of duty key
-			// (by searching for DutyEntry in OfficeEntry of TaskEntry and
-			// subsequently getting parent AdministratorEntry)
-
-			// Obtain the corresponding duty key
-			Enum dutyKey = OFCU.getEnum(null, duty.getKey());
-
-			// TODO obtain work builder for the task entry
-			WorkBuilder<Work> workBuilder = null; // WorkEntry from TaskEntry
-
-			// TODO look through for duty of office
-			workBuilder.registerAdministration("workAdministratorName",
-					"administratorId");
-			taskBuilder.linkPostTaskAdministration("workAdministratorName",
-					dutyKey);
-		}
-		// TODO similar for post administration
 
 		// Return the office entry
 		return officeEntry;
@@ -205,10 +100,15 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 	private final ModelEntryMap<OfficeRoomModel, RoomEntry> roomMap = new ModelEntryMap<OfficeRoomModel, RoomEntry>();
 
 	/**
+	 * {@link AdministratorEntry} instances.
+	 */
+	private final List<AdministratorEntry<?>> administrators = new LinkedList<AdministratorEntry<?>>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param id
-	 *            Id of the {@link net.officefloor.frame.api.manage.Office}.
+	 *            Id of the {@link Office}.
 	 * @param builder
 	 *            {@link OfficeBuilder}.
 	 * @param model
@@ -232,6 +132,29 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 	}
 
 	/**
+	 * Obtains the {@link AdministratorEntry} that contains the
+	 * {@link DutyModel}.
+	 * 
+	 * @param duty
+	 *            {@link DutyModel}.
+	 * @return {@link AdministratorEntry}.
+	 */
+	public AdministratorEntry<?> getAdministrator(DutyModel duty) {
+		// Iterate over the administrators to find the duty
+		for (AdministratorEntry<?> adminEntry : this.administrators) {
+			for (DutyModel adminDuty : adminEntry.getModel().getDuties()) {
+				if (duty == adminDuty) {
+					// Duty of this administrator
+					return adminEntry;
+				}
+			}
+		}
+
+		// Not a duty of this office
+		return null;
+	}
+
+	/**
 	 * Obtains the {@link RoomEntry} for the {@link OfficeRoomModel}.
 	 * 
 	 * @param officeRoom
@@ -246,12 +169,14 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 	}
 
 	/**
-	 * Builds the {@link net.officefloor.frame.api.manage.Office}.
+	 * Builds the {@link Office}.
 	 * 
+	 * @param context
+	 *            {@link LoaderContext}.
 	 * @throws Exception
 	 *             If fails.
 	 */
-	public void build() throws Exception {
+	public void build(LoaderContext context) throws Exception {
 
 		// Obtain the office of the office floor
 		OfficeFloorOfficeModel office = this.officeFloorEntry
@@ -266,9 +191,10 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 					managedObjectId);
 		}
 
-		// TODO Register the administrators
-		System.err.println("TODO [" + this.getClass().getSimpleName()
-				+ "]: build administrators");
+		// Register the administrators
+		for (AdministratorEntry<?> admin : this.administrators) {
+			admin.build(context);
+		}
 
 		// Register the teams
 		for (OfficeTeamModel team : office.getTeams()) {
