@@ -75,8 +75,9 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		portStart++; // increment for next test
 
 		// Register the Server Socket Managed Object
-		ManagedObjectBuilder serverSocketBuilder = this.constructManagedObject(
-				"MO", TcpServerSocketManagedObjectSource.class, "OFFICE");
+		ManagedObjectBuilder<?> serverSocketBuilder = this
+				.constructManagedObject("MO",
+						TcpServerSocketManagedObjectSource.class, "OFFICE");
 		serverSocketBuilder.addProperty("port", String.valueOf(PORT));
 		serverSocketBuilder.addProperty("buffer_size", "1024");
 		serverSocketBuilder.addProperty("message_size", "3");

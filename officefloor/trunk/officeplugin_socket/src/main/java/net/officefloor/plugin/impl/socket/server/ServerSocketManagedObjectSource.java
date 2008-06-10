@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -46,7 +47,7 @@ import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
  * @author Daniel
  */
 public class ServerSocketManagedObjectSource extends
-		AbstractManagedObjectSource {
+		AbstractManagedObjectSource<None, ServerSocketHandlerEnum> {
 
 	/**
 	 * {@link ServerSocketAccepter} listening for connections.
@@ -128,7 +129,9 @@ public class ServerSocketManagedObjectSource extends
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
-	protected void loadMetaData(MetaDataContext context) throws Exception {
+	protected void loadMetaData(
+			MetaDataContext<None, ServerSocketHandlerEnum> context)
+			throws Exception {
 
 		// Provide meta-data
 		context.setManagedObjectClass(AsynchronousManagedObject.class);
@@ -208,7 +211,8 @@ public class ServerSocketManagedObjectSource extends
 	 * @throws Exception
 	 *             If fails.
 	 */
-	protected void registerServerSocketHandler(MetaDataContext context)
+	protected void registerServerSocketHandler(
+			MetaDataContext<None, ServerSocketHandlerEnum> context)
 			throws Exception {
 		// By default do not register
 	}
