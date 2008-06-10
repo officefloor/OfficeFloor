@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.async;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -27,7 +28,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedO
  * 
  * @author Daniel
  */
-public class TestManagedObjectSource extends AbstractAsyncManagedObjectSource {
+public class TestManagedObjectSource extends
+		AbstractAsyncManagedObjectSource<None, None> {
 
 	/**
 	 * {@link ManagedObjectUser}.
@@ -74,7 +76,8 @@ public class TestManagedObjectSource extends AbstractAsyncManagedObjectSource {
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
-	protected void loadMetaData(MetaDataContext context) throws Exception {
+	protected void loadMetaData(MetaDataContext<None, None> context)
+			throws Exception {
 		// Asynchronous managed object
 		context.setManagedObjectClass(AsynchronousManagedObject.class);
 	}

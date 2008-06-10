@@ -14,27 +14,29 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.spi.managedobject.source;
+package net.officefloor.frame.spi.administration.source;
 
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Context that the {@link ManagedObject} is to execute within.
+ * Individual property of the {@link AdministratorSourceSpecification}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectExecuteContext<H extends Enum<H>> {
+public interface AdministratorSourceProperty {
 
 	/**
-	 * <p>
-	 * Obtains the specified handler.
+	 * Obtains name of property.
 	 * 
-	 * @param key
-	 *            Key identifying the {@link Handler} to return.
-	 * @return {@link Handler} for the key.
+	 * @return Name of property.
 	 */
-	@SuppressWarnings("unchecked")
-	Handler getHandler(H key);
+	String getName();
+
+	/**
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
+	 * 
+	 * @return Display name of property.
+	 */
+	String getLabel();
 
 }

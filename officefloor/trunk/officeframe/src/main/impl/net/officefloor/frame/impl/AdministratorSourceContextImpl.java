@@ -21,8 +21,7 @@ import java.util.Properties;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.spi.administration.source.AdministratorSourceContext}.
+ * Implementation of the {@link AdministratorSourceContext}.
  * 
  * @author Daniel
  */

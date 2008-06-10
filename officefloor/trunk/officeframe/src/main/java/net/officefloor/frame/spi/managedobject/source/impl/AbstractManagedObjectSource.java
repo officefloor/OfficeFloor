@@ -32,8 +32,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
  * 
  * @author Daniel
  */
-public abstract class AbstractManagedObjectSource extends
-		AbstractAsyncManagedObjectSource {
+public abstract class AbstractManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
+		extends AbstractAsyncManagedObjectSource<D, H> {
 
 	/*
 	 * (non-Javadoc)

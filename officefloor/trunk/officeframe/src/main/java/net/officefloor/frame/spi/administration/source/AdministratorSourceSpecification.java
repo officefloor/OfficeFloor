@@ -16,11 +16,22 @@
  */
 package net.officefloor.frame.spi.administration.source;
 
+
 /**
- * TODO: description
- *
+ * Specification of a {@link AdministratorSource}. This is different to the
+ * {@link AdministratorSourceMetaData} as it specifies how to configure the
+ * {@link AdministratorSource} to then obtain its
+ * {@link AdministratorSourceMetaData} based on the configuration.
+ * 
  * @author Daniel
  */
 public interface AdministratorSourceSpecification {
 
+	/**
+	 * Obtains the specification of the properties for the
+	 * {@link AdministratorSource}.
+	 * 
+	 * @return Property specification.
+	 */
+	AdministratorSourceProperty[] getProperties();
 }
