@@ -21,7 +21,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 import org.hibernate.Session;
@@ -29,12 +31,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
- * for a hibernate {@link org.hibernate.Session}.
+ * {@link ManagedObjectSource} for a hibernate {@link Session}.
  * 
  * @author Daniel
  */
-public class HibernateManagedObjectSource extends AbstractManagedObjectSource {
+public class HibernateManagedObjectSource
+		extends
+		AbstractManagedObjectSource<HibernateManagedObjectSource.HibernateDependenciesEnum, None> {
 
 	/**
 	 * {@link SessionFactory}.
@@ -69,7 +72,9 @@ public class HibernateManagedObjectSource extends AbstractManagedObjectSource {
 	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
-	protected void loadMetaData(MetaDataContext context) throws Exception {
+	protected void loadMetaData(
+			MetaDataContext<HibernateDependenciesEnum, None> context)
+			throws Exception {
 
 		// Specify types
 		context.setObjectClass(Session.class);
