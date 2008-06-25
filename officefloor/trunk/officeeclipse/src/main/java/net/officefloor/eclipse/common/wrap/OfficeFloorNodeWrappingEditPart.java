@@ -78,4 +78,26 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 		this.figure = figure;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 */
+	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeFloorNodeWrappingEditPart.populateConnectionTargetModels");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#refreshTargetConnections()
+	 */
+	@Override
+	public void refreshTargetConnections() {
+		super.refreshTargetConnections();
+	}
+
 }

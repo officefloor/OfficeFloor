@@ -26,10 +26,10 @@ import net.officefloor.eclipse.common.figure.ListFigure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
 import net.officefloor.eclipse.common.figure.WrappingFigure;
 import net.officefloor.eclipse.common.wrap.OfficeFloorNodeWrappingEditPart;
-import net.officefloor.eclipse.common.wrap.WrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
 import net.officefloor.eclipse.office.models.FlowToAdminDutyWrappingModel;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.Model;
 import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.FlowItemModel;
 import net.officefloor.model.office.FlowItemToTeamModel;
@@ -37,6 +37,7 @@ import net.officefloor.model.office.FlowItemModel.FlowItemEvent;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.ToolbarLayout;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
@@ -49,14 +50,24 @@ public class FlowItemEditPart extends
 		AbstractOfficeFloorSourceNodeEditPart<FlowItemModel> {
 
 	/**
-	 * Pre-admin.
+	 * Pre-admin {@link EditPart}.
 	 */
-	private WrappingModel<FlowItemModel> preAdmin;
+	private OfficeFloorNodeWrappingEditPart preAdminEditPart;
 
 	/**
-	 * Post-admin.
+	 * Pre-admin {@link Model}.
 	 */
-	private WrappingModel<FlowItemModel> postAdmin;
+	private WrappingModel<FlowItemModel> preAdminModel;
+
+	/**
+	 * Pre-admin {@link EditPart}.
+	 */
+	private OfficeFloorNodeWrappingEditPart postAdminEditPart;
+
+	/**
+	 * Post-admin {@link Model}.
+	 */
+	private WrappingModel<FlowItemModel> postAdminModel;
 
 	/*
 	 * (non-Javadoc)
@@ -66,28 +77,28 @@ public class FlowItemEditPart extends
 	@Override
 	protected void init() {
 		// Create the pre admin model
-		final WrappingEditPart preAdminEditPart = new OfficeFloorNodeWrappingEditPart() {
+		this.preAdminEditPart = new OfficeFloorNodeWrappingEditPart() {
 			@Override
 			protected void populateConnectionTargetModels(List<Object> models) {
 				models.addAll(FlowItemEditPart.this.getCastedModel()
 						.getPreAdminDutys());
 			}
 		};
-		preAdminEditPart.setFigure(new ListItemFigure("PRE"));
-		this.preAdmin = new FlowToAdminDutyWrappingModel(true, this
-				.getCastedModel(), preAdminEditPart);
+		this.preAdminEditPart.setFigure(new ListItemFigure("PRE"));
+		this.preAdminModel = new FlowToAdminDutyWrappingModel(true, this
+				.getCastedModel(), this.preAdminEditPart);
 
 		// Create the post admin model
-		final WrappingEditPart postAdminEditPart = new OfficeFloorNodeWrappingEditPart() {
+		this.postAdminEditPart = new OfficeFloorNodeWrappingEditPart() {
 			@Override
 			protected void populateConnectionTargetModels(List<Object> models) {
 				models.addAll(FlowItemEditPart.this.getCastedModel()
 						.getPostAdminDutys());
 			}
 		};
-		postAdminEditPart.setFigure(new ListItemFigure("POST"));
-		this.postAdmin = new FlowToAdminDutyWrappingModel(false, this
-				.getCastedModel(), postAdminEditPart);
+		this.postAdminEditPart.setFigure(new ListItemFigure("POST"));
+		this.postAdminModel = new FlowToAdminDutyWrappingModel(false, this
+				.getCastedModel(), this.postAdminEditPart);
 	}
 
 	/*
@@ -98,8 +109,8 @@ public class FlowItemEditPart extends
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		// Add static children
-		childModels.add(this.preAdmin);
-		childModels.add(this.postAdmin);
+		childModels.add(this.preAdminModel);
+		childModels.add(this.postAdminModel);
 	}
 
 	/*
@@ -118,11 +129,11 @@ public class FlowItemEditPart extends
 				switch (property) {
 				case ADD_PRE_ADMIN_DUTY:
 				case REMOVE_PRE_ADMIN_DUTY:
-					FlowItemEditPart.this.preAdmin.getEditPart().refresh();
+					FlowItemEditPart.this.preAdminEditPart.refreshTargetConnections();
 					break;
 				case ADD_POST_ADMIN_DUTY:
 				case REMOVE_POST_ADMIN_DUTY:
-					FlowItemEditPart.this.postAdmin.getEditPart().refresh();
+					FlowItemEditPart.this.postAdminEditPart.refreshTargetConnections();
 					break;
 				case CHANGE_TEAM:
 					FlowItemEditPart.this.refreshSourceConnections();
@@ -143,7 +154,7 @@ public class FlowItemEditPart extends
 	 */
 	@Override
 	protected IFigure createFigure() {
-		
+
 		// Create the figure
 		WrappingFigure figure = new WrappingFigure(new ListFigure());
 		figure.addDecorate(new ListItemFigure(this.getCastedModel().getId()));

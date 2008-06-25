@@ -20,7 +20,9 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.commands.CreateCommand;
+import net.officefloor.eclipse.common.dialog.AdministratorSourceCreateDialog;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
@@ -31,10 +33,12 @@ import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.common.wrap.OfficeFloorWrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
 import net.officefloor.eclipse.desk.figure.SectionFigure;
+import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
@@ -47,11 +51,12 @@ import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.room.RoomLoader;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.office.OfficeModel}.
+ * {@link EditPart} for the {@link OfficeModel}.
  * 
  * @author Daniel
  */
@@ -64,20 +69,17 @@ public class OfficeEditPart extends
 	private WrappingModel<OfficeModel> addAdministrator;
 
 	/**
-	 * Listing of {@link net.officefloor.model.office.ExternalTeamModel}
-	 * instances.
+	 * Listing of {@link ExternalTeamModel} instances.
 	 */
 	private WrappingModel<OfficeModel> externalTeams;
 
 	/**
-	 * {@link net.officefloor.model.office.OfficeRoomModel}.
+	 * {@link OfficeRoomModel}.
 	 */
 	private WrappingModel<OfficeModel> room;
 
 	/**
-	 * Listing of
-	 * {@link net.officefloor.model.office.ExternalManagedObjectModel}
-	 * instances.
+	 * Listing of {@link ExternalManagedObjectModel} instances.
 	 */
 	private WrappingModel<OfficeModel> externalManagedObjects;
 
@@ -95,27 +97,24 @@ public class OfficeEditPart extends
 				"Add administrator") {
 			@Override
 			protected void handleButtonClick() {
+				try {
+					// Create the Administrator Source
+					AbstractOfficeFloorEditor editor = OfficeEditPart.this
+							.getEditor();
+					IProject project = ProjectConfigurationContext
+							.getProject(editor.getEditorInput());
+					AdministratorSourceCreateDialog dialog = new AdministratorSourceCreateDialog(
+							editor.getSite().getShell(), project);
+					AdministratorModel administrator = dialog
+							.createAdministratorSource();
 
-				// TODO remove
-				OfficeEditPart.this
-						.messageWarning("TODO implement adding an administrator");
-
-				// Add the Administrator
-				AdministratorModel bean = new AdministratorModel();
-				BeanDialog dialog = OfficeEditPart.this.createBeanDialog(bean,
-						"getX", "getY");
-				if (dialog.populate()) {
-					try {
-
-						// TODO Load the administrator
-
-						// Add the administrator
+					// Add administrator (if created)
+					if (administrator != null) {
 						OfficeEditPart.this.getCastedModel().addAdministrator(
-								bean);
-
-					} catch (Exception ex) {
-						OfficeEditPart.this.messageError(ex);
+								administrator);
 					}
+				} catch (Throwable ex) {
+					OfficeEditPart.this.messageError(ex);
 				}
 			}
 		};

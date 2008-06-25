@@ -95,15 +95,15 @@ public class OfficeFloorEditPart extends
 				BeanDialog dialog = OfficeFloorEditPart.this.createBeanDialog(
 						officeBean, "X", "Y");
 				dialog.registerPropertyInput("Id", new ClasspathSelectionInput(
-						OfficeFloorEditPart.this.getEditor(), new ClasspathFilter(
-								IFile.class, new FileExtensionInputFilter(
-										"office"))));
+						OfficeFloorEditPart.this.getEditor(),
+						new ClasspathFilter(IFile.class,
+								new FileExtensionInputFilter("office"))));
 				if (dialog.populate()) {
 					try {
 						// Obtain the class path location
 						String classPathLocation = ClasspathUtil
 								.getClassPathLocation(officeBean.getId());
-						
+
 						// Obtain the office configuration
 						ProjectClassLoader classLoader = ProjectClassLoader
 								.create(OfficeFloorEditPart.this.getEditor());
@@ -209,7 +209,7 @@ public class OfficeFloorEditPart extends
 						OfficeFloorEditPart.this.getCastedModel()
 								.addManagedObjectSource(managedObjectSource);
 					}
-				} catch (Exception ex) {
+				} catch (Throwable ex) {
 					OfficeFloorEditPart.this.messageError(ex);
 				}
 			}
