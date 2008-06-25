@@ -21,6 +21,7 @@ import java.util.Properties;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.DutyFlowModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.PropertyModel;
 
@@ -73,8 +74,11 @@ public class AdministratorSourceLoaderTest extends OfficeFrameTestCase {
 						null), new DutyModel(MockDutyKeys.KEY_THREE.name(),
 						null, null, null, null));
 
-		// TODO load flow keys onto duties
-		System.err.println("TODO [" + this.getClass().getSimpleName()
-				+ "]: load flow keys onto duties");
+		// Validate the flow items
+		DutyModel duty = getItem(model.getDuties(), "getKey",
+				MockDutyKeys.KEY_ONE.name());
+		assertList(new String[] { "getKey" }, duty.getFlows(),
+				new DutyFlowModel(MockDutyFlowKeys.FLOW_ONE.name(), null),
+				new DutyFlowModel(MockDutyFlowKeys.FLOW_TWO.name(), null));
 	}
 }

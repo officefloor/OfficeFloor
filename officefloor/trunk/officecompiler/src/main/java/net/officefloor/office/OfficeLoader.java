@@ -171,6 +171,34 @@ public class OfficeLoader {
 			}
 		}
 
+		// Ensure administrators linked up
+		for (AdministratorModel admin : office.getAdministrators()) {
+
+			// Managed objects being administered
+			for (AdministratorToManagedObjectModel adminToMo : admin
+					.getManagedObjects()) {
+				ExternalManagedObjectModel extMo = adminToMo.getManagedObject();
+				adminToMo.setName(extMo.getName());
+			}
+
+			for (DutyModel duty : admin.getDuties()) {
+
+				// Pre administration
+				for (FlowItemToPreAdministratorDutyModel preAdmin : duty
+						.getPreAdminFlowItems()) {
+					preAdmin.setAdministratorId(admin.getId());
+					preAdmin.setDutyKey(duty.getKey());
+				}
+
+				// Post administration
+				for (FlowItemToPostAdministratorDutyModel postAdmin : duty
+						.getPostAdminFlowItems()) {
+					postAdmin.setAdministratorId(admin.getId());
+					postAdmin.setDutyKey(duty.getKey());
+				}
+			}
+		}
+
 		// Store the office
 		this.modelRepository.store(office, configuration);
 	}
