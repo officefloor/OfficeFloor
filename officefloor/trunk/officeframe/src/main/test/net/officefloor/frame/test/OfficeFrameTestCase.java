@@ -598,6 +598,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * @return Value of property.
 	 */
 	public static Object getProperty(Object object, String methodName) {
+
+		// Ensure have an object to retrieve value
+		assertNotNull("Can not source property '" + methodName
+				+ "' from null object", object);
+
 		Object value = null;
 		try {
 			// Find the method on the object
@@ -626,6 +631,40 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		// Return the value
 		return value;
+	}
+
+	/**
+	 * Obtains the item within the items whose property by methodName matches
+	 * the input value.
+	 * 
+	 * @param items
+	 *            Items to search.
+	 * @param methodName
+	 *            Property on the item.
+	 * @param value
+	 *            Value of property the item should match.
+	 * @return Item with the matching property.
+	 */
+	public static <T> T getItem(Collection<T> items, String methodName,
+			Object value) {
+
+		// Iterate over the items finding the matching item
+		for (T item : items) {
+
+			// Obtain the property value
+			Object itemValue = getProperty(item, methodName);
+
+			// Determine if matches
+			if (value.equals(itemValue)) {
+				// Found the item
+				return item;
+			}
+		}
+
+		// Did not find the item
+		fail("Did not find item by property '" + methodName
+				+ "' for return value " + value);
+		return null;
 	}
 
 	/**
