@@ -20,11 +20,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.impl.AdministratorSourceContextImpl;
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.DutyFlowModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.PropertyModel;
 
@@ -77,8 +80,29 @@ public class AdministratorSourceLoader {
 		A[] dutyKeys = dutyKeysClass.getEnumConstants();
 		DutyModel[] dutyModels = new DutyModel[dutyKeys.length];
 		for (int i = 0; i < dutyModels.length; i++) {
-			dutyModels[i] = new DutyModel(dutyKeys[i].name(), null, null, null,
-					null);
+
+			// Obtain the meta-data for the duty
+			A dutyKey = dutyKeys[i];
+			AdministratorDutyMetaData<?> dutyMetaData = metaData
+					.getAdministratorDutyMetaData(dutyKey);
+
+			// Create the listing of duty flows
+			Class<?> flowKeys = dutyMetaData.getFlowKeys();
+			String flowKeysClassName = None.class.getName();
+			DutyFlowModel[] dutyFlows = null;
+			if (flowKeys != null) {
+				flowKeysClassName = flowKeys.getName();
+				Object[] flowKeyObjects = flowKeys.getEnumConstants();
+				dutyFlows = new DutyFlowModel[flowKeyObjects.length];
+				for (int j = 0; j < flowKeyObjects.length; j++) {
+					Enum<?> flowKey = (Enum<?>) flowKeyObjects[j];
+					dutyFlows[j] = new DutyFlowModel(flowKey.name(), null);
+				}
+			}
+
+			// Create the duty model
+			dutyModels[i] = new DutyModel(dutyKey.name(), flowKeysClassName,
+					dutyFlows, null, null);
 		}
 
 		// Create the Administrator

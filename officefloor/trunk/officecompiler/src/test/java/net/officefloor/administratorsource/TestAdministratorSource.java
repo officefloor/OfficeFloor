@@ -48,6 +48,7 @@ public class TestAdministratorSource extends
 	protected void loadMetaData(MetaDataContext<Object, MockDutyKeys> context)
 			throws Exception {
 		context.setDutyKeys(MockDutyKeys.class);
+		context.setDutyFlows(MockDutyKeys.KEY_ONE, MockDutyFlowKeys.class);
 		context.setExtensionInterface(Object.class);
 	}
 
