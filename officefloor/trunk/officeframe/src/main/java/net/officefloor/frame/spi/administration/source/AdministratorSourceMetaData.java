@@ -17,6 +17,7 @@
 package net.officefloor.frame.spi.administration.source;
 
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -41,5 +42,16 @@ public interface AdministratorSourceMetaData<I extends Object, A extends Enum<A>
 	 * @return {@link Enum} specifying the duties of this {@link Administrator}.
 	 */
 	Class<A> getAministratorDutyKeys();
+
+	/**
+	 * Obtains the {@link AdministratorDutyMetaData} for the particular
+	 * {@link Duty} key.
+	 * 
+	 * @param key
+	 *            Key identifying the particular {@link Duty}.
+	 * @return {@link AdministratorDutyMetaData} for the key.
+	 * @see #getAministratorDutyKeys()
+	 */
+	AdministratorDutyMetaData<?> getAdministratorDutyMetaData(A key);
 
 }
