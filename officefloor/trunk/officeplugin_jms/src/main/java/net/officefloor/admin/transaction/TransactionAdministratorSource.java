@@ -16,78 +16,51 @@
  */
 package net.officefloor.admin.transaction;
 
-import java.util.EnumMap;
-import java.util.Map;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
-import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
 
 /**
- * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}
- * to administer extension interface
- * {@link net.officefloor.admin.transaction.Transaction}.
+ * {@link AdministratorSource} to administer extension interface
+ * {@link Transaction}.
  * 
  * @author Daniel
  */
-public class TransactionAdministratorSource implements
-		AdministratorSource<Transaction, TransactionDutiesEnum>,
-		AdministratorSourceMetaData<Transaction, TransactionDutiesEnum>,
-		Administrator<Transaction, TransactionDutiesEnum> {
-
-	/**
-	 * {@link Duty} instances.
-	 */
-	private final Map<TransactionDutiesEnum, Duty<Transaction, Indexed>> duties = new EnumMap<TransactionDutiesEnum, Duty<Transaction, Indexed>>(
-			TransactionDutiesEnum.class);
-
-	/**
-	 * Initiate.
-	 */
-	public TransactionAdministratorSource() {
-		// Initiate the duties
-		this.duties.put(TransactionDutiesEnum.BEGIN, new BeginDuty());
-		this.duties.put(TransactionDutiesEnum.COMMIT, new CommitDuty());
-		this.duties.put(TransactionDutiesEnum.ROLLBACK, new RollbackDuty());
-	}
+public class TransactionAdministratorSource extends
+		AbstractAdministratorSource<Transaction, TransactionDutiesEnum>
+		implements Administrator<Transaction, TransactionDutiesEnum> {
 
 	/*
 	 * ====================================================================
-	 * AdministratorSource
+	 * AbstractAdministratorSource
 	 * ====================================================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#getSpecification()
+	 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource#loadSpecification(net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.SpecificationContext)
 	 */
-	public AdministratorSourceSpecification getSpecification() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+	@Override
+	protected void loadSpecification(
+			net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.SpecificationContext context) {
+		// No specification details
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#init(net.officefloor.frame.spi.administration.source.AdministratorSourceContext)
+	 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource#loadMetaData(net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.MetaDataContext)
 	 */
-	public void init(AdministratorSourceContext context) throws Exception {
-		// No need for context
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#getMetaData()
-	 */
-	public AdministratorSourceMetaData<Transaction, TransactionDutiesEnum> getMetaData() {
-		return this;
+	@Override
+	protected void loadMetaData(
+			net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.MetaDataContext<Transaction, TransactionDutiesEnum> context)
+			throws Exception {
+		context.setDutyKeys(TransactionDutiesEnum.class);
+		context.setExtensionInterface(Transaction.class);
 	}
 
 	/*
@@ -97,30 +70,6 @@ public class TransactionAdministratorSource implements
 	 */
 	public Administrator<Transaction, TransactionDutiesEnum> createAdministrator() {
 		return this;
-	}
-
-	/*
-	 * ====================================================================
-	 * AdministratorSourceMetaData
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData#getExtensionInterface()
-	 */
-	public Class<Transaction> getExtensionInterface() {
-		return Transaction.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData#getAministratorDutyKeys()
-	 */
-	public Class<TransactionDutiesEnum> getAministratorDutyKeys() {
-		return TransactionDutiesEnum.class;
 	}
 
 	/*
@@ -135,67 +84,72 @@ public class TransactionAdministratorSource implements
 	 * @see net.officefloor.frame.spi.administration.Administrator#getDuty(A)
 	 */
 	public Duty<Transaction, ?> getDuty(TransactionDutiesEnum key) {
-		return this.duties.get(key);
-	}
-
-}
-
-/**
- * {@link net.officefloor.frame.spi.administration.Duty} to begin the
- * transaction.
- */
-class BeginDuty implements Duty<Transaction, Indexed> {
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.Duty#doDuty(net.officefloor.frame.spi.administration.DutyContext)
-	 */
-	public void doDuty(DutyContext<Transaction, Indexed> context)
-			throws Exception {
-		// Begin the transaction
-		for (Transaction transaction : context.getExtensionInterfaces()) {
-			transaction.begin();
+		switch (key) {
+		case BEGIN:
+			return new BeginDuty();
+		case ROLLBACK:
+			return new RollbackDuty();
+		case COMMIT:
+			return new CommitDuty();
+		default:
+			throw new IllegalStateException("Unknown key " + key);
 		}
 	}
-}
 
-/**
- * {@link net.officefloor.frame.spi.administration.Duty} to commit the
- * transaction.
- */
-class CommitDuty implements Duty<Transaction, Indexed> {
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.Duty#doDuty(net.officefloor.frame.spi.administration.DutyContext)
+	/**
+	 * {@link Duty} to begin the transaction.
 	 */
-	public void doDuty(DutyContext<Transaction, Indexed> context)
-			throws Exception {
-		// Commit the transaction
-		for (Transaction transaction : context.getExtensionInterfaces()) {
-			transaction.commit();
+	private class BeginDuty implements Duty<Transaction, Indexed> {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.spi.administration.Duty#doDuty(net.officefloor.frame.spi.administration.DutyContext)
+		 */
+		public void doDuty(DutyContext<Transaction, Indexed> context)
+				throws Exception {
+			// Begin the transaction
+			for (Transaction transaction : context.getExtensionInterfaces()) {
+				transaction.begin();
+			}
 		}
 	}
-}
 
-/**
- * {@link net.officefloor.frame.spi.administration.Duty} to rollback the
- * transaction.
- */
-class RollbackDuty implements Duty<Transaction, Indexed> {
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.Duty#doDuty(net.officefloor.frame.spi.administration.DutyContext)
+	/**
+	 * {@link Duty} to commit the transaction.
 	 */
-	public void doDuty(DutyContext<Transaction, Indexed> context)
-			throws Exception {
-		// Rollback the transaction
-		for (Transaction transaction : context.getExtensionInterfaces()) {
-			transaction.rollback();
+	private class CommitDuty implements Duty<Transaction, Indexed> {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.spi.administration.Duty#doDuty(net.officefloor.frame.spi.administration.DutyContext)
+		 */
+		public void doDuty(DutyContext<Transaction, Indexed> context)
+				throws Exception {
+			// Commit the transaction
+			for (Transaction transaction : context.getExtensionInterfaces()) {
+				transaction.commit();
+			}
+		}
+	}
+
+	/**
+	 * {@link Duty} to rollback the transaction.
+	 */
+	private class RollbackDuty implements Duty<Transaction, Indexed> {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.spi.administration.Duty#doDuty(net.officefloor.frame.spi.administration.DutyContext)
+		 */
+		public void doDuty(DutyContext<Transaction, Indexed> context)
+				throws Exception {
+			// Rollback the transaction
+			for (Transaction transaction : context.getExtensionInterfaces()) {
+				transaction.rollback();
+			}
 		}
 	}
 }
