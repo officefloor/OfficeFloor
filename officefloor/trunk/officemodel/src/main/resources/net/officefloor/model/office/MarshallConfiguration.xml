@@ -121,6 +121,11 @@
 					</attributes>
 				</item>
 			</collection>
+			<object method="getTeam" element="team">
+				<attributes>
+					<attribute method="getTeamName" attribute="name" />
+				</attributes>
+			</object>
 			<collection method="getManagedObjects"
 				element="managed-objects">
 				<item
