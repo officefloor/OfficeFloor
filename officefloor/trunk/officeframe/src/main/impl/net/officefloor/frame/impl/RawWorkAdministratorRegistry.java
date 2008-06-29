@@ -114,7 +114,7 @@ public class RawWorkAdministratorRegistry {
 				Class<?> eiType = rawMetaData.getAdministratorSource()
 						.getMetaData().getExtensionInterface();
 
-				// Create the listing managed objects to be administerred
+				// Create the listing managed objects to be administered
 				String[] workMoNames = workAdminConfig
 						.getWorkManagedObjectNames();
 				ExtensionInterfaceMetaData<?>[] eiMetaData = new ExtensionInterfaceMetaData[workMoNames.length];
