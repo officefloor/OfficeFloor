@@ -88,8 +88,8 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 
 		// Teams
 		assertList(new String[] { "getName" }, office.getExternalTeams(),
-				new ExternalTeamModel("TEAM ONE", null), new ExternalTeamModel(
-						"TEAM TWO", null));
+				new ExternalTeamModel("TEAM ONE", null, null),
+				new ExternalTeamModel("TEAM TWO", null, null));
 
 		// Managed Objects
 		assertList(new String[] { "getName", "getObjectType", "getScope" },
@@ -162,9 +162,13 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 				"getX", "getY" }, office.getAdministrators(),
 				new AdministratorModel("1",
 						"net.officefloor.admin.TestAdminSource",
-						"net.officefloor.duty.DutyKey", null, null, null, 100,
-						200));
+						"net.officefloor.duty.DutyKey", null, null, null, null,
+						100, 200));
 		AdministratorModel administrator = office.getAdministrators().get(0);
+		assertEquals("Incorrect administrator linked team name", "TEAM ONE",
+				administrator.getTeam().getTeamName());
+		assertEquals("Incorrect administrator team", "TEAM ONE", administrator
+				.getTeam().getTeam().getName());
 		assertList(new String[] { "getName", "getValue" }, administrator
 				.getProperties(), new PropertyModel("prop name", "prop value"));
 		assertList(new String[] { "getName" }, administrator

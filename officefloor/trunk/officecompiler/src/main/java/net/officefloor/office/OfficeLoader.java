@@ -23,6 +23,7 @@ import net.officefloor.desk.DeskLoader;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
+import net.officefloor.model.office.AdministratorToTeamModel;
 import net.officefloor.model.office.DutyFlowModel;
 import net.officefloor.model.office.DutyFlowToFlowItemModel;
 import net.officefloor.model.office.DutyModel;
@@ -111,8 +112,10 @@ public class OfficeLoader {
 			managedObjects.put(managedObject.getName(), managedObject);
 		}
 
-		// Connect the administrators to their managed objects
+		// Connect the administrators
 		for (AdministratorModel administrator : office.getAdministrators()) {
+
+			// Connect administrator to their managed objects
 			for (AdministratorToManagedObjectModel conn : administrator
 					.getManagedObjects()) {
 				ExternalManagedObjectModel extMo = managedObjects.get(conn
@@ -120,6 +123,17 @@ public class OfficeLoader {
 				if (extMo != null) {
 					conn.setAdministrator(administrator);
 					conn.setManagedObject(extMo);
+					conn.connect();
+				}
+			}
+
+			// Connect administrator to team
+			AdministratorToTeamModel conn = administrator.getTeam();
+			if (conn != null) {
+				ExternalTeamModel team = teams.get(conn.getTeamName());
+				if (team != null) {
+					conn.setAdministrator(administrator);
+					conn.setTeam(team);
 					conn.connect();
 				}
 			}
@@ -179,6 +193,13 @@ public class OfficeLoader {
 					.getManagedObjects()) {
 				ExternalManagedObjectModel extMo = adminToMo.getManagedObject();
 				adminToMo.setName(extMo.getName());
+			}
+
+			// Team of administration
+			AdministratorToTeamModel adminToTeam = admin.getTeam();
+			if (adminToTeam != null) {
+				ExternalTeamModel team = adminToTeam.getTeam();
+				adminToTeam.setTeamName(team.getName());
 			}
 
 			for (DutyModel duty : admin.getDuties()) {

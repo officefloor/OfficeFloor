@@ -55,8 +55,11 @@ public class AdministratorSourceLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------------------------
 		assertProperties(new AdministratorModel("test",
 				TestAdministratorSource.class.getName(), MockDutyKeys.class
-						.getName(), null, null, null), model, "getId",
+						.getName(), null, null, null, null), model, "getId",
 				"getSource", "getDutyKeyClass");
+
+		// Expect no team
+		assertNull("Should be no team assigned", model.getTeam());
 
 		// Expect no managed objects
 		assertEquals("Should be no managed objects", 0, model

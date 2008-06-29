@@ -133,6 +133,14 @@ public class AdministratorEntry<A extends Enum<A>> extends
 					property.getValue());
 		}
 
+		// Link in the team
+		String teamName = OFCU.get(
+				this.getModel().getTeam(),
+				"Must link in team for administrator " + this.getId()
+						+ " of office " + this.officeEntry.getId()).getTeam()
+				.getName();
+		this.getBuilder().setTeam(teamName);
+
 		// Load the duties
 		for (A dutyKey : this.dutyKeyClass.getEnumConstants()) {
 
