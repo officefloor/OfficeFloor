@@ -35,6 +35,7 @@ import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.RoomEditPart;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
+import net.officefloor.model.office.AdministratorToTeamModel;
 import net.officefloor.model.office.DutyFlowModel;
 import net.officefloor.model.office.DutyFlowToFlowItemModel;
 import net.officefloor.model.office.DutyModel;
@@ -83,6 +84,8 @@ public class OfficeEditor extends AbstractOfficeFloorEditor<OfficeModel> {
 		// Connections
 		map.put(FlowItemToTeamModel.class, OfficeFloorConnectionEditPart.class);
 		map.put(AdministratorToManagedObjectModel.class,
+				OfficeFloorConnectionEditPart.class);
+		map.put(AdministratorToTeamModel.class,
 				OfficeFloorConnectionEditPart.class);
 		map.put(FlowItemToPreAdministratorDutyModel.class,
 				OfficeFloorConnectionEditPart.class);

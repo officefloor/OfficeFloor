@@ -19,6 +19,7 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
@@ -32,17 +33,19 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
+import net.officefloor.model.office.AdministratorToTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.AdministratorModel.AdministratorEvent;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.office.AdministratorModel}.
+ * {@link EditPart} for the {@link AdministratorModel}.
  * 
  * @author Daniel
  */
@@ -70,6 +73,9 @@ public class AdministratorEditPart extends
 					break;
 				case ADD_MANAGED_OBJECT:
 				case REMOVE_MANAGED_OBJECT:
+					AdministratorEditPart.this.refreshSourceConnections();
+					break;
+				case CHANGE_TEAM:
 					AdministratorEditPart.this.refreshSourceConnections();
 					break;
 				}
@@ -122,14 +128,29 @@ public class AdministratorEditPart extends
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
 
-				// Create the connection
-				AdministratorToManagedObjectModel conn = new AdministratorToManagedObjectModel();
-				conn.setAdministrator((AdministratorModel) source);
-				conn.setManagedObject((ExternalManagedObjectModel) target);
-				conn.connect();
+				if (target instanceof ExternalManagedObjectModel) {
+					// Create the connection
+					AdministratorToManagedObjectModel conn = new AdministratorToManagedObjectModel();
+					conn.setAdministrator((AdministratorModel) source);
+					conn.setManagedObject((ExternalManagedObjectModel) target);
+					conn.connect();
+					return conn;
 
-				// Return the connection
-				return conn;
+				} else if (target instanceof ExternalTeamModel) {
+					// Create the connection
+					AdministratorToTeamModel conn = new AdministratorToTeamModel();
+					conn.setAdministrator((AdministratorModel) source);
+					conn.setTeam((ExternalTeamModel) target);
+					conn.connect();
+					return conn;
+
+				} else {
+					throw new OfficeFloorPluginFailure("Unknown target "
+							+ target
+							+ " [type="
+							+ (target == null ? null : target.getClass()
+									.getName()) + "]");
+				}
 			}
 		};
 	}
@@ -142,6 +163,7 @@ public class AdministratorEditPart extends
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(ExternalManagedObjectModel.class);
+		types.add(ExternalTeamModel.class);
 	}
 
 	/*
@@ -152,6 +174,10 @@ public class AdministratorEditPart extends
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getManagedObjects());
+		AdministratorToTeamModel team = this.getCastedModel().getTeam();
+		if (team != null) {
+			models.add(team);
+		}
 	}
 
 	/*
