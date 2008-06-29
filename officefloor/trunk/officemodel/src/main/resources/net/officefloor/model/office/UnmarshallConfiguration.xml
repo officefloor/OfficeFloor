@@ -57,6 +57,10 @@
 		<value method="setDutyKeyClass" node="administrator@duty-keys" />
 		<value method="setX" node="administrator@x" />
 		<value method="setY" node="administrator@y" />
+		<object method="setTeam" node="team"
+			class="net.officefloor.model.office.AdministratorToTeamModel">
+			<value method="setTeamName" node="team@name" />
+		</object>
 		<object method="addProperty" node="property"
 			class="net.officefloor.model.office.PropertyModel">
 			<value method="setName" node="property@name" />
