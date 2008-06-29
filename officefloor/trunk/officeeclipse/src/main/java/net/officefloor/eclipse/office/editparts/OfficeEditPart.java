@@ -110,6 +110,12 @@ public class OfficeEditPart extends
 
 					// Add administrator (if created)
 					if (administrator != null) {
+
+						// Specify default initial position
+						administrator.setX(300);
+						administrator.setY(150);
+
+						// Add the administrator
 						OfficeEditPart.this.getCastedModel().addAdministrator(
 								administrator);
 					}

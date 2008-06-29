@@ -31,10 +31,10 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.EditPart;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.office.ExternalTeamModel}.
+ * {@link EditPart} for the {@link ExternalTeamModel}.
  * 
  * @author Daniel
  */
@@ -60,6 +60,7 @@ public class ExternalTeamEditPart extends
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getFlowItems());
+		models.addAll(this.getCastedModel().getAdministrators());
 	}
 
 	/*
@@ -78,6 +79,10 @@ public class ExternalTeamEditPart extends
 				switch (property) {
 				case ADD_FLOW_ITEM:
 				case REMOVE_FLOW_ITEM:
+					ExternalTeamEditPart.this.refreshTargetConnections();
+					break;
+				case ADD_ADMINISTRATOR:
+				case REMOVE_ADMINISTRATOR:
 					ExternalTeamEditPart.this.refreshTargetConnections();
 					break;
 				}
