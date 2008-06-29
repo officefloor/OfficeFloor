@@ -321,40 +321,35 @@ public class JmsServerManagedObjectSource
 	public ServerSession getServerSession() throws JMSException {
 		synchronized (this.serverSessionPool) {
 
-			// Determine if max sessions reached
-			if (this.numberOfSessions >= this.maxSessions) {
-				// Wait for managed object
-				for (;;) {
-					if (!this.serverSessionPool.isEmpty()) {
-						// Return from the pool
-						return this.serverSessionPool.remove(0);
-					} else {
-						// Block waiting for session to become available
-						try {
-							this.serverSessionPool.wait(100);
-						} catch (InterruptedException ex) {
-							// Ignore interuptions
-						}
-					}
-				}
-			} else {
-				// Pool not full but prioritise taking from pool over creating
-				JmsServerManagedObject serverMo;
+			// Obtain the Server Session
+			ServerSession session = null;
+			while (session == null) {
+
+				// Attempt to obtain from pool
 				if (!this.serverSessionPool.isEmpty()) {
-					// Source from pool
-					serverMo = this.serverSessionPool.remove(0);
+					// Return from the pool
+					session = this.serverSessionPool.remove(0);
+
+				} else if (this.numberOfSessions >= this.maxSessions) {
+					// Block waiting for session to become available
+					try {
+						this.serverSessionPool.wait(100);
+					} catch (InterruptedException ex) {
+						// Ignore interruptions
+					}
+					
 				} else {
 					// Create the server session (transacted)
-					serverMo = new JmsServerManagedObject(this, this.connection
+					session = new JmsServerManagedObject(this, this.connection
 							.createSession(true, Session.SESSION_TRANSACTED));
 
 					// Increment the number of sessions
 					this.numberOfSessions++;
 				}
-
-				// Return the session
-				return serverMo;
 			}
+
+			// Found the session
+			return session;
 		}
 	}
 
