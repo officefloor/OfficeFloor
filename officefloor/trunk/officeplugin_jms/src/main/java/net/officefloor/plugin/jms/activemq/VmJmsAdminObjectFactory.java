@@ -18,6 +18,7 @@ package net.officefloor.plugin.jms.activemq;
 
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.JMSException;
 
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.plugin.jms.JmsAdminObjectFactory;
@@ -122,7 +123,10 @@ public class VmJmsAdminObjectFactory implements JmsAdminObjectFactory {
 	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#createConnectionFactory()
 	 */
 	public ConnectionFactory createConnectionFactory() throws Exception {
-		return connectionFactory;
+		synchronized (VmJmsAdminObjectFactory.class) {
+			validateStarted();
+			return connectionFactory;
+		}
 	}
 
 	/*
@@ -131,7 +135,24 @@ public class VmJmsAdminObjectFactory implements JmsAdminObjectFactory {
 	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#createDestination()
 	 */
 	public Destination createDestination() throws Exception {
-		return destination;
+		synchronized (VmJmsAdminObjectFactory.class) {
+			validateStarted();
+			return destination;
+		}
+	}
+
+	/**
+	 * Ensures the {@link BrokerService} has been started.
+	 * 
+	 * @throws Exception
+	 *             If not started.
+	 */
+	private synchronized void validateStarted() throws Exception {
+		if (service == null) {
+			throw new JMSException(BrokerService.class.getSimpleName()
+					+ " has not been started for this "
+					+ VmJmsAdminObjectFactory.class.getName());
+		}
 	}
 
 }
