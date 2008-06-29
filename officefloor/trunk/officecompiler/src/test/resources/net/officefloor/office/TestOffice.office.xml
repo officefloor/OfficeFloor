@@ -37,6 +37,7 @@
 		<administrator id="1"
 			source="net.officefloor.admin.TestAdminSource"
 			duty-keys="net.officefloor.duty.DutyKey" x="100" y="200">
+			<team name="TEAM ONE" />
 			<properties>
 				<property name="prop name" value="prop value" />
 			</properties>

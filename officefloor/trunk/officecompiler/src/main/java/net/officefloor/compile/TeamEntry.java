@@ -20,14 +20,14 @@ import java.util.Properties;
 
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.TeamFactory;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TeamModel;
 
 /**
- * {@link net.officefloor.frame.spi.team.Team} entry for the
- * {@link net.officefloor.frame.api.manage.OfficeFloor}.
+ * {@link Team} entry for the {@link OfficeFloor}.
  * 
  * @author Daniel
  */
@@ -47,7 +47,7 @@ public class TeamEntry extends AbstractEntry<OfficeFloorBuilder, TeamModel> {
 	public static TeamEntry loadTeam(TeamModel configuration,
 			OfficeFloorEntry officeFloorEntry,
 			OfficeFloorCompilerContext context) {
-		
+
 		// Create the team entry
 		TeamEntry team = new TeamEntry(configuration.getId(), configuration,
 				officeFloorEntry);

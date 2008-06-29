@@ -108,7 +108,7 @@ public class AdministratorSourceLoader {
 		// Create the Administrator
 		AdministratorModel administratorModel = new AdministratorModel(
 				administratorId, administratorSource.getClass().getName(),
-				dutyKeysClass.getName(), propertyModels
+				dutyKeysClass.getName(), null, propertyModels
 						.toArray(new PropertyModel[0]), null, dutyModels);
 
 		// Return the Administrator

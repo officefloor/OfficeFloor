@@ -16,26 +16,23 @@
  */
 package net.officefloor.compile;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
-import net.officefloor.model.officefloor.OfficeManagedObjectModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.work.WorkModel;
 import net.officefloor.util.OFCU;
 
@@ -136,6 +133,13 @@ public class WorkEntry<W extends Work> extends
 	 * {@link TaskEntry} instances of this {@link WorkEntry}.
 	 */
 	private final List<TaskEntry<W>> tasks = new LinkedList<TaskEntry<W>>();
+
+	/**
+	 * Mapping of the
+	 * {@link net.officefloor.model.office.ExternalManagedObjectModel} to the
+	 * local {@link Work} name of the {@link ManagedObject}.
+	 */
+	private final Map<net.officefloor.model.office.ExternalManagedObjectModel, String> officeMoToWorkMoName = new HashMap<net.officefloor.model.office.ExternalManagedObjectModel, String>();
 
 	/**
 	 * Initiate.
@@ -252,8 +256,8 @@ public class WorkEntry<W extends Work> extends
 		this.getBuilder().setWorkFactory(workFactory);
 		this.getBuilder().setInitialTask(initialFlowItem.getId());
 
-		// Create the listing of external managed objects
-		Set<ExternalManagedObjectModel> externalManagedObjects = new HashSet<ExternalManagedObjectModel>();
+		// Create the unique set of desk external managed objects of this work
+		Map<ExternalManagedObjectModel, ManagedObjectLine<W>> externalManagedObjects = new HashMap<ExternalManagedObjectModel, ManagedObjectLine<W>>();
 		for (TaskEntry task : this.tasks) {
 			for (DeskTaskObjectModel taskObject : task.getDeskTaskModel()
 					.getObjects()) {
@@ -263,18 +267,20 @@ public class WorkEntry<W extends Work> extends
 					continue;
 				}
 
-				// Register the external managed object
-				externalManagedObjects.add(OFCU.get(
-						taskObject.getManagedObject(),
-						"No managed object for task ${0} object ${1}",
-						task.getId(), taskObject.getObjectType())
-						.getManagedObject());
+				// Create the managed object line
+				ManagedObjectLine<W> line = new ManagedObjectLine<W>(
+						taskObject, this);
+
+				// Add the line
+				externalManagedObjects
+						.put(line.deskExternalManagedObject, line);
 			}
 		}
 
-		// Build the managed objects
-		for (ExternalManagedObjectModel externalManagedObject : externalManagedObjects) {
-			this.buildManagedObject(externalManagedObject);
+		// Build the unique set of managed objects for this work.
+		// Must be done before tasks as registers work managed object names.
+		for (ManagedObjectLine<W> line : externalManagedObjects.values()) {
+			this.buildManagedObject(line);
 		}
 
 		// Build the tasks
@@ -291,90 +297,116 @@ public class WorkEntry<W extends Work> extends
 	 * @throws Exception
 	 *             If fails.
 	 */
-	public void buildManagedObject(ExternalManagedObjectModel deskMo)
-			throws Exception {
+	public void buildManagedObject(ManagedObjectLine<W> line) throws Exception {
 
-		// Obtain the external managed object name
-		String externalMoName = deskMo.getName();
+		// Obtain the name that tasks may use
+		String workMoName = line.deskExternalManagedObject.getName();
 
-		// Obtain the desk sub room
-		SubRoomModel subRoom = this.deskEntry.getParentRoom().getSubRoom(
-				this.deskEntry);
-
-		// Obtain the room containing the desk
-		RoomEntry roomEntry = this.deskEntry.getParentRoom();
-
-		// Obtain the office external managed object
-		OfficeEntry officeEntry = null;
-		while (roomEntry != null) {
-
-			// Obtain the external managed object name on the desk sub room
-			SubRoomManagedObjectModel subRoomMo = roomEntry
-					.getSubRoomManagedObject(subRoom, externalMoName);
-
-			// Obtain the external managed object name for the room
-			externalMoName = subRoomMo.getExternalManagedObject()
-					.getExternalManagedObject().getName();
-
-			// Obtain parent room of room or office
-			officeEntry = roomEntry.getOffice(); // obtain before changing
-			roomEntry = roomEntry.getParentRoom();
-		}
-
-		// Obtain the office within the office floor
-		OfficeFloorEntry officeFloorEntry = officeEntry.getOfficeFloorEntry();
-		OfficeFloorOfficeModel office = officeFloorEntry
-				.getOfficeFloorOfficeModel(officeEntry);
-
-		// Obtain the office external managed object
-		net.officefloor.model.office.ExternalManagedObjectModel officeExtMo = null;
-		for (net.officefloor.model.office.ExternalManagedObjectModel mo : officeEntry
-				.getModel().getExternalManagedObjects()) {
-			if (externalMoName.equals(mo.getName())) {
-				officeExtMo = mo;
-			}
-		}
-		if (officeExtMo == null) {
-			throw new Exception("Can not find external managed object '"
-					+ externalMoName + "' of office " + officeEntry.getId());
-		}
+		// Obtain the name known on the office
+		String officeMoName = line.officeExternalManagedObject.getName();
 
 		// Build managed object based on its scope
-		if (MANAGED_OBJECT_SCOPE_PROCESS.equals(officeExtMo.getScope())) {
+		String moScope = line.officeExternalManagedObject.getScope();
+		if (MANAGED_OBJECT_SCOPE_PROCESS.equals(moScope)) {
 			// Register the process managed object to this work
-			officeEntry.getBuilder().addProcessManagedObject(
-					"p:" + externalMoName, externalMoName);
-			this.getBuilder().registerProcessManagedObject(deskMo.getName(),
-					"p:" + externalMoName);
+			this.bindProcessBoundManagedObject(workMoName,
+					line.officeExternalManagedObject);
 
-		} else if (MANAGED_OBJECT_SCOPE_WORK.equals(officeExtMo.getScope())) {
+		} else if (MANAGED_OBJECT_SCOPE_WORK.equals(moScope)) {
 			// Register the work managed object to this work
-			this.getBuilder().addWorkManagedObject(deskMo.getName(),
-					externalMoName);
+			this.getBuilder().addWorkManagedObject(workMoName, officeMoName);
 
 		} else {
-			throw new Exception("Unknown scope '" + officeExtMo.getScope()
-					+ "' for managed object '" + externalMoName
-					+ "' of office '" + office.getId() + "'");
+			throw new Exception("Unknown scope '" + moScope
+					+ "' for managed object '" + officeMoName + "' of office '"
+					+ line.officeEntry.getId() + "'");
 		}
 
-		// Obtain office floor managed object
-		OfficeManagedObjectModel officeMo = null;
-		for (OfficeManagedObjectModel mo : office.getManagedObjects()) {
-			if (officeExtMo.getName().equals(mo.getManagedObjectName())) {
-				officeMo = mo;
-			}
-		}
-		if (officeMo == null) {
-			throw new Exception("Can not find managed object '"
-					+ externalMoName + "' for office " + office.getId());
-		}
+		// Register the office managed object to local work name
+		this.officeMoToWorkMoName.put(line.officeExternalManagedObject,
+				workMoName);
 
 		// Register the managed object to the office
-		officeEntry.getBuilder().registerManagedObject(
-				externalMoName,
-				officeMo.getManagedObjectSource().getManagedObjectSource()
-						.getId());
+		line.officeEntry.getBuilder().registerManagedObject(officeMoName,
+				line.managedObjectSource.getId());
 	}
 
+	/**
+	 * <p>
+	 * Binds a {@link ProcessState} bound {@link ManagedObject} to this
+	 * {@link Work}.
+	 * <p>
+	 * This is available for additional {@link ProcessState} bound
+	 * {@link ManagedObject} instances to be available should additional
+	 * functionality such as administration be required on them.
+	 * 
+	 * @param workManagedObjectName
+	 *            Name that the {@link ManagedObject} is accessible by
+	 *            {@link Task} instances of the {@link Work}.
+	 * @param officeManagedObject
+	 *            {@link net.officefloor.model.office.ExternalManagedObjectModel}.
+	 * @throws Exception
+	 *             If fails to bind.
+	 */
+	public void bindProcessBoundManagedObject(
+			String workManagedObjectName,
+			net.officefloor.model.office.ExternalManagedObjectModel officeManagedObject)
+			throws Exception {
+
+		// Obtain the office managed object name
+		String officeManagedObjectName = officeManagedObject.getName();
+		String processLinkedName = "p:" + officeManagedObjectName;
+
+		// Obtain the office entry
+		OfficeEntry officeEntry = this.getOfficeEntry();
+
+		// Register the process managed object within this office
+		officeEntry.getBuilder().addProcessManagedObject(processLinkedName,
+				officeManagedObjectName);
+
+		// Register the process managed object to this work
+		this.getBuilder().registerProcessManagedObject(workManagedObjectName,
+				processLinkedName);
+	}
+
+	/**
+	 * <p>
+	 * Binds a {@link ProcessState} bound {@link ManagedObject} to this
+	 * {@link Work} that is not being used by a {@link Task}. Likely will be
+	 * involved in other functionality such as administration.
+	 * <p>
+	 * A {@link Work} name is generated for the {@link ManagedObject} to make it
+	 * accessible within the {@link Work}.
+	 * 
+	 * @param officeManagedObject
+	 *            {@link net.officefloor.model.office.ExternalManagedObjectModel}.
+	 * @return Name of {@link ManagedObject} local to the {@link Work}.
+	 * @throws Exception
+	 *             If fails to bind {@link ManagedObject}.
+	 */
+	public String bindProcessBoundManagedObject(
+			net.officefloor.model.office.ExternalManagedObjectModel officeManagedObject)
+			throws Exception {
+
+		// Obtain local work managed object name
+		String workManagedObjectName = this.officeMoToWorkMoName
+				.get(officeManagedObject);
+		if (workManagedObjectName == null) {
+			// Generate name as new managed object
+			Collection<String> usedNames = this.officeMoToWorkMoName.values();
+			String prefix = "NecessaryProcessManagedObject";
+			int suffix = 1;
+			workManagedObjectName = prefix;
+			while (usedNames.contains(workManagedObjectName)) {
+				workManagedObjectName = prefix + String.valueOf(suffix++);
+			}
+		}
+
+		// Bind the managed object
+		this.bindProcessBoundManagedObject(workManagedObjectName,
+				officeManagedObject);
+
+		// Return the local work managed object name
+		return workManagedObjectName;
+	}
 }
