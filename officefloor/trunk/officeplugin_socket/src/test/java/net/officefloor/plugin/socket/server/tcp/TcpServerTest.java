@@ -160,7 +160,104 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 	 * Ensures able to handle multiple requests.
 	 */
 	public void testMultipleRequests() throws Exception {
-		this.doRequests(2, true);
+		this.doRequests(10, true);
+	}
+
+	/**
+	 * Ensures can handle parallel requests.
+	 */
+	public void testParallelRequests() throws Throwable {
+		this.doParallelRequests(3, 10, true);
+	}
+
+	/**
+	 * Ensures can handle heavy load of requests.
+	 */
+	public void testHeavyLoad() throws Throwable {
+		final int CALLERS = 100;
+		final int REQUESTS = 100;
+		long startTime = System.currentTimeMillis();
+		this.doParallelRequests(CALLERS, REQUESTS, true);
+		long endTime = System.currentTimeMillis();
+		System.out.println(CALLERS + " callers made " + REQUESTS
+				+ " requests in " + (endTime - startTime) + " milliseconds");
+	}
+
+	/**
+	 * Does parallel requesting.
+	 * 
+	 * @param numberOfCallers
+	 *            Number of callers making parallel requests.
+	 * @param numberOfRequestsPerCaller
+	 *            Number requests each caller makes.
+	 * @param isLog
+	 *            Flag indicating whether to log details.
+	 */
+	private void doParallelRequests(int numberOfCallers,
+			final int numberOfRequestsPerCaller, final boolean isLog)
+			throws Throwable {
+
+		// Create the arrays for managing threads
+		final boolean[] isCompleteFlags = new boolean[numberOfCallers];
+		final Throwable[] failures = new Throwable[numberOfCallers];
+
+		// Create the callers to run
+		for (int i = 0; i < numberOfCallers; i++) {
+
+			// Indicate caller index
+			final int callerIndex = i;
+
+			// Create the caller
+			Runnable caller = new Runnable() {
+				@Override
+				public void run() {
+					try {
+
+						// Execute the requested number of calls
+						TcpServerTest.this.doRequests(
+								numberOfRequestsPerCaller, isLog);
+
+					} catch (Throwable ex) {
+						// Record failure of caller
+						synchronized (isCompleteFlags) {
+							failures[callerIndex] = ex;
+						}
+					} finally {
+						// Flag caller complete
+						synchronized (isCompleteFlags) {
+							isCompleteFlags[callerIndex] = true;
+						}
+					}
+				}
+			};
+
+			// Start the caller
+			new Thread(caller).start();
+		}
+
+		// Wait for all callers to be complete
+		boolean isComplete = false;
+		while (!isComplete) {
+			Thread.sleep(100);
+			isComplete = true;
+			synchronized (isCompleteFlags) {
+				// Determine if complete
+				for (boolean isCompleteFlag : isCompleteFlags) {
+					if (!isCompleteFlag) {
+						isComplete = false;
+					}
+				}
+			}
+		}
+
+		// Propagate first caller failure
+		synchronized (isCompleteFlags) {
+			for (Throwable failure : failures) {
+				if (failure != null) {
+					throw failure;
+				}
+			}
+		}
 	}
 
 	/**
@@ -177,7 +274,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		// Open socket to Office
 		Socket socket = new Socket();
 		socket.connect(new InetSocketAddress(InetAddress.getLocalHost(), PORT),
-				100);
+				1000);
 
 		// Obtain the streams
 		OutputStream outputStream = socket.getOutputStream();

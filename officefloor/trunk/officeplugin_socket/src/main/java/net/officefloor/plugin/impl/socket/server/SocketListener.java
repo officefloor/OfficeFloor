@@ -184,7 +184,13 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 			// Obtain the selected keys
 			Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
 
-			// Process all the connections
+			// TODO remove
+			System.out.println("TODO [" + this.getClass().getSimpleName() + ":"
+					+ this.toString().split("@")[1] + "] reg-conn="
+					+ this.registeredConnections + " selected "
+					+ selectedKeys.size());
+
+			// Process all the selected channels
 			for (SelectionKey key : this.selector.keys()) {
 
 				// Obtain the connection
@@ -192,7 +198,7 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 						.attachment();
 
 				// Synchronize on connection to reduce locking
-				synchronized (connection) {
+				synchronized (connection.getLock()) {
 					try {
 
 						// Interest Operations
@@ -204,6 +210,9 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 						// Determine if selected connection
 						boolean isActive = false; // idle
 						if (selectedKeys.contains(key)) {
+
+							// Remove the key from selection
+							selectedKeys.remove(key);
 
 							// Ensure key is valid
 							if (!key.isValid()) {
@@ -275,18 +284,6 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 									.handleIdleConnection(this);
 						}
 
-						// Determine if require reading
-						if (connection.readStream.getLastMessage() != null) {
-							// Flag to read message
-							interestOps |= SelectionKey.OP_READ;
-						}
-
-						// Determine if require writing
-						if (connection.writeStream.getFirstMessage() != null) {
-							// Flag to write message
-							interestOps |= SelectionKey.OP_WRITE;
-						}
-
 						// Handle closing connection
 						if (this.isCloseConnection || connection.isCancelled()) {
 							// Attempt to close connection
@@ -304,6 +301,16 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 
 							// Connection closing, so write until closed
 							interestOps |= SelectionKey.OP_WRITE;
+
+						} else {
+							// Connection not closed, continue reading
+							interestOps |= SelectionKey.OP_READ;
+
+							// Determine if require writing
+							if (connection.writeStream.getFirstMessage() != null) {
+								// Flag to write message
+								interestOps |= SelectionKey.OP_WRITE;
+							}
 						}
 
 						// Determine if require changing interest ops
@@ -320,12 +327,12 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 						System.err.println("TODO handle failure of connection");
 						ex.printStackTrace();
 					}
-
-					// Flag that complete if no further connections
-					if (this.registeredConnections <= 0) {
-						context.setComplete(true);
-					}
 				}
+			}
+
+			// Flag that complete if no further connections
+			if (this.registeredConnections <= 0) {
+				context.setComplete(true);
 			}
 
 			// Start listening to the just registered communications
@@ -390,12 +397,12 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 		// Flag connection as closed
 		connection.cancel();
 
+		// Connection unregistered
+		this.registeredConnections--;
+
 		// Cancel the key and close connection
 		key.cancel();
 		connection.socketChannel.close();
-
-		// Connection is also unregistered
-		this.registeredConnections--;
 	}
 
 	/**

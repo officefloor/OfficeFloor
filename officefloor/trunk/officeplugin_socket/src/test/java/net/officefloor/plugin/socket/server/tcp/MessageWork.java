@@ -68,6 +68,10 @@ public class MessageWork {
 			// Handle message
 			switch (index) {
 			case -1:
+				
+				// TODO remove
+				System.out.println("Closing connection");
+				
 				// Close connection (do not process further messages)
 				connection.close();
 				break;

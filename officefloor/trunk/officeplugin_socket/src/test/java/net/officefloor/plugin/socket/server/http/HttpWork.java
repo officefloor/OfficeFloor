@@ -40,15 +40,22 @@ public class HttpWork {
 		// Obtain the HTTP request
 		HttpRequest request = connection.getHttpRequest();
 
-		// TODO remove
+		// Detail request being serviced
 		System.out.println(this.getClass().getSimpleName()
 				+ " serving request: " + request.getMethod() + " "
 				+ request.getPath());
 
-		// Send Hello World
+		// Obtain response for the request
 		HttpResponse response = connection.getHttpResponse();
-		new OutputStreamWriter(response.getBody()).append("Hello World")
-				.flush();
+
+		// Write the body of the response
+		String message = "Hello World";
+		new OutputStreamWriter(response.getBody()).append(message).flush();
+
+		// Specify length of the body
+		response.addHeader("Content-Length", String.valueOf(message.length()));
+
+		// Send response
 		response.send();
 	}
 
