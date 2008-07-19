@@ -129,7 +129,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 		// TODO handle write
 		System.err.println("TODO [" + this.getClass().getSimpleName()
 				+ "] handleWrite");
-		context.setCloseConnection(true);
+		// context.setCloseConnection(true);
 	}
 
 	/*
@@ -142,7 +142,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 		// TODO implement
 		System.err.println("TODO [" + this.getClass().getSimpleName()
 				+ "] handleIdleConnection");
-		context.setCloseConnection(true);
+		// context.setCloseConnection(true);
 	}
 
 }

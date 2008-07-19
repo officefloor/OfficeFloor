@@ -24,6 +24,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Iterator;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
@@ -131,7 +132,7 @@ class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 
 		// Register the channel with the selector
 		this.selector = Selector.open();
-		this.channel.register(this.selector, this.channel.validOps());
+		this.channel.register(this.selector, SelectionKey.OP_ACCEPT);
 	}
 
 	/*
@@ -185,17 +186,16 @@ class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 
 			} else {
 				// Obtain the selection key
-				for (SelectionKey key : selector.selectedKeys()) {
+				for (Iterator<SelectionKey> iterator = this.selector
+						.selectedKeys().iterator(); iterator.hasNext();) {
+					SelectionKey key = iterator.next();
+					iterator.remove();
 
 					// Check if accepting a connection
 					if (key.isAcceptable()) {
 
-						// Obtain the Server Socket Channel
-						ServerSocketChannel channel = (ServerSocketChannel) key
-								.channel();
-
-						// Obtain the server channel
-						SocketChannel socketChannel = channel.accept();
+						// Obtain the socket channel
+						SocketChannel socketChannel = this.channel.accept();
 						if (socketChannel != null) {
 
 							// Flag socket as unblocking
