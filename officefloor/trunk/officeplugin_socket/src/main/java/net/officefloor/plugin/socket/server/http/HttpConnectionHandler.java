@@ -19,7 +19,6 @@ package net.officefloor.plugin.socket.server.http;
 import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
-import net.officefloor.plugin.socket.server.http.parse.HttpRequestParserTest;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
