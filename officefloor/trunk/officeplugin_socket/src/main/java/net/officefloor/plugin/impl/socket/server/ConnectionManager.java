@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sun.corba.se.spi.activation.Server;
-
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
@@ -31,6 +29,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.plugin.socket.server.spi.Connection;
+import net.officefloor.plugin.socket.server.spi.Server;
 
 /**
  * Manages the {@link Connection} instances with the {@link Server}.
