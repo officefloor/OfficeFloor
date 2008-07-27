@@ -61,6 +61,9 @@ public class HttpServer implements Server {
 
 		// Create the HTTP managed object
 		HttpManagedObject managedObject = new HttpManagedObject(httpConnHandler);
+		
+		// Reset the connection handler for next request
+		httpConnHandler.resetForNextRequest();
 
 		// Invoke with the managed object
 		this.handlerContext.invokeProcess(0, managedObject, managedObject);

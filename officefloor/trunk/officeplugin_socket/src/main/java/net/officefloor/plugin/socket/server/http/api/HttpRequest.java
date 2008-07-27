@@ -17,6 +17,7 @@
 package net.officefloor.plugin.socket.server.http.api;
 
 import java.io.InputStream;
+import java.util.Set;
 
 /**
  * HTTP request from the {@link ServerHttpConnection}.
@@ -46,6 +47,13 @@ public interface HttpRequest {
 	 * @return HTTP version of the request.
 	 */
 	String getVersion();
+
+	/**
+	 * Obtains the set of HTTP header names on the request.
+	 * 
+	 * @return Set of HTTP header names on the request.
+	 */
+	Set<String> getHeaderNames();
 
 	/**
 	 * Obtains the HTTP header value.

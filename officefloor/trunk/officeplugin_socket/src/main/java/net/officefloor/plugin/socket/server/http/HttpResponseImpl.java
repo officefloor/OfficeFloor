@@ -205,6 +205,13 @@ public class HttpResponseImpl implements HttpResponse {
 	 */
 	@Override
 	public void send() throws IOException {
+
+		// Provide the content length
+		int contentLength = this.body.size();
+		this.headers.add(new Header("Content-Length", String
+				.valueOf(contentLength)));
+
+		// Send the response
 		this.connectionHandler.sendResponse(this);
 	}
 
