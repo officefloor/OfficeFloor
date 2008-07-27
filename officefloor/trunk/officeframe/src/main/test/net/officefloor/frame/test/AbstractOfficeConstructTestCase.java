@@ -117,27 +117,47 @@ public abstract class AbstractOfficeConstructTestCase extends
 				});
 	}
 
+	/**
+	 * <p>
+	 * Validates that no top level escalation occurred.
+	 * <p>
+	 * This method will clear the escalation on exit.
+	 */
+	public void validateNoTopLevelEscalation() throws Throwable {
+		try {
+			if (this.exception != null) {
+				throw this.exception;
+			}
+		} finally {
+			this.exception = null;
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see junit.framework.TestCase#tearDown()
 	 */
 	protected void tearDown() throws Exception {
-		// Return if no failure
-		if (this.exception == null) {
-			return;
-		}
+		try {
+			// Return if no failure
+			if (this.exception == null) {
+				return;
+			}
 
-		// Propagate failure
-		if (this.exception instanceof Exception) {
-			throw (Exception) this.exception;
-		} else if (this.exception instanceof Error) {
-			throw (Error) this.exception;
-		} else {
-			StringWriter buffer = new StringWriter();
-			this.exception.printStackTrace(new PrintWriter(buffer));
-			fail("Unknown failure " + this.exception.getClass().getName()
-					+ ": " + buffer.toString());
+			// Propagate failure
+			if (this.exception instanceof Exception) {
+				throw (Exception) this.exception;
+			} else if (this.exception instanceof Error) {
+				throw (Error) this.exception;
+			} else {
+				StringWriter buffer = new StringWriter();
+				this.exception.printStackTrace(new PrintWriter(buffer));
+				fail("Unknown failure " + this.exception.getClass().getName()
+						+ ": " + buffer.toString());
+			}
+		} finally {
+			super.tearDown();
 		}
 	}
 
