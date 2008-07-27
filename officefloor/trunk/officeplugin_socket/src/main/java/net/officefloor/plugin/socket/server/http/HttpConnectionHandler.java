@@ -59,6 +59,14 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	}
 
 	/**
+	 * Resets for next request.
+	 */
+	public void resetForNextRequest() {
+		// Unset parser so new created on next request
+		this.httpRequestParser = null;
+	}
+
+	/**
 	 * Sends the {@link HttpResponseImpl}.
 	 * 
 	 * @param response
@@ -85,7 +93,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	/**
 	 * {@link HttpRequestParserTest}.
 	 */
-	private HttpRequestParser httpRequestParser = new HttpRequestParser();
+	private HttpRequestParser httpRequestParser;
 
 	/**
 	 * Buffer to read in content. Use the same buffer to reduce unnecessary
@@ -101,6 +109,12 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	@Override
 	public void handleRead(ReadContext context) {
 		try {
+
+			// Ensure a parser is available
+			if (this.httpRequestParser == null) {
+				this.httpRequestParser = new HttpRequestParser();
+			}
+
 			// Read in the content
 			int bytesRead = context.getReadMessage().read(this.buffer);
 

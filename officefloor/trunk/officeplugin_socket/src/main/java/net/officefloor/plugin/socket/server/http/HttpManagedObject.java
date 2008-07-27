@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.http;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
@@ -60,8 +61,12 @@ public class HttpManagedObject implements ServerHttpConnection,
 	 */
 	public HttpManagedObject(HttpConnectionHandler connectionHandler) {
 		this.connectionHandler = connectionHandler;
+
+		// Create the request
 		this.request = new HttpRequestImpl(this.connectionHandler
 				.getHttpRequestParser());
+
+		// Create the response to fill out
 		this.response = new HttpResponseImpl(connectionHandler, this.request);
 	}
 
@@ -199,6 +204,16 @@ public class HttpManagedObject implements ServerHttpConnection,
 		@Override
 		public String getVersion() {
 			return this.version;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.plugin.socket.server.http.api.HttpRequest#getHeaderNames()
+		 */
+		@Override
+		public Set<String> getHeaderNames() {
+			return this.headers.keySet();
 		}
 
 		/*

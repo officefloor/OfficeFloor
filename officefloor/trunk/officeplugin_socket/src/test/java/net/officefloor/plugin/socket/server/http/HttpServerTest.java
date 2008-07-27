@@ -16,86 +16,30 @@
  */
 package net.officefloor.plugin.socket.server.http;
 
-import net.officefloor.frame.api.build.BuildException;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
-import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.OfficeEnhancerContext;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
-import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
-import net.officefloor.plugin.impl.socket.server.ServerSocketHandlerEnum;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.util.EntityUtils;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.SimpleHttpConnectionManager;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 
 /**
  * Tests the {@link HttpServerSocketManagedObjectSource}.
  * 
  * @author Daniel
  */
-public class HttpServerTest extends AbstractOfficeConstructTestCase {
-
-	/**
-	 * Starting port number.
-	 */
-	public static int portStart = 12643;
-
-	/**
-	 * Port number to use for testing.
-	 */
-	public static int PORT;
-
-	/**
-	 * {@link OfficeFloor}.
-	 */
-	private OfficeFloor officeFloor;
+public class HttpServerTest extends HttpServerStartup {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#setUp()
+	 * @see net.officefloor.plugin.socket.server.http.HttpServerStartup#registerHttpServiceTask()
 	 */
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
-		// Specify the port
-		PORT = portStart;
-		portStart++; // increment for next test
-
-		// Register the Server Socket Managed Object
-		ManagedObjectBuilder<?> serverSocketBuilder = this
-				.constructManagedObject("MO",
-						HttpServerSocketManagedObjectSource.class, "OFFICE");
-		serverSocketBuilder.addProperty("port", String.valueOf(PORT));
-		serverSocketBuilder.addProperty("buffer_size", "1024");
-		serverSocketBuilder.addProperty("message_size", "3");
-		serverSocketBuilder.setDefaultTimeout(3000);
-
-		// Register the necessary teams for socket listening
-		this.constructTeam("ACCEPTER_TEAM", new OnePersonTeam(100));
-		this.constructTeam("LISTENER_TEAM", new WorkerPerTaskTeam("Listener"));
-		this.constructTeam("CLEANUP_TEAM", new PassiveTeam());
-		OfficeBuilder officeBuilder = this.getOfficeBuilder();
-		officeBuilder.registerTeam("of-MO.serversocket." + PORT
-				+ ".Accepter.TEAM", "of-ACCEPTER_TEAM");
-		officeBuilder.registerTeam("of-MO.serversocket." + PORT
-				+ ".Listener.TEAM", "of-LISTENER_TEAM");
-
-		// Provide the process managed object to the office
-		officeBuilder.addProcessManagedObject("MO", "MO");
-
+	protected TaskReference registerHttpServiceTask() throws Exception {
 		// Register team to do the work
 		this.constructTeam("WORKER", new OnePersonTeam(100));
 
@@ -106,43 +50,8 @@ public class HttpServerTest extends AbstractOfficeConstructTestCase {
 				"WORKER");
 		taskBuilder.buildObject("P-MO", "MO");
 
-		// Link handler to task
-		officeBuilder.addOfficeEnhancer(new OfficeEnhancer() {
-			@Override
-			public void enhanceOffice(OfficeEnhancerContext context)
-					throws BuildException {
-				// Obtain the managed object handler builder
-				ManagedObjectHandlerBuilder<ServerSocketHandlerEnum> handlerBuilder = context
-						.getManagedObjectHandlerBuilder("of-MO",
-								ServerSocketHandlerEnum.class);
-
-				// Link in the handler task
-				handlerBuilder.registerHandler(
-						ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER)
-						.linkProcess(0, "servicer", "service");
-			}
-		});
-
-		// Create the Office Floor
-		this.officeFloor = this.constructOfficeFloor("OFFICE");
-
-		// Open the Office Floor
-		this.officeFloor.openOfficeFloor();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
-	 */
-	@Override
-	protected void tearDown() throws Exception {
-
-		// Close the office
-		this.officeFloor.closeOfficeFloor();
-
-		// Clean up
-		super.tearDown();
+		// Return the reference to the service task
+		return new TaskReference("servicer", "service");
 	}
 
 	/**
@@ -151,18 +60,33 @@ public class HttpServerTest extends AbstractOfficeConstructTestCase {
 	public void testGetRequest() throws Exception {
 
 		// Create the request
-		HttpUriRequest request = new HttpGet("http://localhost:" + PORT
-				+ "/path");
+		HttpMethod method = new GetMethod(this.getServerUrl() + "/path");
 
 		// Obtain the response
-		HttpResponse response = this.doRequest(request);
-
-		// Obtain the response body
-		String responseBody = EntityUtils.toString(response.getEntity());
+		String responseBody = this.doRequest(method);
 		assertEquals("Incorrect response body", "Hello World", responseBody);
 
 		// Output the response entity
 		System.out.println("GET response body: " + responseBody);
+	}
+
+	/**
+	 * Ensures can handle multiple GET requests.
+	 */
+	public void testMultipleGetRequests() throws Exception {
+
+		// Create the HTTP client (keeping the connection open between requests)
+		HttpClient client = new HttpClient();
+		client.getParams().setParameter("http.connection-manager.class",
+				new SimpleHttpConnectionManager());
+
+		// Validate multiple tests
+		for (int i = 0; i < 100; i++) {
+			// Execute the particular request
+			HttpMethod method = new GetMethod(this.getServerUrl() + "/path");
+			assertEquals("Incorrect response body for request " + i,
+					"Hello World", this.doRequest(client, method));
+		}
 	}
 
 	/**
@@ -171,14 +95,10 @@ public class HttpServerTest extends AbstractOfficeConstructTestCase {
 	public void testPostRequest() throws Exception {
 
 		// Create the request
-		HttpUriRequest request = new HttpPost("http://localhost:" + PORT
-				+ "/path");
-
-		// Obtain the response
-		HttpResponse response = this.doRequest(request);
+		HttpMethod method = new PostMethod(this.getServerUrl() + "/path");
 
 		// Obtain the response body
-		String responseBody = EntityUtils.toString(response.getEntity());
+		String responseBody = this.doRequest(method);
 		assertEquals("Incorrect response body", "Hello World", responseBody);
 
 		// Output the response entity
@@ -186,25 +106,39 @@ public class HttpServerTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Does the {@link HttpUriRequest}.
+	 * Does the {@link HttpMethod}.
 	 * 
 	 * @param request
-	 *            {@link HttpUriRequest}.
-	 * @return Resulting {@link HttpResponse}.
+	 *            {@link HttpMethod}.
+	 * @return Resulting body of response.
 	 */
-	private HttpResponse doRequest(HttpUriRequest request) throws Exception {
+	private String doRequest(HttpMethod method) throws Exception {
+		// Do the request
+		return this.doRequest(new HttpClient(), method);
+	}
 
-		// Create and initiate the client
-		DefaultHttpClient client = new DefaultHttpClient();
-		client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0,
-				false));
+	/**
+	 * Does the {@link HttpMethod}.
+	 * 
+	 * @param client
+	 *            {@link HttpClient}.
+	 * @param method
+	 *            {@link HttpMethod}.
+	 * @return Resulting body of response.
+	 */
+	private String doRequest(HttpClient client, HttpMethod method)
+			throws Exception {
+		try {
+			// Do the request and obtain the response
+			int status = client.executeMethod(method);
+			assertEquals("Incorrect status", 200, status);
 
-		// Do the request and obtain the response
-		HttpResponse response = client.execute(request);
-		assertNotNull(response);
+			// Return the response
+			return method.getResponseBodyAsString();
 
-		// Return the response
-		return response;
+		} finally {
+			method.releaseConnection();
+		}
 	}
 
 }
