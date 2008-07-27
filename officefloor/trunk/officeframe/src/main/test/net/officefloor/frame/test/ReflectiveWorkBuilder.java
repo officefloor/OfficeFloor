@@ -369,7 +369,7 @@ public class ReflectiveWorkBuilder implements Work,
 		@Override
 		public Object doTask(
 				TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context)
-				throws Exception {
+				throws Throwable {
 
 			// Create the parameters
 			Object[] parameters = new Object[this.method.getParameterTypes().length];
@@ -388,7 +388,7 @@ public class ReflectiveWorkBuilder implements Work,
 						ReflectiveWorkBuilder.this.workObject, parameters);
 			} catch (InvocationTargetException ex) {
 				// Throw cause of exception
-				throw (Exception) ex.getCause();
+				throw ex.getCause();
 			}
 		}
 	}
