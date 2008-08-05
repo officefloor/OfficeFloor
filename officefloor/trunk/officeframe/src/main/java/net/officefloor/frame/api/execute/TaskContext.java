@@ -16,21 +16,20 @@
  */
 package net.officefloor.frame.api.execute;
 
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Context in which the {@link net.officefloor.frame.api.execute.Task} is done.
+ * Context in which the {@link Task} is done.
  * 
  * @param P
- *            Type for the parameter to the
- *            {@link net.officefloor.frame.api.execute.Task}.
+ *            Type for the parameter to the {@link Task}.
  * @param W
- *            Specific {@link net.officefloor.frame.api.execute.Work}.
+ *            Specific {@link Work}.
  * @param M
- *            Type providing the keys to the
- *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
- *            instances.
+ *            Type providing the keys to the {@link ManagedObject} instances.
  * @param F
- *            Type providing the keys to the
- *            {@link net.officefloor.frame.internal.structure.Flow} instances.
+ *            Type providing the keys to the {@link Flow} instances.
  * 
  * @author Daniel
  */

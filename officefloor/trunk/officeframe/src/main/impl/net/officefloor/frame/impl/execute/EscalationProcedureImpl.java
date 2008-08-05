@@ -16,26 +16,11 @@
  */
 package net.officefloor.frame.impl.execute;
 
-import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
-import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
-import net.officefloor.frame.internal.structure.WorkMetaData;
-import net.officefloor.frame.spi.team.Team;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.internal.structure.EscalationProcedure}.
+ * Implementation of the {@link EscalationProcedure}.
  * 
  * @author Daniel
  */
@@ -67,51 +52,17 @@ public class EscalationProcedureImpl implements EscalationProcedure {
 	public EscalationProcedureImpl(
 			EscalationProcedure parentEscalationProcedure,
 			Escalation... escalations) {
-		// Store state
 		this.parentEscalationProcedure = parentEscalationProcedure;
 		this.escalations = escalations;
 	}
 
 	/**
 	 * Initiate top level {@link EscalationProcedure}.
-	 * 
-	 * @param team
-	 *            {@link Team} to execute the catch all {@link Task}.
 	 */
-	public EscalationProcedureImpl(Team team) {
-		// No parent as providing catch all escalation
+	public EscalationProcedureImpl() {
+		// No further escalations
 		this.parentEscalationProcedure = null;
-
-		// Create the catch all escalation
-		TaskMetaDataImpl<Throwable, Work, None, None> catchAllTask = new TaskMetaDataImpl<Throwable, Work, None, None>(
-				new CatchAllEscalationTaskFactory(), team, new int[0],
-				new int[0], new int[0], new TaskDutyAssociation[0],
-				new TaskDutyAssociation[0]);
-		FlowMetaData<Work> catchAllFlow = new FlowMetaDataImpl<Work>(
-				FlowInstigationStrategyEnum.SEQUENTIAL, catchAllTask, null);
-		WorkMetaData<Work> workMetaData = new WorkMetaDataImpl<Work>(-1,
-				new CatchAllEscalationWorkFactory(),
-				new ManagedObjectMetaData[0], new AdministratorMetaData[0],
-				catchAllFlow);
-		catchAllTask.loadRemainingState(workMetaData, new FlowMetaData[0],
-				null, this);
-		Escalation catchAllEscalation = new EscalationImpl(Throwable.class,
-				true, catchAllFlow);
-
-		// Provide catch all escalation
-		this.escalations = new Escalation[] { catchAllEscalation };
-	}
-
-	/**
-	 * Invoked by the catch all {@link Escalation}.
-	 * 
-	 * @param exception
-	 *            Cause of the escalation.
-	 */
-	protected void handleTopLevelEscalation(Throwable cause) {
-		// Default implementation is to write exception to stderr
-		System.err.println("Office Floor top level failure: ");
-		cause.printStackTrace();
+		this.escalations = new Escalation[0];
 	}
 
 	/*
@@ -136,93 +87,9 @@ public class EscalationProcedureImpl implements EscalationProcedure {
 			}
 		}
 
-		// Not found so ask parent for escalation
-		return this.parentEscalationProcedure.getEscalation(cause);
-	}
-
-	/**
-	 * {@link TaskFactory} for the top level {@link Escalation}.
-	 */
-	private class CatchAllEscalationTaskFactory implements
-			TaskFactory<Throwable, Work, None, None>,
-			Task<Throwable, Work, None, None> {
-
-		/*
-		 * ===========================================================================
-		 * TaskFactory
-		 * ===========================================================================
-		 */
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor.frame.api.execute.Work)
-		 */
-		@Override
-		public Task<Throwable, Work, None, None> createTask(Work work) {
-			return this;
-		}
-
-		/*
-		 * ===========================================================================
-		 * Task
-		 * ===========================================================================
-		 */
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
-		 */
-		@Override
-		public Object doTask(TaskContext<Throwable, Work, None, None> context) {
-
-			// Handle exception
-			EscalationProcedureImpl.this.handleTopLevelEscalation(context
-					.getParameter());
-
-			// No return
-			return null;
-		}
-	}
-
-	/**
-	 * {@link WorkFactory} for the top level {@link Escalation}.
-	 */
-	private static class CatchAllEscalationWorkFactory implements
-			WorkFactory<Work>, Work {
-
-		/*
-		 * ===========================================================================
-		 * WorkFactory
-		 * ===========================================================================
-		 */
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
-		 */
-		@Override
-		public Work createWork() {
-			return this;
-		}
-
-		/*
-		 * ===========================================================================
-		 * Work
-		 * ===========================================================================
-		 */
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-		 */
-		@Override
-		public void setWorkContext(WorkContext context) throws Exception {
-			// Do nothing
-		}
+		// Not found so ask parent for escalation (if have one)
+		return (this.parentEscalationProcedure == null ? null
+				: this.parentEscalationProcedure.getEscalation(cause));
 	}
 
 }

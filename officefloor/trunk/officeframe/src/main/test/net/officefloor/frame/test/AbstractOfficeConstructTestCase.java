@@ -21,6 +21,7 @@ import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
+import junit.framework.TestCase;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.BuildException;
@@ -32,14 +33,13 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.OfficeFrameImpl;
-import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -51,13 +51,12 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
- * Abstract {@link junit.framework.TestCase} for construction testing of an
- * Office.
+ * Abstract {@link TestCase} for construction testing of an Office.
  * 
  * @author Daniel
  */
 public abstract class AbstractOfficeConstructTestCase extends
-		OfficeFrameTestCase {
+		OfficeFrameTestCase implements EscalationHandler {
 
 	/**
 	 * {@link OfficeFloorBuilder}.
@@ -105,16 +104,20 @@ public abstract class AbstractOfficeConstructTestCase extends
 		this.officeBuilder = OfficeFrame.getInstance().getBuilderFactory()
 				.createOfficeBuilder();
 
-		// Specify exception handling of the office floor
-		this.officeFloorBuilder
-				.setEscalationProcedure(new EscalationProcedureImpl(
-						new PassiveTeam()) {
-					@Override
-					protected void handleTopLevelEscalation(Throwable cause) {
-						// Specify for exception to be thrown
-						AbstractOfficeConstructTestCase.this.exception = cause;
-					}
-				});
+		// Initiate to receive top level escalations to report back in tests
+		this.officeBuilder.setOfficeEscalationHandler(this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.api.execute.EscalationHandler#handleEscalation(java.lang.Throwable)
+	 */
+	@Override
+	public synchronized void handleEscalation(Throwable escalation)
+			throws Throwable {
+		// Record exception to be thrown later
+		this.exception = escalation;
 	}
 
 	/**
@@ -123,12 +126,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * <p>
 	 * This method will clear the escalation on exit.
 	 */
-	public void validateNoTopLevelEscalation() throws Throwable {
+	public synchronized void validateNoTopLevelEscalation() throws Throwable {
 		try {
 			if (this.exception != null) {
 				throw this.exception;
 			}
 		} finally {
+			// Exception thrown, so have it cleared
 			this.exception = null;
 		}
 	}
@@ -138,7 +142,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @see junit.framework.TestCase#tearDown()
 	 */
-	protected void tearDown() throws Exception {
+	protected synchronized void tearDown() throws Exception {
 		try {
 			// Return if no failure
 			if (this.exception == null) {

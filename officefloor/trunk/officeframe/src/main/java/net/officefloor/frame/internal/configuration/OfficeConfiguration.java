@@ -20,10 +20,15 @@ import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Configuration of an Office.
@@ -40,31 +45,24 @@ public interface OfficeConfiguration {
 	String getOfficeName();
 
 	/**
-	 * Obtains the registered {@link net.officefloor.frame.spi.team.Team} links.
+	 * Obtains the registered {@link Team} links.
 	 * 
-	 * @return Registered {@link net.officefloor.frame.spi.team.Team} links.
+	 * @return Registered {@link Team} links.
 	 */
 	LinkedTeamConfiguration[] getRegisteredTeams();
 
 	/**
-	 * Obtains the registered
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} links.
+	 * Obtains the registered {@link ManagedObject} links.
 	 * 
-	 * @return Registered
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         links.
+	 * @return Registered {@link ManagedObject} links.
 	 */
 	LinkedManagedObjectConfiguration[] getRegisteredManagedObjects();
 
 	/**
-	 * Obtains the {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 * instances to be bound to the
-	 * {@link net.officefloor.frame.internal.structure.ProcessState} of this
-	 * {@link Office}.
+	 * Obtains the {@link ManagedObject} instances to be bound to the
+	 * {@link ProcessState} of this {@link Office}.
 	 * 
-	 * @return Listing of the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances.
+	 * @return Listing of the {@link ManagedObject} instances.
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
@@ -72,11 +70,9 @@ public interface OfficeConfiguration {
 			throws ConfigurationException;
 
 	/**
-	 * Obtains the configuration of the
-	 * {@link net.officefloor.frame.api.execute.Work} instances.
+	 * Obtains the configuration of the {@link Work} instances.
 	 * 
-	 * @return {@link net.officefloor.frame.api.execute.Work} configuration for
-	 *         the input name.
+	 * @return {@link Work} configuration for the input name.
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
@@ -91,6 +87,14 @@ public interface OfficeConfiguration {
 	 *             If invalid configuration.
 	 */
 	OfficeEnhancer[] getOfficeEnhancers() throws ConfigurationException;
+
+	/**
+	 * Obtains the {@link EscalationHandler} for the {@link Office}.
+	 * 
+	 * @return {@link EscalationHandler} for the {@link Office}. May be
+	 *         <code>null</code>.
+	 */
+	EscalationHandler getOfficeEscalationHandler();
 
 	/**
 	 * <p>
@@ -114,12 +118,9 @@ public interface OfficeConfiguration {
 			String taskName) throws ConfigurationException;
 
 	/**
-	 * Obtains the configuration of the
-	 * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}
-	 * instances.
+	 * Obtains the configuration of the {@link AdministratorSource} instances.
 	 * 
-	 * @return {@link net.officefloor.frame.spi.administration.source.AdministratorSource}
-	 *         configuration.
+	 * @return {@link AdministratorSource} configuration.
 	 * @throws ConfigurationException
 	 *             If invalid configuration.
 	 */
@@ -128,8 +129,7 @@ public interface OfficeConfiguration {
 
 	/**
 	 * Obtains the list of {@link TaskNodeReference} instances referencing the
-	 * {@link net.officefloor.frame.api.execute.Task} instances to invoke on
-	 * Office start up.
+	 * {@link Task} instances to invoke on Office start up.
 	 * 
 	 * @return List of start up {@link TaskNodeReference} references.
 	 */

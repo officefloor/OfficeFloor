@@ -349,7 +349,7 @@ public class ExecutionNode<W extends Work> implements
 	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getEscalationProcedure()
 	 */
 	public EscalationProcedure getEscalationProcedure() {
-		return new EscalationProcedureImpl(this.getTeam());
+		return new EscalationProcedureImpl();
 	}
 
 	/*

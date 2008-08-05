@@ -19,6 +19,7 @@ package net.officefloor.frame.impl;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.FlowMetaDataImpl;
@@ -31,7 +32,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Raw meta-data of the {@link net.officefloor.frame.api.manage.Office}.
+ * Raw meta-data of the {@link Office}.
  * 
  * @author Daniel
  */
@@ -93,13 +94,17 @@ public class RawOfficeMetaData {
 							.getTaskMetaData(startupRefs[i]), null);
 		}
 
+		// Obtain the office escalation handler
+		EscalationHandler officeEscalationHandler = officeConfiguration
+				.getOfficeEscalationHandler();
+
 		// Create the Office
 		OfficeImpl office = new OfficeImpl(workRegistry
 				.createWorkMetaDataRegistry(), rawMosRegistry
 				.createManagedObjectSourceRegistry(), officeResources
 				.getRawProcessManagedObjectRegistry()
 				.getManagedObjectMetaData(), processStateAdministratorMetaData,
-				startupFlows);
+				officeEscalationHandler, startupFlows);
 
 		// Link the Administrator with Tasks
 		rawAdminRegistry.loadRemainingAdministratorState(workRegistry);

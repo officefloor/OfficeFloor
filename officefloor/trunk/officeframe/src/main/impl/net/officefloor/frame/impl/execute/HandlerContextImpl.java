@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.execute;
 
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.impl.OfficeImpl;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -23,8 +24,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.api.execute.HandlerContext}.
+ * Implementation of the {@link HandlerContext}.
  * 
  * @author Daniel
  */
@@ -77,7 +77,7 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 	 */
 	public void invokeProcess(F key, Object parameter,
 			ManagedObject managedObject) {
-		this.invokeProcess(key.ordinal(), parameter, managedObject);
+		this.invokeProcess(key.ordinal(), parameter, managedObject, null);
 	}
 
 	/*
@@ -89,13 +89,42 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 	 */
 	public void invokeProcess(int processIndex, Object parameter,
 			ManagedObject managedObject) {
+		this.invokeProcess(processIndex, parameter, managedObject, null);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.api.execute.HandlerContext#invokeProcess(java.lang.Enum,
+	 *      java.lang.Object,
+	 *      net.officefloor.frame.spi.managedobject.ManagedObject,
+	 *      net.officefloor.frame.api.execute.EscalationHandler)
+	 */
+	@Override
+	public void invokeProcess(F key, Object parameter,
+			ManagedObject managedObject, EscalationHandler escalationHandler) {
+		this.invokeProcess(key.ordinal(), parameter, managedObject,
+				escalationHandler);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.api.execute.HandlerContext#invokeProcess(int,
+	 *      java.lang.Object,
+	 *      net.officefloor.frame.spi.managedobject.ManagedObject,
+	 *      net.officefloor.frame.api.execute.EscalationHandler)
+	 */
+	@Override
+	public void invokeProcess(int processIndex, Object parameter,
+			ManagedObject managedObject, EscalationHandler escalationHandler) {
 
 		// Obtain the flow meta-data
 		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
 
 		// Create the task in a new process
 		Job task = this.office.createProcess(flowMetaData, parameter,
-				managedObject, this.processMoIndex);
+				managedObject, this.processMoIndex, escalationHandler);
 
 		// Activate the Task
 		task.activateJob();

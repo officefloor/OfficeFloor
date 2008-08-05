@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -127,6 +128,17 @@ public interface OfficeBuilder {
 	 *             Indicate failure in building.
 	 */
 	void addOfficeEnhancer(OfficeEnhancer officeEnhancer) throws BuildException;
+
+	/**
+	 * Specifies the {@link EscalationHandler} for the {@link Office}.
+	 * 
+	 * @param officeEscalationHandler
+	 *            {@link EscalationHandler} for the {@link Office}.
+	 * @throws BuildException
+	 *             Indicates failure in building.
+	 */
+	void setOfficeEscalationHandler(EscalationHandler officeEscalationHandler)
+			throws BuildException;
 
 	/**
 	 * Adds a {@link net.officefloor.frame.api.execute.Task} to invoke on start

@@ -343,7 +343,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Create Process for executing
 		ProcessState processState = new ProcessStateImpl(
-				new ManagedObjectMetaData[] { this.moMetaData }, adminMetaData);
+				new ManagedObjectMetaData[] { this.moMetaData }, adminMetaData,
+				null, null);
 
 		// Obtain the Work meta-data
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
@@ -369,8 +370,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				workContainer);
 
 		// Create the initial Task Container to execute
-		Job initialTaskContainer = flow.createJob(this
-				.getInitialNode(), null, null, workLink);
+		Job initialTaskContainer = flow.createJob(this.getInitialNode(), null,
+				null, workLink);
 
 		// Execute the task tree (until complete)
 		boolean isComplete;
