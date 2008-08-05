@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Implementation of the {@link net.officefloor.frame.api.manage.WorkManager}.
+ * Implementation of the {@link WorkManager}.
  * 
  * @author Daniel
  */
@@ -67,8 +67,8 @@ public class WorkManagerImpl<W extends Work> implements WorkManager {
 				.getInitialFlowMetaData();
 
 		// Create the task within a new process
-		Job taskContainer = this.office.createProcess(flowMetaData,
-				parameter, null, 0);
+		Job taskContainer = this.office.createProcess(flowMetaData, parameter,
+				null, 0, null);
 
 		// Assign the Task to the Team
 		taskContainer.activateJob();

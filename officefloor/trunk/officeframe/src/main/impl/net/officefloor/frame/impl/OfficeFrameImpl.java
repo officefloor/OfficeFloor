@@ -33,7 +33,6 @@ import net.officefloor.frame.api.build.issue.OfficeIssuesListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.BuilderFactoryImpl;
 import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -42,7 +41,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Default implementation of the {@link net.officefloor.frame.api.OfficeFrame}.
+ * Default implementation of the {@link OfficeFrame}.
  * 
  * @author Daniel
  */
@@ -129,8 +128,7 @@ public class OfficeFrameImpl extends OfficeFrame {
 		EscalationProcedure officeFloorEscalationProcedure = officeFloorConfig
 				.getEscalationProcedure();
 		if (officeFloorEscalationProcedure == null) {
-			officeFloorEscalationProcedure = new EscalationProcedureImpl(
-					new PassiveTeam());
+			officeFloorEscalationProcedure = new EscalationProcedureImpl();
 		}
 
 		// Create the Offices

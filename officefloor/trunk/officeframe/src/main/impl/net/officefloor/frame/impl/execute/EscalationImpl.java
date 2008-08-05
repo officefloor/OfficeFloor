@@ -57,7 +57,6 @@ public class EscalationImpl implements Escalation {
 	 */
 	public EscalationImpl(Class<? extends Throwable> typeOfCause,
 			boolean isResetThreadState, FlowMetaData<?> flowMetaData) {
-		super();
 		this.typeOfCause = typeOfCause;
 		this.isResetThreadState = isResetThreadState;
 		this.flowMetaData = flowMetaData;

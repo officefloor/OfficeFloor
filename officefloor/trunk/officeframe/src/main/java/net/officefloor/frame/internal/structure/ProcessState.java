@@ -45,6 +45,15 @@ public interface ProcessState {
 	<W extends Work> Flow createThread(FlowMetaData<W> flowMetaData);
 
 	/**
+	 * Obtains the top level {@link Escalation} that provides the catch all
+	 * exception handling of this {@link ProcessState}.
+	 * 
+	 * @return Top level {@link Escalation} to provide catch all exception
+	 *         handling.
+	 */
+	Escalation getCatchAllEscalation();
+
+	/**
 	 * Flags that the input {@link ThreadState} has complete.
 	 * 
 	 * @param thread

@@ -19,6 +19,8 @@ package net.officefloor.frame.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.WorkManager;
@@ -71,6 +73,12 @@ public class OfficeImpl implements Office {
 	protected final AdministratorMetaData<?, ?>[] processStateAdministratorMetaData;
 
 	/**
+	 * Catch all {@link EscalationHandler} for this {@link Office}. May be
+	 * <code>null</code>.
+	 */
+	protected final EscalationHandler officeEscalationHandler;
+
+	/**
 	 * {@link Flow} instances to invoke on start up of the Office.
 	 */
 	protected final FlowMetaData<?>[] startupFlows;
@@ -90,6 +98,8 @@ public class OfficeImpl implements Office {
 	 * @param processStateAdministratorMetaData
 	 *            {@link AdministratorMetaData} instances for the
 	 *            {@link ProcessState} within this Office.
+	 * @param officeEscalationHandler
+	 *            Catch all {@link EscalationHandler} for this {@link Office}.
 	 * @param startupFlows
 	 *            {@link Flow} instances to invoke on start up of the Office.
 	 */
@@ -98,11 +108,13 @@ public class OfficeImpl implements Office {
 			Map<String, ManagedObjectSource<?, ?>> managedObjectSources,
 			ManagedObjectMetaData[] processStateManagedObjectMetaData,
 			AdministratorMetaData[] processStateAdministratorMetaData,
+			EscalationHandler officeEscalationHandler,
 			FlowMetaData[] startupFlows) {
 		// Store state
 		this.managedObjectSources = managedObjectSources;
 		this.processStateManagedObjectMetaData = processStateManagedObjectMetaData;
 		this.processStateAdministratorMetaData = processStateAdministratorMetaData;
+		this.officeEscalationHandler = officeEscalationHandler;
 		this.startupFlows = startupFlows;
 
 		// Create the Work Registry
@@ -115,15 +127,13 @@ public class OfficeImpl implements Office {
 	}
 
 	/**
-	 * Creates a {@link Job} within a new {@link ProcessState} for
-	 * this Office.
+	 * Creates a {@link Job} within a new {@link ProcessState} for this Office.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} to instigate in a new
 	 *            {@link ProcessState}.
 	 * @param parameter
-	 *            Parameter for the initial
-	 *            {@link net.officefloor.frame.api.execute.Task}.
+	 *            Parameter for the initial {@link Task}.
 	 * @param managedObject
 	 *            {@link ManagedObject} invoking the {@link ProcessState}. May
 	 *            be <code>null</code>.
@@ -131,17 +141,20 @@ public class OfficeImpl implements Office {
 	 *            Index of the input {@link ManagedObject} on the
 	 *            {@link ProcessState}. This value is only used if provided a
 	 *            {@link ManagedObject}.
-	 * @return {@link Job} within a new {@link ProcessState} for this
-	 *         Office.
+	 * @param managedObjectEscalationHandler
+	 *            {@link EscalationHandler} provided by the
+	 *            {@link ManagedObjectSource}.
+	 * @return {@link Job} within a new {@link ProcessState} for this Office.
 	 */
-	public <W extends Work> Job createProcess(
-			FlowMetaData<W> flowMetaData, Object parameter,
-			ManagedObject managedObject, int processMoIndex) {
+	public <W extends Work> Job createProcess(FlowMetaData<W> flowMetaData,
+			Object parameter, ManagedObject managedObject, int processMoIndex,
+			EscalationHandler managedObjectEscalationHandler) {
 
 		// Create the Process State
 		ProcessState processState = new ProcessStateImpl(
 				this.processStateManagedObjectMetaData,
-				this.processStateAdministratorMetaData);
+				this.processStateAdministratorMetaData,
+				managedObjectEscalationHandler, this.officeEscalationHandler);
 
 		// Determine if require loading the managed object
 		if (managedObject != null) {
@@ -186,8 +199,8 @@ public class OfficeImpl implements Office {
 				workContainer);
 
 		// Create the Task Container for the initial Task
-		Job taskContainer = flow.createJob(taskMetaData,
-				null, parameter, workLink);
+		Job taskContainer = flow.createJob(taskMetaData, null, parameter,
+				workLink);
 
 		// Return the Task Container
 		return taskContainer;
@@ -199,7 +212,7 @@ public class OfficeImpl implements Office {
 	void openOffice() {
 		// Invoke the start up flows
 		for (FlowMetaData<?> flowMetaData : this.startupFlows) {
-			this.createProcess(flowMetaData, null, null, 0).activateJob();
+			this.createProcess(flowMetaData, null, null, 0, null).activateJob();
 		}
 	}
 

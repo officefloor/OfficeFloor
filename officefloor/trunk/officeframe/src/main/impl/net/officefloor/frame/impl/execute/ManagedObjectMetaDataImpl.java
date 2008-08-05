@@ -208,7 +208,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 */
 	@Override
 	public ManagedObjectContainer createManagedObjectContainer(Object lock) {
-		
+
 		// Create the container for the Managed Object
 		ManagedObjectContainer managedObjectContainer;
 		if (this.processStateManagedObjectIndex == ManagedObjectMetaData.NON_PROCESS_INDEX) {
@@ -334,7 +334,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 			// Create the recycle task
 			Job recycleTask = this.office.createProcess(
-					this.recycleFlowMetaData, parameter, null, -1);
+					this.recycleFlowMetaData, parameter, null, -1, null);
 
 			// Listen to process completion (handle not being recycled)
 			recycleTask.getThreadState().getProcessState()

@@ -19,8 +19,7 @@ package net.officefloor.frame.api.execute;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Context that the {@link net.officefloor.frame.api.execute.Handler} is to work
- * within.
+ * Context that the {@link Handler} is to work within.
  * 
  * @author Daniel
  */
@@ -55,5 +54,42 @@ public interface HandlerContext<F extends Enum<F>> {
 	 */
 	void invokeProcess(int processIndex, Object parameter,
 			ManagedObject managedObject);
+
+	/**
+	 * Instigates a process to be run with an {@link EscalationHandler} to
+	 * handle top level failures.
+	 * 
+	 * @param key
+	 *            Key identifying the process to instigate.
+	 * @param parameter
+	 *            Parameter that will be available from the
+	 *            {@link TaskContext#getParameter()} of the first {@link Task}
+	 *            of the process to be run.
+	 * @param managedObject
+	 *            {@link ManagedObject} for the process to be run.
+	 * @param escalationHandler
+	 *            {@link EscalationHandler}.
+	 */
+	void invokeProcess(F key, Object parameter, ManagedObject managedObject,
+			EscalationHandler escalationHandler);
+
+	/**
+	 * Similar to
+	 * {@link #invokeProcess(Enum, Object, ManagedObject, EscalationHandler)}
+	 * except that allows dynamic instigation of processes.
+	 * 
+	 * @param processIndex
+	 *            Index of the process to invoke.
+	 * @param parameter
+	 *            Parameter that will be available from the
+	 *            {@link TaskContext#getParameter()} of the first {@link Task}
+	 *            of the process to be run.
+	 * @param managedObject
+	 *            {@link ManagedObject} for the process to be run.
+	 * @param escalationHandler
+	 *            {@link EscalationHandler}.
+	 */
+	void invokeProcess(int processIndex, Object parameter,
+			ManagedObject managedObject, EscalationHandler escalationHandler);
 
 }

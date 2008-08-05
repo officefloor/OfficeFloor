@@ -26,6 +26,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.ThreadWorkLink;
@@ -368,7 +369,7 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 									// Load for sequential execution
 									this.loadSequentialJobNode((JobNode) job);
 								}
-								
+
 								// Sequential job now invoked
 								this.isSequentialJobInvoked = true;
 							}
@@ -443,6 +444,14 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 							Escalation escalation = this.nodeMetaData
 									.getEscalationProcedure().getEscalation(
 											escalationCause);
+
+							// Use catch all escalation, if none provided
+							if (escalation == null) {
+								ProcessState processState = this.threadState
+										.getProcessState();
+								escalation = processState.getCatchAllEscalation();
+							}
+
 							try {
 								// Start escalation
 								this.threadState.escalationStart(this,

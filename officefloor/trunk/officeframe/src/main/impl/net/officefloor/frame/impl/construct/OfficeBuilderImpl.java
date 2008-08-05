@@ -28,7 +28,9 @@ import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectConfiguration;
@@ -39,7 +41,7 @@ import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 
 /**
- * Implements the {@link net.officefloor.frame.api.build.OfficeBuilder}.
+ * Implements the {@link OfficeBuilder}.
  * 
  * @author Daniel
  */
@@ -93,6 +95,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 * Listing of registered {@link OfficeEnhancer} instances.
 	 */
 	private final List<OfficeEnhancer> officeEnhancers = new LinkedList<OfficeEnhancer>();
+
+	/**
+	 * {@link EscalationHandler} for this {@link Office}.
+	 */
+	private EscalationHandler officeEscalationHandler = null;
 
 	/**
 	 * Registry of the {@link AdministratorBuilderImpl} instances by their Id.
@@ -206,6 +213,17 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see net.officefloor.frame.api.build.OfficeBuilder#setOfficeEscalationHandler(net.officefloor.frame.api.execute.EscalationHandler)
+	 */
+	@Override
+	public void setOfficeEscalationHandler(
+			EscalationHandler officeEscalationHandler) throws BuildException {
+		this.officeEscalationHandler = officeEscalationHandler;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see net.officefloor.frame.api.build.OfficeBuilder#addTaskAdministrator(java.lang.String,
 	 *      net.officefloor.frame.api.build.TaskAdministratorBuilder)
 	 */
@@ -302,6 +320,16 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public OfficeEnhancer[] getOfficeEnhancers() throws ConfigurationException {
 		return this.officeEnhancers.toArray(new OfficeEnhancer[0]);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.configuration.OfficeConfiguration#getOfficeEscalationHandler()
+	 */
+	@Override
+	public EscalationHandler getOfficeEscalationHandler() {
+		return this.officeEscalationHandler;
 	}
 
 	/*
