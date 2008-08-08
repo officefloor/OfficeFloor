@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
@@ -293,8 +294,16 @@ public class RawManagedObjectRegistry {
 							processMoIndex, processLinks, office);
 
 					// Create the handler
-					Handler<?> handler = handlerConfig.getHandlerFactory()
-							.createHandler();
+					HandlerFactory<?> handlerFactory = handlerConfig
+							.getHandlerFactory();
+					if (handlerFactory == null) {
+						throw new ConfigurationException("No "
+								+ HandlerFactory.class.getSimpleName()
+								+ " for handler " + key + " of managed object "
+								+ rmo.getManagedObjectName() + " of office "
+								+ rawOfficeMetaData.getOfficeName());
+					}
+					Handler<?> handler = handlerFactory.createHandler();
 
 					// Specify context for the handler
 					handler.setHandlerContext(handlerContext);
