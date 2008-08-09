@@ -18,6 +18,7 @@
 			class="net.officefloor.plugin.socket.server.http.request.config.ProcessConfig">
 			<value method="setClose" node="process@close" />
 			<value method="setBody" node="body" />
+			<value method="setException" node="exception" />
 		</object>
 		<object method="setResponse" node="response"
 			class="net.officefloor.plugin.socket.server.http.request.config.ResponseConfig">
