@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
@@ -76,6 +77,11 @@ public class HttpResponseImpl implements HttpResponse {
 	private final ByteArrayOutputStream body = new ByteArrayOutputStream();
 
 	/**
+	 * Failure.
+	 */
+	private Throwable failure = null;
+
+	/**
 	 * Initiate by defaulting from the {@link HttpRequest}.
 	 * 
 	 * @param connectionHandler
@@ -86,9 +92,26 @@ public class HttpResponseImpl implements HttpResponse {
 	public HttpResponseImpl(HttpConnectionHandler connectionHandler,
 			HttpRequest request) {
 		this.connectionHandler = connectionHandler;
-		this.status = 200;
-		this.statusMessage = "OK";
+		this.status = HttpStatus._200;
+		this.statusMessage = HttpStatus.getStatusMessage(this.status);
 		this.version = request.getVersion();
+	}
+
+	/**
+	 * Flags to send failure caused by the escalation.
+	 * 
+	 * @param escalation
+	 *            Escalation.
+	 * @throws IOException
+	 *             If fails to send escalation.
+	 */
+	public synchronized void sendFailure(Throwable escalation)
+			throws IOException {
+		// Flag the failure in sending
+		this.failure = escalation;
+
+		// Send the response
+		this.connectionHandler.sendResponse(this);
 	}
 
 	/**
@@ -98,7 +121,32 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @throws IOException
 	 *             If fails to obtain the content.
 	 */
-	public byte[] getContent() throws IOException {
+	public synchronized byte[] getContent() throws IOException {
+
+		// Determine if failed to handle request
+		if (this.failure != null) {
+
+			// Clear the headers
+			this.headers.clear();
+
+			// Indicate failed processing
+			this.status = HttpStatus._500;
+			this.statusMessage = HttpStatus.getStatusMessage(this.status);
+
+			// Write the exception as the body
+			this.body.reset();
+			this.failure.printStackTrace(new PrintStream(this.body));
+		}
+
+		// Provide the content length
+		int contentLength = this.body.size();
+		this.headers.add(new Header("Content-Length", String
+				.valueOf(contentLength)));
+
+		// Ensure appropriate successful status
+		if ((contentLength == 0) && (this.status == 200)) {
+			this.setStatus(204);
+		}
 
 		// Create the buffer for the response
 		ByteArrayOutputStream content = new ByteArrayOutputStream(this.body
@@ -147,12 +195,9 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#setStatus(int)
 	 */
 	@Override
-	public void setStatus(int status) {
+	public synchronized void setStatus(int status) {
 		this.status = status;
-
-		// TODO provide corresponding description
-		System.err.println("TODO specify statusMessage on setStatus");
-		this.statusMessage = "TODO provide message for status " + this.status;
+		this.statusMessage = HttpStatus.getStatusMessage(status);
 	}
 
 	/*
@@ -162,7 +207,7 @@ public class HttpResponseImpl implements HttpResponse {
 	 *      java.lang.String)
 	 */
 	@Override
-	public void setStatus(int status, String statusMessage) {
+	public synchronized void setStatus(int status, String statusMessage) {
 		this.status = status;
 		this.statusMessage = statusMessage;
 	}
@@ -173,7 +218,7 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#setVersion(java.lang.String)
 	 */
 	@Override
-	public void setVersion(String version) {
+	public synchronized void setVersion(String version) {
 		this.version = version;
 	}
 
@@ -184,7 +229,7 @@ public class HttpResponseImpl implements HttpResponse {
 	 *      java.lang.String)
 	 */
 	@Override
-	public void addHeader(String name, String value) {
+	public synchronized void addHeader(String name, String value) {
 		this.headers.add(new Header(name, value));
 	}
 
@@ -194,7 +239,7 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#getBody()
 	 */
 	@Override
-	public OutputStream getBody() {
+	public synchronized OutputStream getBody() {
 		return this.body;
 	}
 
@@ -204,13 +249,7 @@ public class HttpResponseImpl implements HttpResponse {
 	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#send()
 	 */
 	@Override
-	public void send() throws IOException {
-
-		// Provide the content length
-		int contentLength = this.body.size();
-		this.headers.add(new Header("Content-Length", String
-				.valueOf(contentLength)));
-
+	public synchronized void send() throws IOException {
 		// Send the response
 		this.connectionHandler.sendResponse(this);
 	}

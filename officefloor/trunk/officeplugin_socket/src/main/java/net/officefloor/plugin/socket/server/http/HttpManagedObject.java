@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -35,7 +36,7 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
  * @author Daniel
  */
 public class HttpManagedObject implements ServerHttpConnection,
-		AsynchronousManagedObject {
+		AsynchronousManagedObject, EscalationHandler {
 
 	/**
 	 * {@link HttpConnectionHandler}.
@@ -50,7 +51,7 @@ public class HttpManagedObject implements ServerHttpConnection,
 	/**
 	 * {@link HttpResponse}.
 	 */
-	private final HttpResponse response;
+	private final HttpResponseImpl response;
 
 	/**
 	 * Initiate.
@@ -130,6 +131,23 @@ public class HttpManagedObject implements ServerHttpConnection,
 	@Override
 	public HttpResponse getHttpResponse() {
 		return this.response;
+	}
+
+	/*
+	 * ==================================================================
+	 * EscalationHandler
+	 * ==================================================================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.api.execute.EscalationHandler#handleEscalation(java.lang.Throwable)
+	 */
+	@Override
+	public void handleEscalation(Throwable escalation) throws Throwable {
+		// Indicate failure to handle request
+		this.response.sendFailure(escalation);
 	}
 
 	/**

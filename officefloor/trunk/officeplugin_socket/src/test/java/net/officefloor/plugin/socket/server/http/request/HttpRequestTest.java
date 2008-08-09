@@ -18,6 +18,8 @@ package net.officefloor.plugin.socket.server.http.request;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -260,9 +262,9 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 			System.out.println("isClose=" + process.isClose);
 			System.out.println(process.body);
 
-			// Execute the method
-			client.executeMethod(method);
 			try {
+				// Execute the method
+				client.executeMethod(method);
 
 				// Obtain the response
 				String actualResponseBody = method.getResponseBodyAsString();
@@ -306,8 +308,20 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 							+ "'", header.value, method.getResponseHeader(
 							header.name).getValue());
 				}
-				assertEquals("Incorrect response body", response.body,
-						actualResponseBody);
+
+				// Validate the body
+				Throwable exception = RequestWork.getException();
+				if (exception == null) {
+					// Ensure body matches
+					assertEquals("Incorrect response body", response.body,
+							actualResponseBody);
+				} else {
+					// Ensure exception reported
+					StringWriter exceptionBody = new StringWriter();
+					exception.printStackTrace(new PrintWriter(exceptionBody));
+					assertEquals("Incorrect response exception", exceptionBody
+							.toString(), actualResponseBody);
+				}
 
 			} finally {
 				// Release the method from the connection

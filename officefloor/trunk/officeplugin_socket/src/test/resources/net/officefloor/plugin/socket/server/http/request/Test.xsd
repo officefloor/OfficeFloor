@@ -40,6 +40,9 @@
 									<xs:sequence>
 										<xs:element name="body"
 											minOccurs="0" />
+										<xs:element name="exception"
+											type="xs:string" maxOccurs="1" minOccurs="0">
+										</xs:element>
 									</xs:sequence>
 									<xs:attribute name="close"
 										type="xs:boolean" use="optional" />

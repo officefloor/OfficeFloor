@@ -44,6 +44,11 @@ public class RequestWork {
 	private static CommunicationConfig communication;
 
 	/**
+	 * Exception thrown in processing response.
+	 */
+	private static Throwable exception = null;
+
+	/**
 	 * Specifies the {@link ProcessConfig} on how to process the request.
 	 * 
 	 * @param communication
@@ -52,6 +57,20 @@ public class RequestWork {
 	public static void setConfiguration(CommunicationConfig communication) {
 		synchronized (RequestWork.class) {
 			RequestWork.communication = communication;
+
+			// Also clear the exception
+			RequestWork.exception = null;
+		}
+	}
+
+	/**
+	 * Obtains the exception thrown in failing to process request.
+	 * 
+	 * @return Exception thrown in failing to process request.
+	 */
+	public static Throwable getException() {
+		synchronized (RequestWork.class) {
+			return RequestWork.exception;
 		}
 	}
 
@@ -62,59 +81,57 @@ public class RequestWork {
 	 *            {@link ServerHttpConnection}.
 	 */
 	public void service(ServerHttpConnection connection) throws Throwable {
-		try {
-			// Obtain the configuration of how to process the request
-			CommunicationConfig communication;
-			synchronized (RequestWork.class) {
-				communication = RequestWork.communication;
-			}
 
-			// Validate the request
-			RequestConfig req = communication.request;
-			HttpRequest request = connection.getHttpRequest();
-			TestCase.assertEquals("Incorrect method", req.method, request
-					.getMethod());
-			TestCase
-					.assertEquals("Incorrect path", req.path, request.getPath());
-			TestCase.assertEquals("Incorrect version", req.version, request
-					.getVersion());
-
-			// Validate request headers provided
-			for (HeaderConfig header : req.headers) {
-				TestCase.assertEquals("Invalid request header for name '"
-						+ header.name + "'", header.value, request
-						.getHeader(header.name));
-			}
-
-			// Validate the request body
-			Reader reader = new InputStreamReader(request.getBody());
-			StringWriter bodyBuffer = new StringWriter();
-			for (int value = reader.read(); value != -1; value = reader.read()) {
-				bodyBuffer.write(value);
-			}
-			String actualBody = (bodyBuffer.getBuffer().length() == 0 ? null
-					: bodyBuffer.toString());
-			TestCase.assertEquals("Incorrect request body", req.body,
-					actualBody);
-
-			// Provide the response
-			HttpResponse response = connection.getHttpResponse();
-			ProcessConfig process = communication.process;
-			if (process.body != null) {
-				Writer writer = new OutputStreamWriter(response.getBody());
-				writer.write(process.body);
-				writer.flush();
-			}
-
-			// Send the response
-			connection.getHttpResponse().send();
-
-		} catch (Throwable ex) {
-			// Ensure send response to not have test hang
-			connection.getHttpResponse().send();
-
-			// Throw the failure
-			throw ex;
+		// Obtain the configuration of how to process the request
+		CommunicationConfig communication;
+		synchronized (RequestWork.class) {
+			communication = RequestWork.communication;
 		}
+
+		// Validate the request
+		RequestConfig req = communication.request;
+		HttpRequest request = connection.getHttpRequest();
+		TestCase.assertEquals("Incorrect method", req.method, request
+				.getMethod());
+		TestCase.assertEquals("Incorrect path", req.path, request.getPath());
+		TestCase.assertEquals("Incorrect version", req.version, request
+				.getVersion());
+
+		// Validate request headers provided
+		for (HeaderConfig header : req.headers) {
+			TestCase.assertEquals("Invalid request header for name '"
+					+ header.name + "'", header.value, request
+					.getHeader(header.name));
+		}
+
+		// Validate the request body
+		Reader reader = new InputStreamReader(request.getBody());
+		StringWriter bodyBuffer = new StringWriter();
+		for (int value = reader.read(); value != -1; value = reader.read()) {
+			bodyBuffer.write(value);
+		}
+		String actualBody = (bodyBuffer.getBuffer().length() == 0 ? null
+				: bodyBuffer.toString());
+		TestCase.assertEquals("Incorrect request body", req.body, actualBody);
+
+		// Throw exception if specified
+		ProcessConfig process = communication.process;
+		if (process.exception != null) {
+			synchronized (RequestWork.class) {
+				RequestWork.exception = new RuntimeException(process.exception);
+				throw RequestWork.exception;
+			}
+		}
+
+		// Provide the response
+		HttpResponse response = connection.getHttpResponse();
+		if (process.body != null) {
+			Writer writer = new OutputStreamWriter(response.getBody());
+			writer.write(process.body);
+			writer.flush();
+		}
+
+		// Send the response
+		connection.getHttpResponse().send();
 	}
 }
