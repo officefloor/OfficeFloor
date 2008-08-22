@@ -9,6 +9,7 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officecompiler</artifactId>
+	<name>Office Floor Compiler</name>
 	<description>Compiler for the Office Floor</description>
 	<properties>
 		<office_version>0.0.1</office_version>
