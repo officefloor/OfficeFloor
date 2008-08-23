@@ -5,6 +5,7 @@
 	<artifactId>officefloor</artifactId>
 	<version>0.0.1</version>
 	<packaging>pom</packaging>
+	<name>Office Floor</name>
 	<description>Parent Office Floor</description>
 	<modules>
 		<module>officeframe</module>
@@ -21,6 +22,13 @@
 		<module>officetool_filingcabinet</module>
 		<module>officework_spring</module>
 	</modules>
+	<url>http://www.officefloor.net</url>
+	<developers>
+		<developer>
+			<id>sagenschneider</id>
+			<name>Daniel Sagenschneider</name>
+		</developer>
+	</developers>
 	<build>
 		<plugins>
 			<plugin>
@@ -38,4 +46,8 @@
 			</plugin>
 		</plugins>
 	</build>
+	<reporting>
+		<plugins>
+		</plugins>
+	</reporting>
 </project>

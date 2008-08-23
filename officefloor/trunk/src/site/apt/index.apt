@@ -4,16 +4,21 @@ Office Floor
 
   The principals behind the application server are:
 
-   * Re-use of existing libraries as much as possible.  The caveate on this that the libraries adhere to the principals.
+   * Re-use of existing libraries as much as possible.  
+     The caveat on this that the libraries adhere to the principals.
 
-   * All configuration is to be graphical.  Focus should be for the developer to write the code and graphically configure this into the application.
+   * All configuration is to be graphical.  
+     Focus should be for the developer to write the code and graphically configure this into the application.
 
-   * Application server is to make concurrency easier.  Junior developers are not expected to deal heavily with the nuances of currency and Office Floor is to shield them from this.
+   * Application server is to make concurrency easier.  
+     Junior developers are not expected to deal heavily with the nuances of currency and Office Floor is to shield them from this.
 
    * Make use of only what you require.
 
 Contrast to Spring
 
-  Spring is the currently taking the java world by storm and this is not by any luck.  The principals behind spring ensure that code is developed to interfaces, encapsulating complexity.  The unfortunate thing is that a lot of that complexity has been pushed out to configuration.  Further to this developers are required to design interfaces that 
-
+  Spring is the currently taking the java world by storm and this is not by any luck.
+The principals behind spring ensure that code is developed to interfaces, encapsulating complexity.
+The unfortunate thing is that a lot of that complexity has been pushed out to configuration.
+Further to this developers are still required to manage threading issues to do any parallel processing.
 
