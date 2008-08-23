@@ -22,3 +22,4 @@ The principals behind spring ensure that code is developed to interfaces, encaps
 The unfortunate thing is that a lot of that complexity has been pushed out to configuration.
 Further to this developers are still required to manage threading issues to do any parallel processing.
 
+TODO continue providing documentation.
