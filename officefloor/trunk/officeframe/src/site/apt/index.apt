@@ -1,0 +1,24 @@
+Office Frame
+
+  Office Frame is the core of the Office Floor.
+As the name suggests it is the frame in which defines the various office components.
+
+  The core components are:
+  
+  * Task
+  
+  * Work
+  
+  * Team
+  
+  * Managed Object
+  
+  * Administrator
+  
+  * Framework which binds these components together
+  
+  The relationship between these components is as follows:
+  
+  * Teams execute Tasks
+  
+  * Work is broken down into Tasks

@@ -3,8 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Office Floor Frame
 Bundle-SymbolicName: net.officefloor.frame
 Bundle-Version: 1.0.0
-Require-Bundle: net.officefloor.eclipse.plugin,
- org.junit
+Require-Bundle: org.junit
 Export-Package: net.officefloor.frame.api,
  net.officefloor.frame.api.build,
  net.officefloor.frame.api.build.issue,
