@@ -111,7 +111,9 @@ public abstract class AbstractOfficeConstructTestCase extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.EscalationHandler#handleEscalation(java.lang.Throwable)
+	 * @see
+	 * net.officefloor.frame.api.execute.EscalationHandler#handleEscalation(
+	 * java.lang.Throwable)
 	 */
 	@Override
 	public synchronized void handleEscalation(Throwable escalation)
@@ -190,7 +192,6 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @return {@link WorkBuilder} for the
 	 *         {@link net.officefloor.frame.api.execute.Work}.
 	 */
-	@SuppressWarnings("unchecked")
 	protected <W extends Work> WorkBuilder<W> constructWork(String workName,
 			WorkFactory<W> workFactory, Class<W> typeOfWork,
 			String initialTaskName) throws BuildException {
@@ -486,7 +487,6 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            instances.
 	 * @return {@link AdministratorBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
 	protected <I extends Object, A extends Enum<A>> AdministratorBuilder<A> constructAdministrator(
 			String adminName, Administrator<I, A> adminOne,
 			AdministratorSourceMetaData<I, A> adminOneMetaData,
@@ -523,7 +523,6 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            instances.
 	 * @return {@link AdministratorBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
 	protected <I extends Object, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> constructAdministrator(
 			String adminName, Class<AS> adminSource, OfficeScope adminScope,
 			String teamName) throws BuildException {

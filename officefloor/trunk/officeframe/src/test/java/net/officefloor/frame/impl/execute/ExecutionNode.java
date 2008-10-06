@@ -260,6 +260,7 @@ public class ExecutionNode<W extends Work> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getRequiredManagedObjects()
 	 */
+	@SuppressWarnings("unchecked")
 	public int[] getRequiredManagedObjects() {
 		// Create the listing of required managed objects
 		List<Integer> moListing = new LinkedList<Integer>();
@@ -288,6 +289,7 @@ public class ExecutionNode<W extends Work> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getCheckManagedObjects()
 	 */
+	@SuppressWarnings("unchecked")
 	public int[] getCheckManagedObjects() {
 		// Create the listing of checked managed objects
 		List<Integer> moListing = new LinkedList<Integer>();
@@ -320,6 +322,7 @@ public class ExecutionNode<W extends Work> implements
 	 * 
 	 * @see net.officefloor.frame.internal.structure.TaskMetaData#translateManagedObjectIndexForWork(int)
 	 */
+	@SuppressWarnings("unchecked")
 	public int translateManagedObjectIndexForWork(int taskMoIndex) {
 		return ((ManagedObjectTaskProcessItem<W, ?>) this.taskProcessing
 				.get(taskMoIndex)).getWorkManagedObjectIndex();

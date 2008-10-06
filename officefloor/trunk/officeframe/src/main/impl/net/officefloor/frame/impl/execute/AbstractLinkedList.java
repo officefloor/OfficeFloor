@@ -79,7 +79,6 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E, R>, R>
 	 * 
 	 * @see net.officefloor.frame.internal.structure.LinkedList#addLinkedListEntry(E)
 	 */
-	@SuppressWarnings("unchecked")
 	public void addLinkedListEntry(E entry) {
 		// Append to end of linked list
 		if (this.head == null) {
@@ -119,7 +118,6 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E, R>, R>
 	 * 
 	 * @see net.officefloor.frame.internal.structure.LinkedList#copyLinkedList()
 	 */
-	@SuppressWarnings("unchecked")
 	public LinkedListItem<E> copyLinkedList() {
 		// Determine if have items in list
 		if (this.head == null) {

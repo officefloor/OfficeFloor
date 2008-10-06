@@ -1,9 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Office Floor Frame
-Bundle-SymbolicName: net.officefloor.frame
+Bundle-SymbolicName: net.officefloor.frame;singleton:=true
 Bundle-Version: 1.0.0
-Require-Bundle: org.junit
+Require-Bundle: org.junit,
+ net.officefloor.eclipse.jars;bundle-version="1.0.0"
 Export-Package: net.officefloor.frame.api,
  net.officefloor.frame.api.build,
  net.officefloor.frame.api.build.issue,
@@ -35,3 +36,4 @@ Export-Package: net.officefloor.frame.api,
  net.officefloor.frame.test,
  net.officefloor.frame.test.match,
  net.officefloor.frame.util
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
