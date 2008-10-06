@@ -262,7 +262,6 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 	 * 
 	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
 	 */
-	@SuppressWarnings("unchecked")
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<RoomEvent>(RoomEvent.values()) {

@@ -47,7 +47,6 @@ public abstract class PropertyChangeHandler<E extends Enum<E>> implements
 	 * 
 	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
 	 */
-	@SuppressWarnings( { "unchecked" })
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		// Obtain the event name

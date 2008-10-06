@@ -1,13 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Office Floor Model
-Bundle-SymbolicName: net.officefloor.model
+Bundle-SymbolicName: net.officefloor.model;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Vendor: Daniel Sagenschneider
 Bundle-Localization: plugin
-Eclipse-AutoStart: true
+Eclipse-AutoStart: false
 Export-Package: net.officefloor.model,
  net.officefloor.model.desk,
+ net.officefloor.model.handler,
  net.officefloor.model.office,
  net.officefloor.model.officefloor,
  net.officefloor.model.room,

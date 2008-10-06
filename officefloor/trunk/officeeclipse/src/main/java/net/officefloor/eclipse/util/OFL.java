@@ -16,14 +16,6 @@
  */
 package net.officefloor.eclipse.util;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
-
 /**
  * Office Floor Logger (OFL), used mainly for debugging.
  * 
@@ -52,22 +44,6 @@ public class OFL {
 			logLevel = LogLevel.DEBUG;
 		} else {
 			logLevel = LogLevel.NONE;
-		}
-	}
-
-	/**
-	 * Debug methods and returns/exceptions of methods on the input object.
-	 * 
-	 * @param object
-	 *            Object to proxy and provide debug information.
-	 */
-	public static <T> T proxyDebug(T object) {
-		switch (logLevel) {
-		case DEBUG:
-			return createLoggingProxy(object, LogLevel.DEBUG);
-		default:
-			// Do not proxy
-			return object;
 		}
 	}
 
@@ -129,97 +105,6 @@ public class OFL {
 			System.err.print(message);
 			break;
 		}
-	}
-
-	/**
-	 * Creates the logging proxy.
-	 * 
-	 * @param object
-	 *            Object to proxy.
-	 * @param level
-	 *            {@link LogLevel}.
-	 * @return Logging proxy to the object.
-	 */
-	@SuppressWarnings("unchecked")
-	private static <T> T createLoggingProxy(final T object, final LogLevel level) {
-
-		// Obtain the class of object to proxied
-		final Class type = object.getClass();
-
-		// Log creating proxy
-		logMessage(level, "New Proxy: " + type.getName());
-
-		// Create and initiate the CG Enhancer
-		Enhancer enhancer = new Enhancer();
-		enhancer.setSuperclass(type);
-		enhancer.setCallback(new MethodInterceptor() {
-			@Override
-			public Object intercept(Object obj, Method method, Object[] args,
-					MethodProxy proxy) throws Throwable {
-
-				// Determine the method signature
-				String signature = type.getSimpleName() + "."
-						+ method.getName() + "(...)";
-
-				try {
-					// Invoke the method
-					Object returnValue = proxy.invoke(object, args);
-
-					// Log method successful
-					logMessage(level, "Method: " + signature);
-
-					// Return the value
-					return returnValue;
-
-				} catch (Throwable ex) {
-					// Log method failing
-					StackTraceElement element = ex.getStackTrace()[0];
-					logMessage(LogLevel.ERROR, "Failed invoking method: "
-							+ signature + "  [" + ex.getClass().getSimpleName()
-							+ ": " + ex.getMessage() + " ("
-							+ element.getFileName() + ":"
-							+ element.getLineNumber() + ")]");
-
-					// Propagate failure
-					throw ex;
-				}
-			}
-		});
-
-		// Try for default constructor
-		T proxy;
-		try {
-			boolean hasDefaultConstructor = false;
-			for (Constructor<T> constructor : type.getConstructors()) {
-				if ((constructor.getParameterTypes() == null)
-						|| (constructor.getParameterTypes().length == 0)) {
-					hasDefaultConstructor = true;
-				}
-			}
-			if (hasDefaultConstructor) {
-				// Create via default constructor
-				proxy = (T) enhancer.create();
-			} else {
-				// Use any constructor (providing values when possible)
-				Constructor constructor = type.getConstructors()[0];
-				Class[] parameterTypes = constructor.getParameterTypes();
-				Object[] parameters = new Object[parameterTypes.length];
-				for (int i = 0; i < parameters.length; i++) {
-					Class parameterType = parameterTypes[i];
-					if (parameterType.isAssignableFrom(String.class)) {
-						parameters[i] = "Mock constructor string";
-					}
-				}
-				proxy = (T) enhancer.create(parameterTypes, parameters);
-			}
-		} catch (Throwable ex) {
-			logMessage(LogLevel.ERROR, "Failed creating proxy for type: ", type
-					.getName(), "\n", ex);
-			throw new OfficeFloorPluginFailure(ex);
-		}
-
-		// Return the proxy for the object
-		return proxy;
 	}
 
 	/**

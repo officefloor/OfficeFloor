@@ -197,7 +197,6 @@ public class FlatXmlUnmarshallerManagedObjectSource<D extends Enum<D>, H extends
 	 * 
 	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getManagedObjectClass()
 	 */
-	@SuppressWarnings("unchecked")
 	public Class<? extends ManagedObject> getManagedObjectClass() {
 		return ManagedObject.class;
 	}
