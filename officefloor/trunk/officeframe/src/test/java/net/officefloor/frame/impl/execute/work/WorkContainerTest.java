@@ -106,7 +106,6 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Mock work bound {@link AdministratorMetaData}.
 	 */
-	@SuppressWarnings("unchecked")
 	private AdministratorMetaData<?, ?> workAdminMetaData = this
 			.createMock(AdministratorMetaData.class);
 
@@ -120,7 +119,6 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Mock process bound {@link AdministratorMetaData}.
 	 */
-	@SuppressWarnings("unchecked")
 	private AdministratorMetaData<?, ?> processAdminMetaData = this
 			.createMock(AdministratorMetaData.class);
 

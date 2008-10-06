@@ -216,7 +216,6 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 * 
 	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
-	@SuppressWarnings("unchecked")
 	public final void start(ManagedObjectExecuteContext<H> context)
 			throws Exception {
 		// Specify context
