@@ -25,7 +25,7 @@ Require-Bundle: net.officefloor.frame,
  org.eclipse.debug.ui,
  org.eclipse.jdt.debug.ui,
  net.officefloor.tool.filingcabinet
-Eclipse-LazyStart: true
+Bundle-ActivationPolicy: lazy
 Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.common,
  net.officefloor.eclipse.common.commands,
@@ -51,3 +51,4 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.room.figure,
  net.officefloor.eclipse.util,
  net.officefloor.eclipse.wizards
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

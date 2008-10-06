@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OXM for the Office Floor
-Bundle-SymbolicName: net.officefloor.xml
+Bundle-SymbolicName: net.officefloor.xml;singleton:=true
 Bundle-Version: 1.0.0
 Export-Package: net.officefloor.plugin.xml,
  net.officefloor.plugin.xml.marshall.output,
@@ -9,4 +9,7 @@ Export-Package: net.officefloor.plugin.xml,
  net.officefloor.plugin.xml.unmarshall.designate,
  net.officefloor.plugin.xml.unmarshall.tree
 Require-Bundle: net.officefloor.frame,
- net.officefloor.model
+ net.officefloor.model,
+ net.officefloor.eclipse.jars;bundle-version="1.0.0",
+ org.junit;bundle-version="3.8.2"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

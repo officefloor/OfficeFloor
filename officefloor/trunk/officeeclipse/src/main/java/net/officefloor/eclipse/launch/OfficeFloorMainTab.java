@@ -119,7 +119,6 @@ public class OfficeFloorMainTab extends AbstractLaunchConfigurationTab {
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse.debug.core.ILaunchConfiguration)
 	 */
 	@Override
-	@SuppressWarnings("restriction")
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
 			// Obtain the values

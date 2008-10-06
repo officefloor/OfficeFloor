@@ -387,7 +387,6 @@ public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends E
 	 * 
 	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getManagedObjectClass()
 	 */
-	@SuppressWarnings("unchecked")
 	public Class<? extends ManagedObject> getManagedObjectClass() {
 		return TreeXmlMarshallerManagedObject.class;
 	}

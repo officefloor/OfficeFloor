@@ -266,7 +266,6 @@ public class BeanDialog extends Dialog {
 	 * 
 	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
 	 */
-	@SuppressWarnings("unchecked")
 	protected void okPressed() {
 
 		// Ensure all properties are populated

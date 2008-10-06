@@ -1,10 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Office Floor Compiler
-Bundle-SymbolicName: net.officefloor.compiler
+Bundle-SymbolicName: net.officefloor.compiler;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Vendor: Daniel Sagenschneider
-Eclipse-LazyStart: true
 Export-Package: net.officefloor,
  net.officefloor.administratorsource,
  net.officefloor.compile,
@@ -23,3 +22,4 @@ Require-Bundle: net.officefloor.api,
  net.officefloor.xml,
  net.officefloor.model,
  org.junit
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
