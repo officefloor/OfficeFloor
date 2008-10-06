@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Office Floor Eclipse Jars
+Bundle-SymbolicName: net.officefloor.eclipse.jars;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: lib/easymock-1.1.jar,
+ .
+Export-Package: org.easymock,
+ org.easymock.internal
+Bundle-Vendor: Daniel Sagenschneider
