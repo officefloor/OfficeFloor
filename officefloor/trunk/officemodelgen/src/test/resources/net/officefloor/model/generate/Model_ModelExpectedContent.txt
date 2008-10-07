@@ -141,7 +141,6 @@ public class ClassModel extends AbstractModel {
     /**
      * Remove Connections.
      */
-    @SuppressWarnings("unchecked")
     public RemoveConnectionsAction<ClassModel> removeConnections() {
         RemoveConnectionsAction<ClassModel> _action = new RemoveConnectionsAction<ClassModel>(this);
         return _action;
