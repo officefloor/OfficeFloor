@@ -446,7 +446,6 @@ public class ModelGenerator {
 		writeLine("    /**");
 		writeLine("     * Remove Connections.");
 		writeLine("     */");
-		writeLine("    @SuppressWarnings(\"unchecked\")");
 		writeLine("    public RemoveConnectionsAction<"
 				+ this.metaData.getClassName() + "> removeConnections() {");
 
