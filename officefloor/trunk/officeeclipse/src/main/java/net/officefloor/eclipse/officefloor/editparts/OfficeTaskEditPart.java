@@ -19,13 +19,14 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.officefloor.figure.OfficeTaskFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext;
 import net.officefloor.model.officefloor.OfficeTaskModel;
 import net.officefloor.model.officefloor.OfficeTaskModel.OfficeTaskEvent;
 
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -34,12 +35,15 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class OfficeTaskEditPart extends
-		AbstractOfficeFloorNodeEditPart<OfficeTaskModel> {
+		AbstractOfficeFloorNodeEditPart<OfficeTaskModel> implements
+		OfficeTaskFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -64,18 +68,22 @@ public class OfficeTaskEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		return new OfficeTaskFigure(this.getCastedModel().getWorkName() + "."
-				+ this.getCastedModel().getTaskName());
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
+				.createOfficeTaskFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -85,12 +93,42 @@ public class OfficeTaskEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getLinkProcesses());
 		models.addAll(this.getCastedModel().getTaskFlows());
+	}
+
+	/*
+	 * ====================== OfficeTaskFigureContext ====================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext#getWorkName
+	 * ()
+	 */
+	@Override
+	public String getWorkName() {
+		return this.getCastedModel().getWorkName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext#getTaskName
+	 * ()
+	 */
+	@Override
+	public String getTaskName() {
+		return this.getCastedModel().getTaskName();
 	}
 
 }

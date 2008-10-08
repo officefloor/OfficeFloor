@@ -19,23 +19,21 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.requests.CreateConnectionRequest;
-
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.common.figure.IndentFigure;
-import net.officefloor.eclipse.common.figure.ListFigure;
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.eclipse.common.figure.WrappingFigure;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
 import net.officefloor.eclipse.office.models.FlowToAdminDutyWrappingModel;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.FlowItemToPostAdministratorDutyModel;
 import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
 import net.officefloor.model.office.DutyModel.DutyEvent;
+
+import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -44,12 +42,14 @@ import net.officefloor.model.office.DutyModel.DutyEvent;
  * @author Daniel
  */
 public class DutyEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<DutyModel> {
+		AbstractOfficeFloorSourceNodeEditPart<DutyModel> implements
+		DutyFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
@@ -82,7 +82,9 @@ public class DutyEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
@@ -92,7 +94,9 @@ public class DutyEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -103,7 +107,9 @@ public class DutyEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -113,7 +119,9 @@ public class DutyEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -141,28 +149,40 @@ public class DutyEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		// Create the figure
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(10,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(this.getCastedModel().getKey()));
-		figure.addChildContainerFigure();
-
-		// Return the figure
-		return figure;
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
+				.createDutyFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populateModelChildren(java.util.List)
 	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getFlows());
+	}
+
+	/*
+	 * =================== DutyFigureContext ========================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.skin.office.DutyFigureContext#getDutyName()
+	 */
+	@Override
+	public String getDutyName() {
+		return this.getCastedModel().getKey();
 	}
 
 }

@@ -19,10 +19,13 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.dialog.OfficeTaskDialog;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
@@ -30,9 +33,6 @@ import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel.ManagedObjectTaskFlowEvent;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
@@ -42,12 +42,15 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class ManagedObjectTaskFlowEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTaskFlowModel> {
+		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTaskFlowModel>
+		implements ManagedObjectTaskFlowFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -70,32 +73,21 @@ public class ManagedObjectTaskFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-
-		// Determine if linked by managed object source to task
-		String linkTask = "";
-		String taskName = this.getCastedModel().getInitialTaskName();
-		if ((taskName != null) && (taskName.length() > 0)) {
-			// Linked to a task by managed object source
-			linkTask = " (" + this.getCastedModel().getInitialWorkName() + "."
-					+ taskName + ")";
-		}
-
-		// Create the figure
-		IFigure figure = new Label(this.getCastedModel().getFlowId() + linkTask);
-		figure.setForegroundColor(ColorConstants.cyan);
-
-		// Return the figure
-		return figure;
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
+				.createManagedObjectTaskFlowFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
@@ -127,7 +119,9 @@ public class ManagedObjectTaskFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
@@ -138,7 +132,9 @@ public class ManagedObjectTaskFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -151,11 +147,53 @@ public class ManagedObjectTaskFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Never a target
+	}
+
+	/*
+	 * ================ ManagedObjectTaskFlowFigureContext ====================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext
+	 * #getFlowName()
+	 */
+	@Override
+	public String getFlowName() {
+		return this.getCastedModel().getFlowId();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext
+	 * #getInitialTaskName()
+	 */
+	@Override
+	public String getInitialTaskName() {
+		return this.getCastedModel().getInitialTaskName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext
+	 * #getInitialWorkName()
+	 */
+	@Override
+	public String getInitialWorkName() {
+		return this.getCastedModel().getInitialWorkName();
 	}
 
 }

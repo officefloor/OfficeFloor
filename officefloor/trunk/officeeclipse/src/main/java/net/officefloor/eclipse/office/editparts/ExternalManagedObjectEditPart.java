@@ -20,19 +20,13 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.compile.WorkEntry;
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectModel.ExternalManagedObjectEvent;
-
-import org.eclipse.draw2d.ActionEvent;
-import org.eclipse.draw2d.ActionListener;
-import org.eclipse.draw2d.Clickable;
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.FlowLayout;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -41,12 +35,15 @@ import org.eclipse.draw2d.Label;
  * @author Daniel
  */
 public class ExternalManagedObjectEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel> {
+		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel> implements
+		ExternalManagedObjectFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -56,7 +53,9 @@ public class ExternalManagedObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -66,7 +65,9 @@ public class ExternalManagedObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -90,58 +91,41 @@ public class ExternalManagedObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		Figure figure = new Figure();
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setLayoutManager(new FlowLayout(true));
-
-		// Name of external managed object
-		Label name = new Label(this.getCastedModel().getName());
-		figure.add(name);
-
-		// Scope of external managed object
-		String scopeName = this.getCastedModel().getScope();
-		if (scopeName == null) {
-			scopeName = "not specified";
-		}
-		final Label scope = new Label(scopeName);
-		scope.setBackgroundColor(ColorConstants.lightBlue);
-		scope.setOpaque(true);
-		Clickable clickableScope = new Clickable(scope);
-		clickableScope.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				// Obtain the next scope
-				String nextScope = ExternalManagedObjectEditPart.this
-						.getNextExternalManagedObjectScope(scope.getText());
-
-				// Change scope on model
-				ExternalManagedObjectEditPart.this.getCastedModel().setScope(
-						nextScope);
-
-				// Change scope on figure
-				scope.setText(nextScope);
-			}
-		});
-		figure.add(clickableScope);
-
-		// Return figure
-		return figure;
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
+				.createExternalManagedObjectFigure(this);
 	}
 
-	/**
-	 * Obtains the next scope for the {@link ExternalManagedObjectModel}.
-	 * 
-	 * @param currentScope
-	 *            Current scope (may be <code>null</code>).
-	 * @return Next scope.
+	/*
+	 * ==================== ExternalManagedObjectFigureContext ================
 	 */
-	protected String getNextExternalManagedObjectScope(String currentScope) {
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext
+	 * #getExternalManagedObjectName()
+	 */
+	@Override
+	public String getExternalManagedObjectName() {
+		return this.getCastedModel().getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext
+	 * #getNextScope(java.lang.String)
+	 */
+	@Override
+	public String getNextScope(String currentScope) {
 		// Find the index of the current scope
 		int currentScopeIndex = -1;
 		for (int i = 0; i < WorkEntry.MANAGED_OBJECT_SCOPES.length; i++) {
@@ -156,6 +140,30 @@ public class ExternalManagedObjectEditPart extends
 
 		// Return the next scope
 		return WorkEntry.MANAGED_OBJECT_SCOPES[nextScopeIndex];
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext
+	 * #getScope()
+	 */
+	@Override
+	public String getScope() {
+		return this.getCastedModel().getScope();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext
+	 * #setScope(java.lang.String)
+	 */
+	@Override
+	public void setScope(String scope) {
+		this.getCastedModel().setScope(scope);
 	}
 
 }

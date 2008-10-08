@@ -19,15 +19,14 @@ package net.officefloor.eclipse.room.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.room.ExternalEscalationFigureContext;
 import net.officefloor.model.room.ExternalEscalationModel;
 import net.officefloor.model.room.ExternalEscalationModel.ExternalEscalationEvent;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -36,12 +35,15 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class ExternalEscalationEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalEscalationModel> {
+		AbstractOfficeFloorNodeEditPart<ExternalEscalationModel> implements
+		ExternalEscalationFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -51,7 +53,9 @@ public class ExternalEscalationEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -61,7 +65,9 @@ public class ExternalEscalationEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -84,17 +90,29 @@ public class ExternalEscalationEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		Label figure = new Label(this.getCastedModel().getName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setBounds(new Rectangle(140, 30, 120, 20));
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+				.createExternalEscalationFigure(this);
+	}
 
-		// Return figure
-		return figure;
+	/*
+	 * ===================== ExternalEscalationFigureContext =================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seenet.officefloor.eclipse.skin.room.ExternalEscalationFigureContext#
+	 * getExternalEscalationName()
+	 */
+	@Override
+	public String getExternalEscalationName() {
+		return this.getCastedModel().getName();
 	}
 
 }

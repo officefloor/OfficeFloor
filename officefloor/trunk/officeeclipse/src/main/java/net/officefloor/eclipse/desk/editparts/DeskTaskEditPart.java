@@ -20,11 +20,12 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.desk.TaskToFlowItemSynchroniser;
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.desk.figure.DeskTaskFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.DeskTaskFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
@@ -33,7 +34,6 @@ import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.DeskTaskModel.DeskTaskEvent;
 
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
@@ -43,65 +43,28 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class DeskTaskEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<DeskTaskModel> {
+		AbstractOfficeFloorSourceNodeEditPart<DeskTaskModel> implements
+		DeskTaskFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
-	protected IFigure createFigure() {
-		// Button to add as flow item
-		final ButtonEditPart addAsFlowItem = new ButtonEditPart("Create") {
-			protected void handleButtonClick() {
-
-				// Obtain the work
-				DeskWorkEditPart workEditPart = (DeskWorkEditPart) DeskTaskEditPart.this
-						.getParent();
-				DeskWorkModel work = workEditPart.getCastedModel();
-
-				// Obtain the desk
-				// Note parent is work listing then desk
-				DeskEditPart deskEditPart = (DeskEditPart) workEditPart
-						.getParent().getParent();
-				DeskModel desk = deskEditPart.getCastedModel();
-
-				// Create the flow item for this task
-				DeskTaskModel task = DeskTaskEditPart.this.getCastedModel();
-				FlowItemModel flowItem = new FlowItemModel(task.getName(),
-						false, work.getId(), task.getName(), task.getTask(),
-						null, null, null, null, null, null, null, null, null);
-				flowItem.setId(deskEditPart.getUniqueFlowItemId(flowItem));
-				flowItem.setX(300);
-				flowItem.setY(100);
-
-				// Ensure synchronised to the task
-				try {
-					TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task
-							.getTask(), flowItem);
-				} catch (Exception ex) {
-					DeskTaskEditPart.this.messageError(ex);
-				}
-
-				// Add the flow item to the desk
-				desk.addFlowItem(flowItem);
-
-				// Link the flow item with the task
-				DeskTaskToFlowItemModel conn = new DeskTaskToFlowItemModel(
-						flowItem, task);
-				conn.connect();
-			}
-		};
-
-		// Return the Desk Task figure
-		return new DeskTaskFigure(this.getCastedModel().getName(),
-				addAsFlowItem.getFigure());
+	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
+				.createDeskTaskFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populateModelChildren(java.util.List)
 	 */
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getObjects());
@@ -110,7 +73,9 @@ public class DeskTaskEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -135,7 +100,8 @@ public class DeskTaskEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
@@ -153,7 +119,9 @@ public class DeskTaskEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(FlowItemModel.class);
@@ -162,7 +130,9 @@ public class DeskTaskEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	protected void populateConnectionSourceModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getFlowItems());
@@ -171,10 +141,72 @@ public class DeskTaskEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
+	}
+
+	/*
+	 * ============ DeskTaskFigureContext ============
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.desk.DeskTaskFigureContext#getTaskName()
+	 */
+	@Override
+	public String getTaskName() {
+		return this.getCastedModel().getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.desk.DeskTaskFigureContext#createAsNewFlowItem
+	 * ()
+	 */
+	@Override
+	public void createAsNewFlowItem() {
+		// Obtain the work
+		DeskWorkEditPart workEditPart = (DeskWorkEditPart) this.getParent();
+		DeskWorkModel work = workEditPart.getCastedModel();
+
+		// Obtain the desk
+		// Note parent is work listing then desk
+		DeskEditPart deskEditPart = (DeskEditPart) workEditPart.getParent()
+				.getParent();
+		DeskModel desk = deskEditPart.getCastedModel();
+
+		// Create the flow item for this task
+		DeskTaskModel task = this.getCastedModel();
+		FlowItemModel flowItem = new FlowItemModel(task.getName(), false, work
+				.getId(), task.getName(), task.getTask(), null, null, null,
+				null, null, null, null, null, null);
+		flowItem.setId(deskEditPart.getUniqueFlowItemId(flowItem));
+		flowItem.setX(300);
+		flowItem.setY(100);
+
+		// Ensure synchronised to the task
+		try {
+			TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task
+					.getTask(), flowItem);
+		} catch (Exception ex) {
+			this.messageError(ex);
+		}
+
+		// Add the flow item to the desk
+		desk.addFlowItem(flowItem);
+
+		// Link the flow item with the task
+		DeskTaskToFlowItemModel conn = new DeskTaskToFlowItemModel(flowItem,
+				task);
+		conn.connect();
 	}
 
 }

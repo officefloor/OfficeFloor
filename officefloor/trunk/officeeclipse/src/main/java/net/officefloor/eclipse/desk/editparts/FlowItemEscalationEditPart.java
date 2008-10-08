@@ -19,11 +19,13 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.desk.figure.FlowItemOutputFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
@@ -32,8 +34,6 @@ import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemEscalationModel.FlowItemEscalationEvent;
 
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
@@ -43,12 +43,15 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class FlowItemEscalationEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<FlowItemEscalationModel> {
+		AbstractOfficeFloorSourceNodeEditPart<FlowItemEscalationModel>
+		implements FlowItemEscalationFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -71,30 +74,21 @@ public class FlowItemEscalationEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-
-		// Obtain simple name of escalation
-		String escalationType = this.getCastedModel().getEscalationType();
-		String simpleType = escalationType;
-		if (simpleType.indexOf('.') > 0) {
-			simpleType = simpleType.substring(simpleType.lastIndexOf('.') + 1);
-		}
-
-		// Create the figure
-		FlowItemOutputFigure figure = new FlowItemOutputFigure(simpleType);
-		figure.setToolTip(new Label(escalationType));
-
-		// Return the figure
-		return figure;
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
+				.createFlowItemEscalation(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
@@ -132,7 +126,9 @@ public class FlowItemEscalationEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
@@ -143,7 +139,9 @@ public class FlowItemEscalationEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -165,11 +163,28 @@ public class FlowItemEscalationEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
+	}
+
+	/*
+	 * ================== FlowItemEscalationFigureContext ================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seenet.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext#
+	 * getEscalationType()
+	 */
+	@Override
+	public String getEscalationType() {
+		return this.getCastedModel().getEscalationType();
 	}
 
 }

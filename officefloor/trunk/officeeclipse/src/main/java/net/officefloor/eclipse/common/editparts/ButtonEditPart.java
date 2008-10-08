@@ -20,12 +20,12 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import net.officefloor.eclipse.common.ModelEditPart;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 
 import org.eclipse.draw2d.ActionEvent;
 import org.eclipse.draw2d.ActionListener;
 import org.eclipse.draw2d.Button;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -64,17 +64,20 @@ public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
 	}
 
 	/*
-	 * =============================================================================
+	 * ================================================
 	 * AbstractOfficeFloorEditPart
-	 * =============================================================================
+	 * ================================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
-	protected IFigure createFigure() {
+	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
 		// Create the button
 		Button button = new Button(this.label);
 
@@ -82,13 +85,15 @@ public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
 		button.addActionListener(this);
 
 		// Return the button
-		return button;
+		return new OfficeFloorFigure(button);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -96,9 +101,9 @@ public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
 	}
 
 	/*
-	 * =============================================================================
+	 * ============================================================
 	 * ModelEditPart
-	 * =============================================================================
+	 * ============================================================
 	 */
 
 	/*
@@ -111,15 +116,17 @@ public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
 	}
 
 	/*
-	 * =============================================================================
+	 * ===========================================================
 	 * ActionListener
-	 * =============================================================================
+	 * ============================================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.draw2d.ActionListener#actionPerformed(org.eclipse.draw2d.ActionEvent)
+	 * @see
+	 * org.eclipse.draw2d.ActionListener#actionPerformed(org.eclipse.draw2d.
+	 * ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent event) {
 		this.handleButtonClick();
@@ -131,9 +138,9 @@ public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
 	protected abstract void handleButtonClick();
 
 	/*
-	 * =============================================================================
+	 * ====================================================================
 	 * Model
-	 * =============================================================================
+	 * ====================================================================
 	 */
 
 	/*
@@ -175,7 +182,8 @@ public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.model.Model#addPropertyChangeListener(java.beans.PropertyChangeListener)
+	 * @seenet.officefloor.model.Model#addPropertyChangeListener(java.beans.
+	 * PropertyChangeListener)
 	 */
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		// No property change listening
@@ -184,7 +192,8 @@ public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.model.Model#removePropertyChangeListener(java.beans.PropertyChangeListener)
+	 * @seenet.officefloor.model.Model#removePropertyChangeListener(java.beans.
+	 * PropertyChangeListener)
 	 */
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		// No property change listening

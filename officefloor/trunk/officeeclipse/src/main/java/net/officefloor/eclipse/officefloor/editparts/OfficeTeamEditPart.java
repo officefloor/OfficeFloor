@@ -19,17 +19,18 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.officefloor.figure.OfficeTeamFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
 import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.model.officefloor.OfficeTeamModel.OfficeTeamEvent;
 
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
@@ -39,12 +40,14 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class OfficeTeamEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<OfficeTeamModel> {
+		AbstractOfficeFloorSourceNodeEditPart<OfficeTeamModel> implements
+		OfficeTeamFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
@@ -66,7 +69,9 @@ public class OfficeTeamEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
@@ -76,7 +81,9 @@ public class OfficeTeamEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -89,7 +96,9 @@ public class OfficeTeamEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -99,7 +108,9 @@ public class OfficeTeamEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -121,11 +132,29 @@ public class OfficeTeamEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		return new OfficeTeamFigure(this.getCastedModel().getTeamName());
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
+				.createOfficeTeamFigure(this);
+	}
+
+	/*
+	 * ================ OfficeTeamFigureContext =======================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext#
+	 * getOfficeTeamName()
+	 */
+	@Override
+	public String getOfficeTeamName() {
+		return this.getCastedModel().getTeamName();
 	}
 
 }

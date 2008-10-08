@@ -19,14 +19,13 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.common.figure.IndentFigure;
-import net.officefloor.eclipse.common.figure.ListFigure;
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.eclipse.common.figure.WrappingFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
@@ -35,8 +34,6 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel.ManagedObjectSourceEvent;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
@@ -47,12 +44,14 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class ManagedObjectSourceEditPart extends
 		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectSourceModel>
-		implements RemovableEditPart {
+		implements RemovableEditPart, ManagedObjectSourceFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -88,23 +87,22 @@ public class ManagedObjectSourceEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(this.getCastedModel().getId()));
-		figure.addChildContainerFigure();
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		return figure;
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
+				.createManagedObjectSourceFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populateModelChildren(java.util.List)
 	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
@@ -117,7 +115,9 @@ public class ManagedObjectSourceEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -127,7 +127,8 @@ public class ManagedObjectSourceEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
@@ -150,7 +151,9 @@ public class ManagedObjectSourceEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
@@ -160,7 +163,9 @@ public class ManagedObjectSourceEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -189,13 +194,30 @@ public class ManagedObjectSourceEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
 	 */
 	@Override
 	public void undelete() {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement ManagedObjectSourceEditPart.undelete");
+	}
+
+	/*
+	 * ================== ManagedObjectSourceFigureContext =====================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigureContext
+	 * #getManagedObjectSourceName()
+	 */
+	@Override
+	public String getManagedObjectSourceName() {
+		return this.getCastedModel().getId();
 	}
 
 }

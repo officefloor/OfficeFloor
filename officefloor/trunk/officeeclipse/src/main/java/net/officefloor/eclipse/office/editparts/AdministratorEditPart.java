@@ -19,16 +19,14 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.common.figure.IndentFigure;
-import net.officefloor.eclipse.common.figure.ListFigure;
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.eclipse.common.figure.WrappingFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.office.AdministratorModel;
@@ -39,8 +37,6 @@ import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.AdministratorModel.AdministratorEvent;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
@@ -51,12 +47,14 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class AdministratorEditPart extends
 		AbstractOfficeFloorSourceNodeEditPart<AdministratorModel> implements
-		RemovableEditPart {
+		RemovableEditPart, AdministratorFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -86,31 +84,22 @@ public class AdministratorEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-
-		// Create the indent figure to contain children
-		IndentFigure indentFigure = new IndentFigure(10, new ListFigure());
-		indentFigure.setBackgroundColor(ColorConstants.cyan);
-
-		// Create the figure
-		WrappingFigure figure = new WrappingFigure(indentFigure);
-		figure.addDecorate(new ListItemFigure(this.getCastedModel().getId()));
-		figure.addChildContainerFigure();
-		figure.setBackgroundColor(ColorConstants.cyan);
-
-		// Return the figure for free form display
-		FreeformWrapperFigure wrappingFigure = new FreeformWrapperFigure(figure);
-		wrappingFigure.setBackgroundColor(ColorConstants.cyan);
-		return wrappingFigure;
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
+				.createAdministratorFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populateModelChildren(java.util.List)
 	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
@@ -120,7 +109,8 @@ public class AdministratorEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
@@ -158,7 +148,9 @@ public class AdministratorEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
@@ -169,7 +161,9 @@ public class AdministratorEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -183,7 +177,9 @@ public class AdministratorEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -207,13 +203,29 @@ public class AdministratorEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
 	 */
 	@Override
 	public void undelete() {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement AdministratorEditPart.undelete");
+	}
+
+	/*
+	 * ==================== AdministratorFigureContext ======================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seenet.officefloor.eclipse.skin.office.AdministratorFigureContext#
+	 * getAdministratorName()
+	 */
+	@Override
+	public String getAdministratorName() {
+		return this.getCastedModel().getId();
 	}
 
 }

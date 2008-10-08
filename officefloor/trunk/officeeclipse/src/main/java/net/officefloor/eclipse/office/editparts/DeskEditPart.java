@@ -19,16 +19,13 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.figure.IndentFigure;
-import net.officefloor.eclipse.common.figure.ListFigure;
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.eclipse.common.figure.WrappingFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.DeskFigureContext;
 import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeDeskModel.OfficeDeskEvent;
-
-import org.eclipse.draw2d.IFigure;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -36,12 +33,15 @@ import org.eclipse.draw2d.IFigure;
  * 
  * @author Daniel
  */
-public class DeskEditPart extends AbstractOfficeFloorEditPart<OfficeDeskModel> {
+public class DeskEditPart extends AbstractOfficeFloorEditPart<OfficeDeskModel>
+		implements DeskFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -64,25 +64,40 @@ public class DeskEditPart extends AbstractOfficeFloorEditPart<OfficeDeskModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(this.getCastedModel().getName()));
-		figure.addChildContainerFigure();
-		return figure;
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
+				.createDeskFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populateModelChildren(java.util.List)
 	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getFlowItems());
+	}
+
+	/*
+	 * ================= DeskFigureContext ========================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.skin.office.DeskFigureContext#getDeskName()
+	 */
+	@Override
+	public String getDeskName() {
+		return this.getCastedModel().getName();
 	}
 
 }

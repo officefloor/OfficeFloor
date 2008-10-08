@@ -19,13 +19,12 @@ package net.officefloor.eclipse.room.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.requests.CreateConnectionRequest;
-
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.room.figure.SubRoomOutputFlowFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.room.SubRoomOutputFlowFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.room.ExternalFlowModel;
 import net.officefloor.model.room.OutputFlowToExternalFlowModel;
@@ -34,6 +33,8 @@ import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel.SubRoomOutputFlowEvent;
 
+import org.eclipse.gef.requests.CreateConnectionRequest;
+
 /**
  * {@link org.eclipse.gef.EditPart} for the
  * {@link net.officefloor.model.room.SubRoomOutputFlowModel}.
@@ -41,12 +42,14 @@ import net.officefloor.model.room.SubRoomOutputFlowModel.SubRoomOutputFlowEvent;
  * @author Daniel
  */
 public class SubRoomOutputFlowEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<SubRoomOutputFlowModel> {
+		AbstractOfficeFloorSourceNodeEditPart<SubRoomOutputFlowModel> implements
+		SubRoomOutputFlowFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
@@ -86,7 +89,9 @@ public class SubRoomOutputFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
@@ -97,7 +102,9 @@ public class SubRoomOutputFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -116,7 +123,9 @@ public class SubRoomOutputFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -126,7 +135,9 @@ public class SubRoomOutputFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -149,11 +160,29 @@ public class SubRoomOutputFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		return new SubRoomOutputFlowFigure(this.getCastedModel().getName());
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+				.createSubRoomOutputFlowFigure(this);
+	}
+
+	/*
+	 * ==================== SubRoomOutputFlowFigureContext ==================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seenet.officefloor.eclipse.skin.room.SubRoomOutputFlowFigureContext#
+	 * getSubRoomOutputFlowName()
+	 */
+	@Override
+	public String getSubRoomOutputFlowName() {
+		return this.getCastedModel().getName();
 	}
 
 }

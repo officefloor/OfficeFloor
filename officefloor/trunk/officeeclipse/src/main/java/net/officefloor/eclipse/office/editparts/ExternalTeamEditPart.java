@@ -19,18 +19,17 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.ExternalTeamFigureContext;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.ExternalTeamModel.ExternalTeamEvent;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -40,12 +39,14 @@ import org.eclipse.gef.EditPart;
  */
 public class ExternalTeamEditPart extends
 		AbstractOfficeFloorNodeEditPart<ExternalTeamModel> implements
-		RemovableEditPart {
+		RemovableEditPart, ExternalTeamFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -55,7 +56,9 @@ public class ExternalTeamEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -66,7 +69,9 @@ public class ExternalTeamEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -93,17 +98,14 @@ public class ExternalTeamEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		Label figure = new Label(this.getCastedModel().getName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setBounds(new Rectangle(140, 30, 120, 20));
-
-		// Return figure
-		return figure;
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
+				.createExternalTeamFigure(this);
 	}
 
 	/*
@@ -124,13 +126,30 @@ public class ExternalTeamEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
 	 */
 	@Override
 	public void undelete() {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement ExternalTeamEditPart.undelete");
+	}
+
+	/*
+	 * =================== ExternalTeamFigureContext ========================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.office.ExternalTeamFigureContext#getTeamName
+	 * ()
+	 */
+	@Override
+	public String getTeamName() {
+		return this.getCastedModel().getName();
 	}
 
 }

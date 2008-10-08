@@ -19,14 +19,14 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.desk.figure.FlowItemFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
@@ -38,7 +38,6 @@ import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel.FlowItemEvent;
 
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
@@ -49,36 +48,27 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class FlowItemEditPart extends
 		AbstractOfficeFloorSourceNodeEditPart<FlowItemModel> implements
-		RemovableEditPart {
+		RemovableEditPart, FlowItemFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
-	protected IFigure createFigure() {
-
-		// Create the check box to indicate if public
-		CheckBoxEditPart publicCheckBox = new CheckBoxEditPart(
-				FlowItemEditPart.this.getCastedModel().getIsPublic()) {
-			protected void checkBoxStateChanged(boolean isChecked) {
-				// Specify if public
-				FlowItemEditPart.this.getCastedModel().setIsPublic(isChecked);
-			}
-		};
-
-		// Create the figure
-		FlowItemFigure figure = new FlowItemFigure(this.getCastedModel()
-				.getId(), publicCheckBox.getFigure());
-
-		// Return the figure (useable as a freeform figure)
-		return new FreeformWrapperFigure(figure);
+	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
+				.createFlowItemFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populateModelChildren(java.util.List)
 	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
@@ -89,7 +79,9 @@ public class FlowItemEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
@@ -100,7 +92,8 @@ public class FlowItemEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
@@ -140,7 +133,9 @@ public class FlowItemEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Add flow to next flow
@@ -161,7 +156,9 @@ public class FlowItemEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Add work that this is initial flow
@@ -189,7 +186,9 @@ public class FlowItemEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -240,13 +239,51 @@ public class FlowItemEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
 	 */
 	@Override
 	public void undelete() {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement FlowItemEditPart.undelete");
+	}
+
+	/*
+	 * ======================= FlowItemFigureContext ========================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.desk.FlowItemFigureContext#getFlowItemName()
+	 */
+	@Override
+	public String getFlowItemName() {
+		return this.getCastedModel().getId();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.skin.desk.FlowItemFigureContext#isPublic()
+	 */
+	@Override
+	public boolean isPublic() {
+		return this.getCastedModel().getIsPublic();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.desk.FlowItemFigureContext#setIsPublic(boolean
+	 * )
+	 */
+	@Override
+	public void setIsPublic(boolean isPublic) {
+		this.getCastedModel().setIsPublic(isPublic);
 	}
 
 }

@@ -1,5 +1,8 @@
 package net.officefloor.eclipse;
 
+import net.officefloor.eclipse.skin.OfficeFloorSkin;
+import net.officefloor.eclipse.skin.standard.StandardOfficeFloorSkin;
+
 import org.eclipse.ui.plugin.*;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.osgi.framework.BundleContext;
@@ -9,8 +12,15 @@ import org.osgi.framework.BundleContext;
  */
 public class OfficeFloorPlugin extends AbstractUIPlugin {
 
-	// The shared instance.
+	/**
+	 * Shared instance.
+	 */
 	private static OfficeFloorPlugin plugin;
+
+	/**
+	 * {@link OfficeFloorSkin}.
+	 */
+	private static OfficeFloorSkin skin;
 
 	/**
 	 * The constructor.
@@ -24,6 +34,11 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+
+		// TODO obtain skin via extension
+
+		// No skin specified by extension so use standard
+		skin = new StandardOfficeFloorSkin();
 	}
 
 	/**
@@ -52,5 +67,14 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return AbstractUIPlugin.imageDescriptorFromPlugin(
 				"officefloor_eclipse", path);
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorSkin}.
+	 * 
+	 * @return {@link OfficeFloorSkin}.
+	 */
+	public static OfficeFloorSkin getSkin() {
+		return skin;
 	}
 }

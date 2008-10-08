@@ -19,14 +19,14 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigureContext;
 import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.ManagedObjectDependencyModel.ManagedObjectDependencyEvent;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,12 +35,15 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class ManagedObjectDependencyEditPart extends
-		AbstractOfficeFloorEditPart<ManagedObjectDependencyModel> {
+		AbstractOfficeFloorEditPart<ManagedObjectDependencyModel> implements
+		ManagedObjectDependencyFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -61,16 +64,30 @@ public class ManagedObjectDependencyEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		// Create the figure
-		IFigure figure = new Label(this.getCastedModel().getDependencyKey());
-		figure.setForegroundColor(ColorConstants.white);
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
+				.createManagedObjectDependencyFigure(this);
+	}
 
-		// Return the figure
-		return figure;
+	/*
+	 * ==================== ManagedObjectDependencyFigureContext ============
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigureContext
+	 * #getManagedObjectDependencyName()
+	 */
+	@Override
+	public String getManagedObjectDependencyName() {
+		return this.getCastedModel().getDependencyKey();
 	}
 
 }
