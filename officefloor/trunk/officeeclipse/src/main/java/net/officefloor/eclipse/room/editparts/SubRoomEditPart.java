@@ -19,17 +19,16 @@ package net.officefloor.eclipse.room.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.room.figure.SubRoomFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.room.SubRoomFigureContext;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomModel.SubRoomEvent;
-
-import org.eclipse.draw2d.IFigure;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -38,12 +37,14 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel
  */
 public class SubRoomEditPart extends AbstractOfficeFloorEditPart<SubRoomModel>
-		implements RemovableEditPart {
+		implements RemovableEditPart, SubRoomFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -72,18 +73,22 @@ public class SubRoomEditPart extends AbstractOfficeFloorEditPart<SubRoomModel>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		return new FreeformWrapperFigure(new SubRoomFigure(this
-				.getCastedModel().getId()));
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+				.createSubRoomFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populateModelChildren(java.util.List)
 	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
@@ -110,13 +115,29 @@ public class SubRoomEditPart extends AbstractOfficeFloorEditPart<SubRoomModel>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
 	 */
 	@Override
 	public void undelete() {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement SubRoomEditPart.undelete");
+	}
+
+	/*
+	 * ================= SubRoomFigureContext =======================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.room.SubRoomFigureContext#getSubRoomName()
+	 */
+	@Override
+	public String getSubRoomName() {
+		return this.getCastedModel().getId();
 	}
 
 }

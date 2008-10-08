@@ -23,6 +23,7 @@ import org.eclipse.draw2d.IFigure;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
 
 /**
  * Abstract node {@link net.officefloor.eclipse.common.wrap.WrappingEditPart}.
@@ -41,7 +42,9 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -51,7 +54,9 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -72,7 +77,21 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.wrap.WrappingEditPart#setFigure(org.eclipse.draw2d.Figure)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
+	 */
+	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return new OfficeFloorFigure(this.figure);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.wrap.WrappingEditPart#setFigure(org.eclipse
+	 * .draw2d.Figure)
 	 */
 	public void setFigure(Figure figure) {
 		this.figure = figure;
@@ -81,7 +100,9 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -93,7 +114,9 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#refreshTargetConnections()
+	 * @see
+	 * org.eclipse.gef.editparts.AbstractGraphicalEditPart#refreshTargetConnections
+	 * ()
 	 */
 	@Override
 	public void refreshTargetConnections() {

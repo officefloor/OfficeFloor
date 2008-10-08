@@ -19,18 +19,15 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.figure.IndentFigure;
-import net.officefloor.eclipse.common.figure.ListFigure;
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.eclipse.common.figure.WrappingFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigureContext;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel.ManagedObjectHandlerEvent;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -39,12 +36,15 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class ManagedObjectHandlerEditPart extends
-		AbstractOfficeFloorEditPart<ManagedObjectHandlerModel> {
+		AbstractOfficeFloorEditPart<ManagedObjectHandlerModel> implements
+		ManagedObjectHandlerFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -66,7 +66,9 @@ public class ManagedObjectHandlerEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populateModelChildren(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populateModelChildren(java.util.List)
 	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
@@ -80,17 +82,30 @@ public class ManagedObjectHandlerEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(this.getCastedModel()
-				.getHandlerKey()));
-		figure.addChildContainerFigure();
-		figure.setForegroundColor(ColorConstants.yellow);
-		return figure;
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
+				.createManagedObjectHandlerFigure(this);
+	}
+
+	/*
+	 * =================== ManagedObjectHandlerFigureContext ================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigureContext
+	 * #getManagedObjectHandlerName()
+	 */
+	@Override
+	public String getManagedObjectHandlerName() {
+		return this.getCastedModel().getHandlerKey();
 	}
 
 }

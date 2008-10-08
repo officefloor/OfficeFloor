@@ -19,14 +19,13 @@ package net.officefloor.eclipse.room.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.room.figure.SubRoomInputFlowFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomInputFlowModel.SubRoomInputFlowEvent;
-
-import org.eclipse.draw2d.IFigure;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -35,12 +34,15 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel
  */
 public class SubRoomInputFlowEditPart extends
-		AbstractOfficeFloorNodeEditPart<SubRoomInputFlowModel> {
+		AbstractOfficeFloorNodeEditPart<SubRoomInputFlowModel> implements
+		SubRoomInputFlowFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -50,7 +52,9 @@ public class SubRoomInputFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
@@ -61,7 +65,9 @@ public class SubRoomInputFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
@@ -86,24 +92,53 @@ public class SubRoomInputFlowEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected IFigure createFigure() {
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+				.createSubRoomInputFlowFigure(this);
+	}
 
-		// Create the check box to indicate if public
-		CheckBoxEditPart publicCheckBox = new CheckBoxEditPart(
-				SubRoomInputFlowEditPart.this.getCastedModel().getIsPublic()) {
-			protected void checkBoxStateChanged(boolean isChecked) {
-				// Specify if public
-				SubRoomInputFlowEditPart.this.getCastedModel().setIsPublic(
-						isChecked);
-			}
-		};
+	/*
+	 * ================= SubRoomInputFlowFigureContext =====================
+	 */
 
-		// Return the figure for the Sub Room Input Flow
-		return new SubRoomInputFlowFigure(this.getCastedModel().getName(),
-				publicCheckBox.getFigure());
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seenet.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext#
+	 * getSubRoomInputFlowName()
+	 */
+	@Override
+	public String getSubRoomInputFlowName() {
+		return this.getCastedModel().getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext#isPublic
+	 * ()
+	 */
+	@Override
+	public boolean isPublic() {
+		return this.getCastedModel().getIsPublic();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext#setIsPublic
+	 * (boolean)
+	 */
+	@Override
+	public void setIsPublic(boolean isPublic) {
+		this.getCastedModel().setIsPublic(isPublic);
 	}
 
 }

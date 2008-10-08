@@ -20,12 +20,12 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import net.officefloor.eclipse.common.ModelEditPart;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 
 import org.eclipse.draw2d.ActionEvent;
 import org.eclipse.draw2d.ActionListener;
 import org.eclipse.draw2d.CheckBox;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -69,15 +69,17 @@ public abstract class CheckBoxEditPart extends
 	}
 
 	/*
-	 * =============================================================================
+	 * ==========================================================================
 	 * AbstractOfficeFloorEditPart
-	 * =============================================================================
+	 * ==============================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -87,23 +89,28 @@ public abstract class CheckBoxEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
-	protected IFigure createFigure() {
+	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
 		// Return the check box
-		return this.checkBox;
+		return new OfficeFloorFigure(this.checkBox);
 	}
 
 	/*
-	 * =============================================================================
+	 * ==========================================================================
 	 * ActionListener
-	 * =============================================================================
+	 * ============================================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.draw2d.ActionListener#actionPerformed(org.eclipse.draw2d.ActionEvent)
+	 * @see
+	 * org.eclipse.draw2d.ActionListener#actionPerformed(org.eclipse.draw2d.
+	 * ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent event) {
 		// Notify the state change
@@ -119,9 +126,9 @@ public abstract class CheckBoxEditPart extends
 	protected abstract void checkBoxStateChanged(boolean isChecked);
 
 	/*
-	 * =============================================================================
+	 * ==========================================================================
 	 * ModelEditPart
-	 * =============================================================================
+	 * ============================================================
 	 */
 
 	/*
@@ -134,9 +141,9 @@ public abstract class CheckBoxEditPart extends
 	}
 
 	/*
-	 * =============================================================================
+	 * ==========================================================================
 	 * Model
-	 * =============================================================================
+	 * ====================================================================
 	 */
 
 	/*
@@ -178,7 +185,8 @@ public abstract class CheckBoxEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.model.Model#addPropertyChangeListener(java.beans.PropertyChangeListener)
+	 * @seenet.officefloor.model.Model#addPropertyChangeListener(java.beans.
+	 * PropertyChangeListener)
 	 */
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
 		// No property change listening
@@ -187,7 +195,8 @@ public abstract class CheckBoxEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.model.Model#removePropertyChangeListener(java.beans.PropertyChangeListener)
+	 * @seenet.officefloor.model.Model#removePropertyChangeListener(java.beans.
+	 * PropertyChangeListener)
 	 */
 	public void removePropertyChangeListener(PropertyChangeListener listener) {
 		// No property change listening

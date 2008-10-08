@@ -25,14 +25,18 @@ import java.util.List;
 
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 import net.officefloor.repository.ConfigurationContext;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
@@ -66,6 +70,11 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	 * Listing of the {@link PropertyChangeHandler} instances.
 	 */
 	protected final List<PropertyChangeHandler<?>> propertyChangeHandlers = new LinkedList<PropertyChangeHandler<?>>();
+
+	/**
+	 * {@link OfficeFloorFigure} for this {@link EditPart}.
+	 */
+	private OfficeFloorFigure officeFloorFigure = null;
 
 	/**
 	 * Initiates the Edit Part.
@@ -121,7 +130,8 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#setModel(java.lang.Object)
+	 * @see
+	 * org.eclipse.gef.editparts.AbstractEditPart#setModel(java.lang.Object)
 	 */
 	public void setModel(Object model) {
 
@@ -154,6 +164,38 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	 */
 	protected abstract void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 */
+	@Override
+	protected IFigure createFigure() {
+		// Create the Office Floor Figure
+		this.officeFloorFigure = this.createOfficeFloorFigure();
+
+		// Return the figure of the Office Floor Figure
+		return this.officeFloorFigure.getFigure();
+	}
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for this {@link EditPart}.
+	 * 
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	protected abstract OfficeFloorFigure createOfficeFloorFigure();
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#getContentPane()
+	 */
+	@Override
+	public IFigure getContentPane() {
+		// Return the content pane of the Office Floor Figure
+		return this.officeFloorFigure.getFigure();
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -223,16 +265,31 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 		this.refreshVisuals();
 	}
 
+	/**
+	 * Executes the input {@link Command}.
+	 * 
+	 * @param command
+	 *            {@link Command}.
+	 */
+	protected void executeCommand(OfficeFloorCommand command) {
+		if (command != null) {
+			this.getViewer().getEditDomain().getCommandStack().execute(command);
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#performRequest(org.eclipse.gef.Request)
+	 * @see
+	 * org.eclipse.gef.editparts.AbstractEditPart#performRequest(org.eclipse
+	 * .gef.Request)
 	 */
 	public void performRequest(Request req) {
 		// Obtain the command and execute if have
 		Command command = this.getCommand(req);
+
+		// Execute the command
 		if (command != null) {
-			// Execute the command
 			this.getViewer().getEditDomain().getCommandStack().execute(command);
 		}
 	}
@@ -368,4 +425,5 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 		MessageDialog.openWarning(this.getEditor().getEditorSite().getShell(),
 				"Office Floor", message);
 	}
+
 }

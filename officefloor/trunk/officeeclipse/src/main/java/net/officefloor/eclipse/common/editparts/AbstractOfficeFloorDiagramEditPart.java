@@ -20,11 +20,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.FreeformLayout;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 import org.eclipse.gef.editpolicies.RootComponentEditPolicy;
@@ -40,15 +40,18 @@ public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
-	protected IFigure createFigure() {
+	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
 		// Create the figure
 		FreeformLayer figure = new FreeformLayer();
 		figure.setLayoutManager(new FreeformLayout());
-
-		// Return figure
-		return figure;
+		
+		// Return the figure
+		return new OfficeFloorFigure(figure);
 	}
 
 	/*

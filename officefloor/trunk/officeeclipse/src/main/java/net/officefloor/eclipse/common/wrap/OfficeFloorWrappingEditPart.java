@@ -19,11 +19,11 @@ package net.officefloor.eclipse.common.wrap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.IFigure;
-
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+
+import org.eclipse.draw2d.Figure;
 
 /**
  * Abstract {@link net.officefloor.eclipse.common.wrap.WrappingEditPart}.
@@ -58,16 +58,21 @@ public abstract class OfficeFloorWrappingEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
-	protected IFigure createFigure() {
-		return this.figure;
+	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return new OfficeFloorFigure(this.figure);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.wrap.WrappingEditPart#setFigure(org.eclipse.draw2d.Figure)
+	 * @see
+	 * net.officefloor.eclipse.common.wrap.WrappingEditPart#setFigure(org.eclipse
+	 * .draw2d.Figure)
 	 */
 	public void setFigure(Figure figure) {
 		this.figure = figure;
@@ -76,7 +81,9 @@ public abstract class OfficeFloorWrappingEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {

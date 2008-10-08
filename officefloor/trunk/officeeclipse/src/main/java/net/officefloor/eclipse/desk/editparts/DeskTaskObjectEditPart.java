@@ -19,18 +19,18 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.desk.figure.DeskTaskObjectFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.DeskTaskObjectModel.DeskTaskObjectEvent;
 
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
@@ -40,34 +40,27 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class DeskTaskObjectEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<DeskTaskObjectModel> {
+		AbstractOfficeFloorSourceNodeEditPart<DeskTaskObjectModel> implements
+		DeskTaskObjectFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
-	protected IFigure createFigure() {
-
-		// Create the check box to indicate if a parameter
-		CheckBoxEditPart parameterCheckBox = new CheckBoxEditPart(this
-				.getCastedModel().getIsParameter()) {
-			protected void checkBoxStateChanged(boolean isChecked) {
-				// Specify if parameter
-				DeskTaskObjectEditPart.this.getCastedModel().setIsParameter(
-						isChecked);
-			}
-		};
-
-		// Create and return the figure
-		return new DeskTaskObjectFigure(this.getCastedModel().getObjectType(),
-				parameterCheckBox.getFigure());
+	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
+				.createDeskTaskObjectFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
 	 */
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
@@ -85,7 +78,9 @@ public class DeskTaskObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart#populateConnectionTargetTypes(java.util.List)
+	 * @seenet.officefloor.eclipse.common.editparts.
+	 * AbstractOfficeFloorSourceNodeEditPart
+	 * #populateConnectionTargetTypes(java.util.List)
 	 */
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(ExternalManagedObjectModel.class);
@@ -94,7 +89,9 @@ public class DeskTaskObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	protected void populateConnectionSourceModels(List<Object> models) {
 		DeskTaskObjectToExternalManagedObjectModel source = this
@@ -107,7 +104,9 @@ public class DeskTaskObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
@@ -116,7 +115,9 @@ public class DeskTaskObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -131,6 +132,46 @@ public class DeskTaskObjectEditPart extends
 				}
 			}
 		});
+	}
+
+	/*
+	 * =================== DeskTaskObjectFigureContext ========================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext#getObjectType
+	 * ()
+	 */
+	@Override
+	public String getObjectType() {
+		return this.getCastedModel().getObjectType();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext#isParameter
+	 * ()
+	 */
+	@Override
+	public boolean isParameter() {
+		return this.getCastedModel().getIsParameter();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext#setIsParameter
+	 * (boolean)
+	 */
+	@Override
+	public void setIsParameter(boolean isParameter) {
+		this.getCastedModel().setIsParameter(isParameter);
 	}
 
 }

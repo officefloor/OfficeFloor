@@ -19,18 +19,16 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel.ExternalManagedObjectEvent;
-
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FlowLayout;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -40,27 +38,27 @@ import org.eclipse.draw2d.Label;
  */
 public class ExternalManagedObjectEditPart extends
 		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel> implements
-		RemovableEditPart {
+		RemovableEditPart, ExternalManagedObjectFigureContext {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * createOfficeFloorFigure()
 	 */
-	protected IFigure createFigure() {
-		Label figure = new Label(this.getCastedModel().getName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setLayoutManager(new FlowLayout(true));
-
-		// Return figure
-		return figure;
+	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
+				.createExternalManagedObjectFigure(this);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionSourceModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionSourceModels(java.util.List)
 	 */
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Not a source
@@ -69,7 +67,9 @@ public class ExternalManagedObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart#populateConnectionTargetModels(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
+	 * #populateConnectionTargetModels(java.util.List)
 	 */
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getTaskObjects());
@@ -78,7 +78,9 @@ public class ExternalManagedObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -105,7 +107,8 @@ public class ExternalManagedObjectEditPart extends
 	@Override
 	public void delete() {
 		// Disconnect and remove the Managed Object
-		RemoveConnectionsAction<ExternalManagedObjectModel> mo = this.getCastedModel().removeConnections();
+		RemoveConnectionsAction<ExternalManagedObjectModel> mo = this
+				.getCastedModel().removeConnections();
 		DeskModel desk = (DeskModel) this.getParent().getParent().getModel();
 		desk.removeExternalManagedObject(mo.getModel());
 	}
@@ -113,13 +116,30 @@ public class ExternalManagedObjectEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
 	 */
 	@Override
 	public void undelete() {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement ExternalManagedObjectEditPart.undelete");
+	}
+
+	/*
+	 * ============= ExternalManagedObjectFigureContext ===================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext#
+	 * getExternalManagedObjectName()
+	 */
+	@Override
+	public String getExternalManagedObjectName() {
+		return this.getCastedModel().getName();
 	}
 
 }
