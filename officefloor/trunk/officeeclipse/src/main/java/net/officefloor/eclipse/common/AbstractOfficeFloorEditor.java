@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse.common;
 
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -40,6 +41,7 @@ import org.eclipse.gef.EditPartFactory;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
+import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
 import org.eclipse.gef.palette.ConnectionCreationToolEntry;
 import org.eclipse.gef.palette.PaletteGroup;
@@ -92,7 +94,22 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 		// Specify the Edit Domain
 		DefaultEditDomain editDomain = new DefaultEditDomain(this);
 		this.setEditDomain(editDomain);
-		editDomain.setCommandStack(new CommandStack());
+
+		// Set up the command stack
+		CommandStack commandStack = new CommandStack();
+		editDomain.setCommandStack(commandStack);
+		commandStack.addCommandStackListener(new CommandStackListener() {
+			@Override
+			public void commandStackChanged(EventObject event) {
+				// Update property dependent actions
+				AbstractOfficeFloorEditor.this
+						.updateActions(AbstractOfficeFloorEditor.this
+								.getPropertyActions());
+
+				// Notify change in dirty state
+				AbstractOfficeFloorEditor.this.firePropertyChange(PROP_DIRTY);
+			}
+		});
 	}
 
 	/**
@@ -395,16 +412,21 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.ui.part.EditorPart#doSave(org.eclipse.core.runtime.IProgressMonitor)
+	 * @seeorg.eclipse.ui.part.EditorPart#doSave(org.eclipse.core.runtime.
+	 * IProgressMonitor)
 	 */
 	public void doSave(IProgressMonitor monitor) {
 		// Obtain the configuration
 		FileConfigurationItem configuration = new FileConfigurationItem(this
 				.getEditorInput(), monitor);
 
-		// Store the Model
 		try {
+			// Store the Model
 			this.storeModel(this.getCastedModel(), configuration);
+
+			// Successfully saved, so flag not dirty
+			this.getCommandStack().markSaveLocation();
+
 		} catch (Exception ex) {
 			// Propagate failure
 			throw new OfficeFloorPluginFailure(ex);
@@ -446,7 +468,8 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette#getPalettePreferences()
+	 * @seeorg.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette#
+	 * getPalettePreferences()
 	 */
 	protected FlyoutPreferences getPalettePreferences() {
 		return new CommonFlyoutPreferences();
@@ -455,7 +478,9 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette#getPaletteRoot()
+	 * @see
+	 * org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette#getPaletteRoot
+	 * ()
 	 */
 	protected PaletteRoot getPaletteRoot() {
 		// Create the root (if not created)
@@ -535,8 +560,9 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.gef.EditPartFactory#createEditPart(org.eclipse.gef.EditPart,
-		 *      java.lang.Object)
+		 * @see
+		 * org.eclipse.gef.EditPartFactory#createEditPart(org.eclipse.gef.EditPart
+		 * , java.lang.Object)
 		 */
 		public EditPart createEditPart(EditPart context, Object model) {
 			// Create the Edit Part
