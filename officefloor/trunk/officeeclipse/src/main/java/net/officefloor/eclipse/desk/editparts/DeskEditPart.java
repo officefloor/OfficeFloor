@@ -120,7 +120,7 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	 */
 	@SuppressWarnings("unchecked")
 	protected void init() {
-
+		
 		// Button to add External Managed Objects
 		final ButtonEditPart extMoButton = new ButtonEditPart("Add Ext MO") {
 			protected void handleButtonClick() {
