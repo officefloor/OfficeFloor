@@ -60,7 +60,7 @@ public class OfficeTaskDialog extends Dialog {
 	 *         or issue in obtaining.
 	 */
 	public static OfficeTaskModel getOfficeTaskModel(Object target,
-			AbstractOfficeFloorEditor<?> editor) {
+			AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the office task
 		OfficeTaskModel task = null;

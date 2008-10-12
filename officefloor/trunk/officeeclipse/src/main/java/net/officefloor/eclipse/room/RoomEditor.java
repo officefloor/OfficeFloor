@@ -62,12 +62,14 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
+public class RoomEditor extends
+		AbstractOfficeFloorEditor<RoomModel, RoomEditPart> {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateEditPartTypes(java.util.Map)
+	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
+	 * populateEditPartTypes(java.util.Map)
 	 */
 	protected void populateEditPartTypes(
 			Map<Class<?>, Class<? extends EditPart>> map) {
@@ -102,7 +104,8 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
 	 */
 	protected boolean isDragTarget() {
 		// Disallow as drag target
@@ -112,7 +115,9 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel(net.officefloor.repository.ConfigurationItem)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel
+	 * (net.officefloor.repository.ConfigurationItem)
 	 */
 	protected RoomModel retrieveModel(ConfigurationItem configuration)
 			throws Exception {
@@ -123,8 +128,9 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
-	 *      net.officefloor.repository.ConfigurationItem)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
+	 * net.officefloor.repository.ConfigurationItem)
 	 */
 	protected void storeModel(RoomModel model, ConfigurationItem configuration)
 			throws Exception {
@@ -163,7 +169,8 @@ public class RoomEditor extends AbstractOfficeFloorEditor<RoomModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateCommandFactories(java.util.List)
+	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
+	 * populateCommandFactories(java.util.List)
 	 */
 	@Override
 	protected void populateCommandFactories(List<CommandFactory<RoomModel>> list) {

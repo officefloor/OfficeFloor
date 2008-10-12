@@ -16,6 +16,9 @@
  */
 package net.officefloor.eclipse.common.action;
 
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
+import net.officefloor.model.Model;
+
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.jface.action.Action;
@@ -25,7 +28,7 @@ import org.eclipse.jface.action.Action;
  * 
  * @author Daniel
  */
-public class CommandAction extends Action {
+public class CommandAction<R extends Model> extends Action {
 
 	/**
 	 * {@link CommandStack}.
@@ -33,25 +36,42 @@ public class CommandAction extends Action {
 	private final CommandStack commandStack;
 
 	/**
-	 * Listing of {@link Command} instances to execute.
+	 * {@link CommandFactory} to create the {@link OfficeFloorCommand}
+	 * instances.
 	 */
-	private final Command[] commands;
+	private final CommandFactory<R> commandFactory;
+
+	/**
+	 * Root {@link Model}.
+	 */
+	private final R rootModel;
+
+	/**
+	 * Selected {@link Model} instances.
+	 */
+	private final Model[] selectedModels;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param text
-	 *            Text for this {@link Action}.
 	 * @param commandStack
 	 *            {@link CommandStack}.
-	 * @param commands
-	 *            {@link Command} instances to be executed.
+	 * @param commandFactory
+	 *            {@link CommandFactory} to create the {@link Command}
+	 *            instances.
+	 * @param rootModel
+	 *            Root {@link Model}.
+	 * @param selectedModels
+	 *            Selected {@link Model} instances.
 	 */
-	public CommandAction(String text, CommandStack commandStack,
-			Command... commands) {
-		super(text);
+	public CommandAction(CommandStack commandStack,
+			CommandFactory<R> commandFactory, R rootModel,
+			Model[] selectedModels) {
+		super(commandFactory.getActionText());
 		this.commandStack = commandStack;
-		this.commands = commands;
+		this.commandFactory = commandFactory;
+		this.rootModel = rootModel;
+		this.selectedModels = selectedModels;
 	}
 
 	/*
@@ -61,10 +81,23 @@ public class CommandAction extends Action {
 	 */
 	@Override
 	public void run() {
-		// Execute the commands
-		for (Command command : this.commands) {
-			this.commandStack.execute(command);
+
+		// Obtain the commands
+		OfficeFloorCommand[] commands = this.commandFactory.createCommands(
+				this.selectedModels, this.rootModel);
+		if ((commands == null) || (commands.length == 0)) {
+			// No commands so nothing to execute
+			return;
 		}
+
+		// Chain the commands together
+		Command command = commands[0];
+		for (int i = 1; i < commands.length; i++) {
+			command = command.chain(commands[i]);
+		}
+
+		// Execute the commands
+		this.commandStack.execute(command);
 	}
 
 }

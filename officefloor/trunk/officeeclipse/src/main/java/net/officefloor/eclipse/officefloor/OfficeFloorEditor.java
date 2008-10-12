@@ -71,7 +71,7 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class OfficeFloorEditor extends
-		AbstractOfficeFloorEditor<OfficeFloorModel> {
+		AbstractOfficeFloorEditor<OfficeFloorModel, OfficeFloorEditPart> {
 
 	/**
 	 * Initialise the specialised {@link FigureFactory} for the model types.
@@ -96,7 +96,8 @@ public class OfficeFloorEditor extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateEditPartTypes(java.util.Map)
+	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
+	 * populateEditPartTypes(java.util.Map)
 	 */
 	@Override
 	protected void populateEditPartTypes(
@@ -143,7 +144,8 @@ public class OfficeFloorEditor extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
 	 */
 	@Override
 	protected boolean isDragTarget() {
@@ -153,7 +155,9 @@ public class OfficeFloorEditor extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel(net.officefloor.repository.ConfigurationItem)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel
+	 * (net.officefloor.repository.ConfigurationItem)
 	 */
 	@Override
 	protected OfficeFloorModel retrieveModel(ConfigurationItem configuration)
@@ -164,8 +168,9 @@ public class OfficeFloorEditor extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
-	 *      net.officefloor.repository.ConfigurationItem)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
+	 * net.officefloor.repository.ConfigurationItem)
 	 */
 	@Override
 	protected void storeModel(OfficeFloorModel model,
@@ -185,7 +190,8 @@ public class OfficeFloorEditor extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateCommandFactories(java.util.List)
+	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
+	 * populateCommandFactories(java.util.List)
 	 */
 	@Override
 	protected void populateCommandFactories(

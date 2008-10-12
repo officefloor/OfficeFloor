@@ -29,7 +29,8 @@ import net.officefloor.eclipse.common.commands.TagFactory;
 import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
-import net.officefloor.eclipse.desk.commands.RefreshWorkCommand;
+import net.officefloor.eclipse.desk.commands.AddExternalManagedObjectCommandFactory;
+import net.officefloor.eclipse.desk.commands.RefreshWorkCommandFactory;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
@@ -76,12 +77,14 @@ import org.eclipse.gef.palette.PaletteGroup;
  * 
  * @author Daniel
  */
-public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
+public class DeskEditor extends
+		AbstractOfficeFloorEditor<DeskModel, DeskEditPart> {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
 	 */
 	protected boolean isDragTarget() {
 		// Disallow as drag target
@@ -91,7 +94,9 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel(net.officefloor.model.repository.ConfigurationItem)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel
+	 * (net.officefloor.model.repository.ConfigurationItem)
 	 */
 	protected DeskModel retrieveModel(ConfigurationItem configuration)
 			throws Exception {
@@ -102,8 +107,9 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
-	 *      net.officefloor.model.repository.ConfigurationItem)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
+	 * net.officefloor.model.repository.ConfigurationItem)
 	 */
 	protected void storeModel(DeskModel model, ConfigurationItem configuration)
 			throws Exception {
@@ -250,7 +256,8 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateEditPartTypes(java.util.Map)
+	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
+	 * populateEditPartTypes(java.util.Map)
 	 */
 	protected void populateEditPartTypes(
 			Map<Class<?>, Class<? extends EditPart>> map) {
@@ -296,7 +303,8 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#initialisePaletteRoot()
+	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
+	 * initialisePaletteRoot()
 	 */
 	protected void initialisePaletteRoot() {
 		// Add the link group
@@ -315,12 +323,15 @@ public class DeskEditor extends AbstractOfficeFloorEditor<DeskModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateCommandFactories(java.util.List)
+	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
+	 * populateCommandFactories(java.util.List)
 	 */
 	@Override
 	protected void populateCommandFactories(List<CommandFactory<DeskModel>> list) {
-		list.add(new RefreshWorkCommand("Refresh Work",
+		list.add(new RefreshWorkCommandFactory("Refresh Work",
 				ProjectConfigurationContext.getProject(this.getEditorInput())));
+		list.add(new AddExternalManagedObjectCommandFactory(this
+				.getRootEditPart()));
 	}
 
 }

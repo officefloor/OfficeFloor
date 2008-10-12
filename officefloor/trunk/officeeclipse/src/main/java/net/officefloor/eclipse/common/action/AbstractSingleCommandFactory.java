@@ -19,6 +19,7 @@ package net.officefloor.eclipse.common.action;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.action.Action;
 
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.model.Model;
 
 /**
@@ -82,14 +83,15 @@ public abstract class AbstractSingleCommandFactory<M extends Model, R extends Mo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.action.CommandFactory#createCommands(net.officefloor.model.Model[],
-	 *      net.officefloor.model.Model)
+	 * @see
+	 * net.officefloor.eclipse.common.action.CommandFactory#createCommands(net
+	 * .officefloor.model.Model[], net.officefloor.model.Model)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public Command[] createCommands(Model[] models, R rootModel) {
-		// Defaultly create the command for each model
-		Command[] commands = new Command[models.length];
+	public OfficeFloorCommand[] createCommands(Model[] models, R rootModel) {
+		// By Default create the command for each model
+		OfficeFloorCommand[] commands = new OfficeFloorCommand[models.length];
 		for (int i = 0; i < models.length; i++) {
 			M model = (M) models[i];
 			commands[i] = this.createCommand(model, rootModel);
@@ -100,14 +102,14 @@ public abstract class AbstractSingleCommandFactory<M extends Model, R extends Mo
 	}
 
 	/**
-	 * Creates a {@link Command} for the {@link Model} passed in.
+	 * Creates a {@link OfficeFloorCommand} for the {@link Model} passed in.
 	 * 
 	 * @param model
 	 *            {@link Model} to create the {@link Command}.
 	 * @param rootModel
 	 *            Root {@link Model}.
-	 * @return {@link Command}.
+	 * @return {@link OfficeFloorCommand}.
 	 */
-	protected abstract Command createCommand(M model, R rootModel);
+	protected abstract OfficeFloorCommand createCommand(M model, R rootModel);
 
 }

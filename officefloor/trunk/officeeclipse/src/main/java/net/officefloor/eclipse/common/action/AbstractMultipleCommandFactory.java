@@ -19,6 +19,7 @@ package net.officefloor.eclipse.common.action;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.action.Action;
 
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.model.Model;
 
 /**
@@ -26,8 +27,8 @@ import net.officefloor.model.Model;
  * 
  * @author Daniel
  */
-public abstract class AbstractMultipleCommandFactory<R extends Model> implements
-		CommandFactory<R> {
+public abstract class AbstractMultipleCommandFactory<R extends Model>
+		implements CommandFactory<R> {
 
 	/**
 	 * Text for the {@link Action}.
@@ -82,13 +83,14 @@ public abstract class AbstractMultipleCommandFactory<R extends Model> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.action.CommandFactory#createCommands(net.officefloor.model.Model[],
-	 *      net.officefloor.model.Model)
+	 * @see
+	 * net.officefloor.eclipse.common.action.CommandFactory#createCommands(net
+	 * .officefloor.model.Model[], net.officefloor.model.Model)
 	 */
 	@Override
-	public Command[] createCommands(Model[] models, R rootModel) {
-		// Defaultly create the command for each model
-		Command[] commands = new Command[models.length];
+	public OfficeFloorCommand[] createCommands(Model[] models, R rootModel) {
+		// By default create the command for each model
+		OfficeFloorCommand[] commands = new OfficeFloorCommand[models.length];
 		for (int i = 0; i < models.length; i++) {
 			commands[i] = this.createCommand(models[i], rootModel);
 		}
@@ -98,14 +100,14 @@ public abstract class AbstractMultipleCommandFactory<R extends Model> implements
 	}
 
 	/**
-	 * Creates a {@link Command} for the {@link Model} passed in.
+	 * Creates a {@link OfficeFloorCommand} for the {@link Model} passed in.
 	 * 
 	 * @param model
 	 *            {@link Model} to create the {@link Command}.
 	 * @param rootModel
 	 *            Root {@link Model}.
-	 * @return {@link Command}.
+	 * @return {@link OfficeFloorCommand}.
 	 */
-	protected abstract Command createCommand(Model model, R rootModel);
+	protected abstract OfficeFloorCommand createCommand(Model model, R rootModel);
 
 }
