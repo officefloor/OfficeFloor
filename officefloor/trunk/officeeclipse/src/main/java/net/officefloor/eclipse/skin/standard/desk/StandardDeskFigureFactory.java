@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard;
+package net.officefloor.eclipse.skin.standard.desk;
 
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
@@ -35,7 +35,9 @@ import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext;
 import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
 import net.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext;
+import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
 
+import org.eclipse.draw2d.CheckBox;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.Label;
@@ -57,7 +59,8 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 */
 	@Override
 	public OfficeFloorFigure createDeskWorkFigure(DeskWorkFigureContext context) {
-		return new OfficeFloorFigure(new DeskWorkFigure(context.getWorkName()));
+		return new OfficeFloorFigureImpl(new DeskWorkFigure(context
+				.getWorkName()));
 	}
 
 	/*
@@ -78,8 +81,8 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 		};
 
 		// Return the Desk Task figure
-		return new OfficeFloorFigure(new DeskTaskFigure(context.getTaskName(),
-				addAsFlowItem.getFigure()));
+		return new OfficeFloorFigureImpl(new DeskTaskFigure(context
+				.getTaskName(), addAsFlowItem.getFigure()));
 	}
 
 	/*
@@ -90,7 +93,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createDeskTaskObjectFigure(
+	public net.officefloor.eclipse.skin.desk.DeskTaskObjectFigure createDeskTaskObjectFigure(
 			final DeskTaskObjectFigureContext context) {
 
 		// Create the check box to indicate if a parameter
@@ -103,8 +106,9 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 		};
 
 		// Create and return the figure
-		return new OfficeFloorFigure(new DeskTaskObjectFigure(context
-				.getObjectType(), parameterCheckBox.getFigure()));
+		return new DeskTaskObjectFigureImpl(new DeskTaskObjectFigure(context
+				.getObjectType(), parameterCheckBox.getFigure()),
+				(CheckBox) parameterCheckBox.getFigure());
 	}
 
 	/*
@@ -124,7 +128,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 		figure.setBounds(new Rectangle(140, 30, 120, 20));
 
 		// Return figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -144,7 +148,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 		figure.setBounds(new Rectangle(140, 30, 120, 20));
 
 		// Return figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -164,7 +168,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 		figure.setLayoutManager(new FlowLayout(true));
 
 		// Return figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -175,7 +179,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.skin.desk.FlowItemFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createFlowItemFigure(
+	public net.officefloor.eclipse.skin.desk.FlowItemFigure createFlowItemFigure(
 			final FlowItemFigureContext context) {
 
 		// Create the check box to indicate if public
@@ -192,7 +196,8 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 				publicCheckBox.getFigure());
 
 		// Return the figure (useable as a freeform figure)
-		return new OfficeFloorFigure(new FreeformWrapperFigure(figure));
+		return new FlowItemFigureImpl(new FreeformWrapperFigure(figure),
+				(CheckBox) publicCheckBox.getFigure());
 	}
 
 	/*
@@ -218,7 +223,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 		figure.setToolTip(new Label(escalationType));
 
 		// Return the figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -232,7 +237,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	public OfficeFloorFigure createFlowItemOutputFigure(
 			FlowItemOutputFigureContext context) {
 		// Return the figure
-		return new OfficeFloorFigure(new FlowItemOutputFigure(context
+		return new OfficeFloorFigureImpl(new FlowItemOutputFigure(context
 				.getFlowItemOutputName()));
 	}
 

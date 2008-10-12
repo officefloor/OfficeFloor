@@ -49,17 +49,15 @@ import org.eclipse.swt.widgets.Shell;
 /**
  * <p>
  * Abstract {@link org.eclipse.gef.EditPart} for the Office.
- * </p>
  * <p>
  * This provides the implementation of a {@link org.eclipse.gef.NodeEditPart}
  * but does not implement the interface. Subclasses may therefore choose to
  * implement the interface if it requires this functionality.
- * </p>
  * 
  * @author Daniel
  */
-public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
-		AbstractGraphicalEditPart implements PropertyChangeListener {
+public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends OfficeFloorFigure>
+		extends AbstractGraphicalEditPart implements PropertyChangeListener {
 
 	/**
 	 * Editor containing this.
@@ -74,7 +72,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	/**
 	 * {@link OfficeFloorFigure} for this {@link EditPart}.
 	 */
-	private OfficeFloorFigure officeFloorFigure = null;
+	private F officeFloorFigure = null;
 
 	/**
 	 * Initiates the Edit Part.
@@ -172,11 +170,23 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	 */
 	@Override
 	protected IFigure createFigure() {
-		// Create the Office Floor Figure
-		this.officeFloorFigure = this.createOfficeFloorFigure();
-
 		// Return the figure of the Office Floor Figure
-		return this.officeFloorFigure.getFigure();
+		return this.getOfficeFloorFigure().getFigure();
+	}
+
+	/**
+	 * <p>
+	 * Obtains the {@link OfficeFloorFigure} for this {@link EditPart}.
+	 * <p>
+	 * This will lazy create the {@link OfficeFloorFigure}.
+	 * 
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	public F getOfficeFloorFigure() {
+		if (this.officeFloorFigure == null) {
+			this.officeFloorFigure = this.createOfficeFloorFigure();
+		}
+		return this.officeFloorFigure;
 	}
 
 	/**
@@ -184,7 +194,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model> extends
 	 * 
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	protected abstract OfficeFloorFigure createOfficeFloorFigure();
+	protected abstract F createOfficeFloorFigure();
 
 	/*
 	 * (non-Javadoc)

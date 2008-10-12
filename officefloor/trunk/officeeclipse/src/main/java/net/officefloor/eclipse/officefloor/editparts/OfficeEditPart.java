@@ -37,9 +37,10 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public class OfficeEditPart extends
-		AbstractOfficeFloorNodeEditPart<OfficeFloorOfficeModel> implements
-		RemovableEditPart, OfficeFigureContext {
+public class OfficeEditPart
+		extends
+		AbstractOfficeFloorNodeEditPart<OfficeFloorOfficeModel, OfficeFloorFigure>
+		implements RemovableEditPart, OfficeFigureContext {
 
 	/*
 	 * (non-Javadoc)

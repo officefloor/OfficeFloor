@@ -38,7 +38,8 @@ import net.officefloor.model.office.OfficeRoomModel.OfficeRoomEvent;
  * 
  * @author Daniel
  */
-public class RoomEditPart extends AbstractOfficeFloorEditPart<OfficeRoomModel>
+public class RoomEditPart extends
+		AbstractOfficeFloorEditPart<OfficeRoomModel, OfficeFloorFigure>
 		implements RemovableEditPart, RoomFigureContext {
 
 	/*

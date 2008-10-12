@@ -39,9 +39,10 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class OfficeTeamEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<OfficeTeamModel> implements
-		OfficeTeamFigureContext {
+public class OfficeTeamEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<OfficeTeamModel, OfficeFloorFigure>
+		implements OfficeTeamFigureContext {
 
 	/*
 	 * (non-Javadoc)

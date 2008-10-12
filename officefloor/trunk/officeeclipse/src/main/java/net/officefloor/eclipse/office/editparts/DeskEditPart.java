@@ -33,7 +33,8 @@ import net.officefloor.model.office.OfficeDeskModel.OfficeDeskEvent;
  * 
  * @author Daniel
  */
-public class DeskEditPart extends AbstractOfficeFloorEditPart<OfficeDeskModel>
+public class DeskEditPart extends
+		AbstractOfficeFloorEditPart<OfficeDeskModel, OfficeFloorFigure>
 		implements DeskFigureContext {
 
 	/*

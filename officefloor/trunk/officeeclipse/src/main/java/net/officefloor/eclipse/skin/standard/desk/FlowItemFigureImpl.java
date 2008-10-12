@@ -14,30 +14,49 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin;
+package net.officefloor.eclipse.skin.standard.desk;
 
+import org.eclipse.draw2d.CheckBox;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
+
+import net.officefloor.eclipse.skin.desk.FlowItemFigure;
+import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
 
 /**
- * Provides details of the {@link IFigure} for an {@link EditPart}.
+ * {@link FlowItemFigure} implementation.
  * 
  * @author Daniel
  */
-public interface OfficeFloorFigure {
+public class FlowItemFigureImpl extends OfficeFloorFigureImpl implements
+		FlowItemFigure {
 
 	/**
-	 * Obtains the {@link IFigure} to represent the {@link EditPart}.
-	 * 
-	 * @return {@link IFigure} to represent the {@link EditPart}.
+	 * Is public {@link CheckBox}.
 	 */
-	public IFigure getFigure();
+	private final CheckBox checkBox;
 
 	/**
-	 * Obtains the {@link IFigure} to add children of this {@link EditPart}.
+	 * Initiate.
 	 * 
-	 * @return {@link IFigure} to add children of this {@link EditPart}.
+	 * @param figure
+	 *            {@link IFigure}.
+	 * @param checkBox
+	 *            Is public {@link CheckBox}.
 	 */
-	public IFigure getContentPane();
+	public FlowItemFigureImpl(IFigure figure, CheckBox checkBox) {
+		super(figure);
+		this.checkBox = checkBox;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.desk.FlowItemFigure#setIsPublic(boolean)
+	 */
+	@Override
+	public void setIsPublic(boolean isPublic) {
+		this.checkBox.setSelected(isPublic);
+	}
 
 }

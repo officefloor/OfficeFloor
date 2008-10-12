@@ -82,7 +82,7 @@ public interface OfficeFigureFactory {
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createExternalManagedObjectFigure(
+	ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context);
 
 	/**

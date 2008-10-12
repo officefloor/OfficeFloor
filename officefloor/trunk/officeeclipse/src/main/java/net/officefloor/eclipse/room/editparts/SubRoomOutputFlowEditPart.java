@@ -41,9 +41,10 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class SubRoomOutputFlowEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<SubRoomOutputFlowModel> implements
-		SubRoomOutputFlowFigureContext {
+public class SubRoomOutputFlowEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<SubRoomOutputFlowModel, OfficeFloorFigure>
+		implements SubRoomOutputFlowFigureContext {
 
 	/*
 	 * (non-Javadoc)

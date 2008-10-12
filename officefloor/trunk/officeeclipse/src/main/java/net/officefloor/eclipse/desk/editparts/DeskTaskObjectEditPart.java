@@ -20,10 +20,11 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigure;
 import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
@@ -39,9 +40,10 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class DeskTaskObjectEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<DeskTaskObjectModel> implements
-		DeskTaskObjectFigureContext {
+public class DeskTaskObjectEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<DeskTaskObjectModel, DeskTaskObjectFigure>
+		implements DeskTaskObjectFigureContext {
 
 	/*
 	 * (non-Javadoc)
@@ -51,7 +53,7 @@ public class DeskTaskObjectEditPart extends
 	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected DeskTaskObjectFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createDeskTaskObjectFigure(this);
 	}
@@ -126,6 +128,13 @@ public class DeskTaskObjectEditPart extends
 			protected void handlePropertyChange(DeskTaskObjectEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
+				case CHANGE_IS_PARAMETER:
+					// Indicate is parameter changed
+					DeskTaskObjectEditPart.this.getOfficeFloorFigure()
+							.setIsParameter(
+									DeskTaskObjectEditPart.this
+											.getCastedModel().getIsParameter());
+					break;
 				case CHANGE_MANAGED_OBJECT:
 					DeskTaskObjectEditPart.this.refreshSourceConnections();
 					break;
@@ -170,8 +179,29 @@ public class DeskTaskObjectEditPart extends
 	 * (boolean)
 	 */
 	@Override
-	public void setIsParameter(boolean isParameter) {
-		this.getCastedModel().setIsParameter(isParameter);
+	public void setIsParameter(final boolean isParameter) {
+
+		// Obtain the current state
+		final boolean currentIsParameter = this.getCastedModel()
+				.getIsParameter();
+
+		// Specify the change
+		this.executeCommand(new OfficeFloorCommand() {
+
+			@Override
+			protected void doCommand() {
+				// Set new value
+				DeskTaskObjectEditPart.this.getCastedModel().setIsParameter(
+						isParameter);
+			}
+
+			@Override
+			protected void undoCommand() {
+				// Reset to old value
+				DeskTaskObjectEditPart.this.getCastedModel().setIsParameter(
+						currentIsParameter);
+			}
+		});
 	}
 
 }

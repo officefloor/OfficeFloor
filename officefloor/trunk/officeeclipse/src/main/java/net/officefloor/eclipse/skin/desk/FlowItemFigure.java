@@ -14,30 +14,24 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin;
+package net.officefloor.eclipse.skin.desk;
 
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.desk.FlowItemModel;
 
 /**
- * Provides details of the {@link IFigure} for an {@link EditPart}.
+ * {@link OfficeFloorFigure} for the {@link FlowItemModel}.
  * 
  * @author Daniel
  */
-public interface OfficeFloorFigure {
+public interface FlowItemFigure extends OfficeFloorFigure {
 
 	/**
-	 * Obtains the {@link IFigure} to represent the {@link EditPart}.
+	 * Flags on display whether is public.
 	 * 
-	 * @return {@link IFigure} to represent the {@link EditPart}.
+	 * @param isPublic
+	 *            <code>true</code> if public.
 	 */
-	public IFigure getFigure();
-
-	/**
-	 * Obtains the {@link IFigure} to add children of this {@link EditPart}.
-	 * 
-	 * @return {@link IFigure} to add children of this {@link EditPart}.
-	 */
-	public IFigure getContentPane();
+	void setIsPublic(boolean isPublic);
 
 }

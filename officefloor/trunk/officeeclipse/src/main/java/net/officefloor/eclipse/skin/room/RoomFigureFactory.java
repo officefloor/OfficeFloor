@@ -94,9 +94,9 @@ public interface RoomFigureFactory {
 	 * 
 	 * @param context
 	 *            {@link SubRoomInputFlowFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
+	 * @return {@link SubRoomInputFlowFigure}.
 	 */
-	OfficeFloorFigure createSubRoomInputFlowFigure(
+	SubRoomInputFlowFigure createSubRoomInputFlowFigure(
 			SubRoomInputFlowFigureContext context);
 
 	/**

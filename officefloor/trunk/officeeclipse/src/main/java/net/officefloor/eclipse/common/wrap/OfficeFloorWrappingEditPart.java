@@ -24,6 +24,7 @@ import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.IFigure;
 
 /**
  * Abstract {@link net.officefloor.eclipse.common.wrap.WrappingEditPart}.
@@ -31,8 +32,8 @@ import org.eclipse.draw2d.Figure;
  * @author Daniel
  */
 public abstract class OfficeFloorWrappingEditPart extends
-		AbstractOfficeFloorEditPart<WrappingModel<?>> implements
-		WrappingEditPart {
+		AbstractOfficeFloorEditPart<WrappingModel<?>, OfficeFloorFigure>
+		implements WrappingEditPart {
 
 	/**
 	 * Allow default construction.
@@ -64,7 +65,18 @@ public abstract class OfficeFloorWrappingEditPart extends
 	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return new OfficeFloorFigure(this.figure);
+		return new OfficeFloorFigure() {
+
+			@Override
+			public IFigure getContentPane() {
+				return OfficeFloorWrappingEditPart.this.figure;
+			}
+
+			@Override
+			public IFigure getFigure() {
+				return OfficeFloorWrappingEditPart.this.figure;
+			}
+		};
 	}
 
 	/*

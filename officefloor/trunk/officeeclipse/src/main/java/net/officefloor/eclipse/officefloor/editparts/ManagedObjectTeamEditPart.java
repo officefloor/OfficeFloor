@@ -39,9 +39,10 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class ManagedObjectTeamEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTeamModel> implements
-		ManagedObjectTeamFigureContext {
+public class ManagedObjectTeamEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTeamModel, OfficeFloorFigure>
+		implements ManagedObjectTeamFigureContext {
 
 	/*
 	 * (non-Javadoc)

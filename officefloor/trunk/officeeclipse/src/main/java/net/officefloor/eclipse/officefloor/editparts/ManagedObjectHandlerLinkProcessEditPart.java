@@ -43,7 +43,7 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class ManagedObjectHandlerLinkProcessEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectHandlerLinkProcessModel>
+		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectHandlerLinkProcessModel, OfficeFloorFigure>
 		implements ManagedObjectHandlerLinkProcessFigureContext {
 
 	/*

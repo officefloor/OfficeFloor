@@ -38,8 +38,8 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class ExternalTeamEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalTeamModel> implements
-		RemovableEditPart, ExternalTeamFigureContext {
+		AbstractOfficeFloorNodeEditPart<ExternalTeamModel, OfficeFloorFigure>
+		implements RemovableEditPart, ExternalTeamFigureContext {
 
 	/*
 	 * (non-Javadoc)

@@ -45,9 +45,10 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class AdministratorEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<AdministratorModel> implements
-		RemovableEditPart, AdministratorFigureContext {
+public class AdministratorEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<AdministratorModel, OfficeFloorFigure>
+		implements RemovableEditPart, AdministratorFigureContext {
 
 	/*
 	 * (non-Javadoc)

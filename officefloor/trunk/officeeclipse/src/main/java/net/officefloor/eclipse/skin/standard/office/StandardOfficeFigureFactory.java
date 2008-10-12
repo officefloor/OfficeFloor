@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard;
+package net.officefloor.eclipse.skin.standard.office;
 
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.common.figure.IndentFigure;
@@ -26,11 +26,13 @@ import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
 import net.officefloor.eclipse.skin.office.DeskFigureContext;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.eclipse.skin.office.DutyFlowFigureContext;
+import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalTeamFigureContext;
 import net.officefloor.eclipse.skin.office.FlowItemFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
 import net.officefloor.eclipse.skin.office.RoomFigureContext;
+import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
 
 import org.eclipse.draw2d.ActionEvent;
 import org.eclipse.draw2d.ActionListener;
@@ -73,7 +75,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 		// Return the figure for free form display
 		FreeformWrapperFigure wrappingFigure = new FreeformWrapperFigure(figure);
 		wrappingFigure.setBackgroundColor(ColorConstants.cyan);
-		return new OfficeFloorFigure(wrappingFigure);
+		return new OfficeFloorFigureImpl(wrappingFigure);
 	}
 
 	/*
@@ -89,7 +91,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 				new ListFigure()));
 		figure.addDecorate(new ListItemFigure(context.getDeskName()));
 		figure.addChildContainerFigure();
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -108,7 +110,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 		figure.addChildContainerFigure();
 
 		// Return the figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -120,7 +122,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	 */
 	@Override
 	public OfficeFloorFigure createDutyFlowFigure(DutyFlowFigureContext context) {
-		return new OfficeFloorFigure(new ListItemFigure(context
+		return new OfficeFloorFigureImpl(new ListItemFigure(context
 				.getDutyFlowName()));
 	}
 
@@ -132,7 +134,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	 * (net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createExternalManagedObjectFigure(
+	public ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			final ExternalManagedObjectFigureContext context) {
 
 		Figure figure = new Figure();
@@ -169,7 +171,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 		figure.add(clickableScope);
 
 		// Return figure
-		return new OfficeFloorFigure(figure);
+		return new ExternalManagedObjectFigureImpl(figure, scope);
 	}
 
 	/*
@@ -189,7 +191,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 		figure.setBounds(new Rectangle(140, 30, 120, 20));
 
 		// Return figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -209,7 +211,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 		figure.addChildContainerFigure();
 
 		// Return the figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -225,7 +227,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 				new ListFigure()));
 		figure.addDecorate(new ListItemFigure(context.getRoomName()));
 		figure.addChildContainerFigure();
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 }

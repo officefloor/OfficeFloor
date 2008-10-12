@@ -36,8 +36,9 @@ import net.officefloor.model.room.SubRoomModel.SubRoomEvent;
  * 
  * @author Daniel
  */
-public class SubRoomEditPart extends AbstractOfficeFloorEditPart<SubRoomModel>
-		implements RemovableEditPart, SubRoomFigureContext {
+public class SubRoomEditPart extends
+		AbstractOfficeFloorEditPart<SubRoomModel, OfficeFloorFigure> implements
+		RemovableEditPart, SubRoomFigureContext {
 
 	/*
 	 * (non-Javadoc)

@@ -25,6 +25,7 @@ import net.officefloor.model.Model;
 
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.FreeformLayout;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 import org.eclipse.gef.editpolicies.RootComponentEditPolicy;
@@ -35,7 +36,7 @@ import org.eclipse.gef.editpolicies.RootComponentEditPolicy;
  * @author Daniel
  */
 public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
-		extends AbstractOfficeFloorEditPart<M> {
+		extends AbstractOfficeFloorEditPart<M, OfficeFloorFigure> {
 
 	/*
 	 * (non-Javadoc)
@@ -47,11 +48,22 @@ public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		// Create the figure
-		FreeformLayer figure = new FreeformLayer();
+		final FreeformLayer figure = new FreeformLayer();
 		figure.setLayoutManager(new FreeformLayout());
-		
+
 		// Return the figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigure() {
+
+			@Override
+			public IFigure getContentPane() {
+				return figure;
+			}
+
+			@Override
+			public IFigure getFigure() {
+				return figure;
+			}
+		};
 	}
 
 	/*

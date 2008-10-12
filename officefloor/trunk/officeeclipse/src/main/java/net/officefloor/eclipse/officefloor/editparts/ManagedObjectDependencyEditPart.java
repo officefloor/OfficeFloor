@@ -34,9 +34,10 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public class ManagedObjectDependencyEditPart extends
-		AbstractOfficeFloorEditPart<ManagedObjectDependencyModel> implements
-		ManagedObjectDependencyFigureContext {
+public class ManagedObjectDependencyEditPart
+		extends
+		AbstractOfficeFloorEditPart<ManagedObjectDependencyModel, OfficeFloorFigure>
+		implements ManagedObjectDependencyFigureContext {
 
 	/*
 	 * (non-Javadoc)

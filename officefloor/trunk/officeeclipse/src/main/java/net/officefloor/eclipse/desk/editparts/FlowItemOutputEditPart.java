@@ -42,9 +42,10 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class FlowItemOutputEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<FlowItemOutputModel> implements
-		FlowItemOutputFigureContext {
+public class FlowItemOutputEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<FlowItemOutputModel, OfficeFloorFigure>
+		implements FlowItemOutputFigureContext {
 
 	/*
 	 * (non-Javadoc)

@@ -46,8 +46,8 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class FlowItemEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<FlowItemModel> implements
-		FlowItemFigureContext {
+		AbstractOfficeFloorSourceNodeEditPart<FlowItemModel, OfficeFloorFigure>
+		implements FlowItemFigureContext {
 
 	/**
 	 * Pre-admin {@link EditPart}.

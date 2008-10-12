@@ -36,9 +36,10 @@ import net.officefloor.model.room.ExternalManagedObjectModel.ExternalManagedObje
  * 
  * @author Daniel
  */
-public class ExternalManagedObjectEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel> implements
-		RemovableEditPart, ExternalManagedObjectFigureContext {
+public class ExternalManagedObjectEditPart
+		extends
+		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel, OfficeFloorFigure>
+		implements RemovableEditPart, ExternalManagedObjectFigureContext {
 
 	/*
 	 * (non-Javadoc)
