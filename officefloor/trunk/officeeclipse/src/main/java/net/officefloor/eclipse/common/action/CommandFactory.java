@@ -19,12 +19,11 @@ package net.officefloor.eclipse.common.action;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.model.Model;
 
-import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 
 /**
- * Factory to create {@link Command} instances.
+ * Factory to create {@link OfficeFloorCommand} instances.
  * 
  * @author Daniel
  */
@@ -46,15 +45,16 @@ public interface CommandFactory<R extends Model> {
 	Class<? extends Model>[] getModelTypes();
 
 	/**
-	 * Creates the {@link Command} listing for the input {@link Model}
-	 * instances.
+	 * Creates the {@link OfficeFloorCommand} listing for the input
+	 * {@link Model} instances.
 	 * 
 	 * @param models
-	 *            {@link Model} instances to create the {@link Command}
-	 *            instances.
+	 *            {@link Model} instances to create the
+	 *            {@link OfficeFloorCommand} instances.
 	 * @param rootModel
 	 *            Root {@link Model}.
-	 * @return {@link Command} instances.
+	 * @return {@link OfficeFloorCommand} instances. May return no instances if
+	 *         nothing to execute.
 	 */
 	OfficeFloorCommand[] createCommands(Model[] models, R rootModel);
 
