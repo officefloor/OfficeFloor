@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse.common.action;
 
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.model.Model;
 
 import org.eclipse.gef.commands.Command;
@@ -55,6 +56,6 @@ public interface CommandFactory<R extends Model> {
 	 *            Root {@link Model}.
 	 * @return {@link Command} instances.
 	 */
-	Command[] createCommands(Model[] models, R rootModel);
+	OfficeFloorCommand[] createCommands(Model[] models, R rootModel);
 
 }

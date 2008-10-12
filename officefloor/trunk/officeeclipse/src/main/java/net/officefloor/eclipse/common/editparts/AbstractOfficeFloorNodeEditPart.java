@@ -128,7 +128,7 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 	 */
 	public ConnectionAnchor getSourceConnectionAnchor(
 			ConnectionEditPart connection) {
-		return new ChopboxAnchor(this.getFigure());
+		return this.getConnectionAnchor(connection);
 	}
 
 	/*
@@ -140,7 +140,30 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 	 */
 	public ConnectionAnchor getTargetConnectionAnchor(
 			ConnectionEditPart connection) {
-		return new ChopboxAnchor(this.getFigure());
+		return this.getConnectionAnchor(connection);
+	}
+
+	/**
+	 * Obtains the {@link ConnectionAnchor} for the {@link ConnectionEditPart}.
+	 * 
+	 * @param connection
+	 *            {@link ConnectionEditPart}.
+	 * @return {@link ConnectionAnchor}.
+	 */
+	private ConnectionAnchor getConnectionAnchor(ConnectionEditPart connection) {
+		// Obtain the type of connection
+		Class<?> connectionModelType = connection.getModel().getClass();
+
+		// Attempt to obtain anchor
+		ConnectionAnchor anchor = this.getOfficeFloorFigure()
+				.getConnectionAnchor(connectionModelType);
+		if (anchor == null) {
+			// Default to around the figure
+			anchor = new ChopboxAnchor(this.getFigure());
+		}
+
+		// Return the anchor
+		return anchor;
 	}
 
 	/*

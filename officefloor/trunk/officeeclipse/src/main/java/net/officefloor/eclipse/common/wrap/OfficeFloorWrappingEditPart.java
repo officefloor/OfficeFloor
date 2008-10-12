@@ -23,6 +23,7 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 
@@ -75,6 +76,12 @@ public abstract class OfficeFloorWrappingEditPart extends
 			@Override
 			public IFigure getFigure() {
 				return OfficeFloorWrappingEditPart.this.figure;
+			}
+
+			@Override
+			public ConnectionAnchor getConnectionAnchor(
+					Class<?> connectionModelType) {
+				return null;
 			}
 		};
 	}

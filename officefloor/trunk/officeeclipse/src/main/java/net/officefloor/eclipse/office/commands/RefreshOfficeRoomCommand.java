@@ -19,12 +19,12 @@ package net.officefloor.eclipse.office.commands;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.action.AbstractSingleCommandFactory;
 import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.office.OfficeLoader;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.action.Action;
 
 /**
@@ -56,15 +56,16 @@ public class RefreshOfficeRoomCommand extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.action.AbstractSingleCommandFactory#createCommand(net.officefloor.model.Model,
-	 *      net.officefloor.model.Model)
+	 * @seenet.officefloor.eclipse.common.action.AbstractSingleCommandFactory#
+	 * createCommand(net.officefloor.model.Model, net.officefloor.model.Model)
 	 */
 	@Override
-	protected Command createCommand(final OfficeRoomModel model,
+	protected OfficeFloorCommand createCommand(final OfficeRoomModel model,
 			OfficeModel rootModel) {
-		return new Command() {
+		return new OfficeFloorCommand() {
+
 			@Override
-			public void execute() {
+			public void doCommand() {
 				try {
 
 					// Create the Project class loader
@@ -90,6 +91,13 @@ public class RefreshOfficeRoomCommand extends
 							"TODO provide Exception to createCommand of "
 									+ CommandFactory.class.getName());
 				}
+			}
+
+			@Override
+			protected void undoCommand() {
+				// TODO Implement
+				throw new UnsupportedOperationException(
+						"TODO implement OfficeFloorCommand.undoCommand");
 			}
 		};
 	}

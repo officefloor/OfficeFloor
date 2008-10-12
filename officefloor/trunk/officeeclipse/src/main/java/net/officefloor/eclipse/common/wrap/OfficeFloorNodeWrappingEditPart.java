@@ -18,6 +18,7 @@ package net.officefloor.eclipse.common.wrap;
 
 import java.util.List;
 
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 
@@ -83,6 +84,12 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 			@Override
 			public IFigure getFigure() {
 				return OfficeFloorNodeWrappingEditPart.this.figure;
+			}
+
+			@Override
+			public ConnectionAnchor getConnectionAnchor(
+					Class<?> connectionModelType) {
+				return null;
 			}
 		};
 	}

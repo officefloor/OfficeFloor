@@ -26,6 +26,7 @@ import net.officefloor.model.Model;
 import org.eclipse.draw2d.ActionEvent;
 import org.eclipse.draw2d.ActionListener;
 import org.eclipse.draw2d.Button;
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
@@ -97,6 +98,12 @@ public abstract class ButtonEditPart extends
 			@Override
 			public IFigure getFigure() {
 				return button;
+			}
+
+			@Override
+			public ConnectionAnchor getConnectionAnchor(
+					Class<?> connectionModelType) {
+				return null;
 			}
 		};
 	}

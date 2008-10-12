@@ -16,8 +16,14 @@
  */
 package net.officefloor.eclipse.skin.standard;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import java.util.HashMap;
+import java.util.Map;
 
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.Model;
+
+import org.eclipse.draw2d.ChopboxAnchor;
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
@@ -37,6 +43,11 @@ public class OfficeFloorFigureImpl implements OfficeFloorFigure {
 	 * {@link IFigure} to add children of this {@link EditPart}.
 	 */
 	private final IFigure contentPane;
+
+	/**
+	 * Map of connection {@link Model} type to {@link ConnectionAnchor}.
+	 */
+	private final Map<Class<?>, ConnectionAnchor> connectionAnchors = new HashMap<Class<?>, ConnectionAnchor>();
 
 	/**
 	 * Initiate.
@@ -62,6 +73,19 @@ public class OfficeFloorFigureImpl implements OfficeFloorFigure {
 		this(figure, figure);
 	}
 
+	/**
+	 * Override to register the {@link ConnectionAnchor}.
+	 * 
+	 * @param connectionModelType
+	 *            Connection {@link Model} type of the connection.
+	 * @param connectionAnchor
+	 *            {@link ConnectionAnchor} for the connection.
+	 */
+	protected void registerConnectionAnchor(Class<?> connectionModelType,
+			ConnectionAnchor connectionAnchor) {
+		// By default load no connection anchors
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -80,6 +104,27 @@ public class OfficeFloorFigureImpl implements OfficeFloorFigure {
 	@Override
 	public IFigure getContentPane() {
 		return this.contentPane;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.OfficeFloorFigure#getConnectionAnchor(java
+	 * .lang.Class)
+	 */
+	@Override
+	public ConnectionAnchor getConnectionAnchor(Class<?> connectionModelType) {
+		// Determine if have connection anchor
+		ConnectionAnchor connectionAnchor = this.connectionAnchors
+				.get(connectionModelType);
+		if (connectionAnchor == null) {
+			// Provide wrapping figure
+			connectionAnchor = new ChopboxAnchor(this.getFigure());
+		}
+
+		// Return the anchor
+		return connectionAnchor;
 	}
 
 }

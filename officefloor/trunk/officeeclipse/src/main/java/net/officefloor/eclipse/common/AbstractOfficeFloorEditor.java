@@ -63,13 +63,18 @@ import org.eclipse.ui.IEditorInput;
  * 
  * @author Daniel
  */
-public abstract class AbstractOfficeFloorEditor<T extends Model> extends
-		GraphicalEditorWithFlyoutPalette implements EditPartFactory {
+public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditPart>
+		extends GraphicalEditorWithFlyoutPalette implements EditPartFactory {
 
 	/**
-	 * Root of Model being editted.
+	 * Root {@link Model} being edited.
 	 */
-	protected T model = null;
+	protected M rootModel;
+
+	/**
+	 * Root {@link EditPart}.
+	 */
+	protected E rootEditPart;
 
 	/**
 	 * Map of model type to {@link EditPart} type.
@@ -80,7 +85,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 	 * Listing of the {@link CommandFactory} instances for the context
 	 * {@link Menu}.
 	 */
-	private CommandFactory<T>[] commandFactories;
+	private CommandFactory<M>[] commandFactories;
 
 	/**
 	 * {@link PaletteRoot}.
@@ -129,17 +134,26 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 	 * @param model
 	 *            Model.
 	 */
-	protected void setCastedModel(T model) {
-		this.model = model;
+	protected void setCastedModel(M model) {
+		this.rootModel = model;
 	}
 
 	/**
-	 * Obtains the Model.
+	 * Obtains the {@link Model}.
 	 * 
-	 * @return Model.
+	 * @return {@link Model}.
 	 */
-	public T getCastedModel() {
-		return this.model;
+	public M getCastedModel() {
+		return this.rootModel;
+	}
+
+	/**
+	 * Obtains the root {@link EditPart}.
+	 * 
+	 * @return Root {@link EditPart}.
+	 */
+	public E getRootEditPart() {
+		return this.rootEditPart;
 	}
 
 	/*
@@ -178,7 +192,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 	protected void initialiseContextMenu() {
 
 		// Obtain the listing of command factories
-		List<CommandFactory<T>> commandFactoryList = new LinkedList<CommandFactory<T>>();
+		List<CommandFactory<M>> commandFactoryList = new LinkedList<CommandFactory<M>>();
 		this.populateCommandFactories(commandFactoryList);
 		this.commandFactories = commandFactoryList
 				.toArray(new CommandFactory[0]);
@@ -197,7 +211,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 
 				// Obtain the selected models
 				EditPart rootEditPart = null;
-				T rootModel = null;
+				M rootModel = null;
 				List<Model> selectedModelList = new LinkedList<Model>();
 				ISelection selection = AbstractOfficeFloorEditor.this
 						.getGraphicalViewer().getSelection();
@@ -224,7 +238,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 
 						// Specify the root model
 						rootEditPart = editPart;
-						rootModel = (T) rootEditPart.getModel();
+						rootModel = (M) rootEditPart.getModel();
 					}
 				}
 				Model[] selectedModels = selectedModelList
@@ -237,7 +251,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 				}
 
 				// Add the appropriate actions
-				for (CommandFactory<T> commandFactory : AbstractOfficeFloorEditor.this.commandFactories) {
+				for (CommandFactory<M> commandFactory : AbstractOfficeFloorEditor.this.commandFactories) {
 
 					// Determine if handles all model types selected
 					boolean isHandled = true;
@@ -257,15 +271,11 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 
 					// Add if handles all model types
 					if (isHandled) {
-						// Create the commands to run
-						Command[] commands = commandFactory.createCommands(
-								selectedModels, rootModel);
-
 						// Add action for the commands to the menu
-						menuManager.add(new CommandAction(commandFactory
-								.getActionText(),
+						menuManager.add(new CommandAction(
 								AbstractOfficeFloorEditor.this
-										.getCommandStack(), commands));
+										.getCommandStack(), commandFactory,
+								rootModel, selectedModels));
 					}
 				}
 			}
@@ -285,7 +295,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 	 *            Listing to add {@link CommandFactory} instances.
 	 */
 	protected abstract void populateCommandFactories(
-			List<CommandFactory<T>> list);
+			List<CommandFactory<M>> list);
 
 	/**
 	 * Allow to override to specify another {@link EditPartFactory}.
@@ -353,8 +363,17 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 					+ this.getClass().getName());
 		}
 
-		// Return a new instance of the edit part
-		return EclipseUtil.createInstance(editPartType);
+		// Create the instance of the edit part
+		EditPart editPart = EclipseUtil.createInstance(editPartType);
+
+		// Determine if created the root edit part
+		if (this.getCastedModel().getClass() == model.getClass()) {
+			// Specify the root edit part
+			this.rootEditPart = (E) editPart;
+		}
+
+		// Return the edit part
+		return editPart;
 	}
 
 	/**
@@ -406,7 +425,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 	 * @throws Exception
 	 *             If fails to obtain the Model.
 	 */
-	protected abstract T retrieveModel(ConfigurationItem configuration)
+	protected abstract M retrieveModel(ConfigurationItem configuration)
 			throws Exception;
 
 	/*
@@ -443,7 +462,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 	 * @throws Exception
 	 *             If fails to store the Model.
 	 */
-	protected abstract void storeModel(T model, ConfigurationItem configuration)
+	protected abstract void storeModel(M model, ConfigurationItem configuration)
 			throws Exception;
 
 	/*
@@ -540,7 +559,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 		/**
 		 * Editor.
 		 */
-		protected final AbstractOfficeFloorEditor<?> editor;
+		protected final AbstractOfficeFloorEditor<?, ?> editor;
 
 		/**
 		 * Initiate with the {@link EditPartFactory} being wrapped.
@@ -551,7 +570,7 @@ public abstract class AbstractOfficeFloorEditor<T extends Model> extends
 		 *            Editor.
 		 */
 		public WrappingEditPartFactory(EditPartFactory editPartFactory,
-				AbstractOfficeFloorEditor<?> editor) {
+				AbstractOfficeFloorEditor<?, ?> editor) {
 			// Store state
 			this.editPartFactory = editPartFactory;
 			this.editor = editor;

@@ -62,7 +62,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	/**
 	 * Editor containing this.
 	 */
-	private AbstractOfficeFloorEditor<?> editor = null;
+	private AbstractOfficeFloorEditor<?, ?> editor = null;
 
 	/**
 	 * Listing of the {@link PropertyChangeHandler} instances.
@@ -89,7 +89,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 * @param editor
 	 *            Editor containing this.
 	 */
-	public void setOfficeFloorEditor(AbstractOfficeFloorEditor<?> editor) {
+	public void setOfficeFloorEditor(AbstractOfficeFloorEditor<?, ?> editor) {
 		this.editor = editor;
 	}
 
@@ -98,7 +98,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 * 
 	 * @return Editor for this.
 	 */
-	public AbstractOfficeFloorEditor<?> getEditor() {
+	public AbstractOfficeFloorEditor<?, ?> getEditor() {
 		return this.editor;
 	}
 
@@ -367,7 +367,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            Request.
 	 */
 	protected Command handleDoubleClick(Request request) {
-		// Defaultly not handled
+		// By default not handled
 		return null;
 	}
 
@@ -380,8 +380,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            Properties to not be populated.
 	 * @return {@link BeanDialog} for the bean.
 	 */
-	protected BeanDialog createBeanDialog(Object bean,
-			String... ignoreProperties) {
+	public BeanDialog createBeanDialog(Object bean, String... ignoreProperties) {
 
 		// Obtain the configuration context
 		ConfigurationContext context = new FileConfigurationItem(this.editor
@@ -404,7 +403,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 * @param message
 	 *            Error message.
 	 */
-	protected void messageError(String message) {
+	public void messageError(String message) {
 		MessageDialog.openError(this.getEditor().getEditorSite().getShell(),
 				"Office Floor", message);
 	}
@@ -416,7 +415,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 * @param error
 	 *            Error.
 	 */
-	protected void messageError(Throwable error) {
+	public void messageError(Throwable error) {
 		// Obtain the stack trace
 		StringWriter buffer = new StringWriter();
 		error.printStackTrace(new PrintWriter(buffer));
@@ -431,7 +430,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 * @param message
 	 *            Warning message
 	 */
-	protected void messageWarning(String message) {
+	public void messageWarning(String message) {
 		MessageDialog.openWarning(this.getEditor().getEditorSite().getShell(),
 				"Office Floor", message);
 	}

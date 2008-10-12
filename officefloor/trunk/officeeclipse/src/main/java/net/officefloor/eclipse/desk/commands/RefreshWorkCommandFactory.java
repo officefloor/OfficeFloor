@@ -21,6 +21,7 @@ import net.officefloor.desk.TaskToFlowItemSynchroniser;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.action.AbstractSingleCommandFactory;
 import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
@@ -29,7 +30,6 @@ import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.work.TaskModel;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.action.Action;
 
 /**
@@ -37,7 +37,7 @@ import org.eclipse.jface.action.Action;
  * 
  * @author Daniel
  */
-public class RefreshWorkCommand extends
+public class RefreshWorkCommandFactory extends
 		AbstractSingleCommandFactory<DeskWorkModel, DeskModel> {
 
 	/**
@@ -53,7 +53,7 @@ public class RefreshWorkCommand extends
 	 * @param project
 	 *            {@link IProject}.
 	 */
-	public RefreshWorkCommand(String actionText, IProject project) {
+	public RefreshWorkCommandFactory(String actionText, IProject project) {
 		super(actionText, DeskWorkModel.class);
 		this.project = project;
 	}
@@ -61,19 +61,20 @@ public class RefreshWorkCommand extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.action.AbstractSingleCommandFactory#createCommand(net.officefloor.model.Model,
-	 *      net.officefloor.model.Model)
+	 * @seenet.officefloor.eclipse.common.action.AbstractSingleCommandFactory#
+	 * createCommand(net.officefloor.model.Model, net.officefloor.model.Model)
 	 */
 	@Override
-	protected Command createCommand(final DeskWorkModel model,
+	protected OfficeFloorCommand createCommand(final DeskWorkModel model,
 			DeskModel rootModel) {
-		return new Command() {
+		return new OfficeFloorCommand() {
+
 			@Override
-			public void execute() {
+			protected void doCommand() {
 				try {
 					// Create the Project class loader
 					ProjectClassLoader projectClassLoader = ProjectClassLoader
-							.create(RefreshWorkCommand.this.project);
+							.create(RefreshWorkCommandFactory.this.project);
 
 					// Create the desk loader
 					DeskLoader deskLoader = new DeskLoader(projectClassLoader);
@@ -114,6 +115,13 @@ public class RefreshWorkCommand extends
 							"TODO provide Exception to createCommand of "
 									+ CommandFactory.class.getName());
 				}
+			}
+
+			@Override
+			protected void undoCommand() {
+				// TODO Implement
+				throw new UnsupportedOperationException(
+						"TODO implement OfficeFloorCommand.undoCommand");
 			}
 		};
 	}

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.common.action.CommandFactoryUtil;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.DeskWorkCreateDialog;
@@ -34,12 +35,12 @@ import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.common.wrap.OfficeFloorWrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
+import net.officefloor.eclipse.desk.commands.AddExternalManagedObjectCommandFactory;
 import net.officefloor.eclipse.desk.figure.SectionFigure;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
-import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.DeskModel.DeskEvent;
 
@@ -116,22 +117,20 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#init()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * init()
 	 */
 	@SuppressWarnings("unchecked")
 	protected void init() {
-		
+
 		// Button to add External Managed Objects
 		final ButtonEditPart extMoButton = new ButtonEditPart("Add Ext MO") {
 			protected void handleButtonClick() {
-				// Add the populated External Managed Object
-				ExternalManagedObjectModel mo = new ExternalManagedObjectModel();
-				BeanDialog dialog = DeskEditPart.this.createBeanDialog(mo,
-						"Object Type", "X", "Y");
-				if (dialog.populate()) {
-					DeskEditPart.this.getCastedModel()
-							.addExternalManagedObject(mo);
-				}
+				// Add the external managed object
+				CommandFactoryUtil.execute(DeskEditPart.this,
+						new AddExternalManagedObjectCommandFactory(
+								DeskEditPart.this));
 			}
 		};
 
@@ -248,7 +247,9 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart#createLayoutEditPolicy()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart
+	 * #createLayoutEditPolicy()
 	 */
 	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
 		return new DeskLayoutEditPolicy();
@@ -257,7 +258,9 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart#populateChildren(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart
+	 * #populateChildren(java.util.List)
 	 */
 	protected void populateChildren(List<Object> childModels) {
 		// Add the static children
@@ -273,7 +276,9 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#populatePropertyChangeHandlers(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * populatePropertyChangeHandlers(java.util.List)
 	 */
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -319,8 +324,10 @@ class DeskLayoutEditPolicy extends OfficeFloorLayoutEditPolicy<DeskModel> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy#createCreateComand(P,
-	 *      java.lang.Object, org.eclipse.draw2d.geometry.Point)
+	 * @see
+	 * net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy
+	 * #createCreateComand(P, java.lang.Object,
+	 * org.eclipse.draw2d.geometry.Point)
 	 */
 	protected CreateCommand<?, ?> createCreateComand(DeskModel parentModel,
 			Object newModel, Point location) {

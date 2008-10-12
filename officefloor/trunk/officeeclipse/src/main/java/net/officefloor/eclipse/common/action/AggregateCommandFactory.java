@@ -22,10 +22,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.gef.commands.Command;
-import org.eclipse.jface.action.Action;
-
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.model.Model;
+
+import org.eclipse.jface.action.Action;
 
 /**
  * {@link CommandFactory} that aggregates {@link CommandFactory} instances.
@@ -105,9 +105,9 @@ public class AggregateCommandFactory<R extends Model> implements
 	 *      net.officefloor.model.Model)
 	 */
 	@Override
-	public Command[] createCommands(Model[] models, R rootModel) {
+	public OfficeFloorCommand[] createCommands(Model[] models, R rootModel) {
 		// Create the appropriate commands
-		List<Command> commands = new LinkedList<Command>();
+		List<OfficeFloorCommand> commands = new LinkedList<OfficeFloorCommand>();
 		for (CommandFactory<R> commandFactory : this.commandFactories) {
 			for (Model model : models) {
 
@@ -129,6 +129,6 @@ public class AggregateCommandFactory<R extends Model> implements
 		}
 
 		// Return the created commands
-		return commands.toArray(new Command[0]);
+		return commands.toArray(new OfficeFloorCommand[0]);
 	}
 }

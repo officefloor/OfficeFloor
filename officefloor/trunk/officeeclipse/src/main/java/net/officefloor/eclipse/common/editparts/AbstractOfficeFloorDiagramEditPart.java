@@ -23,6 +23,7 @@ import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.FreeformLayout;
 import org.eclipse.draw2d.IFigure;
@@ -62,6 +63,12 @@ public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
 			@Override
 			public IFigure getFigure() {
 				return figure;
+			}
+
+			@Override
+			public ConnectionAnchor getConnectionAnchor(
+					Class<?> connectionModelType) {
+				return null;
 			}
 		};
 	}

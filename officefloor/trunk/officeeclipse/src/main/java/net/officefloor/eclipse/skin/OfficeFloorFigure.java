@@ -16,6 +16,9 @@
  */
 package net.officefloor.eclipse.skin;
 
+import net.officefloor.model.Model;
+
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
@@ -31,13 +34,23 @@ public interface OfficeFloorFigure {
 	 * 
 	 * @return {@link IFigure} to represent the {@link EditPart}.
 	 */
-	public IFigure getFigure();
+	IFigure getFigure();
 
 	/**
 	 * Obtains the {@link IFigure} to add children of this {@link EditPart}.
 	 * 
 	 * @return {@link IFigure} to add children of this {@link EditPart}.
 	 */
-	public IFigure getContentPane();
+	IFigure getContentPane();
+
+	/**
+	 * Obtains the {@link ConnectionAnchor} for the particular connection
+	 * {@link Model} type.
+	 * 
+	 * @param connectionModelType
+	 *            Connection {@link Model} type.
+	 * @return {@link ConnectionAnchor}.
+	 */
+	ConnectionAnchor getConnectionAnchor(Class<?> connectionModelType);
 
 }
