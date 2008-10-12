@@ -16,6 +16,9 @@
  */
 package net.officefloor.eclipse.common.action;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.eclipse.gef.commands.Command;
 import org.eclipse.jface.action.Action;
 
@@ -90,10 +93,15 @@ public abstract class AbstractMultipleCommandFactory<R extends Model>
 	@Override
 	public OfficeFloorCommand[] createCommands(Model[] models, R rootModel) {
 		// By default create the command for each model
-		OfficeFloorCommand[] commands = new OfficeFloorCommand[models.length];
+		List<OfficeFloorCommand> list = new LinkedList<OfficeFloorCommand>();
 		for (int i = 0; i < models.length; i++) {
-			commands[i] = this.createCommand(models[i], rootModel);
+			OfficeFloorCommand command = this.createCommand(models[i],
+					rootModel);
+			if (command != null) {
+				list.add(command);
+			}
 		}
+		OfficeFloorCommand[] commands = list.toArray(new OfficeFloorCommand[0]);
 
 		// Return the commands
 		return commands;
@@ -106,7 +114,8 @@ public abstract class AbstractMultipleCommandFactory<R extends Model>
 	 *            {@link Model} to create the {@link Command}.
 	 * @param rootModel
 	 *            Root {@link Model}.
-	 * @return {@link OfficeFloorCommand}.
+	 * @return {@link OfficeFloorCommand} or <code>null</code> if nothing to
+	 *         execute.
 	 */
 	protected abstract OfficeFloorCommand createCommand(Model model, R rootModel);
 
