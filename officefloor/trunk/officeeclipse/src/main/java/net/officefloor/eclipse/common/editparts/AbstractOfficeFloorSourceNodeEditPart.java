@@ -21,6 +21,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.editpolicies.ConnectionGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 
 import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
@@ -32,8 +33,8 @@ import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
  * 
  * @author Daniel
  */
-public abstract class AbstractOfficeFloorSourceNodeEditPart<M extends Model>
-		extends AbstractOfficeFloorNodeEditPart<M> {
+public abstract class AbstractOfficeFloorSourceNodeEditPart<M extends Model, F extends OfficeFloorFigure>
+		extends AbstractOfficeFloorNodeEditPart<M, F> {
 
 	/**
 	 * Creates the {@link GraphicalNodeEditPolicy} to be used.

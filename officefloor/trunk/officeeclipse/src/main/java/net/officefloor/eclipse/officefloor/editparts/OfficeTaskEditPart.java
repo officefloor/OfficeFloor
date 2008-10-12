@@ -35,8 +35,8 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class OfficeTaskEditPart extends
-		AbstractOfficeFloorNodeEditPart<OfficeTaskModel> implements
-		OfficeTaskFigureContext {
+		AbstractOfficeFloorNodeEditPart<OfficeTaskModel, OfficeFloorFigure>
+		implements OfficeTaskFigureContext {
 
 	/*
 	 * (non-Javadoc)

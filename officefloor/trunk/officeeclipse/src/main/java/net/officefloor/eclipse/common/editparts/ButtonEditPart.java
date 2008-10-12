@@ -26,6 +26,7 @@ import net.officefloor.model.Model;
 import org.eclipse.draw2d.ActionEvent;
 import org.eclipse.draw2d.ActionListener;
 import org.eclipse.draw2d.Button;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,8 +36,9 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
-		implements Model, ModelEditPart, ActionListener {
+public abstract class ButtonEditPart extends
+		AbstractOfficeFloorEditPart<Model, OfficeFloorFigure> implements Model,
+		ModelEditPart, ActionListener {
 
 	/**
 	 * Label for the button.
@@ -79,13 +81,24 @@ public abstract class ButtonEditPart extends AbstractOfficeFloorEditPart<Model>
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		// Create the button
-		Button button = new Button(this.label);
+		final Button button = new Button(this.label);
 
 		// Handle the button clicks
 		button.addActionListener(this);
 
 		// Return the button
-		return new OfficeFloorFigure(button);
+		return new OfficeFloorFigure() {
+
+			@Override
+			public IFigure getContentPane() {
+				return button;
+			}
+
+			@Override
+			public IFigure getFigure() {
+				return button;
+			}
+		};
 	}
 
 	/*

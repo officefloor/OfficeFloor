@@ -42,9 +42,10 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class SubRoomEscalationEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<SubRoomEscalationModel> implements
-		SubRoomEscalationFigureContext {
+public class SubRoomEscalationEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<SubRoomEscalationModel, OfficeFloorFigure>
+		implements SubRoomEscalationFigureContext {
 
 	/*
 	 * (non-Javadoc)

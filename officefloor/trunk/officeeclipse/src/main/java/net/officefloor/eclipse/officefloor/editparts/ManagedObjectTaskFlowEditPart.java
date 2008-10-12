@@ -41,8 +41,9 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class ManagedObjectTaskFlowEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTaskFlowModel>
+public class ManagedObjectTaskFlowEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTaskFlowModel, OfficeFloorFigure>
 		implements ManagedObjectTaskFlowFigureContext {
 
 	/*

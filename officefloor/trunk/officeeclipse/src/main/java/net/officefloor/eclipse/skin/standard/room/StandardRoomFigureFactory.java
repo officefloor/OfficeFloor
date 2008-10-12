@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard;
+package net.officefloor.eclipse.skin.standard.room;
 
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
@@ -33,7 +33,9 @@ import net.officefloor.eclipse.skin.room.SubRoomFigureContext;
 import net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext;
 import net.officefloor.eclipse.skin.room.SubRoomManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.room.SubRoomOutputFlowFigureContext;
+import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
 
+import org.eclipse.draw2d.CheckBox;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.Label;
@@ -62,7 +64,7 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 		figure.setBounds(new Rectangle(140, 30, 120, 20));
 
 		// Return figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -81,7 +83,7 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 		figure.setBounds(new Rectangle(140, 30, 120, 20));
 
 		// Return figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -100,7 +102,7 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 		figure.setLayoutManager(new FlowLayout(true));
 
 		// Return figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -112,7 +114,7 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 */
 	@Override
 	public OfficeFloorFigure createSubRoomFigure(SubRoomFigureContext context) {
-		return new OfficeFloorFigure(new FreeformWrapperFigure(
+		return new OfficeFloorFigureImpl(new FreeformWrapperFigure(
 				new SubRoomFigure(context.getSubRoomName())));
 	}
 
@@ -126,7 +128,7 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	@Override
 	public OfficeFloorFigure createSubRoomEscalationFigure(
 			SubRoomEscalationFigureContext context) {
-		return new OfficeFloorFigure(new SubRoomEscalationFigure(context
+		return new OfficeFloorFigureImpl(new SubRoomEscalationFigure(context
 				.getSubRoomEscalationName()));
 	}
 
@@ -138,7 +140,7 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 * (net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createSubRoomInputFlowFigure(
+	public net.officefloor.eclipse.skin.room.SubRoomInputFlowFigure createSubRoomInputFlowFigure(
 			final SubRoomInputFlowFigureContext context) {
 
 		// Create the check box to indicate if public
@@ -151,8 +153,9 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 		};
 
 		// Return the figure for the Sub Room Input Flow
-		return new OfficeFloorFigure(new SubRoomInputFlowFigure(context
-				.getSubRoomInputFlowName(), publicCheckBox.getFigure()));
+		return new SubRoomInputFlowFigureImpl(new SubRoomInputFlowFigure(
+				context.getSubRoomInputFlowName(), publicCheckBox.getFigure()),
+				(CheckBox) publicCheckBox.getFigure());
 	}
 
 	/*
@@ -165,7 +168,7 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	@Override
 	public OfficeFloorFigure createSubRoomManagedObjectFigure(
 			SubRoomManagedObjectFigureContext context) {
-		return new OfficeFloorFigure(new SubRoomManagedObjectFigure(context
+		return new OfficeFloorFigureImpl(new SubRoomManagedObjectFigure(context
 				.getSubRoomManagedObjectName()));
 	}
 
@@ -179,7 +182,7 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	@Override
 	public OfficeFloorFigure createSubRoomOutputFlowFigure(
 			SubRoomOutputFlowFigureContext context) {
-		return new OfficeFloorFigure(new SubRoomOutputFlowFigure(context
+		return new OfficeFloorFigureImpl(new SubRoomOutputFlowFigure(context
 				.getSubRoomOutputFlowName()));
 	}
 

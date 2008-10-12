@@ -21,9 +21,10 @@ import java.util.List;
 
 import net.officefloor.compile.WorkEntry;
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.ExternalManagedObjectModel.ExternalManagedObjectEvent;
@@ -34,9 +35,10 @@ import net.officefloor.model.office.ExternalManagedObjectModel.ExternalManagedOb
  * 
  * @author Daniel
  */
-public class ExternalManagedObjectEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel> implements
-		ExternalManagedObjectFigureContext {
+public class ExternalManagedObjectEditPart
+		extends
+		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel, ExternalManagedObjectFigure>
+		implements ExternalManagedObjectFigureContext {
 
 	/*
 	 * (non-Javadoc)
@@ -78,6 +80,12 @@ public class ExternalManagedObjectEditPart extends
 			protected void handlePropertyChange(
 					ExternalManagedObjectEvent property, PropertyChangeEvent evt) {
 				switch (property) {
+				case CHANGE_SCOPE:
+					ExternalManagedObjectEditPart.this.getOfficeFloorFigure()
+							.setScope(
+									ExternalManagedObjectEditPart.this
+											.getScope());
+					break;
 				case ADD_ADMINISTRATOR:
 				case REMOVE_ADMINISTRATOR:
 					ExternalManagedObjectEditPart.this
@@ -96,7 +104,7 @@ public class ExternalManagedObjectEditPart extends
 	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected ExternalManagedObjectFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createExternalManagedObjectFigure(this);
 	}
@@ -162,8 +170,26 @@ public class ExternalManagedObjectEditPart extends
 	 * #setScope(java.lang.String)
 	 */
 	@Override
-	public void setScope(String scope) {
-		this.getCastedModel().setScope(scope);
+	public void setScope(final String scope) {
+
+		// Maintain current scope
+		final String currentScope = this.getCastedModel().getScope();
+
+		// Change the scope
+		this.executeCommand(new OfficeFloorCommand() {
+
+			@Override
+			protected void doCommand() {
+				ExternalManagedObjectEditPart.this.getCastedModel().setScope(
+						scope);
+			}
+
+			@Override
+			protected void undoCommand() {
+				ExternalManagedObjectEditPart.this.getCastedModel().setScope(
+						currentScope);
+			}
+		});
 	}
 
 }

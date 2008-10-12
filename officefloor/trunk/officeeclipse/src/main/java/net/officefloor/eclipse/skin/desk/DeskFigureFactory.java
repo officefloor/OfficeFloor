@@ -25,6 +25,7 @@ import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.FlowItemOutputModel;
 
 import org.eclipse.draw2d.IFigure;
 
@@ -60,9 +61,9 @@ public interface DeskFigureFactory {
 	 * 
 	 * @param context
 	 *            {@link DeskTaskObjectFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
+	 * @return {@link DeskTaskObjectFigure}.
 	 */
-	OfficeFloorFigure createDeskTaskObjectFigure(
+	DeskTaskObjectFigure createDeskTaskObjectFigure(
 			DeskTaskObjectFigureContext context);
 
 	/**
@@ -101,9 +102,9 @@ public interface DeskFigureFactory {
 	 * 
 	 * @param context
 	 *            {@link FlowItemFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
+	 * @return {@link FlowItemFigure}.
 	 */
-	OfficeFloorFigure createFlowItemFigure(FlowItemFigureContext context);
+	FlowItemFigure createFlowItemFigure(FlowItemFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
@@ -117,8 +118,12 @@ public interface DeskFigureFactory {
 			FlowItemEscalationFigureContext context);
 
 	/**
+	 * Creates the {@link OfficeFloorFigure} for the {@link FlowItemOutputModel}
+	 * .
+	 * 
 	 * @param flowItemOutputEditPart
-	 * @return
+	 *            {@link FlowItemOutputFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
 	 */
 	OfficeFloorFigure createFlowItemOutputFigure(
 			FlowItemOutputFigureContext context);

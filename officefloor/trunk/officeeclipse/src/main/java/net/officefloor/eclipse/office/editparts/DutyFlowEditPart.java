@@ -40,8 +40,8 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class DutyFlowEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<DutyFlowModel> implements
-		DutyFlowFigureContext {
+		AbstractOfficeFloorSourceNodeEditPart<DutyFlowModel, OfficeFloorFigure>
+		implements DutyFlowFigureContext {
 
 	/*
 	 * (non-Javadoc)

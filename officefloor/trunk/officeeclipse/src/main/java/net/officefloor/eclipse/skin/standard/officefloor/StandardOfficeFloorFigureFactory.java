@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard;
+package net.officefloor.eclipse.skin.standard.officefloor;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.FlowLayout;
@@ -45,6 +45,7 @@ import net.officefloor.eclipse.skin.officefloor.OfficeManagedObjectFigureContext
 import net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.TeamFigureContext;
+import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
 
 /**
  * Standard {@link OfficeFloorFigureFactory}.
@@ -70,7 +71,7 @@ public class StandardOfficeFloorFigureFactory implements
 		figure.setForegroundColor(ColorConstants.white);
 
 		// Return the figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -90,7 +91,7 @@ public class StandardOfficeFloorFigureFactory implements
 				.getManagedObjectHandlerName()));
 		figure.addChildContainerFigure();
 		figure.setForegroundColor(ColorConstants.yellow);
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -109,7 +110,7 @@ public class StandardOfficeFloorFigureFactory implements
 		figure.addDecorate(new ListItemFigure("Instance"));
 		figure.addChildContainerFigure();
 		figure.setForegroundColor(ColorConstants.black);
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -137,7 +138,7 @@ public class StandardOfficeFloorFigureFactory implements
 		figure.setForegroundColor(ColorConstants.red);
 
 		// Return the figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -158,7 +159,7 @@ public class StandardOfficeFloorFigureFactory implements
 		figure.addChildContainerFigure();
 		figure.setBackgroundColor(ColorConstants.lightGray);
 		figure.setOpaque(true);
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -183,7 +184,7 @@ public class StandardOfficeFloorFigureFactory implements
 		figure.setForegroundColor(ColorConstants.darkGreen);
 
 		// Return the figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -212,7 +213,7 @@ public class StandardOfficeFloorFigureFactory implements
 		figure.setForegroundColor(ColorConstants.cyan);
 
 		// Return the figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -230,7 +231,7 @@ public class StandardOfficeFloorFigureFactory implements
 		figure.setForegroundColor(ColorConstants.blue);
 
 		// Return the figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 	/*
@@ -242,7 +243,7 @@ public class StandardOfficeFloorFigureFactory implements
 	 */
 	@Override
 	public OfficeFloorFigure createOfficeFigure(OfficeFigureContext context) {
-		return new OfficeFloorFigure(new FreeformWrapperFigure(
+		return new OfficeFloorFigureImpl(new FreeformWrapperFigure(
 				new OfficeFigure(context.getOfficeName())));
 	}
 
@@ -257,7 +258,7 @@ public class StandardOfficeFloorFigureFactory implements
 	@Override
 	public OfficeFloorFigure createOfficeManagedObject(
 			OfficeManagedObjectFigureContext context) {
-		return new OfficeFloorFigure(new OfficeManagedObjectFigure(context
+		return new OfficeFloorFigureImpl(new OfficeManagedObjectFigure(context
 				.getOfficeManagedObjectName()));
 	}
 
@@ -271,7 +272,8 @@ public class StandardOfficeFloorFigureFactory implements
 	@Override
 	public OfficeFloorFigure createOfficeTaskFigure(
 			OfficeTaskFigureContext context) {
-		return new OfficeFloorFigure(new OfficeTaskFigure(context.getWorkName()
+		return new OfficeFloorFigureImpl(new OfficeTaskFigure(context
+				.getWorkName()
 				+ "." + context.getTaskName()));
 	}
 
@@ -285,7 +287,7 @@ public class StandardOfficeFloorFigureFactory implements
 	@Override
 	public OfficeFloorFigure createOfficeTeamFigure(
 			OfficeTeamFigureContext context) {
-		return new OfficeFloorFigure(new OfficeTeamFigure(context
+		return new OfficeFloorFigureImpl(new OfficeTeamFigure(context
 				.getOfficeTeamName()));
 	}
 
@@ -304,7 +306,7 @@ public class StandardOfficeFloorFigureFactory implements
 		figure.setLayoutManager(new FlowLayout(true));
 
 		// Return figure
-		return new OfficeFloorFigure(figure);
+		return new OfficeFloorFigureImpl(figure);
 	}
 
 }

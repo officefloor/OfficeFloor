@@ -47,8 +47,8 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class DeskWorkEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<DeskWorkModel> implements
-		RemovableEditPart, DeskWorkFigureContext {
+		AbstractOfficeFloorSourceNodeEditPart<DeskWorkModel, OfficeFloorFigure>
+		implements RemovableEditPart, DeskWorkFigureContext {
 
 	/*
 	 * (non-Javadoc)

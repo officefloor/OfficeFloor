@@ -35,8 +35,8 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class ManagedObjectTaskEditPart extends
-		AbstractOfficeFloorEditPart<ManagedObjectTaskModel> implements
-		ManagedObjectTaskFigureContext {
+		AbstractOfficeFloorEditPart<ManagedObjectTaskModel, OfficeFloorFigure>
+		implements ManagedObjectTaskFigureContext {
 
 	/*
 	 * (non-Javadoc)

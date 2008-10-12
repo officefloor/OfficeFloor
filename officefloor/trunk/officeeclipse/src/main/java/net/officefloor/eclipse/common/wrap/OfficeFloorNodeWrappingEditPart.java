@@ -31,8 +31,8 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
  * @author Daniel
  */
 public abstract class OfficeFloorNodeWrappingEditPart extends
-		AbstractOfficeFloorNodeEditPart<WrappingModel<?>> implements
-		WrappingEditPart {
+		AbstractOfficeFloorNodeEditPart<WrappingModel<?>, OfficeFloorFigure>
+		implements WrappingEditPart {
 
 	/**
 	 * {@link IFigure}.
@@ -67,23 +67,24 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
-	 */
-	@Override
-	protected IFigure createFigure() {
-		return this.figure;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
 	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
 	 * createOfficeFloorFigure()
 	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return new OfficeFloorFigure(this.figure);
+		return new OfficeFloorFigure() {
+
+			@Override
+			public IFigure getContentPane() {
+				return OfficeFloorNodeWrappingEditPart.this.figure;
+			}
+
+			@Override
+			public IFigure getFigure() {
+				return OfficeFloorNodeWrappingEditPart.this.figure;
+			}
+		};
 	}
 
 	/*

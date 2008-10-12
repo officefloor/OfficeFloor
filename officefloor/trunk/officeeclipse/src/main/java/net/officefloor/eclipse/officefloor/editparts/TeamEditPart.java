@@ -36,8 +36,9 @@ import net.officefloor.model.officefloor.TeamModel.TeamEvent;
  * 
  * @author Daniel
  */
-public class TeamEditPart extends AbstractOfficeFloorNodeEditPart<TeamModel>
-		implements RemovableEditPart, TeamFigureContext {
+public class TeamEditPart extends
+		AbstractOfficeFloorNodeEditPart<TeamModel, OfficeFloorFigure> implements
+		RemovableEditPart, TeamFigureContext {
 
 	/*
 	 * (non-Javadoc)

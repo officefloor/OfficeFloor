@@ -34,9 +34,10 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public class ExternalEscalationEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalEscalationModel> implements
-		ExternalEscalationFigureContext {
+public class ExternalEscalationEditPart
+		extends
+		AbstractOfficeFloorNodeEditPart<ExternalEscalationModel, OfficeFloorFigure>
+		implements ExternalEscalationFigureContext {
 
 	/*
 	 * (non-Javadoc)

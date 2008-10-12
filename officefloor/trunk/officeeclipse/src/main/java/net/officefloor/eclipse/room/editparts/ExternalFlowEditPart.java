@@ -37,8 +37,8 @@ import net.officefloor.model.room.ExternalFlowModel.ExternalFlowEvent;
  * @author Daniel
  */
 public class ExternalFlowEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalFlowModel> implements
-		RemovableEditPart, ExternalFlowFigureContext {
+		AbstractOfficeFloorNodeEditPart<ExternalFlowModel, OfficeFloorFigure>
+		implements RemovableEditPart, ExternalFlowFigureContext {
 
 	/*
 	 * (non-Javadoc)

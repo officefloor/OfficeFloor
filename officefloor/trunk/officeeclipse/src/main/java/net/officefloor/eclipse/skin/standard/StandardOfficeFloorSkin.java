@@ -21,6 +21,10 @@ import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory;
 import net.officefloor.eclipse.skin.room.RoomFigureFactory;
+import net.officefloor.eclipse.skin.standard.desk.StandardDeskFigureFactory;
+import net.officefloor.eclipse.skin.standard.office.StandardOfficeFigureFactory;
+import net.officefloor.eclipse.skin.standard.officefloor.StandardOfficeFloorFigureFactory;
+import net.officefloor.eclipse.skin.standard.room.StandardRoomFigureFactory;
 
 /**
  * The standard {@link OfficeFloorSkin}.

@@ -21,11 +21,12 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.desk.FlowItemFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.RemoveConnectionsAction;
@@ -47,8 +48,8 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class FlowItemEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<FlowItemModel> implements
-		RemovableEditPart, FlowItemFigureContext {
+		AbstractOfficeFloorSourceNodeEditPart<FlowItemModel, FlowItemFigure>
+		implements RemovableEditPart, FlowItemFigureContext {
 
 	/*
 	 * (non-Javadoc)
@@ -58,7 +59,7 @@ public class FlowItemEditPart extends
 	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected FlowItemFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createFlowItemFigure(this);
 	}
@@ -197,6 +198,12 @@ public class FlowItemEditPart extends
 			protected void handlePropertyChange(FlowItemEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
+				case CHANGE_IS_PUBLIC:
+					// Ensure display is public
+					FlowItemEditPart.this.getOfficeFloorFigure().setIsPublic(
+							FlowItemEditPart.this.getCastedModel()
+									.getIsPublic());
+					break;
 				case CHANGE_NEXT_FLOW_ITEM:
 				case CHANGE_NEXT_EXTERNAL_FLOW:
 					FlowItemEditPart.this.refreshSourceConnections();
@@ -282,8 +289,25 @@ public class FlowItemEditPart extends
 	 * )
 	 */
 	@Override
-	public void setIsPublic(boolean isPublic) {
-		this.getCastedModel().setIsPublic(isPublic);
+	public void setIsPublic(final boolean isPublic) {
+
+		// Store current state
+		final boolean currentIsPublic = this.getCastedModel().getIsPublic();
+
+		// Make change
+		this.executeCommand(new OfficeFloorCommand() {
+
+			@Override
+			protected void doCommand() {
+				FlowItemEditPart.this.getCastedModel().setIsPublic(isPublic);
+			}
+
+			@Override
+			protected void undoCommand() {
+				FlowItemEditPart.this.getCastedModel().setIsPublic(
+						currentIsPublic);
+			}
+		});
 	}
 
 }

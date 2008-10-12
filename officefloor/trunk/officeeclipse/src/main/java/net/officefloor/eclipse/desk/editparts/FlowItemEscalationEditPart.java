@@ -42,8 +42,9 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class FlowItemEscalationEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<FlowItemEscalationModel>
+public class FlowItemEscalationEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<FlowItemEscalationModel, OfficeFloorFigure>
 		implements FlowItemEscalationFigureContext {
 
 	/*

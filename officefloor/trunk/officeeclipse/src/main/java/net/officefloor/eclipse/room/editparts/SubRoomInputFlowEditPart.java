@@ -20,9 +20,10 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.room.SubRoomInputFlowFigure;
 import net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomInputFlowModel.SubRoomInputFlowEvent;
@@ -33,9 +34,10 @@ import net.officefloor.model.room.SubRoomInputFlowModel.SubRoomInputFlowEvent;
  * 
  * @author Daniel
  */
-public class SubRoomInputFlowEditPart extends
-		AbstractOfficeFloorNodeEditPart<SubRoomInputFlowModel> implements
-		SubRoomInputFlowFigureContext {
+public class SubRoomInputFlowEditPart
+		extends
+		AbstractOfficeFloorNodeEditPart<SubRoomInputFlowModel, SubRoomInputFlowFigure>
+		implements SubRoomInputFlowFigureContext {
 
 	/*
 	 * (non-Javadoc)
@@ -78,6 +80,12 @@ public class SubRoomInputFlowEditPart extends
 			protected void handlePropertyChange(SubRoomInputFlowEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
+				case CHANGE_IS_PUBLIC:
+					SubRoomInputFlowEditPart.this.getOfficeFloorFigure()
+							.setIsPublic(
+									SubRoomInputFlowEditPart.this
+											.getCastedModel().getIsPublic());
+					break;
 				case ADD_OUTPUT:
 				case REMOVE_OUTPUT:
 				case ADD_ESCALATION:
@@ -97,7 +105,7 @@ public class SubRoomInputFlowEditPart extends
 	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected SubRoomInputFlowFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
 				.createSubRoomInputFlowFigure(this);
 	}
@@ -137,8 +145,26 @@ public class SubRoomInputFlowEditPart extends
 	 * (boolean)
 	 */
 	@Override
-	public void setIsPublic(boolean isPublic) {
-		this.getCastedModel().setIsPublic(isPublic);
+	public void setIsPublic(final boolean isPublic) {
+
+		// Maintain current is public
+		final boolean currentIsPublic = this.getCastedModel().getIsPublic();
+
+		// Make change
+		this.executeCommand(new OfficeFloorCommand() {
+
+			@Override
+			protected void doCommand() {
+				SubRoomInputFlowEditPart.this.getCastedModel().setIsPublic(
+						isPublic);
+			}
+
+			@Override
+			protected void undoCommand() {
+				SubRoomInputFlowEditPart.this.getCastedModel().setIsPublic(
+						currentIsPublic);
+			}
+		});
 	}
 
 }

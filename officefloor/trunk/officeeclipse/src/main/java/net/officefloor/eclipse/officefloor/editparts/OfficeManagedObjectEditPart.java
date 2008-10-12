@@ -39,8 +39,9 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
-public class OfficeManagedObjectEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<OfficeManagedObjectModel>
+public class OfficeManagedObjectEditPart
+		extends
+		AbstractOfficeFloorSourceNodeEditPart<OfficeManagedObjectModel, OfficeFloorFigure>
 		implements OfficeManagedObjectFigureContext {
 
 	/*

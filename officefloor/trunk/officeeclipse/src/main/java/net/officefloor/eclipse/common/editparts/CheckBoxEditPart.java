@@ -26,6 +26,7 @@ import net.officefloor.model.Model;
 import org.eclipse.draw2d.ActionEvent;
 import org.eclipse.draw2d.ActionListener;
 import org.eclipse.draw2d.CheckBox;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -36,8 +37,8 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public abstract class CheckBoxEditPart extends
-		AbstractOfficeFloorEditPart<Model> implements Model, ModelEditPart,
-		ActionListener {
+		AbstractOfficeFloorEditPart<Model, OfficeFloorFigure> implements Model,
+		ModelEditPart, ActionListener {
 
 	/**
 	 * {@link CheckBox}.
@@ -96,7 +97,18 @@ public abstract class CheckBoxEditPart extends
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		// Return the check box
-		return new OfficeFloorFigure(this.checkBox);
+		return new OfficeFloorFigure() {
+
+			@Override
+			public IFigure getContentPane() {
+				return CheckBoxEditPart.this.checkBox;
+			}
+
+			@Override
+			public IFigure getFigure() {
+				return CheckBoxEditPart.this.checkBox;
+			}
+		};
 	}
 
 	/*
