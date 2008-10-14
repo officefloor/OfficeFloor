@@ -17,6 +17,7 @@
 package net.officefloor.eclipse.common.action;
 
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.model.Model;
 
 import org.eclipse.gef.commands.Command;
@@ -24,54 +25,44 @@ import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.jface.action.Action;
 
 /**
- * {@link Action} that invokes the initiated {@link Command} instances.
+ * {@link Action} that invokes the created {@link OfficeFloorCommand} instances.
  * 
  * @author Daniel
  */
-public class CommandAction<R extends Model> extends Action {
+public class OperationAction<R extends Model> extends Action {
 
 	/**
-	 * {@link CommandStack}.
+	 * {@link CommandStack} to execute the {@link OfficeFloorCommand} instances.
 	 */
 	private final CommandStack commandStack;
 
 	/**
-	 * {@link CommandFactory} to create the {@link OfficeFloorCommand}
-	 * instances.
+	 * {@link Operation} to create the {@link OfficeFloorCommand} instances.
 	 */
-	private final CommandFactory<R> commandFactory;
-
-	/**
-	 * Root {@link Model}.
-	 */
-	private final R rootModel;
+	private final Operation operation;
 
 	/**
 	 * Selected {@link Model} instances.
 	 */
-	private final Model[] selectedModels;
+	private final AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param commandStack
 	 *            {@link CommandStack}.
-	 * @param commandFactory
-	 *            {@link CommandFactory} to create the {@link Command}
+	 * @param operation
+	 *            {@link Operation} to create the {@link OfficeFloorCommand}
 	 *            instances.
-	 * @param rootModel
-	 *            Root {@link Model}.
-	 * @param selectedModels
-	 *            Selected {@link Model} instances.
+	 * @param selectedEditParts
+	 *            Selected {@link AbstractOfficeFloorEditPart} instances.
 	 */
-	public CommandAction(CommandStack commandStack,
-			CommandFactory<R> commandFactory, R rootModel,
-			Model[] selectedModels) {
-		super(commandFactory.getActionText());
+	public OperationAction(CommandStack commandStack, Operation operation,
+			AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts) {
+		super(operation.getActionText());
 		this.commandStack = commandStack;
-		this.commandFactory = commandFactory;
-		this.rootModel = rootModel;
-		this.selectedModels = selectedModels;
+		this.operation = operation;
+		this.selectedEditParts = selectedEditParts;
 	}
 
 	/*
@@ -83,8 +74,8 @@ public class CommandAction<R extends Model> extends Action {
 	public void run() {
 
 		// Obtain the commands
-		OfficeFloorCommand[] commands = this.commandFactory.createCommands(
-				this.selectedModels, this.rootModel);
+		OfficeFloorCommand[] commands = this.operation
+				.createCommands(this.selectedEditParts);
 		if ((commands == null) || (commands.length == 0)) {
 			// No commands so nothing to execute
 			return;

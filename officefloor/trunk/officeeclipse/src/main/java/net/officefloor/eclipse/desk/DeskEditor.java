@@ -24,13 +24,10 @@ import net.officefloor.desk.DeskLoader;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.TagFactory;
 import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
-import net.officefloor.eclipse.desk.commands.AddExternalManagedObjectCommandFactory;
-import net.officefloor.eclipse.desk.commands.RefreshWorkCommandFactory;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
@@ -41,6 +38,12 @@ import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
 import net.officefloor.eclipse.desk.editparts.FlowItemEscalationEditPart;
 import net.officefloor.eclipse.desk.editparts.FlowItemOutputEditPart;
+import net.officefloor.eclipse.desk.operations.AddExternalEscalationOperation;
+import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
+import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
+import net.officefloor.eclipse.desk.operations.AddWorkOperation;
+import net.officefloor.eclipse.desk.operations.CreateFlowItemFromDeskTaskOperation;
+import net.officefloor.eclipse.desk.operations.RefreshWorkOperation;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
@@ -323,15 +326,23 @@ public class DeskEditor extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
-	 * populateCommandFactories(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateOperations
+	 * (java.util.List)
 	 */
 	@Override
-	protected void populateCommandFactories(List<CommandFactory<DeskModel>> list) {
-		list.add(new RefreshWorkCommandFactory("Refresh Work",
-				ProjectConfigurationContext.getProject(this.getEditorInput())));
-		list.add(new AddExternalManagedObjectCommandFactory(this
-				.getRootEditPart()));
+	protected void populateOperations(List<Operation> list) {
+		// Add model actions
+		list.add(new AddExternalManagedObjectOperation());
+		list.add(new AddWorkOperation());
+		list.add(new AddExternalFlowOperation());
+		list.add(new AddExternalEscalationOperation());
+
+		// Refresh work action
+		list.add(new RefreshWorkOperation());
+
+		// Create flow item from task
+		list.add(new CreateFlowItemFromDeskTaskOperation());
 	}
 
 }

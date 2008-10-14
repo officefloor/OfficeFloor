@@ -19,22 +19,19 @@ package net.officefloor.eclipse.desk.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.desk.TaskToFlowItemSynchroniser;
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
+import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.desk.operations.CreateFlowItemFromDeskTaskOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.DeskTaskFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
-import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.DeskTaskModel.DeskTaskEvent;
-import net.officefloor.model.work.TaskModel;
 
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
@@ -175,65 +172,7 @@ public class DeskTaskEditPart extends
 	 */
 	@Override
 	public void createAsNewFlowItem() {
-		// Obtain the work
-		DeskWorkEditPart workEditPart = (DeskWorkEditPart) this.getParent();
-		DeskWorkModel work = workEditPart.getCastedModel();
-
-		// Obtain the desk
-		// Note parent is work listing then desk
-		DeskEditPart deskEditPart = (DeskEditPart) workEditPart.getParent()
-				.getParent();
-		final DeskModel desk = deskEditPart.getCastedModel();
-
-		// Create the flow item for this task
-		final DeskTaskModel task = this.getCastedModel();
-		final FlowItemModel flowItem = new FlowItemModel(task.getName(), false,
-				work.getId(), task.getName(), task.getTask(), null, null, null,
-				null, null, null, null, null, null);
-		flowItem.setId(deskEditPart.getUniqueFlowItemId(flowItem));
-		flowItem.setX(300);
-		flowItem.setY(100);
-
-		// Obtain the task model
-		TaskModel<?, ?> taskModel = task.getTask();
-		if (taskModel == null) {
-			this.messageWarning("Can not obtain "
-					+ TaskModel.class.getSimpleName() + " for synchronising");
-		} else {
-			// Ensure synchronised to the task
-			try {
-				TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task
-						.getTask(), flowItem);
-			} catch (Exception ex) {
-				this.messageError(ex);
-			}
-		}
-
-		// Link the flow item with the task
-		final DeskTaskToFlowItemModel conn = new DeskTaskToFlowItemModel(
-				flowItem, task);
-
-		// Provide the change
-		this.executeCommand(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				// Add the flow item to the desk
-				desk.addFlowItem(flowItem);
-
-				// Connect the flow
-				conn.connect();
-			}
-
-			@Override
-			protected void undoCommand() {
-				// Disconnect the flow
-				conn.remove();
-
-				// Remove the flow item from the desk
-				desk.removeFlowItem(flowItem);
-			}
-		});
+		OperationUtil.execute(this, new CreateFlowItemFromDeskTaskOperation());
 	}
 
 }

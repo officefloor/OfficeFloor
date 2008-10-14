@@ -14,54 +14,40 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.office.commands;
+package net.officefloor.eclipse.office.operations;
 
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.action.AbstractSingleCommandFactory;
-import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
+import net.officefloor.eclipse.office.editparts.RoomEditPart;
 import net.officefloor.model.office.OfficeModel;
-import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.office.OfficeLoader;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.action.Action;
 
 /**
  * Refreshes the {@link OfficeModel}.
  * 
  * @author Daniel
  */
-public class RefreshOfficeRoomCommand extends
-		AbstractSingleCommandFactory<OfficeRoomModel, OfficeModel> {
-
-	/**
-	 * {@link IProject}.
-	 */
-	private final IProject project;
+public class RefreshOfficeRoomOperation extends
+		AbstractSingleOperation<RoomEditPart> {
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param actionText
-	 *            {@link Action} text.
-	 * @param project
-	 *            {@link IProject}.
 	 */
-	public RefreshOfficeRoomCommand(String actionText, IProject project) {
-		super(actionText, OfficeRoomModel.class);
-		this.project = project;
+	public RefreshOfficeRoomOperation() {
+		super("Refresh room", RoomEditPart.class);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractSingleCommandFactory#
-	 * createCommand(net.officefloor.model.Model, net.officefloor.model.Model)
+	 * @see
+	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
+	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final OfficeRoomModel model,
-			OfficeModel rootModel) {
+	protected OfficeFloorCommand createCommand(final RoomEditPart editPart) {
 		return new OfficeFloorCommand() {
 
 			@Override
@@ -70,14 +56,15 @@ public class RefreshOfficeRoomCommand extends
 
 					// Create the Project class loader
 					ProjectClassLoader projectClassLoader = ProjectClassLoader
-							.create(RefreshOfficeRoomCommand.this.project);
+							.create(editPart.getEditor());
 
 					// Create the office loader
 					OfficeLoader officeLoader = new OfficeLoader();
 
 					// Load the office room
-					officeLoader.loadOfficeRoom(model, projectClassLoader
-							.getConfigurationContext(), projectClassLoader);
+					officeLoader.loadOfficeRoom(editPart.getCastedModel(),
+							projectClassLoader.getConfigurationContext(),
+							projectClassLoader);
 
 				} catch (Throwable ex) {
 
@@ -89,7 +76,7 @@ public class RefreshOfficeRoomCommand extends
 					ex.printStackTrace();
 					throw new UnsupportedOperationException(
 							"TODO provide Exception to createCommand of "
-									+ CommandFactory.class.getName());
+									+ Operation.class.getName());
 				}
 			}
 

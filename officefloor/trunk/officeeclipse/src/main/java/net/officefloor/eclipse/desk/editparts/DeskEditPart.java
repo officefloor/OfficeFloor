@@ -21,30 +21,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.action.CommandFactoryUtil;
+import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.commands.CreateCommand;
-import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.DeskWorkCreateDialog;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.common.wrap.OfficeFloorWrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingEditPart;
 import net.officefloor.eclipse.common.wrap.WrappingModel;
-import net.officefloor.eclipse.desk.commands.AddExternalManagedObjectCommandFactory;
 import net.officefloor.eclipse.desk.figure.SectionFigure;
+import net.officefloor.eclipse.desk.operations.AddExternalEscalationOperation;
+import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
+import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
+import net.officefloor.eclipse.desk.operations.AddWorkOperation;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalEscalationModel;
-import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.DeskModel.DeskEvent;
 
-import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.geometry.Point;
 
 /**
@@ -128,9 +124,8 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 		final ButtonEditPart extMoButton = new ButtonEditPart("Add Ext MO") {
 			protected void handleButtonClick() {
 				// Add the external managed object
-				CommandFactoryUtil.execute(DeskEditPart.this,
-						new AddExternalManagedObjectCommandFactory(
-								DeskEditPart.this));
+				OperationUtil.execute(DeskEditPart.this,
+						new AddExternalManagedObjectOperation());
 			}
 		};
 
@@ -151,25 +146,9 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 		// Button to add Work
 		final ButtonEditPart workButton = new ButtonEditPart("Add Work") {
 			protected void handleButtonClick() {
-				try {
-					// Add the Desk Work
-					AbstractOfficeFloorEditor editor = DeskEditPart.this
-							.getEditor();
-					IProject project = ProjectConfigurationContext
-							.getProject(editor.getEditorInput());
-					DeskWorkModel deskWork = new DeskWorkCreateDialog(editor
-							.getSite().getShell(), project).createDeskWork();
-					if (deskWork == null) {
-						// Cancelled creation of work
-						return;
-					}
-
-					// Add the work
-					DeskEditPart.this.getCastedModel().addWork(deskWork);
-
-				} catch (Exception ex) {
-					DeskEditPart.this.messageError(ex);
-				}
+				// Add the work
+				OperationUtil
+						.execute(DeskEditPart.this, new AddWorkOperation());
 			}
 		};
 
@@ -189,13 +168,9 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 		// Button to add External Flows
 		final ButtonEditPart extFlowButton = new ButtonEditPart("Add Ext Flow") {
 			protected void handleButtonClick() {
-				// Add the populated External Flow
-				ExternalFlowModel flow = new ExternalFlowModel();
-				BeanDialog dialog = DeskEditPart.this.createBeanDialog(flow,
-						"X", "Y");
-				if (dialog.populate()) {
-					DeskEditPart.this.getCastedModel().addExternalFlow(flow);
-				}
+				// Add external flow
+				OperationUtil.execute(DeskEditPart.this,
+						new AddExternalFlowOperation());
 			}
 		};
 
@@ -218,14 +193,9 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 				"Add Ext Escalation") {
 			@Override
 			protected void handleButtonClick() {
-				// Add the populated External Escalation
-				ExternalEscalationModel escalation = new ExternalEscalationModel();
-				BeanDialog dialog = DeskEditPart.this.createBeanDialog(
-						escalation, "Escalation Type", "X", "Y");
-				if (dialog.populate()) {
-					DeskEditPart.this.getCastedModel().addExternalEscalation(
-							escalation);
-				}
+				// Add the External Escalation
+				OperationUtil.execute(DeskEditPart.this,
+						new AddExternalEscalationOperation());
 			}
 		};
 

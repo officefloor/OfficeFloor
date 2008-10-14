@@ -14,54 +14,44 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.commands;
+package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.common.action.AbstractSingleCommandFactory;
-import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 
 /**
- * {@link CommandFactory} to add the {@link ExternalManagedObjectModel}.
+ * {@link Operation} to add the {@link ExternalManagedObjectModel}.
  * 
  * @author Daniel
  */
-public class AddExternalManagedObjectCommandFactory extends
-		AbstractSingleCommandFactory<DeskModel, DeskModel> {
-
-	/**
-	 * {@link DeskEditPart}.
-	 */
-	private final DeskEditPart deskEditPart;
+public class AddExternalManagedObjectOperation extends
+		AbstractSingleOperation<DeskEditPart> {
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param deskEditPart
-	 *            {@link DeskEditPart}.
 	 */
-	public AddExternalManagedObjectCommandFactory(DeskEditPart deskEditPart) {
-		super("Add managed object", DeskModel.class);
-		this.deskEditPart = deskEditPart;
+	public AddExternalManagedObjectOperation() {
+		super("Add managed object", DeskEditPart.class);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractSingleCommandFactory#
-	 * createCommand(net.officefloor.model.Model, net.officefloor.model.Model)
+	 * @see
+	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
+	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final DeskModel model,
-			DeskModel rootModel) {
+	protected OfficeFloorCommand createCommand(final DeskEditPart editPart) {
 
 		// Create the populated External Managed Object
 		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel();
-		BeanDialog dialog = AddExternalManagedObjectCommandFactory.this.deskEditPart
-				.createBeanDialog(mo, "Object Type", "X", "Y");
+		BeanDialog dialog = editPart.createBeanDialog(mo, "Object Type", "X",
+				"Y");
 		if (!dialog.populate()) {
 			// Not created so do not provide command
 			return null;
@@ -72,12 +62,12 @@ public class AddExternalManagedObjectCommandFactory extends
 
 			@Override
 			protected void doCommand() {
-				model.addExternalManagedObject(mo);
+				editPart.getCastedModel().addExternalManagedObject(mo);
 			}
 
 			@Override
 			protected void undoCommand() {
-				model.removeExternalManagedObject(mo);
+				editPart.getCastedModel().removeExternalManagedObject(mo);
 			}
 		};
 	}

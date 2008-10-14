@@ -20,10 +20,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
-import net.officefloor.eclipse.office.commands.RefreshOfficeRoomCommand;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
 import net.officefloor.eclipse.office.editparts.DeskEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
@@ -33,6 +31,7 @@ import net.officefloor.eclipse.office.editparts.ExternalTeamEditPart;
 import net.officefloor.eclipse.office.editparts.FlowItemEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.RoomEditPart;
+import net.officefloor.eclipse.office.operations.RefreshOfficeRoomOperation;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
 import net.officefloor.model.office.AdministratorToTeamModel;
@@ -146,13 +145,12 @@ public class OfficeEditor extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
-	 * populateCommandFactories(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateOperations
+	 * (java.util.List)
 	 */
 	@Override
-	protected void populateCommandFactories(
-			List<CommandFactory<OfficeModel>> list) {
-		list.add(new RefreshOfficeRoomCommand("Refresh room",
-				ProjectConfigurationContext.getProject(this.getEditorInput())));
+	protected void populateOperations(List<Operation> list) {
+		list.add(new RefreshOfficeRoomOperation());
 	}
 }

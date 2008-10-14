@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.common.action.CommandAction;
-import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.action.OperationAction;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.drag.LocalSelectionTransferDragTargetListener;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
@@ -77,15 +77,14 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	protected E rootEditPart;
 
 	/**
-	 * Map of model type to {@link EditPart} type.
+	 * Map of {@link Model} type to {@link EditPart} type.
 	 */
-	protected Map<Class<?>, Class<? extends EditPart>> modelTypeToeditPartTypeMap = new HashMap<Class<?>, Class<? extends EditPart>>();
+	protected Map<Class<?>, Class<? extends EditPart>> modelTypeToEditPartTypeMap = new HashMap<Class<?>, Class<? extends EditPart>>();
 
 	/**
-	 * Listing of the {@link CommandFactory} instances for the context
-	 * {@link Menu}.
+	 * Listing of the {@link Operation} instances for the context {@link Menu}.
 	 */
-	private CommandFactory<M>[] commandFactories;
+	private Operation[] operations;
 
 	/**
 	 * {@link PaletteRoot}.
@@ -191,15 +190,14 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	@SuppressWarnings("unchecked")
 	protected void initialiseContextMenu() {
 
-		// Obtain the listing of command factories
-		List<CommandFactory<M>> commandFactoryList = new LinkedList<CommandFactory<M>>();
-		this.populateCommandFactories(commandFactoryList);
-		this.commandFactories = commandFactoryList
-				.toArray(new CommandFactory[0]);
+		// Obtain the listing of operations
+		List<Operation> operationList = new LinkedList<Operation>();
+		this.populateOperations(operationList);
+		this.operations = operationList.toArray(new Operation[0]);
 
-		// Ensure have command factories
-		if (this.commandFactories.length == 0) {
-			// No command factories therefore do not provide context menu
+		// Ensure have operations
+		if (this.operations.length == 0) {
+			// No operations therefore do not provide context menu
 			return;
 		}
 
@@ -209,10 +207,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 			@Override
 			public void buildContextMenu(IMenuManager menuManager) {
 
-				// Obtain the selected models
-				EditPart rootEditPart = null;
-				M rootModel = null;
-				List<Model> selectedModelList = new LinkedList<Model>();
+				// Obtain the selected edit parts
+				List<AbstractOfficeFloorEditPart<?, ?>> selectedEditPartList = new LinkedList<AbstractOfficeFloorEditPart<?, ?>>();
 				ISelection selection = AbstractOfficeFloorEditor.this
 						.getGraphicalViewer().getSelection();
 				IStructuredSelection structuredSelection = (IStructuredSelection) selection;
@@ -220,46 +216,29 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 						.hasNext();) {
 					Object selectedItem = iterator.next();
 
-					// Obtain the edit parts and models
-					EditPart editPart = (EditPart) selectedItem;
-					Model model = (Model) editPart.getModel();
-
-					// Add to listing
-					selectedModelList.add(model);
-
-					// Specify the root edit part from first edit part
-					if (rootEditPart == null) {
-
-						// Obtain the parent edit part
-						// (Ignore ScaleableRootEditPart)
-						while (editPart.getParent().getParent() != null) {
-							editPart = editPart.getParent();
-						}
-
-						// Specify the root model
-						rootEditPart = editPart;
-						rootModel = (M) rootEditPart.getModel();
-					}
+					// Obtain the edit part and add to listing
+					AbstractOfficeFloorEditPart<?, ?> editPart = (AbstractOfficeFloorEditPart<?, ?>) selectedItem;
+					selectedEditPartList.add(editPart);
 				}
-				Model[] selectedModels = selectedModelList
-						.toArray(new Model[0]);
+				AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts = selectedEditPartList
+						.toArray(new AbstractOfficeFloorEditPart[0]);
 
-				// Ensure have root model and models
-				if ((rootModel == null) || (selectedModels.length == 0)) {
+				// Ensure have selected edit parts
+				if (selectedEditParts.length == 0) {
 					// Nothing selected, therefore add no actions
 					return;
 				}
 
 				// Add the appropriate actions
-				for (CommandFactory<M> commandFactory : AbstractOfficeFloorEditor.this.commandFactories) {
+				for (Operation operation : AbstractOfficeFloorEditor.this.operations) {
 
-					// Determine if handles all model types selected
+					// Determine if handles all edit part types selected
 					boolean isHandled = true;
-					for (Model model : selectedModels) {
+					for (AbstractOfficeFloorEditPart<?, ?> editPart : selectedEditParts) {
 						boolean isAssignable = false;
-						for (Class<? extends Model> handledModelType : commandFactory
-								.getModelTypes()) {
-							if (handledModelType.isAssignableFrom(model
+						for (Class<? extends EditPart> handledEditPartType : operation
+								.getEditPartTypes()) {
+							if (handledEditPartType.isAssignableFrom(editPart
 									.getClass())) {
 								isAssignable = true;
 							}
@@ -272,10 +251,10 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 					// Add if handles all model types
 					if (isHandled) {
 						// Add action for the commands to the menu
-						menuManager.add(new CommandAction(
+						menuManager.add(new OperationAction(
 								AbstractOfficeFloorEditor.this
-										.getCommandStack(), commandFactory,
-								rootModel, selectedModels));
+										.getCommandStack(), operation,
+								selectedEditParts));
 					}
 				}
 			}
@@ -289,24 +268,23 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	}
 
 	/**
-	 * Populates the listing of {@link CommandFactory} instances.
+	 * Populates the listing of {@link Operation} instances.
 	 * 
 	 * @param list
-	 *            Listing to add {@link CommandFactory} instances.
+	 *            Listing to add {@link Operation} instances.
 	 */
-	protected abstract void populateCommandFactories(
-			List<CommandFactory<M>> list);
+	protected abstract void populateOperations(List<Operation> list);
 
 	/**
 	 * Allow to override to specify another {@link EditPartFactory}.
 	 * 
-	 * @return <code>this</code> if not overriden.
+	 * @return <code>this</code> if not overridden.
 	 */
 	protected EditPartFactory createEditPartFactory() {
 
-		// Populate the mapper
-		this.modelTypeToeditPartTypeMap.clear();
-		this.populateEditPartTypes(this.modelTypeToeditPartTypeMap);
+		// Populate the map
+		this.modelTypeToEditPartTypeMap.clear();
+		this.populateEditPartTypes(this.modelTypeToEditPartTypeMap);
 
 		// Wrap to ensure model is set on the edit part
 		return new EditPartFactory() {
@@ -352,7 +330,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 		}
 
 		// Obtain the edit part type for the model
-		Class<EditPart> editPartType = (Class<EditPart>) this.modelTypeToeditPartTypeMap
+		Class<EditPart> editPartType = (Class<EditPart>) this.modelTypeToEditPartTypeMap
 				.get(model.getClass());
 
 		// Ensure have type

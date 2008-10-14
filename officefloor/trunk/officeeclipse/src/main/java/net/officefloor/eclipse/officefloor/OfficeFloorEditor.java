@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectDependencyEditPart;
@@ -190,12 +190,12 @@ public class OfficeFloorEditor extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
-	 * populateCommandFactories(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateOperations
+	 * (java.util.List)
 	 */
 	@Override
-	protected void populateCommandFactories(
-			List<CommandFactory<OfficeFloorModel>> list) {
-		// No commands yet
+	protected void populateOperations(List<Operation> list) {
+		// No operations yet
 	}
 }

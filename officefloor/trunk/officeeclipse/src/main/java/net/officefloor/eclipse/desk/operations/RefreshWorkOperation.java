@@ -14,59 +14,47 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.commands;
+package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.desk.DeskLoader;
 import net.officefloor.desk.TaskToFlowItemSynchroniser;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.action.AbstractSingleCommandFactory;
-import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.model.desk.DeskModel;
+import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.work.TaskModel;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.action.Action;
-
 /**
  * Refreshes the {@link DeskWorkModel}.
  * 
  * @author Daniel
  */
-public class RefreshWorkCommandFactory extends
-		AbstractSingleCommandFactory<DeskWorkModel, DeskModel> {
-
-	/**
-	 * {@link IProject}.
-	 */
-	private final IProject project;
+public class RefreshWorkOperation extends
+		AbstractSingleOperation<DeskWorkEditPart> {
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param actionText
-	 *            {@link Action} text.
-	 * @param project
-	 *            {@link IProject}.
 	 */
-	public RefreshWorkCommandFactory(String actionText, IProject project) {
-		super(actionText, DeskWorkModel.class);
-		this.project = project;
+	public RefreshWorkOperation() {
+		super("Refresh Work", DeskWorkEditPart.class);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractSingleCommandFactory#
-	 * createCommand(net.officefloor.model.Model, net.officefloor.model.Model)
+	 * @see
+	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
+	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final DeskWorkModel model,
-			DeskModel rootModel) {
+	protected OfficeFloorCommand createCommand(final DeskWorkEditPart editPart) {
+
+		// Make changes
 		return new OfficeFloorCommand() {
 
 			@Override
@@ -74,17 +62,20 @@ public class RefreshWorkCommandFactory extends
 				try {
 					// Create the Project class loader
 					ProjectClassLoader projectClassLoader = ProjectClassLoader
-							.create(RefreshWorkCommandFactory.this.project);
+							.create(editPart.getEditor());
 
 					// Create the desk loader
 					DeskLoader deskLoader = new DeskLoader(projectClassLoader);
 
+					// Obtain the desk work model
+					DeskWorkModel deskWorkModel = editPart.getCastedModel();
+
 					// Load the work (which does the synchronising)
-					deskLoader.loadWork(model, projectClassLoader
+					deskLoader.loadWork(deskWorkModel, projectClassLoader
 							.getConfigurationContext());
 
 					// Synchronise the tasks onto flow items
-					for (DeskTaskModel deskTaskModel : model.getTasks()) {
+					for (DeskTaskModel deskTaskModel : deskWorkModel.getTasks()) {
 
 						// Obtain the task model
 						TaskModel<?, ?> taskModel = deskTaskModel.getTask();
@@ -113,7 +104,7 @@ public class RefreshWorkCommandFactory extends
 					ex.printStackTrace();
 					throw new UnsupportedOperationException(
 							"TODO provide Exception to createCommand of "
-									+ CommandFactory.class.getName());
+									+ Operation.class.getName());
 				}
 			}
 

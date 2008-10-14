@@ -19,19 +19,19 @@ package net.officefloor.eclipse.common.action;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.gef.commands.Command;
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+
+import org.eclipse.gef.EditPart;
 import org.eclipse.jface.action.Action;
 
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.model.Model;
-
 /**
- * Abstract {@link CommandFactory} for a single {@link Model} type.
+ * Abstract {@link Operation} that creates a {@link OfficeFloorCommand} per
+ * {@link EditPart}.
  * 
  * @author Daniel
  */
-public abstract class AbstractSingleCommandFactory<M extends Model, R extends Model>
-		implements CommandFactory<R> {
+public abstract class AbstractMultipleOperation implements Operation {
 
 	/**
 	 * Text for the {@link Action}.
@@ -39,28 +39,26 @@ public abstract class AbstractSingleCommandFactory<M extends Model, R extends Mo
 	private final String actionText;
 
 	/**
-	 * Handled {@link Model} type. Length always one.
+	 * Handled {@link EditPart} types.
 	 */
-	private final Class<M>[] modelTypes;
+	private final Class<? extends EditPart>[] editPartTypes;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param actionText
 	 *            {@link Action} text.
-	 * @param modelTypes
-	 *            {@link Model} type being handled.
+	 * @param editPartTypes
+	 *            {@link EditPart} types being handled.
 	 */
-	@SuppressWarnings("unchecked")
-	public AbstractSingleCommandFactory(String actionText, Class<M> modelType) {
+	public AbstractMultipleOperation(String actionText,
+			Class<? extends EditPart>... editPartTypes) {
 		this.actionText = actionText;
-		this.modelTypes = new Class[] { modelType };
+		this.editPartTypes = editPartTypes;
 	}
 
 	/*
-	 * =====================================================================
-	 * CommandFactory
-	 * =====================================================================
+	 * ======================= Operation ============================
 	 */
 
 	/*
@@ -76,28 +74,26 @@ public abstract class AbstractSingleCommandFactory<M extends Model, R extends Mo
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.action.CommandFactory#getModelTypes()
+	 * @see net.officefloor.eclipse.common.action.Operation#getEditPartTypes()
 	 */
 	@Override
-	public Class<M>[] getModelTypes() {
-		return this.modelTypes;
+	public Class<? extends EditPart>[] getEditPartTypes() {
+		return this.editPartTypes;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.CommandFactory#createCommands(net
-	 * .officefloor.model.Model[], net.officefloor.model.Model)
+	 * @seenet.officefloor.eclipse.common.action.Operation#createCommands(net.
+	 * officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart<?,?>[])
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public OfficeFloorCommand[] createCommands(Model[] models, R rootModel) {
-		// By Default create the command for each model
+	public OfficeFloorCommand[] createCommands(
+			AbstractOfficeFloorEditPart<?, ?>[] editParts) {
+		// By default create the command for each model
 		List<OfficeFloorCommand> list = new LinkedList<OfficeFloorCommand>();
-		for (int i = 0; i < models.length; i++) {
-			M model = (M) models[i];
-			OfficeFloorCommand command = this.createCommand(model, rootModel);
+		for (AbstractOfficeFloorEditPart<?, ?> editPart : editParts) {
+			OfficeFloorCommand command = this.createCommand(editPart);
 			if (command != null) {
 				list.add(command);
 			}
@@ -109,14 +105,15 @@ public abstract class AbstractSingleCommandFactory<M extends Model, R extends Mo
 	}
 
 	/**
-	 * Creates a {@link OfficeFloorCommand} for the {@link Model} passed in.
+	 * Creates a {@link OfficeFloorCommand} for the {@link EditPart} passed in.
 	 * 
-	 * @param model
-	 *            {@link Model} to create the {@link Command}.
-	 * @param rootModel
-	 *            Root {@link Model}.
-	 * @return {@link OfficeFloorCommand}.
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart} to create the
+	 *            {@link OfficeFloorCommand}.
+	 * @return {@link OfficeFloorCommand} or <code>null</code> if nothing to
+	 *         execute.
 	 */
-	protected abstract OfficeFloorCommand createCommand(M model, R rootModel);
+	protected abstract OfficeFloorCommand createCommand(
+			AbstractOfficeFloorEditPart<?, ?> editPart);
 
 }

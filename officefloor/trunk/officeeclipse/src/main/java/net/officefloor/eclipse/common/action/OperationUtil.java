@@ -21,47 +21,39 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 
-import org.eclipse.gef.EditPart;
 import org.eclipse.gef.commands.Command;
 
 /**
- * Utility class to aid working with the {@link CommandFactory}.
+ * Utility class to aid working with an {@link Operation}.
  * 
  * @author Daniel
  */
-public class CommandFactoryUtil {
+public class OperationUtil {
 
 	/**
 	 * Executes the {@link OfficeFloorCommand} instances created from the
-	 * {@link CommandFactory}.
+	 * {@link Operation}.
 	 * 
 	 * @param editPart
-	 *            {@link EditPart}.
-	 * @param commandFactory
-	 *            {@link CommandFactory}.
-	 * @param selectedModels
-	 *            Selected {@link Model} instances. Defaults to the editPart
-	 *            {@link Model} if none provided.
+	 *            {@link AbstractOfficeFloorEditPart}.
+	 * @param operation
+	 *            {@link Operation}.
+	 * @param selectedEditParts
+	 *            Selected {@link AbstractOfficeFloorEditPart} instances.
+	 *            Defaults to the editPart if none provided.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <R extends Model, M extends Model, F extends OfficeFloorFigure> void execute(
-			AbstractOfficeFloorEditPart<M, F> editPart,
-			CommandFactory<R> commandFactory, Model... selectedModels) {
+			AbstractOfficeFloorEditPart<M, F> editPart, Operation operation,
+			AbstractOfficeFloorEditPart<?, ?>... selectedEditParts) {
 
-		// Obtain the root edit part (Ignore ScaleableRootEditPart)
-		EditPart rootEditPart = editPart;
-		while (rootEditPart.getParent().getParent() != null) {
-			rootEditPart = rootEditPart.getParent();
-		}
-
-		// Use the current model as selection if none selected
-		if ((selectedModels == null) || (selectedModels.length == 0)) {
-			selectedModels = new Model[] { editPart.getCastedModel() };
+		// Use the current edit part as selection if none selected
+		if ((selectedEditParts == null) || (selectedEditParts.length == 0)) {
+			selectedEditParts = new AbstractOfficeFloorEditPart<?, ?>[] { editPart };
 		}
 
 		// Create the commands
-		OfficeFloorCommand[] commands = commandFactory.createCommands(
-				selectedModels, (R) rootEditPart.getModel());
+		OfficeFloorCommand[] commands = operation
+				.createCommands(selectedEditParts);
 		if ((commands == null) || (commands.length == 0)) {
 			// No commands so nothing to execute
 			return;
@@ -80,6 +72,6 @@ public class CommandFactoryUtil {
 	/**
 	 * All access via static methods.
 	 */
-	private CommandFactoryUtil() {
+	private OperationUtil() {
 	}
 }
