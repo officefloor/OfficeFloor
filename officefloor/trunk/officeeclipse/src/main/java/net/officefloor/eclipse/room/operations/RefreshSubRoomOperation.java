@@ -14,54 +14,40 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.room.commands;
+package net.officefloor.eclipse.room.operations;
 
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.action.AbstractSingleCommandFactory;
-import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.model.room.RoomModel;
+import net.officefloor.eclipse.room.editparts.SubRoomEditPart;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.room.RoomLoader;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.action.Action;
 
 /**
  * Refreshes the {@link SubRoomModel}.
  * 
  * @author Daniel
  */
-public class RefreshSubRoomCommand extends
-		AbstractSingleCommandFactory<SubRoomModel, RoomModel> {
-
-	/**
-	 * {@link IProject}.
-	 */
-	private final IProject project;
+public class RefreshSubRoomOperation extends
+		AbstractSingleOperation<SubRoomEditPart> {
 
 	/**
 	 * Initiate.
-	 * 
-	 * @param actionText
-	 *            {@link Action} text.
-	 * @param project
-	 *            {@link IProject}.
 	 */
-	public RefreshSubRoomCommand(String actionText, IProject project) {
-		super(actionText, SubRoomModel.class);
-		this.project = project;
+	public RefreshSubRoomOperation() {
+		super("Refresh sub room", SubRoomEditPart.class);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractSingleCommandFactory#
-	 * createCommand(net.officefloor.model.Model, net.officefloor.model.Model)
+	 * @see
+	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
+	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final SubRoomModel model,
-			RoomModel rootModel) {
+	protected OfficeFloorCommand createCommand(final SubRoomEditPart editPart) {
 		return new OfficeFloorCommand() {
 
 			@Override
@@ -70,14 +56,14 @@ public class RefreshSubRoomCommand extends
 
 					// Create the Project class loader
 					ProjectClassLoader projectClassLoader = ProjectClassLoader
-							.create(RefreshSubRoomCommand.this.project);
+							.create(editPart.getEditor());
 
 					// Create the room loader
 					RoomLoader roomLoader = new RoomLoader();
 
 					// Load the sub room
-					roomLoader.loadSubRoom(model, projectClassLoader
-							.getConfigurationContext());
+					roomLoader.loadSubRoom(editPart.getCastedModel(),
+							projectClassLoader.getConfigurationContext());
 
 				} catch (Throwable ex) {
 
@@ -89,7 +75,7 @@ public class RefreshSubRoomCommand extends
 					ex.printStackTrace();
 					throw new UnsupportedOperationException(
 							"TODO provide Exception to createCommand of "
-									+ CommandFactory.class.getName());
+									+ Operation.class.getName());
 				}
 			}
 

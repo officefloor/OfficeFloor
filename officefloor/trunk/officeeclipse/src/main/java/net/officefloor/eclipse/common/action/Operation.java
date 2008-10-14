@@ -17,32 +17,35 @@
 package net.officefloor.eclipse.common.action;
 
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.model.Model;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.gef.EditPart;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 
 /**
- * Factory to create {@link OfficeFloorCommand} instances.
+ * Operation done on {@link EditPart} instances to create resulting
+ * {@link OfficeFloorCommand} to make changes.
  * 
  * @author Daniel
  */
-public interface CommandFactory<R extends Model> {
+public interface Operation {
 
 	/**
-	 * Obtains the text to use for the {@link Action}.
+	 * Obtains the text to use for the {@link IAction}.
 	 * 
-	 * @return Text to use for the {@link Action}.
+	 * @return Text to use for the {@link IAction}.
 	 */
 	String getActionText();
 
 	/**
-	 * Obtains the {@link Model} types that the items within the
+	 * Obtains the {@link EditPart} types that the items within the
 	 * {@link ISelection} must be assignable.
 	 * 
-	 * @return Listing of {@link Model} types.
+	 * @return Listing of {@link AbstractOfficeFloorEditPart} types.
 	 */
-	Class<? extends Model>[] getModelTypes();
+	Class<? extends EditPart>[] getEditPartTypes();
 
 	/**
 	 * Creates the {@link OfficeFloorCommand} listing for the input
@@ -56,6 +59,7 @@ public interface CommandFactory<R extends Model> {
 	 * @return {@link OfficeFloorCommand} instances. May return no instances if
 	 *         nothing to execute.
 	 */
-	OfficeFloorCommand[] createCommands(Model[] models, R rootModel);
+	OfficeFloorCommand[] createCommands(
+			AbstractOfficeFloorEditPart<?, ?>[] editParts);
 
 }

@@ -23,17 +23,17 @@ import java.util.List;
 import java.util.Set;
 
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.model.Model;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.jface.action.Action;
 
 /**
- * {@link CommandFactory} that aggregates {@link CommandFactory} instances.
+ * {@link Operation} that aggregates {@link Operation} instances.
  * 
  * @author Daniel
  */
-public class AggregateCommandFactory<R extends Model> implements
-		CommandFactory<R> {
+public class AggregateOperation implements Operation {
 
 	/**
 	 * Text for the {@link Action}.
@@ -41,41 +41,38 @@ public class AggregateCommandFactory<R extends Model> implements
 	private final String actionText;
 
 	/**
-	 * {@link CommandFactory} instances.
+	 * {@link Operation} instances.
 	 */
-	private final CommandFactory<R>[] commandFactories;
+	private final Operation[] operations;
 
 	/**
-	 * Handled {@link Model} types.
+	 * Handled {@link EditPart} types.
 	 */
-	private final Class<? extends Model>[] modelTypes;
+	private final Class<? extends EditPart>[] editPartTypes;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param actionText
 	 *            {@link Action} text.
-	 * @param commandFactories
-	 *            Listing of {@link CommandFactory} instances.
+	 * @param operations
+	 *            Listing of {@link Operation} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	public AggregateCommandFactory(String actionText,
-			CommandFactory<R>... commandFactories) {
+	public AggregateOperation(String actionText, Operation... operations) {
 		this.actionText = actionText;
-		this.commandFactories = commandFactories;
+		this.operations = operations;
 
-		// Create the set of model types that are handled
-		Set<Class<? extends Model>> modelTypeSet = new HashSet<Class<? extends Model>>();
-		for (CommandFactory<R> commandFactory : this.commandFactories) {
-			modelTypeSet.addAll(Arrays.asList(commandFactory.getModelTypes()));
+		// Create the set of edit part types that are handled
+		Set<Class<? extends EditPart>> editPartTypeSet = new HashSet<Class<? extends EditPart>>();
+		for (Operation operation : this.operations) {
+			editPartTypeSet.addAll(Arrays.asList(operation.getEditPartTypes()));
 		}
-		this.modelTypes = modelTypeSet.toArray(new Class[0]);
+		this.editPartTypes = editPartTypeSet.toArray(new Class[0]);
 	}
 
 	/*
-	 * =====================================================================
-	 * CommandFactory
-	 * =====================================================================
+	 * ======================= Operation ===============================
 	 */
 
 	/*
@@ -91,39 +88,43 @@ public class AggregateCommandFactory<R extends Model> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.action.CommandFactory#getModelTypes()
+	 * @see net.officefloor.eclipse.common.action.Operation#getEditPartTypes()
 	 */
 	@Override
-	public Class<? extends Model>[] getModelTypes() {
-		return this.modelTypes;
+	public Class<? extends EditPart>[] getEditPartTypes() {
+		return this.editPartTypes;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.action.CommandFactory#createCommands(net.officefloor.model.Model[],
-	 *      net.officefloor.model.Model)
+	 * @seenet.officefloor.eclipse.common.action.Operation#createCommands(net.
+	 * officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart<?,?>[])
 	 */
 	@Override
-	public OfficeFloorCommand[] createCommands(Model[] models, R rootModel) {
+	public OfficeFloorCommand[] createCommands(
+			AbstractOfficeFloorEditPart<?, ?>[] editParts) {
 		// Create the appropriate commands
 		List<OfficeFloorCommand> commands = new LinkedList<OfficeFloorCommand>();
-		for (CommandFactory<R> commandFactory : this.commandFactories) {
-			for (Model model : models) {
+		for (Operation operation : this.operations) {
+			for (AbstractOfficeFloorEditPart<?, ?> editPart : editParts) {
 
 				// Determine if command factory handles the model
 				boolean isHandle = false;
-				for (Class<? extends Model> handledModelType : commandFactory
-						.getModelTypes()) {
-					if (handledModelType.isAssignableFrom(model.getClass())) {
+				for (Class<? extends EditPart> handledEditPartType : operation
+						.getEditPartTypes()) {
+					if (handledEditPartType
+							.isAssignableFrom(handledEditPartType.getClass())) {
 						isHandle = true;
 					}
 				}
 
 				// Add the commands if command factory handles
 				if (isHandle) {
-					commands.addAll(Arrays.asList(commandFactory
-							.createCommands(new Model[] { model }, rootModel)));
+					commands
+							.addAll(Arrays
+									.asList(operation
+											.createCommands(new AbstractOfficeFloorEditPart<?, ?>[] { editPart })));
 				}
 			}
 		}
@@ -131,4 +132,5 @@ public class AggregateCommandFactory<R extends Model> implements
 		// Return the created commands
 		return commands.toArray(new OfficeFloorCommand[0]);
 	}
+
 }

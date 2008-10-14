@@ -20,11 +20,9 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.action.CommandFactory;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
-import net.officefloor.eclipse.room.commands.RefreshSubRoomCommand;
 import net.officefloor.eclipse.room.editparts.ExternalEscalationEditPart;
 import net.officefloor.eclipse.room.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.room.editparts.ExternalManagedObjectEditPart;
@@ -34,6 +32,7 @@ import net.officefloor.eclipse.room.editparts.SubRoomEscalationEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomInputFlowEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomManagedObjectEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomOutputFlowEditPart;
+import net.officefloor.eclipse.room.operations.RefreshSubRoomOperation;
 import net.officefloor.model.room.EscalationToExternalEscalationModel;
 import net.officefloor.model.room.EscalationToInputFlowModel;
 import net.officefloor.model.room.ExternalEscalationModel;
@@ -169,13 +168,13 @@ public class RoomEditor extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
-	 * populateCommandFactories(java.util.List)
+	 * @see
+	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateOperations
+	 * (java.util.List)
 	 */
 	@Override
-	protected void populateCommandFactories(List<CommandFactory<RoomModel>> list) {
-		list.add(new RefreshSubRoomCommand("Refresh sub room",
-				ProjectConfigurationContext.getProject(this.getEditorInput())));
+	protected void populateOperations(List<Operation> list) {
+		list.add(new RefreshSubRoomOperation());
 	}
 
 }
