@@ -27,11 +27,13 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 import net.officefloor.repository.ConfigurationContext;
 
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
@@ -170,8 +172,16 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 */
 	@Override
 	protected IFigure createFigure() {
-		// Return the figure of the Office Floor Figure
-		return this.getOfficeFloorFigure().getFigure();
+		
+		// Obtain the figure
+		IFigure figure = this.getOfficeFloorFigure().getFigure();
+		if (this.isFreeformFigure()) {
+			// Wrap with free form wrapper
+			figure = new FreeformWrapperFigure((Figure) figure);
+		}
+		
+		// Return the figure
+		return figure;
 	}
 
 	/**
@@ -187,6 +197,17 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 			this.officeFloorFigure = this.createOfficeFloorFigure();
 		}
 		return this.officeFloorFigure;
+	}
+
+	/**
+	 * Override to indicate that {@link IFigure} needs a
+	 * {@link FreeformWrapperFigure}.
+	 * 
+	 * @return <code>true</code> if {@link IFigure} needs a
+	 *         {@link FreeformWrapperFigure}.
+	 */
+	protected boolean isFreeformFigure() {
+		return false;
 	}
 
 	/**
@@ -230,7 +251,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            List to be populated with the children models.
 	 */
 	protected void populateModelChildren(List<Object> childModels) {
-		// Defaultly no children
+		// By Default no children
 	}
 
 	/**

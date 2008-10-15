@@ -17,9 +17,10 @@
 package net.officefloor.eclipse.common.figure;
 
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.FreeformViewport;
 
 /**
- * TODO: description
+ * {@link WrappingFigure} for a {@link FreeformViewport}.
  * 
  * @author Daniel
  */
@@ -30,7 +31,7 @@ public class FreeformWrapperFigure extends WrappingFigure {
 	 * 
 	 * @param figure
 	 *            {@link Figure} to be wrapped to be put on a
-	 *            {@link org.eclipse.draw2d.FreeformViewport}.
+	 *            {@link FreeformViewport}.
 	 */
 	public FreeformWrapperFigure(Figure figure) {
 		super(figure);

@@ -1,18 +1,18 @@
 <desk>
 	<external-managed-objects>
 		<external-managed-object name="mo"
-			object-type="java.lang.String" />
+			object-type="java.lang.String" x="10" y="11" />
 	</external-managed-objects>
 	<external-flows>
-		<external-flow name="flow" />
+		<external-flow name="flow" x="20" y="21" />
 	</external-flows>
 	<external-escalations>
 		<external-escalation name="escalation"
-			escalation-type="java.sql.SQLException" />
+			escalation-type="java.sql.SQLException" x="30" y="31" />
 	</external-escalations>
 	<works>
 		<work id="work"
-			loader="net.officefloor.work.clazz.ClassWorkLoader">
+			loader="net.officefloor.work.clazz.ClassWorkLoader" x="40" y="41">
 			<initial-flow-item id="1" />
 			<properties>
 				<property name="class.name"
