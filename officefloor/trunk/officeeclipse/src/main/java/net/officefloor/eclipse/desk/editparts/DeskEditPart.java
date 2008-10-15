@@ -21,23 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
-import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
-import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.common.wrap.OfficeFloorWrappingEditPart;
-import net.officefloor.eclipse.common.wrap.WrappingEditPart;
-import net.officefloor.eclipse.common.wrap.WrappingModel;
-import net.officefloor.eclipse.desk.figure.SectionFigure;
-import net.officefloor.eclipse.desk.operations.AddExternalEscalationOperation;
-import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
-import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
-import net.officefloor.eclipse.desk.operations.AddWorkOperation;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.DeskModel.DeskEvent;
 
@@ -50,28 +38,6 @@ import org.eclipse.draw2d.geometry.Point;
  * @author Daniel
  */
 public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> {
-
-	/**
-	 * Listing of {@link net.officefloor.model.desk.ExternalManagedObjectModel}
-	 * instances.
-	 */
-	private WrappingModel<DeskModel> externalManagedObjects;
-
-	/**
-	 * Listing of {@link net.officefloor.model.desk.DeskWorkModel} instances.
-	 */
-	private WrappingModel<DeskModel> works;
-
-	/**
-	 * Listing of {@link net.officefloor.model.desk.ExternalFlowModel}
-	 * instances.
-	 */
-	private WrappingModel<DeskModel> externalFlowItems;
-
-	/**
-	 * Listing of {@link ExternalEscalationModel} instances.
-	 */
-	private WrappingModel<DeskModel> externalEscalations;
 
 	/**
 	 * Obtains the unique {@link FlowItemModel} id for the input
@@ -114,110 +80,6 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * init()
-	 */
-	@SuppressWarnings("unchecked")
-	protected void init() {
-
-		// Button to add External Managed Objects
-		final ButtonEditPart extMoButton = new ButtonEditPart("Add Ext MO") {
-			protected void handleButtonClick() {
-				// Add the external managed object
-				OperationUtil.execute(DeskEditPart.this,
-						new AddExternalManagedObjectOperation());
-			}
-		};
-
-		// External Managed Objects
-		WrappingEditPart extMoEditPart = new OfficeFloorWrappingEditPart() {
-			@Override
-			protected void populateModelChildren(List children) {
-				children.addAll(DeskEditPart.this.getCastedModel()
-						.getExternalManagedObjects());
-				children.add(extMoButton);
-			}
-		};
-		extMoEditPart.setFigure(new FreeformWrapperFigure(new SectionFigure(
-				"Managed Objects")));
-		this.externalManagedObjects = new WrappingModel<DeskModel>(this
-				.getCastedModel(), extMoEditPart, new Point(10, 10));
-
-		// Button to add Work
-		final ButtonEditPart workButton = new ButtonEditPart("Add Work") {
-			protected void handleButtonClick() {
-				// Add the work
-				OperationUtil
-						.execute(DeskEditPart.this, new AddWorkOperation());
-			}
-		};
-
-		// Work
-		WrappingEditPart workEditPart = new OfficeFloorWrappingEditPart() {
-			@Override
-			protected void populateModelChildren(List children) {
-				children.addAll(DeskEditPart.this.getCastedModel().getWorks());
-				children.add(workButton);
-			}
-		};
-		workEditPart.setFigure(new FreeformWrapperFigure(new SectionFigure(
-				"Work")));
-		this.works = new WrappingModel<DeskModel>(this.getCastedModel(),
-				workEditPart, new Point(110, 10));
-
-		// Button to add External Flows
-		final ButtonEditPart extFlowButton = new ButtonEditPart("Add Ext Flow") {
-			protected void handleButtonClick() {
-				// Add external flow
-				OperationUtil.execute(DeskEditPart.this,
-						new AddExternalFlowOperation());
-			}
-		};
-
-		// External flow items
-		WrappingEditPart flowItemsEditPart = new OfficeFloorWrappingEditPart() {
-			@Override
-			protected void populateModelChildren(List children) {
-				children.addAll(DeskEditPart.this.getCastedModel()
-						.getExternalFlows());
-				children.add(extFlowButton);
-			}
-		};
-		flowItemsEditPart.setFigure(new FreeformWrapperFigure(
-				new SectionFigure("Flow Items")));
-		this.externalFlowItems = new WrappingModel<DeskModel>(this
-				.getCastedModel(), flowItemsEditPart, new Point(510, 10));
-
-		// Button to add External Escalation
-		final ButtonEditPart extEscalationButton = new ButtonEditPart(
-				"Add Ext Escalation") {
-			@Override
-			protected void handleButtonClick() {
-				// Add the External Escalation
-				OperationUtil.execute(DeskEditPart.this,
-						new AddExternalEscalationOperation());
-			}
-		};
-
-		// External escalations
-		WrappingEditPart escalationsEditPart = new OfficeFloorWrappingEditPart() {
-			@Override
-			protected void populateModelChildren(List<Object> children) {
-				children.addAll(DeskEditPart.this.getCastedModel()
-						.getExternalEscalations());
-				children.add(extEscalationButton);
-			}
-		};
-		escalationsEditPart.setFigure(new FreeformWrapperFigure(
-				new SectionFigure("Escalations")));
-		this.externalEscalations = new WrappingModel<DeskModel>(this
-				.getCastedModel(), escalationsEditPart, new Point(510, 300));
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
 	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart
 	 * #createLayoutEditPolicy()
 	 */
@@ -233,14 +95,12 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 	 * #populateChildren(java.util.List)
 	 */
 	protected void populateChildren(List<Object> childModels) {
-		// Add the static children
-		childModels.add(this.externalManagedObjects);
-		childModels.add(this.works);
-		childModels.add(this.externalFlowItems);
-		childModels.add(this.externalEscalations);
-
-		// Add the flow items
+		// Add the children
+		childModels.addAll(this.getCastedModel().getWorks());
+		childModels.addAll(this.getCastedModel().getExternalManagedObjects());
 		childModels.addAll(this.getCastedModel().getFlowItems());
+		childModels.addAll(this.getCastedModel().getExternalFlows());
+		childModels.addAll(this.getCastedModel().getExternalEscalations());
 	}
 
 	/*
@@ -258,21 +118,19 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 				switch (property) {
 				case ADD_EXTERNAL_MANAGED_OBJECT:
 				case REMOVE_EXTERNAL_MANAGED_OBJECT:
-					DeskEditPart.this.externalManagedObjects.getEditPart()
-							.refresh();
+					DeskEditPart.this.refresh();
 					break;
 				case ADD_WORK:
 				case REMOVE_WORK:
-					DeskEditPart.this.works.getEditPart().refresh();
+					DeskEditPart.this.refresh();
 					break;
 				case ADD_EXTERNAL_FLOW:
 				case REMOVE_EXTERNAL_FLOW:
-					DeskEditPart.this.externalFlowItems.getEditPart().refresh();
+					DeskEditPart.this.refresh();
 					break;
 				case ADD_EXTERNAL_ESCALATION:
 				case REMOVE_EXTERNAL_ESCALATION:
-					DeskEditPart.this.externalEscalations.getEditPart()
-							.refresh();
+					DeskEditPart.this.refresh();
 					break;
 				case ADD_FLOW_ITEM:
 				case REMOVE_FLOW_ITEM:
@@ -282,7 +140,6 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 			}
 		});
 	}
-
 }
 
 /**

@@ -118,9 +118,9 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 
 		// Validate work
-		assertList(new String[] { "getId", "getLoader" }, desk.getWorks(),
-				new DeskWorkModel("work", ClassWorkLoader.class.getName(),
-						null, null, null, null));
+		assertList(new String[] { "getId", "getLoader", "getX", "getY" }, desk
+				.getWorks(), new DeskWorkModel("work", ClassWorkLoader.class
+				.getName(), null, null, null, null, 40, 41));
 
 		// Validate properties of work
 		DeskWorkModel work = desk.getWorks().get(0);
@@ -303,9 +303,10 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 
 		// Validate external managed objects
-		assertList(new String[] { "getName", "getObjectType" }, desk
-				.getExternalManagedObjects(), new ExternalManagedObjectModel(
-				"mo", "java.lang.String", null));
+		assertList(new String[] { "getName", "getObjectType", "getX", "getY" },
+				desk.getExternalManagedObjects(),
+				new ExternalManagedObjectModel("mo", "java.lang.String", null,
+						10, 11));
 
 		// Validate external managed object connections to work tasks
 		List<DeskTaskObjectToExternalManagedObjectModel> taskObjects = new LinkedList<DeskTaskObjectToExternalManagedObjectModel>();
@@ -324,8 +325,9 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 
 		// Validate external flows
-		assertList(new String[] { "getName" }, desk.getExternalFlows(),
-				new ExternalFlowModel("flow", null, null));
+		assertList(new String[] { "getName", "getX", "getY" }, desk
+				.getExternalFlows(), new ExternalFlowModel("flow", null, null,
+				20, 21));
 
 		// Validate external flow connections to flow items
 		List<FlowItemOutputToExternalFlowModel> externalFlowLinks = new LinkedList<FlowItemOutputToExternalFlowModel>();
@@ -344,9 +346,10 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 
 		// Validate external escalations
-		assertList(new String[] { "getName", "getEscalationType" }, desk
-				.getExternalEscalations(), new ExternalEscalationModel(
-				"escalation", SQLException.class.getName(), null));
+		assertList(new String[] { "getName", "getEscalationType", "getX",
+				"getY" }, desk.getExternalEscalations(),
+				new ExternalEscalationModel("escalation", SQLException.class
+						.getName(), null, 30, 31));
 
 		// Validate external escalation connection to flow item escalations
 		if (isSynchronised) {

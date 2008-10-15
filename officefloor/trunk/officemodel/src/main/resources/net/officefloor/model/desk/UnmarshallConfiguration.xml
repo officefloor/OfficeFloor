@@ -9,11 +9,15 @@
 		<value method="setName" node="external-managed-object@name" />
 		<value method="setObjectType"
 			node="external-managed-object@object-type" />
+		<value method="setX" node="external-managed-object@x" />
+		<value method="setY" node="external-managed-object@y" />
 	</object>
 	<!-- EXTERNAL FLOWS -->
 	<object method="addExternalFlow" node="external-flow"
 		class="net.officefloor.model.desk.ExternalFlowModel">
 		<value method="setName" node="external-flow@name" />
+		<value method="setX" node="external-flow@x" />
+		<value method="setY" node="external-flow@y" />
 	</object>
 	<!-- EXTERNAL ESCALATIONS -->
 	<object method="addExternalEscalation" node="external-escalation"
@@ -21,12 +25,16 @@
 		<value method="setName" node="external-escalation@name" />
 		<value method="setEscalationType"
 			node="external-escalation@escalation-type" />
+		<value method="setX" node="external-escalation@x" />
+		<value method="setY" node="external-escalation@y" />
 	</object>
 	<!-- WORKS -->
 	<object method="addWork" node="work"
 		class="net.officefloor.model.desk.DeskWorkModel">
 		<value method="setId" node="work@id" />
 		<value method="setLoader" node="work@loader" />
+		<value method="setX" node="work@x" />
+		<value method="setY" node="work@y" />
 		<object method="addProperty" node="property"
 			class="net.officefloor.model.desk.PropertyModel">
 			<value method="setName" node="property@name" />

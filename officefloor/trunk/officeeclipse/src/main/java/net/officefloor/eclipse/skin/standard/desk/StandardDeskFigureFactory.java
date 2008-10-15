@@ -18,7 +18,6 @@ package net.officefloor.eclipse.skin.standard.desk;
 
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
-import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.desk.figure.DeskTaskFigure;
 import net.officefloor.eclipse.desk.figure.DeskTaskObjectFigure;
 import net.officefloor.eclipse.desk.figure.DeskWorkFigure;
@@ -195,9 +194,9 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 		FlowItemFigure figure = new FlowItemFigure(context.getFlowItemName(),
 				publicCheckBox.getFigure());
 
-		// Return the figure (useable as a freeform figure)
-		return new FlowItemFigureImpl(new FreeformWrapperFigure(figure),
-				(CheckBox) publicCheckBox.getFigure());
+		// Return the figure
+		return new FlowItemFigureImpl(figure, (CheckBox) publicCheckBox
+				.getFigure());
 	}
 
 	/*
