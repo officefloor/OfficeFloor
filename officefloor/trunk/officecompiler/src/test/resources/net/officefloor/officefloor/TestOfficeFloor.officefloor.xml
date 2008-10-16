@@ -1,7 +1,8 @@
 <office-floor>
 	<managed-object-sources>
 		<managed-object-source id="MO-ID"
-			source="net.officefloor.mo.TestManagedObjectSource" timeout="10">
+			source="net.officefloor.mo.TestManagedObjectSource" timeout="10"
+			x="10" y="11">
 			<managing-office name="office" />
 			<properties>
 				<property name="mo prop name" value="mo prop value" />
@@ -44,7 +45,7 @@
 	</managed-object-sources>
 	<team-instances>
 		<team-instance id="TEAM-ID"
-			team-factory="net.officefloor.team.TestTeamFactory">
+			team-factory="net.officefloor.team.TestTeamFactory" x="20" y="21">
 			<properties>
 				<property name="team prop name" value="team prop value" />
 			</properties>

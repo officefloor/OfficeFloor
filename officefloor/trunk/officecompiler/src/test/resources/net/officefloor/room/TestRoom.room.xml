@@ -1,14 +1,14 @@
 <room>
 	<external-managed-objects>
 		<external-managed-object name="mo"
-			object-type="java.lang.String" />
+			object-type="java.lang.String" x="10" y="11" />
 	</external-managed-objects>
 	<external-flows>
-		<external-flow name="flow" />
+		<external-flow name="flow" x="20" y="21" />
 	</external-flows>
 	<external-escalations>
 		<external-escalation name="escalation"
-			escalation-type="java.sql.SQLException" />
+			escalation-type="java.sql.SQLException" x="30" y="31" />
 	</external-escalations>
 	<sub-rooms>
 		<sub-room id="1" desk="TestDesk.desk.xml" x="100" y="20">

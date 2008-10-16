@@ -165,9 +165,10 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		// Validate the external managed objects
 		// ===================================
 
-		assertList(new String[] { "getName", "getObjectType" }, room
-				.getExternalManagedObjects(), new ExternalManagedObjectModel(
-				"mo", "java.lang.String", null));
+		assertList(new String[] { "getName", "getObjectType", "getX", "getY" },
+				room.getExternalManagedObjects(),
+				new ExternalManagedObjectModel("mo", "java.lang.String", null,
+						10, 11));
 		assertEquals("Incorrect sub room mo", subRoomOne.getManagedObjects()
 				.get(0), room.getExternalManagedObjects().get(0)
 				.getSubRoomManagedObjects().get(0).getManagedObject());
@@ -176,8 +177,9 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		// Validate the external flows
 		// ===================================
 
-		assertList(new String[] { "getName" }, room.getExternalFlows(),
-				new ExternalFlowModel("flow", null));
+		assertList(new String[] { "getName", "getX", "getY" }, room
+				.getExternalFlows(),
+				new ExternalFlowModel("flow", null, 20, 21));
 		assertEquals("Incorrect sub room output", subRoomTwo.getOutputFlows()
 				.get(0), room.getExternalFlows().get(0).getOutputs().get(0)
 				.getOutput());
@@ -186,9 +188,10 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		// Validate the external escalations
 		// ===================================
 
-		assertList(new String[] { "getName", "getEscalationType" }, room
-				.getExternalEscalations(), new ExternalEscalationModel(
-				"escalation", SQLException.class.getName(), null));
+		assertList(new String[] { "getName", "getEscalationType", "getX",
+				"getY" }, room.getExternalEscalations(),
+				new ExternalEscalationModel("escalation", SQLException.class
+						.getName(), null, 30, 31));
 		SubRoomEscalationModel expectedEscalation = subRoomOne.getEscalations()
 				.get(0);
 		SubRoomEscalationModel actualEscalation = room.getExternalEscalations()
@@ -210,7 +213,7 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		FileSystemConfigurationItem tempConfigItem = new FileSystemConfigurationItem(
 				tempFile, null);
 		this.roomLoader.storeRoom(room, tempConfigItem);
-		
+
 		// Reload the Room
 		RoomModel reloadedRoom = this.roomLoader.loadRoom(tempConfigItem);
 

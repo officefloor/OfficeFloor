@@ -17,7 +17,6 @@
 package net.officefloor.eclipse.skin.standard.room;
 
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
-import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.room.figure.SubRoomEscalationFigure;
 import net.officefloor.eclipse.room.figure.SubRoomFigure;
 import net.officefloor.eclipse.room.figure.SubRoomInputFlowFigure;
@@ -114,8 +113,8 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 */
 	@Override
 	public OfficeFloorFigure createSubRoomFigure(SubRoomFigureContext context) {
-		return new OfficeFloorFigureImpl(new FreeformWrapperFigure(
-				new SubRoomFigure(context.getSubRoomName())));
+		return new OfficeFloorFigureImpl(new SubRoomFigure(context
+				.getSubRoomName()));
 	}
 
 	/*

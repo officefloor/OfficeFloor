@@ -10,6 +10,8 @@
 		<value method="setSource" node="managed-object-source@source" />
 		<value method="setDefaultTimeout"
 			node="managed-object-source@timeout" />
+		<value method="setX" node="managed-object-source@x" />
+		<value method="setY" node="managed-object-source@y" />
 		<object method="setManagingOffice" node="managing-office"
 			class="net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel">
 			<value method="setManagingOfficeName"
@@ -84,6 +86,8 @@
 		<value method="setId" node="team-instance@id" />
 		<value method="setTeamFactory"
 			node="team-instance@team-factory" />
+		<value method="setX" node="team-instance@x" />
+		<value method="setY" node="team-instance@y" />
 		<object method="addProperty" node="property"
 			class="net.officefloor.model.officefloor.PropertyModel">
 			<value method="setName" node="property@name" />

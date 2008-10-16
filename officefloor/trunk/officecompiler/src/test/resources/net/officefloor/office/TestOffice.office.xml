@@ -1,13 +1,13 @@
 <office>
 	<teams>
-		<team name="TEAM ONE" />
-		<team name="TEAM TWO" />
+		<team name="TEAM ONE" x="10" y="11" />
+		<team name="TEAM TWO" x="20" y="21" />
 	</teams>
 	<managed-objects>
 		<managed-object name="MO" object-type="java.lang.String"
-			scope="process" />
+			scope="process" x="30" y="31" />
 	</managed-objects>
-	<room id="Room.room.xml" name="OFFICE ROOM">
+	<room id="Room.room.xml" name="OFFICE ROOM" x="40" y="41">
 		<room id="SubRoomOne.room.xml" name="RoomA">
 			<room id="SubSubRoom.room.xml" name="SubRoomA" />
 			<desk id="SubDesk.desk.xml" name="SubDeskA">
