@@ -16,10 +16,14 @@
  */
 package net.officefloor.eclipse.common.action;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.model.Model;
 
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.jface.action.Action;
@@ -29,7 +33,7 @@ import org.eclipse.jface.action.Action;
  * 
  * @author Daniel
  */
-public class OperationAction<R extends Model> extends Action {
+public class OperationAction extends Action {
 
 	/**
 	 * {@link CommandStack} to execute the {@link OfficeFloorCommand} instances.
@@ -47,6 +51,11 @@ public class OperationAction<R extends Model> extends Action {
 	private final AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts;
 
 	/**
+	 * Location.
+	 */
+	private final Point location;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param commandStack
@@ -56,13 +65,17 @@ public class OperationAction<R extends Model> extends Action {
 	 *            instances.
 	 * @param selectedEditParts
 	 *            Selected {@link AbstractOfficeFloorEditPart} instances.
+	 * @param location
+	 *            Location.
 	 */
 	public OperationAction(CommandStack commandStack, Operation operation,
-			AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts) {
+			AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts,
+			Point location) {
 		super(operation.getActionText());
 		this.commandStack = commandStack;
 		this.operation = operation;
 		this.selectedEditParts = selectedEditParts;
+		this.location = location;
 	}
 
 	/*
@@ -73,9 +86,15 @@ public class OperationAction<R extends Model> extends Action {
 	@Override
 	public void run() {
 
+		// Create the operation context
+		OperationContextImpl context = new OperationContextImpl();
+
+		// Perform the operation
+		this.operation.perform(context);
+
 		// Obtain the commands
-		OfficeFloorCommand[] commands = this.operation
-				.createCommands(this.selectedEditParts);
+		OfficeFloorCommand[] commands = context.commands
+				.toArray(new OfficeFloorCommand[0]);
 		if ((commands == null) || (commands.length == 0)) {
 			// No commands so nothing to execute
 			return;
@@ -89,6 +108,51 @@ public class OperationAction<R extends Model> extends Action {
 
 		// Execute the commands
 		this.commandStack.execute(command);
+	}
+
+	/**
+	 * {@link OperationContext}.
+	 */
+	private class OperationContextImpl implements OperationContext {
+
+		/**
+		 * {@link OfficeFloorCommand} instances.
+		 */
+		public final List<OfficeFloorCommand> commands = new LinkedList<OfficeFloorCommand>();
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * net.officefloor.eclipse.common.action.OperationContext#getEditParts()
+		 */
+		@Override
+		public AbstractOfficeFloorEditPart<?, ?>[] getEditParts() {
+			return OperationAction.this.selectedEditParts;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * net.officefloor.eclipse.common.action.OperationContext#getLocation()
+		 */
+		@Override
+		public Point getLocation() {
+			return OperationAction.this.location;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * net.officefloor.eclipse.common.action.OperationContext#execute(net
+		 * .officefloor.eclipse.common.commands.OfficeFloorCommand)
+		 */
+		@Override
+		public void execute(OfficeFloorCommand command) {
+			this.commands.add(command);
+		}
 	}
 
 }

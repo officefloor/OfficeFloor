@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.common.action.OperationAction;
 import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.eclipse.common.action.OperationAction;
 import net.officefloor.eclipse.common.drag.LocalSelectionTransferDragTargetListener;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
@@ -34,11 +34,13 @@ import net.officefloor.model.Model;
 import net.officefloor.repository.ConfigurationItem;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
 import org.eclipse.gef.GraphicalViewer;
+import org.eclipse.gef.Tool;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackListener;
@@ -48,6 +50,7 @@ import org.eclipse.gef.palette.PaletteGroup;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.palette.SelectionToolEntry;
 import org.eclipse.gef.requests.CreationFactory;
+import org.eclipse.gef.tools.SelectionTool;
 import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.jface.action.IMenuManager;
@@ -97,6 +100,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	public AbstractOfficeFloorEditor() {
 		// Specify the Edit Domain
 		DefaultEditDomain editDomain = new DefaultEditDomain(this);
+		editDomain.setDefaultTool(new OfficeFloorSelectionTool());
+		editDomain.loadDefaultTool();
 		this.setEditDomain(editDomain);
 
 		// Set up the command stack
@@ -187,7 +192,6 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	/**
 	 * Initialises the context menu.
 	 */
-	@SuppressWarnings("unchecked")
 	protected void initialiseContextMenu() {
 
 		// Obtain the listing of operations
@@ -206,6 +210,19 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 				.getGraphicalViewer()) {
 			@Override
 			public void buildContextMenu(IMenuManager menuManager) {
+
+				// Obtain the location
+				Tool tool = AbstractOfficeFloorEditor.this.getEditDomain()
+						.getActiveTool();
+				Point location;
+				if (tool instanceof OfficeFloorSelectionTool) {
+					// Obtain location of right-click
+					OfficeFloorSelectionTool selectionTool = (OfficeFloorSelectionTool) tool;
+					location = selectionTool.getLocation();
+				} else {
+					// Provide no location
+					location = new Point(-1, -1);
+				}
 
 				// Obtain the selected edit parts
 				List<AbstractOfficeFloorEditPart<?, ?>> selectedEditPartList = new LinkedList<AbstractOfficeFloorEditPart<?, ?>>();
@@ -254,7 +271,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 						menuManager.add(new OperationAction(
 								AbstractOfficeFloorEditor.this
 										.getCommandStack(), operation,
-								selectedEditParts));
+								selectedEditParts, location));
 					}
 				}
 			}
@@ -521,6 +538,17 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	 */
 	protected void initialisePaletteRoot() {
 		// Do nothing
+	}
+
+	/**
+	 * {@link SelectionTool} to allow obtaining the location of selection.
+	 */
+	private static class OfficeFloorSelectionTool extends SelectionTool {
+
+		@Override
+		public Point getLocation() {
+			return super.getLocation();
+		}
 	}
 
 	/**

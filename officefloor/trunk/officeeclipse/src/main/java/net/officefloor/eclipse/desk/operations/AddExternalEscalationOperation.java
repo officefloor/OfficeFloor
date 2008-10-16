@@ -16,7 +16,9 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import org.eclipse.draw2d.geometry.Point;
+
+import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
@@ -29,7 +31,7 @@ import net.officefloor.model.desk.ExternalEscalationModel;
  * @author Daniel
  */
 public class AddExternalEscalationOperation extends
-		AbstractSingleOperation<DeskEditPart> {
+		AbstractOperation<DeskEditPart> {
 
 	/**
 	 * Initiate.
@@ -41,35 +43,40 @@ public class AddExternalEscalationOperation extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
-	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
+	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
+	 * officefloor.eclipse.common.action.AbstractOperation.Context)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final DeskEditPart editPart) {
-
+	protected void perform(final Context context) {
 		// Create the populated External Escalation
 		final ExternalEscalationModel escalation = new ExternalEscalationModel();
-		BeanDialog dialog = editPart.createBeanDialog(escalation,
+		BeanDialog dialog = context.getEditPart().createBeanDialog(escalation,
 				"Escalation Type", "X", "Y");
 		if (!dialog.populate()) {
 			// Not created
-			return null;
+			return;
 		}
 
+		// Set location
+		Point location = context.getLocation(); 
+		escalation.setX(location.x);
+		escalation.setY(location.y);
+
 		// Make the change
-		return new OfficeFloorCommand() {
+		context.execute(new OfficeFloorCommand() {
 
 			@Override
 			protected void doCommand() {
-				editPart.getCastedModel().addExternalEscalation(escalation);
+				context.getEditPart().getCastedModel().addExternalEscalation(
+						escalation);
 			}
 
 			@Override
 			protected void undoCommand() {
-				editPart.getCastedModel().removeExternalEscalation(escalation);
+				context.getEditPart().getCastedModel()
+						.removeExternalEscalation(escalation);
 			}
-		};
+		});
 	}
 
 }

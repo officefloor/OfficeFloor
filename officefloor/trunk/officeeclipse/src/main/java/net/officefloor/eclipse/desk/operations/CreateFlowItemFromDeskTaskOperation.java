@@ -17,7 +17,7 @@
 package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.desk.TaskToFlowItemSynchroniser;
-import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
@@ -35,7 +35,7 @@ import net.officefloor.model.work.TaskModel;
  * @author Daniel
  */
 public class CreateFlowItemFromDeskTaskOperation extends
-		AbstractSingleOperation<DeskTaskEditPart> {
+		AbstractOperation<DeskTaskEditPart> {
 
 	/**
 	 * Initiate.
@@ -47,12 +47,14 @@ public class CreateFlowItemFromDeskTaskOperation extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
-	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
+	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
+	 * officefloor.eclipse.common.action.AbstractOperation.Context)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(DeskTaskEditPart editPart) {
+	protected void perform(Context context) {
+
+		// Obtain the desk task edit part
+		final DeskTaskEditPart editPart = context.getEditPart();
 
 		// Obtain the work
 		DeskWorkEditPart workEditPart = (DeskWorkEditPart) editPart.getParent();
@@ -93,7 +95,7 @@ public class CreateFlowItemFromDeskTaskOperation extends
 				flowItem, task);
 
 		// Make the change
-		return new OfficeFloorCommand() {
+		context.execute(new OfficeFloorCommand() {
 
 			@Override
 			protected void doCommand() {
@@ -112,7 +114,7 @@ public class CreateFlowItemFromDeskTaskOperation extends
 				// Remove the flow item from the desk
 				desk.removeFlowItem(flowItem);
 			}
-		};
+		});
 	}
 
 }

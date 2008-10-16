@@ -19,7 +19,7 @@ package net.officefloor.eclipse.desk.operations;
 import net.officefloor.desk.DeskLoader;
 import net.officefloor.desk.TaskToFlowItemSynchroniser;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
@@ -34,8 +34,7 @@ import net.officefloor.model.work.TaskModel;
  * 
  * @author Daniel
  */
-public class RefreshWorkOperation extends
-		AbstractSingleOperation<DeskWorkEditPart> {
+public class RefreshWorkOperation extends AbstractOperation<DeskWorkEditPart> {
 
 	/**
 	 * Initiate.
@@ -47,19 +46,20 @@ public class RefreshWorkOperation extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
-	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
+	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
+	 * officefloor.eclipse.common.action.AbstractOperation.Context)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final DeskWorkEditPart editPart) {
-
+	protected void perform(final Context context) {
 		// Make changes
-		return new OfficeFloorCommand() {
+		context.execute(new OfficeFloorCommand() {
 
 			@Override
 			protected void doCommand() {
 				try {
+					// Obtain the desk work edit part
+					DeskWorkEditPart editPart = context.getEditPart();
+
 					// Create the Project class loader
 					ProjectClassLoader projectClassLoader = ProjectClassLoader
 							.create(editPart.getEditor());
@@ -114,7 +114,7 @@ public class RefreshWorkOperation extends
 				throw new UnsupportedOperationException(
 						"TODO implement OfficeFloorCommand.undoCommand");
 			}
-		};
+		});
 	}
 
 }

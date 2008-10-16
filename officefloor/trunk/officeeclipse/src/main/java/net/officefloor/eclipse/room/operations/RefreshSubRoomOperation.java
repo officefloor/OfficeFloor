@@ -17,7 +17,7 @@
 package net.officefloor.eclipse.room.operations;
 
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.room.editparts.SubRoomEditPart;
@@ -29,8 +29,7 @@ import net.officefloor.room.RoomLoader;
  * 
  * @author Daniel
  */
-public class RefreshSubRoomOperation extends
-		AbstractSingleOperation<SubRoomEditPart> {
+public class RefreshSubRoomOperation extends AbstractOperation<SubRoomEditPart> {
 
 	/**
 	 * Initiate.
@@ -42,13 +41,12 @@ public class RefreshSubRoomOperation extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
-	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
+	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
+	 * officefloor.eclipse.common.action.AbstractOperation.Context)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final SubRoomEditPart editPart) {
-		return new OfficeFloorCommand() {
+	protected void perform(final Context context) {
+		context.execute(new OfficeFloorCommand() {
 
 			@Override
 			public void doCommand() {
@@ -56,14 +54,15 @@ public class RefreshSubRoomOperation extends
 
 					// Create the Project class loader
 					ProjectClassLoader projectClassLoader = ProjectClassLoader
-							.create(editPart.getEditor());
+							.create(context.getEditPart().getEditor());
 
 					// Create the room loader
 					RoomLoader roomLoader = new RoomLoader();
 
 					// Load the sub room
-					roomLoader.loadSubRoom(editPart.getCastedModel(),
-							projectClassLoader.getConfigurationContext());
+					roomLoader.loadSubRoom(context.getEditPart()
+							.getCastedModel(), projectClassLoader
+							.getConfigurationContext());
 
 				} catch (Throwable ex) {
 
@@ -85,7 +84,7 @@ public class RefreshSubRoomOperation extends
 				throw new UnsupportedOperationException(
 						"TODO implement OfficeFloorCommand.undoCommand");
 			}
-		};
+		});
 	}
 
 }
