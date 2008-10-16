@@ -14,6 +14,8 @@
 				<attribute method="getSource" attribute="source" />
 				<attribute method="getDefaultTimeout"
 					attribute="timeout" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
 			</attributes>
 			<object method="getManagingOffice"
 				element="managing-office">
@@ -154,6 +156,8 @@
 				<attribute method="getId" attribute="id" />
 				<attribute method="getTeamFactory"
 					attribute="team-factory" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
 			</attributes>
 			<collection method="getProperties" element="properties">
 				<item

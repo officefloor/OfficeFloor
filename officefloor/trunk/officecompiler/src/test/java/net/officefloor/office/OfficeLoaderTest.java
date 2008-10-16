@@ -87,21 +87,21 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 
 		// Teams
-		assertList(new String[] { "getName" }, office.getExternalTeams(),
-				new ExternalTeamModel("TEAM ONE", null, null),
-				new ExternalTeamModel("TEAM TWO", null, null));
+		assertList(new String[] { "getName", "getX", "getY" }, office
+				.getExternalTeams(), new ExternalTeamModel("TEAM ONE", null,
+				null, 10, 11), new ExternalTeamModel("TEAM TWO", null, null,
+				20, 21));
 
 		// Managed Objects
-		assertList(new String[] { "getName", "getObjectType", "getScope" },
-				office.getExternalManagedObjects(),
+		assertList(new String[] { "getName", "getObjectType", "getScope",
+				"getX", "getY" }, office.getExternalManagedObjects(),
 				new ExternalManagedObjectModel("MO", "java.lang.String",
-						WorkEntry.MANAGED_OBJECT_SCOPE_PROCESS, null));
+						WorkEntry.MANAGED_OBJECT_SCOPE_PROCESS, null, 30, 31));
 
 		// Top level room
-		assertEquals("Incorrect room id", "Room.room.xml", office.getRoom()
-				.getId());
-		assertEquals("Incorrect room name", "OFFICE ROOM", office.getRoom()
-				.getName());
+		assertProperties(new OfficeRoomModel("Room.room.xml", "OFFICE ROOM",
+				null, null, 40, 41), office.getRoom(), "getId", "getName",
+				"getX", "getY");
 
 		// Second level Rooms
 		assertList(new String[] { "getId", "getName" }, office.getRoom()

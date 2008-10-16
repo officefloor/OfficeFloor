@@ -9,11 +9,15 @@
 		<value method="setName" node="external-managed-object@name" />
 		<value method="setObjectType"
 			node="external-managed-object@object-type" />
+		<value method="setX" node="external-managed-object@x" />
+		<value method="setY" node="external-managed-object@y" />
 	</object>
 	<!-- EXTERNAL FLOWS -->
 	<object method="addExternalFlow" node="external-flow"
 		class="net.officefloor.model.room.ExternalFlowModel">
 		<value method="setName" node="external-flow@name" />
+		<value method="setX" node="external-flow@x" />
+		<value method="setY" node="external-flow@y" />
 	</object>
 	<!-- EXTERNAL ESCALATIONS -->
 	<object method="addExternalEscalation" node="external-escalation"
@@ -21,6 +25,8 @@
 		<value method="setName" node="external-escalation@name" />
 		<value method="setEscalationType"
 			node="external-escalation@escalation-type" />
+		<value method="setX" node="external-escalation@x" />
+		<value method="setY" node="external-escalation@y" />
 	</object>
 	<!-- SUB ROOMS -->
 	<object method="addSubRoom" node="sub-room"

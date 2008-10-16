@@ -6,6 +6,8 @@
 	<object method="addExternalTeam" node="team"
 		class="net.officefloor.model.office.ExternalTeamModel">
 		<value method="setName" node="team@name" />
+		<value method="setX" node="team@x" />
+		<value method="setY" node="team@y" />
 	</object>
 	<!-- MANAGED OBEJCTS -->
 	<object method="addExternalManagedObject" node="managed-object"
@@ -13,12 +15,16 @@
 		<value method="setName" node="managed-object@name" />
 		<value method="setObjectType" node="managed-object@object-type" />
 		<value method="setScope" node="managed-object@scope" />
+		<value method="setX" node="managed-object@x" />
+		<value method="setY" node="managed-object@y" />
 	</object>
 	<!-- ROOM -->
 	<object method="setRoom" node="room"
 		class="net.officefloor.model.office.OfficeRoomModel" id="ROOM">
 		<value method="setId" node="room@id" />
 		<value method="setName" node="room@name" />
+		<value method="setX" node="room@x" />
+		<value method="setY" node="room@y" />
 		<reference id="ROOM" method="addSubRoom" />
 		<!-- DESK -->
 		<object method="addDesk" node="desk"

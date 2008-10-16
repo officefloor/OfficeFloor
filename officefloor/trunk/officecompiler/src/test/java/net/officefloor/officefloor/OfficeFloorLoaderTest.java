@@ -91,11 +91,11 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the managed objects
 		// ----------------------------------------
-		assertList(new String[] { "getId", "getSource", "getDefaultTimeout" },
-				officeFloor.getManagedObjectSources(),
+		assertList(new String[] { "getId", "getSource", "getDefaultTimeout",
+				"getX", "getY" }, officeFloor.getManagedObjectSources(),
 				new ManagedObjectSourceModel("MO-ID",
 						"net.officefloor.mo.TestManagedObjectSource", "10",
-						null, null, null, null, null, null, null));
+						null, null, null, null, null, null, null, 10, 11));
 		assertEquals("Incorrect managed object managing office", "office",
 				officeFloor.getManagedObjectSources().get(0)
 						.getManagingOffice().getManagingOfficeName());
@@ -160,9 +160,10 @@ public class OfficeFloorLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the teams
 		// ----------------------------------------
-		assertList(new String[] { "getId", "getTeamFactory" }, officeFloor
-				.getTeams(), new TeamModel("TEAM-ID",
-				"net.officefloor.team.TestTeamFactory", null, null, null));
+		assertList(new String[] { "getId", "getTeamFactory", "getX", "getY" },
+				officeFloor.getTeams(), new TeamModel("TEAM-ID",
+						"net.officefloor.team.TestTeamFactory", null, null,
+						null, 20, 21));
 		assertList(new String[] { "getName", "getValue" }, officeFloor
 				.getTeams().get(0).getProperties(), new PropertyModel(
 				"team prop name", "team prop value"));

@@ -8,6 +8,8 @@
 			element="team">
 			<attributes>
 				<attribute method="getName" attribute="name" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
 			</attributes>
 		</item>
 	</collection>
@@ -22,6 +24,8 @@
 				<attribute method="getObjectType"
 					attribute="object-type" />
 				<attribute method="getScope" attribute="scope" />
+				<attribute method="getX" attribute="x" />
+				<attribute method="getY" attribute="y" />
 			</attributes>
 		</item>
 	</collection>
@@ -30,6 +34,8 @@
 		<attributes>
 			<attribute method="getId" attribute="id" />
 			<attribute method="getName" attribute="name" />
+			<attribute method="getX" attribute="x" />
+			<attribute method="getY" attribute="y" />
 		</attributes>
 		<collection method="getSubRooms" id="SUBROOMS">
 			<item type="net.officefloor.model.office.OfficeRoomModel"
