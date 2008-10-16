@@ -172,7 +172,8 @@ public class DeskTaskEditPart extends
 	 */
 	@Override
 	public void createAsNewFlowItem() {
-		OperationUtil.execute(this, new CreateFlowItemFromDeskTaskOperation());
+		OperationUtil.execute(new CreateFlowItemFromDeskTaskOperation(), 100,
+				100, this);
 	}
 
 }

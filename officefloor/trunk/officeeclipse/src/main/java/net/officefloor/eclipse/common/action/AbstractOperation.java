@@ -16,21 +16,19 @@
  */
 package net.officefloor.eclipse.common.action;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.model.Model;
 
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
 import org.eclipse.jface.action.Action;
 
 /**
- * Abstract {@link Operation} for a single {@link Model} type.
+ * Abstract {@link Operation}.
  * 
  * @author Daniel
  */
-public abstract class AbstractSingleOperation<E extends AbstractOfficeFloorEditPart<?, ?>>
+public abstract class AbstractOperation<E extends AbstractOfficeFloorEditPart<?, ?>>
 		implements Operation {
 
 	/**
@@ -52,7 +50,7 @@ public abstract class AbstractSingleOperation<E extends AbstractOfficeFloorEditP
 	 *            {@link AbstractOfficeFloorEditPart} type being handled.
 	 */
 	@SuppressWarnings("unchecked")
-	public AbstractSingleOperation(String actionText, Class<E> editPartType) {
+	public AbstractOperation(String actionText, Class<E> editPartType) {
 		this.actionText = actionText;
 		this.editPartTypes = new Class[] { editPartType };
 	}
@@ -84,36 +82,86 @@ public abstract class AbstractSingleOperation<E extends AbstractOfficeFloorEditP
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @seenet.officefloor.eclipse.common.action.Operation#createCommands(net.
-	 * officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart<?,?>[])
+	 * @see
+	 * net.officefloor.eclipse.common.action.Operation#perform(net.officefloor
+	 * .eclipse.common.action.OperationContext)
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public OfficeFloorCommand[] createCommands(
-			AbstractOfficeFloorEditPart<?, ?>[] editParts) {
-		// By Default create the command for each model
-		List<OfficeFloorCommand> list = new LinkedList<OfficeFloorCommand>();
-		for (AbstractOfficeFloorEditPart<?, ?> editPart : editParts) {
+	public void perform(OperationContext context) {
+		// Run for each edit part
+		for (AbstractOfficeFloorEditPart<?, ?> editPart : context
+				.getEditParts()) {
 			E officeFloorEditPart = (E) editPart;
-			OfficeFloorCommand command = this
-					.createCommand(officeFloorEditPart);
-			if (command != null) {
-				list.add(command);
-			}
-		}
-		OfficeFloorCommand[] commands = list.toArray(new OfficeFloorCommand[0]);
 
-		// Return the commands
-		return commands;
+			// Perform the operation
+			this.perform(new Context(context, officeFloorEditPart));
+		}
 	}
 
 	/**
-	 * Creates a {@link OfficeFloorCommand} for the {@link Model} passed in.
+	 * Performs the {@link Operation} on the particular
+	 * {@link AbstractOfficeFloorEditPart}.
 	 * 
-	 * @param editPart
-	 *            {@link AbstractOfficeFloorEditPart} selected.
-	 * @return {@link OfficeFloorCommand}.
+	 * @param context
+	 *            {@link Context}.
 	 */
-	protected abstract OfficeFloorCommand createCommand(E editPart);
+	protected abstract void perform(Context context);
 
+	/**
+	 * Context.
+	 */
+	protected class Context {
+
+		/**
+		 * {@link OperationContext}.
+		 */
+		private final OperationContext context;
+
+		/**
+		 * {@link EditPart}.
+		 */
+		private final E editPart;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param context
+		 *            {@link OperationContext}.
+		 * @param editPart
+		 *            {@link AbstractOfficeFloorEditPart}.
+		 */
+		public Context(OperationContext context, E editPart) {
+			this.context = context;
+			this.editPart = editPart;
+		}
+
+		/**
+		 * Obtains the {@link AbstractOfficeFloorEditPart}.
+		 * 
+		 * @return {@link AbstractOfficeFloorEditPart}.
+		 */
+		public E getEditPart() {
+			return this.editPart;
+		}
+
+		/**
+		 * Obtains the location.
+		 * 
+		 * @return Location.
+		 */
+		public Point getLocation() {
+			return this.context.getLocation();
+		}
+
+		/**
+		 * Executes the {@link OfficeFloorCommand}.
+		 * 
+		 * @param command
+		 *            {@link OfficeFloorCommand}.
+		 */
+		public void execute(OfficeFloorCommand command) {
+			this.context.execute(command);
+		}
+	}
 }

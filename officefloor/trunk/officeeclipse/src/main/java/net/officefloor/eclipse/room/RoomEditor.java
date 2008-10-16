@@ -174,6 +174,9 @@ public class RoomEditor extends
 	 */
 	@Override
 	protected void populateOperations(List<Operation> list) {
+		// TODO Add model add operations
+		
+		// Add refresh operations
 		list.add(new RefreshSubRoomOperation());
 	}
 

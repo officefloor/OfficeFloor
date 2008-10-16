@@ -16,42 +16,39 @@
  */
 package net.officefloor.eclipse.common.action;
 
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
+
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 
-import org.eclipse.gef.EditPart;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
-
 /**
- * Operation done on {@link EditPart} instances to create resulting
- * {@link OfficeFloorCommand} to make changes.
+ * Context for executing an {@link Operation}.
  * 
  * @author Daniel
  */
-public interface Operation {
+public interface OperationContext {
 
 	/**
-	 * Obtains the text to use for the {@link IAction}.
+	 * Obtains the {@link EditPart} instances for the {@link Operation}.
 	 * 
-	 * @return Text to use for the {@link IAction}.
+	 * @return {@link EditPart} instances.
 	 */
-	String getActionText();
+	AbstractOfficeFloorEditPart<?, ?>[] getEditParts();
 
 	/**
-	 * Obtains the {@link EditPart} types that the items within the
-	 * {@link ISelection} must be assignable.
+	 * Obtains the location for the {@link Operation}.
 	 * 
-	 * @return Listing of {@link AbstractOfficeFloorEditPart} types.
+	 * @return Location for the {@link Operation}.
 	 */
-	Class<? extends EditPart>[] getEditPartTypes();
+	Point getLocation();
 
 	/**
-	 * Performs this {@link Operation}.
+	 * Executes the {@link OfficeFloorCommand}.
 	 * 
-	 * @param context
-	 *            {@link OperationContext}.
+	 * @param command
+	 *            {@link OfficeFloorCommand}.
 	 */
-	void perform(OperationContext context);
+	void execute(OfficeFloorCommand command);
 
 }

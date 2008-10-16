@@ -16,12 +16,9 @@
  */
 package net.officefloor.eclipse.common.action;
 
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.Model;
 
-import org.eclipse.gef.commands.Command;
+import org.eclipse.draw2d.geometry.Point;
 
 /**
  * Utility class to aid working with an {@link Operation}.
@@ -31,42 +28,35 @@ import org.eclipse.gef.commands.Command;
 public class OperationUtil {
 
 	/**
-	 * Executes the {@link OfficeFloorCommand} instances created from the
-	 * {@link Operation}.
+	 * Performs the {@link Operation}.
 	 * 
-	 * @param editPart
-	 *            {@link AbstractOfficeFloorEditPart}.
 	 * @param operation
 	 *            {@link Operation}.
-	 * @param selectedEditParts
-	 *            Selected {@link AbstractOfficeFloorEditPart} instances.
-	 *            Defaults to the editPart if none provided.
+	 * @param x
+	 *            X of location.
+	 * @param y
+	 *            Y of location.
+	 * @param firstSelectedEditPart
+	 *            First selected {@link AbstractOfficeFloorEditPart} instance to
+	 *            ensure at least one.
+	 * @param remainingSelectedEditParts
+	 *            Remaining {@link AbstractOfficeFloorEditPart} instances.
 	 */
-	public static <R extends Model, M extends Model, F extends OfficeFloorFigure> void execute(
-			AbstractOfficeFloorEditPart<M, F> editPart, Operation operation,
-			AbstractOfficeFloorEditPart<?, ?>... selectedEditParts) {
+	public static void execute(Operation operation, int x, int y,
+			AbstractOfficeFloorEditPart<?, ?> firstSelectedEditPart,
+			AbstractOfficeFloorEditPart<?, ?>... remainingSelectedEditParts) {
 
-		// Use the current edit part as selection if none selected
-		if ((selectedEditParts == null) || (selectedEditParts.length == 0)) {
-			selectedEditParts = new AbstractOfficeFloorEditPart<?, ?>[] { editPart };
+		// Create the listing of selected edit parts
+		AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts = new AbstractOfficeFloorEditPart[1 + remainingSelectedEditParts.length];
+		selectedEditParts[0] = firstSelectedEditPart;
+		for (int i = 0; i < remainingSelectedEditParts.length; i++) {
+			selectedEditParts[i + 1] = remainingSelectedEditParts[i];
 		}
 
-		// Create the commands
-		OfficeFloorCommand[] commands = operation
-				.createCommands(selectedEditParts);
-		if ((commands == null) || (commands.length == 0)) {
-			// No commands so nothing to execute
-			return;
-		}
-
-		// Chain the commands together
-		Command command = commands[0];
-		for (int i = 1; i < commands.length; i++) {
-			command = command.chain(commands[i]);
-		}
-
-		// Execute the commands
-		editPart.getViewer().getEditDomain().getCommandStack().execute(command);
+		// Execute the operation
+		new OperationAction(firstSelectedEditPart.getViewer().getEditDomain()
+				.getCommandStack(), operation, selectedEditParts, new Point(x,
+				y)).run();
 	}
 
 	/**

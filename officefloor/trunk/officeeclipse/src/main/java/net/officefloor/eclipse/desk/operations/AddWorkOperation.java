@@ -17,9 +17,10 @@
 package net.officefloor.eclipse.desk.operations;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.draw2d.geometry.Point;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.DeskWorkCreateDialog;
 import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
@@ -32,7 +33,7 @@ import net.officefloor.model.desk.DeskWorkModel;
  * 
  * @author Daniel
  */
-public class AddWorkOperation extends AbstractSingleOperation<DeskEditPart> {
+public class AddWorkOperation extends AbstractOperation<DeskEditPart> {
 
 	/**
 	 * Initiate.
@@ -44,12 +45,14 @@ public class AddWorkOperation extends AbstractSingleOperation<DeskEditPart> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
-	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
+	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
+	 * officefloor.eclipse.common.action.AbstractOperation.Context)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final DeskEditPart editPart) {
+	protected void perform(Context context) {
+
+		// Obtain the desk edit part
+		final DeskEditPart editPart = context.getEditPart();
 
 		// Create the work
 		DeskWorkModel deskWork = null;
@@ -66,12 +69,17 @@ public class AddWorkOperation extends AbstractSingleOperation<DeskEditPart> {
 
 		// Ensure have the work
 		if (deskWork == null) {
-			return null;
+			return;
 		}
+
+		// Set location
+		Point location = context.getLocation();
+		deskWork.setX(location.x);
+		deskWork.setY(location.y);
 
 		// Add the work
 		final DeskWorkModel work = deskWork;
-		return new OfficeFloorCommand() {
+		context.execute(new OfficeFloorCommand() {
 
 			@Override
 			protected void doCommand() {
@@ -82,7 +90,7 @@ public class AddWorkOperation extends AbstractSingleOperation<DeskEditPart> {
 			protected void undoCommand() {
 				editPart.getCastedModel().removeWork(work);
 			}
-		};
+		});
 	}
 
 }

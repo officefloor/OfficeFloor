@@ -16,7 +16,9 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import org.eclipse.draw2d.geometry.Point;
+
+import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
@@ -28,8 +30,7 @@ import net.officefloor.model.desk.ExternalFlowModel;
  * 
  * @author Daniel
  */
-public class AddExternalFlowOperation extends
-		AbstractSingleOperation<DeskEditPart> {
+public class AddExternalFlowOperation extends AbstractOperation<DeskEditPart> {
 
 	/**
 	 * Initiate.
@@ -41,34 +42,39 @@ public class AddExternalFlowOperation extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
-	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
+	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
+	 * officefloor.eclipse.common.action.AbstractOperation.Context)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final DeskEditPart editPart) {
+	protected void perform(final Context context) {
 
 		// Create the populated External Flow
 		final ExternalFlowModel flow = new ExternalFlowModel();
-		BeanDialog dialog = editPart.createBeanDialog(flow, "X", "Y");
+		BeanDialog dialog = context.getEditPart().createBeanDialog(flow, "X",
+				"Y");
 		if (!dialog.populate()) {
 			// Not created
-			return null;
+			return;
 		}
 
+		// Set location
+		Point location = context.getLocation();
+		flow.setX(location.x);
+		flow.setY(location.y);
+
 		// Make the change
-		return new OfficeFloorCommand() {
+		context.execute(new OfficeFloorCommand() {
 
 			@Override
 			protected void doCommand() {
-				editPart.getCastedModel().addExternalFlow(flow);
+				context.getEditPart().getCastedModel().addExternalFlow(flow);
 			}
 
 			@Override
 			protected void undoCommand() {
-				editPart.getCastedModel().removeExternalFlow(flow);
+				context.getEditPart().getCastedModel().removeExternalFlow(flow);
 			}
-		};
+		});
 	}
 
 }

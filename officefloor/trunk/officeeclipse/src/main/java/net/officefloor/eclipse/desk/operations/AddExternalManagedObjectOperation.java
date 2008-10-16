@@ -16,7 +16,9 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.common.action.AbstractSingleOperation;
+import org.eclipse.draw2d.geometry.Point;
+
+import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
@@ -29,7 +31,7 @@ import net.officefloor.model.desk.ExternalManagedObjectModel;
  * @author Daniel
  */
 public class AddExternalManagedObjectOperation extends
-		AbstractSingleOperation<DeskEditPart> {
+		AbstractOperation<DeskEditPart> {
 
 	/**
 	 * Initiate.
@@ -41,12 +43,14 @@ public class AddExternalManagedObjectOperation extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.AbstractSingleOperation#createCommand
-	 * (net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart)
+	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
+	 * officefloor.eclipse.common.action.AbstractOperation.Context)
 	 */
 	@Override
-	protected OfficeFloorCommand createCommand(final DeskEditPart editPart) {
+	protected void perform(Context context) {
+
+		// Obtain the desk edit part
+		final DeskEditPart editPart = context.getEditPart();
 
 		// Create the populated External Managed Object
 		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel();
@@ -54,11 +58,16 @@ public class AddExternalManagedObjectOperation extends
 				"Y");
 		if (!dialog.populate()) {
 			// Not created so do not provide command
-			return null;
+			return;
 		}
 
+		// Set location
+		Point location = context.getLocation();
+		mo.setX(location.x);
+		mo.setY(location.y);
+
 		// Add the external managed object
-		return new OfficeFloorCommand() {
+		context.execute(new OfficeFloorCommand() {
 
 			@Override
 			protected void doCommand() {
@@ -69,7 +78,7 @@ public class AddExternalManagedObjectOperation extends
 			protected void undoCommand() {
 				editPart.getCastedModel().removeExternalManagedObject(mo);
 			}
-		};
+		});
 	}
 
 }
