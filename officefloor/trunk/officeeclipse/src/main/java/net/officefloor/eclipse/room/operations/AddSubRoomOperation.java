@@ -31,7 +31,6 @@ import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.room.RoomLoader;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.draw2d.geometry.Point;
 
 /**
  * Adds a {@link SubRoomModel} to the {@link RoomModel}.
@@ -87,11 +86,6 @@ public class AddSubRoomOperation extends AbstractOperation<RoomEditPart> {
 				subRoom = roomLoader.loadSubRoom(configItem);
 				subRoom.setId(bean.name);
 
-				// Set the location
-				Point location = context.getLocation();
-				subRoom.setX(location.x);
-				subRoom.setY(location.y);
-
 			} catch (Exception ex) {
 				editPart.messageError(ex);
 			}
@@ -101,6 +95,9 @@ public class AddSubRoomOperation extends AbstractOperation<RoomEditPart> {
 		if (subRoom == null) {
 			return;
 		}
+
+		// Set location
+		context.positionModel(subRoom);
 
 		// Make the change
 		final SubRoomModel newSubRoom = subRoom;

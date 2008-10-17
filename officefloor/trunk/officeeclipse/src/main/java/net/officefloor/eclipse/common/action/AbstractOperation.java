@@ -18,6 +18,7 @@ package net.officefloor.eclipse.common.action;
 
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.model.Model;
 
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
@@ -152,6 +153,19 @@ public abstract class AbstractOperation<E extends AbstractOfficeFloorEditPart<?,
 		 */
 		public Point getLocation() {
 			return this.context.getLocation();
+		}
+
+		/**
+		 * Convenience method to load the location onto the {@link Model}.
+		 * 
+		 * @param model
+		 *            {@link Model}.
+		 * @see #getLocation()
+		 */
+		public void positionModel(Model model) {
+			Point location = this.getLocation();
+			model.setX(location.x);
+			model.setY(location.y);
 		}
 
 		/**

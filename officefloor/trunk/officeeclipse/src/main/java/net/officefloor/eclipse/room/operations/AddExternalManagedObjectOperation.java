@@ -16,8 +16,6 @@
  */
 package net.officefloor.eclipse.room.operations;
 
-import org.eclipse.draw2d.geometry.Point;
-
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
@@ -62,9 +60,7 @@ public class AddExternalManagedObjectOperation extends
 		}
 
 		// Set location
-		Point location = context.getLocation();
-		mo.setX(location.x);
-		mo.setY(location.y);
+		context.positionModel(mo);
 
 		// Make the change
 		context.execute(new OfficeFloorCommand() {

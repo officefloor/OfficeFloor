@@ -32,6 +32,8 @@ import net.officefloor.eclipse.room.editparts.SubRoomEscalationEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomInputFlowEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomManagedObjectEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomOutputFlowEditPart;
+import net.officefloor.eclipse.room.operations.AddExternalEscalationOperation;
+import net.officefloor.eclipse.room.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.room.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.room.operations.AddSubRoomOperation;
 import net.officefloor.eclipse.room.operations.RefreshSubRoomOperation;
@@ -179,8 +181,8 @@ public class RoomEditor extends
 		// Add model add operations
 		list.add(new AddSubRoomOperation());
 		list.add(new AddExternalManagedObjectOperation());
-
-		// TODO Add model add operations
+		list.add(new AddExternalFlowOperation());
+		list.add(new AddExternalEscalationOperation());
 
 		// Add refresh operations
 		list.add(new RefreshSubRoomOperation());

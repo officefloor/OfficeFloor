@@ -16,9 +16,6 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.draw2d.geometry.Point;
-
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
@@ -27,6 +24,8 @@ import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
+
+import org.eclipse.core.resources.IProject;
 
 /**
  * Adds a {@link DeskWorkModel} to the {@link DeskModel}.
@@ -73,9 +72,7 @@ public class AddWorkOperation extends AbstractOperation<DeskEditPart> {
 		}
 
 		// Set location
-		Point location = context.getLocation();
-		deskWork.setX(location.x);
-		deskWork.setY(location.y);
+		context.positionModel(deskWork);
 
 		// Add the work
 		final DeskWorkModel work = deskWork;
