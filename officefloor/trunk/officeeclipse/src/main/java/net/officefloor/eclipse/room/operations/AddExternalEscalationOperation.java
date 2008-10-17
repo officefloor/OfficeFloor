@@ -14,27 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.operations;
+package net.officefloor.eclipse.room.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.desk.editparts.DeskEditPart;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.ExternalFlowModel;
+import net.officefloor.eclipse.room.editparts.RoomEditPart;
+import net.officefloor.model.room.ExternalEscalationModel;
+import net.officefloor.model.room.RoomModel;
 
 /**
- * Adds an {@link ExternalFlowModel} to the {@link DeskModel}.
+ * Adds an {@link ExternalEscalationModel} to the {@link RoomModel}.
  * 
  * @author Daniel
  */
-public class AddExternalFlowOperation extends AbstractOperation<DeskEditPart> {
+public class AddExternalEscalationOperation extends
+		AbstractOperation<RoomEditPart> {
 
 	/**
 	 * Initiate.
 	 */
-	public AddExternalFlowOperation() {
-		super("Add external flow", DeskEditPart.class);
+	public AddExternalEscalationOperation() {
+		super("Add escalation", RoomEditPart.class);
 	}
 
 	/*
@@ -44,31 +45,34 @@ public class AddExternalFlowOperation extends AbstractOperation<DeskEditPart> {
 	 * officefloor.eclipse.common.action.AbstractOperation.Context)
 	 */
 	@Override
-	protected void perform(final Context context) {
+	protected void perform(Context context) {
 
-		// Create the populated External Flow
-		final ExternalFlowModel flow = new ExternalFlowModel();
-		BeanDialog dialog = context.getEditPart().createBeanDialog(flow, "X",
-				"Y");
+		// Obtain the edit part
+		final RoomEditPart editPart = context.getEditPart();
+
+		// Add the populated External Escalation
+		final ExternalEscalationModel escalation = new ExternalEscalationModel();
+		BeanDialog dialog = editPart.createBeanDialog(escalation,
+				"Escalation Type", "X", "Y");
 		if (!dialog.populate()) {
 			// Not created
 			return;
 		}
 
 		// Set location
-		context.positionModel(flow);
+		context.positionModel(escalation);
 
-		// Make the change
+		// Make change
 		context.execute(new OfficeFloorCommand() {
 
 			@Override
 			protected void doCommand() {
-				context.getEditPart().getCastedModel().addExternalFlow(flow);
+				editPart.getCastedModel().addExternalEscalation(escalation);
 			}
 
 			@Override
 			protected void undoCommand() {
-				context.getEditPart().getCastedModel().removeExternalFlow(flow);
+				editPart.getCastedModel().removeExternalEscalation(escalation);
 			}
 		});
 	}

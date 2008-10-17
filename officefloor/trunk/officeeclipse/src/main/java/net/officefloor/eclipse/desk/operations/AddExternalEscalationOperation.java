@@ -16,8 +16,6 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import org.eclipse.draw2d.geometry.Point;
-
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
@@ -58,9 +56,7 @@ public class AddExternalEscalationOperation extends
 		}
 
 		// Set location
-		Point location = context.getLocation(); 
-		escalation.setX(location.x);
-		escalation.setY(location.y);
+		context.positionModel(escalation);
 
 		// Make the change
 		context.execute(new OfficeFloorCommand() {
