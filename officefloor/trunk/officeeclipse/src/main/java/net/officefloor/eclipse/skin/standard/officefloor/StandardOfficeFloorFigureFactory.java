@@ -16,12 +16,6 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FlowLayout;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
-
-import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.common.figure.IndentFigure;
 import net.officefloor.eclipse.common.figure.ListFigure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
@@ -46,6 +40,11 @@ import net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.TeamFigureContext;
 import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
+
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.FlowLayout;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link OfficeFloorFigureFactory}.
@@ -243,8 +242,8 @@ public class StandardOfficeFloorFigureFactory implements
 	 */
 	@Override
 	public OfficeFloorFigure createOfficeFigure(OfficeFigureContext context) {
-		return new OfficeFloorFigureImpl(new FreeformWrapperFigure(
-				new OfficeFigure(context.getOfficeName())));
+		return new OfficeFloorFigureImpl(new OfficeFigure(context
+				.getOfficeName()));
 	}
 
 	/*

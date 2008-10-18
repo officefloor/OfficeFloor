@@ -37,6 +37,9 @@ import net.officefloor.eclipse.officefloor.editparts.OfficeManagedObjectEditPart
 import net.officefloor.eclipse.officefloor.editparts.OfficeTaskEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.TeamEditPart;
+import net.officefloor.eclipse.officefloor.operations.AddManagedObjectOperation;
+import net.officefloor.eclipse.officefloor.operations.AddOfficeOperation;
+import net.officefloor.eclipse.officefloor.operations.AddTeamOperation;
 import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
 import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
@@ -196,6 +199,9 @@ public class OfficeFloorEditor extends
 	 */
 	@Override
 	protected void populateOperations(List<Operation> list) {
-		// No operations yet
+		// Add model operations
+		list.add(new AddOfficeOperation());
+		list.add(new AddTeamOperation());
+		list.add(new AddManagedObjectOperation());
 	}
 }

@@ -135,6 +135,8 @@ public class RoomToOfficeRoomSynchroniser {
 		}
 
 		// Synchronise the managed objects
+		int x = officeRoom.getX() + 200;
+		int y = officeRoom.getY();
 		for (net.officefloor.model.room.ExternalManagedObjectModel mo : room
 				.getExternalManagedObjects()) {
 			String moName = mo.getName();
@@ -145,8 +147,9 @@ public class RoomToOfficeRoomSynchroniser {
 				// Add the new managed object (default to work scope)
 				ExternalManagedObjectModel newMo = new ExternalManagedObjectModel(
 						moName, mo.getObjectType(),
-						WorkEntry.MANAGED_OBJECT_SCOPE_WORK, null);
+						WorkEntry.MANAGED_OBJECT_SCOPE_WORK, null, x, y);
 				office.addExternalManagedObject(newMo);
+				y += 30;
 			}
 		}
 
