@@ -14,19 +14,17 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.officefloor.figure;
-
-import org.eclipse.draw2d.Figure;
+package net.officefloor.eclipse.skin.standard.officefloor;
 
 import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.model.officefloor.OfficeTaskModel;
 
 /**
- * {@link Figure} for the {@link OfficeTaskModel}.
+ * {@link org.eclipse.draw2d.Figure} for the
+ * {@link net.officefloor.model.officefloor.OfficeTeamModel}.
  * 
  * @author Daniel
  */
-public class OfficeTaskFigure extends ListItemFigure {
+public class OfficeTeamFigure extends ListItemFigure {
 
 	/**
 	 * Initiate.
@@ -34,7 +32,7 @@ public class OfficeTaskFigure extends ListItemFigure {
 	 * @param text
 	 *            Text.
 	 */
-	public OfficeTaskFigure(String text) {
+	public OfficeTeamFigure(String text) {
 		super(text);
 	}
 

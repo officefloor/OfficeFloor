@@ -14,28 +14,26 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.figure;
+package net.officefloor.eclipse.skin.standard.desk;
 
-import org.eclipse.draw2d.LabeledContainer;
-import org.eclipse.draw2d.ToolbarLayout;
+import net.officefloor.eclipse.common.figure.ListItemFigure;
 
 /**
- * {@link org.eclipse.draw2d.Figure} to demarcate a section.
+ * {@link org.eclipse.draw2d.Figure} for a
+ * {@link net.officefloor.model.desk.FlowItemOutputModel}.
  * 
  * @author Daniel
  */
-public class SectionFigure extends LabeledContainer {
+public class FlowItemOutputFigure extends ListItemFigure {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param title
-	 *            Title of the section.
+	 * @param outputName
+	 *            Output name.
 	 */
-	public SectionFigure(String title) {
-		this.setLayoutManager(new ToolbarLayout(false));
-		this.setOpaque(true);
-		this.setLabel(title);
+	public FlowItemOutputFigure(String outputName) {
+		super(outputName);
 	}
 
 }
