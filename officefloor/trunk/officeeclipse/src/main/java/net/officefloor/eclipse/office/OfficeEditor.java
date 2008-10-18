@@ -31,6 +31,9 @@ import net.officefloor.eclipse.office.editparts.ExternalTeamEditPart;
 import net.officefloor.eclipse.office.editparts.FlowItemEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.RoomEditPart;
+import net.officefloor.eclipse.office.operations.AddAdministratorOperation;
+import net.officefloor.eclipse.office.operations.AddExternalTeamOperation;
+import net.officefloor.eclipse.office.operations.ManageOfficeRoomOperation;
 import net.officefloor.eclipse.office.operations.RefreshOfficeRoomOperation;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
@@ -151,6 +154,13 @@ public class OfficeEditor extends
 	 */
 	@Override
 	protected void populateOperations(List<Operation> list) {
+
+		// Add model operations
+		list.add(new AddAdministratorOperation());
+		list.add(new AddExternalTeamOperation());
+		list.add(new ManageOfficeRoomOperation(this.getRootEditPart()));
+
+		// Refresh model operations
 		list.add(new RefreshOfficeRoomOperation());
 	}
 }

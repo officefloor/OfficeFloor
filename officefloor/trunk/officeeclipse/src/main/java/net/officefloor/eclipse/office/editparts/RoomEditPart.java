@@ -42,6 +42,17 @@ public class RoomEditPart extends
 		AbstractOfficeFloorEditPart<OfficeRoomModel, OfficeFloorFigure>
 		implements RemovableEditPart, RoomFigureContext {
 
+	/**
+	 * Determines if this is the top level {@link OfficeRoomModel}.
+	 * 
+	 * @return <code>true</code> if top level {@link OfficeRoomModel}.
+	 */
+	public boolean isTopLevelRoom() {
+		// Top level if parent the office
+		Object parentModel = this.getParent().getModel();
+		return (parentModel instanceof OfficeModel);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -80,6 +91,19 @@ public class RoomEditPart extends
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createRoomFigure(this);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * isFreeformFigure()
+	 */
+	@Override
+	protected boolean isFreeformFigure() {
+		// Free-form if only top level room
+		return this.isTopLevelRoom();
 	}
 
 	/*
