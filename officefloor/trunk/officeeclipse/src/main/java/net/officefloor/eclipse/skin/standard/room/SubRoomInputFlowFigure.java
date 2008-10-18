@@ -14,34 +14,38 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.room.figure;
+package net.officefloor.eclipse.skin.standard.room;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.ToolbarLayout;
 
 /**
  * {@link org.eclipse.draw2d.Figure} for the
- * {@link net.officefloor.model.room.SubRoomManagedObjectModel}.
+ * {@link net.officefloor.model.room.SubRoomInputFlowModel}.
  * 
  * @author Daniel
  */
-public class SubRoomManagedObjectFigure extends Figure {
+public class SubRoomInputFlowFigure extends Figure {
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param name
-	 *            Name of the managed object.
+	 *            Name of the input flow.
+	 * @param figureForIsPublic
+	 *            {@link Figure} to handle whether public.
 	 */
-	public SubRoomManagedObjectFigure(String name) {
-		this.setLayoutManager(new ToolbarLayout());
-		this.setBackgroundColor(ColorConstants.cyan);
+	public SubRoomInputFlowFigure(String name, IFigure figureForIsPublic) {
+		this.setLayoutManager(new ToolbarLayout(true));
+		this.setBackgroundColor(ColorConstants.lightBlue);
 		this.setOpaque(true);
 		this.setSize(60, 20);
 
 		this.add(new Label(name));
+		this.add(figureForIsPublic);
 	}
 
 }

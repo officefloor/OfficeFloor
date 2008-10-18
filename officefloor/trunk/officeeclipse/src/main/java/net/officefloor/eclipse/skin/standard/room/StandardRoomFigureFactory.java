@@ -17,11 +17,6 @@
 package net.officefloor.eclipse.skin.standard.room;
 
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
-import net.officefloor.eclipse.room.figure.SubRoomEscalationFigure;
-import net.officefloor.eclipse.room.figure.SubRoomFigure;
-import net.officefloor.eclipse.room.figure.SubRoomInputFlowFigure;
-import net.officefloor.eclipse.room.figure.SubRoomManagedObjectFigure;
-import net.officefloor.eclipse.room.figure.SubRoomOutputFlowFigure;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.room.ExternalEscalationFigureContext;
 import net.officefloor.eclipse.skin.room.ExternalFlowFigureContext;

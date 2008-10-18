@@ -14,11 +14,12 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.figure;
+package net.officefloor.eclipse.skin.standard.officefloor;
 
 import net.officefloor.eclipse.common.figure.IndentFigure;
 import net.officefloor.eclipse.common.figure.ListFigure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
+import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -26,51 +27,70 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.ToolbarLayout;
 
 /**
- * {@link org.eclipse.draw2d.Figure} for a
- * {@link net.officefloor.model.desk.FlowItemModel}
+ * {@link Figure} for the {@link OfficeFloorOfficeModel}.
  * 
  * @author Daniel
  */
-public class FlowItemFigure extends Figure {
+public class OfficeFigure extends Figure {
 
 	/**
-	 * Outputs.
+	 * Listing of teams.
 	 */
-	private ListFigure outputs = new ListFigure();
+	private final ListFigure teams;
+
+	/**
+	 * Listing of managed objects.
+	 */
+	private final ListFigure managedObjects;
+
+	/**
+	 * Listing of tasks.
+	 */
+	private final ListFigure tasks;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param flowId
-	 *            Id of flow.
-	 * @param figureForIsPublic
-	 *            {@link IFigure} to handle is public.
+	 * @param officeName
+	 *            Name of the {@link OfficeFloorOfficeModel}.
 	 */
-	public FlowItemFigure(String flowId, IFigure figureForIsPublic) {
+	public OfficeFigure(String officeName) {
 		this.setLayoutManager(new ToolbarLayout());
 		this.setBackgroundColor(ColorConstants.lightGreen);
 		this.setOpaque(true);
 		this.setSize(60, 20);
 
-		// All adding
-		Figure flowItemHeader = new Figure();
-		flowItemHeader.setLayoutManager(new ToolbarLayout(true));
-		flowItemHeader.add(new ListItemFigure(flowId));
-		flowItemHeader.add(figureForIsPublic);
-		super.add(flowItemHeader, null, -1);
-		super.add(new IndentFigure(10, this.outputs), null, -1);
+		// Create the listing of figures
+		this.teams = new ListFigure();
+		this.managedObjects = new ListFigure();
+		this.tasks = new ListFigure();
+
+		// Decorate the office
+		super.add(new ListItemFigure(officeName), null, -1);
+		super.add(new IndentFigure(4, this.teams), null, -1);
+		super.add(new IndentFigure(4, this.managedObjects), null, -1);
+		super.add(new IndentFigure(4, this.tasks), null, -1);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.draw2d.IFigure#add(org.eclipse.draw2d.IFigure,
+	 * @see org.eclipse.draw2d.Figure#add(org.eclipse.draw2d.IFigure,
 	 *      java.lang.Object, int)
 	 */
 	@Override
 	public void add(IFigure figure, Object constraint, int index) {
-		// Add to outputs figure
-		this.outputs.add(figure, constraint, index);
+		if (figure instanceof OfficeTeamFigure) {
+			this.teams.add(figure);
+		} else if (figure instanceof OfficeManagedObjectFigure) {
+			this.managedObjects.add(figure);
+		} else if (figure instanceof OfficeTaskFigure) {
+			this.tasks.add(figure);
+		} else {
+			throw new IllegalArgumentException("Unknown figure '"
+					+ figure.getClass().getName() + "' for adding to "
+					+ this.getClass().getName());
+		}
 	}
 
 }

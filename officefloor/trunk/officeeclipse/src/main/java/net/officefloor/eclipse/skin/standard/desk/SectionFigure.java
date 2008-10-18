@@ -14,26 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.officefloor.figure;
+package net.officefloor.eclipse.skin.standard.desk;
 
-import net.officefloor.eclipse.common.figure.ListItemFigure;
+import org.eclipse.draw2d.LabeledContainer;
+import org.eclipse.draw2d.ToolbarLayout;
 
 /**
- * {@link org.eclipse.draw2d.Figure} for the
- * {@link net.officefloor.model.officefloor.OfficeManagedObjectModel}.
+ * {@link org.eclipse.draw2d.Figure} to demarcate a section.
  * 
  * @author Daniel
  */
-public class OfficeManagedObjectFigure extends ListItemFigure {
+public class SectionFigure extends LabeledContainer {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param text
-	 *            Text.
+	 * @param title
+	 *            Title of the section.
 	 */
-	public OfficeManagedObjectFigure(String text) {
-		super(text);
+	public SectionFigure(String title) {
+		this.setLayoutManager(new ToolbarLayout(false));
+		this.setOpaque(true);
+		this.setLabel(title);
 	}
 
 }

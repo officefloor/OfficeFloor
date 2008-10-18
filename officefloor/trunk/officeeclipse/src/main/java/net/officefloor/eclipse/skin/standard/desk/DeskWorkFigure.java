@@ -14,43 +14,46 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.figure;
+package net.officefloor.eclipse.skin.standard.desk;
 
 import net.officefloor.eclipse.common.figure.IndentFigure;
 import net.officefloor.eclipse.common.figure.ListFigure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
 import net.officefloor.eclipse.common.figure.WrappingFigure;
 
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ToolbarLayout;
 
 /**
- * {@link Figure} for the {@link net.officefloor.model.desk.DeskTaskModel}.
+ * {@link org.eclipse.draw2d.Figure} for the
+ * {@link net.officefloor.model.desk.DeskWorkModel}.
  * 
  * @author Daniel
  */
-public class DeskTaskFigure extends WrappingFigure {
+public class DeskWorkFigure extends WrappingFigure {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param taskName
-	 *            Name of task.
-	 * @param addAsFlowItem
-	 *            Figure to add flow item for this task.
+	 * @param workName
+	 *            Name of work.
 	 */
-	public DeskTaskFigure(String taskName, IFigure addAsFlowItem) {
+	public DeskWorkFigure(String workName) {
 		super(new ListFigure());
 
-		// Add name of task and ability to add as flow item
-		Figure taskHeader = new Figure();
-		taskHeader.setLayoutManager(new ToolbarLayout(true));
-		taskHeader.add(new ListItemFigure(taskName));
-		taskHeader.add(addAsFlowItem);
-		this.addDecorate(taskHeader);
+		// Specify layout
+		ToolbarLayout layout = new ToolbarLayout();
+		layout.setMinorAlignment(ToolbarLayout.ALIGN_TOPLEFT);
+		this.setLayoutManager(layout);
 
-		// Indent all objects of tasks
+		// Decorate this figure
+		this.setBackgroundColor(ColorConstants.lightBlue);
+		this.setOpaque(true);
+
+		// Specify name of work
+		this.addDecorate(new ListItemFigure(workName));
+
+		// Indent the listing of tasks
 		this.addDecorate(new IndentFigure(10, this.getChildContainerFigure()));
 	}
 

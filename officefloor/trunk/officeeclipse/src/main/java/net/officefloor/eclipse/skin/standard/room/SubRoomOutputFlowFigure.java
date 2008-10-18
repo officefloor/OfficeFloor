@@ -14,26 +14,34 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.officefloor.figure;
+package net.officefloor.eclipse.skin.standard.room;
 
-import net.officefloor.eclipse.common.figure.ListItemFigure;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.ToolbarLayout;
 
 /**
  * {@link org.eclipse.draw2d.Figure} for the
- * {@link net.officefloor.model.officefloor.OfficeTeamModel}.
+ * {@link net.officefloor.model.room.SubRoomOutputFlowModel}.
  * 
  * @author Daniel
  */
-public class OfficeTeamFigure extends ListItemFigure {
+public class SubRoomOutputFlowFigure extends Figure {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param text
-	 *            Text.
+	 * @param name
+	 *            Name of the output flow.
 	 */
-	public OfficeTeamFigure(String text) {
-		super(text);
+	public SubRoomOutputFlowFigure(String name) {
+		this.setLayoutManager(new ToolbarLayout());
+		this.setBackgroundColor(ColorConstants.yellow);
+		this.setOpaque(true);
+		this.setSize(60, 20);
+
+		this.add(new Label(name));
 	}
 
 }

@@ -18,11 +18,6 @@ package net.officefloor.eclipse.skin.standard.desk;
 
 import net.officefloor.eclipse.common.editparts.ButtonEditPart;
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
-import net.officefloor.eclipse.desk.figure.DeskTaskFigure;
-import net.officefloor.eclipse.desk.figure.DeskTaskObjectFigure;
-import net.officefloor.eclipse.desk.figure.DeskWorkFigure;
-import net.officefloor.eclipse.desk.figure.FlowItemFigure;
-import net.officefloor.eclipse.desk.figure.FlowItemOutputFigure;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
 import net.officefloor.eclipse.skin.desk.DeskTaskFigureContext;
