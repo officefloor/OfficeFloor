@@ -16,6 +16,8 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
+import org.eclipse.draw2d.geometry.Point;
+
 import net.officefloor.desk.TaskToFlowItemSynchroniser;
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
@@ -62,8 +64,7 @@ public class CreateFlowItemFromDeskTaskOperation extends
 
 		// Obtain the desk
 		// Note parent is work listing then desk
-		DeskEditPart deskEditPart = (DeskEditPart) workEditPart.getParent()
-				.getParent();
+		DeskEditPart deskEditPart = (DeskEditPart) workEditPart.getParent();
 		final DeskModel desk = deskEditPart.getCastedModel();
 
 		// Create the flow item for this task
@@ -72,8 +73,6 @@ public class CreateFlowItemFromDeskTaskOperation extends
 				work.getId(), task.getName(), task.getTask(), null, null, null,
 				null, null, null, null, null, null);
 		flowItem.setId(deskEditPart.getUniqueFlowItemId(flowItem));
-		flowItem.setX(300);
-		flowItem.setY(100);
 
 		// Obtain the task model
 		TaskModel<?, ?> taskModel = task.getTask();
@@ -89,6 +88,11 @@ public class CreateFlowItemFromDeskTaskOperation extends
 				editPart.messageError(ex);
 			}
 		}
+
+		// Position the flow item
+		Point location = context.getLocation();
+		flowItem.setX(location.x + 100);
+		flowItem.setY(location.y);
 
 		// Link the flow item with the task
 		final DeskTaskToFlowItemModel conn = new DeskTaskToFlowItemModel(

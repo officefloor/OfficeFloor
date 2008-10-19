@@ -14,41 +14,26 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard;
+package net.officefloor.eclipse.skin.standard.figure;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
+import org.eclipse.draw2d.ToolbarLayout;
 
 /**
- * Abstract {@link OfficeFloorFigure}.
+ * No spacing {@link ToolbarLayout}.
  * 
  * @author Daniel
  */
-public class OfficeFloorFigureImpl extends AbstractOfficeFloorFigure {
+public class NoSpacingToolbarLayout extends ToolbarLayout {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param figure
-	 *            {@link IFigure} to represent the {@link EditPart}.
-	 * @param contentPane
-	 *            {@link IFigure} to add children of this {@link EditPart}.
+	 * @param isHorizontal
+	 *            <code>true</code> if horizontal.
 	 */
-	public OfficeFloorFigureImpl(IFigure figure, IFigure contentPane) {
-		super(figure, contentPane);
-	}
-
-	/**
-	 * Initiate to add children to top level {@link IFigure}.
-	 * 
-	 * @param figure
-	 *            {@link IFigure} to represent the {@link EditPart} and also
-	 *            potentially have children added.
-	 */
-	public OfficeFloorFigureImpl(IFigure figure) {
-		super(figure);
+	public NoSpacingToolbarLayout(boolean isHorizontal) {
+		super(isHorizontal);
+		this.setSpacing(0);
 	}
 
 }

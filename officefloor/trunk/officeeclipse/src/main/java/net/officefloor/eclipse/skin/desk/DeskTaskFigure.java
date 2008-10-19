@@ -14,41 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard;
+package net.officefloor.eclipse.skin.desk;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.gef.EditPart;
+import net.officefloor.model.desk.DeskTaskModel;
 
 /**
- * Abstract {@link OfficeFloorFigure}.
+ * {@link OfficeFloorFigure} for the {@link DeskTaskModel}.
  * 
  * @author Daniel
  */
-public class OfficeFloorFigureImpl extends AbstractOfficeFloorFigure {
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param figure
-	 *            {@link IFigure} to represent the {@link EditPart}.
-	 * @param contentPane
-	 *            {@link IFigure} to add children of this {@link EditPart}.
-	 */
-	public OfficeFloorFigureImpl(IFigure figure, IFigure contentPane) {
-		super(figure, contentPane);
-	}
-
-	/**
-	 * Initiate to add children to top level {@link IFigure}.
-	 * 
-	 * @param figure
-	 *            {@link IFigure} to represent the {@link EditPart} and also
-	 *            potentially have children added.
-	 */
-	public OfficeFloorFigureImpl(IFigure figure) {
-		super(figure);
-	}
+public interface DeskTaskFigure extends OfficeFloorFigure {
 
 }

@@ -16,24 +16,26 @@
  */
 package net.officefloor.eclipse.skin.standard.desk;
 
-import net.officefloor.eclipse.common.editparts.ButtonEditPart;
-import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
+import net.officefloor.eclipse.skin.desk.DeskTaskFigure;
 import net.officefloor.eclipse.skin.desk.DeskTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext;
+import net.officefloor.eclipse.skin.desk.DeskWorkFigure;
 import net.officefloor.eclipse.skin.desk.DeskWorkFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalEscalationFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.desk.FlowItemEscalationFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext;
+import net.officefloor.eclipse.skin.desk.FlowItemFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
+import net.officefloor.eclipse.skin.desk.FlowItemOutputFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext;
 import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
 
-import org.eclipse.draw2d.CheckBox;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.geometry.Rectangle;
 
@@ -52,9 +54,8 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.desk.skin.DeskWorkFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createDeskWorkFigure(DeskWorkFigureContext context) {
-		return new OfficeFloorFigureImpl(new DeskWorkFigure(context
-				.getWorkName()));
+	public DeskWorkFigure createDeskWorkFigure(DeskWorkFigureContext context) {
+		return new StandardDeskWorkFigure(context);
 	}
 
 	/*
@@ -65,18 +66,9 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.skin.desk.DeskTaskFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createDeskTaskFigure(
+	public DeskTaskFigure createDeskTaskFigure(
 			final DeskTaskFigureContext context) {
-		// Button to add as flow item
-		final ButtonEditPart addAsFlowItem = new ButtonEditPart("Create") {
-			protected void handleButtonClick() {
-				context.createAsNewFlowItem();
-			}
-		};
-
-		// Return the Desk Task figure
-		return new OfficeFloorFigureImpl(new DeskTaskFigure(context
-				.getTaskName(), addAsFlowItem.getFigure()));
+		return new StandardDeskTaskFigure(context);
 	}
 
 	/*
@@ -89,20 +81,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	@Override
 	public net.officefloor.eclipse.skin.desk.DeskTaskObjectFigure createDeskTaskObjectFigure(
 			final DeskTaskObjectFigureContext context) {
-
-		// Create the check box to indicate if a parameter
-		CheckBoxEditPart parameterCheckBox = new CheckBoxEditPart(context
-				.isParameter()) {
-			protected void checkBoxStateChanged(boolean isChecked) {
-				// Specify if parameter
-				context.setIsParameter(isChecked);
-			}
-		};
-
-		// Create and return the figure
-		return new DeskTaskObjectFigureImpl(new DeskTaskObjectFigure(context
-				.getObjectType(), parameterCheckBox.getFigure()),
-				(CheckBox) parameterCheckBox.getFigure());
+		return new StandardDeskTaskObjectFigure(context);
 	}
 
 	/*
@@ -117,7 +96,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 			ExternalEscalationFigureContext context) {
 
 		Label figure = new Label(context.getExternalEscalationName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
+		figure.setBackgroundColor(ColorConstants.orange);
 		figure.setOpaque(true);
 		figure.setBounds(new Rectangle(140, 30, 120, 20));
 
@@ -153,16 +132,9 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createExternalManagedObjectFigure(
+	public ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context) {
-
-		Label figure = new Label(context.getExternalManagedObjectName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setLayoutManager(new FlowLayout(true));
-
-		// Return figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardExternalManagedObjectFigure(context);
 	}
 
 	/*
@@ -173,25 +145,9 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.skin.desk.FlowItemFigureContext)
 	 */
 	@Override
-	public net.officefloor.eclipse.skin.desk.FlowItemFigure createFlowItemFigure(
+	public FlowItemFigure createFlowItemFigure(
 			final FlowItemFigureContext context) {
-
-		// Create the check box to indicate if public
-		CheckBoxEditPart publicCheckBox = new CheckBoxEditPart(context
-				.isPublic()) {
-			protected void checkBoxStateChanged(boolean isChecked) {
-				// Specify if public
-				context.setIsPublic(isChecked);
-			}
-		};
-
-		// Create the figure
-		FlowItemFigure figure = new FlowItemFigure(context.getFlowItemName(),
-				publicCheckBox.getFigure());
-
-		// Return the figure
-		return new FlowItemFigureImpl(figure, (CheckBox) publicCheckBox
-				.getFigure());
+		return new StandardFlowItemFigure(context);
 	}
 
 	/*
@@ -202,22 +158,9 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createFlowItemEscalation(
+	public FlowItemEscalationFigure createFlowItemEscalation(
 			FlowItemEscalationFigureContext context) {
-
-		// Obtain simple name of escalation
-		String escalationType = context.getEscalationType();
-		String simpleType = escalationType;
-		if (simpleType.indexOf('.') > 0) {
-			simpleType = simpleType.substring(simpleType.lastIndexOf('.') + 1);
-		}
-
-		// Create the figure
-		FlowItemOutputFigure figure = new FlowItemOutputFigure(simpleType);
-		figure.setToolTip(new Label(escalationType));
-
-		// Return the figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardFlowItemEscalationFigure(context);
 	}
 
 	/*
@@ -228,11 +171,9 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createFlowItemOutputFigure(
+	public FlowItemOutputFigure createFlowItemOutputFigure(
 			FlowItemOutputFigureContext context) {
-		// Return the figure
-		return new OfficeFloorFigureImpl(new FlowItemOutputFigure(context
-				.getFlowItemOutputName()));
+		return new StandardFlowItemOutputFigure(context);
 	}
 
 }
