@@ -172,14 +172,14 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 */
 	@Override
 	protected IFigure createFigure() {
-		
+
 		// Obtain the figure
 		IFigure figure = this.getOfficeFloorFigure().getFigure();
 		if (this.isFreeformFigure()) {
 			// Wrap with free form wrapper
 			figure = new FreeformWrapperFigure((Figure) figure);
 		}
-		
+
 		// Return the figure
 		return figure;
 	}
@@ -225,7 +225,11 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	@Override
 	public IFigure getContentPane() {
 		// Return the content pane of the Office Floor Figure
-		return this.officeFloorFigure.getFigure();
+		OfficeFloorFigure officeFloorFigure = this.getOfficeFloorFigure();
+		IFigure contentPane = officeFloorFigure.getContentPane();
+
+		// Use top level figure if no content pane provided
+		return (contentPane == null ? this.getFigure() : contentPane);
 	}
 
 	/*

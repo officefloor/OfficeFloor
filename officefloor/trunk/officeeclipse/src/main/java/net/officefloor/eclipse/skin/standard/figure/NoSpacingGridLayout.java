@@ -14,26 +14,29 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard.desk;
+package net.officefloor.eclipse.skin.standard.figure;
 
-import net.officefloor.eclipse.common.figure.ListItemFigure;
+import org.eclipse.draw2d.GridLayout;
 
 /**
- * {@link org.eclipse.draw2d.Figure} for a
- * {@link net.officefloor.model.desk.FlowItemOutputModel}.
+ * {@link GridLayout} with no padding.
  * 
  * @author Daniel
  */
-public class FlowItemOutputFigure extends ListItemFigure {
+public class NoSpacingGridLayout extends GridLayout {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param outputName
-	 *            Output name.
+	 * @param numColumns
+	 *            Number of columns.
 	 */
-	public FlowItemOutputFigure(String outputName) {
-		super(outputName);
+	public NoSpacingGridLayout(int numColumns) {
+		super(numColumns, false);
+		this.horizontalSpacing = 0;
+		this.marginHeight = 0;
+		this.marginWidth = 0;
+		this.verticalSpacing = 0;
 	}
 
 }

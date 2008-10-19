@@ -44,7 +44,7 @@ public interface DeskFigureFactory {
 	 *            {@link DeskWorkFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createDeskWorkFigure(DeskWorkFigureContext context);
+	DeskWorkFigure createDeskWorkFigure(DeskWorkFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link DeskTaskModel}.
@@ -53,7 +53,7 @@ public interface DeskFigureFactory {
 	 *            {@link DeskTaskFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createDeskTaskFigure(DeskTaskFigureContext context);
+	DeskTaskFigure createDeskTaskFigure(DeskTaskFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link DeskTaskObjectModel}
@@ -94,7 +94,7 @@ public interface DeskFigureFactory {
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createExternalManagedObjectFigure(
+	ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context);
 
 	/**
@@ -114,7 +114,7 @@ public interface DeskFigureFactory {
 	 *            {@link FlowItemEscalationFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createFlowItemEscalation(
+	FlowItemEscalationFigure createFlowItemEscalation(
 			FlowItemEscalationFigureContext context);
 
 	/**
@@ -125,6 +125,6 @@ public interface DeskFigureFactory {
 	 *            {@link FlowItemOutputFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createFlowItemOutputFigure(
+	FlowItemOutputFigure createFlowItemOutputFigure(
 			FlowItemOutputFigureContext context);
 }
