@@ -68,17 +68,19 @@ public class ConnectorFigure extends Figure {
 		// Create the figure
 		Figure figure = new Figure();
 
-		// Specify layout
+		// Specify figure layout
+		NoSpacingGridLayout figureLayout = null;
 		switch (direction) {
 		case WEST:
 		case EAST:
-			figure.setLayoutManager(new NoSpacingGridLayout(2));
+			figureLayout = new NoSpacingGridLayout(2);
 			break;
 		case NORTH:
 		case SOUTH:
-			figure.setLayoutManager(new NoSpacingGridLayout(1));
+			figureLayout = new NoSpacingGridLayout(1);
 			break;
 		}
+		figure.setLayoutManager(figureLayout);
 
 		// Create line
 		RectangleFigure rectangle = new RectangleFigure();

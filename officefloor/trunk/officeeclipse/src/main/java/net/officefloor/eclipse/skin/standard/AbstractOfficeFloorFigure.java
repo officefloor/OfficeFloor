@@ -19,6 +19,9 @@ package net.officefloor.eclipse.skin.standard;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.ConnectionModel;
+
 import org.eclipse.draw2d.ChopboxAnchor;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -26,9 +29,6 @@ import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.gef.EditPart;
-
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.Model;
 
 /**
  * Abstract {@link OfficeFloorFigure}.
@@ -48,9 +48,21 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 	private IFigure contentPane = null;
 
 	/**
-	 * Map of connection {@link Model} type to {@link ConnectionAnchor}.
+	 * Map of source {@link ConnectionModel} type to {@link ConnectionAnchor}.
 	 */
-	private final Map<Class<? extends Model>, ConnectionAnchor> connectionAnchors = new HashMap<Class<? extends Model>, ConnectionAnchor>(
+	private final Map<Class<? extends ConnectionModel>, ConnectionAnchor> sourceConnectionAnchors = new HashMap<Class<? extends ConnectionModel>, ConnectionAnchor>(
+			1);
+
+	/**
+	 * Map of target {@link ConnectionModel} type to {@link ConnectionAnchor}.
+	 */
+	private final Map<Class<? extends ConnectionModel>, ConnectionAnchor> targetConnectionAnchors = new HashMap<Class<? extends ConnectionModel>, ConnectionAnchor>(
+			1);
+
+	/**
+	 * Map of {@link ConnectionModel} type to {@link ConnectionAnchor}.
+	 */
+	private final Map<Class<? extends ConnectionModel>, ConnectionAnchor> connectionAnchors = new HashMap<Class<? extends ConnectionModel>, ConnectionAnchor>(
 			1);
 
 	/**
@@ -114,14 +126,42 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 	 * Registers a {@link ConnectionAnchor}.
 	 * 
 	 * @param connectionModelType
-	 *            Connection {@link Model} type of the connection.
+	 *            {@link ConnectionModel} type for the connection.
 	 * @param connectionAnchor
 	 *            {@link ConnectionAnchor} for the connection.
 	 */
 	protected void registerConnectionAnchor(
-			Class<? extends Model> connectionModelType,
+			Class<? extends ConnectionModel> connectionModelType,
 			ConnectionAnchor connectionAnchor) {
 		this.connectionAnchors.put(connectionModelType, connectionAnchor);
+	}
+
+	/**
+	 * Registers a source {@link ConnectionAnchor}.
+	 * 
+	 * @param connectionModelType
+	 *            {@link ConnectionModel} type for the connection.
+	 * @param connectionAnchor
+	 *            Source {@link ConnectionAnchor} for the connection.
+	 */
+	protected void registerSourceConnectionAnchor(
+			Class<? extends ConnectionModel> connectionModelType,
+			ConnectionAnchor connectionAnchor) {
+		this.sourceConnectionAnchors.put(connectionModelType, connectionAnchor);
+	}
+
+	/**
+	 * Registers a target {@link ConnectionAnchor}.
+	 * 
+	 * @param connectionModelType
+	 *            {@link ConnectionModel} type for the connection.
+	 * @param connectionAnchor
+	 *            Target {@link ConnectionAnchor} for the connection.
+	 */
+	protected void registerTargetConnectionAnchor(
+			Class<? extends ConnectionModel> connectionModelType,
+			ConnectionAnchor connectionAnchor) {
+		this.targetConnectionAnchors.put(connectionModelType, connectionAnchor);
 	}
 
 	/*
@@ -165,21 +205,58 @@ public abstract class AbstractOfficeFloorFigure implements OfficeFloorFigure {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * net.officefloor.eclipse.skin.OfficeFloorFigure#getConnectionAnchor(java
-	 * .lang.Class)
+	 * net.officefloor.eclipse.skin.OfficeFloorFigure#getSourceConnectionAnchor
+	 * (java.lang.Class)
 	 */
 	@Override
-	public ConnectionAnchor getConnectionAnchor(Class<?> connectionModelType) {
-		// Determine if have connection anchor
-		ConnectionAnchor connectionAnchor = this.connectionAnchors
+	public ConnectionAnchor getSourceConnectionAnchor(
+			Class<? extends ConnectionModel> connectionModelType) {
+		return this.getConnectionAnchor(this.sourceConnectionAnchors,
+				connectionModelType);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.OfficeFloorFigure#getTargetConnectionAnchor
+	 * (java.lang.Class)
+	 */
+	@Override
+	public ConnectionAnchor getTargetConnectionAnchor(
+			Class<? extends ConnectionModel> connectionModelType) {
+		return this.getConnectionAnchor(this.targetConnectionAnchors,
+				connectionModelType);
+	}
+
+	/**
+	 * Obtains the {@link ConnectionAnchor}.
+	 * 
+	 * @param specificConnectionAnchors
+	 *            Specific {@link ConnectionAnchor} map.
+	 * @param connectionModelType
+	 *            {@link ConnectionModel} type.
+	 * @return {@link ConnectionAnchor}.
+	 */
+	private ConnectionAnchor getConnectionAnchor(
+			Map<Class<? extends ConnectionModel>, ConnectionAnchor> specificConnectionAnchors,
+			Class<? extends ConnectionModel> connectionModelType) {
+
+		// Obtain the specific connection anchor
+		ConnectionAnchor connectionAnchor = specificConnectionAnchors
 				.get(connectionModelType);
-		if (connectionAnchor == null) {
-			// No configured anchor so anchor on figure
-			connectionAnchor = new ChopboxAnchor(this.getFigure());
+		if (connectionAnchor != null) {
+			return connectionAnchor;
 		}
 
-		// Return the anchor
-		return connectionAnchor;
+		// Obtain default connection anchor
+		connectionAnchor = this.connectionAnchors.get(connectionModelType);
+		if (connectionAnchor != null) {
+			return connectionAnchor;
+		}
+
+		// Return anchor around the figure
+		return new ChopboxAnchor(this.getFigure());
 	}
 
 }

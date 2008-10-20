@@ -21,6 +21,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.ModelEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 
 import org.eclipse.draw2d.ActionEvent;
@@ -101,8 +102,14 @@ public abstract class ButtonEditPart extends
 			}
 
 			@Override
-			public ConnectionAnchor getConnectionAnchor(
-					Class<?> connectionModelType) {
+			public ConnectionAnchor getSourceConnectionAnchor(
+					Class<? extends ConnectionModel> connectionModelType) {
+				return null;
+			}
+
+			@Override
+			public ConnectionAnchor getTargetConnectionAnchor(
+					Class<? extends ConnectionModel> connectionModelType) {
 				return null;
 			}
 		};

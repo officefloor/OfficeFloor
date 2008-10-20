@@ -18,8 +18,10 @@ package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
+import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
 import net.officefloor.model.desk.DeskTaskObjectModel;
+import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
 
 /**
  * Toggles whether the {@link DeskTaskObjectModel} is a parameter.
@@ -45,27 +47,64 @@ public class ToggleTaskObjectParameterOperation extends
 	@Override
 	protected void perform(Context context) {
 
-		// TODO remove
-		context.getEditPart()
-				.messageError(
-						"TODO: implement perform of "
-								+ this.getClass().getSimpleName());
+		// Obtain the edit part
+		DeskTaskObjectEditPart editPart = context.getEditPart();
+		final DeskTaskObjectModel deskTaskObject = editPart.getCastedModel();
+		final DeskTaskObjectToExternalManagedObjectModel moConnection = deskTaskObject
+				.getManagedObject();
+
+		// Indicates if initially parameter
+		final boolean isInitiallyParameter = deskTaskObject.getIsParameter();
+
+		// Obtain the existing parameter
+		DeskTaskObjectModel parameter = null;
+		DeskTaskEditPart deskTaskEditPart = (DeskTaskEditPart) editPart
+				.getParent();
+		for (DeskTaskObjectModel object : deskTaskEditPart.getCastedModel()
+				.getObjects()) {
+			if (object.getIsParameter()) {
+				parameter = object;
+			}
+		}
+		final DeskTaskObjectModel currentParameter = parameter;
 
 		// Make changes
 		context.execute(new OfficeFloorCommand() {
 
 			@Override
 			protected void doCommand() {
-				// TODO Implement
-				throw new UnsupportedOperationException(
-						"TODO implement OfficeFloorCommand.doCommand");
+				if (!isInitiallyParameter) {
+					// Remove managed object connection
+					if (moConnection != null) {
+						moConnection.remove();
+					}
+
+					// Unset current parameter
+					if (currentParameter != null) {
+						currentParameter.setIsParameter(false);
+					}
+				}
+
+				// Toggle as parameter
+				deskTaskObject.setIsParameter(!isInitiallyParameter);
 			}
 
 			@Override
 			protected void undoCommand() {
-				// TODO Implement
-				throw new UnsupportedOperationException(
-						"TODO implement OfficeFloorCommand.undoCommand");
+				if (!isInitiallyParameter) {
+					// Reinstate managed object connection
+					if (moConnection != null) {
+						moConnection.connect();
+					}
+
+					// Reset current parameter
+					if (currentParameter != null) {
+						currentParameter.setIsParameter(true);
+					}
+				}
+
+				// Toggle as parameter
+				deskTaskObject.setIsParameter(isInitiallyParameter);
 			}
 		});
 	}

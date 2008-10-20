@@ -64,7 +64,8 @@ public class StandardDeskWorkFigure extends AbstractOfficeFloorFigure implements
 		// Create the work figure
 		Figure workFigure = new Figure();
 		workFigure.setBorder(new LineBorder(1));
-		workFigure.setLayoutManager(new NoSpacingToolbarLayout(false));
+		NoSpacingGridLayout workLayout = new NoSpacingGridLayout(1);
+		workFigure.setLayoutManager(workLayout);
 		figure.add(workFigure);
 
 		// Name of work
@@ -83,6 +84,8 @@ public class StandardDeskWorkFigure extends AbstractOfficeFloorFigure implements
 		contentPane.setBorder(new MarginBorder(2, 5, 2, 2));
 		contentPaneWrap.add(contentPane);
 		workFigure.add(contentPaneWrap);
+		workLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL, 0,
+				true, false));
 
 		// Link to initial flow
 		ConnectorFigure initialFlowConnector = new ConnectorFigure(

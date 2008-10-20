@@ -19,15 +19,33 @@ package net.officefloor.eclipse.skin.standard.desk;
 import net.officefloor.eclipse.skin.desk.FlowItemFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.desk.DeskTaskToFlowItemModel;
+import net.officefloor.model.desk.DeskWorkToFlowItemModel;
+import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
+import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
+import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 
-import org.eclipse.draw2d.ActionEvent;
-import org.eclipse.draw2d.ActionListener;
-import org.eclipse.draw2d.CheckBox;
+import org.eclipse.draw2d.AbstractBorder;
+import org.eclipse.draw2d.Border;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Ellipse;
 import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.FlowLayout;
+import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.GridData;
+import org.eclipse.draw2d.GridLayout;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.MarginBorder;
+import org.eclipse.draw2d.RoundedRectangle;
 import org.eclipse.draw2d.ToolbarLayout;
+import org.eclipse.draw2d.geometry.Insets;
+import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 
 /**
  * {@link StandardFlowItemFigure} implementation.
@@ -38,49 +56,101 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 		FlowItemFigure {
 
 	/**
-	 * Is public {@link CheckBox}.
+	 * Is public {@link Figure}.
 	 */
-	private final CheckBox isPublic;
+	private final Ellipse isPublic;
 
 	/**
 	 * Initiate.
 	 */
 	public StandardFlowItemFigure(final FlowItemFigureContext context) {
 
+		Color flowColour = new Color(null, 130, 255, 150);
+
+		// Create the figure
 		Figure figure = new Figure();
-		figure.setLayoutManager(new ToolbarLayout(false));
-		figure.setBackgroundColor(ColorConstants.lightGreen);
-		figure.setOpaque(true);
+		NoSpacingGridLayout layout = new NoSpacingGridLayout(2);
+		figure.setLayoutManager(layout);
 
-		// Flow name
+		// Create the connector
+		ConnectorFigure inputConnector = new ConnectorFigure(
+				ConnectorDirection.WEST, ColorConstants.black);
+		inputConnector.setBorder(new MarginBorder(10, 0, 0, 0));
+		ConnectionAnchor inputAnchor = inputConnector.getConnectionAnchor();
+		this.registerConnectionAnchor(FlowItemOutputToFlowItemModel.class,
+				inputAnchor);
+		this.registerConnectionAnchor(DeskWorkToFlowItemModel.class,
+				inputAnchor);
+		this.registerConnectionAnchor(DeskTaskToFlowItemModel.class,
+				inputAnchor);
+		this.registerTargetConnectionAnchor(FlowItemToNextFlowItemModel.class,
+				inputAnchor);
+		figure.add(inputConnector);
+		layout.setConstraint(inputConnector, new GridData(SWT.BEGINNING,
+				SWT.BACKGROUND, true, false));
+
+		// Create container of flow item and next flow connector
+		Figure flowItemAndNextFlow = new Figure();
+		NoSpacingGridLayout flowItemAndNextFlowLayout = new NoSpacingGridLayout(
+				1);
+		flowItemAndNextFlow.setLayoutManager(flowItemAndNextFlowLayout);
+		figure.add(flowItemAndNextFlow);
+
+		// Create the flow item container
+		RoundedRectangle flowItem = new RoundedRectangle();
+		NoSpacingGridLayout flowItemLayout = new NoSpacingGridLayout(1);
+		flowItem.setLayoutManager(flowItemLayout);
+		flowItem.setBackgroundColor(flowColour);
+		flowItem.setOpaque(true);
+		flowItemAndNextFlow.add(flowItem);
+
+		// Create the header
+		Figure header = new Figure();
+		GridLayout headerLayout = new GridLayout(2, false);
+		header.setLayoutManager(headerLayout);
+		flowItem.add(header);
+
+		// Is public figure
+		this.isPublic = new Ellipse();
+		this.isPublic.setSize(6, 6);
+		this.isPublic.setBackgroundColor(ColorConstants.black);
+		header.add(this.isPublic);
+
+		// Initiate state of is public
+		this.setIsPublic(context.isPublic());
+
+		// Specify the flow item name
 		Label flowItemName = new Label(context.getFlowItemName());
-		flowItemName.setLayoutManager(new FlowLayout());
+		header.add(flowItemName);
 
-		// Is public
-		this.isPublic = new CheckBox();
-		this.isPublic.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				context.setIsPublic(StandardFlowItemFigure.this.isPublic
-						.isSelected());
-			}
-		});
+		// Content pane
+		Figure contentPaneWrap = new Figure();
+		contentPaneWrap.setLayoutManager(new ToolbarLayout());
+		contentPaneWrap.setBorder(new ContentBorder());
+		Figure contentPane = new Figure();
+		ToolbarLayout contentLayout = new ToolbarLayout(false);
+		contentLayout.setSpacing(5);
+		contentPane.setLayoutManager(contentLayout);
+		contentPane.setBorder(new MarginBorder(2, 20, 2, 2));
+		contentPaneWrap.add(contentPane);
+		flowItem.add(contentPaneWrap);
+		flowItemLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL, 0,
+				true, false));
 
-		// Add the header
-		Figure flowItemHeader = new Figure();
-		flowItemHeader.setLayoutManager(new ToolbarLayout(true));
-		flowItemHeader.add(flowItemName);
-		flowItemHeader.add(this.isPublic);
-		figure.add(flowItemHeader);
-
-		// Add the content pane
-		Figure content = new Figure();
-		content.setLayoutManager(new ToolbarLayout(false));
-		figure.add(content);
+		// Add next flow connector
+		ConnectorFigure nextFlow = new ConnectorFigure(
+				ConnectorDirection.SOUTH, ColorConstants.black);
+		nextFlow.setBorder(new MarginBorder(0, 20, 0, 0));
+		ConnectionAnchor nextFlowAnchor = nextFlow.getConnectionAnchor();
+		this.registerSourceConnectionAnchor(FlowItemToNextFlowItemModel.class,
+				nextFlowAnchor);
+		this.registerConnectionAnchor(FlowItemToNextExternalFlowModel.class,
+				nextFlowAnchor);
+		flowItemAndNextFlow.add(nextFlow);
 
 		// Specify figures
 		this.setFigure(figure);
-		this.setContentPane(content);
+		this.setContentPane(contentPane);
 	}
 
 	/*
@@ -91,7 +161,36 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 	 */
 	@Override
 	public void setIsPublic(boolean isPublic) {
-		this.isPublic.setSelected(isPublic);
+		this.isPublic.setVisible(isPublic);
+	}
+
+	/**
+	 * {@link Border} for the content.
+	 */
+	private class ContentBorder extends AbstractBorder {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.draw2d.Border#getInsets(org.eclipse.draw2d.IFigure)
+		 */
+		@Override
+		public Insets getInsets(IFigure figure) {
+			return new Insets(0);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.eclipse.draw2d.Border#paint(org.eclipse.draw2d.IFigure,
+		 * org.eclipse.draw2d.Graphics, org.eclipse.draw2d.geometry.Insets)
+		 */
+		@Override
+		public void paint(IFigure figure, Graphics graphics, Insets insets) {
+			Rectangle paintRectangle = getPaintRectangle(figure, insets);
+			graphics.drawLine(paintRectangle.getTopLeft(), paintRectangle
+					.getTopRight());
+		}
 	}
 
 }

@@ -126,9 +126,19 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 	 * org.eclipse.gef.NodeEditPart#getSourceConnectionAnchor(org.eclipse.gef
 	 * .ConnectionEditPart)
 	 */
+	@SuppressWarnings("unchecked")
 	public ConnectionAnchor getSourceConnectionAnchor(
 			ConnectionEditPart connection) {
-		return this.getConnectionAnchor(connection);
+		// Obtain the type of connection
+		Class connectionModelType = connection.getModel().getClass();
+		ConnectionAnchor anchor = this.getOfficeFloorFigure()
+				.getSourceConnectionAnchor(connectionModelType);
+		if (anchor != null) {
+			return anchor;
+		}
+
+		// No anchor so provide around figure
+		return new ChopboxAnchor(this.getFigure());
 	}
 
 	/*
@@ -138,32 +148,19 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 	 * org.eclipse.gef.NodeEditPart#getTargetConnectionAnchor(org.eclipse.gef
 	 * .ConnectionEditPart)
 	 */
+	@SuppressWarnings("unchecked")
 	public ConnectionAnchor getTargetConnectionAnchor(
 			ConnectionEditPart connection) {
-		return this.getConnectionAnchor(connection);
-	}
-
-	/**
-	 * Obtains the {@link ConnectionAnchor} for the {@link ConnectionEditPart}.
-	 * 
-	 * @param connection
-	 *            {@link ConnectionEditPart}.
-	 * @return {@link ConnectionAnchor}.
-	 */
-	private ConnectionAnchor getConnectionAnchor(ConnectionEditPart connection) {
 		// Obtain the type of connection
-		Class<?> connectionModelType = connection.getModel().getClass();
-
-		// Attempt to obtain anchor
+		Class connectionModelType = connection.getModel().getClass();
 		ConnectionAnchor anchor = this.getOfficeFloorFigure()
-				.getConnectionAnchor(connectionModelType);
-		if (anchor == null) {
-			// Default to around the figure
-			anchor = new ChopboxAnchor(this.getFigure());
+				.getTargetConnectionAnchor(connectionModelType);
+		if (anchor != null) {
+			return anchor;
 		}
 
-		// Return the anchor
-		return anchor;
+		// No anchor so provide around figure
+		return new ChopboxAnchor(this.getFigure());
 	}
 
 	/*
