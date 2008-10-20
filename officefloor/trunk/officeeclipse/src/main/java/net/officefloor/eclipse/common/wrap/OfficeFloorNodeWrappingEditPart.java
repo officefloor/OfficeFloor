@@ -25,6 +25,7 @@ import org.eclipse.draw2d.IFigure;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.ConnectionModel;
 
 /**
  * Abstract node {@link net.officefloor.eclipse.common.wrap.WrappingEditPart}.
@@ -87,8 +88,14 @@ public abstract class OfficeFloorNodeWrappingEditPart extends
 			}
 
 			@Override
-			public ConnectionAnchor getConnectionAnchor(
-					Class<?> connectionModelType) {
+			public ConnectionAnchor getSourceConnectionAnchor(
+					Class<? extends ConnectionModel> connectionModelType) {
+				return null;
+			}
+
+			@Override
+			public ConnectionAnchor getTargetConnectionAnchor(
+					Class<? extends ConnectionModel> connectionModelType) {
 				return null;
 			}
 		};

@@ -16,7 +16,7 @@
  */
 package net.officefloor.eclipse.skin;
 
-import net.officefloor.model.Model;
+import net.officefloor.model.ConnectionModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.IFigure;
@@ -44,13 +44,25 @@ public interface OfficeFloorFigure {
 	IFigure getContentPane();
 
 	/**
-	 * Obtains the {@link ConnectionAnchor} for the particular connection
-	 * {@link Model} type.
+	 * Obtains the source {@link ConnectionAnchor} for the particular
+	 * {@link ConnectionModel} type.
 	 * 
 	 * @param connectionModelType
-	 *            Connection {@link Model} type.
+	 *            {@link ConnectionModel} type.
 	 * @return {@link ConnectionAnchor}.
 	 */
-	ConnectionAnchor getConnectionAnchor(Class<?> connectionModelType);
+	ConnectionAnchor getSourceConnectionAnchor(
+			Class<? extends ConnectionModel> connectionModelType);
+
+	/**
+	 * Obtains the target {@link ConnectionAnchor} for the particular
+	 * {@link ConnectionModel} type.
+	 * 
+	 * @param connectionModelType
+	 *            {@link ConnectionModel} type.
+	 * @return {@link ConnectionAnchor}.
+	 */
+	ConnectionAnchor getTargetConnectionAnchor(
+			Class<? extends ConnectionModel> connectionModelType);
 
 }

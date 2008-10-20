@@ -16,14 +16,15 @@
  */
 package net.officefloor.eclipse.skin.standard.desk;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
 import net.officefloor.eclipse.skin.desk.DeskTaskFigure;
 import net.officefloor.eclipse.skin.desk.DeskTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskWorkFigure;
 import net.officefloor.eclipse.skin.desk.DeskWorkFigureContext;
+import net.officefloor.eclipse.skin.desk.ExternalEscalationFigure;
 import net.officefloor.eclipse.skin.desk.ExternalEscalationFigureContext;
+import net.officefloor.eclipse.skin.desk.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
@@ -33,11 +34,6 @@ import net.officefloor.eclipse.skin.desk.FlowItemFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
 import net.officefloor.eclipse.skin.desk.FlowItemOutputFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext;
-import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
-
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Label;
-import org.eclipse.draw2d.geometry.Rectangle;
 
 /**
  * Standard {@link DeskFigureFactory}.
@@ -92,16 +88,9 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.skin.desk.ExternalEscalationFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createExternalEscalationFigure(
+	public ExternalEscalationFigure createExternalEscalationFigure(
 			ExternalEscalationFigureContext context) {
-
-		Label figure = new Label(context.getExternalEscalationName());
-		figure.setBackgroundColor(ColorConstants.orange);
-		figure.setOpaque(true);
-		figure.setBounds(new Rectangle(140, 30, 120, 20));
-
-		// Return figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardExternalEscalationFigure(context);
 	}
 
 	/*
@@ -112,16 +101,9 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 * (net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createExternalFlowFigure(
+	public ExternalFlowFigure createExternalFlowFigure(
 			ExternalFlowFigureContext context) {
-
-		Label figure = new Label(context.getExternalFlowName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setBounds(new Rectangle(140, 30, 120, 20));
-
-		// Return figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardExternalFlowFigure(context);
 	}
 
 	/*

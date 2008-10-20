@@ -74,7 +74,7 @@ public interface DeskFigureFactory {
 	 *            {@link ExternalEscalationFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createExternalEscalationFigure(
+	ExternalEscalationFigure createExternalEscalationFigure(
 			ExternalEscalationFigureContext context);
 
 	/**
@@ -84,7 +84,7 @@ public interface DeskFigureFactory {
 	 *            {@link ExternalFlowModel}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createExternalFlowFigure(ExternalFlowFigureContext context);
+	ExternalFlowFigure createExternalFlowFigure(ExternalFlowFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the

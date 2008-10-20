@@ -44,6 +44,7 @@ import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation
 import net.officefloor.eclipse.desk.operations.AddWorkOperation;
 import net.officefloor.eclipse.desk.operations.CreateFlowItemFromDeskTaskOperation;
 import net.officefloor.eclipse.desk.operations.RefreshWorkOperation;
+import net.officefloor.eclipse.desk.operations.ToggleFlowItemPublicOperation;
 import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperation;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
@@ -342,8 +343,9 @@ public class DeskEditor extends
 		// Refresh work action
 		list.add(new RefreshWorkOperation());
 
-		// Create flow item from task
+		// Flow item operations
 		list.add(new CreateFlowItemFromDeskTaskOperation());
+		list.add(new ToggleFlowItemPublicOperation());
 
 		// Toggle as parameter
 		list.add(new ToggleTaskObjectParameterOperation());
