@@ -70,16 +70,20 @@ public class LabelConnectorFigure extends Figure {
 		Figure figure = new Figure();
 
 		// Specify layout
+		NoSpacingGridLayout figureLayout = null;
 		switch (direction) {
 		case WEST:
 		case EAST:
-			figure.setLayoutManager(new NoSpacingGridLayout(2));
+			figureLayout = new NoSpacingGridLayout(2);
 			break;
 		case NORTH:
 		case SOUTH:
-			figure.setLayoutManager(new NoSpacingGridLayout(1));
+			figureLayout = new NoSpacingGridLayout(1);
 			break;
 		}
+		figureLayout.horizontalSpacing = 2;
+		figureLayout.verticalSpacing = 2;
+		figure.setLayoutManager(figureLayout);
 
 		// Provide name
 		label.setLayoutManager(new NoSpacingToolbarLayout(true));

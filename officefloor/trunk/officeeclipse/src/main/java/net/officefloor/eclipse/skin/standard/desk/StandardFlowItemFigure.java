@@ -24,6 +24,7 @@ import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
+import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
@@ -69,7 +70,7 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 
 		// Create the figure
 		Figure figure = new Figure();
-		NoSpacingGridLayout layout = new NoSpacingGridLayout(2);
+		NoSpacingGridLayout layout = new NoSpacingGridLayout(3);
 		figure.setLayoutManager(layout);
 
 		// Create the connector
@@ -79,22 +80,22 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 		ConnectionAnchor inputAnchor = inputConnector.getConnectionAnchor();
 		this.registerConnectionAnchor(FlowItemOutputToFlowItemModel.class,
 				inputAnchor);
-		this.registerConnectionAnchor(DeskWorkToFlowItemModel.class,
+		this.registerConnectionAnchor(FlowItemEscalationToFlowItemModel.class,
 				inputAnchor);
-		this.registerConnectionAnchor(DeskTaskToFlowItemModel.class,
+		this.registerConnectionAnchor(DeskWorkToFlowItemModel.class,
 				inputAnchor);
 		this.registerTargetConnectionAnchor(FlowItemToNextFlowItemModel.class,
 				inputAnchor);
 		figure.add(inputConnector);
 		layout.setConstraint(inputConnector, new GridData(SWT.BEGINNING,
-				SWT.BACKGROUND, true, false));
+				SWT.BEGINNING, true, false));
 
 		// Create container of flow item and next flow connector
-		Figure flowItemAndNextFlow = new Figure();
+		Figure flowItemAndTaskLink = new Figure();
 		NoSpacingGridLayout flowItemAndNextFlowLayout = new NoSpacingGridLayout(
 				1);
-		flowItemAndNextFlow.setLayoutManager(flowItemAndNextFlowLayout);
-		figure.add(flowItemAndNextFlow);
+		flowItemAndTaskLink.setLayoutManager(flowItemAndNextFlowLayout);
+		figure.add(flowItemAndTaskLink);
 
 		// Create the flow item container
 		RoundedRectangle flowItem = new RoundedRectangle();
@@ -102,7 +103,7 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 		flowItem.setLayoutManager(flowItemLayout);
 		flowItem.setBackgroundColor(flowColour);
 		flowItem.setOpaque(true);
-		flowItemAndNextFlow.add(flowItem);
+		flowItemAndTaskLink.add(flowItem);
 
 		// Create the header
 		Figure header = new Figure();
@@ -137,16 +138,26 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 		flowItemLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL, 0,
 				true, false));
 
+		// Add the connector for task
+		ConnectorFigure taskConnector = new ConnectorFigure(
+				ConnectorDirection.SOUTH, ColorConstants.lightGray);
+		taskConnector.setBorder(new MarginBorder(0, 20, 0, 0));
+		this.registerConnectionAnchor(DeskTaskToFlowItemModel.class,
+				taskConnector.getConnectionAnchor());
+		flowItemAndTaskLink.add(taskConnector);
+
 		// Add next flow connector
-		ConnectorFigure nextFlow = new ConnectorFigure(
-				ConnectorDirection.SOUTH, ColorConstants.black);
-		nextFlow.setBorder(new MarginBorder(0, 20, 0, 0));
+		ConnectorFigure nextFlow = new ConnectorFigure(ConnectorDirection.EAST,
+				ColorConstants.black);
+		nextFlow.setBorder(new MarginBorder(10, 0, 0, 0));
 		ConnectionAnchor nextFlowAnchor = nextFlow.getConnectionAnchor();
 		this.registerSourceConnectionAnchor(FlowItemToNextFlowItemModel.class,
 				nextFlowAnchor);
 		this.registerConnectionAnchor(FlowItemToNextExternalFlowModel.class,
 				nextFlowAnchor);
-		flowItemAndNextFlow.add(nextFlow);
+		layout.setConstraint(nextFlow, new GridData(SWT.BEGINNING,
+				SWT.BEGINNING, true, false));
+		figure.add(nextFlow);
 
 		// Specify figures
 		this.setFigure(figure);
