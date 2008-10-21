@@ -102,6 +102,18 @@ public class ExternalEscalationEditPart
 	}
 
 	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * isFreeformFigure()
+	 */
+	@Override
+	protected boolean isFreeformFigure() {
+		return true;
+	}
+
+	/*
 	 * ===================== ExternalEscalationFigureContext =================
 	 */
 
