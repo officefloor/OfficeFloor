@@ -22,6 +22,7 @@ import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Ellipse;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.swt.graphics.Color;
 
@@ -62,6 +63,9 @@ public class ConnectorFigure extends Figure {
 	 */
 	public ConnectorFigure(ConnectorDirection direction, Color colour) {
 
+		final int SIZE = 4;
+		final int ALIGNMENT = (SIZE % 2 == 0 ? -1 : 0);
+
 		// Specify layout
 		this.setLayoutManager(new NoSpacingToolbarLayout(true));
 
@@ -83,27 +87,35 @@ public class ConnectorFigure extends Figure {
 		figure.setLayoutManager(figureLayout);
 
 		// Create line
-		RectangleFigure rectangle = new RectangleFigure();
-		rectangle.setBackgroundColor(colour);
-		rectangle.setForegroundColor(colour);
-		rectangle.setOpaque(true);
+		Figure rectangle = new Figure();
+		rectangle.setLayoutManager(new NoSpacingToolbarLayout(true));
+		RectangleFigure rectangleShape = new RectangleFigure();
+		rectangleShape.setBackgroundColor(colour);
+		rectangleShape.setForegroundColor(colour);
+		rectangleShape.setOpaque(true);
+		int topInset = 0;
+		int leftInset = 0;
 		switch (direction) {
 		case WEST:
 		case EAST:
-			rectangle.setSize(5, 1);
+			rectangleShape.setSize(SIZE + 1, 1);
+			topInset = (SIZE / 2) + ALIGNMENT;
 			break;
 		case NORTH:
 		case SOUTH:
-			rectangle.setSize(1, 5);
+			rectangleShape.setSize(1, SIZE + 1);
+			leftInset = (SIZE / 2) + ALIGNMENT;
 			break;
 		}
+		rectangle.add(rectangleShape);
+		rectangle.setBorder(new MarginBorder(topInset, leftInset, 0, 0));
 
 		// Provide connector
 		Ellipse point = new Ellipse();
 		point.setBackgroundColor(colour);
 		point.setForegroundColor(colour);
 		point.setOpaque(true);
-		point.setSize(4, 4);
+		point.setSize(SIZE, SIZE);
 
 		// Provide connection anchor
 		this.connectionAnchor = new ChopboxAnchor(point);
