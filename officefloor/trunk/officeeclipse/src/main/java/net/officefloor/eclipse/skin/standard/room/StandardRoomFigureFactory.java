@@ -18,8 +18,11 @@ package net.officefloor.eclipse.skin.standard.room;
 
 import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.room.ExternalEscalationFigure;
 import net.officefloor.eclipse.skin.room.ExternalEscalationFigureContext;
+import net.officefloor.eclipse.skin.room.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.room.ExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.room.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.room.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.room.RoomFigureFactory;
 import net.officefloor.eclipse.skin.room.SubRoomEscalationFigureContext;
@@ -30,10 +33,6 @@ import net.officefloor.eclipse.skin.room.SubRoomOutputFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
 
 import org.eclipse.draw2d.CheckBox;
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FlowLayout;
-import org.eclipse.draw2d.Label;
-import org.eclipse.draw2d.geometry.Rectangle;
 
 /**
  * Standard {@link RoomFigureFactory}.
@@ -50,15 +49,9 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 * (net.officefloor.eclipse.skin.room.ExternalEscalationFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createExternalEscalationFigure(
+	public ExternalEscalationFigure createExternalEscalationFigure(
 			ExternalEscalationFigureContext context) {
-		Label figure = new Label(context.getExternalEscalationName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setBounds(new Rectangle(140, 30, 120, 20));
-
-		// Return figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardExternalEscalationFigure(context);
 	}
 
 	/*
@@ -69,15 +62,9 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 * (net.officefloor.eclipse.skin.room.ExternalFlowFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createExternalFlowFigure(
+	public ExternalFlowFigure createExternalFlowFigure(
 			ExternalFlowFigureContext context) {
-		Label figure = new Label(context.getExternalFlowName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setBounds(new Rectangle(140, 30, 120, 20));
-
-		// Return figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardExternalFlowFigure(context);
 	}
 
 	/*
@@ -88,15 +75,9 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 * (net.officefloor.eclipse.skin.room.ExternalManagedObjectFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createExternalManagedObjectFigure(
+	public ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context) {
-		Label figure = new Label(context.getExternalManagedObjectName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setLayoutManager(new FlowLayout(true));
-
-		// Return figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardExternalManagedObjectFigure(context);
 	}
 
 	/*
@@ -107,9 +88,9 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 * (net.officefloor.eclipse.skin.room.SubRoomFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createSubRoomFigure(SubRoomFigureContext context) {
-		return new OfficeFloorFigureImpl(new SubRoomFigure(context
-				.getSubRoomName()));
+	public net.officefloor.eclipse.skin.room.SubRoomFigure createSubRoomFigure(
+			SubRoomFigureContext context) {
+		return new StandardSubRoomFigure(context);
 	}
 
 	/*

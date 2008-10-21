@@ -45,7 +45,7 @@ public interface RoomFigureFactory {
 	 *            {@link ExternalEscalationFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createExternalEscalationFigure(
+	ExternalEscalationFigure createExternalEscalationFigure(
 			ExternalEscalationFigureContext context);
 
 	/**
@@ -55,7 +55,7 @@ public interface RoomFigureFactory {
 	 *            {@link ExternalFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createExternalFlowFigure(ExternalFlowFigureContext context);
+	ExternalFlowFigure createExternalFlowFigure(ExternalFlowFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
@@ -65,7 +65,7 @@ public interface RoomFigureFactory {
 	 *            {@link ExternalManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createExternalManagedObjectFigure(
+	ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context);
 
 	/**
@@ -75,7 +75,7 @@ public interface RoomFigureFactory {
 	 *            {@link SubRoomFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createSubRoomFigure(SubRoomFigureContext context);
+	SubRoomFigure createSubRoomFigure(SubRoomFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the

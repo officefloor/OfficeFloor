@@ -14,30 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard.desk;
+package net.officefloor.eclipse.skin.room;
 
-import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
-import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
-import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.room.SubRoomModel;
 
 /**
- * Standard {@link ExternalManagedObjectFigure}.
+ * {@link OfficeFloorFigure} for the {@link SubRoomModel}.
  * 
  * @author Daniel
  */
-public class StandardExternalManagedObjectFigure extends
-		AbstractOfficeFloorFigure implements ExternalManagedObjectFigure {
+public interface SubRoomFigure extends OfficeFloorFigure {
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param context
-	 *            {@link ExternalManagedObjectFigureContext}.
-	 */
-	public StandardExternalManagedObjectFigure(
-			ExternalManagedObjectFigureContext context) {
-		this
-				.setFigure(new net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure(
-						context.getExternalManagedObjectName()));
-	}
 }
