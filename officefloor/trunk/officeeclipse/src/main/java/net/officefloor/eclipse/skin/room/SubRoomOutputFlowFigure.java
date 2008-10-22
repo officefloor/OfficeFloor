@@ -14,34 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard.room;
+package net.officefloor.eclipse.skin.room;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.Label;
-import org.eclipse.draw2d.ToolbarLayout;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.room.SubRoomOutputFlowModel;
 
 /**
- * {@link org.eclipse.draw2d.Figure} for the
- * {@link net.officefloor.model.room.SubRoomEscalationModel}.
+ * {@link OfficeFloorFigure} for the {@link SubRoomOutputFlowModel}.
  * 
  * @author Daniel
  */
-public class SubRoomEscalationFigure extends Figure {
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param name
-	 *            Name of the escalation.
-	 */
-	public SubRoomEscalationFigure(String name) {
-		this.setLayoutManager(new ToolbarLayout());
-		this.setBackgroundColor(ColorConstants.lightGray);
-		this.setOpaque(true);
-		this.setSize(60, 20);
-
-		this.add(new Label(name));
-	}
+public interface SubRoomOutputFlowFigure extends OfficeFloorFigure {
 
 }

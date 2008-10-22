@@ -85,7 +85,7 @@ public interface RoomFigureFactory {
 	 *            {@link SubRoomFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createSubRoomEscalationFigure(
+	SubRoomEscalationFigure createSubRoomEscalationFigure(
 			SubRoomEscalationFigureContext context);
 
 	/**
@@ -107,7 +107,7 @@ public interface RoomFigureFactory {
 	 *            {@link SubRoomManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createSubRoomManagedObjectFigure(
+	SubRoomManagedObjectFigure createSubRoomManagedObjectFigure(
 			SubRoomManagedObjectFigureContext context);
 
 	/**
@@ -118,7 +118,7 @@ public interface RoomFigureFactory {
 	 *            {@link SubRoomOutputFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createSubRoomOutputFlowFigure(
+	SubRoomOutputFlowFigure createSubRoomOutputFlowFigure(
 			SubRoomOutputFlowFigureContext context);
 
 }

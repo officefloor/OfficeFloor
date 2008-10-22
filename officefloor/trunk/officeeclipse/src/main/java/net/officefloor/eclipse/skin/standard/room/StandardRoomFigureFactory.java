@@ -16,8 +16,6 @@
  */
 package net.officefloor.eclipse.skin.standard.room;
 
-import net.officefloor.eclipse.common.editparts.CheckBoxEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.room.ExternalEscalationFigure;
 import net.officefloor.eclipse.skin.room.ExternalEscalationFigureContext;
 import net.officefloor.eclipse.skin.room.ExternalFlowFigure;
@@ -29,10 +27,8 @@ import net.officefloor.eclipse.skin.room.SubRoomEscalationFigureContext;
 import net.officefloor.eclipse.skin.room.SubRoomFigureContext;
 import net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext;
 import net.officefloor.eclipse.skin.room.SubRoomManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.room.SubRoomOutputFlowFigure;
 import net.officefloor.eclipse.skin.room.SubRoomOutputFlowFigureContext;
-import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
-
-import org.eclipse.draw2d.CheckBox;
 
 /**
  * Standard {@link RoomFigureFactory}.
@@ -101,10 +97,9 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 * (net.officefloor.eclipse.skin.room.SubRoomEscalationFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createSubRoomEscalationFigure(
+	public net.officefloor.eclipse.skin.room.SubRoomEscalationFigure createSubRoomEscalationFigure(
 			SubRoomEscalationFigureContext context) {
-		return new OfficeFloorFigureImpl(new SubRoomEscalationFigure(context
-				.getSubRoomEscalationName()));
+		return new StandardSubRoomEscalationFigure(context);
 	}
 
 	/*
@@ -117,20 +112,7 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	@Override
 	public net.officefloor.eclipse.skin.room.SubRoomInputFlowFigure createSubRoomInputFlowFigure(
 			final SubRoomInputFlowFigureContext context) {
-
-		// Create the check box to indicate if public
-		CheckBoxEditPart publicCheckBox = new CheckBoxEditPart(context
-				.isPublic()) {
-			protected void checkBoxStateChanged(boolean isChecked) {
-				// Specify if public
-				context.setIsPublic(isChecked);
-			}
-		};
-
-		// Return the figure for the Sub Room Input Flow
-		return new SubRoomInputFlowFigureImpl(new SubRoomInputFlowFigure(
-				context.getSubRoomInputFlowName(), publicCheckBox.getFigure()),
-				(CheckBox) publicCheckBox.getFigure());
+		return new StandardSubRoomInputFlowFigure(context);
 	}
 
 	/*
@@ -141,10 +123,9 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 * (net.officefloor.eclipse.skin.room.SubRoomManagedObjectFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createSubRoomManagedObjectFigure(
+	public net.officefloor.eclipse.skin.room.SubRoomManagedObjectFigure createSubRoomManagedObjectFigure(
 			SubRoomManagedObjectFigureContext context) {
-		return new OfficeFloorFigureImpl(new SubRoomManagedObjectFigure(context
-				.getSubRoomManagedObjectName()));
+		return new StandardSubRoomManagedObjectFigure(context);
 	}
 
 	/*
@@ -155,10 +136,9 @@ public class StandardRoomFigureFactory implements RoomFigureFactory {
 	 * (net.officefloor.eclipse.skin.room.SubRoomOutputFlowFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createSubRoomOutputFlowFigure(
+	public SubRoomOutputFlowFigure createSubRoomOutputFlowFigure(
 			SubRoomOutputFlowFigureContext context) {
-		return new OfficeFloorFigureImpl(new SubRoomOutputFlowFigure(context
-				.getSubRoomOutputFlowName()));
+		return new StandardSubRoomOutputFlowFigure(context);
 	}
 
 }
