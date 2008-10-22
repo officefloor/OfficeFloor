@@ -81,9 +81,8 @@ public class StandardSubRoomFigure extends AbstractOfficeFloorFigure implements
 		contentPaneWrap.setBorder(new ContentBorder());
 		Figure contentPane = new Figure();
 		ToolbarLayout contentLayout = new ToolbarLayout(false);
-		contentLayout.setSpacing(5);
 		contentPane.setLayoutManager(contentLayout);
-		contentPane.setBorder(new MarginBorder(2, 20, 2, 2));
+		contentPane.setBorder(new MarginBorder(2, 5, 2, 2));
 		contentPaneWrap.add(contentPane);
 		subRoomFigure.add(contentPaneWrap);
 		subRoomLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL, 0,

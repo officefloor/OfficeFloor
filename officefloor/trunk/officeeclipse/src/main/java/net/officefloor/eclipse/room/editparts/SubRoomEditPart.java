@@ -106,9 +106,9 @@ public class SubRoomEditPart extends
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getInputFlows());
-		childModels.addAll(this.getCastedModel().getManagedObjects());
 		childModels.addAll(this.getCastedModel().getOutputFlows());
 		childModels.addAll(this.getCastedModel().getEscalations());
+		childModels.addAll(this.getCastedModel().getManagedObjects());
 	}
 
 	/*
