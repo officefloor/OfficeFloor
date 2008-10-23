@@ -44,7 +44,7 @@ public interface OfficeFigureFactory {
 	 *            {@link AdministratorFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createAdministratorFigure(
+	AdministratorFigure createAdministratorFigure(
 			AdministratorFigureContext context);
 
 	/**
@@ -54,7 +54,7 @@ public interface OfficeFigureFactory {
 	 *            {@link DeskFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createDeskFigure(DeskFigureContext context);
+	DeskFigure createDeskFigure(DeskFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link DutyModel}.
@@ -63,7 +63,7 @@ public interface OfficeFigureFactory {
 	 *            {@link DutyFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createDutyFigure(DutyFigureContext context);
+	DutyFigure createDutyFigure(DutyFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link DutyFlowModel}.
@@ -92,7 +92,7 @@ public interface OfficeFigureFactory {
 	 *            {@link ExternalTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createExternalTeamFigure(ExternalTeamFigureContext context);
+	ExternalTeamFigure createExternalTeamFigure(ExternalTeamFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link FlowItemModel}.
@@ -110,6 +110,6 @@ public interface OfficeFigureFactory {
 	 *            {@link RoomFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createRoomFigure(RoomFigureContext context);
+	RoomFigure createRoomFigure(RoomFigureContext context);
 
 }

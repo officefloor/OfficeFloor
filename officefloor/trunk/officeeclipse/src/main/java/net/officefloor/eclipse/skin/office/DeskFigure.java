@@ -16,33 +16,14 @@
  */
 package net.officefloor.eclipse.skin.office;
 
-import org.eclipse.draw2d.IFigure;
-
-import net.officefloor.model.desk.DeskModel;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.office.OfficeDeskModel;
-import net.officefloor.model.office.OfficeRoomModel;
 
 /**
- * Context for the {@link DeskModel} {@link IFigure}.
+ * {@link OfficeFloorFigure} for the {@link OfficeDeskModel}.
  * 
  * @author Daniel
  */
-public interface DeskFigureContext {
-
-	/**
-	 * Obtains the names of the ancestor {@link OfficeRoomModel} instances from
-	 * the top level {@link OfficeRoomModel} first down to the
-	 * {@link OfficeRoomModel} containing the {@link OfficeDeskModel}.
-	 * 
-	 * @return Names of the ancestor {@link OfficeRoomModel} instances.
-	 */
-	String[] getRoomNames();
-
-	/**
-	 * Obtains the {@link DeskModel} name.
-	 * 
-	 * @return {@link DeskModel} name.
-	 */
-	String getDeskName();
+public interface DeskFigure extends OfficeFloorFigure {
 
 }

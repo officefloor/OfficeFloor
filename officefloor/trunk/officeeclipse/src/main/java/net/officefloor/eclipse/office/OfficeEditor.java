@@ -33,6 +33,7 @@ import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.RoomEditPart;
 import net.officefloor.eclipse.office.operations.AddAdministratorOperation;
 import net.officefloor.eclipse.office.operations.AddExternalTeamOperation;
+import net.officefloor.eclipse.office.operations.CycleManagedObjectScopeOperation;
 import net.officefloor.eclipse.office.operations.ManageOfficeRoomOperation;
 import net.officefloor.eclipse.office.operations.RefreshOfficeRoomOperation;
 import net.officefloor.model.office.AdministratorModel;
@@ -159,6 +160,7 @@ public class OfficeEditor extends
 		list.add(new AddAdministratorOperation());
 		list.add(new AddExternalTeamOperation());
 		list.add(new ManageOfficeRoomOperation(this.getRootEditPart()));
+		list.add(new CycleManagedObjectScopeOperation());
 
 		// Refresh model operations
 		list.add(new RefreshOfficeRoomOperation());

@@ -17,7 +17,11 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
+
+import org.eclipse.gef.EditPart;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
@@ -99,6 +103,46 @@ public class DeskEditPart extends
 	@Override
 	public String getDeskName() {
 		return this.getCastedModel().getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.eclipse.skin.office.DeskFigureContext#getRoomNames()
+	 */
+	@Override
+	public String[] getRoomNames() {
+
+		// Obtain the parent rooms
+		Deque<String> roomNames = new LinkedList<String>();
+		RoomEditPart room = (RoomEditPart) this.getParent();
+		while (room != null) {
+			roomNames.push(room.getRoomName());
+
+			// Obtain the parent
+			EditPart parentEditPart = room.getParent();
+			if (parentEditPart instanceof RoomEditPart) {
+				// Another parent room
+				room = (RoomEditPart) parentEditPart;
+			} else {
+				// No further parent room (likely now office)
+				room = null;
+			}
+		}
+
+		// Ignore the top level room
+		if (roomNames.size() > 0) {
+			roomNames.pop();
+		}
+
+		// Create the parent rooms list
+		String[] names = new String[roomNames.size()];
+		for (int i = 0; i < names.length; i++) {
+			names[i] = roomNames.pop();
+		}
+
+		// Return the room names
+		return names;
 	}
 
 }
