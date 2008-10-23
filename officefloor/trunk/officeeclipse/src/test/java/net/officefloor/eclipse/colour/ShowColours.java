@@ -16,6 +16,9 @@
  */
 package net.officefloor.eclipse.colour;
 
+import org.eclipse.draw2d.ActionEvent;
+import org.eclipse.draw2d.ActionListener;
+import org.eclipse.draw2d.Clickable;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.LightweightSystem;
@@ -57,14 +60,33 @@ public class ShowColours {
 
 		// Fill the contents with colours
 		int z = 0;
-		Figure[][] colourPoints = new Figure[SIZE][SIZE];
+		final Figure[][] colourPoints = new Figure[SIZE][SIZE];
+		ActionListener clickListener = new ActionListener() {
+
+			private int z = 0;
+
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				this.z += 10;
+				this.z %= SIZE;
+				System.out.println("Colour: " + this.z);
+				for (int x = 0; x < SIZE; x++) {
+					for (int y = 0; y < SIZE; y++) {
+						Figure figure = colourPoints[x][y];
+						figure.setBackgroundColor(new Color(null, x, y, this.z));
+						figure.setToolTip(new Label(x + "," + y + "," + this.z));
+					}
+				}
+			}
+		};
 		for (int x = 0; x < SIZE; x++) {
 			for (int y = 0; y < SIZE; y++) {
-				Figure figure = new Figure();
+				Clickable figure = new Clickable();
 				figure.setLayoutManager(new ToolbarLayout());
 				figure.setBackgroundColor(new Color(null, x, y, z));
 				figure.setOpaque(true);
 				contents.add(figure);
+				figure.addActionListener(clickListener);
 				colourPoints[x][y] = figure;
 				layout.setConstraint(figure,
 						new Rectangle(x + 10, y + 10, 1, 1));
@@ -77,18 +99,6 @@ public class ShowColours {
 		while (!shell.isDisposed()) {
 			while (!display.readAndDispatch()) {
 				display.sleep();
-
-				// Change figure colours
-				z += 10;
-				z %= SIZE;
-				System.out.println("Colour: " + z);
-				for (int x = 0; x < SIZE; x++) {
-					for (int y = 0; y < SIZE; y++) {
-						Figure figure = colourPoints[x][y];
-						figure.setBackgroundColor(new Color(null, x, y, z));
-						figure.setToolTip(new Label(x + "," + y + "," + z));
-					}
-				}
 			}
 		}
 

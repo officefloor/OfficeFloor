@@ -16,33 +16,28 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.common.figure.IndentFigure;
 import net.officefloor.eclipse.common.figure.ListFigure;
 import net.officefloor.eclipse.common.figure.ListItemFigure;
 import net.officefloor.eclipse.common.figure.WrappingFigure;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.office.AdministratorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
+import net.officefloor.eclipse.skin.office.DeskFigure;
 import net.officefloor.eclipse.skin.office.DeskFigureContext;
+import net.officefloor.eclipse.skin.office.DutyFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.eclipse.skin.office.DutyFlowFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.office.ExternalTeamFigure;
 import net.officefloor.eclipse.skin.office.ExternalTeamFigureContext;
 import net.officefloor.eclipse.skin.office.FlowItemFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
+import net.officefloor.eclipse.skin.office.RoomFigure;
 import net.officefloor.eclipse.skin.office.RoomFigureContext;
 import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
 
-import org.eclipse.draw2d.ActionEvent;
-import org.eclipse.draw2d.ActionListener;
-import org.eclipse.draw2d.Clickable;
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.FlowLayout;
-import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.ToolbarLayout;
-import org.eclipse.draw2d.geometry.Rectangle;
 
 /**
  * Standard {@link OfficeFigureFactory}.
@@ -59,23 +54,9 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	 * (net.officefloor.eclipse.skin.office.AdministratorFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createAdministratorFigure(
+	public AdministratorFigure createAdministratorFigure(
 			AdministratorFigureContext context) {
-
-		// Create the indent figure to contain children
-		IndentFigure indentFigure = new IndentFigure(10, new ListFigure());
-		indentFigure.setBackgroundColor(ColorConstants.cyan);
-
-		// Create the figure
-		WrappingFigure figure = new WrappingFigure(indentFigure);
-		figure.addDecorate(new ListItemFigure(context.getAdministratorName()));
-		figure.addChildContainerFigure();
-		figure.setBackgroundColor(ColorConstants.cyan);
-
-		// Return the figure for free form display
-		FreeformWrapperFigure wrappingFigure = new FreeformWrapperFigure(figure);
-		wrappingFigure.setBackgroundColor(ColorConstants.cyan);
-		return new OfficeFloorFigureImpl(wrappingFigure);
+		return new StandardAdministratorFigure(context);
 	}
 
 	/*
@@ -86,12 +67,8 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	 * (net.officefloor.eclipse.skin.office.DeskFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createDeskFigure(DeskFigureContext context) {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(context.getDeskName()));
-		figure.addChildContainerFigure();
-		return new OfficeFloorFigureImpl(figure);
+	public DeskFigure createDeskFigure(DeskFigureContext context) {
+		return new StandardDeskFigure(context);
 	}
 
 	/*
@@ -102,15 +79,8 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	 * (net.officefloor.eclipse.skin.office.DutyFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createDutyFigure(DutyFigureContext context) {
-		// Create the figure
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(10,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(context.getDutyName()));
-		figure.addChildContainerFigure();
-
-		// Return the figure
-		return new OfficeFloorFigureImpl(figure);
+	public DutyFigure createDutyFigure(DutyFigureContext context) {
+		return new StandardDutyFigure(context);
 	}
 
 	/*
@@ -136,42 +106,7 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	@Override
 	public ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			final ExternalManagedObjectFigureContext context) {
-
-		Figure figure = new Figure();
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setLayoutManager(new FlowLayout(true));
-
-		// Name of external managed object
-		Label name = new Label(context.getExternalManagedObjectName());
-		figure.add(name);
-
-		// Scope of external managed object
-		String scopeName = context.getScope();
-		if (scopeName == null) {
-			scopeName = "not specified";
-		}
-		final Label scope = new Label(scopeName);
-		scope.setBackgroundColor(ColorConstants.lightBlue);
-		scope.setOpaque(true);
-		Clickable clickableScope = new Clickable(scope);
-		clickableScope.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				// Obtain the next scope
-				String nextScope = context.getNextScope(scope.getText());
-
-				// Change scope on model
-				context.setScope(nextScope);
-
-				// Change scope on figure
-				scope.setText(nextScope);
-			}
-		});
-		figure.add(clickableScope);
-
-		// Return figure
-		return new ExternalManagedObjectFigureImpl(figure, scope);
+		return new StandardExternalManagedObjectFigure(context);
 	}
 
 	/*
@@ -182,16 +117,9 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	 * (net.officefloor.eclipse.skin.office.ExternalTeamFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createExternalTeamFigure(
+	public ExternalTeamFigure createExternalTeamFigure(
 			ExternalTeamFigureContext context) {
-
-		Label figure = new Label(context.getTeamName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setBounds(new Rectangle(140, 30, 120, 20));
-
-		// Return figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardExternalTeamFigure(context);
 	}
 
 	/*
@@ -222,12 +150,8 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	 * (net.officefloor.eclipse.skin.office.RoomFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createRoomFigure(RoomFigureContext context) {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(context.getRoomName()));
-		figure.addChildContainerFigure();
-		return new OfficeFloorFigureImpl(figure);
+	public RoomFigure createRoomFigure(RoomFigureContext context) {
+		return new StandardRoomFigure(context);
 	}
 
 }

@@ -100,6 +100,18 @@ public class AdministratorEditPart
 	 * 
 	 * @see
 	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * isFreeformFigure()
+	 */
+	@Override
+	protected boolean isFreeformFigure() {
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
 	 * populateModelChildren(java.util.List)
 	 */
 	@Override

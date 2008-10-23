@@ -20,6 +20,7 @@ import net.officefloor.eclipse.skin.desk.FlowItemFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
+import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
@@ -29,22 +30,11 @@ import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 
-import org.eclipse.draw2d.AbstractBorder;
-import org.eclipse.draw2d.Border;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
-import org.eclipse.draw2d.Ellipse;
 import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.GridData;
-import org.eclipse.draw2d.GridLayout;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
-import org.eclipse.draw2d.RoundedRectangle;
-import org.eclipse.draw2d.ToolbarLayout;
-import org.eclipse.draw2d.geometry.Insets;
-import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
@@ -57,9 +47,9 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 		FlowItemFigure {
 
 	/**
-	 * Is public {@link Figure}.
+	 * Flow item {@link Figure}.
 	 */
-	private final Ellipse isPublic;
+	private final ContainerFigure flowItem;
 
 	/**
 	 * Initiate.
@@ -98,45 +88,12 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 		figure.add(flowItemAndTaskLink);
 
 		// Create the flow item container
-		RoundedRectangle flowItem = new RoundedRectangle();
-		NoSpacingGridLayout flowItemLayout = new NoSpacingGridLayout(1);
-		flowItem.setLayoutManager(flowItemLayout);
-		flowItem.setBackgroundColor(flowColour);
-		flowItem.setOpaque(true);
-		flowItemAndTaskLink.add(flowItem);
-
-		// Create the header
-		Figure header = new Figure();
-		GridLayout headerLayout = new GridLayout(2, false);
-		header.setLayoutManager(headerLayout);
-		flowItem.add(header);
-
-		// Is public figure
-		this.isPublic = new Ellipse();
-		this.isPublic.setSize(6, 6);
-		this.isPublic.setBackgroundColor(ColorConstants.black);
-		header.add(this.isPublic);
+		this.flowItem = new ContainerFigure(context
+				.getFlowItemName(), flowColour, 20, true);
+		flowItemAndTaskLink.add(this.flowItem);
 
 		// Initiate state of is public
 		this.setIsPublic(context.isPublic());
-
-		// Specify the flow item name
-		Label flowItemName = new Label(context.getFlowItemName());
-		header.add(flowItemName);
-
-		// Content pane
-		Figure contentPaneWrap = new Figure();
-		contentPaneWrap.setLayoutManager(new ToolbarLayout());
-		contentPaneWrap.setBorder(new ContentBorder());
-		Figure contentPane = new Figure();
-		ToolbarLayout contentLayout = new ToolbarLayout(false);
-		contentLayout.setSpacing(5);
-		contentPane.setLayoutManager(contentLayout);
-		contentPane.setBorder(new MarginBorder(2, 20, 2, 2));
-		contentPaneWrap.add(contentPane);
-		flowItem.add(contentPaneWrap);
-		flowItemLayout.setConstraint(contentPaneWrap, new GridData(SWT.FILL, 0,
-				true, false));
 
 		// Add the connector for task
 		ConnectorFigure taskConnector = new ConnectorFigure(
@@ -161,7 +118,7 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 
 		// Specify figures
 		this.setFigure(figure);
-		this.setContentPane(contentPane);
+		this.setContentPane(this.flowItem.getContentPane());
 	}
 
 	/*
@@ -172,36 +129,7 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 	 */
 	@Override
 	public void setIsPublic(boolean isPublic) {
-		this.isPublic.setVisible(isPublic);
-	}
-
-	/**
-	 * {@link Border} for the content.
-	 */
-	private class ContentBorder extends AbstractBorder {
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.draw2d.Border#getInsets(org.eclipse.draw2d.IFigure)
-		 */
-		@Override
-		public Insets getInsets(IFigure figure) {
-			return new Insets(0);
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.draw2d.Border#paint(org.eclipse.draw2d.IFigure,
-		 * org.eclipse.draw2d.Graphics, org.eclipse.draw2d.geometry.Insets)
-		 */
-		@Override
-		public void paint(IFigure figure, Graphics graphics, Insets insets) {
-			Rectangle paintRectangle = getPaintRectangle(figure, insets);
-			graphics.drawLine(paintRectangle.getTopLeft(), paintRectangle
-					.getTopRight());
-		}
+		this.flowItem.setIsPublic(isPublic);
 	}
 
 }

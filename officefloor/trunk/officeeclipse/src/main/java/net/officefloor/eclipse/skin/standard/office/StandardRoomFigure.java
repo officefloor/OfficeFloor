@@ -14,35 +14,32 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.office;
+package net.officefloor.eclipse.skin.standard.office;
 
-import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Figure;
 
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.office.OfficeDeskModel;
-import net.officefloor.model.office.OfficeRoomModel;
+import net.officefloor.eclipse.skin.office.RoomFigure;
+import net.officefloor.eclipse.skin.office.RoomFigureContext;
+import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 
 /**
- * Context for the {@link DeskModel} {@link IFigure}.
+ * Standard {@link RoomFigure}.
  * 
  * @author Daniel
  */
-public interface DeskFigureContext {
+public class StandardRoomFigure extends AbstractOfficeFloorFigure implements
+		RoomFigure {
 
 	/**
-	 * Obtains the names of the ancestor {@link OfficeRoomModel} instances from
-	 * the top level {@link OfficeRoomModel} first down to the
-	 * {@link OfficeRoomModel} containing the {@link OfficeDeskModel}.
+	 * Initiate.
 	 * 
-	 * @return Names of the ancestor {@link OfficeRoomModel} instances.
+	 * @param context
+	 *            {@link RoomFigureContext}.
 	 */
-	String[] getRoomNames();
-
-	/**
-	 * Obtains the {@link DeskModel} name.
-	 * 
-	 * @return {@link DeskModel} name.
-	 */
-	String getDeskName();
-
+	public StandardRoomFigure(RoomFigureContext context) {
+		Figure figure = new Figure();
+		figure.setLayoutManager(new NoSpacingToolbarLayout(false));
+		this.setFigure(figure);
+	}
 }
