@@ -23,20 +23,16 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.eclipse.common.wrap.OfficeFloorNodeWrappingEditPart;
-import net.officefloor.eclipse.common.wrap.WrappingModel;
-import net.officefloor.eclipse.office.models.FlowToAdminDutyWrappingModel;
+import net.officefloor.eclipse.office.models.PostFlowItemAdministrationJointPointModel;
+import net.officefloor.eclipse.office.models.PreFlowItemAdministrationJointPointModel;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.FlowItemFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.Model;
 import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.FlowItemModel;
 import net.officefloor.model.office.FlowItemToTeamModel;
 import net.officefloor.model.office.FlowItemModel.FlowItemEvent;
 
-import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
@@ -50,24 +46,14 @@ public class FlowItemEditPart extends
 		implements FlowItemFigureContext {
 
 	/**
-	 * Pre-admin {@link EditPart}.
+	 * {@link PreFlowItemAdministrationJointPointModel}.
 	 */
-	private OfficeFloorNodeWrappingEditPart preAdminEditPart;
+	private PreFlowItemAdministrationJointPointModel preFlowItemAdministrationJoinPoint;
 
 	/**
-	 * Pre-admin {@link Model}.
+	 * {@link PostFlowItemAdministrationJointPointModel}.
 	 */
-	private WrappingModel<FlowItemModel> preAdminModel;
-
-	/**
-	 * Pre-admin {@link EditPart}.
-	 */
-	private OfficeFloorNodeWrappingEditPart postAdminEditPart;
-
-	/**
-	 * Post-admin {@link Model}.
-	 */
-	private WrappingModel<FlowItemModel> postAdminModel;
+	private PostFlowItemAdministrationJointPointModel postFlowItemAdministrationJoinPoint;
 
 	/*
 	 * (non-Javadoc)
@@ -78,29 +64,11 @@ public class FlowItemEditPart extends
 	 */
 	@Override
 	protected void init() {
-		// Create the pre admin model
-		this.preAdminEditPart = new OfficeFloorNodeWrappingEditPart() {
-			@Override
-			protected void populateConnectionTargetModels(List<Object> models) {
-				models.addAll(FlowItemEditPart.this.getCastedModel()
-						.getPreAdminDutys());
-			}
-		};
-		this.preAdminEditPart.setFigure(new ListItemFigure("PRE"));
-		this.preAdminModel = new FlowToAdminDutyWrappingModel(true, this
-				.getCastedModel(), this.preAdminEditPart);
-
-		// Create the post admin model
-		this.postAdminEditPart = new OfficeFloorNodeWrappingEditPart() {
-			@Override
-			protected void populateConnectionTargetModels(List<Object> models) {
-				models.addAll(FlowItemEditPart.this.getCastedModel()
-						.getPostAdminDutys());
-			}
-		};
-		this.postAdminEditPart.setFigure(new ListItemFigure("POST"));
-		this.postAdminModel = new FlowToAdminDutyWrappingModel(false, this
-				.getCastedModel(), this.postAdminEditPart);
+		// Create the flow item administration join points
+		this.preFlowItemAdministrationJoinPoint = new PreFlowItemAdministrationJointPointModel(
+				this.getCastedModel());
+		this.postFlowItemAdministrationJoinPoint = new PostFlowItemAdministrationJointPointModel(
+				this.getCastedModel());
 	}
 
 	/*
@@ -112,9 +80,9 @@ public class FlowItemEditPart extends
 	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		// Add static children
-		childModels.add(this.preAdminModel);
-		childModels.add(this.postAdminModel);
+		// Add flow item administration join points
+		childModels.add(this.preFlowItemAdministrationJoinPoint);
+		childModels.add(this.postFlowItemAdministrationJoinPoint);
 	}
 
 	/*
@@ -135,13 +103,13 @@ public class FlowItemEditPart extends
 				switch (property) {
 				case ADD_PRE_ADMIN_DUTY:
 				case REMOVE_PRE_ADMIN_DUTY:
-					FlowItemEditPart.this.preAdminEditPart
-							.refreshTargetConnections();
+					FlowItemEditPart.this.preFlowItemAdministrationJoinPoint
+							.triggerRefreshConnections();
 					break;
 				case ADD_POST_ADMIN_DUTY:
 				case REMOVE_POST_ADMIN_DUTY:
-					FlowItemEditPart.this.postAdminEditPart
-							.refreshTargetConnections();
+					FlowItemEditPart.this.postFlowItemAdministrationJoinPoint
+							.triggerRefreshConnections();
 					break;
 				case CHANGE_TEAM:
 					FlowItemEditPart.this.refreshSourceConnections();

@@ -16,56 +16,55 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import net.officefloor.eclipse.skin.office.DutyFigure;
-import net.officefloor.eclipse.skin.office.DutyFigureContext;
-import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
-import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
-import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.office.FlowItemToPostAdministratorDutyModel;
-import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
-
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 
+import net.officefloor.eclipse.skin.office.FlowItemFigure;
+import net.officefloor.eclipse.skin.office.FlowItemFigureContext;
+import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.office.FlowItemToTeamModel;
+
 /**
- * Standard {@link DutyFigure}.
+ * Standard {@link FlowItemFigure}.
  * 
  * @author Daniel
  */
-public class StandardDutyFigure extends AbstractOfficeFloorFigure implements
-		DutyFigure {
+public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
+		FlowItemFigure {
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link DutyFigureContext}.
+	 *            {@link FlowItemFigureContext}.
 	 */
-	public StandardDutyFigure(DutyFigureContext context) {
+	public StandardFlowItemFigure(FlowItemFigureContext context) {
 
 		// Create the figure
 		Figure figure = new Figure();
-		figure.setLayoutManager(new NoSpacingGridLayout(1));
+		NoSpacingGridLayout figureLayout = new NoSpacingGridLayout(2);
+		figure.setLayoutManager(figureLayout);
 
-		// Create the duty figure
-		LabelConnectorFigure duty = new LabelConnectorFigure(context
-				.getDutyName(), ConnectorDirection.WEST, ColorConstants.black);
-		ConnectionAnchor anchor = duty.getConnectionAnchor();
-		this.registerConnectionAnchor(
-				FlowItemToPreAdministratorDutyModel.class, anchor);
-		this.registerConnectionAnchor(
-				FlowItemToPostAdministratorDutyModel.class, anchor);
-		figure.add(duty);
+		// Create the flow item and team connector
+		LabelConnectorFigure flowItem = new LabelConnectorFigure(context
+				.getFlowItemName(), ConnectorDirection.WEST,
+				ColorConstants.black);
+		ConnectionAnchor anchor = flowItem.getConnectionAnchor();
+		this.registerConnectionAnchor(FlowItemToTeamModel.class, anchor);
+		figure.add(flowItem);
 
-		// Create the content pane
+		// Create the container for child connectors
 		Figure contentPane = new Figure();
-		contentPane.setLayoutManager(new NoSpacingToolbarLayout(false));
+		NoSpacingGridLayout contentPaneLayout = new NoSpacingGridLayout(1);
+		contentPaneLayout.verticalSpacing = 2;
+		contentPane.setLayoutManager(contentPaneLayout);
 		figure.add(contentPane);
 
-		// Specify figure and content pane
+		// Specify the figure
 		this.setFigure(figure);
 		this.setContentPane(contentPane);
 	}

@@ -20,20 +20,12 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
-import net.officefloor.eclipse.common.wrap.WrappingModel;
-import net.officefloor.eclipse.office.models.FlowToAdminDutyWrappingModel;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
-import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.DutyModel;
-import net.officefloor.model.office.FlowItemToPostAdministratorDutyModel;
-import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
 import net.officefloor.model.office.DutyModel.DutyEvent;
-
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -42,54 +34,8 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class DutyEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<DutyModel, OfficeFloorFigure>
-		implements DutyFigureContext {
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
-	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-
-				// Create the appropriate connection
-				FlowToAdminDutyWrappingModel model = (FlowToAdminDutyWrappingModel) target;
-				if (model.isPreAdmin()) {
-					// Pre-admin
-					FlowItemToPreAdministratorDutyModel conn = new FlowItemToPreAdministratorDutyModel();
-					conn.setDuty((DutyModel) source);
-					conn.setFlowItem(model.getFlowItem());
-					conn.connect();
-					return conn;
-
-				} else {
-					// Post-admin
-					FlowItemToPostAdministratorDutyModel conn = new FlowItemToPostAdministratorDutyModel();
-					conn.setDuty((DutyModel) source);
-					conn.setFlowItem(model.getFlowItem());
-					conn.connect();
-					return conn;
-				}
-			}
-		};
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(WrappingModel.class);
-	}
+		AbstractOfficeFloorNodeEditPart<DutyModel, OfficeFloorFigure> implements
+		DutyFigureContext {
 
 	/*
 	 * (non-Javadoc)
@@ -100,8 +46,7 @@ public class DutyEditPart extends
 	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getPreAdminFlowItems());
-		models.addAll(this.getCastedModel().getPostAdminFlowItems());
+		// Never a source
 	}
 
 	/*
@@ -113,7 +58,8 @@ public class DutyEditPart extends
 	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		// Never a target
+		models.addAll(this.getCastedModel().getPreAdminFlowItems());
+		models.addAll(this.getCastedModel().getPostAdminFlowItems());
 	}
 
 	/*
@@ -139,7 +85,7 @@ public class DutyEditPart extends
 				case REMOVE_PRE_ADMIN_FLOW_ITEM:
 				case ADD_POST_ADMIN_FLOW_ITEM:
 				case REMOVE_POST_ADMIN_FLOW_ITEM:
-					DutyEditPart.this.refreshSourceConnections();
+					DutyEditPart.this.refreshTargetConnections();
 					break;
 				}
 			}

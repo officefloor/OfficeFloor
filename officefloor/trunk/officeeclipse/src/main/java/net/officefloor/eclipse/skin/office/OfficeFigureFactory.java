@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse.skin.office;
 
+import net.officefloor.eclipse.office.models.AbstractFlowItemAdministrationJoinPointModel;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.office.AdministratorModel;
@@ -72,7 +73,7 @@ public interface OfficeFigureFactory {
 	 *            {@link DutyFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createDutyFlowFigure(DutyFlowFigureContext context);
+	DutyFlowFigure createDutyFlowFigure(DutyFlowFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
@@ -92,7 +93,8 @@ public interface OfficeFigureFactory {
 	 *            {@link ExternalTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	ExternalTeamFigure createExternalTeamFigure(ExternalTeamFigureContext context);
+	ExternalTeamFigure createExternalTeamFigure(
+			ExternalTeamFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link FlowItemModel}.
@@ -101,7 +103,7 @@ public interface OfficeFigureFactory {
 	 *            {@link FlowItemFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createFlowItemFigure(FlowItemFigureContext context);
+	FlowItemFigure createFlowItemFigure(FlowItemFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link RoomModel}.
@@ -111,5 +113,13 @@ public interface OfficeFigureFactory {
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	RoomFigure createRoomFigure(RoomFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link AbstractFlowItemAdministrationJoinPointModel}.
+	 * 
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	FlowItemAdministrationJoinPointFigure createFlowItemAdministrationJoinPointFigure();
 
 }

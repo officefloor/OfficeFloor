@@ -28,9 +28,12 @@ import net.officefloor.eclipse.office.editparts.DutyEditPart;
 import net.officefloor.eclipse.office.editparts.DutyFlowEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalTeamEditPart;
+import net.officefloor.eclipse.office.editparts.FlowItemAdministrationJoinPointEditPart;
 import net.officefloor.eclipse.office.editparts.FlowItemEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.RoomEditPart;
+import net.officefloor.eclipse.office.models.PostFlowItemAdministrationJointPointModel;
+import net.officefloor.eclipse.office.models.PreFlowItemAdministrationJointPointModel;
 import net.officefloor.eclipse.office.operations.AddAdministratorOperation;
 import net.officefloor.eclipse.office.operations.AddExternalTeamOperation;
 import net.officefloor.eclipse.office.operations.CycleManagedObjectScopeOperation;
@@ -85,6 +88,10 @@ public class OfficeEditor extends
 		map.put(AdministratorModel.class, AdministratorEditPart.class);
 		map.put(DutyModel.class, DutyEditPart.class);
 		map.put(DutyFlowModel.class, DutyFlowEditPart.class);
+		map.put(PreFlowItemAdministrationJointPointModel.class,
+				FlowItemAdministrationJoinPointEditPart.class);
+		map.put(PostFlowItemAdministrationJointPointModel.class,
+				FlowItemAdministrationJoinPointEditPart.class);
 
 		// Connections
 		map.put(FlowItemToTeamModel.class, OfficeFloorConnectionEditPart.class);
