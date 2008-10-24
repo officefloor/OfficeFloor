@@ -16,28 +16,24 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import net.officefloor.eclipse.common.figure.ListFigure;
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.eclipse.common.figure.WrappingFigure;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
 import net.officefloor.eclipse.skin.office.DeskFigure;
 import net.officefloor.eclipse.skin.office.DeskFigureContext;
 import net.officefloor.eclipse.skin.office.DutyFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
+import net.officefloor.eclipse.skin.office.DutyFlowFigure;
 import net.officefloor.eclipse.skin.office.DutyFlowFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalTeamFigure;
 import net.officefloor.eclipse.skin.office.ExternalTeamFigureContext;
+import net.officefloor.eclipse.skin.office.FlowItemAdministrationJoinPointFigure;
+import net.officefloor.eclipse.skin.office.FlowItemFigure;
 import net.officefloor.eclipse.skin.office.FlowItemFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
 import net.officefloor.eclipse.skin.office.RoomFigure;
 import net.officefloor.eclipse.skin.office.RoomFigureContext;
-import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
-
-import org.eclipse.draw2d.ToolbarLayout;
 
 /**
  * Standard {@link OfficeFigureFactory}.
@@ -91,9 +87,8 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	 * (net.officefloor.eclipse.skin.office.DutyFlowFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createDutyFlowFigure(DutyFlowFigureContext context) {
-		return new OfficeFloorFigureImpl(new ListItemFigure(context
-				.getDutyFlowName()));
+	public DutyFlowFigure createDutyFlowFigure(DutyFlowFigureContext context) {
+		return new StandardDutyFlowFigure(context);
 	}
 
 	/*
@@ -130,16 +125,8 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	 * (net.officefloor.eclipse.skin.office.FlowItemFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createFlowItemFigure(FlowItemFigureContext context) {
-
-		// Create the figure
-		WrappingFigure figure = new WrappingFigure(new ListFigure());
-		figure.addDecorate(new ListItemFigure(context.getFlowItemName()));
-		figure.setLayoutManager(new ToolbarLayout(true));
-		figure.addChildContainerFigure();
-
-		// Return the figure
-		return new OfficeFloorFigureImpl(figure);
+	public FlowItemFigure createFlowItemFigure(FlowItemFigureContext context) {
+		return new StandardFlowItemFigure(context);
 	}
 
 	/*
@@ -152,6 +139,17 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	@Override
 	public RoomFigure createRoomFigure(RoomFigureContext context) {
 		return new StandardRoomFigure(context);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seenet.officefloor.eclipse.skin.office.OfficeFigureFactory#
+	 * createFlowItemAdministrationJoinPointFigure()
+	 */
+	@Override
+	public FlowItemAdministrationJoinPointFigure createFlowItemAdministrationJoinPointFigure() {
+		return new StandardFlowItemAdministrationJoinPointFigure();
 	}
 
 }
