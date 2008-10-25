@@ -25,20 +25,27 @@ import net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigureCon
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigureContext;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerInstanceFigureContext;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerLinkProcessFigureContext;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigureContext;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFigureContext;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory;
+import net.officefloor.eclipse.skin.officefloor.OfficeManagedObjectFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext;
+import net.officefloor.eclipse.skin.officefloor.TeamFigure;
 import net.officefloor.eclipse.skin.officefloor.TeamFigureContext;
 import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
 
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.FlowLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 
@@ -145,16 +152,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * ManagedObjectSourceFigureContext )
 	 */
 	@Override
-	public OfficeFloorFigure createManagedObjectSourceFigure(
+	public ManagedObjectSourceFigure createManagedObjectSourceFigure(
 			ManagedObjectSourceFigureContext context) {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(context
-				.getManagedObjectSourceName()));
-		figure.addChildContainerFigure();
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardManagedObjectSourceFigure(context);
 	}
 
 	/*
@@ -165,21 +165,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * (net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createManagedObjectTaskFigure(
+	public ManagedObjectTaskFigure createManagedObjectTaskFigure(
 			ManagedObjectTaskFigureContext context) {
-		// Create the figure
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(context.getWorkName()
-				+ "."
-				+ context.getTaskName()
-				+ (context.getTeamName() == null ? "" : " ("
-						+ context.getTeamName() + ")")));
-		figure.addChildContainerFigure();
-		figure.setForegroundColor(ColorConstants.darkGreen);
-
-		// Return the figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardManagedObjectTaskFigure(context);
 	}
 
 	/*
@@ -191,24 +179,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * .ManagedObjectTaskFlowFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createManagedObjectTaskFlowFigure(
+	public ManagedObjectTaskFlowFigure createManagedObjectTaskFlowFigure(
 			ManagedObjectTaskFlowFigureContext context) {
-
-		// Determine if linked by managed object source to task
-		String linkTask = "";
-		String taskName = context.getInitialTaskName();
-		if ((taskName != null) && (taskName.length() > 0)) {
-			// Linked to a task by managed object source
-			linkTask = " (" + context.getInitialWorkName() + "." + taskName
-					+ ")";
-		}
-
-		// Create the figure
-		IFigure figure = new Label(context.getFlowName() + linkTask);
-		figure.setForegroundColor(ColorConstants.cyan);
-
-		// Return the figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardManagedObjectTaskFlowFigure(context);
 	}
 
 	/*
@@ -219,14 +192,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * (net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createManagedObjectTeamFigure(
+	public ManagedObjectTeamFigure createManagedObjectTeamFigure(
 			ManagedObjectTeamFigureContext context) {
-		// Create the figure
-		IFigure figure = new Label(context.getTeamName());
-		figure.setForegroundColor(ColorConstants.blue);
-
-		// Return the figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardManagedObjectTeamFigure(context);
 	}
 
 	/*
@@ -237,9 +205,8 @@ public class StandardOfficeFloorFigureFactory implements
 	 * (net.officefloor.eclipse.skin.officefloor.OfficeFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createOfficeFigure(OfficeFigureContext context) {
-		return new OfficeFloorFigureImpl(new OfficeFigure(context
-				.getOfficeName()));
+	public OfficeFigure createOfficeFigure(OfficeFigureContext context) {
+		return new StandardOfficeFigure(context);
 	}
 
 	/*
@@ -251,10 +218,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * )
 	 */
 	@Override
-	public OfficeFloorFigure createOfficeManagedObject(
+	public OfficeManagedObjectFigure createOfficeManagedObject(
 			OfficeManagedObjectFigureContext context) {
-		return new OfficeFloorFigureImpl(new OfficeManagedObjectFigure(context
-				.getOfficeManagedObjectName()));
+		return new StandardOfficeManagedObjectFigure(context);
 	}
 
 	/*
@@ -265,11 +231,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * (net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createOfficeTaskFigure(
+	public net.officefloor.eclipse.skin.officefloor.OfficeTaskFigure createOfficeTaskFigure(
 			OfficeTaskFigureContext context) {
-		return new OfficeFloorFigureImpl(new OfficeTaskFigure(context
-				.getWorkName()
-				+ "." + context.getTaskName()));
+		return new StandardOfficeTaskFigure(context);
 	}
 
 	/*
@@ -280,10 +244,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * (net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createOfficeTeamFigure(
+	public OfficeTeamFigure createOfficeTeamFigure(
 			OfficeTeamFigureContext context) {
-		return new OfficeFloorFigureImpl(new OfficeTeamFigure(context
-				.getOfficeTeamName()));
+		return new StandardOfficeTeamFigure(context);
 	}
 
 	/*
@@ -294,14 +257,8 @@ public class StandardOfficeFloorFigureFactory implements
 	 * (net.officefloor.eclipse.skin.officefloor.TeamFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createTeamFigure(TeamFigureContext context) {
-		Label figure = new Label(context.getTeamName());
-		figure.setBackgroundColor(ColorConstants.lightGray);
-		figure.setOpaque(true);
-		figure.setLayoutManager(new FlowLayout(true));
-
-		// Return figure
-		return new OfficeFloorFigureImpl(figure);
+	public TeamFigure createTeamFigure(TeamFigureContext context) {
+		return new StandardTeamFigure(context);
 	}
 
 }

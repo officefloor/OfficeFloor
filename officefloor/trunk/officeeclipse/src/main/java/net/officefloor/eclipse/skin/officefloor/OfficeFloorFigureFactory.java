@@ -93,7 +93,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link ManagedObjectSourceFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createManagedObjectSourceFigure(
+	ManagedObjectSourceFigure createManagedObjectSourceFigure(
 			ManagedObjectSourceFigureContext context);
 
 	/**
@@ -104,7 +104,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link ManagedObjectTaskFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createManagedObjectTaskFigure(
+	ManagedObjectTaskFigure createManagedObjectTaskFigure(
 			ManagedObjectTaskFigureContext context);
 
 	/**
@@ -115,7 +115,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link ManagedObjectTaskFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createManagedObjectTaskFlowFigure(
+	ManagedObjectTaskFlowFigure createManagedObjectTaskFlowFigure(
 			ManagedObjectTaskFlowFigureContext context);
 
 	/**
@@ -126,7 +126,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link ManagedObjectTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createManagedObjectTeamFigure(
+	ManagedObjectTeamFigure createManagedObjectTeamFigure(
 			ManagedObjectTeamFigureContext context);
 
 	/**
@@ -136,7 +136,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link OfficeFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createOfficeFigure(OfficeFigureContext context);
+	OfficeFigure createOfficeFigure(OfficeFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
@@ -146,7 +146,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link OfficeManagedObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createOfficeManagedObject(
+	OfficeManagedObjectFigure createOfficeManagedObject(
 			OfficeManagedObjectFigureContext context);
 
 	/**
@@ -156,7 +156,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link OfficeTaskFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createOfficeTaskFigure(OfficeTaskFigureContext context);
+	OfficeTaskFigure createOfficeTaskFigure(OfficeTaskFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link }.
@@ -165,7 +165,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link }.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createOfficeTeamFigure(OfficeTeamFigureContext context);
+	OfficeTeamFigure createOfficeTeamFigure(OfficeTeamFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link TeamModel}.
@@ -174,6 +174,6 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link TeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createTeamFigure(TeamFigureContext context);
+	TeamFigure createTeamFigure(TeamFigureContext context);
 
 }

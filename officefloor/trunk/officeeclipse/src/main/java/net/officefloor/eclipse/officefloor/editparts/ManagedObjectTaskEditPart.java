@@ -124,7 +124,7 @@ public class ManagedObjectTaskEditPart extends
 	 * #getTeamName()
 	 */
 	@Override
-	public Object getTeamName() {
+	public String getTeamName() {
 		return this.getCastedModel().getTeamName();
 	}
 

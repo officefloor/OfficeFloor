@@ -16,36 +16,14 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
-import org.eclipse.draw2d.IFigure;
-
-import net.officefloor.model.officefloor.ManagedObjectTaskModel;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 
 /**
- * Context for the {@link ManagedObjectTaskModel} {@link IFigure}.
+ * {@link OfficeFloorFigure} for the {@link OfficeFloorOfficeModel}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectTaskFigureContext {
-
-	/**
-	 * Obtains the work name.
-	 * 
-	 * @return Work name.
-	 */
-	String getWorkName();
-
-	/**
-	 * Obtains the task name.
-	 * 
-	 * @return Task name.
-	 */
-	String getTaskName();
-
-	/**
-	 * Obtains the team name.
-	 * 
-	 * @return Team name.
-	 */
-	String getTeamName();
+public interface OfficeFigure extends OfficeFloorFigure {
 
 }
