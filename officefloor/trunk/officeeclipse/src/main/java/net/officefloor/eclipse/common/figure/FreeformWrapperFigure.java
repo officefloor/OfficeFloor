@@ -16,15 +16,23 @@
  */
 package net.officefloor.eclipse.common.figure;
 
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
+
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.FreeformViewport;
+import org.eclipse.draw2d.IFigure;
 
 /**
  * {@link WrappingFigure} for a {@link FreeformViewport}.
  * 
  * @author Daniel
  */
-public class FreeformWrapperFigure extends WrappingFigure {
+public class FreeformWrapperFigure extends Figure {
+
+	/**
+	 * Wrapped {@link Figure}.
+	 */
+	private final Figure wrappedFigure;
 
 	/**
 	 * Initiate.
@@ -34,9 +42,12 @@ public class FreeformWrapperFigure extends WrappingFigure {
 	 *            {@link FreeformViewport}.
 	 */
 	public FreeformWrapperFigure(Figure figure) {
-		super(figure);
+		this.wrappedFigure = figure;
+		this.setLayoutManager(new NoSpacingToolbarLayout(true));
 		this.setOpaque(true);
-		this.addChildContainerFigure();
+		
+		// Add to this (not wrapped figure)
+		super.add(this.wrappedFigure, null, -1);
 	}
 
 	/*
@@ -52,14 +63,37 @@ public class FreeformWrapperFigure extends WrappingFigure {
 		}
 
 		// Layout the wrapped figure
-		this.getChildContainerFigure().setValid(false);
-		this.getChildContainerFigure().validate();
+		this.wrappedFigure.setValid(false);
+		this.wrappedFigure.validate();
 
 		// Make this the size of the wrapped figure
-		this.setSize(this.getChildContainerFigure().getPreferredSize());
+		this.setSize(this.wrappedFigure.getPreferredSize());
 
 		// Do the super validation
 		super.validate();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.draw2d.IFigure#add(org.eclipse.draw2d.IFigure,
+	 *      java.lang.Object, int)
+	 */
+	@Override
+	public void add(IFigure figure, Object constraint, int index) {
+		// Add to child to wrapped figure
+		this.wrappedFigure.add(figure, constraint, index);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.draw2d.Figure#remove(org.eclipse.draw2d.IFigure)
+	 */
+	@Override
+	public void remove(IFigure figure) {
+		// Remove from wrapped figure
+		this.wrappedFigure.remove(figure);
 	}
 
 }

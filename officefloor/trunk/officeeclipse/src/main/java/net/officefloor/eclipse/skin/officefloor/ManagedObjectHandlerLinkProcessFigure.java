@@ -14,27 +14,18 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.figure;
+package net.officefloor.eclipse.skin.officefloor;
 
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.ToolbarLayout;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
 
 /**
- * {@link org.eclipse.draw2d.Figure} to list its children.
+ * {@link OfficeFloorFigure} for the
+ * {@link ManagedObjectHandlerLinkProcessModel}.
  * 
  * @author Daniel
  */
-public class ListFigure extends Figure {
-
-	/**
-	 * Initiate.
-	 */
-	public ListFigure() {
-		ToolbarLayout layout = new ToolbarLayout();
-		layout.setMinorAlignment(ToolbarLayout.ALIGN_TOPLEFT);
-		layout.setStretchMinorAxis(false);
-		layout.setSpacing(2);
-		this.setLayoutManager(layout);
-	}
+public interface ManagedObjectHandlerLinkProcessFigure extends
+		OfficeFloorFigure {
 
 }

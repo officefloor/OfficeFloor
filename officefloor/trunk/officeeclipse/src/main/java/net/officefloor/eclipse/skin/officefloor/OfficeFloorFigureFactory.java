@@ -49,7 +49,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link ManagedObjectDependencyFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createManagedObjectDependencyFigure(
+	ManagedObjectDependencyFigure createManagedObjectDependencyFigure(
 			ManagedObjectDependencyFigureContext context);
 
 	/**
@@ -60,7 +60,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link ManagedObjectHandlerFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createManagedObjectHandlerFigure(
+	ManagedObjectHandlerFigure createManagedObjectHandlerFigure(
 			ManagedObjectHandlerFigureContext context);
 
 	/**
@@ -71,7 +71,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link ManagedObjectHandlerFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createManagedObjectHandlerInstanceFigure(
+	ManagedObjectHandlerInstanceFigure createManagedObjectHandlerInstanceFigure(
 			ManagedObjectHandlerInstanceFigureContext context);
 
 	/**
@@ -82,7 +82,7 @@ public interface OfficeFloorFigureFactory {
 	 *            {@link ManagedObjectHandlerLinkProcessFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFloorFigure createManagedObjectHandlerLinkProcessFigure(
+	ManagedObjectHandlerLinkProcessFigure createManagedObjectHandlerLinkProcessFigure(
 			ManagedObjectHandlerLinkProcessFigureContext context);
 
 	/**

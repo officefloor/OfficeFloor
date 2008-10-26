@@ -16,9 +16,9 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
-import org.eclipse.draw2d.IFigure;
-
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+
+import org.eclipse.draw2d.IFigure;
 
 /**
  * Context for the {@link ManagedObjectHandlerInstanceModel} {@link IFigure}.

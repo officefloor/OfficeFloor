@@ -308,15 +308,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 			public EditPart createEditPart(EditPart context, Object model) {
 
 				// Determine if wrapping
-				EditPart editPart;
-				if (model instanceof ModelEditPart) {
-					// Allow provide own Edit Part
-					editPart = ((ModelEditPart) model).getEditPart();
-				} else {
-					// Create the Edit Part
-					editPart = AbstractOfficeFloorEditor.this.createEditPart(
-							context, model);
-				}
+				EditPart editPart = AbstractOfficeFloorEditor.this
+						.createEditPart(context, model);
 
 				// Ensure created an edit part
 				if (editPart == null) {
