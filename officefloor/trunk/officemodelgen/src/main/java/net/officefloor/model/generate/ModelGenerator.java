@@ -446,6 +446,11 @@ public class ModelGenerator {
 		writeLine("    /**");
 		writeLine("     * Remove Connections.");
 		writeLine("     */");
+		String classSuffix = this.metaData.getClassSuffix();
+		if ((classSuffix != null) && (classSuffix.trim().length() > 0)) {
+			// Generic model so suppress 'unchecked'
+			writeLine("    @SuppressWarnings(\"unchecked\")");
+		}
 		writeLine("    public RemoveConnectionsAction<"
 				+ this.metaData.getClassName() + "> removeConnections() {");
 
