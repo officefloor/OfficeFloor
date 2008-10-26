@@ -16,14 +16,13 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import net.officefloor.eclipse.common.figure.IndentFigure;
-import net.officefloor.eclipse.common.figure.ListFigure;
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.eclipse.common.figure.WrappingFigure;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigureContext;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerInstanceFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerInstanceFigureContext;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerLinkProcessFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerLinkProcessFigureContext;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigureContext;
@@ -43,11 +42,6 @@ import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.officefloor.TeamFigure;
 import net.officefloor.eclipse.skin.officefloor.TeamFigureContext;
-import net.officefloor.eclipse.skin.standard.OfficeFloorFigureImpl;
-
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link OfficeFloorFigureFactory}.
@@ -66,14 +60,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * .ManagedObjectDependencyFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createManagedObjectDependencyFigure(
+	public ManagedObjectDependencyFigure createManagedObjectDependencyFigure(
 			ManagedObjectDependencyFigureContext context) {
-		// Create the figure
-		IFigure figure = new Label(context.getManagedObjectDependencyName());
-		figure.setForegroundColor(ColorConstants.white);
-
-		// Return the figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardManagedObjectDependencyFigure(context);
 	}
 
 	/*
@@ -85,15 +74,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * ManagedObjectHandlerFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createManagedObjectHandlerFigure(
+	public ManagedObjectHandlerFigure createManagedObjectHandlerFigure(
 			ManagedObjectHandlerFigureContext context) {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure(context
-				.getManagedObjectHandlerName()));
-		figure.addChildContainerFigure();
-		figure.setForegroundColor(ColorConstants.yellow);
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardManagedObjectHandlerFigure(context);
 	}
 
 	/*
@@ -105,14 +88,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * .ManagedObjectHandlerInstanceFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createManagedObjectHandlerInstanceFigure(
+	public ManagedObjectHandlerInstanceFigure createManagedObjectHandlerInstanceFigure(
 			ManagedObjectHandlerInstanceFigureContext context) {
-		WrappingFigure figure = new WrappingFigure(new IndentFigure(5,
-				new ListFigure()));
-		figure.addDecorate(new ListItemFigure("Instance"));
-		figure.addChildContainerFigure();
-		figure.setForegroundColor(ColorConstants.black);
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardManagedObjectHandlerInstanceFigure(context);
 	}
 
 	/*
@@ -124,23 +102,9 @@ public class StandardOfficeFloorFigureFactory implements
 	 * .ManagedObjectHandlerLinkProcessFigureContext)
 	 */
 	@Override
-	public OfficeFloorFigure createManagedObjectHandlerLinkProcessFigure(
+	public ManagedObjectHandlerLinkProcessFigure createManagedObjectHandlerLinkProcessFigure(
 			ManagedObjectHandlerLinkProcessFigureContext context) {
-
-		// Determine if linked by managed object source to task
-		String linkTask = "";
-		String taskName = context.getTaskName();
-		if ((taskName != null) && (taskName.length() > 0)) {
-			// Linked to a task by managed object source
-			linkTask = " (" + context.getWorkName() + "." + taskName + ")";
-		}
-
-		// Create the figure
-		IFigure figure = new Label(context.getLinkProcessName() + linkTask);
-		figure.setForegroundColor(ColorConstants.red);
-
-		// Return the figure
-		return new OfficeFloorFigureImpl(figure);
+		return new StandardManagedObjectHandlerLinkProcessFigure(context);
 	}
 
 	/*

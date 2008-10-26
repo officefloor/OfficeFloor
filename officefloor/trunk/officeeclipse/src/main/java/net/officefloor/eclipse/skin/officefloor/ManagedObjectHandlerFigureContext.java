@@ -18,6 +18,7 @@ package net.officefloor.eclipse.skin.officefloor;
 
 import org.eclipse.draw2d.IFigure;
 
+import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 
 /**
@@ -33,5 +34,14 @@ public interface ManagedObjectHandlerFigureContext {
 	 * @return {@link ManagedObjectHandlerModel} name.
 	 */
 	String getManagedObjectHandlerName();
+
+	/**
+	 * Specifies if a {@link ManagedObjectHandlerInstanceModel} has been
+	 * assigned.
+	 * 
+	 * @return <code>true</code> if a {@link ManagedObjectHandlerInstanceModel}
+	 *         has been assigned.
+	 */
+	boolean isHandlerInstanceAssigned();
 
 }

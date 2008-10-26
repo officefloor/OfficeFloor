@@ -14,26 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard.officefloor;
+package net.officefloor.eclipse.skin.officefloor;
 
-import net.officefloor.eclipse.common.figure.ListItemFigure;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 
 /**
- * {@link org.eclipse.draw2d.Figure} for the
- * {@link net.officefloor.model.officefloor.OfficeTeamModel}.
+ * {@link OfficeFloorFigure} for the {@link ManagedObjectHandlerInstanceModel}.
  * 
  * @author Daniel
  */
-public class OfficeTeamFigure extends ListItemFigure {
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param text
-	 *            Text.
-	 */
-	public OfficeTeamFigure(String text) {
-		super(text);
-	}
+public interface ManagedObjectHandlerInstanceFigure extends OfficeFloorFigure {
 
 }

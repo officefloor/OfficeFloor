@@ -22,7 +22,7 @@ import java.util.List;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigureContext;
 import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
 import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
@@ -37,7 +37,7 @@ import org.eclipse.gef.EditPart;
  */
 public class ManagedObjectHandlerEditPart
 		extends
-		AbstractOfficeFloorEditPart<ManagedObjectHandlerModel, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<ManagedObjectHandlerModel, ManagedObjectHandlerFigure>
 		implements ManagedObjectHandlerFigureContext {
 
 	/*
@@ -57,6 +57,8 @@ public class ManagedObjectHandlerEditPart
 					ManagedObjectHandlerEvent property, PropertyChangeEvent evt) {
 				switch (property) {
 				case CHANGE_HANDLER_INSTANCE:
+					ManagedObjectHandlerEditPart.this.getOfficeFloorFigure()
+							.handlerInstanceChanged();
 					ManagedObjectHandlerEditPart.this.refreshChildren();
 					break;
 				}
@@ -88,7 +90,7 @@ public class ManagedObjectHandlerEditPart
 	 * createOfficeFloorFigure()
 	 */
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected ManagedObjectHandlerFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createManagedObjectHandlerFigure(this);
 	}
@@ -107,6 +109,18 @@ public class ManagedObjectHandlerEditPart
 	@Override
 	public String getManagedObjectHandlerName() {
 		return this.getCastedModel().getHandlerKey();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigureContext
+	 * #isHandlerInstanceAssigned()
+	 */
+	@Override
+	public boolean isHandlerInstanceAssigned() {
+		return (this.getCastedModel().getHandlerInstance() != null);
 	}
 
 }

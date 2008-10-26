@@ -14,28 +14,21 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.standard.officefloor;
+package net.officefloor.eclipse.skin.officefloor;
 
-import org.eclipse.draw2d.Figure;
-
-import net.officefloor.eclipse.common.figure.ListItemFigure;
-import net.officefloor.model.officefloor.OfficeTaskModel;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
 
 /**
- * {@link Figure} for the {@link OfficeTaskModel}.
+ * {@link OfficeFloorFigure} for the {@link ManagedObjectHandlerModel}.
  * 
  * @author Daniel
  */
-public class OfficeTaskFigure extends ListItemFigure {
+public interface ManagedObjectHandlerFigure extends OfficeFloorFigure {
 
 	/**
-	 * Initiate.
-	 * 
-	 * @param text
-	 *            Text.
+	 * Flags that the {@link ManagedObjectHandlerInstanceModel} has changed.
 	 */
-	public OfficeTaskFigure(String text) {
-		super(text);
-	}
-
+	void handlerInstanceChanged();
 }

@@ -16,24 +16,36 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import net.officefloor.eclipse.common.figure.ListItemFigure;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerInstanceFigure;
+import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerInstanceFigureContext;
+import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+
+import org.eclipse.draw2d.Figure;
 
 /**
- * {@link org.eclipse.draw2d.Figure} for the
- * {@link net.officefloor.model.officefloor.OfficeManagedObjectModel}.
+ * Standard {@link ManagedObjectHandlerInstanceFigure}.
  * 
  * @author Daniel
  */
-public class OfficeManagedObjectFigure extends ListItemFigure {
+public class StandardManagedObjectHandlerInstanceFigure extends
+		AbstractOfficeFloorFigure implements ManagedObjectHandlerInstanceFigure {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param text
-	 *            Text.
+	 * @param context
+	 *            {@link ManagedObjectHandlerInstanceFigureContext}.
 	 */
-	public OfficeManagedObjectFigure(String text) {
-		super(text);
-	}
+	public StandardManagedObjectHandlerInstanceFigure(
+			ManagedObjectHandlerInstanceFigureContext context) {
 
+		// Create the figure
+		Figure figure = new Figure();
+		figure.setLayoutManager(new NoSpacingGridLayout(1));
+		
+		// Specify figures
+		this.setFigure(figure);
+		this.setContentPane(figure);
+	}
 }

@@ -14,21 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common;
+package net.officefloor.eclipse.skin.officefloor;
 
-import org.eclipse.gef.EditPart;
+import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
 
 /**
- * Model that provides its {@link org.eclipse.gef.EditPart}.
+ * {@link OfficeFloorFigure} for the {@link ManagedObjectDependencyModel}.
  * 
  * @author Daniel
  */
-public interface ModelEditPart {
+public interface ManagedObjectDependencyFigure extends OfficeFloorFigure {
 
-	/**
-	 * Obtains the {@link EditPart} for this model.
-	 * 
-	 * @return {@link EditPart} for this model.
-	 */
-	EditPart getEditPart();
 }
