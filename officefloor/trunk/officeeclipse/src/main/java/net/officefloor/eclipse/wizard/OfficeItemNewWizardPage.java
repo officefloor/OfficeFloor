@@ -14,9 +14,8 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.wizards;
+package net.officefloor.eclipse.wizard;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 import org.eclipse.core.resources.IContainer;
@@ -148,7 +147,9 @@ public class OfficeItemNewWizardPage extends WizardPage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets
+	 * .Composite)
 	 */
 	@Override
 	public void createControl(Composite parent) {
@@ -221,19 +222,24 @@ public class OfficeItemNewWizardPage extends WizardPage {
 			} else if (object instanceof IJavaElement) {
 				resource = ((IJavaElement) object).getResource();
 			} else {
-				throw new OfficeFloorPluginFailure("Unknown selection type: "
-						+ object.getClass().getName());
+				// Unknown resource
+				resource = null;
 			}
 
 			// Obtain the container
 			IContainer container;
-			if (resource instanceof IContainer) {
+			if (resource == null) {
+				container = null;
+			} else if (resource instanceof IContainer) {
 				container = (IContainer) resource;
 			} else {
 				container = resource.getParent();
 			}
 
-			this.containerText.setText(container.getFullPath().toString());
+			// Specify the container path
+			String containerPath = (container == null ? "" : container
+					.getFullPath().toString());
+			this.containerText.setText(containerPath);
 		}
 
 		// Specify the initial item name

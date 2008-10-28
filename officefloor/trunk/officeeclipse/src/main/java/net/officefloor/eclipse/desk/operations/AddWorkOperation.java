@@ -62,7 +62,7 @@ public class AddWorkOperation extends AbstractOperation<DeskEditPart> {
 			deskWork = new DeskWorkCreateDialog(editor.getSite().getShell(),
 					project).createDeskWork();
 
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			editPart.messageError(ex);
 		}
 

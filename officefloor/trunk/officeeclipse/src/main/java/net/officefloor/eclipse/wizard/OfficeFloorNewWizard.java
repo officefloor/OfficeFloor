@@ -14,8 +14,9 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.wizards;
+package net.officefloor.eclipse.wizard;
 
+import net.officefloor.eclipse.wizard.AbstractNewWizard;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 
 import org.eclipse.jface.wizard.IWizard;
