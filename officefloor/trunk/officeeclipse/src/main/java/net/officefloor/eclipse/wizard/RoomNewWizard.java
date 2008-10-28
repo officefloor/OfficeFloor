@@ -14,24 +14,25 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.wizards;
+package net.officefloor.eclipse.wizard;
 
-import net.officefloor.model.desk.DeskModel;
+import net.officefloor.eclipse.wizard.AbstractNewWizard;
+import net.officefloor.model.room.RoomModel;
 
 import org.eclipse.jface.wizard.IWizard;
 
 /**
- * {@link IWizard} to create a {@link DeskModel}.
+ * {@link IWizard} to create a {@link RoomModel}.
  * 
  * @author Daniel
  */
-public class DeskNewWizard extends AbstractNewWizard {
+public class RoomNewWizard extends AbstractNewWizard {
 
 	/**
 	 * Initiate.
 	 */
-	public DeskNewWizard() {
-		super("New Desk", "Create a new Desk", "new_desk", "desk", "<desk/>");
+	public RoomNewWizard() {
+		super("New Room", "Create a new Room", "new_room", "room", "<room/>");
 	}
 
 }

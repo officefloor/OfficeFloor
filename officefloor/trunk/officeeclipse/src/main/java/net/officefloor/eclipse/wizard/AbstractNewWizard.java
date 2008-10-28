@@ -14,13 +14,14 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.wizards;
+package net.officefloor.eclipse.wizard;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.wizard.OfficeItemNewWizardPage;
 import net.officefloor.model.desk.DeskModel;
 
 import org.eclipse.core.resources.IContainer;
