@@ -38,13 +38,13 @@
     <extension point="org.eclipse.ui.newWizards">
         <category id="net.officefloor.eclipse" name="Office Floor">
       </category>
-        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.DeskNewWizard" icon="icons/desk.gif" id="net.officefloor.eclipse.wizards.DeskNewWizard" name="Desk">
+        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.file.DeskNewWizard" icon="icons/desk.gif" id="net.officefloor.eclipse.wizards.DeskNewWizard" name="Desk">
       </wizard>
-        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.RoomNewWizard" icon="icons/room.gif" id="net.officefloor.eclipse.wizards.RoomNewWizard" name="Room">
+        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.file.RoomNewWizard" icon="icons/room.gif" id="net.officefloor.eclipse.wizards.RoomNewWizard" name="Room">
       </wizard>
-        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.OfficeNewWizard" icon="icons/office.gif" id="net.officefloor.eclipse.wizards.OfficeNewWizard" name="Office">
+        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.file.OfficeNewWizard" icon="icons/office.gif" id="net.officefloor.eclipse.wizards.OfficeNewWizard" name="Office">
       </wizard>
-        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.OfficeFloorNewWizard" icon="icons/officefloor.gif" id="net.officefloor.eclipse.wizards.OfficeFloorNewWizard" name="Office Floor">
+        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.file.OfficeFloorNewWizard" icon="icons/officefloor.gif" id="net.officefloor.eclipse.wizards.OfficeFloorNewWizard" name="Office Floor">
       </wizard>
     </extension>
     <extension point="org.eclipse.debug.core.launchConfigurationTypes">
