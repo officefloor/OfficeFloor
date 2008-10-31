@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
+   <extension-point id="workloader" name="Work Loader" schema="schema/workloader.exsd"/>
     <extension id="net.officefloor.editors" name="Editors" point="org.eclipse.ui.editors">
         <editor
               class="net.officefloor.eclipse.desk.DeskEditor"
@@ -92,5 +93,10 @@
          </action>
       </actionSet>
    </extension>
-    
+    <extension
+          point="net.officefloor.eclipse.workloader">
+       <workloader
+             class="net.officefloor.eclipse.extension.workloader.clazz.ClassWorkLoaderExtension">
+       </workloader>
+    </extension>
 </plugin>
