@@ -18,6 +18,8 @@ package net.officefloor.eclipse.wizard.workloader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.model.desk.DeskWorkModel;
@@ -35,7 +37,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 /**
@@ -54,7 +57,7 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 	/**
 	 * Display of the tasks.
 	 */
-	private List tasks;
+	private Table tasks;
 
 	/**
 	 * Mapping of the {@link TaskModel} by its task name.
@@ -102,7 +105,7 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 
 		} else {
 			// Create the listing of the task names
-			java.util.List<TaskModel<?, ?>> tasks = this.workModel.getTasks();
+			List<TaskModel<?, ?>> tasks = this.workModel.getTasks();
 			taskNames = new String[tasks.size()];
 			this.nameToTaskMap = new HashMap<String, TaskModel<?, ?>>(tasks
 					.size());
@@ -116,11 +119,16 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 			}
 		}
 
-		// Load the tasks to select from
-		this.tasks.setItems(taskNames);
+		// Load the tasks to choose from (by default all chosen)
+		this.tasks.removeAll();
+		for (String taskName : taskNames) {
+			TableItem item = new TableItem(this.tasks, SWT.LEFT);
+			item.setText(taskName);
+			item.setChecked(true);
+		}
 
-		// Nothing should be selected, so page not completed
-		this.setPageComplete(false);
+		// Initiate state
+		this.handlePageChange();
 	}
 
 	/**
@@ -137,31 +145,40 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 	 * 
 	 * @return Selected {@link TaskModel} instances.
 	 */
-	public java.util.List<TaskModel<?, ?>> getSelectedTaskModels() {
+	public List<TaskModel<?, ?>> getChosenTaskModels() {
 
 		// Ensure have tasks registered
 		if (this.nameToTaskMap == null) {
 			return new ArrayList<TaskModel<?, ?>>(0);
 		}
 
-		// Obtain the selection
-		String[] selectedTaskNames = this.tasks.getSelection();
-		java.util.List<TaskModel<?, ?>> selectedTasks = new ArrayList<TaskModel<?, ?>>(
-				selectedTaskNames.length);
-		for (String selectedTaskName : selectedTaskNames) {
-
-			// Obtain the selected task
-			TaskModel<?, ?> selectedTask = this.nameToTaskMap
-					.get(selectedTaskName);
-
-			// Load if have the selected task
-			if (selectedTask != null) {
-				selectedTasks.add(selectedTask);
+		// Obtain the listing of checked rows
+		List<TableItem> checkedRows = new LinkedList<TableItem>();
+		for (TableItem row : this.tasks.getItems()) {
+			if (row.getChecked()) {
+				checkedRows.add(row);
 			}
 		}
 
-		// Return the selected tasks
-		return selectedTasks;
+		// Obtain the subsequent tasks
+		List<TaskModel<?, ?>> chosenTasks = new ArrayList<TaskModel<?, ?>>(
+				checkedRows.size());
+		for (TableItem checkedRow : checkedRows) {
+
+			// Obtain the chosen task name
+			String taskName = checkedRow.getText();
+
+			// Obtain the selected task
+			TaskModel<?, ?> task = this.nameToTaskMap.get(taskName);
+
+			// Load if have the task
+			if (task != null) {
+				chosenTasks.add(task);
+			}
+		}
+
+		// Return the chosen tasks
+		return chosenTasks;
 	}
 
 	/*
@@ -191,11 +208,20 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 		});
 
 		// Provide control to select tasks
-		this.tasks = new List(page, SWT.MULTI | SWT.BORDER);
+		this.tasks = new Table(page, SWT.CHECK);
+		this.tasks.setHeaderVisible(false);
+		this.tasks.setLinesVisible(false);
 		this.tasks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		this.tasks.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+
+				// Ignore everything except check box changes
+				if (e.detail != SWT.CHECK) {
+					return;
+				}
+
+				// Handle check box change
 				WorkLoaderTasksWizardPage.this.handlePageChange();
 			}
 		});
@@ -221,9 +247,8 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 			return;
 		}
 
-		// Ensure that one or more tasks are selected
-		int selectionCount = WorkLoaderTasksWizardPage.this.tasks
-				.getSelectionCount();
+		// Ensure that one or more tasks are chosen
+		int selectionCount = this.getChosenTaskModels().size();
 		if (selectionCount == 0) {
 			this.setErrorMessage("Must select at least one task");
 			this.setPageComplete(false);

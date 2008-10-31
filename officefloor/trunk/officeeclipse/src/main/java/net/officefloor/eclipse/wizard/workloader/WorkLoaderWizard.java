@@ -253,7 +253,7 @@ public class WorkLoaderWizard extends Wizard {
 
 		// Obtain the tasks to provide
 		List<TaskModel<?, ?>> selectedTasks = this.tasksPage
-				.getSelectedTaskModels();
+				.getChosenTaskModels();
 
 		// Create and load the desk work
 		DeskWorkModel deskWorkModel = new DeskWorkModel();
