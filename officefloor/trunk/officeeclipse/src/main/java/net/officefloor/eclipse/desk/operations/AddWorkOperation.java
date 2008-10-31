@@ -16,16 +16,13 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.dialog.DeskWorkCreateDialog;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
+import net.officefloor.eclipse.wizard.WizardUtil;
+import net.officefloor.eclipse.wizard.workloader.WorkLoaderWizard;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
-
-import org.eclipse.core.resources.IProject;
 
 /**
  * Adds a {@link DeskWorkModel} to the {@link DeskModel}.
@@ -56,14 +53,13 @@ public class AddWorkOperation extends AbstractOperation<DeskEditPart> {
 		// Create the work
 		DeskWorkModel deskWork = null;
 		try {
-			AbstractOfficeFloorEditor<?, ?> editor = editPart.getEditor();
-			IProject project = ProjectConfigurationContext.getProject(editor
-					.getEditorInput());
-			deskWork = new DeskWorkCreateDialog(editor.getSite().getShell(),
-					project).createDeskWork();
-
+			WorkLoaderWizard workWizard = new WorkLoaderWizard(editPart);
+			if (WizardUtil.runWizard(workWizard, editPart)) {
+				deskWork = workWizard.getDeskWorkModel();
+			}
 		} catch (Throwable ex) {
 			editPart.messageError(ex);
+			return;
 		}
 
 		// Ensure have the work

@@ -168,10 +168,11 @@ public class BeanListInput<B> implements Input<Table> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.Input#buildControl(net.officefloor.eclipse.common.dialog.input.InputContext)
+	 * @seenet.officefloor.eclipse.common.dialog.input.Input#buildControl(net.
+	 * officefloor.eclipse.common.dialog.input.InputContext)
 	 */
 	@Override
-	public Table buildControl(InputContext context) {
+	public Table buildControl(final InputContext context) {
 
 		// Create the table
 		this.table = new Table(context.getParent(),
@@ -227,7 +228,7 @@ public class BeanListInput<B> implements Input<Table> {
 		this.tableViewer.setCellEditors(cellEditors);
 
 		// Specify the cell modifier
-		this.tableViewer.setCellModifier(new PropertyCellModifier());
+		this.tableViewer.setCellModifier(new PropertyCellModifier(context));
 
 		// Specify the label and content providers
 		this.tableViewer.setLabelProvider(new PropertyLabelProvider());
@@ -253,6 +254,9 @@ public class BeanListInput<B> implements Input<Table> {
 					// Add the bean
 					BeanListInput.this.addBean(bean);
 
+					// Notify changed
+					context.notifyValueChanged(BeanListInput.this.beans);
+
 				} catch (Exception ex) {
 					throw new OfficeFloorPluginFailure(ex);
 				}
@@ -274,12 +278,16 @@ public class BeanListInput<B> implements Input<Table> {
 				// Obtain the first bean selected
 				B bean = (B) ((IStructuredSelection) BeanListInput.this.tableViewer
 						.getSelection()).getFirstElement();
+				if (bean == null) {
+					// Nothing selected to delete
+					return;
+				}
 
 				// Remove the bean
-				BeanListInput.this.beans.remove(bean);
+				BeanListInput.this.removeBean(bean);
 
-				// Remove from view
-				BeanListInput.this.tableViewer.remove(bean);
+				// Notify changed
+				context.notifyValueChanged(BeanListInput.this.beans);
 			}
 		});
 
@@ -290,8 +298,10 @@ public class BeanListInput<B> implements Input<Table> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse.swt.widgets.Control,
-	 *      net.officefloor.eclipse.common.dialog.input.InputContext)
+	 * @see
+	 * net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse
+	 * .swt.widgets.Control,
+	 * net.officefloor.eclipse.common.dialog.input.InputContext)
 	 */
 	@Override
 	public List<B> getValue(Table control, InputContext context) {
@@ -343,10 +353,10 @@ public class BeanListInput<B> implements Input<Table> {
 
 			try {
 				// Find the accessor and mutator methods
-				this.accessor = BeanListInput.this.beanType
-						.getMethod("get" + methodName);
-				this.mutator = BeanListInput.this.beanType.getMethod(
-						"set" + methodName, new Class[] { String.class });
+				this.accessor = BeanListInput.this.beanType.getMethod("get"
+						+ methodName);
+				this.mutator = BeanListInput.this.beanType.getMethod("set"
+						+ methodName, new Class[] { String.class });
 			} catch (NoSuchMethodException ex) {
 				throw new OfficeFloorPluginFailure(ex);
 			}
@@ -405,11 +415,27 @@ public class BeanListInput<B> implements Input<Table> {
 	 */
 	private class PropertyCellModifier implements ICellModifier {
 
+		/**
+		 * {@link InputContext}.
+		 */
+		private final InputContext inputContext;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param inputContext
+		 *            {@link InputContext}.
+		 */
+		public PropertyCellModifier(InputContext inputContext) {
+			this.inputContext = inputContext;
+		}
+
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object,
-		 *      java.lang.String)
+		 * @see
+		 * org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object,
+		 * java.lang.String)
 		 */
 		@Override
 		public boolean canModify(Object element, String property) {
@@ -420,8 +446,9 @@ public class BeanListInput<B> implements Input<Table> {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object,
-		 *      java.lang.String)
+		 * @see
+		 * org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object,
+		 * java.lang.String)
 		 */
 		@Override
 		@SuppressWarnings("unchecked")
@@ -443,7 +470,7 @@ public class BeanListInput<B> implements Input<Table> {
 		 * (non-Javadoc)
 		 * 
 		 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object,
-		 *      java.lang.String, java.lang.Object)
+		 * java.lang.String, java.lang.Object)
 		 */
 		@Override
 		@SuppressWarnings("unchecked")
@@ -465,6 +492,9 @@ public class BeanListInput<B> implements Input<Table> {
 			// Update the view with changes
 			BeanListInput.this.tableViewer.update(bean,
 					new String[] { property });
+
+			// Notify change
+			this.inputContext.notifyValueChanged(BeanListInput.this.beans);
 		}
 	}
 
@@ -477,8 +507,9 @@ public class BeanListInput<B> implements Input<Table> {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object,
-		 *      int)
+		 * @see
+		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java
+		 * .lang.Object, int)
 		 */
 		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
@@ -488,8 +519,9 @@ public class BeanListInput<B> implements Input<Table> {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object,
-		 *      int)
+		 * @see
+		 * org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.
+		 * lang.Object, int)
 		 */
 		@Override
 		@SuppressWarnings("unchecked")
@@ -525,7 +557,9 @@ public class BeanListInput<B> implements Input<Table> {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
+		 * @see
+		 * org.eclipse.jface.viewers.IStructuredContentProvider#getElements(
+		 * java.lang.Object)
 		 */
 		@Override
 		public Object[] getElements(Object inputElement) {
@@ -546,8 +580,9 @@ public class BeanListInput<B> implements Input<Table> {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
-		 *      java.lang.Object, java.lang.Object)
+		 * @see
+		 * org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse
+		 * .jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {

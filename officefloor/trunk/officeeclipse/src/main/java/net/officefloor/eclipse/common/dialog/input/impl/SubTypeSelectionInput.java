@@ -16,18 +16,13 @@
  */
 package net.officefloor.eclipse.common.dialog.input.impl;
 
-import java.util.LinkedList;
-
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
+import net.officefloor.eclipse.java.JavaUtil;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -56,39 +51,7 @@ public class SubTypeSelectionInput implements Input<List> {
 	public SubTypeSelectionInput(IProject project, String superClassName)
 			throws OfficeFloorPluginFailure {
 		try {
-
-			// Ensure class on the class path
-			// (necessary to check able to create the class)
-			IJavaProject javaProject = JavaCore.create(project);
-			IType superType = javaProject.findType(superClassName);
-			if (superType == null) {
-				throw new Exception("Class " + superClassName
-						+ " must be on the projects class path");
-			}
-
-			// Obtain the list of implementations
-			ITypeHierarchy hierarchy = superType.newTypeHierarchy(null);
-			IType[] allTypes = hierarchy.getAllClasses();
-
-			// Trim the list to non-abstract implementations
-			LinkedList<IType> subTypes = new LinkedList<IType>();
-			for (IType type : allTypes) {
-
-				// Ignore object
-				if (Object.class.getName().equals(type.getFullyQualifiedName())) {
-					continue;
-				}
-
-				// Ignore abstract classes
-				if (Flags.isAbstract(type.getFlags())) {
-					continue;
-				}
-
-				// Include type
-				subTypes.add(type);
-			}
-			this.subTypes = subTypes.toArray(new IType[0]);
-
+			this.subTypes = JavaUtil.getSubTypes(project, superClassName);
 		} catch (Exception ex) {
 			throw new OfficeFloorPluginFailure(ex);
 		}
@@ -97,7 +60,8 @@ public class SubTypeSelectionInput implements Input<List> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.Input#buildControl(net.officefloor.eclipse.common.dialog.input.InputContext)
+	 * @seenet.officefloor.eclipse.common.dialog.input.Input#buildControl(net.
+	 * officefloor.eclipse.common.dialog.input.InputContext)
 	 */
 	@Override
 	public List buildControl(final InputContext context) {
@@ -128,8 +92,10 @@ public class SubTypeSelectionInput implements Input<List> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse.swt.widgets.Control,
-	 *      net.officefloor.eclipse.common.dialog.input.InputContext)
+	 * @see
+	 * net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse
+	 * .swt.widgets.Control,
+	 * net.officefloor.eclipse.common.dialog.input.InputContext)
 	 */
 	@Override
 	public String getValue(List control, InputContext context) {
