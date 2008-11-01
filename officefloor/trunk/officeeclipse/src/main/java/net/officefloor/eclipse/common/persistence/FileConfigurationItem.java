@@ -18,10 +18,12 @@ package net.officefloor.eclipse.common.persistence;
 
 import java.io.InputStream;
 
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -53,6 +55,30 @@ public class FileConfigurationItem implements ConfigurationItem {
 	 */
 	public static IFile getFile(IEditorInput editorInput) {
 		return ((IFileEditorInput) editorInput).getFile();
+	}
+
+	/**
+	 * Convenience method to obtain the {@link IFile} for the
+	 * {@link AbstractOfficeFloorEditPart}.
+	 * 
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
+	 * @return {@link IFile}.
+	 */
+	public static IFile getFile(AbstractOfficeFloorEditPart<?, ?> editPart) {
+		return getFile(editPart.getEditor().getEditorInput());
+	}
+
+	/**
+	 * Convenience method to obtain the {@link IProject} for the
+	 * {@link AbstractOfficeFloorEditPart}.
+	 * 
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
+	 * @return {@link IProject}.
+	 */
+	public static IProject getProject(AbstractOfficeFloorEditPart<?, ?> editPart) {
+		return getFile(editPart).getProject();
 	}
 
 	/**
@@ -117,7 +143,8 @@ public class FileConfigurationItem implements ConfigurationItem {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.model.persistence.ConfigurationItem#getConfiguration()
+	 * @see
+	 * net.officefloor.model.persistence.ConfigurationItem#getConfiguration()
 	 */
 	public InputStream getConfiguration() throws Exception {
 		return this.file.getContents();
@@ -126,7 +153,9 @@ public class FileConfigurationItem implements ConfigurationItem {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.model.persistence.ConfigurationItem#setConfiguration(java.io.InputStream)
+	 * @see
+	 * net.officefloor.model.persistence.ConfigurationItem#setConfiguration(
+	 * java.io.InputStream)
 	 */
 	public void setConfiguration(InputStream configuration) throws Exception {
 		this.file.setContents(configuration, true, true, this.monitor);

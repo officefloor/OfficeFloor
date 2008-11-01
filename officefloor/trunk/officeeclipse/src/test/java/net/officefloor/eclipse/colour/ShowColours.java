@@ -43,7 +43,7 @@ public class ShowColours {
 	 *            Command line arguments.
 	 */
 	public static void main(String... arguments) {
-
+		
 		final int SIZE = 256;
 
 		// Create the contents

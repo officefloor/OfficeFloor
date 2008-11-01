@@ -16,8 +16,16 @@
  */
 package net.officefloor.eclipse.extension.workloader;
 
+import java.util.List;
+
 import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.work.WorkModel;
 import net.officefloor.work.WorkLoader;
+import net.officefloor.work.WorkSpecification;
+
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 /**
  * Interface for extension to provide enriched {@link WorkLoader} usage.
@@ -46,4 +54,31 @@ public interface WorkLoaderExtension {
 	 * @return Display name.
 	 */
 	String getDisplayName();
+
+	/**
+	 * Populates the input page with the necessary {@link Control} instances to
+	 * obtain the properties. Also allows notifying of changes to properties via
+	 * the {@link WorkLoaderExtensionContext}.
+	 * 
+	 * @param page
+	 *            Page to be setup for obtaining the properties.
+	 * @param context
+	 *            {@link WorkLoaderExtensionContext} to notify of changes to the
+	 *            properties.
+	 * @return Initial set of properties. Providing <code>null</code> or an
+	 *         empty list will initiate on the {@link PropertyModel} instances
+	 *         obtained from the {@link WorkSpecification}.
+	 */
+	List<PropertyModel> createControl(Composite page,
+			WorkLoaderExtensionContext context);
+
+	/**
+	 * Obtains the suggested name of the {@link WorkModel}.
+	 * 
+	 * @param properties
+	 *            Listing of populated {@link PropertyModel} instances.
+	 * @return Suggested {@link WorkModel} name or <code>null</code> if no
+	 *         suggestion.
+	 */
+	String getSuggestedWorkName(List<PropertyModel> properties);
 }

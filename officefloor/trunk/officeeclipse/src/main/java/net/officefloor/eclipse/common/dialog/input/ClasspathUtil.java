@@ -31,11 +31,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarEntryResource;
@@ -46,6 +49,44 @@ import org.eclipse.jdt.internal.core.JarEntryResource;
  * @author Daniel
  */
 public class ClasspathUtil {
+
+	/**
+	 * Obtains the class name of the input {@link IJavaElement}.
+	 * 
+	 * @param classFile
+	 *            {@link IClassFile}.
+	 * @return Class name or <code>null</code> if {@link IJavaElement} not a
+	 *         class or contained within a class.
+	 */
+	public static String getClassName(IJavaElement javaElement) {
+
+		// Find the type
+		IType type;
+		if (javaElement instanceof IType) {
+			type = (IType) javaElement;
+		} else if (javaElement instanceof IClassFile) {
+			type = ((IClassFile) javaElement).getType();
+		} else if (javaElement instanceof ICompilationUnit){
+			ICompilationUnit unit = (ICompilationUnit) javaElement;
+			
+			// Strip extension from name
+			String name = javaElement.getElementName().split("\\.")[0];
+			
+			// Obtain the type
+			type = unit.getType(name);
+		} else {
+			// Look upwards for type
+			type = (IType) javaElement.getAncestor(IJavaElement.TYPE);
+		}
+
+		// Ensure have type
+		if (type == null) {
+			return null;
+		}
+
+		// Determine the fully qualified name
+		return type.getFullyQualifiedName();
+	}
 
 	/**
 	 * Obtains the location on the class path for the input full path.
