@@ -29,6 +29,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -47,9 +49,8 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 public class ClasspathSelectionInput implements Input<Tree> {
 
 	/**
-	 * {@link IProject} as root of {@link Tree}. If <code>null</code>
-	 * includes all open {@link IProject} instances of the
-	 * {@link IWorkspaceRoot}.
+	 * {@link IProject} as root of {@link Tree}. If <code>null</code> includes
+	 * all open {@link IProject} instances of the {@link IWorkspaceRoot}.
 	 */
 	private final IProject project;
 
@@ -127,15 +128,17 @@ public class ClasspathSelectionInput implements Input<Tree> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.Input#buildControl(net.officefloor.eclipse.common.dialog.input.InputContext)
+	 * @seenet.officefloor.eclipse.common.dialog.input.Input#buildControl(net.
+	 * officefloor.eclipse.common.dialog.input.InputContext)
 	 */
 	@Override
-	public Tree buildControl(InputContext context) {
+	public Tree buildControl(final InputContext context) {
 
 		// Create the tree
-		Tree tree = new Tree(context.getParent(), SWT.NONE);
+		final Tree tree = new Tree(context.getParent(), SWT.NONE);
 		GridData gridData = new GridData(GridData.FILL_BOTH);
 		gridData.heightHint = 150; // hint on height
+		gridData.widthHint = 200; // hint on width
 		tree.setLayoutData(gridData);
 
 		// Obtain the root of the tree
@@ -148,6 +151,14 @@ public class ClasspathSelectionInput implements Input<Tree> {
 		treeViewer.setLabelProvider(WorkbenchLabelProvider
 				.getDecoratingWorkbenchLabelProvider());
 		treeViewer.setInput(treeInput);
+		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				// Notify of change
+				context.notifyValueChanged(ClasspathSelectionInput.this
+						.getValue(tree, context));
+			}
+		});
 
 		// Return the tree
 		return tree;
@@ -156,8 +167,10 @@ public class ClasspathSelectionInput implements Input<Tree> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse.swt.widgets.Control,
-	 *      net.officefloor.eclipse.common.dialog.input.InputContext)
+	 * @see
+	 * net.officefloor.eclipse.common.dialog.input.Input#getValue(org.eclipse
+	 * .swt.widgets.Control,
+	 * net.officefloor.eclipse.common.dialog.input.InputContext)
 	 */
 	@Override
 	public Object getValue(Tree control, InputContext context) {
@@ -177,11 +190,11 @@ public class ClasspathSelectionInput implements Input<Tree> {
 		// Return based on specific type
 		if (data instanceof IResource) {
 			IResource resource = (IResource) data;
-			return resource.getFullPath().toString();
+			return resource;
 
 		} else if (data instanceof IJavaElement) {
 			IJavaElement javaElement = (IJavaElement) data;
-			return javaElement.getResource().getFullPath().toString();
+			return javaElement;
 
 		} else {
 			// Unkonwn type
@@ -198,7 +211,9 @@ public class ClasspathSelectionInput implements Input<Tree> {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see org.eclipse.ui.model.BaseWorkbenchContentProvider#getChildren(java.lang.Object)
+		 * @see
+		 * org.eclipse.ui.model.BaseWorkbenchContentProvider#getChildren(java
+		 * .lang.Object)
 		 */
 		@Override
 		public Object[] getChildren(Object o) {

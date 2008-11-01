@@ -18,6 +18,8 @@ package net.officefloor.eclipse.common.dialog;
 
 import junit.framework.TestCase;
 
+import net.officefloor.eclipse.common.dialog.BeanDialog;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;

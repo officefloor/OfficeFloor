@@ -25,6 +25,7 @@ import java.util.Map;
 
 import net.officefloor.desk.WorkToDeskWorkSynchroniser;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
@@ -35,6 +36,7 @@ import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.WorkModel;
 import net.officefloor.work.WorkLoader;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.wizard.IWizard;
@@ -145,16 +147,16 @@ public class WorkLoaderWizard extends Wizard {
 			workLoaderNames[i] = this.workLoaders[i].getDisplayName();
 		}
 
-		// Obtain the class loader
-		ProjectClassLoader classLoader = ProjectClassLoader.create(deskEditPart
-				.getEditor());
+		// Obtain the project and class loader
+		IProject project = FileConfigurationItem.getProject(deskEditPart);
+		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
 
 		// Create the pages
 		this.listingPage = new WorkLoaderListingWizardPage(workLoaderNames);
 		this.propertiesPages = new WorkLoaderPropertiesWizardPage[this.workLoaders.length];
 		for (int i = 0; i < this.propertiesPages.length; i++) {
 			this.propertiesPages[i] = new WorkLoaderPropertiesWizardPage(this,
-					this.workLoaders[i], classLoader);
+					this.workLoaders[i], project, classLoader);
 		}
 		this.tasksPage = new WorkLoaderTasksWizardPage();
 	}
@@ -200,8 +202,9 @@ public class WorkLoaderWizard extends Wizard {
 
 		} else if (page instanceof WorkLoaderPropertiesWizardPage) {
 			// Properties specified, so now select tasks
-			this.tasksPage.setWorkModel(this.currentPropertiesPage
-					.getWorkModel());
+			this.tasksPage.loadWorkModel(this.currentPropertiesPage
+					.getWorkModel(), this.currentPropertiesPage
+					.getSuggestedWorkName());
 			return this.tasksPage;
 
 		} else {

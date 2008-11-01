@@ -85,8 +85,10 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 	 * 
 	 * @param workModel
 	 *            {@link WorkModel}.
+	 * @param suggestedWorkName
+	 *            Suggested work name.
 	 */
-	public void setWorkModel(WorkModel<?> workModel) {
+	public void loadWorkModel(WorkModel<?> workModel, String suggestedWorkName) {
 
 		// Do nothing if same work model
 		if (this.workModel == workModel) {
@@ -126,6 +128,9 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 			item.setText(taskName);
 			item.setChecked(true);
 		}
+
+		// Specify the suggested work name
+		this.workName.setText(suggestedWorkName);
 
 		// Initiate state
 		this.handlePageChange();
@@ -197,9 +202,12 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 
 		// Provide control to specify name
 		Composite name = new Composite(page, SWT.NONE);
+		name.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		name.setLayout(new GridLayout(2, false));
 		new Label(name, SWT.None).setText("Work name: ");
 		this.workName = new Text(name, SWT.SINGLE | SWT.BORDER);
+		this.workName.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true,
+				false));
 		this.workName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -227,7 +235,7 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 		});
 
 		// Initiate state (currently no work)
-		this.setWorkModel(null);
+		this.loadWorkModel(null, "");
 		this.handlePageChange();
 
 		// Specify control

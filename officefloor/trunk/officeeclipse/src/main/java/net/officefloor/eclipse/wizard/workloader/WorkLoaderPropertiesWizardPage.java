@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse.wizard.workloader;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -25,6 +26,8 @@ import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
+import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
+import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
 import net.officefloor.eclipse.wizard.workloader.WorkLoaderWizard.WorkLoaderInstance;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.PropertyModel;
@@ -33,13 +36,12 @@ import net.officefloor.work.WorkLoader;
 import net.officefloor.work.WorkProperty;
 import net.officefloor.work.WorkSpecification;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
 /**
  * {@link IWizardPage} providing the properties of the {@link WorkLoader}.
@@ -57,6 +59,11 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 	 * {@link WorkLoaderInstance} instance.
 	 */
 	private final WorkLoaderInstance workLoaderInstance;
+
+	/**
+	 * {@link IProject}.
+	 */
+	private final IProject project;
 
 	/**
 	 * {@link ClassLoader}.
@@ -95,17 +102,20 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 	 *            Owning {@link WorkLoaderWizard}.
 	 * @param workLoaderInstance
 	 *            {@link WorkLoaderInstance} instances.
+	 * @param project
+	 *            {@link IProject}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @throws Exception
 	 *             If fails to create.
 	 */
 	public WorkLoaderPropertiesWizardPage(WorkLoaderWizard workLoaderWizard,
-			WorkLoaderInstance workLoaderInstance, ClassLoader classLoader)
-			throws Exception {
+			WorkLoaderInstance workLoaderInstance, IProject project,
+			ClassLoader classLoader) throws Exception {
 		super("WorkLoader properties");
 		this.workLoaderWizard = workLoaderWizard;
 		this.workLoaderInstance = workLoaderInstance;
+		this.project = project;
 		this.classLoader = classLoader;
 
 		// Specify wizard and initially not complete
@@ -150,12 +160,41 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 	}
 
 	/**
+	 * Obtains the suggested name of the {@link WorkModel}.
+	 * 
+	 * @return Suggested name of the {@link WorkModel}.
+	 */
+	public String getSuggestedWorkName() {
+
+		// Ensure have extension
+		WorkLoaderExtension extension = this.workLoaderInstance.extension;
+		if (extension == null) {
+			return ""; // no suggestion
+		}
+
+		// Ensure have property models
+		List<PropertyModel> properties = this.getPropertyModels();
+		if (properties == null) {
+			return ""; // no suggestion
+		}
+
+		// Obtain the suggested name
+		String suggestedWorkName = extension.getSuggestedWorkName(properties);
+		return (suggestedWorkName == null ? "" : suggestedWorkName);
+	}
+
+	/**
 	 * Handles change to the properties.
 	 * 
 	 * @param propertyModels
 	 *            {@link PropertyModel} instances.
 	 */
 	private void handlePropertiesChanged(List<PropertyModel> propertyModels) {
+
+		// Ensure have the properties
+		if (propertyModels == null) {
+			propertyModels = new ArrayList<PropertyModel>(0);
+		}
 
 		// Clear the work model and error message
 		this.propertyModels = propertyModels;
@@ -199,10 +238,11 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 				// Work model must be created
 				this.setErrorMessage(this.workLoaderInstance.className
 						+ " failed to provide a " + WorkModel.class.getName());
-			} else {
-				// Successful, may move to next page
-				this.setPageComplete(true);
+				return;
 			}
+
+			// If here successful, may move to next page
+			this.setPageComplete(true);
 
 		} catch (Throwable ex) {
 			// Indicate failure to create the work model
@@ -224,6 +264,8 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 	@Override
 	public void createControl(Composite parent) {
 
+		final String DEFAULT_TITLE_NAME = "Specify properties";
+
 		// Create the page for the work loader
 		Composite page = new Composite(parent, SWT.NONE);
 
@@ -237,7 +279,7 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 		if (this.workLoaderInstance.extension == null) {
 			// No an extension so provide properties table to fill out
 			page.setLayout(new GridLayout());
-			this.setTitle("Specify properties");
+			this.setTitle(DEFAULT_TITLE_NAME);
 			this.propertiesInput = new BeanListInput<PropertyModel>(
 					PropertyModel.class);
 			this.propertiesInput.addProperty("name", 1);
@@ -260,15 +302,49 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 
 		} else {
 			// Extension provided, so allow it to populate the page
+			List<PropertyModel> extensionProperties = this.workLoaderInstance.extension
+					.createControl(page, new WorkLoaderExtensionContext() {
 
-			// TODO remove
-			page.setLayout(new RowLayout(SWT.VERTICAL));
-			new Label(page, SWT.HORIZONTAL)
-					.setText("Provide page population by WorkLoader extension "
-							+ this.workLoaderInstance.getDisplayName());
+						@Override
+						public void setTitle(String title) {
+							WorkLoaderPropertiesWizardPage.this.setTitle(title);
+						}
+
+						@Override
+						public void notifyPropertiesChanged(
+								List<PropertyModel> properties) {
+							WorkLoaderPropertiesWizardPage.this
+									.handlePropertiesChanged(properties);
+						}
+
+						@Override
+						public void setErrorMessage(String message) {
+							WorkLoaderPropertiesWizardPage.this
+									.setErrorMessage(message);
+						}
+
+						@Override
+						public IProject getProject() {
+							return WorkLoaderPropertiesWizardPage.this.project;
+						}
+
+					});
+
+			// Provide default title if none specified
+			String title = this.getTitle();
+			if ((title == null) || (title.trim().length() == 0)) {
+				this.setTitle(DEFAULT_TITLE_NAME);
+			}
+
+			// Determine if have extension properties
+			if ((extensionProperties != null)
+					&& (extensionProperties.size() > 0)) {
+				// Have extension properties, so override specification
+				propertyModels = extensionProperties;
+			}
 		}
 
-		// Indicate initial state (no properties yet)
+		// Indicate initial state
 		this.handlePropertiesChanged(propertyModels);
 
 		// Specify control

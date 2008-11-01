@@ -16,9 +16,25 @@
  */
 package net.officefloor.eclipse.extension.workloader.clazz;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
+import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
+import net.officefloor.eclipse.common.dialog.input.InputFilter;
+import net.officefloor.eclipse.common.dialog.input.InputHandler;
+import net.officefloor.eclipse.common.dialog.input.InputListener;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
+import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
+import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.work.WorkLoader;
 import net.officefloor.work.clazz.ClassWorkLoader;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 
 /**
  * {@link WorkLoaderExtension} for the {@link ClassWorkLoader}.
@@ -47,6 +63,99 @@ public class ClassWorkLoaderExtension implements WorkLoaderExtension {
 	@Override
 	public String getDisplayName() {
 		return "Class";
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seenet.officefloor.eclipse.extension.workloader.WorkLoaderExtension#
+	 * createControl(org.eclipse.swt.widgets.Composite,
+	 * net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext)
+	 */
+	@Override
+	public List<PropertyModel> createControl(Composite page,
+			final WorkLoaderExtensionContext context) {
+
+		// Specify layout
+		page.setLayout(new GridLayout(2, false));
+
+		// Provide the only property which is the class name
+		final PropertyModel property = new PropertyModel(
+				ClassWorkLoader.CLASS_NAME_PROPERTY_NAME, null);
+		final List<PropertyModel> properties = new ArrayList<PropertyModel>(1);
+		properties.add(property);
+
+		// Provide listing of class names
+		ClasspathFilter filter = new ClasspathFilter();
+		filter.addJavaElementFilter(new InputFilter<IJavaElement>() {
+			@Override
+			public boolean isFilter(IJavaElement item) {
+				return !(item instanceof ITypeRoot);
+			}
+		});
+		new InputHandler<String>(page, new ClasspathSelectionInput(context
+				.getProject(), filter), new InputListener() {
+
+			@Override
+			public void notifyValueChanged(Object value) {
+
+				// Must be java element (due to filter)
+				IJavaElement javaElement = (IJavaElement) value;
+
+				// Obtain class name
+				String className = ClasspathUtil.getClassName(javaElement);
+
+				// Inform of change
+				property.setValue(className);
+				context.notifyPropertiesChanged(properties);
+			}
+
+			@Override
+			public void notifyValueInvalid(String message) {
+				context.setErrorMessage(message);
+			}
+		});
+
+		// Return the properties
+		return properties;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @seenet.officefloor.eclipse.extension.workloader.WorkLoaderExtension#
+	 * getSuggestedWorkName(java.util.List)
+	 */
+	@Override
+	public String getSuggestedWorkName(List<PropertyModel> properties) {
+
+		// Find the property containing the class name
+		PropertyModel classNameProperty = null;
+		for (PropertyModel property : properties) {
+			if (ClassWorkLoader.CLASS_NAME_PROPERTY_NAME.equals(property
+					.getName())) {
+				classNameProperty = property;
+			}
+		}
+
+		// Ensure found property
+		if (classNameProperty == null) {
+			// No suggestion as no class name
+			return null;
+		}
+
+		// Ensure have class name
+		String className = classNameProperty.getValue();
+		if ((className == null) || (className.trim().length() == 0)) {
+			return null;
+		}
+
+		// Obtain name (minus package)
+		String[] fragments = className.split("\\.");
+		String simpleClassName = fragments[fragments.length - 1];
+
+		// Return the simple class name
+		return simpleClassName;
 	}
 
 }
