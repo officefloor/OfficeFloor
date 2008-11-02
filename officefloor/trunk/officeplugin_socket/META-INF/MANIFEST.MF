@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Office Floor Socket
+Bundle-SymbolicName: net.officefloor.socket
+Bundle-Version: 1.0.0
+Export-Package: net.officefloor.plugin.impl.socket.server,
+ net.officefloor.plugin.impl.socket.server.messagesegment,
+ net.officefloor.plugin.socket.server.http,
+ net.officefloor.plugin.socket.server.http.api,
+ net.officefloor.plugin.socket.server.http.parse,
+ net.officefloor.plugin.socket.server.http.request,
+ net.officefloor.plugin.socket.server.http.request.config,
+ net.officefloor.plugin.socket.server.spi,
+ net.officefloor.plugin.socket.server.tcp,
+ net.officefloor.plugin.socket.server.tcp.api,
+ net.officefloor.work.http.file,
+ net.officefloor.work.http.route
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: net.officefloor.compiler;bundle-version="1.0.0",
+ net.officefloor.model;bundle-version="1.0.0",
+ net.officefloor.frame;bundle-version="1.0.0",
+ org.junit;bundle-version="3.8.2",
+ net.officefloor.eclipse.jars;bundle-version="1.0.0",
+ net.officefloor.xml;bundle-version="1.0.0"

@@ -5,7 +5,16 @@ Bundle-SymbolicName: net.officefloor.eclipse.jars;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: lib/easymock-1.1.jar,
- .
-Export-Package: org.easymock,
+ .,
+ lib/commons-httpclient-3.1.jar
+Export-Package: org.apache.commons.httpclient,
+ org.apache.commons.httpclient.auth,
+ org.apache.commons.httpclient.cookie,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.methods.multipart,
+ org.apache.commons.httpclient.params,
+ org.apache.commons.httpclient.protocol,
+ org.apache.commons.httpclient.util,
+ org.easymock,
  org.easymock.internal
 Bundle-Vendor: Daniel Sagenschneider

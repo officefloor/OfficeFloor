@@ -90,9 +90,12 @@ public class TaskToFlowItemSynchroniser {
 				continue;
 			}
 
+			// Obtain the label for the output
+			String flowItemOutputLabel = flow.getLabel();
+
 			// Create a new output
-			flowItem.addOutput(new FlowItemOutputModel(flowItemOutputId, flow,
-					null, null));
+			flowItem.addOutput(new FlowItemOutputModel(flowItemOutputId,
+					flowItemOutputLabel, flow, null, null));
 		}
 
 		// Remove any additional flows

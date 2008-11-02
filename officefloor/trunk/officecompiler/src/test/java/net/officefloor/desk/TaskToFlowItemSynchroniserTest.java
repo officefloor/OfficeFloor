@@ -18,9 +18,13 @@ package net.officefloor.desk;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.task.TaskFactoryManufacturer;
 import net.officefloor.model.work.TaskEscalationModel;
 import net.officefloor.model.work.TaskFlowModel;
@@ -41,8 +45,8 @@ public class TaskToFlowItemSynchroniserTest extends OfficeFrameTestCase {
 	public void testTaskToFlowItemSynchroniser() throws Exception {
 
 		// Create the Task
-		TaskFlowModel taskFlowOne = new TaskFlowModel(null, 1);
-		TaskFlowModel taskFlowTwo = new TaskFlowModel(null, 2);
+		TaskFlowModel taskFlowOne = new TaskFlowModel(null, 1, "Label One");
+		TaskFlowModel taskFlowTwo = new TaskFlowModel(null, 2, "Label Two");
 		TaskEscalationModel taskEscalationOne = new TaskEscalationModel(
 				IOException.class.getName());
 		TaskEscalationModel taskEscalationTwo = new TaskEscalationModel(
@@ -62,30 +66,32 @@ public class TaskToFlowItemSynchroniserTest extends OfficeFrameTestCase {
 		// Validate task on flow item
 		assertEquals("Incorrect task", task, flowItem.getTask());
 
+		// Create the listing of expected flow item outputs
+		List<FlowItemOutputModel> expectedOutputs = new LinkedList<FlowItemOutputModel>();
+		expectedOutputs.add(new FlowItemOutputModel("1", "Label One",
+				taskFlowOne, null, null));
+		expectedOutputs.add(new FlowItemOutputModel("2", "Label Two",
+				taskFlowTwo, null, null));
+
 		// Validate outputs on flow item
-		assertEquals("Incorrect number of outputs", 2, flowItem.getOutputs()
-				.size());
-		assertEquals("Incorrect task flow one", taskFlowOne, flowItem
-				.getOutputs().get(0).getTaskFlow());
-		assertEquals("Incorrect task flow two", taskFlowTwo, flowItem
-				.getOutputs().get(1).getTaskFlow());
+		assertList(new String[] { "getId", "getLabel", "getTaskFlow" },
+				flowItem.getOutputs(), expectedOutputs
+						.toArray(new FlowItemOutputModel[0]));
+
+		// Create the listing of expected flow item escalations
+		List<FlowItemEscalationModel> expectedEscalations = new LinkedList<FlowItemEscalationModel>();
+		expectedEscalations.add(new FlowItemEscalationModel(taskEscalationOne
+				.getEscalationType(), taskEscalationOne, null, null));
+		expectedEscalations.add(new FlowItemEscalationModel(taskEscalationTwo
+				.getEscalationType(), taskEscalationTwo, null, null));
 
 		// Validate escalations on flow item
-		assertEquals("Incorrect number of escalations", 2, flowItem
-				.getEscalations().size());
-		assertEquals("Incorrect task escalation one", taskEscalationOne,
-				flowItem.getEscalations().get(0).getTaskEscalation());
-		assertEquals("Incorrect task escalation one type", taskEscalationOne
-				.getEscalationType(), flowItem.getEscalations().get(0)
-				.getEscalationType());
-		assertEquals("Incorrect task escalation two", taskEscalationTwo,
-				flowItem.getEscalations().get(1).getTaskEscalation());
-		assertEquals("Incorrect task escalation two type", taskEscalationTwo
-				.getEscalationType(), flowItem.getEscalations().get(1)
-				.getEscalationType());
+		assertList(new String[] { "getEscalationType", "getTaskEscalation" },
+				flowItem.getEscalations(), expectedEscalations
+						.toArray(new FlowItemEscalationModel[0]));
 
 		// Add task flow
-		TaskFlowModel taskFlowThree = new TaskFlowModel(null, 3);
+		TaskFlowModel taskFlowThree = new TaskFlowModel(null, 3, "Label Three");
 		task.addFlow(taskFlowThree);
 
 		// Add escalation
@@ -96,17 +102,23 @@ public class TaskToFlowItemSynchroniserTest extends OfficeFrameTestCase {
 		// Synchronise again the task to the flow item
 		TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task, flowItem);
 
+		// Alter expected outputs
+		expectedOutputs.add(new FlowItemOutputModel("3", "Label Three",
+				taskFlowThree, null, null));
+
 		// Validate flows synchronised onto flow item
-		assertEquals("Incorrect number of outputs", 3, flowItem.getOutputs()
-				.size());
-		assertEquals("Incorrect task flow three", taskFlowThree, flowItem
-				.getOutputs().get(2).getTaskFlow());
+		assertList(new String[] { "getId", "getLabel", "getTaskFlow" },
+				flowItem.getOutputs(), expectedOutputs
+						.toArray(new FlowItemOutputModel[0]));
+
+		// Alter expected escalations
+		expectedEscalations.add(new FlowItemEscalationModel(taskEscalationThree
+				.getEscalationType(), taskEscalationThree, null, null));
 
 		// Validate escalations synchronised onto flow item
-		assertEquals("Incorrect number of escalations", 3, flowItem
-				.getOutputs().size());
-		assertEquals("Incorrect task escalation three", taskEscalationThree,
-				flowItem.getEscalations().get(2).getTaskEscalation());
+		assertList(new String[] { "getEscalationType", "getTaskEscalation" },
+				flowItem.getEscalations(), expectedEscalations
+						.toArray(new FlowItemEscalationModel[0]));
 
 		// Remove a task flow
 		task.removeFlow(taskFlowTwo);
@@ -117,21 +129,20 @@ public class TaskToFlowItemSynchroniserTest extends OfficeFrameTestCase {
 		// Synchronise again the task to the flow item
 		TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task, flowItem);
 
-		// Validate correct task flow removed
-		assertEquals("Incorrect number of outputs", 2, flowItem.getOutputs()
-				.size());
-		assertEquals("Incorrect first task flow", taskFlowOne, flowItem
-				.getOutputs().get(0).getTaskFlow());
-		assertEquals("Incorrect second task flow", taskFlowThree, flowItem
-				.getOutputs().get(1).getTaskFlow());
+		// Alter expected outputs
+		expectedOutputs.remove(1); // Second output
 
-		// Validate correct escalation removed
-		assertEquals("Incorrect number of escalations", 2, flowItem
-				.getEscalations().size());
-		assertEquals("Incorrect first task escalation", taskEscalationOne,
-				flowItem.getEscalations().get(0).getTaskEscalation());
-		assertEquals("Incorrect second task escalation", taskEscalationThree,
-				flowItem.getEscalations().get(1).getTaskEscalation());
+		// Validate flows synchronised onto flow item
+		assertList(new String[] { "getId", "getLabel", "getTaskFlow" },
+				flowItem.getOutputs(), expectedOutputs
+						.toArray(new FlowItemOutputModel[0]));
+
+		// Alter expected escalations
+		expectedEscalations.remove(1); // Second escalation
+
+		// Validate escalations synchronised onto flow item
+		assertList(new String[] { "getEscalationType", "getTaskEscalation" },
+				flowItem.getEscalations(), expectedEscalations
+						.toArray(new FlowItemEscalationModel[0]));
 	}
-
 }

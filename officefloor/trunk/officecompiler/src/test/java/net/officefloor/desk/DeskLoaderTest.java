@@ -212,10 +212,10 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate outputs of first flow item
 		FlowItemModel flowItemOne = desk.getFlowItems().get(0);
-		assertList(new String[] { "getId" }, flowItemOne.getOutputs(),
-				new FlowItemOutputModel("0", null, null, null),
-				new FlowItemOutputModel("1", null, null, null),
-				new FlowItemOutputModel("2", null, null, null));
+		assertList(new String[] { "getId", "getLabel" }, flowItemOne.getOutputs(),
+				new FlowItemOutputModel("0", "First", null, null, null),
+				new FlowItemOutputModel("1", null, null, null, null),
+				new FlowItemOutputModel("2", "Third", null, null, null));
 
 		// Validate link types of the first flow item
 		assertEquals("Incorrect link type (sequential)",
@@ -272,9 +272,9 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		if (!isSynchronised) {
 			// Validate outputs on third flow item
 			FlowItemModel flowItemThree = desk.getFlowItems().get(2);
-			assertList(new String[] { "getId" }, flowItemThree.getOutputs(),
-					new FlowItemOutputModel("FIRST_FLOW", null, null, null),
-					new FlowItemOutputModel("SECOND_FLOW", null, null, null));
+			assertList(new String[] { "getId", "getLabel" }, flowItemThree.getOutputs(),
+					new FlowItemOutputModel("FIRST_FLOW", null, null, null, null),
+					new FlowItemOutputModel("SECOND_FLOW", "Another", null, null, null));
 
 			// Validate link types of the second flow item
 			assertEquals("Incorrect link type (asynchronous)",

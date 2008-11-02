@@ -18,7 +18,6 @@ package net.officefloor.work.http.route;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Pattern;
 
 import net.officefloor.frame.api.build.Indexed;
@@ -38,10 +37,17 @@ import net.officefloor.work.WorkLoaderContext;
  */
 public class HttpRouteWorkLoader extends AbstractWorkLoader {
 
+	/**
+	 * Property prefix for a routing entry.
+	 */
+	public static final String ROUTE_PROPERTY_PREFIX = "route.";
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.work.AbstractWorkLoader#loadSpecification(net.officefloor.work.AbstractWorkLoader.SpecificationContext)
+	 * @see
+	 * net.officefloor.work.AbstractWorkLoader#loadSpecification(net.officefloor
+	 * .work.AbstractWorkLoader.SpecificationContext)
 	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
@@ -51,38 +57,42 @@ public class HttpRouteWorkLoader extends AbstractWorkLoader {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.work.WorkLoader#loadWork(net.officefloor.work.WorkLoaderContext)
+	 * @seenet.officefloor.work.WorkLoader#loadWork(net.officefloor.work.
+	 * WorkLoaderContext)
 	 */
 	@Override
 	public WorkModel<?> loadWork(WorkLoaderContext context) throws Exception {
 
-		// Obtain mappings
-		Properties properties = context.getProperties();
+		// Iterate over the mappings creating the routings
+		List<String> routeNames = new LinkedList<String>();
+		List<Pattern> routePatterns = new LinkedList<Pattern>();
+		for (String name : context.getPropertyNames()) {
 
-		// Create the patterns
-		List<Pattern> patterns = new LinkedList<Pattern>();
-		boolean isComplete = false;
-		int index = 1;
-		while (!isComplete) {
-			// Obtain pattern
-			String pattern = properties.getProperty(String.valueOf(index++));
-			if (pattern == null) {
-				// Complete as no further pattern
-				isComplete = true;
-			} else {
-				// Add the pattern
-				patterns.add(Pattern.compile(pattern));
+			// Ignore if not starts with routing prefix
+			if (!name.startsWith(ROUTE_PROPERTY_PREFIX)) {
+				continue;
 			}
+
+			// Obtain the route name, by stripping off the prefix
+			String routeName = name.substring(ROUTE_PROPERTY_PREFIX.length());
+
+			// Obtain the pattern for the route
+			String patternText = context.getProperty(name);
+			Pattern pattern = Pattern.compile(patternText);
+
+			// Add details
+			routeNames.add(routeName);
+			routePatterns.add(pattern);
 		}
 
-		// Create the routing
-		Pattern[] routing = patterns.toArray(new Pattern[0]);
-		if (routing.length == 0) {
+		// Ensure have at least one routing
+		if (routePatterns.size() == 0) {
 			throw new Exception("Must have at least one routing entry");
 		}
 
 		// Create the task to route
-		HttpRouteTask task = new HttpRouteTask(routing);
+		HttpRouteTask task = new HttpRouteTask(routePatterns
+				.toArray(new Pattern[0]));
 
 		// Create the task for routing
 		TaskModel<Indexed, Indexed> taskModel = new TaskModel<Indexed, Indexed>();
@@ -90,8 +100,11 @@ public class HttpRouteWorkLoader extends AbstractWorkLoader {
 		taskModel.setTaskFactoryManufacturer(task);
 		taskModel.addObject(new TaskObjectModel<Indexed>(null,
 				ServerHttpConnection.class.getName()));
-		for (int i = 0; i <= routing.length; i++) {
-			taskModel.addFlow(new TaskFlowModel<Indexed>(null, i));
+		int index = 0;
+		for (String routeName : routeNames) {
+			// Flow for each routing entry
+			taskModel.addFlow(new TaskFlowModel<Indexed>(null, index++,
+					routeName));
 		}
 
 		// Create the work for routing

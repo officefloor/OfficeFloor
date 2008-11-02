@@ -27,7 +27,7 @@ import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
-import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
 import net.officefloor.work.WorkLoader;
 import net.officefloor.work.clazz.ClassWorkLoader;
 
@@ -73,16 +73,17 @@ public class ClassWorkLoaderExtension implements WorkLoaderExtension {
 	 * net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext)
 	 */
 	@Override
-	public List<PropertyModel> createControl(Composite page,
+	public List<WorkLoaderProperty> createControl(Composite page,
 			final WorkLoaderExtensionContext context) {
 
 		// Specify layout
 		page.setLayout(new GridLayout(2, false));
 
 		// Provide the only property which is the class name
-		final PropertyModel property = new PropertyModel(
-				ClassWorkLoader.CLASS_NAME_PROPERTY_NAME, null);
-		final List<PropertyModel> properties = new ArrayList<PropertyModel>(1);
+		final WorkLoaderProperty property = new WorkLoaderProperty(
+				ClassWorkLoader.CLASS_NAME_PROPERTY_NAME);
+		final List<WorkLoaderProperty> properties = new ArrayList<WorkLoaderProperty>(
+				1);
 		properties.add(property);
 
 		// Provide listing of class names
@@ -127,11 +128,11 @@ public class ClassWorkLoaderExtension implements WorkLoaderExtension {
 	 * getSuggestedWorkName(java.util.List)
 	 */
 	@Override
-	public String getSuggestedWorkName(List<PropertyModel> properties) {
+	public String getSuggestedWorkName(List<WorkLoaderProperty> properties) {
 
 		// Find the property containing the class name
-		PropertyModel classNameProperty = null;
-		for (PropertyModel property : properties) {
+		WorkLoaderProperty classNameProperty = null;
+		for (WorkLoaderProperty property : properties) {
 			if (ClassWorkLoader.CLASS_NAME_PROPERTY_NAME.equals(property
 					.getName())) {
 				classNameProperty = property;

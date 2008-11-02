@@ -18,7 +18,6 @@ package net.officefloor.desk;
 
 import java.util.Properties;
 
-import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.work.WorkLoaderContext;
 import net.officefloor.work.WorkUnknownPropertyError;
 
@@ -28,6 +27,11 @@ import net.officefloor.work.WorkUnknownPropertyError;
  * @author Daniel
  */
 public class WorkLoaderContextImpl implements WorkLoaderContext {
+
+	/**
+	 * Names of the {@link Properties} in the order defined.
+	 */
+	private final String[] names;
 
 	/**
 	 * {@link Properties}.
@@ -42,14 +46,28 @@ public class WorkLoaderContextImpl implements WorkLoaderContext {
 	/**
 	 * Initiate.
 	 * 
+	 * @param names
+	 *            Names of the {@link Properties} in the order defined.
 	 * @param properties
 	 *            {@link Properties}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 */
-	public WorkLoaderContextImpl(Properties properties, ClassLoader classLoader) {
+	public WorkLoaderContextImpl(String[] names, Properties properties,
+			ClassLoader classLoader) {
+		this.names = names;
 		this.properties = properties;
 		this.classLoader = classLoader;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.work.WorkLoaderContext#getPropertyNames()
+	 */
+	@Override
+	public String[] getPropertyNames() {
+		return this.names;
 	}
 
 	/*
@@ -71,7 +89,7 @@ public class WorkLoaderContextImpl implements WorkLoaderContext {
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.work.WorkLoaderContext#getProperty(java.lang.String,
-	 *      java.lang.String)
+	 * java.lang.String)
 	 */
 	@Override
 	public String getProperty(String name, String defaultValue) {
@@ -100,17 +118,6 @@ public class WorkLoaderContextImpl implements WorkLoaderContext {
 	@Override
 	public ClassLoader getClassLoader() {
 		return this.classLoader;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.work.WorkLoaderContext#getConfigurationContext()
-	 */
-	@Override
-	public ConfigurationContext getConfigurationContext() {
-		throw new UnsupportedOperationException(
-				"DEPRECATED: WorkLoaderContextImpl.getConfigurationContext");
 	}
 
 }
