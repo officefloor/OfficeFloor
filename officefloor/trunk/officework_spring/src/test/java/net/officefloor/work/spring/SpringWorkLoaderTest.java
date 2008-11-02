@@ -67,12 +67,15 @@ public class SpringWorkLoaderTest extends OfficeFrameTestCase {
 		WorkLoader workLoader = new SpringWorkLoader();
 
 		// Create the work loader context for loading the work
+		String[] propertyNames = new String[] {
+				SpringWorkLoader.PROPERTY_SPRING_FILE, SPRING_FILE_PATH,
+				SpringWorkLoader.PROPERTY_BEAN_NAME };
 		Properties properties = new Properties();
 		properties.setProperty(SpringWorkLoader.PROPERTY_SPRING_FILE,
 				SPRING_FILE_PATH);
 		properties.setProperty(SpringWorkLoader.PROPERTY_BEAN_NAME, "test");
 		WorkLoaderContext workLoaderContext = new WorkLoaderContextImpl(
-				properties, this.getClass().getClassLoader());
+				propertyNames, properties, this.getClass().getClassLoader());
 
 		// Load the work
 		WorkModel<?> workModel = workLoader.loadWork(workLoaderContext);

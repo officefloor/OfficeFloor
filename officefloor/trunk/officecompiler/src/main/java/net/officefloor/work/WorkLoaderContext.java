@@ -20,7 +20,6 @@ import java.util.Properties;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.work.WorkModel;
-import net.officefloor.repository.ConfigurationContext;
 
 /**
  * Context for loading a {@link WorkModel}.
@@ -28,6 +27,19 @@ import net.officefloor.repository.ConfigurationContext;
  * @author Daniel
  */
 public interface WorkLoaderContext {
+
+	/**
+	 * <p>
+	 * Obtains the names of the available properties in the order they were
+	 * defined. This allows for ability to provide variable number of properties
+	 * identified by a naming convention and being able to maintain their order.
+	 * <p>
+	 * An example would be providing a listing of routing configurations, each
+	 * entry named <code>route.[something]</code> and order indicating priority.
+	 * 
+	 * @return Names of the properties in the order defined.
+	 */
+	String[] getPropertyNames();
 
 	/**
 	 * Obtains a required property value.
@@ -58,14 +70,6 @@ public interface WorkLoaderContext {
 	 * @return Properties specific for the {@link Work}.
 	 */
 	Properties getProperties();
-
-	/**
-	 * Obtains the {@link ConfigurationContext}.
-	 * 
-	 * @return {@link ConfigurationContext}.
-	 */
-	@Deprecated
-	ConfigurationContext getConfigurationContext();
 
 	/**
 	 * Obtains the {@link ClassLoader} for loading the {@link WorkModel}.

@@ -28,6 +28,7 @@ import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
+import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
 import net.officefloor.eclipse.wizard.workloader.WorkLoaderWizard.WorkLoaderInstance;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.PropertyModel;
@@ -179,7 +180,8 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 		}
 
 		// Obtain the suggested name
-		String suggestedWorkName = extension.getSuggestedWorkName(properties);
+		String suggestedWorkName = extension
+				.getSuggestedWorkName(translateForExtension(properties));
 		return (suggestedWorkName == null ? "" : suggestedWorkName);
 	}
 
@@ -205,6 +207,8 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 		this.setPageComplete(false);
 
 		// Create the properties
+		String[] propertyNames = new String[propertyModels.size()];
+		int index = 0;
 		Properties properties = new Properties();
 		for (PropertyModel propertyModel : propertyModels) {
 
@@ -223,15 +227,16 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 				return;
 			}
 
-			// Load the property
+			// Load the property and specify name in its order
+			propertyNames[index++] = name;
 			properties.setProperty(name, value);
 		}
 
 		try {
 			// Attempt to load the work
 			this.workModel = this.workLoader
-					.loadWork(new WorkLoaderContextImpl(properties,
-							this.classLoader));
+					.loadWork(new WorkLoaderContextImpl(propertyNames,
+							properties, this.classLoader));
 
 			// Determine if work loaded
 			if (this.workModel == null) {
@@ -302,7 +307,7 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 
 		} else {
 			// Extension provided, so allow it to populate the page
-			List<PropertyModel> extensionProperties = this.workLoaderInstance.extension
+			List<WorkLoaderProperty> extensionProperties = this.workLoaderInstance.extension
 					.createControl(page, new WorkLoaderExtensionContext() {
 
 						@Override
@@ -312,9 +317,11 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 
 						@Override
 						public void notifyPropertiesChanged(
-								List<PropertyModel> properties) {
+								List<WorkLoaderProperty> properties) {
+							// Notify of property changes
 							WorkLoaderPropertiesWizardPage.this
-									.handlePropertiesChanged(properties);
+									.handlePropertiesChanged(WorkLoaderPropertiesWizardPage.this
+											.translateForWorkLoader(properties));
 						}
 
 						@Override
@@ -340,7 +347,8 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 			if ((extensionProperties != null)
 					&& (extensionProperties.size() > 0)) {
 				// Have extension properties, so override specification
-				propertyModels = extensionProperties;
+				propertyModels = this
+						.translateForWorkLoader(extensionProperties);
 			}
 		}
 
@@ -350,4 +358,51 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 		// Specify control
 		this.setControl(page);
 	}
+
+	/**
+	 * Translates the listing of {@link PropertyModel} instances into
+	 * {@link WorkLoaderProperty} instances.
+	 * 
+	 * @param properties
+	 *            {@link PropertyModel} instances.
+	 * @return Translated {@link WorkLoaderProperty} instances.
+	 */
+	private List<WorkLoaderProperty> translateForExtension(
+			List<PropertyModel> properties) {
+		List<WorkLoaderProperty> translated;
+		if (properties == null) {
+			translated = new ArrayList<WorkLoaderProperty>(0);
+		} else {
+			translated = new ArrayList<WorkLoaderProperty>(properties.size());
+			for (PropertyModel property : properties) {
+				translated.add(new WorkLoaderProperty(property.getName(),
+						property.getValue()));
+			}
+		}
+		return translated;
+	}
+
+	/**
+	 * Translates the listing of {@link WorkLoaderProperty} instances into
+	 * {@link PropertyModel} instances.
+	 * 
+	 * @param properties
+	 *            {@link WorkLoaderProperty} instances.
+	 * @return Translated {@link PropertyModel} instances.
+	 */
+	private List<PropertyModel> translateForWorkLoader(
+			List<WorkLoaderProperty> properties) {
+		List<PropertyModel> translated;
+		if (properties == null) {
+			translated = new ArrayList<PropertyModel>(0);
+		} else {
+			translated = new ArrayList<PropertyModel>(properties.size());
+			for (WorkLoaderProperty property : properties) {
+				translated.add(new PropertyModel(property.getName(), property
+						.getValue()));
+			}
+		}
+		return translated;
+	}
+
 }

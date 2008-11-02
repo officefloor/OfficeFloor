@@ -50,9 +50,10 @@ public class ClassWorkLoaderTest extends OfficeFrameTestCase {
 		Properties properties = new Properties();
 		properties.setProperty(ClassWorkLoader.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
-		WorkLoaderContext context = new WorkLoaderContextImpl(properties, this
-				.getClass().getClassLoader());
-		
+		WorkLoaderContext context = new WorkLoaderContextImpl(
+				new String[] { ClassWorkLoader.CLASS_NAME_PROPERTY_NAME },
+				properties, this.getClass().getClassLoader());
+
 		// Load the work
 		WorkModel<ClassWork> work = new ClassWorkLoader().loadWork(context);
 

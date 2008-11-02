@@ -69,16 +69,16 @@ public interface WorkLoaderExtension {
 	 *         empty list will initiate on the {@link PropertyModel} instances
 	 *         obtained from the {@link WorkSpecification}.
 	 */
-	List<PropertyModel> createControl(Composite page,
+	List<WorkLoaderProperty> createControl(Composite page,
 			WorkLoaderExtensionContext context);
 
 	/**
 	 * Obtains the suggested name of the {@link WorkModel}.
 	 * 
 	 * @param properties
-	 *            Listing of populated {@link PropertyModel} instances.
+	 *            Listing of populated {@link WorkLoaderProperty} instances.
 	 * @return Suggested {@link WorkModel} name or <code>null</code> if no
 	 *         suggestion.
 	 */
-	String getSuggestedWorkName(List<PropertyModel> properties);
+	String getSuggestedWorkName(List<WorkLoaderProperty> properties);
 }

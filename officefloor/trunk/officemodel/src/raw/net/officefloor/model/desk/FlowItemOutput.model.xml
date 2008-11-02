@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
 	<import>net.officefloor.model.work.TaskFlowModel</import>
-	<field type="String" name="id"/>
-	<field type="TaskFlowModel&lt;?&gt;" name="task flow"/>
-	<field type="FlowItemOutputToExternalFlowModel" name="external flow"/>
-	<field type="FlowItemOutputToFlowItemModel" name="flow item"/>
+	<field type="String" name="id" />
+	<field type="String" name="label" />
+	<field type="TaskFlowModel&lt;?&gt;" name="task flow" />
+	<field type="FlowItemOutputToExternalFlowModel" name="external flow" />
+	<field type="FlowItemOutputToFlowItemModel" name="flow item" />
 </model>

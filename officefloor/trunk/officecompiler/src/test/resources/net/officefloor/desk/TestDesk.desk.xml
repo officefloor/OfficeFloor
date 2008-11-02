@@ -11,12 +11,11 @@
 			escalation-type="java.sql.SQLException" x="30" y="31" />
 	</external-escalations>
 	<works>
-		<work id="work"
-			loader="net.officefloor.work.clazz.ClassWorkLoader" x="40" y="41">
+		<work id="work" loader="net.officefloor.work.clazz.ClassWorkLoader"
+			x="40" y="41">
 			<initial-flow-item id="1" />
 			<properties>
-				<property name="class.name"
-					value="net.officefloor.mock.MockClass" />
+				<property name="class.name" value="net.officefloor.mock.MockClass" />
 			</properties>
 			<task name="taskMethod">
 				<task-object object-type="java.lang.String">
@@ -27,8 +26,7 @@
 				<task-object object-type="java.lang.Integer">
 					<external-managed-object name="mo" />
 				</task-object>
-				<task-object object-type="java.lang.String"
-					parameter="true" />
+				<task-object object-type="java.lang.String" parameter="true" />
 			</task>
 			<task name="anotherMethod" />
 		</work>
@@ -37,20 +35,19 @@
 		<flow-item id="1" x="100" y="200" public="true" work="work"
 			task="taskMethod">
 			<next-external-flow name="flow" />
-			<output id="0">
+			<output id="0" label="First">
 				<external-flow name="flow" link="Sequential" />
 			</output>
 			<output id="1">
 				<flow-item id="2" link="Parallel" />
 			</output>
-			<output id="2">
+			<output id="2" label="Third">
 				<flow-item id="3" link="Asynchronous" />
 			</output>
 			<escalation escalation-type="java.io.IOException">
 				<flow-item id="2" />
 			</escalation>
-			<escalation
-				escalation-type="java.lang.NullPointerException" />
+			<escalation escalation-type="java.lang.NullPointerException" />
 		</flow-item>
 		<flow-item id="2" x="50" y="500" public="false" work="work"
 			task="anotherMethod">
@@ -61,7 +58,7 @@
 			<output id="FIRST_FLOW">
 				<external-flow name="flow" link="Asynchronous" />
 			</output>
-			<output id="SECOND_FLOW">
+			<output id="SECOND_FLOW" label="Another">
 				<flow-item id="1" link="Parallel" />
 			</output>
 			<escalation escalation-type="java.sql.SQLException">

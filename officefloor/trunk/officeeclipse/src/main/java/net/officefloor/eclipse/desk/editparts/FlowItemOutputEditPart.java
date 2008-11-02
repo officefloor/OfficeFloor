@@ -187,7 +187,16 @@ public class FlowItemOutputEditPart
 	 */
 	@Override
 	public String getFlowItemOutputName() {
-		return this.getCastedModel().getId();
+
+		// Obtain the name
+		String name = this.getCastedModel().getLabel();
+		if ((name == null) || (name.trim().length() == 0)) {
+			// Label not provided, so use the id
+			name = this.getCastedModel().getId();
+		}
+
+		// Return the name
+		return name;
 	}
 
 }

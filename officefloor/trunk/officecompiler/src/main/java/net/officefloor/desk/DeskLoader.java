@@ -133,7 +133,8 @@ public class DeskLoader {
 	 * Initiate.
 	 * 
 	 * @param loaderContext
-	 *            {@link LoaderContext} for loading classes of {@link WorkModel}.
+	 *            {@link LoaderContext} for loading classes of {@link WorkModel}
+	 *            .
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
 	 */
@@ -147,7 +148,8 @@ public class DeskLoader {
 	 * Initiate.
 	 * 
 	 * @param loaderContext
-	 *            {@link LoaderContext} for loading classes of {@link WorkModel}.
+	 *            {@link LoaderContext} for loading classes of {@link WorkModel}
+	 *            .
 	 */
 	public DeskLoader(LoaderContext loaderContext) {
 		this(loaderContext, new ModelRepository());
@@ -527,11 +529,15 @@ public class DeskLoader {
 			WorkLoader workLoader = this.loaderContext.createInstance(
 					WorkLoader.class, loaderClassName);
 
-			// Create the listing of properties
+			// Create the listing of properties and their names
+			List<PropertyModel> propertyModels = work.getProperties();
+			String[] propertyNames = new String[propertyModels.size()];
 			Properties properties = new Properties();
+			int index = 0;
 			for (PropertyModel property : work.getProperties()) {
 				String name = property.getName();
 				String value = property.getValue();
+				propertyNames[index++] = name;
 				properties.setProperty(name, value);
 			}
 
@@ -540,7 +546,7 @@ public class DeskLoader {
 
 			// Create the work loader context
 			WorkLoaderContext workLoaderContext = new WorkLoaderContextImpl(
-					properties, classLoader);
+					propertyNames, properties, classLoader);
 
 			// Load the work model
 			WorkModel<?> workModel = workLoader.loadWork(workLoaderContext);
@@ -558,8 +564,7 @@ public class DeskLoader {
 	 *            {@link FlowItemModel}.
 	 * @param desk
 	 *            {@link DeskModel}.
-	 * @return <code>true</code> if {@link FlowItemModel} should exist on
-	 *         work.
+	 * @return <code>true</code> if {@link FlowItemModel} should exist on work.
 	 */
 	private boolean loadFlowItem(FlowItemModel flowItem, DeskModel desk)
 			throws Exception {

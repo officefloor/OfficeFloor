@@ -18,10 +18,9 @@ package net.officefloor.eclipse.extension.workloader;
 
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
-
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.PropertyModel;
+
+import org.eclipse.core.resources.IProject;
 
 /**
  * Context for the {@link WorkLoaderExtension}.
@@ -42,9 +41,9 @@ public interface WorkLoaderExtensionContext {
 	 * Notifies of a change to the properties.
 	 * 
 	 * @param properties
-	 *            {@link PropertyModel} instances.
+	 *            {@link WorkLoaderProperty} instances.
 	 */
-	void notifyPropertiesChanged(List<PropertyModel> properties);
+	void notifyPropertiesChanged(List<WorkLoaderProperty> properties);
 
 	/**
 	 * Specifies an error message. Calling this after notifying of property

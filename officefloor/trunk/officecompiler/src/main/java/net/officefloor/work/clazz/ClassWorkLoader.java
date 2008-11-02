@@ -45,7 +45,9 @@ public class ClassWorkLoader extends AbstractWorkLoader {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.work.AbstractWorkLoader#loadSpecification(net.officefloor.work.AbstractWorkLoader.SpecificationContext)
+	 * @see
+	 * net.officefloor.work.AbstractWorkLoader#loadSpecification(net.officefloor
+	 * .work.AbstractWorkLoader.SpecificationContext)
 	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
@@ -55,7 +57,8 @@ public class ClassWorkLoader extends AbstractWorkLoader {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.work.WorkLoader#loadWork(net.officefloor.work.WorkLoaderContext)
+	 * @seenet.officefloor.work.WorkLoader#loadWork(net.officefloor.work.
+	 * WorkLoaderContext)
 	 */
 	@SuppressWarnings("unchecked")
 	public WorkModel<ClassWork> loadWork(WorkLoaderContext context)
@@ -99,7 +102,8 @@ public class ClassWorkLoader extends AbstractWorkLoader {
 				if ((Flow.class.isAssignableFrom(paramType))
 						|| (Flow.class.getName().equals(paramType.getName()))) {
 					// Add as flow
-					flows.add(new TaskFlowModel<Indexed>(null, flowIndex));
+					flows.add(new TaskFlowModel<Indexed>(null, flowIndex,
+							String.valueOf(flowIndex)));
 
 					// Specify the flow parameter factory
 					parameters[i] = new FlowParameterFactory(flowIndex);
