@@ -19,6 +19,7 @@
 		<module>officeplugin_jdbc</module>
 		<module>officeplugin_jms</module>
 		<module>officeplugin_socket</module>
+		<module>officeeclipse_socket</module>
 		<module>officetool_filingcabinet</module>
 		<module>officework_spring</module>
 	</modules>
