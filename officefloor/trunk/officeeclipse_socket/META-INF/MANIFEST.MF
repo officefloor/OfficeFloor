@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Office Floor Socket
+Bundle-SymbolicName: net.officefloor.eclipse.socket;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Vendor: Daniel Sagenschneider
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ net.officefloor.compiler;bundle-version="1.0.0",
+ net.officefloor.eclipse;bundle-version="1.0.0",
+ net.officefloor.socket;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
