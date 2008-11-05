@@ -136,6 +136,16 @@ public class ModelGenerator {
 	 * Class definition.
 	 */
 	private void classDefinition() throws Exception {
+
+		// Provide suppress warning on ItemModel if required
+		String classSuffix = this.metaData.getClassSuffix();
+		if (!this.metaData.isConnectionModel()) {
+			if ((classSuffix != null) && (classSuffix.trim().length() > 0)) {
+				// Generic model so suppress 'unchecked'
+				writeLine("@SuppressWarnings(\"unchecked\")");
+			}
+		}
+		
 		// Class signature
 		writeLine("public class "
 				+ this.metaData.getClassName()
@@ -448,11 +458,6 @@ public class ModelGenerator {
 		writeLine("    /**");
 		writeLine("     * Remove Connections.");
 		writeLine("     */");
-		String classSuffix = this.metaData.getClassSuffix();
-		if ((classSuffix != null) && (classSuffix.trim().length() > 0)) {
-			// Generic model so suppress 'unchecked'
-			writeLine("    @SuppressWarnings(\"unchecked\")");
-		}
 		writeLine("    public RemoveConnectionsAction<"
 				+ this.metaData.getClassName() + "> removeConnections() {");
 
