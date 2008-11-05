@@ -17,17 +17,16 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
-import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.office.operations.RemoveRoomOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.RoomFigureContext;
-import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.office.OfficeRoomModel.OfficeRoomEvent;
@@ -122,42 +121,13 @@ public class RoomEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
-	 */
-	@Override
-	public void delete() {
-
-		// Only allow top level room to be removed
-		if (!"OFFICE ROOM".equals(this.getCastedModel().getName())) {
-			return;
-		}
-
-		// Top level therefore disconnect and remove the room
-		RemoveConnectionsAction<OfficeRoomModel> room = this.getCastedModel()
-				.removeConnections();
-		OfficeModel office = (OfficeModel) this.getParent().getParent()
-				.getModel();
-		office.setRoom(null);
-
-		// Remove the external managed objects
-		for (ExternalManagedObjectModel mo : new ArrayList<ExternalManagedObjectModel>(
-				office.getExternalManagedObjects())) {
-			room.addCascadeModel(mo.removeConnections());
-			office.removeExternalManagedObject(mo);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
 	 */
 	@Override
-	public void undelete() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement RoomEditPart.undelete");
+	public Operation getRemoveOperation() {
+		return RemoveRoomOperation.createFromRoom();
 	}
 
 	/*

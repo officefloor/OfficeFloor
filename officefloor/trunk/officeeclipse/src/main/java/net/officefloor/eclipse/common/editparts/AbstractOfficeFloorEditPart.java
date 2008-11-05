@@ -41,6 +41,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.editpolicies.AbstractEditPolicy;
@@ -102,6 +103,26 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 */
 	public AbstractOfficeFloorEditor<?, ?> getEditor() {
 		return this.editor;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.gef.editparts.AbstractEditPart#getRoot()
+	 */
+	@Override
+	public RootEditPart getRoot() {
+		// Sometimes parent may not be set
+		if (this.getParent() != null) {
+			// Parent available, so follow to get root
+			return super.getRoot();
+		} else if (this.editor != null) {
+			// Return from editor
+			return ((EditPart) this.editor.getRootEditPart()).getRoot();
+		} else {
+			// Can not obtain root
+			return null;
+		}
 	}
 
 	/*

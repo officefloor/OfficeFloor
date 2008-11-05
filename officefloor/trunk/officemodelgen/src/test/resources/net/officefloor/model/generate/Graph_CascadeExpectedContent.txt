@@ -4,9 +4,10 @@
 package graph.test;
 
 import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
-public class CascadeModel extends AbstractModel {
+public class CascadeModel extends AbstractModel implements ItemModel<CascadeModel> {
 
     public static enum CascadeEvent {
     

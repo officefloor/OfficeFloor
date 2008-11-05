@@ -16,9 +16,10 @@
  */
 package net.officefloor.eclipse.common.action;
 
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.commands.Command;
+import org.eclipse.gef.commands.CommandStack;
 
 /**
  * Utility class to aid working with an {@link Operation}.
@@ -37,17 +38,17 @@ public class OperationUtil {
 	 * @param y
 	 *            Y of location.
 	 * @param firstSelectedEditPart
-	 *            First selected {@link AbstractOfficeFloorEditPart} instance to
-	 *            ensure at least one.
+	 *            First selected {@link EditPart} instance to ensure at least
+	 *            one.
 	 * @param remainingSelectedEditParts
-	 *            Remaining {@link AbstractOfficeFloorEditPart} instances.
+	 *            Remaining {@link EditPart} instances.
 	 */
 	public static void execute(Operation operation, int x, int y,
-			AbstractOfficeFloorEditPart<?, ?> firstSelectedEditPart,
-			AbstractOfficeFloorEditPart<?, ?>... remainingSelectedEditParts) {
+			EditPart firstSelectedEditPart,
+			EditPart... remainingSelectedEditParts) {
 
 		// Create the listing of selected edit parts
-		AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts = new AbstractOfficeFloorEditPart[1 + remainingSelectedEditParts.length];
+		EditPart[] selectedEditParts = new EditPart[1 + remainingSelectedEditParts.length];
 		selectedEditParts[0] = firstSelectedEditPart;
 		for (int i = 0; i < remainingSelectedEditParts.length; i++) {
 			selectedEditParts[i + 1] = remainingSelectedEditParts[i];
@@ -57,6 +58,45 @@ public class OperationUtil {
 		new OperationAction(firstSelectedEditPart.getViewer().getEditDomain()
 				.getCommandStack(), operation, selectedEditParts, new Point(x,
 				y)).run();
+	}
+
+	/**
+	 * <p>
+	 * Obtains the {@link Command} from the {@link Operation}.
+	 * <p>
+	 * Note should the {@link Operation} provide more than one {@link Command},
+	 * only the last {@link Command} is returned.
+	 * 
+	 * @param operation
+	 *            {@link Operation}.
+	 * @param x
+	 *            X of location.
+	 * @param y
+	 *            Y of location.
+	 * @param editPart
+	 *            {@link EditPart} to perform the {@link Operation} on.
+	 * @return {@link Command} or <code>null</code> if {@link Operation} does
+	 *         not provide one.
+	 */
+	public static Command getCommand(Operation operation, int x, int y,
+			EditPart editPart) {
+
+		// Create a command stack to capture the command
+		final Command[] commandHolder = new Command[1];
+		CommandStack commandStack = new CommandStack() {
+			@Override
+			public void execute(Command command) {
+				// Capture the command
+				commandHolder[0] = command;
+			}
+		};
+
+		// Run the operation to obtain the command
+		new OperationAction(commandStack, operation,
+				new EditPart[] { editPart }, new Point(x, y)).run();
+
+		// Return the captured command
+		return commandHolder[0];
 	}
 
 	/**

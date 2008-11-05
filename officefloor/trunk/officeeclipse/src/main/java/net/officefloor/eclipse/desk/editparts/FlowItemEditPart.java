@@ -21,16 +21,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.desk.operations.RemoveFlowItemOperation;
 import net.officefloor.eclipse.skin.desk.FlowItemFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.ExternalFlowModel;
@@ -244,28 +244,13 @@ public class FlowItemEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
-	 */
-	@Override
-	public void delete() {
-		// Disconnect and remove the flow item
-		RemoveConnectionsAction<FlowItemModel> flowItem = this.getCastedModel()
-				.removeConnections();
-		DeskModel desk = (DeskModel) this.getParent().getModel();
-		desk.removeFlowItem(flowItem.getModel());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
 	 */
 	@Override
-	public void undelete() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement FlowItemEditPart.undelete");
+	public Operation getRemoveOperation() {
+		return new RemoveFlowItemOperation();
 	}
 
 	/*

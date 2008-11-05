@@ -17,26 +17,18 @@
 package net.officefloor.model;
 
 /**
- * Interface to aid manipulation of connections/associations.
+ * Interface to aid manipulation of items.
  * 
  * @author Daniel
  */
-public interface ConnectionModel extends Model {
+public interface ItemModel<M extends Model> extends Model {
 
 	/**
-	 * Indicates if this connection is removable.
+	 * Removes the {@link ConnectionModel} instances connected to this
+	 * {@link ItemModel}.
 	 * 
-	 * @return True if may remove the connection.
+	 * @return {@link RemoveConnectionsAction} containing the
+	 *         {@link ConnectionModel} instances removed.
 	 */
-	boolean isRemovable();
-
-	/**
-	 * Connects the source and target.
-	 */
-	void connect();
-
-	/**
-	 * Removes the connection.
-	 */
-	void remove();
+	RemoveConnectionsAction<M> removeConnections();
 }

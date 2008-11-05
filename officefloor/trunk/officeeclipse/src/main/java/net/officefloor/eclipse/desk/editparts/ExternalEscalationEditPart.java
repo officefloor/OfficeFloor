@@ -20,8 +20,11 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.desk.operations.RemoveExternalEscalationOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.ExternalEscalationFigureContext;
 import net.officefloor.model.desk.ExternalEscalationModel;
@@ -37,7 +40,7 @@ import org.eclipse.gef.EditPart;
 public class ExternalEscalationEditPart
 		extends
 		AbstractOfficeFloorNodeEditPart<ExternalEscalationModel, OfficeFloorFigure>
-		implements ExternalEscalationFigureContext {
+		implements RemovableEditPart, ExternalEscalationFigureContext {
 
 	/*
 	 * (non-Javadoc)
@@ -111,6 +114,18 @@ public class ExternalEscalationEditPart
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getHandledEscalations());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
+	 */
+	@Override
+	public Operation getRemoveOperation() {
+		return new RemoveExternalEscalationOperation();
 	}
 
 	/*

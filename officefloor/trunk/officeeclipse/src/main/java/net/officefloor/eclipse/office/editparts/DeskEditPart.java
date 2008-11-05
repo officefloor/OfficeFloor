@@ -24,8 +24,11 @@ import java.util.List;
 import org.eclipse.gef.EditPart;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.office.operations.RemoveRoomOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.DeskFigureContext;
 import net.officefloor.model.office.OfficeDeskModel;
@@ -39,7 +42,7 @@ import net.officefloor.model.office.OfficeDeskModel.OfficeDeskEvent;
  */
 public class DeskEditPart extends
 		AbstractOfficeFloorEditPart<OfficeDeskModel, OfficeFloorFigure>
-		implements DeskFigureContext {
+		implements RemovableEditPart, DeskFigureContext {
 
 	/*
 	 * (non-Javadoc)
@@ -89,6 +92,18 @@ public class DeskEditPart extends
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getFlowItems());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
+	 */
+	@Override
+	public Operation getRemoveOperation() {
+		return RemoveRoomOperation.createFromDesk();
 	}
 
 	/*

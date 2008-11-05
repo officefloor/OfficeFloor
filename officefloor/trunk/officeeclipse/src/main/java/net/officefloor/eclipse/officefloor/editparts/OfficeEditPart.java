@@ -20,13 +20,13 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.officefloor.operations.RemoveOfficeOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFigureContext;
-import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel.OfficeFloorOfficeEvent;
 
@@ -141,29 +141,13 @@ public class OfficeEditPart
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
-	 */
-	@Override
-	public void delete() {
-		// Disconnect and remove Office
-		RemoveConnectionsAction<OfficeFloorOfficeModel> office = this
-				.getCastedModel().removeConnections();
-		OfficeFloorModel officeFloor = (OfficeFloorModel) this.getParent()
-				.getModel();
-		officeFloor.removeOffice(office.getModel());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
 	 */
 	@Override
-	public void undelete() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeEditPart.undelete");
+	public Operation getRemoveOperation() {
+		return new RemoveOfficeOperation();
 	}
 
 	/*

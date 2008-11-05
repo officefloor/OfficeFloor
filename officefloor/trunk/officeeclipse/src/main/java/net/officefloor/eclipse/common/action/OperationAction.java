@@ -21,9 +21,9 @@ import java.util.List;
 
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.model.Model;
 
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.jface.action.Action;
@@ -46,9 +46,9 @@ public class OperationAction extends Action {
 	private final Operation operation;
 
 	/**
-	 * Selected {@link Model} instances.
+	 * Selected {@link EditPart} instances.
 	 */
-	private final AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts;
+	private final EditPart[] selectedEditParts;
 
 	/**
 	 * Location.
@@ -69,7 +69,7 @@ public class OperationAction extends Action {
 	 *            Location.
 	 */
 	public OperationAction(CommandStack commandStack, Operation operation,
-			AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts,
+			EditPart[] selectedEditParts,
 			Point location) {
 		super(operation.getActionText());
 		this.commandStack = commandStack;
@@ -127,7 +127,7 @@ public class OperationAction extends Action {
 		 * net.officefloor.eclipse.common.action.OperationContext#getEditParts()
 		 */
 		@Override
-		public AbstractOfficeFloorEditPart<?, ?>[] getEditParts() {
+		public EditPart[] getEditParts() {
 			return OperationAction.this.selectedEditParts;
 		}
 

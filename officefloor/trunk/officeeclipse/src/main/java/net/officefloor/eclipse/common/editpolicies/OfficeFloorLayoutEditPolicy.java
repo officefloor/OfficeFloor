@@ -16,8 +16,8 @@
  */
 package net.officefloor.eclipse.common.editpolicies;
 
+import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.commands.CreateCommand;
-import net.officefloor.eclipse.common.commands.DeleteEditPartCommand;
 import net.officefloor.eclipse.common.commands.MovePositionalModelCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
@@ -64,8 +64,9 @@ public abstract class OfficeFloorLayoutEditPolicy<P> extends XYLayoutEditPolicy 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editpolicies.ConstrainedLayoutEditPolicy#createAddCommand(org.eclipse.gef.EditPart,
-	 *      java.lang.Object)
+	 * @see
+	 * org.eclipse.gef.editpolicies.ConstrainedLayoutEditPolicy#createAddCommand
+	 * (org.eclipse.gef.EditPart, java.lang.Object)
 	 */
 	protected Command createAddCommand(EditPart child, Object constraint) {
 		// TODO Auto-generated method stub
@@ -75,8 +76,8 @@ public abstract class OfficeFloorLayoutEditPolicy<P> extends XYLayoutEditPolicy 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editpolicies.ConstrainedLayoutEditPolicy#createChangeConstraintCommand(org.eclipse.gef.EditPart,
-	 *      java.lang.Object)
+	 * @seeorg.eclipse.gef.editpolicies.ConstrainedLayoutEditPolicy#
+	 * createChangeConstraintCommand(org.eclipse.gef.EditPart, java.lang.Object)
 	 */
 	protected Command createChangeConstraintCommand(EditPart child,
 			Object constraint) {
@@ -94,7 +95,9 @@ public abstract class OfficeFloorLayoutEditPolicy<P> extends XYLayoutEditPolicy 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editpolicies.LayoutEditPolicy#getCreateCommand(org.eclipse.gef.requests.CreateRequest)
+	 * @see
+	 * org.eclipse.gef.editpolicies.LayoutEditPolicy#getCreateCommand(org.eclipse
+	 * .gef.requests.CreateRequest)
 	 */
 	protected Command getCreateCommand(CreateRequest request) {
 		// Return the create command
@@ -145,7 +148,9 @@ public abstract class OfficeFloorLayoutEditPolicy<P> extends XYLayoutEditPolicy 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.gef.editpolicies.LayoutEditPolicy#getDeleteDependantCommand(org.eclipse.gef.Request)
+	 * @see
+	 * org.eclipse.gef.editpolicies.LayoutEditPolicy#getDeleteDependantCommand
+	 * (org.eclipse.gef.Request)
 	 */
 	protected Command getDeleteDependantCommand(Request request) {
 
@@ -155,7 +160,9 @@ public abstract class OfficeFloorLayoutEditPolicy<P> extends XYLayoutEditPolicy 
 
 		// Create delete command if edit part removable
 		if (editPart instanceof RemovableEditPart) {
-			return new DeleteEditPartCommand((RemovableEditPart) editPart);
+			RemovableEditPart removableEditPart = (RemovableEditPart) editPart;
+			return OperationUtil.getCommand(removableEditPart
+					.getRemoveOperation(), -1, -1, editPart);
 		} else {
 			// Can not delete
 			return null;

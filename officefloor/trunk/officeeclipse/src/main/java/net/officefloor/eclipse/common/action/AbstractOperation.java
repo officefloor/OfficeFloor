@@ -29,8 +29,8 @@ import org.eclipse.jface.action.Action;
  * 
  * @author Daniel
  */
-public abstract class AbstractOperation<E extends AbstractOfficeFloorEditPart<?, ?>>
-		implements Operation {
+public abstract class AbstractOperation<E extends EditPart> implements
+		Operation {
 
 	/**
 	 * Text for the {@link Action}.
@@ -91,8 +91,7 @@ public abstract class AbstractOperation<E extends AbstractOfficeFloorEditPart<?,
 	@SuppressWarnings("unchecked")
 	public void perform(OperationContext context) {
 		// Run for each edit part
-		for (AbstractOfficeFloorEditPart<?, ?> editPart : context
-				.getEditParts()) {
+		for (EditPart editPart : context.getEditParts()) {
 			E officeFloorEditPart = (E) editPart;
 
 			// Perform the operation
