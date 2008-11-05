@@ -17,22 +17,18 @@
 package net.officefloor.eclipse.desk.editparts;
 
 import java.beans.PropertyChangeEvent;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.desk.operations.RemoveWorkOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.DeskWorkFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
@@ -171,54 +167,13 @@ public class DeskWorkEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
-	 */
-	@Override
-	public void delete() {
-
-		// Create the list of flow items for the work
-		// (Must do before removing connections of work - as can not link)
-		List<FlowItemModel> workFlowItems = new LinkedList<FlowItemModel>();
-		for (DeskTaskModel task : new ArrayList<DeskTaskModel>(this
-				.getCastedModel().getTasks())) {
-			for (DeskTaskToFlowItemModel taskToFlowItem : new ArrayList<DeskTaskToFlowItemModel>(
-					task.getFlowItems())) {
-				FlowItemModel flowItem = taskToFlowItem.getFlowItem();
-				if (flowItem != null) {
-					workFlowItems.add(flowItem);
-				}
-			}
-		}
-
-		// Obtain the desk for removing items from
-		DeskModel desk = (DeskModel) this.getParent().getParent().getModel();
-
-		// Remove the work
-		RemoveConnectionsAction<DeskWorkModel> work = this.getCastedModel()
-				.removeConnections();
-		desk.removeWork(work.getModel());
-
-		// Remove the flow items for the work
-		for (FlowItemModel flowItem : workFlowItems) {
-			// Remove connections to the flow item
-			work.addCascadeModel(flowItem.removeConnections());
-
-			// Remove the flow item from the desk
-			desk.removeFlowItem(flowItem);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
 	 */
 	@Override
-	public void undelete() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskWorkEditPart.undelete");
+	public Operation getRemoveOperation() {
+		return new RemoveWorkOperation();
 	}
 
 	/*

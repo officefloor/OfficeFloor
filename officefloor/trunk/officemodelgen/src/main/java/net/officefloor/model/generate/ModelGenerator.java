@@ -127,6 +127,7 @@ public class ModelGenerator {
 		if (this.metaData.isConnectionModel()) {
 			writeLine("import net.officefloor.model.ConnectionModel;");
 		} else {
+			writeLine("import net.officefloor.model.ItemModel;");
 			writeLine("import net.officefloor.model.RemoveConnectionsAction;");
 		}
 	}
@@ -139,9 +140,10 @@ public class ModelGenerator {
 		writeLine("public class "
 				+ this.metaData.getClassName()
 				+ this.metaData.getClassSuffix()
-				+ " extends AbstractModel"
-				+ (this.metaData.isConnectionModel() ? " implements ConnectionModel"
-						: "") + " {");
+				+ " extends AbstractModel implements "
+				+ (this.metaData.isConnectionModel() ? "ConnectionModel"
+						: "ItemModel<" + this.metaData.getClassName() + ">")
+				+ " {");
 
 		// Write class contents
 		writeLine();

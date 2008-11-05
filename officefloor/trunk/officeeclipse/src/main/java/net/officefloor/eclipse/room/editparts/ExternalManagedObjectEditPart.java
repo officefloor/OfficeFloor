@@ -20,14 +20,14 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.room.operations.RemoveExternalManagedObjectOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.room.ExternalManagedObjectFigureContext;
-import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.ExternalManagedObjectModel.ExternalManagedObjectEvent;
 
 /**
@@ -115,27 +115,13 @@ public class ExternalManagedObjectEditPart
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
-	 */
-	@Override
-	public void delete() {
-		RemoveConnectionsAction<ExternalManagedObjectModel> mo = this
-				.getCastedModel().removeConnections();
-		RoomModel room = (RoomModel) this.getParent().getParent().getModel();
-		room.removeExternalManagedObject(mo.getModel());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
 	 */
 	@Override
-	public void undelete() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement ExternalManagedObjectEditPart.undelete");
+	public Operation getRemoveOperation() {
+		return new RemoveExternalManagedObjectOperation();
 	}
 
 	/*

@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.LinkedList;
 
 import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
-public class TwoModel extends AbstractModel {
+public class TwoModel extends AbstractModel implements ItemModel<TwoModel> {
 
     public static enum TwoEvent {
      ADD_ONE_LIST, REMOVE_ONE_LIST

@@ -20,13 +20,13 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.room.operations.RemoveSubRoomOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.room.SubRoomFigureContext;
-import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomModel.SubRoomEvent;
 
@@ -114,28 +114,13 @@ public class SubRoomEditPart extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
-	 */
-	@Override
-	public void delete() {
-		// Disconnect and remove the sub room
-		RemoveConnectionsAction<SubRoomModel> subRoom = this.getCastedModel()
-				.removeConnections();
-		RoomModel room = (RoomModel) this.getParent().getModel();
-		room.removeSubRoom(subRoom.getModel());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
 	 */
 	@Override
-	public void undelete() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SubRoomEditPart.undelete");
+	public Operation getRemoveOperation() {
+		return new RemoveSubRoomOperation();
 	}
 
 	/*

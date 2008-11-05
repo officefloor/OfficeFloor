@@ -16,11 +16,10 @@
  */
 package net.officefloor.eclipse.common.action;
 
+import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
+
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
-
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 
 /**
  * Context for executing an {@link Operation}.
@@ -34,7 +33,7 @@ public interface OperationContext {
 	 * 
 	 * @return {@link EditPart} instances.
 	 */
-	AbstractOfficeFloorEditPart<?, ?>[] getEditParts();
+	EditPart[] getEditParts();
 
 	/**
 	 * Obtains the location for the {@link Operation}.

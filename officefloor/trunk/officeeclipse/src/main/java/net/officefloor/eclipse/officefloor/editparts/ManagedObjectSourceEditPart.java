@@ -20,17 +20,17 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.officefloor.operations.RemoveManagedObjectSourceOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
-import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel.ManagedObjectSourceEvent;
 
@@ -192,29 +192,13 @@ public class ManagedObjectSourceEditPart
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
-	 */
-	@Override
-	public void delete() {
-		// Disconnect and remove managed object source
-		RemoveConnectionsAction<ManagedObjectSourceModel> mos = this
-				.getCastedModel().removeConnections();
-		OfficeFloorModel officeFloor = (OfficeFloorModel) this.getParent()
-				.getParent().getModel();
-		officeFloor.removeManagedObjectSource(mos.getModel());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
 	 */
 	@Override
-	public void undelete() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement ManagedObjectSourceEditPart.undelete");
+	public Operation getRemoveOperation() {
+		return new RemoveManagedObjectSourceOperation();
 	}
 
 	/*

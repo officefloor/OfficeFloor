@@ -19,6 +19,8 @@ package net.officefloor.eclipse.common.editparts;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.eclipse.common.operation.RemoveConnectionOperation;
 import net.officefloor.model.ConnectionModel;
 
 import org.eclipse.draw2d.ColorConstants;
@@ -112,20 +114,12 @@ public class OfficeFloorConnectionEditPart<M extends ConnectionModel> extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.RemovableEditPart#delete()
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
 	 */
-	public void delete() {
-		if (this.getCastedModel().isRemovable()) {
-			this.getCastedModel().remove();
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.RemovableEditPart#undelete()
-	 */
-	public void undelete() {
-		this.getCastedModel().connect();
+	@Override
+	public Operation getRemoveOperation() {
+		return new RemoveConnectionOperation();
 	}
 }

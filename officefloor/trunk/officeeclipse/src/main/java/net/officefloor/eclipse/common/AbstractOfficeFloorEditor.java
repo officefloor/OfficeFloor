@@ -225,7 +225,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 				}
 
 				// Obtain the selected edit parts
-				List<AbstractOfficeFloorEditPart<?, ?>> selectedEditPartList = new LinkedList<AbstractOfficeFloorEditPart<?, ?>>();
+				List<EditPart> selectedEditPartList = new LinkedList<EditPart>();
 				ISelection selection = AbstractOfficeFloorEditor.this
 						.getGraphicalViewer().getSelection();
 				IStructuredSelection structuredSelection = (IStructuredSelection) selection;
@@ -234,11 +234,11 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 					Object selectedItem = iterator.next();
 
 					// Obtain the edit part and add to listing
-					AbstractOfficeFloorEditPart<?, ?> editPart = (AbstractOfficeFloorEditPart<?, ?>) selectedItem;
+					EditPart editPart = (EditPart) selectedItem;
 					selectedEditPartList.add(editPart);
 				}
-				AbstractOfficeFloorEditPart<?, ?>[] selectedEditParts = selectedEditPartList
-						.toArray(new AbstractOfficeFloorEditPart[0]);
+				EditPart[] selectedEditParts = selectedEditPartList
+						.toArray(new EditPart[0]);
 
 				// Ensure have selected edit parts
 				if (selectedEditParts.length == 0) {
@@ -251,7 +251,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 
 					// Determine if handles all edit part types selected
 					boolean isHandled = true;
-					for (AbstractOfficeFloorEditPart<?, ?> editPart : selectedEditParts) {
+					for (EditPart editPart : selectedEditParts) {
 						boolean isAssignable = false;
 						for (Class<? extends EditPart> handledEditPartType : operation
 								.getEditPartTypes()) {

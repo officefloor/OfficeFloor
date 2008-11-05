@@ -16,6 +16,10 @@
  */
 package net.officefloor.eclipse.common.editparts;
 
+import org.eclipse.gef.EditPart;
+
+import net.officefloor.eclipse.common.action.Operation;
+
 /**
  * Contract for an {@link org.eclipse.gef.EditPart} to make it possible to
  * delete it and its subsequent contained model.
@@ -25,13 +29,10 @@ package net.officefloor.eclipse.common.editparts;
 public interface RemovableEditPart {
 
 	/**
-	 * Removes the {@link org.eclipse.gef.EditPart} and its contained model.
+	 * Obtains the {@link Operation} to remove the particular {@link EditPart}.
+	 * 
+	 * @return {@link Operation} to remove the particular {@link EditPart}.
 	 */
-	void delete();
+	Operation getRemoveOperation();
 
-	/**
-	 * Enables the <i>undo</i> of the deleting of the
-	 * {@link org.eclipse.gef.EditPart}.
-	 */
-	void undelete();
 }

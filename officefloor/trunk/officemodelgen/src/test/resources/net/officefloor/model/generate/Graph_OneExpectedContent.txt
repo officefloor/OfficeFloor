@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.LinkedList;
 
 import net.officefloor.model.AbstractModel;
+import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
-public class OneModel extends AbstractModel {
+public class OneModel extends AbstractModel implements ItemModel<OneModel> {
 
     public static enum OneEvent {
      CHANGE_TWO_FIELD, CHANGE_CASCADE_FIELD, ADD_CASCADE_LIST, REMOVE_CASCADE_LIST

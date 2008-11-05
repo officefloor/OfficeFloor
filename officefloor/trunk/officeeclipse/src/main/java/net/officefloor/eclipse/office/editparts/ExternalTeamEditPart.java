@@ -20,14 +20,14 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.office.operations.RemoveExternalTeamOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.ExternalTeamFigureContext;
-import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.office.ExternalTeamModel;
-import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.ExternalTeamModel.ExternalTeamEvent;
 
 import org.eclipse.gef.EditPart;
@@ -120,32 +120,12 @@ public class ExternalTeamEditPart extends
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#delete()
+	/* (non-Javadoc)
+	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation()
 	 */
 	@Override
-	public void delete() {
-		// Disconnect and remove the Team
-		RemoveConnectionsAction<ExternalTeamModel> team = this.getCastedModel()
-				.removeConnections();
-		OfficeModel office = (OfficeModel) this.getParent().getParent()
-				.getModel();
-		office.removeExternalTeam(team.getModel());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#undelete()
-	 */
-	@Override
-	public void undelete() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement ExternalTeamEditPart.undelete");
+	public Operation getRemoveOperation() {
+		return new RemoveExternalTeamOperation();
 	}
 
 	/*

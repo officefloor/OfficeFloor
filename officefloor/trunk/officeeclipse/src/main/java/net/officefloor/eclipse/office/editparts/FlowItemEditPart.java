@@ -20,11 +20,14 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.office.models.PostFlowItemAdministrationJointPointModel;
 import net.officefloor.eclipse.office.models.PreFlowItemAdministrationJointPointModel;
+import net.officefloor.eclipse.office.operations.RemoveRoomOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.FlowItemFigureContext;
 import net.officefloor.model.ConnectionModel;
@@ -43,7 +46,7 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class FlowItemEditPart extends
 		AbstractOfficeFloorSourceNodeEditPart<FlowItemModel, OfficeFloorFigure>
-		implements FlowItemFigureContext {
+		implements RemovableEditPart, FlowItemFigureContext {
 
 	/**
 	 * {@link PreFlowItemAdministrationJointPointModel}.
@@ -193,6 +196,18 @@ public class FlowItemEditPart extends
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(ExternalTeamModel.class);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
+	 * ()
+	 */
+	@Override
+	public Operation getRemoveOperation() {
+		return RemoveRoomOperation.createFromFlowItem();
 	}
 
 	/*
