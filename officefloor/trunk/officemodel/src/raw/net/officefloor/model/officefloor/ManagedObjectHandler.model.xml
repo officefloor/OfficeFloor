@@ -4,5 +4,6 @@
 	<field type="String" name="handler key" />
 	<field type="String" name="handler key class" />
 	<field type="String" name="handler type" />
-	<field type="ManagedObjectHandlerInstanceModel" name="handler instance" />
+	<field type="ManagedObjectHandlerInstanceModel" name="handler instance"
+		cascade-remove="true" />
 </model>
