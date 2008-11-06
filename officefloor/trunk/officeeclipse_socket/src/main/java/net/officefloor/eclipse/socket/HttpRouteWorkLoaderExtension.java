@@ -57,7 +57,7 @@ public class HttpRouteWorkLoaderExtension implements WorkLoaderExtension {
 	 */
 	@Override
 	public String getDisplayName() {
-		return "HTTP route";
+		return "HTTP Route";
 	}
 
 	/*
@@ -115,7 +115,7 @@ public class HttpRouteWorkLoaderExtension implements WorkLoaderExtension {
 	 */
 	@Override
 	public String getSuggestedWorkName(List<WorkLoaderProperty> properties) {
-		return "HTTP router";
+		return "HttpRouter";
 	}
 
 }

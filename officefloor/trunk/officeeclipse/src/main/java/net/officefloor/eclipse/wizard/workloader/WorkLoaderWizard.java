@@ -16,29 +16,21 @@
  */
 package net.officefloor.eclipse.wizard.workloader;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import net.officefloor.desk.WorkToDeskWorkSynchroniser;
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
+import net.officefloor.eclipse.desk.DeskUtil;
+import net.officefloor.eclipse.desk.WorkLoaderInstance;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
-import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
-import net.officefloor.eclipse.java.JavaUtil;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.WorkModel;
-import net.officefloor.work.WorkLoader;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -49,11 +41,6 @@ import org.eclipse.jface.wizard.Wizard;
  * @author Daniel
  */
 public class WorkLoaderWizard extends Wizard {
-
-	/**
-	 * {@link DeskEditPart}.
-	 */
-	private final DeskEditPart deskEditPart;
 
 	/**
 	 * {@link WorkLoaderInstance} instances.
@@ -95,51 +82,12 @@ public class WorkLoaderWizard extends Wizard {
 	 *             If fails to create.
 	 */
 	public WorkLoaderWizard(DeskEditPart deskEditPart) throws Exception {
-		this.deskEditPart = deskEditPart;
+
+		// Obtains the project
+		IProject project = FileConfigurationItem.getProject(deskEditPart);
 
 		// Obtain the work loader instances
-		Map<String, WorkLoaderInstance> workLoaderInstances = new HashMap<String, WorkLoaderInstance>();
-
-		// Obtain from project class path
-		try {
-			// Obtain the types on the class path
-			IType[] types = JavaUtil.getSubTypes(this.deskEditPart,
-					WorkLoader.class.getName());
-			for (IType type : types) {
-				String className = type.getFullyQualifiedName();
-				workLoaderInstances.put(className, new WorkLoaderInstance(
-						className, null));
-			}
-		} catch (JavaModelException ex) {
-			// Do not add the types
-		}
-
-		// Obtain via extension point
-		try {
-			List<WorkLoaderExtension> workLoaderExtensions = ExtensionUtil
-					.createExecutableExtensions(
-							WorkLoaderExtension.EXTENSION_ID,
-							WorkLoaderExtension.class);
-			for (WorkLoaderExtension workLoaderExtension : workLoaderExtensions) {
-				Class<?> workLoaderClass = workLoaderExtension
-						.getWorkLoaderClass();
-				String className = workLoaderClass.getName();
-				workLoaderInstances.put(className, new WorkLoaderInstance(
-						className, workLoaderExtension));
-			}
-		} catch (Exception ex) {
-			// Do not add the types
-		}
-
-		// Obtain the listing of work loader instances (in order)
-		this.workLoaders = workLoaderInstances.values().toArray(
-				new WorkLoaderInstance[0]);
-		Arrays.sort(this.workLoaders, new Comparator<WorkLoaderInstance>() {
-			@Override
-			public int compare(WorkLoaderInstance a, WorkLoaderInstance b) {
-				return a.className.compareTo(b.className);
-			}
-		});
+		this.workLoaders = DeskUtil.createWorkLoaderInstances(project);
 
 		// Obtain the listing of work loader names
 		String[] workLoaderNames = new String[this.workLoaders.length];
@@ -147,16 +95,12 @@ public class WorkLoaderWizard extends Wizard {
 			workLoaderNames[i] = this.workLoaders[i].getDisplayName();
 		}
 
-		// Obtain the project and class loader
-		IProject project = FileConfigurationItem.getProject(deskEditPart);
-		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
-
 		// Create the pages
 		this.listingPage = new WorkLoaderListingWizardPage(workLoaderNames);
 		this.propertiesPages = new WorkLoaderPropertiesWizardPage[this.workLoaders.length];
 		for (int i = 0; i < this.propertiesPages.length; i++) {
 			this.propertiesPages[i] = new WorkLoaderPropertiesWizardPage(this,
-					this.workLoaders[i], project, classLoader);
+					this.workLoaders[i], project);
 		}
 		this.tasksPage = new WorkLoaderTasksWizardPage();
 	}
@@ -251,8 +195,10 @@ public class WorkLoaderWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 
-		// Obtain the work
+		// Obtain the work and the loader
 		WorkModel<?> workModel = this.currentPropertiesPage.getWorkModel();
+		String loader = this.currentPropertiesPage.getWorkLoaderInstance()
+				.getClassName();
 
 		// Obtain the tasks to provide
 		List<TaskModel<?, ?>> selectedTasks = this.tasksPage
@@ -262,6 +208,13 @@ public class WorkLoaderWizard extends Wizard {
 		DeskWorkModel deskWorkModel = new DeskWorkModel();
 		WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
 				deskWorkModel);
+
+		// Specify the loader and properties on the work
+		deskWorkModel.setLoader(loader);
+		for (PropertyModel property : this.currentPropertiesPage
+				.getPropertyModels()) {
+			deskWorkModel.addProperty(property);
+		}
 
 		// Iterate over removing the unselected desk tasks
 		// TODO: include this as part of synchroniseWorkOntoDeskWork
@@ -285,54 +238,4 @@ public class WorkLoaderWizard extends Wizard {
 		return true;
 	}
 
-	/**
-	 * Instance of a {@link WorkLoader}.
-	 */
-	protected static class WorkLoaderInstance {
-
-		/**
-		 * Name of the {@link WorkLoader} class name.
-		 */
-		public final String className;
-
-		/**
-		 * {@link WorkLoaderExtension}. May be <code>null</code> if not obtained
-		 * via extension point.
-		 */
-		public final WorkLoaderExtension extension;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param className
-		 *            Name of the {@link WorkLoader} class name.
-		 * @param extension
-		 *            {@link WorkLoaderExtension}. May be <code>null</code>.
-		 */
-		public WorkLoaderInstance(String className,
-				WorkLoaderExtension extension) {
-			this.className = className;
-			this.extension = extension;
-		}
-
-		/**
-		 * Obtains the display name.
-		 * 
-		 * @return Display name.
-		 */
-		public String getDisplayName() {
-			if (this.extension == null) {
-				// No extension so use class name
-				return this.className;
-			} else {
-				// Attempt to obtain from extension
-				String name = this.extension.getDisplayName();
-				if ((name == null) || (name.trim().length() == 0)) {
-					// No name so use class name
-					name = this.className;
-				}
-				return name;
-			}
-		}
-	}
 }
