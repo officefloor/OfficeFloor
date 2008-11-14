@@ -26,6 +26,7 @@ import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.filter.FileExtensionInputFilter;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.translator.ResourceFullPathValueTranslator;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
@@ -65,6 +66,8 @@ public class AddOfficeOperation extends AbstractOperation<OfficeFloorEditPart> {
 		dialog.registerPropertyInput("Id", new ClasspathSelectionInput(editPart
 				.getEditor(), new ClasspathFilter(IFile.class,
 				new FileExtensionInputFilter("office"))));
+		dialog.registerPropertyValueTranslator("Id",
+				new ResourceFullPathValueTranslator());
 		if (dialog.populate()) {
 			try {
 				// Obtain the class path location

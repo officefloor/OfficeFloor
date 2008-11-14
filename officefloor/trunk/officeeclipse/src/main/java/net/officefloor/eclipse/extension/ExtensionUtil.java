@@ -19,6 +19,8 @@ package net.officefloor.eclipse.extension;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
+
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 
@@ -37,7 +39,7 @@ public class ExtensionUtil {
 	 * @return Id for the extension.
 	 */
 	public static String getExtensionId(String name) {
-		return "net.officefloor.eclipse." + name;
+		return OfficeFloorPlugin.PLUGIN_ID + "." + name;
 	}
 
 	/**

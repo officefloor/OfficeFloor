@@ -13,6 +13,11 @@ import org.osgi.framework.BundleContext;
 public class OfficeFloorPlugin extends AbstractUIPlugin {
 
 	/**
+	 * Plug-in Id for the {@link OfficeFloorPlugin}.
+	 */
+	public static final String PLUGIN_ID = "net.officefloor.eclipse";
+	
+	/**
 	 * Shared instance.
 	 */
 	private static OfficeFloorPlugin plugin;

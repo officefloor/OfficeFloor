@@ -28,6 +28,7 @@ import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.filter.FileExtensionInputFilter;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.translator.ResourceFullPathValueTranslator;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.RoomEditPart;
@@ -140,6 +141,8 @@ public class ManageOfficeRoomOperation extends
 		dialog.registerPropertyInput("Id", new ClasspathSelectionInput(editPart
 				.getEditor(), new ClasspathFilter(IFile.class,
 				new FileExtensionInputFilter("room"))));
+		dialog.registerPropertyValueTranslator("Id",
+				new ResourceFullPathValueTranslator());
 		if (dialog.populate()) {
 			try {
 				// Obtain the class path location
