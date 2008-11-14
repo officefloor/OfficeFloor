@@ -16,13 +16,13 @@
  */
 package net.officefloor.eclipse.common.editparts;
 
+import java.awt.Dialog;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
@@ -33,6 +33,8 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 import net.officefloor.repository.ConfigurationContext;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -46,6 +48,7 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.editpolicies.AbstractEditPolicy;
 import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 
@@ -450,8 +453,8 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            Error message.
 	 */
 	public void messageError(String message) {
-		MessageDialog.openError(this.getEditor().getEditorSite().getShell(),
-				"Office Floor", message);
+		this.messageError(new Status(IStatus.ERROR,
+				OfficeFloorPlugin.PLUGIN_ID, message));
 	}
 
 	/**
@@ -462,12 +465,18 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            Error.
 	 */
 	public void messageError(Throwable error) {
-		// Obtain the stack trace
-		StringWriter buffer = new StringWriter();
-		error.printStackTrace(new PrintWriter(buffer));
+		this.messageError(new Status(IStatus.ERROR,
+				OfficeFloorPlugin.PLUGIN_ID, error.getMessage(), error));
+	}
 
-		// Display the stack trace
-		this.messageError(buffer.toString());
+	/**
+	 * Displays the {@link IStatus} error.
+	 * 
+	 * @param status
+	 *            {@link IStatus} error.
+	 */
+	public void messageError(IStatus status) {
+		this.messageStatus(status, "Error");
 	}
 
 	/**
@@ -477,8 +486,22 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            Warning message
 	 */
 	public void messageWarning(String message) {
-		MessageDialog.openWarning(this.getEditor().getEditorSite().getShell(),
-				"Office Floor", message);
+		this.messageStatus(new Status(IStatus.WARNING,
+				OfficeFloorPlugin.PLUGIN_ID, message), "Warning");
+	}
+
+	/**
+	 * Displays a {@link Dialog} for the {@link IStatus}.
+	 * 
+	 * @param status
+	 *            {@link IStatus}.
+	 * @param title
+	 *            Title for {@link Dialog}.
+	 */
+	private void messageStatus(IStatus status, String title) {
+		// Display the error
+		ErrorDialog.openError(this.getEditor().getEditorSite().getShell(),
+				title, null, status);
 	}
 
 }

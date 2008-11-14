@@ -24,6 +24,7 @@ import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.filter.FileExtensionInputFilter;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.common.dialog.input.translator.ResourceFullPathValueTranslator;
 import net.officefloor.eclipse.room.editparts.RoomEditPart;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomModel;
@@ -64,6 +65,8 @@ public class AddSubRoomOperation extends AbstractOperation<RoomEditPart> {
 		dialog.registerPropertyInput("File", new ClasspathSelectionInput(
 				editPart.getEditor(), new ClasspathFilter(IFile.class,
 						new FileExtensionInputFilter("desk", "room"))));
+		dialog.registerPropertyValueTranslator("File",
+				new ResourceFullPathValueTranslator());
 		SubRoomModel subRoom = null;
 		if (dialog.populate()) {
 			try {
@@ -90,7 +93,7 @@ public class AddSubRoomOperation extends AbstractOperation<RoomEditPart> {
 				editPart.messageError(ex);
 			}
 		}
-		
+
 		// Ensure have the sub room
 		if (subRoom == null) {
 			return;

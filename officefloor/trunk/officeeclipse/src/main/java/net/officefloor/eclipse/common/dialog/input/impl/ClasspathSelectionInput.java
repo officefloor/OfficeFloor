@@ -197,7 +197,7 @@ public class ClasspathSelectionInput implements Input<Tree> {
 			return javaElement;
 
 		} else {
-			// Unkonwn type
+			// Unknown type
 			return null;
 		}
 	}

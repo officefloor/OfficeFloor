@@ -7,5 +7,11 @@
             class="net.officefloor.eclipse.socket.HttpRouteWorkLoaderExtension">
       </workloader>
    </extension>
+   <extension
+         point="net.officefloor.eclipse.workloader">
+      <workloader
+            class="net.officefloor.eclipse.socket.HttpFileWorkLoaderExtension">
+      </workloader>
+   </extension>
 
 </plugin>
