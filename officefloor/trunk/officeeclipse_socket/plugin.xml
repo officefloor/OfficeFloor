@@ -13,5 +13,11 @@
             class="net.officefloor.eclipse.socket.HttpFileWorkLoaderExtension">
       </workloader>
    </extension>
+   <extension
+         point="net.officefloor.eclipse.managedobjectsource">
+      <managedobjectsource
+            class="net.officefloor.eclipse.socket.HttpManagedObjectSourceExtension">
+      </managedobjectsource>
+   </extension>
 
 </plugin>

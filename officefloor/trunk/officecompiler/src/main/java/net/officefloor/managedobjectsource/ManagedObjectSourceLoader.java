@@ -84,10 +84,11 @@ public class ManagedObjectSourceLoader {
 	 *             If fails to load the {@link ManagedObjectSourceModel}. It is
 	 *             {@link Throwable} as {@link Error} instances may be thrown
 	 *             from
-	 *             {@link ManagedObjectSource#init(ManagedObjectSourceContext))}.
+	 *             {@link ManagedObjectSource#init(ManagedObjectSourceContext))}
+	 *             .
 	 */
 	@SuppressWarnings("unchecked")
-	public ManagedObjectSourceModel loadManagedObjectSource(
+	public static ManagedObjectSourceModel loadManagedObjectSource(
 			String managedObjectSourceName,
 			ManagedObjectSource managedObjectSource, Properties properties,
 			long defaultTimeout, ClassLoader classLoader) throws Throwable {
@@ -292,7 +293,7 @@ public class ManagedObjectSourceLoader {
 	/**
 	 * {@link OfficeFrame} for loading the {@link ManagedObjectSourceModel}.
 	 */
-	private class LoaderOfficeFrame extends OfficeFrame {
+	private static class LoaderOfficeFrame extends OfficeFrame {
 
 		/**
 		 * {@link BuilderFactory}.
@@ -317,9 +318,10 @@ public class ManagedObjectSourceLoader {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.OfficeFrame#registerOfficeFloor(java.lang.String,
-		 *      net.officefloor.frame.api.build.OfficeFloorBuilder,
-		 *      net.officefloor.frame.api.build.issue.OfficeIssuesListener)
+		 * @see
+		 * net.officefloor.frame.api.OfficeFrame#registerOfficeFloor(java.lang
+		 * .String, net.officefloor.frame.api.build.OfficeFloorBuilder,
+		 * net.officefloor.frame.api.build.issue.OfficeIssuesListener)
 		 */
 		@Override
 		protected OfficeFloor registerOfficeFloor(String name,

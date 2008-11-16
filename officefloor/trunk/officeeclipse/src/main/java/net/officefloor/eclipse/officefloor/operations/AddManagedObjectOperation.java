@@ -16,14 +16,11 @@
  */
 package net.officefloor.eclipse.officefloor.operations;
 
-import org.eclipse.core.resources.IProject;
-
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.dialog.ManagedObjectSourceCreateDialog;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
+import net.officefloor.eclipse.wizard.WizardUtil;
+import net.officefloor.eclipse.wizard.managedobjectsource.ManagedObjectSourceWizard;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 
@@ -54,17 +51,18 @@ public class AddManagedObjectOperation extends
 		// Obtain the edit part
 		final OfficeFloorEditPart editPart = context.getEditPart();
 
-		// Create the Managed Object Source
+		// Create the managed object source
 		ManagedObjectSourceModel managedObjectSource = null;
 		try {
-			AbstractOfficeFloorEditor<?, ?> editor = editPart.getEditor();
-			IProject project = ProjectConfigurationContext.getProject(editor
-					.getEditorInput());
-			ManagedObjectSourceCreateDialog dialog = new ManagedObjectSourceCreateDialog(
-					editor.getSite().getShell(), project);
-			managedObjectSource = dialog.createManagedObjectSource();
+			ManagedObjectSourceWizard managedObjectSourceWizard = new ManagedObjectSourceWizard(
+					editPart);
+			if (WizardUtil.runWizard(managedObjectSourceWizard, editPart)) {
+				managedObjectSource = managedObjectSourceWizard
+						.getManagedObjectSourceModel();
+			}
 		} catch (Throwable ex) {
 			editPart.messageError(ex);
+			return;
 		}
 
 		// Ensure managed object created

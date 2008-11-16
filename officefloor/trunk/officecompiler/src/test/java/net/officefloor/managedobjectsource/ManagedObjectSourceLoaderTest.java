@@ -50,16 +50,15 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadManagedObjectSourceFromMetaData() throws Throwable {
 
-		// Create the loader
-		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
-
 		// Default timeout
 		final long DEFAULT_TIMEOUT = 10;
 
 		// Load the managed object source model
-		ManagedObjectSourceModel model = loader.loadManagedObjectSource("test",
-				new TestMetaDataManagedObjectSource(), new Properties(),
-				DEFAULT_TIMEOUT, this.getClass().getClassLoader());
+		ManagedObjectSourceModel model = ManagedObjectSourceLoader
+				.loadManagedObjectSource("test",
+						new TestMetaDataManagedObjectSource(),
+						new Properties(), DEFAULT_TIMEOUT, this.getClass()
+								.getClassLoader());
 
 		// --------------------------------------------
 		// Validate managed object source model
@@ -98,9 +97,6 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadManagedObjectSourceFromContext() throws Throwable {
 
-		// Create the loader
-		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
-
 		// Default timeout
 		final long DEFAULT_TIMEOUT = 10;
 
@@ -109,9 +105,10 @@ public class ManagedObjectSourceLoaderTest extends OfficeFrameTestCase {
 		properties.setProperty("property name", "property value");
 
 		// Load the managed object source model
-		ManagedObjectSourceModel model = loader.loadManagedObjectSource("test",
-				new TestContextManagedObjectSource(), properties,
-				DEFAULT_TIMEOUT, this.getClass().getClassLoader());
+		ManagedObjectSourceModel model = ManagedObjectSourceLoader
+				.loadManagedObjectSource("test",
+						new TestContextManagedObjectSource(), properties,
+						DEFAULT_TIMEOUT, this.getClass().getClassLoader());
 
 		// --------------------------------------------
 		// Validate managed object source model
