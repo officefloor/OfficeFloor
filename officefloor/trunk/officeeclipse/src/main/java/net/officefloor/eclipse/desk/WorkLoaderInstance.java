@@ -258,9 +258,6 @@ public class WorkLoaderInstance {
 	/**
 	 * Creates the {@link WorkLoader}.
 	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader} to potentially instantiate
-	 *            {@link WorkLoader}.
 	 * @return {@link WorkLoader}.
 	 * @throws Exception
 	 *             If fails to create the {@link WorkLoader}.

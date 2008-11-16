@@ -2,6 +2,7 @@
 <?eclipse version="3.0"?>
 <plugin>
    <extension-point id="workloader" name="Work Loader" schema="schema/workloader.exsd"/>
+   <extension-point id="managedobjectsource" name="Managed Object Source" schema="schema/managedobjectsource.exsd"/>
     <extension id="net.officefloor.editors" name="Editors" point="org.eclipse.ui.editors">
         <editor
               class="net.officefloor.eclipse.desk.DeskEditor"
@@ -98,5 +99,11 @@
        <workloader
              class="net.officefloor.eclipse.extension.workloader.clazz.ClassWorkLoaderExtension">
        </workloader>
+    </extension>
+    <extension
+          point="net.officefloor.eclipse.managedobjectsource">
+       <managedobjectsource
+             class="net.officefloor.eclipse.extension.managedobjectsource.mock.MockManagedObjectSourceExtension">
+       </managedobjectsource>
     </extension>
 </plugin>

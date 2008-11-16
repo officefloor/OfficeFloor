@@ -50,6 +50,26 @@ public class ServerSocketManagedObjectSource extends
 		AbstractManagedObjectSource<None, ServerSocketHandlerEnum> {
 
 	/**
+	 * Port property name.
+	 */
+	public static final String PROPERTY_PORT = "port";
+
+	/**
+	 * Buffer size property name.
+	 */
+	public static final String PROPERTY_BUFFER_SIZE = "buffer.size";
+
+	/**
+	 * Message size property name.
+	 */
+	public static final String PROPERTY_MESSAGE_SIZE = "message.size";
+
+	/**
+	 * Maximum connections property name.
+	 */
+	public static final String PROPERTY_MAXIMUM_CONNECTIONS = "max.connections";
+
+	/**
 	 * {@link ServerSocketAccepter} listening for connections.
 	 */
 	private ServerSocketAccepter serverSocketAccepter;
@@ -113,20 +133,29 @@ public class ServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
+	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+	 * AbstractAsyncManagedObjectSource
+	 * #loadSpecification(net.officefloor.frame.spi
+	 * .managedobject.source.impl.AbstractAsyncManagedObjectSource
+	 * .SpecificationContext)
 	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty("port");
-		context.addProperty("buffer_size", "Buffer size");
-		context.addProperty("message_size", "Recommended segments per message");
-		context.addProperty("max_conn", "Maximum connextions per listener");
+		context.addProperty(PROPERTY_PORT);
+		context.addProperty(PROPERTY_BUFFER_SIZE, "Buffer size");
+		context.addProperty(PROPERTY_MESSAGE_SIZE,
+				"Recommended segments per message");
+		context.addProperty(PROPERTY_MAXIMUM_CONNECTIONS,
+				"Maximum connextions per listener");
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
+	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+	 * AbstractAsyncManagedObjectSource
+	 * #loadMetaData(net.officefloor.frame.spi.managedobject
+	 * .source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
 	protected void loadMetaData(
@@ -141,13 +170,13 @@ public class ServerSocketManagedObjectSource extends
 				.getManagedObjectSourceContext();
 
 		// Obtain the configuration
-		int port = Integer.parseInt(mosContext.getProperty("port"));
-		int bufferSize = Integer
-				.parseInt(mosContext.getProperty("buffer_size"));
+		int port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
+		int bufferSize = Integer.parseInt(mosContext
+				.getProperty(PROPERTY_BUFFER_SIZE));
 		int recommendedSegmentCount = Integer.parseInt(mosContext
-				.getProperty("message_size"));
-		int maxConn = Integer
-				.parseInt(mosContext.getProperty("max_conn", "63"));
+				.getProperty(PROPERTY_MESSAGE_SIZE));
+		int maxConn = Integer.parseInt(mosContext.getProperty(
+				PROPERTY_MAXIMUM_CONNECTIONS, "63"));
 
 		// Create prefix name
 		String prefix = "serversocket." + port + ".";
@@ -203,8 +232,7 @@ public class ServerSocketManagedObjectSource extends
 	 * <p>
 	 * Protocol specific overriding should at minimum provide:<il>
 	 * <li>Type of object</li>
-	 * <li>{@link ServerSocketHandler} implementation</li>
-	 * </il>
+	 * <li>{@link ServerSocketHandler} implementation</li> </il>
 	 * 
 	 * @param context
 	 *            {@link MetaDataContext}.
@@ -220,7 +248,10 @@ public class ServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start
+	 * (net
+	 * .officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
 	@SuppressWarnings("unchecked")
 	public void start(ManagedObjectExecuteContext context) throws Exception {
@@ -238,7 +269,8 @@ public class ServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource#getManagedObject()
+	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+	 * AbstractManagedObjectSource#getManagedObject()
 	 */
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
