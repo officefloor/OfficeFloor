@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.extension.managedobjectsource.mock;
+package net.officefloor.eclipse.extension.managedobjectsource.internal;
 
 import java.util.List;
 
@@ -22,17 +22,37 @@ import net.officefloor.eclipse.extension.managedobjectsource.InitiateProperty;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.test.MockManagedObjectSource;
 
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link ManagedObjectSourceExtension} for the {@link MockManagedObjectSource}.
+ * Abstract internal {@link ManagedObjectSourceExtension} to not include
+ * particular {@link ManagedObjectSource} types.
  * 
  * @author Daniel
  */
-public class MockManagedObjectSourceExtension implements
+public abstract class AbstractInternalManagedObjectSourceExtension implements
 		ManagedObjectSourceExtension {
+
+	/**
+	 * {@link ManagedObjectSource} class.
+	 */
+	private final Class<? extends ManagedObjectSource<?, ?>> managedObjectSourceClass;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param managedObjectSourceClass
+	 *            {@link ManagedObjectSource} class.
+	 */
+	public AbstractInternalManagedObjectSourceExtension(
+			Class<? extends ManagedObjectSource<?, ?>> managedObjectSourceClass) {
+		this.managedObjectSourceClass = managedObjectSourceClass;
+	}
+
+	/*
+	 * ============== ManagedObjectSourceExtension ================
+	 */
 
 	/*
 	 * (non-Javadoc)
@@ -42,7 +62,7 @@ public class MockManagedObjectSourceExtension implements
 	 */
 	@Override
 	public Class<? extends ManagedObjectSource<?, ?>> getManagedObjectSourceClass() {
-		return MockManagedObjectSource.class;
+		return this.managedObjectSourceClass;
 	}
 
 	/*
@@ -64,7 +84,7 @@ public class MockManagedObjectSourceExtension implements
 	 */
 	@Override
 	public String getDisplayName() {
-		return "Mock";
+		return "Should not be used";
 	}
 
 	/*
@@ -93,7 +113,7 @@ public class MockManagedObjectSourceExtension implements
 	@Override
 	public String getSuggestedManagedObjectSourceName(
 			List<InitiateProperty> properties) {
-		return "Mock";
+		return "Should not be used";
 	}
 
 }

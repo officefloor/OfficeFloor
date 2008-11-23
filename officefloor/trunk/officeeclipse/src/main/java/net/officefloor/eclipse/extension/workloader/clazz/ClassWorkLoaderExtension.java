@@ -19,8 +19,8 @@ package net.officefloor.eclipse.extension.workloader.clazz;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
-import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.InputFilter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;

@@ -16,6 +16,11 @@
  */
 package net.officefloor.eclipse.util;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 
 /**
@@ -80,7 +85,8 @@ public class EclipseUtil {
 	 * @throws OfficeFloorPluginFailure
 	 *             If fails to create an instance.
 	 */
-	public static <T> T createInstance(Class<T> clazz) throws OfficeFloorPluginFailure {
+	public static <T> T createInstance(Class<T> clazz)
+			throws OfficeFloorPluginFailure {
 		try {
 			return clazz.newInstance();
 		} catch (InstantiationException ex) {
@@ -104,6 +110,25 @@ public class EclipseUtil {
 	public static <S> S createInstance(String className, Class<S> superType)
 			throws OfficeFloorPluginFailure {
 		return createInstance(obtainClass(className, superType));
+	}
+
+	/**
+	 * Creates a {@link CoreException} from the input {@link Throwable}.
+	 * 
+	 * @param failure
+	 *            {@link Throwable}.
+	 * @return {@link CoreException}.
+	 */
+	public static CoreException createCoreException(Throwable failure) {
+
+		// Ensure not already a core exception
+		if (failure instanceof CoreException) {
+			return (CoreException) failure;
+		}
+
+		// Create and return core exception for failure
+		return new CoreException(new Status(IStatus.ERROR,
+				OfficeFloorPlugin.PLUGIN_ID, failure.getMessage(), failure));
 	}
 
 	/**

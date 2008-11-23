@@ -16,10 +16,15 @@
  */
 package net.officefloor.eclipse.extension;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
+import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -79,6 +84,50 @@ public class ExtensionUtil {
 
 		// Return the listing of typed executable extensions
 		return typedExecutableExtensions;
+	}
+
+	/**
+	 * Obtains the map of {@link ExtensionClasspathProvider} instances by the
+	 * extension class name.
+	 * 
+	 * @return Map of {@link ExtensionClasspathProvider} instances by the
+	 *         extension class name.
+	 * @throws Exception
+	 *             If fails to obtain the map.
+	 */
+	public static Map<String, ExtensionClasspathProvider> createClasspathProvidersByExtensionClassNames()
+			throws Exception {
+
+		// Create the listing of extension class path providers
+		Map<String, ExtensionClasspathProvider> providers = new HashMap<String, ExtensionClasspathProvider>();
+
+		// Obtain the extensions for work loaders
+		List<WorkLoaderExtension> workLoaderExtensions = createExecutableExtensions(
+				WorkLoaderExtension.EXTENSION_ID, WorkLoaderExtension.class);
+		for (WorkLoaderExtension workLoaderExtension : workLoaderExtensions) {
+			if (workLoaderExtension instanceof ExtensionClasspathProvider) {
+				ExtensionClasspathProvider provider = (ExtensionClasspathProvider) workLoaderExtension;
+				String extensionClassName = workLoaderExtension
+						.getWorkLoaderClass().getName();
+				providers.put(extensionClassName, provider);
+			}
+		}
+
+		// Obtain the extensions for managed object sources
+		List<ManagedObjectSourceExtension> mosExtensions = createExecutableExtensions(
+				ManagedObjectSourceExtension.EXTENSION_ID,
+				ManagedObjectSourceExtension.class);
+		for (ManagedObjectSourceExtension mosExtension : mosExtensions) {
+			if (mosExtension instanceof ExtensionClasspathProvider) {
+				ExtensionClasspathProvider provider = (ExtensionClasspathProvider) mosExtension;
+				String extensionClassName = mosExtension
+						.getManagedObjectSourceClass().getName();
+				providers.put(extensionClassName, provider);
+			}
+		}
+
+		// Return the mapping of extension class name to class path provider
+		return providers;
 	}
 
 	/**

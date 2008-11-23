@@ -16,8 +16,8 @@
  */
 package net.officefloor.eclipse.common.dialog.input.impl;
 
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
-import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
 import net.officefloor.eclipse.common.dialog.input.filter.AlwaysIncludeInputFilter;

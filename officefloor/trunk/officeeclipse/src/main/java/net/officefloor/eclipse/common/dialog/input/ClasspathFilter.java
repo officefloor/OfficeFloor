@@ -19,6 +19,8 @@ package net.officefloor.eclipse.common.dialog.input;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.eclipse.classpath.ClasspathUtil;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;

@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
-import net.officefloor.eclipse.common.dialog.input.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.filter.FileExtensionInputFilter;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.common.dialog.input.translator.ResourceFullPathValueTranslator;

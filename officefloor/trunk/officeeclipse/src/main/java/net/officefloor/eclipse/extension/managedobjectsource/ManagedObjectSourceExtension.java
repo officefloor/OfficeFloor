@@ -19,6 +19,7 @@ package net.officefloor.eclipse.extension.managedobjectsource;
 import java.util.List;
 
 import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
@@ -31,6 +32,8 @@ import org.eclipse.swt.widgets.Control;
  * usage.
  * 
  * @author Daniel
+ * 
+ * @see ExtensionClasspathProvider
  */
 public interface ManagedObjectSourceExtension {
 

@@ -103,7 +103,14 @@
     <extension
           point="net.officefloor.eclipse.managedobjectsource">
        <managedobjectsource
-             class="net.officefloor.eclipse.extension.managedobjectsource.mock.MockManagedObjectSourceExtension">
+             class="net.officefloor.eclipse.extension.managedobjectsource.internal.MockManagedObjectSourceExtension">
        </managedobjectsource>
+    </extension>
+    <extension
+          point="org.eclipse.jdt.core.classpathContainerInitializer">
+       <classpathContainerInitializer
+             class="net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainerInitialiser"
+             id="net.officefloor.eclipse.OFFICE_FLOOR">
+       </classpathContainerInitializer>
     </extension>
 </plugin>

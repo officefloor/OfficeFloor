@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
@@ -69,6 +70,10 @@ public class AddWorkOperation extends AbstractOperation<DeskEditPart> {
 
 		// Set location
 		context.positionModel(deskWork);
+
+		// Update the class path to possibly include the loader
+		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
+				deskWork.getLoader());
 
 		// Add the work
 		final DeskWorkModel work = deskWork;

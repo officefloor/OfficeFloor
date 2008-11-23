@@ -19,6 +19,7 @@ package net.officefloor.eclipse.extension.workloader;
 import java.util.List;
 
 import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.work.WorkModel;
 import net.officefloor.work.WorkLoader;
@@ -31,6 +32,8 @@ import org.eclipse.swt.widgets.Control;
  * Interface for extension to provide enriched {@link WorkLoader} usage.
  * 
  * @author Daniel
+ * 
+ * @see ExtensionClasspathProvider
  */
 public interface WorkLoaderExtension {
 
