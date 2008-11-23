@@ -22,6 +22,9 @@ import java.util.List;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
+import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
@@ -36,7 +39,12 @@ import org.eclipse.swt.widgets.Composite;
  * 
  * @author Daniel
  */
-public class HttpRouteWorkLoaderExtension implements WorkLoaderExtension {
+public class HttpRouteWorkLoaderExtension implements WorkLoaderExtension,
+		ExtensionClasspathProvider {
+
+	/*
+	 * ====================== WorkLoaderExtension =========================
+	 */
 
 	/*
 	 * (non-Javadoc)
@@ -116,6 +124,23 @@ public class HttpRouteWorkLoaderExtension implements WorkLoaderExtension {
 	@Override
 	public String getSuggestedWorkName(List<WorkLoaderProperty> properties) {
 		return "HttpRouter";
+	}
+
+	/*
+	 * =================== ExtensionClasspathProvider =====================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider
+	 * #getClasspathProvisions()
+	 */
+	@Override
+	public ClasspathProvision[] getClasspathProvisions() {
+		return new ClasspathProvision[] { new TypeClasspathProvision(
+				HttpRouteWorkLoader.class) };
 	}
 
 }

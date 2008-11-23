@@ -19,6 +19,9 @@ package net.officefloor.eclipse.socket;
 import java.util.Arrays;
 import java.util.List;
 
+import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.managedobjectsource.InitiateProperty;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
@@ -42,7 +45,7 @@ import org.eclipse.swt.widgets.Text;
  * @author Daniel
  */
 public class HttpManagedObjectSourceExtension implements
-		ManagedObjectSourceExtension {
+		ManagedObjectSourceExtension, ExtensionClasspathProvider {
 
 	/**
 	 * {@link InitiateProperty} for the
@@ -79,6 +82,10 @@ public class HttpManagedObjectSourceExtension implements
 	private final List<InitiateProperty> properties = Arrays.asList(
 			this.portProperty, this.bufferSizeProperty,
 			this.messageSizeProperty, this.maxConnectionsProperty);
+
+	/*
+	 * ================= ManagedObjectSourceExtension ========================
+	 */
 
 	/*
 	 * (non-Javadoc)
@@ -186,6 +193,23 @@ public class HttpManagedObjectSourceExtension implements
 	public String getSuggestedManagedObjectSourceName(
 			List<InitiateProperty> properties) {
 		return "HTTP";
+	}
+
+	/*
+	 * ========================== ExtensionClasspathProvider =================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider
+	 * #getClasspathProvisions()
+	 */
+	@Override
+	public ClasspathProvision[] getClasspathProvisions() {
+		return new ClasspathProvision[] { new TypeClasspathProvision(
+				HttpServerSocketManagedObjectSource.class) };
 	}
 
 }

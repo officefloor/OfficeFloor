@@ -14,13 +14,21 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.dialog.input;
+package net.officefloor.eclipse.classpath;
 
+import java.io.File;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainer;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
+import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
+import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
+import net.officefloor.eclipse.extension.classpath.VariableClasspathProvision;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -29,7 +37,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -44,11 +54,170 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarEntryResource;
 
 /**
- * Utility methods for working with classpath.
+ * Utility methods for working with class path.
  * 
  * @author Daniel
  */
 public class ClasspathUtil {
+
+	/**
+	 * <p>
+	 * Attempts to update the class path of the {@link IJavaProject} for the
+	 * edit part with the extension class names.
+	 * <p>
+	 * No exception is thrown if unable to update the class path and the class
+	 * path is subsequently not updated.
+	 * 
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
+	 * @param monitor
+	 *            {@link IProgressMonitor}.
+	 * @param extensionClassNames
+	 *            Listing of class names that may have extension associated.
+	 */
+	public static void attemptUpdateOfficeFloorClasspath(
+			AbstractOfficeFloorEditPart<?, ?> editPart,
+			IProgressMonitor monitor, String... extensionClassNames) {
+		try {
+			// Obtain the project for the edit part
+			IProject project = FileConfigurationItem.getProject(editPart);
+
+			// Attempt to update the class path
+			updateOfficeFloorClasspath(project, monitor, extensionClassNames);
+
+		} catch (Throwable ex) {
+			// Indicate failure to update class path
+			editPart.messageError(ex);
+		}
+	}
+
+	/**
+	 * Convenience method to ensure {@link OfficeFloorClasspathContainer} is
+	 * available on the {@link IProject} and that the class paths for the input
+	 * extensions are available.
+	 * 
+	 * @param project
+	 *            {@link IProject}.
+	 * @param monitor
+	 *            {@link IProgressMonitor}. May be <code>null</code>.
+	 * @param extensionClassNames
+	 *            Listing of class names that may have an extension associated.
+	 * @throws Exception
+	 *             If fails to ensure available.
+	 */
+	public static void updateOfficeFloorClasspath(IProject project,
+			IProgressMonitor monitor, String... extensionClassNames)
+			throws Exception {
+		updateOfficeFloorClasspath(JavaCore.create(project), monitor,
+				extensionClassNames);
+	}
+
+	/**
+	 * Ensures the {@link OfficeFloorClasspathContainer} is available on the
+	 * {@link IJavaProject} and that the class paths for the input extensions
+	 * are available.
+	 * 
+	 * @param javaProject
+	 *            {@link IJavaProject}.
+	 * @param monitor
+	 *            {@link IProgressMonitor}. May be <code>null</code>.
+	 * @param extensionClassNames
+	 *            Listing of class names that may have an extension associated.
+	 * @throws Exception
+	 *             If fails to ensure available.
+	 */
+	public static void updateOfficeFloorClasspath(IJavaProject javaProject,
+			IProgressMonitor monitor, String... extensionClassNames)
+			throws Exception {
+		OfficeFloorClasspathContainer.addExtensionToProjectClasspath(
+				javaProject, monitor, extensionClassNames);
+	}
+
+	/**
+	 * Creates the {@link IClasspathEntry} from a {@link ClasspathProvision}.
+	 * 
+	 * @param provision
+	 *            {@link ClasspathProvision}.
+	 * @return {@link IClasspathEntry}.
+	 * @throws Exception
+	 *             If fails to create the {@link IClasspathEntry}.
+	 */
+	public static IClasspathEntry createClasspathEntry(
+			ClasspathProvision provision) throws Exception {
+
+		// Handle based on type of provision
+		if (provision instanceof TypeClasspathProvision) {
+			// Type provision
+			TypeClasspathProvision typeProvision = (TypeClasspathProvision) provision;
+			return createClasspathEntry(typeProvision.getType());
+		} else if (provision instanceof VariableClasspathProvision) {
+			// Variable provision
+			VariableClasspathProvision variableProvision = (VariableClasspathProvision) provision;
+			return createClasspathEntry(variableProvision.getVariable(),
+					variableProvision.getPath());
+		} else {
+			// Unknown provision type
+			String provisionTypeName = (provision == null ? null : provision
+					.getClass().getName());
+			throw new OfficeFloorPluginFailure("Unknown "
+					+ ClasspathProvision.class.getSimpleName() + " type "
+					+ provisionTypeName);
+		}
+	}
+
+	/**
+	 * Obtains the {@link IClasspathEntry} of the input variable and path.
+	 * 
+	 * @param variable
+	 *            Name of variable.
+	 * @param path
+	 *            Path from variable.
+	 * @return {@link IClasspathEntry} for the variable.
+	 * @throws Exception
+	 *             If fails to obtain the {@link IClasspathEntry}.
+	 */
+	public static IClasspathEntry createClasspathEntry(String variable,
+			String path) throws Exception {
+
+		// Create the path
+		IPath variablePath = new Path(variable).append(path);
+
+		// Return the variable class path entry
+		return JavaCore.newVariableEntry(variablePath, null, null);
+	}
+
+	/**
+	 * Obtains the {@link IClasspathEntry} of the class path containing the
+	 * {@link Class}.
+	 * 
+	 * @param clazz
+	 *            {@link Class}.
+	 * @return {@link IClasspathEntry} of the class path containing the
+	 *         {@link Class}.
+	 * @throws Exception
+	 *             If fails to obtain the {@link IClasspathEntry}.
+	 */
+	public static IClasspathEntry createClasspathEntry(Class<?> clazz)
+			throws Exception {
+
+		// Obtain the class resource name
+		String classResourceName = clazz.getName().replace('.', '/') + ".class";
+
+		// Obtain the URL to the class resource
+		URL classUrl = clazz.getClassLoader().getResource(classResourceName);
+		URL resolvedUrl = FileLocator.resolve(classUrl);
+
+		// Create the path to class path
+		String resolvedPath = new File(resolvedUrl.toURI()).getAbsolutePath();
+		String classpath = resolvedPath.substring(0,
+				(resolvedPath.length() - classResourceName.length()));
+
+		// Obtain the path for the class path
+		IPath classpathPath = new Path(classpath);
+
+		// Return the class path entry
+		return JavaCore.newLibraryEntry(classpathPath, null, null);
+	}
 
 	/**
 	 * Obtains the class name of the input {@link IJavaElement}.
@@ -66,12 +235,12 @@ public class ClasspathUtil {
 			type = (IType) javaElement;
 		} else if (javaElement instanceof IClassFile) {
 			type = ((IClassFile) javaElement).getType();
-		} else if (javaElement instanceof ICompilationUnit){
+		} else if (javaElement instanceof ICompilationUnit) {
 			ICompilationUnit unit = (ICompilationUnit) javaElement;
-			
+
 			// Strip extension from name
 			String name = javaElement.getElementName().split("\\.")[0];
-			
+
 			// Obtain the type
 			type = unit.getType(name);
 		} else {

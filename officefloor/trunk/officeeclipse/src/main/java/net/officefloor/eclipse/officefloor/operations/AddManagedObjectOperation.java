@@ -16,6 +16,7 @@
  */
 package net.officefloor.eclipse.officefloor.operations;
 
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
@@ -72,6 +73,10 @@ public class AddManagedObjectOperation extends
 
 		// Set location
 		context.positionModel(managedObjectSource);
+
+		// Update the class path to possibly include the managed object source
+		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
+				managedObjectSource.getSource());
 
 		// Add managed object source
 		final ManagedObjectSourceModel newManagedObjectSource = managedObjectSource;

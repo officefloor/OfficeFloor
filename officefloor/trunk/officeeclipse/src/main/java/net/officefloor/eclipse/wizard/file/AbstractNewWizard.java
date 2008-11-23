@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.wizard.file.OfficeItemNewWizardPage;
 import net.officefloor.model.desk.DeskModel;
 
@@ -105,7 +106,7 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 	 * (non-Javadoc)
 	 * 
 	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench,
-	 *      org.eclipse.jface.viewers.IStructuredSelection)
+	 * org.eclipse.jface.viewers.IStructuredSelection)
 	 */
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
@@ -215,6 +216,9 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 			}
 		});
 		monitor.worked(1);
+
+		// Ensure the Office Floor class path container available
+		ClasspathUtil.updateOfficeFloorClasspath(file.getProject(), monitor);
 	}
 
 }

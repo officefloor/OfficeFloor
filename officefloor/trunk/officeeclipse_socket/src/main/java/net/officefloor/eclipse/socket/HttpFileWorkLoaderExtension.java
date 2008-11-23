@@ -24,6 +24,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
@@ -35,7 +38,12 @@ import net.officefloor.work.http.file.HttpFileWorkLoader;
  * 
  * @author Daniel
  */
-public class HttpFileWorkLoaderExtension implements WorkLoaderExtension {
+public class HttpFileWorkLoaderExtension implements WorkLoaderExtension,
+		ExtensionClasspathProvider {
+
+	/*
+	 * ================ WorkLoaderExtension ====================
+	 */
 
 	/*
 	 * (non-Javadoc)
@@ -88,6 +96,23 @@ public class HttpFileWorkLoaderExtension implements WorkLoaderExtension {
 	@Override
 	public String getSuggestedWorkName(List<WorkLoaderProperty> properties) {
 		return "HttpFile";
+	}
+
+	/*
+	 * =================== ExtensionClasspathProvider =====================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider
+	 * #getClasspathProvisions()
+	 */
+	@Override
+	public ClasspathProvision[] getClasspathProvisions() {
+		return new ClasspathProvision[] { new TypeClasspathProvision(
+				HttpFileWorkLoader.class) };
 	}
 
 }
