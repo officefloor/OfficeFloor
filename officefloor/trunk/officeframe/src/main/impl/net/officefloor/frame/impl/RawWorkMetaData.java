@@ -90,16 +90,19 @@ public class RawWorkMetaData {
 		RawTaskRegistry taskRegistry = RawTaskRegistry.createTaskRegistry(
 				workConfig, officeResources, wmoRegistry, wadminRegistry);
 
-		// Obtain the initial Task meta-data
+		// Obtain the initial Task meta-data (if there is an initial task)
+		TaskMetaData<?, ?, ?, ?> initialTaskMetaData = null;
 		String initialTaskName = workConfig.getInitialTaskName();
-		RawTaskMetaData initialRawTaskMetaData = taskRegistry
-				.getRawTaskMetaData(initialTaskName);
-		if (initialRawTaskMetaData == null) {
-			throw new ConfigurationException("Unknown Task '" + initialTaskName
-					+ "' for initial Task of Work '" + workName + "'");
+		if (initialTaskName != null) {
+			RawTaskMetaData initialRawTaskMetaData = taskRegistry
+					.getRawTaskMetaData(initialTaskName);
+			if (initialRawTaskMetaData == null) {
+				throw new ConfigurationException("Unknown Task '"
+						+ initialTaskName + "' for initial Task of Work '"
+						+ workName + "'");
+			}
+			initialTaskMetaData = initialRawTaskMetaData.getTaskMetaData();
 		}
-		TaskMetaData<?, ?, ?, ?> initialTaskMetaData = initialRawTaskMetaData
-				.getTaskMetaData();
 
 		// Create the Flow Manager for the initial flow of the work
 		AssetManager flowManager = rawAssetRegistry

@@ -16,36 +16,24 @@
  */
 package net.officefloor.frame.api.manage;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Office within the {@link OfficeFloor}.
+ * Indicates there is no initial {@link Task} for a {@link Work}.
  * 
  * @author Daniel
  */
-public interface Office {
+public class NoInitialTaskException extends Exception {
 
 	/**
-	 * Obtains the {@link WorkManager} for the named {@link Work}.
+	 * Initiate.
 	 * 
-	 * @param name
-	 *            Name of the {@link Work}.
-	 * @return {@link WorkManager} for the named {@link Work}.
-	 * @throws UnknownWorkException
-	 *             If unknown {@link Work} name.
+	 * @param message
+	 *            Message.
 	 */
-	WorkManager getWorkManager(String workName) throws UnknownWorkException;
-
-	/**
-	 * Obtains a {@link ManagedObject} for the input Id.
-	 * 
-	 * @param managedObjectId
-	 *            Id of the {@link ManagedObject}.
-	 * @return {@link ManagedObject} for the input Id.
-	 * @throws Exception
-	 *             If fails to obtain the {@link ManagedObject}.
-	 */
-	ManagedObject getManagedObject(String managedObjectId) throws Exception;
+	public NoInitialTaskException(String message) {
+		super(message);
+	}
 
 }

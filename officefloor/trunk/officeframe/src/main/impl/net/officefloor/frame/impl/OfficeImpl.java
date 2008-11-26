@@ -23,6 +23,7 @@ import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.execute.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.ProcessStateImpl;
@@ -121,7 +122,7 @@ public class OfficeImpl implements Office {
 		this.workRegistry = new HashMap<String, WorkManager>();
 		for (String name : workMetaData.keySet()) {
 			// Register the Work Manager
-			this.workRegistry.put(name, new WorkManagerImpl(workMetaData
+			this.workRegistry.put(name, new WorkManagerImpl(name, workMetaData
 					.get(name), this));
 		}
 	}
@@ -217,21 +218,20 @@ public class OfficeImpl implements Office {
 	}
 
 	/*
-	 * ====================================================================
-	 * OfficeManager
-	 * ====================================================================
+	 * ====================== Office ==================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.manage.OfficeManager#getWorkManager(java.lang.String)
+	 * @see
+	 * net.officefloor.frame.api.manage.OfficeManager#getWorkManager(java.lang
+	 * .String)
 	 */
-	public WorkManager getWorkManager(String name) {
+	public WorkManager getWorkManager(String name) throws UnknownWorkException {
 		WorkManager workManager = this.workRegistry.get(name);
 		if (workManager == null) {
-			throw new NullPointerException("Unknown work manager '" + name
-					+ "'");
+			throw new UnknownWorkException(name);
 		}
 		return workManager;
 	}
@@ -239,7 +239,9 @@ public class OfficeImpl implements Office {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.manage.OfficeManager#getManagedObject(java.lang.String)
+	 * @see
+	 * net.officefloor.frame.api.manage.OfficeManager#getManagedObject(java.
+	 * lang.String)
 	 */
 	public ManagedObject getManagedObject(String managedObjectId)
 			throws Exception {

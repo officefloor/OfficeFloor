@@ -266,7 +266,8 @@ public class RawManagedObjectRegistry {
 						// Ensure task node reference provided
 						TaskNodeReference taskNodeRef = processLinkConfig[i]
 								.getTaskNodeReference();
-						if ((taskNodeRef.getWorkName() == null)
+						if ((taskNodeRef == null)
+								|| (taskNodeRef.getWorkName() == null)
 								|| (taskNodeRef.getTaskName() == null)) {
 							throw new ConfigurationException(
 									"Task not linked in for process link "
