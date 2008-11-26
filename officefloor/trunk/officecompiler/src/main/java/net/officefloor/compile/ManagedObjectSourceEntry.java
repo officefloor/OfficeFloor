@@ -39,6 +39,7 @@ import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
 import net.officefloor.model.officefloor.ManagedObjectTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.OfficeTaskModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.util.OFCU;
@@ -71,9 +72,24 @@ public class ManagedObjectSourceEntry extends
 			OfficeFloorEntry officeFloorEntry,
 			OfficeFloorCompilerContext context) throws Exception {
 
+		// Obtain the managed object id
+		String managedObjectSourceId = configuration.getId();
+		if ((managedObjectSourceId == null)
+				|| (managedObjectSourceId.trim().length() == 0)) {
+			throw new BuildException("No id provided for "
+					+ ManagedObjectSource.class.getSimpleName());
+		}
+
+		// Obtain the managed object source class name
+		String sourceClassName = configuration.getSource();
+		if ((sourceClassName == null) || (sourceClassName.trim().length() == 0)) {
+			throw new BuildException("No class name provided for "
+					+ ManagedObjectSource.class.getSimpleName() + " ");
+		}
+
 		// Obtain the managed object source class
 		Class managedObjectSourceClass = context.getLoaderContext()
-				.obtainClass(configuration.getSource());
+				.obtainClass(sourceClassName);
 
 		// Create the builder
 		ManagedObjectBuilder<?> builder = context.getBuilderFactory()
@@ -81,14 +97,15 @@ public class ManagedObjectSourceEntry extends
 
 		// Create the entry
 		ManagedObjectSourceEntry mosEntry = new ManagedObjectSourceEntry(
-				configuration.getId(), builder, configuration, officeFloorEntry);
+				managedObjectSourceId, builder, configuration, officeFloorEntry);
 
 		// Return the entry
 		return mosEntry;
 	}
 
 	/**
-	 * {@link OfficeFloorEntry} containing this {@link ManagedObjectSourceEntry}.
+	 * {@link OfficeFloorEntry} containing this {@link ManagedObjectSourceEntry}
+	 * .
 	 */
 	private final OfficeFloorEntry officeFloorEntry;
 
@@ -97,7 +114,8 @@ public class ManagedObjectSourceEntry extends
 	 * 
 	 * @param id
 	 *            Id of the
-	 *            {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+	 *            {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
+	 *            .
 	 * @param builder
 	 *            {@link ManagedObjectBuilder}.
 	 * @param model
@@ -186,19 +204,39 @@ public class ManagedObjectSourceEntry extends
 						for (ManagedObjectHandlerModel handler : ManagedObjectSourceEntry.this
 								.getModel().getHandlers()) {
 
+							// Obtain the key name for the handler
+							String handlerKeyName = handler.getHandlerKey();
+							if ((handlerKeyName == null)
+									|| (handlerKeyName.trim().length() == 0)) {
+								throw new BuildException(
+										"Handle without key name on managed object source "
+												+ managedObjectId);
+							}
+
 							// Obtain the handler key class
 							Class handlerKeyClass;
 							try {
+								String handlerKeyClassName = handler
+										.getHandlerKeyClass();
+								if ((handlerKeyClassName == null)
+										|| (handlerKeyClassName.trim().length() == 0)) {
+									throw new BuildException(
+											"No key class on handler "
+													+ handlerKeyName
+													+ " for managed object source "
+													+ managedObjectId);
+								}
 								handlerKeyClass = builderUtil
-										.obtainClass(handler
-												.getHandlerKeyClass());
+										.obtainClass(handlerKeyClassName);
 							} catch (Exception ex) {
+								if (ex instanceof BuildException) {
+									throw (BuildException) ex;
+								}
 								throw new BuildException(OFCU.exMsg(ex));
 							}
 
 							// Obtain the handler key
 							Enum handlerKey = null;
-							String handlerKeyName = handler.getHandlerKey();
 							for (Object keyObject : handlerKeyClass
 									.getEnumConstants()) {
 								Enum key = (Enum) keyObject;
@@ -222,14 +260,29 @@ public class ManagedObjectSourceEntry extends
 										.getLinkProcesses()) {
 
 									// Obtain the index of the link process
-									int linkProcessIndex = Integer
-											.parseInt(linkProcess
-													.getLinkProcessId());
+									String linkProcessId = linkProcess
+											.getLinkProcessId();
+									int linkProcessIndex;
+									try {
+										linkProcessIndex = Integer
+												.parseInt(linkProcessId);
+									} catch (NumberFormatException ex) {
+										throw new BuildException(
+												"Link process id '"
+														+ linkProcessId
+														+ "' for handler "
+														+ handlerKeyName
+														+ " of managed object source "
+														+ managedObjectId
+														+ " must be an integer");
+									}
 
 									// Link in the starting task of the process
-									LinkProcessToOfficeTaskModel officeTask = linkProcess
+									LinkProcessToOfficeTaskModel officeTaskConnection = linkProcess
 											.getOfficeTask();
-									if (officeTask != null) {
+									if (officeTaskConnection != null) {
+										OfficeTaskModel officeTask = officeTaskConnection
+												.getOfficeTask();
 										handlerBuilder.linkProcess(
 												linkProcessIndex, officeTask
 														.getWorkName(),
@@ -259,11 +312,13 @@ public class ManagedObjectSourceEntry extends
 											.getFlowId());
 
 									// Link in the task of the flow
+									OfficeTaskModel officeTask = link
+											.getOfficeTask();
 									flowNodeBuilder
 											.linkFlow(
 													flowIndex,
-													link.getWorkName(),
-													link.getTaskName(),
+													officeTask.getWorkName(),
+													officeTask.getTaskName(),
 													FlowInstigationStrategyEnum.SEQUENTIAL);
 								}
 							}
