@@ -21,5 +21,6 @@ Require-Bundle: net.officefloor.api,
  net.officefloor.frame,
  net.officefloor.xml,
  net.officefloor.model,
- org.junit
+ net.officefloor.eclipse.jars;bundle-version="1.0.0",
+ org.junit;bundle-version="3.8.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

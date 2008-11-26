@@ -31,6 +31,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.work.WorkModel;
@@ -248,13 +249,20 @@ public class WorkEntry<W extends Work> extends
 		DeskWorkModel deskWork = this.getModel();
 		WorkModel work = deskWork.getWork();
 		WorkFactory<W> workFactory = (WorkFactory<W>) work.getWorkFactory();
-		FlowItemModel initialFlowItem = OFCU.get(deskWork.getInitialFlowItem(),
-				"No initial flow for work ${0}", deskWork.getId())
+
+		// Determine if an initial flow
+		FlowItemModel initialFlowItem = null;
+		DeskWorkToFlowItemModel initialFlowConnection = deskWork
 				.getInitialFlowItem();
+		if (initialFlowConnection != null) {
+			initialFlowItem = initialFlowConnection.getInitialFlowItem();
+		}
 
 		// Load details of work
 		this.getBuilder().setWorkFactory(workFactory);
-		this.getBuilder().setInitialTask(initialFlowItem.getId());
+		if (initialFlowItem != null) {
+			this.getBuilder().setInitialTask(initialFlowItem.getId());
+		}
 
 		// Create the unique set of desk external managed objects of this work
 		Map<ExternalManagedObjectModel, ManagedObjectLine<W>> externalManagedObjects = new HashMap<ExternalManagedObjectModel, ManagedObjectLine<W>>();
@@ -344,7 +352,8 @@ public class WorkEntry<W extends Work> extends
 	 *            Name that the {@link ManagedObject} is accessible by
 	 *            {@link Task} instances of the {@link Work}.
 	 * @param officeManagedObject
-	 *            {@link net.officefloor.model.office.ExternalManagedObjectModel}.
+	 *            {@link net.officefloor.model.office.ExternalManagedObjectModel}
+	 *            .
 	 * @throws Exception
 	 *             If fails to bind.
 	 */
@@ -379,7 +388,8 @@ public class WorkEntry<W extends Work> extends
 	 * accessible within the {@link Work}.
 	 * 
 	 * @param officeManagedObject
-	 *            {@link net.officefloor.model.office.ExternalManagedObjectModel}.
+	 *            {@link net.officefloor.model.office.ExternalManagedObjectModel}
+	 *            .
 	 * @return Name of {@link ManagedObject} local to the {@link Work}.
 	 * @throws Exception
 	 *             If fails to bind {@link ManagedObject}.

@@ -106,7 +106,7 @@ public class OfficeFloorEntry extends
 	/**
 	 * {@link OfficeFloorOfficeModel} to {@link OfficeEntry} mapping.
 	 */
-	private final ModelEntryMap<OfficeFloorOfficeModel, OfficeEntry> officeMap = new ModelEntryMap<OfficeFloorOfficeModel, OfficeEntry>();
+	protected final ModelEntryMap<OfficeFloorOfficeModel, OfficeEntry> officeMap = new ModelEntryMap<OfficeFloorOfficeModel, OfficeEntry>();
 
 	/**
 	 * Initiate.
