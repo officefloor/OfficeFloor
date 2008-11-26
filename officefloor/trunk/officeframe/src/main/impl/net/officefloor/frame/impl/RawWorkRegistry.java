@@ -248,6 +248,17 @@ public class RawWorkRegistry {
 				FlowMetaData[] flowMetaData = new FlowMetaData[flowConfigs.length];
 				for (int i = 0; i < flowMetaData.length; i++) {
 
+					// Ensure have initial task for flow
+					TaskNodeReference initialTask = flowConfigs[i]
+							.getInitialTask();
+					if (initialTask == null) {
+						throw new ConfigurationException(
+								"No task linked for flow "
+										+ flowConfigs[i].getFlowName()
+										+ " of work " + workName + " task "
+										+ taskName);
+					}
+
 					// Obtain the instigation strategy
 					FlowInstigationStrategyEnum strategy = flowConfigs[i]
 							.getInstigationStrategy();
@@ -259,17 +270,6 @@ public class RawWorkRegistry {
 						flowManager = rawAssetRegistry
 								.createAssetManager("Flow " + workName + "."
 										+ taskName + "[" + i + "]");
-					}
-
-					// Ensure have initial task for flow
-					TaskNodeReference initialTask = flowConfigs[i]
-							.getInitialTask();
-					if (initialTask == null) {
-						throw new ConfigurationException(
-								"No task linked for flow "
-										+ flowConfigs[i].getFlowName()
-										+ " of work " + workName + " task "
-										+ taskName);
 					}
 
 					// Create the Flow meta-data

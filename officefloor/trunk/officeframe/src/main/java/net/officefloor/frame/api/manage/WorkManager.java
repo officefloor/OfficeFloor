@@ -17,35 +17,35 @@
 package net.officefloor.frame.api.manage;
 
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Interface to manage a particular type of
- * {@link net.officefloor.frame.api.execute.Work}.
+ * Interface to manage a particular type of {@link Work}.
  * 
  * @author Daniel
  */
 public interface WorkManager {
 
 	/**
-	 * Invokes a new instance of {@link net.officefloor.frame.api.execute.Work}
-	 * which is done within the Office.
+	 * Invokes a new instance of {@link Work} which is done within the
+	 * {@link Office}.
 	 * 
 	 * @param parameter
-	 *            Parameter for the first
-	 *            {@link net.officefloor.frame.api.execute.Task} of the
-	 *            {@link net.officefloor.frame.api.execute.Work}.
+	 *            Parameter for the first {@link Task} of the {@link Work}.
+	 * @throws NoInitialTaskException
+	 *             If {@link Work} does not have an initial {@link Task}.
 	 */
-	FlowFuture invokeWork(Object parameter);
+	FlowFuture invokeWork(Object parameter) throws NoInitialTaskException;
 
 	/**
 	 * <p>
 	 * Obtains a {@link ManagedObject} for the input Id.
 	 * <p>
 	 * As {@link ManagedObject} instances may be dependent on other
-	 * {@link ManagedObject} instances, they require the
-	 * {@link net.officefloor.frame.api.execute.Work} to specify these
-	 * dependencies.
+	 * {@link ManagedObject} instances, they require the {@link Work} to specify
+	 * these dependencies.
 	 * 
 	 * @param managedObjectId
 	 *            Id of the {@link ManagedObject}.

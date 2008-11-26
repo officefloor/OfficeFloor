@@ -18,6 +18,7 @@ package net.officefloor.frame.impl;
 
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -32,6 +33,11 @@ import net.officefloor.frame.spi.team.Job;
 public class WorkManagerImpl<W extends Work> implements WorkManager {
 
 	/**
+	 * Name of the {@link Work}.
+	 */
+	private final String workName;
+
+	/**
 	 * {@link WorkMetaData}.
 	 */
 	protected final WorkMetaData<W> workMetaData;
@@ -44,13 +50,16 @@ public class WorkManagerImpl<W extends Work> implements WorkManager {
 	/**
 	 * Initiate.
 	 * 
+	 * @param workName
+	 *            Name of the {@link Work}.
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
 	 * @param office
 	 *            {@link OfficeImpl}.
 	 */
-	public WorkManagerImpl(WorkMetaData<W> workMetaData, OfficeImpl office) {
-		// Store state
+	public WorkManagerImpl(String workName, WorkMetaData<W> workMetaData,
+			OfficeImpl office) {
+		this.workName = workName;
 		this.workMetaData = workMetaData;
 		this.office = office;
 	}
@@ -58,13 +67,21 @@ public class WorkManagerImpl<W extends Work> implements WorkManager {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.manage.WorkManager#invokeWork(java.lang.Object)
+	 * @see
+	 * net.officefloor.frame.api.manage.WorkManager#invokeWork(java.lang.Object)
 	 */
-	public FlowFuture invokeWork(Object parameter) {
+	public FlowFuture invokeWork(Object parameter)
+			throws NoInitialTaskException {
 
 		// Obtain the Initial Flow meta-data
 		FlowMetaData<W> flowMetaData = this.workMetaData
 				.getInitialFlowMetaData();
+
+		// Ensure there is an initial task for the work
+		if (flowMetaData.getInitialTaskMetaData() == null) {
+			throw new NoInitialTaskException("No initial task for work '"
+					+ this.workName + "'");
+		}
 
 		// Create the task within a new process
 		Job taskContainer = this.office.createProcess(flowMetaData, parameter,
@@ -80,7 +97,9 @@ public class WorkManagerImpl<W extends Work> implements WorkManager {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.manage.WorkManager#getManagedObject(java.lang.String)
+	 * @see
+	 * net.officefloor.frame.api.manage.WorkManager#getManagedObject(java.lang
+	 * .String)
 	 */
 	public ManagedObject getManagedObject(String managedObjectId)
 			throws Exception {

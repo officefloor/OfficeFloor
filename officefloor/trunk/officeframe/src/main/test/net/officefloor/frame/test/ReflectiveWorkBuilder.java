@@ -82,7 +82,11 @@ public class ReflectiveWorkBuilder implements Work,
 		this.workBuilder = OfficeFrame.getInstance().getBuilderFactory()
 				.createWorkBuilder(ReflectiveWorkBuilder.class);
 		this.workBuilder.setWorkFactory(this);
-		this.workBuilder.setInitialTask(initialTaskName);
+
+		// Specify initial task only if provided
+		if (initialTaskName != null) {
+			this.workBuilder.setInitialTask(initialTaskName);
+		}
 
 		// Register the work builder with the office
 		officeBuilder.addWork(workName, this.workBuilder);
@@ -140,13 +144,16 @@ public class ReflectiveWorkBuilder implements Work,
 	/*
 	 * ==========================================================================
 	 * Work
-	 * ==========================================================================
+	 * ======================================================================
+	 * ====
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
+	 * @see
+	 * net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor
+	 * .frame.api.execute.WorkContext)
 	 */
 	@Override
 	public void setWorkContext(WorkContext context) throws Exception {
@@ -156,7 +163,8 @@ public class ReflectiveWorkBuilder implements Work,
 	/*
 	 * ==========================================================================
 	 * WorkFactory
-	 * ==========================================================================
+	 * ==============================================================
+	 * ============
 	 */
 
 	/*
@@ -260,7 +268,7 @@ public class ReflectiveWorkBuilder implements Work,
 					workManagedObjectName);
 			ReflectiveWorkBuilder.this.workBuilder.addWorkManagedObject(
 					workManagedObjectName, managedObjectName);
-			this.parameterFactories[this.objectIndex] = new ObjectParameterFactory(
+			this.parameterFactories[this.parameterIndex] = new ObjectParameterFactory(
 					this.objectIndex);
 
 			// Set for next managed object and parameter
@@ -286,7 +294,7 @@ public class ReflectiveWorkBuilder implements Work,
 			ReflectiveWorkBuilder.this.workBuilder
 					.registerProcessManagedObject(managedObjectName,
 							processLinkName);
-			this.parameterFactories[this.objectIndex] = new ObjectParameterFactory(
+			this.parameterFactories[this.parameterIndex] = new ObjectParameterFactory(
 					this.objectIndex);
 
 			// Set for next managed object and parameter
@@ -339,15 +347,15 @@ public class ReflectiveWorkBuilder implements Work,
 		}
 
 		/*
-		 * ==========================================================================
-		 * TaskFactory
-		 * ==========================================================================
+		 * ============== TaskFactory =======================================
 		 */
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor.frame.api.execute.Work)
+		 * @see
+		 * net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor
+		 * .frame.api.execute.Work)
 		 */
 		@Override
 		public Task<Object, ReflectiveWorkBuilder, Indexed, Indexed> createTask(
@@ -356,15 +364,15 @@ public class ReflectiveWorkBuilder implements Work,
 		}
 
 		/*
-		 * ==========================================================================
-		 * Task
-		 * ==========================================================================
+		 * ===================== Task ====================================
 		 */
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+		 * @see
+		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
+		 * .api.execute.TaskContext)
 		 */
 		@Override
 		public Object doTask(
@@ -410,7 +418,9 @@ public class ReflectiveWorkBuilder implements Work,
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.test.ReflectiveWorkMetaData.ParameterFactory#createParamater(net.officefloor.frame.api.execute.TaskContext)
+		 * @see
+		 * net.officefloor.frame.test.ReflectiveWorkMetaData.ParameterFactory
+		 * #createParamater(net.officefloor.frame.api.execute.TaskContext)
 		 */
 		@Override
 		public Object createParamater(
@@ -442,7 +452,9 @@ public class ReflectiveWorkBuilder implements Work,
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.test.ReflectiveWorkMetaData.ParameterFactory#createParamater(net.officefloor.frame.api.execute.TaskContext)
+		 * @see
+		 * net.officefloor.frame.test.ReflectiveWorkMetaData.ParameterFactory
+		 * #createParamater(net.officefloor.frame.api.execute.TaskContext)
 		 */
 		@Override
 		public Object createParamater(
@@ -475,7 +487,9 @@ public class ReflectiveWorkBuilder implements Work,
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.test.ReflectiveWorkMetaData.ParameterFactory#createParamater(net.officefloor.frame.api.execute.TaskContext)
+		 * @see
+		 * net.officefloor.frame.test.ReflectiveWorkMetaData.ParameterFactory
+		 * #createParamater(net.officefloor.frame.api.execute.TaskContext)
 		 */
 		@Override
 		public Object createParamater(

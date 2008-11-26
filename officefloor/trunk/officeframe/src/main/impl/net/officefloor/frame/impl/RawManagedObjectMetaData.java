@@ -192,7 +192,6 @@ public class RawManagedObjectMetaData {
 			AssetManager sourcingManager, long timeout,
 			ManagedObjectPool managedObjectPool, String recycleWorkName,
 			RawAssetManagerRegistry rawAssetRegistry) {
-		// Store state
 		this.managedObjectName = managedObjectName;
 		this.mosConfig = mosConfig;
 		this.managedObjectSource = managedObjectSource;
@@ -280,11 +279,9 @@ public class RawManagedObjectMetaData {
 	 * 
 	 * @param timeout
 	 *            Timeout of an asynchronous operation by the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            being managed.
+	 *            {@link ManagedObject} being managed.
 	 * @param dependencyMapping
-	 *            Mappings for dependencies of this
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            Mappings for dependencies of this {@link ManagedObject}.
 	 */
 	public <D extends Enum<D>> ManagedObjectMetaData<?> createManagedObjectMetaData(
 			long timeout, Map<D, Integer> dependencyMapping)
@@ -317,6 +314,12 @@ public class RawManagedObjectMetaData {
 		// Create the Operations Manager (if asynchronous)
 		AssetManager operationsManager = null;
 		if (isAsynchronous) {
+
+			// TODO remove
+			System.out.println("TODO remove " + this.getClass().getSimpleName()
+					+ ": registering operations asset "
+					+ this.managedObjectName);
+
 			// Asynchronous thus requires Operations Manager
 			operationsManager = this.rawAssetRegistry
 					.createAssetManager("Operations on Managed Object - "

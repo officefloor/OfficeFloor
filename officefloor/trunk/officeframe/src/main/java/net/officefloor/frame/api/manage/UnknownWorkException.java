@@ -17,35 +17,36 @@
 package net.officefloor.frame.api.manage;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Office within the {@link OfficeFloor}.
+ * Indicates an unknown {@link Work} was requested.
  * 
  * @author Daniel
  */
-public interface Office {
+public class UnknownWorkException extends Exception {
 
 	/**
-	 * Obtains the {@link WorkManager} for the named {@link Work}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Work}.
-	 * @return {@link WorkManager} for the named {@link Work}.
-	 * @throws UnknownWorkException
-	 *             If unknown {@link Work} name.
+	 * Name of the unknown {@link Work}.
 	 */
-	WorkManager getWorkManager(String workName) throws UnknownWorkException;
+	private final String unknownWorkName;
 
 	/**
-	 * Obtains a {@link ManagedObject} for the input Id.
+	 * Initiate.
 	 * 
-	 * @param managedObjectId
-	 *            Id of the {@link ManagedObject}.
-	 * @return {@link ManagedObject} for the input Id.
-	 * @throws Exception
-	 *             If fails to obtain the {@link ManagedObject}.
+	 * @param unknownWorkName
+	 *            Name of the unknown {@link Work}.
 	 */
-	ManagedObject getManagedObject(String managedObjectId) throws Exception;
+	public UnknownWorkException(String unknownWorkName) {
+		super("Unknown work '" + unknownWorkName + "'");
+		this.unknownWorkName = unknownWorkName;
+	}
 
+	/**
+	 * Obtains the name of the unknown {@link Work}.
+	 * 
+	 * @return Name of the unknown {@link Work}.
+	 */
+	public String getUnknownWorkName() {
+		return this.unknownWorkName;
+	}
 }

@@ -248,7 +248,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param workName
 	 *            Work name.
 	 * @param initialTaskName
-	 *            Initial task name.
+	 *            Initial task name. May be <code>null</code> if no initial
+	 *            {@link Task}.
 	 * @return {@link ReflectiveWorkBuilder}.
 	 * @throws BuildException
 	 *             If fails to build.

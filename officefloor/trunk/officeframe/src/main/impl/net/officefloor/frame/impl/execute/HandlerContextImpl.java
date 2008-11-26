@@ -72,8 +72,7 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.api.execute.HandlerContext#invokeProcess(F,
-	 *      java.lang.Object,
-	 *      net.officefloor.frame.spi.managedobject.ManagedObject)
+	 * java.lang.Object, net.officefloor.frame.spi.managedobject.ManagedObject)
 	 */
 	public void invokeProcess(F key, Object parameter,
 			ManagedObject managedObject) {
@@ -84,8 +83,7 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.api.execute.HandlerContext#invokeProcess(int,
-	 *      java.lang.Object,
-	 *      net.officefloor.frame.spi.managedobject.ManagedObject)
+	 * java.lang.Object, net.officefloor.frame.spi.managedobject.ManagedObject)
 	 */
 	public void invokeProcess(int processIndex, Object parameter,
 			ManagedObject managedObject) {
@@ -95,10 +93,11 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.HandlerContext#invokeProcess(java.lang.Enum,
-	 *      java.lang.Object,
-	 *      net.officefloor.frame.spi.managedobject.ManagedObject,
-	 *      net.officefloor.frame.api.execute.EscalationHandler)
+	 * @see
+	 * net.officefloor.frame.api.execute.HandlerContext#invokeProcess(java.lang
+	 * .Enum, java.lang.Object,
+	 * net.officefloor.frame.spi.managedobject.ManagedObject,
+	 * net.officefloor.frame.api.execute.EscalationHandler)
 	 */
 	@Override
 	public void invokeProcess(F key, Object parameter,
@@ -111,15 +110,21 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.api.execute.HandlerContext#invokeProcess(int,
-	 *      java.lang.Object,
-	 *      net.officefloor.frame.spi.managedobject.ManagedObject,
-	 *      net.officefloor.frame.api.execute.EscalationHandler)
+	 * java.lang.Object, net.officefloor.frame.spi.managedobject.ManagedObject,
+	 * net.officefloor.frame.api.execute.EscalationHandler)
 	 */
 	@Override
 	public void invokeProcess(int processIndex, Object parameter,
 			ManagedObject managedObject, EscalationHandler escalationHandler) {
 
 		// Obtain the flow meta-data
+		if ((processIndex < 0) || (processIndex >= this.processLinks.length)) {
+			String validIndexes = (this.processLinks.length == 0 ? " [no processes linked]"
+					: " [valid only 0 to " + (this.processLinks.length - 1)
+							+ "]");
+			throw new IllegalArgumentException("Invalid process index "
+					+ processIndex + validIndexes);
+		}
 		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
 
 		// Create the task in a new process
