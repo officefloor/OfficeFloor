@@ -167,6 +167,11 @@ public class RawManagedObjectMetaData {
 	private final RawAssetManagerRegistry rawAssetRegistry;
 
 	/**
+	 * Operations {@link AssetManager} which is created as necessary.
+	 */
+	private AssetManager operationsAssetManager = null;
+
+	/**
 	 * Initiate detail.
 	 * 
 	 * @param managedObjectName
@@ -314,16 +319,8 @@ public class RawManagedObjectMetaData {
 		// Create the Operations Manager (if asynchronous)
 		AssetManager operationsManager = null;
 		if (isAsynchronous) {
-
-			// TODO remove
-			System.out.println("TODO remove " + this.getClass().getSimpleName()
-					+ ": registering operations asset "
-					+ this.managedObjectName);
-
 			// Asynchronous thus requires Operations Manager
-			operationsManager = this.rawAssetRegistry
-					.createAssetManager("Operations on Managed Object - "
-							+ this.managedObjectName);
+			operationsManager = this.getOperationsAssetManager();
 		}
 
 		// Determine if co-ordinating managed object
@@ -343,4 +340,26 @@ public class RawManagedObjectMetaData {
 		return metaData;
 	}
 
+	/**
+	 * Obtains the operations {@link AssetManager} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return Operations {@link AssetManager} for the
+	 *         {@link ManagedObjectSource}.
+	 * @throws ConfigurationException
+	 *             If fails to obtain.
+	 */
+	private AssetManager getOperationsAssetManager()
+			throws ConfigurationException {
+
+		// Lazy create the operations asset manager
+		if (this.operationsAssetManager == null) {
+			this.operationsAssetManager = this.rawAssetRegistry
+					.createAssetManager("Operations on Managed Object - "
+							+ this.managedObjectName);
+		}
+
+		// Return the operations asset manager
+		return this.operationsAssetManager;
+	}
 }
