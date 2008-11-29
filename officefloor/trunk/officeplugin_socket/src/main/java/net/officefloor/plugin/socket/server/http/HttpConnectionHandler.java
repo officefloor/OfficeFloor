@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.http;
 import java.io.IOException;
 
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
+import net.officefloor.plugin.socket.server.http.parse.HttpRequestParserTest;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
@@ -51,6 +52,16 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	private final int maxBodyLength;
 
 	/**
+	 * Timeout of the {@link Connection}.
+	 */
+	private final long timeout;
+
+	/**
+	 * Time of last interaction. Will be set on the first read.
+	 */
+	private long lastInteractionTime;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param connection
@@ -60,12 +71,15 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 *            a HTTP request.
 	 * @param maxBodyLength
 	 *            Maximum body length for receiving a HTTP request.
+	 * @param timeout
+	 *            Timeout of the {@link Connection} in milliseconds.
 	 */
 	public HttpConnectionHandler(Connection connection,
-			int initialBodyBufferLength, int maxBodyLength) {
+			int initialBodyBufferLength, int maxBodyLength, long timeout) {
 		this.connection = connection;
 		this.initialBodyBufferLength = initialBodyBufferLength;
 		this.maxBodyLength = maxBodyLength;
+		this.timeout = timeout;
 	}
 
 	/**
@@ -128,6 +142,9 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	public void handleRead(ReadContext context) {
 		try {
 
+			// New last interaction time
+			this.lastInteractionTime = context.getTime();
+
 			// Ensure a parser is available
 			if (this.httpRequestParser == null) {
 				this.httpRequestParser = new HttpRequestParser(
@@ -178,10 +195,8 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 */
 	@Override
 	public void handleWrite(WriteContext context) {
-		// TODO handle write
-		System.err.println("TODO [" + this.getClass().getSimpleName()
-				+ "] handleWrite");
-		// context.setCloseConnection(true);
+		// New last interaction time
+		this.lastInteractionTime = context.getTime();
 	}
 
 	/*
@@ -193,10 +208,17 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 */
 	@Override
 	public void handleIdleConnection(IdleContext context) {
-		// TODO implement
-		System.err.println("TODO [" + this.getClass().getSimpleName()
-				+ "] handleIdleConnection");
-		// context.setCloseConnection(true);
+
+		// Obtain the current time
+		long currentTime = context.getTime();
+
+		// Determine time idle
+		long timeIdle = currentTime - this.lastInteractionTime;
+
+		// Close connection if idle too long
+		if (timeIdle >= this.timeout) {
+			context.setCloseConnection(true);
+		}
 	}
 
 }

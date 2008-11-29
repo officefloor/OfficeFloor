@@ -17,10 +17,33 @@
 package net.officefloor.plugin.socket.server.spi;
 
 /**
- * Context for handling a potential write.
+ * Context that is available to all handle methods for the
+ * {@link ConnectionHandler}.
  * 
  * @author Daniel
  */
-public interface WriteContext extends ConnectionHandlerContext {
+public interface ConnectionHandlerContext {
+
+	/**
+	 * Flags to close the {@link Connection}.
+	 * 
+	 * @param isClose
+	 *            <code>true</code> to close the {@link Connection}.
+	 */
+	void setCloseConnection(boolean isClose);
+
+	/**
+	 * <p>
+	 * Obtains the current time in milliseconds.
+	 * <p>
+	 * This should return similar to {@link System#currentTimeMillis()} but is
+	 * provided to cache time for multiple quick operations that require only
+	 * estimates of time.
+	 * <p>
+	 * Note CPU operations should be in the nano-seconds.
+	 * 
+	 * @return Time measured in milliseconds.
+	 */
+	long getTime();
 
 }

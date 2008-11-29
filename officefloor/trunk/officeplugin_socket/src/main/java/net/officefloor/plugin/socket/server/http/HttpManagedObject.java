@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.frame.api.execute.EscalationHandler;
-import net.officefloor.frame.spi.managedobject.AsynchronousListener;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
@@ -35,8 +33,8 @@ import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
  * 
  * @author Daniel
  */
-public class HttpManagedObject implements ServerHttpConnection,
-		AsynchronousManagedObject, EscalationHandler {
+public class HttpManagedObject implements ServerHttpConnection, ManagedObject,
+		EscalationHandler {
 
 	/**
 	 * {@link HttpConnectionHandler}.
@@ -74,29 +72,6 @@ public class HttpManagedObject implements ServerHttpConnection,
 	/*
 	 * =============== ServerHttpConnection =================================
 	 */
-
-	/**
-	 * {@link AsynchronousListener}.
-	 */
-	private AsynchronousListener asynchronousListener;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.AsynchronousManagedObject#
-	 * registerAsynchronousCompletionListener
-	 * (net.officefloor.frame.spi.managedobject.AsynchronousListener)
-	 */
-	@Override
-	public void registerAsynchronousCompletionListener(
-			AsynchronousListener listener) {
-		this.asynchronousListener = listener;
-
-		// TODO use the asynchronous listener
-		System.err.println("TODO [" + this.getClass().getSimpleName()
-				+ "] use the asynchronous listener "
-				+ this.asynchronousListener);
-	}
 
 	/*
 	 * (non-Javadoc)

@@ -44,12 +44,20 @@ public class HttpServerSocketManagedObjectSource extends
 	/**
 	 * Initial size in bytes of the buffer to contain the body's request.
 	 */
+	// TODO provide via property
 	private int initialRequestBodyBufferLength = 1024;
 
 	/**
 	 * Maximum length of the request's body.
 	 */
+	// TODO provide via property
 	private int maxRequestBodyLength = (1024 * 1024);
+
+	/**
+	 * Timeout of the connection in milliseconds.
+	 */
+	// TODO provide via property
+	private long connectionTimeout = 300 * 1000;
 
 	/*
 	 * ================= ServerSocketManagedObjectSource ==================
@@ -71,7 +79,8 @@ public class HttpServerSocketManagedObjectSource extends
 		ManagedObjectSourceContext mosContext = context
 				.getManagedObjectSourceContext();
 
-		// Specify type of object
+		// Specify types
+		context.setManagedObjectClass(HttpManagedObject.class);
 		context.setObjectClass(ServerHttpConnection.class);
 
 		// Provide the handler
@@ -140,7 +149,8 @@ public class HttpServerSocketManagedObjectSource extends
 	@Override
 	public ConnectionHandler createConnectionHandler(Connection connection) {
 		return new HttpConnectionHandler(connection,
-				this.initialRequestBodyBufferLength, this.maxRequestBodyLength);
+				this.initialRequestBodyBufferLength, this.maxRequestBodyLength,
+				this.connectionTimeout);
 	}
 
 }
