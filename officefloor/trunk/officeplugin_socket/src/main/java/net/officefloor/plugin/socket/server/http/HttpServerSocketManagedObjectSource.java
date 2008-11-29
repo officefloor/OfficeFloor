@@ -41,20 +41,32 @@ public class HttpServerSocketManagedObjectSource extends
 		ServerSocketManagedObjectSource implements HandlerFactory<Indexed>,
 		ServerSocketHandler<Indexed> {
 
+	/**
+	 * Initial size in bytes of the buffer to contain the body's request.
+	 */
+	private int initialRequestBodyBufferLength = 1024;
+
+	/**
+	 * Maximum length of the request's body.
+	 */
+	private int maxRequestBodyLength = (1024 * 1024);
+
 	/*
-	 * =============================================================================
-	 * ServerSocketManagedObjectSource
-	 * =============================================================================
+	 * ================= ServerSocketManagedObjectSource ==================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource#registerServerSocketHandler(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
+	 * @see
+	 * net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource
+	 * #
+	 * registerServerSocketHandler(net.officefloor.frame.spi.managedobject.source
+	 * .impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
 	protected void registerServerSocketHandler(
-			net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext<None, ServerSocketHandlerEnum> context)
+			MetaDataContext<None, ServerSocketHandlerEnum> context)
 			throws Exception {
 		ManagedObjectSourceContext mosContext = context
 				.getManagedObjectSourceContext();
@@ -71,9 +83,7 @@ public class HttpServerSocketManagedObjectSource extends
 	}
 
 	/*
-	 * =============================================================================
-	 * HandlerFactory
-	 * =============================================================================
+	 * ================== HandlerFactory =====================
 	 */
 
 	/*
@@ -87,9 +97,7 @@ public class HttpServerSocketManagedObjectSource extends
 	}
 
 	/*
-	 * =============================================================================
-	 * ServerSocketHandler
-	 * =============================================================================
+	 * =================== ServerSocketHandler ===========================
 	 */
 
 	/**
@@ -100,7 +108,9 @@ public class HttpServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor.frame.api.execute.HandlerContext)
+	 * @see
+	 * net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor
+	 * .frame.api.execute.HandlerContext)
 	 */
 	@Override
 	public void setHandlerContext(HandlerContext<Indexed> context)
@@ -111,7 +121,9 @@ public class HttpServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createServer()
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createServer
+	 * ()
 	 */
 	@Override
 	public Server createServer() {
@@ -121,11 +133,14 @@ public class HttpServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createConnectionHandler(net.officefloor.plugin.socket.server.spi.Connection)
+	 * @seenet.officefloor.plugin.socket.server.spi.ServerSocketHandler#
+	 * createConnectionHandler
+	 * (net.officefloor.plugin.socket.server.spi.Connection)
 	 */
 	@Override
 	public ConnectionHandler createConnectionHandler(Connection connection) {
-		return new HttpConnectionHandler(connection);
+		return new HttpConnectionHandler(connection,
+				this.initialRequestBodyBufferLength, this.maxRequestBodyLength);
 	}
 
 }

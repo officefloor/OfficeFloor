@@ -86,9 +86,12 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		// Register the Server Socket Managed Object
 		ManagedObjectBuilder serverSocketBuilder = this.constructManagedObject(
 				"MO", ServerSocketManagedObjectSource.class, "OFFICE");
-		serverSocketBuilder.addProperty("port", "12345");
-		serverSocketBuilder.addProperty("message_size", "2");
-		serverSocketBuilder.addProperty("buffer_size", "16");
+		serverSocketBuilder.addProperty(
+				ServerSocketManagedObjectSource.PROPERTY_PORT, "12345");
+		serverSocketBuilder.addProperty(
+				ServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE, "2");
+		serverSocketBuilder.addProperty(
+				ServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE, "16");
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Register the handler of the Server Socket
@@ -164,7 +167,9 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createServer()
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createServer
+	 * ()
 	 */
 	public Server createServer() {
 		return this;
@@ -173,7 +178,9 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createConnectionHandler(net.officefloor.plugin.socket.server.spi.Communication)
+	 * @seenet.officefloor.plugin.socket.server.spi.ServerSocketHandler#
+	 * createConnectionHandler
+	 * (net.officefloor.plugin.socket.server.spi.Communication)
 	 */
 	public ConnectionHandler createConnectionHandler(Connection communication) {
 		return this;
@@ -182,7 +189,9 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor.frame.api.execute.HandlerContext)
+	 * @see
+	 * net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor
+	 * .frame.api.execute.HandlerContext)
 	 */
 	public void setHandlerContext(HandlerContext<Indexed> context)
 			throws Exception {
@@ -198,7 +207,9 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleRead(net.officefloor.plugin.socket.server.spi.ReadContext)
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleRead
+	 * (net.officefloor.plugin.socket.server.spi.ReadContext)
 	 */
 	public void handleRead(ReadContext context) {
 
@@ -228,7 +239,9 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleWrite(net.officefloor.plugin.socket.server.spi.WriteContext)
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleWrite
+	 * (net.officefloor.plugin.socket.server.spi.WriteContext)
 	 */
 	public void handleWrite(WriteContext context) {
 		// Message being written so close connection (once done)
@@ -238,7 +251,9 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleIdleConnection(net.officefloor.plugin.socket.server.spi.IdleContext)
+	 * @seenet.officefloor.plugin.socket.server.spi.ConnectionHandler#
+	 * handleIdleConnection
+	 * (net.officefloor.plugin.socket.server.spi.IdleContext)
 	 */
 	public void handleIdleConnection(IdleContext context) {
 		System.out.println("Connection is idle");
@@ -253,7 +268,9 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.WriteMessageListener#messageWritten(net.officefloor.plugin.socket.server.spi.WriteMessage)
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.WriteMessageListener#messageWritten
+	 * (net.officefloor.plugin.socket.server.spi.WriteMessage)
 	 */
 	public void messageWritten(WriteMessage message) {
 		// Ensure only written once
@@ -272,7 +289,9 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Server#startRequest(net.officefloor.plugin.socket.server.spi.ReadMessage)
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.Server#startRequest(net.officefloor
+	 * .plugin.socket.server.spi.ReadMessage)
 	 */
 	public void processReadMessage(ReadMessage message,
 			ConnectionHandler connectionHandler) throws IOException {

@@ -17,8 +17,14 @@
 package net.officefloor.plugin.socket.server.http.parse;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import junit.framework.TestCase;
+
+import org.easymock.AbstractMatcher;
+import org.easymock.ArgumentsMatcher;
 
 /**
  * Utility methods to help in US-ASCII testing.
@@ -31,6 +37,10 @@ public class UsAsciiUtil {
 	 * US-ASCII {@link Charset}.
 	 */
 	public static final Charset US_ASCII = Charset.forName("US-ASCII");
+
+	private static final byte CR = convertToUsAscii('\r');
+
+	private static final byte LF = convertToUsAscii('\n');
 
 	/**
 	 * Asserts the US-ASCII content matches the expected String.
@@ -72,6 +82,58 @@ public class UsAsciiUtil {
 	}
 
 	/**
+	 * Convenience method to convert to US-ASCII and HTTP form.
+	 * 
+	 * @param text
+	 *            Text.
+	 * @return HTTP.
+	 */
+	public static byte[] convertToHttp(String text) {
+		return convertToHttp(convertToUsAscii(text));
+	}
+
+	/**
+	 * Ensures that CR characters are followed by a LF.
+	 * 
+	 * @param ascii
+	 *            Ascii content.
+	 * @return HTTP.
+	 */
+	public static byte[] convertToHttp(byte[] ascii) {
+
+		// Transform end of lines if necessary
+		List<Byte> bytes = new ArrayList<Byte>(ascii.length + 10);
+		boolean isLastCr = false;
+		for (byte character : ascii) {
+
+			// Add CR before LF is necessary
+			if (character == LF) {
+				if (!isLastCr) {
+					bytes.add(new Byte(CR));
+				}
+			}
+
+			// Add the character
+			bytes.add(character);
+
+			// Flag if last is CR
+			isLastCr = false;
+			if (character == CR) {
+				isLastCr = true;
+			}
+		}
+
+		// Create the HTTP bytes
+		byte[] buffer = new byte[bytes.size()];
+		for (int i = 0; i < buffer.length; i++) {
+			buffer[i] = bytes.get(i).byteValue();
+		}
+
+		// Return the HTTP bytes
+		return buffer;
+	}
+
+	/**
 	 * Converts the input US-ASCII to String.
 	 * 
 	 * @param ascii
@@ -103,6 +165,29 @@ public class UsAsciiUtil {
 	 */
 	public static byte convertToUsAscii(char character) {
 		return convertToUsAscii(String.valueOf(character))[0];
+	}
+
+	/**
+	 * Creates a {@link ArgumentsMatcher} for method with only one parameter
+	 * being US-ASCII characters.
+	 * 
+	 * @return {@link ArgumentsMatcher}.
+	 */
+	public static ArgumentsMatcher createUsAsciiMatcher() {
+		return new AbstractMatcher() {
+			@Override
+			protected boolean argumentMatches(Object expected, Object actual) {
+				byte[] expectedMessage = (byte[]) expected;
+				byte[] actualMessage = (byte[]) actual;
+				return Arrays.equals(expectedMessage, actualMessage);
+			}
+
+			@Override
+			protected String argumentToString(Object argument) {
+				return (argument == null ? "" : UsAsciiUtil
+						.convertToString((byte[]) argument));
+			}
+		};
 	}
 
 	/**

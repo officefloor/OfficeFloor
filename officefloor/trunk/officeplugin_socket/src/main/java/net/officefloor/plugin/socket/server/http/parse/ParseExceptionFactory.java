@@ -16,52 +16,19 @@
  */
 package net.officefloor.plugin.socket.server.http.parse;
 
-import net.officefloor.plugin.socket.server.http.HttpStatus;
-
 /**
- * Indicates that failed to parse.
+ * Factory for the creation of a {@link ParseException}.
  * 
  * @author Daniel
  */
-public class ParseException extends Exception {
+public interface ParseExceptionFactory {
 
 	/**
-	 * HTTP status indicating failure.
-	 */
-	private final int httpStatus;
-
-	/**
-	 * Initiate.
+	 * Creates the {@link ParseException}.
 	 * 
-	 * @param httpStatus
-	 *            HTTP status indicating failure.
-	 * @param message
-	 *            Reason for parsing failure.
+	 * @param content
+	 *            {@link UsAsciiStringBuilder} reporting the parse failure.
+	 * @return {@link ParseException}.
 	 */
-	public ParseException(int httpStatus, String message) {
-		super(message);
-		this.httpStatus = httpStatus;
-	}
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param cause
-	 *            Cause of parsing failure.
-	 */
-	public ParseException(Throwable cause) {
-		super(cause);
-
-		// Server failure
-		this.httpStatus = HttpStatus._500;
-	}
-
-	/**
-	 * Obtains the HTTP status indicating failure.
-	 * 
-	 * @return HTTP status indicating failure.
-	 */
-	public int getHttpStatus() {
-		return this.httpStatus;
-	}
+	ParseException createParseException(UsAsciiStringBuilder content);
 }

@@ -78,9 +78,15 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		ManagedObjectBuilder<?> serverSocketBuilder = this
 				.constructManagedObject("MO",
 						TcpServerSocketManagedObjectSource.class, "OFFICE");
-		serverSocketBuilder.addProperty("port", String.valueOf(PORT));
-		serverSocketBuilder.addProperty("buffer_size", "1024");
-		serverSocketBuilder.addProperty("message_size", "3");
+		serverSocketBuilder.addProperty(
+				TcpServerSocketManagedObjectSource.PROPERTY_PORT, String
+						.valueOf(PORT));
+		serverSocketBuilder
+				.addProperty(
+						TcpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
+						"1024");
+		serverSocketBuilder.addProperty(
+				TcpServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE, "3");
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Register the necessary teams for socket listening
@@ -137,7 +143,8 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
+	 * @see
+	 * net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
 	 */
 	@Override
 	protected void tearDown() throws Exception {

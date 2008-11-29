@@ -70,9 +70,14 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 		ManagedObjectBuilder<?> serverSocketBuilder = this
 				.constructManagedObject("MO",
 						HttpServerSocketManagedObjectSource.class, "OFFICE");
-		serverSocketBuilder.addProperty("port", String.valueOf(port));
-		serverSocketBuilder.addProperty("buffer_size", "1024");
-		serverSocketBuilder.addProperty("message_size", "3");
+		serverSocketBuilder.addProperty(
+				HttpServerSocketManagedObjectSource.PROPERTY_PORT, String
+						.valueOf(port));
+		serverSocketBuilder.addProperty(
+				HttpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
+				"1024");
+		serverSocketBuilder.addProperty(
+				HttpServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE, "3");
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Register the necessary teams for socket listening
@@ -168,7 +173,8 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
+	 * @see
+	 * net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
 	 */
 	@Override
 	public void tearDown() throws Exception {

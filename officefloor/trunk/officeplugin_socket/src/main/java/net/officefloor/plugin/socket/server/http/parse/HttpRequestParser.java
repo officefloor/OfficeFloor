@@ -20,6 +20,8 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.plugin.socket.server.http.HttpStatus;
+
 /**
  * Parser for a HTTP request.
  * 
@@ -33,7 +35,11 @@ public class HttpRequestParser {
 	private static final Charset US_ASCII = Charset.forName("US-ASCII");
 
 	private static byte UsAscii(char character) {
-		return String.valueOf(character).getBytes(US_ASCII)[0];
+		return UsAscii(String.valueOf(character))[0];
+	}
+
+	private static byte[] UsAscii(String text) {
+		return text.getBytes(US_ASCII);
 	}
 
 	private static final byte A = UsAscii('A');
@@ -55,6 +61,134 @@ public class HttpRequestParser {
 	private static final byte COLON = UsAscii(':');
 
 	private static final byte atoA = (byte) (A - a);
+
+	/**
+	 * <p>
+	 * Valid HTTP methods.
+	 * <p>
+	 * Note: order is done on most likely to occur to improve valid content
+	 * performance.
+	 */
+	private static final byte[][] HTTP_METHODS = new byte[][] { UsAscii("GET"),
+			UsAscii("POST"), UsAscii("HEAD"), UsAscii("PUT"),
+			UsAscii("DELETE"), UsAscii("OPTIONS"), UsAscii("TRACE"),
+			UsAscii("CONNECT") };
+
+	/**
+	 * HTTP methods requiring a Content-Length header.
+	 */
+	private static final byte[][] METHODS_REQUIRING_CONTENT_LENGTH = new byte[][] {
+			UsAscii("POST"), UsAscii("PUT") };
+
+	/**
+	 * Header name for the Content-Length.
+	 */
+	private static final String HEADER_NAME_CONTENT_LENGTH = "CONTENT-LENGTH";
+
+	/**
+	 * HTTP version. HTTP/1.1.
+	 */
+	public static final String HTTP_1_1 = "HTTP/1.1";
+
+	/**
+	 * HTTP version. HTTP/1.0.
+	 */
+	public static final String HTTP_1_0 = "HTTP/1.0";
+
+	/**
+	 * Default HTTP version.
+	 */
+	public static final String DEFAULT_HTTP_VERSION = HTTP_1_0;
+
+	/**
+	 * <p>
+	 * Valid HTTP versions.
+	 * <p>
+	 * Note: order is done on most likely to occur to improve valid content
+	 * performance.
+	 */
+	private static final byte[][] HTTP_VERSIONS = new byte[][] {
+			UsAscii(HTTP_1_1), UsAscii(HTTP_1_0) };
+
+	/**
+	 * Indicates if the partial content received so far is valid against the
+	 * valid values.
+	 * 
+	 * @param partialContent
+	 *            {@link UsAsciiStringBuilder} containing the partial content to
+	 *            validate.
+	 * @param validValues
+	 *            Valid values for the content.
+	 * @return <code>true</code> if partial content is valid.
+	 */
+	private static boolean isPartialContentValid(
+			UsAsciiStringBuilder partialContent, byte[][] validValues) {
+
+		// Characters to validate
+		byte[] characters = partialContent.getBuffer();
+		int count = partialContent.getCharacterCount();
+
+		// Determine if partially matches a valid value
+		VALID_VALUE: for (byte[] validValue : validValues) {
+
+			// Not valid if partial content longer
+			if (count > validValue.length) {
+				continue VALID_VALUE;
+			}
+
+			// Ensure characters match
+			for (int i = 0; i < count; i++) {
+				if (characters[i] != validValue[i]) {
+					continue VALID_VALUE;
+				}
+			}
+
+			// Partially matches a valid value
+			return true;
+		}
+
+		// Did not partially match a valid value
+		return false;
+	}
+
+	/**
+	 * Indicates if the content matches a valid value.
+	 * 
+	 * @param content
+	 *            {@link UsAsciiStringBuilder} containing the content.
+	 * @param validValues
+	 *            Valid values for the content.
+	 * @return <code>true</code> if content is valid value.
+	 */
+	private static boolean isContentValid(UsAsciiStringBuilder content,
+			byte[][] validValues) {
+
+		// Characters to validate
+		byte[] characters = content.getBuffer();
+		int count = content.getCharacterCount();
+
+		// Determine if matches a valid value
+		VALID_VALUE: for (byte[] validValue : validValues) {
+
+			// Not valid if lengths different
+			if (count != validValue.length) {
+				continue VALID_VALUE;
+			}
+
+			// Ensure characters match
+			for (int i = 0; i < validValue.length; i++) {
+				if (characters[i] != validValue[i]) {
+					continue VALID_VALUE;
+				}
+			}
+
+			// Matches a valid value
+			return true;
+		}
+
+		// Did not match a valid value
+		return false;
+	}
 
 	/**
 	 * Determines if character is a letter of the alphabet.
@@ -130,31 +264,99 @@ public class HttpRequestParser {
 	private ParseState parseState = ParseState.START;
 
 	/**
+	 * {@link ParseState} indicating if method and version are correct.
+	 */
+	private ParseState validState = ParseState.START;
+
+	/**
+	 * Method {@link ParseExceptionFactory}/
+	 */
+	private static final ParseExceptionFactory methodParseFactory = new ParseExceptionFactory() {
+		@Override
+		public ParseException createParseException(UsAsciiStringBuilder content) {
+			return new ParseException(HttpStatus._400, "Unknown method: "
+					+ content.toString() + "...");
+		}
+	};
+
+	/**
 	 * Method.
 	 */
-	private final UsAsciiStringBuilder method = new UsAsciiStringBuilder(7, 7);
+	private final UsAsciiStringBuilder method = new UsAsciiStringBuilder(7, 7,
+			methodParseFactory);
+
+	/**
+	 * Path {@link ParseExceptionFactory}.
+	 */
+	private static final ParseExceptionFactory pathParseFactory = new ParseExceptionFactory() {
+		@Override
+		public ParseException createParseException(UsAsciiStringBuilder content) {
+			return new ParseException(HttpStatus._414,
+					"Request URI must be less than "
+							+ content.getCharacterCount() + " characters");
+		}
+	};
 
 	/**
 	 * Path.
 	 */
-	private final UsAsciiStringBuilder path = new UsAsciiStringBuilder(30, 255);
+	private final UsAsciiStringBuilder path = new UsAsciiStringBuilder(30, 255,
+			pathParseFactory);
+
+	/**
+	 * Version {@link ParseExceptionFactory}.
+	 */
+	private static final ParseExceptionFactory versionParseFactory = new ParseExceptionFactory() {
+		@Override
+		public ParseException createParseException(UsAsciiStringBuilder content) {
+			return new ParseException(HttpStatus._400, "Unknown version: "
+					+ content.toString() + "...");
+		}
+	};
 
 	/**
 	 * Version.
 	 */
-	private final UsAsciiStringBuilder version = new UsAsciiStringBuilder(8, 8);
+	private final UsAsciiStringBuilder version = new UsAsciiStringBuilder(8, 8,
+			versionParseFactory);
+
+	/**
+	 * Header name {@link ParseExceptionFactory}.
+	 */
+	private static final ParseExceptionFactory headerNameParseFactory = new ParseExceptionFactory() {
+		@Override
+		public ParseException createParseException(UsAsciiStringBuilder content) {
+			return new ParseException(HttpStatus._400,
+					"Header name too large: " + content.toString()
+							+ "... (must be less than "
+							+ content.getCharacterCount() + " characters)");
+		}
+	};
 
 	/**
 	 * Header name.
 	 */
 	private final UsAsciiStringBuilder headerName = new UsAsciiStringBuilder(
-			20, 50);
+			20, 50, headerNameParseFactory);
+
+	/**
+	 * Header value {@link ParseExceptionFactory}.
+	 */
+	private static final ParseExceptionFactory headerValueParseFactory = new ParseExceptionFactory() {
+		@Override
+		public ParseException createParseException(UsAsciiStringBuilder content) {
+			return new ParseException(HttpStatus._400,
+					"Header value too large: " + content.toString()
+							+ "... (must be less than "
+							+ content.getCharacterCount() + " characters");
+		}
+	};
 
 	/**
 	 * Header value.
 	 */
 	private final UsAsciiStringBuilder headerValue = new UsAsciiStringBuilder(
-			20, 255);
+			20, 255, headerValueParseFactory);
 
 	/**
 	 * Headers.
@@ -162,9 +364,53 @@ public class HttpRequestParser {
 	private final Map<String, String> headers = new HashMap<String, String>(20);
 
 	/**
-	 * Body.
+	 * Body {@link ParseExceptionFactory}.
 	 */
-	private final UsAsciiStringBuilder body = new UsAsciiStringBuilder(10, 1024);
+	private static final ParseExceptionFactory bodyParseFactory = new ParseExceptionFactory() {
+		@Override
+		public ParseException createParseException(UsAsciiStringBuilder content) {
+			return new ParseException(HttpStatus._400,
+					"Request entity exceeded Content-Length size of "
+							+ content.getCharacterCount());
+		}
+	};
+
+	/**
+	 * Maximum initial length of the buffer to contain the body (entity).
+	 */
+	private final int initialBodyBufferLength;
+
+	/**
+	 * Maximum length of the body (entity).
+	 */
+	private final int maxBodyLength;
+
+	/**
+	 * Body. This is created based on the Content-Length taking into account
+	 * {@link #initialBodyLength} and {@link #maxBodyLength}.
+	 */
+	private UsAsciiStringBuilder body = null;
+
+	/**
+	 * Content length value for request.
+	 */
+	private int contentLength = -1;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param initialBodyBufferLength
+	 *            Initial length of the body buffer. This is so that all memory
+	 *            need not be allocated on receiving request, only as request is
+	 *            received.
+	 * @param maxBodyLength
+	 *            Maximum length of the body buffer. Requests with bodies
+	 *            greater that this will fail parsing.
+	 */
+	public HttpRequestParser(int initialBodyBufferLength, int maxBodyLength) {
+		this.initialBodyBufferLength = initialBodyBufferLength;
+		this.maxBodyLength = maxBodyLength;
+	}
 
 	/**
 	 * Parses the additionally read content from the client.
@@ -175,8 +421,7 @@ public class HttpRequestParser {
 	 *            Offset into the buffer where content starts.
 	 * @param length
 	 *            Number of bytes available in the buffer.
-	 * @return <code>true</code> if HTTP request is fully received from
-	 *         client.
+	 * @return <code>true</code> if HTTP request is fully received from client.
 	 * @throws ParseException
 	 *             If fails to parse HTTP request.
 	 */
@@ -207,8 +452,8 @@ public class HttpRequestParser {
 					this.parseState = ParseState.METHOD_PATH_SEPARATION;
 				} else {
 					// Unexpected character
-					throw new ParseException(
-							"Unexpected character in method name '" + character
+					throw new ParseException(HttpStatus._400,
+							"Unexpected character in method '" + character
 									+ "'");
 				}
 				break;
@@ -229,8 +474,8 @@ public class HttpRequestParser {
 					this.path.append(character);
 				} else {
 					// Unexpected character
-					throw new ParseException("Unexpected character in path '"
-							+ character + "'");
+					throw new ParseException(HttpStatus._400,
+							"Unexpected character in path '" + character + "'");
 				}
 				break;
 
@@ -257,7 +502,8 @@ public class HttpRequestParser {
 					this.parseState = ParseState.HEADER_CR_NAME_SEPARATION;
 					break;
 				}
-				throw new ParseException("Should expect LR after a CR");
+				throw new ParseException(HttpStatus._400,
+						"Should expect LF after a CR for status line");
 
 			case HEADER_CR_NAME_SEPARATION:
 				if (character == CR) {
@@ -280,8 +526,8 @@ public class HttpRequestParser {
 					this.headerName.append(toUpper(character));
 				} else {
 					// Unknown header name character
-					throw new ParseException("Unknown header name character '"
-							+ character + "'");
+					throw new ParseException(HttpStatus._400,
+							"Unknown header name character '" + character + "'");
 				}
 				break;
 
@@ -296,7 +542,7 @@ public class HttpRequestParser {
 				if (character == CR) {
 					// Load the header value
 					String name = this.headerName.toString().trim();
-					String value = this.headerValue.toString();
+					String value = this.headerValue.toString().trim();
 					this.headers.put(name, value);
 
 					// Clear values
@@ -310,23 +556,118 @@ public class HttpRequestParser {
 					this.headerValue.append(character);
 				} else {
 					// Unknown header value character
-					throw new ParseException("Unknown header value character '"
-							+ character + "'");
+					throw new ParseException(HttpStatus._400,
+							"Unknown header value character '" + character
+									+ "'");
 				}
 				break;
 
 			case BODY_CR:
-				if (character == LF) {
-					// Expecting LF, so continue on with body
-					this.parseState = ParseState.BODY;
-					break;
+				// Must have LF after CR for body
+				if (character != LF) {
+					throw new ParseException(HttpStatus._400,
+							"Should expect LR after a CR after header");
 				}
-				throw new ParseException("Should expect LR after a CR");
+
+				// Attempt to obtain the Content-Length
+				String contentLengthValue = this.headers
+						.get(HEADER_NAME_CONTENT_LENGTH);
+				if (contentLengthValue != null) {
+					// Should always be able to convert to an integer
+					try {
+						this.contentLength = Integer
+								.parseInt(contentLengthValue);
+					} catch (NumberFormatException ex) {
+						throw new ParseException(HttpStatus._411,
+								"Content-Length header value "
+										+ contentLengthValue
+										+ " must be an integer");
+					}
+				} else {
+					// Ensure method does not require Content-Length
+					if (isContentValid(this.method,
+							METHODS_REQUIRING_CONTENT_LENGTH)) {
+						throw new ParseException(HttpStatus._411,
+								"Must provide Content-Length header for "
+										+ this.method.toString());
+					}
+				}
+
+				// Provide body buffer if have Content-Length
+				if (this.contentLength > 0) {
+					// Ensure the Content-Length within limits
+					if (this.contentLength > this.maxBodyLength) {
+						throw new ParseException(HttpStatus._413,
+								"Request entity must be less than maximum of "
+										+ this.maxBodyLength + " bytes");
+					}
+
+					// Determine initial buffer length
+					long initialLength = Math.min(this.contentLength,
+							this.initialBodyBufferLength);
+					this.body = new UsAsciiStringBuilder((int) initialLength,
+							(int) this.contentLength, bodyParseFactory);
+				}
+
+				// Have LF and headers valid, so continue onto body
+				this.parseState = ParseState.BODY;
+				break;
 
 			case BODY:
+				// Ensure provided Content-Length and created buffer
+				if (this.body == null) {
+					throw new ParseException(HttpStatus._411,
+							"Must provide Content-Length header if sending entity");
+				}
+
 				// Append the body data
 				this.body.append(character);
 				break;
+			}
+		}
+
+		// Validate content
+		switch (this.validState) {
+		case START:
+			// Ensure method is valid
+			if (this.parseState == ParseState.METHOD) {
+				// Ensure content of method is valid so far
+				if (!isPartialContentValid(this.method, HTTP_METHODS)) {
+					throw new ParseException(HttpStatus._400,
+							"Unknown method: " + this.method.toString() + "...");
+				}
+
+			} else if (this.parseState.ordinal() > ParseState.METHOD.ordinal()) {
+				// Ensure valid method
+				if (!isContentValid(this.method, HTTP_METHODS)) {
+					throw new ParseException(HttpStatus._400,
+							"Unknown method: " + this.method.toString());
+				}
+
+				// Method is valid
+				this.validState = ParseState.METHOD;
+			}
+			// Continue on to possibly validate version
+
+		case METHOD:
+			// Ensure version is valid
+			if (this.parseState == ParseState.VERSION) {
+				// Ensure content of version is valid so far
+				if (!isPartialContentValid(this.version, HTTP_VERSIONS)) {
+					throw new ParseException(HttpStatus._400,
+							"Unknown version: " + this.version.toString()
+									+ "...");
+				}
+
+			} else if (this.parseState.ordinal() > ParseState.VERSION.ordinal()) {
+				// Ensure valid version
+				if (!isContentValid(this.version, HTTP_VERSIONS)) {
+					throw new ParseException(HttpStatus._400,
+							"Unknown version: " + this.version.toString());
+				}
+
+				// Version is valid
+				this.validState = ParseState.VERSION;
 			}
 		}
 
@@ -388,8 +729,8 @@ public class HttpRequestParser {
 	 * @return Body.
 	 */
 	public byte[] getBody() {
-		// Return as the bytes input
-		return this.body.toUsAscii();
+		// Return as the bytes input (body may not be provided)
+		return (this.body == null ? new byte[0] : this.body.toUsAscii());
 	}
 
 }

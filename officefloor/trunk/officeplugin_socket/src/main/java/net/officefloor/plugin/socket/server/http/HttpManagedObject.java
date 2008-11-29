@@ -72,9 +72,7 @@ public class HttpManagedObject implements ServerHttpConnection,
 	}
 
 	/*
-	 * ==================================================================
-	 * ServerHttpConnection
-	 * ==================================================================
+	 * =============== ServerHttpConnection =================================
 	 */
 
 	/**
@@ -85,7 +83,9 @@ public class HttpManagedObject implements ServerHttpConnection,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.AsynchronousManagedObject#registerAsynchronousCompletionListener(net.officefloor.frame.spi.managedobject.AsynchronousListener)
+	 * @seenet.officefloor.frame.spi.managedobject.AsynchronousManagedObject#
+	 * registerAsynchronousCompletionListener
+	 * (net.officefloor.frame.spi.managedobject.AsynchronousListener)
 	 */
 	@Override
 	public void registerAsynchronousCompletionListener(
@@ -109,15 +109,14 @@ public class HttpManagedObject implements ServerHttpConnection,
 	}
 
 	/*
-	 * ==================================================================
-	 * ServerHttpConnection
-	 * ==================================================================
+	 * ================== ServerHttpConnection =========================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.ServerHttpConnection#getHttpRequest()
+	 * @seenet.officefloor.plugin.socket.server.http.api.ServerHttpConnection#
+	 * getHttpRequest()
 	 */
 	public synchronized HttpRequest getHttpRequest() {
 		return this.request;
@@ -126,7 +125,8 @@ public class HttpManagedObject implements ServerHttpConnection,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.ServerHttpConnection#getHttpResponse()
+	 * @seenet.officefloor.plugin.socket.server.http.api.ServerHttpConnection#
+	 * getHttpResponse()
 	 */
 	@Override
 	public HttpResponse getHttpResponse() {
@@ -134,15 +134,15 @@ public class HttpManagedObject implements ServerHttpConnection,
 	}
 
 	/*
-	 * ==================================================================
-	 * EscalationHandler
-	 * ==================================================================
+	 * ================== EscalationHandler =============================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.EscalationHandler#handleEscalation(java.lang.Throwable)
+	 * @see
+	 * net.officefloor.frame.api.execute.EscalationHandler#handleEscalation(
+	 * java.lang.Throwable)
 	 */
 	@Override
 	public void handleEscalation(Throwable escalation) throws Throwable {
@@ -197,7 +197,8 @@ public class HttpManagedObject implements ServerHttpConnection,
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.plugin.socket.server.http.api.HttpRequest#getMethod()
+		 * @see
+		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getMethod()
 		 */
 		@Override
 		public String getMethod() {
@@ -207,7 +208,8 @@ public class HttpManagedObject implements ServerHttpConnection,
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.plugin.socket.server.http.api.HttpRequest#getPath()
+		 * @see
+		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getPath()
 		 */
 		@Override
 		public String getPath() {
@@ -217,7 +219,9 @@ public class HttpManagedObject implements ServerHttpConnection,
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.plugin.socket.server.http.api.HttpRequest#getVersion()
+		 * @see
+		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getVersion
+		 * ()
 		 */
 		@Override
 		public String getVersion() {
@@ -227,7 +231,9 @@ public class HttpManagedObject implements ServerHttpConnection,
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.plugin.socket.server.http.api.HttpRequest#getHeaderNames()
+		 * @see
+		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getHeaderNames
+		 * ()
 		 */
 		@Override
 		public Set<String> getHeaderNames() {
@@ -237,7 +243,9 @@ public class HttpManagedObject implements ServerHttpConnection,
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.plugin.socket.server.http.api.HttpRequest#getHeader(java.lang.String)
+		 * @see
+		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getHeader
+		 * (java.lang.String)
 		 */
 		@Override
 		public String getHeader(String name) {
@@ -247,7 +255,8 @@ public class HttpManagedObject implements ServerHttpConnection,
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.plugin.socket.server.http.api.HttpRequest#getBody()
+		 * @see
+		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getBody()
 		 */
 		@Override
 		public InputStream getBody() {

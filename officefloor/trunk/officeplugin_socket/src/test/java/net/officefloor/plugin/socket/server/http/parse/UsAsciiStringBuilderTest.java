@@ -17,6 +17,8 @@
 package net.officefloor.plugin.socket.server.http.parse;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.match.TypeMatcher;
+import net.officefloor.plugin.socket.server.http.HttpStatus;
 
 /**
  * Tests the {@link UsAsciiStringBuilder}.
@@ -24,6 +26,12 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
+
+	/**
+	 * Mock {@link ParseExceptionFactory}.
+	 */
+	private ParseExceptionFactory parseExceptionFactory = this
+			.createMock(ParseExceptionFactory.class);
 
 	/**
 	 * Validate the conversion to US-ASCII.
@@ -42,7 +50,7 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 		final byte LF = 10;
 
 		// String
-		final String text = "azAZ09:" + HttpRequestParserTest.EOL;
+		final String text = "azAZ09:\r\n";
 
 		byte[] ascii = UsAsciiUtil.convertToUsAscii(text);
 
@@ -73,8 +81,10 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testSingleCharacter() throws Exception {
 		final char CHARACTER = 'a';
+		this.replayMockObjects();
 
-		UsAsciiStringBuilder text = new UsAsciiStringBuilder(10, 10);
+		UsAsciiStringBuilder text = new UsAsciiStringBuilder(10, 10,
+				this.parseExceptionFactory);
 
 		// Add data to text
 		text.append(UsAsciiUtil.convertToUsAscii(CHARACTER));
@@ -91,6 +101,8 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 				text.toUsAscii());
 		assertEquals("Incorrect string", String.valueOf(CHARACTER), text
 				.toString());
+
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -98,8 +110,10 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testWithinInitialCapacity() throws Exception {
 		final String STRING = "test56789!";
+		this.replayMockObjects();
 
-		UsAsciiStringBuilder text = new UsAsciiStringBuilder(10, 10);
+		UsAsciiStringBuilder text = new UsAsciiStringBuilder(10, 10,
+				this.parseExceptionFactory);
 
 		// Add data to text
 		byte[] ascii = UsAsciiUtil.convertToUsAscii(STRING);
@@ -115,6 +129,8 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 				.getBuffer());
 		UsAsciiUtil.assertEquals("Incorrect ascii", STRING, text.toUsAscii());
 		assertEquals("Incorrect string", STRING, text.toString());
+
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -122,8 +138,10 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testIncreaseCapacity() throws Exception {
 		final String STRING = "test56789!";
+		this.replayMockObjects();
 
-		UsAsciiStringBuilder text = new UsAsciiStringBuilder(5, 15);
+		UsAsciiStringBuilder text = new UsAsciiStringBuilder(5, 15,
+				this.parseExceptionFactory);
 
 		// Add data to text
 		for (byte character : UsAsciiUtil.convertToUsAscii(STRING)) {
@@ -138,6 +156,8 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 				.getBuffer());
 		UsAsciiUtil.assertEquals("Incorrect ascii", STRING, text.toUsAscii());
 		assertEquals("Incorrect string", STRING, text.toString());
+
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -145,8 +165,17 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 	 */
 	public void testMaxSize() throws Exception {
 		final String STRING = "test56789!";
+		final ParseException parseException = new ParseException(
+				HttpStatus._400, "test");
 
-		UsAsciiStringBuilder text = new UsAsciiStringBuilder(5, 10);
+		// Record actions on mock
+		this.recordReturn(this.parseExceptionFactory,
+				this.parseExceptionFactory.createParseException(null),
+				parseException, new TypeMatcher(UsAsciiStringBuilder.class));
+		this.replayMockObjects();
+
+		UsAsciiStringBuilder text = new UsAsciiStringBuilder(5, 10,
+				this.parseExceptionFactory);
 
 		// Add data to text
 		for (byte character : UsAsciiUtil.convertToUsAscii(STRING)) {
@@ -160,7 +189,9 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 			text.append(UsAsciiUtil.convertToUsAscii('a'));
 			fail("Should not be able add more than max characters");
 		} catch (ParseException ex) {
+			assertEquals("Incorrect parse exception", parseException, ex);
 		}
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -169,8 +200,10 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 	public void testClear() throws Exception {
 		final String ONE = "ONE";
 		final String TWO = "TWO";
+		this.replayMockObjects();
 
-		UsAsciiStringBuilder text = new UsAsciiStringBuilder(5, 15);
+		UsAsciiStringBuilder text = new UsAsciiStringBuilder(5, 15,
+				this.parseExceptionFactory);
 
 		// Add ONE
 		for (byte character : UsAsciiUtil.convertToUsAscii(ONE)) {
@@ -188,6 +221,8 @@ public class UsAsciiStringBuilderTest extends OfficeFrameTestCase {
 			text.append(character);
 		}
 		assertEquals("Incorrect TWO", TWO, text.toString());
+
+		this.verifyMockObjects();
 	}
 
 }
