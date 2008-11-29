@@ -21,28 +21,6 @@ package net.officefloor.plugin.socket.server.spi;
  * 
  * @author Daniel
  */
-public interface IdleContext {
-
-	/**
-	 * <p>
-	 * Obtains the current time in milliseconds.
-	 * <p>
-	 * This should return similar to {@link System#currentTimeMillis()} but is
-	 * provided to cache time for multiple quick operations that require only
-	 * estimates of time.
-	 * <p>
-	 * Note CPU operations should be in the nano-seconds.
-	 * 
-	 * @return Time measured in milliseconds.
-	 */
-	long getTime();
-
-	/**
-	 * Flags to close the {@link Connection}.
-	 * 
-	 * @param isClose
-	 *            <code>true</code> to close the {@link Connection}.
-	 */
-	void setCloseConnection(boolean isClose);
+public interface IdleContext extends ConnectionHandlerContext {
 
 }

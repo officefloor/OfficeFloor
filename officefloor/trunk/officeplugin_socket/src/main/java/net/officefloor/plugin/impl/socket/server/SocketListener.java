@@ -30,6 +30,7 @@ import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.spi.Connection;
+import net.officefloor.plugin.socket.server.spi.ConnectionHandlerContext;
 import net.officefloor.plugin.socket.server.spi.IdleContext;
 import net.officefloor.plugin.socket.server.spi.MessageSegment;
 import net.officefloor.plugin.socket.server.spi.ReadContext;
@@ -63,8 +64,8 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 
 	/**
 	 * {@link Selector} to aid in listening for connections. This should be
-	 * treated as <code>final</code>, however is specified on first run of
-	 * this {@link Task}.
+	 * treated as <code>final</code>, however is specified on first run of this
+	 * {@link Task}.
 	 */
 	private Selector selector;
 
@@ -146,7 +147,9 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+	 * @see
+	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
+	 * .execute.TaskContext)
 	 */
 	public Object doTask(
 			TaskContext<Object, ConnectionManager, None, Indexed> context)
@@ -613,12 +616,61 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	}
 
 	/*
-	 * ====================================================================
-	 * ReadContext
+	 * =============== ConnectionHandlerContext ===============================
+	 * Does not require thread-safety as should only be accessed by the same
+	 * Thread.
+	 */
+
+	/**
+	 * Flag to indicate to close the {@link Connection}.
+	 */
+	private boolean isCloseConnection = false;
+
+	/**
+	 * Resets the context for the {@link Connection}.
 	 * 
+	 */
+	private void resetConnectionContext() {
+		this.isCloseConnection = false;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.ReadContext#setCloseConnection
+	 * (boolean)
+	 */
+	public void setCloseConnection(boolean isClose) {
+		this.isCloseConnection = isClose;
+	}
+
+	/**
+	 * <p>
+	 * Current time for {@link ConnectionHandlerContext}.
+	 * <p>
+	 * This is reset on new run of this {@link Task}.
+	 */
+	private long currentTime = -1;
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.plugin.socket.server.spi.IdleContext#getTime()
+	 */
+	@Override
+	public long getTime() {
+		// Lazy obtain the time
+		if (currentTime < 0) {
+			this.currentTime = System.currentTimeMillis();
+		}
+		return this.currentTime;
+	}
+
+	/*
+	 * ================== ReadContext =====================================
 	 * ReadContext does not require thread-safety as should only be accessed by
 	 * the same Thread.
-	 * ====================================================================
 	 */
 
 	/**
@@ -652,7 +704,8 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ReadContext#getReadMessage()
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.ReadContext#getReadMessage()
 	 */
 	public ReadMessage getReadMessage() {
 		return this.readMessage;
@@ -661,7 +714,9 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ReadContext#setReadComplete(boolean)
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.ReadContext#setReadComplete(
+	 * boolean)
 	 */
 	public void setReadComplete(boolean isComplete) {
 		if (isComplete) {
@@ -676,82 +731,19 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ReadContext#setContinueReading(boolean)
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.ReadContext#setContinueReading
+	 * (boolean)
 	 */
 	public void setContinueReading(boolean isContinue) {
 		this.isContinueReading = isContinue;
 	}
 
 	/*
-	 * ====================================================================
-	 * IdleContext
-	 * 
-	 * IdleContext does not require thread-safety as should only be accessed by
-	 * the same Thread ever.
-	 * ====================================================================
+	 * ============== IdleContext and WriteContext =========================
+	 * IdleContext and WriteContext does not require thread-safety as should
+	 * only be accessed by the same Thread.
 	 */
 
-	/**
-	 * <p>
-	 * Current time for {@link IdleContext}.
-	 * <p>
-	 * This is reset on run of this {@link Task}.
-	 */
-	private long currentTime = -1;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.IdleContext#getTime()
-	 */
-	@Override
-	public long getTime() {
-		// Lazy obtain the time
-		if (currentTime < 0) {
-			this.currentTime = System.currentTimeMillis();
-		}
-		return this.currentTime;
-	}
-
-	/*
-	 * ====================================================================
-	 * WriteContext
-	 * 
-	 * WriteContext does not require thread-safety as should only be accessed by
-	 * the same Thread ever.
-	 * ====================================================================
-	 */
-
-	// No specific methods for WriteContext.
-	/*
-	 * ====================================================================
-	 * ReadContext, WriteContext & IdleContext overlap
-	 * 
-	 * Does not require thread-safety as should only be accessed by the same
-	 * Thread ever.
-	 * ====================================================================
-	 */
-
-	/**
-	 * Flag to indicate to close the {@link Connection}.
-	 */
-	private boolean isCloseConnection = false;
-
-	/**
-	 * Resets the context for the {@link Connection}.
-	 * 
-	 */
-	private void resetConnectionContext() {
-		this.isCloseConnection = false;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ReadContext#setCloseConnection(boolean)
-	 */
-	public void setCloseConnection(boolean isClose) {
-		this.isCloseConnection = isClose;
-	}
-
+	// No specific methods for IdleContext and WriteContext.
 }

@@ -21,7 +21,7 @@ package net.officefloor.plugin.socket.server.spi;
  * 
  * @author Daniel
  */
-public interface ReadContext {
+public interface ReadContext extends ConnectionHandlerContext {
 
 	/**
 	 * Obtains the {@link ReadMessage} that just received read data.
@@ -36,11 +36,12 @@ public interface ReadContext {
 	 * Flags that the read is complete for the {@link ReadMessage}.
 	 * <p>
 	 * This will subsequently invoke the
-	 * {@link Server#processReadMessage(ReadMessage)} with the {@link ReadMessage}.
+	 * {@link Server#processReadMessage(ReadMessage)} with the
+	 * {@link ReadMessage}.
 	 * 
 	 * @param isComplete
-	 *            <code>true</code> if the {@link ReadMessage} contains all
-	 *            data necessary.
+	 *            <code>true</code> if the {@link ReadMessage} contains all data
+	 *            necessary.
 	 */
 	void setReadComplete(boolean isComplete);
 
@@ -48,19 +49,10 @@ public interface ReadContext {
 	 * Flags to continue reading after completing a read.
 	 * 
 	 * @param isContinue
-	 *            <code>true</code> on setting
-	 *            {@link #setReadComplete(boolean)} to <code>true</code> start
-	 *            a new {@link ReadMessage} to continue listening on the
-	 *            {@link Connection}.
+	 *            <code>true</code> on setting {@link #setReadComplete(boolean)}
+	 *            to <code>true</code> start a new {@link ReadMessage} to
+	 *            continue listening on the {@link Connection}.
 	 */
 	void setContinueReading(boolean isContinue);
-
-	/**
-	 * Flags to close the {@link Connection}.
-	 * 
-	 * @param isClose
-	 *            <code>true</code> to close the {@link Connection}.
-	 */
-	void setCloseConnection(boolean isClose);
 
 }

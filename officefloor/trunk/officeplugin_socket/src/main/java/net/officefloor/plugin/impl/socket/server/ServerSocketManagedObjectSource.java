@@ -23,7 +23,6 @@ import java.net.ServerSocket;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -161,9 +160,6 @@ public class ServerSocketManagedObjectSource extends
 	protected void loadMetaData(
 			MetaDataContext<None, ServerSocketHandlerEnum> context)
 			throws Exception {
-
-		// Provide meta-data
-		context.setManagedObjectClass(AsynchronousManagedObject.class);
 
 		// Obtain the managed object source context
 		ManagedObjectSourceContext mosContext = context

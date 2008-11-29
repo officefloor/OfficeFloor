@@ -28,8 +28,8 @@ public interface HttpResponse {
 
 	/**
 	 * <p>
-	 * Allows specifying the HTTP version on the response. Example values would
-	 * be HTTP/1.0, HTTP/1.1, etc.
+	 * Allows specifying the HTTP version on the response. Values should be
+	 * either HTTP/1.0 or HTTP/1.1.
 	 * <p>
 	 * This defaults to value on {@link HttpRequest}.
 	 * 
@@ -85,7 +85,7 @@ public interface HttpResponse {
 	 * Sends this HTTP response to the client.
 	 * 
 	 * @throws IOException
-	 *             If fails to send the message.
+	 *             If fails to trigger sending the message.
 	 */
 	void send() throws IOException;
 }

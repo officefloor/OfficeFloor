@@ -19,10 +19,13 @@ package net.officefloor.plugin.socket.server.http;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.StubMatcher;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
+import net.officefloor.plugin.socket.server.http.parse.ParseException;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.plugin.socket.server.spi.Connection;
+import net.officefloor.plugin.socket.server.spi.IdleContext;
 import net.officefloor.plugin.socket.server.spi.ReadContext;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
+import net.officefloor.plugin.socket.server.spi.WriteContext;
 import net.officefloor.plugin.socket.server.spi.WriteMessage;
 
 /**
@@ -31,6 +34,11 @@ import net.officefloor.plugin.socket.server.spi.WriteMessage;
  * @author Daniel
  */
 public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
+
+	/**
+	 * Timeout of the {@link Connection}.
+	 */
+	private static final long CONNECTION_TIMEOUT = 10;
 
 	/**
 	 * {@link HttpConnectionHandler} being tested.
@@ -57,6 +65,16 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	 */
 	private WriteMessage writeMessage = this.createMock(WriteMessage.class);
 
+	/**
+	 * Mock {@link WriteContext}.
+	 */
+	private WriteContext writeContext = this.createMock(WriteContext.class);
+
+	/**
+	 * Mock {@link IdleContext}.
+	 */
+	private IdleContext idleContext = this.createMock(IdleContext.class);
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -68,7 +86,7 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 
 		// Create the handler to test
 		this.handler = new HttpConnectionHandler(this.connection, 1024,
-				1024 * 1024);
+				1024 * 1024, CONNECTION_TIMEOUT);
 	}
 
 	/**
@@ -81,6 +99,8 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final byte[] request = UsAsciiUtil.convertToHttp(requestText);
 
 		// Record actions
+		this.recordReturn(this.readContext, this.readContext.getTime(), System
+				.currentTimeMillis());
 		this.recordReturn(this.readContext, this.readContext.getReadMessage(),
 				this.readMessage);
 		this.recordReturn(this.readMessage, this.readMessage.read(null),
@@ -115,19 +135,31 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures correctly handles an invalid HTTP request.
-	 * 
-	 * @throws Exception
 	 */
 	public void testInvalidRead() throws Exception {
 
 		String invalidRequestText = "Invalid Request";
 		final byte[] request = UsAsciiUtil.convertToHttp(invalidRequestText);
 
-		String badRequestResponseText = "HTTP/1.0 400 Bad Request\nContent-Length: 23\n\nUnknown method: Invalid";
+		// Generate details of invalid response message
+		String badRequestResponseText = null;
+		try {
+			new HttpRequestParser(1024, 1024).parseMoreContent(request, 0,
+					request.length);
+			fail("Test invalid as should not be able to parse request");
+		} catch (ParseException ex) {
+			int status = ex.getHttpStatus();
+			String statusMsg = HttpStatus.getStatusMessage(status);
+			String reason = ex.getMessage();
+			badRequestResponseText = "HTTP/1.0 " + status + " " + statusMsg
+					+ "\nContent-Length: " + reason.length() + "\n\n" + reason;
+		}
 		final byte[] badRequestResponse = UsAsciiUtil
 				.convertToHttp(badRequestResponseText);
 
 		// Record actions
+		this.recordReturn(this.readContext, this.readContext.getTime(), System
+				.currentTimeMillis());
 		this.recordReturn(this.readContext, this.readContext.getReadMessage(),
 				this.readMessage);
 		this.recordReturn(this.readMessage, this.readMessage.read(null),
@@ -161,4 +193,78 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		assertNull("Should not have parser", this.handler
 				.getHttpRequestParser());
 	}
+
+	/**
+	 * Ensures does nothing on write.
+	 */
+	public void testWrite() {
+
+		// Record actions
+		this.recordReturn(this.writeContext, this.writeContext.getTime(), 1000);
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Handle the write
+		this.handler.handleWrite(this.writeContext);
+
+		// Verify mocks
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures checks idle time.
+	 */
+	public void testIdle() {
+
+		// Record actions
+		this.recordReturn(this.writeContext, this.writeContext.getTime(), 1000);
+		this.recordReturn(this.idleContext, this.idleContext.getTime(), 1000);
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Invoke write to set last interaction time
+		this.handler.handleWrite(this.writeContext);
+
+		// Handle the idle
+		this.handler.handleIdleConnection(this.idleContext);
+
+		// Verify mocks
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures closes {@link Connection} on {@link Connection} being too long
+	 * idle.
+	 */
+	public void testIdleTooLong() {
+
+		// Record actions
+		final long START_TIME = System.currentTimeMillis();
+		final long FIRST_IDLE_TIME = START_TIME + CONNECTION_TIMEOUT - 1;
+		final long SECOND_IDLE_TIME = START_TIME + CONNECTION_TIMEOUT;
+		this.recordReturn(this.writeContext, this.writeContext.getTime(),
+				START_TIME);
+		this.recordReturn(this.idleContext, this.idleContext.getTime(),
+				FIRST_IDLE_TIME);
+		this.recordReturn(this.idleContext, this.idleContext, SECOND_IDLE_TIME);
+		this.idleContext.setCloseConnection(true);
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Invoke write to set last interaction time
+		this.handler.handleWrite(this.writeContext);
+
+		// Invoke idle that is not timed out
+		this.handler.handleIdleConnection(this.idleContext);
+
+		// Invoke idle that times out connection
+		this.handler.handleIdleConnection(this.idleContext);
+
+		// Verify mocks
+		this.verifyMockObjects();
+	}
+
 }

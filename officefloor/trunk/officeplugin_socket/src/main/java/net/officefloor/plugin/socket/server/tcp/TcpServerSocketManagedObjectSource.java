@@ -50,7 +50,11 @@ public class TcpServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource#registerServerSocketHandler(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
+	 * @see
+	 * net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource
+	 * #
+	 * registerServerSocketHandler(net.officefloor.frame.spi.managedobject.source
+	 * .impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
 	protected void registerServerSocketHandler(
@@ -59,7 +63,8 @@ public class TcpServerSocketManagedObjectSource extends
 		ManagedObjectSourceContext mosContext = context
 				.getManagedObjectSourceContext();
 
-		// Specify type of object
+		// Specify types
+		context.setManagedObjectClass(TcpConnectionHandler.class);
 		context.setObjectClass(ServerTcpConnection.class);
 
 		// Provide the handler
@@ -104,7 +109,9 @@ public class TcpServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor.frame.api.execute.HandlerContext)
+	 * @see
+	 * net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor
+	 * .frame.api.execute.HandlerContext)
 	 */
 	@Override
 	public void setHandlerContext(HandlerContext<Indexed> context)
@@ -115,7 +122,9 @@ public class TcpServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createServer()
+	 * @see
+	 * net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createServer
+	 * ()
 	 */
 	@Override
 	public Server createServer() {
@@ -125,7 +134,9 @@ public class TcpServerSocketManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createConnectionHandler(net.officefloor.plugin.socket.server.spi.Connection)
+	 * @seenet.officefloor.plugin.socket.server.spi.ServerSocketHandler#
+	 * createConnectionHandler
+	 * (net.officefloor.plugin.socket.server.spi.Connection)
 	 */
 	@Override
 	public ConnectionHandler createConnectionHandler(Connection connection) {
