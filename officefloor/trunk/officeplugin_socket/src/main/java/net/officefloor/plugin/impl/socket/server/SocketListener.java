@@ -184,12 +184,6 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 			// Obtain the selected keys
 			Set<SelectionKey> selectedKeys = this.selector.selectedKeys();
 
-			// TODO remove
-			System.out.println("TODO [" + this.getClass().getSimpleName() + ":"
-					+ this.toString().split("@")[1] + "] reg-conn="
-					+ this.registeredConnections + " selected "
-					+ selectedKeys.size());
-
 			// Process all the selected channels
 			for (SelectionKey key : this.selector.keys()) {
 

@@ -98,6 +98,35 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	/**
+	 * Initiate a complete {@link HttpResponse} to be sent.
+	 * 
+	 * @param connectionHandler
+	 *            {@link HttpConnectionHandler}.
+	 * @param version
+	 *            HTTP version.
+	 * @param status
+	 *            HTTP status.
+	 * @param body
+	 *            Body text explaining the cause.
+	 * @throws IOException
+	 *             If fails to construct {@link HttpResponse}.
+	 */
+	public HttpResponseImpl(HttpConnectionHandler connectionHandler,
+			String version, int status, String body) throws IOException {
+		this.connectionHandler = connectionHandler;
+		this.version = version;
+		this.status = status;
+		this.statusMessage = HttpStatus.getStatusMessage(this.status);
+
+		// Only write the body if have text
+		if ((body != null) && (body.length() > 0)) {
+			Writer writer = new OutputStreamWriter(this.body, US_ASCII);
+			writer.append(body);
+			writer.flush();
+		}
+	}
+
+	/**
 	 * Flags to send failure caused by the escalation.
 	 * 
 	 * @param escalation
@@ -184,15 +213,14 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	/*
-	 * =============================================================================
-	 * HttpResponse
-	 * =============================================================================
+	 * ================ HttpResponse =======================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#setStatus(int)
+	 * @see
+	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#setStatus(int)
 	 */
 	@Override
 	public synchronized void setStatus(int status) {
@@ -203,8 +231,9 @@ public class HttpResponseImpl implements HttpResponse {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#setStatus(int,
-	 *      java.lang.String)
+	 * @see
+	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#setStatus(int,
+	 * java.lang.String)
 	 */
 	@Override
 	public synchronized void setStatus(int status, String statusMessage) {
@@ -215,7 +244,9 @@ public class HttpResponseImpl implements HttpResponse {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#setVersion(java.lang.String)
+	 * @see
+	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#setVersion
+	 * (java.lang.String)
 	 */
 	@Override
 	public synchronized void setVersion(String version) {
@@ -225,8 +256,9 @@ public class HttpResponseImpl implements HttpResponse {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#addHeader(java.lang.String,
-	 *      java.lang.String)
+	 * @see
+	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#addHeader(
+	 * java.lang.String, java.lang.String)
 	 */
 	@Override
 	public synchronized void addHeader(String name, String value) {

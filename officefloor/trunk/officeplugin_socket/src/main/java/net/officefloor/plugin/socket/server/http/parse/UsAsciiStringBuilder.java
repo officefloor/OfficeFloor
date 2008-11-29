@@ -37,6 +37,11 @@ public class UsAsciiStringBuilder {
 	private final int maxChars;
 
 	/**
+	 * {@link ParseExceptionFactory}.
+	 */
+	private final ParseExceptionFactory parseExceptionFactory;
+
+	/**
 	 * US-ASCII character buffer.
 	 */
 	private byte[] chars;
@@ -53,10 +58,14 @@ public class UsAsciiStringBuilder {
 	 *            Initial capacity of the underlying buffer.
 	 * @param maxChars
 	 *            Maximum number of characters allowed.
+	 * @param parseExceptionFactory
+	 *            {@link ParseExceptionFactory}.
 	 */
-	public UsAsciiStringBuilder(int initialCapacity, int maxChars) {
+	public UsAsciiStringBuilder(int initialCapacity, int maxChars,
+			ParseExceptionFactory parseExceptionFactory) {
 		this.chars = new byte[initialCapacity];
 		this.maxChars = maxChars;
+		this.parseExceptionFactory = parseExceptionFactory;
 	}
 
 	/**
@@ -74,8 +83,7 @@ public class UsAsciiStringBuilder {
 
 			// Ensure string is not too long
 			if (this.count == this.maxChars) {
-				throw new ParseException("String exceeding maximum characters of "
-						+ this.maxChars);
+				throw this.parseExceptionFactory.createParseException(this);
 			}
 
 			// No space in buffer so double size of buffer
