@@ -671,9 +671,20 @@ public class HttpRequestParser {
 			}
 		}
 
-		// Complete when body read
-		// TODO tie into determining the body length
-		return (this.parseState == ParseState.BODY);
+		// Only able to be complete if parsing the body
+		if (this.parseState != ParseState.BODY) {
+			return false;
+		}
+
+		// Ensure all of the body is received
+		if (this.contentLength > 0) {
+			if (this.body.getCharacterCount() < this.contentLength) {
+				return false;
+			}
+		}
+
+		// All of request received and parsed
+		return true;
 	}
 
 	/**

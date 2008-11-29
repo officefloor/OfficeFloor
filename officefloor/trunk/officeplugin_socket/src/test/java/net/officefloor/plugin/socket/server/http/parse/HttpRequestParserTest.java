@@ -33,10 +33,90 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 			1024 * 1024);
 
 	/**
+	 * Ensure able to handle a blank request (only spaces received for it).
+	 */
+	public void testBlank() {
+		this.doMethodTest(" ", false, null, null, null, null);
+	}
+
+	/**
+	 * Ensure able to handle leading spaces.
+	 */
+	public void testLeadingSpaces() {
+		this.doMethodTest(" GET /path HTTP/1.1\n\n", true, "GET", "/path",
+				"HTTP/1.1", null);
+	}
+
+	/**
+	 * Ensure able to parse up to just the method.
+	 */
+	public void testToMethod() {
+		this.doMethodTest("GET", false, "GET", null, null, null);
+	}
+
+	/**
+	 * Ensure able to parse up to just the path.
+	 */
+	public void testToPath() {
+		this.doMethodTest("GET /path", false, "GET", "/path", null, null);
+	}
+
+	/**
+	 * Ensure able to parse up to just the version.
+	 */
+	public void testToVersion() {
+		this.doMethodTest("GET /path HTTP/1.1", false, "GET", "/path",
+				"HTTP/1.1", null);
+	}
+
+	/**
+	 * Ensure able to parse up to just the header name.
+	 */
+	public void testToHeaderName() {
+		this.doMethodTest("GET /path HTTP/1.1\nContent-Length", false, "GET",
+				"/path", "HTTP/1.1", null);
+	}
+
+	/**
+	 * Ensure able to parse up to just the header name.
+	 */
+	public void testToHeaderValue() {
+		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\n", false,
+				"POST", "/path", "HTTP/1.1", null, "Content-Length", "10");
+	}
+
+	/**
+	 * Ensure able to parse up to the body.
+	 */
+	public void testToBody() {
+		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\n\nTEST",
+				false, "POST", "/path", "HTTP/1.1", "TEST", "Content-Length",
+				"10");
+	}
+
+	/**
 	 * Validate GET.
 	 */
 	public void testGet() {
 		this.doMethodTest("GET /path HTTP/1.1\n\n", true, "GET", "/path",
+				"HTTP/1.1", null);
+	}
+
+	/**
+	 * Validate GET with one parameter.
+	 */
+	public void testGetWithOneParamter() {
+		this.doMethodTest("GET /path?param=value HTTP/1.1\n\n", true, "GET",
+				"/path?param=value", "HTTP/1.1", null);
+	}
+
+	/**
+	 * Validate GET with two parameters.
+	 */
+	public void testGetWithOneParamters() {
+		this.doMethodTest(
+				"GET /path?paramOne=valueOne&paramOne=valueTwo HTTP/1.1\n\n",
+				true, "GET", "/path?paramOne=valueOne&paramOne=valueTwo",
 				"HTTP/1.1", null);
 	}
 
@@ -75,6 +155,15 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 	public void testPostWithNoEntity() {
 		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 0\n\n", true,
 				"POST", "/path", "HTTP/1.1", null, "Content-Length", "0");
+	}
+
+	/**
+	 * Validated POST with not all of the body (entity) received.
+	 */
+	public void testPostWithNoAllOfEntityReceived() {
+		this.doMethodTest("POST /path HTTP/1.1\nContent-Length: 10\n\n12345",
+				false, "POST", "/path", "HTTP/1.1", "12345", "Content-Length",
+				"10");
 	}
 
 	/**
@@ -190,9 +279,12 @@ public class HttpRequestParserTest extends OfficeFrameTestCase {
 					content, 0, content.length);
 
 			// Validate request line
-			assertEquals(expectedMethod, this.httpRequestParser.getMethod());
-			assertEquals(expectedPath, this.httpRequestParser.getPath());
-			assertEquals(expectedVersion, this.httpRequestParser.getVersion());
+			assertEquals((expectedMethod == null ? "" : expectedMethod),
+					this.httpRequestParser.getMethod());
+			assertEquals((expectedPath == null ? "" : expectedPath),
+					this.httpRequestParser.getPath());
+			assertEquals((expectedVersion == null ? "" : expectedVersion),
+					this.httpRequestParser.getVersion());
 
 			// Validate correct number of headers
 			assertEquals("Incorrect number of headers",
