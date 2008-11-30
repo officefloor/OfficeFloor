@@ -22,77 +22,34 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
-import net.officefloor.model.task.TaskFactoryManufacturer;
 import net.officefloor.plugin.socket.server.http.HttpStatus;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.work.AbstractSingleTaskWork;
 
 /**
  * {@link Work} and {@link Task} for serving {@link File} content as response.
  * 
  * @author Daniel
  */
-public class HttpFileTask implements WorkFactory<HttpFileTask>, Work,
-		TaskFactoryManufacturer,
-		TaskFactory<Object, HttpFileTask, Indexed, Indexed>,
-		Task<Object, HttpFileTask, Indexed, Indexed> {
+public class HttpFileTask extends
+		AbstractSingleTaskWork<Object, HttpFileTask, Indexed, None> {
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
-	 */
-	@Override
-	public HttpFileTask createWork() {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-	 */
-	@Override
-	public void setWorkContext(WorkContext context) throws Exception {
-		// Nothing to initialise
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.task.TaskFactoryManufacturer#createTaskFactory()
-	 */
-	@Override
-	public TaskFactory<?, ?, ?, ?> createTaskFactory() {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor.frame.api.execute.Work)
-	 */
-	@Override
-	public Task<Object, HttpFileTask, Indexed, Indexed> createTask(
-			HttpFileTask work) {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+	 * @see
+	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
+	 * .execute.TaskContext)
 	 */
 	@Override
 	public Object doTask(
-			TaskContext<Object, HttpFileTask, Indexed, Indexed> context)
+			TaskContext<Object, HttpFileTask, Indexed, None> context)
 			throws Throwable {
 
 		// Obtain the request to route it
@@ -105,7 +62,7 @@ public class HttpFileTask implements WorkFactory<HttpFileTask>, Work,
 		int parameterStart = path.indexOf('?');
 		if (parameterStart > 0) {
 			// Obtain the path minus the parameters
-			path = path.substring(0, (parameterStart - 1));
+			path = path.substring(0, parameterStart);
 		}
 
 		// Obtain the response
@@ -119,8 +76,7 @@ public class HttpFileTask implements WorkFactory<HttpFileTask>, Work,
 			// Item not found
 			response.setStatus(HttpStatus._404); // not found
 			new OutputStreamWriter(response.getBody()).append(
-					"<html><body>Can not find resource " + path
-							+ "</body></html>").flush();
+					"Can not find resource " + path).flush();
 		} else {
 			// Return the file content as response
 			OutputStream responseBody = response.getBody();

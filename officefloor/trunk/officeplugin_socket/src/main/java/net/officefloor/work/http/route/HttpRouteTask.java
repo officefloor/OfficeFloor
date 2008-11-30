@@ -19,30 +19,25 @@ package net.officefloor.work.http.route;
 import java.util.regex.Pattern;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
-import net.officefloor.model.task.TaskFactoryManufacturer;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.work.AbstractSingleTaskWork;
 
 /**
  * {@link Work} and {@link Task} for routing HTTP requests.
  * 
  * @author Daniel
  */
-public class HttpRouteTask implements WorkFactory<HttpRouteTask>, Work,
-		TaskFactoryManufacturer,
-		TaskFactory<Object, HttpRouteTask, Indexed, Indexed>,
-		Task<Object, HttpRouteTask, Indexed, Indexed> {
+public class HttpRouteTask extends
+		AbstractSingleTaskWork<Object, HttpRouteTask, Indexed, Indexed> {
 
 	/**
 	 * {@link Pattern} match against paths to route the {@link HttpRequest}.
 	 */
-	private final Pattern[] routings;
+	protected final Pattern[] routings;
 
 	/**
 	 * Initiate.
@@ -58,48 +53,9 @@ public class HttpRouteTask implements WorkFactory<HttpRouteTask>, Work,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
-	 */
-	@Override
-	public HttpRouteTask createWork() {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-	 */
-	@Override
-	public void setWorkContext(WorkContext context) throws Exception {
-		// Not need context
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.task.TaskFactoryManufacturer#createTaskFactory()
-	 */
-	@Override
-	public TaskFactory<?, ?, ?, ?> createTaskFactory() {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor.frame.api.execute.Work)
-	 */
-	@Override
-	public Task<Object, HttpRouteTask, Indexed, Indexed> createTask(
-			HttpRouteTask work) {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+	 * @see
+	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
+	 * .execute.TaskContext)
 	 */
 	@Override
 	public Object doTask(
@@ -113,10 +69,14 @@ public class HttpRouteTask implements WorkFactory<HttpRouteTask>, Work,
 
 		// Obtain the path from the request
 		String path = request.getPath();
+		if (path == null) {
+			// Ensure path not null
+			path = "";
+		}
 		int parameterStart = path.indexOf('?');
 		if (parameterStart > 0) {
 			// Obtain the path minus the parameters
-			path = path.substring(0, (parameterStart - 1));
+			path = path.substring(0, parameterStart);
 		}
 
 		// Route to appropriate path
