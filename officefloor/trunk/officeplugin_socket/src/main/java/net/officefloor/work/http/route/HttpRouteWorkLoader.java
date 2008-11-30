@@ -107,6 +107,9 @@ public class HttpRouteWorkLoader extends AbstractWorkLoader {
 					routeName));
 		}
 
+		// Create the default flow (if not match any routes)
+		taskModel.addFlow(new TaskFlowModel<Indexed>(null, index++, "default"));
+
 		// Create the work for routing
 		WorkModel<HttpRouteTask> workModel = new WorkModel<HttpRouteTask>();
 		workModel.setTypeOfWork(HttpRouteTask.class);
