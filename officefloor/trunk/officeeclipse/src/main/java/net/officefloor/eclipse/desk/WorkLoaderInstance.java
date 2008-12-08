@@ -151,16 +151,10 @@ public class WorkLoaderInstance {
 		WorkLoader workLoader;
 		try {
 			workLoader = this.getWorkLoader();
-		} catch (Exception ex) {
-			// Failed to obtain work loader, indicate failure
-			page.setLayout(new GridLayout());
-			Label label = new Label(page, SWT.NONE);
-			label.setForeground(ColorConstants.red);
-			label.setText("Failed obtaining "
-					+ WorkLoader.class.getSimpleName() + " " + this.className
-					+ ": " + ex.getMessage());
-
-			// Failed to work loader so no properties
+		} catch (Throwable ex) {
+			// Failed to obtain work loader
+			this.loadFailureControl(page, ex);
+			context.setErrorMessage(ex.getMessage());
 			return null;
 		}
 
@@ -178,9 +172,17 @@ public class WorkLoaderInstance {
 
 		// Determine if have extension
 		if (this.extension != null) {
+
 			// Load controls from extension
-			List<WorkLoaderProperty> initialProperties = this.extension
-					.createControl(page, context);
+			List<WorkLoaderProperty> initialProperties;
+			try {
+				initialProperties = this.extension.createControl(page, context);
+			} catch (Throwable ex) {
+				// Failed to create controls
+				this.loadFailureControl(page, ex);
+				context.setErrorMessage(ex.getMessage());
+				return null;
+			}
 
 			// Return the initial properties
 			if ((initialProperties != null) && (initialProperties.size() > 0)) {
@@ -216,6 +218,22 @@ public class WorkLoaderInstance {
 
 		// Return initial properties from the specification
 		return propertyModels;
+	}
+
+	/**
+	 * Loads failure details.
+	 * 
+	 * @param page
+	 *            Page {@link Composite}.
+	 * @param failure
+	 *            Failure.
+	 */
+	private void loadFailureControl(Composite page, Throwable failure) {
+		page.setLayout(new GridLayout());
+		Label label = new Label(page, SWT.NONE);
+		label.setForeground(ColorConstants.red);
+		label.setText("Failed obtaining " + WorkLoader.class.getSimpleName()
+				+ " " + this.className + ": " + failure.getMessage());
 	}
 
 	/**

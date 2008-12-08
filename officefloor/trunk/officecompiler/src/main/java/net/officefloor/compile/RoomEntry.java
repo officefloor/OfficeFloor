@@ -140,12 +140,12 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	/**
 	 * {@link SubRoomModel} room to {@link RoomEntry}.
 	 */
-	private final ModelEntryMap<SubRoomModel, RoomEntry> roomMap = new ModelEntryMap<SubRoomModel, RoomEntry>();
+	protected final ModelEntryMap<SubRoomModel, RoomEntry> roomMap = new ModelEntryMap<SubRoomModel, RoomEntry>();
 
 	/**
 	 * {@link SubRoomModel} desk to {@link DeskEntry}.
 	 */
-	private final ModelEntryMap<SubRoomModel, DeskEntry> deskMap = new ModelEntryMap<SubRoomModel, DeskEntry>();
+	protected final ModelEntryMap<SubRoomModel, DeskEntry> deskMap = new ModelEntryMap<SubRoomModel, DeskEntry>();
 
 	/**
 	 * Initiate as the room of the office.
@@ -292,7 +292,8 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	}
 
 	/**
-	 * Obtains the {@link SubRoomManagedObjectModel} on the {@link SubRoomModel}.
+	 * Obtains the {@link SubRoomManagedObjectModel} on the {@link SubRoomModel}
+	 * .
 	 * 
 	 * @param subRoom
 	 *            {@link SubRoomModel}.
@@ -375,7 +376,8 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	 * Obtains the listing of {@link DeskEntry} instances for this
 	 * {@link RoomEntry}.
 	 * 
-	 * @return Listing of {@link DeskEntry} instances for this {@link RoomEntry}.
+	 * @return Listing of {@link DeskEntry} instances for this {@link RoomEntry}
+	 *         .
 	 * @throws Exception
 	 *             If a {@link RoomEntry} or {@link DeskEntry} can not be found.
 	 */

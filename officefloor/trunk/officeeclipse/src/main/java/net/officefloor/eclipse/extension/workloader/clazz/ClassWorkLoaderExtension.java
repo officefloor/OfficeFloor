@@ -25,11 +25,15 @@ import net.officefloor.eclipse.common.dialog.input.InputFilter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
+import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
+import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
 import net.officefloor.work.WorkLoader;
 import net.officefloor.work.clazz.ClassWorkLoader;
+import net.officefloor.work.clazz.Flow;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -41,7 +45,12 @@ import org.eclipse.swt.widgets.Composite;
  * 
  * @author Daniel
  */
-public class ClassWorkLoaderExtension implements WorkLoaderExtension {
+public class ClassWorkLoaderExtension implements WorkLoaderExtension,
+		ExtensionClasspathProvider {
+
+	/*
+	 * =================== WorkLoaderExtension ==========================
+	 */
 
 	/*
 	 * (non-Javadoc)
@@ -159,4 +168,19 @@ public class ClassWorkLoaderExtension implements WorkLoaderExtension {
 		return simpleClassName;
 	}
 
+	/*
+	 * ======================= ExtensionClasspathProvider ======================
+	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider
+	 * #getClasspathProvisions()
+	 */
+	@Override
+	public ClasspathProvision[] getClasspathProvisions() {
+		return new ClasspathProvision[]{new TypeClasspathProvision(Flow.class)};
+	}
 }

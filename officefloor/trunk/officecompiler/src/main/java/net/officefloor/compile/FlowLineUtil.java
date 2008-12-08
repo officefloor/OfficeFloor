@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile;
 
+import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalEscalationModel;
@@ -88,7 +89,10 @@ public class FlowLineUtil {
 		// Obtain the desk sub room
 		SubRoomModel subRoom = roomEntry.getSubRoom(deskEntry);
 
-		// Loop until reached room which starts linking down
+		// Loop until:
+		// - reached room which starts linking down
+		// - reach top level room and linked to external escalation
+		SubRoomInputFlowModel inputFlow = null;
 		SubRoomEscalationModel escalation = null;
 		while (externalEscalationName != null) {
 
@@ -115,18 +119,23 @@ public class FlowLineUtil {
 				roomEntry = roomEntry.getParentRoom();
 
 			} else {
+				// No linked to externally, so should be linked to flow
+				EscalationToInputFlowModel inputFlowConnection = escalation
+						.getInputFlow();
+				if (inputFlowConnection == null) {
+					throw new BuildException("Escalation '"
+							+ externalEscalationName + "' on sub room '"
+							+ subRoom.getId() + " is not handled");
+				}
+				inputFlow = inputFlowConnection.getInputFlow();
+
 				// No longer going to external escalation
 				externalEscalationName = null;
 			}
 		}
 
-		// Linking to another room
-		EscalationToInputFlowModel inConn = escalation.getInputFlow();
-		String subRoomName = inConn.getSubRoomName();
-		String inputFlowName = inConn.getInputFlow().getName();
-
 		// Return the linked flow
-		return getLinkedFlow(roomEntry, subRoomName, inputFlowName);
+		return getLinkedFlow(roomEntry, inputFlow);
 	}
 
 	/**
@@ -179,11 +188,10 @@ public class FlowLineUtil {
 
 		// Linking to another room
 		OutputFlowToInputFlowModel inConn = outputFlow.getInput();
-		String subRoomName = inConn.getSubRoomName();
-		String inputFlowName = inConn.getInput().getName();
+		SubRoomInputFlowModel inputFlow = inConn.getInput();
 
 		// Return the linked flow
-		return getLinkedFlow(roomEntry, subRoomName, inputFlowName);
+		return getLinkedFlow(roomEntry, inputFlow);
 	}
 
 	/**
@@ -201,14 +209,32 @@ public class FlowLineUtil {
 	 *             If fails to link.
 	 */
 	private static LinkedFlow getLinkedFlow(RoomEntry roomEntry,
-			String subRoomName, String inputFlowName) throws Exception {
+			SubRoomInputFlowModel subRoomInputFlow) throws Exception {
+
+		// Obtain the sub room for the input flow
+		SubRoomModel subRoom = null;
+		FOUND_SUB_ROOM: for (SubRoomModel r : roomEntry.getModel()
+				.getSubRooms()) {
+			for (SubRoomInputFlowModel i : r.getInputFlows()) {
+				if (subRoomInputFlow == i) {
+					subRoom = r;
+					break FOUND_SUB_ROOM;
+				}
+			}
+		}
+
+		// Obtain the sub room name
+		String subRoomName = subRoom.getId();
+
+		// Obtain the input flow name
+		String inputFlowName = subRoomInputFlow.getName();
 
 		// Find the desk
 		DeskEntry deskEntry = null;
 		while (deskEntry == null) {
 
 			// Obtain the sub room
-			SubRoomModel subRoom = roomEntry.getSubRoom(subRoomName);
+			subRoom = roomEntry.getSubRoom(subRoomName);
 
 			// Obtain sub entry
 			String entryId = subRoom.getRoom();
@@ -220,6 +246,10 @@ public class FlowLineUtil {
 
 				// TODO reduce coupling of room hierarchy.
 				// Decode the sub room and input flow
+				if (!inputFlowName.contains("-")) {
+					throw new BuildException("Invalid input flow name '"
+							+ inputFlowName + "' as must contain '-'");
+				}
 				subRoomName = inputFlowName.split("-")[0];
 				inputFlowName = inputFlowName.substring(subRoomName.length()
 						+ "-".length());
@@ -233,6 +263,11 @@ public class FlowLineUtil {
 					if (inputFlowName.equals(iF.getName())) {
 						inputFlow = iF;
 					}
+				}
+				if (inputFlow == null) {
+					throw new BuildException("Can not find input flow '"
+							+ inputFlowName + "' on sub room '" + subRoomName
+							+ "' of room " + roomEntry.getId());
 				}
 
 				// Obtain the input flow of the sub room
@@ -250,10 +285,16 @@ public class FlowLineUtil {
 
 		// Obtain the target flow item on the desk
 		FlowItemModel flowItem = null;
-		for (FlowItemModel fi : deskEntry.getModel().getFlowItems()) {
+		FOUND_FLOW_ITEM: for (FlowItemModel fi : deskEntry.getModel()
+				.getFlowItems()) {
 			if (inputFlowName.equals(fi.getId())) {
 				flowItem = fi;
+				break FOUND_FLOW_ITEM;
 			}
+		}
+		if (flowItem == null) {
+			throw new BuildException("Can not find flow item '" + inputFlowName
+					+ "' on desk " + deskEntry.getId());
 		}
 
 		// Return the target flow

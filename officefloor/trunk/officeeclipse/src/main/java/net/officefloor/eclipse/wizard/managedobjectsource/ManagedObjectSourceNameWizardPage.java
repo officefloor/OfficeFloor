@@ -29,7 +29,6 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -47,15 +46,14 @@ public class ManagedObjectSourceNameWizardPage extends WizardPage {
 	private Text managedObjectSourceName;
 
 	/**
-	 * {@link Composite} containing the {@link Control} instances to specify the
-	 * default timeout.
+	 * {@link Label} for the default timeout.
 	 */
-	private Composite defaultTimeoutContainer;
+	private Label defaultTimeoutLabel;
 
 	/**
 	 * Display to obtain the default timeout.
 	 */
-	private Text defaultTimeout;
+	private Text defaultTimeoutText;
 
 	/**
 	 * Flag indicating if the default timeout is required.
@@ -120,7 +118,8 @@ public class ManagedObjectSourceNameWizardPage extends WizardPage {
 				// Ignore
 			}
 		}
-		this.defaultTimeoutContainer.setVisible(this.isRequireDefaultTimeout);
+		this.defaultTimeoutLabel.setVisible(this.isRequireDefaultTimeout);
+		this.defaultTimeoutText.setVisible(this.isRequireDefaultTimeout);
 
 		// Initiate state
 		this.handlePageChange();
@@ -148,7 +147,7 @@ public class ManagedObjectSourceNameWizardPage extends WizardPage {
 		}
 
 		// Return the default timeout value specified
-		return Long.parseLong(this.defaultTimeout.getText());
+		return Long.parseLong(this.defaultTimeoutText.getText());
 	}
 
 	/*
@@ -163,14 +162,11 @@ public class ManagedObjectSourceNameWizardPage extends WizardPage {
 
 		// Create the page for the work loader
 		Composite page = new Composite(parent, SWT.NONE);
-		page.setLayout(new GridLayout(1, false));
+		page.setLayout(new GridLayout(2, false));
 
 		// Provide control to specify name
-		Composite name = new Composite(page, SWT.NONE);
-		name.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
-		name.setLayout(new GridLayout(2, false));
-		new Label(name, SWT.NONE).setText("Work name: ");
-		this.managedObjectSourceName = new Text(name, SWT.SINGLE | SWT.BORDER);
+		new Label(page, SWT.NONE).setText("Work name: ");
+		this.managedObjectSourceName = new Text(page, SWT.SINGLE | SWT.BORDER);
 		this.managedObjectSourceName.setLayoutData(new GridData(SWT.FILL,
 				SWT.NONE, true, false));
 		this.managedObjectSourceName.addModifyListener(new ModifyListener() {
@@ -181,17 +177,14 @@ public class ManagedObjectSourceNameWizardPage extends WizardPage {
 		});
 
 		// Provide control to specify default timeout
-		this.defaultTimeoutContainer = new Composite(page, SWT.NONE);
-		this.defaultTimeoutContainer.setLayoutData(new GridData(SWT.FILL,
-				SWT.NONE, true, false));
-		this.defaultTimeoutContainer.setLayout(new GridLayout(2, false));
-		new Label(this.defaultTimeoutContainer, SWT.NONE)
-				.setText("Default timeout: ");
-		this.defaultTimeout = new Text(this.defaultTimeoutContainer, SWT.SINGLE
+		this.defaultTimeoutLabel = new Label(page,
+				SWT.NONE);
+		this.defaultTimeoutLabel.setText("Default timeout: ");
+		this.defaultTimeoutText = new Text(page, SWT.SINGLE
 				| SWT.BORDER);
-		this.defaultTimeout.setLayoutData(new GridData(SWT.FILL, SWT.NONE,
+		this.defaultTimeoutText.setLayoutData(new GridData(SWT.FILL, SWT.NONE,
 				true, false));
-		this.defaultTimeout.addModifyListener(new ModifyListener() {
+		this.defaultTimeoutText.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				ManagedObjectSourceNameWizardPage.this.handlePageChange();
@@ -224,7 +217,7 @@ public class ManagedObjectSourceNameWizardPage extends WizardPage {
 		if (this.isRequireDefaultTimeout) {
 
 			// Ensure have a default timeout value
-			String defaultTimeoutValue = this.defaultTimeout.getText();
+			String defaultTimeoutValue = this.defaultTimeoutText.getText();
 			if ((defaultTimeoutValue == null)
 					|| (defaultTimeoutValue.trim().length() == 0)) {
 				this.setErrorMessage("Must provide default timeout value");

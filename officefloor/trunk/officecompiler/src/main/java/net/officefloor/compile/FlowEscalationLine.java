@@ -40,8 +40,8 @@ public class FlowEscalationLine {
 	public final FlowItemEscalationModel sourceFlowItemEscalation;
 
 	/**
-	 * Source {@link ExternalEscalationModel}. This will be <code>null</code>
-	 * if target {@link FlowItemModel} is on the same {@link DeskModel}.
+	 * Source {@link ExternalEscalationModel}. This will be <code>null</code> if
+	 * target {@link FlowItemModel} is on the same {@link DeskModel}.
 	 */
 	public final ExternalEscalationModel sourceExternalEscalation;
 
@@ -79,8 +79,8 @@ public class FlowEscalationLine {
 	public final TaskEntry<?> targetTaskEntry;
 
 	/**
-	 * Target {@link FlowItemModel}. This will be <code>null</code> if
-	 * handled by top level {@link Escalation}.
+	 * Target {@link FlowItemModel}. This will be <code>null</code> if handled
+	 * by top level {@link Escalation}.
 	 */
 	public final FlowItemModel targetFlowItem;
 
@@ -133,7 +133,7 @@ public class FlowEscalationLine {
 		} else {
 			// Flow escalation not linked
 			throw new Exception("Flow item escalation "
-					+ this.sourceExternalEscalation.getName()
+					+ this.sourceFlowItemEscalation.getEscalationType()
 					+ " on flow item " + this.sourceTaskEntry.getId()
 					+ " not linked to a flow");
 		}
@@ -162,8 +162,8 @@ public class FlowEscalationLine {
 	 * Indicates if the {@link Escalation} is handled by the top level
 	 * {@link Escalation}.
 	 * 
-	 * @return <code>true</code> if the {@link Escalation} is handled by the
-	 *         top level {@link Escalation}.
+	 * @return <code>true</code> if the {@link Escalation} is handled by the top
+	 *         level {@link Escalation}.
 	 */
 	public boolean isHandledByTopLevelEscalation() {
 		return (this.targetFlowItem == null);
