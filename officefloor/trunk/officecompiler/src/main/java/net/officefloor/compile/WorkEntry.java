@@ -128,7 +128,7 @@ public class WorkEntry<W extends Work> extends
 	/**
 	 * {@link FlowItemModel} to {@link TaskEntry} map.
 	 */
-	private final ModelEntryMap<FlowItemModel, TaskEntry<?>> taskMap = new ModelEntryMap<FlowItemModel, TaskEntry<?>>();
+	protected final ModelEntryMap<FlowItemModel, TaskEntry<?>> taskMap = new ModelEntryMap<FlowItemModel, TaskEntry<?>>();
 
 	/**
 	 * {@link TaskEntry} instances of this {@link WorkEntry}.

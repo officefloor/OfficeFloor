@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarEntryResource;
+import org.eclipse.jdt.internal.core.NonJavaResource;
 
 /**
  * Utility methods for working with class path.
@@ -365,6 +366,11 @@ public class ClasspathUtil {
 	 */
 	public static Object[] getChildren(Object parent) {
 
+		// No children for null
+		if (parent == null) {
+			return new Object[0];
+		}
+		
 		// Return children based on type
 		if (parent instanceof IResource) {
 			IResource resource = (IResource) parent;
@@ -377,6 +383,10 @@ public class ClasspathUtil {
 		} else if (parent instanceof JarEntryResource) {
 			JarEntryResource jarEntryResource = (JarEntryResource) parent;
 			return getChildren(jarEntryResource);
+
+		} else if (parent instanceof NonJavaResource) {
+			// No children for non-java resource
+			return new Object[0];
 
 		} else {
 			// Unhandled type

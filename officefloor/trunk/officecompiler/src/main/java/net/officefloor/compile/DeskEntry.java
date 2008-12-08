@@ -84,12 +84,12 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	/**
 	 * {@link DeskWorkModel} to {@link DeskEntry} map.
 	 */
-	private final ModelEntryMap<DeskWorkModel, WorkEntry<?>> workMap = new ModelEntryMap<DeskWorkModel, WorkEntry<?>>();
+	protected final ModelEntryMap<DeskWorkModel, WorkEntry<?>> workMap = new ModelEntryMap<DeskWorkModel, WorkEntry<?>>();
 
 	/**
 	 * {@link FlowItemModel} to {@link TaskEntry} map.
 	 */
-	private final ModelEntryMap<FlowItemModel, TaskEntry<?>> taskMap = new ModelEntryMap<FlowItemModel, TaskEntry<?>>();
+	protected final ModelEntryMap<FlowItemModel, TaskEntry<?>> taskMap = new ModelEntryMap<FlowItemModel, TaskEntry<?>>();
 
 	/**
 	 * Initiate.
