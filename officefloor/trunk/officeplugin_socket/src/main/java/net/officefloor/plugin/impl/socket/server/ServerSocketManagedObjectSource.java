@@ -31,6 +31,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.impl.socket.server.messagesegment.DirectBufferMessageSegmentPool;
+import net.officefloor.plugin.impl.socket.server.messagesegment.HeapBufferMessageSegmentPool;
+import net.officefloor.plugin.impl.socket.server.messagesegment.NotPoolMessageSegmentPool;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
 import net.officefloor.plugin.socket.server.spi.Server;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
@@ -67,6 +69,11 @@ public class ServerSocketManagedObjectSource extends
 	 * Maximum connections property name.
 	 */
 	public static final String PROPERTY_MAXIMUM_CONNECTIONS = "max.connections";
+
+	/**
+	 * Strategy for {@link MessageSegmentPool}.
+	 */
+	public static final String PROPERTY_MESSAGE_SEGMENT_POOL_STRATEGY = "message.segment.pool.technique";
 
 	/**
 	 * {@link ServerSocketAccepter} listening for connections.
@@ -124,9 +131,7 @@ public class ServerSocketManagedObjectSource extends
 	}
 
 	/*
-	 * ====================================================================
-	 * AbstractManagedObjectSource
-	 * ====================================================================
+	 * =================== AbstractManagedObjectSource ==================
 	 */
 
 	/*
@@ -173,13 +178,25 @@ public class ServerSocketManagedObjectSource extends
 				.getProperty(PROPERTY_MESSAGE_SIZE));
 		int maxConn = Integer.parseInt(mosContext.getProperty(
 				PROPERTY_MAXIMUM_CONNECTIONS, "63"));
+		String messageSegmentPoolStrategy = mosContext.getProperty(
+				PROPERTY_MESSAGE_SEGMENT_POOL_STRATEGY, "heap");
 
 		// Create prefix name
 		String prefix = "serversocket." + port + ".";
 
-		// Create the message segment pool
-		DirectBufferMessageSegmentPool messageSegmentPool = new DirectBufferMessageSegmentPool(
-				bufferSize);
+		// Create the message segment pool based on specified strategy
+		MessageSegmentPool messageSegmentPool;
+		if ("heap".equalsIgnoreCase(messageSegmentPoolStrategy)) {
+			messageSegmentPool = new HeapBufferMessageSegmentPool(bufferSize);
+		} else if ("direct".equalsIgnoreCase(messageSegmentPoolStrategy)) {
+			messageSegmentPool = new DirectBufferMessageSegmentPool(bufferSize);
+		} else if ("none".equalsIgnoreCase(messageSegmentPoolStrategy)) {
+			messageSegmentPool = new NotPoolMessageSegmentPool(bufferSize);
+		} else {
+			throw new Exception("Unknown "
+					+ MessageSegmentPool.class.getSimpleName() + " strategy '"
+					+ messageSegmentPoolStrategy + "'");
+		}
 
 		// Create the connection manager
 		ConnectionManager connectionManager = new ConnectionManager(this,

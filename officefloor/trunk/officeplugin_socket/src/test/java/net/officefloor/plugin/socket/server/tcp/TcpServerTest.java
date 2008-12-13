@@ -186,8 +186,18 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		long startTime = System.currentTimeMillis();
 		this.doParallelRequests(CALLERS, REQUESTS, true);
 		long endTime = System.currentTimeMillis();
+		long runTime = endTime - startTime;
+
+		// Output details of performance
+		int totalCalls = CALLERS * REQUESTS;
+		long effectiveTimePerCall = (long) ((runTime / (double) totalCalls) * 1000);
+		System.out.println("=====================");
 		System.out.println(CALLERS + " callers made " + REQUESTS
-				+ " requests in " + (endTime - startTime) + " milliseconds");
+				+ " requests (total " + totalCalls + ") in " + runTime
+				+ " milliseconds");
+		System.out.println("Effectively 1 call every " + effectiveTimePerCall
+				+ " microseconds");
+		System.out.println("=====================");
 	}
 
 	/**
