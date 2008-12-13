@@ -18,6 +18,7 @@ package net.officefloor.plugin.socket.server.http.api;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 /**
  * {@link HttpResponse} for the {@link ServerHttpConnection}.
@@ -75,11 +76,27 @@ public interface HttpResponse {
 	void addHeader(String name, String value);
 
 	/**
+	 * <p>
 	 * Obtains the {@link OutputStream} to write the body of the response.
+	 * <p>
+	 * The returned {@link OutputStream} works in conjunction with
+	 * {@link #appendToBody(ByteBuffer)}.
 	 * 
 	 * @return {@link OutputStream} to write the body of the response.
 	 */
 	OutputStream getBody();
+
+	/**
+	 * <p>
+	 * Appends the content to the body of the HTTP response.
+	 * <p>
+	 * This enables for optimisations for {@link java.nio.DirectByteBuffer}
+	 * instances.
+	 * 
+	 * @param content
+	 *            Content to appended to the HTTP response.
+	 */
+	void appendToBody(ByteBuffer content);
 
 	/**
 	 * Sends this HTTP response to the client.

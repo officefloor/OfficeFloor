@@ -16,14 +16,13 @@
  */
 package net.officefloor.plugin.socket.server.http.parse;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.easymock.AbstractMatcher;
 import org.easymock.ArgumentsMatcher;
 
 /**
@@ -174,20 +173,85 @@ public class UsAsciiUtil {
 	 * @return {@link ArgumentsMatcher}.
 	 */
 	public static ArgumentsMatcher createUsAsciiMatcher() {
-		return new AbstractMatcher() {
-			@Override
-			protected boolean argumentMatches(Object expected, Object actual) {
-				byte[] expectedMessage = (byte[]) expected;
-				byte[] actualMessage = (byte[]) actual;
-				return Arrays.equals(expectedMessage, actualMessage);
+		return new UsAsciiArgumentsMatcher();
+	}
+
+	/**
+	 * {@link ArgumentsMatcher} for US-ASCII comparison.
+	 */
+	private static class UsAsciiArgumentsMatcher implements ArgumentsMatcher {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.easymock.ArgumentsMatcher#matches(java.lang.Object[],
+		 * java.lang.Object[])
+		 */
+		@Override
+		public boolean matches(Object[] expected, Object[] actual) {
+
+			// First argument is always content
+			String expectedContent = UsAsciiUtil.convertToString(this
+					.getAsciiContent(expected[0]));
+
+			// Obtain actual data
+			byte[] actualData = this.getAsciiContent(actual[0]);
+
+			// Determine if subset of data
+			if (actual.length == 3) {
+				// Obtain subset from data
+				int offset = ((Integer) actual[1]).intValue();
+				int length = ((Integer) actual[2]).intValue();
+				byte[] data = new byte[length];
+				System.arraycopy(actualData, offset, data, 0, length);
+				actualData = data;
 			}
 
-			@Override
-			protected String argumentToString(Object argument) {
-				return (argument == null ? "" : UsAsciiUtil
-						.convertToString((byte[]) argument));
+			// Obtain the actual content
+			String actualContent = UsAsciiUtil.convertToString(actualData);
+
+			// Return whether matches
+			return expectedContent.endsWith(actualContent);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.easymock.ArgumentsMatcher#toString(java.lang.Object[])
+		 */
+		@Override
+		public String toString(Object[] arguments) {
+			return UsAsciiUtil.convertToString(this
+					.getAsciiContent(arguments[0]));
+		}
+
+		/**
+		 * Obtains the US-ASCII content from the argument.
+		 * 
+		 * @param argument
+		 *            Argument containing US-ASCII content.
+		 * @return US-ASCII content.
+		 */
+		private byte[] getAsciiContent(Object argument) {
+			if (argument == null) {
+				return new byte[0];
+			} else if (argument instanceof byte[]) {
+				return (byte[]) argument;
+			} else if (argument instanceof ByteBuffer) {
+				ByteBuffer buffer = (ByteBuffer) argument;
+				if (buffer.position() > 0) {
+					buffer = buffer.duplicate();
+					buffer.flip();
+				}
+				byte[] data = new byte[buffer.limit()];
+				buffer.get(data, 0, data.length);
+				return data;
+			} else {
+				TestCase.fail("Unknown argument type: "
+						+ argument.getClass().getName());
+				return null;
 			}
-		};
+		}
 	}
 
 	/**

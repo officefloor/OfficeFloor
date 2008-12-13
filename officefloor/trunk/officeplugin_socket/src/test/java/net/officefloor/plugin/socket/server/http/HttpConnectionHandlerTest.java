@@ -16,6 +16,8 @@
  */
 package net.officefloor.plugin.socket.server.http;
 
+import java.nio.ByteBuffer;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.StubMatcher;
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
@@ -84,9 +86,12 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
+		// Source with specified timeout
+		HttpServerSocketManagedObjectSource source = new HttpServerSocketManagedObjectSource();
+		source.connectionTimeout = CONNECTION_TIMEOUT;
+
 		// Create the handler to test
-		this.handler = new HttpConnectionHandler(this.connection, 1024,
-				1024 * 1024, CONNECTION_TIMEOUT);
+		this.handler = new HttpConnectionHandler(source, this.connection);
 	}
 
 	/**
@@ -142,20 +147,24 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 		final byte[] request = UsAsciiUtil.convertToHttp(invalidRequestText);
 
 		// Generate details of invalid response message
-		String badRequestResponseText = null;
+		byte[] badRequestResponseHeader = null;
+		byte[] badRequestResponseDetail = null;
 		try {
 			new HttpRequestParser(1024, 1024).parseMoreContent(request, 0,
 					request.length);
 			fail("Test invalid as should not be able to parse request");
 		} catch (ParseException ex) {
+			// Obtain detail of bad request
+			badRequestResponseDetail = UsAsciiUtil.convertToUsAscii(ex
+					.getMessage());
+
+			// Provide header of bad request response
 			int status = ex.getHttpStatus();
 			String statusMsg = HttpStatus.getStatusMessage(status);
-			String reason = ex.getMessage();
-			badRequestResponseText = "HTTP/1.0 " + status + " " + statusMsg
-					+ "\nContent-Length: " + reason.length() + "\n\n" + reason;
+			badRequestResponseHeader = UsAsciiUtil.convertToHttp("HTTP/1.0 "
+					+ status + " " + statusMsg + "\nContent-Length: "
+					+ badRequestResponseDetail.length + "\n\n");
 		}
-		final byte[] badRequestResponse = UsAsciiUtil
-				.convertToHttp(badRequestResponseText);
 
 		// Record actions
 		this.recordReturn(this.readContext, this.readContext.getTime(), System
@@ -174,9 +183,13 @@ public class HttpConnectionHandlerTest extends OfficeFrameTestCase {
 				});
 		this.recordReturn(this.connection, this.connection
 				.createWriteMessage(null), this.writeMessage);
-		this.writeMessage.append(badRequestResponse);
+		this.writeMessage.append(badRequestResponseHeader, 0,
+				badRequestResponseHeader.length);
 		this.control(this.writeMessage).setMatcher(
 				UsAsciiUtil.createUsAsciiMatcher());
+		this.recordReturn(this.writeMessage, this.writeMessage
+				.appendSegment(ByteBuffer.wrap(badRequestResponseDetail)),
+				null, UsAsciiUtil.createUsAsciiMatcher());
 		this.writeMessage.write();
 		this.readContext.setReadComplete(true);
 

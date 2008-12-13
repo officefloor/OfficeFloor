@@ -17,12 +17,14 @@
 package net.officefloor.plugin.socket.server.http;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 import net.officefloor.plugin.socket.server.http.parse.HttpRequestParser;
 import net.officefloor.plugin.socket.server.http.parse.ParseException;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
 import net.officefloor.plugin.socket.server.spi.IdleContext;
+import net.officefloor.plugin.socket.server.spi.MessageSegment;
 import net.officefloor.plugin.socket.server.spi.ReadContext;
 import net.officefloor.plugin.socket.server.spi.WriteContext;
 import net.officefloor.plugin.socket.server.spi.WriteMessage;
@@ -35,25 +37,14 @@ import net.officefloor.plugin.socket.server.spi.WriteMessage;
 public class HttpConnectionHandler implements ConnectionHandler {
 
 	/**
+	 * {@link HttpServerSocketManagedObjectSource}.
+	 */
+	private final HttpServerSocketManagedObjectSource source;
+
+	/**
 	 * {@link Connection}.
 	 */
 	private final Connection connection;
-
-	/**
-	 * Initial length of the buffer to contain the body on receiving a HTTP
-	 * request.
-	 */
-	private final int initialBodyBufferLength;
-
-	/**
-	 * Maximum body length for receiving a HTTP request.
-	 */
-	private final int maxBodyLength;
-
-	/**
-	 * Timeout of the {@link Connection}.
-	 */
-	private final long timeout;
 
 	/**
 	 * Time of last interaction. Will be set on the first read.
@@ -63,22 +54,15 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	/**
 	 * Initiate.
 	 * 
+	 * @param source
+	 *            {@link HttpServerSocketManagedObjectSource}.
 	 * @param connection
 	 *            {@link Connection}.
-	 * @param initialBodyBufferLength
-	 *            Initial length of the buffer to contain the body on receiving
-	 *            a HTTP request.
-	 * @param maxBodyLength
-	 *            Maximum body length for receiving a HTTP request.
-	 * @param timeout
-	 *            Timeout of the {@link Connection} in milliseconds.
 	 */
-	public HttpConnectionHandler(Connection connection,
-			int initialBodyBufferLength, int maxBodyLength, long timeout) {
+	public HttpConnectionHandler(HttpServerSocketManagedObjectSource source,
+			Connection connection) {
+		this.source = source;
 		this.connection = connection;
-		this.initialBodyBufferLength = initialBodyBufferLength;
-		this.maxBodyLength = maxBodyLength;
-		this.timeout = timeout;
 	}
 
 	/**
@@ -107,11 +91,20 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 *             If failure of {@link Connection} (eg closed).
 	 */
 	public void sendResponse(HttpResponseImpl response) throws IOException {
-
-		// Create the message to write the response
+		// Create the message, loading response content and writing to client
 		WriteMessage message = this.connection.createWriteMessage(null);
-		message.append(response.getContent());
+		response.loadContent(message);
 		message.write();
+	}
+
+	/**
+	 * Obtains the response buffer length for each {@link MessageSegment} being
+	 * appended to by the {@link OutputStream} to populate the body.
+	 * 
+	 * @return Response buffer length.
+	 */
+	protected int getResponseBufferLength() {
+		return this.source.getResponseBufferLength();
 	}
 
 	/*
@@ -146,8 +139,9 @@ public class HttpConnectionHandler implements ConnectionHandler {
 
 			// Ensure a parser is available
 			if (this.httpRequestParser == null) {
-				this.httpRequestParser = new HttpRequestParser(
-						this.initialBodyBufferLength, this.maxBodyLength);
+				this.httpRequestParser = new HttpRequestParser(this.source
+						.getInitialRequestBodyBufferLength(), this.source
+						.getMaximumRequestBodyLength());
 			}
 
 			// Read in the content
@@ -215,7 +209,7 @@ public class HttpConnectionHandler implements ConnectionHandler {
 		long timeIdle = currentTime - this.lastInteractionTime;
 
 		// Close connection if idle too long
-		if (timeIdle >= this.timeout) {
+		if (timeIdle >= this.source.getConnectionTimeout()) {
 			context.setCloseConnection(true);
 		}
 	}

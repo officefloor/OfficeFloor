@@ -16,6 +16,8 @@
  */
 package net.officefloor.plugin.socket.server.http;
 
+import java.io.OutputStream;
+
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
@@ -26,9 +28,11 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.plugin.impl.socket.server.ServerSocketHandlerEnum;
 import net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
+import net.officefloor.plugin.socket.server.spi.MessageSegment;
 import net.officefloor.plugin.socket.server.spi.Server;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
 
@@ -42,22 +46,68 @@ public class HttpServerSocketManagedObjectSource extends
 		ServerSocketHandler<Indexed> {
 
 	/**
-	 * Initial size in bytes of the buffer to contain the body's request.
+	 * Initial size in bytes of the buffer to contain the {@link HttpRequest}
+	 * body.
 	 */
 	// TODO provide via property
-	private int initialRequestBodyBufferLength = 1024;
+	protected int initialRequestBodyBufferLength = 1024;
 
 	/**
-	 * Maximum length of the request's body.
+	 * Obtains the initial size in bytes of the buffer to contain the
+	 * {@link HttpRequest} body.
+	 * 
+	 * @return Initial buffer size.
 	 */
-	// TODO provide via property
-	private int maxRequestBodyLength = (1024 * 1024);
+	protected int getInitialRequestBodyBufferLength() {
+		return this.initialRequestBodyBufferLength;
+	}
 
 	/**
-	 * Timeout of the connection in milliseconds.
+	 * Maximum length in bytes of the {@link HttpRequest} body.
 	 */
 	// TODO provide via property
-	private long connectionTimeout = 300 * 1000;
+	protected int maximumRequestBodyLength = (1024 * 1024);
+
+	/**
+	 * Obtains the maximum length in bytes of the {@link HttpRequest} body.
+	 * 
+	 * @return Maximum length.
+	 */
+	protected int getMaximumRequestBodyLength() {
+		return this.maximumRequestBodyLength;
+	}
+
+	/**
+	 * Response buffer length for each {@link MessageSegment} being appended to
+	 * by the {@link OutputStream} to populate the body.
+	 */
+	// TODO provide via property
+	protected int responseBufferLength = 1024;
+
+	/**
+	 * Obtains the response buffer length for each {@link MessageSegment} being
+	 * appended to by the {@link OutputStream} to populate the body.
+	 * 
+	 * @return Response buffer length.
+	 */
+	protected int getResponseBufferLength() {
+		return this.responseBufferLength;
+	}
+
+	/**
+	 * Timeout of the {@link Connection} in milliseconds.
+	 */
+	// TODO provide via property
+	protected long connectionTimeout = 5 * 60 * 1000;
+
+	/**
+	 * Returns the {@link Connection} timeout in milliseconds.
+	 * 
+	 * @return {@link Connection} timeout.
+	 */
+	protected long getConnectionTimeout() {
+		return this.connectionTimeout;
+	}
 
 	/*
 	 * ================= ServerSocketManagedObjectSource ==================
@@ -148,9 +198,7 @@ public class HttpServerSocketManagedObjectSource extends
 	 */
 	@Override
 	public ConnectionHandler createConnectionHandler(Connection connection) {
-		return new HttpConnectionHandler(connection,
-				this.initialRequestBodyBufferLength, this.maxRequestBodyLength,
-				this.connectionTimeout);
+		return new HttpConnectionHandler(this, connection);
 	}
 
 }
