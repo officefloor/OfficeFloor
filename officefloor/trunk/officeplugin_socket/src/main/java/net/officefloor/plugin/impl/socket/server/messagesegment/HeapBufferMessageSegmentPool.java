@@ -21,11 +21,11 @@ import java.nio.ByteBuffer;
 import net.officefloor.plugin.socket.server.spi.MessageSegment;
 
 /**
- * Pool of {@link java.nio.DirectByteBuffer} {@link MessageSegment} instances.
+ * Pool of {@link java.nio.HeapByteBuffer} {@link MessageSegment} instances.
  * 
  * @author Daniel
  */
-public class DirectBufferMessageSegmentPool extends
+public class HeapBufferMessageSegmentPool extends
 		AbstractBufferMessageSegmentPool {
 
 	/**
@@ -34,7 +34,7 @@ public class DirectBufferMessageSegmentPool extends
 	 * @param bufferSize
 	 *            Size of the {@link ByteBuffer} instances being pooled.
 	 */
-	public DirectBufferMessageSegmentPool(int bufferSize) {
+	public HeapBufferMessageSegmentPool(int bufferSize) {
 		super(bufferSize);
 	}
 
@@ -46,7 +46,7 @@ public class DirectBufferMessageSegmentPool extends
 	 */
 	@Override
 	protected ByteBuffer createByteBuffer(int bufferSize) {
-		return ByteBuffer.allocateDirect(bufferSize);
+		return ByteBuffer.allocate(bufferSize);
 	}
 
 }
