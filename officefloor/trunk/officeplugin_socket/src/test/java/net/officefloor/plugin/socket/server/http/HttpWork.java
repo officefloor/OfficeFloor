@@ -43,7 +43,7 @@ public class HttpWork {
 		// Detail request being serviced
 		System.out.println(this.getClass().getSimpleName()
 				+ " serving request: " + request.getMethod() + " "
-				+ request.getPath());
+				+ request.getPath() + " " + request.getVersion());
 
 		// Obtain response for the request
 		HttpResponse response = connection.getHttpResponse();
@@ -51,9 +51,6 @@ public class HttpWork {
 		// Write the body of the response
 		String message = "Hello World";
 		new OutputStreamWriter(response.getBody()).append(message).flush();
-
-		// Specify length of the body
-		response.addHeader("Content-Length", String.valueOf(message.length()));
 
 		// Send response
 		response.send();

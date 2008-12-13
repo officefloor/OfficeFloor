@@ -281,7 +281,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		// Open socket to Office
 		Socket socket = new Socket();
 		socket.connect(new InetSocketAddress(InetAddress.getLocalHost(), PORT),
-				1000);
+				5000);
 
 		// Obtain the streams
 		OutputStream outputStream = socket.getOutputStream();

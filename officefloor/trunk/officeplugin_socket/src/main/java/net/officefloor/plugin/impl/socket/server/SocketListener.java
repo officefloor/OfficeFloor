@@ -545,7 +545,9 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 
 				// Setup buffer to write contents
 				ByteBuffer buffer = messageSegment.getBuffer().duplicate();
-				buffer.flip();
+				if (buffer.position() > 0) {
+					buffer.flip();
+				}
 				if (offset > 0) {
 					// Only move position if an offset (as already 0)
 					buffer.position(offset);

@@ -1,0 +1,14 @@
+<html>
+<body>
+<table>
+    <tr>
+        <td>Name</td>
+    </tr>
+    <!-- [List] -->
+    <tr>
+        <td>${name}</td>
+    </tr>
+    <!-- [Tail] -->
+</table>
+</body>
+</html>

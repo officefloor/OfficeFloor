@@ -22,12 +22,14 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
+import net.officefloor.plugin.socket.server.spi.WriteMessage;
 
 /**
  * {@link HttpResponse}.
@@ -45,6 +47,11 @@ public class HttpResponseImpl implements HttpResponse {
 	 * HTTP end of line sequence.
 	 */
 	public static final String EOL = "\r\n";
+
+	/**
+	 * Name of the header Content-Length.
+	 */
+	public static final String HEADER_NAME_CONTENT_LENGTH = "Content-Length";
 
 	/**
 	 * {@link HttpConnectionHandler}.
@@ -72,9 +79,25 @@ public class HttpResponseImpl implements HttpResponse {
 	private final List<Header> headers = new LinkedList<Header>();
 
 	/**
-	 * Body.
+	 * {@link OutputStream} to write the body.
 	 */
-	private final ByteArrayOutputStream body = new ByteArrayOutputStream();
+	private final HttpOutputStream bodyOutputStream = new HttpOutputStream();
+
+	/**
+	 * Listing of {@link ByteBuffer} instances that comprise the body.
+	 */
+	private final List<ByteBuffer> body = new LinkedList<ByteBuffer>();
+
+	/**
+	 * Current {@link ByteBuffer} to fill out for the body.
+	 */
+	private ByteBuffer currentBodyBuffer = null;
+
+	/**
+	 * Flag indicating if this {@link HttpResponse} has been triggered to be
+	 * sent.
+	 */
+	private boolean isSent = false;
 
 	/**
 	 * Failure.
@@ -120,7 +143,8 @@ public class HttpResponseImpl implements HttpResponse {
 
 		// Only write the body if have text
 		if ((body != null) && (body.length() > 0)) {
-			Writer writer = new OutputStreamWriter(this.body, US_ASCII);
+			Writer writer = new OutputStreamWriter(this.bodyOutputStream,
+					US_ASCII);
 			writer.append(body);
 			writer.flush();
 		}
@@ -144,13 +168,16 @@ public class HttpResponseImpl implements HttpResponse {
 	}
 
 	/**
-	 * Obtains the content of this HTTP response to send to the client.
+	 * Loads the content of this HTTP response to the {@link WriteMessage} to
+	 * send to the client.
 	 * 
-	 * @return Content of this HTTP response to send to the client.
+	 * @param message
+	 *            {@link WriteMessage} to be loaded with content.
 	 * @throws IOException
-	 *             If fails to obtain the content.
+	 *             If fails to load the content.
 	 */
-	public synchronized byte[] getContent() throws IOException {
+	public synchronized void loadContent(final WriteMessage message)
+			throws IOException {
 
 		// Determine if failed to handle request
 		if (this.failure != null) {
@@ -163,27 +190,52 @@ public class HttpResponseImpl implements HttpResponse {
 			this.statusMessage = HttpStatus.getStatusMessage(this.status);
 
 			// Write the exception as the body
-			this.body.reset();
-			this.failure.printStackTrace(new PrintStream(this.body));
+			this.body.clear();
+			ByteArrayOutputStream stackTrace = new ByteArrayOutputStream();
+			this.failure.printStackTrace(new PrintStream(stackTrace));
+			this.body.add(ByteBuffer.wrap(stackTrace.toByteArray()));
 		}
 
 		// Provide the content length
-		int contentLength = this.body.size();
-		this.headers.add(new Header("Content-Length", String
+		int contentLength = 0;
+		for (ByteBuffer buffer : this.body) {
+			if (buffer.position() > 0) {
+				// Make the buffer ready for writing
+				buffer.flip();
+			}
+
+			// Increment the content by amount in buffer
+			contentLength += buffer.limit();
+		}
+		this.headers.add(new Header(HEADER_NAME_CONTENT_LENGTH, String
 				.valueOf(contentLength)));
 
 		// Ensure appropriate successful status
-		if ((contentLength == 0) && (this.status == 200)) {
-			this.setStatus(204);
+		if ((contentLength == 0) && (this.status == HttpStatus._200)) {
+			this.setStatus(HttpStatus._204);
 		}
 
-		// Create the buffer for the response
-		ByteArrayOutputStream content = new ByteArrayOutputStream(this.body
-				.size()
-				+ (this.headers.size() * 40));
+		// Create output stream to write content
+		OutputStream outputStream = new OutputStream() {
+
+			@Override
+			public void write(byte[] b) throws IOException {
+				message.append(b);
+			}
+
+			@Override
+			public void write(byte[] b, int off, int len) throws IOException {
+				message.append(b, off, len);
+			}
+
+			@Override
+			public void write(int b) throws IOException {
+				throw new IOException("Only bulk loading");
+			}
+		};
 
 		// Provide US-ASCII translation of status line and response
-		Writer writer = new OutputStreamWriter(content, US_ASCII);
+		Writer writer = new OutputStreamWriter(outputStream, US_ASCII);
 
 		// Write the status line
 		writer.append(this.version);
@@ -206,10 +258,12 @@ public class HttpResponseImpl implements HttpResponse {
 		writer.flush();
 
 		// Write the body
-		this.body.writeTo(content);
+		for (ByteBuffer buffer : this.body) {
+			message.appendSegment(buffer);
+		}
 
-		// Return the content
-		return content.toByteArray();
+		// Body has been written
+		this.body.clear();
 	}
 
 	/*
@@ -262,6 +316,13 @@ public class HttpResponseImpl implements HttpResponse {
 	 */
 	@Override
 	public synchronized void addHeader(String name, String value) {
+
+		// Ignore specifying content length
+		if (HEADER_NAME_CONTENT_LENGTH.equalsIgnoreCase(name)) {
+			return;
+		}
+
+		// Add the header
 		this.headers.add(new Header(name, value));
 	}
 
@@ -272,7 +333,45 @@ public class HttpResponseImpl implements HttpResponse {
 	 */
 	@Override
 	public synchronized OutputStream getBody() {
-		return this.body;
+		return this.bodyOutputStream;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#appendToBody
+	 * (java.nio.ByteBuffer)
+	 */
+	@Override
+	public synchronized void appendToBody(ByteBuffer content) {
+		// Append the content
+		this.body.add(content);
+
+		// No longer a current body buffer
+		this.currentBodyBuffer = null;
+	}
+
+	/**
+	 * <p>
+	 * Obtains the current {@link ByteBuffer} to append body.
+	 * <p>
+	 * This works in conjunction with appending {@link ByteBuffer} instances.
+	 * 
+	 * @return Current {@link ByteBuffer}.
+	 */
+	private ByteBuffer getCurrentBuffer() {
+
+		// Ensure have current buffer that is not full
+		if ((this.currentBodyBuffer == null)
+				|| (this.currentBodyBuffer.remaining() == 0)) {
+			this.currentBodyBuffer = ByteBuffer.allocate(this.connectionHandler
+					.getResponseBufferLength());
+			this.body.add(HttpResponseImpl.this.currentBodyBuffer);
+		}
+
+		// Return the current buffer to append data
+		return HttpResponseImpl.this.currentBodyBuffer;
 	}
 
 	/*
@@ -282,8 +381,15 @@ public class HttpResponseImpl implements HttpResponse {
 	 */
 	@Override
 	public synchronized void send() throws IOException {
+
+		// Do not send if already triggered to be sent
+		if (this.isSent) {
+			return;
+		}
+
 		// Send the response
 		this.connectionHandler.sendResponse(this);
+		this.isSent = true;
 	}
 
 	/**
@@ -315,4 +421,74 @@ public class HttpResponseImpl implements HttpResponse {
 		}
 	}
 
+	/**
+	 * {@link OutputStream} for writing HTTP body.
+	 */
+	private class HttpOutputStream extends OutputStream {
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.io.OutputStream#write(byte[], int, int)
+		 */
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			synchronized (HttpResponseImpl.this) {
+
+				// Obtain the current buffer
+				ByteBuffer buffer = HttpResponseImpl.this.getCurrentBuffer();
+
+				// Determine the length of bytes able to write
+				int bufferLen = buffer.remaining() - 1; // as zero start
+				int writeLen = Math.min(len, bufferLen);
+
+				// Append the content
+				buffer.put(b, off, writeLen);
+
+				// Adjust length remaining to write
+				len = len - writeLen;
+
+				// Determine if further data to write
+				if (len == 0) {
+					return;
+				}
+
+				// Continue writing so adjust offset for next write
+				off = off + writeLen;
+
+				// Handle based on remaining size
+				if (len < HttpResponseImpl.this.connectionHandler
+						.getResponseBufferLength()) {
+					// Write to new buffer (as only partially fills it)
+					buffer = HttpResponseImpl.this.getCurrentBuffer();
+					buffer.put(b, off, len);
+
+				} else {
+					// Large amount of data
+
+					// Create copy in case writing from buffer
+					byte[] data = new byte[len];
+					System.arraycopy(b, off, data, 0, len);
+					buffer = ByteBuffer.wrap(data);
+
+					// Add buffer and flag to start on a new buffer
+					HttpResponseImpl.this.body.add(buffer);
+					HttpResponseImpl.this.currentBodyBuffer = null;
+				}
+			}
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see java.io.OutputStream#write(int)
+		 */
+		@Override
+		public void write(int b) throws IOException {
+			synchronized (HttpResponseImpl.this) {
+				// Append to current buffer
+				HttpResponseImpl.this.getCurrentBuffer().put((byte) b);
+			}
+		}
+	}
 }
