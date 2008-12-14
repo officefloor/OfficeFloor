@@ -16,6 +16,10 @@
  */
 package net.officefloor.work.http.html.template.parse;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,6 +29,41 @@ import java.util.List;
  * @author Daniel
  */
 public class Template {
+
+	/**
+	 * Parses the configuration into a {@link Template}.
+	 * 
+	 * @param inputStream
+	 *            {@link InputStream} to configuration.
+	 * @return {@link Template}.
+	 * @throws IOException
+	 *             If fails to read in {@link Template}.
+	 */
+	public static Template parse(InputStream inputStream) throws IOException {
+		return parse(new InputStreamReader(inputStream));
+	}
+
+	/**
+	 * Parses the configuration into a {@link Template}.
+	 * 
+	 * @param reader
+	 *            {@link Reader} to configuration.
+	 * @return {@link Template}.
+	 * @throws IOException
+	 *             If fails to read in {@link Template}.
+	 */
+	public static Template parse(Reader reader) throws IOException {
+
+		// Read in the contents
+		StringBuilder contents = new StringBuilder();
+		for (int value = reader.read(); value != -1; value = reader.read()) {
+			char character = (char) value;
+			contents.append(character);
+		}
+
+		// Parse the contents
+		return parse(contents.toString());
+	}
 
 	/**
 	 * Parses the configuration into a {@link Template}.
