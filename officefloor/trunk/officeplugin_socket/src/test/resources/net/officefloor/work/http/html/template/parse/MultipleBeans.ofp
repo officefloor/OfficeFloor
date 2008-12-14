@@ -2,7 +2,7 @@
 <body>
 <!-- [one] -->
 Name for bean one: ${name}
-<br>
+<br />
 <!-- [two] -->
 Name for bean two: ${name}
 <br />

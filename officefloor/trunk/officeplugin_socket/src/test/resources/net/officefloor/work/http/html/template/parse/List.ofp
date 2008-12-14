@@ -3,10 +3,12 @@
 <table>
     <tr>
         <td>Name</td>
+        <td>Description</td>
     </tr>
     <!-- [List] -->
     <tr>
         <td>${name}</td>
+        <td>${description}</td>
     </tr>
     <!-- [Tail] -->
 </table>

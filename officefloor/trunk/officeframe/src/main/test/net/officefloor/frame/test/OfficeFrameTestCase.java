@@ -192,6 +192,36 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Asserts the input texts match taking into account platform differences.
+	 * 
+	 * @param message
+	 *            Message.
+	 * @param expected
+	 *            Raw expected text.
+	 * @param actual
+	 *            Raw actual text.
+	 */
+	public static void assertTextEquals(String message, String expected,
+			String actual) {
+		String expectedText = createPlatformIndependentText(expected);
+		String actualText = createPlatformIndependentText(actual);
+		assertEquals(message, expectedText, actualText);
+	}
+
+	/**
+	 * Creates the platform independent text for comparing.
+	 * 
+	 * @param text
+	 *            Raw text.
+	 * @return Platform independent text.
+	 */
+	public static String createPlatformIndependentText(String rawText) {
+		rawText = rawText.replace("\r\n", "\n");
+		rawText = rawText.replace("\r", "\n");
+		return rawText;
+	}
+
+	/**
 	 * Assets that the input graph is as expected.
 	 * 
 	 * @param O
