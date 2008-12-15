@@ -32,6 +32,7 @@ import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
 import net.officefloor.work.PropertyList;
 import net.officefloor.work.WorkLoaderUtil;
 import net.officefloor.work.http.HttpException;
+import net.officefloor.work.http.HttpResponseSendTask;
 import net.officefloor.work.http.MockHttpResponse;
 
 /**
@@ -134,6 +135,13 @@ public class HttpHtmlTemplateWorkLoaderTest extends OfficeFrameTestCase {
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
 
+		// Record actions for 'SendHttpResponse' task
+		this
+				.recordReturn(taskContext, taskContext.getObject(0),
+						httpConnection);
+		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
+				httpResponse);
+
 		// Replay mocks
 		this.replayMockObjects();
 
@@ -156,15 +164,18 @@ public class HttpHtmlTemplateWorkLoaderTest extends OfficeFrameTestCase {
 				.createTask(null);
 		tail.doTask(taskContext);
 
+		// Send the HTTP response
+		TaskModel<?, ?> sendTask = work.getTasks().get(3);
+		Task send = sendTask.getTaskFactoryManufacturer().createTaskFactory()
+				.createTask(null);
+		send.doTask(taskContext);
+
 		// Verify mocks
 		this.verifyMockObjects();
 
 		// Obtain the output template
 		String actualOutput = UsAsciiUtil.convertToString(httpResponse
 				.getBodyContent());
-
-		// TODO remove
-		System.out.println(actualOutput);
 
 		// Expected output (removing last end of line appended)
 		String expectedOutput = this.getFileContents(this.findFile(this
@@ -174,6 +185,9 @@ public class HttpHtmlTemplateWorkLoaderTest extends OfficeFrameTestCase {
 
 		// Validate output
 		assertTextEquals("Incorrect output", expectedOutput, actualOutput);
+
+		// Ensure send
+		assertTrue("HTTP response should be sent", httpResponse.isSent());
 	}
 
 	/**
@@ -232,6 +246,14 @@ public class HttpHtmlTemplateWorkLoaderTest extends OfficeFrameTestCase {
 		tailTask.addEscalation(ioEscalation);
 		tailTask.addEscalation(httpEscalation);
 		work.addTask(tailTask);
+
+		// Send task
+		TaskModel<Indexed, None> sendTask = new TaskModel<Indexed, None>();
+		sendTask.setTaskName("SendHttpResponse");
+		sendTask.setTaskFactoryManufacturer(new HttpResponseSendTask());
+		sendTask.addObject(httpConnection);
+		sendTask.addEscalation(ioEscalation);
+		work.addTask(sendTask);
 
 		// Return the expected work
 		return work;

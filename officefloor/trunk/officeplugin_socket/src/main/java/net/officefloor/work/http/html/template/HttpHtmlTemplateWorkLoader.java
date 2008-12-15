@@ -34,6 +34,7 @@ import net.officefloor.work.AbstractWorkLoader;
 import net.officefloor.work.WorkLoader;
 import net.officefloor.work.WorkLoaderContext;
 import net.officefloor.work.http.HttpException;
+import net.officefloor.work.http.HttpResponseSendTask;
 import net.officefloor.work.http.html.template.parse.ReferenceTemplateSectionContent;
 import net.officefloor.work.http.html.template.parse.StaticTemplateSectionContent;
 import net.officefloor.work.http.html.template.parse.Template;
@@ -194,6 +195,9 @@ public class HttpHtmlTemplateWorkLoader extends AbstractWorkLoader {
 			// Add the task
 			tasks.add(task);
 		}
+
+		// Add the send HTTP response task
+		tasks.add(HttpResponseSendTask.createTaskModel());
 
 		// Create the work
 		WorkModel<HttpHtmlTemplateWork> work = new WorkModel<HttpHtmlTemplateWork>(
