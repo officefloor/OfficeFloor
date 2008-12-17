@@ -112,7 +112,7 @@ public class HttpHtmlTemplateTask implements TaskFactoryManufacturer,
 		Object bean = null;
 		Writer writer = null;
 		if (this.isRequireBean) {
-			bean = context.getObject(1);
+			bean = context.getParameter();
 			writer = new OutputStreamWriter(response.getBody());
 		}
 
