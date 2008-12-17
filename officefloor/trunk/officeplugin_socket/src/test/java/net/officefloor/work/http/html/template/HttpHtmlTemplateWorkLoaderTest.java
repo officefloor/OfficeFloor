@@ -110,7 +110,9 @@ public class HttpHtmlTemplateWorkLoaderTest extends OfficeFrameTestCase {
 						httpConnection);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
-		this.recordReturn(taskContext, taskContext.getObject(1), templateBean);
+		this
+				.recordReturn(taskContext, taskContext.getParameter(),
+						templateBean);
 
 		// Record actions for 'List' task with table row bean
 		this
@@ -118,7 +120,9 @@ public class HttpHtmlTemplateWorkLoaderTest extends OfficeFrameTestCase {
 						httpConnection);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
-		this.recordReturn(taskContext, taskContext.getObject(1), tableRowBean);
+		this
+				.recordReturn(taskContext, taskContext.getParameter(),
+						tableRowBean);
 
 		// Record actions for 'List' task with child row bean
 		this
@@ -126,7 +130,9 @@ public class HttpHtmlTemplateWorkLoaderTest extends OfficeFrameTestCase {
 						httpConnection);
 		this.recordReturn(httpConnection, httpConnection.getHttpResponse(),
 				httpResponse);
-		this.recordReturn(taskContext, taskContext.getObject(1), childRowBean);
+		this
+				.recordReturn(taskContext, taskContext.getParameter(),
+						childRowBean);
 
 		// Record actions for 'Tail' task
 		this
