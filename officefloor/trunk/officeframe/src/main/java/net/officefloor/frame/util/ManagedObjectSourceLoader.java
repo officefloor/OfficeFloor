@@ -157,12 +157,16 @@ public class ManagedObjectSourceLoader {
 	}
 
 	/**
-	 * Loads and returns the {@link ManagedObjectSource}.
+	 * Instantiates and initialises the {@link ManagedObjectSource}.
 	 * 
-	 * @return Loaded {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClass
+	 *            Class of the {@link ManagedObjectSource}.
+	 * @return Initialised {@link ManagedObjectSource}.
+	 * @throws Exception
+	 *             If fails to initialise {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> MS loadManagedObjectSource(
+	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> MS initManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Create a new instance of the managed object source
@@ -185,8 +189,40 @@ public class ManagedObjectSourceLoader {
 				officeFrame);
 		moSource.init(sourceContext);
 
+		// Return the initialised managed object source
+		return moSource;
+	}
+
+	/**
+	 * Starts the {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource}.
+	 * @throws Exception
+	 *             If fails to start the {@link ManagedObjectSource}.
+	 */
+	@SuppressWarnings("unchecked")
+	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> void startManagedObjectSource(
+			MS managedObjectSource) throws Exception {
 		// Start the managed object source
-		moSource.start(new LoadExecuteContext());
+		managedObjectSource.start(new LoadExecuteContext());
+	}
+
+	/**
+	 * Loads (init and start) the {@link ManagedObjectSource}.
+	 * 
+	 * @return Loaded {@link ManagedObjectSource}.
+	 * @throws Exception
+	 *             If fails to init and start the {@link ManagedObjectSource}.
+	 */
+	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> MS loadManagedObjectSource(
+			Class<MS> managedObjectSourceClass) throws Exception {
+
+		// Initialise the managed object source
+		MS moSource = this.initManagedObjectSource(managedObjectSourceClass);
+
+		// Start the managed object source
+		this.startManagedObjectSource(moSource);
 
 		// Return the loaded managed object source
 		return moSource;
@@ -219,7 +255,8 @@ public class ManagedObjectSourceLoader {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext#getHandler(H)
+		 * @seenet.officefloor.frame.spi.managedobject.source.
+		 * ManagedObjectExecuteContext#getHandler(H)
 		 */
 		public Handler<?> getHandler(H key) {
 			// TODO Auto-generated method stub
