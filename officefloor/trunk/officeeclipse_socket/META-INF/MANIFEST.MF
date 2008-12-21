@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Office Floor Socket
+Bundle-Name: Office Floor Socket eclipse plugin
 Bundle-SymbolicName: net.officefloor.eclipse.socket;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Vendor: Daniel Sagenschneider

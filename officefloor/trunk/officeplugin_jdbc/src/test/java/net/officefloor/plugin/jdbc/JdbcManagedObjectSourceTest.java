@@ -17,24 +17,19 @@
 package net.officefloor.plugin.jdbc;
 
 import java.sql.Connection;
+import java.sql.Driver;
+import java.util.LinkedList;
+import java.util.List;
 
-import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
-import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.pool.PassiveManagedObjectPool;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
-import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
  * Tests the {@link JdbcManagedObjectSource}.
@@ -45,128 +40,115 @@ public class JdbcManagedObjectSourceTest extends
 		AbstractOfficeConstructTestCase {
 
 	/**
+	 * {@link PooledConnection}.
+	 */
+	private PooledConnection pooledConnection = this
+			.createMock(PooledConnection.class);
+
+	/**
 	 * {@link Connection}.
 	 */
-	protected volatile Connection connection;
+	private Connection connection = this.createMock(Connection.class);
 
 	/**
-	 * {@link Connection} reused.
+	 * Ensures able to obtain the {@link Connection}.
 	 */
-	protected volatile Connection reusedConnection;
+	public void testLoadAndUseJdbc() throws Exception {
 
-	/**
-	 * Ensures interacts with the database.
-	 */
-	public void testDbInteration() throws Exception {
+		// Specify the pooled connection
+		MockConnectionPoolDataSource.setPooledConnection(this.pooledConnection);
 
 		// Configure the JDBC managed object
 		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("JDBC",
-				JdbcManagedObjectSource.class, "TEST");
-
-		// Bind the Mock Data Source Factory
-		ConnectionPoolDataSource dataSource = this
-				.createMock(ConnectionPoolDataSource.class);
-		MockDataSourceFactory.bind(dataSource, moBuilder);
-
-		// Pool the JDBC managed object instances
+				JdbcManagedObjectSource.class, "OFFICE");
 		moBuilder.setManagedObjectPool(new PassiveManagedObjectPool(1));
+		moBuilder
+				.addProperty(
+						JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY,
+						MockConnectionPoolDataSource.class.getName());
+		moBuilder.addProperty("driver", Driver.class.getName());
+		moBuilder.addProperty("url", "server:10000");
+		moBuilder.addProperty("serverName", "server");
+		moBuilder.addProperty("port", "10000");
+		moBuilder.addProperty("databaseName", "database");
+		moBuilder.addProperty("username", "user");
+		moBuilder.addProperty("password", "not telling");
+		moBuilder.addProperty("loginTimeout", "15");
 
-		// Create the task to use the connection
-		AbstractSingleTask<?, ?, ?, ?> task = new AbstractSingleTask<Object, Work, None, None>() {
-			public Object doTask(TaskContext<Object, Work, None, None> context)
-					throws Exception {
-				// Obtain the Connection
-				Connection connection = (Connection) context.getObject(0);
-
-				// Specify the connection
-				if (JdbcManagedObjectSourceTest.this.connection == null) {
-					JdbcManagedObjectSourceTest.this.connection = connection;
-				} else {
-					JdbcManagedObjectSourceTest.this.reusedConnection = connection;
-				}
-
-				// No further tasks
-				return null;
+		// Construct the task to validate the connection
+		final List<Connection> connections = new LinkedList<Connection>();
+		TestJdbcTask task = new TestJdbcTask(new ConnectionValidator() {
+			@Override
+			public void validateConnection(Connection connection)
+					throws Throwable {
+				// Record the connection being used
+				connections.add(connection);
 			}
-		};
+		});
+		String workName = task.construct(this.getOfficeBuilder(), null, "JDBC",
+				"TEAM");
 
-		// Configure the Office
-		OfficeBuilder officeBuilder = this.getOfficeBuilder();
+		// Configure the necessary Teams
+		this.constructTeam("TEAM", new PassiveTeam());
+		this.constructTeam("of-JDBC.jdbc.recycle", new PassiveTeam());
 
-		// Configure the Work
-		WorkBuilder<?> workBuilder = task.registerWork("work", officeBuilder);
-		workBuilder.addWorkManagedObject("mo", "JDBC");
-
-		// Configure the Task
-		TaskBuilder<?, ?, ?, ?> taskBuilder = task.registerTask("task", "team",
-				workBuilder);
-		taskBuilder.linkManagedObject(0, "mo");
-
-		// Configure the Team
-		Team team = new OnePersonTeam(10);
-		this.constructTeam("team", team);
-		this.constructTeam("of-JDBC.jdbc.recycle", team);
-
-		// ---------------------
-		// Record running
-		// ---------------------
-
-		// Mock objects
-		PooledConnection pooledConnection = this
-				.createMock(PooledConnection.class);
-		Connection connection = this.createMock(Connection.class);
-
-		// Obtain the PooledConnection
-		dataSource.getPooledConnection();
-		this.control(dataSource).setReturnValue(pooledConnection);
-
-		// Listen
-		pooledConnection.addConnectionEventListener(null);
-		this.control(pooledConnection).setMatcher(
+		// Record actions on mocks
+		this.pooledConnection.close();
+		this.pooledConnection.addConnectionEventListener(null);
+		this.control(this.pooledConnection).setMatcher(
 				new TypeMatcher(JdbcManagedObject.class));
+		this.recordReturn(this.pooledConnection, this.pooledConnection
+				.getConnection(), this.connection);
+		this.connection.close();
+		this.recordReturn(this.pooledConnection, this.pooledConnection
+				.getConnection(), this.connection);
+		this.connection.close();
 
-		// Obtain the Connection
-		pooledConnection.getConnection();
-		this.control(pooledConnection).setReturnValue(connection);
-
-		// Connection used, therefore close
-		connection.close();
-
-		// Obtain the next Connection
-		pooledConnection.getConnection();
-		this.control(pooledConnection).setReturnValue(connection);
-
-		// Connection used, therefore close
-		connection.close();
-
-		// ---------------------
-		// Run
-		// ---------------------
-
-		// Replay managed objects
+		// Replay mocks
 		this.replayMockObjects();
 
 		// Open the Office Floor
-		OfficeFloor officeFloor = this.constructOfficeFloor("TEST");
+		OfficeFloor officeFloor = this.constructOfficeFloor("OFFICE");
 		officeFloor.openOfficeFloor();
 
-		// Invoke the work
-		officeFloor.getOffice("TEST").getWorkManager("work").invokeWork(null);
+		// Verify properties were loaded onto connection pool data source
+		MockConnectionPoolDataSource dataSource = MockConnectionPoolDataSource
+				.getInstance();
+		assertEquals("Incorrect driver", Driver.class.getName(), dataSource
+				.getDriver());
+		assertEquals("Incorrect url", "server:10000", dataSource.getUrl());
+		assertEquals("Incorrect server", "server", dataSource.getServerName());
+		assertEquals("Incorrect port", 10000, dataSource.getPort());
+		assertEquals("Incorrect database", "database", dataSource
+				.getDatabaseName());
+		assertEquals("Incorrect username", "user", dataSource.getUsername());
+		assertEquals("Incorrect password", "not telling", dataSource
+				.getPassword());
+		assertEquals("Incorrect login timeout", 15, dataSource
+				.getLoginTimeout());
 
-		// Invoke work to reuse connection
-		officeFloor.getOffice("TEST").getWorkManager("work").invokeWork(null);
+		// Obtain the work manager with task to use the connection
+		WorkManager workManager = officeFloor.getOffice("OFFICE")
+				.getWorkManager(workName);
 
-		// Allow time for processing
-		this.sleep(1);
+		// Invoke work to use the connection
+		workManager.invokeWork(null);
+
+		// Invoke work to re-use the connection
+		workManager.invokeWork(null);
 
 		// Close the Office Floor
 		officeFloor.closeOfficeFloor();
 
-		// Ensure obtained the connections
-		assertNotNull("Connection not obtained", this.connection);
-		assertNotNull("Re-used connection not obtained", this.reusedConnection);
-
-		// Verify
+		// Verify mocks
 		this.verifyMockObjects();
+
+		// Verify task invoked twice with connection
+		assertEquals("Incorrect times task invoked", 2, connections.size());
+		assertEquals("Incorrect first connection", this.connection, connections
+				.get(0));
+		assertEquals("Incorrect second connection", this.connection,
+				connections.get(1));
 	}
+
 }

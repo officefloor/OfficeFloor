@@ -6,11 +6,13 @@ package net.officefloor.plugin.jdbc;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
@@ -19,6 +21,7 @@ import javax.sql.PooledConnection;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
@@ -30,31 +33,25 @@ public class JdbcManagedObjectSource extends
 		AbstractManagedObjectSource<None, None> {
 
 	/**
-	 * Property prefix for properties of this {@link JdbcManagedObjectSource}.
+	 * Property name of the {@link ConnectionPoolDataSourceFactory} class.
 	 */
-	public static final String JDBC_MANAGED_OBJECT_SOURCE_PREFIX = "net.officefloor.plugin.jdbc";
+	public static final String CONNECTION_POOL_DATA_SOURCE_FACTORY_PROPERTY = "connectionpool.datasource.factory";
 
 	/**
-	 * Property name to obtain the class of the {@link DataSourceFactory}.
+	 * Property name of the {@link ConnectionPoolDataSource} class.
 	 */
-	public static final String DATA_SOURCE_FACTORY_CLASS_PROPERTY = JDBC_MANAGED_OBJECT_SOURCE_PREFIX
-			+ ".datasourcefactory";
+	public static final String CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY = "connectionpool.datasource.class";
 
 	/**
-	 * Property name to specify the initialise script for the {@link DataSource}.
+	 * Property name of script containing SQL to be run to initialise the
+	 * {@link DataSource}.
 	 */
-	public static final String DATA_SOURCE_INITIALISE_SCRIPT = JDBC_MANAGED_OBJECT_SOURCE_PREFIX
-			+ ".datasource.initialise.script";
+	public static final String DATA_SOURCE_INITIALISE_SCRIPT = "initialise.script";
 
 	/**
 	 * {@link ConnectionPoolDataSource}.
 	 */
-	private ConnectionPoolDataSource poolDataSource;
-
-	/**
-	 * {@link Properties}.
-	 */
-	private Properties properties = null;
+	protected ConnectionPoolDataSource dataSource;
 
 	/**
 	 * {@link InputStream} to obtain the initialise script details.
@@ -70,67 +67,139 @@ public class JdbcManagedObjectSource extends
 	/**
 	 * Obtains the {@link DataSourceFactory}from the input properties.
 	 * 
-	 * @param properties
-	 *            Properties to create and configure the
-	 *            {@link DataSourceFactory}.
-	 * @return Configured {@link DataSourceFactory}.
+	 * @param context
+	 *            {@link ManagedObjectSourceContext}.
+	 * @return Configured {@link ConnectionPoolDataSource}.
 	 * @throws Exception
 	 *             Should there be a failure creating or configuring the
-	 *             {@link DataSourceFactory}.
+	 *             {@link ConnectionPoolDataSource}.
 	 */
-	protected DataSourceFactory getDataSourceFactory(Properties properties)
-			throws Exception {
+	protected ConnectionPoolDataSource getConnectionPoolDataSource(
+			ManagedObjectSourceContext context) throws Exception {
 
-		// Obtain the name of the data source factory
-		String className = properties
-				.getProperty(DATA_SOURCE_FACTORY_CLASS_PROPERTY);
+		// Determine if a factory is configured
+		String factoryClassName = context.getProperty(
+				CONNECTION_POOL_DATA_SOURCE_FACTORY_PROPERTY, null);
+		if (factoryClassName != null) {
+			// Use the factory to obtain the connection pool data source
+			Class<?> clazz = this.getClass().getClassLoader().loadClass(
+					factoryClassName);
+			Object object = clazz.newInstance();
+			ConnectionPoolDataSourceFactory factory = (ConnectionPoolDataSourceFactory) object;
+			return factory.createConnectionPoolDataSource(context);
+		}
 
-		// Create an instance of the data source factory
-		DataSourceFactory dataSourceFactory = (DataSourceFactory) Class
-				.forName(className).newInstance();
+		// No factory so use connection pool data source directly
+		String className = context
+				.getProperty(CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY);
 
-		// Return the configured data source factory
-		return dataSourceFactory;
+		// Obtain the connection pool data source class
+		Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
+
+		// Create an instance of the data source
+		Object object = clazz.newInstance();
+		ConnectionPoolDataSource dataSource = (ConnectionPoolDataSource) object;
+
+		// Load the properties for the data source
+		for (Method method : clazz.getMethods()) {
+
+			// Ensure the method is a public setter with only one argument
+			if (!Modifier.isPublic(method.getModifiers())) {
+				continue;
+			}
+			if (!method.getName().startsWith("set")) {
+				continue;
+			}
+			Class<?>[] parameterTypes = method.getParameterTypes();
+			if (parameterTypes.length != 1) {
+				continue;
+			}
+
+			// Obtain the property name for the method
+			String propertyName = method.getName().substring("set".length());
+			propertyName = propertyName.substring(0, 1).toLowerCase()
+					+ propertyName.substring(1);
+
+			// Obtain the value for the property
+			Object propertyValue;
+			Class<?> parameterType = parameterTypes[0];
+			if (String.class.isAssignableFrom(parameterType)) {
+				String value = context.getProperty(propertyName);
+				if (value.length() == 0) {
+					continue; // do not set blank strings
+				}
+				propertyValue = value;
+			} else if (Integer.class.isAssignableFrom(parameterType)
+					|| int.class.isAssignableFrom(parameterType)) {
+				propertyValue = Integer.valueOf(context
+						.getProperty(propertyName));
+			} else if (Boolean.class.isAssignableFrom(parameterType)
+					|| boolean.class.isAssignableFrom(parameterType)) {
+				propertyValue = Boolean.valueOf(context
+						.getProperty(propertyName));
+			} else {
+				// Unknown property type, so do not provide
+				continue;
+			}
+
+			// Load the property to the data source
+			try {
+				method.invoke(dataSource, propertyValue);
+			} catch (InvocationTargetException ex) {
+				// Throw cause (and attempt best cause)
+				Throwable cause = ex.getCause();
+				throw (cause instanceof Exception ? (Exception) cause : ex);
+			}
+		}
+
+		// Return the configured data source
+		return dataSource;
 	}
 
 	/*
-	 * ====================================================================
-	 * AbstractManagedObjectSource
-	 * ====================================================================
+	 * ================== AbstractManagedObjectSource ====================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
+	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+	 * AbstractAsyncManagedObjectSource
+	 * #loadSpecification(net.officefloor.frame.spi
+	 * .managedobject.source.impl.AbstractAsyncManagedObjectSource
+	 * .SpecificationContext)
 	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		// Ensure data source factory is provided
-		context.addProperty(DATA_SOURCE_FACTORY_CLASS_PROPERTY,
-				"DataSourceFactory");
+		// Ensure data source provided
+		context.addProperty(CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY,
+				ConnectionPoolDataSource.class.getSimpleName());
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
+	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+	 * AbstractAsyncManagedObjectSource
+	 * #loadMetaData(net.officefloor.frame.spi.managedobject
+	 * .source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
 	 */
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context)
 			throws Exception {
+		ManagedObjectSourceContext mosContext = context
+				.getManagedObjectSourceContext();
 
-		// Obtain the properties
-		this.properties = context.getManagedObjectSourceContext()
-				.getProperties();
+		// Obtain the connection pool data source
+		this.dataSource = this.getConnectionPoolDataSource(context
+				.getManagedObjectSourceContext());
 
 		// Determine if required to initialise the database
-		String initialiseScript = context.getManagedObjectSourceContext()
-				.getProperty(DATA_SOURCE_INITIALISE_SCRIPT, null);
+		String initialiseScript = mosContext.getProperty(
+				DATA_SOURCE_INITIALISE_SCRIPT, null);
 		if (initialiseScript != null) {
 			// Obtain access to the initialise script contents
-			this.initialiseScriptInputStream = context
-					.getManagedObjectSourceContext().getResourceLocator()
+			this.initialiseScriptInputStream = mosContext.getResourceLocator()
 					.locateInputStream(initialiseScript);
 			if (this.initialiseScriptInputStream == null) {
 				throw new Exception("Can not find initialise script '"
@@ -150,36 +219,35 @@ public class JdbcManagedObjectSource extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)
+	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+	 * AbstractAsyncManagedObjectSource
+	 * #start(net.officefloor.frame.spi.managedobject
+	 * .source.impl.AbstractAsyncManagedObjectSource.StartContext)
 	 */
 	@Override
 	protected void start(StartContext<None> startContext) throws Exception {
 
-		// Obtain the Data Source Factory
-		DataSourceFactory sourceFactory = this
-				.getDataSourceFactory(this.properties);
-
-		// Create the data source
-		this.poolDataSource = sourceFactory
-				.createConnectionPoolDataSource(this.properties);
+		// Obtain a connection to the database (to ensure working)
+		PooledConnection connection = this.dataSource.getPooledConnection();
+		connection.close();
 
 		// Initialise data source
 		this.initialiseDataSource();
 
 		// Allow clean up of configuration
-		this.properties = null;
 		this.initialiseScriptInputStream = null;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource#getManagedObject()
+	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+	 * AbstractManagedObjectSource#getManagedObject()
 	 */
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Obtain the pooled connection
-		PooledConnection pooledConnection = this.poolDataSource
+		PooledConnection pooledConnection = this.dataSource
 				.getPooledConnection();
 
 		// Return the JDBC managed object
@@ -232,7 +300,7 @@ public class JdbcManagedObjectSource extends
 		reader.close();
 
 		// Run the statements to initialise data source
-		PooledConnection pooledConnection = this.poolDataSource
+		PooledConnection pooledConnection = this.dataSource
 				.getPooledConnection();
 		Connection connection = pooledConnection.getConnection();
 		for (String sql : statements) {
