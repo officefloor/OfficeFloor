@@ -62,6 +62,28 @@ import org.eclipse.jdt.internal.core.NonJavaResource;
 public class ClasspathUtil {
 
 	/**
+	 * Loads the {@link Class} from the {@link IProject} class path.
+	 * 
+	 * @param project
+	 *            {@link IProject}.
+	 * @param className
+	 *            Class name.
+	 * @return {@link Class}.
+	 * @throws ClassNotFoundException
+	 *             If {@link Class} not found.
+	 */
+	public static Class<?> loadProjectClass(IProject project, String className)
+			throws ClassNotFoundException {
+
+		// Obtain via project class loader
+		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
+		Class<?> clazz = classLoader.loadClass(className);
+
+		// Return the class
+		return clazz;
+	}
+
+	/**
 	 * <p>
 	 * Attempts to update the class path of the {@link IJavaProject} for the
 	 * edit part with the extension class names.
@@ -370,7 +392,7 @@ public class ClasspathUtil {
 		if (parent == null) {
 			return new Object[0];
 		}
-		
+
 		// Return children based on type
 		if (parent instanceof IResource) {
 			IResource resource = (IResource) parent;

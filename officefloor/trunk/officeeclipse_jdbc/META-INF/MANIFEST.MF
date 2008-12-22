@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Office Floor JDBC eclipse plugin
+Bundle-SymbolicName: net.officefloor.eclipse.jdbc;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.ui;bundle-version="3.4.1",
+ org.eclipse.core.runtime;bundle-version="3.4.0",
+ org.eclipse.core.resources;bundle-version="3.4.1",
+ net.officefloor.eclipse;bundle-version="1.0.0",
+ net.officefloor.frame;bundle-version="1.0.0",
+ net.officefloor.jdbc;bundle-version="1.0.0"
+Bundle-Vendor: Daniel Sagenschneider

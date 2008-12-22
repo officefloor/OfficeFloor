@@ -3,7 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Office Floor JDBC
 Bundle-SymbolicName: net.officefloor.jdbc
 Bundle-Version: 1.0.0
-Export-Package: net.officefloor.plugin.jdbc
+Export-Package: net.officefloor.plugin.jdbc,
+ net.officefloor.plugin.jdbc.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: net.officefloor.frame;bundle-version="1.0.0",
  net.officefloor.eclipse.jars;bundle-version="1.0.0"

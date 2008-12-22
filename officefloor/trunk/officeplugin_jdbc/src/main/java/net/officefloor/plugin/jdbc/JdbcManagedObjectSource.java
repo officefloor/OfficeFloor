@@ -6,9 +6,6 @@ package net.officefloor.plugin.jdbc;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.LinkedList;
@@ -23,6 +20,8 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.jdbc.util.ReflectionUtil;
+import net.officefloor.plugin.jdbc.util.Setter;
 
 /**
  * {@link ManagedObjectSource} for JDBC.
@@ -74,6 +73,7 @@ public class JdbcManagedObjectSource extends
 	 *             Should there be a failure creating or configuring the
 	 *             {@link ConnectionPoolDataSource}.
 	 */
+	@SuppressWarnings("unchecked")
 	protected ConnectionPoolDataSource getConnectionPoolDataSource(
 			ManagedObjectSourceContext context) throws Exception {
 
@@ -94,63 +94,26 @@ public class JdbcManagedObjectSource extends
 				.getProperty(CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY);
 
 		// Obtain the connection pool data source class
-		Class<?> clazz = this.getClass().getClassLoader().loadClass(className);
+		Class<Object> clazz = (Class<Object>) this.getClass().getClassLoader()
+				.loadClass(className);
 
 		// Create an instance of the data source
 		Object object = clazz.newInstance();
 		ConnectionPoolDataSource dataSource = (ConnectionPoolDataSource) object;
 
 		// Load the properties for the data source
-		for (Method method : clazz.getMethods()) {
+		for (Setter<Object> setter : ReflectionUtil.getSetters(clazz)) {
 
-			// Ensure the method is a public setter with only one argument
-			if (!Modifier.isPublic(method.getModifiers())) {
-				continue;
-			}
-			if (!method.getName().startsWith("set")) {
-				continue;
-			}
-			Class<?>[] parameterTypes = method.getParameterTypes();
-			if (parameterTypes.length != 1) {
-				continue;
-			}
-
-			// Obtain the property name for the method
-			String propertyName = method.getName().substring("set".length());
-			propertyName = propertyName.substring(0, 1).toLowerCase()
-					+ propertyName.substring(1);
-			
 			// Obtain the property value
+			String propertyName = setter.getPropertyName();
 			String propertyValue = context.getProperty(propertyName, null);
 			if (propertyValue == null) {
 				// Property not configured, so do not load
 				continue;
 			}
 
-			// Obtain the value for the property
-			Object loadValue;
-			Class<?> parameterType = parameterTypes[0];
-			if (String.class.isAssignableFrom(parameterType)) {
-				loadValue = propertyValue;
-			} else if (Integer.class.isAssignableFrom(parameterType)
-					|| int.class.isAssignableFrom(parameterType)) {
-				loadValue = Integer.valueOf(propertyValue);
-			} else if (Boolean.class.isAssignableFrom(parameterType)
-					|| boolean.class.isAssignableFrom(parameterType)) {
-				loadValue = Boolean.valueOf(propertyValue);
-			} else {
-				// Unknown property type, so do not provide
-				continue;
-			}
-
-			// Load the property to the data source
-			try {
-				method.invoke(dataSource, loadValue);
-			} catch (InvocationTargetException ex) {
-				// Throw cause (and attempt best cause)
-				Throwable cause = ex.getCause();
-				throw (cause instanceof Exception ? (Exception) cause : ex);
-			}
+			// Load the property value
+			setter.setPropertyValue(object, propertyValue);
 		}
 
 		// Return the configured data source
