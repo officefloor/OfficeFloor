@@ -36,7 +36,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
  * 
  * @author Daniel
  */
-public class TestJdbcTask extends AbstractSingleTask<Object, Work, None, None> {
+public class JdbcTask extends AbstractSingleTask<Object, Work, None, None> {
 
 	/**
 	 * {@link ConnectionValidator}.
@@ -49,7 +49,7 @@ public class TestJdbcTask extends AbstractSingleTask<Object, Work, None, None> {
 	 * @param validator
 	 *            {@link ConnectionValidator}.
 	 */
-	public TestJdbcTask(ConnectionValidator validator) {
+	public JdbcTask(ConnectionValidator validator) {
 		this.validator = validator;
 	}
 
