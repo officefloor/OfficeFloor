@@ -20,8 +20,10 @@
 		<module>officeplugin_jms</module>
 		<module>officeplugin_socket</module>
 		<module>officeeclipse_socket</module>
-		<module>officetool_filingcabinet</module>
+		<module>officeeclipse_jdbc</module>
 		<module>officework_spring</module>
+		<module>officetool_filingcabinet</module>
+		<module>officeeclipse-jars</module>
 	</modules>
 	<url>http://www.officefloor.net</url>
 	<developers>
