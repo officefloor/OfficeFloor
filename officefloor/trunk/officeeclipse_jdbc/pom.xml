@@ -1,0 +1,37 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>officefloor</artifactId>
+		<groupId>net.officefloor</groupId>
+		<version>0.0.1</version>
+	</parent>
+	<artifactId>officeeclipse_jdbc</artifactId>
+	<name>Office Floor JDBC eclipse</name>
+	<description>Provides extensions for JDBC configuration.</description>
+    <properties>
+        <office_version>0.0.1</office_version>
+        <eclipse_version>[3,)</eclipse_version>
+        <eclipse_win_version>win32</eclipse_win_version>
+    </properties>
+	<dependencies>
+
+        <!-- Office Floor Dependencies -->
+        <dependency>
+            <groupId>net.officefloor</groupId>
+            <artifactId>officeeclipse</artifactId>
+            <version>${office_version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.officefloor</groupId>
+            <artifactId>officecompiler</artifactId>
+            <version>${office_version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.officefloor</groupId>
+            <artifactId>officeplugin_jdbc</artifactId>
+            <version>${office_version}</version>
+        </dependency>
+
+	</dependencies>
+</project>

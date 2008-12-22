@@ -351,15 +351,26 @@ public class BeanListInput<B> implements Input<Table> {
 			methodName = methodName.substring(0, 1).toUpperCase()
 					+ methodName.substring(1);
 
+			// Attempt to obtain the accessor (must have)
 			try {
-				// Find the accessor and mutator methods
 				this.accessor = BeanListInput.this.beanType.getMethod("get"
 						+ methodName);
-				this.mutator = BeanListInput.this.beanType.getMethod("set"
-						+ methodName, new Class[] { String.class });
-			} catch (NoSuchMethodException ex) {
-				throw new OfficeFloorPluginFailure(ex);
+			} catch (Exception ex) {
+				// Must have accessor
+				throw new OfficeFloorPluginFailure("Must have accessor for '"
+						+ methodName + "' on bean "
+						+ BeanListInput.this.beanType.getName());
 			}
+
+			// Attempt to obtain the mutator (not necessary)
+			Method method = null;
+			try {
+				method = BeanListInput.this.beanType.getMethod("set"
+						+ methodName, new Class[] { String.class });
+			} catch (Exception ex) {
+				// No mutator
+			}
+			this.mutator = method;
 		}
 
 		/**
@@ -392,6 +403,15 @@ public class BeanListInput<B> implements Input<Table> {
 		}
 
 		/**
+		 * Indicates if can modify this property.
+		 * 
+		 * @return <code>true</code> if can modify this property.
+		 */
+		public boolean canModify() {
+			return (this.mutator != null);
+		}
+
+		/**
 		 * Specifies the property value on the bean.
 		 * 
 		 * @param bean
@@ -401,6 +421,12 @@ public class BeanListInput<B> implements Input<Table> {
 		 */
 		public void setValue(B bean, String value)
 				throws OfficeFloorPluginFailure {
+
+			// Only set value if have mutator
+			if (this.mutator == null) {
+				return;
+			}
+
 			try {
 				// Set the property value on the bean
 				this.mutator.invoke(bean, value);
@@ -439,8 +465,18 @@ public class BeanListInput<B> implements Input<Table> {
 		 */
 		@Override
 		public boolean canModify(Object element, String property) {
-			// Change all properties except the marker
-			return !BEAN_MARKER.equals(property);
+
+			// Can not change if the marker
+			if (BEAN_MARKER.equals(property)) {
+				return false;
+			}
+
+			// Obtain the bean property
+			BeanProperty beanProperty = BeanListInput.this.beanProperties
+					.get(property);
+
+			// Return whether the property can change
+			return beanProperty.canModify();
 		}
 
 		/*
