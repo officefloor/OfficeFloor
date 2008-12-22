@@ -119,24 +119,25 @@ public class JdbcManagedObjectSource extends
 			String propertyName = method.getName().substring("set".length());
 			propertyName = propertyName.substring(0, 1).toLowerCase()
 					+ propertyName.substring(1);
+			
+			// Obtain the property value
+			String propertyValue = context.getProperty(propertyName, null);
+			if (propertyValue == null) {
+				// Property not configured, so do not load
+				continue;
+			}
 
 			// Obtain the value for the property
-			Object propertyValue;
+			Object loadValue;
 			Class<?> parameterType = parameterTypes[0];
 			if (String.class.isAssignableFrom(parameterType)) {
-				String value = context.getProperty(propertyName);
-				if (value.length() == 0) {
-					continue; // do not set blank strings
-				}
-				propertyValue = value;
+				loadValue = propertyValue;
 			} else if (Integer.class.isAssignableFrom(parameterType)
 					|| int.class.isAssignableFrom(parameterType)) {
-				propertyValue = Integer.valueOf(context
-						.getProperty(propertyName));
+				loadValue = Integer.valueOf(propertyValue);
 			} else if (Boolean.class.isAssignableFrom(parameterType)
 					|| boolean.class.isAssignableFrom(parameterType)) {
-				propertyValue = Boolean.valueOf(context
-						.getProperty(propertyName));
+				loadValue = Boolean.valueOf(propertyValue);
 			} else {
 				// Unknown property type, so do not provide
 				continue;
@@ -144,7 +145,7 @@ public class JdbcManagedObjectSource extends
 
 			// Load the property to the data source
 			try {
-				method.invoke(dataSource, propertyValue);
+				method.invoke(dataSource, loadValue);
 			} catch (InvocationTargetException ex) {
 				// Throw cause (and attempt best cause)
 				Throwable cause = ex.getCause();

@@ -18,6 +18,8 @@ package net.officefloor.plugin.jdbc.vendor.mysql;
 
 import java.util.Properties;
 
+import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
+
 import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
 import net.officefloor.plugin.jdbc.vendor.AbstractVendorJdbcTest;
 
@@ -39,8 +41,8 @@ public class MysqlJdbcTest extends AbstractVendorJdbcTest {
 	protected void loadProperties(Properties properties) {
 		properties
 				.setProperty(
-						JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_FACTORY_PROPERTY,
-						MysqlConnectionPoolDataSourceFactory.class.getName());
+						JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY,
+						MysqlConnectionPoolDataSource.class.getName());
 		properties.setProperty("serverName", "localhost");
 		properties.setProperty("port", "3306");
 		properties.setProperty("databaseName", "officefloor");

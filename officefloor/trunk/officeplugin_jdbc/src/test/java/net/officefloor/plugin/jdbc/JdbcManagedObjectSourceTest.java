@@ -77,7 +77,7 @@ public class JdbcManagedObjectSourceTest extends
 
 		// Construct the task to validate the connection
 		final List<Connection> connections = new LinkedList<Connection>();
-		TestJdbcTask task = new TestJdbcTask(new ConnectionValidator() {
+		JdbcTask task = new JdbcTask(new ConnectionValidator() {
 			@Override
 			public void validateConnection(Connection connection)
 					throws Throwable {

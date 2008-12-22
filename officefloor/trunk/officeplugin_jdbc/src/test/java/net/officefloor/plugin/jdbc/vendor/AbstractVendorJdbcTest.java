@@ -16,8 +16,6 @@
  */
 package net.officefloor.plugin.jdbc.vendor;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,7 +34,7 @@ import net.officefloor.frame.util.ManagedObjectSourceLoader;
 import net.officefloor.plugin.jdbc.ConnectionValidator;
 import net.officefloor.plugin.jdbc.JdbcDataSourceAccess;
 import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
-import net.officefloor.plugin.jdbc.TestJdbcTask;
+import net.officefloor.plugin.jdbc.JdbcTask;
 
 /**
  * Provides the abstract functionality for testing the
@@ -127,69 +125,6 @@ public abstract class AbstractVendorJdbcTest extends
 	}
 
 	/**
-	 * Load the default properties from the {@link ConnectionPoolDataSource}.
-	 * 
-	 * @param dataSource
-	 *            {@link ConnectionPoolDataSource}.
-	 * @param properties
-	 *            {@link Properties}
-	 */
-	protected void loadDefaultProperties(ConnectionPoolDataSource dataSource,
-			Properties properties) {
-
-		// Indicate the properties being loaded
-		Class<?> dataSourceClass = dataSource.getClass();
-
-		// Iterate over the getter methods adding them as properties
-		for (Method method : dataSourceClass.getMethods()) {
-
-			// Ensure is a getter method
-			if (!Modifier.isPublic(method.getModifiers())) {
-				continue;
-			}
-			if ((!method.getName().startsWith("get"))
-					&& (!method.getName().startsWith("is"))) {
-				continue;
-			}
-			if (method.getParameterTypes().length != 0) {
-				continue;
-			}
-			if ((method.getReturnType() == null)
-					|| (Void.class.isAssignableFrom(method.getReturnType()))) {
-				continue;
-			}
-
-			// Determine getter prefix
-			String getterPrefix = (method.getName().startsWith("is") ? "is"
-					: "get");
-
-			// Obtain the property name
-			String propertyName = method.getName().substring(
-					getterPrefix.length());
-			propertyName = propertyName.substring(0, 1).toLowerCase()
-					+ propertyName.substring(1);
-
-			// Ignore getting pooled connection
-			if ("pooledConnection".equals(propertyName)) {
-				continue;
-			}
-
-			try {
-				// Obtain the property value
-				Object propertyValue = method.invoke(dataSource);
-				String valueText = (propertyValue == null ? "" : propertyValue
-						.toString());
-
-				// Load as default value
-				properties.setProperty(propertyName, valueText);
-
-			} catch (Exception ex) {
-				// Ignore setting the property
-			}
-		}
-	}
-
-	/**
 	 * Overridden to populate the properties for the vendor JDBC implementation.
 	 * 
 	 * @param properties
@@ -226,7 +161,7 @@ public abstract class AbstractVendorJdbcTest extends
 								"InitialiseDatabase.sql"));
 
 		// Configure the task for the connection
-		TestJdbcTask task = new TestJdbcTask(new ConnectionValidator() {
+		JdbcTask task = new JdbcTask(new ConnectionValidator() {
 			@Override
 			public void validateConnection(Connection connection)
 					throws Throwable {

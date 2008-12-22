@@ -39,7 +39,6 @@ public class HsqldbJdbcTest extends AbstractVendorJdbcTest {
 	 *            {@link JdbcManagedObjectSource}.
 	 */
 	protected void loadProperties(Properties properties) {
-		this.loadDefaultProperties(new DriverAdapterCPDS(), properties);
 		properties
 				.setProperty(
 						JdbcManagedObjectSource.CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY,
