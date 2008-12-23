@@ -76,6 +76,7 @@ import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.palette.ConnectionCreationToolEntry;
 import org.eclipse.gef.palette.PaletteGroup;
+import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link net.officefloor.model.desk.DeskModel}.
@@ -84,6 +85,11 @@ import org.eclipse.gef.palette.PaletteGroup;
  */
 public class DeskEditor extends
 		AbstractOfficeFloorEditor<DeskModel, DeskEditPart> {
+
+	/**
+	 * ID for this {@link IEditorPart}.
+	 */
+	public static final String EDITOR_ID = "net.officefloor.editors.desk";
 
 	/*
 	 * (non-Javadoc)

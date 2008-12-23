@@ -24,6 +24,7 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.office.OfficeEditor;
 import net.officefloor.eclipse.officefloor.operations.RemoveOfficeOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFigureContext;
@@ -31,6 +32,8 @@ import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel.OfficeFloorOfficeEvent;
 
 import org.eclipse.gef.EditPart;
+import org.eclipse.gef.Request;
+import org.eclipse.gef.commands.Command;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorOfficeModel}.
@@ -148,6 +151,21 @@ public class OfficeEditPart
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveOfficeOperation();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * handleDoubleClick(org.eclipse.gef.Request)
+	 */
+	@Override
+	protected Command handleDoubleClick(Request request) {
+		// Open the office
+		this.openClasspathFile(this.getCastedModel().getId(),
+				OfficeEditor.EDITOR_ID);
+		return null;
 	}
 
 	/*

@@ -58,6 +58,7 @@ import net.officefloor.office.OfficeLoader;
 import net.officefloor.repository.ConfigurationItem;
 
 import org.eclipse.gef.EditPart;
+import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link net.officefloor.model.office.OfficeModel}.
@@ -66,6 +67,11 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeEditor extends
 		AbstractOfficeFloorEditor<OfficeModel, OfficeEditPart> {
+
+	/**
+	 * ID for this {@link IEditorPart}.
+	 */
+	public static final String EDITOR_ID = "net.officefloor.editors.office";
 
 	/*
 	 * (non-Javadoc)

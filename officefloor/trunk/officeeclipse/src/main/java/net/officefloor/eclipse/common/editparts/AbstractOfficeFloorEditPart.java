@@ -19,6 +19,7 @@ package net.officefloor.eclipse.common.editparts;
 import java.awt.Dialog;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,7 +34,12 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 import net.officefloor.repository.ConfigurationContext;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
@@ -51,6 +57,9 @@ import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.ide.IDE;
 
 /**
  * <p>
@@ -418,6 +427,55 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	protected Command handleDoubleClick(Request request) {
 		// By default not handled
 		return null;
+	}
+
+	/**
+	 * Opens the {@link IFile} that corresponds to the input class path location
+	 * of the {@link IProject} containing this {@link IEditorInput}.
+	 * 
+	 * @param classpathFilePath
+	 *            Path of the file on the class path to open.
+	 * @param editorId
+	 *            Id of the {@link IEditorPart}.
+	 */
+	public void openClasspathFile(String classpathFilePath, String editorId) {
+		try {
+			// Obtain the URL with full path
+			ProjectClassLoader projectClassLoader = ProjectClassLoader
+					.create(this.getEditor());
+			URL url = projectClassLoader.getResource(classpathFilePath);
+			if (url == null) {
+				// Can not find item to open
+				MessageDialog.openWarning(this.getEditor().getEditorSite()
+						.getShell(), "Open", "Can not find '"
+						+ classpathFilePath + "'");
+				return;
+			}
+
+			// Obtain the file to open
+			String urlFilePath = url.getFile();
+			IPath path = new Path(urlFilePath);
+			IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+					.findFilesForLocation(path);
+			if (files.length != 1) {
+				// Can not find file
+				MessageDialog.openWarning(this.getEditor().getEditorSite()
+						.getShell(), "Open", "Can not find '"
+						+ classpathFilePath + "' at [" + urlFilePath + "]");
+				return;
+			}
+			IFile file = files[0];
+
+			// Open the file
+			IDE.openEditor(this.getEditor().getEditorSite().getPage(), file,
+					editorId);
+
+		} catch (Throwable ex) {
+			// Failed to open file
+			MessageDialog.openInformation(this.getEditor().getEditorSite()
+					.getShell(), "Open", "Failed to open '" + classpathFilePath
+					+ "': " + ex.getMessage());
+		}
 	}
 
 	/**

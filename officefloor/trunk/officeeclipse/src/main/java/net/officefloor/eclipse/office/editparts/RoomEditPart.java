@@ -19,11 +19,16 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
+import org.eclipse.gef.Request;
+import org.eclipse.gef.commands.Command;
+
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.office.operations.OpenRoomOperation;
 import net.officefloor.eclipse.office.operations.RemoveRoomOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.RoomFigureContext;
@@ -128,6 +133,19 @@ public class RoomEditPart extends
 	@Override
 	public Operation getRemoveOperation() {
 		return RemoveRoomOperation.createFromRoom();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * handleDoubleClick(org.eclipse.gef.Request)
+	 */
+	@Override
+	protected Command handleDoubleClick(Request request) {
+		OperationUtil.execute(OpenRoomOperation.createFromRoom(), -1, -1, this);
+		return null;
 	}
 
 	/*

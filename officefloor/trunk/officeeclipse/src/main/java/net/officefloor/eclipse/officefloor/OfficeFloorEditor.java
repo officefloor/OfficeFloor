@@ -67,6 +67,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
+import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link OfficeFloorModel}.
@@ -75,6 +76,11 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeFloorEditor extends
 		AbstractOfficeFloorEditor<OfficeFloorModel, OfficeFloorEditPart> {
+
+	/**
+	 * ID for this {@link IEditorPart}.
+	 */
+	public static final String EDITOR_ID = "net.officefloor.editors.officefloor";
 
 	/**
 	 * Initialise the specialised {@link FigureFactory} for the model types.

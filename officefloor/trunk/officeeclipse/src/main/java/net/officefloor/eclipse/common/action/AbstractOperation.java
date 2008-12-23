@@ -38,9 +38,9 @@ public abstract class AbstractOperation<E extends EditPart> implements
 	private final String actionText;
 
 	/**
-	 * Handled {@link AbstractOfficeFloorEditPart} type. Length always one.
+	 * Handled {@link AbstractOfficeFloorEditPart} type.
 	 */
-	private final Class<E>[] editPartTypes;
+	private final Class<E> editPartType;
 
 	/**
 	 * Initiate.
@@ -50,10 +50,34 @@ public abstract class AbstractOperation<E extends EditPart> implements
 	 * @param editPartType
 	 *            {@link AbstractOfficeFloorEditPart} type being handled.
 	 */
-	@SuppressWarnings("unchecked")
 	public AbstractOperation(String actionText, Class<E> editPartType) {
 		this.actionText = actionText;
-		this.editPartTypes = new Class[] { editPartType };
+		this.editPartType = editPartType;
+	}
+
+	/**
+	 * Returns whether all the {@link EditPart} instances are assignable to the
+	 * {@link EditPart} type.
+	 * 
+	 * @param editPartType
+	 *            {@link EditPart} type.
+	 * @param editParts
+	 *            {@link EditPart} instances.
+	 * @return <code>true</code> if all assignable.
+	 */
+	protected static <T extends EditPart> boolean isAssignable(
+			Class<T> editPartType, EditPart[] editParts) {
+
+		// Determine all edit parts are assignable to edit part type
+		boolean isAssignable = true;
+		for (EditPart editPart : editParts) {
+			if (!editPartType.isAssignableFrom(editPart.getClass())) {
+				isAssignable = false;
+			}
+		}
+
+		// Return whether assignable
+		return isAssignable;
 	}
 
 	/*
@@ -73,11 +97,14 @@ public abstract class AbstractOperation<E extends EditPart> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.action.Operation#getEditPartTypes()
+	 * @see
+	 * net.officefloor.eclipse.common.action.Operation#isApplicable(org.eclipse
+	 * .gef.EditPart[])
 	 */
 	@Override
-	public Class<E>[] getEditPartTypes() {
-		return this.editPartTypes;
+	public boolean isApplicable(EditPart[] editParts) {
+		// Is applicable, if assignable to all edit part types
+		return isAssignable(this.editPartType, editParts);
 	}
 
 	/*
