@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
@@ -48,6 +49,70 @@ public class JdbcManagedObjectSource extends
 	public static final String DATA_SOURCE_INITIALISE_SCRIPT = "initialise.script";
 
 	/**
+	 * Creates the {@link ConnectionPoolDataSource}.
+	 * 
+	 * @param dataSourceClassName
+	 *            Name of the {@link ConnectionPoolDataSource} {@link Class}.
+	 * @param classLoader
+	 *            {@link ClassLoader} to use to obtain the
+	 *            {@link ConnectionPoolDataSource} {@link Class}.
+	 * @param properties
+	 *            Properties to configure the {@link ConnectionPoolDataSource}.
+	 * @return {@link ConnectionPoolDataSource}.
+	 * @throws Exception
+	 *             If fails to create and configure the
+	 *             {@link ConnectionPoolDataSource}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static ConnectionPoolDataSource createConnectionPoolDataSource(
+			String dataSourceClassName, ClassLoader classLoader,
+			Properties properties) throws Exception {
+
+		// Obtain the connection pool data source class
+		Class clazz = classLoader.loadClass(dataSourceClassName);
+
+		// Obtain and return the connection pool
+		return createConnectionPoolDataSource(clazz, properties);
+	}
+
+	/**
+	 * Creates the {@link ConnectionPoolDataSource}.
+	 * 
+	 * @param dataSourceClass
+	 *            {@link Class} of the {@link ConnectionPoolDataSource}.
+	 * @param properties
+	 *            Properties to configure the {@link ConnectionPoolDataSource}.
+	 * @return {@link ConnectionPoolDataSource}.
+	 * @throws Exception
+	 *             If fails to create and configure the
+	 *             {@link ConnectionPoolDataSource}.
+	 */
+	public static <DS extends ConnectionPoolDataSource> DS createConnectionPoolDataSource(
+			Class<DS> dataSourceClass, Properties properties) throws Exception {
+
+		// Create an instance of the data source
+		DS dataSource = dataSourceClass.newInstance();
+
+		// Load the properties for the data source
+		for (Setter<DS> setter : ReflectionUtil.getSetters(dataSourceClass)) {
+
+			// Obtain the property value
+			String propertyName = setter.getPropertyName();
+			String propertyValue = properties.getProperty(propertyName);
+			if ((propertyValue == null) || (propertyValue.trim().length() == 0)) {
+				// Property not configured, so do not load
+				continue;
+			}
+
+			// Load the property value
+			setter.setPropertyValue(dataSource, propertyValue);
+		}
+
+		// Return the configured data source
+		return dataSource;
+	}
+
+	/**
 	 * {@link ConnectionPoolDataSource}.
 	 */
 	protected ConnectionPoolDataSource dataSource;
@@ -73,7 +138,6 @@ public class JdbcManagedObjectSource extends
 	 *             Should there be a failure creating or configuring the
 	 *             {@link ConnectionPoolDataSource}.
 	 */
-	@SuppressWarnings("unchecked")
 	protected ConnectionPoolDataSource getConnectionPoolDataSource(
 			ManagedObjectSourceContext context) throws Exception {
 
@@ -93,31 +157,12 @@ public class JdbcManagedObjectSource extends
 		String className = context
 				.getProperty(CONNECTION_POOL_DATA_SOURCE_CLASS_PROPERTY);
 
-		// Obtain the connection pool data source class
-		Class<Object> clazz = (Class<Object>) this.getClass().getClassLoader()
-				.loadClass(className);
+		// Obtain the properties for the connection pool
+		Properties properties = context.getProperties();
 
-		// Create an instance of the data source
-		Object object = clazz.newInstance();
-		ConnectionPoolDataSource dataSource = (ConnectionPoolDataSource) object;
-
-		// Load the properties for the data source
-		for (Setter<Object> setter : ReflectionUtil.getSetters(clazz)) {
-
-			// Obtain the property value
-			String propertyName = setter.getPropertyName();
-			String propertyValue = context.getProperty(propertyName, null);
-			if (propertyValue == null) {
-				// Property not configured, so do not load
-				continue;
-			}
-
-			// Load the property value
-			setter.setPropertyValue(object, propertyValue);
-		}
-
-		// Return the configured data source
-		return dataSource;
+		// Create and return the connection pool data source
+		return createConnectionPoolDataSource(className, this.getClass()
+				.getClassLoader(), properties);
 	}
 
 	/*
