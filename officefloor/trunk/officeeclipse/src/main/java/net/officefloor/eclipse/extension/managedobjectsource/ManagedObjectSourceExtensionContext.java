@@ -21,6 +21,8 @@ import java.util.List;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * Context for the {@link ManagedObjectSourceExtension}.
@@ -55,10 +57,19 @@ public interface ManagedObjectSourceExtensionContext {
 	void setErrorMessage(String message);
 
 	/**
-	 * Obtains the {@link IProject} that is adding the {@link ManagedObjectSource}.
+	 * Obtains the {@link IProject} that is adding the
+	 * {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link IProject} that is adding the {@link ManagedObjectSource}.
 	 */
 	IProject getProject();
+
+	/**
+	 * Obtains the {@link Shell} to enable {@link MessageDialog} or other
+	 * graphics requiring it.
+	 * 
+	 * @return {@link Shell}.
+	 */
+	Shell getShell();
 
 }

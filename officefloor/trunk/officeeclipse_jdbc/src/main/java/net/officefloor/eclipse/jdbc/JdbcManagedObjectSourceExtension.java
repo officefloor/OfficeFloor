@@ -22,10 +22,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.sql.ConnectionPoolDataSource;
+import javax.sql.PooledConnection;
 
 import net.officefloor.eclipse.classpath.ClasspathUtil;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
@@ -41,7 +44,12 @@ import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
 import net.officefloor.plugin.jdbc.util.ReflectionUtil;
 import net.officefloor.plugin.jdbc.util.Setter;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -63,7 +71,16 @@ public class JdbcManagedObjectSourceExtension implements
 		Collections.sort(properties, new Comparator<InitiateProperty>() {
 			@Override
 			public int compare(InitiateProperty a, InitiateProperty b) {
-				return calculateWeighting(b) - calculateWeighting(a);
+				// Determine wait comparison
+				int weightComparison = calculateWeighting(b)
+						- calculateWeighting(a);
+				if (weightComparison != 0) {
+					// Comparison determined by weighting
+					return weightComparison;
+				}
+
+				// Weighting the same, so make alphabetical
+				return a.getName().compareTo(b.getName());
 			}
 		});
 	}
@@ -80,23 +97,23 @@ public class JdbcManagedObjectSourceExtension implements
 
 		// Add to waiting based on contents of name
 		String name = property.getName().toUpperCase();
-		if (name.contains("URL")) {
+		if (name.startsWith("URL")) {
 			weighting += 6;
 		}
-		if (name.contains("SERVER") || name.contains("SOURCE")) {
+		if (name.startsWith("SERVER") || name.startsWith("SOURCE")) {
 			weighting += 5;
 		}
-		if (name.contains("PORT")) {
+		if (name.startsWith("PORT")) {
 			weighting += 4;
 		}
-		if (name.contains("DATABASE") || name.contains("CATALOG")
-				|| name.contains("SCHEMA")) {
+		if (name.startsWith("DATABASE") || name.startsWith("CATALOG")
+				|| name.startsWith("SCHEMA")) {
 			weighting += 3;
 		}
-		if (name.contains("USER")) {
+		if (name.startsWith("USER")) {
 			weighting += 2;
 		}
-		if (name.contains("PASSWORD")) {
+		if (name.startsWith("PASSWORD")) {
 			weighting += 1;
 		}
 
@@ -248,9 +265,51 @@ public class JdbcManagedObjectSourceExtension implements
 					}
 				});
 
-		// Load value to page
+		// Load properties input to page
 		new InputHandler<List<InitiateProperty>>(page, propertiesInput,
 				configurationPropertiesAdapter);
+
+		// Provide button to validate connection
+		Button button = new Button(page, SWT.PUSH);
+		button.setText("Test connection");
+		button.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// Obtain the properties for the connection
+				String dataSourceClassName = dataSourceProperty.getValue();
+				Properties properties = new Properties();
+				for (InitiateProperty property : configureProperties) {
+					properties.setProperty(property.getName(), property
+							.getValue());
+				}
+
+				// Test the connection
+				try {
+					// Create the connection pool data source
+					ProjectClassLoader classLoader = ProjectClassLoader
+							.create(context.getProject());
+					ConnectionPoolDataSource dataSource = JdbcManagedObjectSource
+							.createConnectionPoolDataSource(
+									dataSourceClassName, classLoader,
+									properties);
+
+					// Obtain connection from pool to validate ok
+					PooledConnection connection = dataSource
+							.getPooledConnection();
+					connection.close();
+
+					// Indicate connection ok
+					MessageDialog.openInformation(context.getShell(),
+							"Test connection", "Connection OK");
+
+				} catch (Throwable ex) {
+					// Indicate failure to connect
+					MessageDialog.openError(context.getShell(),
+							"Test connection", "Connection failed: "
+									+ ex.getMessage());
+				}
+			}
+		});
 
 		// Initially only the data source property
 		return Arrays.asList(dataSourceProperty);

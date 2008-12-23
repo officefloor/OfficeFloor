@@ -33,6 +33,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * {@link IWizardPage} providing the properties of the
@@ -278,6 +279,11 @@ public class ManagedObjectSourcePropertiesWizardPage extends WizardPage {
 								return ManagedObjectSourcePropertiesWizardPage.this.project;
 							}
 
+							@Override
+							public Shell getShell() {
+								return ManagedObjectSourcePropertiesWizardPage.this
+										.getShell();
+							}
 						});
 
 		// Indicate initial state
