@@ -63,7 +63,7 @@ public class RemoveRoomOperation<E extends AbstractOfficeFloorEditPart<?, ?>>
 	 * 
 	 * @return {@link RemoveRoomOperation}.
 	 */
-	public static Operation createFromFlowItem() {
+	public static RemoveRoomOperation<FlowItemEditPart> createFromFlowItem() {
 		return new RemoveRoomOperation<FlowItemEditPart>(FlowItemEditPart.class);
 	}
 

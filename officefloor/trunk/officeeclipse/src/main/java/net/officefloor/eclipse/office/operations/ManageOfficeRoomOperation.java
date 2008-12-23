@@ -30,6 +30,8 @@ import net.officefloor.eclipse.common.dialog.input.filter.FileExtensionInputFilt
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.common.dialog.input.translator.ResourceFullPathValueTranslator;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.office.editparts.DeskEditPart;
+import net.officefloor.eclipse.office.editparts.FlowItemEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.RoomEditPart;
 import net.officefloor.model.ConnectionModel;
@@ -45,6 +47,7 @@ import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.room.RoomLoader;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.gef.EditPart;
 
 /**
  * Manages the {@link OfficeRoomModel} on the {@link OfficeModel}.
@@ -98,14 +101,21 @@ public class ManageOfficeRoomOperation extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.eclipse.common.action.Operation#getEditPartTypes()
+	 * @see
+	 * net.officefloor.eclipse.common.action.AbstractOperation#isApplicable(
+	 * org.eclipse.gef.EditPart[])
 	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public Class[] getEditPartTypes() {
-		// Focus operation based on whether room added
-		return new Class[] { (this.isRoomAdded() ? RoomEditPart.class
-				: OfficeEditPart.class) };
+	public boolean isApplicable(EditPart[] editParts) {
+		if (this.isRoomAdded()) {
+			// Applicable if a room, desk, or flow item
+			return isAssignable(RoomEditPart.class, editParts)
+					|| isAssignable(DeskEditPart.class, editParts)
+					|| isAssignable(FlowItemEditPart.class, editParts);
+		} else {
+			// Applicable if an office
+			return isAssignable(OfficeEditPart.class, editParts);
+		}
 	}
 
 	/*

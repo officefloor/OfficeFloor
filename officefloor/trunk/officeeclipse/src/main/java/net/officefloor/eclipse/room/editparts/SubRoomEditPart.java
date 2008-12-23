@@ -24,11 +24,16 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
+import net.officefloor.eclipse.desk.DeskEditor;
+import net.officefloor.eclipse.room.RoomEditor;
 import net.officefloor.eclipse.room.operations.RemoveSubRoomOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.room.SubRoomFigureContext;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomModel.SubRoomEvent;
+
+import org.eclipse.gef.Request;
+import org.eclipse.gef.commands.Command;
 
 /**
  * {@link org.eclipse.gef.EditPart} for the
@@ -121,6 +126,32 @@ public class SubRoomEditPart extends
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveSubRoomOperation();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
+	 * handleDoubleClick(org.eclipse.gef.Request)
+	 */
+	@Override
+	protected Command handleDoubleClick(Request request) {
+
+		// Determine if open the desk
+		String deskPath = this.getCastedModel().getDesk();
+		if (deskPath != null) {
+			// Is desk, so open it
+			this.openClasspathFile(deskPath, DeskEditor.EDITOR_ID);
+			return null;
+		}
+
+		// Not a desk, so must be a room
+		String roomPath = this.getCastedModel().getRoom();
+		this.openClasspathFile(roomPath, RoomEditor.EDITOR_ID);
+
+		// No command, as no need for undo
+		return null;
 	}
 
 	/*

@@ -17,11 +17,9 @@
 package net.officefloor.eclipse.common.action;
 
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.viewers.ISelection;
 
 /**
  * Operation done on {@link EditPart} instances to create resulting
@@ -39,12 +37,15 @@ public interface Operation {
 	String getActionText();
 
 	/**
-	 * Obtains the {@link EditPart} types that the items within the
-	 * {@link ISelection} must be assignable.
+	 * Indicates if this {@link Operation} is applicable for the input
+	 * {@link EditPart} instances.
 	 * 
-	 * @return Listing of {@link AbstractOfficeFloorEditPart} types.
+	 * @param editParts
+	 *            {@link EditPart} instances.
+	 * @return <code>true</code> if this {@link Operation} is applicable for the
+	 *         input {@link EditPart} instances.
 	 */
-	Class<? extends EditPart>[] getEditPartTypes();
+	boolean isApplicable(EditPart[] editParts);
 
 	/**
 	 * Performs this {@link Operation}.

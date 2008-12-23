@@ -250,20 +250,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 				for (Operation operation : AbstractOfficeFloorEditor.this.operations) {
 
 					// Determine if handles all edit part types selected
-					boolean isHandled = true;
-					for (EditPart editPart : selectedEditParts) {
-						boolean isAssignable = false;
-						for (Class<? extends EditPart> handledEditPartType : operation
-								.getEditPartTypes()) {
-							if (handledEditPartType.isAssignableFrom(editPart
-									.getClass())) {
-								isAssignable = true;
-							}
-						}
-						if (!isAssignable) {
-							isHandled = false;
-						}
-					}
+					boolean isHandled = operation
+							.isApplicable(selectedEditParts);
 
 					// Add if handles all model types
 					if (isHandled) {

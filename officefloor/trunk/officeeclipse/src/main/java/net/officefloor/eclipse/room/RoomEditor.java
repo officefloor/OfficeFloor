@@ -60,6 +60,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
+import org.eclipse.ui.IEditorPart;
 
 /**
  * Editor for the {@link net.officefloor.model.room.RoomModel}.
@@ -68,6 +69,11 @@ import org.eclipse.gef.EditPart;
  */
 public class RoomEditor extends
 		AbstractOfficeFloorEditor<RoomModel, RoomEditPart> {
+
+	/**
+	 * ID for this {@link IEditorPart}.
+	 */
+	public static final String EDITOR_ID = "net.officefloor.editors.room";
 
 	/*
 	 * (non-Javadoc)
