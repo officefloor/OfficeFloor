@@ -16,7 +16,6 @@
  */
 package net.officefloor.frame.spi.team;
 
-import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * {@link Job} to executed by a {@link Team}.
@@ -64,26 +63,5 @@ public interface Job {
 	 * @see #setNextJob(Job)
 	 */
 	Job getNextJob();
-
-	/**
-	 * <p>
-	 * Activates this {@link Job}.
-	 * <p>
-	 * <b>This MUST not be invoked by {@link Team} instances.</b> This method
-	 * is available for framework to active this {@link Job} by having it
-	 * assigned to its appropriate {@link Team}.
-	 */
-	void activateJob();
-
-	/**
-	 * <p>
-	 * Obtains the {@link ThreadState} that this {@link Job} is bound.
-	 * <p>
-	 * {@link Team} instances should have no need for this method. It is
-	 * available for the framework to utilise.
-	 * 
-	 * @return {@link ThreadState} that this {@link Job} is bound.
-	 */
-	ThreadState getThreadState();
 
 }

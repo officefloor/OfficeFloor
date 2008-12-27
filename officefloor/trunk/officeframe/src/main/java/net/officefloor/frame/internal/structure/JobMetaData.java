@@ -18,38 +18,37 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Meta-data for a job.
+ * Meta-data for a {@link Job}.
  * 
  * @author Daniel
  */
 public interface JobMetaData {
 
 	/**
-	 * Obtains the {@link Team} responsible for completing the job.
+	 * Creates the {@link JobActivatableSet} for executing the {@link Job}.
 	 * 
-	 * @return {@link Team} responsible for completing the job.
+	 * @return {@link JobActivatableSet}.
+	 */
+	JobActivatableSet createJobActivableSet();
+
+	/**
+	 * Obtains the {@link Team} responsible for completing the {@link Job}.
+	 * 
+	 * @return {@link Team} responsible for completing the {@link Job}.
 	 */
 	Team getTeam();
 
 	/**
 	 * Obtains the indexes to the {@link ManagedObject} instances that must be
-	 * loaded before the {@link Task} may be executed.
+	 * loaded before the {@link Job} may be executed.
 	 * 
 	 * @return Listing of indexes of {@link ManagedObject} instances.
 	 */
 	int[] getRequiredManagedObjects();
-
-	/**
-	 * Obtains the {@link EscalationProcedure} for the {@link Task} of this
-	 * {@link TaskMetaData}.
-	 * 
-	 * @return {@link EscalationProcedure} for the {@link Task} of this
-	 *         {@link TaskMetaData}.
-	 */
-	EscalationProcedure getEscalationProcedure();
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within
@@ -61,5 +60,13 @@ public interface JobMetaData {
 	 *         specified {@link Flow}.
 	 */
 	TaskMetaData<?, ?, ?, ?> getNextTaskInFlow();
+
+	/**
+	 * Obtains the {@link EscalationProcedure} for the {@link Job} of this
+	 * {@link JobMetaData}.
+	 * 
+	 * @return {@link EscalationProcedure}.
+	 */
+	EscalationProcedure getEscalationProcedure();
 
 }

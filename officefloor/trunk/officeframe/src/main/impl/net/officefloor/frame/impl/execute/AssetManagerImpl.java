@@ -92,7 +92,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 		this.time = NO_TIME;
 
 		// Iterate over the monitors managing them
-		JobActivateSetImpl notifySet = new JobActivateSetImpl();
+		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
 		while (item != null) {
 
 			// Reset the Asset Report

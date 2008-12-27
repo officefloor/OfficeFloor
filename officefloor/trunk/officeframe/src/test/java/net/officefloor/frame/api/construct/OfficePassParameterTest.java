@@ -20,7 +20,6 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
@@ -51,8 +50,8 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		// Add the first work
 		WorkOne workOne = new WorkOne(parameter);
 		this.constructWork("WORK_ONE", workOne, "SENDER");
-		TaskBuilder<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> taskBuilder = this.constructTask("SENDER", Object.class,
-				workOne, "TEAM", null);
+		TaskBuilder<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> taskBuilder = this
+				.constructTask("SENDER", Object.class, workOne, "TEAM", null);
 		taskBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL);
 
@@ -104,16 +103,9 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-		 */
-		public void setWorkContext(WorkContext context) {
-			// TODO Auto-generated method stub
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+		 * @see
+		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
+		 * .api.execute.TaskContext)
 		 */
 		public Object doTask(
 				TaskContext<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> context)
@@ -155,17 +147,9 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-		 */
-		public void setWorkContext(WorkContext context) {
-			// TODO Auto-generated method stub
-
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+		 * @see
+		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
+		 * .api.execute.TaskContext)
 		 */
 		public Object doTask(
 				TaskContext<Object, WorkTwo, NoManagedObjectsEnum, NoDelegatesEnum> context)

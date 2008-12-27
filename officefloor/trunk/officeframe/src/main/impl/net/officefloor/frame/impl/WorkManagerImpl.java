@@ -21,9 +21,9 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Implementation of the {@link WorkManager}.
@@ -83,15 +83,15 @@ public class WorkManagerImpl<W extends Work> implements WorkManager {
 					+ this.workName + "'");
 		}
 
-		// Create the task within a new process
-		Job taskContainer = this.office.createProcess(flowMetaData, parameter,
+		// Create the job node within a new process
+		JobNode jobNode = this.office.createProcess(flowMetaData, parameter,
 				null, 0, null);
 
-		// Assign the Task to the Team
-		taskContainer.activateJob();
+		// Assign the job node to the Team
+		jobNode.activateJob();
 
-		// Indicate when complete
-		return taskContainer.getThreadState();
+		// Indicate when thread of work complete
+		return jobNode.getThreadState();
 	}
 
 	/*

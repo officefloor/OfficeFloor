@@ -20,6 +20,7 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.spi.team.Job;
 
@@ -47,8 +48,7 @@ public class AssetMonitorImpl extends
 	protected final AssetManager assetManager;
 
 	/**
-	 * Flag indicating to permanently notify waiting {@link Job}
-	 * instances.
+	 * Flag indicating to permanently notify waiting {@link Job} instances.
 	 */
 	protected boolean isPermanentlyNotify = false;
 
@@ -58,9 +58,9 @@ public class AssetMonitorImpl extends
 	protected Throwable failure = null;
 
 	/**
-	 * List of {@link Job} instances waiting on the {@link Asset}.
+	 * List of {@link JobNode} instances waiting on the {@link Asset}.
 	 */
-	protected final LinkedList<MonitoredTask, Object> tasks = new AbstractLinkedList<MonitoredTask, Object>() {
+	protected final LinkedList<MonitoredJobNode, Object> jobNodes = new AbstractLinkedList<MonitoredJobNode, Object>() {
 		@Override
 		public void lastLinkedListEntryRemoved(Object removeParameter) {
 			// Unregister from the Asset Group
@@ -92,9 +92,7 @@ public class AssetMonitorImpl extends
 	}
 
 	/*
-	 * =================================================================================
-	 * AssetMonitor
-	 * =================================================================================
+	 * ================= AssetMonitor ==========================================
 	 */
 
 	/*
@@ -102,6 +100,7 @@ public class AssetMonitorImpl extends
 	 * 
 	 * @see net.officefloor.frame.internal.structure.TaskMonitor#getAsset()
 	 */
+	@Override
 	public Asset getAsset() {
 		return this.asset;
 	}
@@ -111,6 +110,7 @@ public class AssetMonitorImpl extends
 	 * 
 	 * @see net.officefloor.frame.internal.structure.TaskMonitor#getAssetLock()
 	 */
+	@Override
 	public Object getAssetLock() {
 		return this.assetLock;
 	}
@@ -118,49 +118,52 @@ public class AssetMonitorImpl extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetMonitor#wait(net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.AssetMonitor#wait(net.officefloor
+	 * .frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
 	@Override
-	public boolean wait(Job taskContainer, JobActivateSet notifySet) {
-		// Create the monitored item for the task container
-		MonitoredTask monitoredTask = new MonitoredTask(taskContainer,
-				this.tasks);
+	public boolean wait(JobNode jobNode, JobActivateSet notifySet) {
+
+		// Create the monitored item for the job node
+		MonitoredJobNode monitoredJobNode = new MonitoredJobNode(jobNode,
+				this.jobNodes);
 
 		// Only allow one wait at a time
-		Job wakeupTask = null;
+		JobNode wakeupJobNode = null;
 		Throwable wakeupFailure = null;
 		synchronized (this.assetLock) {
 
 			// Determine action based on state
 			if (this.isPermanentlyNotify) {
 				// Permanently notifying, therefore wake up immediately
-				wakeupTask = taskContainer;
+				wakeupJobNode = jobNode;
 				wakeupFailure = this.failure;
 
 			} else {
 				// Determine if first Task
-				if (this.tasks.getHead() == null) {
+				if (this.jobNodes.getHead() == null) {
 					// Require monitoring, therefore register for monitoring
 					this.assetManager.registerAssetMonitor(this);
 				}
 
 				// Add the monitored task
-				this.tasks.addLinkedListEntry(monitoredTask);
+				this.jobNodes.addLinkedListEntry(monitoredJobNode);
 			}
 		}
 
 		// Determine if wake up immediately
-		if (wakeupTask == null) {
-			// No task to wake up, therefore waiting
+		if (wakeupJobNode == null) {
+			// No job node to wake up, therefore waiting
 			return true;
 		}
 
 		// Have task to wake up (as permanent wake up)
 		if (wakeupFailure == null) {
-			notifySet.addNotifiedJob(wakeupTask);
+			notifySet.addNotifiedJobNode(wakeupJobNode);
 		} else {
-			notifySet.addFailedJob(wakeupTask, wakeupFailure);
+			notifySet.addFailedJobNode(wakeupJobNode, wakeupFailure);
 		}
 		return false;
 	}
@@ -168,7 +171,9 @@ public class AssetMonitorImpl extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetMonitor#notifyTasks(net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.AssetMonitor#notifyTasks(net
+	 * .officefloor.frame.internal.structure.AssetNotifySet)
 	 */
 	@Override
 	public void notifyTasks(JobActivateSet notifySet) {
@@ -178,7 +183,9 @@ public class AssetMonitorImpl extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetMonitor#notifyPermanently(net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.AssetMonitor#notifyPermanently
+	 * (net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
 	@Override
 	public void notifyPermanently(JobActivateSet notifySet) {
@@ -188,8 +195,8 @@ public class AssetMonitorImpl extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetMonitor#failTasks(net.officefloor.frame.internal.structure.AssetNotifySet,
-	 *      java.lang.Throwable)
+	 * @seenet.officefloor.frame.internal.structure.AssetMonitor#failTasks(net.
+	 * officefloor.frame.internal.structure.AssetNotifySet, java.lang.Throwable)
 	 */
 	@Override
 	public void failTasks(JobActivateSet notifySet, Throwable failure) {
@@ -199,8 +206,10 @@ public class AssetMonitorImpl extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetMonitor#failPermanently(net.officefloor.frame.internal.structure.AssetNotifySet,
-	 *      java.lang.Throwable)
+	 * @see
+	 * net.officefloor.frame.internal.structure.AssetMonitor#failPermanently
+	 * (net.officefloor.frame.internal.structure.AssetNotifySet,
+	 * java.lang.Throwable)
 	 */
 	@Override
 	public void failPermanently(JobActivateSet notifySet, Throwable failure) {
@@ -209,8 +218,8 @@ public class AssetMonitorImpl extends
 
 	/**
 	 * Purges the list of {@link MonitoredTask} instances, adding the
-	 * {@link Job} instances to the {@link JobActivateSet} with the
-	 * possible {@link Throwable} failure.
+	 * {@link JobNode} instances to the {@link JobActivateSet} with the possible
+	 * {@link Throwable} failure.
 	 * 
 	 * @param notifySet
 	 *            {@link JobActivateSet}.
@@ -222,11 +231,11 @@ public class AssetMonitorImpl extends
 	private void notify(JobActivateSet notifySet, boolean isPermanentlyNotify,
 			Throwable failure) {
 
-		// Obtain the tasks to be notified
-		MonitoredTask task;
+		// Obtain the jobs to be notified
+		MonitoredJobNode monitoredJobNode;
 		synchronized (this.assetLock) {
 			// Purge the list of tasks
-			task = this.tasks.purgeLinkedList(null);
+			monitoredJobNode = this.jobNodes.purgeLinkedList(null);
 
 			// Flag permanently notify (and possible failure)
 			if (isPermanentlyNotify) {
@@ -235,37 +244,40 @@ public class AssetMonitorImpl extends
 			}
 		}
 
-		// Add the tasks for notifying
-		while (task != null) {
+		// Add the job nodes for notifying
+		while (monitoredJobNode != null) {
 			if (failure == null) {
-				notifySet.addNotifiedJob(task.taskContainer);
+				notifySet.addNotifiedJobNode(monitoredJobNode.jobNode);
 			} else {
-				notifySet.addFailedJob(task.taskContainer, failure);
+				notifySet.addFailedJobNode(monitoredJobNode.jobNode, failure);
 			}
-			task = task.getNext();
+			monitoredJobNode = monitoredJobNode.getNext();
 		}
 	}
 
 	/**
-	 * {@link Job} being monitored by the {@link AssetMonitor}.
+	 * {@link JobNode} being monitored by the {@link AssetMonitor}.
 	 */
-	private class MonitoredTask extends
-			AbstractLinkedListEntry<MonitoredTask, Object> {
+	private class MonitoredJobNode extends
+			AbstractLinkedListEntry<MonitoredJobNode, Object> {
 
 		/**
-		 * {@link Job} being monitored.
+		 * {@link JobNode} being monitored.
 		 */
-		protected final Job taskContainer;
+		protected final JobNode jobNode;
 
 		/**
 		 * Initiate.
 		 * 
+		 * @param jobNode
+		 *            {@link JobNode} being monitored.
 		 * @param linkedList
+		 *            {@link LinkedList}.
 		 */
-		public MonitoredTask(Job taskContainer,
-				LinkedList<MonitoredTask, Object> linkedList) {
+		public MonitoredJobNode(JobNode jobNode,
+				LinkedList<MonitoredJobNode, Object> linkedList) {
 			super(linkedList);
-			this.taskContainer = taskContainer;
+			this.jobNode = jobNode;
 		}
 	}
 

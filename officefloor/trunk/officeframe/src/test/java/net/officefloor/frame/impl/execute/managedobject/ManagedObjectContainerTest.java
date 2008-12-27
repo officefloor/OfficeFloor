@@ -21,6 +21,7 @@ import net.officefloor.frame.impl.execute.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -32,7 +33,6 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 import org.easymock.internal.AlwaysMatcher;
@@ -63,13 +63,12 @@ public class ManagedObjectContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link JobContext}.
 	 */
-	private JobContext executionContext = this
-			.createMock(JobContext.class);
+	private JobContext executionContext = this.createMock(JobContext.class);
 
 	/**
-	 * Mock {@link Job}.
+	 * Mock {@link JobNode}.
 	 */
-	private Job taskContainer = this.createMock(Job.class);
+	private JobNode jobNode = this.createMock(JobNode.class);
 
 	/**
 	 * Mock {@link JobActivateSet}.
@@ -128,9 +127,9 @@ public class ManagedObjectContainerTest extends OfficeFrameTestCase {
 			.createMock(ManagedObjectSource.class);
 
 	/**
-	 * Mock recycle {@link Job}.
+	 * Mock recycle {@link JobNode}.
 	 */
-	private Job recycleTask = this.createMock(Job.class);
+	private JobNode recycleJobNode = this.createMock(JobNode.class);
 
 	/**
 	 * Mock {@link ObjectRegistry}.
@@ -177,7 +176,7 @@ public class ManagedObjectContainerTest extends OfficeFrameTestCase {
 			}
 		});
 		this.recordReturn(this.moMetaData, this.moMetaData
-				.createRecycleTask(this.managedObject), this.recycleTask);
+				.createRecycleJobNode(this.managedObject), this.recycleJobNode);
 		this.recordReturn(this.managedObject, this.managedObject.getObject(),
 				this.moObject);
 		this.recordReturn(this.moMetaData, this.moMetaData
@@ -191,8 +190,8 @@ public class ManagedObjectContainerTest extends OfficeFrameTestCase {
 		// Record co-ordinate
 		this.recordReturn(this.moMetaData, this.moMetaData
 				.isCoordinatingManagedObject(), true);
-		this.recordReturn(this.taskContainer, this.taskContainer
-				.getThreadState(), this.threadState);
+		this.recordReturn(this.jobNode, this.jobNode.getThreadState(),
+				this.threadState);
 		this.recordReturn(this.moMetaData, this.moMetaData
 				.createObjectRegistry(this.workContainer, this.threadState),
 				this.objectRegistry);
@@ -206,7 +205,7 @@ public class ManagedObjectContainerTest extends OfficeFrameTestCase {
 
 		// Record unload
 		// TODO consider adding to notify set rather than activating directly
-		this.recycleTask.activateJob();
+		this.recycleJobNode.activateJob();
 
 		// Replay
 		this.replayMockObjects();
@@ -214,13 +213,13 @@ public class ManagedObjectContainerTest extends OfficeFrameTestCase {
 		// Load, ready, co-ordinate, ready, get, unload
 		this.createManagedObjectContainer();
 		this.moContainer.loadManagedObject(this.executionContext,
-				this.taskContainer, this.assetNotifySet);
+				this.jobNode, this.assetNotifySet);
 		this.moContainer.isManagedObjectReady(this.executionContext,
-				this.taskContainer, this.assetNotifySet);
+				this.jobNode, this.assetNotifySet);
 		this.moContainer.coordinateManagedObject(this.workContainer,
-				this.executionContext, this.taskContainer, this.assetNotifySet);
+				this.executionContext, this.jobNode, this.assetNotifySet);
 		this.moContainer.isManagedObjectReady(this.executionContext,
-				this.taskContainer, this.assetNotifySet);
+				this.jobNode, this.assetNotifySet);
 		assertEquals("Incorrect managed object", this.managedObject,
 				this.moContainer.getManagedObject(this.threadState));
 		assertEquals("Incorrect object", this.moObject, this.moContainer

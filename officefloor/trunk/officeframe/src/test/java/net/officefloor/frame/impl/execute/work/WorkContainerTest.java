@@ -29,6 +29,7 @@ import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -138,13 +139,12 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Mock {@link JobContext}.
 	 */
-	private JobContext executionContext = this
-			.createMock(JobContext.class);
+	private JobContext executionContext = this.createMock(JobContext.class);
 
 	/**
-	 * Mock {@link Job}.
+	 * Mock {@link JobNode}.
 	 */
-	private Job taskContainer = this.createMock(Job.class);
+	private JobNode jobNode = this.createMock(JobNode.class);
 
 	/**
 	 * Mock {@link JobActivateSet}.
@@ -237,14 +237,14 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 		this.recordGetManagedObjectMetaData();
 		this.recordWorkGetProcessStateManagedObjectIndex();
 		this.recordReturn(this.workMoContainer, this.workMoContainer
-				.loadManagedObject(this.executionContext, this.taskContainer,
+				.loadManagedObject(this.executionContext, this.jobNode,
 						this.assetNotifySet), true);
 		this.recordProcessGetProcessStateManagedObjectIndex();
 		this.recordGetProcessLock();
 		this.recordWorkGetProcessStateManagedObjectIndex();
 		this.recordProcessGetProcessStateManagedObjectIndex();
 		this.recordReturn(this.processMoContainer, this.processMoContainer
-				.loadManagedObject(this.executionContext, this.taskContainer,
+				.loadManagedObject(this.executionContext, this.jobNode,
 						this.assetNotifySet), true);
 
 		// Record ready
@@ -254,14 +254,14 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 		this.recordGetManagedObjectMetaData();
 		this.recordWorkGetProcessStateManagedObjectIndex();
 		this.workMoContainer.coordinateManagedObject(this.workContainer,
-				this.executionContext, this.taskContainer, this.assetNotifySet);
+				this.executionContext, this.jobNode, this.assetNotifySet);
 		this.control(this.workMoContainer).setMatcher(new AlwaysMatcher());
 		this.recordProcessGetProcessStateManagedObjectIndex();
 		this.recordGetProcessLock();
 		this.recordWorkGetProcessStateManagedObjectIndex();
 		this.recordProcessGetProcessStateManagedObjectIndex();
 		this.processMoContainer.coordinateManagedObject(this.workContainer,
-				this.executionContext, this.taskContainer, this.assetNotifySet);
+				this.executionContext, this.jobNode, this.assetNotifySet);
 		this.control(this.processMoContainer).setMatcher(new AlwaysMatcher());
 
 		// Record ready
@@ -319,13 +319,13 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 		// (remaining: ready, doTask, ready, administer)
 		this.createWorkCtontainer();
 		this.workContainer.loadManagedObjects(managedObjectIndexes,
-				this.executionContext, this.taskContainer, this.assetNotifySet);
+				this.executionContext, this.jobNode, this.assetNotifySet);
 		this.workContainer.isManagedObjectsReady(managedObjectIndexes,
-				this.executionContext, this.taskContainer, this.assetNotifySet);
+				this.executionContext, this.jobNode, this.assetNotifySet);
 		this.workContainer.coordinateManagedObjects(managedObjectIndexes,
-				this.executionContext, this.taskContainer, this.assetNotifySet);
+				this.executionContext, this.jobNode, this.assetNotifySet);
 		this.workContainer.isManagedObjectsReady(managedObjectIndexes,
-				this.executionContext, this.taskContainer, this.assetNotifySet);
+				this.executionContext, this.jobNode, this.assetNotifySet);
 		this.workContainer.administerManagedObjects(this.taskDutyAssociation,
 				this.adminContext);
 
@@ -361,12 +361,11 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records obtaining the {@link ProcessState} lock from the
-	 * {@link Job}.
+	 * Records obtaining the {@link ProcessState} lock from the {@link Job}.
 	 */
 	private void recordGetProcessLock() {
-		this.recordReturn(this.taskContainer, this.taskContainer
-				.getThreadState(), this.threadState);
+		this.recordReturn(this.jobNode, this.jobNode.getThreadState(),
+				this.threadState);
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
 		this.recordReturn(this.processState,
@@ -375,21 +374,22 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 
 	/**
 	 * Records
-	 * {@link WorkContainer#isManagedObjectsReady(int[], JobContext, Job, JobActivateSet)}.
+	 * {@link WorkContainer#isManagedObjectsReady(int[], JobContext, Job, JobActivateSet)}
+	 * .
 	 */
 	private void recordIsManagedObjectReady() {
 		this.recordGetManagedObjectMetaData();
 		this.recordWorkGetProcessStateManagedObjectIndex();
 		this.recordReturn(this.workMoContainer, this.workMoContainer
-				.isManagedObjectReady(this.executionContext,
-						this.taskContainer, this.assetNotifySet), true);
+				.isManagedObjectReady(this.executionContext, this.jobNode,
+						this.assetNotifySet), true);
 		this.recordProcessGetProcessStateManagedObjectIndex();
 		this.recordGetProcessLock();
 		this.recordWorkGetProcessStateManagedObjectIndex();
 		this.recordProcessGetProcessStateManagedObjectIndex();
 		this.recordReturn(this.processMoContainer, this.processMoContainer
-				.isManagedObjectReady(this.executionContext,
-						this.taskContainer, this.assetNotifySet), true);
+				.isManagedObjectReady(this.executionContext, this.jobNode,
+						this.assetNotifySet), true);
 	}
 
 	/**

@@ -22,7 +22,6 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 
 /**
  * Mock {@link net.officefloor.frame.api.execute.Task}.
@@ -32,11 +31,6 @@ import net.officefloor.frame.api.execute.WorkContext;
 public abstract class AbstractMockTask<P extends Object> implements Work,
 		WorkFactory<Work>, Task<P, Work, Indexed, Indexed>,
 		TaskFactory<P, Work, Indexed, Indexed> {
-
-	/**
-	 * {@link WorkContext}.
-	 */
-	private WorkContext workContext;
 
 	/**
 	 * {@link TaskContext}.
@@ -55,15 +49,6 @@ public abstract class AbstractMockTask<P extends Object> implements Work,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-	 */
-	public final void setWorkContext(WorkContext context) throws Exception {
-		this.workContext = context;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
 	 */
 	@SuppressWarnings("unchecked")
@@ -74,7 +59,9 @@ public abstract class AbstractMockTask<P extends Object> implements Work,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+	 * @see
+	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
+	 * .execute.TaskContext)
 	 */
 	public final Object doTask(TaskContext<P, Work, Indexed, Indexed> context)
 			throws Exception {
@@ -84,15 +71,6 @@ public abstract class AbstractMockTask<P extends Object> implements Work,
 
 		// Do the task
 		return this.doTask();
-	}
-
-	/**
-	 * Obtains the {@link WorkContext}.
-	 * 
-	 * @return {@link WorkContext}.
-	 */
-	protected final WorkContext getWorkContext() {
-		return this.workContext;
 	}
 
 	/**

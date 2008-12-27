@@ -28,24 +28,19 @@ import net.officefloor.frame.spi.team.Job;
 public interface Flow extends FlowFuture, LinkedListEntry<Flow, JobActivateSet> {
 
 	/**
-	 * Creates a new {@link Job} bound to this {@link Flow}.
+	 * Creates a new {@link JobNode} bound to this {@link Flow}.
 	 * 
 	 * @param taskMetaData
-	 *            {@link TaskMetaData} for the new {@link Job}.
+	 *            {@link TaskMetaData} for the new {@link JobNode}.
 	 * @param parallelNodeOwner
 	 *            {@link JobNode} that is the parallel owner of the new
-	 *            {@link Job}.
+	 *            {@link JobNode}.
 	 * @param parameter
-	 *            Parameter for the {@link Job}.
-	 * @param currentWorkLink
-	 *            {@link ThreadWorkLink} for the {@link WorkContainer} that is
-	 *            currently in focus. In other words the {@link ThreadWorkLink}
-	 *            of the {@link Job} creating the new {@link Job}.
-	 * @return New configured {@link Job}.
+	 *            Parameter for the {@link JobNode}.
+	 * @return New configured {@link JobNode}.
 	 */
-	Job createJob(TaskMetaData<?, ?, ?, ?> taskMetaData,
-			JobNode parallelNodeOwner, Object parameter,
-			ThreadWorkLink<?> currentWorkLink);
+	JobNode createJobNode(TaskMetaData<?, ?, ?, ?> taskMetaData,
+			JobNode parallelNodeOwner, Object parameter);
 
 	/**
 	 * Flags that the input {@link Job} has completed.

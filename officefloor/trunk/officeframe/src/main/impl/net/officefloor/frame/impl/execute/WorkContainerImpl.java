@@ -19,12 +19,12 @@ package net.officefloor.frame.impl.execute;
 import java.util.Arrays;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -35,15 +35,13 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Container of a {@link Work} instance.
  * 
  * @author Daniel
  */
-public class WorkContainerImpl<W extends Work> implements WorkContext,
-		WorkContainer<W> {
+public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 
 	/**
 	 * {@link Work} being managed.
@@ -123,9 +121,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	}
 
 	/*
-	 * ====================================================================
-	 * WorkContainer
-	 * ====================================================================
+	 * ================== WorkContainer ===================================
 	 */
 
 	/*
@@ -133,6 +129,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	 * 
 	 * @see net.officefloor.frame.internal.structure.WorkContainer#getWorkId()
 	 */
+	@Override
 	public int getWorkId() {
 		return this.workMetaData.getWorkId();
 	}
@@ -140,8 +137,10 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#getWork(net.officefloor.frame.internal.structure.ThreadState)
+	 * @seenet.officefloor.frame.internal.structure.WorkContainer#getWork(net.
+	 * officefloor.frame.internal.structure.ThreadState)
 	 */
+	@Override
 	public W getWork(ThreadState threadState) {
 		return this.work;
 	}
@@ -149,13 +148,15 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#loadManagedObjects(int[],
-	 *      net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.WorkContainer#loadManagedObjects
+	 * (int[], net.officefloor.frame.spi.team.JobContext,
+	 * net.officefloor.frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
+	@Override
 	public boolean loadManagedObjects(int[] managedObjectIndexes,
-			JobContext executionContext, Job taskContainer,
+			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet) {
 
 		boolean isAllLoaded = true;
@@ -176,14 +177,14 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() == ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Load the work scoped managed object
 						isAllLoaded &= this.managedObjects[moIndex]
-								.loadManagedObject(executionContext,
-										taskContainer, notifySet);
+								.loadManagedObject(executionContext, jobNode,
+										notifySet);
 					}
 				}
 			}
 
 			// Lock for loading the process coped managed objects
-			synchronized (taskContainer.getThreadState().getProcessState()
+			synchronized (jobNode.getThreadState().getProcessState()
 					.getProcessLock()) {
 				// Load the process scoped managed objects
 				for (int moIndex : managedObjectIndexes) {
@@ -192,8 +193,8 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() != ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Load the process scoped managed object
 						isAllLoaded &= this.managedObjects[moIndex]
-								.loadManagedObject(executionContext,
-										taskContainer, notifySet);
+								.loadManagedObject(executionContext, jobNode,
+										notifySet);
 					}
 				}
 			}
@@ -206,13 +207,15 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#coordinateManagedObjects(int[],
-	 *      net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @seenet.officefloor.frame.internal.structure.WorkContainer#
+	 * coordinateManagedObjects(int[],
+	 * net.officefloor.frame.spi.team.JobContext,
+	 * net.officefloor.frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
+	@Override
 	public void coordinateManagedObjects(int[] managedObjectIndexes,
-			JobContext executionContext, Job taskContainer,
+			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet) {
 
 		// Skip over if no required managed objects
@@ -231,14 +234,13 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() == ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Co-ordinate the work scoped managed object
 						this.managedObjects[moIndex].coordinateManagedObject(
-								this, executionContext, taskContainer,
-								notifySet);
+								this, executionContext, jobNode, notifySet);
 					}
 				}
 			}
 
 			// Lock for co-ordinating the process coped managed objects
-			synchronized (taskContainer.getThreadState().getProcessState()
+			synchronized (jobNode.getThreadState().getProcessState()
 					.getProcessLock()) {
 				// Co-ordinate the process scoped managed objects
 				for (int moIndex : managedObjectIndexes) {
@@ -247,8 +249,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() != ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Co-ordinate the process scoped managed object
 						this.managedObjects[moIndex].coordinateManagedObject(
-								this, executionContext, taskContainer,
-								notifySet);
+								this, executionContext, jobNode, notifySet);
 					}
 				}
 			}
@@ -258,13 +259,15 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#isManagedObjectsReady(int[],
-	 *      net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.WorkContainer#isManagedObjectsReady
+	 * (int[], net.officefloor.frame.spi.team.JobContext,
+	 * net.officefloor.frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
+	@Override
 	public boolean isManagedObjectsReady(int[] managedObjectIndexes,
-			JobContext executionContext, Job taskContainer,
+			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet) {
 
 		// Skip over if no managed objects
@@ -283,7 +286,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() == ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Check the work scoped managed object
 						if (!this.managedObjects[moIndex].isManagedObjectReady(
-								executionContext, taskContainer, notifySet)) {
+								executionContext, jobNode, notifySet)) {
 							// Waiting on managed object to be ready
 							return false;
 						}
@@ -292,7 +295,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 			}
 
 			// Lock for checking the process coped managed objects
-			synchronized (taskContainer.getThreadState().getProcessState()
+			synchronized (jobNode.getThreadState().getProcessState()
 					.getProcessLock()) {
 				// Check the process scoped managed objects
 				for (int moIndex : managedObjectIndexes) {
@@ -301,7 +304,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 							.getProcessStateManagedObjectIndex() != ManagedObjectMetaData.NON_PROCESS_INDEX) {
 						// Check the process scoped managed object
 						if (!this.managedObjects[moIndex].isManagedObjectReady(
-								executionContext, taskContainer, notifySet)) {
+								executionContext, jobNode, notifySet)) {
 							// Waiting on managed object to be ready
 							return false;
 						}
@@ -317,9 +320,12 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#administerManagedObjects(net.officefloor.frame.internal.structure.TaskDutyAssociation,
-	 *      net.officefloor.frame.internal.structure.AdministratorContext)
+	 * @seenet.officefloor.frame.internal.structure.WorkContainer#
+	 * administerManagedObjects
+	 * (net.officefloor.frame.internal.structure.TaskDutyAssociation,
+	 * net.officefloor.frame.internal.structure.AdministratorContext)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public void administerManagedObjects(TaskDutyAssociation<?> duty,
 			AdministratorContext adminContext) throws Exception {
@@ -393,9 +399,11 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#getObject(int,
-	 *      net.officefloor.frame.internal.structure.ThreadState)
+	 * @see
+	 * net.officefloor.frame.internal.structure.WorkContainer#getObject(int,
+	 * net.officefloor.frame.internal.structure.ThreadState)
 	 */
+	@Override
 	public Object getObject(int moIndex, ThreadState threadState) {
 		return this.managedObjects[moIndex].getObject(threadState);
 	}
@@ -403,50 +411,22 @@ public class WorkContainerImpl<W extends Work> implements WorkContext,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#registerThread(net.officefloor.frame.internal.structure.ThreadState)
+	 * @see net.officefloor.frame.internal.structure.WorkContainer#unloadWork()
 	 */
-	public void registerThread(ThreadState thread) {
-		// Thread using work
-		synchronized (this) {
-			this.activeThreadCount++;
-		}
-	}
+	@Override
+	public void unloadWork() {
+		// Obtain the work managed object meta-data
+		ManagedObjectMetaData<?> workMoMetaDatas[] = this.workMetaData
+				.getManagedObjectMetaData();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#unregisterThread(net.officefloor.frame.internal.structure.ThreadState)
-	 */
-	public void unregisterThread(ThreadState thread) {
-		// Thread not using work
-		int remainingInterest;
-		synchronized (this) {
-			this.activeThreadCount--;
-			remainingInterest = this.activeThreadCount;
-		}
-
-		// Determine if to clean this work
-		if (remainingInterest == 0) {
-
-			// Obtain the work managed object meta-data
-			ManagedObjectMetaData<?> workMoMetaDatas[] = this.workMetaData
-					.getManagedObjectMetaData();
-
-			// Unload the work scoped managed objects
-			for (int i = 0; i < workMoMetaDatas.length; i++) {
-				// Determine if managed object is work scoped
-				if (workMoMetaDatas[i].getProcessStateManagedObjectIndex() == ManagedObjectMetaData.NON_PROCESS_INDEX) {
-					// Unload the work scoped managed object
-					this.managedObjects[i].unloadManagedObject();
-				}
+		// Unload the work scoped managed objects
+		for (int i = 0; i < workMoMetaDatas.length; i++) {
+			// Determine if managed object is work scoped
+			if (workMoMetaDatas[i].getProcessStateManagedObjectIndex() == ManagedObjectMetaData.NON_PROCESS_INDEX) {
+				// Unload the work scoped managed object
+				this.managedObjects[i].unloadManagedObject();
 			}
 		}
 	}
-
-	/*
-	 * ====================================================================
-	 * WorkContext
-	 * ====================================================================
-	 */
 
 }

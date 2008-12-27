@@ -21,7 +21,6 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -39,16 +38,6 @@ public interface TaskMetaData<P, W extends Work, M extends Enum<M>, F extends En
 	 * @return {@link TaskFactory}
 	 */
 	TaskFactory<P, W, M, F> getTaskFactory();
-
-	/**
-	 * Obtains the indexes to the {@link ManagedObject} instances that are
-	 * {@link AsynchronousManagedObject} and require checking to be ready before
-	 * the {@link Task} may be executed.
-	 * 
-	 * @return Listing of indexes of {@link ManagedObject} instances.
-	 */
-	@Deprecated
-	int[] getCheckManagedObjects();
 
 	/**
 	 * Translates the {@link ManagedObject} index of the {@link Task} to that of

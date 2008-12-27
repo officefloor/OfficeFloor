@@ -21,7 +21,6 @@ import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
@@ -128,16 +127,9 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-		 */
-		public void setWorkContext(WorkContext context) {
-			// Do nothing
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+		 * @see
+		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
+		 * .api.execute.TaskContext)
 		 */
 		public Object doTask(
 				TaskContext<Object, WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> context)
@@ -192,16 +184,9 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-		 */
-		public void setWorkContext(WorkContext context) {
-			// Do nothing
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+		 * @see
+		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
+		 * .api.execute.TaskContext)
 		 */
 		public Object doTask(
 				TaskContext<Object, WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> context)

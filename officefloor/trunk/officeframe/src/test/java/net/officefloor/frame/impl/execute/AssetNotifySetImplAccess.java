@@ -16,24 +16,25 @@
  */
 package net.officefloor.frame.impl.execute;
 
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedList;
 
 /**
- * Provides package access to {@link JobActivateSetImpl}.
+ * Provides package access to {@link JobActivatableSetImpl}.
  * 
  * @author Daniel
  */
 public class AssetNotifySetImplAccess {
 
 	/**
-	 * Obtain access to {@link JobActivateSetImpl#tasks}.
+	 * Obtain access to {@link JobActivatableSetImpl#tasks}.
 	 * 
 	 * @param notifySet
-	 *            {@link JobActivateSetImpl}.
-	 * @return {@link LinkedList} for the <code>tasks</code> of the input
-	 *         {@link JobActivateSetImpl}.
+	 *            {@link JobActivatableSetImpl}.
+	 * @return {@link LinkedList} for the {@link JobNode} instances of the input
+	 *         {@link JobActivatableSetImpl}.
 	 */
-	public static LinkedList<?, Object> tasks(JobActivateSetImpl notifySet) {
-		return notifySet.tasks;
+	public static LinkedList<?, Object> tasks(JobActivatableSetImpl notifySet) {
+		return notifySet.jobNodes;
 	}
 }

@@ -25,7 +25,6 @@ import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
@@ -194,15 +193,6 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	@SuppressWarnings("unchecked")
 	public W createWork() {
 		return (W) this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-	 */
-	public void setWorkContext(WorkContext context) throws Exception {
-		// Not used
 	}
 
 	/*

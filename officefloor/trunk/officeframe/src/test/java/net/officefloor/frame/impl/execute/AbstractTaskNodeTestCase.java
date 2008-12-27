@@ -24,29 +24,19 @@ import java.util.Map;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
-import net.officefloor.frame.impl.execute.AssetManagerImpl;
-import net.officefloor.frame.impl.execute.FlowMetaDataImpl;
-import net.officefloor.frame.impl.execute.ManagedObjectMetaDataImpl;
-import net.officefloor.frame.impl.execute.ProcessStateImpl;
-import net.officefloor.frame.impl.execute.ThreadWorkLinkImpl;
-import net.officefloor.frame.impl.execute.WorkContainerImpl;
-import net.officefloor.frame.impl.execute.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.ThreadWorkLink;
-import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -164,9 +154,6 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Create the Work
 		final Work work = new Work() {
-			public void setWorkContext(WorkContext context) throws Exception {
-				// Do nothing
-			}
 		};
 
 		// Create the Work Factory
@@ -355,29 +342,18 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		// Create Flow for executing
 		Flow flow = processState.createThread(flowMetaData);
 
-		// Obtain the thread state
-		ThreadState threadState = flow.getThreadState();
+		// Create the initial job node to execute
+		JobNode initialJobNode = flow.createJobNode(this.getInitialNode(),
+				null, null);
 
-		// Create the Work
-		W work = workMetaData.getWorkFactory().createWork();
-
-		// Create the Work Container
-		WorkContainer<W> workContainer = new WorkContainerImpl<W>(work,
-				workMetaData, processState);
-
-		// Create the Thread Work Link
-		ThreadWorkLink<W> workLink = new ThreadWorkLinkImpl<W>(threadState,
-				workContainer);
-
-		// Create the initial Task Container to execute
-		Job initialTaskContainer = flow.createJob(this.getInitialNode(), null,
-				null, workLink);
+		// Obtain the job from the job node
+		Job initialJob = (Job) initialJobNode;
 
 		// Execute the task tree (until complete)
 		boolean isComplete;
 		do {
 			JobContext context = new MockExecutionContext();
-			isComplete = initialTaskContainer.doJob(context);
+			isComplete = initialJob.doJob(context);
 		} while (!isComplete);
 
 		// Verify functionality on mock objects
@@ -529,7 +505,9 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
+	 * @see
+	 * net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.
+	 * spi.team.TaskContainer)
 	 */
 	public void assignJob(Job task) {
 		// Passively execute
@@ -574,7 +552,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.team.ExecutionContext#continueExecution()
+		 * @see
+		 * net.officefloor.frame.spi.team.ExecutionContext#continueExecution()
 		 */
 		public boolean continueExecution() {
 			// Continue

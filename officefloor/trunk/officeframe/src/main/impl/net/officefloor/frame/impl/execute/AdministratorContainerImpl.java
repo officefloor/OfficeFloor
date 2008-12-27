@@ -30,8 +30,7 @@ import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.DutyContext;
 
 /**
- * Implementation of an
- * {@link net.officefloor.frame.internal.structure.AdministratorContainer}.
+ * Implementation of an {@link AdministratorContainer}.
  * 
  * @author Daniel
  */
@@ -60,15 +59,15 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	}
 
 	/*
-	 * ====================================================================
-	 * AdministratorContainer
-	 * ====================================================================
+	 * ===================== AdministratorContainer =======================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AdministratorContainer#getExtensionInterfaceMetaData(net.officefloor.frame.internal.structure.AdministratorContext)
+	 * @seenet.officefloor.frame.internal.structure.AdministratorContainer#
+	 * getExtensionInterfaceMetaData
+	 * (net.officefloor.frame.internal.structure.AdministratorContext)
 	 */
 	public ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData(
 			AdministratorContext context) {
@@ -78,7 +77,9 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AdministratorContainer#doDuty(net.officefloor.frame.internal.structure.DutyMetaData)
+	 * @see
+	 * net.officefloor.frame.internal.structure.AdministratorContainer#doDuty
+	 * (net.officefloor.frame.internal.structure.DutyMetaData)
 	 */
 	@SuppressWarnings("unchecked")
 	public void doDuty(TaskDutyAssociation<A> taskDuty,
@@ -110,9 +111,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	}
 
 	/*
-	 * ====================================================================
-	 * DutyContext
-	 * ====================================================================
+	 * ==================== DutyContext ===================================
 	 */
 
 	/**
@@ -133,7 +132,9 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.administration.DutyContext#getExtensionInterfaces()
+	 * @see
+	 * net.officefloor.frame.spi.administration.DutyContext#getExtensionInterfaces
+	 * ()
 	 */
 	public List<I> getExtensionInterfaces() {
 		return this.extensionInterfaces;
@@ -143,7 +144,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.spi.administration.DutyContext#doFlow(F,
-	 *      java.lang.Object)
+	 * java.lang.Object)
 	 */
 	public void doFlow(F key, Object parameter) {
 		// Delegate with index of key
@@ -154,7 +155,7 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.spi.administration.DutyContext#doFlow(int,
-	 *      java.lang.Object)
+	 * java.lang.Object)
 	 */
 	public void doFlow(int flowIndex, Object parameter) {
 		// Obtain the flow meta-data

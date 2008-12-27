@@ -20,8 +20,8 @@ import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.impl.OfficeImpl;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Implementation of the {@link HandlerContext}.
@@ -127,12 +127,12 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 		}
 		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
 
-		// Create the task in a new process
-		Job task = this.office.createProcess(flowMetaData, parameter,
+		// Create the job in a new process
+		JobNode jobNode = this.office.createProcess(flowMetaData, parameter,
 				managedObject, this.processMoIndex, escalationHandler);
 
-		// Activate the Task
-		task.activateJob();
+		// Activate the Job
+		jobNode.activateJob();
 	}
 
 }

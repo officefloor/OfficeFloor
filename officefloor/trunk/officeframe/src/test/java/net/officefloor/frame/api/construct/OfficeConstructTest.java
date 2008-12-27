@@ -24,7 +24,6 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -210,11 +209,6 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		// ------------------------------------
 		// Record running the office
 		// ------------------------------------
-
-		// WORK
-		work.setWorkContext(null);
-		this.control(work)
-				.setDefaultMatcher(new TypeMatcher(WorkContext.class));
 
 		// MANAGED OBJECT ONE
 		// Obtain the Object

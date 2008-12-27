@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.OfficeImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
@@ -204,7 +205,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#createManagedObjectContainer(java.lang.Object)
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * createManagedObjectContainer(java.lang.Object)
 	 */
 	@Override
 	public ManagedObjectContainer createManagedObjectContainer(Object lock) {
@@ -227,7 +229,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getProcessStateManagedObjectIndex()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * getProcessStateManagedObjectIndex()
 	 */
 	@Override
 	public int getProcessStateManagedObjectIndex() {
@@ -237,7 +240,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getSourcingManager()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * getSourcingManager()
 	 */
 	@Override
 	public AssetManager getSourcingManager() {
@@ -247,7 +251,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getManagedObjectSource()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * getManagedObjectSource()
 	 */
 	@Override
 	public ManagedObjectSource<?, ?> getManagedObjectSource() {
@@ -257,7 +262,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getManagedObjectPool()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * getManagedObjectPool()
 	 */
 	@Override
 	public ManagedObjectPool getManagedObjectPool() {
@@ -267,7 +273,9 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getTimeout()
+	 * @see
+	 * net.officefloor.frame.internal.structure.ManagedObjectMetaData#getTimeout
+	 * ()
 	 */
 	@Override
 	public long getTimeout() {
@@ -277,7 +285,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#isManagedObjectAsynchronous()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * isManagedObjectAsynchronous()
 	 */
 	@Override
 	public boolean isManagedObjectAsynchronous() {
@@ -287,7 +296,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#getOperationsManager()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * getOperationsManager()
 	 */
 	@Override
 	public AssetManager getOperationsManager() {
@@ -297,7 +307,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#isCoordinatingManagedObject()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * isCoordinatingManagedObject()
 	 */
 	@Override
 	public boolean isCoordinatingManagedObject() {
@@ -307,8 +318,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#createObjectRegistry(net.officefloor.frame.internal.structure.WorkContainer,
-	 *      net.officefloor.frame.internal.structure.ThreadState)
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * createObjectRegistry
+	 * (net.officefloor.frame.internal.structure.WorkContainer,
+	 * net.officefloor.frame.internal.structure.ThreadState)
 	 */
 	@Override
 	public <W extends Work> ObjectRegistry<D> createObjectRegistry(
@@ -320,10 +333,12 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectMetaData#createRecycleTask()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
+	 * createRecycleJobNode
+	 * (net.officefloor.frame.spi.managedobject.ManagedObject)
 	 */
 	@Override
-	public Job createRecycleTask(ManagedObject managedObject) {
+	public JobNode createRecycleJobNode(ManagedObject managedObject) {
 		if (this.recycleFlowMetaData == null) {
 			// No recycling for managed objects
 			return null;
@@ -332,16 +347,16 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			RecycleManagedObjectParameterImpl<ManagedObject> parameter = new RecycleManagedObjectParameterImpl<ManagedObject>(
 					managedObject);
 
-			// Create the recycle task
-			Job recycleTask = this.office.createProcess(
+			// Create the recycle job node
+			JobNode recycleJobNode = this.office.createProcess(
 					this.recycleFlowMetaData, parameter, null, -1, null);
 
 			// Listen to process completion (handle not being recycled)
-			recycleTask.getThreadState().getProcessState()
+			recycleJobNode.getThreadState().getProcessState()
 					.registerProcessCompletionListener(parameter);
 
-			// Return the recycle task
-			return recycleTask;
+			// Return the recycle job node
+			return recycleJobNode;
 		}
 	}
 
@@ -381,7 +396,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter#getManagedObject()
+		 * @seenet.officefloor.frame.spi.managedobject.recycle.
+		 * RecycleManagedObjectParameter#getManagedObject()
 		 */
 		@Override
 		public MO getManagedObject() {
@@ -391,7 +407,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter#reuseManagedObject(MO)
+		 * @seenet.officefloor.frame.spi.managedobject.recycle.
+		 * RecycleManagedObjectParameter#reuseManagedObject(MO)
 		 */
 		@Override
 		public void reuseManagedObject(MO managedObject) {
@@ -414,7 +431,9 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.internal.structure.ProcessCompletionListener#processComplete()
+		 * @see
+		 * net.officefloor.frame.internal.structure.ProcessCompletionListener
+		 * #processComplete()
 		 */
 		@Override
 		public void processComplete() {

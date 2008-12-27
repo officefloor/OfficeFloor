@@ -27,16 +27,13 @@ import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.execute.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.ProcessStateImpl;
-import net.officefloor.frame.impl.execute.ThreadWorkLinkImpl;
-import net.officefloor.frame.impl.execute.WorkContainerImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
-import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.ThreadWorkLink;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -145,9 +142,10 @@ public class OfficeImpl implements Office {
 	 * @param managedObjectEscalationHandler
 	 *            {@link EscalationHandler} provided by the
 	 *            {@link ManagedObjectSource}.
-	 * @return {@link Job} within a new {@link ProcessState} for this Office.
+	 * @return {@link JobNode} within a new {@link ProcessState} for this
+	 *         {@link Office}.
 	 */
-	public <W extends Work> Job createProcess(FlowMetaData<W> flowMetaData,
+	public <W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
 			Object parameter, ManagedObject managedObject, int processMoIndex,
 			EscalationHandler managedObjectEscalationHandler) {
 
@@ -174,37 +172,11 @@ public class OfficeImpl implements Office {
 		TaskMetaData<?, W, ?, ?> taskMetaData = flowMetaData
 				.getInitialTaskMetaData();
 
-		// Obtain the work meta-data
-		WorkMetaData<W> workMetaData = taskMetaData.getWorkMetaData();
+		// Create the Job Node for the initial job
+		JobNode jobNode = flow.createJobNode(taskMetaData, null, parameter);
 
-		// Create the work to invoke
-		W work = workMetaData.getWorkFactory().createWork();
-
-		// Create the Work Container for the Work (not attached to a process)
-		WorkContainerImpl<W> workContainer = new WorkContainerImpl<W>(work,
-				workMetaData, processState);
-
-		// Obtain the ThreadState
-		ThreadState threadState = flow.getThreadState();
-
-		try {
-			// Specify the context for the Work
-			work.setWorkContext(workContainer);
-		} catch (Exception ex) {
-			// Specify failure to be handled
-			threadState.setFailure(ex);
-		}
-
-		// Create the thread work link
-		ThreadWorkLink<W> workLink = new ThreadWorkLinkImpl<W>(threadState,
-				workContainer);
-
-		// Create the Task Container for the initial Task
-		Job taskContainer = flow.createJob(taskMetaData, null, parameter,
-				workLink);
-
-		// Return the Task Container
-		return taskContainer;
+		// Return the Job Node
+		return jobNode;
 	}
 
 	/**

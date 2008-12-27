@@ -24,7 +24,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.ThreadWorkLink;
+import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.team.Job;
 
@@ -34,7 +34,7 @@ import net.officefloor.frame.spi.team.Job;
  * @author Daniel
  */
 public class DutyJob<W extends Work, I, A extends Enum<A>> extends
-		JobContainer<W, AdministratorMetaData<I, A>> {
+		AbstractJobContainer<W, AdministratorMetaData<I, A>> {
 
 	/**
 	 * {@link TaskDutyAssociation}.
@@ -49,12 +49,10 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	/**
 	 * Initiate.
 	 * 
-	 * @param threadState
-	 *            {@link ThreadState}.
 	 * @param flow
 	 *            {@link Flow}.
-	 * @param workLink
-	 *            {@link ThreadWorkLink}.
+	 * @param workContainer
+	 *            {@link WorkContainer}.
 	 * @param adminMetaData
 	 *            {@link AdministratorMetaData}.
 	 * @param taskDutyAssociation
@@ -62,31 +60,30 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 * @param parallelOwner
 	 *            Parallel owning {@link JobNode}.
 	 */
-	public DutyJob(ThreadState threadState, Flow flow,
-			ThreadWorkLink<W> workLink,
+	public DutyJob(Flow flow, WorkContainer<W> workContainer,
 			AdministratorMetaData<I, A> adminMetaData,
 			TaskDutyAssociation<A> taskDutyAssociation, JobNode parallelOwner) {
-		super(threadState, flow, workLink, adminMetaData, parallelOwner);
+		super(flow, workContainer, adminMetaData, parallelOwner);
 		this.taskDutyAssociation = taskDutyAssociation;
 	}
 
 	/*
-	 * ===========================================================================
-	 * JobContainer
-	 * ===========================================================================
+	 * ======================= JobContainer ==========================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.impl.execute.JobImpl#executeJob(net.officefloor.frame.impl.execute.JobExecuteContext)
+	 * @see
+	 * net.officefloor.frame.impl.execute.JobImpl#executeJob(net.officefloor
+	 * .frame.impl.execute.JobExecuteContext)
 	 */
 	@Override
 	protected Object executeJob(JobExecuteContext context) throws Throwable {
-		
+
 		// Administer the duty
-		this.workLink.getWorkContainer().administerManagedObjects(
-				this.taskDutyAssociation, this.administratorContext);
+		this.workContainer.administerManagedObjects(this.taskDutyAssociation,
+				this.administratorContext);
 
 		// Administration duties do not pass on parameters
 		return null;
@@ -100,18 +97,21 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.internal.structure.AdministratorContext#getThreadState()
+		 * @seenet.officefloor.frame.internal.structure.AdministratorContext#
+		 * getThreadState()
 		 */
 		@Override
 		public ThreadState getThreadState() {
-			return DutyJob.this.threadState;
+			return DutyJob.this.flow.getThreadState();
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.internal.structure.AdministratorContext#doFlow(net.officefloor.frame.internal.structure.FlowMetaData,
-		 *      java.lang.Object)
+		 * @see
+		 * net.officefloor.frame.internal.structure.AdministratorContext#doFlow
+		 * (net.officefloor.frame.internal.structure.FlowMetaData,
+		 * java.lang.Object)
 		 */
 		@Override
 		public void doFlow(FlowMetaData<?> flowMetaData, Object parameter) {

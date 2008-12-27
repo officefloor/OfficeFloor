@@ -52,18 +52,17 @@ public interface WorkContainer<W extends Work> {
 	 *            loaded.
 	 * @param executionContext
 	 *            Context for execution.
-	 * @param taskContainer
-	 *            {@link Job} requesting the {@link ManagedObject}
-	 *            instances to be loaded.
+	 * @param jobNode
+	 *            {@link JobNode} requesting the {@link ManagedObject} instances
+	 *            to be loaded.
 	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances
-	 *            to notify.
+	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
 	 * @return <code>true</code> if the {@link ManagedObject} instances were
 	 *         loaded, otherwise <code>false</code> indicating that waiting on
 	 *         the {@link ManagedObject} instances.
 	 */
 	boolean loadManagedObjects(int[] managedObjectIndexes,
-			JobContext executionContext, Job taskContainer,
+			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet);
 
 	/**
@@ -74,15 +73,14 @@ public interface WorkContainer<W extends Work> {
 	 *            co-ordinated.
 	 * @param executionContext
 	 *            Context for execution.
-	 * @param taskContainer
-	 *            {@link Job} requesting the {@link ManagedObject}
-	 *            instances to be co-ordinated.
+	 * @param jobNode
+	 *            {@link JobNode} requesting the {@link ManagedObject} instances
+	 *            to be co-ordinated.
 	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances
-	 *            to notify.
+	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
 	 */
 	void coordinateManagedObjects(int[] managedObjectIndexes,
-			JobContext executionContext, Job taskContainer,
+			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet);
 
 	/**
@@ -95,18 +93,17 @@ public interface WorkContainer<W extends Work> {
 	 *            check if ready.
 	 * @param executionContext
 	 *            Context for execution.
-	 * @param taskContainer
-	 *            {@link Job} requiring the {@link ManagedObject} to
-	 *            be ready.
+	 * @param jobNode
+	 *            {@link JobNode} requiring the {@link ManagedObject} to be
+	 *            ready.
 	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances
-	 *            to notify.
-	 * @return <code>true</code> if the {@link ManagedObject} is ready for
-	 *         use, otherwise <code>false</code> indicating that waiting on
-	 *         the {@link ManagedObject}.
+	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
+	 * @return <code>true</code> if the {@link ManagedObject} is ready for use,
+	 *         otherwise <code>false</code> indicating that waiting on the
+	 *         {@link ManagedObject}.
 	 */
 	boolean isManagedObjectsReady(int[] managedObjectIndexes,
-			JobContext executionContext, Job taskContainer,
+			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet);
 
 	/**
@@ -134,22 +131,8 @@ public interface WorkContainer<W extends Work> {
 	Object getObject(int moIndex, ThreadState threadState);
 
 	/**
-	 * Registers a {@link ThreadState} to use the {@link Work} of this
-	 * {@link WorkContainer}.
-	 * 
-	 * @param thread
-	 *            {@link ThreadState} registering to use the {@link Work} of
-	 *            this {@link WorkContainer}.
+	 * Unloads the {@link Work}.
 	 */
-	void registerThread(ThreadState thread);
-
-	/**
-	 * Unregisters a {@link ThreadState} once it has finished using the
-	 * {@link Work} of this {@link WorkContainer}.
-	 * 
-	 * @param thread
-	 *            {@link ThreadState} finished with this {@link WorkContainer}.
-	 */
-	void unregisterThread(ThreadState thread);
+	void unloadWork();
 
 }

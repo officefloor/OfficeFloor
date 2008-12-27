@@ -25,6 +25,7 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.JobActivatableSet;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -142,15 +143,14 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	}
 
 	/*
-	 * ========================================================================
-	 * AdministratorMetaData
-	 * ========================================================================
+	 * ================= AdministratorMetaData ===============================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AdministratorMetaData#createAdministratorContainer()
+	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
+	 * createAdministratorContainer()
 	 */
 	@Override
 	public AdministratorContainer<I, A> createAdministratorContainer() {
@@ -174,7 +174,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AdministratorMetaData#getProcessStateAdministratorIndex()
+	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
+	 * getProcessStateAdministratorIndex()
 	 */
 	@Override
 	public int getProcessStateAdministratorIndex() {
@@ -184,7 +185,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AdministratorMetaData#getAdministratorSource()
+	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
+	 * getAdministratorSource()
 	 */
 	@Override
 	public AdministratorSource<I, A> getAdministratorSource() {
@@ -194,7 +196,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AdministratorMetaData#getExtensionInterfaceMetaData()
+	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
+	 * getExtensionInterfaceMetaData()
 	 */
 	@Override
 	public ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData() {
@@ -204,11 +207,24 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AdministratorMetaData#getDutyMetaData(A)
+	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
+	 * getDutyMetaData(A)
 	 */
 	@Override
 	public DutyMetaData getDutyMetaData(A key) {
 		return this.dutyMetaData.get(key);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.frame.internal.structure.JobMetaData#createJobActivableSet
+	 * ()
+	 */
+	@Override
+	public JobActivatableSet createJobActivableSet() {
+		return new JobActivatableSetImpl();
 	}
 
 	/*
@@ -224,7 +240,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.JobMetaData#getRequiredManagedObjects()
+	 * @seenet.officefloor.frame.internal.structure.JobMetaData#
+	 * getRequiredManagedObjects()
 	 */
 	@Override
 	public int[] getRequiredManagedObjects() {
@@ -234,7 +251,9 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.JobMetaData#getEscalationProcedure()
+	 * @see
+	 * net.officefloor.frame.internal.structure.JobMetaData#getEscalationProcedure
+	 * ()
 	 */
 	@Override
 	public EscalationProcedure getEscalationProcedure() {
@@ -244,7 +263,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.JobMetaData#getNextTaskInFlow()
+	 * @see
+	 * net.officefloor.frame.internal.structure.JobMetaData#getNextTaskInFlow()
 	 */
 	@Override
 	public TaskMetaData<?, ?, ?, ?> getNextTaskInFlow() {

@@ -20,16 +20,14 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
-import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.AssetReport;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.ThreadWorkLink;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Implementation of the {@link ThreadState}.
@@ -39,7 +37,8 @@ import net.officefloor.frame.spi.team.Job;
 public class ThreadStateImpl implements ThreadState, Asset {
 
 	/**
-	 * {@link LinkedList} of {@link Flow} instances for this {@link ThreadState}.
+	 * {@link LinkedList} of the {@link Flow} instances for this
+	 * {@link ThreadState}.
 	 */
 	protected final LinkedList<Flow, JobActivateSet> flows = new AbstractLinkedList<Flow, JobActivateSet>() {
 		@Override
@@ -52,17 +51,6 @@ public class ThreadStateImpl implements ThreadState, Asset {
 
 			// Complete the thread
 			ThreadStateImpl.this.completeThread(notifySet);
-		}
-	};
-
-	/**
-	 * {@link LinkedList} of {@link ThreadWorkLink} instances for this
-	 * {@link ThreadState}.
-	 */
-	protected final LinkedList<ThreadWorkLink<?>, Object> works = new AbstractLinkedList<ThreadWorkLink<?>, Object>() {
-		@Override
-		public void lastLinkedListEntryRemoved(Object removeParameter) {
-			// No action required on last work removed
 		}
 	};
 
@@ -133,9 +121,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	}
 
 	/*
-	 * ====================================================================
-	 * ThreadState
-	 * ====================================================================
+	 * ===================== ThreadState ==================================
 	 */
 
 	/*
@@ -143,6 +129,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ThreadState#getThreadLock()
 	 */
+	@Override
 	public Object getThreadLock() {
 		return this;
 	}
@@ -152,6 +139,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ThreadState#getFailure()
 	 */
+	@Override
 	public Throwable getFailure() {
 		return this.failure;
 	}
@@ -159,8 +147,11 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ThreadState#setFailure(java.lang.Throwable)
+	 * @see
+	 * net.officefloor.frame.internal.structure.ThreadState#setFailure(java.
+	 * lang.Throwable)
 	 */
+	@Override
 	public void setFailure(Throwable cause) {
 		this.failure = cause;
 	}
@@ -170,6 +161,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * 
 	 * @see net.officefloor.frame.internal.structure.ThreadState#createFlow()
 	 */
+	@Override
 	public Flow createFlow(FlowMetaData<?> flowMetaData) {
 		// Create the flow
 		Flow flow = new FlowImpl(this, this.flows);
@@ -184,17 +176,10 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ThreadState#getWorkList()
+	 * @see
+	 * net.officefloor.frame.internal.structure.ThreadState#getProcessState()
 	 */
-	public LinkedList<ThreadWorkLink<?>, Object> getWorkList() {
-		return this.works;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.ThreadState#getProcessState()
-	 */
+	@Override
 	public ProcessState getProcessState() {
 		return this.processState;
 	}
@@ -202,8 +187,10 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ThreadState#escalationStart(net.officefloor.frame.internal.structure.TaskNode,
-	 *      boolean, net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.ThreadState#escalationStart(
+	 * net.officefloor.frame.internal.structure.TaskNode, boolean,
+	 * net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
 	@Override
 	public void escalationStart(JobNode currentTaskNode,
@@ -222,8 +209,10 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ThreadState#escalationComplete(net.officefloor.frame.internal.structure.TaskNode,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.ThreadState#escalationComplete
+	 * (net.officefloor.frame.internal.structure.TaskNode,
+	 * net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
 	@Override
 	public void escalationComplete(JobNode currentTaskNode,
@@ -242,9 +231,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	}
 
 	/*
-	 * ====================================================================
-	 * FlowFuture
-	 * ====================================================================
+	 * ====================== FlowFuture ==================================
 	 */
 
 	/*
@@ -252,47 +239,49 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * 
 	 * @see net.officefloor.frame.api.execute.FlowFuture#isComplete()
 	 */
+	@Override
 	public boolean isComplete() {
 		return this.isFlowComplete;
 	}
 
 	/*
-	 * ========================================================================
-	 * FlowAsset
-	 * ========================================================================
+	 * ======================= FlowAsset ======================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.FlowAsset#waitOnFlow(net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.FlowAsset#waitOnFlow(net.officefloor
+	 * .frame.spi.team.TaskContainer,
+	 * net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
-	public boolean waitOnFlow(Job taskContainer,
-			JobActivateSet notifySet) {
+	@Override
+	public boolean waitOnFlow(JobNode jobNode, JobActivateSet notifySet) {
 
 		// Determine if the same thread
-		if (this == taskContainer.getThreadState()) {
+		if (this == jobNode.getThreadState()) {
 			// Do not wait on this thread
 			return false;
 		}
 
 		// Return whether task is waiting on this thread.
 		// Note: thread may already be complete.
-		return this.threadMonitor.wait(taskContainer, notifySet);
+		return this.threadMonitor.wait(jobNode, notifySet);
 	}
 
 	/*
-	 * ====================================================================
-	 * Asset
-	 * ====================================================================
+	 * =================== Asset ==========================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.Asset#reportOnAsset(net.officefloor.frame.internal.structure.AssetReport)
+	 * @see
+	 * net.officefloor.frame.internal.structure.Asset#reportOnAsset(net.officefloor
+	 * .frame.internal.structure.AssetReport)
 	 */
+	@Override
 	public void reportOnAsset(AssetReport report) {
 		// TODO Auto-generated method stub
 
