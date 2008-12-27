@@ -18,10 +18,11 @@ package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.impl.execute.AbstractLinkedList;
 import net.officefloor.frame.impl.execute.AssetMonitorImpl;
-import net.officefloor.frame.impl.execute.JobActivateSetImpl;
+import net.officefloor.frame.impl.execute.JobActivatableSetImpl;
 import net.officefloor.frame.impl.execute.AssetNotifySetImplAccess;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.spi.team.Job;
@@ -102,13 +103,13 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testNotifyTasks() {
 		// Create the Task Containers
-		MockTaskContainer taskOne = new MockTaskContainer(this);
-		MockTaskContainer taskTwo = new MockTaskContainer(this);
+		MockJobNode taskOne = new MockJobNode(this);
+		MockJobNode taskTwo = new MockJobNode(this);
 
 		// Record mock objects
 		this.recordAssetManagerRegistration();
-		this.recordTaskActivation(taskOne);
-		this.recordTaskActivation(taskTwo);
+		this.recordJobNodeActivation(taskOne);
+		this.recordJobNodeActivation(taskTwo);
 
 		// Replay
 		this.replayMockObjects();
@@ -133,14 +134,14 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testNotifyTaskAgain() {
 		// Create the Task Containers
-		MockTaskContainer taskOne = new MockTaskContainer(this);
-		MockTaskContainer taskTwo = new MockTaskContainer(this);
+		MockJobNode taskOne = new MockJobNode(this);
+		MockJobNode taskTwo = new MockJobNode(this);
 
 		// Record waiting on tasks twice (for each wait/notify)
 		this.recordAssetManagerRegistration();
-		this.recordTaskActivation(taskOne);
+		this.recordJobNodeActivation(taskOne);
 		this.recordAssetManagerRegistration();
-		this.recordTaskActivation(taskTwo);
+		this.recordJobNodeActivation(taskTwo);
 
 		// Replay
 		this.replayMockObjects();
@@ -164,12 +165,12 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testNotifyPermantly() {
 		// Create the Task Containers
-		MockTaskContainer taskOne = new MockTaskContainer(this);
-		MockTaskContainer taskTwo = new MockTaskContainer(this);
+		MockJobNode taskOne = new MockJobNode(this);
+		MockJobNode taskTwo = new MockJobNode(this);
 
 		// Record waiting on tasks only once
 		this.recordAssetManagerRegistration();
-		this.recordTaskActivation(taskOne);
+		this.recordJobNodeActivation(taskOne);
 
 		// Replay
 		this.replayMockObjects();
@@ -199,13 +200,13 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 		Throwable failure = new Exception();
 
 		// Create the Task Containers
-		MockTaskContainer taskOne = new MockTaskContainer(this);
-		MockTaskContainer taskTwo = new MockTaskContainer(this);
+		MockJobNode taskOne = new MockJobNode(this);
+		MockJobNode taskTwo = new MockJobNode(this);
 
 		// Record waiting on tasks only once
 		this.recordAssetManagerRegistration();
-		this.recordTaskActivation(taskOne, failure);
-		this.recordTaskActivation(taskTwo, failure);
+		this.recordJobNodeActivation(taskOne, failure);
+		this.recordJobNodeActivation(taskTwo, failure);
 
 		// Replay
 		this.replayMockObjects();
@@ -234,12 +235,12 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 		Throwable failure = new Exception();
 
 		// Create the Task Containers
-		MockTaskContainer taskOne = new MockTaskContainer(this);
-		MockTaskContainer taskTwo = new MockTaskContainer(this);
+		MockJobNode taskOne = new MockJobNode(this);
+		MockJobNode taskTwo = new MockJobNode(this);
 
 		// Record waiting on tasks only once
 		this.recordAssetManagerRegistration();
-		this.recordTaskActivation(taskOne, failure);
+		this.recordJobNodeActivation(taskOne, failure);
 
 		// Replay
 		this.replayMockObjects();
@@ -269,43 +270,42 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records {@link Job} activation.
+	 * Records {@link JobNode} activation.
 	 * 
-	 * @param task
-	 *            {@link Job}.
+	 * @param jobNode
+	 *            {@link JobNode}.
 	 */
-	private void recordTaskActivation(Job task) {
-		task.getThreadState().getThreadLock();
-		this.control(task.getThreadState()).setReturnValue(new Object());
+	private void recordJobNodeActivation(JobNode jobNode) {
+		jobNode.getThreadState().getThreadLock();
+		this.control(jobNode.getThreadState()).setReturnValue(new Object());
 	}
 
 	/**
-	 * Records {@link Job} activation.
+	 * Records {@link JobNode} activation.
 	 * 
-	 * @param task
-	 *            {@link Job}.
+	 * @param jobNode
+	 *            {@link JobNode}.
 	 * @param cause
 	 *            {@link Throwable}.
 	 */
-	private void recordTaskActivation(Job task, Throwable cause) {
-		this.recordTaskActivation(task);
-		task.getThreadState().setFailure(cause);
+	private void recordJobNodeActivation(JobNode jobNode, Throwable cause) {
+		this.recordJobNodeActivation(jobNode);
+		jobNode.getThreadState().setFailure(cause);
 	}
 
 	/**
-	 * Has the {@link Job} wait on the {@link AssetMonitor}.
+	 * Has the {@link JobNode} wait on the {@link AssetMonitor}.
 	 * 
-	 * @param taskContainer
-	 *            {@link Job}.
+	 * @param jobNode
+	 *            {@link JobNode}.
 	 * @param isExpectedWaitReturn
 	 *            Expected return from {@link AssetMonitor#wait(Job)}.
 	 */
-	private void doWait(Job taskContainer,
-			boolean isExpectedWaitReturn) {
-		JobActivateSetImpl notifySet = new JobActivateSetImpl();
+	private void doWait(JobNode jobNode, boolean isExpectedWaitReturn) {
+		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
 		synchronized (this.assetMonitor.getAssetLock()) {
 			assertEquals("Incorrect waiting", isExpectedWaitReturn,
-					this.assetMonitor.wait(taskContainer, notifySet));
+					this.assetMonitor.wait(jobNode, notifySet));
 		}
 		if (isExpectedWaitReturn) {
 			// Waiting so should not be added
@@ -323,7 +323,7 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 * {@link AssetMonitor}.
 	 */
 	private void doNotifyTasks() {
-		JobActivateSetImpl notifySet = new JobActivateSetImpl();
+		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
 		synchronized (this.assetMonitor.getAssetLock()) {
 			this.assetMonitor.notifyTasks(notifySet);
 		}
@@ -335,7 +335,7 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 * {@link AssetMonitor} permanently.
 	 */
 	private void doNotifyPermanently() {
-		JobActivateSetImpl notifySet = new JobActivateSetImpl();
+		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
 		synchronized (this.assetMonitor.getAssetLock()) {
 			this.assetMonitor.notifyPermanently(notifySet);
 		}
@@ -343,15 +343,14 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Does the failure notifying of the {@link Job} instances within
-	 * the {@link AssetMonitor}.
+	 * Does the failure notifying of the {@link Job} instances within the
+	 * {@link AssetMonitor}.
 	 * 
 	 * @param failure
-	 *            {@link Throwable} to fail {@link Job} instances
-	 *            with.
+	 *            {@link Throwable} to fail {@link Job} instances with.
 	 */
 	private void doFailTasks(Throwable failure) {
-		JobActivateSetImpl notifySet = new JobActivateSetImpl();
+		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
 		synchronized (this.assetMonitor.getAssetLock()) {
 			this.assetMonitor.failTasks(notifySet, failure);
 		}
@@ -359,15 +358,14 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Does the failure notifying of the {@link Job} instances within
-	 * the {@link AssetMonitor} permanently.
+	 * Does the failure notifying of the {@link Job} instances within the
+	 * {@link AssetMonitor} permanently.
 	 * 
 	 * @param failure
-	 *            {@link Throwable} to fail {@link Job} instances
-	 *            with.
+	 *            {@link Throwable} to fail {@link Job} instances with.
 	 */
 	private void doFailPermanently(Throwable failure) {
-		JobActivateSetImpl notifySet = new JobActivateSetImpl();
+		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
 		synchronized (this.assetMonitor.getAssetLock()) {
 			this.assetMonitor.failPermanently(notifySet, failure);
 		}

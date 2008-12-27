@@ -17,15 +17,12 @@
 package net.officefloor.frame.impl;
 
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import net.officefloor.frame.impl.execute.TaskMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
-import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.spi.team.Team;
 
@@ -99,21 +96,6 @@ public class RawTaskMetaData {
 			requiredManagedObjects[moI++] = moIndex.intValue();
 		}
 
-		// Obtain the check managed objects
-		ManagedObjectMetaData[] workMoMetaData = workMoRegistry
-				.getWorkManagedObjectListing();
-		List<Integer> checkMoList = new LinkedList<Integer>();
-		for (int moIndex = 0; moIndex < requiredManagedObjects.length; moIndex++) {
-			// Add managed object to check if asynchronous
-			if (workMoMetaData[moIndex].isManagedObjectAsynchronous()) {
-				checkMoList.add(new Integer(moIndex));
-			}
-		}
-		int[] checkManagedObjects = new int[checkMoList.size()];
-		for (int i = 0; i < checkManagedObjects.length; i++) {
-			checkManagedObjects[i] = checkMoList.get(i).intValue();
-		}
-
 		// Obtain the pre task administration
 		TaskDutyAssociation<?>[] preTaskAdmin = workAdminRegistry
 				.createTaskAdministration(taskConfiguration
@@ -127,8 +109,7 @@ public class RawTaskMetaData {
 		// Register the Task meta-data
 		return new RawTaskMetaData(new TaskMetaDataImpl(taskConfiguration
 				.getTaskFactory(), team, requiredManagedObjects,
-				checkManagedObjects, tmoToWmoTranslation, preTaskAdmin,
-				postTaskAdmin));
+				tmoToWmoTranslation, preTaskAdmin, postTaskAdmin));
 	}
 
 	/**
@@ -147,7 +128,8 @@ public class RawTaskMetaData {
 	}
 
 	/**
-	 * Obtains the {@link net.officefloor.frame.internal.structure.TaskMetaData}.
+	 * Obtains the {@link net.officefloor.frame.internal.structure.TaskMetaData}
+	 * .
 	 * 
 	 * @return {@link net.officefloor.frame.internal.structure.TaskMetaData}.
 	 */

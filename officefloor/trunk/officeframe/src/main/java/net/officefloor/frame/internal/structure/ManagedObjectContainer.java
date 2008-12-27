@@ -31,20 +31,19 @@ public interface ManagedObjectContainer {
 	/**
 	 * Loads the {@link ManagedObject}.
 	 * 
-	 * @param executionContext
-	 *            Context for execution.
-	 * @param taskContainer
-	 *            {@link Job} requesting the {@link ManagedObject} to
-	 *            be loaded.
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode} requesting the {@link ManagedObject} to be
+	 *            loaded.
 	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances
-	 *            to notify.
+	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
 	 * @return <code>true</code> if the {@link ManagedObject} was loaded,
 	 *         otherwise <code>false</code> indicating that waiting on a
 	 *         {@link ManagedObject}.
 	 */
-	boolean loadManagedObject(JobContext executionContext,
-			Job taskContainer, JobActivateSet notifySet);
+	boolean loadManagedObject(JobContext jobContext, JobNode jobNode,
+			JobActivateSet notifySet);
 
 	/**
 	 * Allows this {@link ManagedObject} to co-ordinate with the other
@@ -53,18 +52,17 @@ public interface ManagedObjectContainer {
 	 * @param workContainer
 	 *            {@link WorkContainer} to source the other
 	 *            {@link ManagedObject} instances.
-	 * @param executionContext
-	 *            Context for execution.
-	 * @param taskContainer
-	 *            {@link Job} requesting the {@link ManagedObject} to
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode} requesting the {@link ManagedObject} to
 	 *            co-ordinate.
 	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances
-	 *            to notify.
+	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
 	 */
 	<W extends Work> void coordinateManagedObject(
-			WorkContainer<W> workContainer, JobContext executionContext,
-			Job taskContainer, JobActivateSet notifySet);
+			WorkContainer<W> workContainer, JobContext jobContext,
+			JobNode jobNode, JobActivateSet notifySet);
 
 	/**
 	 * Indicates if the {@link ManagedObject} is ready. This is to ensure the
@@ -72,20 +70,19 @@ public interface ManagedObjectContainer {
 	 * operation (ie {@link ManagedObject} completed execution and ready for
 	 * another operation).
 	 * 
-	 * @param executionContext
-	 *            Context for execution.
-	 * @param taskContainer
-	 *            {@link Job} requiring the {@link ManagedObject} to
-	 *            be ready.
+	 * @param jobContext
+	 *            {@link JobContext}.
+	 * @param jobNode
+	 *            {@link JobNode} requiring the {@link ManagedObject} to be
+	 *            ready.
 	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances
-	 *            to notify.
+	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
 	 * @return <code>true</code> if the {@link ManagedObject} is ready,
 	 *         otherwise <code>false</code> indicating that waiting on a
 	 *         {@link ManagedObject}.
 	 */
-	boolean isManagedObjectReady(JobContext executionContext,
-			Job taskContainer, JobActivateSet notifySet);
+	boolean isManagedObjectReady(JobContext jobContext, JobNode jobNode,
+			JobActivateSet notifySet);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.

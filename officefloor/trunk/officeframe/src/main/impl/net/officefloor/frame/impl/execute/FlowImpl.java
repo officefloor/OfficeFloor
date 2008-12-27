@@ -17,14 +17,13 @@
 package net.officefloor.frame.impl.execute;
 
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.ThreadWorkLink;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.team.Job;
@@ -68,70 +67,71 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	}
 
 	/*
-	 * ========================================================================
-	 * Flow
-	 * ========================================================================
+	 * ======================= Flow ===========================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.Flow#createTaskContainer(net.officefloor.frame.internal.structure.TaskMetaData,
-	 *      net.officefloor.frame.internal.structure.TaskNode, java.lang.Object)
+	 * @see
+	 * net.officefloor.frame.internal.structure.Flow#createJobNode(net.officefloor
+	 * .frame.internal.structure.TaskMetaData,
+	 * net.officefloor.frame.internal.structure.JobNode, java.lang.Object)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
-	public Job createJob(TaskMetaData<?, ?, ?, ?> taskMetaData,
-			JobNode parallelNodeOwner, Object parameter,
-			ThreadWorkLink<?> currentWorkLink) {
+	public JobNode createJobNode(TaskMetaData<?, ?, ?, ?> taskMetaData,
+			JobNode parallelNodeOwner, Object parameter) {
 
 		// Obtain the work meta-data
 		WorkMetaData workMetaData = taskMetaData.getWorkMetaData();
 
-		// Obtain the work link
-		ThreadWorkLink newWorkLink;
-		if (currentWorkLink.getWorkContainer().getWorkId() == workMetaData
-				.getWorkId()) {
-			// Same work, thus re-use work
-			newWorkLink = currentWorkLink
-					.createThreadWorkLink(this.threadState);
-		} else {
-			// Source work (as different work)
-			// TODO: consider bounding work to Process
-			WorkContainer newWorkContainer = new WorkContainerImpl(workMetaData
-					.getWorkFactory().createWork(), workMetaData,
-					this.threadState.getProcessState());
+		// Create the work container
+		// TODO: use the Task/Work MetaData to create the WorkContainer
+		WorkContainer workContainer = new WorkContainerImpl(workMetaData
+				.getWorkFactory().createWork(), workMetaData, this.threadState
+				.getProcessState());
 
-			// Create thread work link for the new work
-			newWorkLink = new ThreadWorkLinkImpl(this.threadState,
-					newWorkContainer);
+		// Obtain the administration meta-data to determine if require proxy
+		TaskDutyAssociation[] preTaskDuties = taskMetaData
+				.getPreAdministrationMetaData();
+		TaskDutyAssociation[] postTaskDuties = taskMetaData
+				.getPostAdministrationMetaData();
+
+		// Create the work container proxy (if required)
+		WorkContainerProxy proxyWorkContainer = null;
+		if ((preTaskDuties.length + postTaskDuties.length) > 0) {
+			proxyWorkContainer = new WorkContainerProxy(workContainer);
 		}
 
 		// First and last job
-		JobContainer<?, ?>[] firstLastJobs = new JobContainer<?, ?>[2];
+		AbstractJobContainer<?, ?>[] firstLastJobs = new AbstractJobContainer<?, ?>[2];
 
-		// Load the pre-task administrator duty jobs
-		this.loadDutyJobs(firstLastJobs, taskMetaData
-				.getPreAdministrationMetaData(), workMetaData, newWorkLink,
-				parallelNodeOwner);
+		// Load the pre-task administrator duty jobs.
+		// Never use actual work container for pre duties.
+		this.loadDutyJobs(firstLastJobs, preTaskDuties, workMetaData, null,
+				proxyWorkContainer, parallelNodeOwner);
+
+		// If no post duties then task is last job
+		WorkContainer taskWorkContainer = (postTaskDuties.length == 0 ? workContainer
+				: proxyWorkContainer);
 
 		// Load the task job
-		JobContainer<?, ?> taskJob = new TaskJob(this.threadState, this,
-				newWorkLink, taskMetaData, parallelNodeOwner, parameter);
+		AbstractJobContainer<?, ?> taskJob = new TaskJob(this,
+				taskWorkContainer, taskMetaData, parallelNodeOwner, parameter);
 		this.loadJob(firstLastJobs, taskJob);
 
 		// Load the post-task administrator duty jobs
-		this.loadDutyJobs(firstLastJobs, taskMetaData
-				.getPostAdministrationMetaData(), workMetaData, newWorkLink,
-				parallelNodeOwner);
+		this.loadDutyJobs(firstLastJobs, postTaskDuties, workMetaData,
+				workContainer, proxyWorkContainer, parallelNodeOwner);
 
 		// Register the jobs with the work
-		JobContainer<?, ?> job = firstLastJobs[0];
+		AbstractJobContainer<?, ?> job = firstLastJobs[0];
 		while (job != null) {
-			// Register the job and increment job count
-			newWorkLink.registerJob(job);
+			// Increment job count
 			this.activeJobCount++;
 
-			job = (JobContainer<?, ?>) job.getNextNode();
+			job = (AbstractJobContainer<?, ?>) job.getNextNode();
 		}
 
 		// Return the starting job
@@ -148,27 +148,41 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 *            instances.
 	 * @param workMetaData
 	 *            {@link WorkMetaData}.
-	 * @param threadWorkLink
-	 *            {@link ThreadWorkLink}.
+	 * @param actualWorkContainer
+	 *            Actual {@link WorkContainer}.
+	 * @param proxyWorkContainer
+	 *            {@link WorkContainerProxy}.
 	 * @param parallelNodeOwner
 	 *            Parallel owning {@link JobNode}.
 	 */
 	@SuppressWarnings("unchecked")
-	private void loadDutyJobs(JobContainer<?, ?>[] firstLastJobs,
+	private void loadDutyJobs(AbstractJobContainer<?, ?>[] firstLastJobs,
 			TaskDutyAssociation<?>[] taskDutyAssociations,
-			WorkMetaData<?> workMetaData, ThreadWorkLink<?> threadWorkLink,
-			JobNode parallelNodeOwner) {
+			WorkMetaData<?> workMetaData, WorkContainer<?> actualWorkContainer,
+			WorkContainerProxy<?> proxyWorkContainer, JobNode parallelNodeOwner) {
 		// Load the duty jobs
-		for (TaskDutyAssociation<?> taskDutyAssociation : taskDutyAssociations) {
+		for (int i = 0; i < taskDutyAssociations.length; i++) {
+			TaskDutyAssociation<?> taskDutyAssociation = taskDutyAssociations[i];
 
 			// Obtain the associated administrator meta-data
 			AdministratorMetaData<?, ?> adminMetaData = workMetaData
 					.getAdministratorMetaData()[taskDutyAssociation
 					.getAdministratorIndex()];
 
+			// Determine the work container to use
+			WorkContainer<?> workContainer;
+			if (actualWorkContainer == null) {
+				// No actual so always use the proxy
+				workContainer = proxyWorkContainer;
+			} else {
+				// Only use actual on last duty
+				workContainer = (i == (taskDutyAssociations.length - 1)) ? actualWorkContainer
+						: proxyWorkContainer;
+			}
+
 			// Create the duty job
-			JobContainer<?, ?> dutyJob = new DutyJob(this.threadState, this,
-					threadWorkLink, adminMetaData, taskDutyAssociation,
+			AbstractJobContainer<?, ?> dutyJob = new DutyJob(this,
+					workContainer, adminMetaData, taskDutyAssociation,
 					parallelNodeOwner);
 
 			// Load the duty job
@@ -185,8 +199,8 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 * @param newJob
 	 *            New {@link JobNode}.
 	 */
-	private void loadJob(JobContainer<?, ?>[] firstLastJobs,
-			JobContainer<?, ?> newJob) {
+	private void loadJob(AbstractJobContainer<?, ?>[] firstLastJobs,
+			AbstractJobContainer<?, ?> newJob) {
 		if (firstLastJobs[0] == null) {
 			// First job
 			firstLastJobs[0] = newJob;
@@ -201,9 +215,12 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.Flow#taskContainerComplete(net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.Flow#taskContainerComplete(net
+	 * .officefloor.frame.spi.team.TaskContainer,
+	 * net.officefloor.frame.internal.structure.AssetNotifySet)
 	 */
+	@Override
 	public void jobComplete(Job taskContainer, JobActivateSet notifySet) {
 		// Task container now inactive
 		this.activeJobCount--;
@@ -221,14 +238,13 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 * 
 	 * @see net.officefloor.frame.internal.structure.Flow#getThreadState()
 	 */
+	@Override
 	public ThreadState getThreadState() {
 		return this.threadState;
 	}
 
 	/*
-	 * ====================================================================
-	 * FlowFuture
-	 * ====================================================================
+	 * ===================== FlowFuture ===================================
 	 */
 
 	/*
@@ -236,25 +252,27 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 * 
 	 * @see net.officefloor.frame.api.execute.FlowFuture#isComplete()
 	 */
+	@Override
 	public boolean isComplete() {
 		return this.isFlowComplete;
 	}
 
 	/*
-	 * ========================================================================
-	 * FlowAsset
-	 * ========================================================================
+	 * ===================== FlowAsset ========================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.FlowAsset#waitOnFlow(net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.FlowAsset#waitOnFlow(net.officefloor
+	 * .frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
-	public boolean waitOnFlow(Job taskContainer, JobActivateSet notifySet) {
+	@Override
+	public boolean waitOnFlow(JobNode jobNode, JobActivateSet notifySet) {
 		// Delegate to the thread
-		return this.threadState.waitOnFlow(taskContainer, notifySet);
+		return this.threadState.waitOnFlow(jobNode, notifySet);
 	}
 
 }

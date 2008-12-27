@@ -18,13 +18,13 @@ package net.officefloor.frame.impl.execute;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * <p>
@@ -47,7 +47,8 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	 * 
 	 * @param index
 	 *            Index of the {@link ManagedObject} for this
-	 *            {@link ManagedObjectContainer} within the {@link ProcessState}.
+	 *            {@link ManagedObjectContainer} within the {@link ProcessState}
+	 *            .
 	 */
 	public ManagedObjectContainerProxy(int index) {
 		// Store state
@@ -55,55 +56,68 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	}
 
 	/*
+	 * ================= ManagedObjectContainer ==============================
+	 */
+
+	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#loadManagedObject(net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * loadManagedObject(net.officefloor.frame.spi.team.JobContext,
+	 * net.officefloor.frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
+	@Override
 	public boolean loadManagedObject(JobContext executionContext,
-			Job taskContainer, JobActivateSet notifySet) {
-		return taskContainer.getThreadState().getProcessState()
+			JobNode jobNode, JobActivateSet notifySet) {
+		return jobNode.getThreadState().getProcessState()
 				.getManagedObjectContainer(this.index).loadManagedObject(
-						executionContext, taskContainer, notifySet);
+						executionContext, jobNode, notifySet);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#coordinateManagedObject(net.officefloor.frame.internal.structure.WorkContainer,
-	 *      net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * coordinateManagedObject
+	 * (net.officefloor.frame.internal.structure.WorkContainer,
+	 * net.officefloor.frame.spi.team.JobContext,
+	 * net.officefloor.frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
+	@Override
 	public <W extends Work> void coordinateManagedObject(
 			WorkContainer<W> workContainer, JobContext executionContext,
-			Job taskContainer, JobActivateSet notifySet) {
-		taskContainer.getThreadState().getProcessState()
-				.getManagedObjectContainer(this.index).coordinateManagedObject(
-						workContainer, executionContext, taskContainer,
-						notifySet);
+			JobNode jobNode, JobActivateSet notifySet) {
+		jobNode.getThreadState().getProcessState().getManagedObjectContainer(
+				this.index).coordinateManagedObject(workContainer,
+				executionContext, jobNode, notifySet);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#isManagedObjectReady(net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * isManagedObjectReady(net.officefloor.frame.spi.team.JobContext,
+	 * net.officefloor.frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
+	@Override
 	public boolean isManagedObjectReady(JobContext executionContext,
-			Job taskContainer, JobActivateSet notifySet) {
-		return taskContainer.getThreadState().getProcessState()
+			JobNode jobNode, JobActivateSet notifySet) {
+		return jobNode.getThreadState().getProcessState()
 				.getManagedObjectContainer(this.index).isManagedObjectReady(
-						executionContext, taskContainer, notifySet);
+						executionContext, jobNode, notifySet);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#getObject()
+	 * @see
+	 * net.officefloor.frame.internal.structure.ManagedObjectContainer#getObject
+	 * ()
 	 */
+	@Override
 	public Object getObject(ThreadState threadState) {
 		return threadState.getProcessState().getManagedObjectContainer(
 				this.index).getObject(threadState);
@@ -112,8 +126,10 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#getManagedObject()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * getManagedObject()
 	 */
+	@Override
 	public ManagedObject getManagedObject(ThreadState threadState) {
 		return threadState.getProcessState().getManagedObjectContainer(
 				this.index).getManagedObject(threadState);
@@ -122,8 +138,10 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#unloadManagedObject()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * unloadManagedObject()
 	 */
+	@Override
 	public void unloadManagedObject() {
 		// Leave to process to unload
 	}

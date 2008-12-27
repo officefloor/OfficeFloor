@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.execute;
 
+import junit.framework.AssertionFailedError;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -23,13 +24,13 @@ import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobActivatableSet;
 import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.ThreadWorkLink;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
@@ -42,13 +43,8 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public abstract class JobContainer<W extends Work, N extends JobMetaData>
+public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData>
 		implements Job, JobNode, JobExecuteContext {
-
-	/**
-	 * {@link ThreadState}.
-	 */
-	protected final ThreadState threadState;
 
 	/**
 	 * {@link Flow}.
@@ -56,9 +52,9 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	protected final Flow flow;
 
 	/**
-	 * {@link ThreadWorkLink} to access the {@link WorkContainer}.
+	 * {@link WorkContainer}.
 	 */
-	protected final ThreadWorkLink<W> workLink;
+	protected final WorkContainer<W> workContainer;
 
 	/**
 	 * {@link JobMetaData}.
@@ -73,13 +69,11 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	/**
 	 * Initiate.
 	 * 
-	 * @param threadState
-	 *            {@link ThreadState} for executing this {@link Task}.
 	 * @param flow
 	 *            {@link Flow} that this {@link Task} resides within.
-	 * @param workLink
-	 *            {@link ThreadWorkLink} to access the {@link WorkContainer} of
-	 *            the {@link Work} for the {@link Task}.
+	 * @param workContainer
+	 *            {@link WorkContainer} of the {@link Work} for this
+	 *            {@link Task}.
 	 * @param nodeMetaData
 	 *            {@link JobMetaData} for this node.
 	 * @param parallelOwner
@@ -87,11 +81,10 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	 *            parallel {@link Task} this will be the invokee. If not
 	 *            parallel then will be <code>null</code>.
 	 */
-	public JobContainer(ThreadState threadState, Flow flow,
-			ThreadWorkLink<W> workLink, N nodeMetaData, JobNode parallelOwner) {
-		this.threadState = threadState;
+	public AbstractJobContainer(Flow flow, WorkContainer<W> workContainer,
+			N nodeMetaData, JobNode parallelOwner) {
 		this.flow = flow;
-		this.workLink = workLink;
+		this.workContainer = workContainer;
 		this.nodeMetaData = nodeMetaData;
 		this.parallelOwner = parallelOwner;
 	}
@@ -107,59 +100,8 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 			throws Throwable;
 
 	/*
-	 * ========================================================================
-	 * Job
-	 * ========================================================================
+	 * ======================== Job ==========================================
 	 */
-
-	/**
-	 * Flag indicating if this {@link Job} has been assigned to a {@link Team}
-	 * to be executed.
-	 */
-	private boolean isQueuedWithTeam = false;
-
-	/**
-	 * Flag indicating if this {@link Task} is active. Passive teams will try to
-	 * re-enter active tasks. On doing so, they should not run the {@link Task}
-	 * but return and allow earlier invocation to complete.
-	 */
-	private boolean isActive = false;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#activeTask()
-	 */
-	public final void activateJob() {
-
-		// Access Point: TaskContainer, ManagedObjectSource/Pool, ProjectManager
-		// Locks: None (possibly on another ThreadState)
-
-		// Lock to ensure only one activation
-		synchronized (this.threadState.getThreadLock()) {
-
-			// Determine if already queued, active or complete
-			if (this.isQueuedWithTeam || this.isActive
-					|| (this.jobState == JobState.COMPLETED)) {
-				return;
-			}
-
-			// Flag that queued
-			this.isQueuedWithTeam = true;
-
-			// Activate this Task
-			this.nodeMetaData.getTeam().assignJob(this);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#getThreadState()
-	 */
-	public final ThreadState getThreadState() {
-		return this.threadState;
-	}
 
 	/**
 	 * Next {@link Job} that is managed by the {@link Team}.
@@ -169,7 +111,9 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#setNextTask(net.officefloor.frame.spi.team.TaskContainer)
+	 * @see
+	 * net.officefloor.frame.spi.team.TaskContainer#setNextTask(net.officefloor
+	 * .frame.spi.team.TaskContainer)
 	 */
 	public final void setNextJob(Job task) {
 		this.nextJob = task;
@@ -208,7 +152,9 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#doTask(net.officefloor.frame.spi.team.ExecutionContext)
+	 * @see
+	 * net.officefloor.frame.spi.team.TaskContainer#doTask(net.officefloor.frame
+	 * .spi.team.ExecutionContext)
 	 */
 	public final boolean doJob(JobContext executionContext) {
 
@@ -216,12 +162,16 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 		// Locks: None
 
 		// Ensure notify and wait on flow
-		JobActivateSetImpl notifySet = new JobActivateSetImpl();
+		JobActivatableSet notifySet = this.nodeMetaData.createJobActivableSet();
 		FlowAsset waitOnFlowAsset = null;
 		try {
 
+			// Obtain the thread and process state (as used throughout method)
+			ThreadState threadState = this.flow.getThreadState();
+			ProcessState processState = threadState.getProcessState();
+
 			// Only one job per thread at a time
-			synchronized (this.threadState.getThreadLock()) {
+			synchronized (threadState.getThreadLock()) {
 
 				// Ensure no longer active
 				try {
@@ -234,10 +184,10 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 					try {
 						// Handle failure on thread
 						// (possibly from waiting for a managed object)
-						escalationCause = this.threadState.getFailure();
+						escalationCause = threadState.getFailure();
 						if (escalationCause != null) {
 							// Clear failure on the thread, as escalating
-							this.threadState.setFailure(null);
+							threadState.setFailure(null);
 
 							// Escalate the failure on the thread
 							throw escalationCause;
@@ -247,57 +197,73 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 						int[] managedObjectIndexes = this.nodeMetaData
 								.getRequiredManagedObjects();
 
-						// Within process lock, ensure managed objects ready
-						synchronized (this.threadState.getProcessState()
-								.getProcessLock()) {
-							switch (this.jobState) {
-							case LOAD_MANAGED_OBJECTS:
-								// Load the managed objects
-								boolean isAllLoaded = this.workLink
-										.getWorkContainer().loadManagedObjects(
-												managedObjectIndexes,
-												executionContext, this,
-												notifySet);
-
-								// Flag Managed Objects are being loaded
-								this.jobState = JobState.ENSURE_MANAGED_OBJECTS_LOADED;
-
-								// Determine if managed objects are loaded
-								if (!isAllLoaded) {
-									// Wakened up when loaded
-									return true;
-								}
-
-							case ENSURE_MANAGED_OBJECTS_LOADED:
-								// Ensure managed objects are ready
-								if (!this.workLink.getWorkContainer()
-										.isManagedObjectsReady(
-												managedObjectIndexes,
-												executionContext, this,
-												notifySet)) {
-									// Wakened up when ready
-									return true;
-								}
-
-								// Coordinate the managed objects
-								this.workLink.getWorkContainer()
-										.coordinateManagedObjects(
-												managedObjectIndexes,
-												executionContext, this,
-												notifySet);
-
-								// Flag Managed Objects are coordinated
+						// Only take lock if have required managed objects
+						if (managedObjectIndexes.length == 0) {
+							// Only jump forward if initial state
+							if (this.jobState == JobState.LOAD_MANAGED_OBJECTS) {
+								// No managed objects required, so execute job
 								this.jobState = JobState.EXECUTE_JOB;
+							}
 
-							default:
-								// Ensure managed objects are ready
-								if (!this.workLink.getWorkContainer()
-										.isManagedObjectsReady(
-												managedObjectIndexes,
-												executionContext, this,
-												notifySet)) {
-									// Wakened up when ready
-									return true;
+						} else {
+							// Within process lock, ensure managed objects ready
+							synchronized (processState.getProcessLock()) {
+								boolean isJustLoaded = false;
+								switch (this.jobState) {
+								case LOAD_MANAGED_OBJECTS:
+									// Load the managed objects
+									boolean isAllLoaded = this.workContainer
+											.loadManagedObjects(
+													managedObjectIndexes,
+													executionContext, this,
+													notifySet);
+
+									// Flag Managed Objects are being loaded
+									this.jobState = JobState.ENSURE_MANAGED_OBJECTS_LOADED;
+
+									// Determine if managed objects are loaded
+									if (!isAllLoaded) {
+										// Wakened up when loaded
+										return true;
+									}
+
+									// Flag all just loaded
+									isJustLoaded = true;
+
+								case ENSURE_MANAGED_OBJECTS_LOADED:
+									// Must check ready if not just loaded
+									if (!isJustLoaded) {
+										// Ensure managed objects are ready
+										if (!this.workContainer
+												.isManagedObjectsReady(
+														managedObjectIndexes,
+														executionContext, this,
+														notifySet)) {
+											// Wakened up when ready
+											return true;
+										}
+									}
+
+									// Coordinate the managed objects
+									this.workContainer
+											.coordinateManagedObjects(
+													managedObjectIndexes,
+													executionContext, this,
+													notifySet);
+
+									// Flag Managed Objects are coordinated
+									this.jobState = JobState.EXECUTE_JOB;
+
+								default:
+									// Ensure managed objects are ready
+									if (!this.workContainer
+											.isManagedObjectsReady(
+													managedObjectIndexes,
+													executionContext, this,
+													notifySet)) {
+										// Wakened up when ready
+										return true;
+									}
 								}
 							}
 						}
@@ -329,14 +295,13 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 								this.jobState = JobState.EXECUTE_JOB;
 
 								// Determine if parallel task to execute
-								Job parallelTask = this
+								JobNode parallelJob = this
 										.getParallelJobNodeToExecute();
-								if (parallelTask != null) {
+								if (parallelJob != null) {
 									// Execute the parallel job (on same thread)
-									parallelTask.activateJob();
-									if (this
-											.isParallelJobNotComplete(parallelTask)) {
-										// Job task is complete (for now)
+									parallelJob.activateJob();
+									if (this.isParallelJobsNotComplete()) {
+										// Parallel job wakes up when complete
 										return true;
 									} else {
 										// Parallel job completed, re-run this
@@ -360,14 +325,13 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 										.getNextTaskInFlow();
 								if (nextTaskMetaData != null) {
 									// Create next task
-									Job job = this.flow.createJob(
+									JobNode job = this.flow.createJobNode(
 											nextTaskMetaData,
 											this.parallelOwner,
-											this.nextJobParameter,
-											this.workLink);
+											this.nextJobParameter);
 
 									// Load for sequential execution
-									this.loadSequentialJobNode((JobNode) job);
+									this.loadSequentialJobNode(job);
 								}
 
 								// Sequential job now invoked
@@ -375,19 +339,19 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 							}
 
 							// Determine if parallel task to execute
-							Job parallelTask = this
+							JobNode parallelJob = this
 									.getParallelJobNodeToExecute();
-							if (parallelTask != null) {
+							if (parallelJob != null) {
 								// Execute the parallel job (on same thread)
-								parallelTask.activateJob();
-								if (this.isParallelJobNotComplete(parallelTask)) {
-									// Job is complete (for now)
+								parallelJob.activateJob();
+								if (this.isParallelJobsNotComplete()) {
+									// Parallel job wakes up when complete
 									return true;
 								}
 							}
 
 							// Assign next job to team (same thread)
-							Job job = this.getNextJobNodeToExecute();
+							JobNode job = this.getNextJobNodeToExecute();
 							if (job != null) {
 								job.activateJob();
 							}
@@ -427,6 +391,10 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 							}
 						}
 
+						// TODO remove
+					} catch (AssertionFailedError ex) {
+						throw (AssertionFailedError) ex;
+
 					} catch (Throwable ex) {
 
 						// Task failed
@@ -447,56 +415,53 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 
 							// Use catch all escalation, if none provided
 							if (escalation == null) {
-								ProcessState processState = this.threadState
-										.getProcessState();
-								escalation = processState.getCatchAllEscalation();
+								escalation = processState
+										.getCatchAllEscalation();
 							}
 
+							// Start escalation (and ensure complete later)
+							boolean isResetThreadState = escalation
+									.isResetThreadState();
+							threadState.escalationStart(this,
+									isResetThreadState, notifySet);
 							try {
-								// Start escalation
-								this.threadState.escalationStart(this,
-										escalation.isResetThreadState(),
-										notifySet);
 
 								// Do the escalation
-								if (escalation.isResetThreadState()) {
+								FlowMetaData<?> escalationFlowMetaData = escalation
+										.getFlowMetaData();
+								if (isResetThreadState) {
 									// Create and load the sequential flow
-									this
-											.createSequentialFlow(escalation
-													.getFlowMetaData(),
-													escalationCause);
+									this.createSequentialFlow(
+											escalationFlowMetaData,
+											escalationCause);
 
 								} else {
 									// Flag handling failure
 									this.jobState = JobState.HANDLING_FAILURE;
 
 									// Create, load and execute as parallel flow
-									this
-											.createParallelFlow(escalation
-													.getFlowMetaData(),
-													escalationCause);
-									Job parallelTask = this
+									this.createParallelFlow(
+											escalationFlowMetaData,
+											escalationCause);
+									JobNode parallelJob = this
 											.getNextJobNodeToExecute();
-									parallelTask.activateJob();
-									if (this
-											.isParallelJobNotComplete(parallelTask)) {
-										// Will be reactivated after handling
+									parallelJob.activateJob();
+									if (this.isParallelJobsNotComplete()) {
+										// Parallel job wakes up when complete
 										return true;
 									}
 								}
 							} finally {
 								// Escalation complete
-								this.threadState.escalationComplete(this,
-										notifySet);
+								threadState.escalationComplete(this, notifySet);
 							}
 
 						case HANDLING_FAILURE:
 							// Assign the next task of flow to its team
-							Job taskContainer = this.getNextJobNodeToExecute();
-							if (taskContainer != null) {
-								// Same thread, same lock to active so ok
-								// Different thread, should be creating it so ok
-								taskContainer.activateJob();
+							JobNode job = this.getNextJobNodeToExecute();
+							if (job != null) {
+								// Will be either same thread or new thread
+								job.activateJob();
 							}
 
 						case COMPLETED:
@@ -527,6 +492,8 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 			}
 
 		} finally {
+			// Outside thread lock as may be interacting with other threads
+
 			// Wait on flow
 			if (waitOnFlowAsset != null) {
 				waitOnFlowAsset.waitOnFlow(this, notifySet);
@@ -552,8 +519,29 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 
 		// Complete the job
 		this.jobState = JobState.COMPLETED;
+		this.workContainer.unloadWork();
 		this.flow.jobComplete(this, notifySet);
-		this.workLink.unregisterJob(this);
+	}
+
+	/**
+	 * Indicates if the graph of parallel {@link JobNode} instances from this
+	 * {@link JobNode}are complete.
+	 * 
+	 * @return <code>true</code> if the {@link JobNode} is not complete and this
+	 *         {@link JobNode} should release the
+	 *         {@link ThreadState#getThreadLock()} lock to allow it to complete.
+	 */
+	private boolean isParallelJobsNotComplete() {
+		// Obtain the parallel job node
+		JobNode parallelJobNode = this.getParallelNode();
+		if (parallelJobNode == null) {
+			// No parallel jobs, so all complete
+			return false; // No non-complete job
+
+		} else {
+			// Return whether not complete
+			return isParallelJobNotComplete(parallelJobNode);
+		}
 	}
 
 	/**
@@ -566,18 +554,15 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	 * 
 	 * @param parallelJob
 	 *            Parallel {@link JobNode} to check if complete.
-	 * @return <code>true</code> if the {@link JobNode} is not complete and
-	 *         this {@link JobNode} should release the
+	 * @return <code>true</code> if the {@link JobNode} is not complete and this
+	 *         {@link JobNode} should release the
 	 *         {@link ThreadState#getThreadLock()} lock to allow it to complete.
 	 */
-	private boolean isParallelJobNotComplete(Job parallelJob) {
+	private boolean isParallelJobNotComplete(JobNode parallelJob) {
 
-		// Downcast to implementation
-		JobContainer<?, ?> impl = (JobContainer<?, ?>) parallelJob;
-
-		// Determine if input task not is complete
-		if (impl.jobState != JobState.COMPLETED) {
-			// Not complete
+		// Determine if input job node not is complete
+		if (!parallelJob.isJobNodeComplete()) {
+			// Not complete, so parallel nodes not yet complete
 			return true;
 		}
 
@@ -585,12 +570,12 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 		// create these in its process and potentially either passively complete
 		// them or hand them off to another team.
 		boolean isNotComplete = false;
-		Job sequentialNode = (Job) impl.getNextNode();
+		JobNode sequentialNode = parallelJob.getNextNode();
 		if (sequentialNode != null) {
 			isNotComplete |= this.isParallelJobNotComplete(sequentialNode);
 		}
 		if (!isNotComplete) {
-			Job parallelParallelNode = (Job) impl.getParallelNode();
+			JobNode parallelParallelNode = parallelJob.getParallelNode();
 			if (parallelParallelNode != null) {
 				isNotComplete |= this
 						.isParallelJobNotComplete(parallelParallelNode);
@@ -602,11 +587,11 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	}
 
 	/**
-	 * Obtains the parallel {@link Job} to execute.
+	 * Obtains the parallel {@link JobNode} to execute.
 	 * 
-	 * @return Parallel {@link Job} to execute.
+	 * @return Parallel {@link JobNode} to execute.
 	 */
-	private Job getParallelJobNodeToExecute() {
+	private JobNode getParallelJobNodeToExecute() {
 
 		// Determine furthest parallel node
 		JobNode currentTask = this;
@@ -621,19 +606,19 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 			return null;
 		} else {
 			// Return the furthest parallel task
-			return (Job) currentTask;
+			return currentTask;
 		}
 	}
 
 	/**
-	 * Obtains the next {@link Job} to execute.
+	 * Obtains the next {@link JobNode} to execute.
 	 * 
-	 * @return Next {@link Job} to execute.
+	 * @return Next {@link JobNode} to execute.
 	 */
-	private Job getNextJobNodeToExecute() {
+	private JobNode getNextJobNodeToExecute() {
 
 		// Determine if have parallel node
-		Job nextTaskContainer = this.getParallelJobNodeToExecute();
+		JobNode nextTaskContainer = this.getParallelJobNodeToExecute();
 		if (nextTaskContainer != null) {
 			// Parallel node
 			return nextTaskContainer;
@@ -643,7 +628,7 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 		JobNode nextTask = this.getNextNode();
 		if (nextTask != null) {
 			// Sequential node
-			return (Job) nextTask;
+			return nextTask;
 		}
 
 		// Determine if have parallel owner
@@ -653,7 +638,7 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 			nextTask.setParallelNode(null);
 
 			// Parallel owner
-			return (Job) nextTask;
+			return nextTask;
 		}
 
 		// No further tasks
@@ -661,19 +646,19 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	}
 
 	/*
-	 * ====================================================================
-	 * JobContext
+	 * ======================= JobContext =================================
 	 * 
 	 * All methods will be guarded by lock taken in the doJob method.
 	 * Furthermore the JobContext methods do not require synchronized
 	 * co-ordination between themselves as executing a task is single threaded.
-	 * ====================================================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.NodeContext#setTaskComplete(boolean)
+	 * @see
+	 * net.officefloor.frame.internal.structure.NodeContext#setTaskComplete(
+	 * boolean)
 	 */
 	public final void setJobComplete(boolean isComplete) {
 		this.isComplete = isComplete;
@@ -682,7 +667,9 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.NodeContext#joinFlow(net.officefloor.frame.api.execute.FlowFuture)
+	 * @see
+	 * net.officefloor.frame.internal.structure.NodeContext#joinFlow(net.officefloor
+	 * .frame.api.execute.FlowFuture)
 	 */
 	public final void joinFlow(FlowFuture flowFuture) {
 
@@ -699,8 +686,9 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.NodeContext#doFlow(net.officefloor.frame.internal.structure.FlowMetaData,
-	 *      java.lang.Object)
+	 * @see
+	 * net.officefloor.frame.internal.structure.NodeContext#doFlow(net.officefloor
+	 * .frame.internal.structure.FlowMetaData, java.lang.Object)
 	 */
 	public final FlowFuture doFlow(FlowMetaData<?> flowMetaData,
 			Object parameter) {
@@ -740,15 +728,16 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 				.getInitialTaskMetaData();
 
 		// Create thread to execute asynchronously
-		Flow asyncFlow = this.threadState.getProcessState().createThread(
-				flowMetaData);
+		ProcessState processState = this.flow.getThreadState()
+				.getProcessState();
+		Flow asyncFlow = processState.createThread(flowMetaData);
 
-		// Create task for execution
-		Job asyncTask = asyncFlow.createJob(initTaskMetaData, null, parameter,
-				this.workLink);
+		// Create job node for execution
+		JobNode asyncJobNode = asyncFlow.createJobNode(initTaskMetaData, null,
+				parameter);
 
-		// Asynchronously instigate the task
-		asyncTask.activateJob();
+		// Asynchronously instigate the job node
+		asyncJobNode.activateJob();
 
 		// Specify the thread flow future
 		return asyncFlow.getThreadState();
@@ -770,15 +759,16 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
 				.getInitialTaskMetaData();
 
-		// Create a flow for execution
-		Flow parallelFlow = this.threadState.createFlow(flowMetaData);
+		// Create a new flow for execution
+		ThreadState threadState = this.flow.getThreadState();
+		Flow parallelFlow = threadState.createFlow(flowMetaData);
 
-		// Create the Task Container
-		Job parallelTaskContainer = parallelFlow.createJob(initTaskMetaData,
-				this, parameter, this.workLink);
+		// Create the job node
+		JobNode parallelJobNode = parallelFlow.createJobNode(initTaskMetaData,
+				this, parameter);
 
 		// Load the parallel node
-		this.loadParallelJobNode((JobNode) parallelTaskContainer);
+		this.loadParallelJobNode(parallelJobNode);
 
 		// Return the flow future
 		return parallelFlow;
@@ -800,12 +790,12 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
 				.getInitialTaskMetaData();
 
-		// Create the Task Container
-		Job sequentialTaskContainer = this.flow.createJob(initTaskMetaData,
-				this.parallelOwner, parameter, this.workLink);
+		// Create the job node on the same flow as this job node
+		JobNode sequentialJobNode = this.flow.createJobNode(initTaskMetaData,
+				this.parallelOwner, parameter);
 
 		// Load the sequential node
-		this.loadSequentialJobNode((JobNode) sequentialTaskContainer);
+		this.loadSequentialJobNode(sequentialJobNode);
 
 		// Return the flow future
 		return this.flow;
@@ -856,9 +846,7 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	}
 
 	/*
-	 * ====================================================================
-	 * JobNode
-	 * ====================================================================
+	 * ====================== JobNode ====================================
 	 */
 
 	/**
@@ -881,10 +869,72 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	 */
 	private JobNode nextTaskNode;
 
+	/**
+	 * Flag indicating if this {@link Job} has been assigned to a {@link Team}
+	 * to be executed.
+	 */
+	private boolean isQueuedWithTeam = false;
+
+	/**
+	 * Flag indicating if this {@link Task} is active. Passive teams will try to
+	 * re-enter active tasks. On doing so, they should not run the {@link Task}
+	 * but return and allow earlier invocation to complete.
+	 */
+	private boolean isActive = false;
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskNode#setParallelOwner(net.officefloor.frame.internal.structure.TaskNode)
+	 * @see net.officefloor.frame.spi.team.TaskContainer#activeTask()
+	 */
+	public final void activateJob() {
+
+		// Access Point: TaskContainer, ManagedObjectSource/Pool, ProjectManager
+		// Locks: None (possibly on another ThreadState)
+
+		// Lock to ensure only one activation
+		synchronized (this.flow.getThreadState().getThreadLock()) {
+
+			// Determine if already queued, active or complete
+			if (this.isQueuedWithTeam || this.isActive
+					|| (this.jobState == JobState.COMPLETED)) {
+				return;
+			}
+
+			// Flag that queued
+			this.isQueuedWithTeam = true;
+
+			// Activate this Task
+			this.nodeMetaData.getTeam().assignJob(this);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.structure.JobNode#isJobNodeComplete()
+	 */
+	@Override
+	public boolean isJobNodeComplete() {
+		// Complete if in complete state
+		return (this.jobState == JobState.COMPLETED);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.spi.team.TaskContainer#getThreadState()
+	 */
+	public final ThreadState getThreadState() {
+		return this.flow.getThreadState();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.frame.internal.structure.TaskNode#setParallelOwner(net
+	 * .officefloor.frame.internal.structure.TaskNode)
 	 */
 	public final void setParallelOwner(JobNode jobNode) {
 		this.parallelOwner = jobNode;
@@ -902,7 +952,9 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskNode#setParallelNode(net.officefloor.frame.internal.structure.TaskNode)
+	 * @see
+	 * net.officefloor.frame.internal.structure.TaskNode#setParallelNode(net
+	 * .officefloor.frame.internal.structure.TaskNode)
 	 */
 	public final void setParallelNode(JobNode jobNode) {
 		this.parallelNode = jobNode;
@@ -920,7 +972,9 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskNode#setNextNode(net.officefloor.frame.internal.structure.TaskNode)
+	 * @see
+	 * net.officefloor.frame.internal.structure.TaskNode#setNextNode(net.officefloor
+	 * .frame.internal.structure.TaskNode)
 	 */
 	public final void setNextNode(JobNode jobNode) {
 		this.nextTaskNode = jobNode;
@@ -938,7 +992,9 @@ public abstract class JobContainer<W extends Work, N extends JobMetaData>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskNode#clearNodes(net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @see
+	 * net.officefloor.frame.internal.structure.TaskNode#clearNodes(net.officefloor
+	 * .frame.internal.structure.AssetNotifySet)
 	 */
 	@Override
 	public final void clearNodes(JobActivateSet notifySet) {

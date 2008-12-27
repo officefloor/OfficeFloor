@@ -16,12 +16,33 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.spi.team.Job;
+
 /**
  * Node within the tree of {@link JobNode} instances to execute.
  * 
  * @author Daniel
  */
 public interface JobNode {
+
+	/**
+	 * Activates the {@link Job} for this {@link JobNode}.
+	 */
+	void activateJob();
+
+	/**
+	 * Indicates if this {@link JobNode} is completed.
+	 * 
+	 * @return <code>true</code> if this {@link JobNode} is completed.
+	 */
+	boolean isJobNodeComplete();
+
+	/**
+	 * Obtains the {@link ThreadState} that this {@link JobNode} is bound.
+	 * 
+	 * @return {@link ThreadState} that this {@link JobNode} is bound.
+	 */
+	ThreadState getThreadState();
 
 	/**
 	 * <p>
@@ -69,8 +90,8 @@ public interface JobNode {
 	void setNextNode(JobNode taskNode);
 
 	/**
-	 * Obtains the next {@link JobNode} in the {@link Flow} to execute after
-	 * the current {@link JobNode} has completed.
+	 * Obtains the next {@link JobNode} in the {@link Flow} to execute after the
+	 * current {@link JobNode} has completed.
 	 * 
 	 * @return Next {@link JobNode}.
 	 */

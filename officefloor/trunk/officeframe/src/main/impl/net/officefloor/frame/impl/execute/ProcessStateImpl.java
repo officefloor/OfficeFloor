@@ -28,7 +28,6 @@ import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
@@ -129,7 +128,8 @@ public class ProcessStateImpl implements ProcessState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ProcessState#getProcessLock()
+	 * @see
+	 * net.officefloor.frame.internal.structure.ProcessState#getProcessLock()
 	 */
 	public Object getProcessLock() {
 		return this;
@@ -156,7 +156,9 @@ public class ProcessStateImpl implements ProcessState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ProcessState#getCatchAllEscalation()
+	 * @see
+	 * net.officefloor.frame.internal.structure.ProcessState#getCatchAllEscalation
+	 * ()
 	 */
 	@Override
 	public Escalation getCatchAllEscalation() {
@@ -164,7 +166,7 @@ public class ProcessStateImpl implements ProcessState {
 		// Create the catch all escalation
 		TaskMetaDataImpl<Throwable, Work, None, None> catchAllTask = new TaskMetaDataImpl<Throwable, Work, None, None>(
 				new CatchAllEscalationTaskFactory(), new PassiveTeam(),
-				new int[0], new int[0], new int[0], new TaskDutyAssociation[0],
+				new int[0], new int[0], new TaskDutyAssociation[0],
 				new TaskDutyAssociation[0]);
 		FlowMetaData<Work> catchAllFlow = new FlowMetaDataImpl<Work>(
 				FlowInstigationStrategyEnum.SEQUENTIAL, catchAllTask, null);
@@ -184,7 +186,9 @@ public class ProcessStateImpl implements ProcessState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ProcessState#threadComplete(net.officefloor.frame.internal.structure.ThreadState)
+	 * @see
+	 * net.officefloor.frame.internal.structure.ProcessState#threadComplete(
+	 * net.officefloor.frame.internal.structure.ThreadState)
 	 */
 	public void threadComplete(ThreadState thread) {
 		// Decrement the number of threads
@@ -211,7 +215,8 @@ public class ProcessStateImpl implements ProcessState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ProcessState#getManagedObjectContainer(int)
+	 * @seenet.officefloor.frame.internal.structure.ProcessState#
+	 * getManagedObjectContainer(int)
 	 */
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
 		return this.managedObjectContainers[index];
@@ -220,7 +225,8 @@ public class ProcessStateImpl implements ProcessState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ProcessState#getAdministratorContainer(int)
+	 * @seenet.officefloor.frame.internal.structure.ProcessState#
+	 * getAdministratorContainer(int)
 	 */
 	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
 		return this.administratorContainers[index];
@@ -229,7 +235,9 @@ public class ProcessStateImpl implements ProcessState {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ProcessState#registerProcessCompletionListener(net.officefloor.frame.internal.structure.ProcessCompletionListener)
+	 * @seenet.officefloor.frame.internal.structure.ProcessState#
+	 * registerProcessCompletionListener
+	 * (net.officefloor.frame.internal.structure.ProcessCompletionListener)
 	 */
 	public void registerProcessCompletionListener(
 			ProcessCompletionListener listener) {
@@ -244,15 +252,15 @@ public class ProcessStateImpl implements ProcessState {
 			Task<Throwable, Work, None, None> {
 
 		/*
-		 * ===========================================================================
-		 * TaskFactory
-		 * ===========================================================================
+		 * ================== TaskFactory =============================
 		 */
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor.frame.api.execute.Work)
+		 * @see
+		 * net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor
+		 * .frame.api.execute.Work)
 		 */
 		@Override
 		public Task<Throwable, Work, None, None> createTask(Work work) {
@@ -260,15 +268,15 @@ public class ProcessStateImpl implements ProcessState {
 		}
 
 		/*
-		 * ===========================================================================
-		 * Task
-		 * ===========================================================================
+		 * =================== Task ====================================
 		 */
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+		 * @see
+		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
+		 * .api.execute.TaskContext)
 		 */
 		@Override
 		public Object doTask(TaskContext<Throwable, Work, None, None> context) {
@@ -333,9 +341,7 @@ public class ProcessStateImpl implements ProcessState {
 			WorkFactory<Work>, Work {
 
 		/*
-		 * ===========================================================================
-		 * WorkFactory
-		 * ===========================================================================
+		 * ==================== WorkFactory =======================
 		 */
 
 		/*
@@ -346,22 +352,6 @@ public class ProcessStateImpl implements ProcessState {
 		@Override
 		public Work createWork() {
 			return this;
-		}
-
-		/*
-		 * ===========================================================================
-		 * Work
-		 * ===========================================================================
-		 */
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-		 */
-		@Override
-		public void setWorkContext(WorkContext context) throws Exception {
-			// Do nothing
 		}
 	}
 

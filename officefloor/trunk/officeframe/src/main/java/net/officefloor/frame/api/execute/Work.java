@@ -23,14 +23,4 @@ package net.officefloor.frame.api.execute;
  */
 public interface Work {
 
-	/**
-	 * Specifies the {@link WorkContext}.
-	 * 
-	 * @param context
-	 *            {@link WorkContext}.
-	 * @throws Exception
-	 *             If fails to initiate the {@link Work}.
-	 */
-	void setWorkContext(WorkContext context) throws Exception;
-
 }

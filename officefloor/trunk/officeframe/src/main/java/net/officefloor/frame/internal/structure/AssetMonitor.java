@@ -16,11 +16,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Monitor for 'synchronizing' the {@link ThreadState} instances via
- * {@link Job} on an {@link Asset}.
+ * {@link JobNode} on an {@link Asset}.
  * 
  * @author Daniel
  */
@@ -41,23 +40,23 @@ public interface AssetMonitor extends LinkedListEntry<AssetMonitor, Object> {
 	Object getAssetLock();
 
 	/**
-	 * Flags for the {@link ThreadState} of the input {@link Job} to
-	 * wait and on being notified wake up the input {@link Job}.
+	 * Flags for the {@link ThreadState} of the input {@link JobNode} to wait
+	 * and on being notified wake up the input {@link JobNode}.
 	 * 
-	 * @param taskContainer
-	 *            {@link Job} to be notified on waking up the
+	 * @param jobNode
+	 *            {@link JobNode} to be notified on waking up the
 	 *            {@link ThreadState}.
 	 * @param notifySet
-	 *            {@link JobActivateSet} that the {@link Job} is added
-	 *            to if this {@link AssetMonitor} is permanently notified.
-	 * @return <code>true</code> if the {@link Job} is waiting on
-	 *         this {@link AssetMonitor}.
+	 *            {@link JobActivateSet} that the {@link JobNode} is added to if
+	 *            this {@link AssetMonitor} is permanently notified.
+	 * @return <code>true</code> if the {@link JobNode} is waiting on this
+	 *         {@link AssetMonitor}.
 	 */
-	boolean wait(Job taskContainer, JobActivateSet notifySet);
+	boolean wait(JobNode jobNode, JobActivateSet notifySet);
 
 	/**
-	 * Adds all the {@link Job} instances waiting on this
-	 * {@link AssetMonitor} to the input {@link JobActivateSet}.
+	 * Adds all the {@link JobNode} instances waiting on this {@link AssetMonitor}
+	 * to the input {@link JobActivateSet}.
 	 * 
 	 * @param notifySet
 	 *            {@link JobActivateSet}.
@@ -66,10 +65,10 @@ public interface AssetMonitor extends LinkedListEntry<AssetMonitor, Object> {
 
 	/**
 	 * <p>
-	 * Flags this {@link AssetMonitor} to permanently notify waiting
-	 * {@link Job} instances.
+	 * Flags this {@link AssetMonitor} to permanently notify waiting {@link JobNode}
+	 * instances.
 	 * <p>
-	 * Also adds all the {@link Job} instances waiting on this
+	 * Also adds all the {@link JobNode} instances waiting on this
 	 * {@link AssetMonitor} to the input {@link JobActivateSet}.
 	 * 
 	 * @param notifySet
@@ -79,11 +78,10 @@ public interface AssetMonitor extends LinkedListEntry<AssetMonitor, Object> {
 
 	/**
 	 * <p>
-	 * Flags each {@link Job} with the input failure.
+	 * Flags each {@link JobNode} with the input failure.
 	 * <p>
-	 * Adds all the {@link Job} instances waiting on this
-	 * {@link AssetMonitor} to the {@link JobActivateSet} with the input
-	 * {@link Throwable}.
+	 * Adds all the {@link JobNode} instances waiting on this {@link AssetMonitor}
+	 * to the {@link JobActivateSet} with the input {@link Throwable}.
 	 * 
 	 * @param notifySet
 	 *            {@link JobActivateSet}.
@@ -94,9 +92,8 @@ public interface AssetMonitor extends LinkedListEntry<AssetMonitor, Object> {
 
 	/**
 	 * <p>
-	 * Flags each {@link Job} with the input failure and all
-	 * subsequent {@link Job} added via
-	 * {@link #wait(Job, JobActivateSet)}.
+	 * Flags each {@link JobNode} with the input failure and all subsequent
+	 * {@link JobNode} added via {@link #wait(JobNode, JobActivateSet)}.
 	 * 
 	 * @param notifySet
 	 *            {@link JobActivateSet}.

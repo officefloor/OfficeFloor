@@ -22,7 +22,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Context for {@link JobContainer} to execute the {@link Job}.
+ * Context for {@link AbstractJobContainer} to execute the {@link Job}.
  * 
  * @author Daniel
  */

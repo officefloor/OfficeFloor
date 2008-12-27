@@ -16,7 +16,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
@@ -25,7 +24,6 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Meta-data of a {@link ManagedObject}.
@@ -139,15 +137,16 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 			WorkContainer<W> workContainer, ThreadState threadState);
 
 	/**
-	 * Creates the {@link Task} for the recycling of the {@link ManagedObject}.
+	 * Creates the {@link JobNode} for the recycling of the
+	 * {@link ManagedObject}.
 	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} to be recycled. Obtained by the
-	 *            {@link TaskContext#getParameter()} within the {@link Task}.
-	 * @return {@link Task} for the recycling this {@link ManagedObject} or
+	 *            {@link TaskContext#getParameter()} within the {@link JobNode}.
+	 * @return {@link JobNode} for the recycling this {@link ManagedObject} or
 	 *         <code>null</code> if no recycling is required for this
 	 *         {@link ManagedObject}.
 	 */
-	Job createRecycleTask(ManagedObject managedObject);
+	JobNode createRecycleJobNode(ManagedObject managedObject);
 
 }

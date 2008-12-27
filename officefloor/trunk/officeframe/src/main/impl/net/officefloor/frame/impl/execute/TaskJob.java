@@ -24,8 +24,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.TaskMetaData;
-import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.ThreadWorkLink;
+import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.team.Job;
 
 /**
@@ -34,7 +33,7 @@ import net.officefloor.frame.spi.team.Job;
  * @author Daniel
  */
 public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends JobContainer<W, TaskMetaData<P, W, M, F>> implements
+		extends AbstractJobContainer<W, TaskMetaData<P, W, M, F>> implements
 		TaskContext<P, W, M, F> {
 
 	/**
@@ -50,12 +49,10 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	/**
 	 * Initiate.
 	 * 
-	 * @param threadState
-	 *            {@link ThreadState}.
 	 * @param flow
 	 *            {@link Flow}.
-	 * @param workLink
-	 *            {@link ThreadWorkLink}.
+	 * @param workContainer
+	 *            {@link WorkContainer}.
 	 * @param taskMetaData
 	 *            {@link TaskMetaData}.
 	 * @param parallelOwner
@@ -63,27 +60,27 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 * @param parameter
 	 *            Parameter for the {@link Task}.
 	 */
-	public TaskJob(ThreadState threadState, Flow flow,
-			ThreadWorkLink<W> workLink, TaskMetaData<P, W, M, F> taskMetaData,
-			JobNode parallelOwner, P parameter) {
-		super(threadState, flow, workLink, taskMetaData, parallelOwner);
+	public TaskJob(Flow flow, WorkContainer<W> workContainer,
+			TaskMetaData<P, W, M, F> taskMetaData, JobNode parallelOwner,
+			P parameter) {
+		super(flow, workContainer, taskMetaData, parallelOwner);
 		this.parameter = parameter;
 
 		// Create the task
 		this.task = this.nodeMetaData.getTaskFactory().createTask(
-				this.workLink.getWorkContainer().getWork(this.threadState));
+				this.workContainer.getWork(flow.getThreadState()));
 	}
 
 	/*
-	 * ====================================================================================
-	 * JobContainer
-	 * ====================================================================================
+	 * ====================== JobContainer ==========================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.impl.execute.JobContainer#executeJob(net.officefloor.frame.impl.execute.JobExecuteContext)
+	 * @see
+	 * net.officefloor.frame.impl.execute.JobContainer#executeJob(net.officefloor
+	 * .frame.impl.execute.JobExecuteContext)
 	 */
 	@Override
 	protected Object executeJob(JobExecuteContext context) throws Throwable {
@@ -92,9 +89,7 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	/*
-	 * ====================================================================================
-	 * TaskContext
-	 * ====================================================================================
+	 * ====================== TaskContext ===========================
 	 */
 
 	/*
@@ -104,7 +99,7 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 */
 	@Override
 	public W getWork() {
-		return this.workLink.getWorkContainer().getWork(this.threadState);
+		return this.workContainer.getWork(this.flow.getThreadState());
 	}
 
 	/*
@@ -120,7 +115,8 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getObject(java.lang.Enum)
+	 * @see
+	 * net.officefloor.frame.api.execute.TaskContext#getObject(java.lang.Enum)
 	 */
 	@Override
 	public Object getObject(M key) {
@@ -139,15 +135,15 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 				.translateManagedObjectIndexForWork(managedObjectIndex);
 
 		// Return the Object
-		return this.workLink.getWorkContainer().getObject(workMoIndex,
-				this.threadState);
+		return this.workContainer.getObject(workMoIndex, this.flow
+				.getThreadState());
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.api.execute.TaskContext#doFlow(java.lang.Enum,
-	 *      java.lang.Object)
+	 * java.lang.Object)
 	 */
 	@Override
 	public FlowFuture doFlow(F key, Object parameter) {
@@ -158,22 +154,21 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.api.execute.TaskContext#doFlow(int,
-	 *      java.lang.Object)
+	 * java.lang.Object)
 	 */
 	@Override
 	public FlowFuture doFlow(int flowIndex, Object parameter) {
-
-		// Obtain the Flow meta-data
+		// Obtain the Flow meta-data and do the flow
 		FlowMetaData<?> flowMetaData = this.nodeMetaData.getFlow(flowIndex);
-
-		// Do the flow
 		return this.doFlow(flowMetaData, parameter);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#join(net.officefloor.frame.api.execute.FlowFuture)
+	 * @see
+	 * net.officefloor.frame.api.execute.TaskContext#join(net.officefloor.frame
+	 * .api.execute.FlowFuture)
 	 */
 	@Override
 	public void join(FlowFuture flowFuture) {
@@ -187,7 +182,7 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 */
 	@Override
 	public Object getProcessLock() {
-		return this.threadState.getProcessState().getProcessLock();
+		return this.flow.getThreadState().getProcessState().getProcessLock();
 	}
 
 	/*

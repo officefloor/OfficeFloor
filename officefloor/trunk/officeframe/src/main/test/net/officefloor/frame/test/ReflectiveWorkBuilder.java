@@ -30,7 +30,6 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
@@ -139,25 +138,6 @@ public class ReflectiveWorkBuilder implements Work,
 
 		// Return the task meta-data
 		return taskMetaData;
-	}
-
-	/*
-	 * ==========================================================================
-	 * Work
-	 * ======================================================================
-	 * ====
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor
-	 * .frame.api.execute.WorkContext)
-	 */
-	@Override
-	public void setWorkContext(WorkContext context) throws Exception {
-		// Do nothing
 	}
 
 	/*

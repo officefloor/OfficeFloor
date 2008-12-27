@@ -14,15 +14,19 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.api.execute;
+package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.spi.team.Job;
 
 /**
- * Context that the {@link net.officefloor.frame.api.execute.Work} is to operate
- * within.
+ * {@link JobActivateSet} that allows activating the {@link Job} instance.
  * 
  * @author Daniel
  */
-public interface WorkContext {
+public interface JobActivatableSet extends JobActivateSet {
 
+	/**
+	 * Activates the {@link Job} instances with in this {@link JobActivateSet}.
+	 */
+	void activateJobs();
 }

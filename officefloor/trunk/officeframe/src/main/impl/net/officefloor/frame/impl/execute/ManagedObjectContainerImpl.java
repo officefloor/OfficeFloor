@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.AssetReport;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AssetMonitor;
@@ -99,15 +100,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	private long asynchronousStartTime = NO_ASYNC_OPERATION;
 
 	/**
-	 * {@link Job} to recycle the {@link ManagedObject}. This is
-	 * created up front to ensure available to recycle the {@link ManagedObject}.
+	 * {@link JobNode} to recycle the {@link ManagedObject}. This is created up
+	 * front to ensure available to recycle the {@link ManagedObject}.
 	 */
-	private Job recycleTask;
+	private JobNode recycleJobNode;
 
 	/**
 	 * {@link JobActivateSet} that was passed to
-	 * {@link #loadManagedObject(JobContext, Job, JobActivateSet)}
-	 * should the {@link ManagedObjectSource} provide the {@link ManagedObject}
+	 * {@link #loadManagedObject(JobContext, Job, JobActivateSet)} should the
+	 * {@link ManagedObjectSource} provide the {@link ManagedObject}
 	 * immediately.
 	 */
 	private JobActivateSet assetNotifySet = null;
@@ -160,9 +161,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 						.registerAsynchronousCompletionListener(this);
 			}
 
-			// Create the recycle task
-			this.recycleTask = this.metaData
-					.createRecycleTask(this.managedObject);
+			// Create the recycle job node
+			this.recycleJobNode = this.metaData
+					.createRecycleJobNode(this.managedObject);
 
 			try {
 				// Obtain the Object
@@ -179,21 +180,21 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * 
 	 * @param managedObject
 	 *            {@link ManagedObject} to be unloaded.
-	 * @param recycleTask
-	 *            {@link Job} to recycle the {@link ManagedObject}.
+	 * @param recycleJob
+	 *            {@link JobNode} to recycle the {@link ManagedObject}.
 	 */
 	protected void unloadManagedObject(ManagedObject managedObject,
-			Job recycleTask) {
+			JobNode recycleJob) {
 
 		// Ensure have managed object to unload
 		if (managedObject == null) {
 			return;
 		}
 
-		// Task unload action
-		if (recycleTask != null) {
+		// Job unload action
+		if (recycleJob != null) {
 			// Recycle the managed object
-			recycleTask.activateJob();
+			recycleJob.activateJob();
 
 		} else {
 			// Return directly to pool (if pooled)
@@ -205,23 +206,23 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObjectContainer
+	 * =============== ManagedObjectContainer =============================
 	 * 
 	 * Note: Synchronizing of the methods is done in the WorkContainer scoped
 	 * correctly to the work or process.
-	 * ====================================================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#loadManagedObject(net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * loadManagedObject(net.officefloor.frame.spi.team.JobContext,
+	 * net.officefloor.frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
+	@Override
 	public boolean loadManagedObject(JobContext executionContext,
-			Job taskContainer, JobActivateSet notifySet) {
+			JobNode jobNode, JobActivateSet notifySet) {
 
 		// Access Point: ThreadState via TaskContainer
 		// Locks: ThreadState -> Work/Process
@@ -258,7 +259,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Determine if failure in loading
 			if (this.failure != null) {
 				// Report failure
-				taskContainer.getThreadState().setFailure(this.failure);
+				jobNode.getThreadState().setFailure(this.failure);
 
 				// Managed Object failed
 				return true;
@@ -271,7 +272,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 			} else {
 				// Not loaded therefore wait for being loaded
-				this.sourcingMonitor.wait(taskContainer, notifySet);
+				this.sourcingMonitor.wait(jobNode, notifySet);
 
 				// Waiting on managed object to be loaded
 				return false;
@@ -288,14 +289,17 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#coordinateManagedObject(net.officefloor.frame.internal.structure.WorkContainer,
-	 *      net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * coordinateManagedObject
+	 * (net.officefloor.frame.internal.structure.WorkContainer,
+	 * net.officefloor.frame.spi.team.JobContext,
+	 * net.officefloor.frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public void coordinateManagedObject(WorkContainer workContainer,
-			JobContext executionContext, Job taskContainer,
+			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet) {
 
 		// Determine if co-ordinating managed object
@@ -303,7 +307,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 			// Create the object registry for the managed object
 			ObjectRegistry objectRegistry = this.metaData.createObjectRegistry(
-					workContainer, taskContainer.getThreadState());
+					workContainer, jobNode.getThreadState());
 
 			try {
 				// Co-ordinate the managed objects
@@ -311,7 +315,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				cmo.loadObjects(objectRegistry);
 			} catch (Exception ex) {
 				// Flag failure
-				taskContainer.getThreadState().setFailure(ex);
+				jobNode.getThreadState().setFailure(ex);
 			}
 		}
 	}
@@ -319,12 +323,14 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#isManagedObjectReady(net.officefloor.frame.spi.team.ExecutionContext,
-	 *      net.officefloor.frame.spi.team.TaskContainer,
-	 *      net.officefloor.frame.internal.structure.AssetNotifySet)
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * isManagedObjectReady(net.officefloor.frame.spi.team.JobContext,
+	 * net.officefloor.frame.internal.structure.JobNode,
+	 * net.officefloor.frame.internal.structure.JobActivateSet)
 	 */
+	@Override
 	public boolean isManagedObjectReady(JobContext executionContext,
-			Job taskContainer, JobActivateSet notifySet) {
+			JobNode jobNode, JobActivateSet notifySet) {
 
 		// Access Point: ThreadState via TaskContainer
 		// Locks: ThreadState -> Work/Process
@@ -332,7 +338,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		// Check for failure
 		if (this.failure != null) {
 			// Set the failure on the thread
-			taskContainer.getThreadState().setFailure(this.failure);
+			jobNode.getThreadState().setFailure(this.failure);
 
 			// Flag failure sourcing managed object
 			throw new ExecutionError(
@@ -350,7 +356,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Check if loaded
 			if (this.managedObject == null) {
 				// Wait on managed object to be loaded
-				this.sourcingMonitor.wait(taskContainer, notifySet);
+				this.sourcingMonitor.wait(jobNode, notifySet);
 
 				// Waiting on managed object to be loaded
 				return false;
@@ -371,7 +377,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					}
 
 					// Not timed out but undertaking asynchronous operation
-					this.operationsMonitor.wait(taskContainer, notifySet);
+					this.operationsMonitor.wait(jobNode, notifySet);
 
 					// Waiting on managed object to be ready
 					return false;
@@ -392,8 +398,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#getObject(net.officefloor.frame.internal.structure.ThreadState)
+	 * @see
+	 * net.officefloor.frame.internal.structure.ManagedObjectContainer#getObject
+	 * (net.officefloor.frame.internal.structure.ThreadState)
 	 */
+	@Override
 	public Object getObject(ThreadState threadState) {
 
 		// Access Point: ThreadState via TaskContainer
@@ -412,7 +421,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#getManagedObject()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * getManagedObject()
 	 */
 	public ManagedObject getManagedObject(ThreadState threadState) {
 
@@ -425,8 +435,10 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.ManagedObjectContainer#unloadManagedObject()
+	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
+	 * unloadManagedObject()
 	 */
+	@Override
 	public void unloadManagedObject() {
 
 		// Access Point: ThreadState via TaskContainer
@@ -436,20 +448,21 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		this.containerState = ManagedObjectContainerState.UNLOADING;
 
 		// Unload
-		this.unloadManagedObject(this.managedObject, this.recycleTask);
+		this.unloadManagedObject(this.managedObject, this.recycleJobNode);
 	}
 
 	/*
-	 * ====================================================================
-	 * AsynchronousListener
-	 * ====================================================================
+	 * ================ AsynchronousListener ==============================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.AsynchronousListener#notifyStarted()
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.AsynchronousListener#notifyStarted
+	 * ()
 	 */
+	@Override
 	public void notifyStarted() {
 
 		// Access Point: Managed Object (potentially anywhere)
@@ -471,15 +484,18 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.AsynchronousCompletionListener#notifyComplete()
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.AsynchronousCompletionListener
+	 * #notifyComplete()
 	 */
+	@Override
 	public void notifyComplete() {
 
 		// Access Point: Managed Object (potentially anywhere)
 		// Locks: None (or potentially ThreadState)
 
 		// Flag asynchronous operation completed
-		JobActivateSetImpl notifySet = new JobActivateSetImpl();
+		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
 		synchronized (this.lock) {
 
 			// Flag no asynchronous operation occurring
@@ -492,23 +508,23 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObjectUser
-	 * ====================================================================
+	 * ================== ManagedObjectUser ===============================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectUser#setManagedObject(net.officefloor.frame.spi.managedobject.ManagedObject)
+	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectUser#
+	 * setManagedObject(net.officefloor.frame.spi.managedobject.ManagedObject)
 	 */
+	@Override
 	public void setManagedObject(ManagedObject managedObject) {
 
 		// Access Point: ManagedObjectSource/ManagedObjectPool
 		// Locks: None (though possibly ManagedObjectPool)
 
 		// Outside lock, as may need wake up
-		JobActivateSetImpl notifySetImpl = null;
+		JobActivatableSetImpl notifySetImpl = null;
 
 		// Lock to ensure synchronised
 		// (may be invoked by another thread from the Managed Object Source)
@@ -517,7 +533,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Determine if require waking up within this method
 			JobActivateSet notifySet;
 			if (this.assetNotifySet == null) {
-				notifySetImpl = new JobActivateSetImpl();
+				notifySetImpl = new JobActivatableSetImpl();
 				notifySet = notifySetImpl;
 			} else {
 				notifySet = this.assetNotifySet;
@@ -528,7 +544,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			case NOT_LOADED:
 				// Discard the managed object
 				this.unloadManagedObject(managedObject, this.metaData
-						.createRecycleTask(managedObject));
+						.createRecycleJobNode(managedObject));
 
 				// Should never be called before loadManagedObject
 				throw new IllegalStateException(
@@ -540,9 +556,9 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					// Load the managed object
 					this.managedObject = managedObject;
 
-					// Create the recycle task for the managed object
-					this.recycleTask = this.metaData
-							.createRecycleTask(this.managedObject);
+					// Create the recycle job node for the managed object
+					this.recycleJobNode = this.metaData
+							.createRecycleJobNode(this.managedObject);
 
 					// Obtain the object
 					try {
@@ -567,7 +583,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				} else {
 					// Managed object already loaded, thus unload
 					this.unloadManagedObject(managedObject, this.metaData
-							.createRecycleTask(managedObject));
+							.createRecycleJobNode(managedObject));
 				}
 				break;
 
@@ -575,7 +591,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 				// Discard as managed object already flagged for unloading
 				// (if unloading nothing should be waiting on it)
 				this.unloadManagedObject(managedObject, this.metaData
-						.createRecycleTask(managedObject));
+						.createRecycleJobNode(managedObject));
 			}
 		}
 
@@ -588,15 +604,18 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectUser#setFailure(java.lang.Throwable)
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectUser#setFailure
+	 * (java.lang.Throwable)
 	 */
+	@Override
 	public void setFailure(Throwable cause) {
 
 		// Access Point: ManagedObjectSource/ManagedObjectPool
 		// Locks: None (though possibly ManagedObjectPool)
 
 		// Outside lock, as may need wake up
-		JobActivateSetImpl notifySetImpl = null;
+		JobActivatableSetImpl notifySetImpl = null;
 
 		// Lock to ensure synchronised and set failure before failing tasks
 		// (may be invoked by another thread from the Managed Object Source)
@@ -608,7 +627,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Determine if require waking up within this method
 			JobActivateSet notifySet;
 			if (this.assetNotifySet == null) {
-				notifySetImpl = new JobActivateSetImpl();
+				notifySetImpl = new JobActivatableSetImpl();
 				notifySet = notifySetImpl;
 			} else {
 				notifySet = this.assetNotifySet;
@@ -629,16 +648,17 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	}
 
 	/*
-	 * ====================================================================
-	 * Asset
-	 * ====================================================================
+	 * ================== Asset ==========================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.Asset#reportOnAsset(net.officefloor.frame.internal.structure.AssetReport)
+	 * @see
+	 * net.officefloor.frame.internal.structure.Asset#reportOnAsset(net.officefloor
+	 * .frame.internal.structure.AssetReport)
 	 */
+	@Override
 	public void reportOnAsset(AssetReport report) {
 
 		// Determine if failure

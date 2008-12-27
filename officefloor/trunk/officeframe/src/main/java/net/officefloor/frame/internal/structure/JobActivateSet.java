@@ -16,10 +16,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Job;
-
 /**
- * Set of {@link Job} instances that are to be activated.
+ * Set of {@link JobNode} instances that are to be activated.
  * 
  * @author Daniel
  */
@@ -27,24 +25,24 @@ public interface JobActivateSet {
 
 	/**
 	 * <p>
-	 * Adds a {@link Job} being notified.
+	 * Adds a {@link JobNode} being notified.
 	 * <p>
-	 * The {@link Job#activateJob()} method will be invoked at a later time of
-	 * the input {@link Job} when less likely to have dead-lock occur.
+	 * The {@link JobNode#activateJob()} method will be invoked at a later time
+	 * of the input {@link JobNode} when less likely to have dead-lock occur.
 	 * 
-	 * @param notifiedJob
-	 *            Notified {@link Job}.
+	 * @param notifiedJobNode
+	 *            Notified {@link JobNode}.
 	 */
-	void addNotifiedJob(Job notifiedJob);
+	void addNotifiedJobNode(JobNode notifiedJobNode);
 
 	/**
-	 * Adds an {@link Job} being notified of a failure.
+	 * Adds an {@link JobNode} being notified of a failure.
 	 * 
-	 * @param notifiedJob
-	 *            Notified {@link Job}.
+	 * @param notifiedJobNode
+	 *            Notified {@link JobNode}.
 	 * @param failure
 	 *            {@link Throwable} indicating the failure.
 	 */
-	void addFailedJob(Job notifiedJob, Throwable failure);
+	void addFailedJobNode(JobNode notifiedJobNode, Throwable failure);
 
 }

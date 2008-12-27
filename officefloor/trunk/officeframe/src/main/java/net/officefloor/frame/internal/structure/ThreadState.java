@@ -17,10 +17,9 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Work;
 
 /**
- * State of a thread within a Process.
+ * State of a thread within the {@link ProcessState}.
  * 
  * @author Daniel
  */
@@ -57,15 +56,6 @@ public interface ThreadState extends FlowFuture {
 	 * @return New {@link Flow}.
 	 */
 	Flow createFlow(FlowMetaData<?> flowMetaData);
-
-	/**
-	 * Obtains the {@link LinkedList} of {@link Work} bound to this
-	 * {@link ThreadState}.
-	 * 
-	 * @return {@link LinkedList} of {@link Work} bound to this
-	 *         {@link ThreadState}.
-	 */
-	LinkedList<ThreadWorkLink<?>, Object> getWorkList();
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this
