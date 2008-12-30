@@ -118,14 +118,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * 
 	 * @param metaData
 	 *            Meta-data of the {@link ManagedObject}.
-	 * @param lock
-	 *            Lock for managing the {@link ManagedObjectContainer}.
+	 * @param processState
+	 *            {@link ProcessState} that this {@link ManagedObjectContainer}
+	 *            resides within.
 	 */
 	public <D extends Enum<D>> ManagedObjectContainerImpl(
-			ManagedObjectMetaData<D> metaData, Object lock) {
+			ManagedObjectMetaData<D> metaData, ProcessState processState) {
 		// Store state
 		this.metaData = metaData;
-		this.lock = lock;
+		this.lock = processState.getProcessLock();
 
 		// Create the Sourcing Monitor
 		this.sourcingMonitor = this.metaData.getSourcingManager()

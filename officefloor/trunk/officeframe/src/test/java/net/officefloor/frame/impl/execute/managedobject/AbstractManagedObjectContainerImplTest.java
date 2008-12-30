@@ -28,6 +28,7 @@ import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
@@ -272,6 +273,12 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	private final ThreadState threadState = this.createMock(ThreadState.class);
 
 	/**
+	 * {@link ProcessState}.
+	 */
+	private final ProcessState processState = this
+			.createMock(ProcessState.class);
+
+	/**
 	 * {@link ObjectRegistry}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -332,6 +339,10 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 		// Flag now initialised
 		this.isInitialised = true;
+
+		// Obtains the process lock
+		this.recordReturn(this.processState,
+				this.processState.getProcessLock(), "Process lock");
 
 		// Sourcing monitor
 		this.recordReturn(this.managedObjectMetaData,
@@ -566,7 +577,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 				this.managedObjectMetaData
 						.createRecycleJobNode(this.managedObject),
 				(this.isRecycled ? this.recycleJobNode : null));
-		
+
 		// Record unloading the managed object
 		this.record_MoContainer_unloadManagedObject();
 	}
@@ -764,7 +775,7 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	 */
 	protected ManagedObjectContainer createManagedObjectContainer() {
 		return new ManagedObjectContainerImpl(this.managedObjectMetaData,
-				"ProcessState Lock");
+				this.processState);
 	}
 
 	/**

@@ -41,11 +41,13 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	/**
 	 * Creates a new {@link ManagedObjectContainer}.
 	 * 
-	 * @param lock
-	 *            Lock for the {@link ManagedObjectContainer} to synchronize on.
+	 * @param processState
+	 *            {@link ProcessState} that the {@link ManagedObject} is bound
+	 *            within.
 	 * @return New {@link ManagedObjectContainer}.
 	 */
-	ManagedObjectContainer createManagedObjectContainer(Object lock);
+	ManagedObjectContainer createManagedObjectContainer(
+			ProcessState processState);
 
 	/**
 	 * <p>

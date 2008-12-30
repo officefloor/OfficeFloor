@@ -408,10 +408,10 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.workMetaData, this.workMetaData
 				.getManagedObjectMetaData(), this.moMetaData);
 		this.recordReturn(this.workMoMetaData, this.workMoMetaData
-				.createManagedObjectContainer(this.workContainer),
+				.createManagedObjectContainer(this.processState),
 				this.workMoContainer, new AlwaysMatcher());
 		this.recordReturn(this.processMoMetaData, this.processMoMetaData
-				.createManagedObjectContainer(this.workContainer),
+				.createManagedObjectContainer(this.processState),
 				this.processMoContainer, new AlwaysMatcher());
 
 		// Record creating the administrator
