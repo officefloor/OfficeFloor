@@ -197,25 +197,25 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObjectMetaData
-	 * ====================================================================
+	 * ================= ManagedObjectMetaData ============================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @seenet.officefloor.frame.internal.structure.ManagedObjectMetaData#
-	 * createManagedObjectContainer(java.lang.Object)
+	 * createManagedObjectContainer
+	 * (net.officefloor.frame.internal.structure.ProcessState)
 	 */
 	@Override
-	public ManagedObjectContainer createManagedObjectContainer(Object lock) {
+	public ManagedObjectContainer createManagedObjectContainer(
+			ProcessState processState) {
 
 		// Create the container for the Managed Object
 		ManagedObjectContainer managedObjectContainer;
 		if (this.processStateManagedObjectIndex == ManagedObjectMetaData.NON_PROCESS_INDEX) {
 			// Source specific to this work (locking on input lock)
-			managedObjectContainer = new ManagedObjectContainerImpl(this, lock);
+			managedObjectContainer = new ManagedObjectContainerImpl(this, processState);
 		} else {
 			// Source from process state
 			managedObjectContainer = new ManagedObjectContainerProxy(

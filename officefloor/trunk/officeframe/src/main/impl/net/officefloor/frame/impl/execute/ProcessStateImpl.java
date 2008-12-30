@@ -110,7 +110,7 @@ public class ProcessStateImpl implements ProcessState {
 		this.managedObjectContainers = new ManagedObjectContainer[managedObjectMetaData.length];
 		for (int i = 0; i < this.managedObjectContainers.length; i++) {
 			this.managedObjectContainers[i] = new ManagedObjectContainerImpl(
-					managedObjectMetaData[i], this.getProcessLock());
+					managedObjectMetaData[i], this);
 		}
 
 		// Administrators

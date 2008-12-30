@@ -96,7 +96,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 
 			// Create the container for the Managed Object (locking on work)
 			ManagedObjectContainer managedObjectContainer = moMetaData
-					.createManagedObjectContainer(this);
+					.createManagedObjectContainer(processState);
 
 			// Register the managed object
 			this.managedObjects[i] = managedObjectContainer;
