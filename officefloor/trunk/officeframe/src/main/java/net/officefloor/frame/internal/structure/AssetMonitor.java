@@ -33,13 +33,6 @@ public interface AssetMonitor extends LinkedListEntry<AssetMonitor, Object> {
 	Asset getAsset();
 
 	/**
-	 * Obtains the lock for synchronising the {@link Asset}.
-	 * 
-	 * @return Lock for synchronising the {@link Asset}.
-	 */
-	Object getAssetLock();
-
-	/**
 	 * Flags for the {@link ThreadState} of the input {@link JobNode} to wait
 	 * and on being notified wake up the input {@link JobNode}.
 	 * 

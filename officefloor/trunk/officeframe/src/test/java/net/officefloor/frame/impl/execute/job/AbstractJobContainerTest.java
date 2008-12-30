@@ -607,6 +607,15 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 *            {@link Job} being completed.
 	 */
 	protected void record_completeJob(Job job) {
+		// Obtain process lock as clean up may interact with ProcessState
+		this.recordReturn(this.flow, this.flow.getThreadState(),
+				this.threadState);
+		this.recordReturn(this.threadState, this.threadState.getProcessState(),
+				this.processState);
+		this.recordReturn(this.processState,
+				this.processState.getProcessLock(), "Process Lock");
+
+		// Clean up job
 		this.workContainer.unloadWork();
 		this.flow.jobComplete(job, this.jobActivatableSet);
 	}

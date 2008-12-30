@@ -184,7 +184,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			}
 
 			// Lock for loading the process coped managed objects
-			synchronized (jobNode.getThreadState().getProcessState()
+			synchronized (jobNode.getFlow().getThreadState().getProcessState()
 					.getProcessLock()) {
 				// Load the process scoped managed objects
 				for (int moIndex : managedObjectIndexes) {
@@ -240,7 +240,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			}
 
 			// Lock for co-ordinating the process coped managed objects
-			synchronized (jobNode.getThreadState().getProcessState()
+			synchronized (jobNode.getFlow().getThreadState().getProcessState()
 					.getProcessLock()) {
 				// Co-ordinate the process scoped managed objects
 				for (int moIndex : managedObjectIndexes) {
@@ -295,7 +295,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			}
 
 			// Lock for checking the process coped managed objects
-			synchronized (jobNode.getThreadState().getProcessState()
+			synchronized (jobNode.getFlow().getThreadState().getProcessState()
 					.getProcessLock()) {
 				// Check the process scoped managed objects
 				for (int moIndex : managedObjectIndexes) {

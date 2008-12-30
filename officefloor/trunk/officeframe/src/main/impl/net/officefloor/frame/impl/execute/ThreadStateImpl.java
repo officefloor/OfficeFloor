@@ -99,8 +99,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 		if (flowManager == null) {
 			this.threadMonitor = null;
 		} else {
-			this.threadMonitor = flowManager.createAssetMonitor(this, this
-					.getThreadLock());
+			this.threadMonitor = flowManager.createAssetMonitor(this);
 		}
 	}
 
@@ -260,7 +259,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	public boolean waitOnFlow(JobNode jobNode, JobActivateSet notifySet) {
 
 		// Determine if the same thread
-		if (this == jobNode.getThreadState()) {
+		if (this == jobNode.getFlow().getThreadState()) {
 			// Do not wait on this thread
 			return false;
 		}
@@ -273,6 +272,16 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	/*
 	 * =================== Asset ==========================================
 	 */
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see net.officefloor.frame.internal.structure.Asset#getAssetLock()
+	 */
+	@Override
+	public Object getAssetLock() {
+		return this.getThreadLock();
+	}
 
 	/*
 	 * (non-Javadoc)

@@ -57,19 +57,18 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	protected Throwable failure = null;
 
 	/*
-	 * ====================================================================
-	 * AssetManager
-	 * ====================================================================
+	 * ================ AssetManager ======================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetGroup#createTaskMonitor(java.lang.Object,
-	 *      net.officefloor.frame.internal.structure.Asset)
+	 * @see
+	 * net.officefloor.frame.internal.structure.AssetManager#createAssetMonitor
+	 * (net.officefloor.frame.internal.structure.Asset)
 	 */
-	public AssetMonitor createAssetMonitor(Asset asset, Object lock) {
-		return new AssetMonitorImpl(asset, lock, this, this.monitors);
+	public AssetMonitor createAssetMonitor(Asset asset) {
+		return new AssetMonitorImpl(asset, this, this.monitors);
 	}
 
 	/*
@@ -106,7 +105,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 
 			// Lock the Asset from changes
 			try {
-				synchronized (monitor.getAssetLock()) {
+				synchronized (asset.getAssetLock()) {
 					// Report on the Asset
 					asset.reportOnAsset(this);
 				}
@@ -135,10 +134,11 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetGroup#registerTaskMonitor(net.officefloor.frame.internal.structure.TaskMonitor)
+	 * @see
+	 * net.officefloor.frame.internal.structure.AssetGroup#registerTaskMonitor
+	 * (net.officefloor.frame.internal.structure.TaskMonitor)
 	 */
 	public void registerAssetMonitor(AssetMonitor monitor) {
-		// Co-ordinate with managing
 		synchronized (this.monitors) {
 			this.monitors.addLinkedListEntry(monitor);
 		}
@@ -147,22 +147,21 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetGroup#unregisterTaskMonitor(net.officefloor.frame.internal.structure.TaskMonitor)
+	 * @see
+	 * net.officefloor.frame.internal.structure.AssetGroup#unregisterTaskMonitor
+	 * (net.officefloor.frame.internal.structure.TaskMonitor)
 	 */
 	public void unregisterAssetMonitor(AssetMonitor monitor) {
-		// Co-ordinate with managing
 		synchronized (this.monitors) {
 			monitor.removeFromLinkedList(null);
 		}
 	}
 
 	/*
-	 * ====================================================================
-	 * AssetReport
+	 * ================== AssetReport =====================================
 	 * 
 	 * No synchronising necessary as will be invoked by the same thread invoking
 	 * the managed AssetGroup method.
-	 * ====================================================================
 	 */
 
 	/*
@@ -183,7 +182,9 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetReport#setFailure(java.lang.Throwable)
+	 * @see
+	 * net.officefloor.frame.internal.structure.AssetReport#setFailure(java.
+	 * lang.Throwable)
 	 */
 	public void setFailure(Throwable failure) {
 		this.failure = failure;

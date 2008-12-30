@@ -38,11 +38,6 @@ public class AssetMonitorImpl extends
 	protected final Asset asset;
 
 	/**
-	 * Lock for synchronising this {@link Asset}.
-	 */
-	protected final Object assetLock;
-
-	/**
 	 * {@link AssetManager} for managing this.
 	 */
 	protected final AssetManager assetManager;
@@ -74,20 +69,16 @@ public class AssetMonitorImpl extends
 	 * 
 	 * @param asset
 	 *            {@link Asset} to be managed.
-	 * @param assetLock
-	 *            Lock for synchronising the {@link Asset}.
 	 * @param assetManager
 	 *            {@link AssetManager} for managing this.
 	 * @param assetMonitors
 	 *            {@link LinkedList} of the {@link AssetMonitor} instances for
 	 *            the {@link AssetManager}.
 	 */
-	public AssetMonitorImpl(Asset asset, Object assetLock,
-			AssetManager assetManager,
+	public AssetMonitorImpl(Asset asset, AssetManager assetManager,
 			LinkedList<AssetMonitor, Object> taskMonitors) {
 		super(taskMonitors);
 		this.asset = asset;
-		this.assetLock = assetLock;
 		this.assetManager = assetManager;
 	}
 
@@ -108,16 +99,6 @@ public class AssetMonitorImpl extends
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMonitor#getAssetLock()
-	 */
-	@Override
-	public Object getAssetLock() {
-		return this.assetLock;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see
 	 * net.officefloor.frame.internal.structure.AssetMonitor#wait(net.officefloor
 	 * .frame.internal.structure.JobNode,
@@ -133,7 +114,7 @@ public class AssetMonitorImpl extends
 		// Only allow one wait at a time
 		JobNode wakeupJobNode = null;
 		Throwable wakeupFailure = null;
-		synchronized (this.assetLock) {
+		synchronized (this.jobNodes) {
 
 			// Determine action based on state
 			if (this.isPermanentlyNotify) {
@@ -233,7 +214,7 @@ public class AssetMonitorImpl extends
 
 		// Obtain the jobs to be notified
 		MonitoredJobNode monitoredJobNode;
-		synchronized (this.assetLock) {
+		synchronized (this.jobNodes) {
 			// Purge the list of tasks
 			monitoredJobNode = this.jobNodes.purgeLinkedList(null);
 

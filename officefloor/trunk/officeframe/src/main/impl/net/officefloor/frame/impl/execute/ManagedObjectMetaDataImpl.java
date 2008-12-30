@@ -352,7 +352,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 					this.recycleFlowMetaData, parameter, null, -1, null);
 
 			// Listen to process completion (handle not being recycled)
-			recycleJobNode.getThreadState().getProcessState()
+			recycleJobNode.getFlow().getThreadState().getProcessState()
 					.registerProcessCompletionListener(parameter);
 
 			// Return the recycle job node

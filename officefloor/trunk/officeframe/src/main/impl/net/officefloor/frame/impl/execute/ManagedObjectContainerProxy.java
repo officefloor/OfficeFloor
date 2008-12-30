@@ -70,7 +70,7 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	@Override
 	public boolean loadManagedObject(JobContext executionContext,
 			JobNode jobNode, JobActivateSet notifySet) {
-		return jobNode.getThreadState().getProcessState()
+		return jobNode.getFlow().getThreadState().getProcessState()
 				.getManagedObjectContainer(this.index).loadManagedObject(
 						executionContext, jobNode, notifySet);
 	}
@@ -89,9 +89,9 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	public <W extends Work> void coordinateManagedObject(
 			WorkContainer<W> workContainer, JobContext executionContext,
 			JobNode jobNode, JobActivateSet notifySet) {
-		jobNode.getThreadState().getProcessState().getManagedObjectContainer(
-				this.index).coordinateManagedObject(workContainer,
-				executionContext, jobNode, notifySet);
+		jobNode.getFlow().getThreadState().getProcessState()
+				.getManagedObjectContainer(this.index).coordinateManagedObject(
+						workContainer, executionContext, jobNode, notifySet);
 	}
 
 	/*
@@ -105,7 +105,7 @@ public class ManagedObjectContainerProxy implements ManagedObjectContainer {
 	@Override
 	public boolean isManagedObjectReady(JobContext executionContext,
 			JobNode jobNode, JobActivateSet notifySet) {
-		return jobNode.getThreadState().getProcessState()
+		return jobNode.getFlow().getThreadState().getProcessState()
 				.getManagedObjectContainer(this.index).isManagedObjectReady(
 						executionContext, jobNode, notifySet);
 	}

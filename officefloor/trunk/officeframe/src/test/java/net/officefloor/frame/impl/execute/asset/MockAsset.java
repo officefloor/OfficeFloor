@@ -20,7 +20,7 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetReport;
 
 /**
- * Mock {@link net.officefloor.frame.internal.structure.Asset}.
+ * Mock {@link Asset}.
  * 
  * @author Daniel
  */
@@ -30,17 +30,6 @@ public class MockAsset implements Asset {
 	 * Failure of this {@link Asset}.
 	 */
 	protected Throwable failure = null;
-
-	/**
-	 * Obtains the lock for this mock
-	 * {@link net.officefloor.frame.internal.structure.Asset}.
-	 * 
-	 * @return Lock for this mock
-	 *         {@link net.officefloor.frame.internal.structure.Asset}.
-	 */
-	public Object getAssetLock() {
-		return this;
-	}
 
 	/**
 	 * Specifies the failure for this {@link Asset}.
@@ -53,16 +42,27 @@ public class MockAsset implements Asset {
 	}
 
 	/*
-	 * ====================================================================
-	 * Asset
-	 * ====================================================================
+	 * ================= Asset ============================================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.internal.structure.Asset#reportOnAsset(net.officefloor.frame.internal.structure.AssetReport)
+	 * @see net.officefloor.frame.internal.structure.Asset#getAssetLock()
 	 */
+	@Override
+	public Object getAssetLock() {
+		return this;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * net.officefloor.frame.internal.structure.Asset#reportOnAsset(net.officefloor
+	 * .frame.internal.structure.AssetReport)
+	 */
+	@Override
 	public void reportOnAsset(AssetReport report) {
 		// Report if failure
 		if (this.failure != null) {

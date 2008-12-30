@@ -20,11 +20,14 @@ import net.officefloor.frame.impl.execute.AbstractLinkedList;
 import net.officefloor.frame.impl.execute.AssetMonitorImpl;
 import net.officefloor.frame.impl.execute.JobActivatableSetImpl;
 import net.officefloor.frame.impl.execute.AssetNotifySetImplAccess;
+import net.officefloor.frame.impl.execute.JobNodeAdapter;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -38,17 +41,12 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	/**
 	 * {@link AssetMonitor} being tested.
 	 */
-	protected AssetMonitor assetMonitor;
-
-	/**
-	 * Lock for the {@link AssetMonitor}.
-	 */
-	protected final Object lock = new Object();
+	private AssetMonitor assetMonitor;
 
 	/**
 	 * {@link LinkedList} of the {@link AssetMonitor} instances.
 	 */
-	protected final LinkedList<AssetMonitor, Object> monitors = new AbstractLinkedList<AssetMonitor, Object>() {
+	private final LinkedList<AssetMonitor, Object> monitors = new AbstractLinkedList<AssetMonitor, Object>() {
 		@Override
 		public void lastLinkedListEntryRemoved(Object removeParameter) {
 			// No action
@@ -56,34 +54,41 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	};
 
 	/**
-	 * Mock {@link Asset}.
+	 * {@link Asset}.
 	 */
-	protected Asset asset;
+	private final Asset asset = this.createMock(Asset.class);;
 
 	/**
-	 * Mock {@link AssetManager}.
+	 * {@link AssetManager}.
 	 */
-	protected AssetManager assetManager;
+	private final AssetManager assetManager = this
+			.createMock(AssetManager.class);
 
 	/**
-	 * Setup.
+	 * {@link Flow}.
+	 */
+	private final Flow flow = this.createMock(Flow.class);
+
+	/**
+	 * {@link ThreadState}.
+	 */
+	private final ThreadState threadState = this.createMock(ThreadState.class);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
-		// Create the Mock objects for testing
-		this.asset = this.createMock(Asset.class);
-		this.assetManager = this.createMock(AssetManager.class);
-
 		// Create the Task Monitor
-		this.assetMonitor = new AssetMonitorImpl(this.asset, this.lock,
-				this.assetManager, this.monitors);
+		this.assetMonitor = new AssetMonitorImpl(this.asset, this.assetManager,
+				this.monitors);
 	}
 
 	/**
 	 * Ensure correct items are returned.
 	 */
 	public void testGetters() {
-		assertEquals("Incorrect lock object", this.lock, this.assetMonitor
-				.getAssetLock());
 		assertEquals("Incorrect assset", this.asset, this.assetMonitor
 				.getAsset());
 	}
@@ -103,8 +108,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testNotifyTasks() {
 		// Create the Task Containers
-		MockJobNode taskOne = new MockJobNode(this);
-		MockJobNode taskTwo = new MockJobNode(this);
+		MockJobNode taskOne = new MockJobNode(this.flow);
+		MockJobNode taskTwo = new MockJobNode(this.flow);
 
 		// Record mock objects
 		this.recordAssetManagerRegistration();
@@ -117,13 +122,13 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 		// Tasks to wait on monitor
 		this.doWait(taskOne, true);
 		this.doWait(taskTwo, true);
-		assertFalse("Task one should not be activated", taskOne.isActivated());
-		assertFalse("Task two should not be activated", taskTwo.isActivated());
+		assertFalse("Task one should not be activated", taskOne.isActivated);
+		assertFalse("Task two should not be activated", taskTwo.isActivated);
 
 		// Notify the tasks
 		this.doNotifyTasks();
-		assertTrue("Task one should be activated", taskOne.isActivated());
-		assertTrue("Task two should be activated", taskTwo.isActivated());
+		assertTrue("Task one should be activated", taskOne.isActivated);
+		assertTrue("Task two should be activated", taskTwo.isActivated);
 
 		// Verify
 		this.verifyMockObjects();
@@ -134,8 +139,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testNotifyTaskAgain() {
 		// Create the Task Containers
-		MockJobNode taskOne = new MockJobNode(this);
-		MockJobNode taskTwo = new MockJobNode(this);
+		MockJobNode taskOne = new MockJobNode(this.flow);
+		MockJobNode taskTwo = new MockJobNode(this.flow);
 
 		// Record waiting on tasks twice (for each wait/notify)
 		this.recordAssetManagerRegistration();
@@ -149,12 +154,12 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 		// Wait and notify on first task
 		this.doWait(taskOne, true);
 		this.doNotifyTasks();
-		assertTrue("Task one should be activated", taskOne.isActivated());
+		assertTrue("Task one should be activated", taskOne.isActivated);
 
 		// Wait and notify on second task
 		this.doWait(taskTwo, true);
 		this.doNotifyTasks();
-		assertTrue("Task two should be activated", taskOne.isActivated());
+		assertTrue("Task two should be activated", taskOne.isActivated);
 
 		// Verify
 		this.verifyMockObjects();
@@ -165,8 +170,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testNotifyPermantly() {
 		// Create the Task Containers
-		MockJobNode taskOne = new MockJobNode(this);
-		MockJobNode taskTwo = new MockJobNode(this);
+		MockJobNode taskOne = new MockJobNode(this.flow);
+		MockJobNode taskTwo = new MockJobNode(this.flow);
 
 		// Record waiting on tasks only once
 		this.recordAssetManagerRegistration();
@@ -177,15 +182,15 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 
 		// Wait and permanently notify task one
 		this.doWait(taskOne, true);
-		assertFalse("Task one should not be activated", taskOne.isActivated());
+		assertFalse("Task one should not be activated", taskOne.isActivated);
 		this.doNotifyPermanently();
-		assertTrue("Task one should be activated", taskOne.isActivated());
+		assertTrue("Task one should be activated", taskOne.isActivated);
 
 		// Can no longer wait on monitor (and not register with Asset Manager)
 		this.doWait(taskTwo, false);
-		assertFalse("Task two should not be activated", taskTwo.isActivated());
+		assertFalse("Task two should not be activated", taskTwo.isActivated);
 		this.doNotifyTasks();
-		assertFalse("Task two should not be activated", taskTwo.isActivated());
+		assertFalse("Task two should not be activated", taskTwo.isActivated);
 
 		// Verify
 		this.verifyMockObjects();
@@ -200,8 +205,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 		Throwable failure = new Exception();
 
 		// Create the Task Containers
-		MockJobNode taskOne = new MockJobNode(this);
-		MockJobNode taskTwo = new MockJobNode(this);
+		MockJobNode taskOne = new MockJobNode(this.flow);
+		MockJobNode taskTwo = new MockJobNode(this.flow);
 
 		// Record waiting on tasks only once
 		this.recordAssetManagerRegistration();
@@ -214,13 +219,13 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 		// Wait on task containers
 		this.doWait(taskOne, true);
 		this.doWait(taskTwo, true);
-		assertFalse("Task one should not be activated", taskOne.isActivated());
-		assertFalse("Task two should not be activated", taskTwo.isActivated());
+		assertFalse("Task one should not be activated", taskOne.isActivated);
+		assertFalse("Task two should not be activated", taskTwo.isActivated);
 
 		// Notify the tasks of failure
 		this.doFailTasks(failure);
-		assertTrue("Task one should be activated", taskOne.isActivated());
-		assertTrue("Task two should be activated", taskTwo.isActivated());
+		assertTrue("Task one should be activated", taskOne.isActivated);
+		assertTrue("Task two should be activated", taskTwo.isActivated);
 
 		// Verify
 		this.verifyMockObjects();
@@ -235,8 +240,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 		Throwable failure = new Exception();
 
 		// Create the Task Containers
-		MockJobNode taskOne = new MockJobNode(this);
-		MockJobNode taskTwo = new MockJobNode(this);
+		MockJobNode taskOne = new MockJobNode(this.flow);
+		MockJobNode taskTwo = new MockJobNode(this.flow);
 
 		// Record waiting on tasks only once
 		this.recordAssetManagerRegistration();
@@ -247,15 +252,15 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 
 		// Wait and permanently fail task one
 		this.doWait(taskOne, true);
-		assertFalse("Task one should not be activated", taskOne.isActivated());
+		assertFalse("Task one should not be activated", taskOne.isActivated);
 		this.doFailPermanently(failure);
-		assertTrue("Task one should be activated", taskOne.isActivated());
+		assertTrue("Task one should be activated", taskOne.isActivated);
 
 		// Can no longer wait on monitor (and not register with Asset Manager)
 		this.doWait(taskTwo, false);
-		assertFalse("Task two should not be activated", taskTwo.isActivated());
+		assertFalse("Task two should not be activated", taskTwo.isActivated);
 		this.doNotifyTasks();
-		assertFalse("Task two should not be activated", taskTwo.isActivated());
+		assertFalse("Task two should not be activated", taskTwo.isActivated);
 
 		// Verify
 		this.verifyMockObjects();
@@ -276,8 +281,10 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 *            {@link JobNode}.
 	 */
 	private void recordJobNodeActivation(JobNode jobNode) {
-		jobNode.getThreadState().getThreadLock();
-		this.control(jobNode.getThreadState()).setReturnValue(new Object());
+		this.recordReturn(this.flow, this.flow.getThreadState(),
+				this.threadState);
+		this.recordReturn(this.threadState, this.threadState.getThreadLock(),
+				"Thread lock");
 	}
 
 	/**
@@ -290,7 +297,7 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	private void recordJobNodeActivation(JobNode jobNode, Throwable cause) {
 		this.recordJobNodeActivation(jobNode);
-		jobNode.getThreadState().setFailure(cause);
+		this.threadState.setFailure(cause);
 	}
 
 	/**
@@ -303,10 +310,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	private void doWait(JobNode jobNode, boolean isExpectedWaitReturn) {
 		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
-		synchronized (this.assetMonitor.getAssetLock()) {
-			assertEquals("Incorrect waiting", isExpectedWaitReturn,
-					this.assetMonitor.wait(jobNode, notifySet));
-		}
+		assertEquals("Incorrect waiting", isExpectedWaitReturn,
+				this.assetMonitor.wait(jobNode, notifySet));
 		if (isExpectedWaitReturn) {
 			// Waiting so should not be added
 			assertNull("Task should not be added for notifying",
@@ -324,9 +329,7 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	private void doNotifyTasks() {
 		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
-		synchronized (this.assetMonitor.getAssetLock()) {
-			this.assetMonitor.notifyTasks(notifySet);
-		}
+		this.assetMonitor.notifyTasks(notifySet);
 		notifySet.activateJobs();
 	}
 
@@ -336,9 +339,7 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	private void doNotifyPermanently() {
 		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
-		synchronized (this.assetMonitor.getAssetLock()) {
-			this.assetMonitor.notifyPermanently(notifySet);
-		}
+		this.assetMonitor.notifyPermanently(notifySet);
 		notifySet.activateJobs();
 	}
 
@@ -351,9 +352,7 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	private void doFailTasks(Throwable failure) {
 		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
-		synchronized (this.assetMonitor.getAssetLock()) {
-			this.assetMonitor.failTasks(notifySet, failure);
-		}
+		this.assetMonitor.failTasks(notifySet, failure);
 		notifySet.activateJobs();
 	}
 
@@ -366,10 +365,38 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	private void doFailPermanently(Throwable failure) {
 		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
-		synchronized (this.assetMonitor.getAssetLock()) {
-			this.assetMonitor.failPermanently(notifySet, failure);
-		}
+		this.assetMonitor.failPermanently(notifySet, failure);
 		notifySet.activateJobs();
 	}
 
+	/**
+	 * Mock {@link JobNode}.
+	 */
+	private class MockJobNode extends JobNodeAdapter {
+
+		/**
+		 * Flag indicated if activated.
+		 */
+		public boolean isActivated = false;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param flow
+		 *            {@link Flow}.
+		 */
+		public MockJobNode(Flow flow) {
+			super(flow);
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see net.officefloor.frame.impl.execute.JobNodeAdapter#activateJob()
+		 */
+		@Override
+		public void activateJob() {
+			this.isActivated = true;
+		}
+	}
 }

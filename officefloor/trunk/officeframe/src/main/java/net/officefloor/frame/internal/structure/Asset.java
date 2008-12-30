@@ -17,12 +17,18 @@
 package net.officefloor.frame.internal.structure;
 
 /**
- * {@link net.officefloor.frame.internal.structure.Asset} of an
- * {@link net.officefloor.frame.internal.structure.AssetManager}.
+ * {@link Asset} of an {@link AssetManager}.
  * 
  * @author Daniel
  */
 public interface Asset {
+
+	/**
+	 * Obtains the lock for synchronising the {@link Asset}.
+	 * 
+	 * @return Lock for synchronising the {@link Asset}.
+	 */
+	Object getAssetLock();
 
 	/**
 	 * Reports on the {@link Asset}.

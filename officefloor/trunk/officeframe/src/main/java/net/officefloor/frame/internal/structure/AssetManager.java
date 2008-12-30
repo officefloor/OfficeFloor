@@ -16,8 +16,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Job;
-
 /**
  * {@link AssetManager} to manage {@link Asset} instances.
  * 
@@ -28,14 +26,11 @@ public interface AssetManager {
 	/**
 	 * Creates a new {@link AssetMonitor}
 	 * 
-	 * @param lock
-	 *            Lock for synchronising the {@link Asset}.
 	 * @param asset
-	 *            {@link Asset} that {@link Job} instances will wait
-	 *            on.
+	 *            {@link Asset} that {@link JobNode} instances will wait on.
 	 * @return {@link AssetMonitor} for the {@link Asset}.
 	 */
-	AssetMonitor createAssetMonitor(Asset asset, Object assetLock);
+	AssetMonitor createAssetMonitor(Asset asset);
 
 	/**
 	 * Does a single pass management of the {@link AssetManager}.
@@ -46,7 +41,7 @@ public interface AssetManager {
 	 * Registers a {@link AssetMonitor} within this {@link AssetManager}.
 	 * 
 	 * @param monitor
-	 *            {@link AssetMonitor} to be monitored within this
+	 *            {@link AssetMonitor} to be managed by this
 	 *            {@link AssetManager}.
 	 */
 	void registerAssetMonitor(AssetMonitor monitor);
@@ -55,8 +50,7 @@ public interface AssetManager {
 	 * Unregisters a {@link AssetMonitor} from this {@link AssetManager}.
 	 * 
 	 * @param monitor
-	 *            {@link AssetMonitor} no longer requiring monitoring within
-	 *            this {@link AssetManager}.
+	 *            {@link AssetMonitor} no longer requiring managing.
 	 */
 	void unregisterAssetMonitor(AssetMonitor monitor);
 

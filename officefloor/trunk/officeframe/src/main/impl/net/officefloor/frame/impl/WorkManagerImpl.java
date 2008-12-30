@@ -91,7 +91,8 @@ public class WorkManagerImpl<W extends Work> implements WorkManager {
 		jobNode.activateJob();
 
 		// Indicate when thread of work complete
-		return jobNode.getThreadState();
+		// TODO consider making this ProcessState so all threads complete
+		return jobNode.getFlow().getThreadState();
 	}
 
 	/*
