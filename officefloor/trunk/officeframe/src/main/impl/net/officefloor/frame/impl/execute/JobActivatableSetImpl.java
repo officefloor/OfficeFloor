@@ -84,7 +84,8 @@ public class JobActivatableSetImpl implements JobActivatableSet {
 		while (notifiedJobNode != null) {
 
 			// Synchronise on thread of task to ensure safe activation
-			ThreadState threadState = notifiedJobNode.jobNode.getThreadState();
+			ThreadState threadState = notifiedJobNode.jobNode.getFlow()
+					.getThreadState();
 			synchronized (threadState.getThreadLock()) {
 
 				// Flag the failure (if one)

@@ -27,6 +27,7 @@ import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -163,6 +164,11 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	 */
 	private AdministratorContext adminContext = this
 			.createMock(AdministratorContext.class);
+
+	/**
+	 * Mock {@link Flow}.
+	 */
+	private Flow flow = this.createMock(Flow.class);
 
 	/**
 	 * Mock {@link ThreadState}.
@@ -364,7 +370,8 @@ public class WorkContainerTest extends OfficeFrameTestCase {
 	 * Records obtaining the {@link ProcessState} lock from the {@link Job}.
 	 */
 	private void recordGetProcessLock() {
-		this.recordReturn(this.jobNode, this.jobNode.getThreadState(),
+		this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
+		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);

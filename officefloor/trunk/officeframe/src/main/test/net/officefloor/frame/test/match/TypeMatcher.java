@@ -33,22 +33,12 @@ public class TypeMatcher extends AbstractMatcher {
 	protected final Class<?>[] matchTypes;
 
 	/**
-	 * Initiate with a single argument type.
-	 * 
-	 * @param type
-	 *            Type of the only parameter.
-	 */
-	public TypeMatcher(Class<?> type) {
-		this(new Class[] { type });
-	}
-
-	/**
 	 * Initiate with a multiple argument types.
 	 * 
 	 * @param types
 	 *            Types corresponding the parameters.
 	 */
-	public TypeMatcher(Class<?>[] types) {
+	public TypeMatcher(Class<?>... types) {
 		// Initiate state
 		this.matchTypes = types;
 	}
@@ -57,15 +47,15 @@ public class TypeMatcher extends AbstractMatcher {
 	 * (non-Javadoc)
 	 * 
 	 * @see org.easymock.ArgumentsMatcher#matches(java.lang.Object[],
-	 *      java.lang.Object[])
+	 * java.lang.Object[])
 	 */
 	public boolean matches(Object[] expected, Object[] actual) {
-		
+
 		// Ensure get actual matches
 		if (actual == null) {
 			Assert.fail("No actual values");
 		}
-		
+
 		// Determine if incorrect number of parameters
 		if (actual.length != this.matchTypes.length) {
 			Assert.fail("Invalid number of parameters configured into "

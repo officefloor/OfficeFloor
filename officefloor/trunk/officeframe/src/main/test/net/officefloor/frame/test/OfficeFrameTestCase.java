@@ -708,6 +708,22 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	private boolean isVerbose = false;
 
 	/**
+	 * Default constructor.
+	 */
+	public OfficeFrameTestCase() {
+		super();
+	}
+
+	/**
+	 * Initiate allowing specifying name of test.
+	 * 
+	 * @param name Test name.
+	 */
+	public OfficeFrameTestCase(String name) {
+		super(name);
+	}
+
+	/**
 	 * Specifies to provide verbose output to aid in debugging.
 	 * 
 	 * @param isVerbose

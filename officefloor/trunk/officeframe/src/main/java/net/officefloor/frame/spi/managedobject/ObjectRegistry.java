@@ -5,8 +5,8 @@ package net.officefloor.frame.spi.managedobject;
 
 /**
  * <p>
- * Registry providing the dependant Object instances for a {@link ManagedObject}
- * instance.
+ * Registry providing the dependent Object instances for a
+ * {@link CoordinatingManagedObject} instance.
  * <p>
  * This is provided by the Office Floor implementation.
  * 

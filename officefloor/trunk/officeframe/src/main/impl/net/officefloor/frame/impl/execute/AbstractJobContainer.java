@@ -112,9 +112,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * net.officefloor.frame.spi.team.TaskContainer#setNextTask(net.officefloor
-	 * .frame.spi.team.TaskContainer)
+	 * net.officefloor.frame.spi.team.Job#setNextJob(net.officefloor.frame.spi
+	 * .team.Job)
 	 */
+	@Override
 	public final void setNextJob(Job task) {
 		this.nextJob = task;
 	}
@@ -122,8 +123,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#getNextTask()
+	 * @see net.officefloor.frame.spi.team.Job#getNextJob()
 	 */
+	@Override
 	public final Job getNextJob() {
 		return this.nextJob;
 	}
@@ -153,9 +155,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * net.officefloor.frame.spi.team.TaskContainer#doTask(net.officefloor.frame
-	 * .spi.team.ExecutionContext)
+	 * net.officefloor.frame.spi.team.Job#doJob(net.officefloor.frame.spi.team
+	 * .JobContext)
 	 */
+	@Override
 	public final boolean doJob(JobContext executionContext) {
 
 		// Access Point: Team
@@ -519,8 +522,14 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 		// Complete the job
 		this.jobState = JobState.COMPLETED;
-		this.workContainer.unloadWork();
-		this.flow.jobComplete(this, notifySet);
+
+		// Clean up state, may interact with process state
+		ProcessState processState = this.flow.getThreadState()
+				.getProcessState();
+		synchronized (processState.getProcessLock()) {
+			this.workContainer.unloadWork();
+			this.flow.jobComplete(this, notifySet);
+		}
 	}
 
 	/**
@@ -657,9 +666,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * net.officefloor.frame.internal.structure.NodeContext#setTaskComplete(
-	 * boolean)
+	 * net.officefloor.frame.impl.execute.JobExecuteContext#setJobComplete(boolean
+	 * )
 	 */
+	@Override
 	public final void setJobComplete(boolean isComplete) {
 		this.isComplete = isComplete;
 	}
@@ -668,9 +678,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * net.officefloor.frame.internal.structure.NodeContext#joinFlow(net.officefloor
+	 * net.officefloor.frame.impl.execute.JobExecuteContext#joinFlow(net.officefloor
 	 * .frame.api.execute.FlowFuture)
 	 */
+	@Override
 	public final void joinFlow(FlowFuture flowFuture) {
 
 		// TODO replace below to allow to join more than one flow
@@ -687,9 +698,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * net.officefloor.frame.internal.structure.NodeContext#doFlow(net.officefloor
+	 * net.officefloor.frame.impl.execute.JobExecuteContext#doFlow(net.officefloor
 	 * .frame.internal.structure.FlowMetaData, java.lang.Object)
 	 */
+	@Override
 	public final FlowFuture doFlow(FlowMetaData<?> flowMetaData,
 			Object parameter) {
 		// Instigate the flow
@@ -887,6 +899,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * 
 	 * @see net.officefloor.frame.spi.team.TaskContainer#activeTask()
 	 */
+	@Override
 	public final void activateJob() {
 
 		// Access Point: TaskContainer, ManagedObjectSource/Pool, ProjectManager
@@ -898,6 +911,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			// Determine if already queued, active or complete
 			if (this.isQueuedWithTeam || this.isActive
 					|| (this.jobState == JobState.COMPLETED)) {
+				return;
+			}
+
+			// May not activate if non-complete parallel node
+			if (this.isParallelJobsNotComplete()) {
+				// Parallel job will activate this job later
 				return;
 			}
 
@@ -923,10 +942,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#getThreadState()
+	 * @see net.officefloor.frame.internal.structure.JobNode#getFlow()
 	 */
-	public final ThreadState getThreadState() {
-		return this.flow.getThreadState();
+	@Override
+	public Flow getFlow() {
+		return this.flow;
 	}
 
 	/*
@@ -936,6 +956,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * net.officefloor.frame.internal.structure.TaskNode#setParallelOwner(net
 	 * .officefloor.frame.internal.structure.TaskNode)
 	 */
+	@Override
 	public final void setParallelOwner(JobNode jobNode) {
 		this.parallelOwner = jobNode;
 	}
@@ -945,6 +966,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * 
 	 * @see net.officefloor.frame.internal.structure.TaskNode#getParallelOwner()
 	 */
+	@Override
 	public final JobNode getParallelOwner() {
 		return this.parallelOwner;
 	}
@@ -956,6 +978,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * net.officefloor.frame.internal.structure.TaskNode#setParallelNode(net
 	 * .officefloor.frame.internal.structure.TaskNode)
 	 */
+	@Override
 	public final void setParallelNode(JobNode jobNode) {
 		this.parallelNode = jobNode;
 	}
@@ -965,6 +988,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * 
 	 * @see net.officefloor.frame.internal.structure.TaskNode#getParallelNode()
 	 */
+	@Override
 	public final JobNode getParallelNode() {
 		return this.parallelNode;
 	}
@@ -976,6 +1000,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * net.officefloor.frame.internal.structure.TaskNode#setNextNode(net.officefloor
 	 * .frame.internal.structure.TaskNode)
 	 */
+	@Override
 	public final void setNextNode(JobNode jobNode) {
 		this.nextTaskNode = jobNode;
 	}
@@ -985,6 +1010,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * 
 	 * @see net.officefloor.frame.internal.structure.TaskNode#getNextNode()
 	 */
+	@Override
 	public final JobNode getNextNode() {
 		return this.nextTaskNode;
 	}
@@ -1025,7 +1051,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	/**
 	 * State of this {@link Job}.
 	 */
-	private enum JobState {
+	private static enum JobState {
 
 		/**
 		 * Initial state requiring the {@link ManagedObject} instances to be

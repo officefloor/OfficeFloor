@@ -83,8 +83,8 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 		this.recordReturn(this.flowMetaData,
 				this.flowMetaData.getFlowManager(), this.flowAssetManager);
 		this.recordReturn(this.flowAssetManager, this.flowAssetManager
-				.createAssetMonitor(this.threadState, this.threadState),
-				this.threadMonitor, new AlwaysMatcher());
+				.createAssetMonitor(this.threadState), this.threadMonitor,
+				new AlwaysMatcher());
 	}
 
 	/**

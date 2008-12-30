@@ -21,10 +21,13 @@ import net.officefloor.frame.impl.execute.JobActivatableSetImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link net.officefloor.frame.internal.structure.ProjectManager}.
+ * Tests the {@link AssetManager}.
  * 
  * @author Daniel
  */
@@ -33,38 +36,39 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link AssetManager} being monitored.
 	 */
-	protected AssetManager assetManager;
+	private final AssetManager assetManager = new AssetManagerImpl();
 
 	/**
-	 * Mock {@link Asset} for testing.
+	 * {@link Asset}.
 	 */
-	protected MockAsset asset;
+	private final MockAsset asset = new MockAsset();
 
 	/**
-	 * {@link AssetMonitor} for testing.
+	 * {@link AssetMonitor}.
 	 */
-	protected AssetMonitor assetMonitor;
+	private AssetMonitor assetMonitor;
 
 	/**
-	 * Mock {@link net.officefloor.frame.spi.team.Job}.
+	 * {@link JobNode}.
 	 */
-	protected MockJobNode taskContainer;
+	private final JobNode jobNode = this.createMock(JobNode.class);
+
+	/**
+	 * {@link Flow}.
+	 */
+	private final Flow flow = this.createMock(Flow.class);
+
+	/**
+	 * {@link ThreadState}.
+	 */
+	private final ThreadState threadState = this.createMock(ThreadState.class);
 
 	/**
 	 * Setup.
 	 */
 	protected void setUp() throws Exception {
-
-		// Create the Asset Group to test
-		this.assetManager = new AssetManagerImpl();
-
-		// Create the mock objects
-		this.asset = new MockAsset();
-		this.taskContainer = new MockJobNode(this);
-
 		// Create the necessary helper objects
-		this.assetMonitor = this.assetManager.createAssetMonitor(this.asset,
-				this.asset.getAssetLock());
+		this.assetMonitor = this.assetManager.createAssetMonitor(this.asset);
 	}
 
 	/**
@@ -77,24 +81,24 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 
 		// Record the failure
 		// (Lock on the thread to set failure)
-		this.taskContainer.getThreadState().getThreadLock();
-		this.control(this.taskContainer.getThreadState()).setReturnValue(
-				new Object());
+		this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
+		this.recordReturn(this.flow, this.flow.getThreadState(),
+				this.threadState);
+		this.recordReturn(this.threadState, this.threadState.getThreadLock(),
+				"Thead Lock");
 		// (Specify the failure on the ThreadState)
-		this.taskContainer.getThreadState().setFailure(failure);
+		this.threadState.setFailure(failure);
+		// (Activates the job)
+		this.jobNode.activateJob();
 
 		// Replay
 		this.replayMockObjects();
 
 		// Wait on a Task
-		this.assetMonitor.wait(this.taskContainer, new JobActivatableSetImpl());
+		this.assetMonitor.wait(this.jobNode, new JobActivatableSetImpl());
 
 		// Manage
 		this.assetManager.manageAssets();
-
-		// Ensure the Task is not activated
-		assertFalse("Task should not be activated", this.taskContainer
-				.isActivated());
 
 		// Flag the Asset failed
 		this.asset.setFailure(failure);
@@ -102,12 +106,7 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 		// Manage again (this time should be failing)
 		this.assetManager.manageAssets();
 
-		// Ensure the Task is activated
-		assertTrue("Task should be activated (though failed)",
-				this.taskContainer.isActivated());
-
 		// Verify
 		this.verifyMockObjects();
 	}
-
 }

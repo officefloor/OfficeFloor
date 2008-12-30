@@ -38,11 +38,13 @@ public interface JobNode {
 	boolean isJobNodeComplete();
 
 	/**
-	 * Obtains the {@link ThreadState} that this {@link JobNode} is bound.
+	 * Obtains the {@link Flow} that this {@link JobNode} is bound. The returned
+	 * {@link Flow} provide access to the {@link ThreadState} and subsequent
+	 * {@link ProcessState} that this {@link JobNode} is involved in.
 	 * 
-	 * @return {@link ThreadState} that this {@link JobNode} is bound.
+	 * @return {@link Flow} that this {@link JobNode} is bound.
 	 */
-	ThreadState getThreadState();
+	Flow getFlow();
 
 	/**
 	 * <p>
@@ -54,7 +56,7 @@ public interface JobNode {
 	 * @param taskNode
 	 *            Parallel owner of this {@link JobNode}.
 	 */
-	void setParallelOwner(JobNode taskNode);
+	void setParallelOwner(JobNode jobNode);
 
 	/**
 	 * Obtains the parallel owner of this {@link JobNode}.
@@ -71,7 +73,7 @@ public interface JobNode {
 	 * @param taskNode
 	 *            Parallel {@link JobNode}.
 	 */
-	void setParallelNode(JobNode taskNode);
+	void setParallelNode(JobNode jobNode);
 
 	/**
 	 * Obtains the parallel {@link JobNode} to the current {@link JobNode}.
@@ -87,7 +89,7 @@ public interface JobNode {
 	 * @param taskNode
 	 *            Next {@link JobNode}.
 	 */
-	void setNextNode(JobNode taskNode);
+	void setNextNode(JobNode jobNode);
 
 	/**
 	 * Obtains the next {@link JobNode} in the {@link Flow} to execute after the
