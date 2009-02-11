@@ -65,28 +65,22 @@ public interface TaskContext<P extends Object, W extends Work, M extends Enum<M>
 
 	/**
 	 * <p>
-	 * Obtains the object of the specified
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Obtains the object of the specified {@link ManagedObject}.
 	 * 
 	 * @param key
-	 *            Key identifying the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 * @return Object of the specified
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            Key identifying the {@link ManagedObject}.
+	 * @return Object of the specified {@link ManagedObject}.
 	 */
 	Object getObject(M key);
 
 	/**
 	 * <p>
 	 * Similar to {@link #getObject(M)} except that allows dynamically obtaining
-	 * the objects of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances.
+	 * the objects of the {@link ManagedObject} instances.
 	 * 
 	 * @param managedObjectIndex
-	 *            Index identifying the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 * @return Object of the specified
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            Index identifying the {@link ManagedObject}.
+	 * @return Object of the specified {@link ManagedObject}.
 	 */
 	Object getObject(int managedObjectIndex);
 
@@ -130,13 +124,12 @@ public interface TaskContext<P extends Object, W extends Work, M extends Enum<M>
 
 	/**
 	 * <p>
-	 * Stops this {@link Task} from proceding to the next {@link Task} in its
-	 * {@link net.officefloor.frame.internal.structure.Flow} until the
-	 * {@link net.officefloor.frame.internal.structure.Flow} of the input
-	 * {@link FlowFuture} is complete.
+	 * Stops this {@link Task} from proceeding to the next {@link Task} in its
+	 * {@link Flow} until the {@link Flow} of the input {@link FlowFuture} is
+	 * complete.
 	 * 
 	 * @param flowFuture
-	 *            {@link FlowFuture} of the {@link Task} that must complete.
+	 *            {@link FlowFuture} of the {@link Flow} that must complete.
 	 */
 	void join(FlowFuture flowFuture);
 

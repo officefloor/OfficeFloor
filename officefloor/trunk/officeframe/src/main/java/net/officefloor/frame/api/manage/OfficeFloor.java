@@ -16,25 +16,23 @@
  */
 package net.officefloor.frame.api.manage;
 
+import net.officefloor.frame.api.execute.Work;
 
 /**
- * Office floor where {@link net.officefloor.frame.api.execute.Work} is done
- * within offices.
+ * Office floor where {@link Work} is done within {@link Office} instances.
  * 
  * @author Daniel
  */
 public interface OfficeFloor {
 
 	/**
-	 * Opens the floor and starts all
-	 * {@link net.officefloor.frame.api.execute.Work}.
+	 * Opens the floor and starts all {@link Work}.
 	 */
 	void openOfficeFloor();
 
 	/**
-	 * Closes the floor. This stops all
-	 * {@link net.officefloor.frame.api.execute.Work} within the offices and
-	 * releases all resources.
+	 * Closes the floor. This stops all {@link Work} within the {@link Office}
+	 * instances and releases all resources.
 	 */
 	void closeOfficeFloor();
 
@@ -42,8 +40,8 @@ public interface OfficeFloor {
 	 * Obtains the {@link Office} for the input office name.
 	 * 
 	 * @param officeName
-	 *            Name of the office.
-	 * @return {@link Office} for the specified office.
+	 *            Name of the {@link Office}.
+	 * @return Specified {@link Office}.
 	 */
 	Office getOffice(String officeName);
 
