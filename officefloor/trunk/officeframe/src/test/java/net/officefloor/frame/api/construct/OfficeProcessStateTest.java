@@ -59,7 +59,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 				workOne, "SENDER");
 		workOneBuilder.addWorkManagedObject("mo-one", "MANAGED_OBJECT");
 		TaskBuilder<Object, WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> taskOneBuilder = this
-				.constructTask("SENDER", Object.class, workOne, "TEAM", null);
+				.constructTask("SENDER", workOne, "TEAM", null);
 		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL);
 		taskOneBuilder.linkManagedObject(
@@ -72,18 +72,19 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 				workTwo, "RECEIVER");
 		workTwoBuilder.addWorkManagedObject("mo-two", "MANAGED_OBJECT");
 		TaskBuilder<Object, WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> taskTwoBuilder = this
-				.constructTask("RECEIVER", Object.class, workTwo, "TEAM", null);
+				.constructTask("RECEIVER", workTwo, "TEAM", null);
 		taskTwoBuilder.linkManagedObject(
 				WorkTwoManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(),
 				"mo-two");
 
 		// Register and open the office floor
-		OfficeFloor officeFloor = this.constructOfficeFloor("TEST");
+		String officeName = this.getOfficeName();
+		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
 		// Invoke WorkOne
-		WorkManager workManager = officeFloor.getOffice("TEST").getWorkManager(
-				"WORK_ONE");
+		WorkManager workManager = officeFloor.getOffice(officeName)
+				.getWorkManager("WORK_ONE");
 		workManager.invokeWork(new Object());
 
 		// Allow some time for processing

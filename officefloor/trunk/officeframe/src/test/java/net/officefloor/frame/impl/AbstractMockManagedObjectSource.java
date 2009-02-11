@@ -31,8 +31,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectSourcePr
 import net.officefloor.frame.test.MockManagedObjectSourceMetaData;
 
 /**
- * Mock
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+ * Mock {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -42,7 +41,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	/**
 	 * {@link ManagedObjectSourceContext}.
 	 */
-	private ManagedObjectSourceContext sourceContext;
+	private ManagedObjectSourceContext<H> sourceContext;
 
 	/**
 	 * {@link ManagedObjectExecuteContext}.
@@ -54,7 +53,7 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	 * 
 	 * @return {@link ManagedObjectSourceContext}.
 	 */
-	protected final ManagedObjectSourceContext getSourceContext() {
+	protected final ManagedObjectSourceContext<H> getSourceContext() {
 		return this.sourceContext;
 	}
 
@@ -160,7 +159,8 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getSpecification()
+	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
+	 * getSpecification()
 	 */
 	public final ManagedObjectSourceSpecification getSpecification() {
 		return new MockManagedObjectSourceSpecification(this.getPropertyNames());
@@ -169,9 +169,13 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init
+	 * (net
+	 * .officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
 	 */
-	public final void init(ManagedObjectSourceContext context) throws Exception {
+	public final void init(ManagedObjectSourceContext<H> context)
+			throws Exception {
 		// Specify context
 		this.sourceContext = context;
 
@@ -182,7 +186,8 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
+	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
+	 * getMetaData()
 	 */
 	@SuppressWarnings("unchecked")
 	public final ManagedObjectSourceMetaData<D, H> getMetaData() {
@@ -214,7 +219,10 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start
+	 * (net
+	 * .officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
 	public final void start(ManagedObjectExecuteContext<H> context)
 			throws Exception {
@@ -228,7 +236,9 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
+	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
+	 * sourceManagedObject
+	 * (net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
 	 */
 	public final void sourceManagedObject(ManagedObjectUser user) {
 		try {
@@ -250,7 +260,8 @@ public abstract class AbstractMockManagedObjectSource<D extends Enum<D>, H exten
 
 /**
  * Mock
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification}.
+ * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification}
+ * .
  */
 class MockManagedObjectSourceSpecification implements
 		ManagedObjectSourceSpecification {
@@ -282,7 +293,8 @@ class MockManagedObjectSourceSpecification implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification#getProperties()
+	 * @seenet.officefloor.frame.spi.managedobject.source.
+	 * ManagedObjectSourceSpecification#getProperties()
 	 */
 	public ManagedObjectSourceProperty[] getProperties() {
 		// Return the properties

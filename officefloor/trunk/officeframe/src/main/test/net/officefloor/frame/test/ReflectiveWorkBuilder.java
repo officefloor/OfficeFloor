@@ -19,8 +19,7 @@ package net.officefloor.frame.test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.BuildException;
+import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -31,6 +30,9 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Reflective {@link Work} meta-data.
@@ -68,27 +70,20 @@ public class ReflectiveWorkBuilder implements Work,
 	 *            {@link OfficeBuilder} to load {@link WorkBuilder}.
 	 * @param initialTaskName
 	 *            Initial task name.
-	 * @throws BuildException
-	 *             If fails to initiate.
 	 */
 	public ReflectiveWorkBuilder(AbstractOfficeConstructTestCase testCase,
 			String workName, Object workObject, OfficeBuilder officeBuilder,
-			String initialTaskName) throws BuildException {
+			String initialTaskName) {
 		this.testCase = testCase;
 		this.workObject = workObject;
 
 		// Create and initiate the work builder
-		this.workBuilder = OfficeFrame.getInstance().getBuilderFactory()
-				.createWorkBuilder(ReflectiveWorkBuilder.class);
-		this.workBuilder.setWorkFactory(this);
+		this.workBuilder = officeBuilder.addWork(workName, this);
 
 		// Specify initial task only if provided
 		if (initialTaskName != null) {
 			this.workBuilder.setInitialTask(initialTaskName);
 		}
-
-		// Register the work builder with the office
-		officeBuilder.addWork(workName, this.workBuilder);
 	}
 
 	/**
@@ -106,11 +101,8 @@ public class ReflectiveWorkBuilder implements Work,
 	 * @param methodName
 	 *            Name of the method to invoke.
 	 * @return {@link ReflectiveTaskBuilder} for the method.
-	 * @throws BuildException
-	 *             If fails to build the {@link Task}.
 	 */
-	public ReflectiveTaskBuilder buildTask(String methodName, String teamName)
-			throws BuildException {
+	public ReflectiveTaskBuilder buildTask(String methodName, String teamName) {
 
 		// Obtain the method name for the task
 		Method taskMethod = null;
@@ -120,31 +112,28 @@ public class ReflectiveWorkBuilder implements Work,
 			}
 		}
 		if (taskMethod == null) {
-			throw new BuildException("No method '" + methodName + "' on work "
+			TestCase.fail("No method '" + methodName + "' on work "
 					+ this.workObject.getClass().getName());
 		}
 
-		// Create the task builder (parameter type Object)
-		TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder = this.workBuilder
-				.addTask(methodName, Object.class);
-
 		// Create the reflective task meta-data
 		ReflectiveTaskBuilder taskMetaData = new ReflectiveTaskBuilder(
-				taskMethod, taskBuilder);
+				taskMethod);
+
+		// Create the task builder (parameter type Object)
+		TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder = this.workBuilder
+				.addTask(methodName, taskMetaData);
+		taskMetaData.setTaskBuilder(taskBuilder);
 
 		// Initiate the task builder
 		taskBuilder.setTeam(teamName);
-		taskBuilder.setTaskFactory(taskMetaData);
 
 		// Return the task meta-data
 		return taskMetaData;
 	}
 
 	/*
-	 * ==========================================================================
-	 * WorkFactory
-	 * ==============================================================
-	 * ============
+	 * ============== WorkFactory =====================================
 	 */
 
 	/*
@@ -172,7 +161,7 @@ public class ReflectiveWorkBuilder implements Work,
 		/**
 		 * {@link TaskBuilder}.
 		 */
-		private final TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder;
+		private TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder;
 
 		/**
 		 * {@link ParameterFactory} instances for the method.
@@ -199,18 +188,24 @@ public class ReflectiveWorkBuilder implements Work,
 		 * 
 		 * @param method
 		 *            {@link Method} on work object to invoke.
-		 * @param taskBuilder
-		 *            {@link TaskBuilder}.
 		 */
-		public ReflectiveTaskBuilder(
-				Method method,
-				TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder) {
+		public ReflectiveTaskBuilder(Method method) {
 			this.method = method;
-			this.taskBuilder = taskBuilder;
 
 			// Create the parameter factories for the method
 			this.parameterFactories = new ParameterFactory[this.method
 					.getParameterTypes().length];
+		}
+
+		/**
+		 * Specifies the {@link TaskBuilder}.
+		 * 
+		 * @param taskBuilder
+		 *            {@link TaskBuilder}.
+		 */
+		void setTaskBuilder(
+				TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder) {
+			this.taskBuilder = taskBuilder;
 		}
 
 		/**
@@ -238,10 +233,8 @@ public class ReflectiveWorkBuilder implements Work,
 		 * 
 		 * @param managedObjectName
 		 *            Name of the managed object.
-		 * @throws BuildException
-		 *             If fails to build.
 		 */
-		public void buildObject(String managedObjectName) throws BuildException {
+		public void buildObject(String managedObjectName) {
 			// Builds the managed object
 			String workManagedObjectName = "w:" + managedObjectName;
 			this.taskBuilder.linkManagedObject(this.objectIndex,
@@ -259,21 +252,19 @@ public class ReflectiveWorkBuilder implements Work,
 		/**
 		 * Builds the process bound managed object.
 		 * 
-		 * @param managedObjectName
-		 *            Name of the managed object.
-		 * @param processLinkName
-		 *            Process managed object name.
-		 * @throws BuildException
-		 *             If fails to build.
+		 * @param workManagedObjectName
+		 *            Name of the {@link ManagedObject} bound to {@link Work}.
+		 * @param boundManagedObjectName
+		 *            Name of {@link ProcessState} or {@link ThreadState} bound
+		 *            {@link ManagedObject}.
 		 */
-		public void buildObject(String managedObjectName, String processLinkName)
-				throws BuildException {
+		public void buildObject(String workManagedObjectName,
+				String boundManagedObjectName) {
 			// Builds the managed object
 			this.taskBuilder.linkManagedObject(this.objectIndex,
-					managedObjectName);
-			ReflectiveWorkBuilder.this.workBuilder
-					.registerProcessManagedObject(managedObjectName,
-							processLinkName);
+					workManagedObjectName);
+			ReflectiveWorkBuilder.this.workBuilder.linkManagedObject(
+					workManagedObjectName, boundManagedObjectName);
 			this.parameterFactories[this.parameterIndex] = new ObjectParameterFactory(
 					this.objectIndex);
 
@@ -289,11 +280,9 @@ public class ReflectiveWorkBuilder implements Work,
 		 *            Task name.
 		 * @param strategy
 		 *            {@link FlowInstigationStrategyEnum}.
-		 * @throws BuildException
-		 *             If fails to build the flow.
 		 */
 		public void buildFlow(String taskName,
-				FlowInstigationStrategyEnum strategy) throws BuildException {
+				FlowInstigationStrategyEnum strategy) {
 			this.buildFlow(null, taskName, strategy);
 		}
 
@@ -306,11 +295,9 @@ public class ReflectiveWorkBuilder implements Work,
 		 *            Task name.
 		 * @param strategy
 		 *            {@link FlowInstigationStrategyEnum}.
-		 * @throws BuildException
-		 *             If fails to build the flow.
 		 */
 		public void buildFlow(String workName, String taskName,
-				FlowInstigationStrategyEnum strategy) throws BuildException {
+				FlowInstigationStrategyEnum strategy) {
 			// Link in the flow and allow for invocation
 			if (workName != null) {
 				this.taskBuilder.linkFlow(this.flowIndex, workName, taskName,

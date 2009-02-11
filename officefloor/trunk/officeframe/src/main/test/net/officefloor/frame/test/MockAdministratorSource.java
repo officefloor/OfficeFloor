@@ -20,8 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.AdministratorBuilder;
-import net.officefloor.frame.api.build.BuildException;
-import net.officefloor.frame.api.build.BuilderFactory;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
@@ -29,14 +28,12 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaDa
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
 
 /**
- * Mock implementation of the
- * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}
- * for testing.
+ * Mock implementation of the {@link AdministratorSource} for testing.
  * 
  * @author Daniel
  */
-public class MockAdministratorSource<I extends Object, A extends Enum<A>>
-		implements AdministratorSource<I, A> {
+public class MockAdministratorSource<I, A extends Enum<A>> implements
+		AdministratorSource<I, A> {
 
 	/**
 	 * Property name to source the {@link Administrator}.
@@ -52,28 +49,24 @@ public class MockAdministratorSource<I extends Object, A extends Enum<A>>
 	 * Convenience method to bind the {@link Administrator} instance to the
 	 * {@link AdministratorBuilder}.
 	 * 
-	 * @param builderFactory
-	 *            {@link BuilderFactory} to create the
-	 *            {@link AdministratorBuilder} to bind the {@link Administrator}.
 	 * @param name
 	 *            Name to bind under.
 	 * @param administrator
 	 *            {@link Administrator} to bind.
 	 * @param sourceMetaData
 	 *            {@link AdministratorSourceMetaData} to bind.
-	 * @throws BuildException
-	 *             If bind fails.
+	 * @param officeBuilder
+	 *            {@link OfficeBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <A extends Enum<A>> AdministratorBuilder<A> bindAdministrator(
-			BuilderFactory builderFactory, String name,
-			Administrator<?, A> administrator,
-			AdministratorSourceMetaData<?, A> sourceMetaData)
-			throws BuildException {
+			String name, Administrator<?, A> administrator,
+			AdministratorSourceMetaData<?, A> sourceMetaData,
+			OfficeBuilder officeBuilder) {
 
 		// Create the administrator builder
-		AdministratorBuilder<?> builder = builderFactory
-				.createAdministratorBuilder(MockAdministratorSource.class);
+		AdministratorBuilder<?> builder = officeBuilder.addThreadAdministrator(
+				name, MockAdministratorSource.class);
 
 		// Provide task administrator link to meta-data
 		builder.addProperty(TASK_ADMINISTRATOR_PROPERTY, name);
@@ -104,7 +97,9 @@ public class MockAdministratorSource<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.taskadministration.source.TaskAdministratorSource#getSpecification()
+	 * @see
+	 * net.officefloor.frame.spi.taskadministration.source.TaskAdministratorSource
+	 * #getSpecification()
 	 */
 	public AdministratorSourceSpecification getSpecification() {
 		throw new UnsupportedOperationException(
@@ -114,7 +109,10 @@ public class MockAdministratorSource<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#init(net.officefloor.frame.spi.administration.source.AdministratorSourceContext)
+	 * @see
+	 * net.officefloor.frame.spi.administration.source.AdministratorSource#init
+	 * (net
+	 * .officefloor.frame.spi.administration.source.AdministratorSourceContext)
 	 */
 	public void init(AdministratorSourceContext context) throws Exception {
 		// Obtain the name of the Task Administrator
@@ -134,7 +132,9 @@ public class MockAdministratorSource<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.taskadministration.source.TaskAdministratorSource#getMetaData()
+	 * @see
+	 * net.officefloor.frame.spi.taskadministration.source.TaskAdministratorSource
+	 * #getMetaData()
 	 */
 	@SuppressWarnings("unchecked")
 	public AdministratorSourceMetaData<I, A> getMetaData() {
@@ -144,7 +144,8 @@ public class MockAdministratorSource<I extends Object, A extends Enum<A>>
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#createAdministrator()
+	 * @seenet.officefloor.frame.spi.administration.source.AdministratorSource#
+	 * createAdministrator()
 	 */
 	@SuppressWarnings("unchecked")
 	public Administrator<I, A> createAdministrator() {
@@ -153,7 +154,8 @@ public class MockAdministratorSource<I extends Object, A extends Enum<A>>
 
 	/**
 	 * State of the
-	 * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
+	 * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}
+	 * .
 	 */
 	private static class TaskAdministratorSourceState {
 
