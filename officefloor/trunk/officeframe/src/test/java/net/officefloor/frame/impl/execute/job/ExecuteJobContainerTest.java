@@ -17,7 +17,6 @@
 package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.impl.execute.AbstractJobContainer;
 import net.officefloor.frame.spi.team.Job;
 
 /**

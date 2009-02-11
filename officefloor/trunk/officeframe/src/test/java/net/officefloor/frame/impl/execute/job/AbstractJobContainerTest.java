@@ -21,8 +21,6 @@ import org.easymock.internal.AlwaysMatcher;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.AbstractJobContainer;
-import net.officefloor.frame.impl.execute.JobExecuteContext;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;

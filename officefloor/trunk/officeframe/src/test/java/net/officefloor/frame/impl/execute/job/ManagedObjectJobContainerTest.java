@@ -16,7 +16,6 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.impl.execute.AbstractJobContainer;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;

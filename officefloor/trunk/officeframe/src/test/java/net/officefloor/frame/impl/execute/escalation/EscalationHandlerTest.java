@@ -55,7 +55,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", new PassiveTeam());
 
 		// Execute the task and ensure escalation handled
-		this.invokeWork("OFFICE", "WORK", null);
+		this.invokeWork("WORK", null);
 
 		// Ensure escalation is handled by office escalation handler
 		try {
@@ -81,7 +81,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 				.constructManagedObject("MO",
 						EscalationManagedObjectSource.class, "OFFICE");
 		ManagedObjectHandlerBuilder<EscalationManagedObjectSource.Handlers> moHandlerBuilder = moBuilder
-				.getManagedObjectHandlerBuilder(EscalationManagedObjectSource.Handlers.class);
+				.getManagedObjectHandlerBuilder();
 		HandlerBuilder<Indexed> handlerBuilder = moHandlerBuilder
 				.registerHandler(EscalationManagedObjectSource.Handlers.ESCALATE);
 		handlerBuilder.setHandlerFactory(new EscalationManagedObjectSource());
@@ -96,7 +96,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", new PassiveTeam());
 
 		// Create and open the office
-		this.constructOfficeFloor("OFFICE").openOfficeFloor();
+		this.constructOfficeFloor().openOfficeFloor();
 
 		// Invoke processing from the managed object
 		EscalationManagedObjectSource.invokeProcessing();

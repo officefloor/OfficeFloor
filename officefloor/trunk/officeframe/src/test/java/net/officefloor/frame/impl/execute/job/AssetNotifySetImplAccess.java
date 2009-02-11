@@ -14,8 +14,9 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute;
+package net.officefloor.frame.impl.execute.job;
 
+import net.officefloor.frame.impl.execute.job.JobActivatableSetImpl;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedList;
 

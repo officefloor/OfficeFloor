@@ -86,11 +86,12 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", this.team);
 
 		// Open the Office Floor
-		this.officeFloor = this.constructOfficeFloor("OFFICE");
+		String officeName = this.getOfficeName();
+		this.officeFloor = this.constructOfficeFloor();
 		this.officeFloor.openOfficeFloor();
 
 		// Execute the task (to obtain the task container)
-		WorkManager workManager = this.officeFloor.getOffice("OFFICE")
+		WorkManager workManager = this.officeFloor.getOffice(officeName)
 				.getWorkManager("WORK");
 		workManager.invokeWork(null);
 	}
@@ -98,7 +99,8 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
+	 * @see
+	 * net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
 	 */
 	@Override
 	protected void tearDown() throws Exception {
@@ -244,7 +246,9 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
+		 * @see
+		 * net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame
+		 * .spi.team.TaskContainer)
 		 */
 		@Override
 		public void assignJob(Job task) {
@@ -311,15 +315,19 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/*
-		 * ============================================================================
-		 * AsynchronousManagedObject
-		 * ============================================================================
+		 * ======================================================================
+		 * ====== AsynchronousManagedObject
+		 * ======================================
+		 * ======================================
 		 */
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.AsynchronousManagedObject#registerAsynchronousCompletionListener(net.officefloor.frame.spi.managedobject.AsynchronousListener)
+		 * @see
+		 * net.officefloor.frame.spi.managedobject.AsynchronousManagedObject
+		 * #registerAsynchronousCompletionListener
+		 * (net.officefloor.frame.spi.managedobject.AsynchronousListener)
 		 */
 		@Override
 		public void registerAsynchronousCompletionListener(
@@ -330,7 +338,8 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
+		 * @see
+		 * net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
 		 */
 		@Override
 		public Object getObject() throws Exception {

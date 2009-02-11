@@ -16,8 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.impl.execute.AssetManagerImpl;
-import net.officefloor.frame.impl.execute.JobActivatableSetImpl;
+import net.officefloor.frame.impl.execute.job.JobActivatableSetImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
