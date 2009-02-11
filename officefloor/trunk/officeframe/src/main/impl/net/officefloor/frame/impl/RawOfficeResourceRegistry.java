@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.internal.configuration.ConfigurationException;
-import net.officefloor.frame.internal.configuration.LinkedManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.spi.team.Team;
@@ -55,7 +55,7 @@ public class RawOfficeResourceRegistry {
 
 		// Create the registry of managed objects used by the office
 		Map<String, RawManagedObjectMetaData> managedObjects = new HashMap<String, RawManagedObjectMetaData>();
-		for (LinkedManagedObjectConfiguration moConfig : officeConfiguration
+		for (LinkedManagedObjectSourceConfiguration moConfig : officeConfiguration
 				.getRegisteredManagedObjects()) {
 
 			// Obtain the managed object Id

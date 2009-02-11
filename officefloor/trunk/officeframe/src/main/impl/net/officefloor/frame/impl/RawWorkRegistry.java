@@ -21,10 +21,10 @@ import java.util.Map;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.EscalationImpl;
-import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
-import net.officefloor.frame.impl.execute.FlowMetaDataImpl;
-import net.officefloor.frame.impl.execute.TaskMetaDataImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
+import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
+import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;

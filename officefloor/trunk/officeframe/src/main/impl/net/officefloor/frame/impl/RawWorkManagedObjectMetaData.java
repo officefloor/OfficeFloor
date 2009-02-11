@@ -21,9 +21,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import net.officefloor.frame.impl.execute.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
-import net.officefloor.frame.internal.configuration.LinkedManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -96,7 +96,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 * bound {@link RawWorkManagedObjectMetaData}.
 	 * 
 	 * @param linkedManagedObjectConfig
-	 *            {@link LinkedManagedObjectConfiguration} for linking the
+	 *            {@link LinkedManagedObjectSourceConfiguration} for linking the
 	 *            {@link ManagedObject} to the
 	 *            {@link net.officefloor.frame.api.execute.Work}.
 	 * @param processMoRegistry
@@ -105,7 +105,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 */
 	@SuppressWarnings("unchecked")
 	public static RawWorkManagedObjectMetaData<?> createProcessBound(
-			LinkedManagedObjectConfiguration linkedManagedObjectConfig,
+			LinkedManagedObjectSourceConfiguration linkedManagedObjectConfig,
 			RawProcessManagedObjectRegistry processMoRegistry)
 			throws ConfigurationException {
 
@@ -184,9 +184,9 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	private final Map<D, Integer> dependencyMapping;
 
 	/**
-	 * {@link LinkedManagedObjectConfiguration}.
+	 * {@link LinkedManagedObjectSourceConfiguration}.
 	 */
-	private final LinkedManagedObjectConfiguration processManagedObjectConfig;
+	private final LinkedManagedObjectSourceConfiguration processManagedObjectConfig;
 
 	/**
 	 * {@link RawProcessManagedObjectMetaData}.
@@ -226,10 +226,10 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 * @param metaData
 	 *            {@link ManagedObjectMetaData}.
 	 * @param workManagedObjectConfig
-	 *            {@link LinkedManagedObjectConfiguration}.
+	 *            {@link LinkedManagedObjectSourceConfiguration}.
 	 */
 	private RawWorkManagedObjectMetaData(ManagedObjectMetaData<D> metaData,
-			LinkedManagedObjectConfiguration processManagedObjectConfig,
+			LinkedManagedObjectSourceConfiguration processManagedObjectConfig,
 			RawProcessManagedObjectMetaData processMoMetaData) {
 		this.isProcessBound = true;
 		this.workManagedObjectConfig = null;
@@ -246,7 +246,7 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	 * @param metaData
 	 *            {@link ManagedObjectMetaData}.
 	 * @param workManagedObjectConfig
-	 *            {@link LinkedManagedObjectConfiguration}.
+	 *            {@link LinkedManagedObjectSourceConfiguration}.
 	 */
 	private RawWorkManagedObjectMetaData(ManagedObjectMetaData<D> metaData,
 			RawProcessManagedObjectMetaData processMoMetaData) {
@@ -411,17 +411,17 @@ public class RawWorkManagedObjectMetaData<D extends Enum<D>> {
 	}
 
 	/**
-	 * Obtains the {@link LinkedManagedObjectConfiguration} to link the
+	 * Obtains the {@link LinkedManagedObjectSourceConfiguration} to link the
 	 * {@link net.officefloor.frame.internal.structure.ProcessState} bound
 	 * {@link ManagedObject} to the
 	 * {@link net.officefloor.frame.api.execute.Work}.
 	 * 
-	 * @return {@link LinkedManagedObjectConfiguration} to link the
+	 * @return {@link LinkedManagedObjectSourceConfiguration} to link the
 	 *         {@link net.officefloor.frame.internal.structure.ProcessState}
 	 *         bound {@link ManagedObject} to the
 	 *         {@link net.officefloor.frame.api.execute.Work}.
 	 */
-	public LinkedManagedObjectConfiguration getProcessManagedObjectConfiguration() {
+	public LinkedManagedObjectSourceConfiguration getProcessManagedObjectConfiguration() {
 		return this.processManagedObjectConfig;
 	}
 
