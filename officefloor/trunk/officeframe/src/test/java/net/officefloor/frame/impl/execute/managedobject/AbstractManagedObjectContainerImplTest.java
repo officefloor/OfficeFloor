@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.execute.managedobject;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.impl.execute.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.Flow;

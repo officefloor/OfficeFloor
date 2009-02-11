@@ -18,17 +18,16 @@ package net.officefloor.frame.impl.execute.managedobject;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import net.officefloor.frame.impl.execute.error.ExecutionError;
-import net.officefloor.frame.impl.execute.error.ExecutionErrorEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
- * Tests failure {@link ManagedObject} taken time to load.
+ * Tests duplicate calls to the {@link ManagedObjectContainer} when re-used
+ * across {@link ProcessState}.
  * 
  * @author Daniel
  */
-public class FailedDelayedLoadManagedObjectContainerTest extends
+public class DuplicateCallsManagedObjectContainerTest extends
 		AbstractManagedObjectContainerImplTest {
 
 	/**
@@ -38,7 +37,7 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 	 *         meta-data.
 	 */
 	public static Test suite() {
-		return createMetaDataCombinationTestSuite(FailedDelayedLoadManagedObjectContainerTest.class);
+		return createMetaDataCombinationTestSuite(DuplicateCallsManagedObjectContainerTest.class);
 	}
 
 	/*
@@ -49,41 +48,37 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 	@Override
 	protected void runTest() throws Throwable {
 
-		final Throwable failure = new Throwable("sourcing failure");
+		final Object object = "object";
 
-		// Record loading managed object (that is delayed)
+		// Record loading managed object (each should only be run once)
 		this.record_MoContainer_init();
-		this.record_MoContainer_sourceManagedObject(false, null);
-
-		// Record later failure in sourcing managed object
-		this.record_MoUser_setFailure(false, failure);
-
-		// Record propagating failure in sourcing managed object
-		this.record_MoContainer_isManagedObjectReady(ReadyState.FAILURE);
+		this.record_MoContainer_sourceManagedObject(true, null);
+		this.record_MoUser_setManagedObject(true, object);
+		this.record_MoContainer_coordinateManagedObject(null);
+		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
+		this.record_MoContainer_unloadManagedObject();
 
 		// Replay mock objects
 		this.replayMockObjects();
 
-		// Create the managed object container and attempt to load
+		// Create the managed object container
 		ManagedObjectContainer mo = this.createManagedObjectContainer();
-		this.loadManagedObject(mo, false);
 
-		// Specify failure in attempting to load
-		this.managedObjectUser_setFailure(mo, failure);
+		// Attempt to load twice (with only first taking effect)
+		this.loadManagedObject(mo, true);
+		this.loadManagedObject(mo, true);
 
-		try {
-			// Check ready should report failure to load
-			this.isManagedObjectReady(mo, false);
-			fail("Should propagate failure to source");
-		} catch (ExecutionError ex) {
-			// Ensure exception details correct
-			assertEquals("Incorrect error type",
-					ExecutionErrorEnum.MANAGED_OBJECT_SOURCING_FAILURE, ex
-							.getErrorType());
-			assertEquals("Incorrect sourcing cause", failure, ex.getCause());
-		}
+		// Attempt to coordinate twice (with only first taking effect)
+		this.coordinateManagedObject(mo);
+		this.coordinateManagedObject(mo);
 
-		// Unload the managed object (should only set state as not sourced)
+		// Attempt another load, coordinate that should do nothing
+		this.loadManagedObject(mo, true);
+		this.coordinateManagedObject(mo);
+
+		// Should be ready and working
+		this.isManagedObjectReady(mo, true);
+		this.assert_getObject(mo, object);
 		mo.unloadManagedObject();
 
 		// Verify mock objects

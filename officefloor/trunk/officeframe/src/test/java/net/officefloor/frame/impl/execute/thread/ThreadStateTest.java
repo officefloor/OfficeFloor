@@ -18,7 +18,6 @@ package net.officefloor.frame.impl.execute.thread;
 
 import org.easymock.internal.AlwaysMatcher;
 
-import net.officefloor.frame.impl.execute.ThreadStateImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.FlowMetaData;
