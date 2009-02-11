@@ -25,11 +25,11 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel
  */
-public interface AdministratorSourceMetaData<I extends Object, A extends Enum<A>> {
+public interface AdministratorSourceMetaData<I, A extends Enum<A>> {
 
 	/**
-	 * Obtains the {@link Class} that the {@link ManagedObject} must provide to
-	 * be administrated by this.
+	 * Obtains the {@link Class} that the {@link ManagedObject} must provide as
+	 * an extension interface to be administered.
 	 * 
 	 * @return Extension interface for the {@link ManagedObject}.
 	 */

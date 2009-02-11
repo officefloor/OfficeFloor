@@ -27,7 +27,7 @@ import net.officefloor.frame.spi.administration.DutyContext;
  * 
  * @author Daniel
  */
-public interface AdministratorSource<I extends Object, A extends Enum<A>> {
+public interface AdministratorSource<I, A extends Enum<A>> {
 
 	/**
 	 * <p>
