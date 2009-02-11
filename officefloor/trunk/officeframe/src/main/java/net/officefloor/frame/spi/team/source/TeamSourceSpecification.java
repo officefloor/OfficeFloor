@@ -14,31 +14,19 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.spi.managedobject.source;
-
-import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+package net.officefloor.frame.spi.team.source;
 
 /**
- * Builds the {@link Work} necessary for a {@link ManagedObjectSource}.
+ * Specification of a {@link TeamSource}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectWorkBuilder<W extends Work> {
+public interface TeamSourceSpecification {
 
 	/**
-	 * Creates the {@link ManagedObjectTaskBuilder} to build a {@link Task} for
-	 * this {@link Work}.
+	 * Obtains the specification of the properties for the {@link TeamSource}.
 	 * 
-	 * @param taskName
-	 *            Name of task local to this {@link Work}.
-	 * @param taskFactory
-	 *            {@link TaskFactory} to create the {@link Task}.
-	 * @return Specific {@link ManagedObjectTaskBuilder}.
+	 * @return Property specification.
 	 */
-	<P extends Object, F extends Enum<F>> ManagedObjectTaskBuilder<F> addTask(
-			String taskName, TaskFactory<P, W, None, F> taskFactory);
-
+	TeamSourceProperty[] getProperties();
 }

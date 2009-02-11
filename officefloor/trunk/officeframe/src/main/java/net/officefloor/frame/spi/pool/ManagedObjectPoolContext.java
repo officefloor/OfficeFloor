@@ -19,19 +19,17 @@ package net.officefloor.frame.spi.pool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Context for a {@link net.officefloor.frame.spi.pool.ManagedObjectPool}.
+ * Context for a {@link ManagedObjectPool}.
  * 
  * @author Daniel
  */
 public interface ManagedObjectPoolContext {
 
 	/**
-	 * Obtains the {@link ManagedObjectSource} for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * being pooled.
+	 * Obtains the {@link ManagedObjectSource} for the {@link ManagedObject}
+	 * instances being pooled.
 	 * 
-	 * @return {@link ManagedObjectSource} for the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
+	 * @return {@link ManagedObjectSource} for the {@link ManagedObject}
 	 *         instances being pooled.
 	 */
 	ManagedObjectSource<?, ?> getManagedObjectSource();

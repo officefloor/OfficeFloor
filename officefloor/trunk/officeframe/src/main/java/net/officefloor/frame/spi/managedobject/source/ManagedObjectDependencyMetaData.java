@@ -16,11 +16,11 @@
  */
 package net.officefloor.frame.spi.managedobject.source;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Describes an object which the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} for the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource} is
- * dependent upon.
+ * Describes an object which the {@link ManagedObject} for the
+ * {@link ManagedObjectSource} is dependent upon.
  * 
  * @author Daniel
  */

@@ -16,15 +16,13 @@
  */
 package net.officefloor.frame.spi.managedobject.source;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
 
 /**
- * Meta-data of the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+ * Meta-data of the {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -34,62 +32,54 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * <p>
 	 * Obtains the {@link Class} of the {@link ManagedObject} returned from
 	 * {@link ManagedObjectSource#getManagedObject()}.
-	 * </p>
 	 * <p>
 	 * This is to enable coupled configuration rather than specifying in a
 	 * possibly unrelated configuration file.
-	 * </p>
 	 * <p>
 	 * Note this does not prevent the configuration passed to the
-	 * {@link #init(Properties, ResourceLocator, ManagedObjectPoolFactory)}
-	 * method to specify this. {@link Class} must however be the same given the
-	 * same configuration.
-	 * </p>
+	 * {@link ManagedObjectSource#init(ManagedObjectSourceContext)} method to
+	 * specify this. {@link Class} must however be the same given the same
+	 * configuration.
 	 * 
-	 * @return {@link Class} of the {@link ManagedObject} returned from the
-	 *         {@link #getManagedObject()}.
+	 * @return {@link Class} of the {@link ManagedObject} sourced.
 	 */
 	Class<? extends ManagedObject> getManagedObjectClass();
 
 	/**
 	 * <p>
-	 * Obtains the {@link Class} of the object being managed by the
-	 * {@link LifeCycleManagedObject} returned from {@link #getManagedObject()}.
-	 * </p>
+	 * Obtains the {@link Class} of the object returned from
+	 * {@link ManagedObject#getObject()}.
 	 * <p>
 	 * This is to enable coupled configuration rather than specifying in a
 	 * possibly unrelated configuration file.
-	 * </p>
 	 * <p>
 	 * Note this does not prevent the configuration passed to the
-	 * {@link #init(Properties, ResourceLocator, ManagedObjectPoolFactory)}
-	 * method to specify this. {@link Class} must however be the same given the
-	 * same configuration.
+	 * {@link ManagedObjectSource#init(ManagedObjectSourceContext)} method to
+	 * specify this. {@link Class} must however be the same given the same
+	 * configuration.
 	 * </p>
 	 * 
 	 * @return The {@link Class} of the object being managed by the
-	 *         {@link ManagedObject} returned from {@link #getManagedObject()}.
+	 *         {@link ManagedObject}.
 	 */
 	Class<?> getObjectClass();
 
 	/**
 	 * <p>
 	 * Obtains the {@link Enum} specifying the dependencies for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 * </p>
+	 * {@link ManagedObject}.
 	 * <p>
 	 * If there are no dependencies return <code>null</code>.
-	 * </p>
 	 * 
 	 * @return {@link Enum} specifying the dependencies for the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *         {@link ManagedObject}.
 	 */
 	Class<D> getDependencyKeys();
 
 	/**
 	 * Obtains the list of {@link ManagedObjectDependencyMetaData} instances
 	 * should this {@link ManagedObjectSource} provide a
-	 * {@link net.officefloor.frame.spi.managedobject.CoordinatingManagedObject}.
+	 * {@link CoordinatingManagedObject}.
 	 * 
 	 * @return Description of the dependencies for this
 	 *         {@link ManagedObjectSource}.
@@ -99,31 +89,25 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 
 	/**
 	 * <p>
-	 * Obtains the {@link Enum} specifying the
-	 * {@link net.officefloor.frame.api.execute.Handler} instances required.
-	 * </p>
+	 * Obtains the {@link Enum} specifying the {@link Handler} instances
+	 * required.
 	 * <p>
-	 * If there are no {@link net.officefloor.frame.api.execute.Handler}
-	 * instances required then return <code>null</code>.
-	 * </p>
+	 * If there are no {@link Handler} instances required then return
+	 * <code>null</code>.
 	 * 
-	 * @return {@link Enum} specifying the
-	 *         {@link net.officefloor.frame.api.execute.Handler} instances
-	 *         required.
+	 * @return {@link Enum} specifying the {@link Handler} instances required.
 	 */
 	Class<H> getHandlerKeys();
 
 	/**
-	 * Obtains the {@link Class} type that the
-	 * {@link net.officefloor.frame.api.execute.Handler} for the specified key
-	 * must implement.
+	 * Obtains the {@link Class} type that the {@link Handler} for the specified
+	 * key must implement.
 	 * 
 	 * @param key
-	 *            Key identifying the
-	 *            {@link net.officefloor.frame.api.execute.Handler}.
-	 * @return {@link Class} type that the
-	 *         {@link net.officefloor.frame.api.execute.Handler} for the
-	 *         specified key must implement.
+	 *            Key identifying the {@link Handler}.
+	 * @return {@link Class} type that the {@link Handler} for the specified key
+	 *         must implement.
+	 * @see #getHandlerKeys()
 	 */
 	@SuppressWarnings("unchecked")
 	Class<? extends Handler> getHandlerType(H key);

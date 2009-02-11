@@ -3,8 +3,6 @@
  */
 package net.officefloor.frame.spi.managedobject.source;
 
-import java.util.Properties;
-
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -38,19 +36,17 @@ public interface ManagedObjectSource<D extends Enum<D>, H extends Enum<H>> {
 	 *             Should the {@link ManagedObjectSource} fail to configure
 	 *             itself from the input properties.
 	 */
-	void init(ManagedObjectSourceContext context) throws Exception;
+	void init(ManagedObjectSourceContext<H> context) throws Exception;
 
 	/**
 	 * <p>
 	 * Obtains the meta-data to describe this.
 	 * <p>
-	 * This is called after the
-	 * {@link #init(Properties, ResourceLocator, ManagedObjectPoolFactory)}
-	 * method and therefore may use the configuration.
+	 * This is called after the {@link #init(ManagedObjectSourceContext)} method
+	 * and therefore may use the configuration.
 	 * <p>
 	 * This should always return non-null. If there is a problem due to
-	 * incorrect configuration, the
-	 * {@link #init(Properties, ResourceLocator, ManagedObjectPoolFactory)}
+	 * incorrect configuration, the {@link #init(ManagedObjectSourceContext)}
 	 * should indicate this via an exception.
 	 * 
 	 * @return Meta-data to describe this.
@@ -71,7 +67,7 @@ public interface ManagedObjectSource<D extends Enum<D>, H extends Enum<H>> {
 	void start(ManagedObjectExecuteContext<H> context) throws Exception;
 
 	/**
-	 * Sources a {@link ManagedObject}from this {@link ManagedObjectSource}.
+	 * Sources a {@link ManagedObject} from this {@link ManagedObjectSource}.
 	 * 
 	 * @param user
 	 *            {@link ManagedObjectUser} interested in using the

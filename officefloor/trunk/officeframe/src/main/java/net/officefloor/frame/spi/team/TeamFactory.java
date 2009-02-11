@@ -23,6 +23,8 @@ import java.util.Properties;
  * 
  * @author Daniel
  */
+// TODO change to use TeamSource with TeamSpecification
+@Deprecated
 public interface TeamFactory {
 
 	/**
@@ -34,5 +36,7 @@ public interface TeamFactory {
 	 * @throws Exception
 	 *             If fails.
 	 */
+	// TODO change to TeamSource with TeamSpecification
+	@Deprecated
 	Team createTeam(Properties properties) throws Exception;
 }
