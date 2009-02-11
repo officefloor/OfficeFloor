@@ -24,6 +24,13 @@ import java.util.Map;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
+import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
+import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
+import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
+import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
@@ -31,8 +38,10 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.team.Job;
@@ -41,8 +50,7 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Abstract functionality to test execution of
- * {@link net.officefloor.frame.impl.execute.TaskContainerImpl}.
+ * Abstract functionality to test execution of {@link AbstractJobContainer}.
  * 
  * @author Daniel
  */
@@ -50,16 +58,13 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		OfficeFrameTestCase implements Team {
 
 	/**
-	 * Index of the {@link ProcessState}
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} on the
+	 * Index of the {@link ProcessState} {@link ManagedObject} on the
 	 * {@link Work}.
 	 */
 	public static final int PROCESS_MO_INDEX = 0;
 
 	/**
-	 * Index of the {@link Work}
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} on the
-	 * {@link Work}.
+	 * Index of the {@link Work} {@link ManagedObject} on the {@link Work}.
 	 */
 	public static final int WORK_MO_INDEX = 1;
 
@@ -70,42 +75,36 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 	/**
 	 * {@link AssetManager} for managing the sourcing of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} of the
-	 * {@link ProcessState}.
+	 * {@link ManagedObject} of the {@link ProcessState}.
 	 */
 	private AssetManager processSourcingManager;
 
 	/**
 	 * {@link AssetManager} for managing the asynchronous operations on the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} of the
-	 * {@link ProcessState}.
+	 * {@link ManagedObject} of the {@link ProcessState}.
 	 */
 	private AssetManager processOperationsManager;
 
 	/**
-	 * {@link ManagedObjectSource} for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} of the
+	 * {@link ManagedObjectSource} for the {@link ManagedObject} of the
 	 * {@link ProcessState}.
 	 */
 	private ManagedObjectSource<?, ?> processMoSource;
 
 	/**
 	 * {@link AssetManager} for managing the sourcing of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} of the
-	 * {@link Work}.
+	 * {@link ManagedObject} of the {@link Work}.
 	 */
 	private AssetManager workSourcingManager;
 
 	/**
 	 * {@link AssetManager} for managing the asynchronous operations on the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} of the
-	 * {@link Work}.
+	 * {@link ManagedObject} of the {@link Work}.
 	 */
 	private AssetManager workOperationsManager;
 
 	/**
-	 * {@link ManagedObjectSource} for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} of the
+	 * {@link ManagedObjectSource} for the {@link ManagedObject} of the
 	 * {@link Work}.
 	 */
 	private ManagedObjectSource<?, ?> workMoSource;
@@ -328,10 +327,14 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		// TODO consider testing with administrators
 		AdministratorMetaData<?, ?>[] adminMetaData = new AdministratorMetaData[0];
 
+		// Create the process meta-data
+		ManagedObjectMetaData<?>[] managedObjectMetaData = new ManagedObjectMetaData[] { this.moMetaData };
+		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
+				managedObjectMetaData, adminMetaData);
+
 		// Create Process for executing
-		ProcessState processState = new ProcessStateImpl(
-				new ManagedObjectMetaData[] { this.moMetaData }, adminMetaData,
-				null, null);
+		ProcessState processState = new ProcessStateImpl(processMetaData, null,
+				null);
 
 		// Obtain the Work meta-data
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();

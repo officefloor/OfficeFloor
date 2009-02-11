@@ -50,7 +50,7 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 
 		// Provide handler for input managed object
 		ManagedObjectHandlerBuilder<Handlers> moHandlersBuilder = moBuilder
-				.getManagedObjectHandlerBuilder(Handlers.class);
+				.getManagedObjectHandlerBuilder();
 		HandlerBuilder handlerBuilder = moHandlersBuilder
 				.registerHandler(Handlers.INPUT);
 		handlerBuilder.setHandlerFactory(new MockHandler());
@@ -60,9 +60,8 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 		InputTask inputTask = new InputTask();
 		WorkBuilder<InputTask> workBuilder = this.constructWork("WORK",
 				inputTask, "TASK");
-		workBuilder.registerProcessManagedObject("W-INPUT", "P-INPUT");
-		this.constructTask("TASK", Object.class, inputTask, "TEAM", "W-INPUT",
-				null);
+		workBuilder.linkManagedObject("W-INPUT", "P-INPUT");
+		this.constructTask("TASK", inputTask, "TEAM", "W-INPUT", null);
 
 		// Register the team
 		this.constructTeam("TEAM", new PassiveTeam());
@@ -77,7 +76,7 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 		};
 
 		// Build and open the Office Floor
-		OfficeFloor officeFloor = this.constructOfficeFloor("OFFICE");
+		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
 		// Input the parameter
@@ -126,11 +125,7 @@ class InputTask extends AbstractMockTask<Object> {
 	 */
 	protected volatile Object object;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.impl.AbstractMockTask#doTask()
-	 */
+	@Override
 	protected Object doTask() throws Exception {
 		// Obtain the parameter
 		this.parameter = this.getTaskContext().getParameter();
