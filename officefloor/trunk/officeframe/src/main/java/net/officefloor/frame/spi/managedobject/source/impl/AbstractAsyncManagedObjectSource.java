@@ -43,15 +43,14 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		implements ManagedObjectSource<D, H> {
 
 	/*
-	 * ================================================================
-	 * ManagedObjectSource
-	 * ================================================================
+	 * ================ ManagedObjectSource ===========================
 	 */
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getSpecification()
+	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
+	 * getSpecification()
 	 */
 	@Override
 	public ManagedObjectSourceSpecification getSpecification() {
@@ -116,15 +115,15 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		private final List<ManagedObjectSourceProperty> properties = new LinkedList<ManagedObjectSourceProperty>();
 
 		/*
-		 * =======================================================
-		 * SpecificationContext
-		 * =======================================================
+		 * ========== SpecificationContext ========================
 		 */
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.SpecificationContext#addProperty(java.lang.String)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .SpecificationContext#addProperty(java.lang.String)
 		 */
 		@Override
 		public void addProperty(String name) {
@@ -135,8 +134,9 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.SpecificationContext#addProperty(java.lang.String,
-		 *      java.lang.String)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .SpecificationContext#addProperty(java.lang.String, java.lang.String)
 		 */
 		@Override
 		public void addProperty(String name, String label) {
@@ -147,7 +147,10 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.SpecificationContext#addProperty(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .SpecificationContext#addProperty(net.officefloor
+		 * .frame.spi.managedobject.source.ManagedObjectSourceProperty)
 		 */
 		@Override
 		public void addProperty(ManagedObjectSourceProperty property) {
@@ -155,15 +158,14 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		}
 
 		/*
-		 * =======================================================
-		 * ManagedObjectSourceSpecification
-		 * =======================================================
+		 * ========== ManagedObjectSourceSpecification ===========
 		 */
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification#getProperties()
+		 * @seenet.officefloor.frame.spi.managedobject.source.
+		 * ManagedObjectSourceSpecification#getProperties()
 		 */
 		@Override
 		public ManagedObjectSourceProperty[] getProperties() {
@@ -179,10 +181,13 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init
+	 * (net
+	 * .officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
 	 */
 	@Override
-	public void init(ManagedObjectSourceContext context) throws Exception {
+	public void init(ManagedObjectSourceContext<H> context) throws Exception {
 
 		// Create the meta-data
 		this.metaData = new MetaData(context);
@@ -212,7 +217,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		 * 
 		 * @return {@link ManagedObjectSourceContext}.
 		 */
-		ManagedObjectSourceContext getManagedObjectSourceContext();
+		ManagedObjectSourceContext<H> getManagedObjectSourceContext();
 
 		/**
 		 * Specifies the type of the object returned from the
@@ -311,7 +316,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/**
 		 * {@link ManagedObjectSourceContext}.
 		 */
-		private final ManagedObjectSourceContext context;
+		private final ManagedObjectSourceContext<H> context;
 
 		/**
 		 * Object {@link Class}.
@@ -356,30 +361,32 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		 * @param context
 		 *            {@link ManagedObjectSourceContext}.
 		 */
-		public MetaData(ManagedObjectSourceContext context) {
+		public MetaData(ManagedObjectSourceContext<H> context) {
 			this.context = context;
 		}
 
 		/*
-		 * =======================================================
-		 * MetaDataContext
-		 * =======================================================
+		 * ============ MetaDataContext ==========================
 		 */
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#getManagedObjectSourceContext()
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .MetaDataContext#getManagedObjectSourceContext()
 		 */
 		@Override
-		public ManagedObjectSourceContext getManagedObjectSourceContext() {
+		public ManagedObjectSourceContext<H> getManagedObjectSourceContext() {
 			return this.context;
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#setObjectClass(java.lang.Class)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .MetaDataContext#setObjectClass(java.lang.Class)
 		 */
 		@Override
 		public void setObjectClass(Class<?> objectClass) {
@@ -389,7 +396,9 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#setManagedObjectClass(java.lang.Class)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .MetaDataContext#setManagedObjectClass(java.lang.Class)
 		 */
 		@Override
 		public void setManagedObjectClass(
@@ -400,7 +409,9 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#getDependencyLoader(java.lang.Class)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .MetaDataContext#getDependencyLoader(java.lang.Class)
 		 */
 		@Override
 		public DependencyLoader<D> getDependencyLoader(Class<D> keys) {
@@ -416,7 +427,9 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#getHandlerLoader(java.lang.Class)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .MetaDataContext#getHandlerLoader(java.lang.Class)
 		 */
 		@Override
 		@SuppressWarnings("unchecked")
@@ -434,8 +447,12 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.MetaDataContext#addManagedObjectExtensionInterface(java.lang.Class,
-		 *      net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .MetaDataContext#addManagedObjectExtensionInterface(java.lang.Class,
+		 * net
+		 * .officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory
+		 * )
 		 */
 		@Override
 		public <I> void addManagedObjectExtensionInterface(
@@ -455,8 +472,9 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.DependencyLoader#mapDependencyType(java.lang.Enum,
-		 *      java.lang.Class)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .DependencyLoader#mapDependencyType(java.lang.Enum, java.lang.Class)
 		 */
 		@Override
 		public void mapDependencyType(D key, Class<?> type) {
@@ -472,8 +490,9 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource.HandlerLoader#mapHandlerType(java.lang.Enum,
-		 *      java.lang.Class)
+		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
+		 * AbstractManagedObjectSource
+		 * .HandlerLoader#mapHandlerType(java.lang.Enum, java.lang.Class)
 		 */
 		@Override
 		@SuppressWarnings("unchecked")
@@ -490,7 +509,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getObjectClass()
+		 * @seenet.officefloor.frame.spi.managedobject.source.
+		 * ManagedObjectSourceMetaData#getObjectClass()
 		 */
 		@Override
 		public Class<?> getObjectClass() {
@@ -500,7 +520,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
+		 * @seenet.officefloor.frame.spi.managedobject.source.
+		 * ManagedObjectSourceMetaData#getManagedObjectClass()
 		 */
 		@Override
 		public Class<? extends ManagedObject> getManagedObjectClass() {
@@ -510,7 +531,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyKeys()
+		 * @seenet.officefloor.frame.spi.managedobject.source.
+		 * ManagedObjectSourceMetaData#getDependencyKeys()
 		 */
 		@Override
 		public Class<D> getDependencyKeys() {
@@ -520,7 +542,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyMetaData(java.lang.Enum)
+		 * @seenet.officefloor.frame.spi.managedobject.source.
+		 * ManagedObjectSourceMetaData#getDependencyMetaData(java.lang.Enum)
 		 */
 		@Override
 		public ManagedObjectDependencyMetaData getDependencyMetaData(D key) {
@@ -531,7 +554,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerKeys()
+		 * @seenet.officefloor.frame.spi.managedobject.source.
+		 * ManagedObjectSourceMetaData#getHandlerKeys()
 		 */
 		@Override
 		public Class<H> getHandlerKeys() {
@@ -541,7 +565,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(java.lang.Enum)
+		 * @seenet.officefloor.frame.spi.managedobject.source.
+		 * ManagedObjectSourceMetaData#getHandlerType(java.lang.Enum)
 		 */
 		@Override
 		@SuppressWarnings("unchecked")
@@ -552,7 +577,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
+		 * @seenet.officefloor.frame.spi.managedobject.source.
+		 * ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
 		 */
 		@Override
 		public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
@@ -565,7 +591,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
+	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
+	 * getMetaData()
 	 */
 	@Override
 	public ManagedObjectSourceMetaData<D, H> getMetaData() {
@@ -575,7 +602,10 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start
+	 * (net
+	 * .officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
 	@Override
 	public void start(final ManagedObjectExecuteContext<H> context)
@@ -616,7 +646,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 
 	/**
 	 * Context for
-	 * {@link AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)}.
+	 * {@link AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)}
+	 * .
 	 */
 	public static interface StartContext<H extends Enum<H>> {
 
@@ -625,7 +656,8 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		 * 
 		 * @param handlerKeys
 		 *            Keys for the {@link Handler} instances that <b>MUST</b>
-		 *            match {@link ManagedObjectSourceMetaData#getHandlerKeys()}.
+		 *            match {@link ManagedObjectSourceMetaData#getHandlerKeys()}
+		 *            .
 		 * @return {@link ManagedObjectExecuteContext}.
 		 */
 		ManagedObjectExecuteContext<H> getContext(Class<H> handlerKeys);

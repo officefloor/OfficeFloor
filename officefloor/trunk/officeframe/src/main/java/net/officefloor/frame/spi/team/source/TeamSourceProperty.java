@@ -14,31 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.spi.managedobject.source;
-
-import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+package net.officefloor.frame.spi.team.source;
 
 /**
- * Builds the {@link Work} necessary for a {@link ManagedObjectSource}.
+ * Individual property of the {@link TeamSourceSpecification}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectWorkBuilder<W extends Work> {
+public interface TeamSourceProperty {
 
 	/**
-	 * Creates the {@link ManagedObjectTaskBuilder} to build a {@link Task} for
-	 * this {@link Work}.
+	 * Obtains name of property.
 	 * 
-	 * @param taskName
-	 *            Name of task local to this {@link Work}.
-	 * @param taskFactory
-	 *            {@link TaskFactory} to create the {@link Task}.
-	 * @return Specific {@link ManagedObjectTaskBuilder}.
+	 * @return Name of property.
 	 */
-	<P extends Object, F extends Enum<F>> ManagedObjectTaskBuilder<F> addTask(
-			String taskName, TaskFactory<P, W, None, F> taskFactory);
+	String getName();
+
+	/**
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
+	 * 
+	 * @return Display name of property.
+	 */
+	String getLabel();
 
 }

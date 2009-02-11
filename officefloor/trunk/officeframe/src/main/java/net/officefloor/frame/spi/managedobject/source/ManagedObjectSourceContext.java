@@ -18,11 +18,9 @@ package net.officefloor.frame.spi.managedobject.source;
 
 import java.util.Properties;
 
-import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -34,7 +32,7 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
  * 
  * @author Daniel
  */
-public interface ManagedObjectSourceContext {
+public interface ManagedObjectSourceContext<H extends Enum<H>> {
 
 	/**
 	 * Obtains a required property value.
@@ -83,16 +81,9 @@ public interface ManagedObjectSourceContext {
 	/**
 	 * Obtains the {@link ManagedObjectHandlerBuilder}.
 	 * 
-	 * @param handlerKeys
-	 *            {@link Enum} providing the keys for each {@link Handler}.
-	 *            This <b>MUST</b> be the same {@link Enum} returned from
-	 *            {@link ManagedObjectSourceMetaData#getHandlerKeys()}.
 	 * @return {@link ManagedObjectHandlerBuilder}.
-	 * @throws BuildException
-	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
 	 */
-	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getHandlerBuilder(
-			Class<H> handlerKeys) throws BuildException;
+	ManagedObjectHandlerBuilder<H> getHandlerBuilder();
 
 	/**
 	 * <p>
@@ -104,15 +95,12 @@ public interface ManagedObjectSourceContext {
 	 * The initial {@link Task} will be used as the recycle starting point for
 	 * this {@link ManagedObject}.
 	 * 
-	 * @param typeOfWork
-	 *            {@link Class} of the {@link Work}.
+	 * @param workFactory
+	 *            {@link WorkFactory} to create the recycle {@link Work}.
 	 * @return {@link WorkBuilder} to recycle this {@link ManagedObject}.
-	 * @throws BuildException
-	 *             If fails to obtain the recycle
-	 *             {@link ManagedObjectWorkBuilder}.
 	 */
 	<W extends Work> ManagedObjectWorkBuilder<W> getRecycleWork(
-			Class<W> typeOfWork) throws BuildException;
+			WorkFactory<W> workFactory);
 
 	/**
 	 * Adds {@link ManagedObjectWorkBuilder} for {@link Work} of the
@@ -120,16 +108,12 @@ public interface ManagedObjectSourceContext {
 	 * 
 	 * @param workName
 	 *            Name of the {@link Work}.
-	 * @param typeOfWork
-	 *            Type of the {@link Work}.
-	 * @param factory
-	 *            {@link WorkFactory}.
+	 * @param workFactory
+	 *            {@link WorkFactory} to create the {@link Work}.
 	 * @return {@link ManagedObjectWorkBuilder}.
-	 * @throws BuildException
-	 *             If fails to add the {@link Work}.
 	 */
 	<W extends Work> ManagedObjectWorkBuilder<W> addWork(String workName,
-			Class<W> typeOfWork) throws BuildException;
+			WorkFactory<W> workFactory);
 
 	/**
 	 * <p>
@@ -141,9 +125,7 @@ public interface ManagedObjectSourceContext {
 	 *            Name of {@link Work} containing the {@link Task}.
 	 * @param taskName
 	 *            Name of {@link Task} on the {@link Work}.
-	 * @throws BuildException
-	 *             If fails to register startup {@link Task}.
 	 */
-	void addStartupTask(String workName, String taskName) throws BuildException;
+	void addStartupTask(String workName, String taskName);
 
 }

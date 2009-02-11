@@ -14,31 +14,43 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.spi.managedobject.source;
+package net.officefloor.frame.spi.team.source;
 
-import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Builds the {@link Work} necessary for a {@link ManagedObjectSource}.
+ * Source to obtain {@link Team} instances.
  * 
  * @author Daniel
  */
-public interface ManagedObjectWorkBuilder<W extends Work> {
+public interface TeamSource {
 
 	/**
-	 * Creates the {@link ManagedObjectTaskBuilder} to build a {@link Task} for
-	 * this {@link Work}.
+	 * <p>
+	 * Obtains the specification for this.
+	 * <p>
+	 * This will be called before any other methods, therefore this method must
+	 * be able to return the specification immediately after a default
+	 * constructor instantiation.
 	 * 
-	 * @param taskName
-	 *            Name of task local to this {@link Work}.
-	 * @param taskFactory
-	 *            {@link TaskFactory} to create the {@link Task}.
-	 * @return Specific {@link ManagedObjectTaskBuilder}.
+	 * @return Specification of this.
 	 */
-	<P extends Object, F extends Enum<F>> ManagedObjectTaskBuilder<F> addTask(
-			String taskName, TaskFactory<P, W, None, F> taskFactory);
+	TeamSourceSpecification getSpecification();
 
+	/**
+	 * Initialises and configures the {@link TeamSource}.
+	 * 
+	 * @param context
+	 *            {@link TeamSourceContext}.
+	 * @throws Exception
+	 *             If fails to configure the {@link TeamSource}.
+	 */
+	void init(TeamSourceContext context) throws Exception;
+
+	/**
+	 * Creates the {@link Team}.
+	 * 
+	 * @return {@link Team}.
+	 */
+	Team createTeam();
 }
