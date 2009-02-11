@@ -16,8 +16,10 @@
  */
 package net.officefloor.frame.api.execute;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Handler for a {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Handler for a {@link ManagedObject}.
  * 
  * @author Daniel
  */

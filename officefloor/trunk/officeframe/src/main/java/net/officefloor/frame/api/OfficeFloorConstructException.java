@@ -1,0 +1,148 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.frame.api;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.manage.OfficeFloor;
+
+/**
+ * Indicates failure to construct an {@link OfficeFloor}.
+ * 
+ * @author Daniel
+ */
+public class OfficeFloorConstructException extends Exception {
+
+	/**
+	 * Initiate with reason.
+	 * 
+	 * @param reason
+	 *            Reason.
+	 */
+	public OfficeFloorConstructException(String reason) {
+		super(reason);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param reason
+	 *            Reason.
+	 * @param cause
+	 *            Cause.
+	 */
+	public OfficeFloorConstructException(String reason, Throwable cause) {
+		super(reason, cause);
+	}
+
+	/**
+	 * <p>
+	 * Provides the necessary functionality to propagate the
+	 * {@link OfficeFloorConstructException} on the first issue in constructing
+	 * the {@link OfficeFloor}.
+	 * <p>
+	 * Note that this should only be called by the {@link OfficeFrame}.
+	 * 
+	 * @param officeFloorBuilder
+	 *            {@link OfficeFloorBuilder}.
+	 * @return {@link OfficeFloor}.
+	 * @throws OfficeFloorConstructException
+	 *             {@link OfficeFloorConstructException} if failure to construct
+	 *             {@link OfficeFloor}.
+	 * 
+	 * @see OfficeFrame
+	 */
+	static final OfficeFloor registerOfficeFloor(
+			OfficeFloorBuilder officeFloorBuilder)
+			throws OfficeFloorConstructException {
+		try {
+			// Attempt to register and return the Office Floor
+			return OfficeFrame.registerOfficeFloor(officeFloorBuilder,
+					new FailOnFirstIssue());
+
+		} catch (ConstructError issue) {
+			// Propagate the issue
+			throw (OfficeFloorConstructException) issue.getCause();
+		}
+	}
+
+	/**
+	 * {@link OfficeFloorIssues} that fails on the first issue.
+	 */
+	private static class FailOnFirstIssue implements OfficeFloorIssues {
+
+		@Override
+		public void addIssue(AssetType assetType, String assetName,
+				String issueDescription) {
+			// Indicate construction issue
+			this.indicateIssue(assetType + " " + assetName + ": "
+					+ issueDescription);
+		}
+
+		@Override
+		public void addIssue(AssetType assetType, String assetName,
+				String issueDescription, Throwable cause) {
+
+			// Obtain the stack trace of the cause
+			StringWriter stackTrace = new StringWriter();
+			cause.printStackTrace(new PrintWriter(stackTrace));
+
+			// Indicate construction issue
+			this.addIssue(assetType, assetName, issueDescription
+					+ "\n\nCaused by: " + stackTrace);
+		}
+
+		/**
+		 * Indicates issue in construction.
+		 * 
+		 * @param issueDescription
+		 *            Description of the issue.
+		 * @throws ConstructError
+		 *             Propagate to be caught in register office floor.
+		 */
+		private void indicateIssue(String issueDescription)
+				throws ConstructError {
+
+			// Create the construction exception
+			OfficeFloorConstructException cause = new OfficeFloorConstructException(
+					issueDescription);
+
+			// Propagate to be caught in register office floor
+			throw new ConstructError(cause);
+		}
+
+	}
+
+	/**
+	 * Construct {@link Error} to propagate issue.
+	 */
+	private static class ConstructError extends Error {
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param cause
+		 *            Cause.
+		 */
+		public ConstructError(Throwable cause) {
+			super(cause);
+		}
+	}
+
+}
