@@ -1,0 +1,127 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.frame.impl.construct.officefloor;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
+import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
+import net.officefloor.frame.impl.construct.team.TeamBuilderImpl;
+import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
+import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
+import net.officefloor.frame.internal.configuration.TeamConfiguration;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.source.TeamSource;
+
+/**
+ * Implementation of {@link OfficeFloorBuilder}.
+ * 
+ * @author Daniel
+ */
+public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
+		OfficeFloorConfiguration {
+
+	/**
+	 * Listing of {@link ManagedObjectSourceConfiguration} instances.
+	 */
+	private final List<ManagedObjectSourceConfiguration<?, ?>> mangedObjects = new LinkedList<ManagedObjectSourceConfiguration<?, ?>>();
+
+	/**
+	 * Listing of {@link TeamConfiguration} instances.
+	 */
+	private final List<TeamConfiguration<?>> teams = new LinkedList<TeamConfiguration<?>>();
+
+	/**
+	 * Listing of {@link OfficeConfiguration} instances.
+	 */
+	private final List<OfficeConfiguration> offices = new LinkedList<OfficeConfiguration>();
+
+	/**
+	 * {@link EscalationProcedure}.
+	 */
+	private EscalationProcedure escalationProcedure = null;
+
+	/*
+	 * ================ OfficeFloorBuilder ================================
+	 */
+
+	@Override
+	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> addManagedObject(
+			String managedObjectSourceName, Class<MS> managedObjectSourceClass) {
+		// Create, register and return the builder
+		ManagedObjectBuilderImpl<D, H, MS> builder = new ManagedObjectBuilderImpl<D, H, MS>(
+				managedObjectSourceName, managedObjectSourceClass);
+		this.mangedObjects.add(builder);
+		return builder;
+	}
+
+	@Override
+	public <TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName,
+			Class<TS> teamSourceClass) {
+		// Create, register and return the builder
+		TeamBuilderImpl<TS> builder = new TeamBuilderImpl<TS>(teamName,
+				teamSourceClass);
+		this.teams.add(builder);
+		return builder;
+	}
+
+	@Override
+	public OfficeBuilder addOffice(String officeName) {
+		// Create, register and return the builder
+		OfficeBuilderImpl builder = new OfficeBuilderImpl(officeName);
+		this.offices.add(builder);
+		return builder;
+	}
+
+	@Override
+	public void setEscalationProcedure(EscalationProcedure escalationProcedure) {
+		this.escalationProcedure = escalationProcedure;
+	}
+
+	/*
+	 * ================== OfficeFloorConfiguration ========================
+	 */
+
+	@Override
+	public ManagedObjectSourceConfiguration<?, ?>[] getManagedObjectSourceConfiguration() {
+		return this.mangedObjects
+				.toArray(new ManagedObjectSourceConfiguration[0]);
+	}
+
+	@Override
+	public TeamConfiguration<?>[] getTeamConfiguration() {
+		return this.teams.toArray(new TeamConfiguration[0]);
+	}
+
+	@Override
+	public OfficeConfiguration[] getOfficeConfiguration() {
+		return this.offices.toArray(new OfficeConfiguration[0]);
+	}
+
+	@Override
+	public EscalationProcedure getEscalationProcedure() {
+		return this.escalationProcedure;
+	}
+
+}

@@ -1,0 +1,69 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.frame.impl.construct.task;
+
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
+
+/**
+ * {@link TaskDutyConfiguration} implementation.
+ * 
+ * @author Daniel
+ */
+public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
+		TaskDutyConfiguration<A> {
+
+	/**
+	 * Name of the {@link Administrator} within {@link Work}.
+	 */
+	private final String workAdministratorName;
+
+	/**
+	 * Key identifying the {@link Duty} of the {@link Administrator}.
+	 */
+	private final A dutyKey;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param workAdministratorName
+	 *            Name of the {@link Administrator} within {@link Work}.
+	 * @param dutyKey
+	 *            Key identifying the {@link Duty} of the {@link Administrator}.
+	 */
+	public TaskDutyConfigurationImpl(String workAdministratorName, A dutyKey) {
+		this.workAdministratorName = workAdministratorName;
+		this.dutyKey = dutyKey;
+	}
+
+	/*
+	 * ==================== TaskDutyConfiguration =========================
+	 */
+
+	@Override
+	public A getDuty() {
+		return this.dutyKey;
+	}
+
+	@Override
+	public String getWorkAdministratorName() {
+		return this.workAdministratorName;
+	}
+
+}
