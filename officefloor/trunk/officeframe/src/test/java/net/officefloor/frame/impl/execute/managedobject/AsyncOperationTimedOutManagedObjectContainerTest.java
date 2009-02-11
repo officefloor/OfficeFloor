@@ -18,8 +18,8 @@ package net.officefloor.frame.impl.execute.managedobject;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import net.officefloor.frame.impl.execute.ExecutionError;
-import net.officefloor.frame.impl.execute.ExecutionErrorEnum;
+import net.officefloor.frame.impl.execute.error.ExecutionError;
+import net.officefloor.frame.impl.execute.error.ExecutionErrorEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 
