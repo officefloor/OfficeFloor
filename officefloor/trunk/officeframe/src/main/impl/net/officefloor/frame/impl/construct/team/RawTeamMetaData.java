@@ -14,36 +14,29 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute;
+package net.officefloor.frame.impl.construct.team;
+
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Types of execution errors that may occur.
+ * Raw meta-data for a {@link Team}.
  * 
  * @author Daniel
  */
-public enum ExecutionErrorEnum {
+public interface RawTeamMetaData {
 
 	/**
-	 * Indicates failed to source the {@link ManagedObject} from its
-	 * {@link ManagedObjectSource}.
+	 * Obtains the name of the {@link Team}.
+	 * 
+	 * @return Name of the {@link Team}.
 	 */
-	MANAGED_OBJECT_SOURCING_FAILURE,
+	String getTeamName();
 
 	/**
-	 * Indicates the {@link ManagedObject} was not loaded in attempting to
-	 * access it.
+	 * Obtains the {@link Team}.
+	 * 
+	 * @return {@link Team}.
 	 */
-	MANAGED_OBJECT_NOT_LOADED,
+	Team getTeam();
 
-	/**
-	 * Indicates the {@link ManagedObject} failed to provide the Object it is
-	 * managing.
-	 */
-	MANAGED_OBJECT_FAILED_PROVIDING_OBJECT,
-
-	/**
-	 * Indicates the asynchronous operation by the {@link ManagedObject} has
-	 * timed out.
-	 */
-	MANAGED_OBJECT_ASYNC_OPERATION_TIMED_OUT
 }
