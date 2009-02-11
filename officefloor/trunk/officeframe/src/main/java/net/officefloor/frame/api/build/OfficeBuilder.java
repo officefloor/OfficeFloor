@@ -17,103 +17,144 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Builds a Office.
+ * Builder of an {@link Office}.
  * 
  * @author Daniel
  */
 public interface OfficeBuilder {
 
 	/**
-	 * Registers a {@link Team} which will execute
-	 * {@link net.officefloor.frame.api.execute.Task} instances within this
-	 * {@link net.officefloor.frame.api.manage.Office}.
+	 * Registers a {@link Team} which will execute {@link JobNode} instances
+	 * within this {@link Office}.
 	 * 
-	 * @param teamName
+	 * @param officeTeamName
 	 *            Name of the {@link Team} to be referenced locally by this
-	 *            {@link net.officefloor.frame.api.manage.Office}.
-	 * @param teamId
-	 *            Id of the {@link Team}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
+	 *            {@link Office}.
+	 * @param officeFloorTeamName
+	 *            Name of the {@link Team} within the {@link OfficeFloor}.
 	 */
-	void registerTeam(String teamName, String teamId) throws BuildException;
+	void registerTeam(String officeTeamName, String officeFloorTeamName);
 
 	/**
-	 * Registers the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} within this
-	 * {@link net.officefloor.frame.api.manage.Office}.
+	 * Registers the {@link ManagedObject} within this {@link Office}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            to be referenced locally by this
-	 *            {@link net.officefloor.frame.api.manage.Office}.
-	 * @param managedObjectId
-	 *            Id of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 * @throws BuildException
-	 *             Build failure.
+	 * @param officeManagedObjectName
+	 *            Name of the {@link ManagedObject} to be referenced locally by
+	 *            this {@link Office}.
+	 * @param officeFloorManagedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource} within the
+	 *            {@link OfficeFloor}.
 	 */
-	void registerManagedObject(String managedObjectName, String managedObjectId)
-			throws BuildException;
+	void registerManagedObjectSource(String officeManagedObjectName,
+			String officeFloorManagedObjectSourceName);
 
 	/**
-	 * Adds a {@link net.officefloor.frame.internal.structure.ProcessState}
-	 * bound {@link net.officefloor.frame.spi.managedobject.ManagedObject} to
-	 * this {@link net.officefloor.frame.api.manage.Office}.
+	 * <p>
+	 * Adds a {@link ProcessState} bound {@link ManagedObject} to this
+	 * {@link Office}.
+	 * <p>
+	 * Dependency scope:
+	 * <ol>
+	 * <li>Other {@link ManagedObject} instances added via this method.</li>
+	 * </ol>
 	 * 
-	 * @param linkName
-	 *            Name to reference the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            for linking into {@link Work}.
-	 * @param managedObjectName
-	 *            Name of
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            to be process bound.
+	 * @param processManagedObjectName
+	 *            Name to link the {@link ManagedObject} into {@link Work}.
+	 * @param officeManagedObjectName
+	 *            Name of the {@link ManagedObject} registered within this
+	 *            {@link Office}.
 	 * @return {@link DependencyMappingBuilder} to build any necessary
-	 *         dependencies for the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 * @throws BuildException
-	 *             Build failure.
+	 *         dependencies for the {@link ManagedObject}. See scope above.
 	 */
-	DependencyMappingBuilder addProcessManagedObject(String linkName,
-			String managedObjectName) throws BuildException;
+	DependencyMappingBuilder addProcessManagedObject(
+			String processManagedObjectName, String officeManagedObjectName);
 
 	/**
-	 * Adds a
-	 * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}
-	 * to this {@link OfficeBuilder}.
+	 * <p>
+	 * Adds a {@link ThreadState} bound {@link ManagedObject} to this
+	 * {@link Office}.
+	 * <p>
+	 * Dependency scope:
+	 * <ol>
+	 * <li>Other {@link ManagedObject} instances added via this method.</li>
+	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
+	 * </ol>
 	 * 
-	 * @param id
-	 *            Id to register the
-	 *            {@link net.officefloor.frame.spi.administration.source.AdministratorSource}
-	 *            under.
-	 * @param administratorBuilder
-	 *            Builder of the
-	 *            {@link net.officefloor.frame.spi.administration.source.AdministratorSource}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
+	 * @param threadManagedObjectName
+	 *            Name to link the {@link ManagedObject} into {@link Work}.
+	 * @param officeManagedObjectName
+	 *            Name of the{@link ManagedObject} registered within this
+	 *            {@link Office}.
+	 * @return {@link DependencyMappingBuilder} to build any necessary
+	 *         dependencies for the {@link ManagedObject}. See scope above.
 	 */
-	void addAdministrator(String id,
-			AdministratorBuilder<?> administratorBuilder) throws BuildException;
+	DependencyMappingBuilder addThreadManagedObject(
+			String threadManagedObjectName, String officeManagedObjectName);
 
 	/**
-	 * Adds {@link Work} to be done within this {@link OfficeBuilder}.
+	 * <p>
+	 * Adds a {@link ProcessState} bound {@link AdministratorSource} to this
+	 * {@link OfficeBuilder}.
+	 * <p>
+	 * Dependency scope for administered {@link ManagedObject} instances:
+	 * <ol>
+	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
+	 * </ol>
 	 * 
-	 * @param name
+	 * @param processAdministratorName
+	 *            Name to link the {@link Administrator} into {@link Work}.
+	 * @param adminsistratorSource
+	 *            {@link AdministratorSource} class.
+	 * @return {@link AdministratorBuilder} for the {@link Administrator}.
+	 */
+	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addProcessAdministrator(
+			String processAdministratorName, Class<AS> adminsistratorSource);
+
+	/**
+	 * <p>
+	 * Adds a {@link ThreadState} bound {@link AdministratorSource} to this
+	 * {@link OfficeBuilder}.
+	 * <p>
+	 * Dependency scope for administered {@link ManagedObject} instances:
+	 * <ol>
+	 * <li>{@link ThreadState} bound {@link ManagedObject} instances.</li>
+	 * <li>{@link ProcessState} bound {@link ManagedObject} instances.</li>
+	 * </ol>
+	 * 
+	 * @param threadAdministratorName
+	 *            Name to link the {@link Administrator} into {@link Work}.
+	 * @param adminsistratorSource
+	 *            {@link AdministratorSource} class.
+	 * @return administratorBuilder Builder of the {@link Administrator}.
+	 */
+	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addThreadAdministrator(
+			String threadAdministratorName, Class<AS> adminsistratorSource);
+
+	/**
+	 * Adds {@link Work} to be done within this {@link Office}.
+	 * 
+	 * @param workName
 	 *            Name identifying the {@link Work}.
-	 * @param workBuilder
-	 *            {@link WorkBuilder} of the {@link Work} to be done.
-	 * @throws BuildException
-	 *             Indicate failure in building.
+	 * @param workFactory
+	 *            {@link WorkFactory} to create the {@link Work}.
+	 * @return {@link WorkBuilder} to build the {@link Work}.
 	 */
-	void addWork(String name, WorkBuilder<?> workBuilder) throws BuildException;
+	<W extends Work> WorkBuilder<W> addWork(String workName,
+			WorkFactory<W> workFactory);
 
 	/**
 	 * <p>
@@ -124,32 +165,24 @@ public interface OfficeBuilder {
 	 * 
 	 * @param officeEnhancer
 	 *            {@link OfficeEnhancer}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
 	 */
-	void addOfficeEnhancer(OfficeEnhancer officeEnhancer) throws BuildException;
+	void addOfficeEnhancer(OfficeEnhancer officeEnhancer);
 
 	/**
 	 * Specifies the {@link EscalationHandler} for the {@link Office}.
 	 * 
 	 * @param officeEscalationHandler
 	 *            {@link EscalationHandler} for the {@link Office}.
-	 * @throws BuildException
-	 *             Indicates failure in building.
 	 */
-	void setOfficeEscalationHandler(EscalationHandler officeEscalationHandler)
-			throws BuildException;
+	void setOfficeEscalationHandler(EscalationHandler officeEscalationHandler);
 
 	/**
-	 * Adds a {@link net.officefloor.frame.api.execute.Task} to invoke on start
-	 * up of the {@link net.officefloor.frame.api.manage.Office}.
+	 * Adds a {@link Task} to invoke on start up of the {@link Office}.
 	 * 
 	 * @param workName
-	 *            Name of {@link Work} containing the
-	 *            {@link net.officefloor.frame.api.execute.Task}.
+	 *            Name of {@link Work} containing the {@link Task}.
 	 * @param taskName
-	 *            Name of {@link net.officefloor.frame.api.execute.Task} on the
-	 *            {@link Work}.
+	 *            Name of {@link Task} on the {@link Work}.
 	 */
 	void addStartupTask(String workName, String taskName);
 

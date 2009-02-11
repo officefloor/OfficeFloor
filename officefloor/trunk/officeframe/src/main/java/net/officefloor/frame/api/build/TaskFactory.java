@@ -21,11 +21,11 @@ import net.officefloor.frame.api.execute.Work;
 
 /**
  * <p>
- * Creates the {@link net.officefloor.frame.api.execute.Task} to be done.
+ * Creates the {@link Task} to be done.
  * </p>
  * <p>
  * Clients must provide the implementation of this to
- * {@link net.officefloor.frame.api.build.TaskBuilder#setTaskFactory(TaskFactory)}.
+ * {@link TaskBuilder#setTaskFactory(TaskFactory)}.
  * </p>
  * 
  * @author Daniel

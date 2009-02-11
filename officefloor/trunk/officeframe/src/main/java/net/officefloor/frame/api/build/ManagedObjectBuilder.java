@@ -35,10 +35,8 @@ public interface ManagedObjectBuilder<H extends Enum<H>> {
 	 *            Name of property.
 	 * @param value
 	 *            Value of property.
-	 * @throws BuildException
-	 *             Indicate failure in building.
 	 */
-	void addProperty(String name, String value) throws BuildException;
+	void addProperty(String name, String value);
 
 	/**
 	 * Specifies the {@link ManagedObjectPool} for this {@link ManagedObject}.
@@ -54,31 +52,22 @@ public interface ManagedObjectBuilder<H extends Enum<H>> {
 	 * 
 	 * @param timeout
 	 *            Default timeout.
-	 * @throws BuildException
-	 *             Indicate failure in building.
 	 */
-	void setDefaultTimeout(long timeout) throws BuildException;
+	void setDefaultTimeout(long timeout);
 
 	/**
 	 * Specifies the {@link Office} to manage this {@link ManagedObject}.
 	 * 
 	 * @param officeName
 	 *            Name of the {@link Office}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
 	 */
-	void setManagingOffice(String officeName) throws BuildException;
+	void setManagingOffice(String officeName);
 
 	/**
 	 * Obtains the {@link ManagedObjectHandlerBuilder}.
 	 * 
-	 * @param handlerKeys
-	 *            {@link Enum} specifying the handler keys.
 	 * @return {@link ManagedObjectHandlerBuilder}.
-	 * @throws BuildException
-	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
 	 */
-	ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
-			Class<H> handlerKeys) throws BuildException;
+	ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder();
 
 }

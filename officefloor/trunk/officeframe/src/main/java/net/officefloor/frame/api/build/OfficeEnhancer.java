@@ -41,8 +41,6 @@ public interface OfficeEnhancer {
 	 * 
 	 * @param context
 	 *            {@link OfficeEnhancerContext}.
-	 * @throws BuildException
-	 *             If failure in enhancing.
 	 */
-	void enhanceOffice(OfficeEnhancerContext context) throws BuildException;
+	void enhanceOffice(OfficeEnhancerContext context);
 }

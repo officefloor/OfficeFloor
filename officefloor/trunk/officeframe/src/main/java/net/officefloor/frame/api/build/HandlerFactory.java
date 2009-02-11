@@ -19,8 +19,7 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.execute.Handler;
 
 /**
- * Factory for the creation of a
- * {@link net.officefloor.frame.api.execute.Handler}.
+ * Factory for the creation of a {@link Handler}.
  * 
  * @author Daniel
  */

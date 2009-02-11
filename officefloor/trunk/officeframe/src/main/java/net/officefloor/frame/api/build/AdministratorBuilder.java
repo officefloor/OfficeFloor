@@ -21,6 +21,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -31,65 +32,58 @@ import net.officefloor.frame.spi.team.Team;
 public interface AdministratorBuilder<A extends Enum<A>> {
 
 	/**
-	 * Specifies the scope of the {@link Administrator}. Default scope is
-	 * {@link OfficeScope#WORK}.
-	 * 
-	 * @param scope
-	 *            Scope for the {@link Administrator}.
-	 */
-	void setAdministratorScope(OfficeScope scope);
-
-	/**
 	 * Specifies a property for the {@link AdministratorSource}.
 	 * 
 	 * @param name
 	 *            Name of property.
 	 * @param value
 	 *            Value of property.
-	 * @throws BuildException
-	 *             Indicate failure in building.
 	 */
-	void addProperty(String name, String value) throws BuildException;
+	void addProperty(String name, String value);
 
 	/**
 	 * Name of the {@link Team} linked to the {@link Office} of this
 	 * {@link Administrator} which is responsible for doing to the {@link Duty}
 	 * instances of this {@link Administrator}.
 	 * 
-	 * @param teamName
-	 *            Name of {@link Team} for this {@link Administrator}.
+	 * @param officeTeamName
+	 *            Name of {@link Team} within the {@link Office} for this
+	 *            {@link Administrator}.
 	 */
-	void setTeam(String teamName);
+	void setTeam(String officeTeamName);
 
 	/**
-	 * Creates a {@link DutyBuilder} for a {@link Duty} of the
+	 * Flags for the {@link Administrator} to administer the referenced
+	 * {@link ManagedObject}. This may be called more than once to register more
+	 * than one {@link ManagedObject} to be administered by this
 	 * {@link Administrator}.
 	 * 
-	 * @param <F>
-	 *            {@link Enum} listing {@link Flow} instances to be instigated
-	 *            by the {@link Duty}.
+	 * @param scopeManagedObjectName
+	 *            Name of the {@link ManagedObject} within the scope this
+	 *            {@link Administrator} is being added.
+	 */
+	void administerManagedObject(String scopeManagedObjectName);
+
+	/**
+	 * Adds a {@link Duty} of the {@link Administrator}.
+	 * 
 	 * @param dutyKey
 	 *            Key identifying the {@link Duty}.
 	 * @param flowListingEnum
 	 *            {@link Enum} {@link Class} listing {@link Flow} instances to
 	 *            be instigated by the {@link Duty}.
-	 * @return {@link DutyBuilder} for the specified duty.
-	 * @throws BuildException
-	 *             Build failure.
+	 * @return {@link DutyBuilder} for the specified {@link Duty}.
 	 */
-	<F extends Enum<F>> DutyBuilder<F> registerDutyBuilder(A dutyKey,
-			Class<F> flowListingEnum) throws BuildException;
+	<F extends Enum<F>> DutyBuilder<F> addDuty(A dutyKey,
+			Class<F> flowListingEnum);
 
 	/**
-	 * Creates a {@link DutyBuilder} for a {@link Duty} of the
-	 * {@link Administrator}.
+	 * Adds a {@link Duty} of the {@link Administrator}.
 	 * 
 	 * @param dutyKey
 	 *            Key identifying the {@link Duty}.
-	 * @return {@link DutyBuilder} for the specified duty.
-	 * @throws BuildException
-	 *             Build failure.
+	 * @return {@link DutyBuilder} for the specified {@link Duty}.
 	 */
-	DutyBuilder<Indexed> registerDutyBuilder(A dutyKey) throws BuildException;
+	DutyBuilder<Indexed> addDuty(A dutyKey);
 
 }

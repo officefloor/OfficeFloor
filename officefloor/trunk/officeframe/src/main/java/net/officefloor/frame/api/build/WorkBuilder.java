@@ -19,85 +19,88 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Meta-data of the {@link Work}.
+ * Builder of the {@link Work}.
  * 
  * @author Daniel
  */
 public interface WorkBuilder<W extends Work> {
 
 	/**
-	 * Specifies the {@link WorkFactory}.
-	 * 
-	 * @param factory
-	 *            {@link WorkFactory}.
-	 * @throws BuildException
-	 *             Build failure.
-	 */
-	void setWorkFactory(WorkFactory<W> factory) throws BuildException;
-
-	/**
-	 * Links a {@link ProcessState} bound {@link ManagedObject} to this
-	 * {@link Work}.
+	 * Links a {@link ProcessState} or {@link ThreadState} bound
+	 * {@link ManagedObject} to this {@link Work}.
 	 * 
 	 * @param workManagedObjectName
 	 *            Name of the {@link ManagedObject} to be referenced locally by
 	 *            this {@link Work}.
-	 * @param linkName
-	 *            Link name identifying the {@link ProcessState} bound
+	 * @param threadProcessManagedObjectName
+	 *            {@link ProcessState} or {@link ThreadState} name of the
 	 *            {@link ManagedObject}.
-	 * @throws BuildException
-	 *             Build failure.
 	 */
-	void registerProcessManagedObject(String workManagedObjectName,
-			String linkName) throws BuildException;
+	void linkManagedObject(String workManagedObjectName,
+			String threadProcessManagedObjectName);
 
 	/**
-	 * Registers the translation of the key to the Id of the
-	 * {@link ManagedObject}.
+	 * <p>
+	 * Adds a {@link Work} bound {@link ManagedObject}.
+	 * <p>
+	 * Dependency scope:
+	 * <ol>
+	 * <li>Other {@link ManagedObject} instances added via this method.</li>
+	 * <li>{@link ProcessState} bound {@link ManagedObject} instances linked to
+	 * this {@link Work}.</li>
+	 * </ol>
 	 * 
 	 * @param workManagedObjectName
 	 *            Name of the {@link ManagedObject} to be referenced locally by
 	 *            this {@link Work}.
-	 * @param managedObjectName
+	 * @param officeManagedObjectName
 	 *            Name of the {@link ManagedObject} referenced locally within
 	 *            the {@link Office}.
-	 * @throws BuildException
-	 *             Build failure.
 	 */
 	DependencyMappingBuilder addWorkManagedObject(String workManagedObjectName,
-			String managedObjectName) throws BuildException;
+			String officeManagedObjectName);
 
 	/**
-	 * Registers the {@link Administrator} to administor the resulting
-	 * {@link Work}.
+	 * Links a {@link ProcessState} or {@link ThreadState} bound
+	 * {@link Administrator} to this {@link Work}.
 	 * 
 	 * @param workAdministratorName
 	 *            Name of the {@link Administrator} to be referenced locally by
 	 *            this {@link Work}.
-	 * @param administratorId
-	 *            Id of the {@link AdministratorSource}.
-	 * @throws BuildException
-	 *             Build failure.
+	 * @param threadAdministratorName
+	 *            {@link ProcessState} or {@link ThreadState} name of the
+	 *            {@link Administrator}.
 	 */
-	AdministrationBuilder registerAdministration(String workAdministratorName,
-			String administratorId) throws BuildException;
+	void linkAdministrator(String workAdministratorName,
+			String threadProcessAdministratorName);
+
+	/**
+	 * Adds a {@link Work} bound {@link Administrator}.
+	 * 
+	 * @param workAdministratorName
+	 *            Name of the {@link Administrator} to be referenced locally by
+	 *            this {@link Work}.
+	 * @param adminsistratorSource
+	 *            {@link AdministratorSource} class.
+	 * @return {@link AdministratorBuilder} for the {@link Administrator}.
+	 */
+	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorBuilder<A> addWorkAdministrator(
+			String workAdministratorName, Class<AS> adminsistratorSource);
 
 	/**
 	 * Specifies the initial {@link Task} of the {@link Work}.
 	 * 
 	 * @param initialTask
 	 *            Initial {@link Task}.
-	 * @throws BuildException
-	 *             Build failure.
 	 */
-	void setInitialTask(String initialTaskName) throws BuildException;
+	void setInitialTask(String initialTaskName);
 
 	/**
 	 * Creates the {@link TaskBuilder} to build a {@link Task} for this
@@ -105,30 +108,11 @@ public interface WorkBuilder<W extends Work> {
 	 * 
 	 * @param taskName
 	 *            Name of task local to this {@link Work}.
-	 * @param parameterType
-	 *            Type of parameter to the {@link Task}.
-	 * @param managedObjectListingEnum
-	 *            {@link Enum} providing the listing of {@link ManagedObject}
-	 *            instances.
-	 * @param flowListingEnum
-	 *            {@link Enum} providing the listing of {@link Flow} instances.
-	 * @return Specific {@link TaskBuilder}.
+	 * @param taskFactory
+	 *            {@link TaskFactory} to create the {@link Task}.
+	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	<P extends Object, M extends Enum<M>, F extends Enum<F>> TaskBuilder<P, W, M, F> addTask(
-			String taskName, Class<P> parameterType,
-			Class<M> managedObjectListingEnum, Class<F> flowListingEnum);
-
-	/**
-	 * Creates the {@link TaskBuilder} to build a {@link Task} for this
-	 * {@link Work}.
-	 * 
-	 * @param taskName
-	 *            Name of task local to this {@link Work}.
-	 * @param parameterType
-	 *            Type of parameter to the {@link Task}.
-	 * @return Specific {@link TaskBuilder}.
-	 */
-	<P extends Object> TaskBuilder<P, W, Indexed, Indexed> addTask(
-			String taskName, Class<P> parameterType);
+			String taskName, TaskFactory<P, W, M, F> taskFactory);
 
 }

@@ -40,11 +40,8 @@ public interface OfficeEnhancerContext {
 	 * @param taskName
 	 *            Name of {@link Task}.
 	 * @return {@link FlowNodeBuilder}.
-	 * @throws BuildException
-	 *             If fails to obtain the {@link FlowNodeBuilder}.
 	 */
-	FlowNodeBuilder<?> getFlowNodeBuilder(String workName, String taskName)
-			throws BuildException;
+	FlowNodeBuilder<?> getFlowNodeBuilder(String workName, String taskName);
 
 	/**
 	 * Obtains the {@link FlowNodeBuilder} registered under the input
@@ -59,11 +56,9 @@ public interface OfficeEnhancerContext {
 	 * @param taskName
 	 *            Name of {@link Task}.
 	 * @return {@link FlowNodeBuilder}.
-	 * @throws BuildException
-	 *             If fails to obtain the {@link FlowNodeBuilder}.
 	 */
 	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName,
-			String taskName) throws BuildException;
+			String taskName);
 
 	/**
 	 * <p>
@@ -73,18 +68,16 @@ public interface OfficeEnhancerContext {
 	 * It is anticipated that the {@link ManagedObjectSource} is being managed
 	 * by the {@link Office} that this {@link OfficeEnhancer} was added.
 	 * 
-	 * @param managedObjectId
-	 *            Id of the {@link ManagedObjectSource} registered with the
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource} registered with the
 	 *            {@link OfficeFloorBuilder}.
 	 * @param handlerKeys
 	 *            {@link Enum} specifying the {@link Handler} instances. This
 	 *            MUST match the {@link Enum} from the
 	 *            {@link ManagedObjectSourceMetaData#getHandlerKeys()}.
 	 * @return {@link ManagedObjectHandlerBuilder}.
-	 * @throws BuildException
-	 *             If fails to obtain the {@link ManagedObjectHandlerBuilder}.
 	 */
 	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
-			String managedObjectId, Class<H> handlerKeys) throws BuildException;
+			String managedObjectSourceName, Class<H> handlerKeys);
 
 }
