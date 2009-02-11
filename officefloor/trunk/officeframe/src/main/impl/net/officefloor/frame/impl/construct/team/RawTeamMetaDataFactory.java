@@ -14,40 +14,30 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute;
+package net.officefloor.frame.impl.construct.team;
 
-import net.officefloor.frame.internal.structure.DutyMetaData;
-import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.api.OfficeFloorIssues;
+import net.officefloor.frame.internal.configuration.TeamConfiguration;
+import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
- * Implementation of {@link DutyMetaData}.
+ * Factory for the construction of {@link RawTeamMetaData}.
  * 
  * @author Daniel
  */
-public class DutyMetaDataImpl implements DutyMetaData {
+public interface RawTeamMetaDataFactory {
 
 	/**
-	 * Listing of {@link FlowMetaData}.
-	 */
-	private final FlowMetaData<?>[] flows;
-
-	/**
-	 * Initiate.
+	 * Constructs the {@link RawTeamMetaData}.
 	 * 
-	 * @param flows
-	 *            Listing of {@link FlowMetaData}.
+	 * @param configuration
+	 *            {@link TeamConfiguration}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to
+	 *         construct.
 	 */
-	public DutyMetaDataImpl(FlowMetaData<?>[] flows) {
-		this.flows = flows;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.DutyMetaData#getFlow(int)
-	 */
-	public FlowMetaData<?> getFlow(int flowIndex) {
-		return this.flows[flowIndex];
-	}
+	<TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(
+			TeamConfiguration<TS> configuration, OfficeFloorIssues issues);
 
 }
