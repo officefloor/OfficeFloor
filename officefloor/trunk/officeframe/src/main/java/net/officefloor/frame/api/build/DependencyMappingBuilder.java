@@ -16,31 +16,29 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Provides the mappings of the dependencies of a
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} to the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} providing
- * necessary functionality.
+ * <p>
+ * Provides the mappings of the dependencies of a {@link ManagedObject} to the
+ * {@link ManagedObject} providing necessary functionality.
+ * <p>
+ * This works within the scope of where the {@link ManagedObject} is being
+ * added.
  * 
  * @author Daniel
  */
 public interface DependencyMappingBuilder {
 
 	/**
-	 * Specifies the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} for the
-	 * dependency key.
+	 * Specifies the {@link ManagedObject} for the dependency key.
 	 * 
 	 * @param key
 	 *            Key of the dependency.
-	 * @param managedObjectId
-	 *            Id of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            providing the dependency functionality.
-	 * @throws BuildException
-	 *             Indicate failure in building.
+	 * @param scopeManagedObjectName
+	 *            Name of the {@link ManagedObject} within the scope that this
+	 *            {@link DependencyMappingBuilder} was created.
 	 */
-	<D extends Enum<D>> void registerDependencyMapping(D key, String managedObjectId)
-			throws BuildException;
+	<D extends Enum<D>> void mapDependency(D key, String scopeManagedObjectName);
 
 }

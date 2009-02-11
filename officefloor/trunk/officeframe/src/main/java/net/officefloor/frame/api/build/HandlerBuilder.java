@@ -16,10 +16,13 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
- * Builder to build a {@link net.officefloor.frame.api.execute.Handler}.
+ * Builder to build a {@link Handler}.
  * 
  * @author Daniel
  */
@@ -30,47 +33,33 @@ public interface HandlerBuilder<F extends Enum<F>> {
 	 * 
 	 * @param factory
 	 *            {@link HandlerFactory}.
-	 * @throws BuildException
-	 *             If failure to specify factory.
 	 */
-	void setHandlerFactory(HandlerFactory<F> factory) throws BuildException;
+	void setHandlerFactory(HandlerFactory<F> factory);
 
 	/**
-	 * Links in a {@link net.officefloor.frame.internal.structure.ProcessState}
-	 * by specifying the first {@link net.officefloor.frame.api.execute.Task} of
-	 * the {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * Links in a {@link ProcessState} by specifying the first {@link Task} of
+	 * the {@link ProcessState}.
 	 * 
 	 * @param key
-	 *            Key identifying the
-	 *            {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 *            Key identifying flow being invoked by the {@link Handler}.
 	 * @param workName
-	 *            Name of the {@link Work} that the
-	 *            {@link net.officefloor.frame.api.execute.Task} resides on.
+	 *            Name of the {@link Work} that the {@link Task} resides on.
 	 * @param taskName
-	 *            Name of {@link net.officefloor.frame.api.execute.Task}.
-	 * @throws BuildException
-	 *             If failure to link process.
+	 *            Name of {@link Task}.
 	 */
-	void linkProcess(F key, String workName, String taskName)
-			throws BuildException;
+	void linkProcess(F key, String workName, String taskName);
 
 	/**
-	 * Links in a {@link net.officefloor.frame.internal.structure.ProcessState}
-	 * by specifying the first {@link net.officefloor.frame.api.execute.Task} of
-	 * the {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * Links in a {@link ProcessState} by specifying the first {@link Task} of
+	 * the {@link ProcessState}.
 	 * 
 	 * @param processIndex
-	 *            Index identifying the
-	 *            {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 *            Index identifying the {@link ProcessState}.
 	 * @param workName
-	 *            Name of the {@link Work} that the
-	 *            {@link net.officefloor.frame.api.execute.Task} resides on.
+	 *            Name of the {@link Work} that the {@link Task} resides on.
 	 * @param taskName
-	 *            Name of {@link net.officefloor.frame.api.execute.Task}.
-	 * @throws BuildException
-	 *             If failure to link process.
+	 *            Name of {@link Task}.
 	 */
-	void linkProcess(int processIndex, String workName, String taskName)
-			throws BuildException;
+	void linkProcess(int processIndex, String workName, String taskName);
 
 }

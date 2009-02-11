@@ -16,67 +16,60 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
- * Builds the {@link net.officefloor.frame.api.manage.OfficeFloor}.
+ * Builder of an {@link OfficeFloor}.
  * 
  * @author Daniel
  */
 public interface OfficeFloorBuilder {
 
 	/**
-	 * Adds a
-	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
-	 * to this {@link OfficeFloorBuilder}.
+	 * Adds a {@link ManagedObjectSource} to this {@link OfficeFloorBuilder}.
 	 * 
-	 * @param id
-	 *            Id to register the
-	 *            {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
-	 *            under.
-	 * @param managedObjectBuilder
-	 *            Builder of the
-	 *            {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClass
+	 *            Class of the {@link ManagedObjectSource}.
 	 */
-	void addManagedObject(String id, ManagedObjectBuilder<?> managedObjectBuilder)
-			throws BuildException;
+	<D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> addManagedObject(
+			String managedObjectSourceName, Class<MS> managedObjectSourceClass);
 
 	/**
-	 * Adds a {@link Team} which will execute
-	 * {@link net.officefloor.frame.api.execute.Task} instances within this
-	 * {@link OfficeFloorBuilder}.
+	 * Adds a {@link Team} which will execute {@link JobNode} instances within
+	 * this {@link OfficeFloor}.
 	 * 
-	 * @param id
-	 *            Id to register the {@link Team} under.
-	 * @param team
-	 *            {@link Team} to execute
-	 *            {@link net.officefloor.frame.api.execute.Task} instances.
-	 * @throws BuildException
-	 *             Indicate failure in building.
+	 * @param teamName
+	 *            Name to register the {@link Team} under.
+	 * @param teamSourceClass
+	 *            {@link TeamSource} to source the {@link Team}.
+	 * @return {@link TeamBuilder} to build the {@link Team}.
 	 */
-	void addTeam(String id, Team team) throws BuildException;
+	<TS extends TeamSource> TeamBuilder<TS> addTeam(String teamName,
+			Class<TS> teamSourceClass);
 
 	/**
-	 * Creates a new {@link OfficeBuilder}.
+	 * Adds an {@link Office} on the {@link OfficeFloor}.
 	 * 
-	 * @return New {@link OfficeBuilder}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @return {@link OfficeBuilder} to build the {@link Office}.
 	 */
-	void addOffice(String id, OfficeBuilder officeBuilder)
-			throws BuildException;
+	OfficeBuilder addOffice(String officeName);
 
 	/**
-	 * Specifies the {@link EscalationProcedure} for issues of the offices.
+	 * Specifies the {@link EscalationProcedure} for issues escalating out of
+	 * the {@link Office} instances.
 	 * 
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure}.
-	 * @throws BuildException
-	 *             Indicate failure in building.
 	 */
-	void setEscalationProcedure(EscalationProcedure escalationProcedure)
-			throws BuildException;
+	void setEscalationProcedure(EscalationProcedure escalationProcedure);
 }

@@ -35,13 +35,13 @@ import net.officefloor.frame.spi.team.Team;
 public interface FlowNodeBuilder<F extends Enum<F>> {
 
 	/**
-	 * Specifies the {@link Team} that will carry out this node.
+	 * Specifies the {@link Team} by its {@link Office} registered name that
+	 * that is responsible for this node.
 	 * 
-	 * @param teamName
-	 *            Name of the {@link Team} local to the {@link Office} that will
-	 *            execute this node.
+	 * @param officeTeamName
+	 *            Name of the {@link Team} within the {@link Office}.
 	 */
-	void setTeam(String teamName);
+	void setTeam(String officeTeamName);
 
 	/**
 	 * Specifies the next {@link Task} in the {@link Flow} ({@link Task} will
@@ -74,11 +74,8 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            {@link Task}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
-	 * @throws BuildException
-	 *             If fails to link in {@link Flow}.
 	 */
-	void linkFlow(F key, String taskName, FlowInstigationStrategyEnum strategy)
-			throws BuildException;
+	void linkFlow(F key, String taskName, FlowInstigationStrategyEnum strategy);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the
@@ -91,11 +88,9 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            {@link Task}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
-	 * @throws BuildException
-	 *             If fails to link in {@link Flow}.
 	 */
 	void linkFlow(int flowIndex, String taskName,
-			FlowInstigationStrategyEnum strategy) throws BuildException;
+			FlowInstigationStrategyEnum strategy);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the
@@ -111,11 +106,9 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            as this {@link Task}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
-	 * @throws BuildException
-	 *             If fails to link in {@link Flow}.
 	 */
 	void linkFlow(F key, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy) throws BuildException;
+			FlowInstigationStrategyEnum strategy);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the
@@ -131,11 +124,9 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            as this {@link Task}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
-	 * @throws BuildException
-	 *             If fails to link in {@link Flow}.
 	 */
 	void linkFlow(int flowIndex, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy) throws BuildException;
+			FlowInstigationStrategyEnum strategy);
 
 	/**
 	 * <p>

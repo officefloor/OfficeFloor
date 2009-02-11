@@ -16,59 +16,46 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.administration.Duty;
 
 /**
  * <p>
- * Builder to build a {@link net.officefloor.frame.spi.administration.Duty}.
+ * Builder to build a {@link Duty}.
  * <p>
- * All linked {@link net.officefloor.frame.internal.structure.Flow} instances
- * will instigated in parallel.
+ * All linked {@link Flow} instances will be instigated in parallel.
  * 
  * @author Daniel
  */
 public interface DutyBuilder<F extends Enum<F>> {
 
 	/**
-	 * Links in a {@link net.officefloor.frame.internal.structure.Flow} by
-	 * specifying the first {@link net.officefloor.frame.api.execute.Task} of
-	 * the {@link net.officefloor.frame.internal.structure.Flow}.
+	 * Links in a {@link Flow} by specifying the first {@link Task} of the
+	 * {@link Flow}.
 	 * 
-	 * @param F
-	 *            {@link Enum} type for the listing of
-	 *            {@link net.officefloor.frame.internal.structure.Flow}
-	 *            instances to link to this
-	 *            {@link net.officefloor.frame.api.execute.Task}.
 	 * @param key
-	 *            Key identifying the
-	 *            {@link net.officefloor.frame.internal.structure.Flow}.
+	 *            Key identifying the {@link Flow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first
-	 *            {@link net.officefloor.frame.api.execute.Task} of the
-	 *            {@link net.officefloor.frame.internal.structure.Flow} resides
-	 *            on.
+	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link net.officefloor.frame.api.execute.Task} that
-	 *            resides on the {@link Work}.
+	 *            Name of {@link Task} that resides on the {@link Work}.
 	 */
 	void linkFlow(F key, String workName, String taskName);
 
 	/**
-	 * Links in a {@link net.officefloor.frame.internal.structure.Flow} by
-	 * specifying the first {@link net.officefloor.frame.api.execute.Task} of
-	 * the {@link net.officefloor.frame.internal.structure.Flow}.
+	 * Links in a {@link Flow} by specifying the first {@link Task} of the
+	 * {@link Flow}.
 	 * 
 	 * @param flowIndex
-	 *            Index identifying the
-	 *            {@link net.officefloor.frame.internal.structure.Flow}.
+	 *            Index identifying the {@link Flow}.
 	 * @param workName
-	 *            Name of the {@link Work} that the first
-	 *            {@link net.officefloor.frame.api.execute.Task} of the
-	 *            {@link net.officefloor.frame.internal.structure.Flow} resides
-	 *            on.
+	 *            Name of the {@link Work} that the first {@link Task} of the
+	 *            {@link Flow} resides on.
 	 * @param taskName
-	 *            Name of {@link net.officefloor.frame.api.execute.Task} that
-	 *            resides on the {@link Work}.
+	 *            Name of {@link Task} that resides on the {@link Work}.
 	 */
 	void linkFlow(int flowIndex, String workName, String taskName);
 

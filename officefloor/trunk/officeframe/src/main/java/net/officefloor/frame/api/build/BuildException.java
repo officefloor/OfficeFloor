@@ -18,15 +18,18 @@ package net.officefloor.frame.api.build;
 
 /**
  * Indicates a build failure.
- *
+ * 
  * @author Daniel
  */
+// Should not require build exception. Configure anyhow and report issues.
+@Deprecated
 public class BuildException extends Exception {
 
 	/**
 	 * Initiate with reason for build failure.
 	 * 
-	 * @param reason Reason for build failure
+	 * @param reason
+	 *            Reason for build failure
 	 */
 	public BuildException(String reason) {
 		super(reason);

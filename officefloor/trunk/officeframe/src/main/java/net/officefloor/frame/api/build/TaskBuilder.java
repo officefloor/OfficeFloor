@@ -23,20 +23,12 @@ import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Meta-data of the {@link Task}.
+ * Builder of the {@link Task}.
  * 
  * @author Daniel
  */
 public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>>
 		extends FlowNodeBuilder<F> {
-
-	/**
-	 * Specifies the {@link TaskFactory}.
-	 * 
-	 * @param factory
-	 *            {@link TaskFactory}.
-	 */
-	void setTaskFactory(TaskFactory<P, W, M, F> factory);
 
 	/**
 	 * Links in a {@link ManagedObject} to this {@link Task}.
@@ -45,11 +37,8 @@ public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>
 	 *            Key identifying the {@link ManagedObject}.
 	 * @param workManagedObjectName
 	 *            Name of the {@link ManagedObject} local to this {@link Work}.
-	 * @throws BuildException
-	 *             If fails to link {@link ManagedObject}.
 	 */
-	void linkManagedObject(M key, String workManagedObjectName)
-			throws BuildException;
+	void linkManagedObject(M key, String workManagedObjectName);
 
 	/**
 	 * Links in a {@link ManagedObject} to this {@link Task}.
@@ -58,11 +47,8 @@ public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>
 	 *            Index of the {@link ManagedObject}.
 	 * @param workManagedObjectName
 	 *            Name of the {@link ManagedObject} local to this {@link Work}.
-	 * @throws BuildException
-	 *             If fails to link {@link ManagedObject}.
 	 */
-	void linkManagedObject(int managedObjectIndex, String workManagedObjectName)
-			throws BuildException;
+	void linkManagedObject(int managedObjectIndex, String workManagedObjectName);
 
 	/**
 	 * Links in a {@link Duty} to be executed before the {@link Task}.

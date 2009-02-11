@@ -41,7 +41,7 @@ public interface ManagedObjectHandlerBuilder<H extends Enum<H>> {
 	 *             Indicate failure in building.
 	 */
 	<F extends Enum<F>> HandlerBuilder<F> registerHandler(H handlerKey,
-			Class<F> processListingEnum) throws BuildException;
+			Class<F> processListingEnum);
 
 	/**
 	 * Obtains the {@link HandlerBuilder} to register a {@link Handler} for the
@@ -52,6 +52,6 @@ public interface ManagedObjectHandlerBuilder<H extends Enum<H>> {
 	 * @throws BuildException
 	 *             Indicate failure in building.
 	 */
-	HandlerBuilder<Indexed> registerHandler(H handlerKey) throws BuildException;
+	HandlerBuilder<Indexed> registerHandler(H handlerKey);
 
 }

@@ -16,22 +16,24 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.TeamSource;
+
 /**
- * Scopes for a {@link net.officefloor.frame.spi.managedobject.ManagedObject} in
- * relation to the {@link net.officefloor.frame.api.execute.Work}.
+ * Builder of a {@link Team}.
  * 
  * @author Daniel
  */
-public enum OfficeScope {
+public interface TeamBuilder<TS extends TeamSource> {
 
 	/**
-	 * Bound only to the {@link net.officefloor.frame.api.execute.Work}.
+	 * Specifies a property for the {@link TeamSource}.
+	 * 
+	 * @param name
+	 *            Name of property.
+	 * @param value
+	 *            Value of property.
 	 */
-	WORK,
+	void addProperty(String name, String value);
 
-	/**
-	 * Bound to the process and reused amongst the
-	 * {@link net.officefloor.frame.api.execute.Work} instances of the process.
-	 */
-	PROCESS
 }
