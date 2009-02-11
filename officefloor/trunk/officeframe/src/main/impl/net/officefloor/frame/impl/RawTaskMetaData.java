@@ -19,7 +19,7 @@ package net.officefloor.frame.impl;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.officefloor.frame.impl.execute.TaskMetaDataImpl;
+import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;

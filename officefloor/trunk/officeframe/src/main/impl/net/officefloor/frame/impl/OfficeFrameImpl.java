@@ -17,27 +17,29 @@
 package net.officefloor.frame.impl;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
+import net.officefloor.frame.api.OfficeFloorIssues;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.build.issue.OfficeIssuesListener;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.BuilderFactoryImpl;
-import net.officefloor.frame.impl.execute.EscalationProcedureImpl;
-import net.officefloor.frame.internal.configuration.ConfigurationException;
+import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
+import net.officefloor.frame.impl.execute.office.OfficeImpl;
+import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
+import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -65,10 +67,15 @@ public class OfficeFrameImpl extends OfficeFrame {
 	}
 
 	/*
+	 * ======================== OfficeFrame ==================================
+	 */
+
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see net.officefloor.frame.api.construct.OfficeFloor#getMetaDataFactory()
 	 */
+	@Override
 	public BuilderFactory getBuilderFactory() {
 		return this.metaDataFactory;
 	}
@@ -76,26 +83,38 @@ public class OfficeFrameImpl extends OfficeFrame {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.api.OfficeFrame#registerOfficeFloor(java.lang.String,
-	 *      net.officefloor.frame.api.build.OfficeFloorBuilder,
-	 *      net.officefloor.frame.api.build.issue.OfficeIssuesListener)
+	 * @see
+	 * net.officefloor.frame.api.OfficeFrame#registerOfficeFloor(java.lang.String
+	 * , net.officefloor.frame.api.build.OfficeFloorBuilder,
+	 * net.officefloor.frame.api.OfficeFloorIssues)
 	 */
-	protected OfficeFloor registerOfficeFloor(String name,
-			OfficeFloorBuilder officeFloorBuilder,
-			OfficeIssuesListener issuesListener) throws Exception {
+	@Override
+	public synchronized OfficeFloor registerOfficeFloor(String officeFloorName,
+			OfficeFloorBuilder officeFloorBuilder, OfficeFloorIssues issues) {
 
 		// Check if Office Floor already registered
-		if (this.officeFloors.get(name) != null) {
+		if (this.officeFloors.get(officeFloorName) != null) {
 			throw new IllegalStateException(
-					"Office Floor already registered under name '" + name + "'");
+					"Office Floor already registered under name '"
+							+ officeFloorName + "'");
 		}
 
-		// Create and register the office floor
-		OfficeFloor officeFloor = this.createOfficeFloor(officeFloorBuilder);
-		this.officeFloors.put(name, officeFloor);
+		try {
+			// Create and register the office floor
+			OfficeFloor officeFloor = this
+					.createOfficeFloor(officeFloorBuilder);
+			this.officeFloors.put(officeFloorName, officeFloor);
 
-		// Return the Office Floor
-		return officeFloor;
+			// Return the Office Floor
+			return officeFloor;
+
+		} catch (Exception ex) {
+			// Failed construction
+			// TODO remove need for this catch as reported via issues
+			issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName, ex
+					.getMessage());
+			return null;
+		}
 	}
 
 	/**
@@ -122,7 +141,9 @@ public class OfficeFrameImpl extends OfficeFrame {
 						rawAssetRegistry, this);
 
 		// Obtain the registry of teams
-		Map<String, Team> teamRegistry = officeFloorConfig.getTeamRegistry();
+		Map<String, Team> teamRegistry = null;
+		System.err.println("TeamRegistration now configuration listing");
+		// officeFloorConfig.getTeamRegistry();
 
 		// Obtain the office floor escalation procedure
 		EscalationProcedure officeFloorEscalationProcedure = officeFloorConfig
@@ -160,14 +181,28 @@ public class OfficeFrameImpl extends OfficeFrame {
 		// Link the Managed Objects with Tasks
 		rawMosRegistry.loadRemainingManagedObjectState(rawOffices);
 
-		// Create the set of teams
-		Set<Team> teams = new HashSet<Team>();
-		for (Team team : teamRegistry.values()) {
-			teams.add(team);
+		// Create the listing of office meta-data
+		OfficeMetaData[] officeMetaData = new OfficeMetaData[offices.size()];
+		int officeIndex = 0;
+		for (String officeName : offices.keySet()) {
+			OfficeImpl office = offices.get(officeName);
+			officeMetaData[officeIndex++] = new OfficeMetaDataImpl(officeName,
+					office);
 		}
 
+		// Create the listing of teams
+		Team[] teams = new Team[teamRegistry.size()];
+		int teamIndex = 0;
+		for (Team team : teamRegistry.values()) {
+			teams[teamIndex++] = team;
+		}
+
+		// Create the office floor meta-data
+		OfficeFloorMetaData officeFloorMetaData = new OfficeFloorMetaDataImpl(
+				teams, officeMetaData);
+
 		// Return the Office Floor
-		return new OfficeFloorImpl(teams, offices);
+		return officeFloorMetaData.createOfficeFloor();
 	}
 
 	/**
@@ -202,72 +237,62 @@ public class OfficeFrameImpl extends OfficeFrame {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.build.FlowNodesEnhancerContext#getFlowNodeBuilder(java.lang.String,
-		 *      java.lang.String)
+		 * @seenet.officefloor.frame.api.build.FlowNodesEnhancerContext#
+		 * getFlowNodeBuilder(java.lang.String, java.lang.String)
 		 */
 		@Override
 		public FlowNodeBuilder<?> getFlowNodeBuilder(String workName,
-				String taskName) throws BuildException {
+				String taskName) {
 			return this.getFlowNodeBuilder(null, workName, taskName);
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.build.FlowNodesEnhancerContext#getFlowNodeBuilder(java.lang.String,
-		 *      java.lang.String, java.lang.String)
+		 * @seenet.officefloor.frame.api.build.FlowNodesEnhancerContext#
+		 * getFlowNodeBuilder(java.lang.String, java.lang.String,
+		 * java.lang.String)
 		 */
 		@Override
 		public FlowNodeBuilder<?> getFlowNodeBuilder(String namespace,
-				String workName, String taskName) throws BuildException {
-			try {
-				// Obtain the flow node builder
-				return this.officeConfig.getFlowNodeBuilder(namespace,
-						workName, taskName);
-			} catch (ConfigurationException ex) {
-				// Propagate
-				throw new BuildException(ex.getMessage());
-			}
+				String workName, String taskName) {
+			return this.officeConfig.getFlowNodeBuilder(namespace, workName,
+					taskName);
 		}
 
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see net.officefloor.frame.api.build.OfficeEnhancerContext#getManagedObjectHandlerBuilder(java.lang.String,
-		 *      java.lang.Class)
+		 * @seenet.officefloor.frame.api.build.OfficeEnhancerContext#
+		 * getManagedObjectHandlerBuilder(java.lang.String, java.lang.Class)
 		 */
 		@Override
 		@SuppressWarnings("unchecked")
 		public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
-				String managedObjectId, Class<H> handlerKeys)
-				throws BuildException {
-			try {
+				String managedObjectId, Class<H> handlerKeys) {
 
-				// Obtain the managed object source
-				ManagedObjectSourceConfiguration<H, ?> mosConfig = null;
-				for (ManagedObjectSourceConfiguration<?, ?> mos : this.officeFloorConfig
-						.getManagedObjectSourceConfiguration()) {
-					if (managedObjectId.equals(mos.getManagedObjectName())) {
-						mosConfig = (ManagedObjectSourceConfiguration<H, ?>) mos;
-					}
+			// Obtain the managed object source
+			ManagedObjectSourceConfiguration<H, ?> mosConfig = null;
+			for (ManagedObjectSourceConfiguration<?, ?> mos : this.officeFloorConfig
+					.getManagedObjectSourceConfiguration()) {
+				if (managedObjectId.equals(mos.getManagedObjectSourceName())) {
+					mosConfig = (ManagedObjectSourceConfiguration<H, ?>) mos;
 				}
-				if (mosConfig == null) {
-					throw new BuildException(
-							"Can not find managed object source by id '"
-									+ managedObjectId + "'");
-				}
-
-				// Obtain the managed object handler builder
-				ManagedObjectHandlerBuilder<H> handlerBuilder = mosConfig
-						.getHandlerBuilder(handlerKeys);
-
-				// Return the managed object handler builder
-				return handlerBuilder;
-
-			} catch (ConfigurationException ex) {
-				throw new BuildException(ex.getMessage());
 			}
+			if (mosConfig == null) {
+				throw new Error("Can not find managed object source by id '"
+						+ managedObjectId + "'");
+			}
+
+			// Obtain the managed object handler builder
+			ManagedObjectHandlerBuilder<H> handlerBuilder = mosConfig
+					.getHandlerBuilder();
+
+			// Return the managed object handler builder
+			return handlerBuilder;
+
 		}
 
 	}
+
 }

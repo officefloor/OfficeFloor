@@ -19,7 +19,7 @@ package net.officefloor.frame.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.impl.execute.AssetManagerImpl;
+import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.structure.AssetManager;
 
@@ -29,6 +29,7 @@ import net.officefloor.frame.internal.structure.AssetManager;
  * 
  * @author Daniel
  */
+@Deprecated
 public class RawAssetManagerRegistry {
 
 	/**

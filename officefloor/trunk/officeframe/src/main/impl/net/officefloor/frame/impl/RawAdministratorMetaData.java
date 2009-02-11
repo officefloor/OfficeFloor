@@ -20,7 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.api.build.OfficeScope;
-import net.officefloor.frame.impl.execute.AdministratorMetaDataImpl;
+import net.officefloor.frame.impl.construct.administrator.AdministratorSourceContextImpl;
+import net.officefloor.frame.impl.execute.administrator.AdministratorMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;

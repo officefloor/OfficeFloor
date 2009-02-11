@@ -23,7 +23,8 @@ import java.util.Map;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.impl.execute.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.structure.AssetManager;
@@ -41,6 +42,7 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
  * 
  * @author Daniel
  */
+@Deprecated
 public class RawManagedObjectMetaData {
 
 	/**
@@ -75,7 +77,7 @@ public class RawManagedObjectMetaData {
 			throws Exception {
 
 		// Obtain the managed object name
-		String managedObjectName = mosConfig.getManagedObjectName();
+		String managedObjectName = mosConfig.getManagedObjectSourceName();
 
 		// Create the instance of the managed object source
 		ManagedObjectSource<?, ?> managedObjectSource;
@@ -94,9 +96,9 @@ public class RawManagedObjectMetaData {
 		ManagedObjectBuilder<?> managedObjectBuilder = (ManagedObjectBuilder<?>) mosConfig;
 
 		// Create the context for the Managed Object Source
-		ManagedObjectSourceContextImpl<?> context = new ManagedObjectSourceContextImpl(
+		ManagedObjectSourceContextImpl context = new ManagedObjectSourceContextImpl(
 				managedObjectName, mosConfig.getProperties(), resourceLocator,
-				managedObjectBuilder, officeBuilder, officeFrame);
+				managedObjectBuilder, officeBuilder);
 
 		// Initialise the Managed Object Source
 		managedObjectSource.init(context);

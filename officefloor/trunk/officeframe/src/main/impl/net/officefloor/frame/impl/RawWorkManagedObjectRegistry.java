@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.frame.internal.configuration.ConfigurationException;
-import net.officefloor.frame.internal.configuration.LinkedManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -88,7 +88,7 @@ public class RawWorkManagedObjectRegistry {
 		Set<String> processDependencies = new HashSet<String>();
 		Set<String> processLinked = new HashSet<String>();
 		List<RawWorkManagedObjectMetaData> processBoundRequiredListing = new LinkedList<RawWorkManagedObjectMetaData>();
-		for (LinkedManagedObjectConfiguration moConfig : workConfig
+		for (LinkedManagedObjectSourceConfiguration moConfig : workConfig
 				.getProcessManagedObjectConfiguration()) {
 
 			// Create the process bound managed object meta-data

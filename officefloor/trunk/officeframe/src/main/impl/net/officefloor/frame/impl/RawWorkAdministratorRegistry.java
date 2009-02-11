@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.ExtensionInterfaceMetaDataImpl;
-import net.officefloor.frame.impl.execute.TaskDutyAssociationImpl;
+import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDataImpl;
+import net.officefloor.frame.impl.execute.duty.TaskDutyAssociationImpl;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.WorkAdministratorConfiguration;

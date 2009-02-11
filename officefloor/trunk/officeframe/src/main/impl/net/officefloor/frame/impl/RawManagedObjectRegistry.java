@@ -26,13 +26,15 @@ import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
-import net.officefloor.frame.impl.execute.FlowMetaDataImpl;
-import net.officefloor.frame.impl.execute.HandlerContextImpl;
-import net.officefloor.frame.impl.execute.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.impl.construct.managedobjectsource.ClassLoaderResourceLocator;
+import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
+import net.officefloor.frame.impl.execute.managedobject.HandlerContextImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
+import net.officefloor.frame.impl.execute.office.OfficeImpl;
 import net.officefloor.frame.internal.configuration.ConfigurationException;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
-import net.officefloor.frame.internal.configuration.LinkedManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -95,7 +97,7 @@ public class RawManagedObjectRegistry {
 			OfficeBuilder officeBuilder = offices.get(managingOfficeName);
 
 			// Create the raw managed object
-			mosdRepository.put(mosConfig.getManagedObjectName(),
+			mosdRepository.put(mosConfig.getManagedObjectSourceName(),
 					RawManagedObjectMetaData.createRawManagedObjectMetaData(
 							mosConfig, resourceLocator, rawAssetRegistry,
 							officeBuilder, officeFrame));
@@ -214,7 +216,7 @@ public class RawManagedObjectRegistry {
 
 				// Create registry of managed object links
 				Map<String, String> moNameTrans = new HashMap<String, String>();
-				for (LinkedManagedObjectConfiguration linkedMoConfig : rawOfficeMetaData
+				for (LinkedManagedObjectSourceConfiguration linkedMoConfig : rawOfficeMetaData
 						.getOfficeConfiguration().getRegisteredManagedObjects()) {
 					moNameTrans.put(linkedMoConfig.getManagedObjectId(),
 							linkedMoConfig.getManagedObjectName());

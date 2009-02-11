@@ -22,13 +22,16 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.execute.FlowMetaDataImpl;
+import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
+import net.officefloor.frame.impl.execute.office.OfficeImpl;
+import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -98,12 +101,16 @@ public class RawOfficeMetaData {
 		EscalationHandler officeEscalationHandler = officeConfiguration
 				.getOfficeEscalationHandler();
 
+		// Create the Process meta-data for processes within the Office
+		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
+				officeResources.getRawProcessManagedObjectRegistry()
+						.getManagedObjectMetaData(),
+				processStateAdministratorMetaData);
+
 		// Create the Office
 		OfficeImpl office = new OfficeImpl(workRegistry
 				.createWorkMetaDataRegistry(), rawMosRegistry
-				.createManagedObjectSourceRegistry(), officeResources
-				.getRawProcessManagedObjectRegistry()
-				.getManagedObjectMetaData(), processStateAdministratorMetaData,
+				.createManagedObjectSourceRegistry(), processMetaData,
 				officeEscalationHandler, startupFlows);
 
 		// Link the Administrator with Tasks
