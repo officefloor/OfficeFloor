@@ -51,22 +51,23 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		WorkOne workOne = new WorkOne(parameter);
 		this.constructWork("WORK_ONE", workOne, "SENDER");
 		TaskBuilder<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> taskBuilder = this
-				.constructTask("SENDER", Object.class, workOne, "TEAM", null);
+				.constructTask("SENDER", workOne, "TEAM", null);
 		taskBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL);
 
 		// Add the second work
 		WorkTwo workTwo = new WorkTwo();
 		this.constructWork("WORK_TWO", workTwo, "RECEIVER");
-		this.constructTask("RECEIVER", Object.class, workTwo, "TEAM", null);
+		this.constructTask("RECEIVER", workTwo, "TEAM", null);
 
 		// Register and open the office floor
-		OfficeFloor officeFloor = this.constructOfficeFloor("TEST");
+		String officeName = this.getOfficeName();
+		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
 		// Invoke WorkOne
-		WorkManager workManager = officeFloor.getOffice("TEST").getWorkManager(
-				"WORK_ONE");
+		WorkManager workManager = officeFloor.getOffice(officeName)
+				.getWorkManager("WORK_ONE");
 		workManager.invokeWork(null);
 
 		// Allow some time for processing

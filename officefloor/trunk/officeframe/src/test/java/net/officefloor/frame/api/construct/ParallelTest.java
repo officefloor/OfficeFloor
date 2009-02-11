@@ -73,7 +73,7 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 		workBuilder.buildTask("second", "team");
 
 		// Run
-		this.invokeWork("office", "work", null);
+		this.invokeWork("work", null);
 
 		// Validate methods invoked
 		this.validateReflectiveMethodOrder("first", "parallel", "second");

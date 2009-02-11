@@ -16,8 +16,6 @@
  */
 package net.officefloor.frame.util;
 
-import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
@@ -32,7 +30,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Provides a abstract {@link net.officefloor.frame.api.execute.Task}.
+ * Provides an abstract {@link Task}.
  * 
  * @author Daniel
  */
@@ -48,21 +46,10 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder}.
 	 * @return {@link WorkBuilder} to configure the {@link Work}.
-	 * @throws BuildException
-	 *             If fails to register.
 	 */
 	@SuppressWarnings("unchecked")
-	public WorkBuilder registerWork(String workName, OfficeBuilder officeBuilder)
-			throws BuildException {
-		// Create and register the work builder
-		WorkBuilder work = OfficeFrame.getInstance().getBuilderFactory()
-				.createWorkBuilder(this.getClass());
-		officeBuilder.addWork(workName, work);
-
-		// Configure the work builder
-		work.setWorkFactory(this);
-
-		// Return the work builder
+	public WorkBuilder registerWork(String workName, OfficeBuilder officeBuilder) {
+		WorkBuilder work = officeBuilder.addWork(workName, this);
 		return work;
 	}
 
@@ -72,23 +59,20 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 * @param taskName
 	 *            Name for {@link Task}.
 	 * @param teamName
-	 *            Name for {@link net.officefloor.frame.spi.team.Team}.
+	 *            Name for {@link Team}.
 	 * @param workBuilder
 	 *            {@link WorkBuilder}.
 	 * @return {@link TaskBuilder} to configure the {@link Task}.
-	 * @throws BuildException
-	 *             If fails to register.
 	 */
 	@SuppressWarnings("unchecked")
 	public TaskBuilder registerTask(String taskName, String teamName,
-			WorkBuilder workBuilder) throws BuildException {
+			WorkBuilder workBuilder) {
 
 		// Configure the work builder
 		workBuilder.setInitialTask(taskName);
 
 		// Configure this as a task
-		TaskBuilder task = workBuilder.addTask(taskName, Object.class);
-		task.setTaskFactory(this);
+		TaskBuilder task = workBuilder.addTask(taskName, this);
 		task.setTeam(teamName);
 
 		// Return the task builder
@@ -107,12 +91,10 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 * @param officeBuilder
 	 *            {@link OfficeBuilder}.
 	 * @return {@link TaskBuilder} to configure the {@link Task}.
-	 * @throws BuildException
-	 *             If fails to register.
 	 */
 	@SuppressWarnings("unchecked")
 	public TaskBuilder registerTask(String workName, String taskName,
-			String teamName, OfficeBuilder officeBuilder) throws BuildException {
+			String teamName, OfficeBuilder officeBuilder) {
 		// Create and register the work builder
 		WorkBuilder work = this.registerWork(workName, officeBuilder);
 
@@ -136,22 +118,16 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 * @param context
 	 *            {@link ManagedObjectSourceContext}.
 	 * @return {@link ManagedObjectTaskBuilder} to configure the {@link Task}.
-	 * @throws BuildException
-	 *             If fails to register.
 	 */
 	@SuppressWarnings("unchecked")
 	public ManagedObjectTaskBuilder registerTask(String workName,
-			String taskName, String teamName, ManagedObjectSourceContext context)
-			throws BuildException {
+			String taskName, String teamName, ManagedObjectSourceContext context) {
 
 		// Create and initialise the work builder
-		ManagedObjectWorkBuilder work = context.addWork(workName, this
-				.getClass());
-		work.setWorkFactory(this);
+		ManagedObjectWorkBuilder work = context.addWork(workName, this);
 
 		// Create the the task builder
-		ManagedObjectTaskBuilder task = work.addTask(taskName, Object.class,
-				this);
+		ManagedObjectTaskBuilder task = work.addTask(taskName, this);
 		task.setTeam(teamName);
 
 		// Return the task builder
@@ -165,23 +141,18 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 * @param context
 	 *            {@link ManagedObjectSourceContext}.
 	 * @param teamName
-	 *            Name of the {@link net.officefloor.frame.spi.team.Team} to
-	 *            recycle the {@link ManagedObject}.
-	 * @throws BuildException
-	 *             If fails to configure.
+	 *            Name of the {@link Team} to recycle the {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void registerAsRecycleTask(ManagedObjectSourceContext context,
-			String teamName) throws BuildException {
+			String teamName) {
 
 		// Get the recycle work builder
-		ManagedObjectWorkBuilder recycleWork = context.getRecycleWork(this
-				.getClass());
-		recycleWork.setWorkFactory(this);
+		ManagedObjectWorkBuilder recycleWork = context.getRecycleWork(this);
 
 		// Configure this task to recycle the managed object
 		ManagedObjectTaskBuilder recycleTask = recycleWork.addTask("recycle",
-				ManagedObject.class, this);
+				this);
 		recycleTask.setTeam(teamName);
 	}
 

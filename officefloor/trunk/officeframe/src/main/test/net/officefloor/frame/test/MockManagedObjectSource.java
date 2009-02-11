@@ -19,11 +19,9 @@ package net.officefloor.frame.test;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.BuildException;
-import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -53,29 +51,24 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	 * Convenience method to bind the {@link ManagedObject} instance to the
 	 * {@link ManagedObjectBuilder}.
 	 * 
-	 * @param builderFactory
-	 *            {@link BuilderFactory} to obtain the
-	 *            {@link ManagedObjectBuilder} to bind the {@link ManagedObject}.
 	 * @param name
 	 *            Name to bind under.
 	 * @param managedObject
 	 *            {@link ManagedObject} to bind.
 	 * @param sourceMetaData
 	 *            {@link ManagedObjectSourceMetaData} to bind.
-	 * @throws BuildException
-	 *             If bind fails.
+	 * @param officeFloorBuilder
+	 *            {@link OfficeFloorBuilder} to bind {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
 	public static <H extends Enum<H>> ManagedObjectBuilder<H> bindManagedObject(
-			BuilderFactory builderFactory, String name,
-			ManagedObject managedObject,
-			ManagedObjectSourceMetaData<?, H> sourceMetaData)
-			throws BuildException {
+			String name, ManagedObject managedObject,
+			ManagedObjectSourceMetaData<?, H> sourceMetaData,
+			OfficeFloorBuilder officeFloorBuilder) {
 
 		// Create the Managed Object Builder
-		ManagedObjectBuilder<?> builder = OfficeFrame.getInstance()
-				.getBuilderFactory().createManagedObjectBuilder(
-						MockManagedObjectSource.class);
+		ManagedObjectBuilder<?> builder = officeFloorBuilder.addManagedObject(
+				name, MockManagedObjectSource.class);
 
 		// Provide managed object link to meta-data
 		builder.addProperty(MANAGED_OBJECT_PROPERTY, name);
@@ -106,8 +99,10 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getSpecification()
+	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
+	 * getSpecification()
 	 */
+	@Override
 	public ManagedObjectSourceSpecification getSpecification() {
 		throw new UnsupportedOperationException(
 				"Not supported by mock implementation");
@@ -116,10 +111,14 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(java.util.Properties,
-	 *      net.officefloor.frame.spi.managedobject.source.ResourceLocator,
-	 *      net.officefloor.frame.spi.managedobject.source.ManagedObjectPoolFactory)
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init
+	 * (java.util.Properties,
+	 * net.officefloor.frame.spi.managedobject.source.ResourceLocator,
+	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectPoolFactory)
 	 */
+	@Override
+	@SuppressWarnings("unchecked")
 	public void init(ManagedObjectSourceContext context) throws Exception {
 
 		// Obtain the name of the Managed Object
@@ -139,7 +138,8 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getMetaData()
+	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
+	 * getMetaData()
 	 */
 	@SuppressWarnings("unchecked")
 	public ManagedObjectSourceMetaData<None, None> getMetaData() {
@@ -149,7 +149,10 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
+	 * @see
+	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start
+	 * (net
+	 * .officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
 	 */
 	public void start(ManagedObjectExecuteContext<None> context)
 			throws Exception {
@@ -159,7 +162,8 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#getManagedObject()
+	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectSource#
+	 * getManagedObject()
 	 */
 	public void sourceManagedObject(ManagedObjectUser user) {
 		user.setManagedObject(this.managedObjectSourceState.managedObject);
@@ -167,7 +171,8 @@ public class MockManagedObjectSource implements ManagedObjectSource<None, None> 
 
 	/**
 	 * State of the
-	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
+	 * .
 	 */
 	private static class ManagedObjectSourceState {
 

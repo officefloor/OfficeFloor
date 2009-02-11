@@ -16,10 +16,9 @@
  */
 package net.officefloor.frame.api.construct;
 
-import net.officefloor.frame.api.build.AdministrationBuilder;
+import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeScope;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
@@ -66,15 +65,17 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		Administrator adminOne = this.createMock(Administrator.class);
 		AdministratorSourceMetaData adminOneMetaData = this
 				.createMock(AdministratorSourceMetaData.class);
-		this.constructAdministrator("a-one", adminOne, adminOneMetaData,
-				OfficeScope.WORK, "team-one");
+		AdministratorBuilder<?> adminOneBuilder = this.constructAdministrator(
+				"a-one", adminOne, adminOneMetaData, "team-one");
+		adminOneBuilder.administerManagedObject("W-MO-ONE");
 
 		// Administrator Two
 		Administrator adminTwo = this.createMock(Administrator.class);
 		AdministratorSourceMetaData adminTwoMetaData = this
 				.createMock(AdministratorSourceMetaData.class);
-		this.constructAdministrator("a-two", adminTwo, adminTwoMetaData,
-				OfficeScope.WORK, "team-one");
+		AdministratorBuilder<?> adminTwoBuilder = this.constructAdministrator(
+				"a-two", adminTwo, adminTwoMetaData, "team-one");
+		adminTwoBuilder.administerManagedObject("W-MO-ONE");
 
 		// Team
 		this.constructTeam("team-one", new PassiveTeam());
@@ -87,24 +88,20 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		// Link Managed Object One into Work
 		DependencyMappingBuilder dependencyBuilder = workBuilder
 				.addWorkManagedObject("W-MO-ONE", "mo-one");
-		dependencyBuilder.registerDependencyMapping(
-				DependenciesEnum.DEPENDENCY_ONE, "W-MO-TWO");
+		dependencyBuilder.mapDependency(DependenciesEnum.DEPENDENCY_ONE,
+				"W-MO-TWO");
 		workBuilder.addWorkManagedObject("W-MO-TWO", "mo-two");
 
 		// Link Administrator One into Work
-		AdministrationBuilder adminOneBuilder = workBuilder
-				.registerAdministration("W-ADMIN-ONE", "a-one");
-		adminOneBuilder.setManagedObjects(new String[] { "W-MO-ONE" });
+		workBuilder.linkAdministrator("W-ADMIN-ONE", "a-one");
 
 		// Link Administrator Two into Work
-		AdministrationBuilder adminTwoBuilder = workBuilder
-				.registerAdministration("W-ADMIN-TWO", "a-two");
-		adminTwoBuilder.setManagedObjects(new String[] { "W-MO-ONE" });
+		workBuilder.linkAdministrator("W-ADMIN-TWO", "a-two");
 
 		// Task for Work
 		TestTask task = this.createMock(TestTask.class);
 		TaskBuilder<Object, TestWork, ManagedObjectsEnum, TaskFlowsEnum> taskBuilder = this
-				.constructTask("task-one", Object.class, task, "team-one", null);
+				.constructTask("task-one", task, "team-one", null);
 		taskBuilder.linkManagedObject(ManagedObjectsEnum.MANAGED_OBJECT_ONE,
 				"W-MO-ONE");
 		taskBuilder.linkPreTaskAdministration("W-ADMIN-ONE",
@@ -252,14 +249,15 @@ public class OfficeConstructTest extends AbstractOfficeConstructTestCase {
 		this.replayMockObjects();
 
 		// Register the Office Floor
-		final OfficeFloor officeFloor = this.constructOfficeFloor("test");
+		String officeName = this.getOfficeName();
+		final OfficeFloor officeFloor = this.constructOfficeFloor();
 
 		// Open the Office Floor
 		officeFloor.openOfficeFloor();
 
 		// Invoke the Work
-		WorkManager workManager = officeFloor.getOffice("test").getWorkManager(
-				"work-one");
+		WorkManager workManager = officeFloor.getOffice(officeName)
+				.getWorkManager("work-one");
 		workManager.invokeWork(null);
 
 		// Allow some time for processing to occur

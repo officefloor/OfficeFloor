@@ -51,7 +51,7 @@ public class WorkTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", new PassiveTeam());
 
 		// Start the office
-		this.invokeWork("OFFICE", WORK_NAME, null);
+		this.invokeWork(WORK_NAME, null);
 
 		// Ensure task invoked
 		assertTrue("Initial task should be invoked", work.isTaskOneInvoked);
@@ -76,8 +76,8 @@ public class WorkTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", new PassiveTeam());
 
 		// Start the office floor
-		final String OFFICE_NAME = "OFFICE";
-		OfficeFloor officeFloor = this.constructOfficeFloor(OFFICE_NAME);
+		final String OFFICE_NAME = this.getOfficeName();
+		OfficeFloor officeFloor = this.constructOfficeFloor();
 
 		// Should be able to obtain the office
 		Office office = officeFloor.getOffice(OFFICE_NAME);

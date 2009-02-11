@@ -74,7 +74,7 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 		escalationTaskBuilder.buildParameter();
 
 		// Invoke the work
-		this.invokeWork("office", "work", null);
+		this.invokeWork("work", null);
 
 		// Validate failure handled
 		assertEquals("Incorrect exception", workObject.failure,

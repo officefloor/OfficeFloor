@@ -16,7 +16,6 @@
  */
 package net.officefloor.frame.api.construct;
 
-import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
@@ -317,12 +316,10 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		final String INVOKED_TASK = "invokedTask";
 
 		// Create and register the managed object source
-		ManagedObjectBuilder<HandlerKey> managedObjectBuilder = OfficeFrame
-				.getInstance().getBuilderFactory().createManagedObjectBuilder(
+		ManagedObjectBuilder<HandlerKey> managedObjectBuilder = this
+				.getOfficeFloorBuilder().addManagedObject("MO",
 						TestManagedObjectSource.class);
 		managedObjectBuilder.setManagingOffice("OFFICE");
-		this.getOfficeFloorBuilder().addManagedObject("MO",
-				managedObjectBuilder);
 
 		// Specify whether asynchronous
 		if (defaultTimeout > 0) {
@@ -339,7 +336,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		TestManagedObjectSource.setLoadHandler(isManagedObjectOutside);
 		if (isManagedObjectOutside) {
 			ManagedObjectHandlerBuilder<HandlerKey> moHandlerBuilder = managedObjectBuilder
-					.getManagedObjectHandlerBuilder(HandlerKey.class);
+					.getManagedObjectHandlerBuilder();
 			HandlerBuilder<HandlerProcess> handlerBuilder = moHandlerBuilder
 					.registerHandler(HandlerKey.HANDLER, HandlerProcess.class);
 			handlerBuilder.linkProcess(HandlerProcess.TASK, "WORK",
@@ -371,15 +368,15 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 				// Register the process managed object within the office
 				this.getOfficeBuilder().addProcessManagedObject("MO_LINK",
 						"OFFICE_MO");
-				this.getOfficeBuilder()
-						.registerManagedObject("OFFICE_MO", "MO");
+				this.getOfficeBuilder().registerManagedObjectSource(
+						"OFFICE_MO", "MO");
 				break;
 			case WORK:
 				// Register as work bound managed object
 				taskBuilder.buildObject("MO");
 
 				// Register the managed object within the office
-				this.getOfficeBuilder().registerManagedObject("MO", "MO");
+				this.getOfficeBuilder().registerManagedObjectSource("MO", "MO");
 				break;
 			default:
 				fail("Unknown managed object scope " + scope);
@@ -388,7 +385,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", new PassiveTeam());
 
 		// Construct and open the office floor
-		this.officeFloor = this.constructOfficeFloor("OFFICE");
+		this.officeFloor = this.constructOfficeFloor();
 		this.officeFloor.openOfficeFloor();
 
 		// Ensure the managed object source and handler created
@@ -524,8 +521,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 				// Provide the handler
 				ManagedObjectHandlerBuilder<HandlerKey> moHandlerBuilder = context
-						.getManagedObjectSourceContext().getHandlerBuilder(
-								HandlerKey.class);
+						.getManagedObjectSourceContext().getHandlerBuilder();
 				HandlerBuilder<HandlerProcess> handlerBuilder = moHandlerBuilder
 						.registerHandler(HandlerKey.HANDLER,
 								HandlerProcess.class);

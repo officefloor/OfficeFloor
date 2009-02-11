@@ -28,10 +28,12 @@ import java.util.Properties;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.ManagedObjectSourceContextImpl;
-import net.officefloor.frame.impl.construct.WorkBuilderImpl;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
+import net.officefloor.frame.impl.construct.work.WorkBuilderImpl;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -43,6 +45,17 @@ import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
  * @author Daniel
  */
 public class ManagedObjectSourceLoader {
+
+	/**
+	 * Name of the {@link ManagedObjectSource} being loaded.
+	 */
+	public static final String STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME = "managed.object.source";
+
+	/**
+	 * Name of the {@link Office} managing the {@link ManagedObjectSource} being
+	 * loaded.
+	 */
+	public static final String STAND_ALONE_MANAGING_OFFICE_NAME = "office";
 
 	/**
 	 * {@link Properties}.
@@ -172,21 +185,19 @@ public class ManagedObjectSourceLoader {
 		// Create a new instance of the managed object source
 		MS moSource = managedObjectSourceClass.newInstance();
 
-		final String MANAGED_OBJECT_SOURCE_NAME = "mos";
-
 		// Create necessary builders
-		OfficeFrame officeFrame = OfficeFrame.getInstance();
-		OfficeBuilder officeBuilder = officeFrame.getBuilderFactory()
-				.createOfficeBuilder();
-		ManagedObjectBuilder<H> managedObjectBuilder = officeFrame
-				.getBuilderFactory().createManagedObjectBuilder(
+		OfficeFloorBuilder officeFloorBuilder = OfficeFrame.getInstance()
+				.createOfficeFloorBuilder();
+		ManagedObjectBuilder<H> managedObjectBuilder = officeFloorBuilder
+				.addManagedObject(STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME,
 						managedObjectSourceClass);
+		OfficeBuilder officeBuilder = officeFloorBuilder
+				.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
 
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(
-				MANAGED_OBJECT_SOURCE_NAME, this.properties,
-				this.resourceLocator, managedObjectBuilder, officeBuilder,
-				officeFrame);
+				STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, this.properties,
+				this.resourceLocator, managedObjectBuilder, officeBuilder);
 		moSource.init(sourceContext);
 
 		// Return the initialised managed object source
