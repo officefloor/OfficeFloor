@@ -27,17 +27,21 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
+import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -149,7 +153,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				this.workOperationsManager, false, null, 1000);
 		workMo.loadRemainingState(null, null);
 		ManagedObjectMetaData[] workMoMetaData = new ManagedObjectMetaData[] {
-				new ManagedObjectMetaDataImpl(0), workMo };
+				this.moMetaData, workMo };
 
 		// Create the Work
 		final Work work = new Work() {
@@ -172,10 +176,17 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// TODO consider testing with administrator meta-data
 		AdministratorMetaData[] adminMetaData = new AdministratorMetaData[0];
+		AdministratorIndex[] adminIndexes = new AdministratorIndex[0];
+
+		// Create managed object the indexes
+		// TODO ensure working with indexes
+		ManagedObjectIndex[] moIndexes = new ManagedObjectIndex[] { new ManagedObjectIndexImpl(
+				ManagedObjectScope.WORK, 0) };
 
 		// Create the Work meta-data
-		WorkMetaData workMetaData = new WorkMetaDataImpl(1, workFactory,
-				workMoMetaData, adminMetaData, initialFlowMetaData);
+		WorkMetaData workMetaData = new WorkMetaDataImpl(workFactory,
+				moIndexes, workMoMetaData, adminIndexes, adminMetaData,
+				initialFlowMetaData);
 
 		// Initial node
 		this.initialNode = new ExecutionNode(this.nextExecutionNodeId(), this,
