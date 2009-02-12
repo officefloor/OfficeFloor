@@ -17,136 +17,90 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Configuration of a {@link net.officefloor.frame.api.execute.Task}.
+ * Configuration of a {@link Task}.
  * 
  * @author Daniel
  */
 public interface TaskConfiguration<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> {
 
 	/**
-	 * Obtains the name of this {@link net.officefloor.frame.api.execute.Task}
-	 * local to its {@link Work}.
+	 * Obtains the name of this {@link Task} local to its {@link Work}.
 	 * 
-	 * @return Name of this {@link net.officefloor.frame.api.execute.Task} local
-	 *         to its {@link Work}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Name of this {@link Task} local to its {@link Work}.
 	 */
-	String getTaskName() throws ConfigurationException;
+	String getTaskName();
 
 	/**
-	 * Obtains the {@link TaskFactory} for the
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * Obtains the {@link TaskFactory} for the {@link Task}.
 	 * 
 	 * @return {@link TaskFactory}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	TaskFactory<P, W, M, F> getTaskFactory() throws ConfigurationException;
+	TaskFactory<P, W, M, F> getTaskFactory();
 
 	/**
-	 * Obtains the Id of the {@link net.officefloor.frame.spi.team.Team}
-	 * responsible for completing this
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * Obtains the name of {@link Office} registered {@link Team} responsible
+	 * for completing this {@link Task}.
 	 * 
-	 * @return Id of the {@link net.officefloor.frame.spi.team.Team}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Name of the {@link Office} registered {@link Team}.
 	 */
-	String getTeamId() throws ConfigurationException;
+	String getOfficeTeamName();
 
 	/**
-	 * Obtains the reference to the next
-	 * {@link net.officefloor.frame.api.execute.Task} within the
-	 * {@link net.officefloor.frame.internal.structure.Flow}.
+	 * Obtains the reference to the next {@link Task} within the {@link Flow}.
 	 * 
-	 * @return Reference to the next
-	 *         {@link net.officefloor.frame.api.execute.Task} within the
-	 *         {@link net.officefloor.frame.internal.structure.Flow}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Reference to the next {@link Task} within the {@link Flow}.
 	 */
-	TaskNodeReference getNextTaskInFlow() throws ConfigurationException;
+	TaskNodeReference getNextTaskInFlow();
 
 	/**
-	 * Obtains the configuration of the
-	 * {@link net.officefloor.frame.internal.structure.Flow} instances for this
-	 * {@link net.officefloor.frame.api.execute.Task}.
+	 * Obtains the configuration of the {@link Flow} instances for this
+	 * {@link Task}.
 	 * 
-	 * @return Configuration of the
-	 *         {@link net.officefloor.frame.internal.structure.Flow} instances
-	 *         for this {@link net.officefloor.frame.api.execute.Task}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Configuration of {@link Flow} instances for this {@link Task}.
 	 */
-	FlowConfiguration[] getFlowConfiguration() throws ConfigurationException;
+	FlowConfiguration[] getFlowConfiguration();
 
 	/**
-	 * Obtains the configuration of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * for this {@link net.officefloor.frame.api.execute.Task}.
+	 * Obtains the configuration of the {@link ManagedObject} instances for this
+	 * {@link Task}.
 	 * 
-	 * @return Configuration of the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances for this {@link net.officefloor.frame.api.execute.Task}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Configuration of the {@link ManagedObject} instances for this
+	 *         {@link Task} .
 	 */
-	TaskManagedObjectConfiguration[] getManagedObjectConfiguration()
-			throws ConfigurationException;
+	TaskManagedObjectConfiguration[] getManagedObjectConfiguration();
+
+	/**
+	 * Obtains the listing of the {@link TaskDutyConfiguration} for the
+	 * administration to be done before the {@link Task} is executed.
+	 * 
+	 * @return Listing of the {@link TaskDutyConfiguration} for the
+	 *         administration to be done before the {@link Task} is executed.
+	 */
+	TaskDutyConfiguration<?>[] getPreTaskAdministratorDutyConfiguration();
+
+	/**
+	 * Obtains the listing of the {@link TaskDutyConfiguration} for the
+	 * administration to be done after the {@link Task} is executed.
+	 * 
+	 * @return Listing of the {@link TaskDutyConfiguration} for the
+	 *         administration to be done after the {@link Task} is executed.
+	 */
+	TaskDutyConfiguration<?>[] getPostTaskAdministratorDutyConfiguration();
 
 	/**
 	 * Obtains the {@link EscalationConfiguration} instances in escalation
 	 * order. Index 0 being first, index 1 second and so forth.
 	 * 
 	 * @return {@link EscalationConfiguration} instances.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	EscalationConfiguration[] getEscalations() throws ConfigurationException;
-
-	/**
-	 * Obtains the {@link EscalationProcedure} for the
-	 * {@link net.officefloor.frame.api.execute.Task}.
-	 * 
-	 * @return Parent {@link EscalationProcedure} for the
-	 *         {@link net.officefloor.frame.api.execute.Task}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
-	 */
-	EscalationProcedure getParentEscalationProcedure()
-			throws ConfigurationException;
-
-	/**
-	 * Obtains the listing of the {@link TaskDutyConfiguration} for the
-	 * administration to be done before the
-	 * {@link net.officefloor.frame.api.execute.Task} is executed.
-	 * 
-	 * @return Listing of the {@link TaskDutyConfiguration} for the
-	 *         administration to be done before the
-	 *         {@link net.officefloor.frame.api.execute.Task} is executed.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
-	 */
-	TaskDutyConfiguration<?>[] getPreTaskAdministratorDutyConfiguration()
-			throws ConfigurationException;
-
-	/**
-	 * Obtains the listing of the {@link TaskDutyConfiguration} for the
-	 * administration to be done after the
-	 * {@link net.officefloor.frame.api.execute.Task} is executed.
-	 * 
-	 * @return Listing of the {@link TaskDutyConfiguration} for the
-	 *         administration to be done after the
-	 *         {@link net.officefloor.frame.api.execute.Task} is executed.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
-	 */
-	TaskDutyConfiguration<?>[] getPostTaskAdministratorDutyConfiguration()
-			throws ConfigurationException;
+	EscalationConfiguration[] getEscalations();
 
 }

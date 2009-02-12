@@ -18,11 +18,11 @@ package net.officefloor.frame.internal.configuration;
 
 import java.util.Properties;
 
-import net.officefloor.frame.api.build.OfficeScope;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -43,10 +43,8 @@ public interface AdministratorSourceConfiguration<A extends Enum<A>, AS extends 
 	 * Obtains the {@link Class} of the {@link AdministratorSource}.
 	 * 
 	 * @return {@link Class} of the {@link AdministratorSource}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	Class<AS> getAdministratorSourceClass() throws ConfigurationException;
+	Class<AS> getAdministratorSourceClass();
 
 	/**
 	 * Obtains the properties to initialise the {@link AdministratorSource}.
@@ -56,22 +54,21 @@ public interface AdministratorSourceConfiguration<A extends Enum<A>, AS extends 
 	Properties getProperties();
 
 	/**
-	 * Obtains the {@link OfficeScope} for this {@link Administrator}.
-	 * 
-	 * @return {@link OfficeScope} for this {@link Administrator}.
-	 */
-	OfficeScope getAdministratorScope();
-
-	/**
-	 * Obtains the name of the {@link Team} linked to the {@link Office}
-	 * responsible for completing this {@link Duty} instances of this
+	 * Obtains the name of the {@link Team} within the {@link Office}
+	 * responsible for completing the {@link Duty} instances of this
 	 * {@link Administrator}.
 	 * 
-	 * @return Id of the {@link Team}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return {@link Office} name of the {@link Team}.
 	 */
-	String getTeamName() throws ConfigurationException;
+	String getOfficeTeamName();
+
+	/**
+	 * Obtains the names of the {@link ManagedObject} instances to be
+	 * administered.
+	 * 
+	 * @return Names of the {@link ManagedObject} instances to be administered.
+	 */
+	String[] getAdministeredManagedObjectNames();
 
 	/**
 	 * Obtains the listing of {@link DutyConfiguration} for the {@link Duty}

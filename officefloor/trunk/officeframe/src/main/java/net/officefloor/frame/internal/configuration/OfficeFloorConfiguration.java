@@ -16,8 +16,6 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import java.util.Map;
-
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -25,7 +23,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Configuration for an {@link net.officefloor.frame.api.manage.OfficeFloor}.
+ * Configuration for an {@link OfficeFloor}.
  * 
  * @author Daniel
  */
@@ -35,31 +33,24 @@ public interface OfficeFloorConfiguration {
 	 * Obtains the configuration of the {@link ManagedObjectSource} instances.
 	 * 
 	 * @return {@link ManagedObjectSource} configuration.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	ManagedObjectSourceConfiguration<?, ?>[] getManagedObjectSourceConfiguration()
-			throws ConfigurationException;
+	ManagedObjectSourceConfiguration<?, ?>[] getManagedObjectSourceConfiguration();
 
 	/**
-	 * Obtains the registry of {@link Team} instances by their respective Id.
+	 * Obtains the configuration of the {@link Team} instances on the
+	 * {@link OfficeFloor}.
 	 * 
-	 * @return Registry of {@link Team} instances by their respective Id.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return {@link TeamConfiguration} instances.
 	 */
-	Map<String, Team> getTeamRegistry() throws ConfigurationException;
+	TeamConfiguration<?>[] getTeamConfiguration();
 
 	/**
 	 * Obtains the configuration of the {@link Office} instances on the
 	 * {@link OfficeFloor}.
 	 * 
-	 * @return {@link Office} configuration.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return {@link OfficeConfiguration} instances.
 	 */
-	OfficeConfiguration[] getOfficeConfiguration()
-			throws ConfigurationException;
+	OfficeConfiguration[] getOfficeConfiguration();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link OfficeFloor}.

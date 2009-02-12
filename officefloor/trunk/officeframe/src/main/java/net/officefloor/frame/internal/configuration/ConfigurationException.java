@@ -21,6 +21,8 @@ package net.officefloor.frame.internal.configuration;
  *
  * @author Daniel
  */
+// using OfficeFloorIssues rather than throwing exceptions
+@Deprecated
 public class ConfigurationException extends Exception {
 
 	/**

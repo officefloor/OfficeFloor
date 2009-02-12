@@ -24,14 +24,17 @@ import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Configuration of an Office.
+ * Configuration of an {@link Office}.
  * 
  * @author Daniel
  */
@@ -45,48 +48,82 @@ public interface OfficeConfiguration {
 	String getOfficeName();
 
 	/**
-	 * Obtains the registered {@link Team} links.
+	 * <p>
+	 * Obtains the {@link OfficeBuilder} for this {@link Office}.
+	 * <p>
+	 * This is to allow {@link Asset} instances (such as a
+	 * {@link ManagedObjectSource}) to provide additional configuration for the
+	 * {@link Office}.
 	 * 
-	 * @return Registered {@link Team} links.
+	 * @return {@link OfficeBuilder}.
+	 */
+	OfficeBuilder getBuilder();
+
+	/**
+	 * Obtains the links to the {@link OfficeFloor} {@link Team} instances.
+	 * 
+	 * @return Links to the {@link OfficeFloor} {@link Team} instances.
 	 */
 	LinkedTeamConfiguration[] getRegisteredTeams();
 
 	/**
-	 * Obtains the registered {@link ManagedObject} links.
+	 * Obtains the links to the {@link OfficeFloor} {@link ManagedObjectSource}
+	 * instances.
 	 * 
-	 * @return Registered {@link ManagedObject} links.
+	 * @return Links to the {@link OfficeFloor} {@link ManagedObjectSource}
+	 *         instances.
 	 */
-	LinkedManagedObjectConfiguration[] getRegisteredManagedObjects();
+	LinkedManagedObjectSourceConfiguration[] getRegisteredManagedObjectSources();
 
 	/**
 	 * Obtains the {@link ManagedObject} instances to be bound to the
 	 * {@link ProcessState} of this {@link Office}.
 	 * 
-	 * @return Listing of the {@link ManagedObject} instances.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Listing of the configuration of the {@link ManagedObject}
+	 *         instances bound to the {@link ProcessState}.
 	 */
-	ManagedObjectConfiguration[] getManagedObjectConfiguration()
-			throws ConfigurationException;
+	ManagedObjectConfiguration<?>[] getProcessManagedObjectConfiguration();
+
+	/**
+	 * Obtains the {@link ManagedObject} instances to be bound to the
+	 * {@link ThreadState} of this {@link Office}.
+	 * 
+	 * @return Listing of the configuration of the {@link ManagedObject}
+	 *         instances bound to the {@link ThreadState}.
+	 */
+	ManagedObjectConfiguration<?>[] getThreadManagedObjectConfiguration();
+
+	/**
+	 * Obtains the configuration of the {@link AdministratorSource} instances
+	 * bound to the {@link ProcessState}.
+	 * 
+	 * @return {@link AdministratorSource} configuration of instances bound to
+	 *         the {@link ProcessState}.
+	 */
+	AdministratorSourceConfiguration<?, ?>[] getProcessAdministratorSourceConfiguration();
+
+	/**
+	 * Obtains the configuration of the {@link AdministratorSource} instances
+	 * bound to the {@link ThreadState}.
+	 * 
+	 * @return {@link AdministratorSource} configuration of instances bound to
+	 *         the {@link ThreadState}.
+	 */
+	AdministratorSourceConfiguration<?, ?>[] getThreadAdministratorSourceConfiguration();
 
 	/**
 	 * Obtains the configuration of the {@link Work} instances.
 	 * 
 	 * @return {@link Work} configuration for the input name.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	<W extends Work> WorkConfiguration<W>[] getWorkConfiguration()
-			throws ConfigurationException;
+	<W extends Work> WorkConfiguration<W>[] getWorkConfiguration();
 
 	/**
 	 * Obtains the {@link OfficeEnhancer} instances for this {@link Office}.
 	 * 
 	 * @return Listing of the {@link OfficeEnhancer} for this {@link Office}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	OfficeEnhancer[] getOfficeEnhancers() throws ConfigurationException;
+	OfficeEnhancer[] getOfficeEnhancers();
 
 	/**
 	 * Obtains the {@link EscalationHandler} for the {@link Office}.
@@ -111,21 +148,9 @@ public interface OfficeConfiguration {
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @return {@link TaskBuilder}.
-	 * @throws ConfigurationException
-	 *             If can not find the {@link FlowNodeBuilder}.
 	 */
 	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName,
-			String taskName) throws ConfigurationException;
-
-	/**
-	 * Obtains the configuration of the {@link AdministratorSource} instances.
-	 * 
-	 * @return {@link AdministratorSource} configuration.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
-	 */
-	AdministratorSourceConfiguration<?, ?>[] getAdministratorSourceConfiguration()
-			throws ConfigurationException;
+			String taskName);
 
 	/**
 	 * Obtains the list of {@link TaskNodeReference} instances referencing the

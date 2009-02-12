@@ -16,32 +16,31 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
+
 /**
- * Configuration for a {@link net.officefloor.frame.spi.administration.Duty}.
+ * Configuration for a {@link Duty}.
  * 
  * @author Daniel
  */
 public interface DutyConfiguration<A extends Enum<A>> {
 
 	/**
-	 * Obtains the key identifying this
-	 * {@link net.officefloor.frame.spi.administration.Duty} on the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * Obtains key identifying the {@link Duty} of the {@link Administrator}.
 	 * 
-	 * @return Key identifying this
-	 *         {@link net.officefloor.frame.spi.administration.Duty} on the
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * @return Key identifying the {@link Duty} on the {@link Administrator}.
 	 */
 	A getDutyKey();
 
 	/**
-	 * Obtains the configuration for the
-	 * {@link net.officefloor.frame.internal.structure.Flow} instances invoked
-	 * by the {@link net.officefloor.frame.api.execute.Handler}.
+	 * Obtains the configuration for the {@link Flow} instances invoked by the
+	 * {@link Duty}.
 	 * 
-	 * @return {@link TaskNodeReference} specifying the first
-	 *         {@link net.officefloor.frame.api.execute.Task} of the linked
-	 *         {@link net.officefloor.frame.internal.structure.Flow}.
+	 * @return {@link TaskNodeReference} specifying the first {@link Task} of
+	 *         the linked {@link Flow}.
 	 */
 	TaskNodeReference[] getLinkedProcessConfiguration();
 

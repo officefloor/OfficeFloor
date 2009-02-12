@@ -26,6 +26,8 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel
  */
+// AdministratorSourceConfiguration<?, ?> is to replace or is a link
+@Deprecated
 public interface WorkAdministratorConfiguration {
 
 	/**

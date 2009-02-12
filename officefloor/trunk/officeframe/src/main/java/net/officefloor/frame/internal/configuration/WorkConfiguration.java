@@ -17,11 +17,15 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Provides configuration of a {@link net.officefloor.frame.api.execute.Work}
- * item.
+ * Provides configuration of {@link Work}.
  * 
  * @author Daniel
  */
@@ -35,81 +39,60 @@ public interface WorkConfiguration<W extends Work> {
 	String getWorkName();
 
 	/**
-	 * Obtains the {@link WorkFactory} to create the
-	 * {@link net.officefloor.frame.api.execute.Work} to be done.
+	 * Obtains the {@link WorkFactory} to create the {@link Work}.
 	 * 
-	 * @return {@link WorkFactory} to create the
-	 *         {@link net.officefloor.frame.api.execute.Work} to be done.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return {@link WorkFactory} to create the {@link Work} to be done.
 	 */
-	WorkFactory<W> getWorkFactory() throws ConfigurationException;
+	WorkFactory<W> getWorkFactory();
 
 	/**
-	 * Obtains the {@link net.officefloor.frame.internal.structure.ProcessState}
-	 * bound {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 * instances for this {@link Work}.
+	 * Obtains the {@link ProcessState} and {@link ThreadState} bound
+	 * {@link ManagedObject} instances for this {@link Work}.
 	 * 
-	 * @return Listing of
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances for this {@link Work}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Listing of {@link ManagedObject} configuration instances for this
+	 *         {@link Work}.
 	 */
-	LinkedManagedObjectConfiguration[] getProcessManagedObjectConfiguration()
-			throws ConfigurationException;
+	LinkedWorkManagedObjectConfiguration[] getLinkedManagedObjectConfiguration();
 
 	/**
-	 * Obtains the {@link Work} bound
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * for this {@link Work}.
+	 * Obtains the configuration of the {@link Work} bound {@link ManagedObject}
+	 * instances.
 	 * 
-	 * @return Listing of the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         instances for this {@link Work}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Listing of the {@link ManagedObject} configuration for this
+	 *         {@link Work}.
 	 */
-	ManagedObjectConfiguration[] getManagedObjectConfiguration()
-			throws ConfigurationException;
+	ManagedObjectConfiguration<?>[] getManagedObjectConfiguration();
 
 	/**
-	 * Obtains the
-	 * {@link net.officefloor.frame.spi.administration.Administrator} instances
-	 * for this {@link Work}.
+	 * Obtains the {@link ProcessState} and {@link ThreadState} bound
+	 * {@link Administrator} instances for this {@link Work}.
 	 * 
-	 * @return Listing of the
-	 *         {@link net.officefloor.frame.spi.administration.Administrator}
-	 *         instances for this {@link Work}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Listing of {@link Administrator} configuration instances for this
+	 *         {@link Work}.
 	 */
-	WorkAdministratorConfiguration[] getAdministratorConfiguration()
-			throws ConfigurationException;
+	LinkedWorkAdministratorConfiguration[] getLinkedAdministratorConfiguration();
 
 	/**
-	 * Obtains the name of the initial
-	 * {@link net.officefloor.frame.api.execute.Task} of the
-	 * {@link net.officefloor.frame.api.execute.Work}.
+	 * Obtains the configuration of the {@link Work} bound {@link Administrator}
+	 * instances.
 	 * 
-	 * @return Name of the initial
-	 *         {@link net.officefloor.frame.api.execute.Task} of the
-	 *         {@link net.officefloor.frame.api.execute.Work}.
+	 * @return Listing of {@link Administrator} configuration this {@link Work}.
+	 */
+	AdministratorSourceConfiguration<?, ?>[] getAdministratorConfiguration();
+
+	/**
+	 * Obtains the name of the initial {@link Task} of the {@link Work}.
+	 * 
+	 * @return Name of the initial {@link Task} of the {@link Work}.
 	 */
 	String getInitialTaskName();
 
 	/**
-	 * Obtains the configuration for the
-	 * {@link net.officefloor.frame.api.execute.Task} instances for the
+	 * Obtains the configuration for the {@link Task} instances for the
 	 * {@link Work}.
 	 * 
-	 * @return Configuration for the
-	 *         {@link net.officefloor.frame.api.execute.Task} instances of the
-	 *         {@link Work}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
+	 * @return Configuration for the {@link Task} instances of the {@link Work}.
 	 */
-	TaskConfiguration<?, W, ?, ?>[] getTaskConfiguration()
-			throws ConfigurationException;
+	TaskConfiguration<?, W, ?, ?>[] getTaskConfiguration();
 
 }

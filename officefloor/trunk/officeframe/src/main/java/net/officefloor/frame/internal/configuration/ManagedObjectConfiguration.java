@@ -16,40 +16,36 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Configuration of a
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} for use.
+ * Configuration of a {@link ProcessState} or {@link ThreadState} bound
+ * {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectConfiguration {
+public interface ManagedObjectConfiguration<D extends Enum<D>> {
 
 	/**
-	 * Obtains the Id of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Obtains the name of the {@link ManagedObject} registered within the
+	 * {@link Office}.
 	 * 
-	 * @return Id of the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * @return Name of the {@link ManagedObject} registered within the
+	 *         {@link Office}.
 	 */
-	String getManagedObjectId();
+	String getOfficeManagedObjectName();
 
 	/**
-	 * Obtains the name that the {@link net.officefloor.frame.api.execute.Work}
-	 * and its {@link net.officefloor.frame.api.execute.Task} refer to this
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Obtains name of the {@link ManagedObject} bound to either
+	 * {@link ProcessState} or {@link ThreadState}.
 	 * 
-	 * @return Local name.
+	 * @return Name of the {@link ManagedObject} bound to either
+	 *         {@link ProcessState} or {@link ThreadState}.
 	 */
-	String getManagedObjectName();
-
-	/**
-	 * Obtains the timeout for operations on the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 * 
-	 * @return Timeout for operations on the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 */
-	long getTimeout();
+	String getBoundManagedObjectName();
 
 	/**
 	 * Obtains the listing of {@link ManagedObjectDependencyConfiguration}
@@ -57,6 +53,6 @@ public interface ManagedObjectConfiguration {
 	 * 
 	 * @return {@link ManagedObjectDependencyConfiguration} instances.
 	 */
-	ManagedObjectDependencyConfiguration<?>[] getDependencyConfiguration();
+	ManagedObjectDependencyConfiguration<D>[] getDependencyConfiguration();
 
 }

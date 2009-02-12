@@ -16,23 +16,21 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Configuration for a
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} of a
- * {@link net.officefloor.frame.api.execute.Task}.
+ * Configuration for a {@link ManagedObject} of a {@link Task}.
  * 
  * @author Daniel
  */
 public interface TaskManagedObjectConfiguration {
 
 	/**
-	 * Obtains the name local to the
-	 * {@link net.officefloor.frame.api.execute.Work} for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Obtains the name local to the {@link Work} for the {@link ManagedObject}.
 	 * 
-	 * @return Local
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         name.
+	 * @return {@link ManagedObject} local to the {@link Work}.
 	 */
 	String getWorkManagedObjectName();
 
