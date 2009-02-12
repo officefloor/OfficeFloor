@@ -19,11 +19,11 @@ package net.officefloor.frame.spi.administration;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Administrates {@link ManagedObject} instances.
+ * Provides administration of the {@link ManagedObject} instances.
  * 
  * @author Daniel
  */
-public interface Administrator<I extends Object, A extends Enum<A>> {
+public interface Administrator<I, A extends Enum<A>> {
 
 	/**
 	 * {@link Duty} to be undertaken on the {@link ManagedObject} extension
