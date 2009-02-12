@@ -16,26 +16,28 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.JobNode;
+
 /**
- * Reference to a {@link net.officefloor.frame.internal.structure.JobNode}.
+ * Reference to a {@link JobNode}.
  * 
  * @author Daniel
  */
 public interface TaskNodeReference {
 
 	/**
-	 * Obtains the name of the {@link net.officefloor.frame.api.execute.Work}
-	 * containing the {@link net.officefloor.frame.api.execute.Task}.
+	 * Obtains the name of the {@link Work} containing the {@link Task}.
 	 * 
-	 * @return Name of the {@link net.officefloor.frame.api.execute.Work}
-	 *         containing the {@link net.officefloor.frame.api.execute.Task}.
+	 * @return Name of the {@link Work} containing the {@link Task}.
 	 */
 	String getWorkName();
 
 	/**
-	 * Obtains the name of the {@link net.officefloor.frame.api.execute.Task}.
+	 * Obtains the name of the {@link Task}.
 	 * 
-	 * @return Name of the {@link net.officefloor.frame.api.execute.Task}.
+	 * @return Name of the {@link Task}.
 	 */
 	String getTaskName();
 }

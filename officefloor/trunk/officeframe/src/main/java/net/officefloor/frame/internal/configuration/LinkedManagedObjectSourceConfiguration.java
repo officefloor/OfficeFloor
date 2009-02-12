@@ -16,30 +16,34 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+
 /**
- * Configuration linking in a
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Configuration linking in a {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
-public interface LinkedManagedObjectConfiguration {
+public interface LinkedManagedObjectSourceConfiguration {
 
 	/**
-	 * Obtains the Id of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Obtains the name of the {@link OfficeFloor} {@link ManagedObjectSource}
+	 * instance.
 	 * 
-	 * @return Id of the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * @return Name of the {@link OfficeFloor} {@link ManagedObjectSource}
+	 *         instance.
 	 */
-	String getManagedObjectId();
+	String getOfficeFloorManagedObjectSourceName();
 
 	/**
-	 * Obtains the name that this linked
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} is referred
-	 * to locally.
+	 * Obtains the name that the {@link ManagedObject} is registered within the
+	 * {@link Office}.
 	 * 
-	 * @return Local name.
+	 * @return Name that the {@link ManagedObject} is registered within the
+	 *         {@link Office}.
 	 */
-	String getManagedObjectName();
+	String getOfficeManagedObjectName();
 
 }

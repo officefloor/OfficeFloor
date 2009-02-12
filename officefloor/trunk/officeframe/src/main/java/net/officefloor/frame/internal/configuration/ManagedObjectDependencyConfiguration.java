@@ -16,33 +16,30 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Configuration of
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} dependency to
- * another {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Configuration of {@link ManagedObject} dependency to another
+ * {@link ManagedObject}.
  * 
  * @author Daniel
  */
 public interface ManagedObjectDependencyConfiguration<D extends Enum<D>> {
 
 	/**
-	 * Obtains the dependency key of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} for which
-	 * this maps the dependent
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Obtains the dependency key of the {@link ManagedObject} for which this
+	 * maps the dependent {@link ManagedObject}.
 	 * 
 	 * @return Dependency key.
 	 */
 	D getDependencyKey();
 
 	/**
-	 * Obtains the name of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} providing
-	 * the dependency.
+	 * Obtains the name of the {@link ManagedObject} providing the dependency
+	 * within the scope the {@link ManagedObject} is bound.
 	 * 
-	 * @return Local name of the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         providing the dependency.
+	 * @return Name of the {@link ManagedObject} providing the dependency within
+	 *         the scope the {@link ManagedObject} is bound.
 	 */
-	String getManagedObjectName();
+	String getScopeManagedObjectName();
 }

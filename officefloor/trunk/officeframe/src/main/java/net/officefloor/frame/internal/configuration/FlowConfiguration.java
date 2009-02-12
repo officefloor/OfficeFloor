@@ -38,19 +38,14 @@ public interface FlowConfiguration {
 	 * Obtains the strategy to instigate this {@link Flow}.
 	 * 
 	 * @return Strategy to instigate this {@link Flow}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	FlowInstigationStrategyEnum getInstigationStrategy()
-			throws ConfigurationException;
+	FlowInstigationStrategyEnum getInstigationStrategy();
 
 	/**
 	 * Obtains the reference to the initial {@link Task} of this {@link Flow}.
 	 * 
 	 * @return Reference to the initial {@link Task} of this {@link Flow}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	TaskNodeReference getInitialTask() throws ConfigurationException;
+	TaskNodeReference getInitialTask();
 
 }

@@ -16,26 +16,31 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.team.Team;
+
 /**
- * Configuration linking a {@link net.officefloor.frame.spi.team.Team}.
+ * Configuration linking a {@link Team}.
  * 
  * @author Daniel
  */
 public interface LinkedTeamConfiguration {
 
 	/**
-	 * Obtains the Id of the {@link net.officefloor.frame.spi.team.Team}.
+	 * Obtains the name of the {@link Team} on the {@link OfficeFloor}.
 	 * 
-	 * @return Id of the {@link net.officefloor.frame.spi.team.Team}.
+	 * @return Name of the {@link Team} on the {@link OfficeFloor}.
 	 */
-	String getTeamId();
+	String getOfficeFloorTeamName();
 
 	/**
-	 * Obtains the name that this linked
-	 * {@link net.officefloor.frame.spi.team.Team} is referred to locally.
+	 * Obtains the name that the {@link Team} is registered within the
+	 * {@link Office}.
 	 * 
-	 * @return Local name.
+	 * @return Name that the {@link Team} is registered within the
+	 *         {@link Office}.
 	 */
-	String getTeamName();
+	String getOfficeTeamName();
 
 }

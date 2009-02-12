@@ -18,8 +18,8 @@ package net.officefloor.frame.internal.configuration;
 
 import java.util.Properties;
 
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -37,7 +37,19 @@ public interface ManagedObjectSourceConfiguration<H extends Enum<H>, MS extends 
 	 * 
 	 * @return Name of this {@link ManagedObjectSource}.
 	 */
-	String getManagedObjectName();
+	String getManagedObjectSourceName();
+
+	/**
+	 * <p>
+	 * Obtains the {@link ManagedObjectBuilder} for this
+	 * {@link ManagedObjectSource}.
+	 * <p>
+	 * This is to enable the {@link ManagedObjectSource} to provide additional
+	 * configuration for itself.
+	 * 
+	 * @return {@link ManagedObjectBuilder}.
+	 */
+	ManagedObjectBuilder<H> getBuilder();
 
 	/**
 	 * Obtains the name of the {@link Office} responsible for managing this
@@ -52,10 +64,8 @@ public interface ManagedObjectSourceConfiguration<H extends Enum<H>, MS extends 
 	 * Obtains the {@link Class} of the {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link Class} of the {@link ManagedObjectSource}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	Class<MS> getManagedObjectSourceClass() throws ConfigurationException;
+	Class<MS> getManagedObjectSourceClass();
 
 	/**
 	 * Obtains the properties to initialise the {@link ManagedObjectSource}.
@@ -85,24 +95,16 @@ public interface ManagedObjectSourceConfiguration<H extends Enum<H>, MS extends 
 	/**
 	 * Obtains the {@link ManagedObjectHandlerBuilder} to allow enhancing.
 	 * 
-	 * {@link Enum} providing the keys for each {@link Handler}.
-	 * 
 	 * @return {@link ManagedObjectHandlerBuilder}.
-	 * @throws ConfigurationException
-	 *             If fails to obtain {@link ManagedObjectHandlerBuilder}.
 	 */
-	ManagedObjectHandlerBuilder<H> getHandlerBuilder(Class<H> handlerKeys)
-			throws ConfigurationException;
+	ManagedObjectHandlerBuilder<H> getHandlerBuilder();
 
 	/**
 	 * Obtains the {@link HandlerConfiguration} for the
 	 * {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link HandlerConfiguration} for the {@link ManagedObjectSource}.
-	 * @throws ConfigurationException
-	 *             If invalid configuration.
 	 */
-	HandlerConfiguration<?, ?>[] getHandlerConfiguration()
-			throws ConfigurationException;
+	HandlerConfiguration<H, ?>[] getHandlerConfiguration();
 
 }
