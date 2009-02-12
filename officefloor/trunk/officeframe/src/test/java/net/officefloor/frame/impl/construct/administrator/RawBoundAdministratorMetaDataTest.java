@@ -26,6 +26,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -435,35 +436,42 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the administrators
 		this.replayMockObjects();
-		RawBoundAdministratorMetaData<?, ?>[] adminMetaDatas = this
+		RawBoundAdministratorMetaData<?, ?>[] rawAdminMetaDatas = this
 				.constructRawAdministrator(1, this.configuration);
+		RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = rawAdminMetaDatas[0];
+		AdministratorMetaData<?, ?> adminMetaData = rawAdminMetaData
+				.getAdministratorMetaData();
 		this.verifyMockObjects();
 
 		// Verify bound administrator meta-data
-		RawBoundAdministratorMetaData<?, ?> adminMetaData = adminMetaDatas[0];
-		assertEquals("Incorrect name", "ADMIN", adminMetaData
+		assertEquals("Incorrect name", "ADMIN", rawAdminMetaData
 				.getAdministratorName());
-		assertEquals("Incorrect scope", this.administratorScope, adminMetaData
-				.getAdministratorIndex().getAdministratorScope());
-		assertEquals("Incorrect bound index", 0, adminMetaData
+		assertEquals("Incorrect scope", this.administratorScope,
+				rawAdminMetaData.getAdministratorIndex()
+						.getAdministratorScope());
+		assertEquals("Incorrect bound index", 0, rawAdminMetaData
 				.getAdministratorIndex().getIndexOfAdministratorWithinScope());
-		assertNotNull("Must have admin source", adminMetaData
+		assertNotNull("Must have admin source", rawAdminMetaData
 				.getAdministratorSource());
-		assertEquals("Incorrect first duty key", DutyKey.ONE, adminMetaData
+		assertEquals("Incorrect first duty key", DutyKey.ONE, rawAdminMetaData
 				.getDutyKeys()[DutyKey.ONE.ordinal()]);
-		assertEquals("Incorrect second duty key", DutyKey.TWO, adminMetaData
+		assertEquals("Incorrect second duty key", DutyKey.TWO, rawAdminMetaData
 				.getDutyKeys()[DutyKey.TWO.ordinal()]);
-		assertEquals("Incorrect team", this.team, adminMetaData
+		assertEquals("Incorrect team", this.team, rawAdminMetaData
 				.getResponsibleTeam());
 		assertEquals("Incorrect number of administered managed objects", 1,
-				adminMetaData.getAdministeredManagedObjectMetaData().length);
-		RawAdministeredManagedObjectMetaData<?> moMetaData = adminMetaData
+				rawAdminMetaData.getAdministeredManagedObjectMetaData().length);
+		RawAdministeredManagedObjectMetaData<?> moMetaData = rawAdminMetaData
 				.getAdministeredManagedObjectMetaData()[0];
 		assertEquals("Incorrect administered managed object",
 				this.rawBoundMoMetaData, moMetaData.getManagedObjectMetaData());
 		assertEquals("Incorrect extension interface factory",
 				this.extensionInterfaceFactory, moMetaData
 						.getExtensionInterfaceFactory());
+
+		// Verify the administrator meta-data
+		assertNotNull("Must have admin source", adminMetaData
+				.getAdministratorSource());
 	}
 
 	/**

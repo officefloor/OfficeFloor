@@ -34,6 +34,8 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>>
 	 * Index indicating the {@link Administrator} will not be sourced from the
 	 * {@link ProcessState}.
 	 */
+	// TODO Scopes have replaced need for this
+	@Deprecated
 	static final int NON_PROCESS_INDEX = -1;
 
 	/**
@@ -55,6 +57,8 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>>
 	 * @return Index of the {@link Administrator} within the
 	 *         {@link ProcessState} or {@link #NON_PROCESS_INDEX}.
 	 */
+	// TODO Scopes have replaced need for this
+	@Deprecated
 	int getProcessStateAdministratorIndex();
 
 	/**

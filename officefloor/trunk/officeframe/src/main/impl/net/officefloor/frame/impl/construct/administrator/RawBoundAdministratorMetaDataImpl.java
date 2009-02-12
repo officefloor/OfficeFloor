@@ -31,6 +31,7 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
+import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -382,6 +383,13 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	@Override
 	public RawAdministeredManagedObjectMetaData<I>[] getAdministeredManagedObjectMetaData() {
 		return this.rawAdministeredManagedObjects;
+	}
+
+	@Override
+	public AdministratorMetaData<?, ?> getAdministratorMetaData() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement RawBoundAdministratorMetaData<I,A>.getAdministratorMetaData");
 	}
 
 	/**
