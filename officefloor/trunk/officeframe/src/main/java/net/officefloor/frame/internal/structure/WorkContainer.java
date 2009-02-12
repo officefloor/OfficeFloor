@@ -50,8 +50,8 @@ public interface WorkContainer<W extends Work> {
 	 * @param managedObjectIndexes
 	 *            Indexes identifying the {@link ManagedObject} instances to be
 	 *            loaded.
-	 * @param executionContext
-	 *            Context for execution.
+	 * @param jobContext
+	 *            Context for executing the {@link Job}.
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} instances
 	 *            to be loaded.
@@ -62,8 +62,7 @@ public interface WorkContainer<W extends Work> {
 	 *         the {@link ManagedObject} instances.
 	 */
 	boolean loadManagedObjects(int[] managedObjectIndexes,
-			JobContext executionContext, JobNode jobNode,
-			JobActivateSet notifySet);
+			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet);
 
 	/**
 	 * Co-ordinates the {@link ManagedObject} instances.
@@ -71,8 +70,8 @@ public interface WorkContainer<W extends Work> {
 	 * @param managedObjectIndexes
 	 *            Indexes identifying the {@link ManagedObject} instances to be
 	 *            co-ordinated.
-	 * @param executionContext
-	 *            Context for execution.
+	 * @param jobContext
+	 *            Context for executing the {@link Job}.
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} instances
 	 *            to be co-ordinated.
@@ -80,8 +79,7 @@ public interface WorkContainer<W extends Work> {
 	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
 	 */
 	void coordinateManagedObjects(int[] managedObjectIndexes,
-			JobContext executionContext, JobNode jobNode,
-			JobActivateSet notifySet);
+			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet);
 
 	/**
 	 * Indicates if the particular {@link ManagedObject} is ready for use. In
@@ -91,8 +89,8 @@ public interface WorkContainer<W extends Work> {
 	 * @param managedObjectIndexes
 	 *            Indexes identifying the {@link ManagedObject} instances to
 	 *            check if ready.
-	 * @param executionContext
-	 *            Context for execution.
+	 * @param jobContext
+	 *            Context for executing the {@link Job}.
 	 * @param jobNode
 	 *            {@link JobNode} requiring the {@link ManagedObject} to be
 	 *            ready.
@@ -103,8 +101,7 @@ public interface WorkContainer<W extends Work> {
 	 *         {@link ManagedObject}.
 	 */
 	boolean isManagedObjectsReady(int[] managedObjectIndexes,
-			JobContext executionContext, JobNode jobNode,
-			JobActivateSet notifySet);
+			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet);
 
 	/**
 	 * Administers the {@link ManagedObject} instances as per the input
@@ -115,11 +112,11 @@ public interface WorkContainer<W extends Work> {
 	 *            be undertaken.
 	 * @param adminContext
 	 *            {@link AdministratorContext}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to administer the {@link ManagedObject} instances.
 	 */
 	void administerManagedObjects(TaskDutyAssociation<?> duty,
-			AdministratorContext adminContext) throws Exception;
+			AdministratorContext adminContext) throws Throwable;
 
 	/**
 	 * Obtains the Object of the particular {@link ManagedObject}.

@@ -53,11 +53,11 @@ public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
 	 *            Extension interfaces to be administered.
 	 * @param context
 	 *            {@link AdministratorContext} to do the administration within.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If duty fails.
 	 */
 	void doDuty(TaskDutyAssociation<A> taskDutyAssociation,
 			List<I> extensionInterfaces, AdministratorContext context)
-			throws Exception;
+			throws Throwable;
 
 }
