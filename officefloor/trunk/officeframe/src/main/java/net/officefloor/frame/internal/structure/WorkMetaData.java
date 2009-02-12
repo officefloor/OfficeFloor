@@ -33,6 +33,8 @@ public interface WorkMetaData<W extends Work> {
 	 * 
 	 * @return ID distinguishing this {@link Work} from the other {@link Work}.
 	 */
+	// TODO remove work ID in favour of bounding to a scope
+	@Deprecated
 	int getWorkId();
 
 	/**
@@ -52,13 +54,31 @@ public interface WorkMetaData<W extends Work> {
 	FlowMetaData<W> getInitialFlowMetaData();
 
 	/**
-	 * Obtains the meta-data of the {@link ManagedObject} instances for the
+	 * Obtains the {@link ManagedObjectIndex} instances to look up the
+	 * {@link ManagedObjectContainer} instances for the {@link Work}.
+	 * 
+	 * @return {@link ManagedObjectIndex} instances to look up the
+	 *         {@link ManagedObjectContainer} instances for the {@link Work}.
+	 */
+	ManagedObjectIndex[] getManagedObjectIndexes();
+
+	/**
+	 * Obtains the meta-data of the {@link ManagedObject} instances bound to the
 	 * {@link Work}.
 	 * 
-	 * @return Meta-data of the {@link ManagedObject} instances for the
+	 * @return Meta-data of the {@link ManagedObject} instances bound to the
 	 *         {@link Work}.
 	 */
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
+
+	/**
+	 * Obtains the {@link AdministratorIndex} instances to look up the
+	 * {@link AdministratorContainer} instances for the {@link Work}.
+	 * 
+	 * @return {@link AdministratorIndex} instances to look up the
+	 *         {@link AdministratorContainer} instances for the {@link Work}.
+	 */
+	AdministratorIndex[] getAdministratorIndexes();
 
 	/**
 	 * Obtains the meta-data of the {@link Administrator} instances for the

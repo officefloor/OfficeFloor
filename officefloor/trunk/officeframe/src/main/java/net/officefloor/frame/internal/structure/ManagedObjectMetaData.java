@@ -36,6 +36,8 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * Index indicating the {@link ManagedObject} will not be sourced from the
 	 * {@link ProcessState}.
 	 */
+	// TODO use the ManagedObjectIndex
+	@Deprecated
 	static final int NON_PROCESS_INDEX = -1;
 
 	/**
@@ -60,6 +62,8 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * @return Index of the {@link ManagedObject} within the
 	 *         {@link ProcessState} or {@link #NON_PROCESS_INDEX}.
 	 */
+	// TODO use the ManagedObjectIndex
+	@Deprecated
 	int getProcessStateManagedObjectIndex();
 
 	/**

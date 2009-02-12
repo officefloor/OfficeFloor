@@ -67,6 +67,24 @@ public interface ThreadState extends FlowFuture {
 	ProcessState getProcessState();
 
 	/**
+	 * Obtains the {@link ManagedObjectContainer} for the input index.
+	 * 
+	 * @param index
+	 *            Index of the {@link ManagedObjectContainer} to be returned.
+	 * @return {@link ManagedObjectContainer} for the index.
+	 */
+	ManagedObjectContainer getManagedObjectContainer(int index);
+
+	/**
+	 * Obtains the {@link AdministratorContainer} for the input index.
+	 * 
+	 * @param index
+	 *            Index of the {@link AdministratorContainer} to be returned.
+	 * @return {@link AdministratorContainer} for the index.
+	 */
+	AdministratorContainer<?, ?> getAdministratorContainer(int index);
+
+	/**
 	 * Flags that escalation is about to happen on this {@link ThreadState}.
 	 * 
 	 * @param currentTaskNode

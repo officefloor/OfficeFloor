@@ -17,8 +17,7 @@
 package net.officefloor.frame.internal.structure;
 
 /**
- * Listener for the completion of a
- * {@link net.officefloor.frame.internal.structure.ProcessState}.
+ * Listener for the completion of a {@link ProcessState}.
  * 
  * @author Daniel
  */
