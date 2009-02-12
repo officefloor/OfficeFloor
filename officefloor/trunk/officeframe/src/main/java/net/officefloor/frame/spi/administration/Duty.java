@@ -19,21 +19,21 @@ package net.officefloor.frame.spi.administration;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link Duty} to be undertaken to administer than {@link ManagedObject}
+ * {@link Duty} to be undertaken to administer the {@link ManagedObject}
  * instances.
  * 
  * @author Daniel
  */
-public interface Duty<I extends Object, F extends Enum<F>> {
+public interface Duty<I, F extends Enum<F>> {
 
 	/**
 	 * Administers the {@link ManagedObject} instances.
 	 * 
 	 * @param context
 	 *            {@link DutyContext}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to do duty.
 	 */
-	void doDuty(DutyContext<I, F> context) throws Exception;
+	void doDuty(DutyContext<I, F> context) throws Throwable;
 
 }
