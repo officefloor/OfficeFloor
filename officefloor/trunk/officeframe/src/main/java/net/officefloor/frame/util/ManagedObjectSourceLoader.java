@@ -186,7 +186,7 @@ public class ManagedObjectSourceLoader {
 		MS moSource = managedObjectSourceClass.newInstance();
 
 		// Create necessary builders
-		OfficeFloorBuilder officeFloorBuilder = OfficeFrame.getInstance()
+		OfficeFloorBuilder officeFloorBuilder = OfficeFrame
 				.createOfficeFloorBuilder();
 		ManagedObjectBuilder<H> managedObjectBuilder = officeFloorBuilder
 				.addManagedObject(STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME,

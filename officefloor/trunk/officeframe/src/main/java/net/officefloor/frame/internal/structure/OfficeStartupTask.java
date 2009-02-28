@@ -16,21 +16,28 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.manage.Office;
+
 /**
- * Meta-data for the
- * {@link net.officefloor.frame.internal.structure.ProcessState}.
+ * Startup task for an {@link Office}.
  * 
  * @author Daniel
  */
-public interface ProcessStateMetaData {
+public interface OfficeStartupTask {
 
 	/**
-	 * Obtains the listing of {@link ManagedObjectMetaData} for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances
-	 * bound to the process within the Office.
+	 * Obtains the {@link FlowMetaData} for the startup task.
 	 * 
-	 * @return {@link ManagedObjectMetaData} instances.
+	 * @return {@link FlowMetaData} for the startup task.
 	 */
-	<D extends Enum<D>> ManagedObjectMetaData<D>[] getManagedObjectMetaData();
+	FlowMetaData<?> getFlowMetaData();
+
+	/**
+	 * Obtains the parameter to invoke the startup {@link Task} with.
+	 * 
+	 * @return Parameter for the startup {@link Task}.
+	 */
+	Object getParameter();
 
 }

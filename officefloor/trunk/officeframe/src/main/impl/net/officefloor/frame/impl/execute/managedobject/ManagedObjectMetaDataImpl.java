@@ -19,12 +19,14 @@ package net.officefloor.frame.impl.execute.managedobject;
 import java.util.Map;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.office.OfficeImpl;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -36,7 +38,6 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.spi.team.Job;
 
 /**
@@ -45,7 +46,7 @@ import net.officefloor.frame.spi.team.Job;
  * @author Daniel
  */
 public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
-		ManagedObjectMetaData<D>, ManagedObjectPoolContext {
+		ManagedObjectMetaData<D> {
 
 	/**
 	 * {@link ManagedObjectSource} of the {@link ManagedObject}.
@@ -72,7 +73,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/**
 	 * Mappings for dependencies of this {@link ManagedObject}.
 	 */
-	private final Map<D, Integer> dependencyMapping;
+	private final Map<D, ManagedObjectIndex> dependencyMapping;
 
 	/**
 	 * {@link ManagedObjectPool} of the {@link ManagedObject}.
@@ -96,9 +97,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private final AssetManager operationsManager;
 
 	/**
-	 * {@link OfficeImpl} to create the {@link Job} instances.
+	 * {@link OfficeMetaData} containing this {@link ManagedObjectMetaData} to
+	 * create the {@link Job} instances.
 	 */
-	private OfficeImpl office;
+	private OfficeMetaData officeMetaData;
 
 	/**
 	 * {@link FlowMetaData} for the recycling of this {@link ManagedObject}.
@@ -111,29 +113,32 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * 
 	 * @param source
 	 *            {@link ManagedObjectSource} of the {@link ManagedObject}.
-	 * @param timeout
-	 *            Timeout of an asynchronous operation by the
-	 *            {@link ManagedObject} being managed.
-	 * @param dependencyMapping
-	 *            Mappings for dependencies of this {@link ManagedObject}.
 	 * @param pool
 	 *            {@link ManagedObjectPool} of the {@link ManagedObject}.
-	 * @param isManagedObjectAsynchronous
-	 *            <code>true</code> if the {@link ManagedObject} is
-	 *            {@link AsynchronousManagedObject}.
 	 * @param sourcingManager
 	 *            {@link AssetManager} to manage the sourcing of the
 	 *            {@link ManagedObject} instances.
+	 * @param isManagedObjectAsynchronous
+	 *            <code>true</code> if the {@link ManagedObject} is
+	 *            {@link AsynchronousManagedObject}.
 	 * @param operationsManager
 	 *            {@link AssetManager} to manage the asynchronous operations on
 	 *            the {@link ManagedObject} instances.
+	 * @param isCoordinatingManagedObject
+	 *            <code>true</code> if the {@link ManagedObject} is
+	 *            {@link CoordinatingManagedObject}.
+	 * @param dependencyMapping
+	 *            Mappings for dependencies of this {@link ManagedObject}.
+	 * @param timeout
+	 *            Timeout of an asynchronous operation by the
+	 *            {@link ManagedObject} being managed.
 	 */
 	public ManagedObjectMetaDataImpl(ManagedObjectSource<?, ?> source,
 			ManagedObjectPool pool, AssetManager sourcingManager,
 			boolean isManagedObjectAsynchronous,
 			AssetManager operationsManager,
 			boolean isCoordinatingManagedObject,
-			Map<D, Integer> dependencyMapping, long timeout) {
+			Map<D, ManagedObjectIndex> dependencyMapping, long timeout) {
 		this.source = source;
 		this.timeout = timeout;
 		this.isCoordinatingManagedObject = isCoordinatingManagedObject;
@@ -147,24 +152,19 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/**
 	 * Loads the remaining state of this {@link ManagedObjectMetaData}.
 	 * 
-	 * @param office
-	 *            {@link OfficeImpl}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData} of the {@link Office} containing this
+	 *            {@link ManagedObjectMetaData}.
 	 * @param recycleFlowMetaData
 	 *            {@link FlowMetaData} for the recycing of this
 	 *            {@link ManagedObject}.
 	 * @throws Exception
 	 *             If fails to load remaining state.
 	 */
-	public void loadRemainingState(OfficeImpl office,
+	public void loadRemainingState(OfficeMetaData officeMetaData,
 			FlowMetaData<?> recycleFlowMetaData) throws Exception {
-		// Load the remaining state
-		this.office = office;
+		this.officeMetaData = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
-
-		// Initiate the pool
-		if (this.pool != null) {
-			this.pool.init(this);
-		}
 	}
 
 	/*
@@ -174,15 +174,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	@Override
 	public ManagedObjectContainer createManagedObjectContainer(
 			ProcessState processState) {
-		// Return the created managed object container
 		return new ManagedObjectContainerImpl(this, processState);
-	}
-
-	@Override
-	public int getProcessStateManagedObjectIndex() {
-		// TODO remove method once removed from interface
-		throw new UnsupportedOperationException(
-				"TODO remove once removed from interface");
 	}
 
 	@Override
@@ -238,7 +230,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 					managedObject);
 
 			// Create the recycle job node
-			JobNode recycleJobNode = this.office.createProcess(
+			JobNode recycleJobNode = this.officeMetaData.createProcess(
 					this.recycleFlowMetaData, parameter, null, -1, null);
 
 			// Listen to process completion (handle not being recycled)

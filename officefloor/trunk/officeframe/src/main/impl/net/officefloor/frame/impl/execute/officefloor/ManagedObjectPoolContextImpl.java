@@ -14,26 +14,41 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl;
+package net.officefloor.frame.impl.execute.officefloor;
 
-import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.impl.construct.officefloor.OfficeFloorBuilderImpl;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.pool.ManagedObjectPoolContext;
 
 /**
- * Default implementation of the {@link OfficeFrame}.
+ * {@link ManagedObjectPoolContext} implementation.
  * 
  * @author Daniel
  */
-public class OfficeFrameImpl extends OfficeFrame {
+public class ManagedObjectPoolContextImpl implements ManagedObjectPoolContext {
+
+	/**
+	 * {@link ManagedObjectSource}.
+	 */
+	private final ManagedObjectSource<?, ?> managedObjectSource;
+
+	/**
+	 * Initialise.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource}.
+	 */
+	public ManagedObjectPoolContextImpl(
+			ManagedObjectSource<?, ?> managedObjectSource) {
+		this.managedObjectSource = managedObjectSource;
+	}
 
 	/*
-	 * ======================== OfficeFrame ==================================
+	 * =================== ManagedObjectPoolContext =======================
 	 */
 
 	@Override
-	public OfficeFloorBuilder createOfficeFloorBuilder(String officeFloorName) {
-		return new OfficeFloorBuilderImpl(officeFloorName);
+	public ManagedObjectSource<?, ?> getManagedObjectSource() {
+		return this.managedObjectSource;
 	}
 
 }

@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;

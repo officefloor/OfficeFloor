@@ -72,4 +72,28 @@ public interface OfficeFloorBuilder {
 	 *            {@link EscalationProcedure}.
 	 */
 	void setEscalationProcedure(EscalationProcedure escalationProcedure);
+
+	/**
+	 * Builds the {@link OfficeFloor}.
+	 * 
+	 * @param issuesListener
+	 *            {@link OfficeFloorIssues} to listen for issues in constructing
+	 *            the {@link OfficeFloor}.
+	 * @return Built {@link OfficeFloor} if successfully built, or
+	 *         <code>null</code> if could not construct {@link OfficeFloor} with
+	 *         reasons passed to the {@link OfficeFloorIssues}.
+	 */
+	OfficeFloor buildOfficeFloor(OfficeFloorIssues issuesListener);
+
+	/**
+	 * Builds the {@link OfficeFloor}.
+	 * 
+	 * @return Built {@link OfficeFloor}.
+	 * @throws OfficeFloorBuildException
+	 *             If fails to build the {@link OfficeFloor}.
+	 * 
+	 * @see OfficeFloorBuildException
+	 */
+	OfficeFloor buildOfficeFloor() throws OfficeFloorBuildException;
+
 }

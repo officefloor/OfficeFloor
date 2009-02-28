@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -1057,7 +1057,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	private void record_WorkMetaData() {
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getWorkMetaData(), this.workMetaData);
+				.getWorkMetaData(this.issues), this.workMetaData);
 	}
 
 	/**

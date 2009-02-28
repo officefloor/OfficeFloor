@@ -17,24 +17,30 @@
 package net.officefloor.frame.impl.construct.managedobject;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
 /**
  * Raw meta-data for a bound {@link ManagedObject}.
@@ -354,10 +360,58 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public ManagedObjectMetaData<?> getManagedObjectMetaData() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement RawBoundManagedObjectMetaData<D>.getManagedObjectMetaData");
+	@SuppressWarnings("unchecked")
+	public ManagedObjectMetaData<?> getManagedObjectMetaData(
+			OfficeFloorIssues issues) {
+
+		// Obtain the details of the managed object
+		ManagedObjectSource<D, ?> managedObjectSource = this.rawMoMetaData
+				.getManagedObjectSource();
+		ManagedObjectPool managedObjectPool = this.rawMoMetaData
+				.getManagedObjectPool();
+		AssetManager sourcingAssetManager = this.rawMoMetaData
+				.getSourcingAssetManager();
+		AssetManager operationsAssetManager = this.rawMoMetaData
+				.getOperationsAssetManager();
+		boolean isManagedObjectAsynchronous = this.rawMoMetaData
+				.isAsynchronous();
+		boolean isManagedObjectCoordinating = this.rawMoMetaData
+				.isCoordinating();
+		long timeout = this.rawMoMetaData.getDefaultTimeout();
+
+		// Obtain the dependency mapping
+		Map<D, ManagedObjectIndex> dependencyMapping = null;
+		for (D dependencyKey : this.dependencyKeys) {
+
+			// Lazy create the dependency mapping based on key type
+			if (dependencyMapping == null) {
+				Class<D> dependencyKeyClass = (Class<D>) dependencyKey
+						.getClass();
+				dependencyMapping = new EnumMap<D, ManagedObjectIndex>(
+						dependencyKeyClass);
+			}
+
+			// Load the dependency
+			RawBoundManagedObjectMetaData<?> dependency = this.dependencies
+					.get(dependencyKey);
+			dependencyMapping.put(dependencyKey, dependency
+					.getManagedObjectIndex());
+		}
+		if (dependencyMapping == null) {
+			// Ensure have a dependency map
+			dependencyMapping = Collections.emptyMap();
+		}
+
+		// Create the managed object meta-data
+		ManagedObjectMetaDataImpl<D> metaData = new ManagedObjectMetaDataImpl<D>(
+				managedObjectSource, managedObjectPool, sourcingAssetManager,
+				isManagedObjectAsynchronous, operationsAssetManager,
+				isManagedObjectCoordinating, dependencyMapping, timeout);
+
+		// TODO load the remaining state
+
+		// Return the managed object meta-data
+		return metaData;
 	}
 
 }

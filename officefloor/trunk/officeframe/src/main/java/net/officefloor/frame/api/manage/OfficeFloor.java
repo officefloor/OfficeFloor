@@ -27,8 +27,11 @@ public interface OfficeFloor {
 
 	/**
 	 * Opens the floor and starts all {@link Work}.
+	 * 
+	 * @throws Exception
+	 *             If fails to open the floor.
 	 */
-	void openOfficeFloor();
+	void openOfficeFloor() throws Exception;
 
 	/**
 	 * Closes the floor. This stops all {@link Work} within the {@link Office}

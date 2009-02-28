@@ -21,8 +21,13 @@ import java.util.Map;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.execute.office.OfficeImpl;
+import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -56,22 +61,12 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * ====================== OfficeFloor ================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.manage.OfficeFloor#openOfficeFloor()
-	 */
 	@Override
-	public synchronized void openOfficeFloor() {
+	public synchronized void openOfficeFloor() throws Exception {
 
 		// Ensure not already open
 		if (this.offices != null) {
 			throw new IllegalStateException("Office floor is already open");
-		}
-
-		// Start the teams working, necessary to create the offices
-		for (Team team : this.officeFloorMetaData.getTeams()) {
-			team.startWorking();
 		}
 
 		// Create the offices to open floor for work
@@ -82,18 +77,59 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 			// Create the office
 			String officeName = officeMetaData.getOfficeName();
-			Office office = officeMetaData.createOffice();
+			Office office = new OfficeImpl(officeMetaData);
 
 			// Maintain reference to office for returning
 			this.offices.put(officeName, office);
 		}
+
+		// Start the managed object source instances
+		for (ManagedObjectSourceInstance<?> mosInstance : this.officeFloorMetaData
+				.getManagedObjectSourceInstances()) {
+			this.startManagedObjectSourceInstance(mosInstance);
+		}
+
+		// TODO start the Project Manager (Office Manager)
+
+		// Start the teams working within the offices
+		for (Team team : this.officeFloorMetaData.getTeams()) {
+			team.startWorking();
+		}
+
+		// Invoke the startup tasks for each office
+		for (OfficeMetaData officeMetaData : officeMetaDatas) {
+			for (OfficeStartupTask startupTask : officeMetaData
+					.getStartupTasks()) {
+				officeMetaData.createProcess(startupTask.getFlowMetaData(),
+						startupTask.getParameter());
+			}
+		}
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Starts the {@link ManagedObjectSourceInstance}.
 	 * 
-	 * @see net.officefloor.frame.api.manage.OfficeFloor#closeOfficeFloor()
+	 * @param mosInstance
+	 *            {@link ManagedObjectSourceInstance}.
+	 * @throws Exception
+	 *             If fails to start the {@link ManagedObjectSourceInstance}.
 	 */
+	private <H extends Enum<H>> void startManagedObjectSourceInstance(
+			ManagedObjectSourceInstance<H> mosInstance) throws Exception {
+
+		// Start the managed object source
+		ManagedObjectSource<?, H> mos = mosInstance.getManagedObjectSource();
+		mos.start(new ManagedObjectExecuteContextImpl<H>(mosInstance
+				.getHandlers()));
+
+		// Determine if pooled
+		ManagedObjectPool pool = mosInstance.getManagedObjectPool();
+		if (pool != null) {
+			// Have pool, so start the pool
+			pool.init(new ManagedObjectPoolContextImpl(mos));
+		}
+	}
+
 	@Override
 	public synchronized void closeOfficeFloor() {
 
@@ -103,21 +139,20 @@ public class OfficeFloorImpl implements OfficeFloor {
 			return;
 		}
 
+		// TODO provide notification to managed objects to stop working
+
 		// Stop the teams working as closing
+		// TODO need to consider teams handing off tasks between each other
 		for (Team team : this.officeFloorMetaData.getTeams()) {
 			team.stopWorking();
 		}
+		
+		// TODO stop the Project Manager (Office Manager)
 
 		// Flag that no longer open
 		this.offices = null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.manage.OfficeFloor#getOffice(java.lang.String)
-	 */
 	@Override
 	public synchronized Office getOffice(String officeName) {
 

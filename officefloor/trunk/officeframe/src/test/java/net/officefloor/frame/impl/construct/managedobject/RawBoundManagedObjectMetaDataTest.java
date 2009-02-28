@@ -19,8 +19,8 @@ package net.officefloor.frame.impl.construct.managedobject;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
@@ -176,7 +176,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.constructRawBoundManagedObjectMetaData(1,
 						this.managedObjectConfiguration);
 		ManagedObjectMetaData<?> moMetaData = rawBoundMoMetaData[0]
-				.getManagedObjectMetaData();
+				.getManagedObjectMetaData(this.issues);
 		this.verifyMockObjects();
 
 		// Verify the managed object meta-data contents
@@ -193,6 +193,9 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.isManagedObjectAsynchronous());
 		assertFalse("Not coordinating", moMetaData
 				.isCoordinatingManagedObject());
+
+		// Verify managed object meta-data
+
 	}
 
 	/**

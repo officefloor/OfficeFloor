@@ -18,22 +18,30 @@ package net.officefloor.frame.impl.construct.administrator;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
+import net.officefloor.frame.impl.execute.administrator.AdministratorMetaDataImpl;
+import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDataImpl;
+import net.officefloor.frame.impl.execute.duty.DutyMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.DutyMetaData;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -386,10 +394,42 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public AdministratorMetaData<?, ?> getAdministratorMetaData() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement RawBoundAdministratorMetaData<I,A>.getAdministratorMetaData");
+
+		// Create the listing of managed object meta-data
+		ExtensionInterfaceMetaData<I>[] eiMetaData = new ExtensionInterfaceMetaData[this.rawAdministeredManagedObjects.length];
+		for (int i = 0; i < eiMetaData.length; i++) {
+
+			// Obtain the details of extension interface
+			RawAdministeredManagedObjectMetaData<I> adminMo = this.rawAdministeredManagedObjects[i];
+			int index = -1; // TODO obtain the index
+			ExtensionInterfaceFactory<I> factory = adminMo
+					.getExtensionInterfaceFactory();
+
+			// Create and load the extension interface meta-data
+			eiMetaData[i] = new ExtensionInterfaceMetaDataImpl<I>(index,
+					factory);
+		}
+
+		// TODO obtain the escalation procedure
+		EscalationProcedure escalationProcedure = null;
+
+		// Create the administrator meta-data
+		AdministratorMetaDataImpl<I, A> metaData = new AdministratorMetaDataImpl<I, A>(
+				this.administratorSource, eiMetaData, this.team,
+				escalationProcedure);
+
+		// TODO look to support duty invoking other tasks
+		Map<A, DutyMetaData> dutyMetaData = new HashMap<A, DutyMetaData>();
+		for (A dutyKey : this.dutyKeys) {
+			dutyMetaData
+					.put(dutyKey, new DutyMetaDataImpl(new FlowMetaData[0]));
+		}
+		metaData.loadRemainingState(dutyMetaData);
+
+		// Returns the administrator meta-data
+		return metaData;
 	}
 
 	/**

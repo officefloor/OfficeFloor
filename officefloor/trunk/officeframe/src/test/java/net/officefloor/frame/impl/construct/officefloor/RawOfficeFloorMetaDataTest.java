@@ -18,11 +18,15 @@ package net.officefloor.frame.impl.construct.officefloor;
 
 import java.util.Arrays;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataFactory;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
@@ -41,6 +45,11 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
+
+	/**
+	 * Name of the {@link OfficeFloor}.
+	 */
+	private static final String OFFICE_FLOOR_NAME = "OFFICE_FLOOR";
 
 	/**
 	 * {@link OfficeFloorConfiguration}.
@@ -92,10 +101,48 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 			.createMock(RawManagedObjectMetaData.class);
 
 	/**
+	 * {@link RawBoundManagedObjectMetaDataFactory}.
+	 */
+	private final RawBoundManagedObjectMetaDataFactory rawBoundMoFactory = this
+			.createMock(RawBoundManagedObjectMetaDataFactory.class);
+
+	/**
+	 * {@link RawBoundAdministratorMetaDataFactory}.
+	 */
+	private final RawBoundAdministratorMetaDataFactory rawBoundAdminFactory = this
+			.createMock(RawBoundAdministratorMetaDataFactory.class);
+
+	/**
 	 * {@link AssetManagerFactory}.
 	 */
 	private final AssetManagerFactory assetManagerFactory = this
 			.createMock(AssetManagerFactory.class);
+
+	/**
+	 * {@link RawOfficeMetaDataFactory}.
+	 */
+	private final RawOfficeMetaDataFactory rawOfficeFactory = this
+			.createMock(RawOfficeMetaDataFactory.class);
+
+	/**
+	 * Ensures issue if no {@link OfficeFloor} name.
+	 */
+	public void testNoOfficeFloorName() {
+
+		// Record no office floor name
+		this.recordReturn(this.configuration, this.configuration
+				.getOfficeFloorName(), null);
+		this.issues.addIssue(AssetType.OFFICE_FLOOR, "Unknown",
+				"Name not provided for Office Floor");
+		this.record_constructTeams();
+		this.record_constructManagedObjectSources();
+		this.record_constructEscalationProcedure();
+
+		// Attempt to construct office floor
+		this.replayMockObjects();
+		this.constructRawOfficeFloorMetaData();
+		this.verifyMockObjects();
+	}
 
 	/**
 	 * Ensures handle not construct {@link Team}.
@@ -103,6 +150,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	public void testNotConstructTeam() {
 
 		// Record not construct team
+		this.record_officeFloorName();
 		this.recordReturn(this.configuration, this.configuration
 				.getTeamConfiguration(),
 				new TeamConfiguration[] { this.teamConfiguration });
@@ -130,6 +178,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		final RawTeamMetaData teamTwo = this.createMock(RawTeamMetaData.class);
 
 		// Record construct teams with duplicate name
+		this.record_officeFloorName();
 		this.recordReturn(this.configuration, this.configuration
 				.getTeamConfiguration(), new TeamConfiguration[] {
 				this.teamConfiguration, this.teamConfiguration });
@@ -141,9 +190,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				.constructRawTeamMetaData(this.teamConfiguration, this.issues),
 				teamTwo);
 		this.recordReturn(teamTwo, teamTwo.getTeamName(), DUPLICATE_TEAM_NAME);
-		this.issues.addIssue(AssetType.OFFICE_FLOOR, "OfficeFloor",
-				"Teams registered with the same name '" + DUPLICATE_TEAM_NAME
-						+ "'");
+		this.record_officeFloorIssue("Teams registered with the same name '"
+				+ DUPLICATE_TEAM_NAME + "'");
 
 		// Focus on teams
 		this.record_constructManagedObjectSources();
@@ -166,9 +214,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	public void testConstructTeams() {
 
 		// Record constructing teams
+		this.record_officeFloorName();
 		this.record_constructTeams("ONE", "TWO", "THREE");
-
-		// Focus on teams
 		this.record_constructManagedObjectSources();
 		this.record_constructEscalationProcedure();
 
@@ -190,10 +237,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testNotConstructManagedObject() {
 
-		// Focus on managed objects
-		this.record_constructTeams();
-
 		// Record not construct managed object
+		this.record_officeFloorName();
+		this.record_constructTeams();
 		this
 				.recordReturn(
 						this.configuration,
@@ -204,8 +250,6 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 				.constructRawManagedObjectMetaData(this.mosConfiguration,
 						this.issues, this.assetManagerFactory,
 						this.configuration), null);
-
-		// Focus on managed objects
 		this.record_constructEscalationProcedure();
 
 		// Attempt to construct office floor
@@ -226,10 +270,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		final RawManagedObjectMetaData mosTwo = this
 				.createMock(RawManagedObjectMetaData.class);
 
-		// Focus on managed objects
-		this.record_constructTeams();
-
 		// Record construct managed object sources with duplicate name
+		this.record_officeFloorName();
+		this.record_constructTeams();
 		this.recordReturn(this.configuration, this.configuration
 				.getManagedObjectSourceConfiguration(),
 				new ManagedObjectSourceConfiguration[] { this.mosConfiguration,
@@ -246,11 +289,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 						this.configuration), mosTwo);
 		this.recordReturn(mosTwo, mosTwo.getManagedObjectName(),
 				DUPLICATE_MANAGED_OBJECT_SOURCE_NAME);
-		this.issues.addIssue(AssetType.OFFICE_FLOOR, "OfficeFloor",
-				"Managed object sources registered with the same name '"
+		this
+				.record_officeFloorIssue("Managed object sources registered with the same name '"
 						+ DUPLICATE_MANAGED_OBJECT_SOURCE_NAME + "'");
-
-		// Focus on managed objects
 		this.record_constructEscalationProcedure();
 
 		// Attempt to construct office floor
@@ -272,13 +313,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testConstructManagedObjectSources() {
 
-		// Focus on managed object sources
-		this.record_constructTeams();
-
 		// Record construction of the teams
+		this.record_officeFloorName();
+		this.record_constructTeams();
 		this.record_constructManagedObjectSources("ONE", "TWO", "THREE");
-
-		// Focus on managed objects
 		this.record_constructEscalationProcedure();
 
 		// Attempt to construct office floor
@@ -298,11 +336,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoEscalationProcedure() {
 
-		// No teams and managed object sources
+		// Record no escalation procedure
+		this.record_officeFloorName();
 		this.record_constructTeams();
 		this.record_constructManagedObjectSources();
-
-		// Record no escalation procedure
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalationProcedure(), null);
 
@@ -327,11 +364,10 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		final EscalationProcedure escalationProcedure = this
 				.createMock(EscalationProcedure.class);
 
-		// No teams and managed object sources
+		// Record have escalation procedure
+		this.record_officeFloorName();
 		this.record_constructTeams();
 		this.record_constructManagedObjectSources();
-
-		// Record no escalation procedure
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalationProcedure(), escalationProcedure);
 
@@ -344,6 +380,14 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		// Ensure provide escalation procedure
 		assertEquals("Must be able to provide escalation procedure",
 				escalationProcedure, metaData.getEscalationProcedure());
+	}
+
+	/**
+	 * Records obtaining the {@link OfficeFloor} name.
+	 */
+	private void record_officeFloorName() {
+		this.recordReturn(this.configuration, this.configuration
+				.getOfficeFloorName(), OFFICE_FLOOR_NAME);
 	}
 
 	/**
@@ -407,6 +451,17 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records an issue for the {@link OfficeFloor}.
+	 * 
+	 * @param issueDescription
+	 *            Description of issue.
+	 */
+	private void record_officeFloorIssue(String issueDescription) {
+		this.issues.addIssue(AssetType.OFFICE_FLOOR, OFFICE_FLOOR_NAME,
+				issueDescription);
+	}
+
+	/**
 	 * Constructs the {@link RawOfficeFloorMetaDataImpl}.
 	 * 
 	 * @return {@link RawOfficeFloorMetaDataImpl}.
@@ -417,7 +472,9 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 		RawOfficeFloorMetaData metaData = RawOfficeFloorMetaDataImpl
 				.getFactory().constructRawOfficeFloorMetaData(
 						this.configuration, this.issues, this.rawTeamFactory,
-						this.rawMosFactory, this.assetManagerFactory);
+						this.rawMosFactory, this.rawBoundMoFactory,
+						this.rawBoundAdminFactory, this.assetManagerFactory,
+						this.rawOfficeFactory);
 
 		// Meta-data should always be constructed
 		assertNotNull("Meta-data should be constructed", metaData);

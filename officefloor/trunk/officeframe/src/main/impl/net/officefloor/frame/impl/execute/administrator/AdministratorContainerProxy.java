@@ -35,6 +35,8 @@ import net.officefloor.frame.internal.structure.TaskDutyAssociation;
  * 
  * @author Daniel
  */
+// TODO remove
+@Deprecated
 public class AdministratorContainerProxy<I extends Object, A extends Enum<A>>
 		implements AdministratorContainer<I, A> {
 

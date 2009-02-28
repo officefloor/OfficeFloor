@@ -190,9 +190,10 @@ public class ProcessStateImpl implements ProcessState {
 		FlowMetaData<Work> catchAllFlow = new FlowMetaDataImpl<Work>(
 				FlowInstigationStrategyEnum.SEQUENTIAL, catchAllTask, null);
 		WorkMetaData<Work> workMetaData = new WorkMetaDataImpl<Work>(
-				new CatchAllEscalationWorkFactory(), new ManagedObjectIndex[0],
-				new ManagedObjectMetaData[0], new AdministratorIndex[0],
-				new AdministratorMetaData[0], catchAllFlow);
+				"Catch All Escalation", new CatchAllEscalationWorkFactory(),
+				new ManagedObjectIndex[0], new ManagedObjectMetaData[0],
+				new AdministratorIndex[0], new AdministratorMetaData[0],
+				catchAllFlow);
 		catchAllTask.loadRemainingState(workMetaData, new FlowMetaData[0],
 				null, null);
 		Escalation catchAllEscalation = new EscalationImpl(Throwable.class,

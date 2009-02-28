@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.construct.team;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.spi.team.source.TeamSource;
 

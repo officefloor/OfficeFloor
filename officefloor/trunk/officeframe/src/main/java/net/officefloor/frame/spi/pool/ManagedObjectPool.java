@@ -7,9 +7,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 
 /**
- * <p>
- * Pool of {@link net.officefloor.frame.spi.managedobject.ManagedObject}
- * instances.
+ * Pool of {@link ManagedObject} instances.
  * 
  * @author Daniel
  */

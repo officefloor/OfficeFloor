@@ -37,6 +37,11 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 
 	/**
+	 * Name of this {@link Work}.
+	 */
+	private final String workName;
+
+	/**
 	 * {@link WorkFactory}.
 	 */
 	private final WorkFactory<W> workFactory;
@@ -91,12 +96,13 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 *            {@link FlowMetaData} for the initial {@link Flow} of the
 	 *            {@link Work}.
 	 */
-	public WorkMetaDataImpl(WorkFactory<W> workFactory,
+	public WorkMetaDataImpl(String workName, WorkFactory<W> workFactory,
 			ManagedObjectIndex[] moIndexes,
 			ManagedObjectMetaData<?>[] moMetaData,
 			AdministratorIndex[] adminIndexes,
 			AdministratorMetaData<?, ?>[] adminMetaData,
 			FlowMetaData<W> initialFlowMetaData) {
+		this.workName = workName;
 		this.workFactory = workFactory;
 		this.managedObjectIndexes = moIndexes;
 		this.managedObjectMetaData = moMetaData;
@@ -113,6 +119,11 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	public int getWorkId() {
 		// TODO remove
 		throw new UnsupportedOperationException("getWorkId deprecated");
+	}
+
+	@Override
+	public String getWorkName() {
+		return this.workName;
 	}
 
 	@Override

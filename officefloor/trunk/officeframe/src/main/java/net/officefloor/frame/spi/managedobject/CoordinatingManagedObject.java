@@ -5,13 +5,10 @@ package net.officefloor.frame.spi.managedobject;
 
 /**
  * <p>
- * Provides the ability for the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} to obtain
- * references to the Objects of other
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances.
+ * Provides the ability for the {@link ManagedObject} to obtain references to
+ * the Objects of other {@link ManagedObject} instances.
  * <p>
- * Optionally implemented by the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} provider.
+ * Optionally implemented by the {@link ManagedObject} provider.
  * 
  * @author Daniel
  */
@@ -28,10 +25,10 @@ public interface CoordinatingManagedObject<D extends Enum<D>> {
 	 * @param registry
 	 *            Registry of the Objects for the {@link ManagedObject}
 	 *            instances.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             Should this {@link CoordinatingManagedObject} fail to load
 	 *             the {@link ManagedObject}.
 	 */
-	void loadObjects(ObjectRegistry<D> registry) throws Exception;
+	void loadObjects(ObjectRegistry<D> registry) throws Throwable;
 
 }

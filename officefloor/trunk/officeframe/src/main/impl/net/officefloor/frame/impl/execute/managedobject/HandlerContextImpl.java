@@ -17,10 +17,12 @@
 package net.officefloor.frame.impl.execute.managedobject;
 
 import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
-import net.officefloor.frame.impl.execute.office.OfficeImpl;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -31,74 +33,57 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> {
 
 	/**
-	 * Index of the {@link ManagedObject} within the
-	 * {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 * Index of the {@link ManagedObject} within the {@link ProcessState}.
 	 */
-	protected final int processMoIndex;
+	private final int processMoIndex;
 
 	/**
 	 * List of initial {@link FlowMetaData} of the process links for the
-	 * {@link net.officefloor.frame.api.execute.Handler}.
+	 * {@link Handler}.
 	 */
-	protected final FlowMetaData<?>[] processLinks;
+	private final FlowMetaData<?>[] processLinks;
 
 	/**
-	 * {@link OfficeImpl} to create
-	 * {@link net.officefloor.frame.internal.structure.ProcessState} instances.
+	 * {@link OfficeMetaData} to create {@link ProcessState} instances.
 	 */
-	protected final OfficeImpl office;
+	private final OfficeMetaData officeMetaData;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param processMoIndex
-	 *            Index of the {@link ManagedObject} using the
-	 *            {@link net.officefloor.frame.api.execute.Handler} within the
-	 *            {@link net.officefloor.frame.internal.structure.ProcessState}.
+	 *            Index of the {@link ManagedObject} using the {@link Handler}
+	 *            within the {@link ProcessState}.
 	 * @param processLinks
 	 *            List of {@link FlowMetaData} of the process links for the
-	 *            {@link net.officefloor.frame.api.execute.Handler}.
-	 * @param office
-	 *            {@link OfficeImpl}.
+	 *            {@link Handler}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData} to create {@link ProcessState}
+	 *            instances.
 	 */
 	public HandlerContextImpl(int processMoIndex,
-			FlowMetaData<?>[] processLinks, OfficeImpl office) {
+			FlowMetaData<?>[] processLinks, OfficeMetaData officeMetaData) {
 		this.processMoIndex = processMoIndex;
 		this.processLinks = processLinks;
-		this.office = office;
+		this.officeMetaData = officeMetaData;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.HandlerContext#invokeProcess(F,
-	 * java.lang.Object, net.officefloor.frame.spi.managedobject.ManagedObject)
+	 * =============== HandlerContext =================================
 	 */
+
+	@Override
 	public void invokeProcess(F key, Object parameter,
 			ManagedObject managedObject) {
 		this.invokeProcess(key.ordinal(), parameter, managedObject, null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.HandlerContext#invokeProcess(int,
-	 * java.lang.Object, net.officefloor.frame.spi.managedobject.ManagedObject)
-	 */
+	@Override
 	public void invokeProcess(int processIndex, Object parameter,
 			ManagedObject managedObject) {
 		this.invokeProcess(processIndex, parameter, managedObject, null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.HandlerContext#invokeProcess(java.lang
-	 * .Enum, java.lang.Object,
-	 * net.officefloor.frame.spi.managedobject.ManagedObject,
-	 * net.officefloor.frame.api.execute.EscalationHandler)
-	 */
 	@Override
 	public void invokeProcess(F key, Object parameter,
 			ManagedObject managedObject, EscalationHandler escalationHandler) {
@@ -106,13 +91,6 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 				escalationHandler);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.HandlerContext#invokeProcess(int,
-	 * java.lang.Object, net.officefloor.frame.spi.managedobject.ManagedObject,
-	 * net.officefloor.frame.api.execute.EscalationHandler)
-	 */
 	@Override
 	public void invokeProcess(int processIndex, Object parameter,
 			ManagedObject managedObject, EscalationHandler escalationHandler) {
@@ -128,8 +106,9 @@ public class HandlerContextImpl<F extends Enum<F>> implements HandlerContext<F> 
 		FlowMetaData<?> flowMetaData = this.processLinks[processIndex];
 
 		// Create the job in a new process
-		JobNode jobNode = this.office.createProcess(flowMetaData, parameter,
-				managedObject, this.processMoIndex, escalationHandler);
+		JobNode jobNode = this.officeMetaData.createProcess(flowMetaData,
+				parameter, managedObject, this.processMoIndex,
+				escalationHandler);
 
 		// Activate the Job
 		jobNode.activateJob();

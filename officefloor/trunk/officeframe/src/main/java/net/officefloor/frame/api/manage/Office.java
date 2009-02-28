@@ -46,6 +46,8 @@ public interface Office {
 	 * @throws Exception
 	 *             If fails to obtain the {@link ManagedObject}.
 	 */
+	// TODO consider moving this to OfficeFloor
+	@Deprecated
 	ManagedObject getManagedObject(String managedObjectId) throws Exception;
 
 }

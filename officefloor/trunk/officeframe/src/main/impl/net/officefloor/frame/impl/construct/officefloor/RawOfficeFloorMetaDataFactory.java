@@ -16,9 +16,12 @@
  */
 package net.officefloor.frame.impl.construct.officefloor;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataFactory;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 
@@ -41,14 +44,23 @@ public interface RawOfficeFloorMetaDataFactory {
 	 *            {@link RawTeamMetaDataFactory}.
 	 * @param rawMosFactory
 	 *            {@link RawManagedObjectMetaDataFactory}.
+	 * @param rawBoundMoFactory
+	 *            {@link RawBoundManagedObjectMetaDataFactory}.
+	 * @param rawBoundAdminFactory
+	 *            {@link RawBoundAdministratorMetaDataFactory}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
-	 * @return {@link RawOfficeFloorMetaDataImpl}.
+	 * @param rawOfficeFactory
+	 *            {@link RawOfficeMetaDataFactory}.
+	 * @return {@link RawOfficeFloorMetaData}.
 	 */
 	RawOfficeFloorMetaData constructRawOfficeFloorMetaData(
 			OfficeFloorConfiguration configuration, OfficeFloorIssues issues,
 			RawTeamMetaDataFactory rawTeamFactory,
 			RawManagedObjectMetaDataFactory rawMosFactory,
-			AssetManagerFactory assetManagerFactory);
+			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
+			RawBoundAdministratorMetaDataFactory rawBoundAdminFactory,
+			AssetManagerFactory assetManagerFactory,
+			RawOfficeMetaDataFactory rawOfficeFactory);
 
 }

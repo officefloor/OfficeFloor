@@ -16,7 +16,10 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Meta-data for the {@link Office}.
@@ -33,9 +36,60 @@ public interface OfficeMetaData {
 	String getOfficeName();
 
 	/**
-	 * Creates the {@link Office} from this meta-data.
+	 * Obtains the {@link WorkMetaData} of the {@link Work} that may be done
+	 * within this {@link Office}.
 	 * 
-	 * @return {@link Office}.
+	 * @return {@link WorkMetaData} instances of this {@link Office}.
 	 */
-	Office createOffice();
+	WorkMetaData<?>[] getWorkMetaData();
+
+	/**
+	 * Obtains the {@link OfficeStartupTask} instances for this {@link Office}.
+	 * 
+	 * @return {@link OfficeStartupTask} instances for this {@link Office}.
+	 */
+	OfficeStartupTask[] getStartupTasks();
+
+	/**
+	 * Creates a new {@link ProcessState} within the {@link Office} returning
+	 * the starting {@link JobNode} to be executed.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
+	 *            {@link ProcessState}.
+	 * @param parameter
+	 *            Parameter to the starting {@link JobNode}.
+	 * @param managedObject
+	 *            {@link ManagedObject} that possibly invoked the new
+	 *            {@link ProcessState}. This may be <code>null</code>.
+	 * @param processMoIndex
+	 *            Index of the {@link ManagedObject} within the
+	 *            {@link ProcessState}. Ignored if {@link ManagedObject} passed
+	 *            in is <code>null</code>.
+	 * @param managedObjectEscalationHandler
+	 *            Potential {@link EscalationHandler} provided by the
+	 *            {@link ManagedObject}. May be <code>null</code> to just use
+	 *            the default {@link Office} {@link EscalationProcedure}.
+	 *            Ignored if {@link ManagedObject} passed in is
+	 *            <code>null</code>.
+	 * @return {@link JobNode} to start processing the {@link ProcessState}.
+	 */
+	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
+			Object parameter, ManagedObject managedObject, int processMoIndex,
+			EscalationHandler managedObjectEscalationHandler);
+
+	/**
+	 * Creates a new {@link ProcessState} that is not triggered by a
+	 * {@link ManagedObject}.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData} of the starting {@link JobNode} for the
+	 *            {@link ProcessState}.
+	 * @param parameter
+	 *            Parameter to the starting {@link JobNode}.
+	 * @return {@link JobNode} to start processing the {@link ProcessState}.
+	 */
+	<W extends Work> JobNode createProcess(FlowMetaData<W> flowMetaData,
+			Object parameter);
+
 }

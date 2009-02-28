@@ -16,7 +16,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -31,35 +30,12 @@ public interface AdministratorMetaData<I extends Object, A extends Enum<A>>
 		extends JobMetaData {
 
 	/**
-	 * Index indicating the {@link Administrator} will not be sourced from the
-	 * {@link ProcessState}.
-	 */
-	// TODO Scopes have replaced need for this
-	@Deprecated
-	static final int NON_PROCESS_INDEX = -1;
-
-	/**
 	 * Creates a new {@link AdministratorContainer} from this
 	 * {@link AdministratorMetaData}.
 	 * 
 	 * @return New {@link AdministratorContainer}.
 	 */
 	AdministratorContainer<I, A> createAdministratorContainer();
-
-	/**
-	 * <p>
-	 * Obtains the index of the {@link Administrator} within the
-	 * {@link ProcessState}.
-	 * <p>
-	 * Note that if this does not provide a value of {@link #NON_PROCESS_INDEX}
-	 * then the {@link Administrator} will be sourced only for the {@link Work}.
-	 * 
-	 * @return Index of the {@link Administrator} within the
-	 *         {@link ProcessState} or {@link #NON_PROCESS_INDEX}.
-	 */
-	// TODO Scopes have replaced need for this
-	@Deprecated
-	int getProcessStateAdministratorIndex();
 
 	/**
 	 * Obtains the {@link AdministratorSource}.

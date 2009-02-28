@@ -38,7 +38,6 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.frame.impl.OfficeFrameImpl;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -56,6 +55,11 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
  */
 public abstract class AbstractOfficeConstructTestCase extends
 		OfficeFrameTestCase implements EscalationHandler {
+
+	/**
+	 * Index of the current {@link OfficeFloor} being constructed.
+	 */
+	private static int OFFICE_FLOOR_INDEX = 0;
 
 	/**
 	 * Index of the current {@link Office} being constructed.
@@ -99,12 +103,10 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
-		// Clear the office
-		((OfficeFrameImpl) OfficeFrameImpl.getInstance()).clearOfficeFloors();
-
 		// Initiate for constructing office
+		OFFICE_FLOOR_INDEX++;
 		this.officeFloorBuilder = OfficeFrame.getInstance()
-				.createOfficeFloorBuilder();
+				.createOfficeFloorBuilder(this.getOfficeFloorName());
 		OFFICE_INDEX++;
 		this.officeBuilder = this.officeFloorBuilder.addOffice(this
 				.getOfficeName());
@@ -188,6 +190,15 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 */
 	protected OfficeBuilder getOfficeBuilder() {
 		return this.officeBuilder;
+	}
+
+	/**
+	 * Obtains the name of the {@link OfficeFloor} currently being constructed.
+	 * 
+	 * @return Name of the {@link OfficeFloor} currently being constructed.
+	 */
+	protected String getOfficeFloorName() {
+		return "officefloor-" + OFFICE_FLOOR_INDEX;
 	}
 
 	/**
@@ -528,12 +539,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 	protected OfficeFloor constructOfficeFloor() throws Exception {
 
 		// Construct the Office Floor
-		this.officeFloor = OfficeFrame
-				.registerOfficeFloor(this.officeFloorBuilder);
+		this.officeFloor = this.officeFloorBuilder.buildOfficeFloor();
 
 		// Initiate for constructing another office
+		OFFICE_FLOOR_INDEX++;
 		this.officeFloorBuilder = OfficeFrame.getInstance()
-				.createOfficeFloorBuilder();
+				.createOfficeFloorBuilder(this.getOfficeFloorName());
 		OFFICE_INDEX++;
 		this.officeBuilder = this.officeFloorBuilder.addOffice(this
 				.getOfficeName());
