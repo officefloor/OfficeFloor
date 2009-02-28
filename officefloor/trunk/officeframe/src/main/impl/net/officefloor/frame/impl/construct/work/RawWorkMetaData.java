@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.construct.work;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -79,9 +79,11 @@ public interface RawWorkMetaData<W extends Work> {
 	/**
 	 * Obtains the {@link WorkMetaData} for this {@link RawWorkMetaData}.
 	 * 
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
 	 * @return {@link WorkMetaData}.
 	 */
-	WorkMetaData<W> getWorkMetaData();
+	WorkMetaData<W> getWorkMetaData(OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link RawTaskMetaData} on the {@link Work} by the input

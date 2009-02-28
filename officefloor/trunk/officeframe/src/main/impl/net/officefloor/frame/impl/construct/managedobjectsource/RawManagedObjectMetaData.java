@@ -16,9 +16,14 @@
  */
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
+import java.util.Map;
+
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
@@ -83,10 +88,39 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	AssetManager getSourcingAssetManager();
 
 	/**
+	 * Obtains the operations {@link AssetManager}.
+	 * 
+	 * @return Operations {@link AssetManager}.
+	 */
+	AssetManager getOperationsAssetManager();
+
+	/**
+	 * Indicates if {@link AsynchronousManagedObject}.
+	 * 
+	 * @return <code>true</code> if {@link AsynchronousManagedObject}.
+	 */
+	boolean isAsynchronous();
+
+	/**
+	 * Indicates if {@link CoordinatingManagedObject}.
+	 * 
+	 * @return <code>true</code> if {@link CoordinatingManagedObject}.
+	 */
+	boolean isCoordinating();
+
+	/**
 	 * Obtains the name of {@link Work} to recycle the {@link ManagedObject}.
 	 * 
 	 * @return Name of {@link Work} to recycle the {@link ManagedObject}.
 	 */
 	String getRecycleWorkName();
+
+	/**
+	 * Obtains the {@link Handler} instances for the {@link ManagedObjectSource}
+	 * by the respective {@link Handler} key.
+	 * 
+	 * @return {@link Handler} instances for the {@link ManagedObjectSource}.
+	 */
+	Map<H, Handler<?>> getHandlers();
 
 }

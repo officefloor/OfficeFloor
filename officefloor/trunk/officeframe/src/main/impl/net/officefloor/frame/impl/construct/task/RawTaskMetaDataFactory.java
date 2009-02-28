@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.work.RawWorkMetaData;

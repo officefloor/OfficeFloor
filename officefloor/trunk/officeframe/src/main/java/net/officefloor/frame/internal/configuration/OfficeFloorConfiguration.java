@@ -30,6 +30,13 @@ import net.officefloor.frame.spi.team.Team;
 public interface OfficeFloorConfiguration {
 
 	/**
+	 * Obtains the name of the {@link OfficeFloor}.
+	 * 
+	 * @return {@link OfficeFloor}.
+	 */
+	String getOfficeFloorName();
+
+	/**
 	 * Obtains the configuration of the {@link ManagedObjectSource} instances.
 	 * 
 	 * @return {@link ManagedObjectSource} configuration.

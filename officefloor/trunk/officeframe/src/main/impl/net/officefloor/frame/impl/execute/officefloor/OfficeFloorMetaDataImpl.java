@@ -18,6 +18,7 @@ package net.officefloor.frame.impl.execute.officefloor;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.spi.team.Team;
@@ -35,6 +36,11 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	private final Team[] teams;
 
 	/**
+	 * Listing of {@link ManagedObjectSourceInstance} instances.
+	 */
+	private final ManagedObjectSourceInstance<?>[] managedObjectSourceInstances;
+
+	/**
 	 * {@link OfficeMetaData} for the {@link Office} instances within the
 	 * {@link OfficeFloor}.
 	 */
@@ -45,12 +51,17 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	 * 
 	 * @param teams
 	 *            Listing of {@link Team} instances.
+	 * @param managedObjectSourceInstances
+	 *            Listing of {@link ManagedObjectSourceInstance} instances.
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData} for the {@link Office} instances within
 	 *            the {@link OfficeFloor}.
 	 */
-	public OfficeFloorMetaDataImpl(Team[] teams, OfficeMetaData[] officeMetaData) {
+	public OfficeFloorMetaDataImpl(Team[] teams,
+			ManagedObjectSourceInstance<?>[] managedObjectSourceInstances,
+			OfficeMetaData[] officeMetaData) {
 		this.teams = teams;
+		this.managedObjectSourceInstances = managedObjectSourceInstances;
 		this.officeMetaData = officeMetaData;
 	}
 
@@ -58,39 +69,19 @@ public class OfficeFloorMetaDataImpl implements OfficeFloorMetaData {
 	 * ================== OfficeFloorMetaData ==========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.OfficeFloorMetaData#getTeams()
-	 */
 	@Override
 	public Team[] getTeams() {
 		return this.teams;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.OfficeFloorMetaData#
-	 * getOfficeMetaData()
-	 */
 	@Override
 	public OfficeMetaData[] getOfficeMetaData() {
 		return this.officeMetaData;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.OfficeFloorMetaData#
-	 * createOfficeFloor()
-	 */
 	@Override
-	public OfficeFloor createOfficeFloor() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorMetaData.createOfficeFloor");
+	public ManagedObjectSourceInstance<?>[] getManagedObjectSourceInstances() {
+		return this.managedObjectSourceInstances;
 	}
 
 }

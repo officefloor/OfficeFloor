@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaData;
@@ -401,7 +401,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	}
 
 	@Override
-	public WorkMetaData<W> getWorkMetaData() {
+	public WorkMetaData<W> getWorkMetaData(OfficeFloorIssues issues) {
 
 		// Lazy construct the work meta-data
 		if (this.workMetaData != null) {
@@ -420,7 +420,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		ManagedObjectMetaData<?>[] managedObjectMetaData = new ManagedObjectMetaData[this.workManagedObjects.length];
 		for (int i = 0; i < managedObjectMetaData.length; i++) {
 			managedObjectMetaData[i] = this.workManagedObjects[i]
-					.getManagedObjectMetaData();
+					.getManagedObjectMetaData(issues);
+			// TODO handle managed object meta-data not available
 		}
 
 		// Create the listing of administrator indexes
@@ -439,8 +440,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		}
 
 		// Create the work meta-data
-		this.workMetaData = new WorkMetaDataImpl<W>(this.workFactory,
-				managedObjectIndexes, managedObjectMetaData,
+		this.workMetaData = new WorkMetaDataImpl<W>(this.workName,
+				this.workFactory, managedObjectIndexes, managedObjectMetaData,
 				administratorIndexes, administratorMetaData, null);
 
 		// Return the work meta-data

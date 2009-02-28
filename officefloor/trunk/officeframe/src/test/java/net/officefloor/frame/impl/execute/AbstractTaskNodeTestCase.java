@@ -184,9 +184,9 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				ManagedObjectScope.WORK, 0) };
 
 		// Create the Work meta-data
-		WorkMetaData workMetaData = new WorkMetaDataImpl(workFactory,
-				moIndexes, workMoMetaData, adminIndexes, adminMetaData,
-				initialFlowMetaData);
+		WorkMetaData workMetaData = new WorkMetaDataImpl("TEST_WORK",
+				workFactory, moIndexes, workMoMetaData, adminIndexes,
+				adminMetaData, initialFlowMetaData);
 
 		// Initial node
 		this.initialNode = new ExecutionNode(this.nextExecutionNodeId(), this,

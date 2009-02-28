@@ -23,6 +23,7 @@ import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorM
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.Team;
@@ -120,5 +121,12 @@ public interface RawOfficeMetaData {
 	 *         {@link ThreadState} bound names.
 	 */
 	Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrator();
+
+	/**
+	 * Obtains the {@link OfficeMetaData}.
+	 * 
+	 * @return {@link OfficeMetaData}.
+	 */
+	OfficeMetaData getOfficeMetaData();
 
 }

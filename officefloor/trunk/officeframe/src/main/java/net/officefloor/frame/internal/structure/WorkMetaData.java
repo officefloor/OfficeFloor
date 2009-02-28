@@ -38,6 +38,13 @@ public interface WorkMetaData<W extends Work> {
 	int getWorkId();
 
 	/**
+	 * Obtains the name of this {@link Work}.
+	 * 
+	 * @return Name of this {@link Work}.
+	 */
+	String getWorkName();
+
+	/**
 	 * Obtain the {@link WorkFactory}.
 	 * 
 	 * @return {@link WorkFactory} of the {@link Work}.

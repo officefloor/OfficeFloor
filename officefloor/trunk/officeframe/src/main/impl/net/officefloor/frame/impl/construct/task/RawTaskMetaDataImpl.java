@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
@@ -319,7 +319,8 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 			OfficeFloorIssues issues) {
 
 		// Obtain the work meta-data
-		WorkMetaData<W> workMetaData = this.rawWorkMetaData.getWorkMetaData();
+		WorkMetaData<W> workMetaData = this.rawWorkMetaData
+				.getWorkMetaData(issues);
 
 		// Obtain the listing of flow meta-data
 		FlowConfiguration[] flowConfigurations = this.configuration

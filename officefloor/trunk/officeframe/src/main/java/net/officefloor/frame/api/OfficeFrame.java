@@ -16,20 +16,22 @@
  */
 package net.officefloor.frame.api;
 
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.OfficeFrameImpl;
 
 /**
- * Singleton Office Frame to create the {@link OfficeFloor}.
+ * <p>
+ * Office Frame to create the {@link OfficeFloor}.
+ * <p>
+ * This is the starting point to use the framework.
  * 
  * @author Daniel
  */
 public abstract class OfficeFrame {
 
 	/**
-	 * Singleton {@link OfficeFloor}.
+	 * Singleton {@link OfficeFrame}.
 	 */
 	private static OfficeFrame INSTANCE = null;
 
@@ -57,8 +59,12 @@ public abstract class OfficeFrame {
 	 * @return Singleton {@link OfficeFrame}.
 	 */
 	public synchronized static final OfficeFrame getInstance() {
+
 		// Lazy load
 		if (INSTANCE == null) {
+
+			// TODO consider providing implementation from JVM argument
+
 			// Default implementation
 			INSTANCE = new OfficeFrameImpl();
 		}
@@ -69,52 +75,22 @@ public abstract class OfficeFrame {
 
 	/**
 	 * <p>
-	 * Convenience method to register a single {@link OfficeFloor}, as there is
-	 * typically only one {@link OfficeFloor} per JVM.
+	 * Convenience method to create a single {@link OfficeFloorBuilder}, as
+	 * there is typically only one {@link OfficeFloor} per JVM.
 	 * <p>
 	 * If more than one {@link OfficeFloor} is required, use the
 	 * {@link OfficeFrame} returned from {@link #getInstance()}.
 	 * 
-	 * @param officeFloorBuilder
-	 *            {@link OfficeFloorBuilder}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return {@link OfficeFloor} if successfully registered, or
-	 *         <code>null</code> if could not construct {@link OfficeFloor} with
-	 *         reasons passed to the {@link OfficeFloorIssues}.
+	 * @return {@link OfficeFloorBuilder}.
 	 */
-	public static final OfficeFloor registerOfficeFloor(
-			OfficeFloorBuilder officeFloorBuilder, OfficeFloorIssues issues) {
+	public static final OfficeFloorBuilder createOfficeFloorBuilder() {
 
 		// Use default name for the office floor
 		String officeFloorName = OfficeFloor.class.getSimpleName();
 
-		// Register the office floor
-		return OfficeFrame.getInstance().registerOfficeFloor(officeFloorName,
-				officeFloorBuilder, issues);
-	}
-
-	/**
-	 * <p>
-	 * Convenience method to register a single {@link OfficeFloor}, as there is
-	 * typically only one {@link OfficeFloor} per JVM. Also throws
-	 * {@link OfficeFloorConstructException} on first issue that arises in
-	 * constructing the {@link OfficeFloor}.
-	 * <p>
-	 * If more than one {@link OfficeFloor} is required, use the
-	 * {@link OfficeFrame} returned from {@link #getInstance()}.
-	 * 
-	 * @param officeFloorBuilder
-	 *            {@link OfficeFloorBuilder}.
-	 * @return {@link OfficeFloor}.
-	 * @throws OfficeFloorConstructException
-	 *             If fails to construct the {@link OfficeFloor}.
-	 */
-	public static final OfficeFloor registerOfficeFloor(
-			OfficeFloorBuilder officeFloorBuilder)
-			throws OfficeFloorConstructException {
-		return OfficeFloorConstructException
-				.registerOfficeFloor(officeFloorBuilder);
+		// Create the office floor builder by the default name
+		return OfficeFrame.getInstance().createOfficeFloorBuilder(
+				officeFloorName);
 	}
 
 	/*
@@ -124,27 +100,11 @@ public abstract class OfficeFrame {
 	/**
 	 * Obtains the {@link BuilderFactory}.
 	 * 
-	 * @return {@link BuilderFactory}.
-	 */
-	public abstract OfficeFloorBuilder createOfficeFloorBuilder();
-
-	/**
-	 * Registers the {@link OfficeBuilder} on this {@link OfficeFrame}.
-	 * 
 	 * @param officeFloorName
 	 *            Name of the {@link OfficeFloor}.
-	 * @param officeFloorBuilder
-	 *            {@link OfficeFloorBuilder} of the {@link OfficeFloor} to be
-	 *            registered.
-	 * @param issuesListener
-	 *            {@link OfficeFloorIssues} to listen for issues in constructing
-	 *            the {@link OfficeFloor}.
-	 * @return {@link OfficeFloor} if successfully registered, or
-	 *         <code>null</code> if could not construct {@link OfficeFloor} with
-	 *         reasons passed to the {@link OfficeFloorIssues}.
+	 * @return {@link BuilderFactory}.
 	 */
-	public abstract OfficeFloor registerOfficeFloor(String officeFloorName,
-			OfficeFloorBuilder officeFloorBuilder,
-			OfficeFloorIssues issuesListener);
+	public abstract OfficeFloorBuilder createOfficeFloorBuilder(
+			String officeFloorName);
 
 }

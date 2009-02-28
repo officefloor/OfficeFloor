@@ -14,20 +14,20 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.api;
+package net.officefloor.frame.api.build;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * Indicates failure to construct an {@link OfficeFloor}.
+ * Indicates failure to build a {@link OfficeFloor}.
  * 
  * @author Daniel
  */
-public class OfficeFloorConstructException extends Exception {
+public class OfficeFloorBuildException extends Exception {
 
 	/**
 	 * Initiate with reason.
@@ -35,7 +35,7 @@ public class OfficeFloorConstructException extends Exception {
 	 * @param reason
 	 *            Reason.
 	 */
-	public OfficeFloorConstructException(String reason) {
+	public OfficeFloorBuildException(String reason) {
 		super(reason);
 	}
 
@@ -47,38 +47,38 @@ public class OfficeFloorConstructException extends Exception {
 	 * @param cause
 	 *            Cause.
 	 */
-	public OfficeFloorConstructException(String reason, Throwable cause) {
+	public OfficeFloorBuildException(String reason, Throwable cause) {
 		super(reason, cause);
 	}
 
 	/**
 	 * <p>
 	 * Provides the necessary functionality to propagate the
-	 * {@link OfficeFloorConstructException} on the first issue in constructing
-	 * the {@link OfficeFloor}.
+	 * {@link OfficeFloorBuildException} on the first issue in constructing the
+	 * {@link OfficeFloor}.
 	 * <p>
-	 * Note that this should only be called by the {@link OfficeFrame}.
+	 * This is a convenience method for
+	 * {@link OfficeFloorBuilder#buildOfficeFloor()}.
 	 * 
 	 * @param officeFloorBuilder
 	 *            {@link OfficeFloorBuilder}.
 	 * @return {@link OfficeFloor}.
-	 * @throws OfficeFloorConstructException
-	 *             {@link OfficeFloorConstructException} if failure to construct
+	 * @throws OfficeFloorBuildException
+	 *             {@link OfficeFloorBuildException} if failure to construct
 	 *             {@link OfficeFloor}.
 	 * 
 	 * @see OfficeFrame
 	 */
-	static final OfficeFloor registerOfficeFloor(
+	public static final OfficeFloor buildOfficeFloor(
 			OfficeFloorBuilder officeFloorBuilder)
-			throws OfficeFloorConstructException {
+			throws OfficeFloorBuildException {
 		try {
-			// Attempt to register and return the Office Floor
-			return OfficeFrame.registerOfficeFloor(officeFloorBuilder,
-					new FailOnFirstIssue());
+			// Attempt to build and return the Office Floor
+			return officeFloorBuilder.buildOfficeFloor(new FailOnFirstIssue());
 
 		} catch (ConstructError issue) {
 			// Propagate the issue
-			throw (OfficeFloorConstructException) issue.getCause();
+			throw (OfficeFloorBuildException) issue.getCause();
 		}
 	}
 
@@ -120,7 +120,7 @@ public class OfficeFloorConstructException extends Exception {
 				throws ConstructError {
 
 			// Create the construction exception
-			OfficeFloorConstructException cause = new OfficeFloorConstructException(
+			OfficeFloorBuildException cause = new OfficeFloorBuildException(
 					issueDescription);
 
 			// Propagate to be caught in register office floor

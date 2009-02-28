@@ -54,7 +54,6 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 *            {@link AdministratorMetaData}.
 	 */
 	public AdministratorContainerImpl(AdministratorMetaData<I, A> metaData) {
-		// Store state
 		this.metaData = metaData;
 	}
 
@@ -62,25 +61,13 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 * ===================== AdministratorContainer =======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.AdministratorContainer#
-	 * getExtensionInterfaceMetaData
-	 * (net.officefloor.frame.internal.structure.AdministratorContext)
-	 */
+	@Override
 	public ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData(
 			AdministratorContext context) {
 		return this.metaData.getExtensionInterfaceMetaData();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.AdministratorContainer#doDuty
-	 * (net.officefloor.frame.internal.structure.DutyMetaData)
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public void doDuty(TaskDutyAssociation<A> taskDuty,
 			List<I> extensionInterfaces, AdministratorContext context)
@@ -129,34 +116,18 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 	 */
 	private DutyMetaData dutyMetaData;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.administration.DutyContext#getExtensionInterfaces
-	 * ()
-	 */
+	@Override
 	public List<I> getExtensionInterfaces() {
 		return this.extensionInterfaces;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.DutyContext#doFlow(F,
-	 * java.lang.Object)
-	 */
+	@Override
 	public void doFlow(F key, Object parameter) {
 		// Delegate with index of key
 		this.doFlow(key.ordinal(), parameter);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.DutyContext#doFlow(int,
-	 * java.lang.Object)
-	 */
+	@Override
 	public void doFlow(int flowIndex, Object parameter) {
 		// Obtain the flow meta-data
 		FlowMetaData<?> flowMetaData = this.dutyMetaData.getFlow(flowIndex);

@@ -17,22 +17,34 @@
 package net.officefloor.frame.impl.construct.officefloor;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
+import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataFactory;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
+import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
+import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
+import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
+import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
@@ -70,6 +82,11 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	private final EscalationProcedure escalationProcedure;
 
 	/**
+	 * Listing of {@link RawOfficeMetaData} for the {@link OfficeFloor}.
+	 */
+	private RawOfficeMetaData[] offices;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param teamRegistry
@@ -99,10 +116,20 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			OfficeFloorConfiguration configuration, OfficeFloorIssues issues,
 			RawTeamMetaDataFactory rawTeamFactory,
 			RawManagedObjectMetaDataFactory rawMosFactory,
-			AssetManagerFactory assetManagerFactory) {
+			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
+			RawBoundAdministratorMetaDataFactory rawBoundAdminFactory,
+			AssetManagerFactory assetManagerFactory,
+			RawOfficeMetaDataFactory rawOfficeFactory) {
 
 		// Name of office floor for reporting issues
-		final String officeFloorName = OfficeFloor.class.getSimpleName();
+		String officeFloorName = configuration.getOfficeFloorName();
+		if (ConstructUtil.isBlank(officeFloorName)) {
+			issues.addIssue(AssetType.OFFICE_FLOOR, "Unknown",
+					"Name not provided for Office Floor");
+
+			// Not that important to name the Office Floor, so provide default
+			officeFloorName = OfficeFloor.class.getSimpleName();
+		}
 
 		// Construct the teams
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
@@ -163,9 +190,45 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			escalationProcedure = new EscalationProcedureImpl();
 		}
 
-		// Create and return the raw meta-data
-		return new RawOfficeFloorMetaDataImpl(teamRegistry, mosRegistry,
-				escalationProcedure);
+		// Create the raw office floor meta-data
+		RawOfficeFloorMetaDataImpl rawMetaData = new RawOfficeFloorMetaDataImpl(
+				teamRegistry, mosRegistry, escalationProcedure);
+
+		// Construct the offices
+		Map<String, RawOfficeMetaData> officeRegistry = new HashMap<String, RawOfficeMetaData>();
+		for (OfficeConfiguration officeConfiguration : configuration
+				.getOfficeConfiguration()) {
+
+			// Construct the office
+			RawOfficeMetaData officeMetaData = rawOfficeFactory
+					.constructRawOfficeMetaData(officeConfiguration, issues,
+							rawMetaData, rawBoundMoFactory,
+							rawBoundAdminFactory);
+			if (officeMetaData == null) {
+				continue; // issue with office
+			}
+
+			// Obtain the office name
+			String officeName = officeMetaData.getOfficeName();
+			if (officeRegistry.containsKey(officeName)) {
+				issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName,
+						"Offices registered with the same name '" + officeName
+								+ "'");
+				continue; // maintain only the first office
+			}
+
+			// Register the office
+			officeRegistry.put(officeName, officeMetaData);
+		}
+
+		// Specify the offices on the meta-data
+		rawMetaData.offices = officeRegistry.values().toArray(
+				new RawOfficeMetaData[0]);
+		
+		// TODO load remaining state for managed object sources
+
+		// Return the raw meta-data
+		return rawMetaData;
 	}
 
 	/*
@@ -186,5 +249,48 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	@Override
 	public EscalationProcedure getEscalationProcedure() {
 		return this.escalationProcedure;
+	}
+
+	@Override
+	public OfficeFloorMetaData getOfficeFloorMetaData() {
+
+		// Obtain the listing of teams
+		Team[] teams = this.teamRegistry.values().toArray(new Team[0]);
+
+		// Obtain the listing of managed object source instances
+		List<ManagedObjectSourceInstance<?>> mosInstances = new LinkedList<ManagedObjectSourceInstance<?>>();
+		for (RawManagedObjectMetaData<?, ?> rawMoMetaData : this.mosRegistry
+				.values()) {
+			ManagedObjectSourceInstance<?> mosInstance = this
+					.createManagedObjectSourceInstance(rawMoMetaData);
+			mosInstances.add(mosInstance);
+		}
+
+		// Obtain the listing of offices
+		OfficeMetaData[] officeMetaDatas = new OfficeMetaData[this.offices.length];
+		for (int i = 0; i < officeMetaDatas.length; i++) {
+			officeMetaDatas[i] = this.offices[i].getOfficeMetaData();
+		}
+
+		// Create and return the office floor meta-data
+		OfficeFloorMetaDataImpl metaData = new OfficeFloorMetaDataImpl(teams,
+				mosInstances.toArray(new ManagedObjectSourceInstance[0]),
+				officeMetaDatas);
+		return metaData;
+	}
+
+	/**
+	 * Creates the {@link ManagedObjectSourceInstance} for the
+	 * {@link RawManagedObjectMetaData}.
+	 * 
+	 * @param rawMoMetaData
+	 *            {@link RawManagedObjectMetaData}.
+	 * @return {@link ManagedObjectSourceInstance}.
+	 */
+	private <H extends Enum<H>> ManagedObjectSourceInstance<H> createManagedObjectSourceInstance(
+			RawManagedObjectMetaData<?, H> rawMoMetaData) {
+		return new ManagedObjectSourceInstanceImpl<H>(rawMoMetaData
+				.getManagedObjectSource(), rawMoMetaData.getHandlers(),
+				rawMoMetaData.getManagedObjectPool());
 	}
 }

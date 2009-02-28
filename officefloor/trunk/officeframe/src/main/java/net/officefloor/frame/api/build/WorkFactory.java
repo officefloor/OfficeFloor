@@ -19,18 +19,7 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * <p>
- * Creates {@link net.officefloor.frame.api.execute.Work} to be done.
- * </p>
- * <p>
- * It will also provide meta-data for hooking
- * {@link net.officefloor.frame.api.execute.Work} instances together via a
- * {@link net.officefloor.frame.api.execute.WorkSupervisor}.
- * </p>
- * <p>
- * Clients must provide the implementation of this to
- * {@link net.officefloor.frame.api.build.WorkBuilder#setWorkFactory(WorkFactory)}.
- * </p>
+ * Creates {@link Work} to be done.
  * 
  * @author Daniel
  */

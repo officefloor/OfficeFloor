@@ -14,24 +14,43 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.spi.pool;
+package net.officefloor.frame.internal.structure;
 
+import java.util.Map;
+
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
 /**
- * Context for a {@link ManagedObjectPool}.
+ * Instance of a {@link ManagedObjectSource} and items to support it.
  * 
  * @author Daniel
  */
-public interface ManagedObjectPoolContext {
+public interface ManagedObjectSourceInstance<H extends Enum<H>> {
 
 	/**
-	 * Obtains the {@link ManagedObjectSource} for the {@link ManagedObject}
-	 * instances being pooled.
+	 * Obtains the {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ManagedObjectSource} for the {@link ManagedObject}
-	 *         instances being pooled.
+	 * @return {@link ManagedObjectSource}.
 	 */
-	ManagedObjectSource<?, ?> getManagedObjectSource();
+	ManagedObjectSource<?, H> getManagedObjectSource();
+
+	/**
+	 * Obtains the map of {@link Handler} instances for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return Map of {@link Handler} instances for the
+	 *         {@link ManagedObjectSource}.
+	 */
+	Map<H, Handler<?>> getHandlers();
+
+	/**
+	 * Obtains the {@link ManagedObjectPool}.
+	 * 
+	 * @return {@link ManagedObjectPool} or <code>null</code> if
+	 *         {@link ManagedObjectSource} is not pooled.
+	 */
+	ManagedObjectPool getManagedObjectPool();
 
 }

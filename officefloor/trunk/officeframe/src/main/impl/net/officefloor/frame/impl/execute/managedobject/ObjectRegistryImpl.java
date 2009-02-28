@@ -18,33 +18,33 @@ package net.officefloor.frame.impl.execute.managedobject;
 
 import java.util.Map;
 
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.spi.managedobject.ObjectRegistry}.
+ * Implementation of the {@link ObjectRegistry}.
  * 
  * @author Daniel
  */
 public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> {
 
 	/**
-	 * {@link WorkContainer} to obtain the co-ordinating
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link WorkContainer} to obtain the coordinating {@link ManagedObject}.
 	 */
 	private final WorkContainer<?> workContainer;
 
 	/**
-	 * Map of dependency key to the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} index.
+	 * Map of dependency key to the {@link ManagedObjectIndex}.
 	 */
-	private final Map<D, Integer> dependencies;
+	private final Map<D, ManagedObjectIndex> dependencies;
 
 	/**
-	 * {@link ThreadState} requesting the co-ordinating of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link ThreadState} requesting the coordinating of the
+	 * {@link ManagedObject}.
 	 */
 	private final ThreadState threadState;
 
@@ -52,46 +52,54 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 	 * Initiate.
 	 * 
 	 * @param workContainer
-	 *            {@link WorkContainer} to obtain the co-ordinating
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            {@link WorkContainer} to obtain the coordinating
+	 *            {@link ManagedObject}.
 	 * @param dependencies
-	 *            Map of dependency key to
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            index.
+	 *            Map of dependency key to {@link ManagedObjectIndex}.
 	 * @param threadState
-	 *            {@link ThreadState} requesting the co-ordinating of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 *            This is used to access the
-	 *            {@link net.officefloor.frame.internal.structure.ProcessState}
-	 *            bound
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *            instances.
+	 *            {@link ThreadState} requesting the coordinating of the
+	 *            {@link ManagedObject}. This is used to access the
+	 *            {@link ProcessState} bound {@link ManagedObject} instances.
 	 */
 	public ObjectRegistryImpl(WorkContainer<?> workContainer,
-			Map<D, Integer> dependencies, ThreadState threadState) {
+			Map<D, ManagedObjectIndex> dependencies, ThreadState threadState) {
 		this.workContainer = workContainer;
 		this.dependencies = dependencies;
 		this.threadState = threadState;
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObjectMetaData
-	 * ====================================================================
+	 * ===================== ManagedObjectMetaData ===================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.ObjectRegistry#getObject(D)
-	 */
+	@Override
 	public Object getObject(D key) {
+	
 		// Obtain the managed object index
-		Integer moIndex = this.dependencies.get(key);
+		ManagedObjectIndex index = this.dependencies.get(key);
 
 		// Obtain the Object
-		Object object = this.workContainer.getObject(moIndex.intValue(),
-				this.threadState);
+		Object object;
+		switch (index.getManagedObjectScope()) {
+		case WORK:
+			object = this.workContainer.getObject(index
+					.getIndexOfManagedObjectWithinScope(), this.threadState);
+			break;
+		case THREAD:
+			object = this.threadState.getManagedObjectContainer(
+					index.getIndexOfManagedObjectWithinScope()).getObject(
+					this.threadState);
+			break;
+		case PROCESS:
+			object = this.threadState.getProcessState()
+					.getManagedObjectContainer(
+							index.getIndexOfManagedObjectWithinScope())
+					.getObject(this.threadState);
+			break;
+		default:
+			throw new IllegalStateException("Unknown managed object scope "
+					+ index.getManagedObjectScope());
+		}
 
 		// Return the Object
 		return object;

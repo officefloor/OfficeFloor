@@ -27,7 +27,6 @@ import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.JobActivatableSet;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -42,13 +41,6 @@ import net.officefloor.frame.spi.team.Team;
  */
 public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 		implements AdministratorMetaData<I, A> {
-
-	/**
-	 * Index of the {@link Administrator} for this
-	 * {@link AdministratorContainer} within the {@link ProcessState} or
-	 * {@link AdministratorMetaData#NON_PROCESS_INDEX}.
-	 */
-	protected final int processStateAdministratorIndex;
 
 	/**
 	 * {@link AdministratorSource}.
@@ -85,23 +77,6 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	protected Map<A, DutyMetaData> dutyMetaData;
 
 	/**
-	 * Initiate with meta-data of the {@link Administrator} scoped to the
-	 * {@link ProcessState}.
-	 * 
-	 * @param processStateAdministratorIndex
-	 *            Index of the {@link Administrator} within the
-	 *            {@link ProcessState}.
-	 */
-	public AdministratorMetaDataImpl(int processStateAdministratorIndex) {
-		this.processStateAdministratorIndex = processStateAdministratorIndex;
-		this.eiMetaData = null;
-		this.administratorSource = null;
-		this.team = null;
-		this.escalationProcedure = null;
-		this.requiredManagedObjects = null;
-	}
-
-	/**
 	 * Initiate with meta-data of the {@link Administrator} scope to the
 	 * {@link Work}.
 	 * 
@@ -118,7 +93,6 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 			AdministratorSource<I, A> administratorSource,
 			ExtensionInterfaceMetaData<I>[] eiMetaData, Team team,
 			EscalationProcedure escalationProcedure) {
-		this.processStateAdministratorIndex = AdministratorMetaData.NON_PROCESS_INDEX;
 		this.eiMetaData = eiMetaData;
 		this.administratorSource = administratorSource;
 		this.team = team;
@@ -147,126 +121,46 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	 * ================= AdministratorMetaData ===============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
-	 * createAdministratorContainer()
-	 */
 	@Override
 	public AdministratorContainer<I, A> createAdministratorContainer() {
-
-		// Create the container for the Administrator
-		AdministratorContainer<I, A> administratorContainer;
-		if (this.processStateAdministratorIndex == AdministratorMetaData.NON_PROCESS_INDEX) {
-			// Source specific to this work
-			administratorContainer = new AdministratorContainerImpl<I, A, None>(
-					this);
-		} else {
-			// Source from the process state
-			administratorContainer = new AdministratorContainerProxy<I, A>(
-					this.processStateAdministratorIndex);
-		}
-
-		// Return the Administrator Container
-		return administratorContainer;
+		return new AdministratorContainerImpl<I, A, None>(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
-	 * getProcessStateAdministratorIndex()
-	 */
-	@Override
-	public int getProcessStateAdministratorIndex() {
-		return this.processStateAdministratorIndex;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
-	 * getAdministratorSource()
-	 */
 	@Override
 	public AdministratorSource<I, A> getAdministratorSource() {
 		return this.administratorSource;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
-	 * getExtensionInterfaceMetaData()
-	 */
 	@Override
 	public ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData() {
 		return this.eiMetaData;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.AdministratorMetaData#
-	 * getDutyMetaData(A)
-	 */
 	@Override
 	public DutyMetaData getDutyMetaData(A key) {
 		return this.dutyMetaData.get(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobMetaData#createJobActivableSet
-	 * ()
-	 */
 	@Override
 	public JobActivatableSet createJobActivableSet() {
 		return new JobActivatableSetImpl();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.JobMetaData#getTeam()
-	 */
 	@Override
 	public Team getTeam() {
 		return this.team;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.JobMetaData#
-	 * getRequiredManagedObjects()
-	 */
 	@Override
 	public int[] getRequiredManagedObjects() {
 		return this.requiredManagedObjects;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobMetaData#getEscalationProcedure
-	 * ()
-	 */
 	@Override
 	public EscalationProcedure getEscalationProcedure() {
 		return this.escalationProcedure;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobMetaData#getNextTaskInFlow()
-	 */
 	@Override
 	public TaskMetaData<?, ?, ?, ?> getNextTaskInFlow() {
 		// Never a next task for an administrator duty

@@ -21,7 +21,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 
 /**
- * Implementationg of the {@link ExtensionInterfaceMetaData}.
+ * Implementation of the {@link ExtensionInterfaceMetaData}.
  * 
  * @author Daniel
  */
@@ -52,7 +52,6 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	 */
 	public ExtensionInterfaceMetaDataImpl(int managedObjectIndex,
 			ExtensionInterfaceFactory<I> extensionInterfaceFactory) {
-		// Store state
 		this.managedObjectIndex = managedObjectIndex;
 		this.extensionInterfaceFactory = extensionInterfaceFactory;
 	}
@@ -61,22 +60,12 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	 * ====================== ExtensionInterfaceMetaData =====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ExtensionInterfaceMetaData#
-	 * getManagedObjectKey()
-	 */
+	@Override
 	public int getManagedObjectIndex() {
 		return this.managedObjectIndex;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ExtensionInterfaceMetaData#
-	 * getExtensionInterfaceFactory()
-	 */
+	@Override
 	public ExtensionInterfaceFactory<I> getExtensionInterfaceFactory() {
 		return this.extensionInterfaceFactory;
 	}

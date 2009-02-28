@@ -53,22 +53,14 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ProcessMetaData#
-	 * getManagedObjectMetaData()
+	 * ============== ProcessMetaData =================================
 	 */
+
 	@Override
 	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
 		return this.managedObjectMetaData;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ProcessMetaData#
-	 * getAdministratorMetaData()
-	 */
 	@Override
 	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
 		return this.administratorMetaData;

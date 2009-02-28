@@ -19,9 +19,9 @@ package net.officefloor.frame.impl.construct.work;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaData;
@@ -166,7 +166,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Fully construct work
 		this.replayMockObjects();
 		RawWorkMetaData<W> metaData = this.fullyConstructRawWorkMetaData();
-		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
+		WorkMetaData<W> workMetaData = metaData.getWorkMetaData(this.issues);
 		this.verifyMockObjects();
 
 		// Ensure no managed objects
@@ -206,13 +206,13 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.recordReturn(rawMoMetaData, rawMoMetaData.getDependencyKeys(),
 				new Enum[0]);
 		this.recordReturn(rawMoMetaData, rawMoMetaData
-				.getManagedObjectMetaData(), moMetaData);
+				.getManagedObjectMetaData(this.issues), moMetaData);
 
 		// Construct work with task managed object
 		this.replayMockObjects();
 		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
 		metaData.constructRawWorkManagedObjectMetaData("MO", this.issues);
-		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
+		WorkMetaData<W> workMetaData = metaData.getWorkMetaData(this.issues);
 		this.verifyMockObjects();
 
 		// Verify work meta-data
@@ -254,7 +254,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
 		metaData.constructRawWorkManagedObjectMetaData("MO", this.issues);
-		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
+		WorkMetaData<W> workMetaData = metaData.getWorkMetaData(this.issues);
 		this.verifyMockObjects();
 
 		// Verify work meta-data
@@ -309,7 +309,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
 		metaData.constructRawWorkManagedObjectMetaData("ONE", this.issues);
-		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
+		WorkMetaData<W> workMetaData = metaData.getWorkMetaData(this.issues);
 		this.verifyMockObjects();
 
 		// Verify work meta-data
@@ -362,7 +362,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
 		metaData.constructRawWorkAdministratorMetaData("ADMIN", this.issues);
-		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
+		WorkMetaData<W> workMetaData = metaData.getWorkMetaData(this.issues);
 		this.verifyMockObjects();
 
 		// Verify work meta-data
@@ -405,7 +405,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.replayMockObjects();
 		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
 		metaData.constructRawWorkAdministratorMetaData("ADMIN", this.issues);
-		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
+		WorkMetaData<W> workMetaData = metaData.getWorkMetaData(this.issues);
 		this.verifyMockObjects();
 
 		// Verify work meta-data
@@ -672,9 +672,10 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
 
 		// Obtain the work meta-data
-		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
+		WorkMetaData<W> workMetaData = metaData.getWorkMetaData(this.issues);
 		assertNotNull("Should obtain work meta-data", workMetaData);
-		WorkMetaData<W> anotherWorkMetaData = metaData.getWorkMetaData();
+		WorkMetaData<W> anotherWorkMetaData = metaData
+				.getWorkMetaData(this.issues);
 		assertEquals("Work meta-data should be same on each getWorkMetaData",
 				workMetaData, anotherWorkMetaData);
 

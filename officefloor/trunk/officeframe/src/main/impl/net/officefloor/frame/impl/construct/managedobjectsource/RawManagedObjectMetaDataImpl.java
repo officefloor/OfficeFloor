@@ -18,10 +18,10 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import java.util.Properties;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
-import net.officefloor.frame.api.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
@@ -31,6 +31,8 @@ import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
@@ -55,7 +57,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	@SuppressWarnings("unchecked")
 	public static RawManagedObjectMetaDataFactory getFactory() {
 		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1,
-				null, null, null);
+				null, null, null, false, false, null);
 	}
 
 	/**
@@ -95,6 +97,21 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	private final AssetManager sourcingAssetManager;
 
 	/**
+	 * Operations {@link AssetManager}.
+	 */
+	private final AssetManager operationsAssetManager;
+
+	/**
+	 * Flag indicating if {@link AsynchronousManagedObject}.
+	 */
+	private final boolean isAsynchronous;
+
+	/**
+	 * Flag indicating if {@link CoordinatingManagedObject}.
+	 */
+	private final boolean isCoordinating;
+
+	/**
 	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
 	 */
 	private final String recycleWorkName;
@@ -118,6 +135,12 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 *            {@link ManagedObjectPool}.
 	 * @param sourcingAssetManager
 	 *            Sourcing {@link AssetManager}.
+	 * @param operationsAssetManager
+	 *            Operations {@link AssetManager}.
+	 * @param isAsynchronous
+	 *            Flag indicating if {@link AsynchronousManagedObject}.
+	 * @param isCoordinating
+	 *            Flag indicating if {@link CoordinatingManagedObject}.
 	 * @param recycleWorkName
 	 *            Name of the {@link Work} to recycle the {@link ManagedObject}.
 	 */
@@ -127,7 +150,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			ManagedObjectSource<D, H> managedObjectSource,
 			ManagedObjectSourceMetaData<D, H> managedObjectSourceMetaData,
 			long defaultTimeout, ManagedObjectPool managedObjectPool,
-			AssetManager sourcingAssetManager, String recycleWorkName) {
+			AssetManager sourcingAssetManager,
+			AssetManager operationsAssetManager, boolean isAsynchronous,
+			boolean isCoordinating, String recycleWorkName) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
@@ -135,6 +160,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		this.defaultTimeout = defaultTimeout;
 		this.managedObjectPool = managedObjectPool;
 		this.sourcingAssetManager = sourcingAssetManager;
+		this.operationsAssetManager = operationsAssetManager;
+		this.isAsynchronous = isAsynchronous;
+		this.isCoordinating = isCoordinating;
 		this.recycleWorkName = recycleWorkName;
 	}
 
@@ -250,6 +278,29 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			return null; // can not carry on
 		}
 
+		// Obtain managed object type to determine details
+		Class<?> managedObjectClass = metaData.getManagedObjectClass();
+		if (managedObjectClass == null) {
+			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+					"No managed object class provided");
+			return null; // can not carry on
+		}
+
+		// Determine if asynchronous
+		boolean isManagedObjectAsynchronous = AsynchronousManagedObject.class
+				.isAssignableFrom(managedObjectClass);
+		AssetManager operationsAssetManager = null;
+		if (isManagedObjectAsynchronous) {
+			// Asynchronous so provide operations manager
+			operationsAssetManager = assetManagerFactory.createAssetManager(
+					AssetType.MANAGED_OBJECT, managedObjectName, "operations",
+					issues);
+		}
+
+		// Determine if coordinating
+		boolean isManagedObjectCoordinating = CoordinatingManagedObject.class
+				.isAssignableFrom(managedObjectClass);
+
 		// Obtain the default timeout
 		long defaultTimeout = configuration.getDefaultTimeout();
 		if (defaultTimeout < 0) {
@@ -268,7 +319,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		// Return the create raw managed object meta data
 		return new RawManagedObjectMetaDataImpl<d, h>(managedObjectSourceName,
 				configuration, managedObjectSource, metaData, defaultTimeout,
-				managedObjectPool, sourcingAssetManager, recycleWorkName);
+				managedObjectPool, sourcingAssetManager,
+				operationsAssetManager, isManagedObjectAsynchronous,
+				isManagedObjectCoordinating, recycleWorkName);
 	}
 
 	/*
@@ -308,6 +361,21 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	@Override
 	public AssetManager getSourcingAssetManager() {
 		return this.sourcingAssetManager;
+	}
+
+	@Override
+	public AssetManager getOperationsAssetManager() {
+		return this.operationsAssetManager;
+	}
+
+	@Override
+	public boolean isAsynchronous() {
+		return this.isAsynchronous;
+	}
+
+	@Override
+	public boolean isCoordinating() {
+		return this.isCoordinating;
 	}
 
 	@Override

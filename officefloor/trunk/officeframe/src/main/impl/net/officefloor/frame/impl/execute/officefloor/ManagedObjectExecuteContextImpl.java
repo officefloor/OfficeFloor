@@ -14,16 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl;
+package net.officefloor.frame.impl.execute.officefloor;
 
 import java.util.Map;
 
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext}.
+ * {@link ManagedObjectExecuteContext} implementation.
  * 
  * @author Daniel
  */
@@ -31,36 +31,25 @@ public class ManagedObjectExecuteContextImpl<H extends Enum<H>> implements
 		ManagedObjectExecuteContext<H> {
 
 	/**
-	 * Registry of {@link Handler} instances for the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link Handler} instances for the {@link ManagedObjectSource}.
 	 */
-	protected final Map<H, Handler<?>> handlers;
+	private final Map<H, Handler<?>> handlers;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param handlers
-	 *            Registry of {@link Handler} instances for the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 *            {@link Handler} instances for the {@link ManagedObjectSource}.
 	 */
 	public ManagedObjectExecuteContextImpl(Map<H, Handler<?>> handlers) {
 		this.handlers = handlers;
 	}
 
-	/**
-	 * Indicates the
-	 * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(ManagedObjectExecuteContext)}
-	 * method has completed.
-	 */
-	public void flagStartOver() {
-		// Nothing to block
-	}
-
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext#getHandler(H)
+	 * ================ ManagedObjectExecuteContext ==========================
 	 */
+
+	@Override
 	public Handler<?> getHandler(H key) {
 		return this.handlers.get(key);
 	}

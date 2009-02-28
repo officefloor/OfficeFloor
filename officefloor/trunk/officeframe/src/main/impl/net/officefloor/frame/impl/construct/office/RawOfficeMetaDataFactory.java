@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.construct.office;
 
-import net.officefloor.frame.api.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;

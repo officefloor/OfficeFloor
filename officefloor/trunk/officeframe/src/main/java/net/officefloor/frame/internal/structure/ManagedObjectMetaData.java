@@ -33,14 +33,6 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
 public interface ManagedObjectMetaData<D extends Enum<D>> {
 
 	/**
-	 * Index indicating the {@link ManagedObject} will not be sourced from the
-	 * {@link ProcessState}.
-	 */
-	// TODO use the ManagedObjectIndex
-	@Deprecated
-	static final int NON_PROCESS_INDEX = -1;
-
-	/**
 	 * Creates a new {@link ManagedObjectContainer}.
 	 * 
 	 * @param processState
@@ -50,21 +42,6 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 */
 	ManagedObjectContainer createManagedObjectContainer(
 			ProcessState processState);
-
-	/**
-	 * <p>
-	 * Obtains the index of the {@link ManagedObject} within the
-	 * {@link ProcessState}.
-	 * <p>
-	 * Note that if this does not provide a value of {@link #NON_PROCESS_INDEX}
-	 * then the {@link ManagedObject} will be sourced only for the {@link Work}.
-	 * 
-	 * @return Index of the {@link ManagedObject} within the
-	 *         {@link ProcessState} or {@link #NON_PROCESS_INDEX}.
-	 */
-	// TODO use the ManagedObjectIndex
-	@Deprecated
-	int getProcessStateManagedObjectIndex();
 
 	/**
 	 * Obtains the {@link AssetManager} that manages the sourcing of the

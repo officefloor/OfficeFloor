@@ -28,13 +28,6 @@ import net.officefloor.frame.spi.team.Team;
 public interface OfficeFloorMetaData {
 
 	/**
-	 * Obtains the {@link Team} instances of the {@link OfficeFloor}.
-	 * 
-	 * @return {@link Team} instances of the {@link OfficeFloor}.
-	 */
-	Team[] getTeams();
-
-	/**
 	 * Obtains the {@link OfficeMetaData} instances of the {@link Office}
 	 * instances contained within the {@link OfficeFloor}.
 	 * 
@@ -43,9 +36,18 @@ public interface OfficeFloorMetaData {
 	OfficeMetaData[] getOfficeMetaData();
 
 	/**
-	 * Creates the {@link OfficeFloor}.
+	 * Obtains the {@link ManagedObjectSourceInstance} instances contained
+	 * within the {@link OfficeFloor}.
 	 * 
-	 * @return {@link OfficeFloor}.
+	 * @return {@link ManagedObjectSourceInstance} instances.
 	 */
-	OfficeFloor createOfficeFloor();
+	ManagedObjectSourceInstance<?>[] getManagedObjectSourceInstances();
+
+	/**
+	 * Obtains the {@link Team} instances of the {@link OfficeFloor}.
+	 * 
+	 * @return {@link Team} instances of the {@link OfficeFloor}.
+	 */
+	Team[] getTeams();
+
 }
