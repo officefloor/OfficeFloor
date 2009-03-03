@@ -105,6 +105,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
+	public ProcessMetaData getProcessMetaData() {
+		return this.processMetaData;
+	}
+
+	@Override
 	public WorkMetaData<?>[] getWorkMetaData() {
 		return this.workMetaDatas;
 	}

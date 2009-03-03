@@ -378,7 +378,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 						managedObjectSourceName, managedObjectSourceClass);
 
 		// Flag managing office
-		managedObjectBuilder.setManagingOffice(managingOffice);
+		managedObjectBuilder.setManagingOffice(managingOffice,
+				managedObjectName);
 
 		// Link into the Office
 		this.officeBuilder.registerManagedObjectSource(managedObjectName,
@@ -405,7 +406,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 						metaData, this.getOfficeFloorBuilder());
 
 		// Flag managing office
-		managedObjectBuilder.setManagingOffice(managingOffice);
+		managedObjectBuilder.setManagingOffice(managingOffice,
+				managedObjectName);
 
 		// Link into the Office
 		this.officeBuilder.registerManagedObjectSource(managedObjectName,

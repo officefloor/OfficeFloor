@@ -33,6 +33,15 @@ import net.officefloor.frame.spi.pool.ManagedObjectPool;
 public interface ManagedObjectMetaData<D extends Enum<D>> {
 
 	/**
+	 * Obtains the name of the {@link ManagedObject} bound within the
+	 * {@link ManagedObjectScope}.
+	 * 
+	 * @return Name of the {@link ManagedObject} bound within the
+	 *         {@link ManagedObjectScope}.
+	 */
+	String getBoundManagedObjectName();
+
+	/**
 	 * Creates a new {@link ManagedObjectContainer}.
 	 * 
 	 * @param processState
@@ -109,7 +118,7 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	 * Creates the {@link ObjectRegistry} for the {@link ManagedObject}.
 	 * 
 	 * @param workContainer
-	 *            {@link WorkContainer} to obtain the co-ordinating
+	 *            {@link WorkContainer} to obtain the coordinating
 	 *            {@link ManagedObject} instances.
 	 * @param threadState
 	 *            {@link ThreadState} to provide access to the

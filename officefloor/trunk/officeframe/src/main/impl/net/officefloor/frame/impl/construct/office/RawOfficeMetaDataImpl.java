@@ -25,6 +25,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaData;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobject.OfficeManagingManagedObject;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
@@ -38,6 +39,7 @@ import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.Team;
@@ -176,6 +178,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	@Override
 	public RawOfficeMetaData constructRawOfficeMetaData(
 			OfficeConfiguration configuration, OfficeFloorIssues issues,
+			OfficeManagingManagedObject[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory) {
@@ -267,17 +270,23 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		// Obtain the process bound managed object instances
 		ManagedObjectConfiguration<?>[] processManagedObjectConfiguration = configuration
 				.getProcessManagedObjectConfiguration();
-		final RawBoundManagedObjectMetaData<?>[] processBoundManagedObjects;
+		final RawBoundManagedObjectMetaData<?>[] initialProcessBoundManagedObjects;
 		if ((processManagedObjectConfiguration == null)
 				|| (processManagedObjectConfiguration.length == 0)) {
-			processBoundManagedObjects = new RawBoundManagedObjectMetaData[0];
+			initialProcessBoundManagedObjects = new RawBoundManagedObjectMetaData[0];
 		} else {
-			processBoundManagedObjects = rawBoundManagedObjectFactory
+			initialProcessBoundManagedObjects = rawBoundManagedObjectFactory
 					.constructBoundManagedObjectMetaData(
 							processManagedObjectConfiguration, issues,
 							ManagedObjectScope.PROCESS, AssetType.OFFICE,
 							officeName, registeredMo, null);
 		}
+
+		// Add the Managed Objects that are managed by the Office
+		final RawBoundManagedObjectMetaData<?>[] processBoundManagedObjects = rawBoundManagedObjectFactory
+				.affixOfficeManagingManagedObjects(officeName,
+						initialProcessBoundManagedObjects,
+						officeManagingManagedObjects, issues);
 
 		// Create the map of process bound managed objects by name
 		Map<String, RawBoundManagedObjectMetaData<?>> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
@@ -405,6 +414,13 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	@Override
 	public Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrator() {
 		return this.scopeAdmins;
+	}
+
+	@Override
+	public OfficeMetaData getOfficeMetaData() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement RawOfficeMetaData.getOfficeMetaData");
 	}
 
 }

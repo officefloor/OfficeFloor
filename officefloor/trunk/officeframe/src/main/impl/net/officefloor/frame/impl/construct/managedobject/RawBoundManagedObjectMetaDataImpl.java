@@ -225,6 +225,97 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		return boundMoList.toArray(new RawBoundManagedObjectMetaDataImpl[0]);
 	}
 
+	@Override
+	public RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
+			String officeName,
+			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
+			OfficeManagingManagedObject[] officeManagingManagedObjects,
+			OfficeFloorIssues issues) {
+
+		// Create the map of process bound managed objects.
+		// At same time also determine the maximum process bound index.
+		Map<String, RawBoundManagedObjectMetaData<?>> processBoundMos = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
+		int nextProcessBoundIndex = 0;
+		for (RawBoundManagedObjectMetaData<?> processBoundMo : processBoundManagedObjectMetaData) {
+
+			// Register the process bound managed object
+			processBoundMos.put(processBoundMo.getBoundManagedObjectName(),
+					processBoundMo);
+
+			// Determine if update the index
+			ManagedObjectIndex index = processBoundMo.getManagedObjectIndex();
+			if (!ManagedObjectScope.PROCESS.equals(index
+					.getManagedObjectScope())) {
+				issues
+						.addIssue(AssetType.OFFICE, officeName,
+								"Attempting to add Office managing Managed Objects to non-process scope");
+				return processBoundManagedObjectMetaData; // only process bound
+			}
+			int moIndex = index.getIndexOfManagedObjectWithinScope();
+			if (moIndex >= nextProcessBoundIndex) {
+				nextProcessBoundIndex = moIndex + 1; // +1 as next index
+			}
+		}
+
+		// Create the list to append additional managed objects
+		List<RawBoundManagedObjectMetaData<?>> managedObjects = new LinkedList<RawBoundManagedObjectMetaData<?>>();
+		managedObjects.addAll(Arrays.asList(processBoundManagedObjectMetaData));
+
+		// Append additional process bound managed objects
+		for (OfficeManagingManagedObject officeMo : officeManagingManagedObjects) {
+
+			// Obtain the process bound name
+			String processBoundName = officeMo.getProcessBoundName();
+			if (ConstructUtil.isBlank(processBoundName)) {
+				issues
+						.addIssue(
+								AssetType.OFFICE,
+								officeName,
+								"Must provide process bound name for Managed Object being managed by the Office");
+				continue; // Must have process bound name
+			}
+
+			// Obtain the raw managed object meta-data
+			RawManagedObjectMetaData<?, ?> rawMoMetaData = officeMo
+					.getRawManagedObjectMetaData();
+			if (rawMoMetaData == null) {
+				issues.addIssue(AssetType.OFFICE, officeName,
+						"Must provide raw managed object meta-data for office managed object "
+								+ processBoundName);
+				continue; // Must have raw managed object meta-data
+			}
+
+			// Determine if managed by the office already
+			RawBoundManagedObjectMetaData<?> rawBoundMo = processBoundMos
+					.get(processBoundName);
+			if (rawBoundMo != null) {
+				// Already bound, so confirm the same managed object
+				if (rawMoMetaData != rawBoundMo.getRawManagedObjectMetaData()) {
+					issues
+							.addIssue(
+									AssetType.OFFICE,
+									officeName,
+									"Managed Object "
+											+ processBoundName
+											+ " is being managed by Office by Process bound Managed Object by name is different");
+				}
+			} else {
+				// Not bound, so create bound managed object meta-data
+				ManagedObjectIndex moIndex = new ManagedObjectIndexImpl(
+						ManagedObjectScope.PROCESS, nextProcessBoundIndex++);
+				rawBoundMo = this.newRawBoundManagedObjectMetaDataImpl(
+						processBoundName, moIndex, null, rawMoMetaData);
+
+				// Append to listing and map to make next office aware
+				managedObjects.add(rawBoundMo);
+				processBoundMos.put(processBoundName, rawBoundMo);
+			}
+		}
+
+		// Return the new listing of raw bound managed object meta-data
+		return managedObjects.toArray(new RawBoundManagedObjectMetaData[0]);
+	}
+
 	/**
 	 * Wraps construction of {@link RawBoundManagedObjectMetaDataImpl} to avoid
 	 * generic type safe issues.
@@ -279,8 +370,8 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		moMetaData.setDependencyKeys(dependencyClass);
 
 		// Create the dependency mappings
-		ManagedObjectDependencyConfiguration<d>[] dependencyMappings = moMetaData
-				.getManagedObjectConfiguration().getDependencyConfiguration();
+		ManagedObjectDependencyConfiguration<d>[] dependencyMappings = moMetaData.managedObjectConfiguration
+				.getDependencyConfiguration();
 		Map<d, ManagedObjectDependencyConfiguration<d>> dependencies = new HashMap<d, ManagedObjectDependencyConfiguration<d>>();
 		for (ManagedObjectDependencyConfiguration<d> dependencyMapping : dependencyMappings) {
 			dependencies.put(dependencyMapping.getDependencyKey(),
@@ -337,11 +428,6 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	@Override
 	public ManagedObjectIndex getManagedObjectIndex() {
 		return this.index;
-	}
-
-	@Override
-	public ManagedObjectConfiguration<D> getManagedObjectConfiguration() {
-		return this.managedObjectConfiguration;
 	}
 
 	@Override
@@ -404,7 +490,8 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 		// Create the managed object meta-data
 		ManagedObjectMetaDataImpl<D> metaData = new ManagedObjectMetaDataImpl<D>(
-				managedObjectSource, managedObjectPool, sourcingAssetManager,
+				this.boundManagedObjectName, managedObjectSource,
+				managedObjectPool, sourcingAssetManager,
 				isManagedObjectAsynchronous, operationsAssetManager,
 				isManagedObjectCoordinating, dependencyMapping, timeout);
 

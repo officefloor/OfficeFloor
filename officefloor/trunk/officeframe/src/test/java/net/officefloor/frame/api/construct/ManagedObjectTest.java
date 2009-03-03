@@ -319,7 +319,8 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		ManagedObjectBuilder<HandlerKey> managedObjectBuilder = this
 				.getOfficeFloorBuilder().addManagedObject("MO",
 						TestManagedObjectSource.class);
-		managedObjectBuilder.setManagingOffice("OFFICE");
+		managedObjectBuilder.setManagingOffice("OFFICE",
+				(isManagedObjectOutside ? "OFFICE_MO" : null));
 
 		// Specify whether asynchronous
 		if (defaultTimeout > 0) {

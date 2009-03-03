@@ -27,6 +27,8 @@ import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
+import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
@@ -51,9 +53,10 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 	private final Class<MS> managedObjectSourceClass;
 
 	/**
-	 * Name of {@link Office} managing this {@link ManagedObject}.
+	 * {@link ManagingOfficeConfiguration} for this {@link ManagedObject}.
 	 */
-	private String managingOfficeName;
+	private ManagingOfficeConfiguration managingOfficeConfiguration = new ManagingOfficeConfigurationImpl(
+			null, null);
 
 	/**
 	 * {@link Properties} for the {@link ManagedObjectSource}.
@@ -109,8 +112,10 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 	}
 
 	@Override
-	public void setManagingOffice(String officeName) {
-		this.managingOfficeName = officeName;
+	public void setManagingOffice(String officeName,
+			String processBoundManagedObjectName) {
+		this.managingOfficeConfiguration = new ManagingOfficeConfigurationImpl(
+				officeName, processBoundManagedObjectName);
 	}
 
 	@Override
@@ -133,8 +138,8 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 	}
 
 	@Override
-	public String getManagingOfficeName() {
-		return this.managingOfficeName;
+	public ManagingOfficeConfiguration getManagingOfficeConfiguration() {
+		return this.managingOfficeConfiguration;
 	}
 
 	@Override
@@ -229,12 +234,6 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 		 * ================ ManagedObjectHandlerBuilder =====================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @seenet.officefloor.frame.api.build.ManagedObjectHandlersBuilder#
-		 * registerHandler(java.lang.Enum)
-		 */
 		@Override
 		@SuppressWarnings("unchecked")
 		public HandlerBuilder<Indexed> registerHandler(H handlerKey) {
@@ -254,12 +253,6 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 			return (HandlerBuilder<Indexed>) handlerBuilder;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @seenet.officefloor.frame.api.build.ManagedObjectHandlerBuilder#
-		 * registerHandler(java.lang.Enum, java.lang.Class)
-		 */
 		@Override
 		@SuppressWarnings("unchecked")
 		public <F extends Enum<F>> HandlerBuilder<F> registerHandler(
@@ -279,6 +272,54 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 
 			// Return the builder
 			return (HandlerBuilder<F>) handlerBuilder;
+		}
+	}
+
+	/**
+	 * {@link ManagingOfficeConfiguration} implementation.
+	 */
+	private static class ManagingOfficeConfigurationImpl implements
+			ManagingOfficeConfiguration {
+
+		/**
+		 * Name of the {@link Office} managing the {@link ManagedObject}.
+		 */
+		private final String officeName;
+
+		/**
+		 * Name to bind the {@link ManagedObject} within the
+		 * {@link ProcessState} of the managing {@link Office}.
+		 */
+		private final String processBoundManagedObjectName;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param officeName
+		 *            Name of the {@link Office} managing the
+		 *            {@link ManagedObject}.
+		 * @param processBoundManagedObjectName
+		 *            Name to bind the {@link ManagedObject} within the
+		 *            {@link ProcessState} of the managing {@link Office}.
+		 */
+		public ManagingOfficeConfigurationImpl(String officeName,
+				String processBoundManagedObjectName) {
+			this.officeName = officeName;
+			this.processBoundManagedObjectName = processBoundManagedObjectName;
+		}
+
+		/*
+		 * ============= ManagingOfficeConfiguration ==========================
+		 */
+
+		@Override
+		public String getOfficeName() {
+			return this.officeName;
+		}
+
+		@Override
+		public String getProcessBoundManagedObjectName() {
+			return this.processBoundManagedObjectName;
 		}
 	}
 

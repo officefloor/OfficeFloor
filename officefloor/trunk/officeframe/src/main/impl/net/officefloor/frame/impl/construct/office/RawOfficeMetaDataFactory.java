@@ -18,6 +18,7 @@ package net.officefloor.frame.impl.construct.office;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobject.OfficeManagingManagedObject;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
@@ -29,9 +30,6 @@ import net.officefloor.frame.internal.configuration.OfficeConfiguration;
  */
 public interface RawOfficeMetaDataFactory {
 
-	// TODO consider how to link in the managed objects that invoke tasks but
-	// are not used by the office.
-
 	/**
 	 * Constructs the {@link RawOfficeMetaData}.
 	 * 
@@ -39,6 +37,8 @@ public interface RawOfficeMetaDataFactory {
 	 *            {@link OfficeConfiguration}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
+	 * @param officeManagingManagedObjects
+	 *            {@link OfficeManagingManagedObject} instances.
 	 * @param rawOfficeFloorMetaData
 	 *            {@link RawOfficeFloorMetaData}.
 	 * @param rawBoundManagedObjectFactory
@@ -49,6 +49,7 @@ public interface RawOfficeMetaDataFactory {
 	 */
 	RawOfficeMetaData constructRawOfficeMetaData(
 			OfficeConfiguration configuration, OfficeFloorIssues issues,
+			OfficeManagingManagedObject[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory);
