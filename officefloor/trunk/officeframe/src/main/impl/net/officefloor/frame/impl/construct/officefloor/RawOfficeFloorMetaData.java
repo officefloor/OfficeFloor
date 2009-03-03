@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.construct.officefloor;
 
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
@@ -63,6 +64,8 @@ public interface RawOfficeFloorMetaData {
 	/**
 	 * Obtains the {@link OfficeFloorMetaData}.
 	 * 
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
 	 * @return {@link OfficeFloorMetaData}.
 	 */
 	OfficeFloorMetaData getOfficeFloorMetaData();

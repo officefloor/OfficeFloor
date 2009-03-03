@@ -142,15 +142,17 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		this.workMoSource = this.createMock(ManagedObjectSource.class);
 
 		// Create the Managed Object meta-data for the Process
-		this.moMetaData = new ManagedObjectMetaDataImpl(this.processMoSource,
-				processMoPool, this.processSourcingManager, true,
+		this.moMetaData = new ManagedObjectMetaDataImpl("PROCESS_MO",
+				this.processMoSource, processMoPool,
+				this.processSourcingManager, true,
 				this.processOperationsManager, false, null, 1000);
 		this.moMetaData.loadRemainingState(null, null);
 
 		// Create the Work Managed Object meta-data
 		ManagedObjectMetaDataImpl workMo = new ManagedObjectMetaDataImpl(
-				this.workMoSource, workMoPool, this.workSourcingManager, false,
-				this.workOperationsManager, false, null, 1000);
+				"WORK_MO", this.workMoSource, workMoPool,
+				this.workSourcingManager, false, this.workOperationsManager,
+				false, null, 1000);
 		workMo.loadRemainingState(null, null);
 		ManagedObjectMetaData[] workMoMetaData = new ManagedObjectMetaData[] {
 				this.moMetaData, workMo };

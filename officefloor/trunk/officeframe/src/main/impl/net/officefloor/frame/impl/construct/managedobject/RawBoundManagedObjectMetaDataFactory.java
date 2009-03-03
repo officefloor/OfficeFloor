@@ -20,11 +20,16 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Factory for the creation of {@link RawBoundManagedObjectMetaData}.
@@ -67,5 +72,35 @@ public interface RawBoundManagedObjectMetaDataFactory {
 			String assetName,
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData<?>> scopeManagedObjects);
+
+	/**
+	 * <p>
+	 * For the input list of {@link ProcessState} bound
+	 * {@link RawBoundManagedObjectMetaData} instances, this method returns the
+	 * list appending in any {@link Office} managed {@link ManagedObject}
+	 * instances that are not already bound.
+	 * <p>
+	 * This provides for the {@link ManagedObjectMetaData} within the
+	 * {@link ProcessState} of the {@link Office} for
+	 * {@link ManagedObjectSource} instances that invoke {@link Task} instances
+	 * within the {@link Office} but are not used by the {@link Office}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office} for raising issues.
+	 * @param processBoundManagedObjectMetaData
+	 *            {@link RawBoundManagedObjectMetaData} instances bound to the
+	 *            {@link ProcessState} of the {@link Office}.
+	 * @param officeManagingManagedObjects
+	 *            {@link OfficeManagingManagedObject} instances.
+	 * @return Resulting new list of {@link RawBoundManagedObjectMetaData}
+	 *         instances affixing in the {@link OfficeManagingManagedObject}
+	 *         instances to the original {@link RawBoundManagedObjectMetaData}
+	 *         list.
+	 */
+	RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
+			String officeName,
+			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
+			OfficeManagingManagedObject[] officeManagingManagedObjects,
+			OfficeFloorIssues issues);
 
 }

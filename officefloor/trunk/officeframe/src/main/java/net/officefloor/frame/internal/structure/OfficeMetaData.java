@@ -36,6 +36,14 @@ public interface OfficeMetaData {
 	String getOfficeName();
 
 	/**
+	 * Obtains the {@link ProcessMetaData} for processes within this
+	 * {@link Office}.
+	 * 
+	 * @return {@link ProcessMetaData} for processes within this {@link Office}.
+	 */
+	ProcessMetaData getProcessMetaData();
+
+	/**
 	 * Obtains the {@link WorkMetaData} of the {@link Work} that may be done
 	 * within this {@link Office}.
 	 * 

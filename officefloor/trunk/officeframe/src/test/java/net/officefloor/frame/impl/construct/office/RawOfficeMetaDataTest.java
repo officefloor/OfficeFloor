@@ -16,6 +16,9 @@
  */
 package net.officefloor.frame.impl.construct.office;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
@@ -24,6 +27,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobject.OfficeManagingManagedObject;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
@@ -93,6 +97,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private final LinkedManagedObjectSourceConfiguration linkedMosConfiguration = this
 			.createMock(LinkedManagedObjectSourceConfiguration.class);
+
+	/**
+	 * {@link OfficeManagingManagedObject} instances.
+	 */
+	private final List<OfficeManagingManagedObject> officeManagingManagedObjects = new LinkedList<OfficeManagingManagedObject>();
 
 	/**
 	 * Ensure issue if no {@link Office} name.
@@ -449,10 +458,14 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	private RawOfficeMetaData constructRawOfficeMetaData(
 			boolean isExpectConstruct) {
 
+		// Obtain the office managing managed objects
+		OfficeManagingManagedObject[] officeMos = this.officeManagingManagedObjects
+				.toArray(new OfficeManagingManagedObject[0]);
+
 		// Construct the meta-data
 		RawOfficeMetaData metaData = RawOfficeMetaDataImpl.getFactory()
 				.constructRawOfficeMetaData(this.configuration, this.issues,
-						this.rawOfficeFloorMetaData,
+						officeMos, this.rawOfficeFloorMetaData,
 						this.rawBoundManagedObjectFactory,
 						this.rawBoundAdministratorFactory);
 		if (isExpectConstruct) {

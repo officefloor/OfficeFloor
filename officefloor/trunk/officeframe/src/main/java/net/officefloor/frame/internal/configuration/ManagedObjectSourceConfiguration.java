@@ -52,13 +52,12 @@ public interface ManagedObjectSourceConfiguration<H extends Enum<H>, MS extends 
 	ManagedObjectBuilder<H> getBuilder();
 
 	/**
-	 * Obtains the name of the {@link Office} responsible for managing this
-	 * {@link ManagedObject}.
+	 * Obtains the {@link ManagingOfficeConfiguration} detailing the
+	 * {@link Office} responsible for managing this {@link ManagedObjectSource}.
 	 * 
-	 * @return Name of the {@link Office} responsible for managing this
-	 *         {@link ManagedObject}.
+	 * @return {@link ManagingOfficeConfiguration}.
 	 */
-	String getManagingOfficeName();
+	ManagingOfficeConfiguration getManagingOfficeConfiguration();
 
 	/**
 	 * Obtains the {@link Class} of the {@link ManagedObjectSource}.

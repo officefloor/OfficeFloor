@@ -18,7 +18,6 @@ package net.officefloor.frame.impl.construct.managedobject;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -43,13 +42,6 @@ public interface RawBoundManagedObjectMetaData<D extends Enum<D>> {
 	 * @return {@link ManagedObjectIndex}.
 	 */
 	ManagedObjectIndex getManagedObjectIndex();
-
-	/**
-	 * Obtains the {@link ManagedObjectConfiguration}.
-	 * 
-	 * @return {@link ManagedObjectConfiguration}.
-	 */
-	ManagedObjectConfiguration<D> getManagedObjectConfiguration();
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaData}.

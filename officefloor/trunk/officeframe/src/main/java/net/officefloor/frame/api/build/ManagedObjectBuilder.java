@@ -17,6 +17,7 @@
 package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
@@ -60,8 +61,12 @@ public interface ManagedObjectBuilder<H extends Enum<H>> {
 	 * 
 	 * @param officeName
 	 *            Name of the {@link Office}.
+	 * @param processBoundManagedObjectName
+	 *            Name to bind the {@link ManagedObject} within the
+	 *            {@link ProcessState} within the {@link Office}.
 	 */
-	void setManagingOffice(String officeName);
+	void setManagingOffice(String officeName,
+			String processBoundManagedObjectName);
 
 	/**
 	 * Obtains the {@link ManagedObjectHandlerBuilder}.

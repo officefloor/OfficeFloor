@@ -26,6 +26,7 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -47,6 +48,12 @@ import net.officefloor.frame.spi.team.Job;
  */
 public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		ManagedObjectMetaData<D> {
+
+	/**
+	 * Name of the {@link ManagedObject} bound within the
+	 * {@link ManagedObjectScope}.
+	 */
+	private final String boundManagedObjectName;
 
 	/**
 	 * {@link ManagedObjectSource} of the {@link ManagedObject}.
@@ -111,6 +118,9 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * Initiate with meta-data of the {@link ManagedObject} to source specific
 	 * to the {@link Work}.
 	 * 
+	 * @param boundManagedObjectName
+	 *            Name of the {@link ManagedObject} bound within the
+	 *            {@link ManagedObjectScope}.
 	 * @param source
 	 *            {@link ManagedObjectSource} of the {@link ManagedObject}.
 	 * @param pool
@@ -133,12 +143,13 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            Timeout of an asynchronous operation by the
 	 *            {@link ManagedObject} being managed.
 	 */
-	public ManagedObjectMetaDataImpl(ManagedObjectSource<?, ?> source,
-			ManagedObjectPool pool, AssetManager sourcingManager,
-			boolean isManagedObjectAsynchronous,
+	public ManagedObjectMetaDataImpl(String boundManagedObjectName,
+			ManagedObjectSource<?, ?> source, ManagedObjectPool pool,
+			AssetManager sourcingManager, boolean isManagedObjectAsynchronous,
 			AssetManager operationsManager,
 			boolean isCoordinatingManagedObject,
 			Map<D, ManagedObjectIndex> dependencyMapping, long timeout) {
+		this.boundManagedObjectName = boundManagedObjectName;
 		this.source = source;
 		this.timeout = timeout;
 		this.isCoordinatingManagedObject = isCoordinatingManagedObject;
@@ -170,6 +181,11 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	/*
 	 * ================= ManagedObjectMetaData ============================
 	 */
+
+	@Override
+	public String getBoundManagedObjectName() {
+		return this.boundManagedObjectName;
+	}
 
 	@Override
 	public ManagedObjectContainer createManagedObjectContainer(
