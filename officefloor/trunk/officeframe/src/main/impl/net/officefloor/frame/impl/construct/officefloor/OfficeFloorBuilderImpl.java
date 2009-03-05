@@ -143,96 +143,9 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 						new AssetManagerFactoryImpl(),
 						RawOfficeMetaDataImpl.getFactory());
 
-		// TODO Implement
-		if (true)
-			throw new UnsupportedOperationException(
-					"TODO clean up OfficeFloorBuilderImpl.buildOfficeFloor");
-
 		// Obtain the office floor meta-data and return the office floor
 		OfficeFloorMetaData metaData = rawMetaData.getOfficeFloorMetaData();
 		return new OfficeFloorImpl(metaData);
-
-		// TODO remove the below once implemented into
-		// RawOfficeFloorMetaDataFactory
-		// // Transform Office Floor Builder into Configuration
-		// OfficeFloorConfiguration officeFloorConfig = this;
-		//
-		// // Create the Asset Manager registry
-		// RawAssetManagerRegistry rawAssetRegistry = new
-		// RawAssetManagerRegistry();
-		//
-		// // Create the registry of raw Managed Object meta-data
-		// RawManagedObjectRegistry rawMosRegistry = RawManagedObjectRegistry
-		// .createRawManagedObjectMetaDataRegistry(officeFloorConfig,
-		// rawAssetRegistry, this);
-		//
-		// // Obtain the registry of teams
-		// Map<String, Team> teamRegistry = null;
-		// System.err.println("TeamRegistration now configuration listing");
-		// // officeFloorConfig.getTeamRegistry();
-		//
-		// // Obtain the office floor escalation procedure
-		// EscalationProcedure officeFloorEscalationProcedure =
-		// officeFloorConfig
-		// .getEscalationProcedure();
-		// if (officeFloorEscalationProcedure == null) {
-		// officeFloorEscalationProcedure = new EscalationProcedureImpl();
-		// }
-		//
-		// // Create the Offices
-		// Map<String, RawOfficeMetaData> rawOffices = new HashMap<String,
-		// RawOfficeMetaData>();
-		// Map<String, OfficeImpl> offices = new HashMap<String, OfficeImpl>();
-		// for (OfficeConfiguration officeConfig : officeFloorConfig
-		// .getOfficeConfiguration()) {
-		// // Obtain the Office name
-		// String officeName = officeConfig.getOfficeName();
-		//
-		// // Enhance the office
-		// OfficeEnhancerContext flowNodesEnhancerContext = new
-		// OfficeEnhancerContextImpl(
-		// officeConfig, officeFloorConfig);
-		// for (OfficeEnhancer officeEnhancer : officeConfig
-		// .getOfficeEnhancers()) {
-		// officeEnhancer.enhanceOffice(flowNodesEnhancerContext);
-		// }
-		//
-		// // Create the office
-		// RawOfficeMetaData rawOfficeMetaData = RawOfficeMetaData
-		// .createOffice(officeConfig, teamRegistry, rawMosRegistry,
-		// rawAssetRegistry, officeFloorEscalationProcedure);
-		//
-		// // Register the office
-		// rawOffices.put(officeName, rawOfficeMetaData);
-		// offices.put(officeName, rawOfficeMetaData.getOffice());
-		// }
-		//
-		// // Link the Managed Objects with Tasks
-		// rawMosRegistry.loadRemainingManagedObjectState(rawOffices);
-		//
-		// // Create the listing of office meta-data
-		// OfficeMetaData[] officeMetaData = new OfficeMetaData[offices.size()];
-		// int officeIndex = 0;
-		// for (String officeName : offices.keySet()) {
-		// OfficeImpl office = offices.get(officeName);
-		// officeMetaData[officeIndex++] = new OfficeMetaDataImpl(officeName,
-		// office);
-		// }
-		//
-		// // Create the listing of teams
-		// Team[] teams = new Team[teamRegistry.size()];
-		// int teamIndex = 0;
-		// for (Team team : teamRegistry.values()) {
-		// teams[teamIndex++] = team;
-		// }
-		//
-		// // Create the office floor meta-data
-		// OfficeFloorMetaData officeFloorMetaData = new
-		// OfficeFloorMetaDataImpl(
-		// teams, officeMetaData);
-		//
-		// // Return the Office Floor
-		// return officeFloorMetaData.createOfficeFloor();
 	}
 
 	/*
