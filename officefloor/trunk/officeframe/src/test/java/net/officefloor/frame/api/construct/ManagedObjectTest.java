@@ -20,6 +20,7 @@ import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.HandlerContext;
@@ -319,8 +320,11 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		ManagedObjectBuilder<HandlerKey> managedObjectBuilder = this
 				.getOfficeFloorBuilder().addManagedObject("MO",
 						TestManagedObjectSource.class);
-		managedObjectBuilder.setManagingOffice("OFFICE",
-				(isManagedObjectOutside ? "OFFICE_MO" : null));
+		ManagingOfficeBuilder managingOfficeBuilder = managedObjectBuilder
+				.setManagingOffice("OFFICE");
+		if (isManagedObjectOutside) {
+			managingOfficeBuilder.setProcessBoundManagedObjectName("OFFICE_MO");
+		}
 
 		// Specify whether asynchronous
 		if (defaultTimeout > 0) {
