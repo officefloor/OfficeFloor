@@ -91,7 +91,7 @@ public interface RawOfficeMetaData {
 	 *         {@link Office} by the {@link ProcessState} and
 	 *         {@link ThreadState} bound names.
 	 */
-	Map<String, RawBoundManagedObjectMetaData<?>> getOfficeScopeManagedObject();
+	Map<String, RawBoundManagedObjectMetaData<?>> getOfficeScopeManagedObjects();
 
 	/**
 	 * Obtains the {@link ProcessState} {@link RawBoundAdministratorMetaData}
@@ -120,7 +120,7 @@ public interface RawOfficeMetaData {
 	 *         {@link Office} by the {@link ProcessState} and
 	 *         {@link ThreadState} bound names.
 	 */
-	Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrator();
+	Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrators();
 
 	/**
 	 * Obtains the {@link OfficeMetaData}.

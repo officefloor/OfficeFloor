@@ -34,19 +34,26 @@ import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectM
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.impl.construct.task.RawTaskMetaData;
+import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedWorkAdministratorConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedWorkManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
+import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -66,7 +73,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	 */
 	@SuppressWarnings("unchecked")
 	public static RawWorkMetaDataFactory getFactory() {
-		return new RawWorkMetaDataImpl(null, null, null, null, null, null, null);
+		return new RawWorkMetaDataImpl(null, null, null, null, null, null);
 	}
 
 	/**
@@ -78,11 +85,6 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	 * {@link RawOfficeMetaData}.
 	 */
 	private final RawOfficeMetaData rawOfficeMetaData;
-
-	/**
-	 * {@link WorkFactory}.
-	 */
-	private final WorkFactory<W> workFactory;
 
 	/**
 	 * {@link RawBoundManagedObjectMetaData} of the {@link ManagedObject}
@@ -135,9 +137,12 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	private int nextWorkRequiredAdministratorIndex = 0;
 
 	/**
-	 * {@link WorkMetaData} to be lazy constructed once all {@link Task}
-	 * instances have indicated the {@link ManagedObject} and
-	 * {@link Administrator} instances required.
+	 * {@link RawTaskMetaData} instances of this {@link Work}.
+	 */
+	private List<RawTaskMetaData<?, W, ?, ?>> rawTaskMetaDatas = null;
+
+	/**
+	 * {@link WorkMetaData}.
 	 */
 	private WorkMetaData<W> workMetaData = null;
 
@@ -148,8 +153,6 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	 *            Name of the {@link Work}.
 	 * @param rawOfficeMetaData
 	 *            {@link RawOfficeMetaData}.
-	 * @param workFactory
-	 *            {@link WorkFactory}.
 	 * @param workManagedObjects
 	 *            {@link RawBoundManagedObjectMetaData} of the
 	 *            {@link ManagedObject} instances bound to this {@link Work}.
@@ -168,14 +171,12 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	public RawWorkMetaDataImpl(
 			String workName,
 			RawOfficeMetaData rawOfficeMetaData,
-			WorkFactory<W> workFactory,
 			RawBoundManagedObjectMetaData<?>[] workManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData<?>> taskScopeManagedObjects,
 			RawBoundAdministratorMetaData<?, ?>[] workAdministrators,
 			Map<String, RawBoundAdministratorMetaData<?, ?>> taskScopeAdministrators) {
 		this.workName = workName;
 		this.rawOfficeMetaData = rawOfficeMetaData;
-		this.workFactory = workFactory;
 		this.workManagedObjects = workManagedObjects;
 		this.taskScopeManagedObjects = taskScopeManagedObjects;
 		this.workAdministrators = workAdministrators;
@@ -191,7 +192,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			WorkConfiguration<w> configuration, OfficeFloorIssues issues,
 			RawOfficeMetaData rawOfficeMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory) {
+			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
+			RawTaskMetaDataFactory rawTaskFactory) {
 
 		// Obtain the work name
 		String workName = configuration.getWorkName();
@@ -213,7 +215,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 		// Obtain the office scoped managed objects
 		Map<String, RawBoundManagedObjectMetaData<?>> officeScopeMo = rawOfficeMetaData
-				.getOfficeScopeManagedObject();
+				.getOfficeScopeManagedObjects();
 
 		// Obtain the work bound managed objects
 		ManagedObjectConfiguration<?>[] moConfiguration = configuration
@@ -260,7 +262,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 		// Obtain the office scope administrators
 		Map<String, RawBoundAdministratorMetaData<?, ?>> officeScopeAdmin = rawOfficeMetaData
-				.getOfficeScopeAdministrator();
+				.getOfficeScopeAdministrators();
 
 		// Create the scoped managed objects available to the administrators
 		Map<String, RawBoundManagedObjectMetaData<?>> adminScopeMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
@@ -310,10 +312,101 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		}
 		taskScopeAdmin.putAll(workAdmin); // second as may override names
 
+		// Create the raw work meta-data
+		RawWorkMetaDataImpl<w> rawWorkMetaData = new RawWorkMetaDataImpl<w>(
+				workName, rawOfficeMetaData, workBoundMo, taskScopeMo,
+				workBoundAdmins, taskScopeAdmin);
+
+		// Obtain the name of the task for the initial flow of work
+		String initialTaskName = configuration.getInitialTaskName();
+		TaskMetaData<?, w, ?, ?> initialTaskMetaData = null;
+
+		// Construct the task meta-data of this work (also find initial task)
+		rawWorkMetaData.rawTaskMetaDatas = new LinkedList<RawTaskMetaData<?, w, ?, ?>>();
+		List<TaskMetaData<?, w, ?, ?>> taskMetaDatas = new LinkedList<TaskMetaData<?, w, ?, ?>>();
+		for (TaskConfiguration<?, w, ?, ?> taskConfiguration : configuration
+				.getTaskConfiguration()) {
+
+			// Construct and register the raw task meta-data
+			RawTaskMetaData<?, w, ?, ?> rawTaskMetaData = rawTaskFactory
+					.constructRawTaskMetaData(taskConfiguration, issues,
+							rawWorkMetaData);
+			if (rawTaskMetaData == null) {
+				continue; // failed to construct the task
+			}
+			rawWorkMetaData.rawTaskMetaDatas.add(rawTaskMetaData);
+
+			// Construct and register the task meta-data
+			TaskMetaData<?, w, ?, ?> taskMetaData = rawTaskMetaData
+					.getTaskMetaData();
+			taskMetaDatas.add(taskMetaData);
+
+			// Determine if the initial task for the work
+			if (initialTaskName != null) {
+				if (initialTaskName.equals(rawTaskMetaData.getTaskName())) {
+					initialTaskMetaData = taskMetaData;
+				}
+			}
+		}
+
+		// Create the initial flow meta-data for the work
+		FlowMetaData<w> initialFlowMetaData = null;
+		if (initialTaskName != null) {
+			// Ensure have the initial task meta-data
+			if (initialTaskMetaData == null) {
+				issues.addIssue(AssetType.WORK, workName,
+						"No initial task by name '" + initialTaskName
+								+ "' on work");
+				return null; // must have initial task meta-data
+			}
+
+			// Construct the initial flow meta-data
+			// TODO obtain the asset manager for the flow
+			initialFlowMetaData = new FlowMetaDataImpl<w>(
+					FlowInstigationStrategyEnum.ASYNCHRONOUS,
+					initialTaskMetaData, null);
+		}
+
+		// Create the listing of managed object indexes
+		ManagedObjectIndex[] managedObjectIndexes = new ManagedObjectIndex[rawWorkMetaData.workRequiredManagedObjects
+				.size()];
+		for (int i = 0; i < managedObjectIndexes.length; i++) {
+			managedObjectIndexes[i] = rawWorkMetaData.workRequiredManagedObjects
+					.get(i).getManagedObjectIndex();
+		}
+
+		// Create the listing of work bound managed object meta-data
+		ManagedObjectMetaData<?>[] managedObjectMetaData = new ManagedObjectMetaData[rawWorkMetaData.workManagedObjects.length];
+		for (int i = 0; i < managedObjectMetaData.length; i++) {
+			managedObjectMetaData[i] = rawWorkMetaData.workManagedObjects[i]
+					.getManagedObjectMetaData();
+			// TODO handle managed object meta-data not available
+		}
+
+		// Create the listing of administrator indexes
+		AdministratorIndex[] administratorIndexes = new AdministratorIndex[rawWorkMetaData.workRequiredAdministrators
+				.size()];
+		for (int i = 0; i < administratorIndexes.length; i++) {
+			administratorIndexes[i] = rawWorkMetaData.workRequiredAdministrators
+					.get(i).getAdministratorIndex();
+		}
+
+		// Create the listing of work bound administrator meta-data
+		AdministratorMetaData<?, ?>[] administratorMetaData = new AdministratorMetaData[rawWorkMetaData.workAdministrators.length];
+		for (int i = 0; i < administratorMetaData.length; i++) {
+			administratorMetaData[i] = rawWorkMetaData.workAdministrators[i]
+					.getAdministratorMetaData();
+		}
+
+		// Create the work meta-data
+		rawWorkMetaData.workMetaData = new WorkMetaDataImpl<w>(
+				rawWorkMetaData.workName, workFactory, managedObjectIndexes,
+				managedObjectMetaData, administratorIndexes,
+				administratorMetaData, initialFlowMetaData, ConstructUtil
+						.toArray(taskMetaDatas, new TaskMetaData[0]));
+
 		// Return the raw work meta-data
-		return new RawWorkMetaDataImpl<w>(workName, rawOfficeMetaData,
-				workFactory, workBoundMo, taskScopeMo, workBoundAdmins,
-				taskScopeAdmin);
+		return rawWorkMetaData;
 	}
 
 	/*
@@ -394,58 +487,29 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	}
 
 	@Override
-	public RawTaskMetaData<?, W, ?, ?> getRawTaskMetaData(String taskName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement RawWorkMetaData<W>.getRawTaskMetaData");
+	public WorkMetaData<W> getWorkMetaData(OfficeFloorIssues issues) {
+		return this.workMetaData;
 	}
 
 	@Override
-	public WorkMetaData<W> getWorkMetaData(OfficeFloorIssues issues) {
+	public void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+			OfficeFloorIssues issues) {
 
-		// Lazy construct the work meta-data
-		if (this.workMetaData != null) {
-			return this.workMetaData;
+		// Link tasks of work bound managed objects
+		for (RawBoundManagedObjectMetaData<?> rawBoundMoMetaData : this.workManagedObjects) {
+			rawBoundMoMetaData.linkTasks(taskMetaDataLocator, issues);
 		}
 
-		// Create the listing of managed object indexes
-		ManagedObjectIndex[] managedObjectIndexes = new ManagedObjectIndex[this.workRequiredManagedObjects
-				.size()];
-		for (int i = 0; i < managedObjectIndexes.length; i++) {
-			managedObjectIndexes[i] = this.workRequiredManagedObjects.get(i)
-					.getManagedObjectIndex();
+		// Link tasks of work bound administrators
+		for (RawBoundAdministratorMetaData<?, ?> rawBoundAdminMetaData : this.workAdministrators) {
+			rawBoundAdminMetaData.linkTasks(taskMetaDataLocator, issues);
 		}
 
-		// Create the listing of work bound managed object meta-data
-		ManagedObjectMetaData<?>[] managedObjectMetaData = new ManagedObjectMetaData[this.workManagedObjects.length];
-		for (int i = 0; i < managedObjectMetaData.length; i++) {
-			managedObjectMetaData[i] = this.workManagedObjects[i]
-					.getManagedObjectMetaData(issues);
-			// TODO handle managed object meta-data not available
+		// Link the tasks of this work
+		for (RawTaskMetaData<?, W, ?, ?> rawTaskMetaData : this.rawTaskMetaDatas) {
+			rawTaskMetaData.linkTasks(taskMetaDataLocator, this.workMetaData,
+					issues);
 		}
-
-		// Create the listing of administrator indexes
-		AdministratorIndex[] administratorIndexes = new AdministratorIndex[this.workRequiredAdministrators
-				.size()];
-		for (int i = 0; i < administratorIndexes.length; i++) {
-			administratorIndexes[i] = this.workRequiredAdministrators.get(i)
-					.getAdministratorIndex();
-		}
-
-		// Create the listing of work bound administrator meta-data
-		AdministratorMetaData<?, ?>[] administratorMetaData = new AdministratorMetaData[this.workAdministrators.length];
-		for (int i = 0; i < administratorMetaData.length; i++) {
-			administratorMetaData[i] = this.workAdministrators[i]
-					.getAdministratorMetaData();
-		}
-
-		// Create the work meta-data
-		this.workMetaData = new WorkMetaDataImpl<W>(this.workName,
-				this.workFactory, managedObjectIndexes, managedObjectMetaData,
-				administratorIndexes, administratorMetaData, null);
-
-		// Return the work meta-data
-		return this.workMetaData;
 	}
 
 	/**

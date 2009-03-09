@@ -23,6 +23,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawOfficeManagingManagedObjectMetaData;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -91,16 +92,16 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 *            {@link RawBoundManagedObjectMetaData} instances bound to the
 	 *            {@link ProcessState} of the {@link Office}.
 	 * @param officeManagingManagedObjects
-	 *            {@link OfficeManagingManagedObject} instances.
+	 *            {@link RawOfficeManagingManagedObjectMetaData} instances.
 	 * @return Resulting new list of {@link RawBoundManagedObjectMetaData}
-	 *         instances affixing in the {@link OfficeManagingManagedObject}
+	 *         instances affixing in the {@link RawOfficeManagingManagedObjectMetaData}
 	 *         instances to the original {@link RawBoundManagedObjectMetaData}
 	 *         list.
 	 */
 	RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
 			String officeName,
 			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
-			OfficeManagingManagedObject[] officeManagingManagedObjects,
+			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
 			OfficeFloorIssues issues);
 
 }

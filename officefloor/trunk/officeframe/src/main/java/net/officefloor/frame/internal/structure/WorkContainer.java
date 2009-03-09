@@ -29,13 +29,6 @@ import net.officefloor.frame.spi.team.Job;
 public interface WorkContainer<W extends Work> {
 
 	/**
-	 * Obtains the type Id of this {@link Work}.
-	 * 
-	 * @return Type Id for this {@link Work}.
-	 */
-	int getWorkId();
-
-	/**
 	 * Obtains the {@link Work} being managed.
 	 * 
 	 * @param threadState

@@ -129,37 +129,12 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	 * ================== WorkContainer ===================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#getWorkId()
-	 */
-	@Override
-	@SuppressWarnings("deprecation")
-	public int getWorkId() {
-		return this.workMetaData.getWorkId();
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.WorkContainer#getWork(net.
-	 * officefloor.frame.internal.structure.ThreadState)
-	 */
 	@Override
 	public W getWork(ThreadState threadState) {
 		return this.work;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.WorkContainer#loadManagedObjects
-	 * (int[], net.officefloor.frame.spi.team.JobContext,
-	 * net.officefloor.frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public boolean loadManagedObjects(int[] managedObjectIndexes,
 			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet) {
@@ -219,15 +194,6 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		return isAllLoaded;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.WorkContainer#
-	 * coordinateManagedObjects(int[],
-	 * net.officefloor.frame.spi.team.JobContext,
-	 * net.officefloor.frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public void coordinateManagedObjects(int[] managedObjectIndexes,
 			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet) {
@@ -275,15 +241,6 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.WorkContainer#isManagedObjectsReady
-	 * (int[], net.officefloor.frame.spi.team.JobContext,
-	 * net.officefloor.frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public boolean isManagedObjectsReady(int[] managedObjectIndexes,
 			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet) {
@@ -335,14 +292,6 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.WorkContainer#
-	 * administerManagedObjects
-	 * (net.officefloor.frame.internal.structure.TaskDutyAssociation,
-	 * net.officefloor.frame.internal.structure.AdministratorContext)
-	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public void administerManagedObjects(TaskDutyAssociation<?> duty,
@@ -439,13 +388,6 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		adminContainer.doDuty(duty, Arrays.asList(ei), adminContext);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.WorkContainer#getObject(int,
-	 * net.officefloor.frame.internal.structure.ThreadState)
-	 */
 	@Override
 	public Object getObject(int moIndex, ThreadState threadState) {
 
@@ -484,11 +426,6 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		return container.getObject(threadState);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#unloadWork()
-	 */
 	@Override
 	public void unloadWork() {
 

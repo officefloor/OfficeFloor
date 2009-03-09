@@ -21,6 +21,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
+import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 
 /**
@@ -43,12 +44,15 @@ public interface RawWorkMetaDataFactory {
 	 *            {@link RawBoundManagedObjectMetaDataFactory}.
 	 * @param rawBoundAdministratorFactory
 	 *            {@link RawBoundAdministratorMetaDataFactory}.
+	 * @param rawTaskFactory
+	 *            {@link RawTaskMetaDataFactory}.
 	 * @return {@link RawWorkMetaData}.
 	 */
 	<W extends Work> RawWorkMetaData<W> constructRawWorkMetaData(
 			WorkConfiguration<W> configuration, OfficeFloorIssues issues,
 			RawOfficeMetaData rawOfficeMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory);
+			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
+			RawTaskMetaDataFactory rawTaskFactory);
 
 }

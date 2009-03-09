@@ -52,7 +52,7 @@ public class ManagedObjectSourceUnknownPropertyError extends Error {
 	 * 
 	 * @return Name of the unknown property.
 	 */
-	public String getUnkonwnPropertyName() {
+	public String getUnknownPropertyName() {
 		return this.unknownPropertyName;
 	}
 

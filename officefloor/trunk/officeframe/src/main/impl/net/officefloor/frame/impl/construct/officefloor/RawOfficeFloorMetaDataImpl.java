@@ -26,15 +26,17 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
-import net.officefloor.frame.impl.construct.managedobject.OfficeManagingManagedObject;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawOfficeManagingManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataFactory;
+import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.construct.work.RawWorkMetaDataFactory;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
 import net.officefloor.frame.impl.execute.officefloor.OfficeFloorMetaDataImpl;
@@ -43,7 +45,6 @@ import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -84,9 +85,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	private final EscalationProcedure escalationProcedure;
 
 	/**
-	 * Listing of {@link OfficeMetaData} for the {@link OfficeFloor}.
+	 * {@link OfficeFloorMetaData}.
 	 */
-	private OfficeMetaData[] officeMetaDatas;
+	private OfficeFloorMetaData officeFloorMetaData;
 
 	/**
 	 * Initiate.
@@ -121,7 +122,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdminFactory,
 			AssetManagerFactory assetManagerFactory,
-			RawOfficeMetaDataFactory rawOfficeFactory) {
+			RawOfficeMetaDataFactory rawOfficeFactory,
+			RawWorkMetaDataFactory rawWorkFactory,
+			RawTaskMetaDataFactory rawTaskFactory) {
 
 		// Name of office floor for reporting issues
 		String officeFloorName = configuration.getOfficeFloorName();
@@ -160,7 +163,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 		// Construct the managed object sources
 		Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry = new HashMap<String, RawManagedObjectMetaData<?, ?>>();
-		Map<String, List<RawManagedObjectMetaData<?, ?>>> officeManagedObjects = new HashMap<String, List<RawManagedObjectMetaData<?, ?>>>();
+		Map<String, List<RawOfficeManagingManagedObjectMetaData>> officeManagedObjects = new HashMap<String, List<RawOfficeManagingManagedObjectMetaData>>();
 		for (ManagedObjectSourceConfiguration mosConfiguration : configuration
 				.getManagedObjectSourceConfiguration()) {
 
@@ -181,22 +184,38 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 				continue; // maintain only first managed object source
 			}
 
+			// Obtain details for the office managing the managed object
+			RawOfficeManagingManagedObjectMetaData managingOfficeMetaData = mosMetaData
+					.getManagingOfficeMetaData();
+			if (managingOfficeMetaData == null) {
+				issues
+						.addIssue(AssetType.MANAGED_OBJECT,
+								managedObjectSourceName,
+								"Managing Object Source did not specify managing office meta-data");
+				continue; // must have a managing office
+			}
+			String managingOfficeName = managingOfficeMetaData
+					.getManagingOfficeName();
+			if (ConstructUtil.isBlank(managingOfficeName)) {
+				issues
+						.addIssue(AssetType.MANAGED_OBJECT,
+								managedObjectSourceName,
+								"Managed Object Source did not specify a managing Office");
+				continue; // must have a managing office
+			}
+
 			// Register the managed object source
 			mosRegistry.put(managedObjectSourceName, mosMetaData);
 
-			// Register managed object against its managing office
-			String managingOfficeName = mosMetaData.getManagingOfficeName();
-			if (!ConstructUtil.isBlank(managingOfficeName)) {
-				// Requires a managing office, so register for loading
-				List<RawManagedObjectMetaData<?, ?>> officeManagingManagedObjects = officeManagedObjects
-						.get(managingOfficeName);
-				if (officeManagingManagedObjects == null) {
-					officeManagingManagedObjects = new LinkedList<RawManagedObjectMetaData<?, ?>>();
-					officeManagedObjects.put(managingOfficeName,
-							officeManagingManagedObjects);
-				}
-				officeManagingManagedObjects.add(mosMetaData);
+			// Register for being managed by the office
+			List<RawOfficeManagingManagedObjectMetaData> officeManagingManagedObjects = officeManagedObjects
+					.get(managingOfficeName);
+			if (officeManagingManagedObjects == null) {
+				officeManagingManagedObjects = new LinkedList<RawOfficeManagingManagedObjectMetaData>();
+				officeManagedObjects.put(managingOfficeName,
+						officeManagingManagedObjects);
 			}
+			officeManagingManagedObjects.add(managingOfficeMetaData);
 		}
 
 		// Obtain the escalation procedure
@@ -226,39 +245,21 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			}
 
 			// Obtain the managed objects being managed by the office
-			List<RawManagedObjectMetaData<?, ?>> officeRawMoMetaDatas = officeManagedObjects
+			List<RawOfficeManagingManagedObjectMetaData> officeManagingManagedObjectList = officeManagedObjects
 					.get(officeName);
-			List<OfficeManagingManagedObject> officeManagingManagedObjects = new LinkedList<OfficeManagingManagedObject>();
-			if (officeRawMoMetaDatas != null) {
-				for (RawManagedObjectMetaData<?, ?> officeRawMoMetaData : officeRawMoMetaDatas) {
+			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects = (officeManagingManagedObjectList == null ? new RawOfficeManagingManagedObjectMetaData[0]
+					: officeManagingManagedObjectList
+							.toArray(new RawOfficeManagingManagedObjectMetaData[0]));
 
-					// Obtain the process bound managed object name
-					String processBoundMoName = officeRawMoMetaData
-							.getManagingOfficeProcessBoundManagedObjectName();
-					if (ConstructUtil.isBlank(processBoundMoName)) {
-						issues.addIssue(AssetType.OFFICE, officeName,
-								"Must provide process bound name for Managed Object Source "
-										+ officeRawMoMetaData
-												.getManagedObjectName());
-						continue; // Can not bound managed object to office
-					}
-
-					// Add the office bound managed object
-					officeManagingManagedObjects
-							.add(new OfficeManagingManagedObjectImpl(
-									processBoundMoName, officeRawMoMetaData));
-				}
-			}
+			// Unregister managed objects as check later all managed by offices
+			officeManagedObjects.remove(officeName);
 
 			// Construct the raw office meta-data
 			RawOfficeMetaData rawOfficeMetaData = rawOfficeFactory
-					.constructRawOfficeMetaData(
-							officeConfiguration,
-							issues,
-							officeManagingManagedObjects
-									.toArray(new OfficeManagingManagedObject[0]),
-							rawMetaData, rawBoundMoFactory,
-							rawBoundAdminFactory);
+					.constructRawOfficeMetaData(officeConfiguration, issues,
+							officeManagingManagedObjects, rawMetaData,
+							rawBoundMoFactory, rawBoundAdminFactory,
+							rawWorkFactory, rawTaskFactory);
 			if (rawOfficeMetaData == null) {
 				continue; // issue with office
 			}
@@ -271,44 +272,63 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 					.getOfficeMetaData();
 			officeMetaDatas.add(officeMetaData);
 
-			// Obtain map of process managed object name to process bound index
-			ManagedObjectMetaData<?>[] moMetaDatas = officeMetaData
-					.getProcessMetaData().getManagedObjectMetaData();
-			Map<String, Integer> processMoNameToIndex = new HashMap<String, Integer>();
-			for (int i = 0; i < moMetaDatas.length; i++) {
-				processMoNameToIndex.put(moMetaDatas[i]
-						.getBoundManagedObjectName(), i);
-			}
-
 			// Have the managed objects managed by the office
-			if (officeRawMoMetaDatas != null) {
-				for (RawManagedObjectMetaData<?, ?> officeRawMoMetaData : officeRawMoMetaDatas) {
+			for (RawOfficeManagingManagedObjectMetaData officeManagingManagedObject : officeManagingManagedObjects) {
+				officeManagingManagedObject.getRawManagedObjectMetaData()
+						.manageByOffice(officeMetaData, issues);
+			}
+		}
 
-					// Obtain the index of the managed object in the office
-					String managedObjectProcessBoundName = officeRawMoMetaData
-							.getManagingOfficeProcessBoundManagedObjectName();
-					Integer processBoundIndex = processMoNameToIndex
-							.get(managedObjectProcessBoundName);
-					if (processBoundIndex == null) {
-						issues.addIssue(AssetType.OFFICE, officeName,
-								"Managed Object Source "
-										+ officeRawMoMetaData
-												.getManagedObjectName()
-										+ " of process bound name '"
-										+ managedObjectProcessBoundName
-										+ "' not managed by Office");
-						continue; // managed object not in office
-					}
-
-					// Have managed object managed by the office
-					officeRawMoMetaData.manageByOffice(officeMetaData,
-							processBoundIndex.intValue(), issues);
+		// Issue if office not exist for the managed object
+		if (officeManagedObjects.size() > 0) {
+			for (String officeName : officeManagedObjects.keySet()) {
+				for (RawOfficeManagingManagedObjectMetaData managingOfficeMetaData : officeManagedObjects
+						.get(officeName)) {
+					issues.addIssue(AssetType.MANAGED_OBJECT, officeName,
+							"No Office by name '"
+									+ officeName
+									+ "' to manage Managed Object Source "
+									+ managingOfficeMetaData
+											.getRawManagedObjectMetaData()
+											.getManagedObjectName());
 				}
 			}
 		}
 
+		// Obtain the listing of teams
+		Team[] teams = this.teamRegistry.values().toArray(new Team[0]);
+
+		// Obtain the listing of managed object source instances
+		List<ManagedObjectSourceInstance<?>> mosInstances = new LinkedList<ManagedObjectSourceInstance<?>>();
+		for (RawManagedObjectMetaData<?, ?> rawMoMetaData : this.mosRegistry
+				.values()) {
+			ManagedObjectSourceInstance<?> mosInstance = this
+					.createManagedObjectSourceInstance(rawMoMetaData);
+			mosInstances.add(mosInstance);
+		}
+
+		// Create the office floor meta-data
+		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(teams,
+				mosInstances.toArray(new ManagedObjectSourceInstance[0]),
+				officeMetaDatas.toArray(new OfficeMetaData[0]));
+
 		// Return the raw meta-data
 		return rawMetaData;
+	}
+
+	/**
+	 * Creates the {@link ManagedObjectSourceInstance} for the
+	 * {@link RawManagedObjectMetaData}.
+	 * 
+	 * @param rawMoMetaData
+	 *            {@link RawManagedObjectMetaData}.
+	 * @return {@link ManagedObjectSourceInstance}.
+	 */
+	private <H extends Enum<H>> ManagedObjectSourceInstance<H> createManagedObjectSourceInstance(
+			RawManagedObjectMetaData<?, H> rawMoMetaData) {
+		return new ManagedObjectSourceInstanceImpl<H>(rawMoMetaData
+				.getManagedObjectSource(), rawMoMetaData.getHandlers(),
+				rawMoMetaData.getManagedObjectPool());
 	}
 
 	/*
@@ -333,40 +353,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 	@Override
 	public OfficeFloorMetaData getOfficeFloorMetaData() {
-
-		// TODO consider lazy loading office floor meta-data
-
-		// Obtain the listing of teams
-		Team[] teams = this.teamRegistry.values().toArray(new Team[0]);
-
-		// Obtain the listing of managed object source instances
-		List<ManagedObjectSourceInstance<?>> mosInstances = new LinkedList<ManagedObjectSourceInstance<?>>();
-		for (RawManagedObjectMetaData<?, ?> rawMoMetaData : this.mosRegistry
-				.values()) {
-			ManagedObjectSourceInstance<?> mosInstance = this
-					.createManagedObjectSourceInstance(rawMoMetaData);
-			mosInstances.add(mosInstance);
-		}
-
-		// Create and return the office floor meta-data
-		OfficeFloorMetaDataImpl metaData = new OfficeFloorMetaDataImpl(teams,
-				mosInstances.toArray(new ManagedObjectSourceInstance[0]),
-				this.officeMetaDatas);
-		return metaData;
+		return this.officeFloorMetaData;
 	}
 
-	/**
-	 * Creates the {@link ManagedObjectSourceInstance} for the
-	 * {@link RawManagedObjectMetaData}.
-	 * 
-	 * @param rawMoMetaData
-	 *            {@link RawManagedObjectMetaData}.
-	 * @return {@link ManagedObjectSourceInstance}.
-	 */
-	private <H extends Enum<H>> ManagedObjectSourceInstance<H> createManagedObjectSourceInstance(
-			RawManagedObjectMetaData<?, H> rawMoMetaData) {
-		return new ManagedObjectSourceInstanceImpl<H>(rawMoMetaData
-				.getManagedObjectSource(), rawMoMetaData.getHandlers(),
-				rawMoMetaData.getManagedObjectPool());
-	}
 }

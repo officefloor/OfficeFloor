@@ -167,13 +167,11 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            {@link OfficeMetaData} of the {@link Office} containing this
 	 *            {@link ManagedObjectMetaData}.
 	 * @param recycleFlowMetaData
-	 *            {@link FlowMetaData} for the recycing of this
+	 *            {@link FlowMetaData} for the recycling of this
 	 *            {@link ManagedObject}.
-	 * @throws Exception
-	 *             If fails to load remaining state.
 	 */
 	public void loadRemainingState(OfficeMetaData officeMetaData,
-			FlowMetaData<?> recycleFlowMetaData) throws Exception {
+			FlowMetaData<?> recycleFlowMetaData) {
 		this.officeMetaData = officeMetaData;
 		this.recycleFlowMetaData = recycleFlowMetaData;
 	}

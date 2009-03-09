@@ -14,19 +14,18 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.process;
+package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 
 /**
- * {@link ProcessMetaData} implementation.
+ * {@link ThreadMetaData} implementation.
  * 
  * @author Daniel
  */
-public class ProcessMetaDataImpl implements ProcessMetaData {
+public class ThreadMetaDataImpl implements ThreadMetaData {
 
 	/**
 	 * {@link ManagedObjectMetaData} instances.
@@ -39,31 +38,21 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	private final AdministratorMetaData<?, ?>[] administratorMetaData;
 
 	/**
-	 * {@link ThreadMetaData}.
-	 */
-	private final ThreadMetaData threadMetaData;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectMetaData
 	 *            {@link ManagedObjectMetaData} instances.
 	 * @param administratorMetaData
 	 *            {@link AdministratorMetaData} instances.
-	 * @param threadMetaData
-	 *            {@link ThreadMetaData}.
 	 */
-	public ProcessMetaDataImpl(
-			ManagedObjectMetaData<?>[] managedObjectMetaData,
-			AdministratorMetaData<?, ?>[] administratorMetaData,
-			ThreadMetaData threadMetaData) {
+	public ThreadMetaDataImpl(ManagedObjectMetaData<?>[] managedObjectMetaData,
+			AdministratorMetaData<?, ?>[] administratorMetaData) {
 		this.managedObjectMetaData = managedObjectMetaData;
 		this.administratorMetaData = administratorMetaData;
-		this.threadMetaData = threadMetaData;
 	}
 
 	/*
-	 * ============== ProcessMetaData =================================
+	 * ================== ThreadMetaData =============================
 	 */
 
 	@Override
@@ -74,11 +63,6 @@ public class ProcessMetaDataImpl implements ProcessMetaData {
 	@Override
 	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
 		return this.administratorMetaData;
-	}
-
-	@Override
-	public ThreadMetaData getThreadMetaData() {
-		return this.threadMetaData;
 	}
 
 }

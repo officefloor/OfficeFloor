@@ -14,25 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.managedobject;
+package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * <p>
- * {@link ManagedObject} that is managed by the {@link Office}.
- * <p>
- * Ultimately this means the {@link ManagedObject} has {@link Handler} instances
- * that invoke {@link Task} instances within the {@link Office}.
+ * Meta-data of a {@link ManagedObject} that is managed by the {@link Office}.
  * 
  * @author Daniel
  */
-public interface OfficeManagingManagedObject {
+public interface RawOfficeManagingManagedObjectMetaData {
+
+	/**
+	 * Obtains the name for the {@link Office} managing the
+	 * {@link ManagedObject}.
+	 * 
+	 * @return Name for the {@link Office} managing the {@link ManagedObject}.
+	 */
+	String getManagingOfficeName();
 
 	/**
 	 * <p>
@@ -43,8 +46,13 @@ public interface OfficeManagingManagedObject {
 	 * made available to the {@link ProcessState}. Whether the {@link Office}
 	 * wants to make use of the {@link ManagedObject} is its choice but is
 	 * available to do so.
+	 * <p>
+	 * Ultimately this means the {@link ManagedObject} has {@link Handler}
+	 * instances that invoke {@link Task} instances within the {@link Office}.
 	 * 
-	 * @return {@link ProcessState} bound name for the {@link ManagedObject}.
+	 * @return {@link ProcessState} bound name for the {@link ManagedObject} or
+	 *         <code>null</code> if not required to be {@link ProcessState}
+	 *         bound.
 	 */
 	String getProcessBoundName();
 

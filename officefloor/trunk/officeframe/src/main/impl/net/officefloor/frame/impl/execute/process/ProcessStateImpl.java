@@ -51,6 +51,7 @@ import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -144,21 +145,12 @@ public class ProcessStateImpl implements ProcessState {
 	 * ===================== ProcessState ===============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.ProcessState#getProcessLock()
-	 */
+	@Override
 	public Object getProcessLock() {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.ProcessState#createThread()
-	 */
+	@Override
 	public <W extends Work> Flow createThread(FlowMetaData<W> flowMetaData) {
 		// Create the new thread
 		ThreadState threadState = new ThreadStateImpl(this, flowMetaData);
@@ -172,18 +164,13 @@ public class ProcessStateImpl implements ProcessState {
 		return threadState.createFlow(flowMetaData);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.ProcessState#getCatchAllEscalation
-	 * ()
-	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public Escalation getCatchAllEscalation() {
 
 		// Create the catch all escalation
 		TaskMetaDataImpl<Throwable, Work, None, None> catchAllTask = new TaskMetaDataImpl<Throwable, Work, None, None>(
+				"Catch All Escalations Task",
 				new CatchAllEscalationTaskFactory(), new PassiveTeam(),
 				new int[0], new int[0], new TaskDutyAssociation[0],
 				new TaskDutyAssociation[0]);
@@ -193,7 +180,7 @@ public class ProcessStateImpl implements ProcessState {
 				"Catch All Escalation", new CatchAllEscalationWorkFactory(),
 				new ManagedObjectIndex[0], new ManagedObjectMetaData[0],
 				new AdministratorIndex[0], new AdministratorMetaData[0],
-				catchAllFlow);
+				catchAllFlow, new TaskMetaData[0]);
 		catchAllTask.loadRemainingState(workMetaData, new FlowMetaData[0],
 				null, null);
 		Escalation catchAllEscalation = new EscalationImpl(Throwable.class,
@@ -203,13 +190,7 @@ public class ProcessStateImpl implements ProcessState {
 		return catchAllEscalation;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.ProcessState#threadComplete(
-	 * net.officefloor.frame.internal.structure.ThreadState)
-	 */
+	@Override
 	public void threadComplete(ThreadState thread) {
 		// Decrement the number of threads
 		synchronized (this.getProcessLock()) {
@@ -232,33 +213,17 @@ public class ProcessStateImpl implements ProcessState {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ProcessState#
-	 * getManagedObjectContainer(int)
-	 */
+	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
 		return this.managedObjectContainers[index];
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ProcessState#
-	 * getAdministratorContainer(int)
-	 */
+	@Override
 	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
 		return this.administratorContainers[index];
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ProcessState#
-	 * registerProcessCompletionListener
-	 * (net.officefloor.frame.internal.structure.ProcessCompletionListener)
-	 */
+	@Override
 	public void registerProcessCompletionListener(
 			ProcessCompletionListener listener) {
 		this.completionListeners.add(listener);
@@ -275,13 +240,6 @@ public class ProcessStateImpl implements ProcessState {
 		 * ================== TaskFactory =============================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor
-		 * .frame.api.execute.Work)
-		 */
 		@Override
 		public Task<Throwable, Work, None, None> createTask(Work work) {
 			return this;
@@ -291,13 +249,6 @@ public class ProcessStateImpl implements ProcessState {
 		 * =================== Task ====================================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
-		 * .api.execute.TaskContext)
-		 */
 		@Override
 		public Object doTask(TaskContext<Throwable, Work, None, None> context) {
 

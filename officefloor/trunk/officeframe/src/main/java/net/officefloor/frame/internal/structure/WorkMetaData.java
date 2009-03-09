@@ -17,6 +17,7 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Administrator;
 
@@ -26,16 +27,6 @@ import net.officefloor.frame.spi.administration.Administrator;
  * @author Daniel
  */
 public interface WorkMetaData<W extends Work> {
-
-	/**
-	 * Obtains the ID distinguishing this {@link Work} from the other
-	 * {@link Work}.
-	 * 
-	 * @return ID distinguishing this {@link Work} from the other {@link Work}.
-	 */
-	// TODO remove work ID in favour of bounding to a scope
-	@Deprecated
-	int getWorkId();
 
 	/**
 	 * Obtains the name of this {@link Work}.
@@ -56,7 +47,8 @@ public interface WorkMetaData<W extends Work> {
 	 * {@link Work}.
 	 * 
 	 * @return {@link FlowMetaData} for the initial {@link Flow} of the
-	 *         {@link Work}.
+	 *         {@link Work} or <code>null</code> if no initial {@link Flow} for
+	 *         the {@link Work}.
 	 */
 	FlowMetaData<W> getInitialFlowMetaData();
 
@@ -95,5 +87,14 @@ public interface WorkMetaData<W extends Work> {
 	 *         {@link Work}.
 	 */
 	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
+
+	/**
+	 * Obtains the {@link TaskMetaData} for the {@link Task} instances of this
+	 * {@link Work}.
+	 * 
+	 * @return {@link TaskMetaData} for the {@link Task} instances of this
+	 *         {@link Work}.
+	 */
+	TaskMetaData<?, W, ?, ?>[] getTaskMetaData();
 
 }

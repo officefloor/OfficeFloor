@@ -22,7 +22,9 @@ import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataFactory;
+import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
+import net.officefloor.frame.impl.construct.work.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 
 /**
@@ -52,6 +54,10 @@ public interface RawOfficeFloorMetaDataFactory {
 	 *            {@link AssetManagerFactory}.
 	 * @param rawOfficeFactory
 	 *            {@link RawOfficeMetaDataFactory}.
+	 * @param rawWorkMetaDataFactory
+	 *            {@link RawWorkMetaDataFactory}.
+	 * @param rawTaskMetaDataFactory
+	 *            {@link RawTaskMetaDataFactory}.
 	 * @return {@link RawOfficeFloorMetaData}.
 	 */
 	RawOfficeFloorMetaData constructRawOfficeFloorMetaData(
@@ -61,6 +67,8 @@ public interface RawOfficeFloorMetaDataFactory {
 			RawBoundManagedObjectMetaDataFactory rawBoundMoFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdminFactory,
 			AssetManagerFactory assetManagerFactory,
-			RawOfficeMetaDataFactory rawOfficeFactory);
+			RawOfficeMetaDataFactory rawOfficeFactory,
+			RawWorkMetaDataFactory rawWorkMetaDataFactory,
+			RawTaskMetaDataFactory rawTaskMetaDataFactory);
 
 }

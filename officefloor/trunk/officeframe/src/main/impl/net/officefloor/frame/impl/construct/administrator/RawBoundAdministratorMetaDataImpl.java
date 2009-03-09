@@ -34,6 +34,7 @@ import net.officefloor.frame.impl.execute.administrator.AdministratorMetaDataImp
 import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDataImpl;
 import net.officefloor.frame.impl.execute.duty.DutyMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
@@ -430,6 +431,14 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 
 		// Returns the administrator meta-data
 		return metaData;
+	}
+
+	@Override
+	public void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+			OfficeFloorIssues issues) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement RawBoundAdministratorMetaData<I,A>.linkTasks");
 	}
 
 	/**

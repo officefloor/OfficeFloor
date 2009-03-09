@@ -240,6 +240,16 @@ public class ExecutionNode<W extends Work> implements
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getTaskName()
+	 */
+	@Override
+	public String getTaskName() {
+		return this.getClass().getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see
 	 * net.officefloor.frame.internal.structure.JobMetaData#createJobActivableSet
 	 * ()
