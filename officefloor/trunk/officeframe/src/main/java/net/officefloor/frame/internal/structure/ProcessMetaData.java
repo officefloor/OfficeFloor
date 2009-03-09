@@ -44,4 +44,13 @@ public interface ProcessMetaData {
 	 */
 	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
 
+	/**
+	 * Obtains the {@link ThreadMetaData} of {@link ThreadState} instances
+	 * spawned from the {@link ProcessState} of this {@link ProcessMetaData}.
+	 * 
+	 * @return {@link ThreadMetaData} of {@link ThreadState} instances spawned
+	 *         from the {@link ProcessState} of this {@link ProcessMetaData}.
+	 */
+	ThreadMetaData getThreadMetaData();
+
 }

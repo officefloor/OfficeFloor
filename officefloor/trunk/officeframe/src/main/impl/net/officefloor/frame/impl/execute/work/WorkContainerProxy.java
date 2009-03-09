@@ -51,36 +51,11 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	 * ========================== WorkContainer ============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#getWorkId()
-	 */
-	@Override
-	public int getWorkId() {
-		return this.delegate.getWorkId();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.WorkContainer#getWork(net.
-	 * officefloor.frame.internal.structure.ThreadState)
-	 */
 	@Override
 	public W getWork(ThreadState threadState) {
 		return this.delegate.getWork(threadState);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.WorkContainer#isManagedObjectsReady
-	 * (int[], net.officefloor.frame.spi.team.JobContext,
-	 * net.officefloor.frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public boolean isManagedObjectsReady(int[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
@@ -89,15 +64,6 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 				executionContext, jobNode, notifySet);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.WorkContainer#loadManagedObjects
-	 * (int[], net.officefloor.frame.spi.team.JobContext,
-	 * net.officefloor.frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public boolean loadManagedObjects(int[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
@@ -106,15 +72,6 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 				executionContext, jobNode, notifySet);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.WorkContainer#
-	 * coordinateManagedObjects(int[],
-	 * net.officefloor.frame.spi.team.JobContext,
-	 * net.officefloor.frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public void coordinateManagedObjects(int[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
@@ -123,37 +80,17 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 				executionContext, jobNode, notifySet);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.WorkContainer#
-	 * administerManagedObjects
-	 * (net.officefloor.frame.internal.structure.TaskDutyAssociation,
-	 * net.officefloor.frame.internal.structure.AdministratorContext)
-	 */
 	@Override
 	public void administerManagedObjects(TaskDutyAssociation<?> duty,
 			AdministratorContext adminContext) throws Throwable {
 		this.delegate.administerManagedObjects(duty, adminContext);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.WorkContainer#getObject(int,
-	 * net.officefloor.frame.internal.structure.ThreadState)
-	 */
 	@Override
 	public Object getObject(int moIndex, ThreadState threadState) {
 		return this.delegate.getObject(moIndex, threadState);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.WorkContainer#unloadWork()
-	 */
 	@Override
 	public void unloadWork() {
 		// Not the last flow item for the work, so do not unload

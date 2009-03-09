@@ -660,8 +660,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getRawTaskMetaData("TASK"), null);
+//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+//				.getRawTaskMetaData("TASK"), null);
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
 				.getWorkName(), "WORK");
 		this
@@ -703,8 +703,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getRawTaskMetaData("TASK"), flowRawTaskMetaData);
+//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+//				.getRawTaskMetaData("TASK"), flowRawTaskMetaData);
 		this.recordReturn(flowRawTaskMetaData, flowRawTaskMetaData
 				.getTaskMetaData(), flowTaskMetaData);
 		this.recordReturn(flowConfiguration, flowConfiguration
@@ -748,8 +748,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getRawTaskMetaData("TASK"), flowRawTaskMetaData);
+//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+//				.getRawTaskMetaData("TASK"), flowRawTaskMetaData);
 		this.recordReturn(flowRawTaskMetaData, flowRawTaskMetaData
 				.getTaskMetaData(), flowTaskMetaData);
 		this.recordReturn(flowConfiguration, flowConfiguration
@@ -829,8 +829,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				null);
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"NEXT_TASK");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getRawTaskMetaData("NEXT_TASK"), nextRawTaskMetaData);
+//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+//				.getRawTaskMetaData("NEXT_TASK"), nextRawTaskMetaData);
 		this.recordReturn(nextRawTaskMetaData, nextRawTaskMetaData
 				.getTaskMetaData(), nextTaskMetaData);
 		this.record_NoEscalations();
@@ -978,9 +978,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"ESCALATION_HANDLER");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getRawTaskMetaData("ESCALATION_HANDLER"),
-				escalationRawTaskMetaData);
+//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+//				.getRawTaskMetaData("ESCALATION_HANDLER"),
+//				escalationRawTaskMetaData);
 		this.recordReturn(escalationRawTaskMetaData, escalationRawTaskMetaData
 				.getTaskMetaData(), escalationTaskMetaData);
 
@@ -1147,7 +1147,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		// Other tasks and work expected to be constructed between these steps
 
 		// Load the remaining state
-		metaData.loadRemainingState(this.workRegistry, this.issues);
+		// TODO link the tasks
+//		metaData.linkTasks(this.workRegistry, this.issues);
 
 		// Return the fully constructed meta-data
 		return metaData;

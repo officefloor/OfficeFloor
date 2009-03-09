@@ -176,7 +176,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.constructRawBoundManagedObjectMetaData(1,
 						this.managedObjectConfiguration);
 		ManagedObjectMetaData<?> moMetaData = rawBoundMoMetaData[0]
-				.getManagedObjectMetaData(this.issues);
+				.getManagedObjectMetaData();
 		this.verifyMockObjects();
 
 		// Verify the managed object meta-data contents

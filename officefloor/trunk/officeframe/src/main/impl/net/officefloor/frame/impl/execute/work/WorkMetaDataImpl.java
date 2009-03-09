@@ -25,6 +25,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -76,6 +77,11 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	private final FlowMetaData<W> initialFlowMetaData;
 
 	/**
+	 * {@link TaskMetaData} of the {@link Task} instances of this {@link Work}.
+	 */
+	private final TaskMetaData<?, W, ?, ?>[] taskMetaData;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param workFactory
@@ -95,13 +101,17 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 * @param initialFlowMetaData
 	 *            {@link FlowMetaData} for the initial {@link Flow} of the
 	 *            {@link Work}.
+	 * @param taskMetaData
+	 *            {@link TaskMetaData} of the {@link Task} instances of this
+	 *            {@link Work}.
 	 */
 	public WorkMetaDataImpl(String workName, WorkFactory<W> workFactory,
 			ManagedObjectIndex[] moIndexes,
 			ManagedObjectMetaData<?>[] moMetaData,
 			AdministratorIndex[] adminIndexes,
 			AdministratorMetaData<?, ?>[] adminMetaData,
-			FlowMetaData<W> initialFlowMetaData) {
+			FlowMetaData<W> initialFlowMetaData,
+			TaskMetaData<?, W, ?, ?>[] taskMetaData) {
 		this.workName = workName;
 		this.workFactory = workFactory;
 		this.managedObjectIndexes = moIndexes;
@@ -109,17 +119,12 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 		this.administratorIndexes = adminIndexes;
 		this.administratorMetaData = adminMetaData;
 		this.initialFlowMetaData = initialFlowMetaData;
+		this.taskMetaData = taskMetaData;
 	}
 
 	/*
 	 * ===================== WorkMetaData =================================
 	 */
-
-	@Override
-	public int getWorkId() {
-		// TODO remove
-		throw new UnsupportedOperationException("getWorkId deprecated");
-	}
 
 	@Override
 	public String getWorkName() {
@@ -154,6 +159,11 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	@Override
 	public AdministratorMetaData<?, ?>[] getAdministratorMetaData() {
 		return this.administratorMetaData;
+	}
+
+	@Override
+	public TaskMetaData<?, W, ?, ?>[] getTaskMetaData() {
+		return this.taskMetaData;
 	}
 
 }

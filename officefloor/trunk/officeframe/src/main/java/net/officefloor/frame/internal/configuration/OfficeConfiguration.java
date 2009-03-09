@@ -131,6 +131,8 @@ public interface OfficeConfiguration {
 	 * @return {@link EscalationHandler} for the {@link Office}. May be
 	 *         <code>null</code>.
 	 */
+	@Deprecated
+	// TODO return a TaskNodeReference of task in office to handle escalations
 	EscalationHandler getOfficeEscalationHandler();
 
 	/**

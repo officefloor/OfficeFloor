@@ -14,34 +14,34 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.internal.configuration;
+package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Configuration for a {@link Duty}.
+ * Meta-data for the {@link ThreadState}.
  * 
  * @author Daniel
  */
-public interface DutyConfiguration<A extends Enum<A>> {
+public interface ThreadMetaData {
 
 	/**
-	 * Obtains key identifying the {@link Duty} of the {@link Administrator}.
+	 * Obtains the {@link ManagedObjectMetaData} of the {@link ManagedObject}
+	 * instances bound to the {@link ThreadState}.
 	 * 
-	 * @return Key identifying the {@link Duty} on the {@link Administrator}.
+	 * @return {@link ManagedObjectMetaData} of the {@link ManagedObject}
+	 *         instances bound to the {@link ThreadState}.
 	 */
-	A getDutyKey();
+	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
 
 	/**
-	 * Obtains the configuration for the {@link Flow} instances invoked by the
-	 * {@link Duty}.
+	 * Obtains the {@link AdministratorMetaData} of the {@link Administrator}
+	 * instances bound to the {@link ThreadState}.
 	 * 
-	 * @return {@link TaskNodeReference} specifying the first {@link Task} of
-	 *         the linked {@link Flow}.
+	 * @return {@link AdministratorMetaData} of the {@link Administrator}
+	 *         instances bound to the {@link ThreadState}.
 	 */
-	TaskNodeReference[] getLinkedProcessConfiguration();
+	AdministratorMetaData<?, ?>[] getAdministratorMetaData();
 
 }

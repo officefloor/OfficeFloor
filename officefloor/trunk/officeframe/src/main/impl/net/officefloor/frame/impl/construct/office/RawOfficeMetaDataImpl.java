@@ -17,31 +17,49 @@
 package net.officefloor.frame.impl.construct.office;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaData;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobject.OfficeManagingManagedObject;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawOfficeManagingManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
+import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.construct.work.RawWorkMetaData;
+import net.officefloor.frame.impl.construct.work.RawWorkMetaDataFactory;
+import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
+import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
+import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.configuration.WorkConfiguration;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.OfficeStartupTask;
+import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -116,6 +134,11 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	private final Map<String, RawBoundAdministratorMetaData<?, ?>> scopeAdmins;
 
 	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private OfficeMetaData officeMetaData;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param officeName
@@ -177,11 +200,14 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 	@Override
 	public RawOfficeMetaData constructRawOfficeMetaData(
-			OfficeConfiguration configuration, OfficeFloorIssues issues,
-			OfficeManagingManagedObject[] officeManagingManagedObjects,
+			OfficeConfiguration configuration,
+			OfficeFloorIssues issues,
+			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory) {
+			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
+			RawWorkMetaDataFactory rawWorkFactory,
+			RawTaskMetaDataFactory rawTaskFactory) {
 
 		// Obtain the name of the office
 		String officeName = configuration.getOfficeName();
@@ -355,11 +381,140 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			scopeAdmins.put(admin.getAdministratorName(), admin);
 		}
 
-		// Return the office meta data
-		return new RawOfficeMetaDataImpl(officeName, rawOfficeFloorMetaData,
-				officeTeams, registeredMo, processBoundManagedObjects,
-				threadBoundManagedObjects, scopeMo, processBoundAdministrators,
-				threadBoundAdministrators, scopeAdmins);
+		// Create the raw office meta-data
+		RawOfficeMetaDataImpl rawOfficeMetaData = new RawOfficeMetaDataImpl(
+				officeName, rawOfficeFloorMetaData, officeTeams, registeredMo,
+				processBoundManagedObjects, threadBoundManagedObjects, scopeMo,
+				processBoundAdministrators, threadBoundAdministrators,
+				scopeAdmins);
+
+		// Construct the meta-data of the work carried out within the office
+		List<RawWorkMetaData<?>> rawWorkMetaDatas = new LinkedList<RawWorkMetaData<?>>();
+		List<WorkMetaData<?>> workMetaDatas = new LinkedList<WorkMetaData<?>>();
+		for (WorkConfiguration<?> workConfiguration : configuration
+				.getWorkConfiguration()) {
+			RawWorkMetaData<?> rawWorkMetaData = rawWorkFactory
+					.constructRawWorkMetaData(workConfiguration, issues,
+							rawOfficeMetaData, rawBoundManagedObjectFactory,
+							rawBoundAdministratorFactory, rawTaskFactory);
+			rawWorkMetaDatas.add(rawWorkMetaData);
+			WorkMetaData<?> workMetaData = rawWorkMetaData
+					.getWorkMetaData(issues);
+			workMetaDatas.add(workMetaData);
+		}
+
+		// Create the thread meta-data
+		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(this
+				.constructManagedObjectMetaData(threadBoundManagedObjects),
+				this.constructAdministratorMetaData(threadBoundAdministrators));
+
+		// Create the process meta-data
+		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
+				this.constructManagedObjectMetaData(processBoundManagedObjects),
+				this.constructAdministratorMetaData(processBoundAdministrators),
+				threadMetaData);
+
+		// TODO obtain the startup tasks
+		OfficeStartupTask[] startupTasks = null;
+
+		// TODO change this to a TaskNodeReference for task to be handler
+		EscalationHandler officeEscalationHandler = configuration
+				.getOfficeEscalationHandler();
+
+		// Create the office meta-data
+		rawOfficeMetaData.officeMetaData = new OfficeMetaDataImpl(
+				this.officeName, workMetaDatas.toArray(new WorkMetaData[0]),
+				processMetaData, startupTasks, officeEscalationHandler);
+
+		// Create the task locator
+		TaskMetaDataLocator taskMetaDataLocator = new TaskMetaDataLocatorImpl(
+				rawOfficeMetaData.officeMetaData);
+
+		// Link tasks within the meta-data of the office
+		for (RawWorkMetaData<?> rawWorkMetaData : rawWorkMetaDatas) {
+			rawWorkMetaData.linkTasks(taskMetaDataLocator, issues);
+		}
+		this.linkTasks(taskMetaDataLocator, threadBoundManagedObjects, issues);
+		this.linkTasks(taskMetaDataLocator, threadBoundAdministrators, issues);
+		this.linkTasks(taskMetaDataLocator, processBoundManagedObjects, issues);
+		this.linkTasks(taskMetaDataLocator, processBoundAdministrators, issues);
+
+		// Return the raw office meta-data
+		return rawOfficeMetaData;
+	}
+
+	/**
+	 * Constructs the {@link ManagedObjectMetaData} listing from the input
+	 * {@link RawBoundManagedObjectMetaData} instances.
+	 * 
+	 * @param rawBoundManagedObjects
+	 *            {@link RawBoundManagedObjectMetaData} instances.
+	 * @return {@link ManagedObjectMetaData} instances.
+	 */
+	private ManagedObjectMetaData<?>[] constructManagedObjectMetaData(
+			RawBoundManagedObjectMetaData<?>[] rawBoundManagedObjects) {
+		ManagedObjectMetaData<?>[] moMetaData = new ManagedObjectMetaData[rawBoundManagedObjects.length];
+		for (int i = 0; i < moMetaData.length; i++) {
+			moMetaData[i] = rawBoundManagedObjects[i]
+					.getManagedObjectMetaData();
+		}
+		return moMetaData;
+	}
+
+	/**
+	 * Links the {@link TaskMetaData} instances into the
+	 * {@link RawBoundManagedObjectMetaData} instances.
+	 * 
+	 * @param taskMetaDataLocator
+	 *            {@link TaskMetaDataLocator}.
+	 * @param rawBoundManagedObjects
+	 *            {@link RawBoundManagedObjectMetaData} instances.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 */
+	private void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+			RawBoundManagedObjectMetaData<?>[] rawBoundManagedObjects,
+			OfficeFloorIssues issues) {
+		for (RawBoundManagedObjectMetaData<?> rawBoundManagedObject : rawBoundManagedObjects) {
+			rawBoundManagedObject.linkTasks(taskMetaDataLocator, issues);
+		}
+	}
+
+	/**
+	 * Constructs the {@link AdministratorMetaData} listing from the input
+	 * {@link RawBoundAdministratorMetaData} instances.
+	 * 
+	 * @param rawBoundAdministratorMetaData
+	 *            {@link RawBoundAdministratorMetaData} instances.
+	 * @return {@link AdministratorMetaData} instances.
+	 */
+	private AdministratorMetaData<?, ?>[] constructAdministratorMetaData(
+			RawBoundAdministratorMetaData<?, ?>[] rawBoundAdministratorMetaData) {
+		AdministratorMetaData<?, ?>[] adminMetaData = new AdministratorMetaData[rawBoundAdministratorMetaData.length];
+		for (int i = 0; i < adminMetaData.length; i++) {
+			adminMetaData[i] = rawBoundAdministratorMetaData[i]
+					.getAdministratorMetaData();
+		}
+		return adminMetaData;
+	}
+
+	/**
+	 * Links the {@link TaskMetaData} instances into the
+	 * {@link RawBoundAdministratorMetaData} instances.
+	 * 
+	 * @param taskMetaDataLocator
+	 *            {@link TaskMetaDataLocator}.
+	 * @param rawBoundManagedObjects
+	 *            {@link RawBoundAdministratorMetaData} instances.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 */
+	private void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+			RawBoundAdministratorMetaData<?, ?>[] rawBoundAdministrators,
+			OfficeFloorIssues issues) {
+		for (RawBoundAdministratorMetaData<?, ?> rawBoundAdministrator : rawBoundAdministrators) {
+			rawBoundAdministrator.linkTasks(taskMetaDataLocator, issues);
+		}
 	}
 
 	/*
@@ -397,7 +552,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	}
 
 	@Override
-	public Map<String, RawBoundManagedObjectMetaData<?>> getOfficeScopeManagedObject() {
+	public Map<String, RawBoundManagedObjectMetaData<?>> getOfficeScopeManagedObjects() {
 		return this.scopeMo;
 	}
 
@@ -412,15 +567,13 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	}
 
 	@Override
-	public Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrator() {
+	public Map<String, RawBoundAdministratorMetaData<?, ?>> getOfficeScopeAdministrators() {
 		return this.scopeAdmins;
 	}
 
 	@Override
 	public OfficeMetaData getOfficeMetaData() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement RawOfficeMetaData.getOfficeMetaData");
+		return this.officeMetaData;
 	}
 
 }

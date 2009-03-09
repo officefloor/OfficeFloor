@@ -18,9 +18,11 @@ package net.officefloor.frame.impl.construct.office;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobject.OfficeManagingManagedObject;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawOfficeManagingManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
+import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
+import net.officefloor.frame.impl.construct.work.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 
 /**
@@ -38,20 +40,27 @@ public interface RawOfficeMetaDataFactory {
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @param officeManagingManagedObjects
-	 *            {@link OfficeManagingManagedObject} instances.
+	 *            {@link RawOfficeManagingManagedObjectMetaData} instances.
 	 * @param rawOfficeFloorMetaData
 	 *            {@link RawOfficeFloorMetaData}.
 	 * @param rawBoundManagedObjectFactory
 	 *            {@link RawBoundManagedObjectMetaDataFactory}.
 	 * @param rawBoundAdministratorFactory
 	 *            {@link RawBoundAdministratorMetaDataFactory}.
+	 * @param rawWorkFactory
+	 *            {@link RawWorkMetaDataFactory}.
+	 * @param rawTaskFactory
+	 *            {@link RawTaskMetaDataFactory}.
 	 * @return {@link RawOfficeMetaData}.
 	 */
 	RawOfficeMetaData constructRawOfficeMetaData(
-			OfficeConfiguration configuration, OfficeFloorIssues issues,
-			OfficeManagingManagedObject[] officeManagingManagedObjects,
+			OfficeConfiguration configuration,
+			OfficeFloorIssues issues,
+			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
-			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory);
+			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
+			RawWorkMetaDataFactory rawWorkFactory,
+			RawTaskMetaDataFactory rawTaskFactory);
 
 }

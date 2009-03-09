@@ -32,6 +32,13 @@ public interface TaskMetaData<P, W extends Work, M extends Enum<M>, F extends En
 		extends JobMetaData {
 
 	/**
+	 * Obtains the name of this {@link Task}.
+	 * 
+	 * @return Name of this {@link Task}.
+	 */
+	String getTaskName();
+
+	/**
 	 * Obtains the {@link TaskFactory} to create the {@link Task} for this
 	 * {@link TaskMetaData}.
 	 * 

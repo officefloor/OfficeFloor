@@ -31,6 +31,7 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
+import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
@@ -44,6 +45,8 @@ import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -188,7 +191,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		// Create the Work meta-data
 		WorkMetaData workMetaData = new WorkMetaDataImpl("TEST_WORK",
 				workFactory, moIndexes, workMoMetaData, adminIndexes,
-				adminMetaData, initialFlowMetaData);
+				adminMetaData, initialFlowMetaData, new TaskMetaData[0]);
 
 		// Initial node
 		this.initialNode = new ExecutionNode(this.nextExecutionNodeId(), this,
@@ -337,13 +340,17 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		// Executing therefore replay mock objects
 		this.replayMockObjects();
 
+		// TODO consider testing with thread state
+		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
+				new ManagedObjectMetaData[0], new AdministratorMetaData[0]);
+
 		// TODO consider testing with administrators
 		AdministratorMetaData<?, ?>[] adminMetaData = new AdministratorMetaData[0];
 
 		// Create the process meta-data
 		ManagedObjectMetaData<?>[] managedObjectMetaData = new ManagedObjectMetaData[] { this.moMetaData };
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
-				managedObjectMetaData, adminMetaData);
+				managedObjectMetaData, adminMetaData, threadMetaData);
 
 		// Create Process for executing
 		ProcessState processState = new ProcessStateImpl(processMetaData, null,

@@ -27,8 +27,10 @@ import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectM
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaDataFactory;
+import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaData;
 import net.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory;
+import net.officefloor.frame.impl.construct.work.RawWorkMetaDataFactory;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
@@ -123,6 +125,18 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private final RawOfficeMetaDataFactory rawOfficeFactory = this
 			.createMock(RawOfficeMetaDataFactory.class);
+
+	/**
+	 * {@link RawWorkMetaDataFactory}.
+	 */
+	private final RawWorkMetaDataFactory rawWorkMetaDataFactory = this
+			.createMock(RawWorkMetaDataFactory.class);
+
+	/**
+	 * {@link RawTaskMetaDataFactory}.
+	 */
+	private final RawTaskMetaDataFactory rawTaskMetaDataFactory = this
+			.createMock(RawTaskMetaDataFactory.class);
 
 	/**
 	 * Ensures issue if no {@link OfficeFloor} name.
@@ -474,7 +488,8 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 						this.configuration, this.issues, this.rawTeamFactory,
 						this.rawMosFactory, this.rawBoundMoFactory,
 						this.rawBoundAdminFactory, this.assetManagerFactory,
-						this.rawOfficeFactory);
+						this.rawOfficeFactory, this.rawWorkMetaDataFactory,
+						this.rawTaskMetaDataFactory);
 
 		// Meta-data should always be constructed
 		assertNotNull("Meta-data should be constructed", metaData);

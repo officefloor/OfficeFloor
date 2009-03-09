@@ -40,39 +40,44 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 		implements TaskMetaData<P, W, M, F> {
 
 	/**
+	 * Name of the {@link Task}.
+	 */
+	private final String taskName;
+
+	/**
 	 * {@link TaskFactory} to create the {@link Task} of the
 	 * {@link TaskMetaData}.
 	 */
-	protected final TaskFactory<P, W, M, F> taskFactory;
+	private final TaskFactory<P, W, M, F> taskFactory;
 
 	/**
 	 * {@link Team} responsible for executing this {@link Task}.
 	 */
-	protected final Team team;
+	private final Team team;
 
 	/**
 	 * Indexes identifying the {@link ManagedObject} instances that must be
 	 * ready before the {@link Task} can be executed.
 	 */
-	protected final int[] requiredManagedObjects;
+	private final int[] requiredManagedObjects;
 
 	/**
 	 * Translations of the {@link Task} {@link ManagedObject} index to the
 	 * {@link Work} {@link ManagedObject} index.
 	 */
-	protected final int[] taskToWorkMoTranslations;
+	private final int[] taskToWorkMoTranslations;
 
 	/**
 	 * {@link TaskDutyAssociation} specifying the {@link Duty} instances to be
 	 * completed before executing the {@link Task}.
 	 */
-	protected final TaskDutyAssociation<?>[] preTaskDuties;
+	private final TaskDutyAssociation<?>[] preTaskDuties;
 
 	/**
 	 * {@link TaskDutyAssociation} specifying the {@link Duty} instances to be
 	 * completed after executing the {@link Task}.
 	 */
-	protected final TaskDutyAssociation<?>[] postTaskDuties;
+	private final TaskDutyAssociation<?>[] postTaskDuties;
 
 	/**
 	 * <p>
@@ -80,7 +85,7 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
 	 */
-	protected WorkMetaData<W> workMetaData;
+	private WorkMetaData<W> workMetaData;
 
 	/**
 	 * <p>
@@ -88,7 +93,7 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
 	 */
-	protected FlowMetaData<?>[] flowMetaData;
+	private FlowMetaData<?>[] flowMetaData;
 
 	/**
 	 * <p>
@@ -96,17 +101,19 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
 	 */
-	protected TaskMetaData<?, ?, ?, ?> nextTaskInFlow;
+	private TaskMetaData<?, ?, ?, ?> nextTaskInFlow;
 
 	/**
 	 * {@link EscalationProcedure} for exceptions of the {@link Task} of this
 	 * {@link TaskMetaData}.
 	 */
-	protected EscalationProcedure escalationProcedure;
+	private EscalationProcedure escalationProcedure;
 
 	/**
 	 * Initiate with details of the meta-data for the {@link Task}.
 	 * 
+	 * @param taskName
+	 *            Name of the {@link Task}.
 	 * @param taskFactory
 	 *            {@link TaskFactory} to create the {@link Task} of the
 	 *            {@link TaskMetaData}.
@@ -125,11 +132,12 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 *            {@link TaskDutyAssociation} specifying the {@link Duty}
 	 *            instances to be completed after executing the {@link Task}.
 	 */
-	public TaskMetaDataImpl(TaskFactory<P, W, M, F> taskFactory, Team team,
+	public TaskMetaDataImpl(String taskName,
+			TaskFactory<P, W, M, F> taskFactory, Team team,
 			int[] requiredManagedObjects, int[] taskToWorkMoTranslations,
 			TaskDutyAssociation<?>[] preTaskDuties,
 			TaskDutyAssociation<?>[] postTaskDuties) {
-		// Store state
+		this.taskName = taskName;
 		this.taskFactory = taskFactory;
 		this.team = team;
 		this.requiredManagedObjects = requiredManagedObjects;
@@ -164,121 +172,64 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskMetaData#getTaskFactory()
+	 * ================= TaskMetaData ===================================
 	 */
+
+	@Override
+	public String getTaskName() {
+		return this.taskName;
+	}
+
 	@Override
 	public TaskFactory<P, W, M, F> getTaskFactory() {
 		return this.taskFactory;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobMetaData#createJobActivableSet
-	 * ()
-	 */
 	@Override
 	public JobActivatableSet createJobActivableSet() {
 		return new JobActivatableSetImpl();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getTeam()
-	 */
 	@Override
 	public Team getTeam() {
 		return this.team;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.TaskMetaData#
-	 * getRequiredManagedObjects()
-	 */
 	@Override
 	public int[] getRequiredManagedObjects() {
 		return this.requiredManagedObjects;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.TaskMetaData#
-	 * translateManagedObjectIndexForWork(int)
-	 */
 	@Override
 	public int translateManagedObjectIndexForWork(int taskMoIndex) {
 		return this.taskToWorkMoTranslations[taskMoIndex];
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getFlow(int)
-	 */
 	@Override
 	public FlowMetaData<?> getFlow(int flowIndex) {
 		return this.flowMetaData[flowIndex];
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskMetaData#getWorkMetaData()
-	 */
 	@Override
 	public WorkMetaData<W> getWorkMetaData() {
 		return this.workMetaData;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskMetaData#getEscalationProcedure
-	 * ()
-	 */
 	@Override
 	public EscalationProcedure getEscalationProcedure() {
 		return this.escalationProcedure;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskMetaData#getNextTaskInFlow()
-	 */
 	@Override
 	public TaskMetaData<?, ?, ?, ?> getNextTaskInFlow() {
 		return this.nextTaskInFlow;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.TaskMetaData#
-	 * getPreAdministrationMetaData()
-	 */
 	@Override
 	public TaskDutyAssociation<?>[] getPreAdministrationMetaData() {
 		return this.preTaskDuties;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.TaskMetaData#
-	 * getPostAdministrationMetaData()
-	 */
 	@Override
 	public TaskDutyAssociation<?>[] getPostAdministrationMetaData() {
 		return this.postTaskDuties;

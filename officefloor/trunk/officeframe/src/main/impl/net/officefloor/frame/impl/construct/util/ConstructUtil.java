@@ -17,12 +17,17 @@
 package net.officefloor.frame.impl.construct.util;
 
 import java.lang.reflect.Array;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 
 /**
  * Utility class to aid in construction of the {@link OfficeFloor}.
@@ -129,8 +134,95 @@ public class ConstructUtil {
 	}
 
 	/**
+	 * Convenience method for {@link List#toArray(Object[])} to pass compiler
+	 * warnings for generic typed array.
+	 * 
+	 * @param list
+	 *            List to transform into an array.
+	 * @param type
+	 *            Type of the array.
+	 * @return List as an array.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] toArray(List<T> list, Object[] type) {
+		Object[] array = list.toArray(type);
+		return (T[]) array;
+	}
+
+	/**
+	 * Obtains the {@link TaskMetaData} reporting any failure to find to the
+	 * {@link OfficeFloorIssues}.
+	 * 
+	 * @param taskNodeReference
+	 *            {@link TaskNodeReference}.
+	 * @param taskLocator
+	 *            {@link TaskMetaDataLocator} to use to locate the
+	 *            {@link TaskMetaData}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 * @param assetType
+	 *            {@link AssetType} for reporting issues.
+	 * @param assetName
+	 *            {@link Asset} name for reporting issues.
+	 * @param forItemDescription
+	 *            Description after &quot;for&quot; indicating what the
+	 *            {@link TaskMetaData} is for.
+	 * @param isWorkNameRequired
+	 *            Flags indicating if {@link Work} name is required.
+	 *            <code>false</code> indicates that the
+	 *            {@link TaskMetaDataLocator} has a default {@link Work} to find
+	 *            {@link TaskMetaData}.
+	 * @return {@link TaskMetaData} or <code>null</code> if not found with
+	 *         issues reported to the {@link OfficeFloorIssues}.
+	 */
+	public static TaskMetaData<?, ?, ?, ?> getTaskMetaData(
+			TaskNodeReference taskNodeReference,
+			TaskMetaDataLocator taskLocator, OfficeFloorIssues issues,
+			AssetType assetType, String assetName, String forItemDescription,
+			boolean isWorkNameRequired) {
+
+		// Obtain the work name
+		String workName = taskNodeReference.getWorkName();
+
+		// Determine if have the work name
+		boolean isHaveWorkName = !ConstructUtil.isBlank(workName);
+		if (isWorkNameRequired && (!isHaveWorkName)) {
+			issues.addIssue(assetType, assetName, "Must have work name for "
+					+ forItemDescription);
+			return null; // must have the work name
+		}
+
+		// Obtain the task name
+		String taskName = taskNodeReference.getTaskName();
+		if (ConstructUtil.isBlank(taskName)) {
+			issues.addIssue(assetType, assetName, "Must have task name for "
+					+ forItemDescription);
+			return null; // must have the task name
+		}
+
+		// Obtain the task meta-data
+		TaskMetaData<?, ?, ?, ?> taskMetaData;
+		if (isHaveWorkName) {
+			taskMetaData = taskLocator.getTaskMetaData(workName, taskName);
+		} else {
+			taskMetaData = taskLocator.getTaskMetaData(taskName);
+		}
+
+		// Ensure have the task meta-data
+		if (taskMetaData == null) {
+			issues.addIssue(assetType, assetName,
+					"Can not find task meta-data for " + forItemDescription);
+			return null; // must find the task meta-data
+		}
+
+		// Return the task meta-data
+		return taskMetaData;
+	}
+
+	/**
 	 * All access via static methods.
 	 */
 	private ConstructUtil() {
 	}
+
 }

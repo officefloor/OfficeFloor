@@ -28,16 +28,20 @@ import java.util.Map;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawOfficeManagingManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
@@ -92,6 +96,11 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private final Map<D, RawBoundManagedObjectMetaData<?>> dependencies = new HashMap<D, RawBoundManagedObjectMetaData<?>>();
 
 	/**
+	 * {@link ManagedObjectMetaData} of this {@link RawManagedObjectMetaData}.
+	 */
+	private ManagedObjectMetaDataImpl<D> managedObjectMetaData;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param boundManagedObjectName
@@ -111,37 +120,6 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		this.index = index;
 		this.managedObjectConfiguration = managedObjectConfiguration;
 		this.rawMoMetaData = rawMoMetaData;
-	}
-
-	/**
-	 * Specifies the dependency keys.
-	 * 
-	 * @param dependencyKeyClass
-	 *            Class specifying the dependency keys.
-	 */
-	private void setDependencyKeys(Class<D> dependencyKeyClass) {
-		// Specify the dependencies in ordinal order
-		this.dependencyKeys = dependencyKeyClass.getEnumConstants();
-		Arrays.sort(this.dependencyKeys, new Comparator<D>() {
-			@Override
-			public int compare(D a, D b) {
-				return a.ordinal() - b.ordinal();
-			}
-		});
-	}
-
-	/**
-	 * Maps in the dependency.
-	 * 
-	 * @param dependencyKey
-	 *            Dependency key.
-	 * @param dependentManagedObject
-	 *            {@link RawBoundManagedObjectMetaData} of the dependent
-	 *            {@link ManagedObject}.
-	 */
-	private void mapDependency(D dependencyKey,
-			RawBoundManagedObjectMetaData<?> dependentManagedObject) {
-		this.dependencies.put(dependencyKey, dependentManagedObject);
 	}
 
 	/*
@@ -208,7 +186,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			boundMoList.add(rawBoundMoMetaData);
 		}
 
-		// Load dependencies of bound managed objects
+		// Load dependencies and meta-data of bound managed objects
 		for (RawBoundManagedObjectMetaDataImpl<?> moMetaData : boundMoList) {
 
 			// Create the mapping of scope managed objects
@@ -219,17 +197,20 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			// Load the dependencies
 			this.loadDependencies(moMetaData, issues, assetType, assetName,
 					dependencyMo);
+
+			// Load the meta-data
+			moMetaData.loadManagedObjectMetaData();
 		}
 
 		// Return the bound managed object meta-data
-		return boundMoList.toArray(new RawBoundManagedObjectMetaDataImpl[0]);
+		return boundMoList.toArray(new RawBoundManagedObjectMetaData[0]);
 	}
 
 	@Override
 	public RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
 			String officeName,
 			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
-			OfficeManagingManagedObject[] officeManagingManagedObjects,
+			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
 			OfficeFloorIssues issues) {
 
 		// Create the map of process bound managed objects.
@@ -262,7 +243,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		managedObjects.addAll(Arrays.asList(processBoundManagedObjectMetaData));
 
 		// Append additional process bound managed objects
-		for (OfficeManagingManagedObject officeMo : officeManagingManagedObjects) {
+		for (RawOfficeManagingManagedObjectMetaData officeMo : officeManagingManagedObjects) {
 
 			// Obtain the process bound name
 			String processBoundName = officeMo.getProcessBoundName();
@@ -303,10 +284,15 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 				// Not bound, so create bound managed object meta-data
 				ManagedObjectIndex moIndex = new ManagedObjectIndexImpl(
 						ManagedObjectScope.PROCESS, nextProcessBoundIndex++);
-				rawBoundMo = this.newRawBoundManagedObjectMetaDataImpl(
-						processBoundName, moIndex, null, rawMoMetaData);
+				RawBoundManagedObjectMetaDataImpl<?> rawBoundMoImpl = this
+						.newRawBoundManagedObjectMetaDataImpl(processBoundName,
+								moIndex, null, rawMoMetaData);
+
+				// Ensure the managed object meta-data is loaded
+				rawBoundMoImpl.loadManagedObjectMetaData();
 
 				// Append to listing and map to make next office aware
+				rawBoundMo = rawBoundMoImpl;
 				managedObjects.add(rawBoundMo);
 				processBoundMos.put(processBoundName, rawBoundMo);
 			}
@@ -314,6 +300,37 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 		// Return the new listing of raw bound managed object meta-data
 		return managedObjects.toArray(new RawBoundManagedObjectMetaData[0]);
+	}
+
+	/**
+	 * Specifies the dependency keys.
+	 * 
+	 * @param dependencyKeyClass
+	 *            Class specifying the dependency keys.
+	 */
+	private void setDependencyKeys(Class<D> dependencyKeyClass) {
+		// Specify the dependencies in ordinal order
+		this.dependencyKeys = dependencyKeyClass.getEnumConstants();
+		Arrays.sort(this.dependencyKeys, new Comparator<D>() {
+			@Override
+			public int compare(D a, D b) {
+				return a.ordinal() - b.ordinal();
+			}
+		});
+	}
+
+	/**
+	 * Maps in the dependency.
+	 * 
+	 * @param dependencyKey
+	 *            Dependency key.
+	 * @param dependentManagedObject
+	 *            {@link RawBoundManagedObjectMetaData} of the dependent
+	 *            {@link ManagedObject}.
+	 */
+	private void mapDependency(D dependencyKey,
+			RawBoundManagedObjectMetaData<?> dependentManagedObject) {
+		this.dependencies.put(dependencyKey, dependentManagedObject);
 	}
 
 	/**
@@ -416,39 +433,17 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		}
 	}
 
-	/*
-	 * ============== RawBoundManagedObjectMetaData ====================
+	/**
+	 * Loads the {@link ManagedObjectMetaData} for the
+	 * {@link RawBoundManagedObjectMetaData}.
 	 */
-
-	@Override
-	public String getBoundManagedObjectName() {
-		return this.boundManagedObjectName;
-	}
-
-	@Override
-	public ManagedObjectIndex getManagedObjectIndex() {
-		return this.index;
-	}
-
-	@Override
-	public RawManagedObjectMetaData<D, ?> getRawManagedObjectMetaData() {
-		return this.rawMoMetaData;
-	}
-
-	@Override
-	public D[] getDependencyKeys() {
-		return this.dependencyKeys;
-	}
-
-	@Override
-	public RawBoundManagedObjectMetaData<?> getDependency(D dependencyKey) {
-		return this.dependencies.get(dependencyKey);
-	}
-
-	@Override
 	@SuppressWarnings("unchecked")
-	public ManagedObjectMetaData<?> getManagedObjectMetaData(
-			OfficeFloorIssues issues) {
+	private void loadManagedObjectMetaData() {
+
+		// Determine if already loaded
+		if (this.managedObjectMetaData != null) {
+			return; // already loaded
+		}
 
 		// Obtain the details of the managed object
 		ManagedObjectSource<D, ?> managedObjectSource = this.rawMoMetaData
@@ -488,17 +483,61 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			dependencyMapping = Collections.emptyMap();
 		}
 
-		// Create the managed object meta-data
-		ManagedObjectMetaDataImpl<D> metaData = new ManagedObjectMetaDataImpl<D>(
+		// Create and specify the managed object meta-data
+		this.managedObjectMetaData = new ManagedObjectMetaDataImpl<D>(
 				this.boundManagedObjectName, managedObjectSource,
 				managedObjectPool, sourcingAssetManager,
 				isManagedObjectAsynchronous, operationsAssetManager,
 				isManagedObjectCoordinating, dependencyMapping, timeout);
+	}
 
-		// TODO load the remaining state
+	/*
+	 * ============== RawBoundManagedObjectMetaData ====================
+	 */
 
-		// Return the managed object meta-data
-		return metaData;
+	@Override
+	public String getBoundManagedObjectName() {
+		return this.boundManagedObjectName;
+	}
+
+	@Override
+	public ManagedObjectIndex getManagedObjectIndex() {
+		return this.index;
+	}
+
+	@Override
+	public RawManagedObjectMetaData<D, ?> getRawManagedObjectMetaData() {
+		return this.rawMoMetaData;
+	}
+
+	@Override
+	public D[] getDependencyKeys() {
+		return this.dependencyKeys;
+	}
+
+	@Override
+	public RawBoundManagedObjectMetaData<?> getDependency(D dependencyKey) {
+		return this.dependencies.get(dependencyKey);
+	}
+
+	@Override
+	public ManagedObjectMetaData<D> getManagedObjectMetaData() {
+		return this.managedObjectMetaData;
+	}
+
+	@Override
+	public void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+			OfficeFloorIssues issues) {
+
+		// Obtain the office meta-data
+		OfficeMetaData officeMetaData = taskMetaDataLocator.getOfficeMetaData();
+
+		// TODO Obtain the recycle task meta-data
+		FlowMetaData<?> recycleFlowMetaData = null;
+
+		// Load the remaining state of the managed object meta-data
+		this.managedObjectMetaData.loadRemainingState(officeMetaData,
+				recycleFlowMetaData);
 	}
 
 }

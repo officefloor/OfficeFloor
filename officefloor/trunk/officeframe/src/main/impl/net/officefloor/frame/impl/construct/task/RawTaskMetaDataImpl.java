@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -44,6 +43,7 @@ import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -225,7 +225,7 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 
 		// Create the task meta-data
 		TaskMetaDataImpl<p, w, m, f> taskMetaData = new TaskMetaDataImpl<p, w, m, f>(
-				taskFactory, team, requiredManagedObjects,
+				taskName, taskFactory, team, requiredManagedObjects,
 				taskToWorkMoTranslations, preTaskDuties, postTaskDuties);
 
 		// Return the raw task meta-data
@@ -313,14 +313,12 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public void loadRemainingState(
-			Map<String, RawWorkMetaData<?>> rawWorkMetaDatas,
-			OfficeFloorIssues issues) {
+	public void linkTasks(TaskMetaDataLocator genericTaskLocator,
+			WorkMetaData<W> workMetaData, OfficeFloorIssues issues) {
 
-		// Obtain the work meta-data
-		WorkMetaData<W> workMetaData = this.rawWorkMetaData
-				.getWorkMetaData(issues);
+		// Create the work specific task meta-data locator
+		TaskMetaDataLocator taskLocator = genericTaskLocator
+				.createWorkSpecificTaskMetaDataLocator(workMetaData);
 
 		// Obtain the listing of flow meta-data
 		FlowConfiguration[] flowConfigurations = this.configuration
@@ -339,9 +337,10 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 			}
 
 			// Obtain the task meta-data
-			TaskMetaData<?, ?, ?, ?> taskMetaData = this.getTaskMetaData(
-					taskNodeReference, rawWorkMetaDatas, issues,
-					GetTaskReason.FLOW, i);
+			TaskMetaData<?, ?, ?, ?> taskMetaData = ConstructUtil
+					.getTaskMetaData(taskNodeReference, taskLocator, issues,
+							AssetType.TASK, this.getTaskName(), "flow index "
+									+ i, false);
 			if (taskMetaData == null) {
 				continue; // no initial task for flow
 			}
@@ -365,8 +364,9 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				.getNextTaskInFlow();
 		TaskMetaData<?, ?, ?, ?> nextTaskInFlow = null;
 		if (nextTaskNodeReference != null) {
-			nextTaskInFlow = this.getTaskMetaData(nextTaskNodeReference,
-					rawWorkMetaDatas, issues, GetTaskReason.NEXT_TASK, -1);
+			nextTaskInFlow = ConstructUtil.getTaskMetaData(
+					nextTaskNodeReference, taskLocator, issues, AssetType.TASK,
+					this.getTaskName(), "next task", false);
 		}
 
 		// Create the escalation procedure
@@ -396,9 +396,10 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 						"No task referenced for escalation index 0");
 				continue; // no escalation handler referenced
 			}
-			TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = this
-					.getTaskMetaData(escalationReference, rawWorkMetaDatas,
-							issues, GetTaskReason.ESCALATION, i);
+			TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = ConstructUtil
+					.getTaskMetaData(escalationReference, taskLocator, issues,
+							AssetType.TASK, this.getTaskName(),
+							"escalation index " + i, false);
 			if (escalationTaskMetaData == null) {
 				continue; // no escalation handler
 			}
@@ -417,112 +418,4 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				nextTaskInFlow, escalationProcedure);
 	}
 
-	/**
-	 * Obtains the {@link TaskMetaData}.
-	 * 
-	 * @param taskNodeReference
-	 *            {@link TaskNodeReference}.
-	 * @param rawWorkMetaDatas
-	 *            {@link RawWorkMetaData} instances by their {@link Work} names.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return {@link TaskMetaData} or <code>null</code> if can not find
-	 *         {@link Task}.
-	 */
-	private TaskMetaData<?, ?, ?, ?> getTaskMetaData(
-			TaskNodeReference taskNodeReference,
-			Map<String, RawWorkMetaData<?>> rawWorkMetaDatas,
-			OfficeFloorIssues issues, GetTaskReason reason, int reasonItemIndex) {
-
-		// Obtain the raw work
-		String workName = taskNodeReference.getWorkName();
-		RawWorkMetaData<?> rawWorkMetaData;
-		if (workName == null) {
-			rawWorkMetaData = this.rawWorkMetaData;
-		} else {
-			rawWorkMetaData = rawWorkMetaDatas.get(workName);
-			if (rawWorkMetaData == null) {
-				String msg;
-				switch (reason) {
-				case FLOW:
-					msg = "Unknown work '" + workName + "' for flow index "
-							+ reasonItemIndex;
-					break;
-				case NEXT_TASK:
-					msg = "Unknown work '" + workName + "' for next task";
-					break;
-				case ESCALATION:
-					msg = "Unknown work '" + workName
-							+ "' for escalation index " + reasonItemIndex;
-					break;
-				default:
-					throw new IllegalArgumentException("Unknown reason "
-							+ reason);
-				}
-				issues.addIssue(AssetType.TASK, this.getTaskName(), msg);
-				return null; // no work of task
-			}
-		}
-
-		// Obtain the raw task
-		String taskName = taskNodeReference.getTaskName();
-		if (ConstructUtil.isBlank(taskName)) {
-			String msg;
-			switch (reason) {
-			case FLOW:
-				msg = "No task name provided for flow index " + reasonItemIndex;
-				break;
-			case NEXT_TASK:
-				msg = "No task name provided for next task";
-				break;
-			case ESCALATION:
-				msg = "No task name provided for escalation index "
-						+ reasonItemIndex;
-				break;
-			default:
-				throw new IllegalArgumentException("Unknown reason " + reason);
-			}
-			issues.addIssue(AssetType.TASK, this.getTaskName(), msg);
-			return null; // no task
-		}
-		RawTaskMetaData<?, ?, ?, ?> rawTaskMetaData = rawWorkMetaData
-				.getRawTaskMetaData(taskName);
-		if (rawTaskMetaData == null) {
-			String msg;
-			switch (reason) {
-			case FLOW:
-				msg = "Unknown task '" + taskName + "' on work "
-						+ rawWorkMetaData.getWorkName() + " for flow index "
-						+ reasonItemIndex;
-				break;
-			case NEXT_TASK:
-				msg = "Unknown task '" + taskName + "' on work "
-						+ rawWorkMetaData.getWorkName() + " for next task";
-				break;
-			case ESCALATION:
-				msg = "Unknown task '" + taskName + "' on work "
-						+ rawWorkMetaData.getWorkName()
-						+ " for escalation index " + reasonItemIndex;
-				break;
-			default:
-				throw new IllegalArgumentException("Unknown reason " + reason);
-			}
-			issues.addIssue(AssetType.TASK, this.getTaskName(), msg);
-			return null; // no task
-		}
-
-		// Obtain the task meta-data
-		TaskMetaData<?, ?, ?, ?> taskMetaData = rawTaskMetaData
-				.getTaskMetaData();
-
-		// Return the task meta-data
-		return taskMetaData;
-	}
-
-	/**
-	 * Reason for getting the {@link TaskMetaData}.
-	 */
-	private enum GetTaskReason {
-		FLOW, NEXT_TASK, ESCALATION
-	}
 }

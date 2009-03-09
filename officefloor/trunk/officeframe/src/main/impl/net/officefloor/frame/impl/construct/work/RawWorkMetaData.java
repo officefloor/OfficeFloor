@@ -17,11 +17,12 @@
 package net.officefloor.frame.impl.construct.work;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
-import net.officefloor.frame.impl.construct.task.RawTaskMetaData;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -86,14 +87,14 @@ public interface RawWorkMetaData<W extends Work> {
 	WorkMetaData<W> getWorkMetaData(OfficeFloorIssues issues);
 
 	/**
-	 * Obtains the {@link RawTaskMetaData} on the {@link Work} by the input
-	 * name.
+	 * Links the {@link TaskMetaData} instances to enable {@link Flow} of
+	 * execution.
 	 * 
-	 * @param taskName
-	 *            Name of the {@link Task}.
-	 * @return {@link RawTaskMetaData} or <code>null</code> if unknown
-	 *         {@link Task}.
+	 * @param taskLocator
+	 *            {@link TaskMetaDataLocator}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
 	 */
-	RawTaskMetaData<?, W, ?, ?> getRawTaskMetaData(String taskName);
+	void linkTasks(TaskMetaDataLocator taskLocator, OfficeFloorIssues issues);
 
 }

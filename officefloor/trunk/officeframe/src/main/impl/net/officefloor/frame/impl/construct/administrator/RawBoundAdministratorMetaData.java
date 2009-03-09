@@ -16,8 +16,12 @@
  */
 package net.officefloor.frame.impl.construct.administrator;
 
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -81,4 +85,17 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	 * @return {@link AdministratorMetaData} for this {@link Administrator}.
 	 */
 	AdministratorMetaData<?, ?> getAdministratorMetaData();
+
+	/**
+	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
+	 * execution.
+	 * 
+	 * @param taskMetaDataLocator
+	 *            {@link TaskMetaDataLocator}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 */
+	void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+			OfficeFloorIssues issues);
+
 }

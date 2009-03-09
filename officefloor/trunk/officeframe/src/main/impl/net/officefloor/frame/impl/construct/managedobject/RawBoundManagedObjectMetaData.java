@@ -18,8 +18,11 @@ package net.officefloor.frame.impl.construct.managedobject;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -70,11 +73,21 @@ public interface RawBoundManagedObjectMetaData<D extends Enum<D>> {
 	 * Obtains the {@link ManagedObjectMetaData} for this
 	 * {@link RawBoundManagedObjectMetaData}.
 	 * 
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
 	 * @return {@link ManagedObjectMetaData} for this
 	 *         {@link RawBoundManagedObjectMetaData}.
 	 */
-	ManagedObjectMetaData<?> getManagedObjectMetaData(OfficeFloorIssues issues);
+	ManagedObjectMetaData<D> getManagedObjectMetaData();
+
+	/**
+	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
+	 * execution.
+	 * 
+	 * @param taskMetaDataLocator
+	 *            {@link TaskMetaDataLocator}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 */
+	void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+			OfficeFloorIssues issues);
 
 }

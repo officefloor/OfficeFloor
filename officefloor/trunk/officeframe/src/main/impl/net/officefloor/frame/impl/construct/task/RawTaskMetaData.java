@@ -16,13 +16,14 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import java.util.Map;
-
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.work.RawWorkMetaData;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
  * Raw meta-data for a {@link Task}.
@@ -54,14 +55,17 @@ public interface RawTaskMetaData<P, W extends Work, M extends Enum<M>, F extends
 	TaskMetaData<P, W, M, F> getTaskMetaData();
 
 	/**
-	 * Loads the remaining state of the {@link TaskMetaData}.
+	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
+	 * execution.
 	 * 
-	 * @param rawWorkMetaDatas
-	 *            {@link RawWorkMetaData} instances by their {@link Work} name.
+	 * @param taskMetaDataLocator
+	 *            {@link TaskMetaDataLocator}.
+	 * @param workMetaData
+	 *            {@link WorkMetaData} containing this {@link TaskMetaData}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void loadRemainingState(Map<String, RawWorkMetaData<?>> rawWorkMetaDatas,
-			OfficeFloorIssues issues);
+	void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+			WorkMetaData<W> workMetaData, OfficeFloorIssues issues);
 
 }

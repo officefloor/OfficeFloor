@@ -25,7 +25,6 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -54,14 +53,10 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData} of the {@link Office} managing this
 	 *            {@link ManagedObjectSource}.
-	 * @param indexOfManagedObjectInProcessState
-	 *            Index of the {@link ManagedObject} within the
-	 *            {@link ProcessState} of the {@link Office}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void manageByOffice(OfficeMetaData officeMetaData,
-			int indexOfManagedObjectInProcessState, OfficeFloorIssues issues);
+	void manageByOffice(OfficeMetaData officeMetaData, OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceConfiguration}.
@@ -129,27 +124,13 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	boolean isCoordinating();
 
 	/**
-	 * Obtains the name of the {@link Office} managing this
-	 * {@link ManagedObject}.
+	 * Obtains the {@link RawOfficeManagingManagedObjectMetaData} of the
+	 * {@link Office} managing this {@link ManagedObject}.
 	 * 
-	 * @return Name of the {@link Office} managing this {@link ManagedObject}.
-	 *         Should return <code>null</code> if not to be managed by an
-	 *         {@link Office}.
+	 * @return {@link RawOfficeManagingManagedObjectMetaData} of the
+	 *         {@link Office} managing this {@link ManagedObject}.
 	 */
-	String getManagingOfficeName();
-
-	/**
-	 * <p>
-	 * Obtains the name to bind the {@link ManagedObject} within the
-	 * {@link ProcessState} of the managing {@link Office}.
-	 * <p>
-	 * Should {@link #getManagingOfficeName()} return <code>null</code> this
-	 * method will be ignored.
-	 * 
-	 * @return Name to bind the {@link ManagedObject} within the
-	 *         {@link ProcessState} of the managing {@link Office}.
-	 */
-	String getManagingOfficeProcessBoundManagedObjectName();
+	RawOfficeManagingManagedObjectMetaData getManagingOfficeMetaData();
 
 	/**
 	 * Obtains the name of {@link Work} to recycle the {@link ManagedObject}.

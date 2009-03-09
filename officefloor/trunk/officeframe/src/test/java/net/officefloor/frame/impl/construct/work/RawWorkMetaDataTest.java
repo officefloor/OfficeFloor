@@ -30,6 +30,7 @@ import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectM
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
+import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
 import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
@@ -112,6 +113,12 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	 * their scoped names.
 	 */
 	private final Map<String, RawBoundAdministratorMetaData<?, ?>> officeScopeAdministrators = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
+
+	/**
+	 * {@link RawTaskMetaDataFactory}.
+	 */
+	private final RawTaskMetaDataFactory rawTaskMetaDataFactory = this
+			.createMock(RawTaskMetaDataFactory.class);
 
 	/**
 	 * Ensure issue if no {@link Work} name.
@@ -206,7 +213,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.recordReturn(rawMoMetaData, rawMoMetaData.getDependencyKeys(),
 				new Enum[0]);
 		this.recordReturn(rawMoMetaData, rawMoMetaData
-				.getManagedObjectMetaData(this.issues), moMetaData);
+				.getManagedObjectMetaData(), moMetaData);
 
 		// Construct work with task managed object
 		this.replayMockObjects();
@@ -449,8 +456,10 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		}
 
 		// Record bounding managed objects to work
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-				.getOfficeScopeManagedObject(), this.officeScopeManagedObjects);
+		this
+				.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
+						.getOfficeScopeManagedObjects(),
+						this.officeScopeManagedObjects);
 		ManagedObjectConfiguration<?>[] moConfiguration = new ManagedObjectConfiguration[moCount];
 		this.recordReturn(this.configuration, this.configuration
 				.getManagedObjectConfiguration(), moConfiguration);
@@ -540,8 +549,10 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		}
 
 		// Record bounding administrators to work
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-				.getOfficeScopeAdministrator(), this.officeScopeAdministrators);
+		this
+				.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
+						.getOfficeScopeAdministrators(),
+						this.officeScopeAdministrators);
 		AdministratorSourceConfiguration<?, ?>[] adminConfiguration = new AdministratorSourceConfiguration[adminCount];
 		this.recordReturn(this.configuration, this.configuration
 				.getAdministratorConfiguration(), adminConfiguration);
@@ -648,7 +659,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 				.constructRawWorkMetaData(this.configuration, this.issues,
 						this.rawOfficeMetaData,
 						this.rawBoundManagedObjectFactory,
-						this.rawBoundAdministratorFactory);
+						this.rawBoundAdministratorFactory,
+						this.rawTaskMetaDataFactory);
 		if (isExpectConstruct) {
 			assertNotNull("Expect to construct meta-data", metaData);
 		} else {

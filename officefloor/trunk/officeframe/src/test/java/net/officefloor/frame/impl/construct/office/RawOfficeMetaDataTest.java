@@ -27,9 +27,11 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobject.OfficeManagingManagedObject;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawOfficeManagingManagedObjectMetaData;
 import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
+import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
+import net.officefloor.frame.impl.construct.work.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
@@ -99,9 +101,21 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			.createMock(LinkedManagedObjectSourceConfiguration.class);
 
 	/**
-	 * {@link OfficeManagingManagedObject} instances.
+	 * {@link RawOfficeManagingManagedObjectMetaData} instances.
 	 */
-	private final List<OfficeManagingManagedObject> officeManagingManagedObjects = new LinkedList<OfficeManagingManagedObject>();
+	private final List<RawOfficeManagingManagedObjectMetaData> officeManagingManagedObjects = new LinkedList<RawOfficeManagingManagedObjectMetaData>();
+
+	/**
+	 * {@link RawWorkMetaDataFactory}.
+	 */
+	private final RawWorkMetaDataFactory rawWorkMetaDataFactory = this
+			.createMock(RawWorkMetaDataFactory.class);
+
+	/**
+	 * {@link RawTaskMetaDataFactory}.
+	 */
+	private final RawTaskMetaDataFactory rawTaskMetaDataFactory = this
+			.createMock(RawTaskMetaDataFactory.class);
 
 	/**
 	 * Ensure issue if no {@link Office} name.
@@ -459,15 +473,17 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			boolean isExpectConstruct) {
 
 		// Obtain the office managing managed objects
-		OfficeManagingManagedObject[] officeMos = this.officeManagingManagedObjects
-				.toArray(new OfficeManagingManagedObject[0]);
+		RawOfficeManagingManagedObjectMetaData[] officeMos = this.officeManagingManagedObjects
+				.toArray(new RawOfficeManagingManagedObjectMetaData[0]);
 
 		// Construct the meta-data
 		RawOfficeMetaData metaData = RawOfficeMetaDataImpl.getFactory()
 				.constructRawOfficeMetaData(this.configuration, this.issues,
 						officeMos, this.rawOfficeFloorMetaData,
 						this.rawBoundManagedObjectFactory,
-						this.rawBoundAdministratorFactory);
+						this.rawBoundAdministratorFactory,
+						this.rawWorkMetaDataFactory,
+						this.rawTaskMetaDataFactory);
 		if (isExpectConstruct) {
 			assertNotNull("Meta-data should be constructed", metaData);
 		} else {
