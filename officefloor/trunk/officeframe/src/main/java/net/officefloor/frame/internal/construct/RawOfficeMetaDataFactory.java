@@ -14,15 +14,9 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.office;
+package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataFactory;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawOfficeManagingManagedObjectMetaData;
-import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
-import net.officefloor.frame.impl.construct.task.RawTaskMetaDataFactory;
-import net.officefloor.frame.impl.construct.work.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 
 /**

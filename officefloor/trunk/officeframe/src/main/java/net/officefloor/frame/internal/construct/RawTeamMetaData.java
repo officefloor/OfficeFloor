@@ -14,30 +14,29 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.team;
+package net.officefloor.frame.internal.construct;
 
-import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.internal.configuration.TeamConfiguration;
-import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Factory for the construction of {@link RawTeamMetaData}.
+ * Raw meta-data for a {@link Team}.
  * 
  * @author Daniel
  */
-public interface RawTeamMetaDataFactory {
+public interface RawTeamMetaData {
 
 	/**
-	 * Constructs the {@link RawTeamMetaData}.
+	 * Obtains the name of the {@link Team}.
 	 * 
-	 * @param configuration
-	 *            {@link TeamConfiguration}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to
-	 *         construct.
+	 * @return Name of the {@link Team}.
 	 */
-	<TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(
-			TeamConfiguration<TS> configuration, OfficeFloorIssues issues);
+	String getTeamName();
+
+	/**
+	 * Obtains the {@link Team}.
+	 * 
+	 * @return {@link Team}.
+	 */
+	Team getTeam();
 
 }

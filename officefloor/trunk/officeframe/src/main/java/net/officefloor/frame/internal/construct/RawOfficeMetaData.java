@@ -14,15 +14,11 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.office;
+package net.officefloor.frame.internal.construct;
 
 import java.util.Map;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaData;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
-import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;

@@ -14,29 +14,31 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.administrator;
+package net.officefloor.frame.internal.construct;
 
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.spi.administration.Administrator;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 
 /**
- * Meta-data about a {@link ManagedObject} that is being administered by an
- * {@link Administrator}.
+ * Raw meta-data of the {@link Administrator} within the {@link Work}.
  * 
  * @author Daniel
  */
-public interface RawAdministeredManagedObjectMetaData<I> {
+public interface RawWorkAdministratorMetaData {
 
 	/**
-	 * {@link RawBoundManagedObjectMetaData}.
+	 * Obtains the {@link AdministratorIndex} for this {@link Administrator}.
+	 * 
+	 * @return {@link AdministratorIndex} for this {@link Administrator}.
 	 */
-	RawBoundManagedObjectMetaData<?> getManagedObjectMetaData();
+	AdministratorIndex getAdministratorIndex();
 
 	/**
-	 * {@link ExtensionInterfaceFactory}.
+	 * Obtains the index of this {@link Administrator} within the {@link Work}.
+	 * 
+	 * @return Index of this {@link Administrator} within the {@link Work}.
 	 */
-	ExtensionInterfaceFactory<I> getExtensionInterfaceFactory();
+	int getWorkAdministratorIndex();
 
 }

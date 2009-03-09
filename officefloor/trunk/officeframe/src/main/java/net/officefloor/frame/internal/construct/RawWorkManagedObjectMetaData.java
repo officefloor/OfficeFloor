@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.work;
+package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;

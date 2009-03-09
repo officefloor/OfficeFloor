@@ -22,6 +22,7 @@ import java.util.Map;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.structure.AssetManager;
 
 /**
@@ -37,13 +38,9 @@ public class AssetManagerFactoryImpl implements AssetManagerFactory {
 	private final Map<String, AssetManager> registry = new HashMap<String, AssetManager>();
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.impl.construct.asset.AssetManagerFactory#
-	 * createAssetManager(net.officefloor.frame.api.OfficeFloorIssues.AssetType,
-	 * java.lang.String, java.lang.String,
-	 * net.officefloor.frame.api.OfficeFloorIssues)
+	 * ================= AssetManagerFactory =================================
 	 */
+
 	@Override
 	public AssetManager createAssetManager(AssetType assetType,
 			String assetName, String responsibility, OfficeFloorIssues issues) {
