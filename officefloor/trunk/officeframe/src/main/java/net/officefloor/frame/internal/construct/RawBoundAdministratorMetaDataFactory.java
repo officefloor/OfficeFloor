@@ -14,14 +14,13 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.administrator;
+package net.officefloor.frame.internal.construct;
 
 import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;

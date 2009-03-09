@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.managedobject;
+package net.officefloor.frame.internal.construct;
 
 import java.util.Map;
 
@@ -22,8 +22,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawOfficeManagingManagedObjectMetaData;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;

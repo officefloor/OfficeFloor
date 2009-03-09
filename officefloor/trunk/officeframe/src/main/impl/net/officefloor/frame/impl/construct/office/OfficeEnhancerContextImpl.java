@@ -23,10 +23,10 @@ import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaData;
-import net.officefloor.frame.impl.construct.officefloor.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 
 /**
  * {@link OfficeEnhancerContext} implementation.

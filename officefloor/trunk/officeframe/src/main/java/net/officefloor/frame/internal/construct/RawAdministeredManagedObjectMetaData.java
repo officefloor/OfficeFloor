@@ -14,29 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.team;
+package net.officefloor.frame.internal.construct;
 
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 
 /**
- * Raw meta-data for a {@link Team}.
+ * Meta-data about a {@link ManagedObject} that is being administered by an
+ * {@link Administrator}.
  * 
  * @author Daniel
  */
-public interface RawTeamMetaData {
+public interface RawAdministeredManagedObjectMetaData<I> {
 
 	/**
-	 * Obtains the name of the {@link Team}.
-	 * 
-	 * @return Name of the {@link Team}.
+	 * {@link RawBoundManagedObjectMetaData}.
 	 */
-	String getTeamName();
+	RawBoundManagedObjectMetaData<?> getManagedObjectMetaData();
 
 	/**
-	 * Obtains the {@link Team}.
-	 * 
-	 * @return {@link Team}.
+	 * {@link ExtensionInterfaceFactory}.
 	 */
-	Team getTeam();
+	ExtensionInterfaceFactory<I> getExtensionInterfaceFactory();
 
 }

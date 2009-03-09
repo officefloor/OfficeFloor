@@ -14,13 +14,11 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.work;
+package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.construct.office.RawOfficeMetaData;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;

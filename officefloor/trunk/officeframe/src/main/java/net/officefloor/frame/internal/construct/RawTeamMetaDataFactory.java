@@ -14,31 +14,30 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.work;
+package net.officefloor.frame.internal.construct;
 
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.internal.configuration.TeamConfiguration;
+import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
- * Raw meta-data of the {@link Administrator} within the {@link Work}.
+ * Factory for the construction of {@link RawTeamMetaData}.
  * 
  * @author Daniel
  */
-public interface RawWorkAdministratorMetaData {
+public interface RawTeamMetaDataFactory {
 
 	/**
-	 * Obtains the {@link AdministratorIndex} for this {@link Administrator}.
+	 * Constructs the {@link RawTeamMetaData}.
 	 * 
-	 * @return {@link AdministratorIndex} for this {@link Administrator}.
+	 * @param configuration
+	 *            {@link TeamConfiguration}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 * @return {@link RawTeamMetaData} or <code>null</code> if fails to
+	 *         construct.
 	 */
-	AdministratorIndex getAdministratorIndex();
-
-	/**
-	 * Obtains the index of this {@link Administrator} within the {@link Work}.
-	 * 
-	 * @return Index of this {@link Administrator} within the {@link Work}.
-	 */
-	int getWorkAdministratorIndex();
+	<TS extends TeamSource> RawTeamMetaData constructRawTeamMetaData(
+			TeamConfiguration<TS> configuration, OfficeFloorIssues issues);
 
 }

@@ -14,11 +14,11 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.managedobjectsource;
+package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactory;
+import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;

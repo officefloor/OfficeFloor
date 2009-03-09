@@ -23,6 +23,8 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.TeamConfiguration;
+import net.officefloor.frame.internal.construct.RawTeamMetaData;
+import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
