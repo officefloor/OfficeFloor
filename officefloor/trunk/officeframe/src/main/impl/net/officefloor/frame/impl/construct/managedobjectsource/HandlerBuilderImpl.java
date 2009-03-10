@@ -25,6 +25,7 @@ import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
+import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
@@ -76,33 +77,17 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 	 * ============= HandlerBuilder =======================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.build.HandlerBuilder#setHandlerFactory(net.
-	 * officefloor.frame.api.build.HandlerFactory)
-	 */
+	@Override
 	public void setHandlerFactory(HandlerFactory<F> factory) {
 		this.factory = factory;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.HandlerBuilder#linkProcess(F,
-	 * java.lang.String, java.lang.String)
-	 */
+	@Override
 	public void linkProcess(F key, String workName, String taskName) {
 		this.linkProcess(key.ordinal(), key, workName, taskName);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.HandlerBuilder#linkProcess(int,
-	 * java.lang.String, java.lang.String)
-	 */
+	@Override
 	public void linkProcess(int processIndex, String workName, String taskName) {
 		this.linkProcess(processIndex, null, workName, taskName);
 	}
@@ -142,57 +127,20 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 	 * ================== HandlerBuilder ==================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.configuration.HandlerConfiguration#
-	 * getHandlerKey()
-	 */
+	@Override
 	public H getHandlerKey() {
 		return this.handlerKey;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.configuration.HandlerConfiguration#
-	 * getHandlerFactory()
-	 */
+	@Override
 	public HandlerFactory<F> getHandlerFactory() {
 		return this.factory;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.configuration.HandlerConfiguration#
-	 * getLinkedProcessConfiguration()
-	 */
-	@SuppressWarnings("unchecked")
+	@Override
 	public HandlerFlowConfiguration<F>[] getLinkedProcessConfiguration() {
-
-		// Obtain the size of array
-		int arraySize = -1;
-		for (Integer flowIndex : this.processes.keySet()) {
-			int index = flowIndex.intValue();
-			if (index > arraySize) {
-				arraySize = index;
-			}
-		}
-		arraySize += 1; // size is one more than max index
-
-		// Create the listing of handler flows
-		HandlerFlowConfiguration<F>[] handlerFlows = new HandlerFlowConfiguration[arraySize];
-		for (Integer flowIndex : this.processes.keySet()) {
-			HandlerFlowConfigurationImpl handlerFlow = this.processes
-					.get(flowIndex);
-
-			// Specify the handler flow
-			handlerFlows[flowIndex.intValue()] = handlerFlow;
-		}
-
-		// Return the listing
-		return handlerFlows;
+		return ConstructUtil.toArray(this.processes,
+				new HandlerFlowConfiguration[0]);
 	}
 
 	/**
@@ -237,37 +185,16 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 		 * ================= HandlerFlowConfiguration ===================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.internal.configuration.HandlerFlowConfiguration
-		 * #getFlowKey()
-		 */
 		@Override
 		public F getFlowKey() {
 			return this.flowKey;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.internal.configuration.HandlerFlowConfiguration
-		 * #getFlowName()
-		 */
 		@Override
 		public String getFlowName() {
 			return this.flowName;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.internal.configuration.HandlerFlowConfiguration
-		 * #getTaskNodeReference()
-		 */
 		@Override
 		public TaskNodeReference getTaskNodeReference() {
 			return this.taskNodeReference;

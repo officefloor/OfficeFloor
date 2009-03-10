@@ -40,6 +40,13 @@ public interface TaskMetaDataLocator {
 	OfficeMetaData getOfficeMetaData();
 
 	/**
+	 * Obtains the default {@link WorkMetaData}.
+	 * 
+	 * @return Default {@link WorkMetaData}.
+	 */
+	WorkMetaData<?> getDefaultWorkMetaData();
+
+	/**
 	 * Creates a {@link TaskMetaDataLocator} that defaults to the input
 	 * {@link WorkMetaData} if no {@link Work} name is provided.
 	 * 
@@ -56,7 +63,9 @@ public interface TaskMetaDataLocator {
 	 * name.
 	 * 
 	 * @param workName
-	 *            Name of the {@link Work} that the {@link Task} is on.
+	 *            Name of the {@link Work} that the {@link Task} is on. If
+	 *            <code>null</code> attempts to find {@link TaskMetaData} on the
+	 *            default {@link WorkMetaData}.
 	 * @param taskName
 	 *            Name of the {@link Task}.
 	 * @return {@link TaskMetaData} or <code>null</code> if not found.

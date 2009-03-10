@@ -29,32 +29,19 @@ import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
 public class TeamSourceAdapter implements TeamSource {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.source.TeamSource#getSpecification()
+	 * ==================== TeamSource ==================================
 	 */
+
 	@Override
 	public TeamSourceSpecification getSpecification() {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.team.TeamSource#init(net.officefloor.frame.
-	 * spi.team.TeamSourceContext)
-	 */
 	@Override
 	public void init(TeamSourceContext context) throws Exception {
 		// Do nothing
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TeamSource#createTeam()
-	 */
 	@Override
 	public Team createTeam() {
 		return null;

@@ -36,6 +36,8 @@ public interface RawWorkMetaDataFactory {
 	 *            {@link OfficeFloorIssues}.
 	 * @param rawOfficeMetaData
 	 *            {@link RawOfficeMetaData}.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
 	 * @param rawBoundManagedObjectFactory
 	 *            {@link RawBoundManagedObjectMetaDataFactory}.
 	 * @param rawBoundAdministratorFactory
@@ -47,6 +49,7 @@ public interface RawWorkMetaDataFactory {
 	<W extends Work> RawWorkMetaData<W> constructRawWorkMetaData(
 			WorkConfiguration<W> configuration, OfficeFloorIssues issues,
 			RawOfficeMetaData rawOfficeMetaData,
+			AssetManagerFactory assetManagerFactory,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
 			RawTaskMetaDataFactory rawTaskFactory);

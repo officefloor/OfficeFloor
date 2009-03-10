@@ -477,6 +477,9 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			// Load the dependency
 			RawBoundManagedObjectMetaData<?> dependency = this.dependencies
 					.get(dependencyKey);
+			if (dependency == null) {
+				continue; // dependency not available
+			}
 			dependencyMapping.put(dependencyKey, dependency
 					.getManagedObjectIndex());
 		}

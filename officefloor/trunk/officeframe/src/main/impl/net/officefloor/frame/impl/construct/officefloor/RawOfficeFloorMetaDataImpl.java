@@ -24,6 +24,7 @@ import java.util.Map;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.construct.office.TaskMetaDataLocatorImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.officefloor.ManagedObjectSourceInstanceImpl;
@@ -46,6 +47,7 @@ import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
@@ -260,8 +262,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			RawOfficeMetaData rawOfficeMetaData = rawOfficeFactory
 					.constructRawOfficeMetaData(officeConfiguration, issues,
 							officeManagingManagedObjects, rawMetaData,
-							rawBoundMoFactory, rawBoundAdminFactory,
-							rawWorkFactory, rawTaskFactory);
+							assetManagerFactory, rawBoundMoFactory,
+							rawBoundAdminFactory, rawWorkFactory,
+							rawTaskFactory);
 			if (rawOfficeMetaData == null) {
 				continue; // issue with office
 			}
@@ -274,10 +277,15 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 					.getOfficeMetaData();
 			officeMetaDatas.add(officeMetaData);
 
+			// Create the task locator for the office meta-data
+			TaskMetaDataLocator taskMetaDataLocator = new TaskMetaDataLocatorImpl(
+					officeMetaData);
+
 			// Have the managed objects managed by the office
 			for (RawOfficeManagingManagedObjectMetaData officeManagingManagedObject : officeManagingManagedObjects) {
 				officeManagingManagedObject.getRawManagedObjectMetaData()
-						.manageByOffice(officeMetaData, issues);
+						.manageByOffice(taskMetaDataLocator,
+								assetManagerFactory, issues);
 			}
 		}
 

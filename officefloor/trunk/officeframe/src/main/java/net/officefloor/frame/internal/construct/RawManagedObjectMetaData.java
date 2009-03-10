@@ -24,7 +24,6 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -48,15 +47,18 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 
 	/**
 	 * Sets up the {@link ManagedObjectSource} to be managed by the
-	 * {@link Office} of the input {@link OfficeMetaData}.
+	 * {@link Office} of the input {@link TaskMetaDataLocator}.
 	 * 
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData} of the {@link Office} managing this
-	 *            {@link ManagedObjectSource}.
+	 * @param taskMetaDataLocator
+	 *            {@link TaskMetaDataLocator} for the {@link Office} managing
+	 *            the {@link ManagedObject}.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void manageByOffice(OfficeMetaData officeMetaData, OfficeFloorIssues issues);
+	void manageByOffice(TaskMetaDataLocator taskMetaDataLocator,
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceConfiguration}.
@@ -133,9 +135,11 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	RawOfficeManagingManagedObjectMetaData getManagingOfficeMetaData();
 
 	/**
-	 * Obtains the name of {@link Work} to recycle the {@link ManagedObject}.
+	 * Obtains the name of the {@link Work} responsible for recycling this
+	 * {@link ManagedObject}.
 	 * 
-	 * @return Name of {@link Work} to recycle the {@link ManagedObject}.
+	 * @return Name of {@link Work} to recycle this {@link ManagedObject} or
+	 *         <code>null</code> if not recycled.
 	 */
 	String getRecycleWorkName();
 

@@ -39,6 +39,7 @@ import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
@@ -46,6 +47,7 @@ import net.officefloor.frame.internal.construct.RawWorkAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -316,11 +318,16 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 
 	@Override
 	public void linkTasks(TaskMetaDataLocator genericTaskLocator,
-			WorkMetaData<W> workMetaData, OfficeFloorIssues issues) {
+			WorkMetaData<W> workMetaData,
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Create the work specific task meta-data locator
 		TaskMetaDataLocator taskLocator = genericTaskLocator
 				.createWorkSpecificTaskMetaDataLocator(workMetaData);
+
+		// Obtain the work name and create the asset name
+		String workName = workMetaData.getWorkName();
+		String assetName = workName + "." + this.getTaskName();
 
 		// Obtain the listing of flow meta-data
 		FlowConfiguration[] flowConfigurations = this.configuration
@@ -356,9 +363,14 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				continue; // no instigation strategy
 			}
 
+			// Provide asset manager for instigation of flow
+			AssetManager flowAssetManager = assetManagerFactory
+					.createAssetManager(AssetType.TASK, assetName, "Flow" + i,
+							issues);
+
 			// Create and add the flow meta-data
-			flowMetaDatas[i] = new FlowMetaDataImpl(instigationStrategy,
-					taskMetaData, null);
+			flowMetaDatas[i] = this.newFlowMetaData(instigationStrategy,
+					taskMetaData, flowAssetManager);
 		}
 
 		// Obtain the next task in flow
@@ -406,11 +418,15 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				continue; // no escalation handler
 			}
 
+			// Provide asset manager for instigation of escalation
+			AssetManager escalationAssetManager = assetManagerFactory
+					.createAssetManager(AssetType.TASK, assetName, "Escalation"
+							+ i, issues);
+
 			// Create and add the escalation
-			escalations[i] = new EscalationImpl(typeOfCause, true,
-					new FlowMetaDataImpl(
-							FlowInstigationStrategyEnum.SEQUENTIAL,
-							escalationTaskMetaData, null));
+			escalations[i] = new EscalationImpl(typeOfCause, true, this
+					.newFlowMetaData(FlowInstigationStrategyEnum.SEQUENTIAL,
+							escalationTaskMetaData, escalationAssetManager));
 		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
 				officeFloorEscalationProcedure, escalations);
@@ -418,6 +434,24 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 		// Load the remaining state for the task meta-data
 		this.taskMetaData.loadRemainingState(workMetaData, flowMetaDatas,
 				nextTaskInFlow, escalationProcedure);
+	}
+
+	/**
+	 * Creates a new {@link FlowMetaData}.
+	 * 
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 * @param taskMetaData
+	 *            {@link TaskMetaData}.
+	 * @param assetManager
+	 *            {@link AssetManager}.
+	 * @return New {@link FlowMetaData}.
+	 */
+	private <w extends Work> FlowMetaData<w> newFlowMetaData(
+			FlowInstigationStrategyEnum instigationStrategy,
+			TaskMetaData<?, w, ?, ?> taskMetaData, AssetManager assetManager) {
+		return new FlowMetaDataImpl<w>(FlowInstigationStrategyEnum.SEQUENTIAL,
+				taskMetaData, assetManager);
 	}
 
 }

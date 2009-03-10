@@ -75,6 +75,11 @@ public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
 	}
 
 	@Override
+	public WorkMetaData<?> getDefaultWorkMetaData() {
+		return this.workMetaData;
+	}
+
+	@Override
 	public TaskMetaDataLocator createWorkSpecificTaskMetaDataLocator(
 			WorkMetaData<?> workMetaData) {
 		return new TaskMetaDataLocatorImpl(this.officeMetaData, workMetaData);

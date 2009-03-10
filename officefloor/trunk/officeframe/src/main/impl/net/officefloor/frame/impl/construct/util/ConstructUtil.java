@@ -106,7 +106,7 @@ public class ConstructUtil {
 	 * @return {@link Map} contents as an array.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <O> O[] toArray(Map<Integer, ? extends O> map, O[] type) {
+	public static <O> O[] toArray(Map<Integer, ? extends O> map, Object[] type) {
 
 		// Obtain the array size
 		int arraySize = -1;
@@ -187,7 +187,7 @@ public class ConstructUtil {
 		// Determine if have the work name
 		boolean isHaveWorkName = !ConstructUtil.isBlank(workName);
 		if (isWorkNameRequired && (!isHaveWorkName)) {
-			issues.addIssue(assetType, assetName, "Must have work name for "
+			issues.addIssue(assetType, assetName, "No work name provided for "
 					+ forItemDescription);
 			return null; // must have the work name
 		}
@@ -195,7 +195,7 @@ public class ConstructUtil {
 		// Obtain the task name
 		String taskName = taskNodeReference.getTaskName();
 		if (ConstructUtil.isBlank(taskName)) {
-			issues.addIssue(assetType, assetName, "Must have task name for "
+			issues.addIssue(assetType, assetName, "No task name provided for "
 					+ forItemDescription);
 			return null; // must have the task name
 		}
@@ -210,8 +210,16 @@ public class ConstructUtil {
 
 		// Ensure have the task meta-data
 		if (taskMetaData == null) {
+
+			// Ensure have the name of the work being searched
+			if (!isHaveWorkName) {
+				workName = taskLocator.getDefaultWorkMetaData().getWorkName();
+			}
+
+			// Indicate issue as can not find meta-data
 			issues.addIssue(assetType, assetName,
-					"Can not find task meta-data for " + forItemDescription);
+					"Can not find task meta-data (work=" + workName + ", task="
+							+ taskName + ") for " + forItemDescription);
 			return null; // must find the task meta-data
 		}
 

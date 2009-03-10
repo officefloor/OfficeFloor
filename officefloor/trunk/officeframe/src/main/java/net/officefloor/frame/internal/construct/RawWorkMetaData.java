@@ -78,11 +78,9 @@ public interface RawWorkMetaData<W extends Work> {
 	/**
 	 * Obtains the {@link WorkMetaData} for this {@link RawWorkMetaData}.
 	 * 
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
 	 * @return {@link WorkMetaData}.
 	 */
-	WorkMetaData<W> getWorkMetaData(OfficeFloorIssues issues);
+	WorkMetaData<W> getWorkMetaData();
 
 	/**
 	 * Links the {@link TaskMetaData} instances to enable {@link Flow} of
@@ -90,9 +88,12 @@ public interface RawWorkMetaData<W extends Work> {
 	 * 
 	 * @param taskLocator
 	 *            {@link TaskMetaDataLocator}.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkTasks(TaskMetaDataLocator taskLocator, OfficeFloorIssues issues);
+	void linkTasks(TaskMetaDataLocator taskLocator,
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 }
