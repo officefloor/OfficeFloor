@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.construct;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -60,10 +61,14 @@ public interface RawTaskMetaData<P, W extends Work, M extends Enum<M>, F extends
 	 *            {@link TaskMetaDataLocator}.
 	 * @param workMetaData
 	 *            {@link WorkMetaData} containing this {@link TaskMetaData}.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory} to create the {@link AssetManager}
+	 *            instances that manage {@link Flow} instances.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
 	void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
-			WorkMetaData<W> workMetaData, OfficeFloorIssues issues);
+			WorkMetaData<W> workMetaData,
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 }

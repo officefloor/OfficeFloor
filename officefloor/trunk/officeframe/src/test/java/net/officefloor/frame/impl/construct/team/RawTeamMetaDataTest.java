@@ -170,13 +170,6 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		 */
 		public static final String PROPERTY_VALUE = "property.value";
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.impl.construct.team.TeamSourceAdapter#init(
-		 * net.officefloor.frame.spi.team.TeamSourceContext)
-		 */
 		@Override
 		public void init(TeamSourceContext context) throws Exception {
 			String property = context.getProperty(PROPERTY_NAME);
@@ -218,13 +211,6 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		 */
 		public static Exception initFailure;
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.impl.construct.team.TeamSourceAdapter#init(
-		 * net.officefloor.frame.spi.team.TeamSourceContext)
-		 */
 		@Override
 		public void init(TeamSourceContext context) throws Exception {
 			throw initFailure;
@@ -265,13 +251,6 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		 */
 		public static RuntimeException createFailure;
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.impl.construct.team.TeamSourceAdapter#createTeam
-		 * ()
-		 */
 		@Override
 		public Team createTeam() {
 			throw createFailure;
@@ -337,13 +316,6 @@ public class RawTeamMetaDataTest extends OfficeFrameTestCase {
 		 */
 		public static Team team;
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.impl.construct.team.TeamSourceAdapter#createTeam
-		 * ()
-		 */
 		@Override
 		public Team createTeam() {
 			return team;

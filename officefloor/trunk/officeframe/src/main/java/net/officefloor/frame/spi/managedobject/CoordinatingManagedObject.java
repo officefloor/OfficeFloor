@@ -12,7 +12,8 @@ package net.officefloor.frame.spi.managedobject;
  * 
  * @author Daniel
  */
-public interface CoordinatingManagedObject<D extends Enum<D>> {
+public interface CoordinatingManagedObject<D extends Enum<D>> extends
+		ManagedObject {
 
 	/**
 	 * <p>

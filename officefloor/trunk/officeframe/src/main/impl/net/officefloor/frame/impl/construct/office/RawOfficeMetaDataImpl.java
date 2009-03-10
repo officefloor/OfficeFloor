@@ -36,6 +36,7 @@ import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -206,6 +207,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			OfficeFloorIssues issues,
 			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
+			AssetManagerFactory assetManagerFactory,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
 			RawWorkMetaDataFactory rawWorkFactory,
@@ -397,11 +399,11 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				.getWorkConfiguration()) {
 			RawWorkMetaData<?> rawWorkMetaData = rawWorkFactory
 					.constructRawWorkMetaData(workConfiguration, issues,
-							rawOfficeMetaData, rawBoundManagedObjectFactory,
+							rawOfficeMetaData, assetManagerFactory,
+							rawBoundManagedObjectFactory,
 							rawBoundAdministratorFactory, rawTaskFactory);
 			rawWorkMetaDatas.add(rawWorkMetaData);
-			WorkMetaData<?> workMetaData = rawWorkMetaData
-					.getWorkMetaData(issues);
+			WorkMetaData<?> workMetaData = rawWorkMetaData.getWorkMetaData();
 			workMetaDatas.add(workMetaData);
 		}
 
@@ -434,7 +436,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Link tasks within the meta-data of the office
 		for (RawWorkMetaData<?> rawWorkMetaData : rawWorkMetaDatas) {
-			rawWorkMetaData.linkTasks(taskMetaDataLocator, issues);
+			rawWorkMetaData.linkTasks(taskMetaDataLocator, assetManagerFactory,
+					issues);
 		}
 		this.linkTasks(taskMetaDataLocator, threadBoundManagedObjects, issues);
 		this.linkTasks(taskMetaDataLocator, threadBoundAdministrators, issues);

@@ -32,12 +32,15 @@ import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawWorkAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
@@ -64,6 +67,11 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 * Name of the {@link Task}.
 	 */
 	private static final String TASK_NAME = "TASK";
+
+	/**
+	 * Name of the {@link Work} containing the {@link Task}.
+	 */
+	private static final String DEFAULT_WORK_NAME = "DEFAULT_WORK_NAME";
 
 	/**
 	 * {@link TaskConfiguration}.
@@ -111,11 +119,6 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 			.createMock(WorkMetaData.class);
 
 	/**
-	 * {@link RawWorkMetaData} instances by their {@link Work} name.
-	 */
-	private final Map<String, RawWorkMetaData<?>> workRegistry = new HashMap<String, RawWorkMetaData<?>>();
-
-	/**
 	 * {@link RawOfficeFloorMetaData}.
 	 */
 	private final RawOfficeFloorMetaData rawOfficeFloorMetaData = this
@@ -126,6 +129,24 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	private final EscalationProcedure officeFloorEscalationProcedure = this
 			.createMock(EscalationProcedure.class);
+
+	/**
+	 * {@link TaskMetaDataLocator}.
+	 */
+	private final TaskMetaDataLocator inputTaskMetaDataLocator = this
+			.createMock(TaskMetaDataLocator.class);
+
+	/**
+	 * {@link TaskMetaDataLocator} to find the {@link TaskMetaData}.
+	 */
+	private final TaskMetaDataLocator taskLocator = this
+			.createMock(TaskMetaDataLocator.class);
+
+	/**
+	 * {@link AssetManagerFactory}.
+	 */
+	private final AssetManagerFactory assetManagerFactory = this
+			.createMock(AssetManagerFactory.class);
 
 	/**
 	 * Ensure issue if not {@link Task} name.
@@ -291,7 +312,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
-	 * Ensure able to link to a {@link ManagedObject}.
+	 * Ensure able to link to a single {@link ManagedObject} that has no
+	 * dependencies.
 	 */
 	public void testLinkManagedObject() {
 
@@ -301,7 +323,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(RawWorkManagedObjectMetaData.class);
 		final int WORK_MO_INDEX = 3; // managed objects added by other tasks
 
-		// Record unknown managed object
+		// Record linking to a single managed object
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration, this.configuration
 				.getManagedObjectConfiguration(),
@@ -554,7 +576,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
 				new FlowConfiguration[] { flowConfiguration });
@@ -584,7 +606,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
 				new FlowConfiguration[] { flowConfiguration });
@@ -619,15 +641,20 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
 				new FlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
-				"ANOTHER WORK");
-		this.record_taskIssue("Unknown work 'ANOTHER WORK' for flow index 0");
+				"UNKNOWN WORK");
+		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
+				"IGNORED TASK NAME");
+		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
+				"UNKNOWN WORK", "IGNORED TASK NAME"), null);
+		this
+				.record_taskIssue("Can not find task meta-data (work=UNKNOWN WORK, task=IGNORED TASK NAME) for flow index 0");
 		this.record_NoNextTask();
 		this.record_NoEscalations();
 
@@ -651,7 +678,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
 				new FlowConfiguration[] { flowConfiguration });
@@ -661,12 +688,14 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-//				.getRawTaskMetaData("TASK"), null);
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getWorkName(), "WORK");
+		this.recordReturn(this.taskLocator, this.taskLocator
+				.getTaskMetaData("TASK"), null);
+		this.recordReturn(this.taskLocator, this.taskLocator
+				.getDefaultWorkMetaData(), this.workMetaData);
+		this.recordReturn(this.workMetaData, this.workMetaData.getWorkName(),
+				"WORK");
 		this
-				.record_taskIssue("Unknown task 'TASK' on work WORK for flow index 0");
+				.record_taskIssue("Can not find task meta-data (work=WORK, task=TASK) for flow index 0");
 		this.record_NoNextTask();
 		this.record_NoEscalations();
 
@@ -685,8 +714,6 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(FlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final RawTaskMetaData<?, ?, ?, ?> flowRawTaskMetaData = this
-				.createMock(RawTaskMetaData.class);
 		final TaskMetaData<?, ?, ?, ?> flowTaskMetaData = this
 				.createMock(TaskMetaData.class);
 
@@ -694,7 +721,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
 				new FlowConfiguration[] { flowConfiguration });
@@ -704,10 +731,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-//				.getRawTaskMetaData("TASK"), flowRawTaskMetaData);
-		this.recordReturn(flowRawTaskMetaData, flowRawTaskMetaData
-				.getTaskMetaData(), flowTaskMetaData);
+		this.recordReturn(this.taskLocator, this.taskLocator
+				.getTaskMetaData("TASK"), flowTaskMetaData);
 		this.recordReturn(flowConfiguration, flowConfiguration
 				.getInstigationStrategy(), null);
 		this
@@ -730,16 +755,15 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(FlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final RawTaskMetaData<?, ?, ?, ?> flowRawTaskMetaData = this
-				.createMock(RawTaskMetaData.class);
 		final TaskMetaData<?, ?, ?, ?> flowTaskMetaData = this
 				.createMock(TaskMetaData.class);
+		final AssetManager assetManager = this.createMock(AssetManager.class);
 
 		// Record construct flow
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
 				new FlowConfiguration[] { flowConfiguration });
@@ -749,13 +773,14 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
-//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-//				.getRawTaskMetaData("TASK"), flowRawTaskMetaData);
-		this.recordReturn(flowRawTaskMetaData, flowRawTaskMetaData
-				.getTaskMetaData(), flowTaskMetaData);
+		this.recordReturn(this.taskLocator, this.taskLocator
+				.getTaskMetaData("TASK"), flowTaskMetaData);
 		this.recordReturn(flowConfiguration, flowConfiguration
 				.getInstigationStrategy(),
 				FlowInstigationStrategyEnum.SEQUENTIAL);
+		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
+				.createAssetManager(AssetType.TASK, DEFAULT_WORK_NAME + "."
+						+ TASK_NAME, "Flow0", this.issues), assetManager);
 		this.record_NoNextTask();
 		this.record_NoEscalations();
 
@@ -789,7 +814,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.recordReturn(this.configuration, this.configuration
 				.getNextTaskInFlow(), taskNodeReference);
@@ -813,27 +838,23 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final RawTaskMetaData<?, ?, ?, ?> nextRawTaskMetaData = this
-				.createMock(RawTaskMetaData.class);
 		final TaskMetaData<?, ?, ?, ?> nextTaskMetaData = this
 				.createMock(TaskMetaData.class);
 
-		// Record construct next task
+		// Record construct next task (which is on another work)
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.recordReturn(this.configuration, this.configuration
 				.getNextTaskInFlow(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
-				null);
+				"ANOTHER_WORK");
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"NEXT_TASK");
-//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-//				.getRawTaskMetaData("NEXT_TASK"), nextRawTaskMetaData);
-		this.recordReturn(nextRawTaskMetaData, nextRawTaskMetaData
-				.getTaskMetaData(), nextTaskMetaData);
+		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
+				"ANOTHER_WORK", "NEXT_TASK"), nextTaskMetaData);
 		this.record_NoEscalations();
 
 		// Fully construct task meta-data
@@ -861,7 +882,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
 		this.record_OfficeFloorEscalationProcedure();
@@ -890,7 +911,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
 		this.record_OfficeFloorEscalationProcedure();
@@ -923,7 +944,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
 		this.record_OfficeFloorEscalationProcedure();
@@ -955,16 +976,15 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(EscalationConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final RawTaskMetaData<?, ?, ?, ?> escalationRawTaskMetaData = this
-				.createMock(RawTaskMetaData.class);
 		final TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = this
 				.createMock(TaskMetaData.class);
+		final AssetManager assetManager = this.createMock(AssetManager.class);
 
 		// Record construct escalation
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.record_NoAdministration();
-		this.record_WorkMetaData();
+		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
 		this.record_OfficeFloorEscalationProcedure();
@@ -979,11 +999,11 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				null); // same work
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"ESCALATION_HANDLER");
-//		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-//				.getRawTaskMetaData("ESCALATION_HANDLER"),
-//				escalationRawTaskMetaData);
-		this.recordReturn(escalationRawTaskMetaData, escalationRawTaskMetaData
-				.getTaskMetaData(), escalationTaskMetaData);
+		this.recordReturn(this.taskLocator, this.taskLocator
+				.getTaskMetaData("ESCALATION_HANDLER"), escalationTaskMetaData);
+		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
+				.createAssetManager(AssetType.TASK, DEFAULT_WORK_NAME + "."
+						+ TASK_NAME, "Escalation0", this.issues), assetManager);
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1054,11 +1074,17 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
-	 * Records obtaining the {@link WorkMetaData}.
+	 * Records obtaining the {@link TaskMetaDataLocator}.
 	 */
-	private void record_WorkMetaData() {
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getWorkMetaData(this.issues), this.workMetaData);
+	private void record_createWorkSpecificTaskMetaDataLocator() {
+		this
+				.recordReturn(
+						this.inputTaskMetaDataLocator,
+						this.inputTaskMetaDataLocator
+								.createWorkSpecificTaskMetaDataLocator(this.workMetaData),
+						this.taskLocator);
+		this.recordReturn(this.workMetaData, this.workMetaData.getWorkName(),
+				DEFAULT_WORK_NAME);
 	}
 
 	/**
@@ -1147,9 +1173,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Other tasks and work expected to be constructed between these steps
 
-		// Load the remaining state
-		// TODO link the tasks
-//		metaData.linkTasks(this.workRegistry, this.issues);
+		// Link the tasks and load remaining state to task meta-data
+		metaData.linkTasks(this.inputTaskMetaDataLocator, this.workMetaData,
+				this.assetManagerFactory, this.issues);
 
 		// Return the fully constructed meta-data
 		return metaData;

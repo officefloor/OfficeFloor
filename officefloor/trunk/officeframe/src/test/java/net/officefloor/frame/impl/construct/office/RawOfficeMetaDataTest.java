@@ -31,6 +31,7 @@ import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceCon
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
@@ -105,6 +106,12 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 * {@link RawOfficeManagingManagedObjectMetaData} instances.
 	 */
 	private final List<RawOfficeManagingManagedObjectMetaData> officeManagingManagedObjects = new LinkedList<RawOfficeManagingManagedObjectMetaData>();
+
+	/**
+	 * {@link AssetManagerFactory}.
+	 */
+	private final AssetManagerFactory assetManagerFactory = this
+			.createMock(AssetManagerFactory.class);
 
 	/**
 	 * {@link RawWorkMetaDataFactory}.
@@ -481,6 +488,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		RawOfficeMetaData metaData = RawOfficeMetaDataImpl.getFactory()
 				.constructRawOfficeMetaData(this.configuration, this.issues,
 						officeMos, this.rawOfficeFloorMetaData,
+						this.assetManagerFactory,
 						this.rawBoundManagedObjectFactory,
 						this.rawBoundAdministratorFactory,
 						this.rawWorkMetaDataFactory,

@@ -37,6 +37,7 @@ import net.officefloor.frame.internal.configuration.LinkedWorkManagedObjectConfi
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -52,6 +53,7 @@ import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -172,7 +174,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	 *            {@link Administrator} scope names used by the {@link Task}
 	 *            instances of this {@link Work}.
 	 */
-	public RawWorkMetaDataImpl(
+	private RawWorkMetaDataImpl(
 			String workName,
 			RawOfficeMetaData rawOfficeMetaData,
 			RawBoundManagedObjectMetaData<?>[] workManagedObjects,
@@ -195,6 +197,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	public <w extends Work> RawWorkMetaData<w> constructRawWorkMetaData(
 			WorkConfiguration<w> configuration, OfficeFloorIssues issues,
 			RawOfficeMetaData rawOfficeMetaData,
+			AssetManagerFactory assetManagerFactory,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
 			RawTaskMetaDataFactory rawTaskFactory) {
@@ -247,17 +250,33 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			// Obtain the work managed object name
 			String workManagedObjectName = linkMoConfiguration
 					.getWorkManagedObjectName();
-			// TODO handle no name
+			if (ConstructUtil.isBlank(workManagedObjectName)) {
+				issues
+						.addIssue(AssetType.WORK, workName,
+								"No work managed object name provided for managed object");
+				continue; // can not link in managed object
+			}
 
 			// Obtain the bound managed object name
 			String boundManagedObjectName = linkMoConfiguration
 					.getBoundManagedObjectName();
-			// TODO handle no name
+			if (ConstructUtil.isBlank(boundManagedObjectName)) {
+				issues.addIssue(AssetType.WORK, workName,
+						"No bound name provided for work managed object "
+								+ workManagedObjectName);
+				continue; // can not link in managed object
+			}
 
 			// Obtain the bound managed object from office scope
 			RawBoundManagedObjectMetaData<?> mo = officeScopeMo
 					.get(boundManagedObjectName);
-			// TODO handle no managed object
+			if (mo == null) {
+				issues.addIssue(AssetType.WORK, workName,
+						"No bound managed object '" + boundManagedObjectName
+								+ "' found for work managed object "
+								+ workManagedObjectName);
+				continue; // can not link in managed object
+			}
 
 			// Bound to work under work managed object name
 			taskScopeMo.put(workManagedObjectName, mo);
@@ -299,17 +318,33 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			// Obtain work administrator name
 			String workAdministratorName = linkAdminConfiguration
 					.getWorkAdministratorName();
-			// TODO handle no name
+			if (ConstructUtil.isBlank(workAdministratorName)) {
+				issues
+						.addIssue(AssetType.WORK, workName,
+								"No work administrator name provided for administrator");
+				continue; // can not link in administrator
+			}
 
 			// Obtain the bound administrator name
 			String boundAdministratorName = linkAdminConfiguration
 					.getBoundAdministratorName();
-			// TODO handle no name
+			if (ConstructUtil.isBlank(boundAdministratorName)) {
+				issues.addIssue(AssetType.WORK, workName,
+						"No bound name provided for work administrator "
+								+ workAdministratorName);
+				continue; // can not link in administrator
+			}
 
 			// Obtain the bound administrator from office scope
 			RawBoundAdministratorMetaData<?, ?> admin = officeScopeAdmin
 					.get(boundAdministratorName);
-			// TODO handle unknown admin
+			if (admin == null) {
+				issues.addIssue(AssetType.WORK, workName,
+						"No bound administrator '" + boundAdministratorName
+								+ "' found for work administrator "
+								+ workAdministratorName);
+				continue; // can not link in administrator
+			}
 
 			// Bound to work under work administrator name
 			taskScopeAdmin.put(workAdministratorName, admin);
@@ -356,6 +391,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		// Create the initial flow meta-data for the work
 		FlowMetaData<w> initialFlowMetaData = null;
 		if (initialTaskName != null) {
+
 			// Ensure have the initial task meta-data
 			if (initialTaskMetaData == null) {
 				issues.addIssue(AssetType.WORK, workName,
@@ -364,11 +400,14 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 				return null; // must have initial task meta-data
 			}
 
+			// Obtain the asset manager to initiate the flow
+			AssetManager assetManager = assetManagerFactory.createAssetManager(
+					AssetType.WORK, workName, "InitialFlow", issues);
+
 			// Construct the initial flow meta-data
-			// TODO obtain the asset manager for the flow
 			initialFlowMetaData = new FlowMetaDataImpl<w>(
 					FlowInstigationStrategyEnum.ASYNCHRONOUS,
-					initialTaskMetaData, null);
+					initialTaskMetaData, assetManager);
 		}
 
 		// Create the listing of managed object indexes
@@ -384,7 +423,12 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		for (int i = 0; i < managedObjectMetaData.length; i++) {
 			managedObjectMetaData[i] = rawWorkMetaData.workManagedObjects[i]
 					.getManagedObjectMetaData();
-			// TODO handle managed object meta-data not available
+			if (managedObjectMetaData[i] == null) {
+				issues.addIssue(AssetType.WORK, workName,
+						"No managed object meta-data for work managed object "
+								+ rawWorkMetaData.workManagedObjects[i]
+										.getBoundManagedObjectName());
+			}
 		}
 
 		// Create the listing of administrator indexes
@@ -440,7 +484,12 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		// Obtain the bound administrator
 		RawBoundAdministratorMetaData<?, ?> boundAdmin = this.taskScopeAdministrators
 				.get(workAdministratorName);
-		// TODO handle unknown
+		if (boundAdmin == null) {
+			issues.addIssue(AssetType.WORK, this.workName,
+					"No work administrator for task by name '"
+							+ workAdministratorName + "'");
+			return null; // unknown administrator
+		}
 
 		// Obtain the index details for the administrator
 		AdministratorIndex adminIndex = boundAdmin.getAdministratorIndex();
@@ -482,7 +531,12 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		// Obtain the bound managed object
 		RawBoundManagedObjectMetaData<?> boundMo = this.taskScopeManagedObjects
 				.get(workManagedObjectName);
-		// TODO handle unknown
+		if (boundMo == null) {
+			issues.addIssue(AssetType.WORK, this.workName,
+					"No work managed object for task by name '"
+							+ workManagedObjectName + "'");
+			return null; // unknown managed object
+		}
 
 		// Construct and return the work managed object
 		RawWorkManagedObjectMetaData workMo = this
@@ -491,13 +545,13 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	}
 
 	@Override
-	public WorkMetaData<W> getWorkMetaData(OfficeFloorIssues issues) {
+	public WorkMetaData<W> getWorkMetaData() {
 		return this.workMetaData;
 	}
 
 	@Override
 	public void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
-			OfficeFloorIssues issues) {
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Link tasks of work bound managed objects
 		for (RawBoundManagedObjectMetaData<?> rawBoundMoMetaData : this.workManagedObjects) {
@@ -512,7 +566,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		// Link the tasks of this work
 		for (RawTaskMetaData<?, W, ?, ?> rawTaskMetaData : this.rawTaskMetaDatas) {
 			rawTaskMetaData.linkTasks(taskMetaDataLocator, this.workMetaData,
-					issues);
+					assetManagerFactory, issues);
 		}
 	}
 
