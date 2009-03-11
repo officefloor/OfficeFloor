@@ -86,6 +86,13 @@ public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
 	}
 
 	@Override
+	public WorkMetaData<?> getWorkMetaData(String workName) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement TaskMetaDataLocator.getWorkMetaData");
+	}
+
+	@Override
 	public TaskMetaData<?, ?, ?, ?> getTaskMetaData(String workName,
 			String taskName) {
 		// TODO Implement
