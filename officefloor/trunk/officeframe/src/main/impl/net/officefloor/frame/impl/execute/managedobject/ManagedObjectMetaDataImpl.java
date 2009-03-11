@@ -245,7 +245,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 			// Create the recycle job node
 			JobNode recycleJobNode = this.officeMetaData.createProcess(
-					this.recycleFlowMetaData, parameter, null, -1, null);
+					this.recycleFlowMetaData, parameter);
 
 			// Listen to process completion (handle not being recycled)
 			recycleJobNode.getFlow().getThreadState().getProcessState()
@@ -312,7 +312,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		public void processComplete() {
 			if ((!this.isRecycled)
 					&& (ManagedObjectMetaDataImpl.this.pool != null)) {
-				// Not recycle, therefore lost to pool
+				// Not recycled, therefore lost to pool
 				ManagedObjectMetaDataImpl.this.pool
 						.lostManagedObject(this.managedObject);
 			}

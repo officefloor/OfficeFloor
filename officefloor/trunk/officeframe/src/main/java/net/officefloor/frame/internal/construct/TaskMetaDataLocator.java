@@ -59,6 +59,15 @@ public interface TaskMetaDataLocator {
 			WorkMetaData<?> workMetaData);
 
 	/**
+	 * Obtains the {@link WorkMetaData} by the {@link Work} name.
+	 * 
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @return {@link WorkMetaData} or <code>null</code> if not found.
+	 */
+	WorkMetaData<?> getWorkMetaData(String workName);
+
+	/**
 	 * Obtains the {@link TaskMetaData} by the {@link Work} and {@link Task}
 	 * name.
 	 * 

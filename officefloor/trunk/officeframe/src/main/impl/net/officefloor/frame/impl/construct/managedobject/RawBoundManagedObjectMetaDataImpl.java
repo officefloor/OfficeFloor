@@ -44,6 +44,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
@@ -537,8 +538,31 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		// Obtain the office meta-data
 		OfficeMetaData officeMetaData = taskMetaDataLocator.getOfficeMetaData();
 
-		// TODO Obtain the recycle task meta-data
+		// Obtain the recycle task meta-data
 		FlowMetaData<?> recycleFlowMetaData = null;
+		String recycleWorkName = this.rawMoMetaData.getRecycleWorkName();
+		NO_RECYCLE_TASK: if (recycleWorkName != null) {
+
+			// Locate the work meta-data
+			WorkMetaData<?> workMetaData = taskMetaDataLocator
+					.getWorkMetaData(recycleWorkName);
+			if (workMetaData == null) {
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						this.boundManagedObjectName, "Recycle work '"
+								+ recycleWorkName + "' not found");
+				break NO_RECYCLE_TASK;
+			}
+
+			// Obtain the initial flow of work as recycle flow
+			recycleFlowMetaData = workMetaData.getInitialFlowMetaData();
+			if (recycleFlowMetaData == null) {
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						this.boundManagedObjectName,
+						"No initial flow on work '" + recycleWorkName
+								+ "' for recycle task");
+				break NO_RECYCLE_TASK;
+			}
+		}
 
 		// Load the remaining state of the managed object meta-data
 		this.managedObjectMetaData.loadRemainingState(officeMetaData,

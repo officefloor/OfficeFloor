@@ -19,6 +19,8 @@ package net.officefloor.frame.impl.construct.managedobject;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.easymock.AbstractMatcher;
+
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
@@ -27,11 +29,23 @@ import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.internal.structure.WorkContainer;
+import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.ObjectRegistry;
+import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.pool.ManagedObjectPool;
@@ -60,7 +74,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	/**
 	 * {@link ManagedObjectScope}.
 	 */
-	private ManagedObjectScope managedObjectScope = ManagedObjectScope.PROCESS;
+	private ManagedObjectScope managedObjectScope = ManagedObjectScope.THREAD;
 
 	/**
 	 * {@link AssetType}.
@@ -112,6 +126,41 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private final AssetManager operationsAssetManager = this
 			.createMock(AssetManager.class);
+
+	/**
+	 * {@link WorkContainer}.
+	 */
+	private final WorkContainer<?> workContainer = this
+			.createMock(WorkContainer.class);
+
+	/**
+	 * {@link ThreadState}.
+	 */
+	private final ThreadState threadState = this.createMock(ThreadState.class);
+
+	/**
+	 * {@link ProcessState}.
+	 */
+	private final ProcessState processState = this
+			.createMock(ProcessState.class);
+
+	/**
+	 * {@link ManagedObjectContainer}.
+	 */
+	private final ManagedObjectContainer managedObjectContainer = this
+			.createMock(ManagedObjectContainer.class);
+
+	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private final OfficeMetaData officeMetaData = this
+			.createMock(OfficeMetaData.class);
+
+	/**
+	 * {@link TaskMetaDataLocator}.
+	 */
+	private final TaskMetaDataLocator taskMetaDataLocator = this
+			.createMock(TaskMetaDataLocator.class);
 
 	/**
 	 * Ensure issue if no bound name.
@@ -279,17 +328,19 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testDependencyOnAnotherBound() {
 
+		final Object dependencyObject = "dependency object";
+
 		// Managed object configuration
-		ManagedObjectConfiguration<?> oneConfig = this
+		final ManagedObjectConfiguration<?> oneConfig = this
 				.createMock(ManagedObjectConfiguration.class);
-		RawManagedObjectMetaData<?, ?> oneMetaData = this
+		final RawManagedObjectMetaData<?, ?> oneMetaData = this
 				.registerRawManagedObjectMetaData("ONE");
-		ManagedObjectConfiguration<?> twoConfig = this
+		final ManagedObjectConfiguration<?> twoConfig = this
 				.createMock(ManagedObjectConfiguration.class);
-		RawManagedObjectMetaData<?, ?> twoMetaData = this
+		final RawManagedObjectMetaData<?, ?> twoMetaData = this
 				.registerRawManagedObjectMetaData("TWO");
 
-		ManagedObjectDependencyConfiguration<?> dependencyConfig = this
+		final ManagedObjectDependencyConfiguration<?> dependencyConfig = this
 				.createMock(ManagedObjectDependencyConfiguration.class);
 
 		// Record construction
@@ -324,21 +375,40 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.record_getManagedObjectDetails(oneMetaData);
 		this.record_getManagedObjectDetails(twoMetaData);
 
-		// Attempt to construct
+		// Record creating object registry
+		this.recordReturn(this.threadState, this.threadState
+				.getManagedObjectContainer(1), this.managedObjectContainer);
+		this.recordReturn(this.managedObjectContainer,
+				this.managedObjectContainer.getObject(this.threadState),
+				dependencyObject);
+
 		this.replayMockObjects();
-		RawBoundManagedObjectMetaData<?>[] metaData = this
+
+		// Construct
+		RawBoundManagedObjectMetaData<?>[] rawMetaData = this
 				.constructRawBoundManagedObjectMetaData(2, oneConfig, twoConfig);
+		ManagedObjectMetaData<DependencyKey> moMetaData = (ManagedObjectMetaData<DependencyKey>) rawMetaData[0]
+				.getManagedObjectMetaData();
+
+		// Create the object registry and object the dependent object
+		ObjectRegistry<DependencyKey> objectRegistry = moMetaData
+				.createObjectRegistry(this.workContainer, this.threadState);
+		Object object = objectRegistry.getObject(DependencyKey.KEY);
+
 		this.verifyMockObjects();
 
 		// Validate dependency mapping
-		RawBoundManagedObjectMetaData<DependencyKey> one = (RawBoundManagedObjectMetaData<DependencyKey>) metaData[0];
+		RawBoundManagedObjectMetaData<DependencyKey> one = (RawBoundManagedObjectMetaData<DependencyKey>) rawMetaData[0];
 		assertEquals("Incorrect number of dependency keys", 1, one
 				.getDependencyKeys().length);
 		assertEquals("Incorrect dependency key", DependencyKey.KEY, one
 				.getDependencyKeys()[0]);
-		RawBoundManagedObjectMetaData<?> two = metaData[1];
+		RawBoundManagedObjectMetaData<?> two = rawMetaData[1];
 		assertEquals("Incorrect dependency", two, one
 				.getDependency(DependencyKey.KEY));
+
+		// Validate object registry
+		assertEquals("Incorrect dependency object", dependencyObject, object);
 	}
 
 	/**
@@ -348,13 +418,15 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testDependencyOnScopeBound() {
 
+		final Object dependencyObject = "dependency object";
+
 		// Managed object configuration
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
+		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this
 				.registerRawManagedObjectMetaData("OFFICE_MO");
-		RawBoundManagedObjectMetaData<?> scopeMetaData = this
+		final RawBoundManagedObjectMetaData<?> scopeMoMetaData = this
 				.scopeRawManagedObjectMetaData("SCOPE");
 
-		ManagedObjectDependencyConfiguration<?> dependencyConfig = this
+		final ManagedObjectDependencyConfiguration<?> dependencyConfig = this
 				.createMock(ManagedObjectDependencyConfiguration.class);
 
 		// Record construction
@@ -364,7 +436,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.managedObjectConfiguration,
 				this.managedObjectConfiguration.getOfficeManagedObjectName(),
 				"OFFICE_MO");
-		this.recordReturn(rawMetaData, rawMetaData
+		this.recordReturn(rawMoMetaData, rawMoMetaData
 				.getManagedObjectSourceMetaData(),
 				this.managedObjectSourceMetaData);
 		this.recordReturn(this.managedObjectSourceMetaData,
@@ -380,38 +452,252 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				dependencyConfig.getDependencyKey(), DependencyKey.KEY);
 		this.recordReturn(dependencyConfig, dependencyConfig
 				.getScopeManagedObjectName(), "SCOPE");
-		this.recordReturn(scopeMetaData, scopeMetaData.getManagedObjectIndex(),
-				new ManagedObjectIndexImpl(ManagedObjectScope.PROCESS, 5));
-		this.record_getManagedObjectDetails(rawMetaData);
+		this.recordReturn(scopeMoMetaData, scopeMoMetaData
+				.getManagedObjectIndex(), new ManagedObjectIndexImpl(
+				ManagedObjectScope.PROCESS, 5));
+		this.record_getManagedObjectDetails(rawMoMetaData);
 
-		// Attempt to construct
+		// Record creating object registry
+		this.recordReturn(this.threadState, this.threadState.getProcessState(),
+				this.processState);
+		this.recordReturn(this.processState, this.processState
+				.getManagedObjectContainer(5), this.managedObjectContainer);
+		this.recordReturn(this.managedObjectContainer,
+				this.managedObjectContainer.getObject(this.threadState),
+				dependencyObject);
+
 		this.replayMockObjects();
-		RawBoundManagedObjectMetaData<?>[] metaData = this
+
+		// Construct
+		RawBoundManagedObjectMetaData<?>[] rawMetaData = this
 				.constructRawBoundManagedObjectMetaData(1,
 						this.managedObjectConfiguration);
+		ManagedObjectMetaData<DependencyKey> moMetaData = (ManagedObjectMetaData<DependencyKey>) rawMetaData[0]
+				.getManagedObjectMetaData();
 
-		fail("TODO create the ObjectRegistry");
+		// Create the object registry and object the dependent object
+		ObjectRegistry<DependencyKey> objectRegistry = moMetaData
+				.createObjectRegistry(this.workContainer, this.threadState);
+		Object object = objectRegistry.getObject(DependencyKey.KEY);
 
 		this.verifyMockObjects();
 
 		// Validate dependency mapping
-		RawBoundManagedObjectMetaData<DependencyKey> dependency = (RawBoundManagedObjectMetaData<DependencyKey>) metaData[0];
+		RawBoundManagedObjectMetaData<DependencyKey> dependency = (RawBoundManagedObjectMetaData<DependencyKey>) rawMetaData[0];
 		assertEquals("Incorrect number of dependency keys", 1, dependency
 				.getDependencyKeys().length);
 		assertEquals("Incorrect dependency key", DependencyKey.KEY, dependency
 				.getDependencyKeys()[0]);
-		assertEquals("Incorrect dependency", scopeMetaData, dependency
+		assertEquals("Incorrect dependency", scopeMoMetaData, dependency
 				.getDependency(DependencyKey.KEY));
 
 		// Verify creation of object registry
-		fail("TODO verify ObjectRegistry");
+		assertEquals("Incorrect dependency object", dependencyObject, object);
+	}
+
+	/**
+	 * Ensure able to not have a recycle {@link Task}.
+	 */
+	public void testNoRecycleTask() {
+
+		final ManagedObject managedObject = this
+				.createMock(ManagedObject.class);
+
+		// Record construction
+		RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.record_constructManagedObject();
+
+		// Record linking tasks
+		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
+				.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getRecycleWorkName(),
+				null);
+
+		this.replayMockObjects();
+
+		// Construct and link tasks
+		RawBoundManagedObjectMetaData<?> rawMetaData = this
+				.constructRawBoundManagedObjectMetaData(1,
+						this.managedObjectConfiguration)[0];
+		rawMetaData.linkTasks(this.taskMetaDataLocator, this.issues);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData
+				.getManagedObjectMetaData();
+
+		// Create the recycle task
+		JobNode recycleTask = moMetaData.createRecycleJobNode(managedObject);
+
+		this.verifyMockObjects();
+
+		// Ensure no recycle task
+		assertNull("Should not have recycle task", recycleTask);
+	}
+
+	/**
+	 * Ensure issue if no {@link WorkMetaData} for recycle {@link Task}.
+	 */
+	public void testNoWorkForRecycleTask() {
+
+		final ManagedObject managedObject = this
+				.createMock(ManagedObject.class);
+
+		// Record construction
+		RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.record_constructManagedObject();
+
+		// Record linking tasks
+		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
+				.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getRecycleWorkName(),
+				"RECYCLE_WORK");
+		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
+				.getWorkMetaData("RECYCLE_WORK"), null);
+		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND",
+				"Recycle work 'RECYCLE_WORK' not found");
+
+		this.replayMockObjects();
+
+		// Construct and link tasks
+		RawBoundManagedObjectMetaData<?> rawMetaData = this
+				.constructRawBoundManagedObjectMetaData(1,
+						this.managedObjectConfiguration)[0];
+		rawMetaData.linkTasks(this.taskMetaDataLocator, this.issues);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData
+				.getManagedObjectMetaData();
+
+		// Create the recycle task
+		JobNode recycleTask = moMetaData.createRecycleJobNode(managedObject);
+
+		this.verifyMockObjects();
+
+		// Ensure no recycle task
+		assertNull("Should not have recycle task", recycleTask);
+	}
+
+	/**
+	 * Ensure issue if no initial {@link FlowMetaData} for recycle {@link Task}.
+	 */
+	public void testNoInitialFlowForRecycleTask() {
+
+		final WorkMetaData<?> workMetaData = this
+				.createMock(WorkMetaData.class);
+		final ManagedObject managedObject = this
+				.createMock(ManagedObject.class);
+
+		// Record construction
+		RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.record_constructManagedObject();
+
+		// Record linking tasks
+		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
+				.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getRecycleWorkName(),
+				"RECYCLE_WORK");
+		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
+				.getWorkMetaData("RECYCLE_WORK"), workMetaData);
+		this.recordReturn(workMetaData, workMetaData.getInitialFlowMetaData(),
+				null);
+		this.issues.addIssue(AssetType.MANAGED_OBJECT, "BOUND",
+				"No initial flow on work 'RECYCLE_WORK' for recycle task");
+
+		this.replayMockObjects();
+
+		// Construct and link tasks
+		RawBoundManagedObjectMetaData<?> rawMetaData = this
+				.constructRawBoundManagedObjectMetaData(1,
+						this.managedObjectConfiguration)[0];
+		rawMetaData.linkTasks(this.taskMetaDataLocator, this.issues);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData
+				.getManagedObjectMetaData();
+
+		// Create the recycle task
+		JobNode recycleTask = moMetaData.createRecycleJobNode(managedObject);
+
+		this.verifyMockObjects();
+
+		// Ensure no recycle task
+		assertNull("Should not have recycle task", recycleTask);
 	}
 
 	/**
 	 * Ensure able to link the recycle {@link Task}.
 	 */
 	public void testLinkRecycleTask() {
-		fail("TODO test link recycle task");
+
+		final WorkMetaData<?> recycleWorkMetaData = this
+				.createMock(WorkMetaData.class);
+		final FlowMetaData<?> recycleFlowMetaData = this
+				.createMock(FlowMetaData.class);
+		final JobNode recycleJobNode = this.createMock(JobNode.class);
+		final Flow recycleFlow = this.createMock(Flow.class);
+		final ManagedObject managedObject = this
+				.createMock(ManagedObject.class);
+
+		// Record construction
+		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.record_constructManagedObject();
+
+		// Record linking tasks
+		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
+				.getOfficeMetaData(), this.officeMetaData);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getRecycleWorkName(),
+				"RECYCLE_WORK");
+		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
+				.getWorkMetaData("RECYCLE_WORK"), recycleWorkMetaData);
+		this.recordReturn(recycleWorkMetaData, recycleWorkMetaData
+				.getInitialFlowMetaData(), recycleFlowMetaData);
+
+		// Record creating recycle job node
+		this.recordReturn(this.officeMetaData, this.officeMetaData
+				.createProcess(recycleFlowMetaData, null), recycleJobNode,
+				new AbstractMatcher() {
+					@Override
+					@SuppressWarnings("unchecked")
+					public boolean matches(Object[] expected, Object[] actual) {
+						assertEquals("Incorrect flow meta-data",
+								recycleFlowMetaData, actual[0]);
+						RecycleManagedObjectParameter<ManagedObject> parameter = (RecycleManagedObjectParameter<ManagedObject>) actual[1];
+						assertEquals("Incorrect managed object", managedObject,
+								parameter.getManagedObject());
+						return true;
+					}
+				});
+		this
+				.recordReturn(recycleJobNode, recycleJobNode.getFlow(),
+						recycleFlow);
+		this.recordReturn(recycleFlow, recycleFlow.getThreadState(),
+				this.threadState);
+		this.recordReturn(this.threadState, this.threadState.getProcessState(),
+				this.processState);
+		this.processState.registerProcessCompletionListener(null);
+		this.control(this.processState).setMatcher(new AbstractMatcher() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public boolean matches(Object[] expected, Object[] actual) {
+				// Parameter also given as completion listener
+				RecycleManagedObjectParameter<ManagedObject> parameter = (RecycleManagedObjectParameter<ManagedObject>) actual[0];
+				assertEquals("Incorrect managed object", managedObject,
+						parameter.getManagedObject());
+				return true;
+			}
+		});
+
+		this.replayMockObjects();
+
+		// Construct and link in recycle task
+		RawBoundManagedObjectMetaData<?> rawMetaData = this
+				.constructRawBoundManagedObjectMetaData(1,
+						this.managedObjectConfiguration)[0];
+		rawMetaData.linkTasks(this.taskMetaDataLocator, this.issues);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData
+				.getManagedObjectMetaData();
+
+		// Create the recycle task
+		JobNode recycleTask = moMetaData.createRecycleJobNode(managedObject);
+
+		this.verifyMockObjects();
+
+		// Ensure have recycle task
+		assertNotNull("Must have recycle task", recycleTask);
 	}
 
 	/**
@@ -450,6 +736,32 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.registeredManagedObjects
 				.put(registeredManagedObjectName, metaData);
 		return metaData;
+	}
+
+	/**
+	 * Records constructing a single {@link RawManagedObjectMetaData}.
+	 */
+	private RawManagedObjectMetaData<?, ?> record_constructManagedObject() {
+
+		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.registerRawManagedObjectMetaData("OFFICE_MO");
+
+		// Record the construction
+		this.recordReturn(this.managedObjectConfiguration,
+				this.managedObjectConfiguration.getBoundManagedObjectName(),
+				"BOUND");
+		this.recordReturn(this.managedObjectConfiguration,
+				this.managedObjectConfiguration.getOfficeManagedObjectName(),
+				"OFFICE_MO");
+		this.recordReturn(rawMoMetaData, rawMoMetaData
+				.getManagedObjectSourceMetaData(),
+				this.managedObjectSourceMetaData);
+		this.recordReturn(this.managedObjectSourceMetaData,
+				this.managedObjectSourceMetaData.getDependencyKeys(), null);
+		this.record_getManagedObjectDetails(rawMoMetaData);
+
+		// Return the raw managed object meta-data constructed
+		return rawMoMetaData;
 	}
 
 	/**

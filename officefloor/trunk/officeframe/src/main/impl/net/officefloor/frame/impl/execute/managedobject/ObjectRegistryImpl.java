@@ -74,27 +74,26 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 
 	@Override
 	public Object getObject(D key) {
-	
+
 		// Obtain the managed object index
 		ManagedObjectIndex index = this.dependencies.get(key);
 
 		// Obtain the Object
 		Object object;
+		int indexWithinScope = index.getIndexOfManagedObjectWithinScope();
 		switch (index.getManagedObjectScope()) {
 		case WORK:
-			object = this.workContainer.getObject(index
-					.getIndexOfManagedObjectWithinScope(), this.threadState);
+			object = this.workContainer.getObject(indexWithinScope,
+					this.threadState);
 			break;
 		case THREAD:
 			object = this.threadState.getManagedObjectContainer(
-					index.getIndexOfManagedObjectWithinScope()).getObject(
-					this.threadState);
+					indexWithinScope).getObject(this.threadState);
 			break;
 		case PROCESS:
 			object = this.threadState.getProcessState()
-					.getManagedObjectContainer(
-							index.getIndexOfManagedObjectWithinScope())
-					.getObject(this.threadState);
+					.getManagedObjectContainer(indexWithinScope).getObject(
+							this.threadState);
 			break;
 		default:
 			throw new IllegalStateException("Unknown managed object scope "
