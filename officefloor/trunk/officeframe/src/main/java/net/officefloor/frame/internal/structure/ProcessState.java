@@ -33,6 +33,13 @@ public interface ProcessState {
 	Object getProcessLock();
 
 	/**
+	 * Obtains the {@link ProcessMetaData} for this {@link ProcessState}.
+	 * 
+	 * @return {@link ProcessMetaData} for this {@link ProcessState}.
+	 */
+	ProcessMetaData getProcessMetaData();
+
+	/**
 	 * <p>
 	 * Creates a {@link Flow} for the new {@link ThreadState} bound to this
 	 * {@link ProcessState}.

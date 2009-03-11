@@ -43,10 +43,10 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawWorkAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -270,12 +270,11 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				continue; // no administrator name
 			}
 
-			// Construct the work bound administrator
-			RawWorkAdministratorMetaData workAdmin = rawWorkMetaData
-					.constructRawWorkAdministratorMetaData(workAdminName,
-							issues);
-			if (workAdmin == null) {
-				continue; // no work administrator
+			// Obtain the index for the administrator
+			AdministratorIndex adminIndex = rawWorkMetaData
+					.getAdministratorIndex(workAdminName, issues);
+			if (adminIndex == null) {
+				continue; // no administrator
 			}
 
 			// Obtain the duty key
@@ -289,7 +288,7 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 
 			// Create and add the task duty association
 			TaskDutyAssociation<?> taskDutyAssociation = new TaskDutyAssociationImpl(
-					workAdmin.getWorkAdministratorIndex(), dutyKey);
+					adminIndex, dutyKey);
 			taskDuties.add(taskDutyAssociation);
 		}
 

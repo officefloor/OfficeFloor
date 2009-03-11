@@ -47,6 +47,15 @@ public interface TaskMetaData<P, W extends Work, M extends Enum<M>, F extends En
 	TaskFactory<P, W, M, F> getTaskFactory();
 
 	/**
+	 * Obtains the {@link work} indexes to the {@link ManagedObject} instances
+	 * that must be loaded before the {@link Task} may be executed.
+	 * 
+	 * @return Listing of {@link work} indexes of {@link ManagedObject}
+	 *         instances.
+	 */
+	int[] getRequiredManagedObjects();
+
+	/**
 	 * Translates the {@link ManagedObject} index of the {@link Task} to that of
 	 * the {@link Work}.
 	 * 

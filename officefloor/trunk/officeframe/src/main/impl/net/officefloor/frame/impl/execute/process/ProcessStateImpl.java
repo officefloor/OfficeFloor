@@ -38,7 +38,6 @@ import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.Flow;
@@ -71,35 +70,35 @@ public class ProcessStateImpl implements ProcessState {
 	/**
 	 * {@link ManagedObjectContainer} instances for the {@link ProcessState}.
 	 */
-	protected final ManagedObjectContainer[] managedObjectContainers;
+	private final ManagedObjectContainer[] managedObjectContainers;
 
 	/**
 	 * {@link AdministratorContainer} instances for the {@link ProcessState}.
 	 */
-	protected final AdministratorContainer<?, ?>[] administratorContainers;
+	private final AdministratorContainer<?, ?>[] administratorContainers;
 
 	/**
 	 * {@link EscalationHandler} provided by the {@link ManagedObject} that
 	 * invoked this {@link ProcessState}. May be <code>null</code>.
 	 */
-	protected final EscalationHandler managedObjectEscalationHandler;
+	private final EscalationHandler managedObjectEscalationHandler;
 
 	/**
 	 * {@link EscalationHandler} provided by the {@link Office}. May be
 	 * <code>null</code>.
 	 */
-	protected final EscalationHandler officeEscalationHandler;
+	private final EscalationHandler officeEscalationHandler;
 
 	/**
 	 * Listing of {@link ProcessCompletionListener} instances.
 	 */
-	protected final List<ProcessCompletionListener> completionListeners = new LinkedList<ProcessCompletionListener>();
+	private final List<ProcessCompletionListener> completionListeners = new LinkedList<ProcessCompletionListener>();
 
 	/**
 	 * Count of active {@link ThreadState} instances for this
 	 * {@link ProcessState}.
 	 */
-	protected int activeThreadCount = 0;
+	private int activeThreadCount = 0;
 
 	/**
 	 * Initiate.
@@ -151,9 +150,15 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
+	public ProcessMetaData getProcessMetaData() {
+		return this.processMetaData;
+	}
+
+	@Override
 	public <W extends Work> Flow createThread(FlowMetaData<W> flowMetaData) {
 		// Create the new thread
-		ThreadState threadState = new ThreadStateImpl(this, flowMetaData);
+		ThreadState threadState = new ThreadStateImpl(this.processMetaData
+				.getThreadMetaData(), this, flowMetaData);
 
 		// Increment the number of threads
 		synchronized (this.getProcessLock()) {
@@ -179,8 +184,7 @@ public class ProcessStateImpl implements ProcessState {
 		WorkMetaData<Work> workMetaData = new WorkMetaDataImpl<Work>(
 				"Catch All Escalation", new CatchAllEscalationWorkFactory(),
 				new ManagedObjectIndex[0], new ManagedObjectMetaData[0],
-				new AdministratorIndex[0], new AdministratorMetaData[0],
-				catchAllFlow, new TaskMetaData[0]);
+				new AdministratorMetaData[0], catchAllFlow, new TaskMetaData[0]);
 		catchAllTask.loadRemainingState(workMetaData, new FlowMetaData[0],
 				null, null);
 		Escalation catchAllEscalation = new EscalationImpl(Throwable.class,
@@ -315,11 +319,6 @@ public class ProcessStateImpl implements ProcessState {
 		 * ==================== WorkFactory =======================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
-		 */
 		@Override
 		public Work createWork() {
 			return this;

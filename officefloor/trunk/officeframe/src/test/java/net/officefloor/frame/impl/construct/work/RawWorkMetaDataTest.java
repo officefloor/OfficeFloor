@@ -42,7 +42,6 @@ import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawWorkAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
@@ -203,8 +202,6 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 				workMetaData.getManagedObjectMetaData().length);
 
 		// Ensure no administrators
-		assertEquals("Should not have administrator indexes", 0, workMetaData
-				.getAdministratorIndexes().length);
 		assertEquals("Should not have administrator meta-data", 0, workMetaData
 				.getAdministratorMetaData().length);
 
@@ -678,8 +675,9 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			@Override
 			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
 					OfficeFloorIssues issues) {
-				rawWorkMetaData.constructRawWorkAdministratorMetaData("ADMIN",
-						issues);
+				AdministratorIndex adminIndex = rawWorkMetaData
+						.getAdministratorIndex("ADMIN", issues);
+				assertEquals("Incorrect administrator index", index, adminIndex);
 			}
 		});
 
@@ -702,11 +700,6 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
 
 		// Verify work meta-data
-		AdministratorIndex[] adminIndexes = workMetaData
-				.getAdministratorIndexes();
-		assertEquals("Should have a single administrator index", 1,
-				adminIndexes.length);
-		assertEquals("Incorrect administrator index", index, adminIndexes[0]);
 		AdministratorMetaData<?, ?>[] workAdminMetaData = workMetaData
 				.getAdministratorMetaData();
 		assertEquals("Should have a work bound administrator meta-data", 1,
@@ -732,8 +725,9 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			@Override
 			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
 					OfficeFloorIssues issues) {
-				rawWorkMetaData.constructRawWorkAdministratorMetaData("ADMIN",
-						issues);
+				AdministratorIndex adminIndex = rawWorkMetaData
+						.getAdministratorIndex("ADMIN", issues);
+				assertEquals("Incorrect administrator index", index, adminIndex);
 			}
 		});
 
@@ -756,11 +750,6 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
 
 		// Verify work meta-data
-		AdministratorIndex[] adminIndexes = workMetaData
-				.getAdministratorIndexes();
-		assertEquals("Should have a single administrator index", 1,
-				adminIndexes.length);
-		assertEquals("Incorrect administrator index", index, adminIndexes[0]);
 		AdministratorMetaData<?, ?>[] workAdminMetaData = workMetaData
 				.getAdministratorMetaData();
 		assertEquals("Should not have administrator meta-data as linked", 0,
@@ -778,10 +767,10 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			@Override
 			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
 					OfficeFloorIssues issues) {
-				RawWorkAdministratorMetaData rawWorkAdmin = rawWorkMetaData
-						.constructRawWorkAdministratorMetaData("ADMIN", issues);
-				assertNull("Should not get raw work administrator meta-data",
-						rawWorkAdmin);
+				AdministratorIndex adminIndex = rawWorkMetaData
+						.getAdministratorIndex("ADMIN", issues);
+				assertNull("Should not get work administrator index",
+						adminIndex);
 			}
 		});
 
@@ -896,7 +885,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 				.getAdministratorMetaData(), adminMetaData);
 		this.record_tasks(task);
 		rawMoMetaData.linkTasks(taskLocator, this.issues);
-		rawAdminMetaData.linkTasks(taskLocator, this.issues);
+		rawAdminMetaData.linkTasks(taskLocator, this.assetManagerFactory,
+				this.issues);
 		task.rawTaskMetaData.linkTasks(taskLocator, null,
 				this.assetManagerFactory, this.issues);
 		this.control(task.rawTaskMetaData).setMatcher(new AbstractMatcher() {
@@ -1075,7 +1065,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 					});
 			for (int i = 0; i < adminCount; i++) {
 				this.recordReturn(workBoundAdmins[i], workBoundAdmins[i]
-						.getAdministratorName(), boundAdminNames[i]);
+						.getBoundAdministratorName(), boundAdminNames[i]);
 			}
 		}
 	}

@@ -16,11 +16,13 @@
  */
 package net.officefloor.frame.impl.execute.duty;
 
+import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * Implementation of
- * {@link net.officefloor.frame.internal.structure.TaskDutyAssociation}.
+ * Implementation of {@link TaskDutyAssociation}.
  * 
  * @author Daniel
  */
@@ -28,13 +30,12 @@ public class TaskDutyAssociationImpl<A extends Enum<A>> implements
 		TaskDutyAssociation<A> {
 
 	/**
-	 * Index of the
-	 * {@link net.officefloor.frame.spi.administration.Administrator}.
+	 * {@link AdministratorIndex} identifying the {@link Administrator}.
 	 */
-	private final int adminIndex;
+	private final AdministratorIndex adminIndex;
 
 	/**
-	 * Key identifying the {@link net.officefloor.frame.spi.administration.Duty}.
+	 * Key identifying the {@link Duty} of the {@link Administrator}.
 	 */
 	private final A dutyKey;
 
@@ -42,31 +43,26 @@ public class TaskDutyAssociationImpl<A extends Enum<A>> implements
 	 * Initiate.
 	 * 
 	 * @param adminIndex
-	 *            Index of the
-	 *            {@link net.officefloor.frame.spi.administration.Administrator}.
+	 *            {@link AdministratorIndex} identifying the
+	 *            {@link Administrator}.
 	 * @param dutyKey
-	 *            Key identifying the
-	 *            {@link net.officefloor.frame.spi.administration.Duty}.
+	 *            Key identifying the {@link Duty} of the {@link Administrator}.
 	 */
-	public TaskDutyAssociationImpl(int adminIndex, A dutyKey) {
+	public TaskDutyAssociationImpl(AdministratorIndex adminIndex, A dutyKey) {
 		this.adminIndex = adminIndex;
 		this.dutyKey = dutyKey;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskDutyAssociation#getAdministratorIndex()
+	 * ================= TaskDutyAssociation ==================================
 	 */
-	public int getAdministratorIndex() {
+
+	@Override
+	public AdministratorIndex getAdministratorIndex() {
 		return this.adminIndex;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskDutyAssociation#getDutyKey()
-	 */
+	@Override
 	public A getDutyKey() {
 		return this.dutyKey;
 	}

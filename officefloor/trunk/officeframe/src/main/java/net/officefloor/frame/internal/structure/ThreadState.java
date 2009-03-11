@@ -33,6 +33,13 @@ public interface ThreadState extends FlowFuture {
 	Object getThreadLock();
 
 	/**
+	 * Obtains the {@link ThreadMetaData} for this {@link ThreadState}.
+	 * 
+	 * @return {@link ThreadMetaData} for this {@link ThreadState}.
+	 */
+	ThreadMetaData getThreadMetaData();
+
+	/**
 	 * Returning a {@link Throwable} indicates that the thread has failed.
 	 * 
 	 * @return {@link Throwable} indicating the thread has failed or

@@ -23,8 +23,6 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
-import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.team.Team;
 
 /**
  * Raw meta-data of a bound {@link Administrator}.
@@ -34,11 +32,11 @@ import net.officefloor.frame.spi.team.Team;
 public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 
 	/**
-	 * Obtains the name of the {@link Administrator}.
+	 * Obtains the name the {@link Administrator} is bound under.
 	 * 
-	 * @return Name of the {@link Administrator}.
+	 * @return Name the {@link Administrator} is bound under.
 	 */
-	String getAdministratorName();
+	String getBoundAdministratorName();
 
 	/**
 	 * Obtains the {@link AdministratorIndex}.
@@ -46,22 +44,6 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	 * @return {@link AdministratorIndex}.
 	 */
 	AdministratorIndex getAdministratorIndex();
-
-	/**
-	 * Obtains the {@link AdministratorSource}.
-	 * 
-	 * @return {@link AdministratorSource}.
-	 */
-	AdministratorSource<I, A> getAdministratorSource();
-
-	/**
-	 * Obtains the {@link Team} responsible for carrying out the
-	 * {@link Administrator} {@link Duty} instances.
-	 * 
-	 * @return {@link Team} responsible for carrying out the
-	 *         {@link Administrator} {@link Duty} instances.
-	 */
-	Team getResponsibleTeam();
 
 	/**
 	 * Obtains the keys identifying the {@link Duty} instances for the
@@ -72,18 +54,11 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	A[] getDutyKeys();
 
 	/**
-	 * Obtains the {@link RawAdministeredManagedObjectMetaData} instances.
-	 * 
-	 * @return {@link RawAdministeredManagedObjectMetaData} instances.
-	 */
-	RawAdministeredManagedObjectMetaData<I>[] getAdministeredManagedObjectMetaData();
-
-	/**
 	 * Obtains the {@link AdministratorMetaData} for this {@link Administrator}.
 	 * 
 	 * @return {@link AdministratorMetaData} for this {@link Administrator}.
 	 */
-	AdministratorMetaData<?, ?> getAdministratorMetaData();
+	AdministratorMetaData<I, A> getAdministratorMetaData();
 
 	/**
 	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
@@ -91,10 +66,12 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	 * 
 	 * @param taskMetaDataLocator
 	 *            {@link TaskMetaDataLocator}.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
 	void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
-			OfficeFloorIssues issues);
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 }

@@ -71,15 +71,6 @@ public interface WorkMetaData<W extends Work> {
 	ManagedObjectMetaData<?>[] getManagedObjectMetaData();
 
 	/**
-	 * Obtains the {@link AdministratorIndex} instances to look up the
-	 * {@link AdministratorContainer} instances for the {@link Work}.
-	 * 
-	 * @return {@link AdministratorIndex} instances to look up the
-	 *         {@link AdministratorContainer} instances for the {@link Work}.
-	 */
-	AdministratorIndex[] getAdministratorIndexes();
-
-	/**
 	 * Obtains the meta-data of the {@link Administrator} instances for the
 	 * {@link Work}.
 	 * 

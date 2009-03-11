@@ -65,7 +65,8 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	public TaskJob(Flow flow, WorkContainer<W> workContainer,
 			TaskMetaData<P, W, M, F> taskMetaData, JobNode parallelOwner,
 			P parameter) {
-		super(flow, workContainer, taskMetaData, parallelOwner);
+		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData
+				.getRequiredManagedObjects());
 		this.parameter = parameter;
 
 		// Create the task

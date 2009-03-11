@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.execute.work;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -60,12 +59,6 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	private final ManagedObjectMetaData<?>[] managedObjectMetaData;
 
 	/**
-	 * {@link AdministratorIndex} instances in the order the {@link Task}
-	 * instances of this {@link Work} expect.
-	 */
-	private final AdministratorIndex[] administratorIndexes;
-
-	/**
 	 * {@link AdministratorMetaData} of the {@link Administrator} instances
 	 * bound to this {@link Work}.
 	 */
@@ -92,9 +85,6 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 * @param moMetaData
 	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}
 	 *            instances bound to this {@link Work}.
-	 * @param adminIndexes
-	 *            {@link AdministratorIndex} instances in the order the
-	 *            {@link Task} instances of this {@link Work} expect.
 	 * @param adminMetaData
 	 *            {@link AdministratorMetaData} of the {@link Administrator}
 	 *            instances bound to this {@link Work}.
@@ -108,7 +98,6 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	public WorkMetaDataImpl(String workName, WorkFactory<W> workFactory,
 			ManagedObjectIndex[] moIndexes,
 			ManagedObjectMetaData<?>[] moMetaData,
-			AdministratorIndex[] adminIndexes,
 			AdministratorMetaData<?, ?>[] adminMetaData,
 			FlowMetaData<W> initialFlowMetaData,
 			TaskMetaData<?, W, ?, ?>[] taskMetaData) {
@@ -116,7 +105,6 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 		this.workFactory = workFactory;
 		this.managedObjectIndexes = moIndexes;
 		this.managedObjectMetaData = moMetaData;
-		this.administratorIndexes = adminIndexes;
 		this.administratorMetaData = adminMetaData;
 		this.initialFlowMetaData = initialFlowMetaData;
 		this.taskMetaData = taskMetaData;
@@ -149,11 +137,6 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	@Override
 	public ManagedObjectMetaData<?>[] getManagedObjectMetaData() {
 		return this.managedObjectMetaData;
-	}
-
-	@Override
-	public AdministratorIndex[] getAdministratorIndexes() {
-		return this.administratorIndexes;
 	}
 
 	@Override

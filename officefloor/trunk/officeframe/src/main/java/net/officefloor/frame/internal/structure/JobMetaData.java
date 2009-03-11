@@ -17,7 +17,6 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
@@ -41,14 +40,6 @@ public interface JobMetaData {
 	 * @return {@link Team} responsible for completing the {@link Job}.
 	 */
 	Team getTeam();
-
-	/**
-	 * Obtains the indexes to the {@link ManagedObject} instances that must be
-	 * loaded before the {@link Job} may be executed.
-	 * 
-	 * @return Listing of indexes of {@link ManagedObject} instances.
-	 */
-	int[] getRequiredManagedObjects();
 
 	/**
 	 * Obtains the {@link TaskMetaData} of the next {@link Task} within

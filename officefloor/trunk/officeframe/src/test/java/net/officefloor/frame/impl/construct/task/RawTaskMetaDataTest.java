@@ -36,10 +36,10 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
-import net.officefloor.frame.internal.construct.RawWorkAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -260,7 +260,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	public void testNoManagedObjectName() {
 
-		TaskManagedObjectConfiguration moConfiguration = this
+		final TaskManagedObjectConfiguration moConfiguration = this
 				.createMock(TaskManagedObjectConfiguration.class);
 
 		// Record no managed object name
@@ -284,7 +284,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	public void testUnknownManagedObject() {
 
-		TaskManagedObjectConfiguration moConfiguration = this
+		final TaskManagedObjectConfiguration moConfiguration = this
 				.createMock(TaskManagedObjectConfiguration.class);
 
 		// Record unknown managed object
@@ -317,9 +317,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	public void testLinkManagedObject() {
 
-		TaskManagedObjectConfiguration moConfiguration = this
+		final TaskManagedObjectConfiguration moConfiguration = this
 				.createMock(TaskManagedObjectConfiguration.class);
-		RawWorkManagedObjectMetaData rawWorkMo = this
+		final RawWorkManagedObjectMetaData rawWorkMo = this
 				.createMock(RawWorkManagedObjectMetaData.class);
 		final int WORK_MO_INDEX = 3; // managed objects added by other tasks
 
@@ -363,12 +363,12 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	public void testManagedObjectDependency() {
 
-		TaskManagedObjectConfiguration moConfiguration = this
+		final TaskManagedObjectConfiguration moConfiguration = this
 				.createMock(TaskManagedObjectConfiguration.class);
-		RawWorkManagedObjectMetaData rawWorkMo = this
+		final RawWorkManagedObjectMetaData rawWorkMo = this
 				.createMock(RawWorkManagedObjectMetaData.class);
 		final int WORK_MO_INDEX = 3; // managed objects added by other tasks
-		RawWorkManagedObjectMetaData dependencyWorkMo = this
+		final RawWorkManagedObjectMetaData dependencyWorkMo = this
 				.createMock(RawWorkManagedObjectMetaData.class);
 		final int DEPENDENCY_MO_INDEX = 2; // another task using directly
 
@@ -416,7 +416,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	public void testNoAdministratorName() {
 
-		TaskDutyConfiguration<?> dutyConfiguration = this
+		final TaskDutyConfiguration<?> dutyConfiguration = this
 				.createMock(TaskDutyConfiguration.class);
 
 		// Record no administrator name
@@ -448,7 +448,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	public void testUnknownAdministrator() {
 
-		TaskDutyConfiguration<?> dutyConfiguration = this
+		final TaskDutyConfiguration<?> dutyConfiguration = this
 				.createMock(TaskDutyConfiguration.class);
 
 		// Record unknown administrator
@@ -460,8 +460,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.recordReturn(dutyConfiguration, dutyConfiguration
 				.getWorkAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.constructRawWorkAdministratorMetaData("ADMIN", this.issues),
-				null);
+				.getAdministratorIndex("ADMIN", this.issues), null);
 		this.recordReturn(this.configuration, this.configuration
 				.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
@@ -482,10 +481,10 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	public void testNoDutyKey() {
 
-		TaskDutyConfiguration<?> dutyConfiguration = this
+		final TaskDutyConfiguration<?> dutyConfiguration = this
 				.createMock(TaskDutyConfiguration.class);
-		RawWorkAdministratorMetaData rawWorkAdmin = this
-				.createMock(RawWorkAdministratorMetaData.class);
+		final AdministratorIndex adminIndex = this
+				.createMock(AdministratorIndex.class);
 
 		// Record no duty key
 		this.record_taskNameFactoryTeam();
@@ -496,8 +495,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.recordReturn(dutyConfiguration, dutyConfiguration
 				.getWorkAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.constructRawWorkAdministratorMetaData("ADMIN", this.issues),
-				rawWorkAdmin);
+				.getAdministratorIndex("ADMIN", this.issues), adminIndex);
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDuty(), null);
 		this.record_taskIssue("No duty key for pre-task at index 0");
 		this.recordReturn(this.configuration, this.configuration
@@ -520,11 +518,10 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	public void testLinkAdministrator() {
 
-		TaskDutyConfiguration<?> dutyConfiguration = this
+		final TaskDutyConfiguration<?> dutyConfiguration = this
 				.createMock(TaskDutyConfiguration.class);
-		RawWorkAdministratorMetaData rawWorkAdmin = this
-				.createMock(RawWorkAdministratorMetaData.class);
-		final int WORK_ADMIN_INDEX = 2; // other tasks added admins
+		final AdministratorIndex adminIndex = this
+				.createMock(AdministratorIndex.class);
 
 		// Record link administrator duty (do post as previous tests did pre)
 		this.record_taskNameFactoryTeam();
@@ -538,12 +535,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.recordReturn(dutyConfiguration, dutyConfiguration
 				.getWorkAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.constructRawWorkAdministratorMetaData("ADMIN", this.issues),
-				rawWorkAdmin);
+				.getAdministratorIndex("ADMIN", this.issues), adminIndex);
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDuty(),
 				DutyKey.KEY);
-		this.recordReturn(rawWorkAdmin, rawWorkAdmin
-				.getWorkAdministratorIndex(), WORK_ADMIN_INDEX);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
@@ -558,8 +552,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getPostAdministrationMetaData();
 		assertEquals("Should have post-task duties", 1, postDuties.length);
 		TaskDutyAssociation<?> postDuty = postDuties[0];
-		assertEquals("Incorrect admin index for duty", WORK_ADMIN_INDEX,
-				postDuty.getAdministratorIndex());
+		assertEquals("Incorrect admin index for duty", adminIndex, postDuty
+				.getAdministratorIndex());
 		assertEquals("Incorrect key for duty", DutyKey.KEY, postDuty
 				.getDutyKey());
 	}
@@ -798,8 +792,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				FlowInstigationStrategyEnum.SEQUENTIAL, flowMetaData
 						.getInstigationStrategy());
 
-		// TODO verify flow manager
-		flowMetaData.getFlowManager();
+		// Ensure correct flow manager
+		assertEquals("Incorrect flow manager", assetManager, flowMetaData
+				.getFlowManager());
 	}
 
 	/**

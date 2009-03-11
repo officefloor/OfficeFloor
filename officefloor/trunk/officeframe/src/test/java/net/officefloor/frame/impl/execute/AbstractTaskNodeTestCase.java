@@ -33,7 +33,6 @@ import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
@@ -181,7 +180,6 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// TODO consider testing with administrator meta-data
 		AdministratorMetaData[] adminMetaData = new AdministratorMetaData[0];
-		AdministratorIndex[] adminIndexes = new AdministratorIndex[0];
 
 		// Create managed object the indexes
 		// TODO ensure working with indexes
@@ -190,8 +188,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Create the Work meta-data
 		WorkMetaData workMetaData = new WorkMetaDataImpl("TEST_WORK",
-				workFactory, moIndexes, workMoMetaData, adminIndexes,
-				adminMetaData, initialFlowMetaData, new TaskMetaData[0]);
+				workFactory, moIndexes, workMoMetaData, adminMetaData,
+				initialFlowMetaData, new TaskMetaData[0]);
 
 		// Initial node
 		this.initialNode = new ExecutionNode(this.nextExecutionNodeId(), this,

@@ -31,7 +31,6 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -45,28 +44,22 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	/**
 	 * {@link AdministratorSource}.
 	 */
-	protected final AdministratorSource<I, A> administratorSource;
+	private final AdministratorSource<I, A> administratorSource;
 
 	/**
 	 * {@link ExtensionInterfaceMetaData}.
 	 */
-	protected final ExtensionInterfaceMetaData<I>[] eiMetaData;
-
-	/**
-	 * Indexes on the {@link Work} of the required {@link ManagedObject}
-	 * instances.
-	 */
-	protected final int[] requiredManagedObjects;
+	private final ExtensionInterfaceMetaData<I>[] eiMetaData;
 
 	/**
 	 * {@link Team}.
 	 */
-	protected final Team team;
+	private final Team team;
 
 	/**
 	 * {@link EscalationProcedure}.
 	 */
-	protected final EscalationProcedure escalationProcedure;
+	private final EscalationProcedure escalationProcedure;
 
 	/**
 	 * <p>
@@ -97,13 +90,6 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 		this.administratorSource = administratorSource;
 		this.team = team;
 		this.escalationProcedure = escalationProcedure;
-
-		// Create the listing of required managed objects
-		this.requiredManagedObjects = new int[this.eiMetaData.length];
-		for (int i = 0; i < this.requiredManagedObjects.length; i++) {
-			this.requiredManagedObjects[i] = this.eiMetaData[i]
-					.getManagedObjectIndex();
-		}
 	}
 
 	/**
@@ -149,11 +135,6 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	@Override
 	public Team getTeam() {
 		return this.team;
-	}
-
-	@Override
-	public int[] getRequiredManagedObjects() {
-		return this.requiredManagedObjects;
 	}
 
 	@Override

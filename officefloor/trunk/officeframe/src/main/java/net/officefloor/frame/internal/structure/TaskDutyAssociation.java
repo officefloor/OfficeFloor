@@ -16,23 +16,23 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Meta-data for a {@link Duty} to administer the {@link Task}.
+ * Meta-data for a {@link Duty} to administer the {@link ManagedObject} instances.
  * 
  * @author Daniel
  */
 public interface TaskDutyAssociation<A extends Enum<A>> {
 
 	/**
-	 * Obtains index of the {@link Administrator} within the {@link Work}.
+	 * Obtains {@link AdministratorIndex} identifying the {@link Administrator}.
 	 * 
-	 * @return Index of the {@link Administrator} within the {@link Work}.
+	 * @return {@link AdministratorIndex} identifying the {@link Administrator}.
 	 */
-	int getAdministratorIndex();
+	AdministratorIndex getAdministratorIndex();
 
 	/**
 	 * Obtains the key identifying the {@link Duty} to be administered by the

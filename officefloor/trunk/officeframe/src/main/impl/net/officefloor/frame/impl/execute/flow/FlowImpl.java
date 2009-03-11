@@ -16,12 +16,14 @@
  */
 package net.officefloor.frame.impl.execute.flow;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.duty.DutyJob;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.work.WorkContainerImpl;
 import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
+import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobActivateSet;
@@ -45,17 +47,17 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	/**
 	 * {@link ThreadState} that this {@link Flow} is bound.
 	 */
-	protected final ThreadState threadState;
+	private final ThreadState threadState;
 
 	/**
 	 * Count of active {@link Job} instances.
 	 */
-	protected int activeJobCount = 0;
+	private int activeJobCount = 0;
 
 	/**
 	 * Completion flag indicating if this {@link Flow} is complete.
 	 */
-	protected volatile boolean isFlowComplete = false;
+	private volatile boolean isFlowComplete = false;
 
 	/**
 	 * Initiate.
@@ -76,14 +78,6 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 * ======================= Flow ===========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.Flow#createJobNode(net.officefloor
-	 * .frame.internal.structure.TaskMetaData,
-	 * net.officefloor.frame.internal.structure.JobNode, java.lang.Object)
-	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public JobNode createJobNode(TaskMetaData<?, ?, ?, ?> taskMetaData,
@@ -116,7 +110,7 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 		// Load the pre-task administrator duty jobs.
 		// Never use actual work container for pre duties.
 		this.loadDutyJobs(firstLastJobs, preTaskDuties, workMetaData, null,
-				proxyWorkContainer, parallelNodeOwner);
+				proxyWorkContainer, parallelNodeOwner, taskMetaData);
 
 		// If no post duties then task is last job
 		WorkContainer taskWorkContainer = (postTaskDuties.length == 0 ? workContainer
@@ -129,7 +123,8 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 
 		// Load the post-task administrator duty jobs
 		this.loadDutyJobs(firstLastJobs, postTaskDuties, workMetaData,
-				workContainer, proxyWorkContainer, parallelNodeOwner);
+				workContainer, proxyWorkContainer, parallelNodeOwner,
+				taskMetaData);
 
 		// Register the jobs with the work
 		AbstractJobContainer<?, ?> job = firstLastJobs[0];
@@ -160,20 +155,42 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 *            {@link WorkContainerProxy}.
 	 * @param parallelNodeOwner
 	 *            Parallel owning {@link JobNode}.
+	 * @param administeringTaskMetaData
+	 *            {@link TaskMetaData} of the {@link Task} being administered.
 	 */
 	@SuppressWarnings("unchecked")
 	private void loadDutyJobs(AbstractJobContainer<?, ?>[] firstLastJobs,
 			TaskDutyAssociation<?>[] taskDutyAssociations,
 			WorkMetaData<?> workMetaData, WorkContainer<?> actualWorkContainer,
-			WorkContainerProxy<?> proxyWorkContainer, JobNode parallelNodeOwner) {
+			WorkContainerProxy<?> proxyWorkContainer,
+			JobNode parallelNodeOwner,
+			TaskMetaData<?, ?, ?, ?> administeringTaskMetaData) {
+
 		// Load the duty jobs
 		for (int i = 0; i < taskDutyAssociations.length; i++) {
 			TaskDutyAssociation<?> taskDutyAssociation = taskDutyAssociations[i];
 
 			// Obtain the associated administrator meta-data
-			AdministratorMetaData<?, ?> adminMetaData = workMetaData
-					.getAdministratorMetaData()[taskDutyAssociation
-					.getAdministratorIndex()];
+			AdministratorMetaData<?, ?> adminMetaData;
+			AdministratorIndex adminIndex = taskDutyAssociation
+					.getAdministratorIndex();
+			int indexInScope = adminIndex.getIndexOfAdministratorWithinScope();
+			switch (adminIndex.getAdministratorScope()) {
+			case WORK:
+				adminMetaData = workMetaData.getAdministratorMetaData()[indexInScope];
+				break;
+			case THREAD:
+				adminMetaData = this.threadState.getThreadMetaData()
+						.getAdministratorMetaData()[indexInScope];
+				break;
+			case PROCESS:
+				adminMetaData = this.threadState.getProcessState()
+						.getProcessMetaData().getAdministratorMetaData()[indexInScope];
+				break;
+			default:
+				throw new IllegalStateException("Unknown administrator scope "
+						+ adminIndex.getAdministratorScope());
+			}
 
 			// Determine the work container to use
 			WorkContainer<?> workContainer;
@@ -189,7 +206,7 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 			// Create the duty job
 			AbstractJobContainer<?, ?> dutyJob = new DutyJob(this,
 					workContainer, adminMetaData, taskDutyAssociation,
-					parallelNodeOwner);
+					parallelNodeOwner, administeringTaskMetaData);
 
 			// Load the duty job
 			this.loadJob(firstLastJobs, dutyJob);
@@ -218,14 +235,6 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.Flow#taskContainerComplete(net
-	 * .officefloor.frame.spi.team.TaskContainer,
-	 * net.officefloor.frame.internal.structure.AssetNotifySet)
-	 */
 	@Override
 	public void jobComplete(Job taskContainer, JobActivateSet notifySet) {
 		// Task container now inactive
@@ -239,11 +248,6 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.Flow#getThreadState()
-	 */
 	@Override
 	public ThreadState getThreadState() {
 		return this.threadState;
@@ -253,11 +257,6 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 * ===================== FlowFuture ===================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.FlowFuture#isComplete()
-	 */
 	@Override
 	public boolean isComplete() {
 		return this.isFlowComplete;
@@ -267,14 +266,6 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 	 * ===================== FlowAsset ========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.FlowAsset#waitOnFlow(net.officefloor
-	 * .frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public boolean waitOnFlow(JobNode jobNode, JobActivateSet notifySet) {
 		// Delegate to the thread
