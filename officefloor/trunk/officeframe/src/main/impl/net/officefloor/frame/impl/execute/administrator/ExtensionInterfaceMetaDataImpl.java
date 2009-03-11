@@ -17,6 +17,7 @@
 package net.officefloor.frame.impl.execute.administrator;
 
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 
@@ -29,10 +30,10 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 		ExtensionInterfaceMetaData<I> {
 
 	/**
-	 * Index identifying the {@link ManagedObject} implementing the extension
-	 * interface.
+	 * {@link ManagedObjectIndex} identifying the {@link ManagedObject}
+	 * implementing the extension interface.
 	 */
-	protected final int managedObjectIndex;
+	protected final ManagedObjectIndex managedObjectIndex;
 
 	/**
 	 * {@link ExtensionInterfaceFactory} to create the extension interface from
@@ -44,13 +45,14 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	 * Initiate.
 	 * 
 	 * @param managedObjectIndex
-	 *            Index identifying the {@link ManagedObject} implementing the
-	 *            extension interface.
+	 *            {@link ManagedObjectIndex} identifying the
+	 *            {@link ManagedObject} implementing the extension interface.
 	 * @param extensionInterfaceFactory
 	 *            {@link ExtensionInterfaceFactory} to create the extension
 	 *            interface from the {@link ManagedObject}.
 	 */
-	public ExtensionInterfaceMetaDataImpl(int managedObjectIndex,
+	public ExtensionInterfaceMetaDataImpl(
+			ManagedObjectIndex managedObjectIndex,
 			ExtensionInterfaceFactory<I> extensionInterfaceFactory) {
 		this.managedObjectIndex = managedObjectIndex;
 		this.extensionInterfaceFactory = extensionInterfaceFactory;
@@ -61,7 +63,7 @@ public class ExtensionInterfaceMetaDataImpl<I extends Object> implements
 	 */
 
 	@Override
-	public int getManagedObjectIndex() {
+	public ManagedObjectIndex getManagedObjectIndex() {
 		return this.managedObjectIndex;
 	}
 

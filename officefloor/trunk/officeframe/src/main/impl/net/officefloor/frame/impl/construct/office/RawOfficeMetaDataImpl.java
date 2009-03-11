@@ -342,7 +342,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		// Create the map of process bound administrators by name
 		Map<String, RawBoundAdministratorMetaData<?, ?>> scopeAdmins = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
 		for (RawBoundAdministratorMetaData<?, ?> admin : processBoundAdministrators) {
-			scopeAdmins.put(admin.getAdministratorName(), admin);
+			scopeAdmins.put(admin.getBoundAdministratorName(), admin);
 		}
 
 		// Obtain the thread bound managed object instances
@@ -382,7 +382,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Load the thread bound administrators to scope administrators
 		for (RawBoundAdministratorMetaData<?, ?> admin : threadBoundAdministrators) {
-			scopeAdmins.put(admin.getAdministratorName(), admin);
+			scopeAdmins.put(admin.getBoundAdministratorName(), admin);
 		}
 
 		// Create the raw office meta-data
@@ -440,9 +440,11 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 					issues);
 		}
 		this.linkTasks(taskMetaDataLocator, threadBoundManagedObjects, issues);
-		this.linkTasks(taskMetaDataLocator, threadBoundAdministrators, issues);
+		this.linkTasks(taskMetaDataLocator, assetManagerFactory,
+				threadBoundAdministrators, issues);
 		this.linkTasks(taskMetaDataLocator, processBoundManagedObjects, issues);
-		this.linkTasks(taskMetaDataLocator, processBoundAdministrators, issues);
+		this.linkTasks(taskMetaDataLocator, assetManagerFactory,
+				processBoundAdministrators, issues);
 
 		// Return the raw office meta-data
 		return rawOfficeMetaData;
@@ -509,16 +511,20 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 * 
 	 * @param taskMetaDataLocator
 	 *            {@link TaskMetaDataLocator}.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
 	 * @param rawBoundManagedObjects
 	 *            {@link RawBoundAdministratorMetaData} instances.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
 	private void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+			AssetManagerFactory assetManagerFactory,
 			RawBoundAdministratorMetaData<?, ?>[] rawBoundAdministrators,
 			OfficeFloorIssues issues) {
 		for (RawBoundAdministratorMetaData<?, ?> rawBoundAdministrator : rawBoundAdministrators) {
-			rawBoundAdministrator.linkTasks(taskMetaDataLocator, issues);
+			rawBoundAdministrator.linkTasks(taskMetaDataLocator,
+					assetManagerFactory, issues);
 		}
 	}
 

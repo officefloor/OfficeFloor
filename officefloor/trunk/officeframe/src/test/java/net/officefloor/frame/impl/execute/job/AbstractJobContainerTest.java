@@ -235,9 +235,6 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		} else {
 			// No failure, so continue on to obtain managed object indexes
 			this.lastRequiredManagedObjectIndexes = requiredManagedObjectIndexes;
-			this.recordReturn(this.jobMetaData, this.jobMetaData
-					.getRequiredManagedObjects(),
-					this.lastRequiredManagedObjectIndexes);
 			if (this.lastRequiredManagedObjectIndexes.length > 0) {
 				// Has managed objects, so lock on process to initiate them
 				this.recordReturn(this.processState, this.processState
@@ -715,9 +712,12 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 */
 		public FunctionalityJob(JobNode parallelOwnerJob,
 				JobFunctionality... jobFunctionality) {
-			super(AbstractJobContainerTest.this.flow,
+			super(
+					AbstractJobContainerTest.this.flow,
 					AbstractJobContainerTest.this.workContainer,
-					AbstractJobContainerTest.this.jobMetaData, parallelOwnerJob);
+					AbstractJobContainerTest.this.jobMetaData,
+					parallelOwnerJob,
+					AbstractJobContainerTest.this.lastRequiredManagedObjectIndexes);
 			this.parallelOwnerJob = parallelOwnerJob;
 			this.jobFunctionality = jobFunctionality;
 		}

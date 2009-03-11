@@ -16,7 +16,6 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import junit.framework.AssertionFailedError;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -68,6 +67,12 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	private JobState jobState = JobState.LOAD_MANAGED_OBJECTS;
 
 	/**
+	 * {@link work} indexes to the {@link ManagedObject} instances that must be
+	 * loaded before the {@link Task} may be executed.
+	 */
+	private final int[] requiredManagedObjects;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param flow
@@ -81,13 +86,17 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 *            If this is invoked as or a parallel {@link Task} or from a
 	 *            parallel {@link Task} this will be the invokee. If not
 	 *            parallel then will be <code>null</code>.
+	 * @param requiredManagedObjects
+	 *            {@link work} indexes to the {@link ManagedObject} instances
+	 *            that must be loaded before the {@link Task} may be executed.
 	 */
 	public AbstractJobContainer(Flow flow, WorkContainer<W> workContainer,
-			N nodeMetaData, JobNode parallelOwner) {
+			N nodeMetaData, JobNode parallelOwner, int[] requiredManagedObjects) {
 		this.flow = flow;
 		this.workContainer = workContainer;
 		this.nodeMetaData = nodeMetaData;
 		this.parallelOwner = parallelOwner;
+		this.requiredManagedObjects = requiredManagedObjects;
 	}
 
 	/**
@@ -109,23 +118,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 */
 	private Job nextJob = null;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.team.Job#setNextJob(net.officefloor.frame.spi
-	 * .team.Job)
-	 */
 	@Override
 	public final void setNextJob(Job task) {
 		this.nextJob = task;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Job#getNextJob()
-	 */
 	@Override
 	public final Job getNextJob() {
 		return this.nextJob;
@@ -152,13 +149,6 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 */
 	private boolean isSequentialJobInvoked = false;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.team.Job#doJob(net.officefloor.frame.spi.team
-	 * .JobContext)
-	 */
 	@Override
 	public final boolean doJob(JobContext executionContext) {
 
@@ -197,12 +187,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							throw escalationCause;
 						}
 
-						// Obtain the required managed object indexes
-						int[] managedObjectIndexes = this.nodeMetaData
-								.getRequiredManagedObjects();
-
 						// Only take lock if have required managed objects
-						if (managedObjectIndexes.length == 0) {
+						if (this.requiredManagedObjects.length == 0) {
 							// Only jump forward if initial state
 							if (this.jobState == JobState.LOAD_MANAGED_OBJECTS) {
 								// No managed objects required, so execute job
@@ -218,7 +204,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 									// Load the managed objects
 									boolean isAllLoaded = this.workContainer
 											.loadManagedObjects(
-													managedObjectIndexes,
+													this.requiredManagedObjects,
 													executionContext, this,
 													notifySet);
 
@@ -240,7 +226,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 										// Ensure managed objects are ready
 										if (!this.workContainer
 												.isManagedObjectsReady(
-														managedObjectIndexes,
+														this.requiredManagedObjects,
 														executionContext, this,
 														notifySet)) {
 											// Wakened up when ready
@@ -251,7 +237,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 									// Coordinate the managed objects
 									this.workContainer
 											.coordinateManagedObjects(
-													managedObjectIndexes,
+													this.requiredManagedObjects,
 													executionContext, this,
 													notifySet);
 
@@ -262,7 +248,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 									// Ensure managed objects are ready
 									if (!this.workContainer
 											.isManagedObjectsReady(
-													managedObjectIndexes,
+													this.requiredManagedObjects,
 													executionContext, this,
 													notifySet)) {
 										// Wakened up when ready
@@ -394,10 +380,6 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								escalationCause = ex;
 							}
 						}
-
-						// TODO remove
-					} catch (AssertionFailedError ex) {
-						throw (AssertionFailedError) ex;
 
 					} catch (Throwable ex) {
 

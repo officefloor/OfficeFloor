@@ -45,7 +45,6 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFac
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawWorkAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
@@ -129,18 +128,6 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	 * Index of the next {@link RawWorkManagedObjectMetaData}.
 	 */
 	private int nextWorkRequiredManagedObjectIndex = 0;
-
-	/**
-	 * {@link RawWorkAdministratorMetaData} in the order the {@link Task}
-	 * instances expect to obtain {@link Administrator} instances from this
-	 * {@link Work}.
-	 */
-	private final List<RawWorkAdministratorMetaDataImpl> workRequiredAdministrators = new LinkedList<RawWorkAdministratorMetaDataImpl>();
-
-	/**
-	 * Index of the next {@link RawWorkAdministratorMetaData}.
-	 */
-	private int nextWorkRequiredAdministratorIndex = 0;
 
 	/**
 	 * {@link RawTaskMetaData} instances of this {@link Work}.
@@ -307,7 +294,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		}
 		Map<String, RawBoundAdministratorMetaData<?, ?>> workAdmin = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
 		for (RawBoundAdministratorMetaData<?, ?> admin : workBoundAdmins) {
-			workAdmin.put(admin.getAdministratorName(), admin);
+			workAdmin.put(admin.getBoundAdministratorName(), admin);
 		}
 
 		// Create the work scope administrators available to tasks
@@ -431,14 +418,6 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			}
 		}
 
-		// Create the listing of administrator indexes
-		AdministratorIndex[] administratorIndexes = new AdministratorIndex[rawWorkMetaData.workRequiredAdministrators
-				.size()];
-		for (int i = 0; i < administratorIndexes.length; i++) {
-			administratorIndexes[i] = rawWorkMetaData.workRequiredAdministrators
-					.get(i).getAdministratorIndex();
-		}
-
 		// Create the listing of work bound administrator meta-data
 		AdministratorMetaData<?, ?>[] administratorMetaData = new AdministratorMetaData[rawWorkMetaData.workAdministrators.length];
 		for (int i = 0; i < administratorMetaData.length; i++) {
@@ -449,9 +428,9 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		// Create the work meta-data
 		rawWorkMetaData.workMetaData = new WorkMetaDataImpl<w>(
 				rawWorkMetaData.workName, workFactory, managedObjectIndexes,
-				managedObjectMetaData, administratorIndexes,
-				administratorMetaData, initialFlowMetaData, ConstructUtil
-						.toArray(taskMetaDatas, new TaskMetaData[0]));
+				managedObjectMetaData, administratorMetaData,
+				initialFlowMetaData, ConstructUtil.toArray(taskMetaDatas,
+						new TaskMetaData[0]));
 
 		// Return the raw work meta-data
 		return rawWorkMetaData;
@@ -472,7 +451,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	}
 
 	@Override
-	public RawWorkAdministratorMetaData constructRawWorkAdministratorMetaData(
+	public AdministratorIndex getAdministratorIndex(
 			String workAdministratorName, OfficeFloorIssues issues) {
 
 		// Work meta-data should not yet be created
@@ -491,31 +470,11 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			return null; // unknown administrator
 		}
 
-		// Obtain the index details for the administrator
+		// Obtain the index for the administrator
 		AdministratorIndex adminIndex = boundAdmin.getAdministratorIndex();
 
-		// Create the key for the administrator
-		RawWorkAdministratorMetaDataImpl key = new RawWorkAdministratorMetaDataImpl(
-				adminIndex, -1);
-
-		// Obtain the work required administrator
-		RawWorkAdministratorMetaDataImpl workRequiredAdministrator;
-		if (this.workRequiredAdministrators.contains(key)) {
-			// Already created
-			workRequiredAdministrator = this.workRequiredAdministrators
-					.get(this.workRequiredAdministrators.indexOf(key));
-
-		} else {
-			// Create the work required administrator
-			workRequiredAdministrator = new RawWorkAdministratorMetaDataImpl(
-					adminIndex, this.nextWorkRequiredAdministratorIndex++);
-
-			// Ensure load as work required administrator
-			this.workRequiredAdministrators.add(workRequiredAdministrator);
-		}
-
-		// Return the work bound administrator meta-data
-		return workRequiredAdministrator;
+		// Return the administrator index
+		return adminIndex;
 	}
 
 	@Override
@@ -560,7 +519,8 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 		// Link tasks of work bound administrators
 		for (RawBoundAdministratorMetaData<?, ?> rawBoundAdminMetaData : this.workAdministrators) {
-			rawBoundAdminMetaData.linkTasks(taskMetaDataLocator, issues);
+			rawBoundAdminMetaData.linkTasks(taskMetaDataLocator,
+					assetManagerFactory, issues);
 		}
 
 		// Link the tasks of this work
@@ -731,89 +691,6 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		public RawWorkManagedObjectMetaData[] getDependencies() {
 			return this.dependencies
 					.toArray(new RawWorkManagedObjectMetaData[0]);
-		}
-	}
-
-	/**
-	 * {@link RawWorkAdministratorMetaData} implementation.
-	 */
-	private static class RawWorkAdministratorMetaDataImpl implements
-			RawWorkAdministratorMetaData {
-
-		/**
-		 * {@link AdministratorIndex}.
-		 */
-		private final AdministratorIndex administratorIndex;
-
-		/**
-		 * Index of this {@link RawWorkAdministratorMetaDataImpl} within the
-		 * {@link Work}.
-		 */
-		private final int workAdministratorIndex;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param administratorIndex
-		 *            {@link AdministratorIndex}.
-		 * @param workAdministratorIndex
-		 *            Index of this {@link RawWorkAdministratorMetaDataImpl}
-		 *            within the {@link Work}.
-		 */
-		public RawWorkAdministratorMetaDataImpl(
-				AdministratorIndex administratorIndex,
-				int workAdministratorIndex) {
-			this.administratorIndex = administratorIndex;
-			this.workAdministratorIndex = workAdministratorIndex;
-		}
-
-		/*
-		 * ============== Object ===========================================
-		 */
-
-		@Override
-		public boolean equals(Object obj) {
-
-			// Same object
-			if (obj == this) {
-				return true;
-			}
-
-			// Ensure same type
-			if (!(obj instanceof RawWorkManagedObjectMetaDataImpl)) {
-				return false;
-			}
-			RawWorkAdministratorMetaDataImpl that = (RawWorkAdministratorMetaDataImpl) obj;
-
-			// Return if same index
-			return (this.administratorIndex.getAdministratorScope() == that.administratorIndex
-					.getAdministratorScope())
-					&& (this.administratorIndex
-							.getIndexOfAdministratorWithinScope() == that.administratorIndex
-							.getIndexOfAdministratorWithinScope());
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = this.administratorIndex.getAdministratorScope()
-					.hashCode()
-					+ this.administratorIndex
-							.getIndexOfAdministratorWithinScope();
-			return hash;
-		}
-
-		/*
-		 * =============== RawWorkAdministratorMetaData ======================
-		 */
-
-		@Override
-		public AdministratorIndex getAdministratorIndex() {
-			return this.administratorIndex;
-		}
-
-		@Override
-		public int getWorkAdministratorIndex() {
-			return this.workAdministratorIndex;
 		}
 	}
 

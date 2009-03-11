@@ -23,7 +23,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Context in which the {@link Administrator} executes.
+ * Context in which the {@link Duty} executes.
  * 
  * @author Daniel
  */

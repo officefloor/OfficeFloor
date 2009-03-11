@@ -16,7 +16,8 @@
  */
 package net.officefloor.frame.impl.execute.work;
 
-import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
@@ -48,24 +49,24 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	/**
 	 * {@link Work} being managed.
 	 */
-	protected final W work;
+	private final W work;
 
 	/**
 	 * {@link WorkMetaData} of the {@link Work} being managed.
 	 */
-	protected final WorkMetaData<W> workMetaData;
+	private final WorkMetaData<W> workMetaData;
 
 	/**
 	 * {@link ManagedObjectContainer} instances for the respective
-	 * {@link ManagedObject} instances.
+	 * {@link ManagedObject} instances bound to this {@link Work}.
 	 */
-	protected final ManagedObjectContainer[] managedObjects;
+	private final ManagedObjectContainer[] managedObjects;
 
 	/**
 	 * {@link AdministratorContainer} instances for the respective
-	 * {@link Administrator} instances.
+	 * {@link Administrator} instances bound to this {@link Work}.
 	 */
-	protected final AdministratorContainer<?, ?>[] administrators;
+	private final AdministratorContainer<?, ?>[] administrators;
 
 	/**
 	 * Initiate.
@@ -90,45 +91,11 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		AdministratorMetaData adminMetaDatas[] = workMetaData
 				.getAdministratorMetaData();
 		this.administrators = new AdministratorContainer[adminMetaDatas.length];
-
-		// ---------------- TODO remove below --------------------------
-		if (true)
-			return;
-
-		// Create the administrator containers
-		for (int i = 0; i < adminMetaDatas.length; i++) {
-
-			// Obtain the current managed object meta-data
-			AdministratorMetaData adminMetaData = adminMetaDatas[i];
-
-			// Create the container for the Administrator
-			AdministratorContainer administratorContainer = adminMetaData
-					.createAdministratorContainer();
-
-			// Register the administrator
-			this.administrators[i] = administratorContainer;
-		}
-
-		// Create the managed object containers
-		// this.managedObjects = new ManagedObjectContainer[moMetaDatas.length];
-		for (int i = 0; i < moMetaDatas.length; i++) {
-
-			// Obtain the current managed object meta-data
-			ManagedObjectMetaData moMetaData = moMetaDatas[i];
-
-			// Create the container for the Managed Object (locking on work)
-			ManagedObjectContainer managedObjectContainer = moMetaData
-					.createManagedObjectContainer(processState);
-
-			// Register the managed object
-			this.managedObjects[i] = managedObjectContainer;
-		}
 	}
 
 	/*
 	 * ================== WorkContainer ===================================
 	 */
-
 
 	@Override
 	public W getWork(ThreadState threadState) {
@@ -304,14 +271,17 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		ThreadState threadState = adminContext.getThreadState();
 		ProcessState processState = threadState.getProcessState();
 
+		// TODO get admin, mos in process lock as may change state of process
+
+		// Obtain the index identifying the administrator
+		AdministratorIndex adminIndex = duty.getAdministratorIndex();
+
 		// Obtain the administrator container
-		AdministratorIndex adminIndex = this.workMetaData
-				.getAdministratorIndexes()[duty.getAdministratorIndex()];
-		int adminScopeIndex = adminIndex.getIndexOfAdministratorWithinScope();
 		AdministratorContainer adminContainer;
+		int adminScopeIndex = adminIndex.getIndexOfAdministratorWithinScope();
 		switch (adminIndex.getAdministratorScope()) {
 		case WORK:
-			// Lazy create the administrator container. This is the safe to lazy
+			// Lazy create the administrator container. This is safe to lazy
 			// create as work containers are not shared between threads and this
 			// operates within the thread lock.
 			adminContainer = this.administrators[adminScopeIndex];
@@ -333,31 +303,25 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			break;
 
 		default:
-			throw new IllegalStateException("Unknown managed object scope "
+			throw new IllegalStateException("Unknown administrator scope "
 					+ adminIndex.getAdministratorScope());
 		}
-
-		// Obtain the managed object indexes
-		ManagedObjectIndex[] indexes = this.workMetaData
-				.getManagedObjectIndexes();
 
 		// Obtain the extension interfaces to be managed
 		ExtensionInterfaceMetaData<?>[] eiMetaDatas = adminContainer
 				.getExtensionInterfaceMetaData(adminContext);
-		Object[] ei = new Object[eiMetaDatas.length];
+		List ei = new LinkedList();
 		for (int i = 0; i < eiMetaDatas.length; i++) {
 			ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
 
-			// Obtain the index of managed object within scope
-			ManagedObjectIndex moIndex = indexes[eiMetaData
-					.getManagedObjectIndex()];
-			int moScopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
+			// Obtain the index of managed object to administer
+			ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
 
 			// Obtain the managed object container
 			ManagedObjectContainer container;
+			int moScopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
 			switch (moIndex.getManagedObjectScope()) {
 			case WORK:
-				// Always available by loadManagedObjects
 				container = this.managedObjects[moScopeIndex];
 				break;
 
@@ -375,17 +339,25 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 						+ moIndex.getManagedObjectScope());
 			}
 
+			// Ensure have the container
+			if (container == null) {
+				continue; // no container so no managed object to administer
+			}
+
 			// Obtain the managed object
 			ManagedObject managedObject = container
 					.getManagedObject(threadState);
+			if (managedObject == null) {
+				continue; // no managed object to administer
+			}
 
 			// Obtain and load the extension interface
-			ei[i] = eiMetaData.getExtensionInterfaceFactory()
-					.createExtensionInterface(managedObject);
+			ei.add(eiMetaData.getExtensionInterfaceFactory()
+					.createExtensionInterface(managedObject));
 		}
 
 		// Administer the managed objects
-		adminContainer.doDuty(duty, Arrays.asList(ei), adminContext);
+		adminContainer.doDuty(duty, ei, adminContext);
 	}
 
 	@Override

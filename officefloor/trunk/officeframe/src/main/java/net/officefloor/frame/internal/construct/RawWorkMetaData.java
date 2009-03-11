@@ -19,6 +19,7 @@ package net.officefloor.frame.internal.construct;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -62,25 +63,18 @@ public interface RawWorkMetaData<W extends Work> {
 			String workManagedObjectName, OfficeFloorIssues issues);
 
 	/**
-	 * Constructs the {@link RawWorkAdministratorMetaData} for the
-	 * {@link Administrator} of the {@link Work}.
+	 * Obtains the {@link AdministratorIndex} for the {@link Work}
+	 * {@link Administrator} name.
 	 * 
 	 * @param workAdministratorName
 	 *            Name of the {@link Administrator} within the {@link Work}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @return Constructed {@link RawWorkAdministratorMetaData} or
-	 *         <code>null</code> if issue in constructing it.
+	 * @return {@link AdministratorIndex} or <code>null</code> if issue in
+	 *         obtaining it.
 	 */
-	RawWorkAdministratorMetaData constructRawWorkAdministratorMetaData(
-			String workAdministratorName, OfficeFloorIssues issues);
-
-	/**
-	 * Obtains the {@link WorkMetaData} for this {@link RawWorkMetaData}.
-	 * 
-	 * @return {@link WorkMetaData}.
-	 */
-	WorkMetaData<W> getWorkMetaData();
+	AdministratorIndex getAdministratorIndex(String workAdministratorName,
+			OfficeFloorIssues issues);
 
 	/**
 	 * Links the {@link TaskMetaData} instances to enable {@link Flow} of
@@ -95,5 +89,12 @@ public interface RawWorkMetaData<W extends Work> {
 	 */
 	void linkTasks(TaskMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
+
+	/**
+	 * Obtains the {@link WorkMetaData} for this {@link RawWorkMetaData}.
+	 * 
+	 * @return {@link WorkMetaData}.
+	 */
+	WorkMetaData<W> getWorkMetaData();
 
 }

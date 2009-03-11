@@ -491,11 +491,6 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.taskDutyAssociation, this.taskDutyAssociation
 				.getAdministratorIndex(), administratorIndex);
 
-		// Record obtaining the administrator indexes
-		this.recordReturn(this.workMetaData, this.workMetaData
-				.getAdministratorIndexes(), this.administratorIndexes
-				.toArray(new AdministratorIndex[0]));
-
 		// Record obtaining the administrator container
 		AdministratorContainer administratorContainer;
 		AdministratorIndex index = this.administratorIndexes

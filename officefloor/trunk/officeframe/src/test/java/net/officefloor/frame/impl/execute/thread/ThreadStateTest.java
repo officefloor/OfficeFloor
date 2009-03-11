@@ -22,6 +22,7 @@ import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -36,6 +37,12 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 * {@link ThreadStateImpl} being tested.
 	 */
 	private ThreadStateImpl threadState;
+
+	/**
+	 * Mock {@link ThreadMetaData}.
+	 */
+	private ThreadMetaData threadMetaData = this
+			.createMock(ThreadMetaData.class);
 
 	/**
 	 * Mock {@link ProcessState}.
@@ -90,7 +97,7 @@ public class ThreadStateTest extends OfficeFrameTestCase {
 	 * Creates the {@link ThreadState}.
 	 */
 	private void createThreadState() {
-		this.threadState = new ThreadStateImpl(this.processState,
-				this.flowMetaData);
+		this.threadState = new ThreadStateImpl(this.threadMetaData,
+				this.processState, this.flowMetaData);
 	}
 }

@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.duty;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.job.JobExecuteContext;
@@ -25,6 +26,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
+import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.administration.Duty;
@@ -61,11 +63,15 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 *            {@link TaskDutyAssociation}.
 	 * @param parallelOwner
 	 *            Parallel owning {@link JobNode}.
+	 * @param administeringTaskMetaData
+	 *            {@link TaskMetaData} of the {@link Task} being administered.
 	 */
 	public DutyJob(Flow flow, WorkContainer<W> workContainer,
 			AdministratorMetaData<I, A> adminMetaData,
-			TaskDutyAssociation<A> taskDutyAssociation, JobNode parallelOwner) {
-		super(flow, workContainer, adminMetaData, parallelOwner);
+			TaskDutyAssociation<A> taskDutyAssociation, JobNode parallelOwner,
+			TaskMetaData<?, ?, ?, ?> administeringTaskMetaData) {
+		super(flow, workContainer, adminMetaData, parallelOwner,
+				administeringTaskMetaData.getRequiredManagedObjects());
 		this.taskDutyAssociation = taskDutyAssociation;
 	}
 
