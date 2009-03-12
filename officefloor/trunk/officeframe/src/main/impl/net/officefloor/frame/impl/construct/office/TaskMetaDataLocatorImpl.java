@@ -16,6 +16,11 @@
  */
 package net.officefloor.frame.impl.construct.office;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -37,6 +42,16 @@ public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
 	 * {@link WorkMetaData} to default to on locating {@link TaskMetaData}.
 	 */
 	private final WorkMetaData<?> workMetaData;
+
+	/**
+	 * {@link WorkEntry} instances of the {@link Office}.
+	 */
+	private final Map<String, WorkEntry> officeWork = new HashMap<String, WorkEntry>();
+
+	/**
+	 * Default {@link WorkEntry}.
+	 */
+	private final WorkEntry defaultWorkEntry;
 
 	/**
 	 * Initiate.
@@ -63,6 +78,22 @@ public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
 			WorkMetaData<?> workMetaData) {
 		this.officeMetaData = officeMetaData;
 		this.workMetaData = workMetaData;
+
+		// Load the work entries and specify default work entry
+		WorkEntry defaultWork = null;
+		for (WorkMetaData<?> work : officeMetaData.getWorkMetaData()) {
+
+			// Create and register the work entry for the work
+			String workName = work.getWorkName();
+			WorkEntry workEntry = new WorkEntry(work);
+			this.officeWork.put(workName, workEntry);
+
+			// Determine if the default work entry
+			if (work == this.workMetaData) {
+				defaultWork = workEntry;
+			}
+		}
+		this.defaultWorkEntry = defaultWork;
 	}
 
 	/*
@@ -87,24 +118,55 @@ public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
 
 	@Override
 	public WorkMetaData<?> getWorkMetaData(String workName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement TaskMetaDataLocator.getWorkMetaData");
+		WorkEntry workEntry = this.officeWork.get(workName);
+		return (workEntry != null ? workEntry.workMetaData : null);
 	}
 
 	@Override
 	public TaskMetaData<?, ?, ?, ?> getTaskMetaData(String workName,
 			String taskName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement TaskMetaDataLocator.getTaskMetaData");
+		WorkEntry workEntry = (workName != null ? this.officeWork.get(workName)
+				: this.defaultWorkEntry);
+		return (workEntry != null ? workEntry.tasks.get(taskName) : null);
 	}
 
 	@Override
 	public TaskMetaData<?, ?, ?, ?> getTaskMetaData(String taskName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement TaskMetaDataLocator.getTaskMetaData");
+		return (this.defaultWorkEntry != null ? this.defaultWorkEntry.tasks
+				.get(taskName) : null);
+	}
+
+	/**
+	 * {@link WorkEntry}.
+	 */
+	private class WorkEntry {
+
+		/**
+		 * {@link WorkMetaData} for this {@link WorkEntry}.
+		 */
+		public final WorkMetaData<?> workMetaData;
+
+		/**
+		 * {@link TaskMetaData} entries by their {@link Task} names.
+		 */
+		public final Map<String, TaskMetaData<?, ?, ?, ?>> tasks = new HashMap<String, TaskMetaData<?, ?, ?, ?>>();
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param workMetaData
+		 *            {@link WorkMetaData}.
+		 */
+		public WorkEntry(WorkMetaData<?> workMetaData) {
+			this.workMetaData = workMetaData;
+
+			// Load the tasks
+			for (TaskMetaData<?, ?, ?, ?> taskMetaData : workMetaData
+					.getTaskMetaData()) {
+				String taskName = taskMetaData.getTaskName();
+				this.tasks.put(taskName, taskMetaData);
+			}
+		}
 	}
 
 }

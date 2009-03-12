@@ -24,10 +24,13 @@ import java.util.Map;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
+import net.officefloor.frame.impl.execute.office.OfficeStartupTaskImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
@@ -35,6 +38,7 @@ import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceCon
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
+import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
@@ -53,6 +57,10 @@ import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -356,7 +364,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			threadBoundManagedObjects = rawBoundManagedObjectFactory
 					.constructBoundManagedObjectMetaData(
 							threadManagedObjectConfiguration, issues,
-							ManagedObjectScope.PROCESS, AssetType.OFFICE,
+							ManagedObjectScope.THREAD, AssetType.OFFICE,
 							officeName, registeredMo, scopeMo);
 		}
 
@@ -397,15 +405,33 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		List<WorkMetaData<?>> workMetaDatas = new LinkedList<WorkMetaData<?>>();
 		for (WorkConfiguration<?> workConfiguration : configuration
 				.getWorkConfiguration()) {
+
+			// Construct the work
 			RawWorkMetaData<?> rawWorkMetaData = rawWorkFactory
 					.constructRawWorkMetaData(workConfiguration, issues,
 							rawOfficeMetaData, assetManagerFactory,
 							rawBoundManagedObjectFactory,
 							rawBoundAdministratorFactory, rawTaskFactory);
-			rawWorkMetaDatas.add(rawWorkMetaData);
+			if (rawWorkMetaData == null) {
+				continue; // issue in constructing work
+			}
+
+			// Obtain the work meta-data and register
 			WorkMetaData<?> workMetaData = rawWorkMetaData.getWorkMetaData();
+			rawWorkMetaDatas.add(rawWorkMetaData);
 			workMetaDatas.add(workMetaData);
 		}
+
+		// Create the listing of startup tasks to later populate
+		TaskNodeReference[] startupTaskReferences = configuration
+				.getStartupTasks();
+		int startupTasksLength = (startupTaskReferences == null ? 0
+				: startupTaskReferences.length);
+		OfficeStartupTask[] startupTasks = new OfficeStartupTask[startupTasksLength];
+
+		// TODO change this to a TaskNodeReference for a Task to be the handler
+		EscalationHandler officeEscalationHandler = configuration
+				.getOfficeEscalationHandler();
 
 		// Create the thread meta-data
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(this
@@ -418,13 +444,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				this.constructAdministratorMetaData(processBoundAdministrators),
 				threadMetaData);
 
-		// TODO obtain the startup tasks
-		OfficeStartupTask[] startupTasks = null;
-
-		// TODO change this to a TaskNodeReference for task to be handler
-		EscalationHandler officeEscalationHandler = configuration
-				.getOfficeEscalationHandler();
-
 		// Create the office meta-data
 		rawOfficeMetaData.officeMetaData = new OfficeMetaDataImpl(
 				this.officeName, workMetaDatas.toArray(new WorkMetaData[0]),
@@ -433,6 +452,36 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		// Create the task locator
 		TaskMetaDataLocator taskMetaDataLocator = new TaskMetaDataLocatorImpl(
 				rawOfficeMetaData.officeMetaData);
+
+		// Load the startup tasks
+		for (int i = 0; i < startupTasksLength; i++) {
+
+			// Obtain the task meta-data for the startup task
+			TaskMetaData<?, ?, ?, ?> startupTaskMetaData = ConstructUtil
+					.getTaskMetaData(startupTaskReferences[i],
+							taskMetaDataLocator, issues, AssetType.OFFICE,
+							officeName, "Startup Task " + i, true);
+			if (startupTaskMetaData == null) {
+				continue; // startup task not found
+			}
+
+			// Obtain the flow asset manager
+			AssetManager startupFlowAssetManager = assetManagerFactory
+					.createAssetManager(AssetType.OFFICE, officeName,
+							"StartupTask" + i, issues);
+
+			// Create the startup flow meta-data.
+			// Always asynchronous as runs in own process.
+			FlowMetaData<?> startupFlow = this.newFlowMetaData(
+					FlowInstigationStrategyEnum.ASYNCHRONOUS,
+					startupTaskMetaData, startupFlowAssetManager);
+
+			// TODO consider providing a parameter to the startup task
+			Object parameter = null;
+
+			// Create and load the startup task
+			startupTasks[i] = new OfficeStartupTaskImpl(startupFlow, parameter);
+		}
 
 		// Link tasks within the meta-data of the office
 		for (RawWorkMetaData<?> rawWorkMetaData : rawWorkMetaDatas) {
@@ -526,6 +575,24 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			rawBoundAdministrator.linkTasks(taskMetaDataLocator,
 					assetManagerFactory, issues);
 		}
+	}
+
+	/**
+	 * Creates a new {@link FlowMetaData}.
+	 * 
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 * @param taskMetaData
+	 *            {@link TaskMetaData}.
+	 * @param assetManager
+	 *            {@link Flow} {@link AssetManager}.
+	 * @return New {@link FlowMetaData}.
+	 */
+	private <W extends Work> FlowMetaData<W> newFlowMetaData(
+			FlowInstigationStrategyEnum instigationStrategy,
+			TaskMetaData<?, W, ?, ?> taskMetaData, AssetManager assetManager) {
+		return new FlowMetaDataImpl<W>(instigationStrategy, taskMetaData,
+				assetManager);
 	}
 
 	/*
