@@ -14,39 +14,24 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.spi.team;
+package net.officefloor.frame.spi.managedobject.pool;
 
-import java.util.Properties;
-
-import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamFactory;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Factory for the {@link net.officefloor.frame.spi.team.impl.OnePersonTeam}.
+ * Context for a {@link ManagedObjectPool}.
  * 
  * @author Daniel
  */
-public class OnePersonTeamFactory implements TeamFactory {
+public interface ManagedObjectPoolContext {
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Obtains the {@link ManagedObjectSource} for the {@link ManagedObject}
+	 * instances being pooled.
 	 * 
-	 * @see net.officefloor.TeamFactory#createTeam(java.util.Properties)
+	 * @return {@link ManagedObjectSource} for the {@link ManagedObject}
+	 *         instances being pooled.
 	 */
-	public Team createTeam(Properties properties) throws Exception {
+	ManagedObjectSource<?, ?> getManagedObjectSource();
 
-		// Obtain the wait time
-		long waitTime;
-		String waitTimeText = properties.getProperty("wait");
-		if ((waitTimeText == null) || (waitTimeText.trim().length() == 0)) {
-			// Default
-			waitTime = 100;
-		} else {
-			// Specify from properties
-			waitTime = Long.parseLong(waitTimeText);
-		}
-
-		// Return the one person team
-		return new OnePersonTeam(waitTime);
-	}
 }

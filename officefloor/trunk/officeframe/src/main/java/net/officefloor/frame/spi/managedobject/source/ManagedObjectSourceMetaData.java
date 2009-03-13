@@ -19,7 +19,6 @@ package net.officefloor.frame.spi.managedobject.source;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
 
 /**
  * Meta-data of the {@link ManagedObjectSource}.
@@ -120,4 +119,5 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 *         {@link ManagedObject} implements.
 	 */
 	ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData();
+
 }

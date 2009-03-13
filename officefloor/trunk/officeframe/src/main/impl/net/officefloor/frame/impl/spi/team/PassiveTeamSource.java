@@ -16,24 +16,30 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import java.util.Properties;
-
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamFactory;
+import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.spi.team.source.TeamSourceContext;
+import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 
 /**
- * Factory for the {@link net.officefloor.frame.spi.team.impl.PassiveTeam}.
+ * {@link TeamSource} for the {@link PassiveTeam}.
  * 
  * @author Daniel
  */
-public class PassiveTeamFactory implements TeamFactory {
+public class PassiveTeamSource extends AbstractTeamSource {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.TeamFactory#createTeam(java.util.Properties)
+	 * ==================== AbstractTeamSource ===========================
 	 */
-	public Team createTeam(Properties properties) throws Exception {
+
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		// No properties
+	}
+
+	@Override
+	protected Team createTeam(TeamSourceContext context) throws Exception {
 		return new PassiveTeam();
 	}
+
 }

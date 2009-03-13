@@ -16,34 +16,43 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import java.util.Properties;
-
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamFactory;
+import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.spi.team.source.TeamSourceContext;
+import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 
 /**
- * {@link TeamFactory} for a {@link LeaderFollowerTeam}.
+ * {@link TeamSource} for the {@link OnePersonTeam}.
  * 
  * @author Daniel
  */
-public class LeaderFollowerTeamFactory implements TeamFactory {
+public class OnePersonTeamSource extends AbstractTeamSource {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TeamFactory#createTeam(java.util.Properties)
+	 * ==================== AbstractTeamSource ==============================
 	 */
+
 	@Override
-	public Team createTeam(Properties properties) throws Exception {
-
-		// Obtain the configuration
-		String teamName = properties.getProperty("name",
-				LeaderFollowerTeam.class.getSimpleName());
-		int teamSize = Integer.parseInt(properties.getProperty("size", "10"));
-		long waitTime = Long.parseLong(properties.getProperty("wait.time",
-				"100"));
-
-		// Create and return the team
-		return new LeaderFollowerTeam(teamName, teamSize, waitTime);
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty("wait");
 	}
+
+	@Override
+	protected Team createTeam(TeamSourceContext context) throws Exception {
+
+		// Obtain the wait time
+		long waitTime;
+		String waitTimeText = context.getProperty("wait");
+		if ((waitTimeText == null) || (waitTimeText.trim().length() == 0)) {
+			// Default
+			waitTime = 100;
+		} else {
+			// Specify from properties
+			waitTime = Long.parseLong(waitTimeText);
+		}
+
+		// Return the one person team
+		return new OnePersonTeam(waitTime);
+	}
+
 }

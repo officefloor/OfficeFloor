@@ -62,7 +62,7 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.spi.team.Team;
 
 /**

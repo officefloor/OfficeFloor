@@ -16,10 +16,11 @@
  */
 package net.officefloor.frame.spi.managedobject.recycle;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Parameter to the recycle {@link net.officefloor.frame.api.execute.Task}.
+ * Parameter to the recycle {@link Task}.
  * 
  * @author Daniel
  */

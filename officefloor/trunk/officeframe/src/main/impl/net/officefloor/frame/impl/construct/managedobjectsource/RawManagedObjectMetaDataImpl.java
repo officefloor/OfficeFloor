@@ -58,11 +58,11 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
-import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
 /**
  * Raw {@link ManagedObjectMetaData}.

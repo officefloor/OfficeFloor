@@ -14,53 +14,37 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.spi.managedobject.source.impl;
+package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.spi.team.source.TeamSourceContext;
+import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 
 /**
- * Implementation of the {@link ManagedObjectSourceProperty}.
+ * {@link TeamSource} for the {@link WorkerPerTaskTeam}.
  * 
  * @author Daniel
  */
-public class ManagedObjectSourcePropertyImpl implements
-		ManagedObjectSourceProperty {
-
-	/**
-	 * Name of property.
-	 */
-	protected final String name;
-
-	/**
-	 * Label of property.
-	 */
-	protected final String label;
-
-	/**
-	 * Initiate with name and label of property.
-	 * 
-	 * @param name
-	 *            Name of property.
-	 * @param label
-	 *            Label of property.
-	 */
-	public ManagedObjectSourcePropertyImpl(String name, String label) {
-		this.name = name;
-		this.label = label;
-	}
+public class WorkerPerTaskTeamSource extends AbstractTeamSource {
 
 	/*
-	 * =============== ManagedObjectSourceProperty =============================
+	 * ==================== AbstractTeamSource ===============================
 	 */
 
 	@Override
-	public String getName() {
-		return this.name;
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty("name");
 	}
 
 	@Override
-	public String getLabel() {
-		return this.label;
+	protected Team createTeam(TeamSourceContext context) throws Exception {
+		// Obtain the team name
+		String teamName = context.getProperty("name", WorkerPerTaskTeam.class
+				.getSimpleName());
+
+		// Create and return the team
+		return new WorkerPerTaskTeam(teamName);
 	}
 
 }

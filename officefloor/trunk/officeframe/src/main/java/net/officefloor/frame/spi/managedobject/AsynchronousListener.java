@@ -18,8 +18,7 @@ package net.officefloor.frame.spi.managedobject;
 
 /**
  * <p>
- * Listener that is notified when the
- * {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject} has
+ * Listener that is notified when the {@link AsynchronousManagedObject} has
  * completed.
  * <p>
  * This is provided by the Office Floor implementation.
@@ -39,5 +38,5 @@ public interface AsynchronousListener {
 	 * ready for another operation.
 	 */
 	void notifyComplete();
-	
+
 }

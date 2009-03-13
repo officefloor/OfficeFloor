@@ -22,13 +22,12 @@ import net.officefloor.frame.spi.team.Team;
 
 /**
  * <p>
- * Passive {@link net.officefloor.frame.spi.team.Team} which uses the invoking
- * {@link java.lang.Thread} to execute the
- * {@link net.officefloor.frame.api.execute.Task}.
+ * Passive {@link Team} which uses the invoking {@link Thread} to execute the
+ * {@link Job}.
  * </p>
  * <p>
- * Note that using this team will block the invoking {@link java.lang.Thread}
- * until the {@link net.officefloor.frame.api.execute.Task} is complete.
+ * Note that using this team will block the invoking {@link Thread} until the
+ * {@link Job} is complete.
  * </p>
  * 
  * @author Daniel
@@ -36,41 +35,36 @@ import net.officefloor.frame.spi.team.Team;
 public class PassiveTeam implements Team, JobContext {
 
 	/**
+	 * Value indicating the time is not specified.
+	 */
+	private static final long TIME_NOT_SET = -1;
+
+	/**
 	 * Current time for execution.
 	 */
-	protected long time;
+	private long time = TIME_NOT_SET;
 
 	/**
 	 * Indicates if should continue working.
 	 */
-	protected volatile boolean continueWorking = true;
+	private volatile boolean continueWorking = true;
 
 	/*
-	 * ========================================================================
-	 * Team
-	 * ========================================================================
+	 * ==================== Team =====================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#startWorking()
-	 */
+	@Override
 	public void startWorking() {
 		// No workers as passive
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
-	 */
+	@Override
 	public void assignJob(Job task) {
-		// Loop executing the Task until it is complete or stop working
+		// Loop executing the Job until it is complete or stop working
 		do {
 
-			// Specify the time
-			this.time = System.currentTimeMillis();
+			// Reset the time for next run
+			this.time = TIME_NOT_SET;
 
 			// Attempt to complete the Task
 			if (task.doJob(this)) {
@@ -84,36 +78,29 @@ public class PassiveTeam implements Team, JobContext {
 		} while (this.continueWorking);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#stopWorking()
-	 */
+	@Override
 	public void stopWorking() {
 		// Flag to stop working
 		this.continueWorking = false;
 	}
 
 	/*
-	 * ====================================================================
-	 * ExecutionContext
-	 * ====================================================================
+	 * ==================== JobContext ====================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.ExecutionContext#getTime()
-	 */
+	@Override
 	public long getTime() {
+
+		// Ensure the time is specified
+		if (this.time == TIME_NOT_SET) {
+			this.time = System.currentTimeMillis();
+		}
+
+		// Return the time
 		return this.time;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.ExecutionContext#continueExecution()
-	 */
+	@Override
 	public boolean continueExecution() {
 		return this.continueWorking;
 	}

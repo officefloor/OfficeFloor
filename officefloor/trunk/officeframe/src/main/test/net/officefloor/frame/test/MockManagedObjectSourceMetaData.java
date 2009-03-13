@@ -21,8 +21,8 @@ import java.util.Map;
 
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectDependencyMetaDataImpl;
 

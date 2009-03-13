@@ -20,8 +20,8 @@ import java.util.Map;
 
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
 /**
  * {@link ManagedObjectSourceInstance} implementation.

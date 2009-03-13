@@ -17,14 +17,14 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.ProjectManager;
+import net.officefloor.frame.internal.structure.OfficeManager;
 
 /**
- * Implementation of the {@link ProjectManager}.
+ * Implementation of the {@link OfficeManager}.
  * 
  * @author Daniel
  */
-public class ProjectManagerImpl implements ProjectManager {
+public class OfficeManagerImpl implements OfficeManager {
 
 	/**
 	 * Interval in milliseconds between each monitor run.
@@ -34,49 +34,38 @@ public class ProjectManagerImpl implements ProjectManager {
 	/**
 	 * List of {@link AssetManager} instances to be managed.
 	 */
-	protected final AssetManager[] assetGroups;
+	protected final AssetManager[] assetManagers;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param monitorInterval
 	 *            Interval in milliseconds between each monitor run.
-	 * @param assetGroups
+	 * @param assetManagers
 	 *            List of {@link AssetManager} instances to be managed.
 	 */
-	public ProjectManagerImpl(long monitorInterval, AssetManager[] assetGroups) {
+	public OfficeManagerImpl(long monitorInterval, AssetManager[] assetManagers) {
 		this.MONITOR_INTERVAL = monitorInterval;
-		this.assetGroups = assetGroups;
+		this.assetManagers = assetManagers;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.ProjectManager#startManaging
-	 * (long)
+	 * ================= OfficeManager =======================================
 	 */
+
+	@Override
 	public void startManaging(long interval) {
 		// TODO Auto-generated method stub
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.ProjectManager#manage()
-	 */
+	@Override
 	public void manage() {
 		// TODO Auto-generated method stub
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.ProjectManager#stopManaging()
-	 */
+	@Override
 	public void stopManaging() {
 		// TODO Auto-generated method stub
 

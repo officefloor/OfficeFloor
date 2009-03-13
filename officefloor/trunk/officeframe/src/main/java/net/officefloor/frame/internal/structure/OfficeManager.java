@@ -16,37 +16,40 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.manage.Office;
+
 /**
- * Manages the {@link net.officefloor.frame.internal.structure.AssetManager}
- * instances within the Office.
+ * Manages the {@link AssetManager} instances within an {@link Office}.
  * 
  * @author Daniel
  */
-public interface ProjectManager {
+public interface OfficeManager {
 
 	/**
-	 * Starts this {@link ProjectManager} managing the
-	 * {@link net.officefloor.frame.api.execute.Work} within the Office.
+	 * Starts this {@link OfficeManager} managing the {@link AssetManager}
+	 * instances within the {@link Office}.
 	 * 
 	 * @param interval
-	 *            Interval in milliseconds between each check of the Office.
-	 *            Setting this high reduces overhead of managing the office,
-	 *            however setting lower increases responsiveness of the Office.
+	 *            Interval in milliseconds between each check of the
+	 *            {@link Office}. Setting this high reduces overhead of managing
+	 *            the {@link Office}, however setting lower increases
+	 *            responsiveness of the {@link Office}.
 	 */
 	void startManaging(long interval);
 
 	/**
 	 * <p>
-	 * Does the managing the {@link net.officefloor.frame.api.execute.Work}
-	 * within the Office.
+	 * Does the managing the {@link AssetManager} instances within the
+	 * {@link Office}.
 	 * <p>
-	 * Provided to allow manual invocation of managing the Office.
+	 * Provided to allow manual invocation of managing the {@link Office}.
 	 */
 	void manage();
 
 	/**
-	 * Stops this {@link ProjectManager} managing the
-	 * {@link net.officefloor.frame.api.execute.Work} within the Office.
+	 * Stops this {@link OfficeManager} managing the {@link AssetManager}
+	 * instances within the {@link Office}.
 	 */
 	void stopManaging();
+
 }
