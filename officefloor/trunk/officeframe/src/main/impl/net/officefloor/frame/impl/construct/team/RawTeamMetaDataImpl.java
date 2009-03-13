@@ -74,14 +74,6 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	 * =============== RawTeamMetaDataFactory =============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.impl.construct.team.RawTeamMetaDataFactory#
-	 * constructRawTeamMetaData
-	 * (net.officefloor.frame.internal.configuration.TeamConfiguration,
-	 * net.officefloor.frame.api.OfficeFloorIssues)
-	 */
 	@Override
 	public <TS extends TeamSource> RawTeamMetaDataImpl constructRawTeamMetaData(
 			TeamConfiguration<TS> configuration, OfficeFloorIssues issues) {
@@ -155,22 +147,11 @@ public class RawTeamMetaDataImpl implements RawTeamMetaDataFactory,
 	 * =============== RawTeamMetaData =============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.impl.construct.team.RawTeamMetaData#getTeamName()
-	 */
 	@Override
 	public String getTeamName() {
 		return this.teamName;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.impl.construct.team.RawTeamMetaData#getTeam()
-	 */
 	@Override
 	public Team getTeam() {
 		return this.team;

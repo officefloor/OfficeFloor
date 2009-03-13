@@ -143,8 +143,9 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	 */
 
 	@Override
-	public void registerTeam(String teamName, String teamId) {
-		this.teams.add(new LinkedTeamConfigurationImpl(teamId, teamName));
+	public void registerTeam(String officeTeamName, String officeFloorTeamName) {
+		this.teams.add(new LinkedTeamConfigurationImpl(officeTeamName,
+				officeFloorTeamName));
 	}
 
 	@Override

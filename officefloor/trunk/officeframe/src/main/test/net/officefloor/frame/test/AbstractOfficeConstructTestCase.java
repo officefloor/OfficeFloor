@@ -462,15 +462,15 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 */
 	protected TeamBuilder<?> constructTeam(String teamName, Team team) {
 
-		// Obtain the office floor Id for the team
-		String teamId = "of-" + teamName;
+		// Obtain the office floor team name
+		String officeFloorTeamName = "of-" + teamName;
 
 		// Bind the team into the office floor
 		TeamBuilder<?> teamBuilder = MockTeamSource.bindTeamBuilder(
-				this.officeFloorBuilder, teamId, team);
+				this.officeFloorBuilder, officeFloorTeamName, team);
 
 		// Link into the Office
-		this.officeBuilder.registerTeam(teamName, teamId);
+		this.officeBuilder.registerTeam(teamName, officeFloorTeamName);
 
 		// Return the team builder
 		return teamBuilder;

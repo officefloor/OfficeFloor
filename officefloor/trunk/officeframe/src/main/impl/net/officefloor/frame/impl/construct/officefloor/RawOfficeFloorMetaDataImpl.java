@@ -142,18 +142,19 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 		// Construct the teams
 		Map<String, RawTeamMetaData> teamRegistry = new HashMap<String, RawTeamMetaData>();
+		List<Team> teamListing = new LinkedList<Team>();
 		for (TeamConfiguration<?> teamConfiguration : configuration
 				.getTeamConfiguration()) {
 
-			// Construct the team
-			RawTeamMetaData teamMetaData = rawTeamFactory
+			// Construct the raw team meta-data
+			RawTeamMetaData rawTeamMetaData = rawTeamFactory
 					.constructRawTeamMetaData(teamConfiguration, issues);
-			if (teamMetaData == null) {
+			if (rawTeamMetaData == null) {
 				continue; // issue with team
 			}
 
 			// Obtain the team name
-			String teamName = teamMetaData.getTeamName();
+			String teamName = rawTeamMetaData.getTeamName();
 			if (teamRegistry.containsKey(teamName)) {
 				issues.addIssue(AssetType.OFFICE_FLOOR, officeFloorName,
 						"Teams registered with the same name '" + teamName
@@ -161,12 +162,17 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 				continue; // maintain only first team
 			}
 
+			// Obtain the team
+			Team team = rawTeamMetaData.getTeam();
+
 			// Register the team
-			teamRegistry.put(teamName, teamMetaData);
+			teamRegistry.put(teamName, rawTeamMetaData);
+			teamListing.add(team);
 		}
 
 		// Construct the managed object sources
 		Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry = new HashMap<String, RawManagedObjectMetaData<?, ?>>();
+		List<RawManagedObjectMetaData<?, ?>> mosListing = new LinkedList<RawManagedObjectMetaData<?, ?>>();
 		Map<String, List<RawOfficeManagingManagedObjectMetaData>> officeManagedObjects = new HashMap<String, List<RawOfficeManagingManagedObjectMetaData>>();
 		for (ManagedObjectSourceConfiguration mosConfiguration : configuration
 				.getManagedObjectSourceConfiguration()) {
@@ -210,6 +216,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 
 			// Register the managed object source
 			mosRegistry.put(managedObjectSourceName, mosMetaData);
+			mosListing.add(mosMetaData);
 
 			// Register for being managed by the office
 			List<RawOfficeManagingManagedObjectMetaData> officeManagingManagedObjects = officeManagedObjects
@@ -294,32 +301,30 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			for (String officeName : officeManagedObjects.keySet()) {
 				for (RawOfficeManagingManagedObjectMetaData managingOfficeMetaData : officeManagedObjects
 						.get(officeName)) {
-					issues.addIssue(AssetType.MANAGED_OBJECT, officeName,
-							"No Office by name '"
-									+ officeName
-									+ "' to manage Managed Object Source "
-									+ managingOfficeMetaData
-											.getRawManagedObjectMetaData()
-											.getManagedObjectName());
+					String managedObjectSourceName = managingOfficeMetaData
+							.getRawManagedObjectMetaData()
+							.getManagedObjectName();
+					issues
+							.addIssue(AssetType.MANAGED_OBJECT,
+									managedObjectSourceName,
+									"Can not find managing office '"
+											+ officeName + "'");
 				}
 			}
 		}
 
-		// Obtain the listing of teams
-		Team[] teams = this.teamRegistry.values().toArray(new Team[0]);
-
 		// Obtain the listing of managed object source instances
 		List<ManagedObjectSourceInstance<?>> mosInstances = new LinkedList<ManagedObjectSourceInstance<?>>();
-		for (RawManagedObjectMetaData<?, ?> rawMoMetaData : this.mosRegistry
-				.values()) {
+		for (RawManagedObjectMetaData<?, ?> rawMoMetaData : mosListing) {
 			ManagedObjectSourceInstance<?> mosInstance = this
 					.createManagedObjectSourceInstance(rawMoMetaData);
 			mosInstances.add(mosInstance);
 		}
 
 		// Create the office floor meta-data
-		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(teams,
-				mosInstances.toArray(new ManagedObjectSourceInstance[0]),
+		rawMetaData.officeFloorMetaData = new OfficeFloorMetaDataImpl(
+				teamListing.toArray(new Team[0]), mosInstances
+						.toArray(new ManagedObjectSourceInstance[0]),
 				officeMetaDatas.toArray(new OfficeMetaData[0]));
 
 		// Return the raw meta-data
