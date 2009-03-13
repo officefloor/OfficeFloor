@@ -370,7 +370,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		ProcessState processState = threadState.getProcessState();
 
 		// Obtain the index of managed object within scope
-		ManagedObjectIndex index = this.workMetaData.getManagedObjectIndexes()[moIndex];
+		ManagedObjectIndex[] indexes = this.workMetaData
+				.getManagedObjectIndexes();
+		ManagedObjectIndex index = indexes[moIndex];
 		int scopeIndex = index.getIndexOfManagedObjectWithinScope();
 
 		// Obtain the managed object container

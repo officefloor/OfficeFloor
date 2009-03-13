@@ -23,12 +23,15 @@ import org.easymock.AbstractMatcher;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawOfficeManagingManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
@@ -36,6 +39,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -742,9 +746,184 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures issue if {@link RawBoundManagedObjectMetaData} input is not bound
+	 * to the {@link ProcessState}.
+	 */
+	public void testAffixToNonProcessBoundManagedObjects() {
+
+		final RawBoundManagedObjectMetaData<?> boundMo = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final ManagedObjectIndex boundMoIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.THREAD, 0);
+
+		// Record affixing the already bound managed object
+		this.recordReturn(boundMo, boundMo.getBoundManagedObjectName(),
+				"NON_PROCESS_MO");
+		this.recordReturn(boundMo, boundMo.getManagedObjectIndex(),
+				boundMoIndex);
+		this.issues
+				.addIssue(
+						AssetType.OFFICE,
+						"OFFICE",
+						"Attempting to affix managed objects to listing of managed objects that are not all process bound");
+
+		// Affix the managed objects
+		this.replayMockObjects();
+		RawBoundManagedObjectMetaData<?> returnedBoundMo = this
+				.affixOfficeManagingManagedObjects(1,
+						new RawBoundManagedObjectMetaData[] { boundMo })[0];
+		this.verifyMockObjects();
+
+		// Verify the bound managed object
+		assertEquals("Incorrect bound managed object", boundMo, returnedBoundMo);
+	}
+
+	/**
+	 * Ensures not affixes a {@link ManagedObject} that does not require
+	 * {@link Handler} instances.
+	 */
+	public void testNotAffixManagedObjectRequiringNoHandlers() {
+
+		final RawOfficeManagingManagedObjectMetaData officeMo = this
+				.createMock(RawOfficeManagingManagedObjectMetaData.class);
+		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.createMock(RawManagedObjectMetaData.class);
+
+		// Record not affix as not require handlers
+		this.recordReturn(officeMo, officeMo.getRawManagedObjectMetaData(),
+				rawMoMetaData);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getHandlerKeys(), null);
+
+		// Affix the managed objects
+		this.replayMockObjects();
+		this.affixOfficeManagingManagedObjects(0,
+				new RawBoundManagedObjectMetaData[0], officeMo);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures issue if no {@link ProcessState} bound name to affix the
+	 * {@link ManagedObject}.
+	 */
+	public void testNoProcessManagedObjectNameForAffixing() {
+
+		final RawOfficeManagingManagedObjectMetaData officeMo = this
+				.createMock(RawOfficeManagingManagedObjectMetaData.class);
+		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.createMock(RawManagedObjectMetaData.class);
+
+		// Record not affix as not require handlers
+		this.recordReturn(officeMo, officeMo.getRawManagedObjectMetaData(),
+				rawMoMetaData);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getHandlerKeys(),
+				HandlerKey.class.getEnumConstants());
+		this.recordReturn(officeMo, officeMo.getProcessBoundName(), null);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getManagedObjectName(),
+				"MO");
+		this.issues
+				.addIssue(AssetType.MANAGED_OBJECT, "MO",
+						"Must provide process bound name as requires managing by an office");
+
+		// Affix the managed objects
+		this.replayMockObjects();
+		this.affixOfficeManagingManagedObjects(0,
+				new RawBoundManagedObjectMetaData[0], officeMo);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures able to affix a {@link RawOfficeManagingManagedObjectMetaData}
+	 * that is already {@link ProcessState} bound to the {@link Office}.
+	 */
+	public void testAffixBoundManagedObjects() {
+
+		final String BOUND_MO_NAME = "BOUND_MO";
+
+		final RawBoundManagedObjectMetaData<?> boundMo = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final ManagedObjectIndex boundMoIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.PROCESS, 0);
+		final RawOfficeManagingManagedObjectMetaData officeMo = this
+				.createMock(RawOfficeManagingManagedObjectMetaData.class);
+		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.createMock(RawManagedObjectMetaData.class);
+
+		// Record affixing the already bound managed object
+		this.recordReturn(boundMo, boundMo.getBoundManagedObjectName(),
+				BOUND_MO_NAME);
+		this.recordReturn(boundMo, boundMo.getManagedObjectIndex(),
+				boundMoIndex);
+		this.recordReturn(officeMo, officeMo.getRawManagedObjectMetaData(),
+				rawMoMetaData);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getHandlerKeys(),
+				HandlerKey.class.getEnumConstants());
+		this.recordReturn(officeMo, officeMo.getProcessBoundName(),
+				BOUND_MO_NAME);
+		this.recordReturn(boundMo, boundMo.getRawManagedObjectMetaData(),
+				rawMoMetaData);
+
+		// Affix the managed objects
+		this.replayMockObjects();
+		RawBoundManagedObjectMetaData<?> returnedBoundMo = this
+				.affixOfficeManagingManagedObjects(1,
+						new RawBoundManagedObjectMetaData[] { boundMo },
+						officeMo)[0];
+		this.verifyMockObjects();
+
+		// Verify the bound managed object
+		assertEquals("Incorrect bound managed object", boundMo, returnedBoundMo);
+	}
+
+	/**
+	 * Ensures able to affix a {@link RawOfficeManagingManagedObjectMetaData}
+	 * that is not {@link ProcessState} bound to the {@link Office}.
+	 */
+	public void testAffixNonBoundManagedObjects() {
+
+		final RawOfficeManagingManagedObjectMetaData officeMo = this
+				.createMock(RawOfficeManagingManagedObjectMetaData.class);
+		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.createMock(RawManagedObjectMetaData.class);
+
+		// Record affixing the non bound managed object
+		this.recordReturn(officeMo, officeMo.getRawManagedObjectMetaData(),
+				rawMoMetaData);
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getHandlerKeys(),
+				HandlerKey.class.getEnumConstants());
+		this
+				.recordReturn(officeMo, officeMo.getProcessBoundName(),
+						"NOT_BOUND");
+		this.record_getManagedObjectDetails(rawMoMetaData);
+
+		// Affix the managed objects
+		this.replayMockObjects();
+		RawBoundManagedObjectMetaData<?> returnedBoundMo = this
+				.affixOfficeManagingManagedObjects(1,
+						new RawBoundManagedObjectMetaData[0], officeMo)[0];
+		this.verifyMockObjects();
+
+		// Verify bound
+		ManagedObjectIndex moIndex = returnedBoundMo.getManagedObjectIndex();
+		assertEquals("Incorrect managed object scope",
+				ManagedObjectScope.PROCESS, moIndex.getManagedObjectScope());
+		assertEquals("Incorrect managed object index in scope", 0, moIndex
+				.getIndexOfManagedObjectWithinScope());
+		assertEquals("Incorrect bound managed object",
+				this.managedObjectSource, returnedBoundMo
+						.getManagedObjectMetaData().getManagedObjectSource());
+	}
+
+	/**
 	 * Dependency key {@link Enum}.
 	 */
 	private enum DependencyKey {
+		KEY
+	}
+
+	/**
+	 * {@link Handler} key {@link Enum}.
+	 */
+	private enum HandlerKey {
 		KEY
 	}
 
@@ -850,6 +1029,38 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Ensure correct number constructed
 		assertEquals("Incorrect number of bound managed objects",
 				expectedNumberConstructed, metaData.length);
+
+		// Return the meta-data
+		return metaData;
+	}
+
+	/**
+	 * Affixes the {@link RawOfficeManagingManagedObjectMetaData} instances.
+	 * 
+	 * @param expectedNumberReturned
+	 *            Expected number of {@link RawBoundManagedObjectMetaData}
+	 *            instances to be returned.
+	 * @param processBoundManagedObjectMetaData
+	 *            {@link ProcessState} {@link RawBoundManagedObjectMetaData}
+	 *            instances.
+	 * @param officeManagingManagedObjects
+	 *            {@link RawOfficeManagingManagedObjectMetaData} instances.
+	 * @return Returned {@link RawBoundManagedObjectMetaData}.
+	 */
+	private RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
+			int expectedNumberReturned,
+			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
+			RawOfficeManagingManagedObjectMetaData... officeManagingManagedObjects) {
+
+		// Attempt to affix office managed objects
+		RawBoundManagedObjectMetaData<?>[] metaData = RawBoundManagedObjectMetaDataImpl
+				.getFactory().affixOfficeManagingManagedObjects("OFFICE",
+						processBoundManagedObjectMetaData,
+						officeManagingManagedObjects, this.issues);
+
+		// Ensure correct number returned
+		assertEquals("Incorrect number of bound managed objects returned",
+				expectedNumberReturned, metaData.length);
 
 		// Return the meta-data
 		return metaData;

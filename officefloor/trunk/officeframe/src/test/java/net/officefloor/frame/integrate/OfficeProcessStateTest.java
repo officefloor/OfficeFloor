@@ -43,6 +43,8 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 	@SuppressWarnings("unchecked")
 	public void testProcessState() throws Exception {
 
+		final String officeName = this.getOfficeName();
+
 		// Parameter to be passed between work instances
 		final Object parameter = new Object();
 
@@ -51,7 +53,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 
 		// Add the Managed Object
 		this.constructManagedObject(new ManagedObjectOne(), "MANAGED_OBJECT",
-				"TEST");
+				officeName);
 
 		// Add the first work
 		WorkOne workOne = new WorkOne(parameter);
@@ -78,7 +80,6 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 				"mo-two");
 
 		// Register and open the office floor
-		String officeName = this.getOfficeName();
 		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 

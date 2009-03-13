@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute;
+package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobActivateSet;
@@ -43,43 +43,25 @@ public class JobNodeAdapter implements JobNode {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.JobNode#activateJob()
+	 * ==================== JobNode =====================================
 	 */
+
 	@Override
 	public void activateJob() {
 		// Do nothing
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.JobNode#isJobNodeComplete()
-	 */
 	@Override
 	public boolean isJobNodeComplete() {
 		// Always running
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobNode#clearNodes(net.officefloor
-	 * .frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public void clearNodes(JobActivateSet notifySet) {
 		// Do nothing
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.JobNode#getFlow()
-	 */
 	@Override
 	public Flow getFlow() {
 		return this.flow;
@@ -90,23 +72,11 @@ public class JobNodeAdapter implements JobNode {
 	 */
 	private JobNode nextNode = null;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobNode#setNextNode(net.officefloor
-	 * .frame.internal.structure.JobNode)
-	 */
 	@Override
 	public void setNextNode(JobNode jobNode) {
 		this.nextNode = jobNode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.JobNode#getNextNode()
-	 */
 	@Override
 	public JobNode getNextNode() {
 		return this.nextNode;
@@ -117,23 +87,11 @@ public class JobNodeAdapter implements JobNode {
 	 */
 	private JobNode parallelNode = null;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobNode#setParallelNode(net.
-	 * officefloor.frame.internal.structure.JobNode)
-	 */
 	@Override
 	public void setParallelNode(JobNode jobNode) {
 		this.parallelNode = jobNode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.JobNode#getParallelNode()
-	 */
 	@Override
 	public JobNode getParallelNode() {
 		return this.parallelNode;
@@ -144,23 +102,11 @@ public class JobNodeAdapter implements JobNode {
 	 */
 	private JobNode parallelOwner = null;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobNode#setParallelOwner(net
-	 * .officefloor.frame.internal.structure.JobNode)
-	 */
 	@Override
 	public void setParallelOwner(JobNode jobNode) {
 		this.parallelOwner = jobNode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.JobNode#getParallelOwner()
-	 */
 	@Override
 	public JobNode getParallelOwner() {
 		return this.parallelOwner;

@@ -62,22 +62,12 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	 * ================ AssetManager ======================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.AssetManager#createAssetMonitor
-	 * (net.officefloor.frame.internal.structure.Asset)
-	 */
+	@Override
 	public AssetMonitor createAssetMonitor(Asset asset) {
 		return new AssetMonitorImpl(asset, this, this.monitors);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetManager#manageAssets()
-	 */
+	@Override
 	public void manageAssets() {
 
 		// Access Point: Project Manager
@@ -133,26 +123,14 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 		notifySet.activateJobs();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.AssetGroup#registerTaskMonitor
-	 * (net.officefloor.frame.internal.structure.TaskMonitor)
-	 */
+	@Override
 	public void registerAssetMonitor(AssetMonitor monitor) {
 		synchronized (this.monitors) {
 			this.monitors.addLinkedListEntry(monitor);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.AssetGroup#unregisterTaskMonitor
-	 * (net.officefloor.frame.internal.structure.TaskMonitor)
-	 */
+	@Override
 	public void unregisterAssetMonitor(AssetMonitor monitor) {
 		synchronized (this.monitors) {
 			monitor.removeFromLinkedList(null);
@@ -166,11 +144,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	 * the managed AssetGroup method.
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.AssetReport#getTime()
-	 */
+	@Override
 	public long getTime() {
 		// Lazy obtain current time
 		if (this.time == NO_TIME) {
@@ -181,13 +155,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 		return this.time;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.AssetReport#setFailure(java.
-	 * lang.Throwable)
-	 */
+	@Override
 	public void setFailure(Throwable failure) {
 		this.failure = failure;
 	}

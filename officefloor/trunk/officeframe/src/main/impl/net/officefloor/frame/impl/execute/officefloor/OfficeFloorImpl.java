@@ -22,6 +22,7 @@ import java.util.Map;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.office.OfficeImpl;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -98,10 +99,12 @@ public class OfficeFloorImpl implements OfficeFloor {
 
 		// Invoke the startup tasks for each office
 		for (OfficeMetaData officeMetaData : officeMetaDatas) {
-			for (OfficeStartupTask startupTask : officeMetaData
+			for (OfficeStartupTask officeStartupTask : officeMetaData
 					.getStartupTasks()) {
-				officeMetaData.createProcess(startupTask.getFlowMetaData(),
-						startupTask.getParameter());
+				JobNode startupTask = officeMetaData.createProcess(
+						officeStartupTask.getFlowMetaData(), officeStartupTask
+								.getParameter());
+				startupTask.activateJob();
 			}
 		}
 	}
@@ -146,7 +149,7 @@ public class OfficeFloorImpl implements OfficeFloor {
 		for (Team team : this.officeFloorMetaData.getTeams()) {
 			team.stopWorking();
 		}
-		
+
 		// TODO stop the Project Manager (Office Manager)
 
 		// Flag that no longer open

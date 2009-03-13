@@ -72,7 +72,7 @@ public class WorkManagerImpl implements WorkManager {
 				.getInitialFlowMetaData();
 
 		// Ensure there is an initial task for the work
-		if (flowMetaData.getInitialTaskMetaData() == null) {
+		if (flowMetaData == null) {
 			throw new NoInitialTaskException("No initial task for work '"
 					+ this.workMetaData.getWorkName() + "'");
 		}

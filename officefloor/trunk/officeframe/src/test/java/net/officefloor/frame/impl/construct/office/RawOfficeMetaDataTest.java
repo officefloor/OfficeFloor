@@ -721,8 +721,18 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		// Construct the office
 		this.replayMockObjects();
-		this.constructRawOfficeMetaData(true);
+		RawOfficeMetaData rawOfficeMetaData = this
+				.constructRawOfficeMetaData(true);
+		OfficeMetaData officeMetaData = rawOfficeMetaData.getOfficeMetaData();
 		this.verifyMockObjects();
+
+		// Verify the office meta-data
+		assertEquals("Incorrect office name", "OFFICE", officeMetaData
+				.getOfficeName());
+		WorkMetaData<?>[] returnedWorkMetaData = officeMetaData
+				.getWorkMetaData();
+		assertEquals("Incorrect number of work", 1, returnedWorkMetaData.length);
+		assertEquals("Incorrect work", workMetaData, returnedWorkMetaData[0]);
 	}
 
 	/**

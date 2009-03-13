@@ -14,22 +14,15 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute;
+package net.officefloor.frame.integrate.handler;
 
 /**
- * Processor for a {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * Listing of handlers.
  * 
  * @author Daniel
  */
-public interface ManagedObjectProcesser<O> {
+public enum Handlers {
 
-	/**
-	 * Process the object of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 * 
-	 * @param object
-	 *            Object of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 */
-	void process(O object);
+	INPUT
+
 }

@@ -19,8 +19,6 @@ package net.officefloor.frame.integrate;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -50,7 +48,7 @@ public class WorkTest extends AbstractOfficeConstructTestCase {
 		// Register the team
 		this.constructTeam("TEAM", new PassiveTeam());
 
-		// Start the office
+		// Invoke the work's initial task
 		this.invokeWork(WORK_NAME, null);
 
 		// Ensure task invoked
@@ -75,19 +73,9 @@ public class WorkTest extends AbstractOfficeConstructTestCase {
 		// Register the team
 		this.constructTeam("TEAM", new PassiveTeam());
 
-		// Start the office floor
-		final String OFFICE_NAME = this.getOfficeName();
-		OfficeFloor officeFloor = this.constructOfficeFloor();
-
-		// Should be able to obtain the office
-		Office office = officeFloor.getOffice(OFFICE_NAME);
-
-		// Obtain the work manager
-		WorkManager workManager = office.getWorkManager(WORK_NAME);
-
 		try {
-			// Attempt to invoke the work
-			workManager.invokeWork(null);
+			// Invoke the work without initial task
+			this.invokeWork(WORK_NAME, null);
 
 			// Should not be successful as no initial task
 			fail("Should not invoke work as no initial task");

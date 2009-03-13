@@ -17,9 +17,12 @@
 package net.officefloor.frame.impl.execute.thread;
 
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
+import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
@@ -30,6 +33,7 @@ import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -63,6 +67,16 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * {@link ThreadMetaData} for this {@link ThreadState}.
 	 */
 	private final ThreadMetaData threadMetaData;
+
+	/**
+	 * {@link ManagedObjectContainer} instances for this {@link ThreadState}.
+	 */
+	private final ManagedObjectContainer[] managedObjectContainers;
+
+	/**
+	 * {@link AdministratorContainer} instances for this {@link ThreadState}.
+	 */
+	private final AdministratorContainer<?, ?>[] administratorContainers;
 
 	/**
 	 * {@link ProcessState} for this {@link ThreadState}.
@@ -102,10 +116,29 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} for this {@link ThreadState}.
 	 */
+	@SuppressWarnings("unchecked")
 	public ThreadStateImpl(ThreadMetaData threadMetaData,
 			ProcessState processState, FlowMetaData<?> flowMetaData) {
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
+
+		// Create the managed object containers
+		ManagedObjectMetaData<?>[] moMetaData = this.threadMetaData
+				.getManagedObjectMetaData();
+		this.managedObjectContainers = new ManagedObjectContainer[moMetaData.length];
+		for (int i = 0; i < this.managedObjectContainers.length; i++) {
+			this.managedObjectContainers[i] = new ManagedObjectContainerImpl(
+					moMetaData[i], this.processState);
+		}
+
+		// Create the administrator containers
+		AdministratorMetaData<?, ?>[] adminMetaData = this.threadMetaData
+				.getAdministratorMetaData();
+		this.administratorContainers = new AdministratorContainer[adminMetaData.length];
+		for (int i = 0; i < this.administratorContainers.length; i++) {
+			this.administratorContainers[i] = new AdministratorContainerImpl(
+					adminMetaData[i]);
+		}
 
 		// Create the thread monitor (if required)
 		AssetManager flowManager = flowMetaData.getFlowManager();
@@ -175,16 +208,12 @@ public class ThreadStateImpl implements ThreadState, Asset {
 
 	@Override
 	public ManagedObjectContainer getManagedObjectContainer(int index) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement ThreadState.getManagedObjectContainer");
+		return this.managedObjectContainers[index];
 	}
 
 	@Override
 	public AdministratorContainer<?, ?> getAdministratorContainer(int index) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement ThreadState.getAdministratorContainer");
+		return this.administratorContainers[index];
 	}
 
 	@Override

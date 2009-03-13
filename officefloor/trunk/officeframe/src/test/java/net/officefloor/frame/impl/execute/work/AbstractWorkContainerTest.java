@@ -99,12 +99,6 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	private boolean[] isManagedObjectAvailable = null;
 
 	/**
-	 * Listing of {@link AdministratorIndex} instances for the
-	 * {@link WorkMetaData}.
-	 */
-	private final List<AdministratorIndex> administratorIndexes = new ArrayList<AdministratorIndex>();
-
-	/**
 	 * {@link AdministratorScope#WORK} bound {@link AdministratorContainer}
 	 * instances.
 	 */
@@ -139,8 +133,9 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * 
 	 * @param scope
 	 *            {@link ManagedObjectScope} for the {@link ManagedObjectIndex}.
+	 * @return {@link ManagedObjectIndex}.
 	 */
-	protected void addManagedObjectIndex(ManagedObjectScope scope) {
+	protected ManagedObjectIndex addManagedObjectIndex(ManagedObjectScope scope) {
 
 		// Can not change meta-data after initialising
 		if (this.isManagedObjectAvailable != null) {
@@ -182,13 +177,14 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 		default:
 			fail("Unknown managed object scope " + scope);
-			return;
+			return null;
 		}
 
-		// Create and add the managed object index
+		// Create, add and return the managed object index
 		ManagedObjectIndex index = new ManagedObjectIndexImpl(scope,
 				scopeBoundIndex);
 		this.managedObjectIndexes.add(index);
+		return index;
 	}
 
 	/**
@@ -197,8 +193,9 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * 
 	 * @param scope
 	 *            {@link AdministratorScope} for the {@link AdministratorIndex}.
+	 * @return {@link AdministratorIndex}.
 	 */
-	protected void addAdministratorIndex(AdministratorScope scope) {
+	protected AdministratorIndex addAdministratorIndex(AdministratorScope scope) {
 
 		// Can not change meta-data after initialising
 		if (this.isAdministratorAvailable != null) {
@@ -240,13 +237,11 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 		default:
 			fail("Unknown administrator scope " + scope);
-			return;
+			return null;
 		}
 
-		// Create and add the administrator index
-		AdministratorIndex index = new AdministratorIndexImpl(scope,
-				scopeBoundIndex);
-		this.administratorIndexes.add(index);
+		// Create and return the administrator index
+		return new AdministratorIndexImpl(scope, scopeBoundIndex);
 	}
 
 	/**
@@ -479,7 +474,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	protected void record_WorkContainer_administerManagedObjects(
-			int administratorIndex, int... managedObjectIndexes) {
+			AdministratorIndex adminIndex, ManagedObjectIndex... moIndexes) {
 
 		// Record obtaining the states
 		this.recordReturn(this.administratorContext, this.administratorContext
@@ -489,14 +484,12 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 		// Record obtaining the administrator index
 		this.recordReturn(this.taskDutyAssociation, this.taskDutyAssociation
-				.getAdministratorIndex(), administratorIndex);
+				.getAdministratorIndex(), adminIndex);
 
 		// Record obtaining the administrator container
 		AdministratorContainer administratorContainer;
-		AdministratorIndex index = this.administratorIndexes
-				.get(administratorIndex);
-		int scopeIndex = index.getIndexOfAdministratorWithinScope();
-		switch (index.getAdministratorScope()) {
+		int scopeIndex = adminIndex.getIndexOfAdministratorWithinScope();
+		switch (adminIndex.getAdministratorScope()) {
 		case WORK:
 			administratorContainer = this.workAdministratorContainers
 					.get(scopeIndex);
@@ -532,17 +525,13 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			break;
 
 		default:
-			fail("Unknown administrator scope " + index.getAdministratorScope());
+			fail("Unknown administrator scope "
+					+ adminIndex.getAdministratorScope());
 			return;
 		}
 
-		// Obtain the managed object indexes
-		this.recordReturn(this.workMetaData, this.workMetaData
-				.getManagedObjectIndexes(), this.managedObjectIndexes
-				.toArray(new ManagedObjectIndex[0]));
-
 		// Create the extension interface meta-data
-		ExtensionInterfaceMetaData<?>[] eiMetaDatas = new ExtensionInterfaceMetaData[managedObjectIndexes.length];
+		ExtensionInterfaceMetaData<?>[] eiMetaDatas = new ExtensionInterfaceMetaData[moIndexes.length];
 		for (int i = 0; i < eiMetaDatas.length; i++) {
 			eiMetaDatas[i] = this.createMock(ExtensionInterfaceMetaData.class);
 		}
@@ -554,13 +543,13 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		Object[] extensionInterfaces = new Object[eiMetaDatas.length];
 		for (int i = 0; i < eiMetaDatas.length; i++) {
 			ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
-			int managedObjectIndex = managedObjectIndexes[i];
+			ManagedObjectIndex moIndex = moIndexes[i];
 
 			// Record obtaining the managed object
 			this.recordReturn(eiMetaData, eiMetaData.getManagedObjectIndex(),
-					managedObjectIndex);
+					moIndex);
 			ManagedObjectContainer managedObjectContainer = this
-					.record_getManagedObjectContainer(managedObjectIndex, false);
+					.record_getManagedObjectContainer(moIndex, false);
 			ManagedObject managedObject = this.createMock(ManagedObject.class);
 			this.recordReturn(managedObjectContainer, managedObjectContainer
 					.getManagedObject(this.threadState), managedObject);
