@@ -25,7 +25,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 
 /**
  * Context for a {@link ManagedObjectSource}.

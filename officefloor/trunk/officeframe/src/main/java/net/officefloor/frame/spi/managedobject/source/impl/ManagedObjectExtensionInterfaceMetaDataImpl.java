@@ -17,17 +17,16 @@
 package net.officefloor.frame.spi.managedobject.source.impl;
 
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 
 /**
- * Implementation of
- * {@link net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData}.
+ * Implementation of {@link ManagedObjectExtensionInterfaceMetaData}.
  * 
  * @author Daniel
  */
 public class ManagedObjectExtensionInterfaceMetaDataImpl<I extends Object>
 		implements ManagedObjectExtensionInterfaceMetaData<I> {
-	
+
 	/**
 	 * Extension interface type.
 	 */
@@ -53,19 +52,15 @@ public class ManagedObjectExtensionInterfaceMetaDataImpl<I extends Object>
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData#getExtensionInterfaceType()
+	 * ================== ManagedObjectExtensionInterfaceMetaData ==============
 	 */
+
+	@Override
 	public Class<I> getExtensionInterfaceType() {
 		return this.type;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData#getExtensionInterfaceFactory()
-	 */
+	@Override
 	public ExtensionInterfaceFactory<I> getExtensionInterfaceFactory() {
 		return this.factory;
 	}

@@ -16,13 +16,14 @@
  */
 package net.officefloor.frame.spi.managedobject;
 
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+
 /**
  * <p>
  * Contract to provide control over asynchronous processing by the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * {@link ManagedObject}.
  * <p>
- * Implemented by the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} provider.
+ * Implemented by the {@link ManagedObjectSource} provider.
  * 
  * @author Daniel
  */
@@ -30,11 +31,12 @@ public interface AsynchronousManagedObject extends ManagedObject {
 
 	/**
 	 * Provides the {@link AsynchronousListener} to the
-	 * {@link AsynchronousManagedObject} to enable callback to notify state and
+	 * {@link AsynchronousManagedObject} to enable call back to notify state and
 	 * completion of asynchronous processing.
 	 * 
 	 * @param listener
 	 *            {@link AsynchronousListener}.
 	 */
 	void registerAsynchronousCompletionListener(AsynchronousListener listener);
+
 }

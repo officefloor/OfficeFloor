@@ -1,7 +1,7 @@
 /*
  * Created on Jan 10, 2006
  */
-package net.officefloor.frame.spi.pool;
+package net.officefloor.frame.spi.managedobject.pool;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;

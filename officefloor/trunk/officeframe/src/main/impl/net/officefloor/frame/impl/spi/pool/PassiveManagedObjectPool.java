@@ -20,12 +20,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPoolContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.spi.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.pool.ManagedObjectPoolContext;
 
 /**
- * {@link net.officefloor.frame.spi.pool.ManagedObjectPool} for passive
+ * {@link net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool} for passive
  * management of {@link net.officefloor.frame.spi.managedobject.ManagedObject}
  * instances.
  * 

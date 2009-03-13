@@ -50,20 +50,14 @@ public class AdministratorSourcePropertyImpl implements
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceProperty#getName()
+	 * ==================== AdministratorSourceProperty =======================
 	 */
+
 	@Override
 	public String getName() {
 		return this.name;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceProperty#getLabel()
-	 */
 	@Override
 	public String getLabel() {
 		return this.label;

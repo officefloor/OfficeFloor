@@ -19,8 +19,8 @@ package net.officefloor.frame.internal.structure;
 import java.util.Map;
 
 import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.pool.ManagedObjectPool;
 
 /**
  * Instance of a {@link ManagedObjectSource} and items to support it.

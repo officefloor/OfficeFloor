@@ -24,7 +24,6 @@ package net.officefloor.frame.spi.managedobject;
 public interface ManagedObject {
 
 	/**
-	 * <p>
 	 * Obtains the object being managed.
 	 * 
 	 * @return Object being managed.

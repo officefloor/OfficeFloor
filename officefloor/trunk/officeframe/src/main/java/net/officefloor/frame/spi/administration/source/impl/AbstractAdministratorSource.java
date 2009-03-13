@@ -40,10 +40,9 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		implements AdministratorSource<I, A> {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#getSpecification()
+	 * ==================== AdministratorSource ==============================
 	 */
+
 	@Override
 	public AdministratorSourceSpecification getSpecification() {
 		// Create and populate the specification
@@ -105,57 +104,35 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		 */
 		private final List<AdministratorSourceProperty> properties = new LinkedList<AdministratorSourceProperty>();
 
-		// ---------------------------------------------------------------
-		// SpecificationContext
-		// ---------------------------------------------------------------
-
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.SpecificationContext#addProperty(java.lang.String)
+		 * ================= SpecificationContext =======================
 		 */
+
 		@Override
 		public void addProperty(String name) {
 			this.properties
 					.add(new AdministratorSourcePropertyImpl(name, name));
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.SpecificationContext#addProperty(java.lang.String,
-		 *      java.lang.String)
-		 */
 		@Override
 		public void addProperty(String name, String label) {
 			this.properties
 					.add(new AdministratorSourcePropertyImpl(name, label));
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.SpecificationContext#addProperty(net.officefloor.frame.spi.administration.source.AdministratorSourceProperty)
-		 */
 		@Override
 		public void addProperty(AdministratorSourceProperty property) {
 			this.properties.add(property);
 		}
 
-		// ---------------------------------------------------------------
-		// AdministratorSourceSpecification
-		// ---------------------------------------------------------------
-
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification#getProperties()
+		 * ================== AdministratorSourceSpecification ===============
 		 */
+
 		@Override
 		public AdministratorSourceProperty[] getProperties() {
 			return this.properties.toArray(new AdministratorSourceProperty[0]);
 		}
-
 	}
 
 	/**
@@ -163,11 +140,6 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	 */
 	private MetaData metaData;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#init(net.officefloor.frame.spi.administration.source.AdministratorSourceContext)
-	 */
 	@Override
 	public void init(AdministratorSourceContext context) throws Exception {
 		// Create and populate the meta-data
@@ -266,15 +238,15 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 			this.context = context;
 		}
 
-		// --------------------------------------------------------------------
-		// MetaDataContext
-		// --------------------------------------------------------------------
-
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.MetaDataContext#setDutyKeys(java.lang.Class)
+		 * ================= MetaDataContext ================================
 		 */
+
+		@Override
+		public AdministratorSourceContext getAdministratorSourceContext() {
+			return this.context;
+		}
+
 		@Override
 		public void setDutyKeys(Class<A> dutyKeys) {
 
@@ -289,67 +261,31 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.MetaDataContext#setDutyFlows(java.lang.Object,
-		 *      java.lang.Class)
-		 */
 		@Override
 		public <F extends Enum<F>> void setDutyFlows(A dutyKey,
 				Class<F> flowKeys) {
 			this.dutyMetaData.put(dutyKey, new DutyMetaData<F>(flowKeys));
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.MetaDataContext#setExtensionInterface(java.lang.Class)
-		 */
 		@Override
 		public void setExtensionInterface(Class<I> extensionInterface) {
 			this.extensionInterface = extensionInterface;
 		}
 
-		// --------------------------------------------------------------------
-		// AdministratorSourceMetaData
-		// --------------------------------------------------------------------
-
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.MetaDataContext#getAdministratorSourceContext()
+		 * ================= AdministratorSourceMetaData =======================
 		 */
-		@Override
-		public AdministratorSourceContext getAdministratorSourceContext() {
-			return this.context;
-		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData#getAministratorDutyKeys()
-		 */
 		@Override
 		public Class<A> getAministratorDutyKeys() {
 			return this.dutyKeys;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData#getAdministratorDutyMetaData(java.lang.Enum)
-		 */
 		@Override
 		public AdministratorDutyMetaData<?> getAdministratorDutyMetaData(A key) {
 			return this.dutyMetaData.get(key);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData#getExtensionInterface()
-		 */
 		@Override
 		public Class<I> getExtensionInterface() {
 			return this.extensionInterface;
@@ -378,21 +314,15 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData#getFlowKeys()
+		 * ================= AdministratorDutyMetaData ======================
 		 */
+		
 		@Override
 		public Class<F> getFlowKeys() {
 			return this.flowKeys;
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#getMetaData()
-	 */
 	@Override
 	public AdministratorSourceMetaData<I, A> getMetaData() {
 		// Return the meta data

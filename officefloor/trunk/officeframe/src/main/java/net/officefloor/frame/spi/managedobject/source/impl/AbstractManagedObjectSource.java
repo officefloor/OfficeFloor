@@ -36,10 +36,9 @@ public abstract class AbstractManagedObjectSource<D extends Enum<D>, H extends E
 		extends AbstractAsyncManagedObjectSource<D, H> {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
+	 * ============= ManagedObjectSource ===================================
 	 */
+
 	@Override
 	public void sourceManagedObject(ManagedObjectUser user) {
 		try {

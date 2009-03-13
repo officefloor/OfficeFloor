@@ -14,24 +14,33 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.spi.pool;
+package net.officefloor.frame.spi.managedobject.source;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 
 /**
- * Context for a {@link ManagedObjectPool}.
+ * Meta-data regarding an extension interface implemented by the
+ * {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectPoolContext {
+public interface ManagedObjectExtensionInterfaceMetaData<I> {
 
 	/**
-	 * Obtains the {@link ManagedObjectSource} for the {@link ManagedObject}
-	 * instances being pooled.
+	 * Obtains the type of extension interface.
 	 * 
-	 * @return {@link ManagedObjectSource} for the {@link ManagedObject}
-	 *         instances being pooled.
+	 * @return {@link Class} representing the type of extension interface.
 	 */
-	ManagedObjectSource<?, ?> getManagedObjectSource();
+	Class<I> getExtensionInterfaceType();
+
+	/**
+	 * Obtains the {@link ExtensionInterfaceFactory} to create the extension
+	 * interface for the {@link ManagedObject}.
+	 * 
+	 * @return {@link ExtensionInterfaceFactory} to create the extension
+	 *         interface for the {@link ManagedObject}.
+	 */
+	ExtensionInterfaceFactory<I> getExtensionInterfaceFactory();
 
 }

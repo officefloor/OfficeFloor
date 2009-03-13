@@ -19,8 +19,7 @@ package net.officefloor.frame.spi.managedobject.source.impl;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData}.
+ * Implementation of the {@link ManagedObjectDependencyMetaData}.
  * 
  * @author Daniel
  */
@@ -43,10 +42,10 @@ public class ManagedObjectDependencyMetaDataImpl implements
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData#getType()
+	 * ================= ManagedObjectDependencyMetaData =================
 	 */
+
+	@Override
 	public Class<?> getType() {
 		return this.type;
 	}

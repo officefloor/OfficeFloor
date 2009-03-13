@@ -16,32 +16,40 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import java.util.Properties;
-
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamFactory;
+import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.spi.team.source.TeamSourceContext;
+import net.officefloor.frame.spi.team.source.impl.AbstractTeamSource;
 
 /**
- * {@link TeamFactory} for the {@link WorkerPerTaskTeam}.
+ * {@link TeamSource} for a {@link LeaderFollowerTeam}.
  * 
  * @author Daniel
  */
-public class WorkerPerTaskTeamFactory implements TeamFactory {
+public class LeaderFollowerTeamSource extends AbstractTeamSource {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TeamFactory#createTeam(java.util.Properties)
+	 * =================== AbstractTeamSource =============================
 	 */
-	@Override
-	public Team createTeam(Properties properties) throws Exception {
 
-		// Obtain the team name
-		String teamName = properties.getProperty("name",
-				WorkerPerTaskTeam.class.getSimpleName());
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty("name");
+		context.addProperty("size");
+		context.addProperty("wait.time");
+	}
+
+	@Override
+	protected Team createTeam(TeamSourceContext context) throws Exception {
+
+		// Obtain the configuration
+		String teamName = context.getProperty("name", LeaderFollowerTeam.class
+				.getSimpleName());
+		int teamSize = Integer.parseInt(context.getProperty("size", "10"));
+		long waitTime = Long.parseLong(context.getProperty("wait.time", "100"));
 
 		// Create and return the team
-		return new WorkerPerTaskTeam(teamName);
+		return new LeaderFollowerTeam(teamName, teamSize, waitTime);
 	}
 
 }
