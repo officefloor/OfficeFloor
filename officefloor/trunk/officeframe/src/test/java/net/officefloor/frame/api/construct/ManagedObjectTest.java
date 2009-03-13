@@ -316,12 +316,15 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		final String EXTERNAL_EVENT_TASK = "externalEvent";
 		final String INVOKED_TASK = "invokedTask";
 
+		// Obtain the name of the office
+		String officeName = this.getOfficeName();
+		
 		// Create and register the managed object source
 		ManagedObjectBuilder<HandlerKey> managedObjectBuilder = this
 				.getOfficeFloorBuilder().addManagedObject("MO",
 						TestManagedObjectSource.class);
 		ManagingOfficeBuilder managingOfficeBuilder = managedObjectBuilder
-				.setManagingOffice("OFFICE");
+				.setManagingOffice(officeName);
 		if (isManagedObjectOutside) {
 			managingOfficeBuilder.setProcessBoundManagedObjectName("OFFICE_MO");
 		}
