@@ -622,6 +622,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect sourcing asset manager",
 				this.sourcingAssetManager, rawMetaData
 						.getSourcingAssetManager());
+		assertEquals("Ensure round trip managing office details", rawMetaData,
+				rawMetaData.getManagingOfficeMetaData()
+						.getRawManagedObjectMetaData());
 	}
 
 	/**

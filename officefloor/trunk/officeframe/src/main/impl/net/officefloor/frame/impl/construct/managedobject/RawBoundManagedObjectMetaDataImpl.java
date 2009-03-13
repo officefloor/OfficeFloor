@@ -139,13 +139,13 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData<?>> scopeManagedObjects) {
 
-		// Create copy of scope bound managed objects
-		Map<String, RawBoundManagedObjectMetaData<?>> boundMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
-		if (scopeManagedObjects != null) {
-			boundMo.putAll(scopeManagedObjects);
+		// Handle if null scope managed objects
+		if (scopeManagedObjects == null) {
+			scopeManagedObjects = Collections.emptyMap();
 		}
 
 		// Obtain the bound managed object instances
+		Map<String, RawBoundManagedObjectMetaData<?>> boundMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
 		List<RawBoundManagedObjectMetaDataImpl<?>> boundMoList = new LinkedList<RawBoundManagedObjectMetaDataImpl<?>>();
 		int boundMoIndex = 0;
 		for (ManagedObjectConfiguration<?> mo : boundManagedObjectConfiguration) {

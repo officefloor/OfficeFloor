@@ -14,10 +14,9 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.api.construct;
+package net.officefloor.frame.integrate;
 
 import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
@@ -28,20 +27,19 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Tests the {@link net.officefloor.frame.internal.structure.ProcessState} is
- * appropriately passed between {@link net.officefloor.frame.api.execute.Work}
- * instances of the Office.
+ * Validates passing a parameter between two
+ * {@link net.officefloor.frame.api.execute.Work} instances of a office.
  * 
  * @author Daniel
  */
-public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
+public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Validate {@link net.officefloor.frame.internal.structure.ProcessState} is
-	 * passed between {@link net.officefloor.frame.api.execute.Work} instances.
+	 * Validates that able to pass parameters between
+	 * {@link net.officefloor.frame.api.execute.Work} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testProcessState() throws Exception {
+	public void testPassParameterBetweenWork() throws Exception {
 
 		// Parameter to be passed between work instances
 		final Object parameter = new Object();
@@ -49,33 +47,18 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		// Add the team
 		this.constructTeam("TEAM", new OnePersonTeam(10));
 
-		// Add the Managed Object
-		this.constructManagedObject(new ManagedObjectOne(), "MANAGED_OBJECT",
-				"TEST");
-
 		// Add the first work
 		WorkOne workOne = new WorkOne(parameter);
-		WorkBuilder<WorkOne> workOneBuilder = this.constructWork("WORK_ONE",
-				workOne, "SENDER");
-		workOneBuilder.addWorkManagedObject("mo-one", "MANAGED_OBJECT");
-		TaskBuilder<Object, WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> taskOneBuilder = this
+		this.constructWork("WORK_ONE", workOne, "SENDER");
+		TaskBuilder<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> taskBuilder = this
 				.constructTask("SENDER", workOne, "TEAM", null);
-		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
+		taskBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL);
-		taskOneBuilder.linkManagedObject(
-				WorkOneManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(),
-				"mo-one");
 
 		// Add the second work
 		WorkTwo workTwo = new WorkTwo();
-		WorkBuilder<WorkTwo> workTwoBuilder = this.constructWork("WORK_TWO",
-				workTwo, "RECEIVER");
-		workTwoBuilder.addWorkManagedObject("mo-two", "MANAGED_OBJECT");
-		TaskBuilder<Object, WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> taskTwoBuilder = this
-				.constructTask("RECEIVER", workTwo, "TEAM", null);
-		taskTwoBuilder.linkManagedObject(
-				WorkTwoManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(),
-				"mo-two");
+		this.constructWork("WORK_TWO", workTwo, "RECEIVER");
+		this.constructTask("RECEIVER", workTwo, "TEAM", null);
 
 		// Register and open the office floor
 		String officeName = this.getOfficeName();
@@ -85,7 +68,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		// Invoke WorkOne
 		WorkManager workManager = officeFloor.getOffice(officeName)
 				.getWorkManager("WORK_ONE");
-		workManager.invokeWork(new Object());
+		workManager.invokeWork(null);
 
 		// Allow some time for processing
 		this.sleep(1);
@@ -98,17 +81,10 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Object retrieved.
-	 */
-	private static Object retrievedObject = null;
-
-	/**
 	 * First {@link net.officefloor.frame.api.execute.Work} type for testing.
 	 */
-	private class WorkOne
-			implements
-			Work,
-			Task<Object, WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> {
+	private class WorkOne implements Work,
+			Task<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> {
 
 		/**
 		 * Parameter to invoke delegate work with.
@@ -133,40 +109,27 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		 * .api.execute.TaskContext)
 		 */
 		public Object doTask(
-				TaskContext<Object, WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> context)
+				TaskContext<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> context)
 				throws Exception {
 
-			// Obtain the Managed Object
-			ManagedObjectOne managedObjectOne = (ManagedObjectOne) context
-					.getObject(WorkOneManagedObjectsEnum.MANAGED_OBJECT_ONE);
+			// Delegate to the work
+			context.doFlow(WorkOneDelegatesEnum.WORK_TWO, this.parameter);
 
-			// Specify the retrieved object
-			retrievedObject = managedObjectOne;
-
-			// Specify the parameter
-			managedObjectOne.setParameter(parameter);
-
-			// Obtain the Work Supervisor to initiate the second work
-			context.doFlow(WorkOneDelegatesEnum.WORK_TWO, null);
-
-			// No futher parameter
+			// No parameter
 			return null;
 		}
+
 	}
 
 	private enum WorkOneDelegatesEnum {
 		WORK_TWO
 	}
 
-	private enum WorkOneManagedObjectsEnum {
-		MANAGED_OBJECT_ONE
-	}
-
 	/**
 	 * Second {@link net.officefloor.frame.api.execute.Work} type for testing.
 	 */
 	private class WorkTwo implements Work,
-			Task<Object, WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> {
+			Task<Object, WorkTwo, NoManagedObjectsEnum, NoDelegatesEnum> {
 
 		/**
 		 * Parameter received when {@link Work} invoked.
@@ -190,19 +153,11 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		 * .api.execute.TaskContext)
 		 */
 		public Object doTask(
-				TaskContext<Object, WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> context)
+				TaskContext<Object, WorkTwo, NoManagedObjectsEnum, NoDelegatesEnum> context)
 				throws Exception {
 
-			// Obtain the Managed Object
-			ManagedObjectOne managedObjectOne = (ManagedObjectOne) context
-					.getObject(WorkTwoManagedObjectsEnum.MANAGED_OBJECT_ONE);
-
-			// Ensure the correct retrieved object
-			assertSame("Incorrect retrieved object", retrievedObject,
-					managedObjectOne);
-
-			// Obtain the parameter
-			this.parameter = managedObjectOne.getParameter();
+			// Store the parameter
+			this.parameter = context.getParameter();
 
 			// No parameter
 			return null;
@@ -213,39 +168,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 	private enum NoDelegatesEnum {
 	}
 
-	private enum WorkTwoManagedObjectsEnum {
-		MANAGED_OBJECT_ONE
-	}
-
-	/**
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 */
-	private class ManagedObjectOne {
-
-		/**
-		 * Parameter.
-		 */
-		protected volatile Object parameter;
-
-		/**
-		 * Specifies the parameter.
-		 * 
-		 * @param parameter
-		 *            Parameter.
-		 */
-		public void setParameter(Object parameter) {
-			this.parameter = parameter;
-		}
-
-		/**
-		 * Obtains the parameter.
-		 * 
-		 * @return Parameter.
-		 */
-		public Object getParameter() {
-			return this.parameter;
-		}
-
+	private enum NoManagedObjectsEnum {
 	}
 
 }

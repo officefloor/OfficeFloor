@@ -81,7 +81,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	@SuppressWarnings("unchecked")
 	public static RawManagedObjectMetaDataFactory getFactory() {
 		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1,
-				null, null, null, false, false, null, null, null);
+				null, null, null, false, false, null, null, null, null);
 	}
 
 	/**
@@ -180,8 +180,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 *            Flag indicating if {@link AsynchronousManagedObject}.
 	 * @param isCoordinating
 	 *            Flag indicating if {@link CoordinatingManagedObject}.
-	 * @param rawOfficeManagingManagedObjectMetaData
-	 *            {@link RawOfficeManagingManagedObjectMetaData}.
+	 * @param managingOfficeName
+	 *            Name of the managing {@link Office}.
+	 * @param processBoundManagedObjectName
+	 *            Name to bind the {@link ManagedObject} to the
+	 *            {@link ProcessState} of the {@link Office}.
 	 * @param handlerKeysClass
 	 *            Class providing the {@link Handler} keys for the
 	 *            {@link ManagedObject}.
@@ -193,14 +196,12 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			ManagedObjectSourceConfiguration<H, ?> managedObjectSourceConfiguration,
 			ManagedObjectSource<D, H> managedObjectSource,
 			ManagedObjectSourceMetaData<D, H> managedObjectSourceMetaData,
-			long defaultTimeout,
-			ManagedObjectPool managedObjectPool,
+			long defaultTimeout, ManagedObjectPool managedObjectPool,
 			AssetManager sourcingAssetManager,
-			AssetManager operationsAssetManager,
-			boolean isAsynchronous,
-			boolean isCoordinating,
-			RawOfficeManagingManagedObjectMetaData rawOfficeManagingManagedObjectMetaData,
-			Class<H> handlerKeysClass, String recycleWorkName) {
+			AssetManager operationsAssetManager, boolean isAsynchronous,
+			boolean isCoordinating, String managingOfficeName,
+			String processBoundManagedObjectName, Class<H> handlerKeysClass,
+			String recycleWorkName) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
@@ -211,7 +212,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		this.operationsAssetManager = operationsAssetManager;
 		this.isAsynchronous = isAsynchronous;
 		this.isCoordinating = isCoordinating;
-		this.rawOfficeManagingManagedObjectMetaData = rawOfficeManagingManagedObjectMetaData;
+		this.rawOfficeManagingManagedObjectMetaData = new RawOfficeManagingManagedObjectMetaDataImpl(
+				managingOfficeName, processBoundManagedObjectName, this);
 		this.handlerKeysClass = handlerKeysClass;
 		this.recycleWorkName = recycleWorkName;
 	}
@@ -383,8 +385,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 				return null; // can not carry on
 			}
 		}
-		RawOfficeManagingManagedObjectMetaData rawOfficeManagingManagedObjectMetaData = new RawOfficeManagingManagedObjectMetaDataImpl(
-				managingOfficeName, processBoundManagedObjectName);
 
 		// Obtain the managed object pool
 		ManagedObjectPool managedObjectPool = configuration
@@ -398,8 +398,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 				configuration, managedObjectSource, metaData, defaultTimeout,
 				managedObjectPool, sourcingAssetManager,
 				operationsAssetManager, isManagedObjectAsynchronous,
-				isManagedObjectCoordinating,
-				rawOfficeManagingManagedObjectMetaData, handlerKeysClass,
+				isManagedObjectCoordinating, managingOfficeName,
+				processBoundManagedObjectName, handlerKeysClass,
 				recycleWorkName);
 	}
 
@@ -735,7 +735,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	/**
 	 * {@link RawOfficeManagingManagedObjectMetaData} implementation.
 	 */
-	private class RawOfficeManagingManagedObjectMetaDataImpl implements
+	private static class RawOfficeManagingManagedObjectMetaDataImpl implements
 			RawOfficeManagingManagedObjectMetaData {
 
 		/**
@@ -750,6 +750,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		private final String processBoundName;
 
 		/**
+		 * {@link RawManagedObjectMetaData}.
+		 */
+		private final RawManagedObjectMetaData<?, ?> rawManagedObjectMetaData;
+
+		/**
 		 * Initialise.
 		 * 
 		 * @param managingOfficeName
@@ -757,11 +762,15 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		 * @param processBoundName
 		 *            {@link ProcessState} bound name for the
 		 *            {@link ManagedObject} within the {@link Office}.
+		 * @param rawManagedObjectMetaData
+		 *            {@link RawManagedObjectMetaData}.
 		 */
 		public RawOfficeManagingManagedObjectMetaDataImpl(
-				String managingOfficeName, String processBoundName) {
+				String managingOfficeName, String processBoundName,
+				RawManagedObjectMetaData<?, ?> rawManagedObjectMetaData) {
 			this.managingOfficeName = managingOfficeName;
 			this.processBoundName = processBoundName;
+			this.rawManagedObjectMetaData = rawManagedObjectMetaData;
 		}
 
 		/*
@@ -780,7 +789,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 
 		@Override
 		public RawManagedObjectMetaData<?, ?> getRawManagedObjectMetaData() {
-			return RawManagedObjectMetaDataImpl.this;
+			return this.rawManagedObjectMetaData;
 		}
 	}
 
