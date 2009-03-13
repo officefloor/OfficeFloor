@@ -14,12 +14,13 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.handler;
+package net.officefloor.frame.integrate.handler;
 
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.AbstractMockHandler;
 import net.officefloor.frame.impl.AbstractMockTask;
@@ -41,12 +42,14 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 	@SuppressWarnings("unchecked")
 	public void testHandler() throws Exception {
 
+		String officeName = this.getOfficeName();
+
 		// Construct the managed object
 		ManagedObjectBuilder moBuilder = this.constructManagedObject("INPUT",
-				InputManagedObjectSource.class, "OFFICE");
+				InputManagedObjectSource.class, officeName);
 
 		// Make process bound managed object
-		this.getOfficeBuilder().addProcessManagedObject("P-INPUT", "INPUT");
+		this.getOfficeBuilder().addProcessManagedObject("INPUT", "INPUT");
 
 		// Provide handler for input managed object
 		ManagedObjectHandlerBuilder<Handlers> moHandlersBuilder = moBuilder
@@ -60,7 +63,7 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 		InputTask inputTask = new InputTask();
 		WorkBuilder<InputTask> workBuilder = this.constructWork("WORK",
 				inputTask, "TASK");
-		workBuilder.linkManagedObject("W-INPUT", "P-INPUT");
+		workBuilder.linkManagedObject("W-INPUT", "INPUT");
 		this.constructTask("TASK", inputTask, "TEAM", "W-INPUT", null);
 
 		// Register the team
@@ -89,52 +92,54 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 		assertEquals("Incorrect parameter", PARAMETER, inputTask.parameter);
 		assertEquals("Incorrect object", OBJECT, inputTask.object);
 	}
-}
-
-/**
- * Mock {@link net.officefloor.frame.api.execute.Handler}.
- */
-class MockHandler<H extends Enum<H>> extends AbstractMockHandler<H> {
 
 	/**
-	 * Handles the {@link ManagedObject}.
-	 * 
-	 * @param parameter
-	 *            Parameter.
-	 * @param managedObject
-	 *            {@link ManagedObject}.
+	 * Mock {@link Handler}.
 	 */
-	public void handle(Object parameter, ManagedObject managedObject) {
-		// Invoke the process
-		this.getContext().invokeProcess(0, parameter, managedObject);
+	public static class MockHandler<H extends Enum<H>> extends
+			AbstractMockHandler<H> {
+
+		/**
+		 * Handles the {@link ManagedObject}.
+		 * 
+		 * @param parameter
+		 *            Parameter.
+		 * @param managedObject
+		 *            {@link ManagedObject}.
+		 */
+		public void handle(Object parameter, ManagedObject managedObject) {
+			// Invoke the process
+			this.getContext().invokeProcess(0, parameter, managedObject);
+		}
 	}
-}
-
-/**
- * Task to process handler input.
- */
-class InputTask extends AbstractMockTask<Object> {
 
 	/**
-	 * Parameter.
+	 * Task to process handler input.
 	 */
-	protected volatile Object parameter;
+	private static class InputTask extends AbstractMockTask<Object> {
 
-	/**
-	 * Object.
-	 */
-	protected volatile Object object;
+		/**
+		 * Parameter.
+		 */
+		protected volatile Object parameter;
 
-	@Override
-	protected Object doTask() throws Exception {
-		// Obtain the parameter
-		this.parameter = this.getTaskContext().getParameter();
+		/**
+		 * Object.
+		 */
+		protected volatile Object object;
 
-		// Obtain the object
-		this.object = this.getTaskContext().getObject(0);
+		@Override
+		protected Object doTask() throws Exception {
+			// Obtain the parameter
+			this.parameter = this.getTaskContext().getParameter();
 
-		// No return
-		return null;
+			// Obtain the object
+			this.object = this.getTaskContext().getObject(0);
+
+			// No return
+			return null;
+		}
+
 	}
 
 }

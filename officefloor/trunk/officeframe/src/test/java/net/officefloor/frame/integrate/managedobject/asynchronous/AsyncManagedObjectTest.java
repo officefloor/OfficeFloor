@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.async;
+package net.officefloor.frame.integrate.managedobject.asynchronous;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.execute.Task;
@@ -68,9 +68,11 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		// Setup
 		super.setUp();
 
+		String officeName = this.getOfficeName();
+
 		// Construct the managed object
 		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("MO",
-				TestManagedObjectSource.class, "OFFICE");
+				TestManagedObjectSource.class, officeName);
 		moBuilder.setDefaultTimeout(1000);
 
 		// Construct the work to execute
@@ -86,7 +88,6 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("TEAM", this.team);
 
 		// Open the Office Floor
-		String officeName = this.getOfficeName();
 		this.officeFloor = this.constructOfficeFloor();
 		this.officeFloor.openOfficeFloor();
 

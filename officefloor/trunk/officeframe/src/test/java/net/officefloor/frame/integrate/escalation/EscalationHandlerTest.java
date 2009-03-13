@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.escalation;
+package net.officefloor.frame.integrate.escalation;
 
 import junit.framework.AssertionFailedError;
 import net.officefloor.frame.api.build.HandlerBuilder;
@@ -76,10 +76,12 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		// Create the escalation
 		Throwable escalation = new Throwable("Escalation");
 
+		String officeName = this.getOfficeName();
+
 		// Register the managed object
 		ManagedObjectBuilder<EscalationManagedObjectSource.Handlers> moBuilder = this
 				.constructManagedObject("MO",
-						EscalationManagedObjectSource.class, "OFFICE");
+						EscalationManagedObjectSource.class, officeName);
 		ManagedObjectHandlerBuilder<EscalationManagedObjectSource.Handlers> moHandlerBuilder = moBuilder
 				.getManagedObjectHandlerBuilder();
 		HandlerBuilder<Indexed> handlerBuilder = moHandlerBuilder

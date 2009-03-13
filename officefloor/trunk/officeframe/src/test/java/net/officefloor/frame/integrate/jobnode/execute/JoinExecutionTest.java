@@ -14,15 +14,32 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.handler;
+package net.officefloor.frame.integrate.jobnode.execute;
+
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.integrate.jobnode.AbstractTaskNodeTestCase;
+import net.officefloor.frame.integrate.jobnode.ExecutionNode;
 
 /**
- * Listing of handlers.
+ * Validates joining.
  * 
  * @author Daniel
  */
-public enum Handlers {
+public class JoinExecutionTest extends AbstractTaskNodeTestCase<Work> {
 
-	INPUT
+	/**
+	 * Ensure join asynchronous.
+	 */
+	public void testJoinAsynchronous() {
+
+		ExecutionNode<Work> asyncNode = this.bindAsynchronousNode(this
+				.getInitialNode());
+		this.joinNode(this.getInitialNode(), asyncNode);
+
+		this.execute();
+
+		this.validateExecutionOrder(this.getInitialNode(), asyncNode, this
+				.getInitialNode());
+	}
 
 }

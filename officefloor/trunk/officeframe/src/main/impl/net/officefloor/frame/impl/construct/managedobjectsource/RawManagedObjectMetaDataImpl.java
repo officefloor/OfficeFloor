@@ -81,7 +81,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	@SuppressWarnings("unchecked")
 	public static RawManagedObjectMetaDataFactory getFactory() {
 		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1,
-				null, null, null, false, false, null, null, null, null);
+				null, null, null, false, false, null, null, null, null, null);
 	}
 
 	/**
@@ -141,14 +141,19 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	private final RawOfficeManagingManagedObjectMetaData rawOfficeManagingManagedObjectMetaData;
 
 	/**
+	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
+	 */
+	private final String recycleWorkName;
+
+	/**
 	 * Class providing the {@link Handler} keys for the {@link ManagedObject}.
 	 */
 	private final Class<H> handlerKeysClass;
 
 	/**
-	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
+	 * {@link Handler} keys for the {@link ManagedObjectSource}.
 	 */
-	private final String recycleWorkName;
+	private final H[] handlerKeys;
 
 	/**
 	 * {@link Handler} instances for the {@link ManagedObjectSource}.
@@ -190,6 +195,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 *            {@link ManagedObject}.
 	 * @param recycleWorkName
 	 *            Name of the {@link Work} to recycle the {@link ManagedObject}.
+	 * @param handlerKeys
+	 *            {@link Handler} keys for the {@link ManagedObjectSource}.
 	 */
 	private RawManagedObjectMetaDataImpl(
 			String managedObjectName,
@@ -201,7 +208,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			AssetManager operationsAssetManager, boolean isAsynchronous,
 			boolean isCoordinating, String managingOfficeName,
 			String processBoundManagedObjectName, Class<H> handlerKeysClass,
-			String recycleWorkName) {
+			H[] handlerKeys, String recycleWorkName) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
@@ -215,6 +222,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		this.rawOfficeManagingManagedObjectMetaData = new RawOfficeManagingManagedObjectMetaDataImpl(
 				managingOfficeName, processBoundManagedObjectName, this);
 		this.handlerKeysClass = handlerKeysClass;
+		this.handlerKeys = handlerKeys;
 		this.recycleWorkName = recycleWorkName;
 	}
 
@@ -370,9 +378,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 
 		// Determine if the managed object requires binding to process of office
 		Class<h> handlerKeysClass = metaData.getHandlerKeys();
+		h[] handlerKeys = this.getEnumConstants(handlerKeysClass);
 		String processBoundManagedObjectName = null;
-		if ((handlerKeysClass != null)
-				&& (handlerKeysClass.getEnumConstants().length > 0)) {
+		if (handlerKeys.length > 0) {
 			// Has handlers, so requires to be bound to process of office
 			processBoundManagedObjectName = managingOfficeConfiguration
 					.getProcessBoundManagedObjectName();
@@ -399,8 +407,25 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 				managedObjectPool, sourcingAssetManager,
 				operationsAssetManager, isManagedObjectAsynchronous,
 				isManagedObjectCoordinating, managingOfficeName,
-				processBoundManagedObjectName, handlerKeysClass,
+				processBoundManagedObjectName, handlerKeysClass, handlerKeys,
 				recycleWorkName);
+	}
+
+	/**
+	 * Provides type safe way to always obtain a constant {@link Enum} array.
+	 * 
+	 * @param enumClass
+	 *            {@link Enum} class. May be <code>null</code>.
+	 * @return {@link Enum} constants.
+	 */
+	@SuppressWarnings("unchecked")
+	private <e extends Enum<e>> e[] getEnumConstants(Class<e> enumClass) {
+		e[] constants = (enumClass != null ? enumClass.getEnumConstants()
+				: null);
+		if (constants == null) {
+			constants = (e[]) new Enum[0];
+		}
+		return constants;
 	}
 
 	/*
@@ -468,6 +493,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	}
 
 	@Override
+	public H[] getHandlerKeys() {
+		return this.handlerKeys;
+	}
+
+	@Override
 	public void manageByOffice(TaskMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
@@ -476,8 +506,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 				.getHandlerConfiguration();
 
 		// Obtain the handler class providing the keys
-		if ((this.handlerKeysClass == null)
-				|| (this.handlerKeysClass.getEnumConstants().length == 0)) {
+		if ((this.handlerKeys == null) || (this.handlerKeys.length == 0)) {
 			// Ensure no handlers configured
 			if (handlerConfigurations.length > 0) {
 				issues

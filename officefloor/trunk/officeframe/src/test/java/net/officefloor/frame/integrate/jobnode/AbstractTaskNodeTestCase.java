@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute;
+package net.officefloor.frame.integrate.jobnode;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -34,7 +34,6 @@ import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -46,10 +45,10 @@ import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadMetaData;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
@@ -70,26 +69,20 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	public static final int PROCESS_MO_INDEX = 0;
 
 	/**
+	 * Index of the {@link ThreadState} {@link ManagedObject} on the
+	 * {@link Work}.
+	 */
+	public static final int THREAD_MO_INDEX = 1;
+
+	/**
 	 * Index of the {@link Work} {@link ManagedObject} on the {@link Work}.
 	 */
-	public static final int WORK_MO_INDEX = 1;
+	public static final int WORK_MO_INDEX = 2;
 
 	/**
 	 * Initial {@link ExecutionNode}.
 	 */
 	private ExecutionNode<W> initialNode;
-
-	/**
-	 * {@link AssetManager} for managing the sourcing of the
-	 * {@link ManagedObject} of the {@link ProcessState}.
-	 */
-	private AssetManager processSourcingManager;
-
-	/**
-	 * {@link AssetManager} for managing the asynchronous operations on the
-	 * {@link ManagedObject} of the {@link ProcessState}.
-	 */
-	private AssetManager processOperationsManager;
 
 	/**
 	 * {@link ManagedObjectSource} for the {@link ManagedObject} of the
@@ -98,28 +91,16 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	private ManagedObjectSource<?, ?> processMoSource;
 
 	/**
-	 * {@link AssetManager} for managing the sourcing of the
-	 * {@link ManagedObject} of the {@link Work}.
+	 * {@link ManagedObjectSource} for the {@link ManagedObject} of the
+	 * {@link ThreadState}.
 	 */
-	private AssetManager workSourcingManager;
-
-	/**
-	 * {@link AssetManager} for managing the asynchronous operations on the
-	 * {@link ManagedObject} of the {@link Work}.
-	 */
-	private AssetManager workOperationsManager;
+	private ManagedObjectSource<?, ?> threadMoSource;
 
 	/**
 	 * {@link ManagedObjectSource} for the {@link ManagedObject} of the
 	 * {@link Work}.
 	 */
 	private ManagedObjectSource<?, ?> workMoSource;
-
-	/**
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} meta-data
-	 * for the {@link ProcessState}.
-	 */
-	private ManagedObjectMetaDataImpl<?> moMetaData;
 
 	/**
 	 * Initiate the Test.
@@ -129,35 +110,10 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// TODO: consider testing the recycle tasks
 
-		// Create the Asset Managers for the Managed Objects
-		this.processSourcingManager = new AssetManagerImpl();
-		this.processOperationsManager = new AssetManagerImpl();
-		this.workSourcingManager = new AssetManagerImpl();
-		this.workOperationsManager = new AssetManagerImpl();
-
-		// Create the managed object pools
-		ManagedObjectPool processMoPool = null;
-		ManagedObjectPool workMoPool = null;
-
 		// Create the mock objects
 		this.processMoSource = this.createMock(ManagedObjectSource.class);
+		this.threadMoSource = this.createMock(ManagedObjectSource.class);
 		this.workMoSource = this.createMock(ManagedObjectSource.class);
-
-		// Create the Managed Object meta-data for the Process
-		this.moMetaData = new ManagedObjectMetaDataImpl("PROCESS_MO",
-				this.processMoSource, processMoPool,
-				this.processSourcingManager, true,
-				this.processOperationsManager, false, null, 1000);
-		this.moMetaData.loadRemainingState(null, null);
-
-		// Create the Work Managed Object meta-data
-		ManagedObjectMetaDataImpl workMo = new ManagedObjectMetaDataImpl(
-				"WORK_MO", this.workMoSource, workMoPool,
-				this.workSourcingManager, false, this.workOperationsManager,
-				false, null, 1000);
-		workMo.loadRemainingState(null, null);
-		ManagedObjectMetaData[] workMoMetaData = new ManagedObjectMetaData[] {
-				this.moMetaData, workMo };
 
 		// Create the Work
 		final Work work = new Work() {
@@ -170,26 +126,32 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 			}
 		};
 
-		// Create the Flow Manager for the initial flow
-		AssetManager flowManager = new AssetManagerImpl();
-
 		// Create the Initial Flow
 		FlowMetaData initialFlowMetaData = new FlowMetaDataImpl(
 				FlowInstigationStrategyEnum.ASYNCHRONOUS,
-				this.getInitialNode(), flowManager);
-
-		// TODO consider testing with administrator meta-data
-		AdministratorMetaData[] adminMetaData = new AdministratorMetaData[0];
+				this.getInitialNode(), new AssetManagerImpl());
 
 		// Create managed object the indexes
-		// TODO ensure working with indexes
-		ManagedObjectIndex[] moIndexes = new ManagedObjectIndex[] { new ManagedObjectIndexImpl(
-				ManagedObjectScope.WORK, 0) };
+		ManagedObjectIndex[] moIndexes = new ManagedObjectIndex[3];
+		moIndexes[PROCESS_MO_INDEX] = new ManagedObjectIndexImpl(
+				ManagedObjectScope.PROCESS, 0);
+		moIndexes[THREAD_MO_INDEX] = new ManagedObjectIndexImpl(
+				ManagedObjectScope.THREAD, 0);
+		moIndexes[WORK_MO_INDEX] = new ManagedObjectIndexImpl(
+				ManagedObjectScope.WORK, 0);
+
+		// Create the Work Managed Object meta-data
+		ManagedObjectMetaDataImpl workMo = new ManagedObjectMetaDataImpl(
+				"WORK_MO", this.workMoSource, null, new AssetManagerImpl(),
+				false, new AssetManagerImpl(), false, null, 1000);
+		workMo.loadRemainingState(null, null);
 
 		// Create the Work meta-data
+		// TODO consider testing with administrator meta-data
 		WorkMetaData workMetaData = new WorkMetaDataImpl("TEST_WORK",
-				workFactory, moIndexes, workMoMetaData, adminMetaData,
-				initialFlowMetaData, new TaskMetaData[0]);
+				workFactory, moIndexes, new ManagedObjectMetaData[] { workMo },
+				new AdministratorMetaData[0], initialFlowMetaData,
+				new TaskMetaData[0]);
 
 		// Initial node
 		this.initialNode = new ExecutionNode(this.nextExecutionNodeId(), this,
@@ -212,6 +174,15 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	 */
 	protected ManagedObjectSource<?, ?> getProcessManagedObjectSource() {
 		return this.processMoSource;
+	}
+
+	/**
+	 * Obtains the {@link ThreadState} bound {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ThreadState} bound {@link ManagedObjectSource}.
+	 */
+	protected ManagedObjectSource<?, ?> getThreadManagedObjectSource() {
+		return this.threadMoSource;
 	}
 
 	/**
@@ -333,41 +304,42 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	/**
 	 * Executes the tree.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void execute() {
 
 		// Executing therefore replay mock objects
 		this.replayMockObjects();
 
-		// TODO consider testing with thread state
+		// Consider the thread meta-data
+		// TODO consider testing with thread bound administrators
+		ManagedObjectMetaDataImpl<?> threadMoMetaData = new ManagedObjectMetaDataImpl(
+				"THREAD_MO", this.threadMoSource, null, new AssetManagerImpl(),
+				false, new AssetManagerImpl(), false, null, 1000);
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
-				new ManagedObjectMetaData[0], new AdministratorMetaData[0]);
-
-		// TODO consider testing with administrators
-		AdministratorMetaData<?, ?>[] adminMetaData = new AdministratorMetaData[0];
+				new ManagedObjectMetaData[] { threadMoMetaData },
+				new AdministratorMetaData[0]);
 
 		// Create the process meta-data
-		ManagedObjectMetaData<?>[] managedObjectMetaData = new ManagedObjectMetaData[] { this.moMetaData };
+		// TODO consider testing with process bound administrators
+		ManagedObjectMetaDataImpl<?> processMoMetaData = new ManagedObjectMetaDataImpl(
+				"PROCESS_MO", this.processMoSource, null,
+				new AssetManagerImpl(), true, new AssetManagerImpl(), false,
+				null, 1000);
+		processMoMetaData.loadRemainingState(null, null);
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
-				managedObjectMetaData, adminMetaData, threadMetaData);
-
-		// Create Process for executing
-		ProcessState processState = new ProcessStateImpl(processMetaData, null,
-				null);
-
-		// Obtain the Work meta-data
-		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
-
-		// Obtain the initial Flow meta-data
-		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
+				new ManagedObjectMetaData[] { processMoMetaData },
+				new AdministratorMetaData[0], threadMetaData);
 
 		// Create Flow for executing
+		ProcessState processState = new ProcessStateImpl(processMetaData, null,
+				null);
+		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
+		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
 		Flow flow = processState.createThread(flowMetaData);
 
 		// Create the initial job node to execute
 		JobNode initialJobNode = flow.createJobNode(this.getInitialNode(),
 				null, null);
-
-		// Obtain the job from the job node
 		Job initialJob = (Job) initialJobNode;
 
 		// Execute the task tree (until complete)
@@ -509,38 +481,22 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	}
 
 	/*
-	 * ========================================================================
-	 * Team
-	 * ========================================================================
+	 * ===================== Team =============================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#startWorking()
-	 */
+	@Override
 	public void startWorking() {
 		// Do nothing
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.
-	 * spi.team.TaskContainer)
-	 */
+	@Override
 	public void assignJob(Job task) {
 		// Passively execute
 		while (!task.doJob(new MockExecutionContext()))
 			;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#stopWorking()
-	 */
+	@Override
 	public void stopWorking() {
 		// Do nothing
 	}
@@ -553,13 +509,9 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		/**
 		 * Time.
 		 */
-		protected long time = 0;
+		private long time = 0;
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.team.ExecutionContext#getTime()
-		 */
+		@Override
 		public long getTime() {
 			// Lazy obtain the time
 			if (this.time == 0) {
@@ -570,17 +522,11 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 			return this.time;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.spi.team.ExecutionContext#continueExecution()
-		 */
+		@Override
 		public boolean continueExecution() {
 			// Continue
 			return true;
 		}
-
 	}
 
 }

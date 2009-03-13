@@ -14,32 +14,22 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.test;
-
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.AbstractTaskNodeTestCase;
-import net.officefloor.frame.impl.execute.ExecutionNode;
+package net.officefloor.frame.integrate.jobnode;
 
 /**
- * Validates joining.
+ * Processor for a {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
  * 
  * @author Daniel
  */
-public class JoinExecutionTest extends AbstractTaskNodeTestCase<Work> {
+public interface ManagedObjectProcesser<O> {
 
 	/**
-	 * Ensure join asynchronous.
+	 * Process the object of the
+	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * 
+	 * @param object
+	 *            Object of the
+	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
 	 */
-	public void testJoinAsynchronous() {
-
-		ExecutionNode<Work> asyncNode = this.bindAsynchronousNode(this
-				.getInitialNode());
-		this.joinNode(this.getInitialNode(), asyncNode);
-
-		this.execute();
-
-		this.validateExecutionOrder(this.getInitialNode(), asyncNode, this
-				.getInitialNode());
-	}
-
+	void process(O object);
 }

@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -584,7 +585,21 @@ public abstract class AbstractOfficeConstructTestCase extends
 		// Invoke the work
 		Office office = this.officeFloor.getOffice(officeName);
 		WorkManager workManager = office.getWorkManager(workName);
-		workManager.invokeWork(parameter);
+		FlowFuture flowFuture = workManager.invokeWork(parameter);
+
+		// Block until flow is complete (or times out)
+		long startBlockTime = System.currentTimeMillis();
+		while (!flowFuture.isComplete()) {
+
+			// Wait some time as still executing
+			Thread.sleep(100);
+
+			// Timeout after two seconds
+			long currentTime = System.currentTimeMillis();
+			if ((currentTime - startBlockTime) > 2000) {
+				fail("Timing out test as taking too long");
+			}
+		}
 	}
 
 }

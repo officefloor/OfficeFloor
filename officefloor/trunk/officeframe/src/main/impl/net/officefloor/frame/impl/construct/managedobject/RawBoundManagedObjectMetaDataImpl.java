@@ -231,8 +231,10 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			if (!ManagedObjectScope.PROCESS.equals(index
 					.getManagedObjectScope())) {
 				issues
-						.addIssue(AssetType.OFFICE, officeName,
-								"Attempting to add Office managing Managed Objects to non-process scope");
+						.addIssue(
+								AssetType.OFFICE,
+								officeName,
+								"Attempting to affix managed objects to listing of managed objects that are not all process bound");
 				return processBoundManagedObjectMetaData; // only process bound
 			}
 			int moIndex = index.getIndexOfManagedObjectWithinScope();
@@ -248,25 +250,30 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		// Append additional process bound managed objects
 		for (RawOfficeManagingManagedObjectMetaData officeMo : officeManagingManagedObjects) {
 
-			// Obtain the process bound name
-			String processBoundName = officeMo.getProcessBoundName();
-			if (ConstructUtil.isBlank(processBoundName)) {
-				issues
-						.addIssue(
-								AssetType.OFFICE,
-								officeName,
-								"Must provide process bound name for Managed Object being managed by the Office");
-				continue; // Must have process bound name
-			}
-
 			// Obtain the raw managed object meta-data
 			RawManagedObjectMetaData<?, ?> rawMoMetaData = officeMo
 					.getRawManagedObjectMetaData();
 			if (rawMoMetaData == null) {
-				issues.addIssue(AssetType.OFFICE, officeName,
-						"Must provide raw managed object meta-data for office managed object "
-								+ processBoundName);
+				issues
+						.addIssue(AssetType.OFFICE, officeName,
+								"Must provide raw managed object meta-data for office managed object");
 				continue; // Must have raw managed object meta-data
+			}
+
+			// Only bind to process state if have handler keys
+			Object[] handlerKeys = rawMoMetaData.getHandlerKeys();
+			if ((handlerKeys == null) || (handlerKeys.length == 0)) {
+				continue; // no handlers so do not bind to process state
+			}
+
+			// Obtain the process bound name
+			String processBoundName = officeMo.getProcessBoundName();
+			if (ConstructUtil.isBlank(processBoundName)) {
+				issues
+						.addIssue(AssetType.MANAGED_OBJECT, rawMoMetaData
+								.getManagedObjectName(),
+								"Must provide process bound name as requires managing by an office");
+				continue; // Must have process bound name
 			}
 
 			// Determine if managed by the office already

@@ -445,9 +445,9 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				threadMetaData);
 
 		// Create the office meta-data
-		rawOfficeMetaData.officeMetaData = new OfficeMetaDataImpl(
-				this.officeName, workMetaDatas.toArray(new WorkMetaData[0]),
-				processMetaData, startupTasks, officeEscalationHandler);
+		rawOfficeMetaData.officeMetaData = new OfficeMetaDataImpl(officeName,
+				workMetaDatas.toArray(new WorkMetaData[0]), processMetaData,
+				startupTasks, officeEscalationHandler);
 
 		// Create the task locator
 		TaskMetaDataLocator taskMetaDataLocator = new TaskMetaDataLocatorImpl(

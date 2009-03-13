@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.integrate;
+package net.officefloor.frame.integrate.managedobject;
 
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
@@ -217,6 +217,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	private void doTest(boolean isManagedObjectOutside,
 			boolean isManagedObjectInside, ManagedObjectScope scope,
 			long defaultTimeout) throws Throwable {
+		String officeName = this.getOfficeName();
 		this.initiateOfficeFloor(isManagedObjectOutside, isManagedObjectInside,
 				scope, defaultTimeout);
 		if (isManagedObjectOutside) {
@@ -225,7 +226,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		}
 		if (isManagedObjectInside) {
 			// Available inside, so trigger work depending on managed object
-			this.ensureCanInvokeWork();
+			this.ensureCanInvokeWork(officeName);
 		}
 	}
 
@@ -242,10 +243,10 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Tests invoking the {@link Work}.
 	 */
-	private void ensureCanInvokeWork() throws Throwable {
+	private void ensureCanInvokeWork(String officeName) throws Throwable {
 		this.resetTask();
 		Object parameter = new Object();
-		WorkManager workManager = this.officeFloor.getOffice("OFFICE")
+		WorkManager workManager = this.officeFloor.getOffice(officeName)
 				.getWorkManager("WORK");
 		workManager.invokeWork(parameter);
 		this.validateTaskInvoked(parameter, managedObjectSource);

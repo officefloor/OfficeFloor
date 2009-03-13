@@ -16,7 +16,6 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.impl.execute.JobNodeAdapter;
 import net.officefloor.frame.impl.execute.job.AssetNotifySetImplAccess;
 import net.officefloor.frame.impl.execute.job.JobActivatableSetImpl;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
@@ -78,6 +77,7 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		// Create the Task Monitor
 		this.assetMonitor = new AssetMonitorImpl(this.asset, this.assetManager,
@@ -389,10 +389,9 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.impl.execute.JobNodeAdapter#activateJob()
+		 * ================== JobNodeAdapter ===============================
 		 */
+
 		@Override
 		public void activateJob() {
 			this.isActivated = true;

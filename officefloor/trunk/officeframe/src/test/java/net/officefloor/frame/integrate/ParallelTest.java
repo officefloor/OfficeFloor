@@ -58,8 +58,9 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 	 *            {@link Team}.
 	 */
 	public void doTest(Team team) throws Exception {
+
 		// Configure
-		this.constructTeam("team", new PassiveTeam());
+		this.constructTeam("team", team);
 		ReflectiveWorkBuilder workBuilder = this.constructWork(
 				new ParallelWorkObject("TestParameter"), "work", "first");
 		ReflectiveTaskBuilder firstTaskBuilder = workBuilder.buildTask("first",
@@ -79,7 +80,7 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 		this.validateReflectiveMethodOrder("first", "parallel", "second");
 	}
 
-	public class ParallelWorkObject {
+	public static class ParallelWorkObject {
 
 		public final Object inputParameter;
 
@@ -100,4 +101,5 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 		public void second() {
 		}
 	}
+
 }

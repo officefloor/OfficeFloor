@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.async;
+package net.officefloor.frame.integrate.managedobject.asynchronous;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;

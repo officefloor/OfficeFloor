@@ -769,9 +769,10 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				"TASK");
 		this.recordReturn(this.taskLocator, this.taskLocator
 				.getTaskMetaData("TASK"), flowTaskMetaData);
-		this.recordReturn(flowConfiguration, flowConfiguration
-				.getInstigationStrategy(),
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+		this
+				.recordReturn(flowConfiguration, flowConfiguration
+						.getInstigationStrategy(),
+						FlowInstigationStrategyEnum.PARALLEL);
 		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
 				.createAssetManager(AssetType.TASK, DEFAULT_WORK_NAME + "."
 						+ TASK_NAME, "Flow0", this.issues), assetManager);
@@ -789,7 +790,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		assertEquals("Incorrect initial task meta-data", flowTaskMetaData,
 				flowMetaData.getInitialTaskMetaData());
 		assertEquals("Incorrect instigation strategy",
-				FlowInstigationStrategyEnum.SEQUENTIAL, flowMetaData
+				FlowInstigationStrategyEnum.PARALLEL, flowMetaData
 						.getInstigationStrategy());
 
 		// Ensure correct flow manager

@@ -50,9 +50,7 @@ public interface RawOfficeManagingManagedObjectMetaData {
 	 * Ultimately this means the {@link ManagedObject} has {@link Handler}
 	 * instances that invoke {@link Task} instances within the {@link Office}.
 	 * 
-	 * @return {@link ProcessState} bound name for the {@link ManagedObject} or
-	 *         <code>null</code> if not required to be {@link ProcessState}
-	 *         bound.
+	 * @return {@link ProcessState} bound name for the {@link ManagedObject}.
 	 */
 	String getProcessBoundName();
 
@@ -64,4 +62,5 @@ public interface RawOfficeManagingManagedObjectMetaData {
 	 *         be managed by the {@link Office}.
 	 */
 	RawManagedObjectMetaData<?, ?> getRawManagedObjectMetaData();
+
 }

@@ -35,16 +35,18 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 
 		// Create a job to use the managed object
 		final Object moObject = "ManagedObject Object";
-		Job job = this.createJob(false, new JobFunctionality() {
-			@Override
-			public Object executeFunctionality(JobFunctionalityContext context)
-					throws Throwable {
-				// Ensure get the managed object
-				Object object = context.getObject(0);
-				assertEquals("Incorrect managed object", moObject, object);
-				return null;
-			}
-		});
+		Job job = this.createJob(false, new int[] { 0 },
+				new JobFunctionality() {
+					@Override
+					public Object executeFunctionality(
+							JobFunctionalityContext context) throws Throwable {
+						// Ensure get the managed object
+						Object object = context.getObject(0);
+						assertEquals("Incorrect managed object", moObject,
+								object);
+						return null;
+					}
+				});
 
 		// Record actions
 		this.record_JobContainer_initialSteps(null, 0);
@@ -76,16 +78,18 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 
 		// Create a job to use the asynchronous managed object
 		final Object moObject = "AsynchronousManagedObject Object";
-		Job job = this.createJob(false, new JobFunctionality() {
-			@Override
-			public Object executeFunctionality(JobFunctionalityContext context)
-					throws Throwable {
-				// Ensure get the managed object
-				Object object = context.getObject(0);
-				assertEquals("Incorrect managed object", moObject, object);
-				return null;
-			}
-		});
+		Job job = this.createJob(false, new int[] { 0 },
+				new JobFunctionality() {
+					@Override
+					public Object executeFunctionality(
+							JobFunctionalityContext context) throws Throwable {
+						// Ensure get the managed object
+						Object object = context.getObject(0);
+						assertEquals("Incorrect managed object", moObject,
+								object);
+						return null;
+					}
+				});
 
 		// Record actions of attempt to load managed objects
 		this.record_JobContainer_initialSteps(null, 0);
@@ -126,16 +130,18 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 
 		// Create a job to use the asynchronous managed object
 		final Object moObject = "CoordinatingManagedObject Object";
-		Job job = this.createJob(false, new JobFunctionality() {
-			@Override
-			public Object executeFunctionality(JobFunctionalityContext context)
-					throws Throwable {
-				// Ensure get the managed object
-				Object object = context.getObject(1);
-				assertEquals("Incorrect managed object", moObject, object);
-				return null;
-			}
-		});
+		Job job = this.createJob(false, new int[] { 0, 1 },
+				new JobFunctionality() {
+					@Override
+					public Object executeFunctionality(
+							JobFunctionalityContext context) throws Throwable {
+						// Ensure get the managed object
+						Object object = context.getObject(1);
+						assertEquals("Incorrect managed object", moObject,
+								object);
+						return null;
+					}
+				});
 
 		// Record actions of attempt to load managed objects
 		this.record_JobContainer_initialSteps(null, 0, 1);

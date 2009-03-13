@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute;
+package net.officefloor.frame.integrate.jobnode;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -146,6 +146,12 @@ public class ExecutionNode<W extends Work> implements
 			source = this.testCase.getProcessManagedObjectSource();
 			mo = this.testCase.createMock(AsynchronousManagedObject.class);
 			isAsynchronous = true;
+			break;
+
+		case AbstractTaskNodeTestCase.THREAD_MO_INDEX:
+			source = this.testCase.getThreadManagedObjectSource();
+			mo = this.testCase.createMock(ManagedObject.class);
+			isAsynchronous = false;
 			break;
 
 		case AbstractTaskNodeTestCase.WORK_MO_INDEX:

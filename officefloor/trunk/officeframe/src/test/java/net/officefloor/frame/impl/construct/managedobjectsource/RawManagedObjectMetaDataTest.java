@@ -625,6 +625,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		assertEquals("Ensure round trip managing office details", rawMetaData,
 				rawMetaData.getManagingOfficeMetaData()
 						.getRawManagedObjectMetaData());
+		assertEquals("Should not have handler keys", 0, rawMetaData
+				.getHandlerKeys().length);
 	}
 
 	/**
@@ -1272,6 +1274,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify the content of the raw meta data
+		Object[] handlerKeys = rawMetaData.getHandlerKeys();
+		assertEquals("Should have a handler key", 1, handlerKeys.length);
+		assertEquals("Incorrect handler key", HandlerKey.KEY, handlerKeys[0]);
 		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
 		assertEquals("Should be a handler", 1, handlers.size());
 		assertEquals("Incorrect handler", handler, handlers.get(HandlerKey.KEY));

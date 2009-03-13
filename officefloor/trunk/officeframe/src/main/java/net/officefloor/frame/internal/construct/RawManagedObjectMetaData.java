@@ -144,6 +144,13 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	String getRecycleWorkName();
 
 	/**
+	 * Obtains the {@link Handler} keys for the {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link Handler} keys for the {@link ManagedObjectSource}.
+	 */
+	H[] getHandlerKeys();
+
+	/**
 	 * Obtains the {@link Handler} instances for the {@link ManagedObjectSource}
 	 * by the respective {@link Handler} key.
 	 * 

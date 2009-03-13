@@ -14,12 +14,15 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.test;
+package net.officefloor.frame.integrate.jobnode.execute;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.AbstractTaskNodeTestCase;
-import net.officefloor.frame.impl.execute.ExecutionNode;
-import net.officefloor.frame.impl.execute.ManagedObjectProcesser;
+import net.officefloor.frame.integrate.jobnode.AbstractTaskNodeTestCase;
+import net.officefloor.frame.integrate.jobnode.ExecutionNode;
+import net.officefloor.frame.integrate.jobnode.ManagedObjectProcesser;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Validates simple execution trees.
@@ -41,9 +44,7 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	}
 
 	/**
-	 * Ensure able to access the
-	 * {@link net.officefloor.frame.internal.structure.ProcessState}
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Ensure able to access the {@link ProcessState} {@link ManagedObject}.
 	 */
 	public void testAccessProcessManagedObject() {
 
@@ -67,8 +68,31 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 	}
 
 	/**
-	 * Ensure able to access the {@link net.officefloor.frame.api.execute.Work}
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Ensure able to access the {@link ThreadState} {@link ManagedObject}.
+	 */
+	public void testAccessThreadManagedObject() {
+
+		final Object OBJECT = new Object();
+		final Object[] processObject = new Object[1];
+
+		// Flag use of the thread managed object
+		this.getInitialNode().processManagedObject(THREAD_MO_INDEX, OBJECT,
+				new ManagedObjectProcesser<Object>() {
+					public void process(Object object) {
+						processObject[0] = object;
+					}
+				});
+
+		// Execute the single node
+		this.execute();
+
+		assertTrue("Ensure the single node was executed", this.getInitialNode()
+				.isExecuted());
+		assertEquals("Ensure object matches", OBJECT, processObject[0]);
+	}
+
+	/**
+	 * Ensure able to access the {@link Work} {@link ManagedObject}.
 	 */
 	public void testAccessWorkManagedObject() {
 

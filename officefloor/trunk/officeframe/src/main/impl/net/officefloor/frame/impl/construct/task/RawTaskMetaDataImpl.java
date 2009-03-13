@@ -449,8 +449,8 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 	private <w extends Work> FlowMetaData<w> newFlowMetaData(
 			FlowInstigationStrategyEnum instigationStrategy,
 			TaskMetaData<?, w, ?, ?> taskMetaData, AssetManager assetManager) {
-		return new FlowMetaDataImpl<w>(FlowInstigationStrategyEnum.SEQUENTIAL,
-				taskMetaData, assetManager);
+		return new FlowMetaDataImpl<w>(instigationStrategy, taskMetaData,
+				assetManager);
 	}
 
 }

@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.handler;
+package net.officefloor.frame.integrate.handler;
 
 import java.util.Map;
 
@@ -66,7 +66,7 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	protected void initHandlers(PassByReference<Class<Handlers>> handlerKeys,
 			Map<Handlers, Class<?>> handlers) {
 		handlerKeys.setValue(Handlers.class);
-		handlers.put(Handlers.INPUT, MockHandler.class);
+		handlers.put(Handlers.INPUT, HandlerExecutionTest.MockHandler.class);
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 		// Obtain the handler
 		Handler<?> handler = this.getExecuteContext()
 				.getHandler(Handlers.INPUT);
-		MockHandler mockHandler = (MockHandler) handler;
+		HandlerExecutionTest.MockHandler mockHandler = (HandlerExecutionTest.MockHandler) handler;
 
 		// Input the parameter
 		mockHandler.handle(parameter, managedObject);
