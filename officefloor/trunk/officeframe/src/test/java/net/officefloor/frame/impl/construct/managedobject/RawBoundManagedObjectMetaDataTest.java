@@ -227,6 +227,47 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to provide no scope {@link ManagedObject} instances.
+	 */
+	public void testNullScopeManagedObjects() {
+
+		// Managed object configuration
+		RawManagedObjectMetaData<?, ?> rawMoMetaData = this
+				.registerRawManagedObjectMetaData("OFFICE_MO");
+
+		// Record construction
+		this.recordReturn(this.managedObjectConfiguration,
+				this.managedObjectConfiguration.getBoundManagedObjectName(),
+				"BOUND");
+		this.recordReturn(this.managedObjectConfiguration,
+				this.managedObjectConfiguration.getOfficeManagedObjectName(),
+				"OFFICE_MO");
+		this.recordReturn(rawMoMetaData, rawMoMetaData
+				.getManagedObjectSourceMetaData(),
+				this.managedObjectSourceMetaData);
+		this.recordReturn(this.managedObjectSourceMetaData,
+				this.managedObjectSourceMetaData.getDependencyKeys(), null);
+		this.record_getManagedObjectDetails(rawMoMetaData);
+
+		// Construct bound meta-data without scope managed objects
+		this.replayMockObjects();
+		RawBoundManagedObjectMetaData<?>[] rawBoundMoMetaData = RawBoundManagedObjectMetaDataImpl
+				.getFactory()
+				.constructBoundManagedObjectMetaData(
+						new ManagedObjectConfiguration[] { this.managedObjectConfiguration },
+						this.issues, this.managedObjectScope, this.assetType,
+						this.assetName, this.registeredManagedObjects, null);
+		ManagedObjectMetaData<?> boundMoMetaData = rawBoundMoMetaData[0]
+				.getManagedObjectMetaData();
+		this.verifyMockObjects();
+
+		// Verify constructed
+		assertEquals("Incorrect managed object source",
+				this.managedObjectSource, boundMoMetaData
+						.getManagedObjectSource());
+	}
+
+	/**
 	 * Ensure can construct {@link RawBoundManagedObjectMetaData} with no
 	 * dependencies.
 	 */

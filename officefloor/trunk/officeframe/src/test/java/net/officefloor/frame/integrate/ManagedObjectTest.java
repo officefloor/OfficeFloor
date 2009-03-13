@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.api.construct;
+package net.officefloor.frame.integrate;
 
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.HandlerFactory;
@@ -318,7 +318,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 		// Obtain the name of the office
 		String officeName = this.getOfficeName();
-		
+
 		// Create and register the managed object source
 		ManagedObjectBuilder<HandlerKey> managedObjectBuilder = this
 				.getOfficeFloorBuilder().addManagedObject("MO",
@@ -490,29 +490,11 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 * ================ ManagedObjectSource ======================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-		 * AbstractAsyncManagedObjectSource
-		 * #loadSpecification(net.officefloor.frame
-		 * .spi.managedobject.source.impl
-		 * .AbstractAsyncManagedObjectSource.SpecificationContext)
-		 */
 		@Override
 		protected void loadSpecification(SpecificationContext context) {
 			// No requirements
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-		 * AbstractAsyncManagedObjectSource
-		 * #loadMetaData(net.officefloor.frame.spi
-		 * .managedobject.source.impl.AbstractAsyncManagedObjectSource
-		 * .MetaDataContext)
-		 */
 		@Override
 		protected void loadMetaData(MetaDataContext<None, HandlerKey> context)
 				throws Exception {
@@ -537,14 +519,6 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-		 * AbstractAsyncManagedObjectSource
-		 * #start(net.officefloor.frame.spi.managedobject
-		 * .source.impl.AbstractAsyncManagedObjectSource.StartContext)
-		 */
 		@Override
 		protected void start(StartContext<HandlerKey> startContext)
 				throws Exception {
@@ -555,12 +529,6 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-		 * AbstractManagedObjectSource#getManagedObject()
-		 */
 		@Override
 		protected ManagedObject getManagedObject() throws Throwable {
 			return this;
@@ -570,12 +538,6 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 * ================ ManagedObject ======================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
-		 */
 		@Override
 		public Object getObject() throws Exception {
 			return this;
@@ -585,14 +547,6 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 * ================ AsynchronousManagedObject ==============
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.spi.managedobject.AsynchronousManagedObject
-		 * #registerAsynchronousCompletionListener
-		 * (net.officefloor.frame.spi.managedobject.AsynchronousListener)
-		 */
 		@Override
 		public void registerAsynchronousCompletionListener(
 				AsynchronousListener listener) {
@@ -638,11 +592,6 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 * =============== HandlerFactory ==================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.build.HandlerFactory#createHandler()
-		 */
 		@Override
 		public Handler<HandlerProcess> createHandler() {
 			return this;
@@ -652,18 +601,11 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 * =============== Handler ==================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @seenet.officefloor.frame.api.execute.Handler#setHandlerContext(net.
-		 * officefloor.frame.api.execute.HandlerContext)
-		 */
 		@Override
 		public void setHandlerContext(HandlerContext<HandlerProcess> context)
 				throws Exception {
 			this.context = context;
 		}
-
 	}
 
 	/**
@@ -712,4 +654,5 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			this.managedObject = managedObject;
 		}
 	}
+
 }
