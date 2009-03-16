@@ -83,9 +83,12 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	@SuppressWarnings("unchecked")
 	public void testSendingMessage() throws Exception {
 
+		// Obtain the office name
+		String officeName = this.getOfficeName();
+
 		// Register the Server Socket Managed Object
 		ManagedObjectBuilder serverSocketBuilder = this.constructManagedObject(
-				"MO", ServerSocketManagedObjectSource.class, "OFFICE");
+				"MO", ServerSocketManagedObjectSource.class, officeName);
 		serverSocketBuilder.addProperty(
 				ServerSocketManagedObjectSource.PROPERTY_PORT, "12345");
 		serverSocketBuilder.addProperty(
@@ -95,8 +98,7 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Register the handler of the Server Socket
-		serverSocketBuilder.getManagedObjectHandlerBuilder(
-				ServerSocketHandlerEnum.class).registerHandler(
+		serverSocketBuilder.getManagedObjectHandlerBuilder().registerHandler(
 				ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER)
 				.setHandlerFactory(this);
 
@@ -109,10 +111,8 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		officeBuilder.registerTeam("of-MO.serversocket.12345.Listener.TEAM",
 				"of-LISTENER_TEAM");
 
-		// Create the Office Floor
-		OfficeFloor officeFloor = this.constructOfficeFloor("OFFICE");
-
-		// Open the Office Floor
+		// Create and open the Office Floor
+		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
 		// Open socket to Office
@@ -144,73 +144,39 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	}
 
 	/*
-	 * ====================================================================
-	 * HandlerFactory
-	 * ====================================================================
+	 * =========================== Handler =================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.HandlerFactory#createHandler()
-	 */
+	@Override
 	public Handler<Indexed> createHandler() {
 		return this;
 	}
 
-	/*
-	 * ====================================================================
-	 * ServerSocketHandler
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createServer
-	 * ()
-	 */
-	public Server createServer() {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.socket.server.spi.ServerSocketHandler#
-	 * createConnectionHandler
-	 * (net.officefloor.plugin.socket.server.spi.Communication)
-	 */
-	public ConnectionHandler createConnectionHandler(Connection communication) {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor
-	 * .frame.api.execute.HandlerContext)
-	 */
+	@Override
 	public void setHandlerContext(HandlerContext<Indexed> context)
 			throws Exception {
 		// Do nothing with context
 	}
 
 	/*
-	 * ====================================================================
-	 * ConnectionHandler
-	 * ====================================================================
+	 * =================== ServerSocketHandler#createServer ===============
 	 */
 
+	@Override
+	public Server createServer() {
+		return this;
+	}
+
+	@Override
+	public ConnectionHandler createConnectionHandler(Connection connection) {
+		return this;
+	}
+
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleRead
-	 * (net.officefloor.plugin.socket.server.spi.ReadContext)
+	 * ================== ConnectionHandler ================================
 	 */
+
+	@Override
 	public void handleRead(ReadContext context) {
 
 		// Obtain the message
@@ -236,42 +202,22 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		context.setReadComplete(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleWrite
-	 * (net.officefloor.plugin.socket.server.spi.WriteContext)
-	 */
+	@Override
 	public void handleWrite(WriteContext context) {
 		// Message being written so close connection (once done)
 		context.setCloseConnection(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.socket.server.spi.ConnectionHandler#
-	 * handleIdleConnection
-	 * (net.officefloor.plugin.socket.server.spi.IdleContext)
-	 */
+	@Override
 	public void handleIdleConnection(IdleContext context) {
 		System.out.println("Connection is idle");
 	}
 
 	/*
-	 * ====================================================================
-	 * WriteMessageListener
-	 * ====================================================================
+	 * ================== WriteMessageListener ============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.WriteMessageListener#messageWritten
-	 * (net.officefloor.plugin.socket.server.spi.WriteMessage)
-	 */
+	@Override
 	public void messageWritten(WriteMessage message) {
 		// Ensure only written once
 		assertNull("Message should only be written once", this.writtenMessage);
@@ -281,18 +227,10 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	}
 
 	/*
-	 * ====================================================================
-	 * Server
-	 * ====================================================================
+	 * ==================== Server ==========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.Server#startRequest(net.officefloor
-	 * .plugin.socket.server.spi.ReadMessage)
-	 */
+	@Override
 	public void processReadMessage(ReadMessage message,
 			ConnectionHandler connectionHandler) throws IOException {
 
@@ -308,4 +246,5 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 		this.writeMessage.appendSegment().getBuffer().put(RESPONSE_MSG);
 		this.writeMessage.write();
 	}
+
 }

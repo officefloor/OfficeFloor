@@ -23,7 +23,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -74,10 +73,13 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		PORT = portStart;
 		portStart++; // increment for next test
 
+		// Obtain the office name
+		String officeName = this.getOfficeName();
+
 		// Register the Server Socket Managed Object
 		ManagedObjectBuilder<?> serverSocketBuilder = this
 				.constructManagedObject("MO",
-						TcpServerSocketManagedObjectSource.class, "OFFICE");
+						TcpServerSocketManagedObjectSource.class, officeName);
 		serverSocketBuilder.addProperty(
 				TcpServerSocketManagedObjectSource.PROPERTY_PORT, String
 						.valueOf(PORT));
@@ -119,8 +121,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		// Link handler to task
 		officeBuilder.addOfficeEnhancer(new OfficeEnhancer() {
 			@Override
-			public void enhanceOffice(OfficeEnhancerContext context)
-					throws BuildException {
+			public void enhanceOffice(OfficeEnhancerContext context) {
 				// Obtain the managed object handler builder
 				ManagedObjectHandlerBuilder<ServerSocketHandlerEnum> handlerBuilder = context
 						.getManagedObjectHandlerBuilder("of-MO",
@@ -133,10 +134,8 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 			}
 		});
 
-		// Create the Office Floor
-		this.officeFloor = this.constructOfficeFloor("OFFICE");
-
-		// Open the Office Floor
+		// Create and open the Office Floor
+		this.officeFloor = this.constructOfficeFloor();
 		this.officeFloor.openOfficeFloor();
 	}
 

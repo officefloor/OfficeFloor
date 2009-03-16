@@ -27,7 +27,6 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.Server;
 
@@ -47,7 +46,8 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 	private final ServerSocketManagedObjectSource moSource;
 
 	/**
-	 * Maximum number of {@link Connection} instances per {@link SocketListener}.
+	 * Maximum number of {@link Connection} instances per {@link SocketListener}
+	 * .
 	 */
 	private final int maxConnPerListener;
 
@@ -101,34 +101,15 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 	}
 
 	/*
-	 * ====================================================================
-	 * WorkFactory, Work, TaskFactory
-	 * ====================================================================
+	 * ===================== Work =========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
-	 */
+	@Override
 	public ConnectionManager createWork() {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-	 */
-	public void setWorkContext(WorkContext context) throws Exception {
-		// Do nothing
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
-	 */
+	@Override
 	public Task<Object, ConnectionManager, None, Indexed> createTask(
 			ConnectionManager work) {
 		// Return a new socket listener

@@ -1,7 +1,0 @@
-Listing of items TODO:
-
-1) Register as Asset in office to be managed so to allow clean up of empty SocketListeners.
-2) Provide a HTTP handler implementation.
-3) Greater testing to ensure works (possibly when implementing HTTP handler).
-4) Provide client socket implementation.
-5) Allow MessageSegmentPool to be plugged in to enable specialised management of buffers.
