@@ -55,12 +55,15 @@ public class JdbcManagedObjectSourceTest extends
 	 */
 	public void testLoadAndUseJdbc() throws Exception {
 
+		// Obtain the office name
+		String officeName = this.getOfficeName();
+
 		// Specify the pooled connection
 		MockConnectionPoolDataSource.setPooledConnection(this.pooledConnection);
 
 		// Configure the JDBC managed object
 		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("JDBC",
-				JdbcManagedObjectSource.class, "OFFICE");
+				JdbcManagedObjectSource.class, officeName);
 		moBuilder.setManagedObjectPool(new PassiveManagedObjectPool(1));
 		moBuilder
 				.addProperty(
@@ -108,7 +111,7 @@ public class JdbcManagedObjectSourceTest extends
 		this.replayMockObjects();
 
 		// Open the Office Floor
-		OfficeFloor officeFloor = this.constructOfficeFloor("OFFICE");
+		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
 		// Verify properties were loaded onto connection pool data source
@@ -128,7 +131,7 @@ public class JdbcManagedObjectSourceTest extends
 				.getLoginTimeout());
 
 		// Obtain the work manager with task to use the connection
-		WorkManager workManager = officeFloor.getOffice("OFFICE")
+		WorkManager workManager = officeFloor.getOffice(officeName)
 				.getWorkManager(workName);
 
 		// Invoke work to use the connection

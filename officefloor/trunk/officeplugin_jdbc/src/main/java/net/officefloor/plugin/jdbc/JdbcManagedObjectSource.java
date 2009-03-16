@@ -139,7 +139,7 @@ public class JdbcManagedObjectSource extends
 	 *             {@link ConnectionPoolDataSource}.
 	 */
 	protected ConnectionPoolDataSource getConnectionPoolDataSource(
-			ManagedObjectSourceContext context) throws Exception {
+			ManagedObjectSourceContext<?> context) throws Exception {
 
 		// Determine if a factory is configured
 		String factoryClassName = context.getProperty(
@@ -169,15 +169,6 @@ public class JdbcManagedObjectSource extends
 	 * ================== AbstractManagedObjectSource ====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-	 * AbstractAsyncManagedObjectSource
-	 * #loadSpecification(net.officefloor.frame.spi
-	 * .managedobject.source.impl.AbstractAsyncManagedObjectSource
-	 * .SpecificationContext)
-	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		// Ensure data source provided
@@ -185,18 +176,10 @@ public class JdbcManagedObjectSource extends
 				ConnectionPoolDataSource.class.getSimpleName());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-	 * AbstractAsyncManagedObjectSource
-	 * #loadMetaData(net.officefloor.frame.spi.managedobject
-	 * .source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
-	 */
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context)
 			throws Exception {
-		ManagedObjectSourceContext mosContext = context
+		ManagedObjectSourceContext<None> mosContext = context
 				.getManagedObjectSourceContext();
 
 		// Obtain the connection pool data source
@@ -225,14 +208,6 @@ public class JdbcManagedObjectSource extends
 		context.setManagedObjectClass(JdbcManagedObject.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-	 * AbstractAsyncManagedObjectSource
-	 * #start(net.officefloor.frame.spi.managedobject
-	 * .source.impl.AbstractAsyncManagedObjectSource.StartContext)
-	 */
 	@Override
 	protected void start(StartContext<None> startContext) throws Exception {
 
@@ -247,12 +222,6 @@ public class JdbcManagedObjectSource extends
 		this.initialiseScriptInputStream = null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-	 * AbstractManagedObjectSource#getManagedObject()
-	 */
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Obtain the pooled connection

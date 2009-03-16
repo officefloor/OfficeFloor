@@ -31,13 +31,7 @@ import net.officefloor.plugin.jdbc.vendor.AbstractVendorJdbcTest;
  */
 public class HsqldbJdbcTest extends AbstractVendorJdbcTest {
 
-	/**
-	 * Loads the properties for the {@link JdbcManagedObjectSource}.
-	 * 
-	 * @param properties
-	 *            Properties to be populated for the
-	 *            {@link JdbcManagedObjectSource}.
-	 */
+	@Override
 	protected void loadProperties(Properties properties) {
 		properties
 				.setProperty(
@@ -47,6 +41,11 @@ public class HsqldbJdbcTest extends AbstractVendorJdbcTest {
 		properties.setProperty("url", "jdbc:hsqldb:mem:test");
 		properties.setProperty("user", "sa");
 		properties.setProperty("password", "");
+	}
+
+	@Override
+	protected boolean isDropTablesOnSetup() {
+		return false; // IMDB always fresh on startup
 	}
 
 }

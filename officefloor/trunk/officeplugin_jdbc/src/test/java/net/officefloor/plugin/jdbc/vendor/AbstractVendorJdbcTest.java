@@ -96,8 +96,11 @@ public abstract class AbstractVendorJdbcTest extends
 			ConnectionPoolDataSource dataSource = JdbcDataSourceAccess
 					.obtainConnectionPoolDataSource(mos);
 			PooledConnection connection = dataSource.getPooledConnection();
-			Statement statement = connection.getConnection().createStatement();
-			statement.execute("DROP TABLE PRODUCT");
+			if (this.isDropTablesOnSetup()) {
+				Statement statement = connection.getConnection()
+						.createStatement();
+				statement.execute("DROP TABLE PRODUCT");
+			}
 			connection.close();
 		} catch (SQLException ex) {
 			// IMDBs will not be setup and otherwise should pass.
@@ -134,6 +137,15 @@ public abstract class AbstractVendorJdbcTest extends
 	protected abstract void loadProperties(Properties properties);
 
 	/**
+	 * Flag indicating whether to drop the TABLEs within the database on setup.
+	 * 
+	 * @return <code>true</code> to drop the TABLEs.
+	 */
+	protected boolean isDropTablesOnSetup() {
+		return true;
+	}
+
+	/**
 	 * Tests setup of a database and selecting data from it.
 	 */
 	public void testSelect() throws Exception {
@@ -143,9 +155,12 @@ public abstract class AbstractVendorJdbcTest extends
 			return;
 		}
 
+		// Obtain the office name
+		String officeName = this.getOfficeName();
+
 		// Configure the JDBC managed object
 		ManagedObjectBuilder<?> moBuilder = this.constructManagedObject("JDBC",
-				JdbcManagedObjectSource.class, "OFFICE");
+				JdbcManagedObjectSource.class, officeName);
 		Properties properties = this.getDataSourceProperties();
 		System.out.println("Loading "
 				+ JdbcManagedObjectSource.class.getSimpleName()
@@ -183,11 +198,11 @@ public abstract class AbstractVendorJdbcTest extends
 		this.constructTeam("of-JDBC.jdbc.recycle", new PassiveTeam());
 
 		// Open the Office Floor
-		OfficeFloor officeFloor = this.constructOfficeFloor("OFFICE");
+		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
 		// Obtain the work manager with task to use the connection
-		WorkManager workManager = officeFloor.getOffice("OFFICE")
+		WorkManager workManager = officeFloor.getOffice(officeName)
 				.getWorkManager(workName);
 
 		// Invoke work to use the connection
@@ -196,4 +211,5 @@ public abstract class AbstractVendorJdbcTest extends
 		// Close the Office Floor
 		officeFloor.closeOfficeFloor();
 	}
+
 }
