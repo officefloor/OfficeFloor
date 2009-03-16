@@ -213,7 +213,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 
 	@Override
 	public LinkedWorkAdministratorConfiguration[] getLinkedAdministratorConfiguration() {
-		return this.workAdministrators
+		return this.linkedAdministrators
 				.toArray(new LinkedWorkAdministratorConfiguration[0]);
 	}
 

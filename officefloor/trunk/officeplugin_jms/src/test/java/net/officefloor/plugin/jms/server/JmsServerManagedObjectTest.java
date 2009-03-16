@@ -20,21 +20,18 @@ import javax.jms.TextMessage;
 
 import net.officefloor.admin.transaction.TransactionAdministratorSource;
 import net.officefloor.admin.transaction.TransactionDutiesEnum;
-import net.officefloor.frame.api.build.AdministrationBuilder;
-import net.officefloor.frame.api.build.BuildException;
+import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeScope;
+import net.officefloor.frame.api.build.OfficeEnhancer;
+import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.jms.AbstractJmsManagedObjectTest;
 import net.officefloor.plugin.jms.JmsUtil;
@@ -63,28 +60,27 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 	@SuppressWarnings("unchecked")
 	public void testConsumeTextMessage() throws Exception {
 
+		// Obtain the office name
+		String officeName = this.getOfficeName();
+
 		// Configure the JMS Server Managed Object
 		ManagedObjectBuilder moBuilder = this.constructManagedObject(
-				"JMS_SERVER", JmsServerManagedObjectSource.class, "TEST");
+				"JMS_SERVER", JmsServerManagedObjectSource.class, officeName);
 		moBuilder.addProperty(JmsUtil.JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY,
 				VmJmsAdminObjectFactory.class.getName());
 		moBuilder.addProperty(
 				JmsServerManagedObjectSource.JMS_MAX_SERVER_SESSION, "2");
-
-		// Configure the administrator to commit
-		this.constructAdministrator("TRANSACTION",
-				TransactionAdministratorSource.class, OfficeScope.WORK,
-				"worker");
 
 		// Create the process message task
 		AbstractSingleTask processTask = new AbstractSingleTask() {
 			public Object doTask(TaskContext context) throws Exception {
 				// Set text of message
 				TextMessage message = (TextMessage) context.getParameter();
-				msg = message.getText();
+				JmsServerManagedObjectTest.this.msg = message.getText();
 
 				// Output message contents
-				System.out.println("Processing msg: " + msg);
+				System.out.println("Processing msg: "
+						+ JmsServerManagedObjectTest.this.msg);
 
 				// Wakeup test case
 				synchronized (this) {
@@ -99,27 +95,33 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 
 		// Configure the Office
 		OfficeBuilder officeBuilder = this.getOfficeBuilder();
-		officeBuilder.addProcessManagedObject("P_JMS", "JMS_SERVER");
+		officeBuilder.addProcessManagedObject("JMS_SERVER", "JMS_SERVER");
+
+		// Configure the administrator to commit
+		AdministratorBuilder<TransactionDutiesEnum> adminBuilder = this
+				.constructAdministrator("TRANSACTION",
+						TransactionAdministratorSource.class,
+						"of-JMS_SERVER.jms.server.onmessage");
+		adminBuilder.administerManagedObject("JMS_SERVER");
+		adminBuilder.addDuty(TransactionDutiesEnum.BEGIN);
+		adminBuilder.addDuty(TransactionDutiesEnum.COMMIT);
+		adminBuilder.addDuty(TransactionDutiesEnum.ROLLBACK);
 
 		// Configure the Work
 		WorkBuilder workBuilder = processTask.registerWork("work",
 				officeBuilder);
-		workBuilder.registerProcessManagedObject("mo", "P_JMS");
-		AdministrationBuilder adminBuilder = workBuilder
-				.registerAdministration("transaction", "TRANSACTION");
-		adminBuilder.setManagedObjects(new String[] { "mo" });
+		workBuilder.linkAdministrator("transaction", "TRANSACTION");
 
 		// Configure the Task
 		TaskBuilder taskBuilder = processTask.registerTask("task",
-				"jms.server.recycle", workBuilder);
+				"of-JMS_SERVER.jms.server.onmessage", workBuilder);
 		taskBuilder.linkPostTaskAdministration("transaction",
 				TransactionDutiesEnum.COMMIT);
 
 		// Obtain the on message task to link it to task processing result
 		this.getOfficeBuilder().addOfficeEnhancer(new OfficeEnhancer() {
 			@Override
-			public void enhanceOffice(OfficeEnhancerContext context)
-					throws BuildException {
+			public void enhanceOffice(OfficeEnhancerContext context) {
 				// Obtain the JMS flow node
 				FlowNodeBuilder<?> flowNodeBuilder = context
 						.getFlowNodeBuilder("of-JMS_SERVER",
@@ -132,14 +134,13 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		});
 
 		// Configure the teams
-		Team team = new OnePersonTeam(10);
-		this.constructTeam("worker", team);
-		this.constructTeam("jms.server.recycle", team);
-		this.constructTeam("of-JMS_SERVER.jms.server.recycle", team);
-		this.constructTeam("of-JMS_SERVER.jms.server.onmessage", team);
+		this.constructTeam("of-JMS_SERVER.jms.server.recycle",
+				OnePersonTeamSource.class);
+		this.constructTeam("of-JMS_SERVER.jms.server.onmessage",
+				OnePersonTeamSource.class);
 
 		// Open the Office Floor
-		OfficeFloor officeFloor = this.constructOfficeFloor("TEST");
+		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
 
 		// Process a number of messages

@@ -47,6 +47,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
@@ -473,6 +474,32 @@ public abstract class AbstractOfficeConstructTestCase extends
 				this.officeFloorBuilder, officeFloorTeamName, team);
 
 		// Link into the Office
+		this.officeBuilder.registerTeam(teamName, officeFloorTeamName);
+
+		// Return the team builder
+		return teamBuilder;
+	}
+
+	/**
+	 * Facade method to create a {@link Team}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @param teamSourceClass
+	 *            {@link TeamSource} class.
+	 * @return {@link TeamBuilder}.
+	 */
+	protected <TS extends TeamSource> TeamBuilder<?> constructTeam(
+			String teamName, Class<TS> teamSourceClass) {
+
+		// Obtain the office floor team name
+		String officeFloorTeamName = "of-" + teamName;
+
+		// Add the team to the office floor
+		TeamBuilder<?> teamBuilder = this.officeFloorBuilder.addTeam(
+				officeFloorTeamName, teamSourceClass);
+
+		// Link into the office
 		this.officeBuilder.registerTeam(teamName, officeFloorTeamName);
 
 		// Return the team builder
