@@ -23,15 +23,11 @@ import net.officefloor.plugin.xml.XmlMarshallException;
 
 /**
  * <p>
- * Factory for the creation of a
- * {@link net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshaller}.
- * </p>
+ * Factory for the creation of a {@link TreeXmlMarshaller}.
  * <p>
- * This is to ease obtaining a
- * {@link net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshaller} but if
- * utilising office floor framework should plugin via
- * {@link net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshallerManagedObjectSource}.
- * </p>
+ * This is to ease obtaining a {@link TreeXmlMarshaller} but if utilising office
+ * floor framework should plug-in via
+ * {@link TreeXmlMarshallerManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -66,20 +62,20 @@ public class TreeXmlMarshallerFactory {
 	 * @throws XmlMarshallException
 	 *             If fails to create the {@link TreeXmlMarshaller}.
 	 */
-	@SuppressWarnings("unchecked")
 	public TreeXmlMarshaller createMarshaller(InputStream configuration)
 			throws XmlMarshallException {
 
 		// Create the managed object source
-		TreeXmlMarshallerManagedObjectSource<?, ?> source = new TreeXmlMarshallerManagedObjectSource(
+		TreeXmlMarshallerManagedObjectSource source = new TreeXmlMarshallerManagedObjectSource(
 				configuration);
 
 		// Source the marshaller
 		try {
 			return (TreeXmlMarshaller) ManagedObjectUserStandAlone
 					.sourceManagedObject(source).getObject();
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			throw new XmlMarshallException(ex.getMessage(), ex);
 		}
 	}
+
 }

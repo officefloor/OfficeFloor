@@ -26,8 +26,7 @@ import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 
 /**
- * Tests te
- * {@link net.officefloor.plugin.xml.unmarshall.flat.FlatXmlUnmarshallerManagedObjectSource}.
+ * Tests the {@link FlatXmlUnmarshallerManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -48,7 +47,7 @@ public class FlatXmlUnmarshallerManagedObjectSourceTest extends
 	/**
 	 * {@link FlatXmlUnmarshallerManagedObjectSource}to test.
 	 */
-	protected FlatXmlUnmarshallerManagedObjectSource<?, ?> resourceSource;
+	protected FlatXmlUnmarshallerManagedObjectSource resourceSource;
 
 	/**
 	 * Object to have the XML loaded onto.
@@ -98,7 +97,7 @@ public class FlatXmlUnmarshallerManagedObjectSourceTest extends
 	/**
 	 * Ensure able to do a simple load.
 	 */
-	public void testSimpleLoad() throws Exception {
+	public void testSimpleLoad() throws Throwable {
 
 		// Create the XML unmarshaller managed object
 		ManagedObject managedObject = ManagedObjectUserStandAlone
@@ -122,7 +121,7 @@ public class FlatXmlUnmarshallerManagedObjectSourceTest extends
 	/**
 	 * Ensure able to load null values correctly.
 	 */
-	public void testNullLoad() throws Exception {
+	public void testNullLoad() throws Throwable {
 
 		// Create the XML unmarshaller managed object
 		ManagedObject managedObject = ManagedObjectUserStandAlone

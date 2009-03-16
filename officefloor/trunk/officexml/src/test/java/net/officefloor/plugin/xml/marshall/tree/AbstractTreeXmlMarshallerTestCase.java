@@ -25,7 +25,7 @@ import net.officefloor.plugin.xml.marshall.output.WriterXmlOutput;
 import net.officefloor.plugin.xml.marshall.tree.objects.RootObject;
 
 /**
- * Tests the {@link net.officefloor.plugin.xml.XmlMarshaller} implementation.
+ * Tests the {@link XmlMarshaller} implementation.
  * 
  * @author Daniel
  */
@@ -35,24 +35,12 @@ public abstract class AbstractTreeXmlMarshallerTestCase extends
 	/**
 	 * Initiate the writer to capture the marshalled XML.
 	 */
-	protected StringWriter writer;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
-	protected void setUp() throws Exception {
-		super.setUp();
-
-		// Initiate the writer
-		writer = new StringWriter();
-	}
+	private StringWriter writer = new StringWriter();
 
 	/**
 	 * Ensures able to do a flat marshall of an object.
 	 */
-	public void testFlatMarshall() throws Exception {
+	public void testFlatMarshall() throws Throwable {
 
 		// Create the marshaller
 		XmlMarshaller marshaller = this.createFlatMarshaller();
@@ -77,12 +65,12 @@ public abstract class AbstractTreeXmlMarshallerTestCase extends
 	 *             If fails to create the {@link TreeXmlMarshaller}.
 	 */
 	protected abstract TreeXmlMarshaller createFlatMarshaller()
-			throws Exception;
+			throws Throwable;
 
 	/**
 	 * Ensure able to tree marshall an object.
 	 */
-	public void testTreeMarshall() throws Exception {
+	public void testTreeMarshall() throws Throwable {
 
 		// Create the marshaller
 		XmlMarshaller marshaller = this.createTreeMarshaller();
@@ -105,16 +93,16 @@ public abstract class AbstractTreeXmlMarshallerTestCase extends
 	 * Creates the {@link TreeXmlMarshaller} for the tree marshall test.
 	 * 
 	 * @return {@link TreeXmlMarshaller} for tree marshall test.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to create the {@link TreeXmlMarshaller}.
 	 */
 	protected abstract TreeXmlMarshaller createTreeMarshaller()
-			throws Exception;
+			throws Throwable;
 
 	/**
 	 * Ensure able to marshall a Collection.
 	 */
-	public void testCollectionMarshall() throws Exception {
+	public void testCollectionMarshall() throws Throwable {
 
 		// Create the marshaller
 		XmlMarshaller marshaller = this.createCollectionMarshaller();
@@ -137,16 +125,16 @@ public abstract class AbstractTreeXmlMarshallerTestCase extends
 	 * Creates the {@link TreeXmlMarshaller} for the collection marshall test.
 	 * 
 	 * @return {@link TreeXmlMarshaller} for collection marshall test.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to create the {@link TreeXmlMarshaller}.
 	 */
 	protected abstract TreeXmlMarshaller createCollectionMarshaller()
-			throws Exception;
+			throws Throwable;
 
 	/**
 	 * Ensure able to marshall a type.
 	 */
-	public void testTypeMarshall() throws Exception {
+	public void testTypeMarshall() throws Throwable {
 
 		// Create the marshaller
 		XmlMarshaller marshaller = this.createTypeMarshaller();
@@ -169,16 +157,16 @@ public abstract class AbstractTreeXmlMarshallerTestCase extends
 	 * Creates the {@link TreeXmlMarshaller} for the type marshall test.
 	 * 
 	 * @return {@link TreeXmlMarshaller} for type marshall test.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to create the {@link TreeXmlMarshaller}.
 	 */
 	protected abstract TreeXmlMarshaller createTypeMarshaller()
-			throws Exception;
+			throws Throwable;
 
 	/**
 	 * Ensure able to marshall a reference.
 	 */
-	public void testReferenceMarshall() throws Exception {
+	public void testReferenceMarshall() throws Throwable {
 
 		// Create the marshaller
 		XmlMarshaller marshaller = this.createReferenceMarshaller();
@@ -200,16 +188,16 @@ public abstract class AbstractTreeXmlMarshallerTestCase extends
 	 * Creates the {@link TreeXmlMarshaller} for the reference marshall test.
 	 * 
 	 * @return {@link TreeXmlMarshaller} for reference marshall test.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to create the {@link TreeXmlMarshaller}.
 	 */
 	protected abstract TreeXmlMarshaller createReferenceMarshaller()
-			throws Exception;
+			throws Throwable;
 
 	/**
 	 * Ensure able to marshall a referenced collection.
 	 */
-	public void testReferenceCollectionMarshall() throws Exception {
+	public void testReferenceCollectionMarshall() throws Throwable {
 
 		// Create the Collection Marshaller
 		XmlMarshaller marshaller = this.createReferenceCollectionMarshaller();
@@ -233,10 +221,10 @@ public abstract class AbstractTreeXmlMarshallerTestCase extends
 	 * marshall test.
 	 * 
 	 * @return {@link TreeXmlMarshaller} for reference collection marshall test.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to create the {@link TreeXmlMarshaller}.
 	 */
 	protected abstract TreeXmlMarshaller createReferenceCollectionMarshaller()
-			throws Exception;
+			throws Throwable;
 
 }

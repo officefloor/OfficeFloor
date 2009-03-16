@@ -23,8 +23,7 @@ import net.officefloor.frame.util.ManagedObjectSourceLoader;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 
 /**
- * Tests the
- * {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerManagedObjectSource}.
+ * Tests the {@link TreeXmlUnmarshallerManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -32,22 +31,18 @@ public class TreeXmlUnmarshallerManagedObjectSourceTest extends
 		AbstractTreeXmlUnmarshallerTestCase {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.tree.AbstractTreeXmlUnmarshallerTestCase#createNonRecursiveTreeXmlUnmarshaller()
+	 * ================= AbstractTreeXmlUnmarshallerTestCase =================
 	 */
+
+	@Override
 	protected TreeXmlUnmarshaller createNonRecursiveTreeXmlUnmarshaller()
-			throws Exception {
+			throws Throwable {
 		return this.createUnmarshaller("NonRecursiveMetaData.xml");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.tree.AbstractTreeXmlUnmarshallerTestCase#createRecursiveTreeXmlUnmarshaller()
-	 */
+	@Override
 	protected TreeXmlUnmarshaller createRecursiveTreeXmlUnmarshaller()
-			throws Exception {
+			throws Throwable {
 		return this.createUnmarshaller("RecursiveMetaData.xml");
 	}
 
@@ -57,11 +52,11 @@ public class TreeXmlUnmarshallerManagedObjectSourceTest extends
 	 * @param configurationFileName
 	 *            Name of file containing the mapping configuration.
 	 * @return {@link TreeXmlUnmarshaller}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to create the {@link TreeXmlUnmarshaller}.
 	 */
-	protected TreeXmlUnmarshaller createUnmarshaller(
-			String configurationFileName) throws Exception {
+	private TreeXmlUnmarshaller createUnmarshaller(String configurationFileName)
+			throws Throwable {
 
 		// Create the mock objects
 		final ResourceLocator resourceLocator = this
@@ -85,7 +80,7 @@ public class TreeXmlUnmarshallerManagedObjectSourceTest extends
 						TreeXmlUnmarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME,
 						configurationFileName);
 		loader.setResourceLocator(resourceLocator);
-		TreeXmlUnmarshallerManagedObjectSource<?, ?> source = loader
+		TreeXmlUnmarshallerManagedObjectSource source = loader
 				.loadManagedObjectSource(TreeXmlUnmarshallerManagedObjectSource.class);
 
 		// Return the TreeXmlUnmarshaller

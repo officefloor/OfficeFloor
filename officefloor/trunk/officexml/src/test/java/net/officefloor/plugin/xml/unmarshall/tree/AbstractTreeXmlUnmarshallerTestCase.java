@@ -30,8 +30,7 @@ import net.officefloor.plugin.xml.unmarshall.tree.objects.SecondObject;
 import net.officefloor.plugin.xml.unmarshall.tree.objects.ThirdObject;
 
 /**
- * Tests the
- * {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller}.
+ * Tests the {@link TreeXmlUnmarshaller}.
  * 
  * @author Daniel
  */
@@ -43,27 +42,27 @@ public abstract class AbstractTreeXmlUnmarshallerTestCase extends
 	 * values.
 	 * 
 	 * @return {@link TreeXmlUnmarshaller}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fail to create the {@link TreeXmlUnmarshaller}.
 	 */
 	protected abstract TreeXmlUnmarshaller createNonRecursiveTreeXmlUnmarshaller()
-			throws Exception;
+			throws Throwable;
 
 	/**
 	 * Creates the {@link TreeXmlUnmarshaller} to test the loading recursive
 	 * values.
 	 * 
 	 * @return {@link TreeXmlUnmarshaller}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fail to create the {@link TreeXmlUnmarshaller}.
 	 */
 	protected abstract TreeXmlUnmarshaller createRecursiveTreeXmlUnmarshaller()
-			throws Exception;
+			throws Throwable;
 
 	/**
-	 * Ensures able to load xml values (non-recursively).
+	 * Ensures able to load XML values (non-recursively).
 	 */
-	public void testLoadNonRecursiveValues() throws Exception {
+	public void testLoadNonRecursiveValues() throws Throwable {
 
 		// Contains the xml
 		final String XML_FILE_NAME = "NonRecursiveInputFile.xml";
@@ -103,9 +102,9 @@ public abstract class AbstractTreeXmlUnmarshallerTestCase extends
 	}
 
 	/**
-	 * Ensures able to load xml value recursively.
+	 * Ensures able to load XML value recursively.
 	 */
-	public void testLoadRecursiveValues() throws Exception {
+	public void testLoadRecursiveValues() throws Throwable {
 
 		// Contains the recursive xml.
 		final String XML_FILE_NAME = "RecursiveInputFile.xml";

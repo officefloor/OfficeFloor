@@ -24,18 +24,17 @@ import net.officefloor.plugin.xml.unmarshall.load.DynamicValueLoader;
 import net.officefloor.plugin.xml.unmarshall.load.ValueLoaderFactory;
 
 /**
- * Meta-data for a
- * {@link net.officefloor.plugin.xml.unmarshall.flat.FlatXmlUnmarshaller}.
+ * Meta-data for a {@link FlatXmlUnmarshaller}.
  * 
  * @author Daniel
  */
 public class FlatXmlUnmarshallerMetaData {
 
 	/**
-	 * Map of {@link DynamicValueLoader}objects to load values to the target
+	 * Map of {@link DynamicValueLoader} objects to load values to the target
 	 * object.
 	 */
-	protected final Map<String, DynamicValueLoader> valueLoaders;
+	private final Map<String, DynamicValueLoader> valueLoaders;
 
 	/**
 	 * Initiate.
@@ -49,7 +48,6 @@ public class FlatXmlUnmarshallerMetaData {
 	 */
 	public FlatXmlUnmarshallerMetaData(ValueLoaderFactory valueLoaderFactory,
 			XmlMapping[] mappings) throws XmlMarshallException {
-		// Store state
 		this.valueLoaders = new HashMap<String, DynamicValueLoader>();
 
 		// Iterate over mappings loading them
@@ -68,11 +66,11 @@ public class FlatXmlUnmarshallerMetaData {
 	}
 
 	/**
-	 * Obtain the {@link DynamicValueLoader}for the input element.
+	 * Obtain the {@link DynamicValueLoader} for the input element.
 	 * 
 	 * @param elementName
 	 *            Name of element.
-	 * @return {@link DynamicValueLoader}to load value to target object.
+	 * @return {@link DynamicValueLoader} to load value to target object.
 	 */
 	public DynamicValueLoader getValueLoader(String elementName) {
 		return (DynamicValueLoader) this.valueLoaders.get(elementName);

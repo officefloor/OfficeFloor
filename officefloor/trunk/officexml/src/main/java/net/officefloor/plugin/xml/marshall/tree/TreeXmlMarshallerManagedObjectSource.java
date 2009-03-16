@@ -18,20 +18,12 @@ package net.officefloor.plugin.xml.marshall.tree;
 
 import java.io.InputStream;
 
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectSourcePropertyImpl;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.xml.XmlMarshallException;
-import net.officefloor.plugin.xml.XmlMarshaller;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 import net.officefloor.plugin.xml.marshall.translate.TranslatorRegistry;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller;
@@ -40,25 +32,24 @@ import net.officefloor.plugin.xml.unmarshall.tree.XmlMappingMetaData;
 import net.officefloor.plugin.xml.unmarshall.tree.XmlMappingType;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
- * for the {@link net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshaller}.
+ * {@link ManagedObjectSource} for the {@link TreeXmlMarshaller}.
  * 
  * @author Daniel
  */
-public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		implements ManagedObjectSource<D, H>, ManagedObjectSourceMetaData<D, H> {
+public class TreeXmlMarshallerManagedObjectSource extends
+		AbstractManagedObjectSource<None, None> {
 
 	/**
-	 * Property name to obtain the {@link java.io.InputStream} for configuring
-	 * the {@link TreeXmlMarshaller}.
+	 * Property name to obtain the {@link InputStream} for configuring the
+	 * {@link TreeXmlMarshaller}.
 	 */
-	protected static final String CONFIGURATION_PROPERTY_NAME = "configuration";
+	public static final String CONFIGURATION_PROPERTY_NAME = "configuration";
 
 	/**
 	 * Meta-data for the {@link TreeXmlUnmarshaller} to enable it to configure
 	 * the meta-data for the {@link TreeXmlMarshaller}.
 	 */
-	protected static final XmlMappingMetaData OBJECT_XML_MAPPING_META_DATA = new XmlMappingMetaData(
+	private static final XmlMappingMetaData OBJECT_XML_MAPPING_META_DATA = new XmlMappingMetaData(
 			net.officefloor.plugin.xml.marshall.tree.XmlMappingMetaData.class,
 			"marshall",
 			new XmlMappingMetaData[] {
@@ -255,7 +246,7 @@ public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends E
 	 * Instance of the {@link TreeXmlMarshaller} used for all marshalling from
 	 * this source.
 	 */
-	protected TreeXmlMarshallerManagedObject instance;
+	private TreeXmlMarshallerManagedObject instance;
 
 	/**
 	 * Ensure default constructor to enable creation of an instance.
@@ -273,7 +264,6 @@ public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends E
 	 */
 	TreeXmlMarshallerManagedObjectSource(InputStream configuration)
 			throws XmlMarshallException {
-		// Configure the marshaller
 		this.loadInstance(configuration);
 	}
 
@@ -285,7 +275,7 @@ public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends E
 	 * @throws XmlMarshallException
 	 *             If fails to configure the {@link TreeXmlMarshaller}.
 	 */
-	protected void loadInstance(InputStream configuration)
+	private void loadInstance(InputStream configuration)
 			throws XmlMarshallException {
 		// Create the unmarshaller to configure meta-data of the marshaller
 		XmlUnmarshaller unmarshaller = TreeXmlUnmarshallerFactory.getInstance()
@@ -295,49 +285,33 @@ public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends E
 		net.officefloor.plugin.xml.marshall.tree.XmlMappingMetaData metaData = new net.officefloor.plugin.xml.marshall.tree.XmlMappingMetaData();
 		unmarshaller.unmarshall(configuration, metaData);
 
-		// Create the marshaller instance with the single managed object
-		// instance
+		// Create the marshaller with the single managed object instance
 		this.instance = new TreeXmlMarshallerManagedObject(
 				new TreeXmlMarshaller(metaData, new TranslatorRegistry(),
 						new ReferencedXmlMappingRegistry()));
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObjectSource
-	 * ====================================================================
+	 * ================== AbstractManagedObjectSource ==========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getSpecification()
-	 */
-	public ManagedObjectSourceSpecification getSpecification() {
-		return new ManagedObjectSourceSpecification() {
-			public ManagedObjectSourceProperty[] getProperties() {
-				return new ManagedObjectSourceProperty[] { new ManagedObjectSourcePropertyImpl(
-						CONFIGURATION_PROPERTY_NAME, "Configuration file") };
-			}
-		};
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty(CONFIGURATION_PROPERTY_NAME, "Configuration file");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
-	 */
-	public void init(ManagedObjectSourceContext context) throws Exception {
-		// Ensure have configuration property name
-		String configurationName = context.getProperties().getProperty(
-				CONFIGURATION_PROPERTY_NAME);
-		if ((configurationName == null) || (configurationName.length() == 0)) {
-			throw new Exception("Property '" + CONFIGURATION_PROPERTY_NAME
-					+ "' must be specified.");
-		}
+	@Override
+	protected void loadMetaData(MetaDataContext<None, None> context)
+			throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context
+				.getManagedObjectSourceContext();
+
+		// Obtain the location of the configuration
+		String configurationName = mosContext
+				.getProperty(CONFIGURATION_PROPERTY_NAME);
 
 		// Ensure obtain configuration
-		InputStream configuration = context.getResourceLocator()
+		InputStream configuration = mosContext.getResourceLocator()
 				.locateInputStream(configurationName);
 		if (configuration == null) {
 			throw new Exception("Could not find configuration by location '"
@@ -346,141 +320,47 @@ public class TreeXmlMarshallerManagedObjectSource<D extends Enum<D>, H extends E
 
 		// Load the instance
 		this.loadInstance(configuration);
+
+		// Load the meta-data details
+		context.setManagedObjectClass(TreeXmlMarshallerManagedObject.class);
+		context.setObjectClass(TreeXmlMarshaller.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getMetaData()
-	 */
-	public ManagedObjectSourceMetaData<D, H> getMetaData() {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
-	 */
-	public void start(ManagedObjectExecuteContext<H> context) throws Exception {
-		// No handlers necessary
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
-	 */
-	public void sourceManagedObject(ManagedObjectUser user) {
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
 		// Return the instance
-		user.setManagedObject(this.instance);
+		return this.instance;
 	}
-
-	/*
-	 * ====================================================================
-	 * ManagedObjectSourceMetaData
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getManagedObjectClass()
-	 */
-	public Class<? extends ManagedObject> getManagedObjectClass() {
-		return TreeXmlMarshallerManagedObject.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getObjectClass()
-	 */
-	public Class<?> getObjectClass() {
-		return XmlMarshaller.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyKeys()
-	 */
-	public Class<D> getDependencyKeys() {
-		// No dependencies
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyMetaData(D)
-	 */
-	public ManagedObjectDependencyMetaData getDependencyMetaData(D key) {
-		// No dependencies
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerKeys()
-	 */
-	public Class<H> getHandlerKeys() {
-		// No dependencies
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
-	 */
-	public Class<? extends Handler<?>> getHandlerType(H key) {
-		// No dependencies
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
-	 */
-	public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
-		// No administration
-		return null;
-	}
-
-}
-
-/**
- * {@link net.officefloor.core.spi.managedobject.ManagedObject} for the
- * {@link net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshaller}.
- */
-class TreeXmlMarshallerManagedObject implements ManagedObject {
 
 	/**
-	 * Instance of the {@link TreeXmlMarshaller} for this source.
+	 * {@link ManagedObject} for the {@link TreeXmlMarshaller}.
 	 */
-	protected final TreeXmlMarshaller marshaller;
+	private static class TreeXmlMarshallerManagedObject implements
+			ManagedObject {
 
-	/**
-	 * Initiate with the {@link TreeXmlMarshaller} to be managed.
-	 * 
-	 * @param marshaller
-	 *            {@link TreeXmlMarshaller} to be managed.
-	 */
-	public TreeXmlMarshallerManagedObject(TreeXmlMarshaller marshaller) {
-		// Store state
-		this.marshaller = marshaller;
-	}
+		/**
+		 * Instance of the {@link TreeXmlMarshaller} for this source.
+		 */
+		private final TreeXmlMarshaller marshaller;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.managedobject.ManagedObject#getObject()
-	 */
-	public Object getObject() throws Exception {
-		return this.marshaller;
+		/**
+		 * Initiate with the {@link TreeXmlMarshaller} to be managed.
+		 * 
+		 * @param marshaller
+		 *            {@link TreeXmlMarshaller} to be managed.
+		 */
+		public TreeXmlMarshallerManagedObject(TreeXmlMarshaller marshaller) {
+			this.marshaller = marshaller;
+		}
+
+		/*
+		 * ================ ManagedObject ======================================
+		 */
+
+		@Override
+		public Object getObject() throws Exception {
+			return this.marshaller;
+		}
 	}
 
 }
