@@ -92,17 +92,19 @@ public interface ThreadState extends FlowFuture {
 	AdministratorContainer<?, ?> getAdministratorContainer(int index);
 
 	/**
+	 * <p>
 	 * Flags that escalation is about to happen on this {@link ThreadState}.
+	 * <p>
+	 * This allows the {@link ThreadState} to know not to clean up should all
+	 * its {@link Flow} instances be closed and a new one will be created for
+	 * the {@link Escalation}.
 	 * 
 	 * @param currentTaskNode
 	 *            Current {@link JobNode} being executed.
-	 * @param isResetThreadState
-	 *            Flag indicating to reset the {@link ThreadState}.
 	 * @param notifySet
 	 *            {@link JobActivateSet}.
 	 */
-	void escalationStart(JobNode currentTaskNode, boolean isResetThreadState,
-			JobActivateSet notifySet);
+	void escalationStart(JobNode currentTaskNode, JobActivateSet notifySet);
 
 	/**
 	 * Flags that escalation has complete on this {@link ThreadState}.
@@ -113,5 +115,20 @@ public interface ThreadState extends FlowFuture {
 	 *            {@link JobActivateSet}.
 	 */
 	void escalationComplete(JobNode currentTaskNode, JobActivateSet notifySet);
+
+	/**
+	 * Obtains the {@link EscalationLevel} of this {@link ThreadState}.
+	 * 
+	 * @return {@link EscalationLevel} of this {@link ThreadState}.
+	 */
+	EscalationLevel getEscalationLevel();
+
+	/**
+	 * Specifies the {@link EscalationLevel} for this {@link ThreadState}.
+	 * 
+	 * @param escalationLevel
+	 *            {@link EscalationLevel}.
+	 */
+	void setEscalationLevel(EscalationLevel escalationLevel);
 
 }

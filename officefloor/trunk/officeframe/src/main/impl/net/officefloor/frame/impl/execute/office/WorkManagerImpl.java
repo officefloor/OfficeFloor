@@ -84,15 +84,14 @@ public class WorkManagerImpl implements WorkManager {
 		// Assign the job node to the Team
 		jobNode.activateJob();
 
-		// Indicate when thread of work complete
-		// TODO consider making this ProcessState so all threads complete
-		return jobNode.getFlow().getThreadState();
+		// Indicate when process of work complete
+		return jobNode.getFlow().getThreadState().getProcessState();
 	}
 
 	@Override
-	public ManagedObject getManagedObject(String managedObjectId)
-			throws Exception {
-		// TODO implement
+	public ManagedObject getManagedObject(String managedObjectName)
+			throws Throwable {
+		// TODO implement obtaining managed object externally from WorkManager
 		throw new UnsupportedOperationException("TODO implement");
 	}
 

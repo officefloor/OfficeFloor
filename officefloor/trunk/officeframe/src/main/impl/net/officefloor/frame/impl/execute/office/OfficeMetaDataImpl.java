@@ -19,11 +19,15 @@ package net.officefloor.frame.impl.execute.office;
 import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
+import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.OfficeStartupTask;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
@@ -45,6 +49,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final String officeName;
 
 	/**
+	 * {@link OfficeManager}.
+	 */
+	private final OfficeManager officeManager;
+
+	/**
 	 * {@link WorkMetaData} of the {@link Work} that can be done within the
 	 * {@link Office}.
 	 */
@@ -62,16 +71,22 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final OfficeStartupTask[] startupTasks;
 
 	/**
-	 * Catch all {@link EscalationHandler} for this {@link Office}. May be
-	 * <code>null</code>.
+	 * {@link EscalationProcedure} for the {@link Office}.
 	 */
-	private final EscalationHandler officeEscalationHandler;
+	private final EscalationProcedure escalationProcedure;
+
+	/**
+	 * {@link OfficeFloor} {@link Escalation}.
+	 */
+	private final Escalation officeFloorEscalation;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param officeName
 	 *            Name of the {@link Office}.
+	 * @param officeManager
+	 *            {@link OfficeManager}.
 	 * @param workMetaDatas
 	 *            {@link WorkMetaData} of the {@link Work} that can be done
 	 *            within the {@link Office}.
@@ -80,19 +95,23 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 *            created within this {@link Office}.
 	 * @param startupTasks
 	 *            {@link OfficeStartupTask} instances.
-	 * @param officeEscalationHandler
-	 *            Catch all {@link EscalationHandler} for this {@link Office}.
-	 *            May be <code>null</code>.
+	 * @param escalationProcedure
+	 *            {@link EscalationProcedure} for the {@link Office}.
+	 * @param officeFloorEscalation
+	 *            {@link OfficeFloor} {@link Escalation}.
 	 */
-	public OfficeMetaDataImpl(String officeName,
+	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager,
 			WorkMetaData<?>[] workMetaDatas, ProcessMetaData processMetaData,
 			OfficeStartupTask[] startupTasks,
-			EscalationHandler officeEscalationHandler) {
+			EscalationProcedure escalationProcedure,
+			Escalation officeFloorEscalation) {
 		this.officeName = officeName;
+		this.officeManager = officeManager;
 		this.workMetaDatas = workMetaDatas;
 		this.processMetaData = processMetaData;
 		this.startupTasks = startupTasks;
-		this.officeEscalationHandler = officeEscalationHandler;
+		this.escalationProcedure = escalationProcedure;
+		this.officeFloorEscalation = officeFloorEscalation;
 	}
 
 	/*
@@ -105,6 +124,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	}
 
 	@Override
+	public OfficeManager getOfficeManager() {
+		return this.officeManager;
+	}
+
+	@Override
 	public ProcessMetaData getProcessMetaData() {
 		return this.processMetaData;
 	}
@@ -112,6 +136,11 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	@Override
 	public WorkMetaData<?>[] getWorkMetaData() {
 		return this.workMetaDatas;
+	}
+
+	@Override
+	public EscalationProcedure getEscalationProcedure() {
+		return this.escalationProcedure;
 	}
 
 	@Override
@@ -132,7 +161,8 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 
 		// Create the Process State
 		ProcessState processState = new ProcessStateImpl(this.processMetaData,
-				managedObjectEscalationHandler, this.officeEscalationHandler);
+				this, managedObjectEscalationHandler,
+				this.officeFloorEscalation);
 
 		// Determine if require loading the managed object
 		if (managedObject != null) {

@@ -36,6 +36,13 @@ public interface OfficeMetaData {
 	String getOfficeName();
 
 	/**
+	 * Obtains the {@link OfficeManager} of the {@link Office}.
+	 * 
+	 * @return {@link OfficeManager} of the {@link Office}.
+	 */
+	OfficeManager getOfficeManager();
+
+	/**
 	 * Obtains the {@link ProcessMetaData} for processes within this
 	 * {@link Office}.
 	 * 
@@ -50,6 +57,15 @@ public interface OfficeMetaData {
 	 * @return {@link WorkMetaData} instances of this {@link Office}.
 	 */
 	WorkMetaData<?>[] getWorkMetaData();
+
+	/**
+	 * Obtains the {@link EscalationProcedure} for this {@link Office}. This is
+	 * used when the {@link EscalationProcedure} instances on the {@link Flow}
+	 * does not handle the escalation.
+	 * 
+	 * @return {@link EscalationProcedure} for this {@link Office}.
+	 */
+	EscalationProcedure getEscalationProcedure();
 
 	/**
 	 * Obtains the {@link OfficeStartupTask} instances for this {@link Office}.

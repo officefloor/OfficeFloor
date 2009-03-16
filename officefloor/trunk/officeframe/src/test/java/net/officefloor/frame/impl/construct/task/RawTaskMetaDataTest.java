@@ -25,7 +25,6 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
@@ -33,12 +32,11 @@ import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Escalation;
@@ -119,28 +117,16 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 			.createMock(WorkMetaData.class);
 
 	/**
-	 * {@link RawOfficeFloorMetaData}.
+	 * {@link OfficeMetaDataLocator}.
 	 */
-	private final RawOfficeFloorMetaData rawOfficeFloorMetaData = this
-			.createMock(RawOfficeFloorMetaData.class);
+	private final OfficeMetaDataLocator inputTaskMetaDataLocator = this
+			.createMock(OfficeMetaDataLocator.class);
 
 	/**
-	 * {@link OfficeFloor} {@link EscalationProcedure}.
+	 * {@link OfficeMetaDataLocator} to find the {@link TaskMetaData}.
 	 */
-	private final EscalationProcedure officeFloorEscalationProcedure = this
-			.createMock(EscalationProcedure.class);
-
-	/**
-	 * {@link TaskMetaDataLocator}.
-	 */
-	private final TaskMetaDataLocator inputTaskMetaDataLocator = this
-			.createMock(TaskMetaDataLocator.class);
-
-	/**
-	 * {@link TaskMetaDataLocator} to find the {@link TaskMetaData}.
-	 */
-	private final TaskMetaDataLocator taskLocator = this
-			.createMock(TaskMetaDataLocator.class);
+	private final OfficeMetaDataLocator taskLocator = this
+			.createMock(OfficeMetaDataLocator.class);
 
 	/**
 	 * {@link AssetManagerFactory}.
@@ -881,7 +867,6 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
-		this.record_OfficeFloorEscalationProcedure();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(),
 				new EscalationConfiguration[] { escalationConfiguration });
@@ -910,7 +895,6 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
-		this.record_OfficeFloorEscalationProcedure();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(),
 				new EscalationConfiguration[] { escalationConfiguration });
@@ -943,7 +927,6 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
-		this.record_OfficeFloorEscalationProcedure();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(),
 				new EscalationConfiguration[] { escalationConfiguration });
@@ -983,7 +966,6 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.record_NoFlows();
 		this.record_NoNextTask();
-		this.record_OfficeFloorEscalationProcedure();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(),
 				new EscalationConfiguration[] { escalationConfiguration });
@@ -1018,7 +1000,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		assertEquals("Incorrect escalation task meta-data",
 				escalationTaskMetaData, flowMetaData.getInitialTaskMetaData());
 		assertEquals("Incorrect instigation strategy",
-				FlowInstigationStrategyEnum.SEQUENTIAL, flowMetaData
+				FlowInstigationStrategyEnum.PARALLEL, flowMetaData
 						.getInstigationStrategy());
 	}
 
@@ -1070,14 +1052,14 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
-	 * Records obtaining the {@link TaskMetaDataLocator}.
+	 * Records obtaining the {@link OfficeMetaDataLocator}.
 	 */
 	private void record_createWorkSpecificTaskMetaDataLocator() {
 		this
 				.recordReturn(
 						this.inputTaskMetaDataLocator,
 						this.inputTaskMetaDataLocator
-								.createWorkSpecificTaskMetaDataLocator(this.workMetaData),
+								.createWorkSpecificOfficeMetaDataLocator(this.workMetaData),
 						this.taskLocator);
 		this.recordReturn(this.workMetaData, this.workMetaData.getWorkName(),
 				DEFAULT_WORK_NAME);
@@ -1100,23 +1082,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
-	 * Records obtaining the {@link OfficeFloor} {@link EscalationProcedure}.
-	 */
-	private void record_OfficeFloorEscalationProcedure() {
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getRawOfficeMetaData(), this.rawOfficeMetaData);
-		this.recordReturn(this.rawOfficeMetaData, this.rawOfficeMetaData
-				.getRawOfficeFloorMetaData(), this.rawOfficeFloorMetaData);
-		this.recordReturn(this.rawOfficeFloorMetaData,
-				this.rawOfficeFloorMetaData.getEscalationProcedure(),
-				this.officeFloorEscalationProcedure);
-	}
-
-	/**
 	 * Records no {@link Escalation}.
 	 */
 	private void record_NoEscalations() {
-		this.record_OfficeFloorEscalationProcedure();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(), new EscalationConfiguration[0]);
 	}

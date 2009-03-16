@@ -18,7 +18,6 @@ package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.Escalation;
-import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Configuration for the {@link Escalation}.
@@ -33,18 +32,6 @@ public interface EscalationConfiguration {
 	 * @return Type of cause handled by this {@link Escalation}.
 	 */
 	Class<? extends Throwable> getTypeOfCause();
-
-	/**
-	 * <p>
-	 * Indicates to reset the {@link ThreadState} as the escalation flow will
-	 * replace the current flow.
-	 * <p>
-	 * <code>false</code> indicates that the {@link ThreadState} should
-	 * continue after escalation.
-	 * 
-	 * @return <code>true</code> to reset the {@link ThreadState}.
-	 */
-	boolean isResetThreadState();
 
 	/**
 	 * Obtains the {@link TaskNodeReference} for the {@link Task} handling the

@@ -46,7 +46,7 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawOfficeManagingManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -81,7 +81,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	@SuppressWarnings("unchecked")
 	public static RawManagedObjectMetaDataFactory getFactory() {
 		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1,
-				null, null, null, false, false, null, null, null, null, null);
+				null, false, false, null, null, null, null, null);
 	}
 
 	/**
@@ -114,16 +114,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 * {@link ManagedObjectPool}.
 	 */
 	private final ManagedObjectPool managedObjectPool;
-
-	/**
-	 * Sourcing {@link AssetManager}.
-	 */
-	private final AssetManager sourcingAssetManager;
-
-	/**
-	 * Operations {@link AssetManager}.
-	 */
-	private final AssetManager operationsAssetManager;
 
 	/**
 	 * Flag indicating if {@link AsynchronousManagedObject}.
@@ -177,10 +167,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 *            asynchronous operations on the {@link ManagedObject}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
-	 * @param sourcingAssetManager
-	 *            Sourcing {@link AssetManager}.
-	 * @param operationsAssetManager
-	 *            Operations {@link AssetManager}.
 	 * @param isAsynchronous
 	 *            Flag indicating if {@link AsynchronousManagedObject}.
 	 * @param isCoordinating
@@ -204,19 +190,15 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			ManagedObjectSource<D, H> managedObjectSource,
 			ManagedObjectSourceMetaData<D, H> managedObjectSourceMetaData,
 			long defaultTimeout, ManagedObjectPool managedObjectPool,
-			AssetManager sourcingAssetManager,
-			AssetManager operationsAssetManager, boolean isAsynchronous,
-			boolean isCoordinating, String managingOfficeName,
-			String processBoundManagedObjectName, Class<H> handlerKeysClass,
-			H[] handlerKeys, String recycleWorkName) {
+			boolean isAsynchronous, boolean isCoordinating,
+			String managingOfficeName, String processBoundManagedObjectName,
+			Class<H> handlerKeysClass, H[] handlerKeys, String recycleWorkName) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
 		this.managedObjectSourceMetaData = managedObjectSourceMetaData;
 		this.defaultTimeout = defaultTimeout;
 		this.managedObjectPool = managedObjectPool;
-		this.sourcingAssetManager = sourcingAssetManager;
-		this.operationsAssetManager = operationsAssetManager;
 		this.isAsynchronous = isAsynchronous;
 		this.isCoordinating = isCoordinating;
 		this.rawOfficeManagingManagedObjectMetaData = new RawOfficeManagingManagedObjectMetaDataImpl(
@@ -233,7 +215,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	@Override
 	public <d extends Enum<d>, h extends Enum<h>, MS extends ManagedObjectSource<d, h>> RawManagedObjectMetaData<d, h> constructRawManagedObjectMetaData(
 			ManagedObjectSourceConfiguration<h, MS> configuration,
-			OfficeFloorIssues issues, AssetManagerFactory assetManagerFactory,
+			OfficeFloorIssues issues,
 			OfficeFloorConfiguration officeFloorConfiguration) {
 
 		// Obtain the managed object source name
@@ -337,14 +319,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			return null; // can not carry on
 		}
 
-		// Create the sourcing asset manager
-		AssetManager sourcingAssetManager = assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT,
-						managedObjectSourceName, "sourcing", issues);
-		if (sourcingAssetManager == null) {
-			return null; // can not carry on
-		}
-
 		// Obtain managed object type to determine details
 		Class<?> managedObjectClass = metaData.getManagedObjectClass();
 		if (managedObjectClass == null) {
@@ -353,18 +327,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			return null; // can not carry on
 		}
 
-		// Determine if asynchronous
+		// Determine if asynchronous and/or coordinating
 		boolean isManagedObjectAsynchronous = AsynchronousManagedObject.class
 				.isAssignableFrom(managedObjectClass);
-		AssetManager operationsAssetManager = null;
-		if (isManagedObjectAsynchronous) {
-			// Asynchronous so provide operations manager
-			operationsAssetManager = assetManagerFactory.createAssetManager(
-					AssetType.MANAGED_OBJECT, managedObjectSourceName,
-					"operations", issues);
-		}
-
-		// Determine if coordinating
 		boolean isManagedObjectCoordinating = CoordinatingManagedObject.class
 				.isAssignableFrom(managedObjectClass);
 
@@ -404,8 +369,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		// Return the created raw managed object meta data
 		return new RawManagedObjectMetaDataImpl<d, h>(managedObjectSourceName,
 				configuration, managedObjectSource, metaData, defaultTimeout,
-				managedObjectPool, sourcingAssetManager,
-				operationsAssetManager, isManagedObjectAsynchronous,
+				managedObjectPool, isManagedObjectAsynchronous,
 				isManagedObjectCoordinating, managingOfficeName,
 				processBoundManagedObjectName, handlerKeysClass, handlerKeys,
 				recycleWorkName);
@@ -429,7 +393,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	}
 
 	/*
-	 * ==================== RawManagedObjectMetaDataFactory ==================
+	 * ==================== RawManagedObjectMetaData ===========================
 	 */
 
 	@Override
@@ -463,16 +427,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	}
 
 	@Override
-	public AssetManager getSourcingAssetManager() {
-		return this.sourcingAssetManager;
-	}
-
-	@Override
-	public AssetManager getOperationsAssetManager() {
-		return this.operationsAssetManager;
-	}
-
-	@Override
 	public boolean isAsynchronous() {
 		return this.isAsynchronous;
 	}
@@ -498,7 +452,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	}
 
 	@Override
-	public void manageByOffice(TaskMetaDataLocator taskLocator,
+	public void manageByOffice(OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Obtain the handler configurations
@@ -617,7 +571,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 * @param officeMetaData
 	 *            {@link OfficeMetaData}.
 	 * @param taskLocator
-	 *            {@link TaskMetaDataLocator}.
+	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param indexOfManagedObjectInProcessState
@@ -629,7 +583,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 */
 	private <F extends Enum<F>> Handler<F> createHandler(H handlerKey,
 			HandlerConfiguration<H, F> configuration,
-			OfficeMetaData officeMetaData, TaskMetaDataLocator taskLocator,
+			OfficeMetaData officeMetaData, OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory,
 			int indexOfManagedObjectInProcessState, OfficeFloorIssues issues) {
 

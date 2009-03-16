@@ -58,7 +58,7 @@ public interface RawTaskMetaData<P, W extends Work, M extends Enum<M>, F extends
 	 * execution.
 	 * 
 	 * @param taskMetaDataLocator
-	 *            {@link TaskMetaDataLocator}.
+	 *            {@link OfficeMetaDataLocator}.
 	 * @param workMetaData
 	 *            {@link WorkMetaData} containing this {@link TaskMetaData}.
 	 * @param assetManagerFactory
@@ -67,7 +67,7 @@ public interface RawTaskMetaData<P, W extends Work, M extends Enum<M>, F extends
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+	void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
 			WorkMetaData<W> workMetaData,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 

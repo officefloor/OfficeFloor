@@ -23,7 +23,6 @@ import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -140,16 +139,12 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link Escalation}.
-	 * @param isResetThreadState
-	 *            Indicates the {@link ThreadState} is to be reset on following
-	 *            the {@link Escalation}.
 	 * @param taskName
 	 *            Name of the {@link Task} that resides on the same {@link Work}
 	 *            as this {@link Task}.
 	 * @see #addEscalation(Class, boolean, String, String)
 	 */
-	void addEscalation(Class<? extends Throwable> typeOfCause,
-			boolean isResetThreadState, String taskName);
+	void addEscalation(Class<? extends Throwable> typeOfCause, String taskName);
 
 	/**
 	 * Adds an {@link Escalation} to the {@link EscalationProcedure} for the
@@ -157,9 +152,6 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link Escalation}.
-	 * @param isResetThreadState
-	 *            Indicates the {@link ThreadState} is to be reset on following
-	 *            the {@link Escalation}.
 	 * @param workName
 	 *            Name of the {@link Work} that the first {@link Task} of the
 	 *            {@link Flow} resides on.
@@ -168,7 +160,7 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            as this {@link Task}.
 	 * @see #addEscalation(Class, boolean, String)
 	 */
-	void addEscalation(Class<? extends Throwable> typeOfCause,
-			boolean isResetThreadState, String workName, String taskName);
+	void addEscalation(Class<? extends Throwable> typeOfCause, String workName,
+			String taskName);
 
 }

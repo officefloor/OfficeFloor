@@ -16,6 +16,8 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
+import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -65,6 +67,11 @@ public class JobNodeAdapter implements JobNode {
 	@Override
 	public Flow getFlow() {
 		return this.flow;
+	}
+
+	@Override
+	public EscalationProcedure getEscalationProcedure() {
+		return new EscalationProcedureImpl();
 	}
 
 	/**

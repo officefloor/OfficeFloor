@@ -215,17 +215,16 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 
 	@Override
 	public void addEscalation(Class<? extends Throwable> typeOfCause,
-			boolean isResetThreadState, String taskName) {
+			String taskName) {
 		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
-				isResetThreadState, new TaskNodeReferenceImpl(taskName)));
+				new TaskNodeReferenceImpl(taskName)));
 	}
 
 	@Override
 	public void addEscalation(Class<? extends Throwable> typeOfCause,
-			boolean isResetThreadState, String workName, String taskName) {
+			String workName, String taskName) {
 		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
-				isResetThreadState, new TaskNodeReferenceImpl(workName,
-						taskName)));
+				new TaskNodeReferenceImpl(workName, taskName)));
 	}
 
 	/*

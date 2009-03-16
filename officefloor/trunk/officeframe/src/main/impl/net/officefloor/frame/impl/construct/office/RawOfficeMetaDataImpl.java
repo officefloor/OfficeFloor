@@ -23,17 +23,21 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.construct.asset.AssetManagerFactoryImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeStartupTaskImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
@@ -41,6 +45,7 @@ import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -54,10 +59,11 @@ import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -215,7 +221,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			OfficeFloorIssues issues,
 			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
-			AssetManagerFactory assetManagerFactory,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
 			RawWorkMetaDataFactory rawWorkFactory,
@@ -228,6 +233,20 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 					.getSimpleName(), "Office registered without name");
 			return null; // can not continue
 		}
+
+		// Obtain the monitor interval for the office manager
+		long monitorOfficeInterval = configuration.getMonitorOfficeInterval();
+		if (monitorOfficeInterval <= 0) {
+			issues.addIssue(AssetType.OFFICE, officeName,
+					"Monitor office interval must be greater than zero");
+			return null; // can not continue
+		}
+
+		// Create the office manager and asset manager factory
+		OfficeManagerImpl officeManager = new OfficeManagerImpl(
+				monitorOfficeInterval);
+		AssetManagerFactoryImpl officeAssetManagerFactory = new AssetManagerFactoryImpl(
+				officeManager);
 
 		// Enhance the office
 		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration,
@@ -317,14 +336,16 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 					.constructBoundManagedObjectMetaData(
 							processManagedObjectConfiguration, issues,
 							ManagedObjectScope.PROCESS, AssetType.OFFICE,
-							officeName, registeredMo, null);
+							officeName, officeAssetManagerFactory,
+							registeredMo, null);
 		}
 
 		// Add the Managed Objects that are managed by the Office
 		final RawBoundManagedObjectMetaData<?>[] processBoundManagedObjects = rawBoundManagedObjectFactory
 				.affixOfficeManagingManagedObjects(officeName,
 						initialProcessBoundManagedObjects,
-						officeManagingManagedObjects, issues);
+						officeManagingManagedObjects,
+						officeAssetManagerFactory, issues);
 
 		// Create the map of process bound managed objects by name
 		Map<String, RawBoundManagedObjectMetaData<?>> scopeMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
@@ -365,7 +386,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 					.constructBoundManagedObjectMetaData(
 							threadManagedObjectConfiguration, issues,
 							ManagedObjectScope.THREAD, AssetType.OFFICE,
-							officeName, registeredMo, scopeMo);
+							officeName, officeAssetManagerFactory,
+							registeredMo, scopeMo);
 		}
 
 		// Load the thread bound managed objects to scope managed objects
@@ -409,7 +431,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			// Construct the work
 			RawWorkMetaData<?> rawWorkMetaData = rawWorkFactory
 					.constructRawWorkMetaData(workConfiguration, issues,
-							rawOfficeMetaData, assetManagerFactory,
+							rawOfficeMetaData, officeAssetManagerFactory,
 							rawBoundManagedObjectFactory,
 							rawBoundAdministratorFactory, rawTaskFactory);
 			if (rawWorkMetaData == null) {
@@ -429,9 +451,18 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				: startupTaskReferences.length);
 		OfficeStartupTask[] startupTasks = new OfficeStartupTask[startupTasksLength];
 
-		// TODO change this to a TaskNodeReference for a Task to be the handler
-		EscalationHandler officeEscalationHandler = configuration
-				.getOfficeEscalationHandler();
+		// Create the listing of escalations to later populate
+		EscalationConfiguration[] officeEscalationConfigurations = configuration
+				.getEscalationConfiguration();
+		int officeEscalationsLength = (officeEscalationConfigurations == null ? 0
+				: officeEscalationConfigurations.length);
+		Escalation[] officeEscalations = new Escalation[officeEscalationsLength];
+		EscalationProcedure officeEscalationProcedure = new EscalationProcedureImpl(
+				officeEscalations);
+
+		// Obtain the office floor escalation
+		Escalation officeFloorEscalation = rawOfficeFloorMetaData
+				.getOfficeFloorEscalation();
 
 		// Create the thread meta-data
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(this
@@ -446,11 +477,12 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Create the office meta-data
 		rawOfficeMetaData.officeMetaData = new OfficeMetaDataImpl(officeName,
-				workMetaDatas.toArray(new WorkMetaData[0]), processMetaData,
-				startupTasks, officeEscalationHandler);
+				officeManager, workMetaDatas.toArray(new WorkMetaData[0]),
+				processMetaData, startupTasks, officeEscalationProcedure,
+				officeFloorEscalation);
 
-		// Create the task locator
-		TaskMetaDataLocator taskMetaDataLocator = new TaskMetaDataLocatorImpl(
+		// Create the meta-data locator
+		OfficeMetaDataLocator metaDataLocator = new OfficeMetaDataLocatorImpl(
 				rawOfficeMetaData.officeMetaData);
 
 		// Load the startup tasks
@@ -458,15 +490,15 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 			// Obtain the task meta-data for the startup task
 			TaskMetaData<?, ?, ?, ?> startupTaskMetaData = ConstructUtil
-					.getTaskMetaData(startupTaskReferences[i],
-							taskMetaDataLocator, issues, AssetType.OFFICE,
-							officeName, "Startup Task " + i, true);
+					.getTaskMetaData(startupTaskReferences[i], metaDataLocator,
+							issues, AssetType.OFFICE, officeName,
+							"Startup Task " + i, true);
 			if (startupTaskMetaData == null) {
 				continue; // startup task not found
 			}
 
 			// Obtain the flow asset manager
-			AssetManager startupFlowAssetManager = assetManagerFactory
+			AssetManager startupFlowAssetManager = officeAssetManagerFactory
 					.createAssetManager(AssetType.OFFICE, officeName,
 							"StartupTask" + i, issues);
 
@@ -483,17 +515,59 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			startupTasks[i] = new OfficeStartupTaskImpl(startupFlow, parameter);
 		}
 
+		// Load the office escalations
+		for (int i = 0; i < officeEscalationsLength; i++) {
+			EscalationConfiguration escalationConfiguration = officeEscalationConfigurations[i];
+
+			// Obtain the type of issue being handled by escalation
+			Class<? extends Throwable> typeOfCause = escalationConfiguration
+					.getTypeOfCause();
+			if (typeOfCause == null) {
+				issues
+						.addIssue(AssetType.OFFICE, officeName,
+								"Type of cause not provided for office escalation "
+										+ i);
+				continue; // must type type of cause
+			}
+
+			// Obtain the task meta-data for the escalation
+			TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = ConstructUtil
+					.getTaskMetaData(officeEscalationConfigurations[i]
+							.getTaskNodeReference(), metaDataLocator, issues,
+							AssetType.OFFICE, officeName, "Office Escalation "
+									+ i, true);
+			if (escalationTaskMetaData == null) {
+				continue; // escalation task not found
+			}
+
+			// Create flow meta-data (always use thread's flow asset manager)
+			FlowMetaData<?> escalationFlow = this.newFlowMetaData(
+					FlowInstigationStrategyEnum.PARALLEL,
+					escalationTaskMetaData, null);
+
+			// Create and load the escalation
+			officeEscalations[i] = new EscalationImpl(typeOfCause,
+					escalationFlow);
+		}
+
 		// Link tasks within the meta-data of the office
 		for (RawWorkMetaData<?> rawWorkMetaData : rawWorkMetaDatas) {
-			rawWorkMetaData.linkTasks(taskMetaDataLocator, assetManagerFactory,
-					issues);
+			rawWorkMetaData.linkTasks(metaDataLocator,
+					officeAssetManagerFactory, issues);
 		}
-		this.linkTasks(taskMetaDataLocator, threadBoundManagedObjects, issues);
-		this.linkTasks(taskMetaDataLocator, assetManagerFactory,
+		this.linkTasks(metaDataLocator, threadBoundManagedObjects, issues);
+		this.linkTasks(metaDataLocator, officeAssetManagerFactory,
 				threadBoundAdministrators, issues);
-		this.linkTasks(taskMetaDataLocator, processBoundManagedObjects, issues);
-		this.linkTasks(taskMetaDataLocator, assetManagerFactory,
+		this.linkTasks(metaDataLocator, processBoundManagedObjects, issues);
+		this.linkTasks(metaDataLocator, officeAssetManagerFactory,
 				processBoundAdministrators, issues);
+
+		// Have the managed objects managed by the office
+		for (RawOfficeManagingManagedObjectMetaData officeManagingManagedObject : officeManagingManagedObjects) {
+			officeManagingManagedObject.getRawManagedObjectMetaData()
+					.manageByOffice(metaDataLocator, officeAssetManagerFactory,
+							issues);
+		}
 
 		// Return the raw office meta-data
 		return rawOfficeMetaData;
@@ -522,13 +596,13 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 * {@link RawBoundManagedObjectMetaData} instances.
 	 * 
 	 * @param taskMetaDataLocator
-	 *            {@link TaskMetaDataLocator}.
+	 *            {@link OfficeMetaDataLocator}.
 	 * @param rawBoundManagedObjects
 	 *            {@link RawBoundManagedObjectMetaData} instances.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	private void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+	private void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
 			RawBoundManagedObjectMetaData<?>[] rawBoundManagedObjects,
 			OfficeFloorIssues issues) {
 		for (RawBoundManagedObjectMetaData<?> rawBoundManagedObject : rawBoundManagedObjects) {
@@ -559,7 +633,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 * {@link RawBoundAdministratorMetaData} instances.
 	 * 
 	 * @param taskMetaDataLocator
-	 *            {@link TaskMetaDataLocator}.
+	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param rawBoundManagedObjects
@@ -567,7 +641,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	private void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+	private void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
 			AssetManagerFactory assetManagerFactory,
 			RawBoundAdministratorMetaData<?, ?>[] rawBoundAdministrators,
 			OfficeFloorIssues issues) {

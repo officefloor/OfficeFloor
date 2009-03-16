@@ -16,19 +16,20 @@
  */
 package net.officefloor.frame.api.execute;
 
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowAsset;
 
 /**
- * Future token to indicate a flow has completed.
+ * Future token to indicate a {@link Flow} has completed.
  * 
  * @author Daniel
  */
 public interface FlowFuture extends FlowAsset {
 
 	/**
-	 * Indicates the flow has complete.
+	 * Indicates the {@link Flow} has complete.
 	 * 
-	 * @return <code>true</code> if the flow has completed.
+	 * @return <code>true</code> if the {@link Flow} has completed.
 	 */
 	boolean isComplete();
 

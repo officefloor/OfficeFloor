@@ -48,7 +48,7 @@ import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
@@ -221,7 +221,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			workBoundMo = rawBoundManagedObjectFactory
 					.constructBoundManagedObjectMetaData(moConfiguration,
 							issues, ManagedObjectScope.WORK, AssetType.WORK,
-							workName, rawOfficeMetaData
+							workName, assetManagerFactory, rawOfficeMetaData
 									.getManagedObjectMetaData(), officeScopeMo);
 		}
 		Map<String, RawBoundManagedObjectMetaData<?>> workMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
@@ -509,7 +509,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	}
 
 	@Override
-	public void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+	public void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Link tasks of work bound managed objects

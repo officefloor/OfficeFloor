@@ -65,13 +65,13 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	 * execution.
 	 * 
 	 * @param taskMetaDataLocator
-	 *            {@link TaskMetaDataLocator}.
+	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+	void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 }

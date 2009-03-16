@@ -18,9 +18,11 @@ package net.officefloor.frame.impl.construct.asset;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -31,9 +33,15 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 
 	/**
+	 * {@link OfficeManager}.
+	 */
+	private final OfficeManagerImpl officeManager = new OfficeManagerImpl(1000);
+
+	/**
 	 * {@link AssetManagerFactory}.
 	 */
-	private final AssetManagerFactory factory = new AssetManagerFactoryImpl();
+	private final AssetManagerFactory factory = new AssetManagerFactoryImpl(
+			this.officeManager);
 
 	/**
 	 * {@link OfficeFloorIssues}.
@@ -56,6 +64,14 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 
 		// Verify mocks
 		this.verifyMockObjects();
+
+		// Ensure the asset manager was added the office manager
+		AssetManager[] officeAssetManagers = this.officeManager
+				.getAssetManagers();
+		assertEquals("Should only expect one asset manager", 1,
+				officeAssetManagers.length);
+		assertEquals("Incorrect asset manager", assetManager,
+				officeAssetManagers[0]);
 	}
 
 	/**
@@ -73,14 +89,22 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 
 		// Attempt to create the Asset Manager twice
 		this.replayMockObjects();
-		AssetManager assetManager = this.factory.createAssetManager(assetType,
-				assetName, responsibility, this.issues);
+		AssetManager assetManagerOne = this.factory.createAssetManager(
+				assetType, assetName, responsibility, this.issues);
 		assertNotNull("Should create asset manager on first attempt",
-				assetManager);
-		assetManager = this.factory.createAssetManager(assetType, assetName,
-				responsibility, this.issues);
+				assetManagerOne);
+		AssetManager assetManagerTwo = this.factory.createAssetManager(
+				assetType, assetName, responsibility, this.issues);
 		assertNull("Should not create asset manager for same asset",
-				assetManager);
+				assetManagerTwo);
 		this.verifyMockObjects();
+
+		// Ensure the only the first asset manager was added the office manager
+		AssetManager[] officeAssetManagers = this.officeManager
+				.getAssetManagers();
+		assertEquals("Should only expect one asset manager", 1,
+				officeAssetManagers.length);
+		assertEquals("Incorrect asset manager", assetManagerOne,
+				officeAssetManagers[0]);
 	}
 }

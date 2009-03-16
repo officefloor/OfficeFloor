@@ -18,7 +18,6 @@ package net.officefloor.frame.impl.execute.escalation;
 
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Implementation of {@link Escalation}.
@@ -33,12 +32,6 @@ public class EscalationImpl implements Escalation {
 	private final Class<? extends Throwable> typeOfCause;
 
 	/**
-	 * Flag to indicate that {@link ThreadState} be reset before doing this
-	 * {@link Escalation}.
-	 */
-	private final boolean isResetThreadState;
-
-	/**
 	 * {@link FlowMetaData} determine the actions for this {@link Escalation}.
 	 */
 	private final FlowMetaData<?> flowMetaData;
@@ -48,45 +41,25 @@ public class EscalationImpl implements Escalation {
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause handled by this {@link Escalation}.
-	 * @param isResetThreadState
-	 *            Flag to indicate that {@link ThreadState} be reset before
-	 *            doing this {@link Escalation}.
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} determine the actions for this
 	 *            {@link Escalation}.
 	 */
 	public EscalationImpl(Class<? extends Throwable> typeOfCause,
-			boolean isResetThreadState, FlowMetaData<?> flowMetaData) {
+			FlowMetaData<?> flowMetaData) {
 		this.typeOfCause = typeOfCause;
-		this.isResetThreadState = isResetThreadState;
 		this.flowMetaData = flowMetaData;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.Escalation#getTypeOfCause()
+	 * ======================== Escalation ====================================
 	 */
+	
 	@Override
 	public Class<? extends Throwable> getTypeOfCause() {
 		return this.typeOfCause;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.Escalation#isResetThreadState()
-	 */
-	@Override
-	public boolean isResetThreadState() {
-		return this.isResetThreadState;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.Escalation#getFlowMetaData()
-	 */
 	@Override
 	public FlowMetaData<?> getFlowMetaData() {
 		return this.flowMetaData;

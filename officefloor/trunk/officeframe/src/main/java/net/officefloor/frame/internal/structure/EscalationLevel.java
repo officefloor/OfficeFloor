@@ -14,33 +14,44 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.api.execute;
+package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.internal.structure.Escalation;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * <p>
- * Provides means for a {@link Handler} to handle a {@link Throwable} that is
- * not handled by the {@link EscalationProcedure} of the {@link Flow}.
- * <p>
- * An example of this would be a HTTP server {@link ManagedObjectSource} that
- * would send a status 500 on a {@link Throwable}.
+ * Escalation levels for a {@link ThreadState}.
  * 
  * @author Daniel
  */
-public interface EscalationHandler {
+public enum EscalationLevel {
 
 	/**
-	 * Handles the {@link Throwable}.
-	 * 
-	 * @param escalation
-	 *            Escalation.
-	 * @throws Throwable
-	 *             If fails to handle {@link Escalation}.
+	 * {@link ThreadState} executing the {@link Flow} instances with all
+	 * {@link Escalation} instances handled by {@link Flow}.
 	 */
-	void handleEscalation(Throwable escalation) throws Throwable;
+	FLOW,
+
+	/**
+	 * {@link ThreadState} invoking {@link EscalationHandler} provided by the
+	 * {@link Handler} of the {@link ManagedObjectSource} triggering the
+	 * {@link ProcessState}.
+	 */
+	MANAGED_OBJECT_SOURCE_HANDLER,
+
+	/**
+	 * {@link ThreadState} invoking {@link Escalation} provided by the
+	 * {@link Office}.
+	 */
+	OFFICE,
+
+	/**
+	 * {@link ThreadState} invoking catch all {@link Escalation} provided by the
+	 * {@link OfficeFloor}.
+	 */
+	OFFICE_FLOOR
 
 }

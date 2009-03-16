@@ -36,6 +36,16 @@ public interface WorkMetaData<W extends Work> {
 	String getWorkName();
 
 	/**
+	 * Creates a {@link WorkContainer} from this {@link WorkMetaData}.
+	 * 
+	 * @param processState
+	 *            {@link ProcessState} that the {@link WorkContainer} is being
+	 *            created within.
+	 * @return {@link WorkContainer}.
+	 */
+	WorkContainer<W> createWorkContainer(ProcessState processState);
+
+	/**
 	 * Obtain the {@link WorkFactory}.
 	 * 
 	 * @return {@link WorkFactory} of the {@link Work}.

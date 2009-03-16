@@ -37,8 +37,6 @@ public interface RawOfficeMetaDataFactory {
 	 *            {@link RawOfficeManagingManagedObjectMetaData} instances.
 	 * @param rawOfficeFloorMetaData
 	 *            {@link RawOfficeFloorMetaData}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
 	 * @param rawBoundManagedObjectFactory
 	 *            {@link RawBoundManagedObjectMetaDataFactory}.
 	 * @param rawBoundAdministratorFactory
@@ -54,7 +52,6 @@ public interface RawOfficeMetaDataFactory {
 			OfficeFloorIssues issues,
 			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
-			AssetManagerFactory assetManagerFactory,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
 			RawWorkMetaDataFactory rawWorkFactory,

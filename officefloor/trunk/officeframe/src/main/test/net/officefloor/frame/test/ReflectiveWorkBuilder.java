@@ -317,13 +317,6 @@ public class ReflectiveWorkBuilder implements Work,
 		 * ============== TaskFactory =======================================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor
-		 * .frame.api.execute.Work)
-		 */
 		@Override
 		public Task<Object, ReflectiveWorkBuilder, Indexed, Indexed> createTask(
 				ReflectiveWorkBuilder work) {
@@ -334,13 +327,6 @@ public class ReflectiveWorkBuilder implements Work,
 		 * ===================== Task ====================================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
-		 * .api.execute.TaskContext)
-		 */
 		@Override
 		public Object doTask(
 				TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context)
@@ -382,13 +368,6 @@ public class ReflectiveWorkBuilder implements Work,
 	 */
 	private static class ParameterParameterFactory implements ParameterFactory {
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.test.ReflectiveWorkMetaData.ParameterFactory
-		 * #createParamater(net.officefloor.frame.api.execute.TaskContext)
-		 */
 		@Override
 		public Object createParamater(
 				TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context) {
@@ -416,13 +395,6 @@ public class ReflectiveWorkBuilder implements Work,
 			this.index = index;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.test.ReflectiveWorkMetaData.ParameterFactory
-		 * #createParamater(net.officefloor.frame.api.execute.TaskContext)
-		 */
 		@Override
 		public Object createParamater(
 				TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context) {
@@ -451,13 +423,6 @@ public class ReflectiveWorkBuilder implements Work,
 			this.index = index;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.test.ReflectiveWorkMetaData.ParameterFactory
-		 * #createParamater(net.officefloor.frame.api.execute.TaskContext)
-		 */
 		@Override
 		public Object createParamater(
 				final TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context) {

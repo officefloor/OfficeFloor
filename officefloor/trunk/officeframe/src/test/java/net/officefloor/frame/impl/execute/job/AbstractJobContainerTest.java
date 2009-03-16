@@ -16,14 +16,11 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import org.easymock.AbstractMatcher;
-import org.easymock.ArgumentsMatcher;
-import org.easymock.internal.AlwaysMatcher;
-
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -39,6 +36,10 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+
+import org.easymock.AbstractMatcher;
+import org.easymock.ArgumentsMatcher;
+import org.easymock.internal.AlwaysMatcher;
 
 /**
  * Contains functionality for testing the {@link AbstractJobContainer}.
@@ -533,78 +534,118 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	private final Escalation escalation = this.createMock(Escalation.class);
 
 	/**
-	 * Records getting the {@link Escalation}.
+	 * Records handling an {@link Escalation}.
 	 * 
 	 * @param job
 	 *            {@link Job}.
 	 * @param failure
 	 *            {@link Throwable} causing escalation.
-	 * @param isSpecificallyHandled
-	 *            Flag indicating if handled specifically.
+	 * @param isHandled
+	 *            Flag indicating if the {@link Escalation} is handled.
 	 */
-	protected void record_JobContainer_getEscalation(Job job,
-			Throwable failure, boolean isSpecificallyHandled) {
+	protected void record_JobContainer_handleEscalation(Job job,
+			Throwable failure, boolean isHandled) {
+		FunctionalityJob functionalityJob = (FunctionalityJob) job;
+		this.threadState.escalationStart(functionalityJob,
+				this.jobActivatableSet);
+		this.record_completeJob(job);
 		this.recordReturn(this.jobMetaData, this.jobMetaData
 				.getEscalationProcedure(), this.escalationProcedure);
-		this.recordReturn(this.escalationProcedure, this.escalationProcedure
-				.getEscalation(failure),
-				(isSpecificallyHandled ? this.escalation : null));
-		if (!isSpecificallyHandled) {
-			// No specifically handled, so must use catch all escalation
-			this.recordReturn(this.processState, this.processState
-					.getCatchAllEscalation(), this.escalation);
+		Escalation escalation = (isHandled ? this.escalation : null);
+		if (functionalityJob.parallelOwnerJob == null) {
+			// No parallel owner, so handle by job
+			this
+					.recordReturn(this.escalationProcedure,
+							this.escalationProcedure.getEscalation(failure),
+							escalation);
+		} else {
+			// Parallel owner, so handle by job
+			this.recordReturn(this.escalationProcedure,
+					this.escalationProcedure.getEscalation(failure), null);
+			this.recordReturn(functionalityJob.parallelOwnerJob,
+					functionalityJob.parallelOwnerJob.getEscalationProcedure(),
+					this.escalationProcedure);
+			this
+					.recordReturn(this.escalationProcedure,
+							this.escalationProcedure.getEscalation(failure),
+							escalation);
+			this.recordReturn(functionalityJob.parallelOwnerJob,
+					functionalityJob.parallelOwnerJob.getParallelOwner(), null);
+		}
+		if (isHandled) {
+			this.record_JobContainer_createEscalationJob(failure,
+					functionalityJob.parallelOwnerJob);
+		}
+		this.threadState.escalationComplete(functionalityJob,
+				this.jobActivatableSet);
+		if (isHandled) {
+			this.escalationJob.activateJob();
 		}
 	}
 
 	/**
-	 * Records handling an {@link Escalation} that resets the
-	 * {@link ThreadState}.
+	 * Records handling an {@link Escalation}.
 	 * 
 	 * @param job
 	 *            {@link Job}.
 	 * @param failure
 	 *            {@link Throwable} causing escalation.
+	 * @param handledLevel
+	 *            {@link EscalationLevel} that handles escalation.
 	 */
-	protected void record_JobContainer_handleResetEscalation(Job job,
-			Throwable failure) {
-		FunctionalityJob functionalityJob = (FunctionalityJob) job;
-		this.recordReturn(this.escalation,
-				this.escalation.isResetThreadState(), true);
-		this.threadState.escalationStart(functionalityJob, true,
-				this.jobActivatableSet);
-		this.recordReturn(this.escalation, this.escalation.getFlowMetaData(),
-				this.escalationFlowMetaData);
-		this.recordReturn(this.escalationFlowMetaData,
-				this.escalationFlowMetaData.getInitialTaskMetaData(),
-				this.escalationTaskMetaData);
-		this
-				.recordReturn(this.flow, this.flow.createJobNode(
-						this.escalationTaskMetaData, null, failure),
-						this.escalationJob);
-		this.threadState.escalationComplete(functionalityJob,
-				this.jobActivatableSet);
+	protected void record_JobContainer_globalEscalation(Job job,
+			Throwable failure, EscalationLevel handledLevel) {
+		this.recordReturn(this.threadState, this.threadState
+				.getEscalationLevel(), EscalationLevel.FLOW);
+
+		// Handled by the managed object source handler escalation handler
+		if (handledLevel == EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER) {
+			this
+					.recordReturn(this.processState, this.processState
+							.getManagedObjectSourceHandlerEscalation(),
+							this.escalation);
+			this.threadState
+					.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
+			this.record_JobContainer_createEscalationJob(failure, null);
+			this.escalationJob.activateJob();
+			return;
+		}
+		this.recordReturn(this.processState, this.processState
+				.getManagedObjectSourceHandlerEscalation(), null);
+
+		// Handled by the office escalation procedure
+		this.recordReturn(this.processState, this.processState
+				.getOfficeEscalationProcedure(), this.escalationProcedure);
+		if (handledLevel == EscalationLevel.OFFICE) {
+			this.recordReturn(this.escalationProcedure,
+					this.escalationProcedure.getEscalation(failure),
+					this.escalation);
+			this.threadState.setEscalationLevel(EscalationLevel.OFFICE);
+			this.record_JobContainer_createEscalationJob(failure, null);
+			this.escalationJob.activateJob();
+			return;
+		}
+		this.recordReturn(this.escalationProcedure, this.escalationProcedure
+				.getEscalation(failure), null);
+
+		// Handled by the office floor escalation
+		this.recordReturn(this.processState, this.processState
+				.getOfficeFloorEscalation(), this.escalation);
+		this.threadState.setEscalationLevel(EscalationLevel.OFFICE_FLOOR);
+		this.record_JobContainer_createEscalationJob(failure, null);
 		this.escalationJob.activateJob();
 	}
 
 	/**
-	 * Records handling an {@link Escalation} that does not reset the
-	 * {@link ThreadState}.
+	 * Records the creation of the {@link Escalation} {@link JobNode}.
 	 * 
-	 * @param job
-	 *            {@link Job}.
 	 * @param failure
 	 *            {@link Throwable} causing escalation.
-	 * @param isEscalationComplate
-	 *            Flags if the {@link Escalation} parallel {@link Job} completes
-	 *            passively.
+	 * @param parallelOwner
+	 *            Parallel owner of {@link Escalation} {@link JobNode}.
 	 */
-	protected void record_JobContainer_handleNotResetEscalation(Job job,
-			Throwable failure, final boolean isEscalationComplate) {
-		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
-		this.recordReturn(this.escalation,
-				this.escalation.isResetThreadState(), false);
-		this.threadState.escalationStart(functionalityJob, false,
-				this.jobActivatableSet);
+	private void record_JobContainer_createEscalationJob(Throwable failure,
+			JobNode parallelOwner) {
 		this.recordReturn(this.escalation, this.escalation.getFlowMetaData(),
 				this.escalationFlowMetaData);
 		this.recordReturn(this.escalationFlowMetaData,
@@ -615,29 +656,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadState, this.threadState
 				.createFlow(this.escalationFlowMetaData), this.escalationFlow);
 		this.recordReturn(this.escalationFlow, this.escalationFlow
-				.createJobNode(this.escalationTaskMetaData, functionalityJob,
+				.createJobNode(this.escalationTaskMetaData, parallelOwner,
 						failure), this.escalationJob);
-		this.escalationJob.setParallelOwner(functionalityJob);
-		this.recordReturn(this.escalationJob, this.escalationJob
-				.getParallelNode(), null);
-		this.escalationJob.activateJob();
-		this.control(this.escalationJob).setMatcher(new AlwaysMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				// Clears parallel node on job if completes
-				if (isEscalationComplate) {
-					functionalityJob.setParallelNode(null);
-				}
-				return true;
-			}
-		});
-		if (!isEscalationComplate) {
-			// Not complete, so will still be linked
-			this.recordReturn(this.escalationJob, this.escalationJob
-					.isJobNodeComplete(), isEscalationComplate);
-		}
-		this.threadState.escalationComplete(functionalityJob,
-				this.jobActivatableSet);
 	}
 
 	/**
@@ -794,12 +814,12 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		/**
 		 * {@link ParallelOwnerJob} for this {@link Job}.
 		 */
-		private final JobNode parallelOwnerJob;
+		public final JobNode parallelOwnerJob;
 
 		/**
 		 * Flag indicating if the {@link Job} is executed.
 		 */
-		private boolean isJobExecuted = false;
+		public boolean isJobExecuted = false;
 
 		/**
 		 * Initiate.

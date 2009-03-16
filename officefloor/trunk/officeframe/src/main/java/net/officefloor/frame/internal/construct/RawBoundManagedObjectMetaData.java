@@ -81,11 +81,11 @@ public interface RawBoundManagedObjectMetaData<D extends Enum<D>> {
 	 * execution.
 	 * 
 	 * @param taskMetaDataLocator
-	 *            {@link TaskMetaDataLocator}.
+	 *            {@link OfficeMetaDataLocator}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+	void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
 			OfficeFloorIssues issues);
 
 }

@@ -44,7 +44,7 @@ import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
@@ -870,8 +870,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		final AdministratorMetaData<?, ?> adminMetaData = this
 				.createMock(AdministratorMetaData.class);
 		final RecordedTask task = new RecordedTask("TASK");
-		final TaskMetaDataLocator taskLocator = this
-				.createMock(TaskMetaDataLocator.class);
+		final OfficeMetaDataLocator taskLocator = this
+				.createMock(OfficeMetaDataLocator.class);
 
 		// Record a linking tasks
 		this.record_workNameFactory();
@@ -958,7 +958,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 							.constructBoundManagedObjectMetaData(
 									moConfiguration, this.issues,
 									ManagedObjectScope.WORK, AssetType.WORK,
-									WORK_NAME, officeRegisteredManagedObjects,
+									WORK_NAME, this.assetManagerFactory,
+									officeRegisteredManagedObjects,
 									this.officeScopeManagedObjects),
 					workBoundMo);
 			for (int i = 0; i < moCount; i++) {

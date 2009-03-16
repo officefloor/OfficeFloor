@@ -28,14 +28,8 @@ public interface OfficeManager {
 	/**
 	 * Starts this {@link OfficeManager} managing the {@link AssetManager}
 	 * instances within the {@link Office}.
-	 * 
-	 * @param interval
-	 *            Interval in milliseconds between each check of the
-	 *            {@link Office}. Setting this high reduces overhead of managing
-	 *            the {@link Office}, however setting lower increases
-	 *            responsiveness of the {@link Office}.
 	 */
-	void startManaging(long interval);
+	void startManaging();
 
 	/**
 	 * <p>

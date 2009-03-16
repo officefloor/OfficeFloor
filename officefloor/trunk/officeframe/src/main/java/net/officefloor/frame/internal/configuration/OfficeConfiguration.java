@@ -17,15 +17,15 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -46,6 +46,15 @@ public interface OfficeConfiguration {
 	 * @return Name of this {@link Office}.
 	 */
 	String getOfficeName();
+
+	/**
+	 * Obtains the interval in milli-seconds between each time the
+	 * {@link OfficeManager} monitors the {@link Office}.
+	 * 
+	 * @return Interval in milli-seconds between each time the
+	 *         {@link OfficeManager} monitors the {@link Office}.
+	 */
+	long getMonitorOfficeInterval();
 
 	/**
 	 * <p>
@@ -126,13 +135,12 @@ public interface OfficeConfiguration {
 	OfficeEnhancer[] getOfficeEnhancers();
 
 	/**
-	 * Obtains the {@link EscalationHandler} for the {@link Office}.
+	 * Obtains the {@link EscalationConfiguration} instances for the
+	 * {@link Office}.
 	 * 
-	 * @return {@link EscalationHandler} for the {@link Office}. May be
-	 *         <code>null</code>.
+	 * @return {@link EscalationConfiguration} instances for the {@link Office}.
 	 */
-	// TODO return a TaskNodeReference of task in office to handle escalations
-	EscalationHandler getOfficeEscalationHandler();
+	EscalationConfiguration[] getEscalationConfiguration();
 
 	/**
 	 * <p>

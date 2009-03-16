@@ -21,17 +21,17 @@ import java.util.Map;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
- * {@link TaskMetaDataLocator} implementation.
+ * {@link OfficeMetaDataLocator} implementation.
  * 
  * @author Daniel
  */
-public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
+public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -60,7 +60,7 @@ public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
 	 *            {@link OfficeMetaData} to find the {@link TaskMetaData}
 	 *            within.
 	 */
-	public TaskMetaDataLocatorImpl(OfficeMetaData officeMetaData) {
+	public OfficeMetaDataLocatorImpl(OfficeMetaData officeMetaData) {
 		this(officeMetaData, null);
 	}
 
@@ -74,7 +74,7 @@ public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
 	 *            {@link WorkMetaData} to default to on locating
 	 *            {@link TaskMetaData}.
 	 */
-	private TaskMetaDataLocatorImpl(OfficeMetaData officeMetaData,
+	private OfficeMetaDataLocatorImpl(OfficeMetaData officeMetaData,
 			WorkMetaData<?> workMetaData) {
 		this.officeMetaData = officeMetaData;
 		this.workMetaData = workMetaData;
@@ -97,7 +97,7 @@ public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
 	}
 
 	/*
-	 * ================== TaskMetaDataLocator ===============================
+	 * ================== OfficeMetaDataLocator ===============================
 	 */
 
 	@Override
@@ -111,9 +111,9 @@ public class TaskMetaDataLocatorImpl implements TaskMetaDataLocator {
 	}
 
 	@Override
-	public TaskMetaDataLocator createWorkSpecificTaskMetaDataLocator(
+	public OfficeMetaDataLocator createWorkSpecificOfficeMetaDataLocator(
 			WorkMetaData<?> workMetaData) {
-		return new TaskMetaDataLocatorImpl(this.officeMetaData, workMetaData);
+		return new OfficeMetaDataLocatorImpl(this.officeMetaData, workMetaData);
 	}
 
 	@Override

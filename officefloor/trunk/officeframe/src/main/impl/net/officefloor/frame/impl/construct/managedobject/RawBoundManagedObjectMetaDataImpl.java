@@ -32,11 +32,12 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeManagingManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -136,6 +137,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			ManagedObjectScope scope,
 			AssetType assetType,
 			String assetName,
+			AssetManagerFactory assetManagerFactory,
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData<?>> scopeManagedObjects) {
 
@@ -202,7 +204,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 					dependencyMo);
 
 			// Load the meta-data
-			moMetaData.loadManagedObjectMetaData();
+			moMetaData.loadManagedObjectMetaData(assetManagerFactory, issues);
 		}
 
 		// Return the bound managed object meta-data
@@ -214,7 +216,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			String officeName,
 			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
 			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
-			OfficeFloorIssues issues) {
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Create the map of process bound managed objects.
 		// At same time also determine the maximum process bound index.
@@ -299,7 +301,8 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 								moIndex, null, rawMoMetaData);
 
 				// Ensure the managed object meta-data is loaded
-				rawBoundMoImpl.loadManagedObjectMetaData();
+				rawBoundMoImpl.loadManagedObjectMetaData(assetManagerFactory,
+						issues);
 
 				// Append to listing and map to make next office aware
 				rawBoundMo = rawBoundMoImpl;
@@ -448,7 +451,8 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 * {@link RawBoundManagedObjectMetaData}.
 	 */
 	@SuppressWarnings("unchecked")
-	private void loadManagedObjectMetaData() {
+	private void loadManagedObjectMetaData(
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Determine if already loaded
 		if (this.managedObjectMetaData != null) {
@@ -460,15 +464,25 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 				.getManagedObjectSource();
 		ManagedObjectPool managedObjectPool = this.rawMoMetaData
 				.getManagedObjectPool();
-		AssetManager sourcingAssetManager = this.rawMoMetaData
-				.getSourcingAssetManager();
-		AssetManager operationsAssetManager = this.rawMoMetaData
-				.getOperationsAssetManager();
 		boolean isManagedObjectAsynchronous = this.rawMoMetaData
 				.isAsynchronous();
 		boolean isManagedObjectCoordinating = this.rawMoMetaData
 				.isCoordinating();
 		long timeout = this.rawMoMetaData.getDefaultTimeout();
+
+		// Create the sourcing asset manager
+		AssetManager sourcingAssetManager = assetManagerFactory
+				.createAssetManager(AssetType.MANAGED_OBJECT,
+						this.boundManagedObjectName, "sourcing", issues);
+
+		// Create operations asset manager only if asynchronous
+		AssetManager operationsAssetManager = null;
+		if (isManagedObjectAsynchronous) {
+			// Asynchronous so provide operations manager
+			operationsAssetManager = assetManagerFactory.createAssetManager(
+					AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
+					"operations", issues);
+		}
 
 		// Obtain the dependency mapping
 		Map<D, ManagedObjectIndex> dependencyMapping = null;
@@ -539,7 +553,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public void linkTasks(TaskMetaDataLocator taskMetaDataLocator,
+	public void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
 			OfficeFloorIssues issues) {
 
 		// Obtain the office meta-data

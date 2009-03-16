@@ -24,11 +24,11 @@ import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 
 /**
- * Locates the {@link TaskMetaData}.
+ * Locates the meta-data within the {@link OfficeMetaData}.
  * 
  * @author Daniel
  */
-public interface TaskMetaDataLocator {
+public interface OfficeMetaDataLocator {
 
 	/**
 	 * Obtains the {@link OfficeMetaData} of the {@link Office} that
@@ -47,15 +47,15 @@ public interface TaskMetaDataLocator {
 	WorkMetaData<?> getDefaultWorkMetaData();
 
 	/**
-	 * Creates a {@link TaskMetaDataLocator} that defaults to the input
+	 * Creates a {@link OfficeMetaDataLocator} that defaults to the input
 	 * {@link WorkMetaData} if no {@link Work} name is provided.
 	 * 
 	 * @param workMetaData
 	 *            {@link WorkMetaData} of the {@link Work} to default searching
 	 *            for {@link TaskMetaData}.
-	 * @return {@link TaskMetaDataLocator}.
+	 * @return {@link OfficeMetaDataLocator}.
 	 */
-	TaskMetaDataLocator createWorkSpecificTaskMetaDataLocator(
+	OfficeMetaDataLocator createWorkSpecificOfficeMetaDataLocator(
 			WorkMetaData<?> workMetaData);
 
 	/**

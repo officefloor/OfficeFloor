@@ -30,11 +30,8 @@ import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
-import net.officefloor.frame.impl.construct.work.WorkBuilderImpl;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
@@ -137,11 +134,6 @@ public class ManagedObjectSourceLoader {
 	};
 
 	/**
-	 * {@link WorkBuilderImpl} containing the recycle details.
-	 */
-	private WorkBuilderImpl<? extends Work> recycle = null;
-
-	/**
 	 * Default constructor.
 	 */
 	public ManagedObjectSourceLoader() {
@@ -240,40 +232,16 @@ public class ManagedObjectSourceLoader {
 	}
 
 	/**
-	 * Recycle the {@link ManagedObject}.
-	 * 
-	 * @param managedObject
-	 *            {@link ManagedObject} to be recycled.
-	 */
-	public void recycleManagedObject(ManagedObject managedObject) {
-
-		// Ensure able to recycle
-		if (this.recycle == null) {
-			return;
-		}
-
-		// TODO implement
-		throw new UnsupportedOperationException(
-				"TODO implement recycling managed object in stand alone");
-	}
-
-	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
 	private class LoadExecuteContext<H extends Enum<H>> implements
 			ManagedObjectExecuteContext<H> {
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @seenet.officefloor.frame.spi.managedobject.source.
-		 * ManagedObjectExecuteContext#getHandler(H)
-		 */
+		@Override
 		public Handler<?> getHandler(H key) {
-			// TODO Auto-generated method stub
-			throw new UnsupportedOperationException("TODO implement");
+			throw new UnsupportedOperationException(
+					"Managed Object Source may not use Handlers when running stand-alone");
 		}
-
 	}
 
 }

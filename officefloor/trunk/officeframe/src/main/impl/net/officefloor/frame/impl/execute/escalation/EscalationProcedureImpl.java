@@ -27,55 +27,25 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 public class EscalationProcedureImpl implements EscalationProcedure {
 
 	/**
-	 * Parent {@link EscalationProcedure} to be taken if the provided
-	 * {@link Escalation} instances for this {@link EscalationProcedure} do not
-	 * handle the escalation.
-	 */
-	protected final EscalationProcedure parentEscalationProcedure;
-
-	/**
 	 * {@link Escalation} instances in order for this procedure.
 	 */
-	protected final Escalation[] escalations;
+	private final Escalation[] escalations;
 
 	/**
 	 * Initiate with {@link Escalation} details.
 	 * 
-	 * @param parentEscalationProcedure
-	 *            {@link EscalationProcedure} to be taken if the
-	 *            {@link Escalation} instances for this
-	 *            {@link EscalationProcedure} do not handle the escalation.
 	 * @param escalations
 	 *            {@link Escalation} instances in order to be taken for this
 	 *            procedure.
 	 */
-	public EscalationProcedureImpl(
-			EscalationProcedure parentEscalationProcedure,
-			Escalation... escalations) {
-		this.parentEscalationProcedure = parentEscalationProcedure;
+	public EscalationProcedureImpl(Escalation... escalations) {
 		this.escalations = escalations;
-	}
-
-	/**
-	 * Initiate top level {@link EscalationProcedure}.
-	 */
-	public EscalationProcedureImpl() {
-		// No further escalations
-		this.parentEscalationProcedure = null;
-		this.escalations = new Escalation[0];
 	}
 
 	/*
 	 * ============= EscalationProcedure ==================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.EscalationProcedure#getEscalation
-	 * (java.lang.Throwable)
-	 */
 	@Override
 	public Escalation getEscalation(Throwable cause) {
 
@@ -87,9 +57,8 @@ public class EscalationProcedureImpl implements EscalationProcedure {
 			}
 		}
 
-		// Not found so ask parent for escalation (if have one)
-		return (this.parentEscalationProcedure == null ? null
-				: this.parentEscalationProcedure.getEscalation(cause));
+		// Not found
+		return null;
 	}
 
 }
