@@ -21,6 +21,8 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.error.ExecutionError;
 import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationLevel;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -354,7 +356,6 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							return true;
 
 						case FAILED:
-						case HANDLING_FAILURE:
 							// Carry on to handle the failure
 							break;
 
@@ -390,75 +391,121 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						escalationCause = ex;
 					}
 
+					// Handle failure
 					try {
-						// Handle completion/failure
-						switch (this.jobState) {
-						case FAILED:
-							// Obtain the escalation to handle the failure
-							Escalation escalation = this.nodeMetaData
-									.getEscalationProcedure().getEscalation(
-											escalationCause);
 
-							// Use catch all escalation, if none provided
-							if (escalation == null) {
-								escalation = processState
-										.getCatchAllEscalation();
-							}
+						// Obtain the node to handle the escalation
+						JobNode escalationNode = null;
 
-							// Start escalation (and ensure complete later)
-							boolean isResetThreadState = escalation
-									.isResetThreadState();
-							threadState.escalationStart(this,
-									isResetThreadState, notifySet);
-							try {
+						// Inform thread of escalation search
+						threadState.escalationStart(this, notifySet);
+						try {
+							// Escalation from this node, so nothing further
+							this.clearNodes(notifySet);
 
-								// Do the escalation
-								FlowMetaData<?> escalationFlowMetaData = escalation
-										.getFlowMetaData();
-								if (isResetThreadState) {
-									// Create and load the sequential flow
-									this.createSequentialFlow(
-											escalationFlowMetaData,
-											escalationCause);
-
+							// Search upwards for an escalation handler
+							JobNode node = this;
+							JobNode escalationOwnerNode = this
+									.getParallelOwner();
+							do {
+								Escalation escalation = node
+										.getEscalationProcedure()
+										.getEscalation(escalationCause);
+								if (escalation == null) {
+									// Clear node as not handles escalation
+									node.clearNodes(notifySet);
 								} else {
-									// Flag handling failure
-									this.jobState = JobState.HANDLING_FAILURE;
-
-									// Create, load and execute as parallel flow
-									this.createParallelFlow(
-											escalationFlowMetaData,
-											escalationCause);
-									JobNode parallelJob = this
-											.getNextJobNodeToExecute();
-									parallelJob.activateJob();
-									if (this.isParallelJobsNotComplete()) {
-										// Parallel job wakes up when complete
-										return true;
-									}
+									// Create the node for the escalation
+									escalationNode = this
+											.createEscalationJobNode(escalation
+													.getFlowMetaData(),
+													escalationCause,
+													escalationOwnerNode);
 								}
-							} finally {
-								// Escalation complete
-								threadState.escalationComplete(this, notifySet);
-							}
 
-						case HANDLING_FAILURE:
-							// Assign the next task of flow to its team
-							JobNode job = this.getNextJobNodeToExecute();
-							if (job != null) {
-								// Will be either same thread or new thread
-								job.activateJob();
-							}
+								// Move to parallel owner for next try
+								if (node != escalationOwnerNode) {
+									// Direct parallel owner of job escalating
+									node = escalationOwnerNode;
+								} else {
+									// Ancestor parallel owner
+									node = node.getParallelOwner();
+									escalationOwnerNode = node;
+								}
 
-						case COMPLETED:
-							// Complete the task
-							this.completeJob(notifySet);
-							break;
+							} while ((escalationNode == null)
+									&& (escalationOwnerNode != null));
 
-						default:
-							throw new IllegalStateException(
-									"Should not be in state " + this.jobState);
+						} finally {
+							// Inform thread escalation search over
+							threadState.escalationComplete(this, notifySet);
 						}
+
+						// Note: invoking escalation node is done outside
+						// escalation search as passive teams may complete
+						// the thread but in escalation search state, the thread
+						// will not be allowed to complete leaving it hanging.
+
+						// Determine if require a global escalation
+						if (escalationNode == null) {
+							// No escalation, so use global escalation
+							Escalation globalEscalation = null;
+							switch (threadState.getEscalationLevel()) {
+							case FLOW:
+								// Obtain the managed object source escalation
+								globalEscalation = processState
+										.getManagedObjectSourceHandlerEscalation();
+								if (globalEscalation != null) {
+									threadState
+											.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
+									break;
+								}
+
+							case MANAGED_OBJECT_SOURCE_HANDLER:
+								// Tried managed object, now at office
+								globalEscalation = processState
+										.getOfficeEscalationProcedure()
+										.getEscalation(escalationCause);
+								if (globalEscalation != null) {
+									threadState
+											.setEscalationLevel(EscalationLevel.OFFICE);
+									break;
+								}
+
+							case OFFICE:
+								// Tried office, now at office floor
+								globalEscalation = processState
+										.getOfficeFloorEscalation();
+
+								// Always now at office floor escalation level
+								threadState
+										.setEscalationLevel(EscalationLevel.OFFICE_FLOOR);
+
+								// Attempt to use office floor escalation
+								if (globalEscalation != null) {
+									break;
+								}
+
+							case OFFICE_FLOOR:
+								// Should not be escalating at office floor.
+								// Allow stderr failure to pick up issue.
+								throw escalationCause;
+
+							default:
+								throw new IllegalStateException(
+										"Should not be in state "
+												+ threadState
+														.getEscalationLevel());
+							}
+
+							// Create the global escalation
+							escalationNode = this.createEscalationJobNode(
+									globalEscalation.getFlowMetaData(),
+									escalationCause, null);
+						}
+
+						// Activate escalation node
+						escalationNode.activateJob();
 
 					} catch (Throwable ex) {
 						// Should not receive failure here.
@@ -645,25 +692,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * co-ordination between themselves as executing a task is single threaded.
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.impl.execute.JobExecuteContext#setJobComplete(boolean
-	 * )
-	 */
 	@Override
 	public final void setJobComplete(boolean isComplete) {
 		this.isComplete = isComplete;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.impl.execute.JobExecuteContext#joinFlow(net.officefloor
-	 * .frame.api.execute.FlowFuture)
-	 */
 	@Override
 	public final void joinFlow(FlowFuture flowFuture) {
 
@@ -677,13 +710,6 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		this.flowAsset = (FlowAsset) flowFuture;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.impl.execute.JobExecuteContext#doFlow(net.officefloor
-	 * .frame.internal.structure.FlowMetaData, java.lang.Object)
-	 */
 	@Override
 	public final FlowFuture doFlow(FlowMetaData<?> flowMetaData,
 			Object parameter) {
@@ -704,6 +730,37 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			// Unknown instigation strategy
 			throw new IllegalStateException("Unknown instigation strategy");
 		}
+	}
+
+	/**
+	 * Creates an {@link Escalation} {@link JobNode} from the input
+	 * {@link FlowMetaData}.
+	 * 
+	 * @param flowMetaData
+	 *            {@link FlowMetaData}.
+	 * @param parameter
+	 *            Parameter.
+	 * @param parallelOwner
+	 *            Parallel owner for the {@link Escalation} {@link JobNode}.
+	 * @return {@link JobNode}.
+	 */
+	private JobNode createEscalationJobNode(FlowMetaData<?> flowMetaData,
+			Object parameter, JobNode parallelOwner) {
+
+		// Obtain the task meta-data for instigating the flow
+		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
+				.getInitialTaskMetaData();
+
+		// Create a new flow for execution
+		ThreadState threadState = this.flow.getThreadState();
+		Flow parallelFlow = threadState.createFlow(flowMetaData);
+
+		// Create the job node
+		JobNode escalationJobNode = parallelFlow.createJobNode(
+				initTaskMetaData, parallelOwner, parameter);
+
+		// Return the escalation job node
+		return escalationJobNode;
 	}
 
 	/**
@@ -877,11 +934,6 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 */
 	private boolean isActive = false;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#activeTask()
-	 */
 	@Override
 	public final void activateJob() {
 
@@ -911,121 +963,68 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.JobNode#isJobNodeComplete()
-	 */
 	@Override
 	public boolean isJobNodeComplete() {
 		// Complete if in complete state
 		return (this.jobState == JobState.COMPLETED);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.JobNode#getFlow()
-	 */
 	@Override
 	public Flow getFlow() {
 		return this.flow;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskNode#setParallelOwner(net
-	 * .officefloor.frame.internal.structure.TaskNode)
-	 */
+	@Override
+	public EscalationProcedure getEscalationProcedure() {
+		return this.nodeMetaData.getEscalationProcedure();
+	}
+
 	@Override
 	public final void setParallelOwner(JobNode jobNode) {
 		this.parallelOwner = jobNode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskNode#getParallelOwner()
-	 */
 	@Override
 	public final JobNode getParallelOwner() {
 		return this.parallelOwner;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskNode#setParallelNode(net
-	 * .officefloor.frame.internal.structure.TaskNode)
-	 */
 	@Override
 	public final void setParallelNode(JobNode jobNode) {
 		this.parallelNode = jobNode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskNode#getParallelNode()
-	 */
 	@Override
 	public final JobNode getParallelNode() {
 		return this.parallelNode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskNode#setNextNode(net.officefloor
-	 * .frame.internal.structure.TaskNode)
-	 */
 	@Override
 	public final void setNextNode(JobNode jobNode) {
 		this.nextTaskNode = jobNode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskNode#getNextNode()
-	 */
 	@Override
 	public final JobNode getNextNode() {
 		return this.nextTaskNode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskNode#clearNodes(net.officefloor
-	 * .frame.internal.structure.AssetNotifySet)
-	 */
 	@Override
 	public final void clearNodes(JobActivateSet notifySet) {
 
-		// Complete this task
+		// Complete this job
 		this.completeJob(notifySet);
 
-		// Unset the linked nodes
+		// Clear all the parallel jobs from this node
 		JobNode parallel = this.getParallelNode();
 		this.setParallelNode(null);
-		JobNode owner = this.getParallelOwner();
-		this.setParallelOwner(null);
-		JobNode sequential = this.getNextNode();
-		this.setNextNode(null);
-
-		// Clear the linked nodes
 		if (parallel != null) {
 			parallel.clearNodes(notifySet);
 		}
-		if (owner != null) {
-			owner.clearNodes(notifySet);
-		}
+
+		// Clear all the sequential jobs from this node
+		JobNode sequential = this.getNextNode();
+		this.setNextNode(null);
 		if (sequential != null) {
 			sequential.clearNodes(notifySet);
 		}
@@ -1067,11 +1066,6 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		 * Failure in executing.
 		 */
 		FAILED,
-
-		/**
-		 * Currently handling the failure.
-		 */
-		HANDLING_FAILURE,
 
 		/**
 		 * {@link TaskContainer} has completed.

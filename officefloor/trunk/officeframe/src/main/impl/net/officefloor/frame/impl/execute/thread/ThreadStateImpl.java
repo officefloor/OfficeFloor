@@ -27,6 +27,8 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.AssetReport;
+import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobActivateSet;
@@ -53,12 +55,12 @@ public class ThreadStateImpl implements ThreadState, Asset {
 		@Override
 		public void lastLinkedListEntryRemoved(JobActivateSet notifySet) {
 
-			// Do nothing if reseting the state
-			if (ThreadStateImpl.this.isResetingState) {
+			// Do nothing if searching for escalation
+			if (ThreadStateImpl.this.isEscalating) {
 				return;
 			}
 
-			// Complete the thread
+			// Complete the thread as not escalating and no more flows
 			ThreadStateImpl.this.completeThread(notifySet);
 		}
 	};
@@ -89,14 +91,19 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	private final AssetMonitor threadMonitor;
 
 	/**
-	 * Flag indicating reseting the state.
+	 * Flag indicating that looking for {@link Escalation}.
 	 */
-	private boolean isResetingState = false;
+	private boolean isEscalating = false;
 
 	/**
 	 * Failure of the {@link ThreadState}.
 	 */
 	private Throwable failure = null;
+
+	/**
+	 * {@link EscalationLevel} for this {@link ThreadState}.
+	 */
+	private EscalationLevel escalationLevel = EscalationLevel.FLOW;
 
 	/**
 	 * <p>
@@ -218,32 +225,24 @@ public class ThreadStateImpl implements ThreadState, Asset {
 
 	@Override
 	public void escalationStart(JobNode currentTaskNode,
-			boolean isResetThreadState, JobActivateSet notifySet) {
-		// Determine if reset thread state
-		if (isResetThreadState) {
-			try {
-				this.isResetingState = true;
-				currentTaskNode.clearNodes(notifySet);
-			} finally {
-				this.isResetingState = false;
-			}
-		}
+			JobActivateSet notifySet) {
+		this.isEscalating = true;
 	}
 
 	@Override
 	public void escalationComplete(JobNode currentTaskNode,
 			JobActivateSet notifySet) {
+		this.isEscalating = false;
+	}
 
-		// Determine if thread is complete
-		if ((currentTaskNode.getNextNode() != null)
-				|| (currentTaskNode.getParallelNode() != null)
-				|| (currentTaskNode.getParallelNode() != null)) {
-			// Thread still active, therefore do nothing
-			return;
-		}
+	@Override
+	public EscalationLevel getEscalationLevel() {
+		return this.escalationLevel;
+	}
 
-		// Thread finished, therefore complete
-		this.completeThread(notifySet);
+	@Override
+	public void setEscalationLevel(EscalationLevel escalationLevel) {
+		this.escalationLevel = escalationLevel;
 	}
 
 	/*
@@ -284,7 +283,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 
 	@Override
 	public void reportOnAsset(AssetReport report) {
-		// TODO Auto-generated method stub
+		// TODO implement asset reporting on a ThreadState
 	}
 
 }

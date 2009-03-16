@@ -24,6 +24,7 @@ import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -271,89 +272,94 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		ThreadState threadState = adminContext.getThreadState();
 		ProcessState processState = threadState.getProcessState();
 
-		// TODO get admin, mos in process lock as may change state of process
-
 		// Obtain the index identifying the administrator
 		AdministratorIndex adminIndex = duty.getAdministratorIndex();
-
-		// Obtain the administrator container
-		AdministratorContainer adminContainer;
+		AdministratorScope adminScope = adminIndex.getAdministratorScope();
 		int adminScopeIndex = adminIndex.getIndexOfAdministratorWithinScope();
-		switch (adminIndex.getAdministratorScope()) {
-		case WORK:
-			// Lazy create the administrator container. This is safe to lazy
-			// create as work containers are not shared between threads and this
-			// operates within the thread lock.
-			adminContainer = this.administrators[adminScopeIndex];
-			if (adminContainer == null) {
-				adminContainer = this.workMetaData.getAdministratorMetaData()[adminScopeIndex]
-						.createAdministratorContainer();
-				this.administrators[adminScopeIndex] = adminContainer;
-			}
-			break;
 
-		case THREAD:
-			adminContainer = threadState
-					.getAdministratorContainer(adminScopeIndex);
-			break;
-
-		case PROCESS:
-			adminContainer = processState
-					.getAdministratorContainer(adminScopeIndex);
-			break;
-
-		default:
-			throw new IllegalStateException("Unknown administrator scope "
-					+ adminIndex.getAdministratorScope());
-		}
-
-		// Obtain the extension interfaces to be managed
-		ExtensionInterfaceMetaData<?>[] eiMetaDatas = adminContainer
-				.getExtensionInterfaceMetaData(adminContext);
+		// Obtain the administrator container.
+		// Must be done within process lock as may be changing state of process.
+		AdministratorContainer adminContainer;
 		List ei = new LinkedList();
-		for (int i = 0; i < eiMetaDatas.length; i++) {
-			ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
-
-			// Obtain the index of managed object to administer
-			ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
-
-			// Obtain the managed object container
-			ManagedObjectContainer container;
-			int moScopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
-			switch (moIndex.getManagedObjectScope()) {
+		synchronized (processState.getProcessLock()) {
+			switch (adminScope) {
 			case WORK:
-				container = this.managedObjects[moScopeIndex];
+				// Lazy create the administrator container. This is safe to lazy
+				// create as work containers are not shared between threads and
+				// this operates within the thread lock.
+				adminContainer = this.administrators[adminScopeIndex];
+				if (adminContainer == null) {
+					adminContainer = this.workMetaData
+							.getAdministratorMetaData()[adminScopeIndex]
+							.createAdministratorContainer();
+					this.administrators[adminScopeIndex] = adminContainer;
+				}
 				break;
 
 			case THREAD:
-				container = threadState.getManagedObjectContainer(moScopeIndex);
+				adminContainer = threadState
+						.getAdministratorContainer(adminScopeIndex);
 				break;
 
 			case PROCESS:
-				container = processState
-						.getManagedObjectContainer(moScopeIndex);
+				adminContainer = processState
+						.getAdministratorContainer(adminScopeIndex);
 				break;
 
 			default:
-				throw new IllegalStateException("Unknown managed object scope "
-						+ moIndex.getManagedObjectScope());
+				throw new IllegalStateException("Unknown administrator scope "
+						+ adminIndex.getAdministratorScope());
 			}
 
-			// Ensure have the container
-			if (container == null) {
-				continue; // no container so no managed object to administer
-			}
+			// Obtain the extension interfaces to be managed
+			ExtensionInterfaceMetaData<?>[] eiMetaDatas = adminContainer
+					.getExtensionInterfaceMetaData(adminContext);
+			for (int i = 0; i < eiMetaDatas.length; i++) {
+				ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
 
-			// Obtain the managed object
-			ManagedObject managedObject = container
-					.getManagedObject(threadState);
-			if (managedObject == null) {
-				continue; // no managed object to administer
-			}
+				// Obtain the index of managed object to administer
+				ManagedObjectIndex moIndex = eiMetaData.getManagedObjectIndex();
 
-			// Obtain and load the extension interface
-			ei.add(eiMetaData.getExtensionInterfaceFactory()
-					.createExtensionInterface(managedObject));
+				// Obtain the managed object container
+				ManagedObjectContainer container;
+				int moScopeIndex = moIndex.getIndexOfManagedObjectWithinScope();
+				switch (moIndex.getManagedObjectScope()) {
+				case WORK:
+					container = this.managedObjects[moScopeIndex];
+					break;
+
+				case THREAD:
+					container = threadState
+							.getManagedObjectContainer(moScopeIndex);
+					break;
+
+				case PROCESS:
+					container = processState
+							.getManagedObjectContainer(moScopeIndex);
+					break;
+
+				default:
+					throw new IllegalStateException(
+							"Unknown managed object scope "
+									+ moIndex.getManagedObjectScope());
+				}
+
+				// Ensure have the container
+				if (container == null) {
+					continue; // no container so no managed object to administer
+				}
+
+				// Obtain the managed object
+				ManagedObject managedObject = container
+						.getManagedObject(threadState);
+				if (managedObject == null) {
+					continue; // no managed object to administer
+				}
+
+				// Obtain and load the extension interface
+				ei.add(eiMetaData.getExtensionInterfaceFactory()
+						.createExtensionInterface(managedObject));
+			}
 		}
 
 		// Administer the managed objects

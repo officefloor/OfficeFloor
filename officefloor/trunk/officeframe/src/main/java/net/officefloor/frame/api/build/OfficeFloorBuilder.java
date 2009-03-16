@@ -16,9 +16,9 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -65,13 +65,13 @@ public interface OfficeFloorBuilder {
 	OfficeBuilder addOffice(String officeName);
 
 	/**
-	 * Specifies the {@link EscalationProcedure} for issues escalating out of
-	 * the {@link Office} instances.
+	 * Specifies the {@link EscalationHandler} for issues escalating out of the
+	 * {@link Office} instances.
 	 * 
-	 * @param escalationProcedure
-	 *            {@link EscalationProcedure}.
+	 * @param escalationHandler
+	 *            {@link EscalationHandler}.
 	 */
-	void setEscalationProcedure(EscalationProcedure escalationProcedure);
+	void setEscalationHandler(EscalationHandler escalationHandler);
 
 	/**
 	 * Builds the {@link OfficeFloor}.

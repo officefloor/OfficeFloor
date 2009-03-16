@@ -41,18 +41,19 @@ public interface WorkManager {
 
 	/**
 	 * <p>
-	 * Obtains a {@link ManagedObject} for the input Id.
+	 * Obtains a {@link ManagedObject} within the {@link Work} scope by the
+	 * input name.
 	 * <p>
 	 * As {@link ManagedObject} instances may be dependent on other
 	 * {@link ManagedObject} instances, they require the {@link Work} to specify
 	 * these dependencies.
 	 * 
-	 * @param managedObjectId
-	 *            Id of the {@link ManagedObject}.
-	 * @return {@link ManagedObject} for the input Id.
-	 * @throws Exception
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObject}.
+	 * @return {@link ManagedObject} for the input name.
+	 * @throws Throwable
 	 *             If fails to obtain the {@link ManagedObject}.
 	 */
-	ManagedObject getManagedObject(String managedObjectId) throws Exception;
+	ManagedObject getManagedObject(String managedObjectName) throws Throwable;
 
 }

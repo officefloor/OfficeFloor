@@ -16,9 +16,9 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
@@ -60,11 +60,12 @@ public interface OfficeFloorConfiguration {
 	OfficeConfiguration[] getOfficeConfiguration();
 
 	/**
-	 * Obtains the {@link EscalationProcedure} for the {@link OfficeFloor}.
+	 * Obtains the {@link EscalationHandler} for issues escalating out of the
+	 * {@link Office} instances.
 	 * 
-	 * @return {@link EscalationProcedure} for the {@link OfficeFloor}. May be
-	 *         <code>null</code>.
+	 * @return {@link EscalationHandler} for issues escalating out of the
+	 *         {@link Office} instances. May be <code>null</code>.
 	 */
-	EscalationProcedure getEscalationProcedure();
+	EscalationHandler getEscalationHandler();
 
 }

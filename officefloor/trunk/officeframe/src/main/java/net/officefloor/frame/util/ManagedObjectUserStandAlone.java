@@ -21,10 +21,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 
 /**
- * Implementation of a
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectUser} to
- * source an object from a
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}.
+ * Implementation of a {@link ManagedObjectUser} to source an object from a
+ * {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -36,11 +34,11 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser {
 	 * @param source
 	 *            {@link ManagedObjectSource}.
 	 * @return Object from the {@link ManagedObjectSource}.
-	 * @throws Exception
-	 *             If fails to source object.
+	 * @throws Throwable
+	 *             If fails to source the {@link ManagedObject}.
 	 */
 	public static ManagedObject sourceManagedObject(
-			ManagedObjectSource<?, ?> source) throws Exception {
+			ManagedObjectSource<?, ?> source) throws Throwable {
 
 		// Create a new user
 		ManagedObjectUserStandAlone user = new ManagedObjectUserStandAlone();
@@ -72,19 +70,14 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser {
 	 * Obtain the {@link ManagedObject}.
 	 * 
 	 * @return {@link ManagedObject}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to source {@link ManagedObject}.
 	 */
-	private ManagedObject getManagedObject() throws Exception {
+	private ManagedObject getManagedObject() throws Throwable {
+
 		// Propagate if failure
 		if (this.failure != null) {
-			if (this.failure instanceof Exception) {
-				throw (Exception) this.failure;
-			} else if (this.failure instanceof Error) {
-				throw (Error) this.failure;
-			} else {
-				throw new Exception(this.failure);
-			}
+			throw this.failure;
 		}
 
 		// Otherwise return managed object
@@ -92,25 +85,15 @@ public class ManagedObjectUserStandAlone implements ManagedObjectUser {
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObjectUser
-	 * ====================================================================
+	 * ==================== ManagedObjectUser =============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectUser#setManagedObject(net.officefloor.frame.spi.managedobject.ManagedObject)
-	 */
+	@Override
 	public void setManagedObject(ManagedObject managedObject) {
 		this.managedObject = managedObject;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectUser#setFailure(java.lang.Throwable)
-	 */
+	@Override
 	public void setFailure(Throwable cause) {
 		this.failure = cause;
 	}

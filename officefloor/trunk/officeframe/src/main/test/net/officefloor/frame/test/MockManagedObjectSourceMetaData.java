@@ -27,8 +27,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaDat
 import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectDependencyMetaDataImpl;
 
 /**
- * Mock
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData}.
+ * Mock {@link ManagedObjectSourceMetaData}.
  * 
  * @author Daniel
  */
@@ -124,69 +123,45 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getManagedObjectClass()
+	 * ==================== ManagedObjectSourceMetaData =======================
 	 */
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public Class<? extends ManagedObject> getManagedObjectClass() {
 		return this.managedObjectClass;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getObjectClass()
-	 */
+	@Override
 	public Class<?> getObjectClass() {
 		return this.objectClass;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyKeys()
-	 */
+	@Override
 	public Class<D> getDependencyKeys() {
 		return this.dependencyKeys;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyMetaData(D)
-	 */
+	@Override
 	public ManagedObjectDependencyMetaData getDependencyMetaData(D key) {
 		return this.dependencyMetaData.get(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerKeys()
-	 */
+	@Override
 	public Class<H> getHandlerKeys() {
 		return this.handlerKeys;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public Class<? extends Handler<?>> getHandlerType(H key) {
 		return (Class) this.handlerMetaData.get(key);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
-	 */
+	@Override
 	public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
-		// TODO Auto-generated method stub
-		return null;
+		// None by default
+		return new ManagedObjectExtensionInterfaceMetaData[0];
 	}
 
 }

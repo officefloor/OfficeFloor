@@ -16,16 +16,11 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
-import java.util.Map;
-
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 
 /**
  * {@link Office} implementation.
@@ -67,79 +62,6 @@ public class OfficeImpl implements Office {
 
 		// Unknown work if at this point
 		throw new UnknownWorkException(workName);
-	}
-
-	@Override
-	public ManagedObject getManagedObject(String managedObjectId)
-			throws Exception {
-
-		// TODO determine how to expose managed object
-		if (true)
-			throw new UnsupportedOperationException(
-					"TODO determine how to expose managed objects outside framework."
-							+ " Need to consider exposing Managed Objects outside framework to provide flexibility.");
-
-		Map<String, ManagedObjectSource<?, ?>> managedObjectSources = null;
-
-		// References to load Managed Object
-		final ManagedObject[] loadedManagedObject = new ManagedObject[1];
-		final Throwable[] loadFailureCause = new Throwable[1];
-
-		// Obtain the managed object source
-		ManagedObjectSource<?, ?> source = managedObjectSources
-				.get(managedObjectId);
-		if (source == null) {
-			throw new Exception("Unknown managed object '" + managedObjectId
-					+ "'");
-		}
-
-		// Attempt to load the Managed Object
-		source.sourceManagedObject(new ManagedObjectUser() {
-			public void setManagedObject(ManagedObject managedObject) {
-				synchronized (loadedManagedObject) {
-					// Load the Managed Object
-					loadedManagedObject[0] = managedObject;
-
-					// Notify loaded
-					loadedManagedObject.notify();
-				}
-			}
-
-			public void setFailure(Throwable cause) {
-				synchronized (loadedManagedObject) {
-					// Flag the failure cause
-					loadFailureCause[0] = cause;
-
-					// Notify loaded
-					loadedManagedObject.notify();
-				}
-			}
-		});
-
-		// Wait for Managed Object to be loaded
-		for (;;) {
-			// Return if loaded
-			synchronized (loadedManagedObject) {
-
-				// Check if obtained managed object
-				if (loadedManagedObject[0] != null) {
-					return loadedManagedObject[0];
-				}
-
-				// Propagate if failed to obtain
-				if (loadFailureCause[0] != null) {
-					throw new Error(loadFailureCause[0]);
-				}
-
-				// Wait to be loaded
-				try {
-					loadedManagedObject.wait();
-				} catch (InterruptedException ex) {
-					// Interrupted, therefore return null
-					return null;
-				}
-			}
-		}
 	}
 
 }

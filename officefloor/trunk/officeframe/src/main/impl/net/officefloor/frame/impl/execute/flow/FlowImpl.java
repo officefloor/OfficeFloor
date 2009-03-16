@@ -21,7 +21,6 @@ import net.officefloor.frame.impl.execute.duty.DutyJob;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
 import net.officefloor.frame.impl.execute.task.TaskJob;
-import net.officefloor.frame.impl.execute.work.WorkContainerImpl;
 import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
@@ -86,11 +85,9 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 		// Obtain the work meta-data
 		WorkMetaData workMetaData = taskMetaData.getWorkMetaData();
 
-		// Create the work container
-		// TODO: use the Task/Work MetaData to create the WorkContainer
-		WorkContainer workContainer = new WorkContainerImpl(workMetaData
-				.getWorkFactory().createWork(), workMetaData, this.threadState
-				.getProcessState());
+		// Create the work container for a new work
+		WorkContainer workContainer = workMetaData
+				.createWorkContainer(this.threadState.getProcessState());
 
 		// Obtain the administration meta-data to determine if require proxy
 		TaskDutyAssociation[] preTaskDuties = taskMetaData
@@ -126,12 +123,10 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 				workContainer, proxyWorkContainer, parallelNodeOwner,
 				taskMetaData);
 
-		// Register the jobs with the work
+		// Add the jobs to the job count for this flow
 		AbstractJobContainer<?, ?> job = firstLastJobs[0];
 		while (job != null) {
-			// Increment job count
 			this.activeJobCount++;
-
 			job = (AbstractJobContainer<?, ?>) job.getNextNode();
 		}
 

@@ -25,9 +25,9 @@ import net.officefloor.frame.api.build.OfficeFloorBuildException;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataImpl;
-import net.officefloor.frame.impl.construct.asset.AssetManagerFactoryImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.RawManagedObjectMetaDataImpl;
@@ -79,7 +79,7 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	/**
 	 * {@link EscalationProcedure}.
 	 */
-	private EscalationProcedure escalationProcedure = null;
+	private EscalationHandler escalationHandler = null;
 
 	/**
 	 * Initiate.
@@ -124,8 +124,8 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	}
 
 	@Override
-	public void setEscalationProcedure(EscalationProcedure escalationProcedure) {
-		this.escalationProcedure = escalationProcedure;
+	public void setEscalationHandler(EscalationHandler escalationHandler) {
+		this.escalationHandler = escalationHandler;
 	}
 
 	@Override
@@ -143,7 +143,6 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 						RawManagedObjectMetaDataImpl.getFactory(),
 						RawBoundManagedObjectMetaDataImpl.getFactory(),
 						RawBoundAdministratorMetaDataImpl.getFactory(),
-						new AssetManagerFactoryImpl(),
 						RawOfficeMetaDataImpl.getFactory(),
 						RawWorkMetaDataImpl.getFactory(),
 						RawTaskMetaDataImpl.getFactory());
@@ -179,8 +178,8 @@ public class OfficeFloorBuilderImpl implements OfficeFloorBuilder,
 	}
 
 	@Override
-	public EscalationProcedure getEscalationProcedure() {
-		return this.escalationProcedure;
+	public EscalationHandler getEscalationHandler() {
+		return this.escalationHandler;
 	}
 
 }

@@ -14,26 +14,36 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.api.manage;
+package net.officefloor.frame.impl.execute.officefloor;
 
-import net.officefloor.frame.api.execute.Work;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * Office within the {@link OfficeFloor}.
+ * Default {@link OfficeFloor} {@link EscalationHandler} that prints issue to
+ * {@link System#err}.
  * 
  * @author Daniel
  */
-public interface Office {
+public class DefaultOfficeFloorEscalationHandler implements EscalationHandler {
 
-	/**
-	 * Obtains the {@link WorkManager} for the named {@link Work}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Work}.
-	 * @return {@link WorkManager} for the named {@link Work}.
-	 * @throws UnknownWorkException
-	 *             If unknown {@link Work} name.
+	/*
+	 * =================== EscalationHandler ==================================
 	 */
-	WorkManager getWorkManager(String workName) throws UnknownWorkException;
+
+	@Override
+	public void handleEscalation(Throwable escalation) throws Throwable {
+
+		// Obtain the stack trace
+		StringWriter stackTrace = new StringWriter();
+		escalation.printStackTrace(new PrintWriter(stackTrace));
+
+		// Prints details of the error
+		System.err.println("FAILURE: Office not handling:\n"
+				+ stackTrace.toString());
+	}
 
 }

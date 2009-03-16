@@ -90,7 +90,10 @@ public class OfficeFloorImpl implements OfficeFloor {
 			this.startManagedObjectSourceInstance(mosInstance);
 		}
 
-		// TODO start the Project Manager (Office Manager)
+		// Start the office managers
+		for (OfficeMetaData officeMetaData : officeMetaDatas) {
+			officeMetaData.getOfficeManager().startManaging();
+		}
 
 		// Start the teams working within the offices
 		for (Team team : this.officeFloorMetaData.getTeams()) {
@@ -150,7 +153,11 @@ public class OfficeFloorImpl implements OfficeFloor {
 			team.stopWorking();
 		}
 
-		// TODO stop the Project Manager (Office Manager)
+		// Stop the office managers
+		for (OfficeMetaData officeMetaData : this.officeFloorMetaData
+				.getOfficeMetaData()) {
+			officeMetaData.getOfficeManager().stopManaging();
+		}
 
 		// Flag that no longer open
 		this.offices = null;

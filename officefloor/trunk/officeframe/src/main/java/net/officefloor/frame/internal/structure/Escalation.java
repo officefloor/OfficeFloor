@@ -16,10 +16,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.Task;
-
 /**
- * Escalation for a {@link Task} issue.
+ * Escalation for a {@link JobNode}.
  * 
  * @author Daniel
  */
@@ -31,18 +29,6 @@ public interface Escalation {
 	 * @return Type of cause handled by this {@link Escalation}.
 	 */
 	Class<? extends Throwable> getTypeOfCause();
-
-	/**
-	 * <p>
-	 * Indicates to reset the {@link ThreadState} as the escalation flow will
-	 * replace the current flow.
-	 * <p>
-	 * <code>false</code> indicates that the {@link ThreadState} should
-	 * continue after escalation.
-	 * 
-	 * @return <code>true</code> to reset the {@link ThreadState}.
-	 */
-	boolean isResetThreadState();
 
 	/**
 	 * Obtains the {@link FlowMetaData} of the escalation.

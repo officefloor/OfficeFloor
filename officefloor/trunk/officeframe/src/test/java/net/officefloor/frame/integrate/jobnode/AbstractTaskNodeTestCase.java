@@ -108,8 +108,6 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 	@SuppressWarnings("unchecked")
 	protected void setUp() throws Exception {
 
-		// TODO: consider testing the recycle tasks
-
 		// Create the mock objects
 		this.processMoSource = this.createMock(ManagedObjectSource.class);
 		this.threadMoSource = this.createMock(ManagedObjectSource.class);
@@ -147,7 +145,6 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		workMo.loadRemainingState(null, null);
 
 		// Create the Work meta-data
-		// TODO consider testing with administrator meta-data
 		WorkMetaData workMetaData = new WorkMetaDataImpl("TEST_WORK",
 				workFactory, moIndexes, new ManagedObjectMetaData[] { workMo },
 				new AdministratorMetaData[0], initialFlowMetaData,
@@ -311,7 +308,6 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		this.replayMockObjects();
 
 		// Consider the thread meta-data
-		// TODO consider testing with thread bound administrators
 		ManagedObjectMetaDataImpl<?> threadMoMetaData = new ManagedObjectMetaDataImpl(
 				"THREAD_MO", this.threadMoSource, null, new AssetManagerImpl(),
 				false, new AssetManagerImpl(), false, null, 1000);
@@ -320,7 +316,6 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				new AdministratorMetaData[0]);
 
 		// Create the process meta-data
-		// TODO consider testing with process bound administrators
 		ManagedObjectMetaDataImpl<?> processMoMetaData = new ManagedObjectMetaDataImpl(
 				"PROCESS_MO", this.processMoSource, null,
 				new AssetManagerImpl(), true, new AssetManagerImpl(), false,
@@ -332,7 +327,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Create Flow for executing
 		ProcessState processState = new ProcessStateImpl(processMetaData, null,
-				null);
+				null, null);
 		WorkMetaData<W> workMetaData = this.getInitialNode().getWorkMetaData();
 		FlowMetaData<?> flowMetaData = workMetaData.getInitialFlowMetaData();
 		Flow flow = processState.createThread(flowMetaData);

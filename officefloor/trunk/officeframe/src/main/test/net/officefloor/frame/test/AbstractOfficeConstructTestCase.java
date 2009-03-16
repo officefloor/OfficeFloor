@@ -103,6 +103,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		// Initiate for constructing office
 		OFFICE_FLOOR_INDEX++;
@@ -112,8 +113,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 		this.officeBuilder = this.officeFloorBuilder.addOffice(this
 				.getOfficeName());
 
-		// Initiate to receive top level escalations to report back in tests
-		this.officeBuilder.setOfficeEscalationHandler(this);
+		// Initiate to receive the top level escalation to report back in tests
+		this.officeFloorBuilder.setEscalationHandler(this);
 	}
 
 	/*
@@ -152,6 +153,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected synchronized void tearDown() throws Exception {
 		try {
 			// Return if no failure

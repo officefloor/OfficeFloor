@@ -24,10 +24,13 @@ import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
+import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
 /**
  * Validates that escalations of tasks is appropriately managed by the
@@ -38,33 +41,61 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder;
 public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensures handles escalation by the {@link Office}
+	 * Ensures handles escalation by the {@link OfficeFloor}
 	 * {@link EscalationHandler}.
 	 */
-	public void testOfficeEscalation() throws Throwable {
+	public void testOfficeFloorEscalation() throws Throwable {
 
 		// Create the escalation
-		Throwable escalation = new Throwable("Escalation");
+		RuntimeException escalation = new RuntimeException("Escalation");
 
-		// Register work for processing
+		// Construct work
 		ReflectiveWorkBuilder workBuilder = this.constructWork(
 				new EscalationHandlerWork(escalation), "WORK", "task");
 		workBuilder.buildTask("task", "TEAM");
-
-		// Register the team
 		this.constructTeam("TEAM", new PassiveTeam());
 
-		// Execute the task and ensure escalation handled
+		// Execute the task to have escalation handled
 		this.invokeWork("WORK", null);
 
-		// Ensure escalation is handled by office escalation handler
+		// Ensure escalation is handled by office floor escalation handler
 		try {
 			this.validateNoTopLevelEscalation();
-			fail("Should have a top level escalation");
+			fail("Should have a office floor escalation");
 		} catch (Throwable ex) {
 			// Ensure appropriate escalation is captured
 			assertEquals("Incorrect escalation", escalation, ex);
 		}
+	}
+
+	/**
+	 * Ensures handles escalation by the {@link Office}
+	 * {@link EscalationProcedure}.
+	 */
+	public void testOfficeEscalation() throws Throwable {
+
+		// Create the escalation
+		RuntimeException escalation = new RuntimeException("Escalation");
+
+		// Add office escalation to handle escalation
+		this.getOfficeBuilder().addEscalation(RuntimeException.class, "WORK",
+				"officeEscalation");
+
+		// Construct work
+		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
+		ReflectiveWorkBuilder workBuilder = this.constructWork(work, "WORK",
+				"task");
+		workBuilder.buildTask("task", "TEAM");
+		ReflectiveTaskBuilder officeEscalation = workBuilder.buildTask(
+				"officeEscalation", "TEAM");
+		officeEscalation.buildParameter();
+		this.constructTeam("TEAM", new PassiveTeam());
+
+		// Execute the task to have escalation handled
+		this.invokeWork("WORK", null);
+
+		// Ensure escalation is handled by office escalation procedure
+		assertEquals("Incorrect escalation", escalation, work.officeException);
 	}
 
 	/**
@@ -76,9 +107,10 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		// Create the escalation
 		Throwable escalation = new Throwable("Escalation");
 
+		// Obtain the name of the office
 		String officeName = this.getOfficeName();
 
-		// Register the managed object
+		// Construct the managed object source
 		ManagedObjectBuilder<EscalationManagedObjectSource.Handlers> moBuilder = this
 				.constructManagedObject("MO",
 						EscalationManagedObjectSource.class, officeName);
@@ -89,12 +121,10 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		handlerBuilder.setHandlerFactory(new EscalationManagedObjectSource());
 		handlerBuilder.linkProcess(0, "WORK", "task");
 
-		// Register work for processing
+		// Construct the work
 		ReflectiveWorkBuilder workBuilder = this.constructWork(
 				new EscalationHandlerWork(escalation), "WORK", "task");
 		workBuilder.buildTask("task", "TEAM");
-
-		// Register the team
 		this.constructTeam("TEAM", new PassiveTeam());
 
 		// Create and open the office
@@ -130,6 +160,11 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		private final Throwable escalation;
 
 		/**
+		 * Exception handled by the {@link Office}.
+		 */
+		public RuntimeException officeException;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param escalation
@@ -148,5 +183,16 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		public void task() throws Throwable {
 			throw this.escalation;
 		}
+
+		/**
+		 * Provides for the {@link Office} {@link EscalationProcedure}.
+		 * 
+		 * @param exception
+		 *            Failure to be handled.
+		 */
+		public void officeEscalation(RuntimeException exception) {
+			this.officeException = exception;
+		}
 	}
+
 }

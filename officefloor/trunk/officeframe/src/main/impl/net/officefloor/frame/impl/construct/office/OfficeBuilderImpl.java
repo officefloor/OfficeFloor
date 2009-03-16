@@ -26,21 +26,23 @@ import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
+import net.officefloor.frame.impl.construct.task.EscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.impl.construct.work.WorkBuilderImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
+import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
+import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -119,14 +121,20 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<OfficeEnhancer> officeEnhancers = new LinkedList<OfficeEnhancer>();
 
 	/**
-	 * {@link EscalationHandler} for this {@link Office}.
+	 * Listing of the {@link Escalation} instances.
 	 */
-	private EscalationHandler officeEscalationHandler = null;
+	private final List<EscalationConfiguration> escalations = new LinkedList<EscalationConfiguration>();
 
 	/**
 	 * List of start up {@link Task} instances for the {@link Office}.
 	 */
 	private final List<TaskNodeReference> startupTasks = new LinkedList<TaskNodeReference>();
+
+	/**
+	 * Interval in milli-seconds to monitor the {@link Office}. Default is 1
+	 * second.
+	 */
+	private long monitorOfficeInterval = 1000;
 
 	/**
 	 * Initiate.
@@ -141,6 +149,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/*
 	 * ============ OfficeBuilder =========================================
 	 */
+
+	@Override
+	public void setMonitorOfficeInterval(long monitorOfficeInterval) {
+		this.monitorOfficeInterval = monitorOfficeInterval;
+	}
 
 	@Override
 	public void registerTeam(String officeTeamName, String officeFloorTeamName) {
@@ -210,9 +223,10 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public void setOfficeEscalationHandler(
-			EscalationHandler officeEscalationHandler) {
-		this.officeEscalationHandler = officeEscalationHandler;
+	public void addEscalation(Class<? extends Throwable> typeOfCause,
+			String workName, String taskName) {
+		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
+				new TaskNodeReferenceImpl(workName, taskName)));
 	}
 
 	@Override
@@ -227,6 +241,11 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public String getOfficeName() {
 		return this.officeName;
+	}
+
+	@Override
+	public long getMonitorOfficeInterval() {
+		return this.monitorOfficeInterval;
 	}
 
 	@Override
@@ -281,8 +300,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public EscalationHandler getOfficeEscalationHandler() {
-		return this.officeEscalationHandler;
+	public EscalationConfiguration[] getEscalationConfiguration() {
+		return this.escalations.toArray(new EscalationConfiguration[0]);
 	}
 
 	@Override

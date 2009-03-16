@@ -49,7 +49,7 @@ import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -116,18 +116,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	private final ManagedObjectSourceMetaData<Indexed, HandlerKey> metaData = this
 			.createMock(ManagedObjectSourceMetaData.class);
-
-	/**
-	 * Sourcing {@link AssetManager}.
-	 */
-	private final AssetManager sourcingAssetManager = this
-			.createMock(AssetManager.class);
-
-	/**
-	 * Operations {@link AssetManager}.
-	 */
-	private final AssetManager operationsAssetManager = this
-			.createMock(AssetManager.class);
 
 	/**
 	 * {@link ManagedObjectPool}.
@@ -203,10 +191,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			.createMock(TaskFactory.class);
 
 	/**
-	 * {@link TaskMetaDataLocator}.
+	 * {@link OfficeMetaDataLocator}.
 	 */
-	private final TaskMetaDataLocator taskMetaDataLocator = this
-			.createMock(TaskMetaDataLocator.class);
+	private final OfficeMetaDataLocator taskMetaDataLocator = this
+			.createMock(OfficeMetaDataLocator.class);
 
 	/**
 	 * {@link OfficeMetaData}.
@@ -416,33 +404,12 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if no sourcing {@link AssetManager}.
-	 */
-	public void testNoSourcingAssetManager() {
-
-		// Record no sourcing asset manager
-		this.record_initManagedObject();
-		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT,
-						MANAGED_OBJECT_NAME, "sourcing", this.issues), null);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		this.constructRawManagedObjectMetaData(false);
-		this.verifyMockObjects();
-	}
-
-	/**
 	 * Ensures issue if no {@link ManagedObject} class.
 	 */
 	public void testNoManagedObjectClass() {
 
 		// Record no managed object class
 		this.record_initManagedObject();
-		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT,
-						MANAGED_OBJECT_NAME, "sourcing", this.issues),
-				this.sourcingAssetManager);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				null);
 		this.record_issue("No managed object class provided");
@@ -460,10 +427,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record negative default timeout
 		this.record_initManagedObject();
-		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT,
-						MANAGED_OBJECT_NAME, "sourcing", this.issues),
-				this.sourcingAssetManager);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				ManagedObject.class);
 		this.recordReturn(this.configuration, this.configuration
@@ -483,10 +446,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record no process bound name
 		this.record_initManagedObject();
-		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT,
-						MANAGED_OBJECT_NAME, "sourcing", this.issues),
-				this.sourcingAssetManager);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				ManagedObject.class);
 		this.recordReturn(this.configuration, this.configuration
@@ -608,20 +567,12 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.getManagedObjectSource() instanceof MockManagedObjectSource));
 		assertEquals("Incorrect source meta-data", this.metaData, rawMetaData
 				.getManagedObjectSourceMetaData());
-		assertEquals("Incorrect sourcing asset manager",
-				this.sourcingAssetManager, rawMetaData
-						.getSourcingAssetManager());
 		assertEquals("Incorrect default timeout", 0, rawMetaData
 				.getDefaultTimeout());
 		assertFalse("Should not be asynchronous", rawMetaData.isAsynchronous());
-		assertNull("Should not have operations asset manager", rawMetaData
-				.getOperationsAssetManager());
 		assertFalse("Should not be coordinating", rawMetaData.isCoordinating());
 		assertEquals("Incorrect managed object pool", this.managedObjectPool,
 				rawMetaData.getManagedObjectPool());
-		assertEquals("Incorrect sourcing asset manager",
-				this.sourcingAssetManager, rawMetaData
-						.getSourcingAssetManager());
 		assertEquals("Ensure round trip managing office details", rawMetaData,
 				rawMetaData.getManagingOfficeMetaData()
 						.getRawManagedObjectMetaData());
@@ -647,9 +598,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Verify flagged as asynchronous
 		assertTrue("Should be asynchronous", rawMetaData.isAsynchronous());
-		assertEquals("Incorrect operations asset manager",
-				this.operationsAssetManager, rawMetaData
-						.getOperationsAssetManager());
 	}
 
 	/**
@@ -1342,22 +1290,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			Class<M> managedObjectClass, Class<?> handlerKeyClass,
 			String processBoundName) {
 		// Record completing creating raw meta data
-		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT,
-						MANAGED_OBJECT_NAME, "sourcing", this.issues),
-				this.sourcingAssetManager);
 		this.recordReturn(this.configuration, this.configuration
 				.getDefaultTimeout(), 0);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				managedObjectClass);
-		if (AsynchronousManagedObject.class
-				.isAssignableFrom(managedObjectClass)) {
-			this.recordReturn(this.assetManagerFactory,
-					this.assetManagerFactory.createAssetManager(
-							AssetType.MANAGED_OBJECT, MANAGED_OBJECT_NAME,
-							"operations", this.issues),
-					this.operationsAssetManager);
-		}
 		this.recordReturn(this.metaData, this.metaData.getHandlerKeys(),
 				handlerKeyClass);
 		if (handlerKeyClass != null) {
@@ -1647,9 +1583,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Attempt to construct
 		RawManagedObjectMetaData metaData = RawManagedObjectMetaDataImpl
-				.getFactory()
-				.constructRawManagedObjectMetaData(this.configuration,
-						this.issues, this.assetManagerFactory,
+				.getFactory().constructRawManagedObjectMetaData(
+						this.configuration, this.issues,
 						this.officeFloorConfiguration);
 
 		// Provide assertion on whether should be constructed

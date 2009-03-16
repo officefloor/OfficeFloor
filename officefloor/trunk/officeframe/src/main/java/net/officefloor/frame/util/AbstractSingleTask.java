@@ -157,20 +157,20 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
+	 * =================== WorkFactory ========================================
 	 */
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public W createWork() {
 		return (W) this;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
+	 * =================== TaskFactory ========================================
 	 */
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public Task<P, W, M, F> createTask(W work) {
 		return (Task<P, W, M, F>) work;

@@ -54,6 +54,8 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 * @param assetName
 	 *            Name of the {@link Asset} that {@link ManagedObject} instances
 	 *            are being bound.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
 	 * @param registeredManagedObjects
 	 *            Registered {@link ManagedObject} instances that may be
 	 *            selected for being bound.
@@ -69,6 +71,7 @@ public interface RawBoundManagedObjectMetaDataFactory {
 			ManagedObjectScope managedObjectScope,
 			AssetType assetType,
 			String assetName,
+			AssetManagerFactory assetManagerFactory,
 			Map<String, RawManagedObjectMetaData<?, ?>> registeredManagedObjects,
 			Map<String, RawBoundManagedObjectMetaData<?>> scopeManagedObjects);
 
@@ -91,15 +94,19 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 *            {@link ProcessState} of the {@link Office}.
 	 * @param officeManagingManagedObjects
 	 *            {@link RawOfficeManagingManagedObjectMetaData} instances.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
 	 * @return Resulting new list of {@link RawBoundManagedObjectMetaData}
-	 *         instances affixing in the {@link RawOfficeManagingManagedObjectMetaData}
-	 *         instances to the original {@link RawBoundManagedObjectMetaData}
-	 *         list.
+	 *         instances affixing in the
+	 *         {@link RawOfficeManagingManagedObjectMetaData} instances to the
+	 *         original {@link RawBoundManagedObjectMetaData} list.
 	 */
 	RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
 			String officeName,
 			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
 			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
-			OfficeFloorIssues issues);
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 }

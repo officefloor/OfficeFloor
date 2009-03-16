@@ -45,7 +45,7 @@ import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Escalation;
@@ -316,13 +316,13 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	@Override
-	public void linkTasks(TaskMetaDataLocator genericTaskLocator,
+	public void linkTasks(OfficeMetaDataLocator genericTaskLocator,
 			WorkMetaData<W> workMetaData,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
-		// Create the work specific task meta-data locator
-		TaskMetaDataLocator taskLocator = genericTaskLocator
-				.createWorkSpecificTaskMetaDataLocator(workMetaData);
+		// Create the work specific meta-data locator
+		OfficeMetaDataLocator taskLocator = genericTaskLocator
+				.createWorkSpecificOfficeMetaDataLocator(workMetaData);
 
 		// Obtain the work name and create the asset name
 		String workName = workMetaData.getWorkName();
@@ -383,9 +383,6 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 		}
 
 		// Create the escalation procedure
-		EscalationProcedure officeFloorEscalationProcedure = this.rawWorkMetaData
-				.getRawOfficeMetaData().getRawOfficeFloorMetaData()
-				.getEscalationProcedure();
 		EscalationConfiguration[] escalationConfigurations = this.configuration
 				.getEscalations();
 		Escalation[] escalations = new Escalation[escalationConfigurations.length];
@@ -423,12 +420,12 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 							+ i, issues);
 
 			// Create and add the escalation
-			escalations[i] = new EscalationImpl(typeOfCause, true, this
-					.newFlowMetaData(FlowInstigationStrategyEnum.SEQUENTIAL,
+			escalations[i] = new EscalationImpl(typeOfCause, this
+					.newFlowMetaData(FlowInstigationStrategyEnum.PARALLEL,
 							escalationTaskMetaData, escalationAssetManager));
 		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
-				officeFloorEscalationProcedure, escalations);
+				escalations);
 
 		// Load the remaining state for the task meta-data
 		this.taskMetaData.loadRemainingState(workMetaData, flowMetaDatas,

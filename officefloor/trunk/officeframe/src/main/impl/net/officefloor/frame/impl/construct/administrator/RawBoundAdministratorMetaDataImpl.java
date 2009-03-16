@@ -42,7 +42,7 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
@@ -369,7 +369,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			}
 		});
 
-		// TODO obtain the escalation procedure
+		// TODO allow configuration of escalation procedure for administrator
 		EscalationProcedure escalationProcedure = null;
 
 		// Create the administrator meta-data
@@ -392,7 +392,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 */
 
 	@Override
-	public void linkTasks(TaskMetaDataLocator taskLocator,
+	public void linkTasks(OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Obtain the duty configurations by duty keys

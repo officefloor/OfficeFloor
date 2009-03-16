@@ -16,10 +16,10 @@
  */
 package net.officefloor.frame.api.execute;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Handler for a {@link ManagedObject}.
+ * Handler for a {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -32,7 +32,7 @@ public interface Handler<F extends Enum<F>> {
 	 *            {@link HandlerContext} that this {@link Handler} will operate
 	 *            within.
 	 * @throws Exception
-	 *             If fails that initiate.
+	 *             If fails to initialise from {@link HandlerContext}.
 	 */
 	void setHandlerContext(HandlerContext<F> context) throws Exception;
 

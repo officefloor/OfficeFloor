@@ -31,6 +31,18 @@ import net.officefloor.frame.impl.OfficeFrameImpl;
 public abstract class OfficeFrame {
 
 	/**
+	 * <p>
+	 * {@link System#getProperty(String)} that allows specifying the
+	 * {@link OfficeFrame} implementation {@link Class}.
+	 * <p>
+	 * Should this not be specified the default {@link OfficeFrameImpl} will be
+	 * used.
+	 * <p>
+	 * Note: it is anticipated that {@link OfficeFrameImpl} will always be used.
+	 */
+	public static final String IMPLEMENTATION_CLASS_PROPERTY_NAME = "net.officefloor.frame.implementation";
+
+	/**
 	 * Singleton {@link OfficeFrame}.
 	 */
 	private static OfficeFrame INSTANCE = null;
@@ -63,10 +75,26 @@ public abstract class OfficeFrame {
 		// Lazy load
 		if (INSTANCE == null) {
 
-			// TODO consider providing implementation from JVM argument
+			// Determine if overriding the implementation
+			String implementationClassName = System
+					.getProperty(IMPLEMENTATION_CLASS_PROPERTY_NAME);
+			if ((implementationClassName != null)
+					&& (implementationClassName.trim().length() > 0)) {
+				// Have override implementation, so use
+				try {
+					INSTANCE = (OfficeFrame) Class.forName(
+							implementationClassName).newInstance();
+				} catch (Throwable ex) {
+					throw new IllegalArgumentException(
+							"Can not create instance of "
+									+ implementationClassName
+									+ " from default constructor", ex);
+				}
 
-			// Default implementation
-			INSTANCE = new OfficeFrameImpl();
+			} else {
+				// No override, so use default implementation
+				INSTANCE = new OfficeFrameImpl();
+			}
 		}
 
 		// Return the singleton instance

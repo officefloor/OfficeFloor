@@ -31,7 +31,7 @@ import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
@@ -150,10 +150,10 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 			.createMock(AdministratorSourceMetaData.class);
 
 	/**
-	 * {@link TaskMetaDataLocator}.
+	 * {@link OfficeMetaDataLocator}.
 	 */
-	private final TaskMetaDataLocator taskMetaDataLocator = this
-			.createMock(TaskMetaDataLocator.class);
+	private final OfficeMetaDataLocator taskMetaDataLocator = this
+			.createMock(OfficeMetaDataLocator.class);
 
 	/**
 	 * {@link AssetManagerFactory}.

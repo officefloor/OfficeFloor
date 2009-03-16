@@ -486,6 +486,10 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.taskDutyAssociation, this.taskDutyAssociation
 				.getAdministratorIndex(), adminIndex);
 
+		// Record obtaining the process lock
+		this.recordReturn(this.processState,
+				this.processState.getProcessLock(), "Process Lock");
+
 		// Record obtaining the administrator container
 		AdministratorContainer administratorContainer;
 		int scopeIndex = adminIndex.getIndexOfAdministratorWithinScope();

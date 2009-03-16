@@ -81,13 +81,13 @@ public interface RawWorkMetaData<W extends Work> {
 	 * execution.
 	 * 
 	 * @param taskLocator
-	 *            {@link TaskMetaDataLocator}.
+	 *            {@link OfficeMetaDataLocator}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void linkTasks(TaskMetaDataLocator taskLocator,
+	void linkTasks(OfficeMetaDataLocator taskLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 	/**

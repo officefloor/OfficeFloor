@@ -24,7 +24,9 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -117,6 +119,16 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	@Override
 	public String getWorkName() {
 		return this.workName;
+	}
+
+	@Override
+	public WorkContainer<W> createWorkContainer(ProcessState processState) {
+
+		// Create the work
+		W work = this.workFactory.createWork();
+
+		// Create and return the work container for the work
+		return new WorkContainerImpl<W>(work, this, processState);
 	}
 
 	@Override

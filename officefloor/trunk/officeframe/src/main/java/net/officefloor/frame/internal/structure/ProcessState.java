@@ -16,14 +16,20 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * State of a process within the Office.
+ * State of a process within the {@link Office}.
  * 
  * @author Daniel
  */
-public interface ProcessState {
+public interface ProcessState extends FlowFuture {
 
 	/**
 	 * Obtains the lock for the process.
@@ -52,15 +58,6 @@ public interface ProcessState {
 	<W extends Work> Flow createThread(FlowMetaData<W> flowMetaData);
 
 	/**
-	 * Obtains the top level {@link Escalation} that provides the catch all
-	 * exception handling of this {@link ProcessState}.
-	 * 
-	 * @return Top level {@link Escalation} to provide catch all exception
-	 *         handling.
-	 */
-	Escalation getCatchAllEscalation();
-
-	/**
 	 * Flags that the input {@link ThreadState} has complete.
 	 * 
 	 * @param thread
@@ -85,6 +82,30 @@ public interface ProcessState {
 	 * @return {@link AdministratorContainer} for the index.
 	 */
 	AdministratorContainer<?, ?> getAdministratorContainer(int index);
+
+	/**
+	 * Obtains the {@link Escalation} for the {@link EscalationHandler} provided
+	 * by the {@link ManagedObjectSource} {@link Handler}.
+	 * 
+	 * @return {@link Escalation} or <code>null</code> if {@link Handler} did
+	 *         not provide a {@link EscalationHandler} or this
+	 *         {@link ProcessState} not invoked by a {@link Handler}.
+	 */
+	Escalation getManagedObjectSourceHandlerEscalation();
+
+	/**
+	 * Obtains the {@link EscalationProcedure} for the {@link Office}.
+	 * 
+	 * @return {@link EscalationProcedure} for the {@link Office}.
+	 */
+	EscalationProcedure getOfficeEscalationProcedure();
+
+	/**
+	 * Obtains the catch all {@link Escalation} for the {@link OfficeFloor}.
+	 * 
+	 * @return Catch all {@link Escalation} for the {@link OfficeFloor}.
+	 */
+	Escalation getOfficeFloorEscalation();
 
 	/**
 	 * Registers a {@link ProcessCompletionListener} with this

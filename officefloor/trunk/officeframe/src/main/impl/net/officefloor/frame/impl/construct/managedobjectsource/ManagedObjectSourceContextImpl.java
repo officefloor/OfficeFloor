@@ -478,16 +478,16 @@ public class ManagedObjectSourceContextImpl<H extends Enum<H>> implements
 
 		@Override
 		public void addEscalation(Class<? extends Throwable> typeOfCause,
-				boolean isResetThreadState, String taskName) {
-			this.taskBuilder.addEscalation(typeOfCause, isResetThreadState,
+				String taskName) {
+			this.taskBuilder.addEscalation(typeOfCause,
 					ManagedObjectSourceContextImpl.this
 							.getNamespacedName(taskName));
 		}
 
 		@Override
 		public void addEscalation(Class<? extends Throwable> typeOfCause,
-				boolean isResetThreadState, String workName, String taskName) {
-			this.taskBuilder.addEscalation(typeOfCause, isResetThreadState,
+				String workName, String taskName) {
+			this.taskBuilder.addEscalation(typeOfCause,
 					ManagedObjectSourceContextImpl.this
 							.getNamespacedName(workName),
 					ManagedObjectSourceContextImpl.this

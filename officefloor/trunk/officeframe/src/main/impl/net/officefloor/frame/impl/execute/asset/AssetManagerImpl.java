@@ -113,7 +113,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 				monitor.failTasks(notifySet, this.failure);
 			}
 
-			// TODO: provide asset group reporting
+			// TODO provide asset manager reporting
 
 			// Next iteration
 			item = item.getNext();
@@ -141,7 +141,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	 * ================== AssetReport =====================================
 	 * 
 	 * No synchronising necessary as will be invoked by the same thread invoking
-	 * the managed AssetGroup method.
+	 * the manageAssets method.
 	 */
 
 	@Override

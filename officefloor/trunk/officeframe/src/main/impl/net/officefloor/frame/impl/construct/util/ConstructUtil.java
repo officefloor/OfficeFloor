@@ -25,7 +25,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
-import net.officefloor.frame.internal.construct.TaskMetaDataLocator;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 
@@ -156,7 +156,7 @@ public class ConstructUtil {
 	 * @param taskNodeReference
 	 *            {@link TaskNodeReference}.
 	 * @param taskLocator
-	 *            {@link TaskMetaDataLocator} to use to locate the
+	 *            {@link OfficeMetaDataLocator} to use to locate the
 	 *            {@link TaskMetaData}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
@@ -170,14 +170,14 @@ public class ConstructUtil {
 	 * @param isWorkNameRequired
 	 *            Flags indicating if {@link Work} name is required.
 	 *            <code>false</code> indicates that the
-	 *            {@link TaskMetaDataLocator} has a default {@link Work} to find
+	 *            {@link OfficeMetaDataLocator} has a default {@link Work} to find
 	 *            {@link TaskMetaData}.
 	 * @return {@link TaskMetaData} or <code>null</code> if not found with
 	 *         issues reported to the {@link OfficeFloorIssues}.
 	 */
 	public static TaskMetaData<?, ?, ?, ?> getTaskMetaData(
 			TaskNodeReference taskNodeReference,
-			TaskMetaDataLocator taskLocator, OfficeFloorIssues issues,
+			OfficeMetaDataLocator taskLocator, OfficeFloorIssues issues,
 			AssetType assetType, String assetName, String forItemDescription,
 			boolean isWorkNameRequired) {
 

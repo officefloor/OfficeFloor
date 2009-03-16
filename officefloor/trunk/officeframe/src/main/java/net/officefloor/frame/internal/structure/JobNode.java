@@ -47,6 +47,13 @@ public interface JobNode {
 	Flow getFlow();
 
 	/**
+	 * Obtains the {@link EscalationProcedure} for this {@link JobNode}.
+	 * 
+	 * @return {@link EscalationProcedure} for this {@link JobNode}.
+	 */
+	EscalationProcedure getEscalationProcedure();
+
+	/**
 	 * <p>
 	 * Specifies the parallel owner of this {@link JobNode}.
 	 * <p>

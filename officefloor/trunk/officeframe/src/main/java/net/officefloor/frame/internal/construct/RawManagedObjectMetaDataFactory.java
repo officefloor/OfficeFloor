@@ -37,8 +37,6 @@ public interface RawManagedObjectMetaDataFactory {
 	 *            {@link ManagedObjectSourceConfiguration}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
 	 * @param officeFloorConfiguration
 	 *            {@link OfficeFloorConfiguration} of the {@link OfficeFloor}
 	 *            containing the {@link ManagedObjectSource}.
@@ -47,7 +45,7 @@ public interface RawManagedObjectMetaDataFactory {
 	 */
 	<D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> RawManagedObjectMetaData<D, H> constructRawManagedObjectMetaData(
 			ManagedObjectSourceConfiguration<H, MS> configuration,
-			OfficeFloorIssues issues, AssetManagerFactory assetManagerFactory,
+			OfficeFloorIssues issues,
 			OfficeFloorConfiguration officeFloorConfiguration);
 
 }

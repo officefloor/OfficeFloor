@@ -16,20 +16,26 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.EscalationLevel;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Tests {@link ExecuteJobContainerTest} handling failures (/escalations).
+ * Tests {@link AbstractJobContainer} handling escalations.
  * 
  * @author Daniel
  */
 public class EscalateJobContainerTest extends AbstractJobContainerTest {
 
 	/**
-	 * Ensure handle failure that resets the {@link ThreadState}.
+	 * Ensure able to handle by {@link EscalationProcedure} of {@link Job}.
 	 */
-	public void testFailureThatResetsThreadState() {
+	public void testFailureHandledByJob() {
 
 		// Create job with thread failure
 		final Throwable failure = new Throwable("Thread failure");
@@ -37,9 +43,7 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 
 		// Record failure on thread
 		this.record_JobContainer_initialSteps(failure);
-		this.record_JobContainer_getEscalation(job, failure, true);
-		this.record_JobContainer_handleResetEscalation(job, failure);
-		this.record_completeJob(job);
+		this.record_JobContainer_handleEscalation(job, failure, true);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Replay mocks
@@ -56,9 +60,37 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensure handle failure that does not reset the {@link ThreadState}.
+	 * Ensure parallel owner can handle escalation.
 	 */
-	public void testFailureNotResetsThreadState() {
+	public void testFailureHandledByParallelOwner() {
+
+		// Create job with thread failure and parallel owner
+		final Throwable failure = new Throwable("Thread failure");
+		Job job = this.createJob(true);
+
+		// Record failure on thread
+		this.record_JobContainer_initialSteps(failure);
+		this.record_JobContainer_handleEscalation(job, failure, true);
+		this.record_JobActivatableSet_activateJobs();
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Execute the job with thread failure
+		this.doJob(job, true);
+
+		// Verify mocks
+		this.verifyMockObjects();
+
+		// Ensure job not executed
+		assertJobNotExecuted(job);
+	}
+
+	/**
+	 * Ensure {@link ManagedObjectSource} {@link Handler}
+	 * {@link EscalationHandler} handles the escalation.
+	 */
+	public void testFailureHandledManagedObjectSourceEscalationHandler() {
 
 		// Create job with thread failure
 		final Throwable failure = new Throwable("Thread failure");
@@ -66,9 +98,68 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 
 		// Record failure on thread
 		this.record_JobContainer_initialSteps(failure);
-		this.record_JobContainer_getEscalation(job, failure, true);
-		this.record_JobContainer_handleNotResetEscalation(job, failure, true);
-		this.record_completeJob(job);
+		this.record_JobContainer_handleEscalation(job, failure, false);
+		this.record_JobContainer_globalEscalation(job, failure,
+				EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
+		this.record_JobActivatableSet_activateJobs();
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Execute the job with thread failure
+		this.doJob(job, true);
+
+		// Verify mocks
+		this.verifyMockObjects();
+
+		// Ensure job not executed
+		assertJobNotExecuted(job);
+	}
+
+	/**
+	 * Ensure {@link Office} {@link EscalationProcedure} can handle escalation.
+	 */
+	public void testFailureHandledByOfficeEscalationProcedure() {
+
+		// Create job with thread failure
+		final Throwable failure = new Throwable("Thread failure");
+		Job job = this.createJob(false);
+
+		// Record failure on thread
+		this.record_JobContainer_initialSteps(failure);
+		this.record_JobContainer_handleEscalation(job, failure, false);
+		this.record_JobContainer_globalEscalation(job, failure,
+				EscalationLevel.OFFICE);
+		this.record_JobActivatableSet_activateJobs();
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Execute the job with thread failure
+		this.doJob(job, true);
+
+		// Verify mocks
+		this.verifyMockObjects();
+
+		// Ensure job not executed
+		assertJobNotExecuted(job);
+	}
+
+	/**
+	 * Ensure {@link OfficeFloor} {@link EscalationHandler} can handle
+	 * escalation.
+	 */
+	public void testFailureHandledByOfficeFloorEscalationHandler() {
+
+		// Create job with thread failure
+		final Throwable failure = new Throwable("Thread failure");
+		Job job = this.createJob(false);
+
+		// Record failure on thread
+		this.record_JobContainer_initialSteps(failure);
+		this.record_JobContainer_handleEscalation(job, failure, false);
+		this.record_JobContainer_globalEscalation(job, failure,
+				EscalationLevel.OFFICE_FLOOR);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Replay mocks

@@ -16,44 +16,36 @@
  */
 package net.officefloor.frame.impl.execute.process;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.EscalationHandler;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
-import net.officefloor.frame.impl.execute.escalation.EscalationImpl;
-import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
-import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
-import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
-import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.internal.structure.OfficeMetaData;
 import net.officefloor.frame.internal.structure.ProcessCompletionListener;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskDutyAssociation;
-import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 
 /**
  * Implementation of the {@link ProcessState}.
@@ -68,6 +60,11 @@ public class ProcessStateImpl implements ProcessState {
 	private final ProcessMetaData processMetaData;
 
 	/**
+	 * {@link OfficeMetaData}.
+	 */
+	private final OfficeMetaData officeMetaData;
+
+	/**
 	 * {@link ManagedObjectContainer} instances for the {@link ProcessState}.
 	 */
 	private final ManagedObjectContainer[] managedObjectContainers;
@@ -78,16 +75,17 @@ public class ProcessStateImpl implements ProcessState {
 	private final AdministratorContainer<?, ?>[] administratorContainers;
 
 	/**
-	 * {@link EscalationHandler} provided by the {@link ManagedObject} that
-	 * invoked this {@link ProcessState}. May be <code>null</code>.
-	 */
-	private final EscalationHandler managedObjectEscalationHandler;
-
-	/**
-	 * {@link EscalationHandler} provided by the {@link Office}. May be
+	 * {@link EscalationHandlerEscalation} containing the
+	 * {@link EscalationHandler} provided by the {@link ManagedObjectSource}
+	 * {@link Handler} that invoked this {@link ProcessState}. May be
 	 * <code>null</code>.
 	 */
-	private final EscalationHandler officeEscalationHandler;
+	private final EscalationHandlerEscalation managedObjectSourceHandlerEscalation;
+
+	/**
+	 * {@link OfficeFloor} {@link Escalation}.
+	 */
+	private final Escalation officeFloorEscalation;
 
 	/**
 	 * Listing of {@link ProcessCompletionListener} instances.
@@ -101,21 +99,34 @@ public class ProcessStateImpl implements ProcessState {
 	private int activeThreadCount = 0;
 
 	/**
+	 * <p>
+	 * Completion flag indicating when this {@link FlowFuture} is complete.
+	 * <p>
+	 * <code>volatile</code> to enable inter-thread visibility.
+	 */
+	private volatile boolean isComplete = false;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param processMetaData
 	 *            {@link ProcessMetaData} for this {@link ProcessState}.
+	 * @param officeMetaData
+	 *            {@link OfficeMetaData}.
 	 * @param managedObjectEscalationHandler
 	 *            {@link EscalationHandler} provided by the
 	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
-	 * @param officeEscalationHandler
-	 *            {@link EscalationHandler} provided by the {@link Office}.
+	 * @param officeFloorEscalaion
+	 *            {@link OfficeFloor} {@link Escalation}.
 	 */
 	@SuppressWarnings("unchecked")
 	public ProcessStateImpl(ProcessMetaData processMetaData,
+			OfficeMetaData officeMetaData,
 			EscalationHandler managedObjectEscalationHandler,
-			EscalationHandler officeEscalationHandler) {
+			Escalation officeFloorEscalaion) {
 		this.processMetaData = processMetaData;
+		this.officeMetaData = officeMetaData;
+		this.officeFloorEscalation = officeFloorEscalaion;
 
 		// Managed Objects
 		ManagedObjectMetaData<?>[] managedObjectMetaData = this.processMetaData
@@ -135,9 +146,13 @@ public class ProcessStateImpl implements ProcessState {
 					administratorMetaData[i]);
 		}
 
-		// Escalation
-		this.managedObjectEscalationHandler = managedObjectEscalationHandler;
-		this.officeEscalationHandler = officeEscalationHandler;
+		// TODO allow configuring the team responsible for MO handling
+		Team team = new PassiveTeam();
+
+		// Escalation handled by managed object source handler
+		this.managedObjectSourceHandlerEscalation = (managedObjectEscalationHandler == null ? null
+				: new EscalationHandlerEscalation(
+						managedObjectEscalationHandler, team));
 	}
 
 	/*
@@ -170,31 +185,6 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Escalation getCatchAllEscalation() {
-
-		// Create the catch all escalation
-		TaskMetaDataImpl<Throwable, Work, None, None> catchAllTask = new TaskMetaDataImpl<Throwable, Work, None, None>(
-				"Catch All Escalations Task",
-				new CatchAllEscalationTaskFactory(), new PassiveTeam(),
-				new int[0], new int[0], new TaskDutyAssociation[0],
-				new TaskDutyAssociation[0]);
-		FlowMetaData<Work> catchAllFlow = new FlowMetaDataImpl<Work>(
-				FlowInstigationStrategyEnum.SEQUENTIAL, catchAllTask, null);
-		WorkMetaData<Work> workMetaData = new WorkMetaDataImpl<Work>(
-				"Catch All Escalation", new CatchAllEscalationWorkFactory(),
-				new ManagedObjectIndex[0], new ManagedObjectMetaData[0],
-				new AdministratorMetaData[0], catchAllFlow, new TaskMetaData[0]);
-		catchAllTask.loadRemainingState(workMetaData, new FlowMetaData[0],
-				null, null);
-		Escalation catchAllEscalation = new EscalationImpl(Throwable.class,
-				true, catchAllFlow);
-
-		// Return the escalation
-		return catchAllEscalation;
-	}
-
-	@Override
 	public void threadComplete(ThreadState thread) {
 		// Decrement the number of threads
 		synchronized (this.getProcessLock()) {
@@ -204,15 +194,16 @@ public class ProcessStateImpl implements ProcessState {
 			if (this.activeThreadCount == 0) {
 				// No further threads therefore unload managed objects
 				for (int i = 0; i < this.managedObjectContainers.length; i++) {
-
-					// Unload the managed objects
 					this.managedObjectContainers[i].unloadManagedObject();
-
-					// Notify process complete
-					for (ProcessCompletionListener listener : this.completionListeners) {
-						listener.processComplete();
-					}
 				}
+
+				// Notify process complete
+				for (ProcessCompletionListener listener : this.completionListeners) {
+					listener.processComplete();
+				}
+
+				// Flag the process now complete
+				this.isComplete = true;
 			}
 		}
 	}
@@ -228,101 +219,45 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
+	public Escalation getManagedObjectSourceHandlerEscalation() {
+		return this.managedObjectSourceHandlerEscalation;
+	}
+
+	@Override
+	public EscalationProcedure getOfficeEscalationProcedure() {
+		return this.officeMetaData.getEscalationProcedure();
+	}
+
+	@Override
+	public Escalation getOfficeFloorEscalation() {
+		return this.officeFloorEscalation;
+	}
+
+	@Override
 	public void registerProcessCompletionListener(
 			ProcessCompletionListener listener) {
 		this.completionListeners.add(listener);
 	}
 
-	/**
-	 * {@link TaskFactory} for the top level {@link Escalation}.
+	/*
+	 * ==================== FlowFuture ======================================
 	 */
-	private class CatchAllEscalationTaskFactory implements
-			TaskFactory<Throwable, Work, None, None>,
-			Task<Throwable, Work, None, None> {
 
-		/*
-		 * ================== TaskFactory =============================
-		 */
-
-		@Override
-		public Task<Throwable, Work, None, None> createTask(Work work) {
-			return this;
-		}
-
-		/*
-		 * =================== Task ====================================
-		 */
-
-		@Override
-		public Object doTask(TaskContext<Throwable, Work, None, None> context) {
-
-			// Obtain the escalation handling
-			EscalationHandler moEh = ProcessStateImpl.this.managedObjectEscalationHandler;
-			EscalationHandler ofEh = ProcessStateImpl.this.officeEscalationHandler;
-
-			// Obtain the escalation
-			Throwable initialEscalation = context.getParameter();
-			Throwable escalation = initialEscalation;
-
-			// Handle escalation first from managed object
-			try {
-				// Determine if provided escalation handler
-				if (moEh != null) {
-					// Allow escalation handling
-					moEh.handleEscalation(escalation);
-
-					// Escalation handled
-					return null;
-				}
-			} catch (Throwable ex) {
-				// Continue on to process the failed escalation
-				escalation = ex;
-			}
-
-			// Handle escalation next from office
-			try {
-				// Determine if provided escalation handler
-				if (ofEh != null) {
-					// Allow escalation handling
-					ofEh.handleEscalation(escalation);
-
-					// Escalation handled
-					return null;
-				}
-			} catch (Throwable ex) {
-				// Continue on to process the failed escalation
-				escalation = ex;
-			}
-
-			// Log escalation to stderr as last resort
-			StringWriter msg = new StringWriter();
-			msg.write("Office Floor top level failure: ");
-			escalation.printStackTrace(new PrintWriter(msg));
-			if (initialEscalation != escalation) {
-				msg.write("\n\nCause by: ");
-				initialEscalation.printStackTrace(new PrintWriter(msg));
-			}
-			System.err.println(msg.toString());
-
-			// Escalation handled
-			return null;
-		}
+	@Override
+	public boolean isComplete() {
+		return this.isComplete;
 	}
 
-	/**
-	 * {@link WorkFactory} for the top level {@link Escalation}.
+	/*
+	 * =================== FlowAsset ========================================
 	 */
-	private static class CatchAllEscalationWorkFactory implements
-			WorkFactory<Work>, Work {
 
-		/*
-		 * ==================== WorkFactory =======================
-		 */
-
-		@Override
-		public Work createWork() {
-			return this;
-		}
+	@Override
+	public boolean waitOnFlow(JobNode jobNode, JobActivateSet notifySet) {
+		// Job of a process can not wait on its process to be finished. By this
+		// definition the job itself must be finished.
+		throw new IllegalStateException(
+				"Job can not wait on its own process to be finished");
 	}
 
 }

@@ -16,7 +16,6 @@
  */
 package net.officefloor.frame.internal.structure;
 
-
 /**
  * {@link Flow} Asset.
  * 

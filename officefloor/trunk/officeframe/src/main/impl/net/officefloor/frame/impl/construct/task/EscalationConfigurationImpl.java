@@ -18,7 +18,6 @@ package net.officefloor.frame.impl.construct.task;
 
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
-import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
  * Implementation of the {@link EscalationConfiguration}.
@@ -33,11 +32,6 @@ public class EscalationConfigurationImpl implements EscalationConfiguration {
 	private final Class<? extends Throwable> typeOfCause;
 
 	/**
-	 * Flag indicating to reset the {@link ThreadState}.
-	 */
-	private final boolean isResetThreadState;
-
-	/**
 	 * {@link TaskNodeReference}.
 	 */
 	private final TaskNodeReference taskNodeReference;
@@ -47,15 +41,12 @@ public class EscalationConfigurationImpl implements EscalationConfiguration {
 	 * 
 	 * @param typeOfCause
 	 *            Type of cause.
-	 * @param isResetThreadState
-	 *            Flag indicating to reset the {@link ThreadState}.
 	 * @param taskNodeReference
 	 *            {@link TaskNodeReference}.
 	 */
 	public EscalationConfigurationImpl(Class<? extends Throwable> typeOfCause,
-			boolean isResetThreadState, TaskNodeReference taskNodeReference) {
+			TaskNodeReference taskNodeReference) {
 		this.typeOfCause = typeOfCause;
-		this.isResetThreadState = isResetThreadState;
 		this.taskNodeReference = taskNodeReference;
 	}
 
@@ -66,11 +57,6 @@ public class EscalationConfigurationImpl implements EscalationConfiguration {
 	@Override
 	public Class<? extends Throwable> getTypeOfCause() {
 		return this.typeOfCause;
-	}
-
-	@Override
-	public boolean isResetThreadState() {
-		return this.isResetThreadState;
 	}
 
 	@Override

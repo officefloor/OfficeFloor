@@ -23,7 +23,6 @@ import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -47,17 +46,17 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 
 	/**
 	 * Sets up the {@link ManagedObjectSource} to be managed by the
-	 * {@link Office} of the input {@link TaskMetaDataLocator}.
+	 * {@link Office} of the input {@link OfficeMetaDataLocator}.
 	 * 
 	 * @param taskMetaDataLocator
-	 *            {@link TaskMetaDataLocator} for the {@link Office} managing
+	 *            {@link OfficeMetaDataLocator} for the {@link Office} managing
 	 *            the {@link ManagedObject}.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 */
-	void manageByOffice(TaskMetaDataLocator taskMetaDataLocator,
+	void manageByOffice(OfficeMetaDataLocator taskMetaDataLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 	/**
@@ -96,20 +95,6 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	 * @return {@link ManagedObjectPool} or <code>null</code> if not pooled.
 	 */
 	ManagedObjectPool getManagedObjectPool();
-
-	/**
-	 * Obtains the sourcing {@link AssetManager}.
-	 * 
-	 * @return Sourcing {@link AssetManager}.
-	 */
-	AssetManager getSourcingAssetManager();
-
-	/**
-	 * Obtains the operations {@link AssetManager}.
-	 * 
-	 * @return Operations {@link AssetManager}.
-	 */
-	AssetManager getOperationsAssetManager();
 
 	/**
 	 * Indicates if {@link AsynchronousManagedObject}.
