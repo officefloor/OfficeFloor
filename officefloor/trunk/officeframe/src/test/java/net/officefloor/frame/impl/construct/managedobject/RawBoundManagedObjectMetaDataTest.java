@@ -439,7 +439,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Construct
-		RawBoundManagedObjectMetaData<?>[] rawMetaData = this
+		RawBoundManagedObjectMetaData[] rawMetaData = this
 				.constructRawBoundManagedObjectMetaData(2, oneConfig, twoConfig);
 		ManagedObjectMetaData<DependencyKey> moMetaData = (ManagedObjectMetaData<DependencyKey>) rawMetaData[0]
 				.getManagedObjectMetaData();
@@ -530,7 +530,7 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Construct
-		RawBoundManagedObjectMetaData<?>[] rawMetaData = this
+		RawBoundManagedObjectMetaData[] rawMetaData = this
 				.constructRawBoundManagedObjectMetaData(1,
 						this.managedObjectConfiguration);
 		ManagedObjectMetaData<DependencyKey> moMetaData = (ManagedObjectMetaData<DependencyKey>) rawMetaData[0]

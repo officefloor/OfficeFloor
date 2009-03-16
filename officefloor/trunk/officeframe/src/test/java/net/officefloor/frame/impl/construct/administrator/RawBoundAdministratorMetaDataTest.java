@@ -908,7 +908,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	private RawBoundAdministratorMetaData<?, DutyKey> constructRawAdministratorAndLinkTasks() {
 
 		// Construct the raw administrator meta-data
-		RawBoundAdministratorMetaData<?, ?> metaData = this
+		RawBoundAdministratorMetaData metaData = this
 				.constructRawAdministrator(1, this.configuration)[0];
 
 		// Link the tasks
