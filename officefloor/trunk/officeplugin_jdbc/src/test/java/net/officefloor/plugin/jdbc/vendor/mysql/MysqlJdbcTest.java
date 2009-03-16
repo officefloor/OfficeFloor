@@ -30,13 +30,6 @@ import net.officefloor.plugin.jdbc.vendor.AbstractVendorJdbcTest;
  */
 public class MysqlJdbcTest extends AbstractVendorJdbcTest {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.jdbc.vendor.AbstractVendorJdbcTest#loadProperties
-	 * (java.util.Properties)
-	 */
 	@Override
 	protected void loadProperties(Properties properties) {
 		properties

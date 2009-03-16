@@ -37,5 +37,6 @@ public interface ConnectionPoolDataSourceFactory {
 	 *             If fails to create the {@link ConnectionPoolDataSource}.
 	 */
 	ConnectionPoolDataSource createConnectionPoolDataSource(
-			ManagedObjectSourceContext context) throws Exception;
+			ManagedObjectSourceContext<?> context) throws Exception;
+
 }
