@@ -134,15 +134,6 @@ public class ServerSocketManagedObjectSource extends
 	 * =================== AbstractManagedObjectSource ==================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-	 * AbstractAsyncManagedObjectSource
-	 * #loadSpecification(net.officefloor.frame.spi
-	 * .managedobject.source.impl.AbstractAsyncManagedObjectSource
-	 * .SpecificationContext)
-	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_PORT);
@@ -153,21 +144,13 @@ public class ServerSocketManagedObjectSource extends
 				"Maximum connextions per listener");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-	 * AbstractAsyncManagedObjectSource
-	 * #loadMetaData(net.officefloor.frame.spi.managedobject
-	 * .source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
-	 */
 	@Override
 	protected void loadMetaData(
 			MetaDataContext<None, ServerSocketHandlerEnum> context)
 			throws Exception {
 
 		// Obtain the managed object source context
-		ManagedObjectSourceContext mosContext = context
+		ManagedObjectSourceContext<ServerSocketHandlerEnum> mosContext = context
 				.getManagedObjectSourceContext();
 
 		// Obtain the configuration
@@ -207,20 +190,18 @@ public class ServerSocketManagedObjectSource extends
 				new InetSocketAddress(port), connectionManager,
 				recommendedSegmentCount, messageSegmentPool);
 		ManagedObjectWorkBuilder<ServerSocketAccepter> accepterWork = mosContext
-				.addWork(prefix + "Accepter", ServerSocketAccepter.class);
-		accepterWork.setWorkFactory(this.serverSocketAccepter);
+				.addWork(prefix + "Accepter", this.serverSocketAccepter);
 		ManagedObjectTaskBuilder<Indexed> accepterTask = accepterWork.addTask(
-				"Accepter", Object.class, this.serverSocketAccepter);
+				"Accepter", this.serverSocketAccepter);
 		accepterTask.setTeam(prefix + "Accepter.TEAM");
 		accepterTask.linkFlow(0, (prefix + "Listener"), "Listener",
 				FlowInstigationStrategyEnum.ASYNCHRONOUS);
 
 		// Register the listening of connections
 		ManagedObjectWorkBuilder<ConnectionManager> listenerWork = mosContext
-				.addWork(prefix + "Listener", ConnectionManager.class);
-		listenerWork.setWorkFactory(connectionManager);
+				.addWork(prefix + "Listener", connectionManager);
 		ManagedObjectTaskBuilder<Indexed> listenerTask = listenerWork.addTask(
-				"Listener", Object.class, connectionManager);
+				"Listener", connectionManager);
 		listenerTask.setTeam(prefix + "Listener.TEAM");
 
 		// Flag to start accepter on server start up
@@ -258,14 +239,7 @@ public class ServerSocketManagedObjectSource extends
 		// By default do not register
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start
-	 * (net
-	 * .officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public void start(ManagedObjectExecuteContext context) throws Exception {
 		// Obtain the handler
@@ -279,12 +253,6 @@ public class ServerSocketManagedObjectSource extends
 		this.serverSocketAccepter.bind(serverSocketHandler);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.impl.
-	 * AbstractManagedObjectSource#getManagedObject()
-	 */
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Should never be directly used by a task

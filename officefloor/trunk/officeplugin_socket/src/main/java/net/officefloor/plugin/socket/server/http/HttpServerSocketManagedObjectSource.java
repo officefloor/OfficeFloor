@@ -113,20 +113,11 @@ public class HttpServerSocketManagedObjectSource extends
 	 * ================= ServerSocketManagedObjectSource ==================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource
-	 * #
-	 * registerServerSocketHandler(net.officefloor.frame.spi.managedobject.source
-	 * .impl.AbstractAsyncManagedObjectSource.MetaDataContext)
-	 */
 	@Override
 	protected void registerServerSocketHandler(
 			MetaDataContext<None, ServerSocketHandlerEnum> context)
 			throws Exception {
-		ManagedObjectSourceContext mosContext = context
+		ManagedObjectSourceContext<ServerSocketHandlerEnum> mosContext = context
 				.getManagedObjectSourceContext();
 
 		// Specify types
@@ -134,43 +125,26 @@ public class HttpServerSocketManagedObjectSource extends
 		context.setObjectClass(ServerHttpConnection.class);
 
 		// Provide the handler
-		HandlerBuilder<Indexed> handlerBuilder = mosContext.getHandlerBuilder(
-				ServerSocketHandlerEnum.class).registerHandler(
-				ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER);
+		HandlerBuilder<Indexed> handlerBuilder = mosContext.getHandlerBuilder()
+				.registerHandler(ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER);
 		handlerBuilder.setHandlerFactory(this);
 		handlerBuilder.linkProcess(0, null, null); // handles the message
 	}
 
 	/*
-	 * ================== HandlerFactory =====================
+	 * ================== Handler ========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.HandlerFactory#createHandler()
-	 */
 	@Override
 	public Handler<Indexed> createHandler() {
 		return this;
 	}
-
-	/*
-	 * =================== ServerSocketHandler ===========================
-	 */
 
 	/**
 	 * {@link HandlerContext}.
 	 */
 	private HandlerContext<Indexed> handlerContext;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor
-	 * .frame.api.execute.HandlerContext)
-	 */
 	@Override
 	public void setHandlerContext(HandlerContext<Indexed> context)
 			throws Exception {
@@ -178,24 +152,14 @@ public class HttpServerSocketManagedObjectSource extends
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createServer
-	 * ()
+	 * =================== ServerSocketHandler ===========================
 	 */
+
 	@Override
 	public Server createServer() {
 		return new HttpServer(this.handlerContext);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.socket.server.spi.ServerSocketHandler#
-	 * createConnectionHandler
-	 * (net.officefloor.plugin.socket.server.spi.Connection)
-	 */
 	@Override
 	public ConnectionHandler createConnectionHandler(Connection connection) {
 		return new HttpConnectionHandler(this, connection);

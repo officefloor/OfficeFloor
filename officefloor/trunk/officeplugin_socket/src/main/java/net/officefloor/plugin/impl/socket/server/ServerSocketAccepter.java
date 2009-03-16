@@ -33,7 +33,6 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 import net.officefloor.plugin.impl.socket.server.messagesegment.DirectBufferMessageSegmentPool;
 import net.officefloor.plugin.socket.server.spi.Message;
 import net.officefloor.plugin.socket.server.spi.MessageSegment;
@@ -136,39 +135,21 @@ class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
+	 * ======================= Work ============================================
 	 */
+
+	@Override
 	public ServerSocketAccepter createWork() {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-	 */
-	public void setWorkContext(WorkContext context) throws IOException {
-		// Do nothing
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
-	 */
+	@Override
 	public Task<Object, ServerSocketAccepter, None, Indexed> createTask(
 			ServerSocketAccepter work) {
-		// Return this
 		return work;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public Object doTask(
 			TaskContext<Object, ServerSocketAccepter, None, Indexed> context)
@@ -241,47 +222,29 @@ class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#register(java.nio.channels.Selector,
-		 *      int, java.lang.Object)
+		 * ======================= NonblockingSocketChannel ====================
 		 */
+		
 		@Override
 		public SelectionKey register(Selector selector, int ops,
 				Object attachment) throws IOException {
 			return this.socketChannel.register(selector, ops, attachment);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#read(java.nio.ByteBuffer)
-		 */
 		@Override
 		public int read(ByteBuffer buffer) throws IOException {
 			return this.socketChannel.read(buffer);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#write(java.nio.ByteBuffer)
-		 */
 		@Override
 		public int write(ByteBuffer data) throws IOException {
 			return this.socketChannel.write(data);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#close()
-		 */
 		@Override
 		public void close() throws IOException {
 			this.socketChannel.close();
 		}
-
 	}
 
 }

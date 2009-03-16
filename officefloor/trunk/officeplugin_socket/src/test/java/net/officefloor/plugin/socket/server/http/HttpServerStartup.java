@@ -16,7 +16,6 @@
  */
 package net.officefloor.plugin.socket.server.http;
 
-import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -66,10 +65,13 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 		port = portStart;
 		portStart++; // increment for next test
 
+		// Obtain the office name
+		String officeName = this.getOfficeName();
+
 		// Register the Server Socket Managed Object
 		ManagedObjectBuilder<?> serverSocketBuilder = this
 				.constructManagedObject("MO",
-						HttpServerSocketManagedObjectSource.class, "OFFICE");
+						HttpServerSocketManagedObjectSource.class, officeName);
 		serverSocketBuilder.addProperty(
 				HttpServerSocketManagedObjectSource.PROPERTY_PORT, String
 						.valueOf(port));
@@ -99,8 +101,7 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 		// Link handler to task
 		officeBuilder.addOfficeEnhancer(new OfficeEnhancer() {
 			@Override
-			public void enhanceOffice(OfficeEnhancerContext context)
-					throws BuildException {
+			public void enhanceOffice(OfficeEnhancerContext context) {
 				// Obtain the managed object handler builder
 				ManagedObjectHandlerBuilder<ServerSocketHandlerEnum> handlerBuilder = context
 						.getManagedObjectHandlerBuilder("of-MO",
@@ -113,10 +114,8 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 			}
 		});
 
-		// Create the Office Floor
-		this.officeFloor = this.constructOfficeFloor("OFFICE");
-
-		// Open the Office Floor
+		// Create and open the Office Floor
+		this.officeFloor = this.constructOfficeFloor();
 		this.officeFloor.openOfficeFloor();
 	}
 

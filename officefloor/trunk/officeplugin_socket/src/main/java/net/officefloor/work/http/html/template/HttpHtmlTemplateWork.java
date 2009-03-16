@@ -18,7 +18,6 @@ package net.officefloor.work.http.html.template;
 
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 
 /**
  * HTTP HTML Template {@link Work}.
@@ -29,22 +28,9 @@ public class HttpHtmlTemplateWork implements Work,
 		WorkFactory<HttpHtmlTemplateWork> {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor
-	 * .frame.api.execute.WorkContext)
+	 * ================ WorkFactory =============================
 	 */
-	@Override
-	public void setWorkContext(WorkContext context) throws Exception {
-		// Do nothing
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
-	 */
 	@Override
 	public HttpHtmlTemplateWork createWork() {
 		return this;
