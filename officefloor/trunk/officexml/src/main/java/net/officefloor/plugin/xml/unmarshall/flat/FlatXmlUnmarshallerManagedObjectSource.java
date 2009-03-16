@@ -19,95 +19,50 @@ package net.officefloor.plugin.xml.unmarshall.flat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.extension.ManagedObjectExtensionInterfaceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectSourcePropertyImpl;
-import net.officefloor.frame.spi.pool.ManagedObjectPool;
-import net.officefloor.plugin.xml.XmlMarshallException;
-import net.officefloor.plugin.xml.XmlUnmarshaller;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.plugin.xml.unmarshall.load.ValueLoaderFactory;
 import net.officefloor.plugin.xml.unmarshall.translate.TranslatorRegistry;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}to
- * obtain a
- * {@link net.officefloor.plugin.xml.unmarshall.flat.FlatXmlUnmarshaller}.
+ * {@link ManagedObjectSource} to obtain a {@link FlatXmlUnmarshaller}.
  * 
  * @author Daniel
  */
-public class FlatXmlUnmarshallerManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		implements ManagedObjectSource<D, H>, ManagedObjectSourceMetaData<D, H> {
+public class FlatXmlUnmarshallerManagedObjectSource extends
+		AbstractManagedObjectSource<None, None> {
 
 	/**
 	 * Property name of the {@link Class}of the target object.
 	 */
-	protected static final String CLASS_PROPERTY_NAME = "class";
+	public static final String CLASS_PROPERTY_NAME = "class";
 
 	/**
 	 * Meta-data for the {@link FlatXmlUnmarshaller}.
 	 */
-	protected FlatXmlUnmarshallerMetaData metaData = null;
+	private FlatXmlUnmarshallerMetaData metaData = null;
 
-	/**
-	 * Pool that instances are cached within.
+	/*
+	 * ====================== AbstractManagedObjectSource =====================
 	 */
-	protected ManagedObjectPool resourcePool = null;
 
-	/**
-	 * Default contructor to enable creation of an instance.
-	 */
-	public FlatXmlUnmarshallerManagedObjectSource() {
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		context.addProperty(CLASS_PROPERTY_NAME, "Target class name");
 	}
 
-	/*
-	 * ====================================================================
-	 * ManagedObjectSource
-	 * ====================================================================
-	 */
+	@Override
+	protected void loadMetaData(MetaDataContext<None, None> context)
+			throws Exception {
+		ManagedObjectSourceContext<None> mosContext = context
+				.getManagedObjectSourceContext();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getSpecification()
-	 */
-	public ManagedObjectSourceSpecification getSpecification() {
-		return new ManagedObjectSourceSpecification() {
-			public ManagedObjectSourceProperty[] getProperties() {
-				return new ManagedObjectSourceProperty[] { new ManagedObjectSourcePropertyImpl(
-						CLASS_PROPERTY_NAME, "Target class name") };
-			}
-		};
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
-	 */
-	public void init(ManagedObjectSourceContext context) throws Exception {
-
-		// Obtain the properties
-		Properties properties = context.getProperties();
-
-		// Obtain the class
-		String className = properties.getProperty(CLASS_PROPERTY_NAME);
-
-		// Ensure have the class name
-		if ((className == null) || (className.trim().length() == 0)) {
-			throw new Exception("Property '" + CLASS_PROPERTY_NAME
-					+ "' must be specified.");
-		}
+		// Obtain the class name
+		String className = mosContext.getProperty(CLASS_PROPERTY_NAME);
 
 		// Obtain the target object class
 		Class<?> targetObjectClass;
@@ -121,8 +76,8 @@ public class FlatXmlUnmarshallerManagedObjectSource<D extends Enum<D>, H extends
 
 		// Obtain the listing of XML mappings
 		List<XmlMapping> xmlMappingsList = new ArrayList<XmlMapping>();
-		for (Iterator<?> iterator = properties.keySet().iterator(); iterator
-				.hasNext();) {
+		for (Iterator<?> iterator = mosContext.getProperties().keySet()
+				.iterator(); iterator.hasNext();) {
 			// Obtain the current key
 			String currentKey = (String) iterator.next();
 
@@ -130,13 +85,13 @@ public class FlatXmlUnmarshallerManagedObjectSource<D extends Enum<D>, H extends
 			if (!CLASS_PROPERTY_NAME.equals(currentKey)) {
 
 				// Obtain the value for the key
-				String value = properties.getProperty(currentKey);
+				String value = mosContext.getProperty(currentKey);
 
 				// Add the XML mapping for current key
 				xmlMappingsList.add(new XmlMapping(currentKey, value));
 			}
 		}
-		// Obtain as arrary
+		// Obtain as array
 		XmlMapping[] xmlMappings = (XmlMapping[]) xmlMappingsList
 				.toArray(new XmlMapping[0]);
 
@@ -147,144 +102,50 @@ public class FlatXmlUnmarshallerManagedObjectSource<D extends Enum<D>, H extends
 		ValueLoaderFactory valueLoaderFactory = new ValueLoaderFactory(
 				translatorRegistry, targetObjectClass);
 
-		// Create the meta-data
+		// Create the flat XML unmarshaller meta-data
 		this.metaData = new FlatXmlUnmarshallerMetaData(valueLoaderFactory,
 				xmlMappings);
+
+		// Load the managed object meta-data
+		context.setManagedObjectClass(FlatXmlUnmarshallerManagedObject.class);
+		context.setObjectClass(FlatXmlUnmarshaller.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getMetaData()
-	 */
-	public ManagedObjectSourceMetaData<D, H> getMetaData() {
-		return this;
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
+		return new FlatXmlUnmarshallerManagedObject(new FlatXmlUnmarshaller(
+				this.metaData));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
+	/**
+	 * Implementation of the {@link ManagedObject}.
 	 */
-	public void start(ManagedObjectExecuteContext<H> context) throws Exception {
-		// No handlers
-	}
+	private static class FlatXmlUnmarshallerManagedObject implements
+			ManagedObject {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
-	 */
-	public void sourceManagedObject(ManagedObjectUser user) {
-		try {
-			// Create an instance of the resource
-			user.setManagedObject(new FlatXmlUnmarshallerManagedObject(
-					new FlatXmlUnmarshaller(this.metaData)));
-		} catch (XmlMarshallException ex) {
-			// Proprate failure to create instance
-			user.setFailure(ex);
+		/**
+		 * {@link FlatXmlUnmarshaller}being managed.
+		 */
+		private final FlatXmlUnmarshaller unmarshaller;
+
+		/**
+		 * Initiate with the {@link FlatXmlUnmarshaller}to be managed.
+		 * 
+		 * @param unmarshaller
+		 *            {@link FlatXmlUnmarshaller}to be managed.
+		 */
+		public FlatXmlUnmarshallerManagedObject(FlatXmlUnmarshaller unmarshaller) {
+			this.unmarshaller = unmarshaller;
 		}
-	}
 
-	/*
-	 * ====================================================================
-	 * ManagedObjectSourceMetaData
-	 * ====================================================================
-	 */
+		/*
+		 * ================== ManagedObject ===================================
+		 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getManagedObjectClass()
-	 */
-	public Class<? extends ManagedObject> getManagedObjectClass() {
-		return ManagedObject.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.objectsource.ManagedObjectSource#getObjectClass()
-	 */
-	public Class<?> getObjectClass() {
-		return XmlUnmarshaller.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyKeys()
-	 */
-	public Class<D> getDependencyKeys() {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getDependencyMetaData(D)
-	 */
-	public ManagedObjectDependencyMetaData getDependencyMetaData(D key) {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerKeys()
-	 */
-	public Class<H> getHandlerKeys() {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getHandlerType(H)
-	 */
-	public Class<? extends Handler<?>> getHandlerType(H key) {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData#getExtensionInterfacesMetaData()
-	 */
-	public ManagedObjectExtensionInterfaceMetaData<?>[] getExtensionInterfacesMetaData() {
-		return null;
-	}
-
-}
-
-/**
- * Implementation of the {@link ManagedObject}.
- */
-class FlatXmlUnmarshallerManagedObject implements ManagedObject {
-
-	/**
-	 * {@link FlatXmlUnmarshaller}being managed.
-	 */
-	protected final FlatXmlUnmarshaller unmarshaller;
-
-	/**
-	 * Initiate with the {@link FlatXmlUnmarshaller}to be managed.
-	 * 
-	 * @param unmarshaller
-	 *            {@link FlatXmlUnmarshaller}to be managed.
-	 */
-	public FlatXmlUnmarshallerManagedObject(FlatXmlUnmarshaller unmarshaller) {
-		// Store state
-		this.unmarshaller = unmarshaller;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.core.spi.managedobject.ManagedObject#getObject()
-	 */
-	public Object getObject() {
-		return this.unmarshaller;
+		@Override
+		public Object getObject() {
+			return this.unmarshaller;
+		}
 	}
 
 }

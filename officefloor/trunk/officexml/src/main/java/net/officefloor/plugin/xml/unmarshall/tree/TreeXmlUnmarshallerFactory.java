@@ -23,14 +23,12 @@ import net.officefloor.plugin.xml.XmlMarshallException;
 
 /**
  * <p>
- * Factory for the creation of a
- * {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller}.
+ * Factory for the creation of a {@link TreeXmlUnmarshaller}.
  * </p>
  * <p>
- * This is to ease obtaining a
- * {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshaller} but if
- * utilising office floor framework should plugin via
- * {@link net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerManagedObjectSource}.
+ * This is to ease obtaining a {@link TreeXmlUnmarshaller} but if utilising
+ * office floor framework should plug-in via
+ * {@link TreeXmlUnmarshallerManagedObjectSource}.
  * </p>
  * 
  * @author Daniel
@@ -66,10 +64,8 @@ public class TreeXmlUnmarshallerFactory {
 	 * @throws XmlMarshallException
 	 *             If fails to create the {@link TreeXmlUnmarshaller}.
 	 */
-	@SuppressWarnings("unchecked")
 	public TreeXmlUnmarshaller createUnmarshaller(InputStream configuration)
 			throws XmlMarshallException {
-		// Return the created unmarshaller
 		return this
 				.createUnmarshaller(new TreeXmlUnmarshallerManagedObjectSource(
 						configuration));
@@ -84,10 +80,8 @@ public class TreeXmlUnmarshallerFactory {
 	 * @throws XmlMarshallException
 	 *             If fails to create the {@link TreeXmlUnmarshaller}.
 	 */
-	@SuppressWarnings("unchecked")
 	public TreeXmlUnmarshaller createUnmarshaller(
 			XmlMappingMetaData configuration) throws XmlMarshallException {
-		// Return the created unmarshaller
 		return this
 				.createUnmarshaller(new TreeXmlUnmarshallerManagedObjectSource(
 						configuration));
@@ -101,18 +95,17 @@ public class TreeXmlUnmarshallerFactory {
 	 *            {@link TreeXmlUnmarshallerManagedObjectSource}.
 	 * @return {@link TreeXmlUnmarshaller}.
 	 * @throws XmlMarshallException
-	 *             If fails to create teh {@link TreeXmlUnmarshaller}.
+	 *             If fails to create the {@link TreeXmlUnmarshaller}.
 	 */
-	protected TreeXmlUnmarshaller createUnmarshaller(
-			TreeXmlUnmarshallerManagedObjectSource<?, ?> source)
+	private TreeXmlUnmarshaller createUnmarshaller(
+			TreeXmlUnmarshallerManagedObjectSource source)
 			throws XmlMarshallException {
-
-		// Source the unmarshaller
 		try {
 			return (TreeXmlUnmarshaller) ManagedObjectUserStandAlone
 					.sourceManagedObject(source).getObject();
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			throw new XmlMarshallException(ex.getMessage(), ex);
 		}
 	}
+
 }

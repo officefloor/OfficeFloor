@@ -23,8 +23,7 @@ import net.officefloor.frame.util.ManagedObjectSourceLoader;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 
 /**
- * Tests the
- * {@link net.officefloor.plugin.xml.marshall.tree.TreeXmlMarshallerManagedObjectSource}.
+ * Tests the {@link TreeXmlMarshallerManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -32,58 +31,37 @@ public class TreeXmlMarshallerManagedObjectSourceTest extends
 		AbstractTreeXmlMarshallerTestCase {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.marshall.tree.AbstractTreeXmlMarshallerTestCase#createFlatMarshaller()
+	 * =============== AbstractTreeXmlMarshallerTestCase ==================
 	 */
-	protected TreeXmlMarshaller createFlatMarshaller() throws Exception {
+	
+	@Override
+	protected TreeXmlMarshaller createFlatMarshaller() throws Throwable {
 		return this.createMarshaller("FlatMetaData.xml");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.marshall.tree.AbstractTreeXmlMarshallerTestCase#createTreeMarshaller()
-	 */
-	protected TreeXmlMarshaller createTreeMarshaller() throws Exception {
+	@Override
+	protected TreeXmlMarshaller createTreeMarshaller() throws Throwable {
 		return this.createMarshaller("TreeMetaData.xml");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.marshall.tree.AbstractTreeXmlMarshallerTestCase#createCollectionMarshaller()
-	 */
-	protected TreeXmlMarshaller createCollectionMarshaller() throws Exception {
+	@Override
+	protected TreeXmlMarshaller createCollectionMarshaller() throws Throwable {
 		return this.createMarshaller("CollectionMetaData.xml");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.marshall.tree.AbstractTreeXmlMarshallerTestCase#createTypeMarshaller()
-	 */
-	protected TreeXmlMarshaller createTypeMarshaller() throws Exception {
+	@Override
+	protected TreeXmlMarshaller createTypeMarshaller() throws Throwable {
 		return this.createMarshaller("TypeMetaData.xml");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.marshall.tree.AbstractTreeXmlMarshallerTestCase#createReferenceMarshaller()
-	 */
-	protected TreeXmlMarshaller createReferenceMarshaller() throws Exception {
+	@Override
+	protected TreeXmlMarshaller createReferenceMarshaller() throws Throwable {
 		return this.createMarshaller("ReferenceMetaData.xml");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.xml.marshall.tree.AbstractTreeXmlMarshallerTestCase#createReferenceCollectionMarshaller()
-	 */
 	@Override
 	protected TreeXmlMarshaller createReferenceCollectionMarshaller()
-			throws Exception {
+			throws Throwable {
 		return this.createMarshaller("CollectionReferenceMetaData.xml");
 	}
 
@@ -93,11 +71,11 @@ public class TreeXmlMarshallerManagedObjectSourceTest extends
 	 * @param configurationFileName
 	 *            Name of file containing the mapping configuration.
 	 * @return {@link TreeXmlMarshaller}.
-	 * @throws Exception
+	 * @throws Throwable
 	 *             If fails to create the {@link TreeXmlMarshaller}.
 	 */
 	protected TreeXmlMarshaller createMarshaller(String configurationFileName)
-			throws Exception {
+			throws Throwable {
 
 		// Create the mock objects
 		final ResourceLocator resourceLocator = this
@@ -121,7 +99,7 @@ public class TreeXmlMarshallerManagedObjectSourceTest extends
 						TreeXmlMarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME,
 						configurationFileName);
 		loader.setResourceLocator(resourceLocator);
-		TreeXmlMarshallerManagedObjectSource<?, ?> source = loader
+		TreeXmlMarshallerManagedObjectSource source = loader
 				.loadManagedObjectSource(TreeXmlMarshallerManagedObjectSource.class);
 
 		// Return the TreeXmlMarshaller
