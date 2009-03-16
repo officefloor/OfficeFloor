@@ -29,7 +29,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel
  */
-public class AbstractLinkedListTest extends OfficeFrameTestCase {
+public class LinkedListTest extends OfficeFrameTestCase {
 
 	/**
 	 * {@link AbstractLinkedList} to test.
@@ -37,9 +37,9 @@ public class AbstractLinkedListTest extends OfficeFrameTestCase {
 	protected final LinkedList<TestLinkedListEntry, Object> linkedList = new AbstractLinkedList<TestLinkedListEntry, Object>() {
 		@Override
 		public void lastLinkedListEntryRemoved(Object removeParameter) {
-			AbstractLinkedListTest.this.isLastEntryRemoved = true;
+			LinkedListTest.this.isLastEntryRemoved = true;
 			if (removeParameter != null) {
-				AbstractLinkedListTest.this.removeParameters
+				LinkedListTest.this.removeParameters
 						.add(removeParameter);
 			}
 		}

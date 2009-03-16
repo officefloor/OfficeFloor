@@ -95,9 +95,13 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 							testCase = testCaseClass.newInstance();
 						} catch (Throwable ex) {
 							suite
-									.addTest(TestSuite
-											.warning("Must provide public default constructor on "
-													+ testCaseClass.getName()));
+									.addTest(new TestCase(testCaseClass
+											.getName()) {
+										@Override
+										protected void runTest() {
+											fail("Must provide public default constructor");
+										}
+									});
 							return suite;
 						}
 
