@@ -34,55 +34,32 @@ public class TransactionAdministratorSource extends
 		implements Administrator<Transaction, TransactionDutiesEnum> {
 
 	/*
-	 * ====================================================================
-	 * AbstractAdministratorSource
-	 * ====================================================================
+	 * ===================== AbstractAdministratorSource ====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource#loadSpecification(net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.SpecificationContext)
-	 */
 	@Override
-	protected void loadSpecification(
-			net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.SpecificationContext context) {
+	protected void loadSpecification(SpecificationContext context) {
 		// No specification details
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource#loadMetaData(net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.MetaDataContext)
-	 */
 	@Override
 	protected void loadMetaData(
-			net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource.MetaDataContext<Transaction, TransactionDutiesEnum> context)
+			MetaDataContext<Transaction, TransactionDutiesEnum> context)
 			throws Exception {
 		context.setDutyKeys(TransactionDutiesEnum.class);
 		context.setExtensionInterface(Transaction.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.source.AdministratorSource#createAdministrator()
-	 */
+	@Override
 	public Administrator<Transaction, TransactionDutiesEnum> createAdministrator() {
 		return this;
 	}
 
 	/*
-	 * ====================================================================
-	 * Administrator
-	 * ====================================================================
+	 * =================== Administrator ==================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.administration.Administrator#getDuty(A)
-	 */
+	@Override
 	public Duty<Transaction, ?> getDuty(TransactionDutiesEnum key) {
 		switch (key) {
 		case BEGIN:
@@ -100,12 +77,7 @@ public class TransactionAdministratorSource extends
 	 * {@link Duty} to begin the transaction.
 	 */
 	private class BeginDuty implements Duty<Transaction, Indexed> {
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.Duty#doDuty(net.officefloor.frame.spi.administration.DutyContext)
-		 */
+		@Override
 		public void doDuty(DutyContext<Transaction, Indexed> context)
 				throws Exception {
 			// Begin the transaction
@@ -119,12 +91,7 @@ public class TransactionAdministratorSource extends
 	 * {@link Duty} to commit the transaction.
 	 */
 	private class CommitDuty implements Duty<Transaction, Indexed> {
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.Duty#doDuty(net.officefloor.frame.spi.administration.DutyContext)
-		 */
+		@Override
 		public void doDuty(DutyContext<Transaction, Indexed> context)
 				throws Exception {
 			// Commit the transaction
@@ -138,12 +105,7 @@ public class TransactionAdministratorSource extends
 	 * {@link Duty} to rollback the transaction.
 	 */
 	private class RollbackDuty implements Duty<Transaction, Indexed> {
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.administration.Duty#doDuty(net.officefloor.frame.spi.administration.DutyContext)
-		 */
+		@Override
 		public void doDuty(DutyContext<Transaction, Indexed> context)
 				throws Exception {
 			// Rollback the transaction
@@ -152,4 +114,5 @@ public class TransactionAdministratorSource extends
 			}
 		}
 	}
+
 }

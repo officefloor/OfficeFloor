@@ -41,15 +41,7 @@ public class OnePersonTeamSource extends AbstractTeamSource {
 	protected Team createTeam(TeamSourceContext context) throws Exception {
 
 		// Obtain the wait time
-		long waitTime;
-		String waitTimeText = context.getProperty("wait");
-		if ((waitTimeText == null) || (waitTimeText.trim().length() == 0)) {
-			// Default
-			waitTime = 100;
-		} else {
-			// Specify from properties
-			waitTime = Long.parseLong(waitTimeText);
-		}
+		long waitTime = Long.parseLong(context.getProperty("wait", "100"));
 
 		// Return the one person team
 		return new OnePersonTeam(waitTime);

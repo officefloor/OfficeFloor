@@ -16,12 +16,11 @@
  */
 package net.officefloor.plugin.jms;
 
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 
 /**
- * Provides abstract functionality for a
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource}
- * for JMS.
+ * Provides abstract functionality for a {@link ManagedObjectSource} for JMS.
  * 
  * @author Daniel
  */
@@ -47,7 +46,7 @@ public class JmsUtil {
 	 *             If fails to create the {@link JmsAdminObjectFactory}.
 	 */
 	public static JmsAdminObjectFactory getJmsAdminObjectFactory(
-			ManagedObjectSourceContext context) throws Exception {
+			ManagedObjectSourceContext<?> context) throws Exception {
 
 		// Obtain the name of the JMS admin object factory
 		String className = context

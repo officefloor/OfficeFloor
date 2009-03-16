@@ -22,7 +22,7 @@ public interface JmsAdminObjectFactory {
 	 * @param context
 	 *            {@link ManagedObjectSourceContext}.
 	 */
-	void init(ManagedObjectSourceContext context);
+	void init(ManagedObjectSourceContext<?> context);
 
 	/**
 	 * Creates the {@link ConnectionFactory} administered object.

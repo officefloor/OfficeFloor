@@ -151,16 +151,9 @@ public class JmsServerManagedObjectSource
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObjectSource
-	 * ====================================================================
+	 * ===================== AbstractManagedObjectSource =======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
-	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		// No specification
@@ -168,11 +161,6 @@ public class JmsServerManagedObjectSource
 				"Admin Object Factory");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
-	 */
 	@Override
 	protected void loadMetaData(
 			MetaDataContext<None, JmsServerHandlersEnum> context)
@@ -182,7 +170,7 @@ public class JmsServerManagedObjectSource
 		context.setManagedObjectClass(JmsServerManagedObject.class);
 
 		// Obtain the managed object source context
-		ManagedObjectSourceContext mosContext = context
+		ManagedObjectSourceContext<JmsServerHandlersEnum> mosContext = context
 				.getManagedObjectSourceContext();
 
 		// Obtain the JMS admin object factory
@@ -216,8 +204,7 @@ public class JmsServerManagedObjectSource
 
 		// Register the handler (and link OnMessageTask)
 		ManagedObjectHandlerBuilder<JmsServerHandlersEnum> managedObjectBuilder = context
-				.getManagedObjectSourceContext().getHandlerBuilder(
-						JmsServerHandlersEnum.class);
+				.getManagedObjectSourceContext().getHandlerBuilder();
 		HandlerBuilder<Indexed> handler = managedObjectBuilder
 				.registerHandler(JmsServerHandlersEnum.JMS_SERVER_HANDLER);
 		handler.setHandlerFactory(this);
@@ -238,11 +225,7 @@ public class JmsServerManagedObjectSource
 				});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext)
-	 */
+	@Override
 	public void start(ManagedObjectExecuteContext<JmsServerHandlersEnum> context)
 			throws Exception {
 
@@ -262,11 +245,6 @@ public class JmsServerManagedObjectSource
 		this.connection.start();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource#getManagedObject()
-	 */
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Can not source server managed object
@@ -276,48 +254,25 @@ public class JmsServerManagedObjectSource
 	}
 
 	/*
-	 * ====================================================================
-	 * HandlerFactory
-	 * ====================================================================
+	 * ===================== Handler =======================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.HandlerFactory#createHandler()
-	 */
+	@Override
 	public Handler<Indexed> createHandler() {
 		return this;
 	}
 
-	/*
-	 * ====================================================================
-	 * Handler
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor.frame.api.execute.HandlerContext)
-	 */
+	@Override
 	public void setHandlerContext(HandlerContext<Indexed> context)
 			throws Exception {
-		// Store for use
 		this.handlerContext = context;
 	}
 
 	/*
-	 * ====================================================================
-	 * ServerSessionPool
-	 * ====================================================================
+	 * ==================== ServerSessionPool =============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.jms.ServerSessionPool#getServerSession()
-	 */
+	@Override
 	public ServerSession getServerSession() throws JMSException {
 		synchronized (this.serverSessionPool) {
 
@@ -337,7 +292,7 @@ public class JmsServerManagedObjectSource
 					} catch (InterruptedException ex) {
 						// Ignore interruptions
 					}
-					
+
 				} else {
 					// Create the server session (transacted)
 					session = new JmsServerManagedObject(this, this.connection

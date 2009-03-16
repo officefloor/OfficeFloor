@@ -33,7 +33,7 @@ public class TextJmsManagedObjectTest extends AbstractJmsManagedObjectTest {
 	/**
 	 * Ensure able to publish a test message.
 	 */
-	public void testPublishTextMessage() throws Exception {
+	public void testPublishTextMessage() throws Throwable {
 
 		final String TEST_MSG = "test msg";
 

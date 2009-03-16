@@ -14,16 +14,17 @@ import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.plugin.jms.activemq.VmJmsAdminObjectFactory;
 
 /**
  * Abstract {@link junit.framework.TestCase} for testing JMS
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public class AbstractJmsManagedObjectTest extends
+public abstract class AbstractJmsManagedObjectTest extends
 		AbstractOfficeConstructTestCase {
 
 	/**
@@ -46,6 +47,7 @@ public class AbstractJmsManagedObjectTest extends
 	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -73,11 +75,11 @@ public class AbstractJmsManagedObjectTest extends
 	 * 
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
-		super.tearDown();
-
 		// Stop the service
 		VmJmsAdminObjectFactory.stop();
+		super.tearDown();
 	}
 
 	/**
@@ -102,7 +104,7 @@ public class AbstractJmsManagedObjectTest extends
 
 		// Close the consumer
 		receiver.close();
-		
+
 		// Commit
 		this.session.commit();
 

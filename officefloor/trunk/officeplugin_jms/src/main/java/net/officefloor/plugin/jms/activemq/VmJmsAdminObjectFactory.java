@@ -103,25 +103,15 @@ public class VmJmsAdminObjectFactory implements JmsAdminObjectFactory {
 	}
 
 	/*
-	 * ====================================================================
-	 * JmsAdminObjectFactory
-	 * ====================================================================
+	 * ====================== JmsAdminObjectFactory ============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
-	 */
-	public void init(ManagedObjectSourceContext context) {
+	@Override
+	public void init(ManagedObjectSourceContext<?> context) {
 		// Do nothing
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#createConnectionFactory()
-	 */
+	@Override
 	public ConnectionFactory createConnectionFactory() throws Exception {
 		synchronized (VmJmsAdminObjectFactory.class) {
 			validateStarted();
@@ -129,11 +119,7 @@ public class VmJmsAdminObjectFactory implements JmsAdminObjectFactory {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#createDestination()
-	 */
+	@Override
 	public Destination createDestination() throws Exception {
 		synchronized (VmJmsAdminObjectFactory.class) {
 			validateStarted();

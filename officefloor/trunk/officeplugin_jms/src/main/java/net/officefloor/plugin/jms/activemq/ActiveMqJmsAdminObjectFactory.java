@@ -35,11 +35,11 @@ public class ActiveMqJmsAdminObjectFactory implements JmsAdminObjectFactory {
 	protected ActiveMQDestination destination;
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#init(net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext)
+	 * =================== JmsAdminObjectFactory =============================
 	 */
-	public void init(ManagedObjectSourceContext context) {
+
+	@Override
+	public void init(ManagedObjectSourceContext<?> context) {
 
 		// Create the connection factory
 		this.connectionFactory = new ActiveMQConnectionFactory();
@@ -53,20 +53,12 @@ public class ActiveMqJmsAdminObjectFactory implements JmsAdminObjectFactory {
 				destinationUrl, ActiveMQDestination.QUEUE_TYPE);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#createConnectionFactory()
-	 */
+	@Override
 	public ConnectionFactory createConnectionFactory() {
 		return this.connectionFactory;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.jms.JmsAdminObjectFactory#createDestination()
-	 */
+	@Override
 	public Destination createDestination() {
 		return this.destination;
 	}
