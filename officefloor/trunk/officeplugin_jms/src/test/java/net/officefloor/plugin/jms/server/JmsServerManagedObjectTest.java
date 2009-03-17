@@ -110,12 +110,11 @@ public class JmsServerManagedObjectTest extends AbstractJmsManagedObjectTest {
 		// Configure the Work
 		WorkBuilder workBuilder = processTask.registerWork("work",
 				officeBuilder);
-		workBuilder.linkAdministrator("transaction", "TRANSACTION");
 
 		// Configure the Task
 		TaskBuilder taskBuilder = processTask.registerTask("task",
 				"of-JMS_SERVER.jms.server.onmessage", workBuilder);
-		taskBuilder.linkPostTaskAdministration("transaction",
+		taskBuilder.linkPostTaskAdministration("TRANSACTION",
 				TransactionDutiesEnum.COMMIT);
 
 		// Obtain the on message task to link it to task processing result
