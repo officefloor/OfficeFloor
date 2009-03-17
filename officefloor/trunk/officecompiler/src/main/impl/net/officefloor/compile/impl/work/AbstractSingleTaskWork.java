@@ -14,30 +14,32 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work;
+package net.officefloor.compile.impl.work;
 
+import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.model.task.TaskFactoryManufacturer;
 
 /**
- * {@link TaskFactory} that is compiler aware.
+ * Abstract {@link Work} that only has a single {@link Task} for use by a
+ * {@link WorkLoader}.
  * 
  * @author Daniel
  */
-public interface CompilerAwareTaskFactory<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends TaskFactory<P, W, M, F> {
+public abstract class AbstractSingleTaskWork<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
+		extends AbstractSingleTask<P, W, M, F> implements
+		TaskFactoryManufacturer {
 
-	/**
-	 * Initialises the {@link TaskFactory}.
-	 * 
-	 * @param task
-	 *            {@link FlowItemModel} for the {@link TaskFactory}. A
-	 *            {@link FlowItemModel} is a particular instantiation of a
-	 *            {@link Task}.
-	 * @throws Exception
-	 *             If fails to initialise the {@link TaskFactory}.
+	/*
+	 * ================= TaskFactoryManufacturer =========================
 	 */
-	void initialiseTaskFactory(FlowItemModel task) throws Exception;
+
+	@Override
+	public TaskFactory<?, ?, ?, ?> createTaskFactory() {
+		return this;
+	}
+
 }

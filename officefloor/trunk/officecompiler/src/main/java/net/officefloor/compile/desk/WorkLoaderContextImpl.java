@@ -14,12 +14,12 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.desk;
+package net.officefloor.compile.desk;
 
 import java.util.Properties;
 
-import net.officefloor.work.WorkLoaderContext;
-import net.officefloor.work.WorkUnknownPropertyError;
+import net.officefloor.compile.work.WorkLoaderContext;
+import net.officefloor.compile.work.WorkUnknownPropertyError;
 
 /**
  * {@link WorkLoaderContext} implementation.

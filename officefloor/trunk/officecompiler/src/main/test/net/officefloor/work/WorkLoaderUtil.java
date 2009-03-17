@@ -19,7 +19,9 @@ package net.officefloor.work;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-import net.officefloor.desk.WorkLoaderContextImpl;
+import net.officefloor.compile.desk.WorkLoaderContextImpl;
+import net.officefloor.compile.work.WorkLoader;
+import net.officefloor.compile.work.WorkLoaderContext;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.model.task.TaskFactoryManufacturer;
 import net.officefloor.model.work.TaskEscalationModel;

@@ -16,7 +16,6 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.HandlerBuilder;

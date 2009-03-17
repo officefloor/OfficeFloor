@@ -14,38 +14,53 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work;
+package net.officefloor.compile.impl.work;
 
-import net.officefloor.model.work.WorkModel;
+import net.officefloor.compile.work.WorkProperty;
 
 /**
- * Loads the {@link WorkModel}.
+ * {@link WorkProperty} implementation.
  * 
  * @author Daniel
  */
-public interface WorkLoader {
+public class WorkPropertyImpl implements WorkProperty {
 
 	/**
-	 * <p>
-	 * Obtains the {@link WorkSpecification} for this {@link WorkLoader}.
-	 * <p>
-	 * This enables the {@link WorkLoaderContext} to be populated with the
-	 * necessary details as per this {@link WorkSpecification} in loading the
-	 * {@link WorkModel}.
-	 * 
-	 * @return {@link WorkSpecification}.
+	 * Name.
 	 */
-	WorkSpecification getSpecification();
+	private final String name;
 
 	/**
-	 * Loads the {@link WorkModel} from configuration.
-	 * 
-	 * @param context
-	 *            {@link WorkLoaderContext} to source details to load the
-	 *            {@link WorkModel}.
-	 * @throws Exception
-	 *             If fails.
+	 * Label.
 	 */
-	WorkModel<?> loadWork(WorkLoaderContext context) throws Exception;
+	private final String label;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param label
+	 *            Label. Defaults to <code>name</code> if <code>null</code>.
+	 */
+	public WorkPropertyImpl(String name, String label) {
+		this.name = name;
+		this.label = ((label == null) || (label.trim().length() == 0)) ? name
+				: label;
+	}
+
+	/*
+	 * ====================== WorkProperty ==================================
+	 */
+
+	@Override
+	public String getLabel() {
+		return this.label;
+	}
+
+	@Override
+	public String getName() {
+		return this.name;
+	}
 
 }

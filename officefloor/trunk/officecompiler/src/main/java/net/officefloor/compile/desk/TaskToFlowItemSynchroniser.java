@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.desk;
+package net.officefloor.compile.desk;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +34,8 @@ import net.officefloor.model.work.TaskModel;
  * 
  * @author Daniel
  */
+//Provide do/undo synchronise
+@Deprecated
 public class TaskToFlowItemSynchroniser {
 
 	/**

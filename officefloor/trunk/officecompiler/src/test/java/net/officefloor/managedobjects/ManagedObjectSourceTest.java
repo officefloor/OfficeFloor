@@ -18,7 +18,7 @@ package net.officefloor.managedobjects;
 
 import java.io.File;
 
-import net.officefloor.LoaderContext;
+import net.officefloor.compile.LoaderContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.BuilderFactory;

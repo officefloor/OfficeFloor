@@ -14,8 +14,9 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.desk;
+package net.officefloor.compile.desk;
 
+import net.officefloor.compile.desk.TaskToDeskTaskSynchroniser;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.task.TaskFactoryManufacturer;
@@ -23,10 +24,12 @@ import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
 
 /**
- * Tests the {@link net.officefloor.desk.TaskToDeskTaskSynchroniser}.
+ * Tests the {@link net.officefloor.compile.desk.TaskToDeskTaskSynchroniser}.
  * 
  * @author Daniel
  */
+// Provide do/undo synchronise
+@Deprecated
 public class TaskToDeskTaskSynchroniserTest extends OfficeFrameTestCase {
 
 	/**

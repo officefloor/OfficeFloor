@@ -16,7 +16,7 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.desk.DeskLoader;
+import net.officefloor.compile.desk.DeskLoader;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.FlowItemModel;

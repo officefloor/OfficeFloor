@@ -18,7 +18,6 @@ package net.officefloor.compile;
 
 import java.util.Properties;
 
-import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;

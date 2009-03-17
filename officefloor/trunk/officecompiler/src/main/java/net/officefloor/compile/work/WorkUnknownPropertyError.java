@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work;
+package net.officefloor.compile.work;
 
 /**
  * <p>
@@ -41,8 +41,7 @@ public class WorkUnknownPropertyError extends Error {
 	 * @param unknownPropertyName
 	 *            Name of the unknown property.
 	 */
-	public WorkUnknownPropertyError(String message,
-			String unknownPropertyName) {
+	public WorkUnknownPropertyError(String message, String unknownPropertyName) {
 		super(message);
 		this.unknownPropertyName = unknownPropertyName;
 	}
@@ -52,7 +51,7 @@ public class WorkUnknownPropertyError extends Error {
 	 * 
 	 * @return Name of the unknown property.
 	 */
-	public String getUnkonwnPropertyName() {
+	public String getUnknonwnPropertyName() {
 		return this.unknownPropertyName;
 	}
 

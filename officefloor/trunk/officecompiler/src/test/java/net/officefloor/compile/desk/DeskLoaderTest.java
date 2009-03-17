@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.desk;
+package net.officefloor.compile.desk;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,8 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.LoaderContext;
+import net.officefloor.compile.LoaderContext;
+import net.officefloor.compile.desk.DeskLoader;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
 import net.officefloor.model.RemoveConnectionsAction;
@@ -46,7 +47,7 @@ import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.work.clazz.ClassWorkLoader;
 
 /**
- * Ensure able to load the {@link net.officefloor.model.desk.DeskModel}.
+ * Ensure able to load the {@link DeskModel}.
  * 
  * @author Daniel
  */
@@ -67,6 +68,7 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 
 		// Create the desk loader to test
@@ -212,10 +214,10 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate outputs of first flow item
 		FlowItemModel flowItemOne = desk.getFlowItems().get(0);
-		assertList(new String[] { "getId", "getLabel" }, flowItemOne.getOutputs(),
-				new FlowItemOutputModel("0", "First", null, null, null),
-				new FlowItemOutputModel("1", null, null, null, null),
-				new FlowItemOutputModel("2", "Third", null, null, null));
+		assertList(new String[] { "getId", "getLabel" }, flowItemOne
+				.getOutputs(), new FlowItemOutputModel("0", "First", null,
+				null, null), new FlowItemOutputModel("1", null, null, null,
+				null), new FlowItemOutputModel("2", "Third", null, null, null));
 
 		// Validate link types of the first flow item
 		assertEquals("Incorrect link type (sequential)",
@@ -272,9 +274,10 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		if (!isSynchronised) {
 			// Validate outputs on third flow item
 			FlowItemModel flowItemThree = desk.getFlowItems().get(2);
-			assertList(new String[] { "getId", "getLabel" }, flowItemThree.getOutputs(),
-					new FlowItemOutputModel("FIRST_FLOW", null, null, null, null),
-					new FlowItemOutputModel("SECOND_FLOW", "Another", null, null, null));
+			assertList(new String[] { "getId", "getLabel" }, flowItemThree
+					.getOutputs(), new FlowItemOutputModel("FIRST_FLOW", null,
+					null, null, null), new FlowItemOutputModel("SECOND_FLOW",
+					"Another", null, null, null));
 
 			// Validate link types of the second flow item
 			assertEquals("Incorrect link type (asynchronous)",
@@ -385,4 +388,5 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		assertGraph(desk, reloadedDesk,
 				RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
 	}
+	
 }

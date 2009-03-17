@@ -20,12 +20,12 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.work.CompilerAwareTaskFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
-import net.officefloor.work.CompilerAwareTaskFactory;
 
 /**
  * {@link net.officefloor.frame.api.build.TaskFactory} to invoke the method on

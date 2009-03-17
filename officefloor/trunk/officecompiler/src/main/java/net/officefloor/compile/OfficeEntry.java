@@ -19,7 +19,6 @@ package net.officefloor.compile;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.model.office.AdministratorModel;

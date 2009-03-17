@@ -16,7 +16,6 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.AdministratorBuilder;
 import net.officefloor.frame.api.build.DutyBuilder;
 import net.officefloor.frame.api.manage.Office;

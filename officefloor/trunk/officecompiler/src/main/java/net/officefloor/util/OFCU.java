@@ -20,7 +20,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.frame.api.build.BuildException;
 
 /**
  * {@link OfficeFloorCompiler} util.
@@ -39,11 +38,11 @@ public class OFCU {
 	 * @param parameters
 	 *            Parameters.
 	 * @return Not <code>null</code> object.
-	 * @throws BuildException
+	 * @throws NullPointerException
 	 *             If object is <code>null</code>.
 	 */
 	public static <T> T get(T object, String message, Object... parameters)
-			throws BuildException {
+			throws NullPointerException {
 
 		// Return if not null
 		if (object != null) {
@@ -58,7 +57,7 @@ public class OFCU {
 		}
 
 		// Throw failure
-		throw new BuildException(message);
+		throw new NullPointerException(message);
 	}
 
 	/**

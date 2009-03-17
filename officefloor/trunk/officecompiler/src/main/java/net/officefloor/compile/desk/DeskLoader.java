@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.desk;
+package net.officefloor.compile.desk;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import net.officefloor.LoaderContext;
+import net.officefloor.compile.LoaderContext;
+import net.officefloor.compile.work.WorkLoader;
+import net.officefloor.compile.work.WorkLoaderContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
@@ -50,8 +52,6 @@ import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.ModelRepository;
 import net.officefloor.util.DoubleKeyMap;
-import net.officefloor.work.WorkLoader;
-import net.officefloor.work.WorkLoaderContext;
 
 /**
  * Loads the {@link net.officefloor.model.desk.DeskModel}.

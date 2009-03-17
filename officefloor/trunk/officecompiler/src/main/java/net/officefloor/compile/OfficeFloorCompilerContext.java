@@ -16,7 +16,6 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ModelRepository;

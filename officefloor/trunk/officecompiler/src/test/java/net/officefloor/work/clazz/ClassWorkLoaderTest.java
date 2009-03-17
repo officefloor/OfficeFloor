@@ -20,7 +20,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import net.officefloor.desk.WorkLoaderContextImpl;
+import net.officefloor.compile.desk.WorkLoaderContextImpl;
+import net.officefloor.compile.work.WorkLoaderContext;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
@@ -28,7 +29,6 @@ import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
 import net.officefloor.model.work.WorkModel;
-import net.officefloor.work.WorkLoaderContext;
 
 /**
  * Test the {@link net.officefloor.work.clazz.ClassWorkLoader}.
