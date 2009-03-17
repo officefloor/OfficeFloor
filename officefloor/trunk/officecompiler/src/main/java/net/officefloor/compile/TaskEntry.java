@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.AdministrationLine.ManagedObjectUnderAdministration;
-import net.officefloor.compile.work.CompilerAwareTaskFactory;
+import net.officefloor.compile.spi.work.source.CompilerAwareTaskFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.Indexed;

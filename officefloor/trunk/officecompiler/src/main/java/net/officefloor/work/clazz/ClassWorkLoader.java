@@ -21,8 +21,8 @@ import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.impl.work.AbstractWorkLoader;
-import net.officefloor.compile.work.WorkLoaderContext;
+import net.officefloor.compile.impl.work.source.AbstractWorkLoader;
+import net.officefloor.compile.spi.work.source.WorkLoaderContext;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;

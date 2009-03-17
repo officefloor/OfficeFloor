@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import net.officefloor.compile.desk.WorkLoaderContextImpl;
-import net.officefloor.compile.work.WorkLoaderContext;
+import net.officefloor.compile.impl.work.source.WorkLoaderContextImpl;
+import net.officefloor.compile.spi.work.source.WorkLoaderContext;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;

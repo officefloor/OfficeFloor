@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.work.CompilerAwareTaskFactory;
+import net.officefloor.compile.spi.work.source.CompilerAwareTaskFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskTaskObjectModel;

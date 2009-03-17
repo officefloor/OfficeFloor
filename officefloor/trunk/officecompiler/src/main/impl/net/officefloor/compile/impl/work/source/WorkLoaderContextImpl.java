@@ -14,12 +14,12 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.desk;
+package net.officefloor.compile.impl.work.source;
 
 import java.util.Properties;
 
-import net.officefloor.compile.work.WorkLoaderContext;
-import net.officefloor.compile.work.WorkUnknownPropertyError;
+import net.officefloor.compile.spi.work.source.WorkLoaderContext;
+import net.officefloor.compile.spi.work.source.WorkUnknownPropertyError;
 
 /**
  * {@link WorkLoaderContext} implementation.
@@ -61,20 +61,14 @@ public class WorkLoaderContextImpl implements WorkLoaderContext {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.work.WorkLoaderContext#getPropertyNames()
+	 * ==================== WorkLoaderContext ================================
 	 */
+
 	@Override
 	public String[] getPropertyNames() {
 		return this.names;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.work.WorkLoaderContext#getProperty(java.lang.String)
-	 */
 	@Override
 	public String getProperty(String name) throws WorkUnknownPropertyError {
 		String value = this.getProperty(name, null);
@@ -85,12 +79,6 @@ public class WorkLoaderContextImpl implements WorkLoaderContext {
 		return value;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.work.WorkLoaderContext#getProperty(java.lang.String,
-	 * java.lang.String)
-	 */
 	@Override
 	public String getProperty(String name, String defaultValue) {
 		String value = this.properties.getProperty(name);
@@ -100,21 +88,11 @@ public class WorkLoaderContextImpl implements WorkLoaderContext {
 		return value;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.work.WorkLoaderContext#getProperties()
-	 */
 	@Override
 	public Properties getProperties() {
 		return this.properties;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.work.WorkLoaderContext#getClassLoader()
-	 */
 	@Override
 	public ClassLoader getClassLoader() {
 		return this.classLoader;

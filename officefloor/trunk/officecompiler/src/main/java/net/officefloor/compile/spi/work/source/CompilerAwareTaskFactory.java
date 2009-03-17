@@ -14,28 +14,31 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.work;
+package net.officefloor.compile.spi.work.source;
+
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.model.desk.FlowItemModel;
 
 /**
- * Property of the {@link WorkSpecification}.
+ * {@link TaskFactory} that is compiler aware.
  * 
  * @author Daniel
  */
-public interface WorkProperty {
+public interface CompilerAwareTaskFactory<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>>
+		extends TaskFactory<P, W, M, F> {
 
 	/**
-	 * Obtains the name of the property.
+	 * Initialises the {@link TaskFactory}.
 	 * 
-	 * @return Name of the property.
+	 * @param task
+	 *            {@link FlowItemModel} for the {@link TaskFactory}. A
+	 *            {@link FlowItemModel} is a particular instantiation of a
+	 *            {@link Task}.
+	 * @throws Exception
+	 *             If fails to initialise the {@link TaskFactory}.
 	 */
-	String getName();
-
-	/**
-	 * Obtains the display name of the property. If this returns
-	 * <code>null</code> then the return value of {@link #getName()} is used.
-	 * 
-	 * @return Display name of property.
-	 */
-	String getLabel();
+	void initialiseTaskFactory(FlowItemModel task) throws Exception;
 
 }

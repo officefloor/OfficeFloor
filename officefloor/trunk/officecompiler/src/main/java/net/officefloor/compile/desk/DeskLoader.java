@@ -23,8 +23,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import net.officefloor.compile.LoaderContext;
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.compile.work.WorkLoaderContext;
+import net.officefloor.compile.impl.work.source.WorkLoaderContextImpl;
+import net.officefloor.compile.spi.work.source.WorkLoader;
+import net.officefloor.compile.spi.work.source.WorkLoaderContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;

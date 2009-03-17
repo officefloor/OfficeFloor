@@ -14,45 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.work;
+package net.officefloor.compile.spi.work.source;
 
 /**
- * <p>
- * Indicates a property was not configured within the
- * {@link ManagedObjectSourceContext}.
- * <p>
- * This is a serious error as the {@link ManagedObjectSource} is requiring this
- * property to initialise and subsequently start.
+ * Property of the {@link WorkSpecification}.
  * 
  * @author Daniel
  */
-public class WorkUnknownPropertyError extends Error {
+public interface WorkProperty {
 
 	/**
-	 * Name of the unknown property.
-	 */
-	private final String unknownPropertyName;
-
-	/**
-	 * Initiate.
+	 * Obtains the name of the property.
 	 * 
-	 * @param message
-	 *            Message.
-	 * @param unknownPropertyName
-	 *            Name of the unknown property.
+	 * @return Name of the property.
 	 */
-	public WorkUnknownPropertyError(String message, String unknownPropertyName) {
-		super(message);
-		this.unknownPropertyName = unknownPropertyName;
-	}
+	String getName();
 
 	/**
-	 * Obtains the name of the unknown property.
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
 	 * 
-	 * @return Name of the unknown property.
+	 * @return Display name of property.
 	 */
-	public String getUnknonwnPropertyName() {
-		return this.unknownPropertyName;
-	}
+	String getLabel();
 
 }
