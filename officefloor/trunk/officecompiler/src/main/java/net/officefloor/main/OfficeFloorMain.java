@@ -21,7 +21,6 @@ import java.io.IOException;
 import net.officefloor.LoaderContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
@@ -125,10 +124,6 @@ public class OfficeFloorMain {
 		// Create the loader context
 		LoaderContext loaderContext = new LoaderContext(classLoader);
 
-		// Obtain the builder factory
-		BuilderFactory builderFactory = OfficeFrame.getInstance()
-				.getBuilderFactory();
-
 		// Obtain the office floor configuration
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
 				OFFICE_FLOOR_MAIN, classLoader);
@@ -140,9 +135,12 @@ public class OfficeFloorMain {
 							+ officeFloorConfigFile + "'");
 		}
 
+		// Obtain the office frame
+		OfficeFrame officeFrame = OfficeFrame.getInstance();
+
 		// Compile the office floor
 		OfficeFloor officeFloor = compiler.compileOfficeFloor(
-				officeFloorConfigurationItem, builderFactory, loaderContext);
+				officeFloorConfigurationItem, officeFrame, loaderContext);
 
 		// Return the office floor
 		return officeFloor;

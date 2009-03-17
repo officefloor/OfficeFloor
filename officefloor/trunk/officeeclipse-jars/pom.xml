@@ -8,10 +8,11 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>officeeclipse-jars</artifactId>
-	<description>Jars necessary for developing with Office Floor Eclipse Plugins</description>
-    <properties>
-        <office_version>0.0.1</office_version>
-    </properties>
+	<name>Office Floor Eclipse Jars</name>
+	<description>Jars necessary for developing with Office Floor Eclipse Plug-ins</description>
+	<properties>
+		<office_version>0.0.1</office_version>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -36,26 +37,26 @@
 		</plugins>
 	</build>
 	<dependencies>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officeframe</artifactId>
-            <version>${office_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officeplugin_socket</artifactId>
-            <version>${office_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officeplugin_jdbc</artifactId>
-            <version>${office_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officeplugin_jms</artifactId>
-            <version>${office_version}</version>
-        </dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officeframe</artifactId>
+			<version>${office_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officeplugin_socket</artifactId>
+			<version>${office_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officeplugin_jdbc</artifactId>
+			<version>${office_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officeplugin_jms</artifactId>
+			<version>${office_version}</version>
+		</dependency>
 	</dependencies>
 </project>
 

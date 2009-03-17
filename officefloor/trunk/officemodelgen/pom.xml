@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -9,8 +8,9 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officemodelgen</artifactId>
+	<name>Office Floor Persistent Model Generator</name>
 	<description>
-		Generates the Office Floor model for configuring via an IDE.
+		Generates the Office Floor model for configuring via an IDE.  This is a code generator internal to Office Floor to save effort in writing the peristent classes.
 	</description>
 	<properties>
 		<office_version>0.0.1</office_version>
