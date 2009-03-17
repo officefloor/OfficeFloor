@@ -18,15 +18,14 @@ package net.officefloor.plugin.hibernate;
 
 import java.sql.Connection;
 
-import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.hibernate.HibernateManagedObjectSource.HibernateDependenciesEnum;
@@ -34,8 +33,7 @@ import net.officefloor.plugin.hibernate.HibernateManagedObjectSource.HibernateDe
 import org.hibernate.Session;
 
 /**
- * Test the
- * {@link net.officefloor.plugin.hibernate.HibernateManagedObjectSource}.
+ * Test the {@link HibernateManagedObjectSource}.
  * 
  * @author Daniel
  */
@@ -46,11 +44,14 @@ public class HibernateManagedObjectSourceTest extends
 	 * Test Hibernate connection.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testHibernate() throws Exception {
+	public void testHibernate() throws Throwable {
+
+		// Obtain the office name
+		String officeName = this.getOfficeName();
 
 		// Configure the Hibernate managed object
 		ManagedObjectBuilder moBuilder = this.constructManagedObject(
-				"Hibernate", HibernateManagedObjectSource.class, "TEST");
+				"Hibernate", HibernateManagedObjectSource.class, officeName);
 		moBuilder.addProperty("configuration",
 				"net/officefloor/plugin/hibernate/hibernate.cfg.xml");
 
@@ -60,14 +61,15 @@ public class HibernateManagedObjectSourceTest extends
 			public Object getObject() throws Exception {
 				return mockConnection;
 			}
-		}, "TEST");
-
-		// Flag in transaction so not 'aggressively released'
-		mockConnection.getAutoCommit();
-		this.control(mockConnection).setReturnValue(false);
+		}, officeName);
 
 		// Allow specifying the session connection
 		final Connection[] connectionHolder = new Connection[1];
+
+		// Flag not in transaction so not 'aggressively released'
+		this
+				.recordReturn(mockConnection, mockConnection.getAutoCommit(),
+						false);
 
 		// Create the task to use the session
 		AbstractSingleTask<?, ?, ?, ?> task = new AbstractSingleTask() {
@@ -89,9 +91,7 @@ public class HibernateManagedObjectSourceTest extends
 		WorkBuilder<?> workBuilder = task.registerWork("work", this
 				.getOfficeBuilder());
 		workBuilder.addWorkManagedObject("conn", "Connection");
-		DependencyMappingBuilder dependencyBuilder = workBuilder
-				.addWorkManagedObject("mo", "Hibernate");
-		dependencyBuilder.registerDependencyMapping(
+		workBuilder.addWorkManagedObject("mo", "Hibernate").mapDependency(
 				HibernateDependenciesEnum.CONNECTION, "conn");
 
 		// Configure the Task
@@ -100,23 +100,17 @@ public class HibernateManagedObjectSourceTest extends
 		taskBuilder.linkManagedObject(0, "mo");
 
 		// Configure the Team
-		Team team = new PassiveTeam();
-		this.constructTeam("team", team);
+		this.constructTeam("team", new PassiveTeam());
 
-		// Replay
+		// Invoke the work to obtain the Hibernate Session
 		this.replayMockObjects();
-
-		// Open the Office Floor
-		OfficeFloor officeFloor = this.constructOfficeFloor("TEST");
+		OfficeFloor officeFloor = this.constructOfficeFloor();
 		officeFloor.openOfficeFloor();
-
-		// Invoke the work
-		officeFloor.getOffice("TEST").getWorkManager("work").invokeWork(null);
-
-		// Close the Office Floor
+		WorkManager workManager = officeFloor.getOffice(officeName)
+				.getWorkManager("work");
+		workManager.invokeWork(null);
 		officeFloor.closeOfficeFloor();
-
-		// Verify mock objects
+		this.validateNoTopLevelEscalation();
 		this.verifyMockObjects();
 
 		// Ensure have Session Connection
@@ -127,10 +121,6 @@ public class HibernateManagedObjectSourceTest extends
 		assertNotNull("Session missing Connection", sessionConnection);
 
 		// Ensure using specified connection
-		System.out.println("mock: " + mockConnection + "["
-				+ mockConnection.getClass().getName() + "]");
-		System.out.println("session: " + sessionConnection + "["
-				+ sessionConnection.getClass().getName() + "]");
 		assertEquals("Incorrect underlying connection", mockConnection,
 				sessionConnection);
 	}
