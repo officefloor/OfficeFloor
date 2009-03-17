@@ -16,7 +16,6 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.desk.DeskTaskModel;

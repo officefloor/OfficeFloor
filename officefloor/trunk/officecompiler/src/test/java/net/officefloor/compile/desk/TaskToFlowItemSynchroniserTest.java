@@ -14,13 +14,14 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.desk;
+package net.officefloor.compile.desk;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.desk.TaskToFlowItemSynchroniser;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
@@ -32,10 +33,12 @@ import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
 
 /**
- * Tests the {@link net.officefloor.desk.TaskToFlowItemSynchroniser}.
+ * Tests the {@link net.officefloor.compile.desk.TaskToFlowItemSynchroniser}.
  * 
  * @author Daniel
  */
+//Provide do/undo synchronise
+@Deprecated
 public class TaskToFlowItemSynchroniserTest extends OfficeFrameTestCase {
 
 	/**

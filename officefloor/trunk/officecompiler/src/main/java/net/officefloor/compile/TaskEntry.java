@@ -21,8 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.LoaderContext;
 import net.officefloor.compile.AdministrationLine.ManagedObjectUnderAdministration;
+import net.officefloor.compile.work.CompilerAwareTaskFactory;
 import net.officefloor.frame.api.build.AdministrationBuilder;
 import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.Indexed;
@@ -39,7 +39,6 @@ import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.work.TaskModel;
-import net.officefloor.work.CompilerAwareTaskFactory;
 
 /**
  * {@link Task} for the {@link Work}.

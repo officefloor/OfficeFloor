@@ -17,7 +17,7 @@
 package net.officefloor.compile;
 
 import net.officefloor.compile.FlowLineUtil.LinkedFlow;
-import net.officefloor.desk.DeskLoader;
+import net.officefloor.compile.desk.DeskLoader;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;

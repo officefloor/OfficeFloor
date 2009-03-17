@@ -19,7 +19,7 @@ package net.officefloor.office;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.desk.DeskLoader;
+import net.officefloor.compile.desk.DeskLoader;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;

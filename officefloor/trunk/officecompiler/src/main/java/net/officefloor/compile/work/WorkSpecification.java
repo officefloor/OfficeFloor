@@ -14,30 +14,23 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.mock;
+package net.officefloor.compile.work;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
-import net.officefloor.work.clazz.Flow;
+import net.officefloor.frame.api.execute.Work;
 
 /**
- * Mock class for testing {@link net.officefloor.compile.work.WorkLoader}.
+ * Provides the specification of the {@link Work} to be loaded by the particular
+ * {@link WorkLoader}.
  * 
  * @author Daniel
  */
-public class MockClass {
+public interface WorkSpecification {
 
-	public Object taskMethod(String parameter, Flow<?> flowSequential,
-			Flow<Object> flowParallel, Flow<String> flowAsynchronous)
-			throws IOException {
-		return null;
-	}
+	/**
+	 * Obtains the specification of the properties for the {@link Work}.
+	 * 
+	 * @return Property specification.
+	 */
+	WorkProperty[] getProperties();
 
-	public void anotherMethod() throws SQLException {
-	}
-
-	Object nonTaskMethod(Object parameter) {
-		return null;
-	}
 }

@@ -18,7 +18,7 @@ package net.officefloor.main;
 
 import java.io.IOException;
 
-import net.officefloor.LoaderContext;
+import net.officefloor.compile.LoaderContext;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.Office;

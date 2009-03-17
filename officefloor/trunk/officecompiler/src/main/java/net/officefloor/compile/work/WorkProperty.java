@@ -14,23 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work;
-
-import net.officefloor.frame.api.execute.Work;
+package net.officefloor.compile.work;
 
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link WorkLoader}.
+ * Property of the {@link WorkSpecification}.
  * 
  * @author Daniel
  */
-public interface WorkSpecification {
+public interface WorkProperty {
 
 	/**
-	 * Obtains the specification of the properties for the {@link Work}.
+	 * Obtains the name of the property.
 	 * 
-	 * @return Property specification.
+	 * @return Name of the property.
 	 */
-	WorkProperty[] getProperties();
+	String getName();
+
+	/**
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
+	 * 
+	 * @return Display name of property.
+	 */
+	String getLabel();
 
 }

@@ -21,17 +21,20 @@ import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.impl.work.AbstractWorkLoader;
+import net.officefloor.compile.work.WorkLoaderContext;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.work.TaskEscalationModel;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
 import net.officefloor.model.work.WorkModel;
-import net.officefloor.work.AbstractWorkLoader;
-import net.officefloor.work.WorkLoaderContext;
 
 /**
- * {@link net.officefloor.work.WorkLoader} for a class.
+ * {@link WorkLoader} for a {@link Class} having the {@link Object} as the
+ * {@link Work} and {@link Method} instances as the {@link Task} instances.
  * 
  * @author Daniel
  */
@@ -43,23 +46,14 @@ public class ClassWorkLoader extends AbstractWorkLoader {
 	public static final String CLASS_NAME_PROPERTY_NAME = "class.name";
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.work.AbstractWorkLoader#loadSpecification(net.officefloor
-	 * .work.AbstractWorkLoader.SpecificationContext)
+	 * =================== AbstractWorkLoader ==============================
 	 */
+
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(CLASS_NAME_PROPERTY_NAME, "Class");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.work.WorkLoader#loadWork(net.officefloor.work.
-	 * WorkLoaderContext)
-	 */
 	@SuppressWarnings("unchecked")
 	public WorkModel<ClassWork> loadWork(WorkLoaderContext context)
 			throws Exception {
