@@ -61,6 +61,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -1070,7 +1071,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(taskMetaData, taskMetaData
 				.getPostAdministrationMetaData(), new TaskDutyAssociation[0]);
 		this.recordReturn(taskMetaData, taskMetaData
-				.getRequiredManagedObjects(), new int[0]);
+				.getRequiredManagedObjects(), new ManagedObjectIndex[0]);
 		this.recordReturn(taskMetaData, taskMetaData.getTaskFactory(),
 				taskFactory);
 		this.recordReturn(workContainer, workContainer.getWork(null), work,

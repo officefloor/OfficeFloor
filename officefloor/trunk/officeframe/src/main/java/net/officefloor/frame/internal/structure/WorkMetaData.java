@@ -63,15 +63,6 @@ public interface WorkMetaData<W extends Work> {
 	FlowMetaData<W> getInitialFlowMetaData();
 
 	/**
-	 * Obtains the {@link ManagedObjectIndex} instances to look up the
-	 * {@link ManagedObjectContainer} instances for the {@link Work}.
-	 * 
-	 * @return {@link ManagedObjectIndex} instances to look up the
-	 *         {@link ManagedObjectContainer} instances for the {@link Work}.
-	 */
-	ManagedObjectIndex[] getManagedObjectIndexes();
-
-	/**
 	 * Obtains the meta-data of the {@link ManagedObject} instances bound to the
 	 * {@link Work}.
 	 * 

@@ -17,27 +17,23 @@
 package net.officefloor.frame.impl.construct.work;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
-import net.officefloor.frame.internal.configuration.LinkedWorkAdministratorConfiguration;
-import net.officefloor.frame.internal.configuration.LinkedWorkManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -45,17 +41,13 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFac
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -99,10 +91,9 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 	/**
 	 * {@link RawBoundManagedObjectMetaData} instances by the
-	 * {@link ManagedObject} scope names used by the {@link Task} instances of
-	 * this {@link Work}.
+	 * {@link ManagedObjectScope} names.
 	 */
-	private final Map<String, RawBoundManagedObjectMetaData<?>> taskScopeManagedObjects;
+	private final Map<String, RawBoundManagedObjectMetaData<?>> scopeManagedObjects;
 
 	/**
 	 * {@link RawBoundManagedObjectMetaData} of the {@link Administrator}
@@ -112,22 +103,9 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 	/**
 	 * {@link RawBoundAdministratorMetaData} instances by the
-	 * {@link Administrator} scope names used by the {@link Task} instances of
-	 * this {@link Work}.
+	 * {@link AdministratorScope} names.
 	 */
-	private final Map<String, RawBoundAdministratorMetaData<?, ?>> taskScopeAdministrators;
-
-	/**
-	 * {@link RawWorkManagedObjectMetaData} in the order the {@link Task}
-	 * instances expect to obtain {@link ManagedObject} instances from this
-	 * {@link Work}.
-	 */
-	private final List<RawWorkManagedObjectMetaDataImpl> workRequiredManagedObjects = new LinkedList<RawWorkManagedObjectMetaDataImpl>();
-
-	/**
-	 * Index of the next {@link RawWorkManagedObjectMetaData}.
-	 */
-	private int nextWorkRequiredManagedObjectIndex = 0;
+	private final Map<String, RawBoundAdministratorMetaData<?, ?>> scopeAdministrators;
 
 	/**
 	 * {@link RawTaskMetaData} instances of this {@link Work}.
@@ -149,31 +127,28 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	 * @param workManagedObjects
 	 *            {@link RawBoundManagedObjectMetaData} of the
 	 *            {@link ManagedObject} instances bound to this {@link Work}.
-	 * @param taskScopeManagedObjects
+	 * @param scopeManagedObjects
 	 *            {@link RawBoundManagedObjectMetaData} instances by the
-	 *            {@link ManagedObject} scope names used by the {@link Task}
-	 *            instances of this {@link Work}.
+	 *            {@link ManagedObjectScope} names.
 	 * @param workAdministrators
 	 *            {@link RawBoundManagedObjectMetaData} of the
 	 *            {@link Administrator} instances bound to this {@link Work}.
-	 * @param taskScopeAdministrators
+	 * @param scopeAdministrators
 	 *            {@link RawBoundAdministratorMetaData} instances by the
-	 *            {@link Administrator} scope names used by the {@link Task}
-	 *            instances of this {@link Work}.
+	 *            {@link AdministratorScope} names.
 	 */
-	private RawWorkMetaDataImpl(
-			String workName,
+	private RawWorkMetaDataImpl(String workName,
 			RawOfficeMetaData rawOfficeMetaData,
 			RawBoundManagedObjectMetaData<?>[] workManagedObjects,
-			Map<String, RawBoundManagedObjectMetaData<?>> taskScopeManagedObjects,
+			Map<String, RawBoundManagedObjectMetaData<?>> scopeManagedObjects,
 			RawBoundAdministratorMetaData<?, ?>[] workAdministrators,
-			Map<String, RawBoundAdministratorMetaData<?, ?>> taskScopeAdministrators) {
+			Map<String, RawBoundAdministratorMetaData<?, ?>> scopeAdministrators) {
 		this.workName = workName;
 		this.rawOfficeMetaData = rawOfficeMetaData;
 		this.workManagedObjects = workManagedObjects;
-		this.taskScopeManagedObjects = taskScopeManagedObjects;
+		this.scopeManagedObjects = scopeManagedObjects;
 		this.workAdministrators = workAdministrators;
-		this.taskScopeAdministrators = taskScopeAdministrators;
+		this.scopeAdministrators = scopeAdministrators;
 	}
 
 	/*
@@ -224,60 +199,17 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 							workName, assetManagerFactory, rawOfficeMetaData
 									.getManagedObjectMetaData(), officeScopeMo);
 		}
-		Map<String, RawBoundManagedObjectMetaData<?>> workMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
-		for (RawBoundManagedObjectMetaData<?> mo : workBoundMo) {
-			workMo.put(mo.getBoundManagedObjectName(), mo);
-		}
 
 		// Create the work scope managed objects available to tasks
-		Map<String, RawBoundManagedObjectMetaData<?>> taskScopeMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
-		for (LinkedWorkManagedObjectConfiguration linkMoConfiguration : configuration
-				.getLinkedManagedObjectConfiguration()) {
-
-			// Obtain the work managed object name
-			String workManagedObjectName = linkMoConfiguration
-					.getWorkManagedObjectName();
-			if (ConstructUtil.isBlank(workManagedObjectName)) {
-				issues
-						.addIssue(AssetType.WORK, workName,
-								"No work managed object name provided for managed object");
-				continue; // can not link in managed object
-			}
-
-			// Obtain the bound managed object name
-			String boundManagedObjectName = linkMoConfiguration
-					.getBoundManagedObjectName();
-			if (ConstructUtil.isBlank(boundManagedObjectName)) {
-				issues.addIssue(AssetType.WORK, workName,
-						"No bound name provided for work managed object "
-								+ workManagedObjectName);
-				continue; // can not link in managed object
-			}
-
-			// Obtain the bound managed object from office scope
-			RawBoundManagedObjectMetaData<?> mo = officeScopeMo
-					.get(boundManagedObjectName);
-			if (mo == null) {
-				issues.addIssue(AssetType.WORK, workName,
-						"No bound managed object '" + boundManagedObjectName
-								+ "' found for work managed object "
-								+ workManagedObjectName);
-				continue; // can not link in managed object
-			}
-
-			// Bound to work under work managed object name
-			taskScopeMo.put(workManagedObjectName, mo);
+		Map<String, RawBoundManagedObjectMetaData<?>> workScopeMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
+		workScopeMo.putAll(officeScopeMo); // include all office scoped
+		for (RawBoundManagedObjectMetaData<?> mo : workBoundMo) {
+			workScopeMo.put(mo.getBoundManagedObjectName(), mo);
 		}
-		taskScopeMo.putAll(workMo); // second as may override names
 
 		// Obtain the office scope administrators
 		Map<String, RawBoundAdministratorMetaData<?, ?>> officeScopeAdmin = rawOfficeMetaData
 				.getOfficeScopeAdministrators();
-
-		// Create the scoped managed objects available to the administrators
-		Map<String, RawBoundManagedObjectMetaData<?>> adminScopeMo = new HashMap<String, RawBoundManagedObjectMetaData<?>>();
-		adminScopeMo.putAll(officeScopeMo);
-		adminScopeMo.putAll(workMo); // second as may override names
 
 		// Obtain the work bound administrators
 		AdministratorSourceConfiguration<?, ?>[] adminConfiguration = configuration
@@ -289,59 +221,20 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			workBoundAdmins = rawBoundAdministratorFactory
 					.constructRawBoundAdministratorMetaData(adminConfiguration,
 							issues, AdministratorScope.WORK, AssetType.WORK,
-							workName, rawOfficeMetaData.getTeams(),
-							adminScopeMo);
-		}
-		Map<String, RawBoundAdministratorMetaData<?, ?>> workAdmin = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
-		for (RawBoundAdministratorMetaData<?, ?> admin : workBoundAdmins) {
-			workAdmin.put(admin.getBoundAdministratorName(), admin);
+							workName, rawOfficeMetaData.getTeams(), workScopeMo);
 		}
 
 		// Create the work scope administrators available to tasks
-		Map<String, RawBoundAdministratorMetaData<?, ?>> taskScopeAdmin = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
-		for (LinkedWorkAdministratorConfiguration linkAdminConfiguration : configuration
-				.getLinkedAdministratorConfiguration()) {
-
-			// Obtain work administrator name
-			String workAdministratorName = linkAdminConfiguration
-					.getWorkAdministratorName();
-			if (ConstructUtil.isBlank(workAdministratorName)) {
-				issues
-						.addIssue(AssetType.WORK, workName,
-								"No work administrator name provided for administrator");
-				continue; // can not link in administrator
-			}
-
-			// Obtain the bound administrator name
-			String boundAdministratorName = linkAdminConfiguration
-					.getBoundAdministratorName();
-			if (ConstructUtil.isBlank(boundAdministratorName)) {
-				issues.addIssue(AssetType.WORK, workName,
-						"No bound name provided for work administrator "
-								+ workAdministratorName);
-				continue; // can not link in administrator
-			}
-
-			// Obtain the bound administrator from office scope
-			RawBoundAdministratorMetaData<?, ?> admin = officeScopeAdmin
-					.get(boundAdministratorName);
-			if (admin == null) {
-				issues.addIssue(AssetType.WORK, workName,
-						"No bound administrator '" + boundAdministratorName
-								+ "' found for work administrator "
-								+ workAdministratorName);
-				continue; // can not link in administrator
-			}
-
-			// Bound to work under work administrator name
-			taskScopeAdmin.put(workAdministratorName, admin);
+		Map<String, RawBoundAdministratorMetaData<?, ?>> workScopeAdmin = new HashMap<String, RawBoundAdministratorMetaData<?, ?>>();
+		workScopeAdmin.putAll(officeScopeAdmin); // include all office scoped
+		for (RawBoundAdministratorMetaData<?, ?> admin : workBoundAdmins) {
+			workScopeAdmin.put(admin.getBoundAdministratorName(), admin);
 		}
-		taskScopeAdmin.putAll(workAdmin); // second as may override names
 
 		// Create the raw work meta-data
 		RawWorkMetaDataImpl<w> rawWorkMetaData = new RawWorkMetaDataImpl<w>(
-				workName, rawOfficeMetaData, workBoundMo, taskScopeMo,
-				workBoundAdmins, taskScopeAdmin);
+				workName, rawOfficeMetaData, workBoundMo, workScopeMo,
+				workBoundAdmins, workScopeAdmin);
 
 		// Obtain the name of the task for the initial flow of work
 		String initialTaskName = configuration.getInitialTaskName();
@@ -397,14 +290,6 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 					initialTaskMetaData, assetManager);
 		}
 
-		// Create the listing of managed object indexes
-		ManagedObjectIndex[] managedObjectIndexes = new ManagedObjectIndex[rawWorkMetaData.workRequiredManagedObjects
-				.size()];
-		for (int i = 0; i < managedObjectIndexes.length; i++) {
-			managedObjectIndexes[i] = rawWorkMetaData.workRequiredManagedObjects
-					.get(i).getManagedObjectIndex();
-		}
-
 		// Create the listing of work bound managed object meta-data
 		ManagedObjectMetaData<?>[] managedObjectMetaData = new ManagedObjectMetaData[rawWorkMetaData.workManagedObjects.length];
 		for (int i = 0; i < managedObjectMetaData.length; i++) {
@@ -427,10 +312,9 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 		// Create the work meta-data
 		rawWorkMetaData.workMetaData = new WorkMetaDataImpl<w>(
-				rawWorkMetaData.workName, workFactory, managedObjectIndexes,
-				managedObjectMetaData, administratorMetaData,
-				initialFlowMetaData, ConstructUtil.toArray(taskMetaDatas,
-						new TaskMetaData[0]));
+				rawWorkMetaData.workName, workFactory, managedObjectMetaData,
+				administratorMetaData, initialFlowMetaData, ConstructUtil
+						.toArray(taskMetaDatas, new TaskMetaData[0]));
 
 		// Return the raw work meta-data
 		return rawWorkMetaData;
@@ -451,56 +335,15 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	}
 
 	@Override
-	public AdministratorIndex getAdministratorIndex(
-			String workAdministratorName, OfficeFloorIssues issues) {
-
-		// Work meta-data should not yet be created
-		if (this.workMetaData != null) {
-			throw new IllegalStateException(
-					"Work meta-data already constructed when trying to add another administrator");
-		}
-
-		// Obtain the bound administrator
-		RawBoundAdministratorMetaData<?, ?> boundAdmin = this.taskScopeAdministrators
-				.get(workAdministratorName);
-		if (boundAdmin == null) {
-			issues.addIssue(AssetType.WORK, this.workName,
-					"No work administrator for task by name '"
-							+ workAdministratorName + "'");
-			return null; // unknown administrator
-		}
-
-		// Obtain the index for the administrator
-		AdministratorIndex adminIndex = boundAdmin.getAdministratorIndex();
-
-		// Return the administrator index
-		return adminIndex;
+	public RawBoundManagedObjectMetaData<?> getScopeManagedObjectMetaData(
+			String scopeManagedObjectName) {
+		return this.scopeManagedObjects.get(scopeManagedObjectName);
 	}
 
 	@Override
-	public RawWorkManagedObjectMetaData constructRawWorkManagedObjectMetaData(
-			String workManagedObjectName, OfficeFloorIssues issues) {
-
-		// Work meta-data should not yet be created
-		if (this.workMetaData != null) {
-			throw new IllegalStateException(
-					"Work meta-data already constructed when trying to add another managed object");
-		}
-
-		// Obtain the bound managed object
-		RawBoundManagedObjectMetaData<?> boundMo = this.taskScopeManagedObjects
-				.get(workManagedObjectName);
-		if (boundMo == null) {
-			issues.addIssue(AssetType.WORK, this.workName,
-					"No work managed object for task by name '"
-							+ workManagedObjectName + "'");
-			return null; // unknown managed object
-		}
-
-		// Construct and return the work managed object
-		RawWorkManagedObjectMetaData workMo = this
-				.constructRawWorkManagedObjectMetaData(boundMo, issues);
-		return workMo;
+	public RawBoundAdministratorMetaData<?, ?> getScopeAdministratorMetaData(
+			String scopeAdministratorName) {
+		return this.scopeAdministrators.get(scopeAdministratorName);
 	}
 
 	@Override
@@ -527,170 +370,6 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		for (RawTaskMetaData<?, W, ?, ?> rawTaskMetaData : this.rawTaskMetaDatas) {
 			rawTaskMetaData.linkTasks(taskMetaDataLocator, this.workMetaData,
 					assetManagerFactory, issues);
-		}
-	}
-
-	/**
-	 * Constructs the {@link RawWorkManagedObjectMetaDataImpl} and its
-	 * dependencies.
-	 * 
-	 * @param managedObject
-	 *            {@link RawBoundManagedObjectMetaData}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 */
-	private <D extends Enum<D>> RawWorkManagedObjectMetaDataImpl constructRawWorkManagedObjectMetaData(
-			RawBoundManagedObjectMetaData<D> managedObject,
-			OfficeFloorIssues issues) {
-
-		// Obtain the index details for the managed object
-		ManagedObjectIndex managedObjectIndex = managedObject
-				.getManagedObjectIndex();
-
-		// Create the key for the managed object
-		RawWorkManagedObjectMetaDataImpl key = new RawWorkManagedObjectMetaDataImpl(
-				managedObjectIndex, -1);
-
-		// Obtain the work required managed object
-		RawWorkManagedObjectMetaDataImpl workRequiredManagedObject;
-		if (this.workRequiredManagedObjects.contains(key)) {
-			// Already created
-			workRequiredManagedObject = this.workRequiredManagedObjects
-					.get(this.workRequiredManagedObjects.indexOf(key));
-
-		} else {
-
-			// Create the work required managed object meta-data
-			workRequiredManagedObject = new RawWorkManagedObjectMetaDataImpl(
-					managedObjectIndex,
-					this.nextWorkRequiredManagedObjectIndex++);
-
-			// Ensure load as work required managed object
-			this.workRequiredManagedObjects.add(workRequiredManagedObject);
-
-			// Load the dependencies
-			for (D dependencyKey : managedObject.getDependencyKeys()) {
-
-				// Obtain the dependency
-				RawBoundManagedObjectMetaData<?> dependency = managedObject
-						.getDependency(dependencyKey);
-				if (dependency == null) {
-					issues.addIssue(AssetType.WORK, workName,
-							"Dependency for key " + dependencyKey
-									+ " of managed object "
-									+ managedObject.getBoundManagedObjectName()
-									+ " not available");
-					continue; // dependency not available
-				}
-
-				// Recursively load dependencies
-				RawWorkManagedObjectMetaDataImpl rawWorkMoDependency = this
-						.constructRawWorkManagedObjectMetaData(dependency,
-								issues);
-
-				// Add all the dependencies
-				workRequiredManagedObject.dependencies.add(rawWorkMoDependency);
-				workRequiredManagedObject.dependencies
-						.addAll(rawWorkMoDependency.dependencies);
-			}
-		}
-
-		// Return the work bound managed object meta-data
-		return workRequiredManagedObject;
-	}
-
-	/**
-	 * {@link RawWorkManagedObjectMetaData} implementation.
-	 */
-	public static class RawWorkManagedObjectMetaDataImpl implements
-			RawWorkManagedObjectMetaData {
-
-		/**
-		 * {@link ManagedObjectIndex}.
-		 */
-		private final ManagedObjectIndex managedObjectIndex;
-
-		/**
-		 * Index of this {@link RawWorkManagedObjectMetaDataImpl} within the
-		 * {@link Work}.
-		 */
-		private final int workManagedObjectIndex;
-
-		/**
-		 * All recursive dependencies for this
-		 * {@link RawWorkManagedObjectMetaDataImpl}.
-		 */
-		private final Set<RawWorkManagedObjectMetaDataImpl> dependencies = new HashSet<RawWorkManagedObjectMetaDataImpl>();
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param managedObjectIndex
-		 *            {@link ManagedObjectIndex}.
-		 * @param workManagedObjectIndex
-		 *            Index of this {@link RawWorkManagedObjectMetaDataImpl}
-		 *            within the {@link Work}.
-		 */
-		public RawWorkManagedObjectMetaDataImpl(
-				ManagedObjectIndex managedObjectIndex,
-				int workManagedObjectIndex) {
-			this.managedObjectIndex = managedObjectIndex;
-			this.workManagedObjectIndex = workManagedObjectIndex;
-		}
-
-		/*
-		 * ================== Object =================================
-		 */
-
-		@Override
-		public boolean equals(Object obj) {
-
-			// Same object
-			if (obj == this) {
-				return true;
-			}
-
-			// Ensure same type
-			if (!(obj instanceof RawWorkManagedObjectMetaDataImpl)) {
-				return false;
-			}
-			RawWorkManagedObjectMetaDataImpl that = (RawWorkManagedObjectMetaDataImpl) obj;
-
-			// Return if same index
-			return (this.managedObjectIndex.getManagedObjectScope() == that.managedObjectIndex
-					.getManagedObjectScope())
-					&& (this.managedObjectIndex
-							.getIndexOfManagedObjectWithinScope() == that.managedObjectIndex
-							.getIndexOfManagedObjectWithinScope());
-		}
-
-		@Override
-		public int hashCode() {
-			int hash = this.managedObjectIndex.getManagedObjectScope()
-					.hashCode()
-					+ this.managedObjectIndex
-							.getIndexOfManagedObjectWithinScope();
-			return hash;
-		}
-
-		/*
-		 * ================ RawWorkManagedObjectMetaData =====================
-		 */
-
-		@Override
-		public ManagedObjectIndex getManagedObjectIndex() {
-			return this.managedObjectIndex;
-		}
-
-		@Override
-		public int getWorkManagedObjectIndex() {
-			return this.workManagedObjectIndex;
-		}
-
-		@Override
-		public RawWorkManagedObjectMetaData[] getDependencies() {
-			return this.dependencies
-					.toArray(new RawWorkManagedObjectMetaData[0]);
 		}
 	}
 

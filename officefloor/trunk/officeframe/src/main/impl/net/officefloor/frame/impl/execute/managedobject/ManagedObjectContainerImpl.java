@@ -216,14 +216,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * ProcessState lock.
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
-	 * loadManagedObject(net.officefloor.frame.spi.team.JobContext,
-	 * net.officefloor.frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public boolean loadManagedObject(JobContext executionContext,
 			JobNode jobNode, JobActivateSet notifySet) {
@@ -305,16 +297,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
-	 * coordinateManagedObject
-	 * (net.officefloor.frame.internal.structure.WorkContainer,
-	 * net.officefloor.frame.spi.team.JobContext,
-	 * net.officefloor.frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public void coordinateManagedObject(WorkContainer workContainer,
@@ -376,14 +358,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
-	 * isManagedObjectReady(net.officefloor.frame.spi.team.JobContext,
-	 * net.officefloor.frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public boolean isManagedObjectReady(JobContext executionContext,
 			JobNode jobNode, JobActivateSet notifySet) {
@@ -462,13 +436,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.ManagedObjectContainer#getObject
-	 * (net.officefloor.frame.internal.structure.ThreadState)
-	 */
 	@Override
 	public Object getObject(ThreadState threadState) {
 
@@ -485,12 +452,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		return this.object;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
-	 * getManagedObject()
-	 */
+	@Override
 	public ManagedObject getManagedObject(ThreadState threadState) {
 
 		// Access Point: JobContainer via WorkContainer
@@ -499,12 +461,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		return this.managedObject;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.ManagedObjectContainer#
-	 * unloadManagedObject()
-	 */
 	@Override
 	public void unloadManagedObject() {
 
@@ -525,13 +481,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * ================ AsynchronousListener ==============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.managedobject.AsynchronousListener#notifyStarted
-	 * ()
-	 */
 	@Override
 	public void notifyStarted() {
 
@@ -551,13 +500,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.managedobject.AsynchronousCompletionListener
-	 * #notifyComplete()
-	 */
 	@Override
 	public void notifyComplete() {
 
@@ -581,12 +523,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * ================== ManagedObjectUser ===============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.managedobject.source.ManagedObjectUser#
-	 * setManagedObject(net.officefloor.frame.spi.managedobject.ManagedObject)
-	 */
 	@Override
 	public void setManagedObject(ManagedObject managedObject) {
 
@@ -674,13 +610,6 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.managedobject.source.ManagedObjectUser#setFailure
-	 * (java.lang.Throwable)
-	 */
 	@Override
 	public void setFailure(Throwable cause) {
 
@@ -726,23 +655,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 * ================== Asset ==========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.Asset#getAssetLock()
-	 */
 	@Override
 	public Object getAssetLock() {
 		return this.lock;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.Asset#reportOnAsset(net.officefloor
-	 * .frame.internal.structure.AssetReport)
-	 */
 	@Override
 	public void reportOnAsset(AssetReport report) {
 
@@ -806,4 +723,5 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		 */
 		UNLOADING,
 	}
+
 }

@@ -34,6 +34,7 @@ import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
 import net.officefloor.frame.impl.execute.administrator.AdministratorMetaDataImpl;
 import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDataImpl;
 import net.officefloor.frame.impl.execute.duty.DutyMetaDataImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
@@ -82,7 +83,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	@SuppressWarnings("unchecked")
 	public static RawBoundAdministratorMetaDataFactory getFactory() {
 		return new RawBoundAdministratorMetaDataImpl(null, null, null, null,
-				null, null);
+				null, null, null);
 	}
 
 	/**
@@ -99,6 +100,11 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 * {@link AdministratorSourceConfiguration}.
 	 */
 	private final AdministratorSourceConfiguration<A, ?> administratorSourceConfiguration;
+
+	/**
+	 * Administered {@link RawBoundManagedObjectMetaData}.
+	 */
+	private final RawBoundManagedObjectMetaData<?>[] administeredRawBoundManagedObjects;
 
 	/**
 	 * Class specifying the {@link Duty} keys.
@@ -124,6 +130,8 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	 *            {@link AdministratorIndex}.
 	 * @param administratorSourceConfiguration
 	 *            {@link AdministratorSourceConfiguration}.
+	 * @param administeredRawBoundManagedObjects
+	 *            Administered {@link RawBoundManagedObjectMetaData}.
 	 * @param dutyKeyClass
 	 *            Class specifying the {@link Duty} keys.
 	 * @param dutyKeys
@@ -135,11 +143,13 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			String boundAdministratorName,
 			AdministratorIndex administratorIndex,
 			AdministratorSourceConfiguration<A, ?> administratorSourceConfiguration,
+			RawBoundManagedObjectMetaData<?>[] administeredRawBoundManagedObjects,
 			Class<A> dutyKeyClass, A[] dutyKeys,
 			AdministratorMetaDataImpl<I, A> adminMetaData) {
 		this.boundAdministratorName = boundAdministratorName;
 		this.administratorIndex = administratorIndex;
 		this.administratorSourceConfiguration = administratorSourceConfiguration;
+		this.administeredRawBoundManagedObjects = administeredRawBoundManagedObjects;
 		this.dutyKeyClass = dutyKeyClass;
 		this.dutyKeys = dutyKeys;
 		this.adminMetaData = adminMetaData;
@@ -281,6 +291,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 		}
 
 		// Obtain the managed objects being administered
+		List<RawBoundManagedObjectMetaData<?>> administeredManagedObjects = new LinkedList<RawBoundManagedObjectMetaData<?>>();
 		List<ExtensionInterfaceMetaData<i>> eiMetaDatas = new LinkedList<ExtensionInterfaceMetaData<i>>();
 		for (String moName : configuration.getAdministeredManagedObjectNames()) {
 
@@ -346,6 +357,9 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			// Obtain the index of the managed object
 			ManagedObjectIndex moIndex = mo.getManagedObjectIndex();
 
+			// Add the administered managed object
+			administeredManagedObjects.add(mo);
+
 			// Add the extension interface meta-data
 			eiMetaDatas.add(new ExtensionInterfaceMetaDataImpl<i>(moIndex,
 					extensionInterfaceFactory));
@@ -370,7 +384,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 		});
 
 		// TODO allow configuration of escalation procedure for administrator
-		EscalationProcedure escalationProcedure = null;
+		EscalationProcedure escalationProcedure = new EscalationProcedureImpl();
 
 		// Create the administrator meta-data
 		AdministratorMetaDataImpl<i, a> adminMetaData = new AdministratorMetaDataImpl<i, a>(
@@ -380,8 +394,10 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 
 		// Create the raw bound administrator meta-data
 		RawBoundAdministratorMetaData<i, a> rawBoundAdminMetaData = new RawBoundAdministratorMetaDataImpl<i, a>(
-				adminName, administratorIndex, configuration, dutyKeyClass,
-				dutyKeys, adminMetaData);
+				adminName, administratorIndex, configuration,
+				administeredManagedObjects
+						.toArray(new RawBoundManagedObjectMetaData[0]),
+				dutyKeyClass, dutyKeys, adminMetaData);
 
 		// Return the raw bound administrator meta-data
 		return rawBoundAdminMetaData;
@@ -504,6 +520,11 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 	@Override
 	public AdministratorIndex getAdministratorIndex() {
 		return this.administratorIndex;
+	}
+
+	@Override
+	public RawBoundManagedObjectMetaData<?>[] getAdministeredRawBoundManagedObjects() {
+		return this.administeredRawBoundManagedObjects;
 	}
 
 	@Override

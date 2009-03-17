@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import junit.framework.TestCase;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -29,7 +30,9 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -51,6 +54,11 @@ public class ReflectiveWorkBuilder implements Work,
 	 * {@link Work} object to invoke reflectively.
 	 */
 	private final Object workObject;
+
+	/**
+	 * {@link OfficeBuilder} building this {@link Work}.
+	 */
+	private final OfficeBuilder officeBuilder;
 
 	/**
 	 * {@link WorkBuilder}.
@@ -76,6 +84,7 @@ public class ReflectiveWorkBuilder implements Work,
 			String initialTaskName) {
 		this.testCase = testCase;
 		this.workObject = workObject;
+		this.officeBuilder = officeBuilder;
 
 		// Create and initiate the work builder
 		this.workBuilder = officeBuilder.addWork(workName, this);
@@ -229,48 +238,74 @@ public class ReflectiveWorkBuilder implements Work,
 		}
 
 		/**
-		 * Builds the work bound managed object.
+		 * Builds the {@link Work} bound {@link ManagedObject}.
 		 * 
-		 * @param managedObjectName
-		 *            Name of the managed object.
+		 * @param officeManagedObjectName
+		 *            {@link Office} name of the {@link ManagedObject}.
+		 * @return {@link DependencyMappingBuilder}.
 		 */
-		public void buildObject(String managedObjectName) {
-			// Builds the managed object
-			String workManagedObjectName = "w:" + managedObjectName;
-			this.taskBuilder.linkManagedObject(this.objectIndex,
-					workManagedObjectName);
-			ReflectiveWorkBuilder.this.workBuilder.addWorkManagedObject(
-					workManagedObjectName, managedObjectName);
-			this.parameterFactories[this.parameterIndex] = new ObjectParameterFactory(
-					this.objectIndex);
-
-			// Set for next managed object and parameter
-			this.objectIndex++;
-			this.parameterIndex++;
+		public DependencyMappingBuilder buildObject(
+				String officeManagedObjectName) {
+			return this.buildObject(officeManagedObjectName,
+					ManagedObjectScope.WORK);
 		}
 
 		/**
-		 * Builds the process bound managed object.
+		 * Builds the {@link ManagedObjectScope} bound {@link ManagedObject}.
 		 * 
-		 * @param workManagedObjectName
-		 *            Name of the {@link ManagedObject} bound to {@link Work}.
+		 * @param officeManagedObjectName
+		 *            {@link Office} name of the {@link ManagedObject}.
 		 * @param boundManagedObjectName
 		 *            Name of {@link ProcessState} or {@link ThreadState} bound
 		 *            {@link ManagedObject}.
 		 */
-		public void buildObject(String workManagedObjectName,
-				String boundManagedObjectName) {
-			// Builds the managed object
+		public DependencyMappingBuilder buildObject(
+				String officeManagedObjectName,
+				ManagedObjectScope managedObjectScope) {
+
+			// Build the managed object based on scope
+			String scopeManagedObjectName;
+			DependencyMappingBuilder mappingBuilder;
+			switch (managedObjectScope) {
+			case WORK:
+				scopeManagedObjectName = "w:" + officeManagedObjectName;
+				mappingBuilder = ReflectiveWorkBuilder.this.workBuilder
+						.addWorkManagedObject(scopeManagedObjectName,
+								officeManagedObjectName);
+				break;
+
+			case THREAD:
+				scopeManagedObjectName = "t:" + officeManagedObjectName;
+				mappingBuilder = ReflectiveWorkBuilder.this.officeBuilder
+						.addThreadManagedObject(scopeManagedObjectName,
+								officeManagedObjectName);
+				break;
+
+			case PROCESS:
+				scopeManagedObjectName = "p:" + officeManagedObjectName;
+				mappingBuilder = ReflectiveWorkBuilder.this.officeBuilder
+						.addProcessManagedObject(scopeManagedObjectName,
+								officeManagedObjectName);
+				break;
+
+			default:
+				TestCase.fail("Unknown managed object scope "
+						+ managedObjectScope);
+				return null;
+			}
+
+			// Link to task and setup to return
 			this.taskBuilder.linkManagedObject(this.objectIndex,
-					workManagedObjectName);
-			ReflectiveWorkBuilder.this.workBuilder.linkManagedObject(
-					workManagedObjectName, boundManagedObjectName);
+					scopeManagedObjectName);
 			this.parameterFactories[this.parameterIndex] = new ObjectParameterFactory(
 					this.objectIndex);
 
 			// Set for next managed object and parameter
 			this.objectIndex++;
 			this.parameterIndex++;
+
+			// Return the dependency mapping builder
+			return mappingBuilder;
 		}
 
 		/**

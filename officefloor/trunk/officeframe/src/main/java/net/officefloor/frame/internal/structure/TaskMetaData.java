@@ -47,23 +47,24 @@ public interface TaskMetaData<P, W extends Work, M extends Enum<M>, F extends En
 	TaskFactory<P, W, M, F> getTaskFactory();
 
 	/**
-	 * Obtains the {@link work} indexes to the {@link ManagedObject} instances
-	 * that must be loaded before the {@link Task} may be executed.
+	 * Obtains the {@link ManagedObjectIndex} instances identifying the
+	 * {@link ManagedObject} instances that must be loaded before the
+	 * {@link Task} may be executed.
 	 * 
-	 * @return Listing of {@link work} indexes of {@link ManagedObject}
-	 *         instances.
+	 * @return Listing of {@link ManagedObjectIndex} instances.
 	 */
-	int[] getRequiredManagedObjects();
+	ManagedObjectIndex[] getRequiredManagedObjects();
 
 	/**
 	 * Translates the {@link ManagedObject} index of the {@link Task} to that of
-	 * the {@link Work}.
+	 * the {@link Work} ({@link ManagedObjectIndex}).
 	 * 
 	 * @param taskMoIndex
 	 *            {@link ManagedObject} index of the {@link Task}.
-	 * @return {@link ManagedObject} index of the {@link Work}.
+	 * @return {@link ManagedObjectIndex} identifying the {@link ManagedObject}
+	 *         for the {@link Task} index.
 	 */
-	int translateManagedObjectIndexForWork(int taskMoIndex);
+	ManagedObjectIndex translateManagedObjectIndexForWork(int taskMoIndex);
 
 	/**
 	 * Obtains the {@link FlowMetaData} of the specified {@link Flow}.

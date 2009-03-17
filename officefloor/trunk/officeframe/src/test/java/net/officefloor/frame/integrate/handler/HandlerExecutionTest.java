@@ -19,18 +19,17 @@ package net.officefloor.frame.integrate.handler;
 import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.AbstractMockHandler;
 import net.officefloor.frame.impl.AbstractMockTask;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Tests {@link net.officefloor.frame.api.execute.Handler} invoking a
- * {@link net.officefloor.frame.internal.structure.ProcessState}.
+ * Tests {@link Handler} invoking a {@link ProcessState}.
  * 
  * @author Daniel
  */
@@ -61,10 +60,8 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 
 		// Provide task for handler input
 		InputTask inputTask = new InputTask();
-		WorkBuilder<InputTask> workBuilder = this.constructWork("WORK",
-				inputTask, "TASK");
-		workBuilder.linkManagedObject("W-INPUT", "INPUT");
-		this.constructTask("TASK", inputTask, "TEAM", "W-INPUT", null);
+		this.constructWork("WORK", inputTask, "TASK");
+		this.constructTask("TASK", inputTask, "TEAM", "INPUT", null);
 
 		// Register the team
 		this.constructTeam("TEAM", new PassiveTeam());

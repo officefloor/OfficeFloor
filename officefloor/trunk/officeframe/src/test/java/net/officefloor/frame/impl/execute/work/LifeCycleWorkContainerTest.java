@@ -53,28 +53,31 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 
 		// Record creating and loading the work container
 		this.record_WorkContainer_init();
-		this.record_WorkContainer_loadManagedObjects(0, 1, 2);
-		this.record_WorkContainer_coordinateManagedObjects(0, 1, 2);
-		this.record_WorkContainer_isManagedObjectsReady(0, 1, 2);
+		this.record_WorkContainer_loadManagedObjects(moWork, moThread,
+				moProcess);
+		this.record_WorkContainer_coordinateManagedObjects(moWork, moThread,
+				moProcess);
+		this.record_WorkContainer_isManagedObjectsReady(moWork, moThread,
+				moProcess);
 
 		// Record pre-administration of the work container
 		this.record_WorkContainer_administerManagedObjects(adminWork, moWork,
 				moThread, moProcess);
-		this.record_WorkContainer_administerManagedObjects(adminThread, moThread,
-				moProcess);
+		this.record_WorkContainer_administerManagedObjects(adminThread,
+				moThread, moProcess);
 		this.record_WorkContainer_administerManagedObjects(adminProcess,
 				moProcess);
 
 		// Record doing work with the managed objects
-		this.record_WorkContainer_getObject(0, "WORK");
-		this.record_WorkContainer_getObject(1, "THREAD");
-		this.record_WorkContainer_getObject(2, "PROCESS");
+		this.record_WorkContainer_getObject(moWork, "WORK");
+		this.record_WorkContainer_getObject(moThread, "THREAD");
+		this.record_WorkContainer_getObject(moProcess, "PROCESS");
 
 		// Record post-administration of the work container
 		this.record_WorkContainer_administerManagedObjects(adminProcess,
 				moProcess);
-		this.record_WorkContainer_administerManagedObjects(adminThread, moThread,
-				moProcess);
+		this.record_WorkContainer_administerManagedObjects(adminThread,
+				moThread, moProcess);
 		this.record_WorkContainer_administerManagedObjects(adminWork, moWork,
 				moThread, moProcess);
 
@@ -86,9 +89,11 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 
 		// Create the work container
 		WorkContainer<?> work = this.createWorkContainer();
-		this.loadManagedObjects(work, true, 0, 1, 2);
-		this.coordinateManagedObject(work, 0, 1, 2);
-		this.isManagedObjectsReady(work, true, 0, 1, 2);
+
+		// Should fail to obtain managed object container before loaded
+		this.loadManagedObjects(work, true, moWork, moThread, moProcess);
+		this.coordinateManagedObject(work, moWork, moThread, moProcess);
+		this.isManagedObjectsReady(work, true, moWork, moThread, moProcess);
 
 		// Pre-administer the managed objects
 		this.administerManagedObjects(work);
@@ -96,9 +101,9 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 		this.administerManagedObjects(work);
 
 		// Do work with the managed objects
-		this.getObject(work, 0, "WORK");
-		this.getObject(work, 1, "THREAD");
-		this.getObject(work, 2, "PROCESS");
+		this.getObject(work, moWork, "WORK");
+		this.getObject(work, moThread, "THREAD");
+		this.getObject(work, moProcess, "PROCESS");
 
 		// Post-administer the managed objects
 		this.administerManagedObjects(work);
@@ -118,18 +123,22 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 	 */
 	public void testReuse() throws Throwable {
 
-		// Tasks use separate managed objects except one which is re-used and of
-		// work scope.
-		final int[] taskOneManagedObjects = new int[] { 0, 2, 3 };
-		final int[] taskTwoManagedObjects = new int[] { 1, 3 };
-
 		// Add managed object of each scope
-		this.addManagedObjectIndex(ManagedObjectScope.WORK);
+		ManagedObjectIndex moOne = this
+				.addManagedObjectIndex(ManagedObjectScope.WORK);
 		ManagedObjectIndex moTwo = this
 				.addManagedObjectIndex(ManagedObjectScope.THREAD);
 		ManagedObjectIndex moThree = this
 				.addManagedObjectIndex(ManagedObjectScope.PROCESS);
-		this.addManagedObjectIndex(ManagedObjectScope.WORK);
+		ManagedObjectIndex moFour = this
+				.addManagedObjectIndex(ManagedObjectScope.WORK);
+
+		// Tasks use separate managed objects except one which is re-used and of
+		// work scope.
+		final ManagedObjectIndex[] taskOneManagedObjects = new ManagedObjectIndex[] {
+				moOne, moThree, moFour };
+		final ManagedObjectIndex[] taskTwoManagedObjects = new ManagedObjectIndex[] {
+				moTwo, moFour };
 
 		// Add an unused managed object (for a task three)
 		this.addManagedObjectIndex(ManagedObjectScope.WORK);
@@ -161,8 +170,8 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 		this.record_WorkContainer_isManagedObjectsReady(taskTwoManagedObjects);
 
 		// Task one does work with the managed objects. Two is only dependency
-		this.record_WorkContainer_getObject(0, "ZERO");
-		this.record_WorkContainer_getObject(3, "THREE");
+		this.record_WorkContainer_getObject(moOne, "ONE");
+		this.record_WorkContainer_getObject(moFour, "FOUR");
 
 		// Task two does pre-administration
 		this.record_WorkContainer_administerManagedObjects(taskTwoAdmin, moTwo);
@@ -172,8 +181,8 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 				moThree);
 
 		// Task two does work with the managed objects
-		this.record_WorkContainer_getObject(1, "ONE");
-		this.record_WorkContainer_getObject(3, "THREE");
+		this.record_WorkContainer_getObject(moTwo, "TWO");
+		this.record_WorkContainer_getObject(moFour, "FOUR");
 
 		// Task two does post-administration
 		this.record_WorkContainer_administerManagedObjects(taskTwoAdmin, moTwo);
@@ -201,8 +210,8 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 		this.isManagedObjectsReady(work, true, taskTwoManagedObjects);
 
 		// Task one does work with managed objects
-		this.getObject(work, 0, "ZERO");
-		this.getObject(work, 3, "THREE");
+		this.getObject(work, moOne, "ONE");
+		this.getObject(work, moFour, "FOUR");
 
 		// Task two does pre-administration
 		this.administerManagedObjects(work);
@@ -211,8 +220,8 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 		this.administerManagedObjects(work);
 
 		// Task two does work with managed objects
-		this.getObject(work, 1, "ONE");
-		this.getObject(work, 3, "THREE");
+		this.getObject(work, moTwo, "TWO");
+		this.getObject(work, moFour, "FOUR");
 
 		// Task two does post-administration
 		this.administerManagedObjects(work);

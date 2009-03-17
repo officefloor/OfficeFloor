@@ -114,8 +114,8 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 */
 
 	@Override
-	public void setTeam(String teamId) {
-		this.teamName = teamId;
+	public void setTeam(String officeTeamName) {
+		this.teamName = officeTeamName;
 	}
 
 	@Override
@@ -129,29 +129,29 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	}
 
 	@Override
-	public void linkManagedObject(M key, String workManagedObjectName) {
-		this.linkManagedObject(key.ordinal(), workManagedObjectName);
+	public void linkManagedObject(M key, String scopeManagedObjectName) {
+		this.linkManagedObject(key.ordinal(), scopeManagedObjectName);
 	}
 
 	@Override
 	public void linkManagedObject(int managedObjectIndex,
-			String workManagedObjectName) {
+			String scopeManagedObjectName) {
 		this.managedObjects.put(new Integer(managedObjectIndex),
-				new TaskManagedObjectConfigurationImpl(workManagedObjectName));
+				new TaskManagedObjectConfigurationImpl(scopeManagedObjectName));
 	}
 
 	@Override
 	public <A extends Enum<A>> void linkPreTaskAdministration(
-			String workAdministratorName, A dutyKey) {
+			String scopeAdministratorName, A dutyKey) {
 		this.preTaskDuties.add(new TaskDutyConfigurationImpl<A>(
-				workAdministratorName, dutyKey));
+				scopeAdministratorName, dutyKey));
 	}
 
 	@Override
 	public <A extends Enum<A>> void linkPostTaskAdministration(
-			String workAdministratorName, A dutyKey) {
+			String scopeAdministratorName, A dutyKey) {
 		this.postTaskDuties.add(new TaskDutyConfigurationImpl<A>(
-				workAdministratorName, dutyKey));
+				scopeAdministratorName, dutyKey));
 	}
 
 	@Override

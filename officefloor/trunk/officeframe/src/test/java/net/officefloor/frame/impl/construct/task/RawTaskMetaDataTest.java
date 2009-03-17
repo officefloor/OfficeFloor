@@ -25,6 +25,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
@@ -33,9 +34,10 @@ import net.officefloor.frame.internal.configuration.TaskManagedObjectConfigurati
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
-import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AssetManager;
@@ -44,6 +46,8 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -244,7 +248,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	/**
 	 * Ensure issue if no {@link ManagedObject} name.
 	 */
-	public void testNoManagedObjectName() {
+	public void testNoScopeManagedObjectName() {
 
 		final TaskManagedObjectConfiguration moConfiguration = this
 				.createMock(TaskManagedObjectConfiguration.class);
@@ -255,7 +259,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getManagedObjectConfiguration(),
 				new TaskManagedObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration
-				.getWorkManagedObjectName(), null);
+				.getScopeManagedObjectName(), null);
 		this.record_taskIssue("No name for managed object at index 0");
 		this.record_NoAdministration();
 
@@ -279,11 +283,10 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getManagedObjectConfiguration(),
 				new TaskManagedObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration
-				.getWorkManagedObjectName(), "MO");
-		this
-				.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-						.constructRawWorkManagedObjectMetaData("MO",
-								this.issues), null);
+				.getScopeManagedObjectName(), "MO");
+		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+				.getScopeManagedObjectMetaData("MO"), null);
+		this.record_taskIssue("Can not find scope managed object 'MO'");
 		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
@@ -298,65 +301,21 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
-	 * Ensure able to link to a single {@link ManagedObject} that has no
-	 * dependencies.
-	 */
-	public void testLinkManagedObject() {
-
-		final TaskManagedObjectConfiguration moConfiguration = this
-				.createMock(TaskManagedObjectConfiguration.class);
-		final RawWorkManagedObjectMetaData rawWorkMo = this
-				.createMock(RawWorkManagedObjectMetaData.class);
-		final int WORK_MO_INDEX = 3; // managed objects added by other tasks
-
-		// Record linking to a single managed object
-		this.record_taskNameFactoryTeam();
-		this.recordReturn(this.configuration, this.configuration
-				.getManagedObjectConfiguration(),
-				new TaskManagedObjectConfiguration[] { moConfiguration });
-		this.recordReturn(moConfiguration, moConfiguration
-				.getWorkManagedObjectName(), "MO");
-		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.constructRawWorkManagedObjectMetaData("MO", this.issues),
-				rawWorkMo);
-		this.recordReturn(rawWorkMo, rawWorkMo.getWorkManagedObjectIndex(),
-				WORK_MO_INDEX);
-		this.recordReturn(rawWorkMo, rawWorkMo.getDependencies(),
-				new RawWorkManagedObjectMetaData[0]);
-		this.record_NoAdministration();
-
-		// Attempt to construct task meta-data
-		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
-				.constructRawTaskMetaData(true);
-		this.verifyMockObjects();
-
-		// Ensure have managed object
-		int[] requiredManagedObjects = metaData.getTaskMetaData()
-				.getRequiredManagedObjects();
-		assertEquals("Should have managed objects", 1,
-				requiredManagedObjects.length);
-		assertEquals("Incorrect managed object", WORK_MO_INDEX,
-				requiredManagedObjects[0]);
-
-		// Ensure can translate
-		assertEquals("Incorrect task managed object", WORK_MO_INDEX, metaData
-				.getTaskMetaData().translateManagedObjectIndexForWork(0));
-	}
-
-	/**
 	 * Ensure able to link in {@link ManagedObject} dependency.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testManagedObjectDependency() {
 
 		final TaskManagedObjectConfiguration moConfiguration = this
 				.createMock(TaskManagedObjectConfiguration.class);
-		final RawWorkManagedObjectMetaData rawWorkMo = this
-				.createMock(RawWorkManagedObjectMetaData.class);
-		final int WORK_MO_INDEX = 3; // managed objects added by other tasks
-		final RawWorkManagedObjectMetaData dependencyWorkMo = this
-				.createMock(RawWorkManagedObjectMetaData.class);
-		final int DEPENDENCY_MO_INDEX = 2; // another task using directly
+		final RawBoundManagedObjectMetaData<DependencyKey> rawWorkMo = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final ManagedObjectIndex workMoIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.THREAD, 0);
+		final RawBoundManagedObjectMetaData<?> dependencyWorkMo = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final ManagedObjectIndex dependencyMoIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.THREAD, 1);
 
 		// Record unknown managed object
 		this.record_taskNameFactoryTeam();
@@ -364,16 +323,19 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getManagedObjectConfiguration(),
 				new TaskManagedObjectConfiguration[] { moConfiguration });
 		this.recordReturn(moConfiguration, moConfiguration
-				.getWorkManagedObjectName(), "MO");
+				.getScopeManagedObjectName(), "MO");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.constructRawWorkManagedObjectMetaData("MO", this.issues),
-				rawWorkMo);
-		this.recordReturn(rawWorkMo, rawWorkMo.getWorkManagedObjectIndex(),
-				WORK_MO_INDEX);
-		this.recordReturn(rawWorkMo, rawWorkMo.getDependencies(),
-				new RawWorkManagedObjectMetaData[] { dependencyWorkMo });
+				.getScopeManagedObjectMetaData("MO"), rawWorkMo);
+		this.recordReturn(rawWorkMo, rawWorkMo.getManagedObjectIndex(),
+				workMoIndex);
+		this.recordReturn(rawWorkMo, rawWorkMo.getDependencyKeys(),
+				DependencyKey.class.getEnumConstants());
+		this.recordReturn(rawWorkMo,
+				rawWorkMo.getDependency(DependencyKey.KEY), dependencyWorkMo);
 		this.recordReturn(dependencyWorkMo, dependencyWorkMo
-				.getWorkManagedObjectIndex(), DEPENDENCY_MO_INDEX);
+				.getManagedObjectIndex(), dependencyMoIndex);
+		this.recordReturn(dependencyWorkMo, dependencyWorkMo
+				.getDependencyKeys(), null);
 		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
@@ -383,18 +345,25 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.verifyMockObjects();
 
 		// Ensure have managed object
-		int[] requiredManagedObjects = metaData.getTaskMetaData()
-				.getRequiredManagedObjects();
+		ManagedObjectIndex[] requiredManagedObjects = metaData
+				.getTaskMetaData().getRequiredManagedObjects();
 		assertEquals("Should have managed objects", 2,
 				requiredManagedObjects.length);
-		assertEquals("Incorrect dependency managed object",
-				DEPENDENCY_MO_INDEX, requiredManagedObjects[0]);
-		assertEquals("Incorrect required managed object", WORK_MO_INDEX,
+		assertEquals("Incorrect required managed object", workMoIndex,
+				requiredManagedObjects[0]);
+		assertEquals("Incorrect dependency managed object", dependencyMoIndex,
 				requiredManagedObjects[1]);
 
 		// Ensure can translate
-		assertEquals("Incorrect task managed object", WORK_MO_INDEX, metaData
+		assertEquals("Incorrect task managed object", workMoIndex, metaData
 				.getTaskMetaData().translateManagedObjectIndexForWork(0));
+	}
+
+	/**
+	 * Dependency keys.
+	 */
+	private enum DependencyKey {
+		KEY
 	}
 
 	/**
@@ -412,7 +381,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getPreTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration, dutyConfiguration
-				.getWorkAdministratorName(), null);
+				.getScopeAdministratorName(), null);
 		this.record_taskIssue("No administrator name for pre-task at index 0");
 		this.recordReturn(this.configuration, this.configuration
 				.getPostTaskAdministratorDutyConfiguration(),
@@ -444,9 +413,10 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getPreTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration, dutyConfiguration
-				.getWorkAdministratorName(), "ADMIN");
+				.getScopeAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getAdministratorIndex("ADMIN", this.issues), null);
+				.getScopeAdministratorMetaData("ADMIN"), null);
+		this.record_taskIssue("Can not find scope administrator 'ADMIN'");
 		this.recordReturn(this.configuration, this.configuration
 				.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
@@ -469,6 +439,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		final TaskDutyConfiguration<?> dutyConfiguration = this
 				.createMock(TaskDutyConfiguration.class);
+		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this
+				.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorIndex adminIndex = this
 				.createMock(AdministratorIndex.class);
 
@@ -479,9 +451,11 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getPreTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration, dutyConfiguration
-				.getWorkAdministratorName(), "ADMIN");
+				.getScopeAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getAdministratorIndex("ADMIN", this.issues), adminIndex);
+				.getScopeAdministratorMetaData("ADMIN"), rawAdmin);
+		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(),
+				adminIndex);
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDuty(), null);
 		this.record_taskIssue("No duty key for pre-task at index 0");
 		this.recordReturn(this.configuration, this.configuration
@@ -500,16 +474,90 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
-	 * Ensure able to link {@link Administrator} {@link Duty}.
+	 * Ensure able to construct pre {@link TaskDutyAssociation}.
 	 */
-	public void testLinkAdministrator() {
+	public void testConstructPreAdministratorDuty() {
 
 		final TaskDutyConfiguration<?> dutyConfiguration = this
 				.createMock(TaskDutyConfiguration.class);
+		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this
+				.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorIndex adminIndex = this
 				.createMock(AdministratorIndex.class);
+		final RawBoundManagedObjectMetaData<?> rawMo = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final ManagedObjectIndex moIndex = this
+				.createMock(ManagedObjectIndex.class);
 
-		// Record link administrator duty (do post as previous tests did pre)
+		// Record construct task duty association
+		this.record_taskNameFactoryTeam();
+		this.record_NoManagedObjects();
+		this.recordReturn(this.configuration, this.configuration
+				.getPreTaskAdministratorDutyConfiguration(),
+				new TaskDutyConfiguration[] { dutyConfiguration });
+		this.recordReturn(dutyConfiguration, dutyConfiguration
+				.getScopeAdministratorName(), "ADMIN");
+		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+				.getScopeAdministratorMetaData("ADMIN"), rawAdmin);
+		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(),
+				adminIndex);
+		this.recordReturn(dutyConfiguration, dutyConfiguration.getDuty(),
+				DutyKey.KEY);
+		this.recordReturn(rawAdmin, rawAdmin
+				.getAdministeredRawBoundManagedObjects(),
+				new RawBoundManagedObjectMetaData[] { rawMo });
+		this.recordReturn(rawMo, rawMo.getManagedObjectIndex(), moIndex);
+		this.recordReturn(rawMo, rawMo.getDependencyKeys(), null);
+		this.recordReturn(this.configuration, this.configuration
+				.getPostTaskAdministratorDutyConfiguration(),
+				new TaskDutyConfiguration[0]);
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawTaskMetaData<P, W, M, F> rawMetaData = this
+				.constructRawTaskMetaData(true);
+		TaskMetaData<P, W, M, F> taskMetaData = rawMetaData.getTaskMetaData();
+		this.verifyMockObjects();
+
+		// Ensure have duty
+		assertEquals("Should have duty", 1, taskMetaData
+				.getPreAdministrationMetaData().length);
+		TaskDutyAssociation<?> taskDuty = taskMetaData
+				.getPreAdministrationMetaData()[0];
+		assertEquals("Incorrect administrator index", adminIndex, taskDuty
+				.getAdministratorIndex());
+		assertEquals("Incorrect duty key", DutyKey.KEY, taskDuty.getDutyKey());
+
+		// Ensure have administered managed object included in required
+		assertEquals("Administered managed objects should be required", 1,
+				taskMetaData.getRequiredManagedObjects().length);
+		assertEquals("Incorrect administered managed object index", moIndex,
+				taskMetaData.getRequiredManagedObjects()[0]);
+	}
+
+	/**
+	 * Ensures that dependency of administered {@link ManagedObject} is also
+	 * included in required {@link ManagedObjectIndex} instances.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testPostTaskDutyWithAdministeredManagedObjectDependency() {
+
+		final TaskDutyConfiguration<?> dutyConfiguration = this
+				.createMock(TaskDutyConfiguration.class);
+		final RawBoundAdministratorMetaData<?, ?> rawAdmin = this
+				.createMock(RawBoundAdministratorMetaData.class);
+		final AdministratorIndex adminIndex = this
+				.createMock(AdministratorIndex.class);
+		final RawBoundManagedObjectMetaData<DependencyKey> rawMo = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final ManagedObjectIndex moIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.THREAD, 0);
+		final RawBoundManagedObjectMetaData<?> rawDependency = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final ManagedObjectIndex dependencyIndex = new ManagedObjectIndexImpl(
+				ManagedObjectScope.PROCESS, 0);
+
+		// Record construct task duty association
 		this.record_taskNameFactoryTeam();
 		this.record_NoManagedObjects();
 		this.recordReturn(this.configuration, this.configuration
@@ -519,29 +567,49 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[] { dutyConfiguration });
 		this.recordReturn(dutyConfiguration, dutyConfiguration
-				.getWorkAdministratorName(), "ADMIN");
+				.getScopeAdministratorName(), "ADMIN");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
-				.getAdministratorIndex("ADMIN", this.issues), adminIndex);
+				.getScopeAdministratorMetaData("ADMIN"), rawAdmin);
+		this.recordReturn(rawAdmin, rawAdmin.getAdministratorIndex(),
+				adminIndex);
 		this.recordReturn(dutyConfiguration, dutyConfiguration.getDuty(),
 				DutyKey.KEY);
+		this.recordReturn(rawAdmin, rawAdmin
+				.getAdministeredRawBoundManagedObjects(),
+				new RawBoundManagedObjectMetaData[] { rawMo });
+		this.recordReturn(rawMo, rawMo.getManagedObjectIndex(), moIndex);
+		this.recordReturn(rawMo, rawMo.getDependencyKeys(), DependencyKey.class
+				.getEnumConstants());
+		this.recordReturn(rawMo, rawMo.getDependency(DependencyKey.KEY),
+				rawDependency);
+		this.recordReturn(rawDependency, rawDependency.getManagedObjectIndex(),
+				dependencyIndex);
+		this.recordReturn(rawDependency, rawDependency.getDependencyKeys(),
+				null);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
+		RawTaskMetaData<P, W, M, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
+		TaskMetaData<P, W, M, F> taskMetaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
 
-		// Ensure post-task duty only
-		assertEquals("Should not have pre-task duties", 0, metaData
-				.getTaskMetaData().getPreAdministrationMetaData().length);
-		TaskDutyAssociation<?>[] postDuties = metaData.getTaskMetaData()
-				.getPostAdministrationMetaData();
-		assertEquals("Should have post-task duties", 1, postDuties.length);
-		TaskDutyAssociation<?> postDuty = postDuties[0];
-		assertEquals("Incorrect admin index for duty", adminIndex, postDuty
+		// Ensure have duty
+		assertEquals("Should have post task duty", 1, taskMetaData
+				.getPostAdministrationMetaData().length);
+		TaskDutyAssociation<?> taskDuty = taskMetaData
+				.getPostAdministrationMetaData()[0];
+		assertEquals("Incorrect administrator index", adminIndex, taskDuty
 				.getAdministratorIndex());
-		assertEquals("Incorrect key for duty", DutyKey.KEY, postDuty
-				.getDutyKey());
+		assertEquals("Incorrect duty key", DutyKey.KEY, taskDuty.getDutyKey());
+
+		// Ensure have administered managed object and dependency in required
+		assertEquals("Administered managed objects should be required", 2,
+				taskMetaData.getRequiredManagedObjects().length);
+		assertEquals("Incorrect administered managed object", moIndex,
+				taskMetaData.getRequiredManagedObjects()[0]);
+		assertEquals("Incorrect administered dependency", dependencyIndex,
+				taskMetaData.getRequiredManagedObjects()[1]);
 	}
 
 	/**

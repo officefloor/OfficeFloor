@@ -21,6 +21,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -52,29 +53,27 @@ public interface RawWorkMetaData<W extends Work> {
 	 * Constructs the {@link RawWorkManagedObjectMetaData} for the
 	 * {@link ManagedObject} of the {@link Work}.
 	 * 
-	 * @param workManagedObjectName
-	 *            Name of the {@link ManagedObject} within the {@link Work}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return Constructed {@link RawWorkManagedObjectMetaData} or
-	 *         <code>null</code> if issue in constructing it.
+	 * @param scopeManagedObjectName
+	 *            Name of the {@link ManagedObject} within the
+	 *            {@link ManagedObjectScope}.
+	 * @return {@link RawBoundManagedObjectMetaData} or <code>null</code> not
+	 *         found.
 	 */
-	RawWorkManagedObjectMetaData constructRawWorkManagedObjectMetaData(
-			String workManagedObjectName, OfficeFloorIssues issues);
+	RawBoundManagedObjectMetaData<?> getScopeManagedObjectMetaData(
+			String scopeManagedObjectName);
 
 	/**
 	 * Obtains the {@link AdministratorIndex} for the {@link Work}
 	 * {@link Administrator} name.
 	 * 
-	 * @param workAdministratorName
-	 *            Name of the {@link Administrator} within the {@link Work}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return {@link AdministratorIndex} or <code>null</code> if issue in
-	 *         obtaining it.
+	 * @param scopeAdministratorName
+	 *            Name of the {@link Administrator} within the
+	 *            {@link ManagedObjectScope}.
+	 * @return {@link RawBoundAdministratorMetaData} or <code>null</code> if not
+	 *         found.
 	 */
-	AdministratorIndex getAdministratorIndex(String workAdministratorName,
-			OfficeFloorIssues issues);
+	RawBoundAdministratorMetaData<?, ?> getScopeAdministratorMetaData(
+			String scopeAdministratorName);
 
 	/**
 	 * Links the {@link TaskMetaData} instances to enable {@link Flow} of

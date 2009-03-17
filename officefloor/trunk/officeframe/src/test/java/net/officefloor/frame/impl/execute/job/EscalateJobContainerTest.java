@@ -42,7 +42,7 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 		Job job = this.createJob(false);
 
 		// Record failure on thread
-		this.record_JobContainer_initialSteps(failure);
+		this.record_JobContainer_initialSteps(job, failure);
 		this.record_JobContainer_handleEscalation(job, failure, true);
 		this.record_JobActivatableSet_activateJobs();
 
@@ -69,7 +69,7 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 		Job job = this.createJob(true);
 
 		// Record failure on thread
-		this.record_JobContainer_initialSteps(failure);
+		this.record_JobContainer_initialSteps(job, failure);
 		this.record_JobContainer_handleEscalation(job, failure, true);
 		this.record_JobActivatableSet_activateJobs();
 
@@ -97,7 +97,7 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 		Job job = this.createJob(false);
 
 		// Record failure on thread
-		this.record_JobContainer_initialSteps(failure);
+		this.record_JobContainer_initialSteps(job, failure);
 		this.record_JobContainer_handleEscalation(job, failure, false);
 		this.record_JobContainer_globalEscalation(job, failure,
 				EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
@@ -126,7 +126,7 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 		Job job = this.createJob(false);
 
 		// Record failure on thread
-		this.record_JobContainer_initialSteps(failure);
+		this.record_JobContainer_initialSteps(job, failure);
 		this.record_JobContainer_handleEscalation(job, failure, false);
 		this.record_JobContainer_globalEscalation(job, failure,
 				EscalationLevel.OFFICE);
@@ -156,7 +156,7 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 		Job job = this.createJob(false);
 
 		// Record failure on thread
-		this.record_JobContainer_initialSteps(failure);
+		this.record_JobContainer_initialSteps(job, failure);
 		this.record_JobContainer_handleEscalation(job, failure, false);
 		this.record_JobContainer_globalEscalation(job, failure,
 				EscalationLevel.OFFICE_FLOOR);

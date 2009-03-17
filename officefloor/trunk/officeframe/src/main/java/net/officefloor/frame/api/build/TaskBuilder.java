@@ -18,6 +18,8 @@ package net.officefloor.frame.api.build;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -35,41 +37,45 @@ public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>
 	 * 
 	 * @param key
 	 *            Key identifying the {@link ManagedObject}.
-	 * @param workManagedObjectName
-	 *            Name of the {@link ManagedObject} local to this {@link Work}.
+	 * @param scopeManagedObjectName
+	 *            Name of the {@link ManagedObject} within the
+	 *            {@link ManagedObjectScope}.
 	 */
-	void linkManagedObject(M key, String workManagedObjectName);
+	void linkManagedObject(M key, String scopeManagedObjectName);
 
 	/**
 	 * Links in a {@link ManagedObject} to this {@link Task}.
 	 * 
 	 * @param managedObjectIndex
 	 *            Index of the {@link ManagedObject}.
-	 * @param workManagedObjectName
-	 *            Name of the {@link ManagedObject} local to this {@link Work}.
+	 * @param scopeManagedObjectName
+	 *            Name of the {@link ManagedObject} within the
+	 *            {@link ManagedObjectScope}.
 	 */
-	void linkManagedObject(int managedObjectIndex, String workManagedObjectName);
+	void linkManagedObject(int managedObjectIndex, String scopeManagedObjectName);
 
 	/**
 	 * Links in a {@link Duty} to be executed before the {@link Task}.
 	 * 
-	 * @param workAdministratorName
-	 *            Name of the {@link Administrator} local to this {@link Work}.
+	 * @param scopeAdministratorName
+	 *            Name of the {@link Administrator} within the
+	 *            {@link AdministratorScope}.
 	 * @param dutyKey
 	 *            Key identifying the {@link Duty}.
 	 */
 	<A extends Enum<A>> void linkPreTaskAdministration(
-			String workAdministratorName, A dutyKey);
+			String scopeAdministratorName, A dutyKey);
 
 	/**
 	 * Links in a {@link Duty} to be executed after the {@link Task}.
 	 * 
-	 * @param workAdministratorName
-	 *            Name of the {@link Administrator} local to this {@link Work}.
+	 * @param scopeAdministratorName
+	 *            Name of the {@link Administrator} within the
+	 *            {@link AdministratorScope}.
 	 * @param dutyKey
 	 *            Key identifying the {@link Duty}.
 	 */
 	<A extends Enum<A>> void linkPostTaskAdministration(
-			String workAdministratorName, A dutyKey);
+			String scopeAdministratorName, A dutyKey);
 
 }

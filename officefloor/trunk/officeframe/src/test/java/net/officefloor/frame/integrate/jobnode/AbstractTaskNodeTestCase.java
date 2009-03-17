@@ -27,7 +27,6 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
@@ -38,9 +37,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -61,23 +58,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		OfficeFrameTestCase implements Team {
-
-	/**
-	 * Index of the {@link ProcessState} {@link ManagedObject} on the
-	 * {@link Work}.
-	 */
-	public static final int PROCESS_MO_INDEX = 0;
-
-	/**
-	 * Index of the {@link ThreadState} {@link ManagedObject} on the
-	 * {@link Work}.
-	 */
-	public static final int THREAD_MO_INDEX = 1;
-
-	/**
-	 * Index of the {@link Work} {@link ManagedObject} on the {@link Work}.
-	 */
-	public static final int WORK_MO_INDEX = 2;
 
 	/**
 	 * Initial {@link ExecutionNode}.
@@ -129,15 +109,6 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 				FlowInstigationStrategyEnum.ASYNCHRONOUS,
 				this.getInitialNode(), new AssetManagerImpl());
 
-		// Create managed object the indexes
-		ManagedObjectIndex[] moIndexes = new ManagedObjectIndex[3];
-		moIndexes[PROCESS_MO_INDEX] = new ManagedObjectIndexImpl(
-				ManagedObjectScope.PROCESS, 0);
-		moIndexes[THREAD_MO_INDEX] = new ManagedObjectIndexImpl(
-				ManagedObjectScope.THREAD, 0);
-		moIndexes[WORK_MO_INDEX] = new ManagedObjectIndexImpl(
-				ManagedObjectScope.WORK, 0);
-
 		// Create the Work Managed Object meta-data
 		ManagedObjectMetaDataImpl workMo = new ManagedObjectMetaDataImpl(
 				"WORK_MO", this.workMoSource, null, new AssetManagerImpl(),
@@ -146,7 +117,7 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 
 		// Create the Work meta-data
 		WorkMetaData workMetaData = new WorkMetaDataImpl("TEST_WORK",
-				workFactory, moIndexes, new ManagedObjectMetaData[] { workMo },
+				workFactory, new ManagedObjectMetaData[] { workMo },
 				new AdministratorMetaData[0], initialFlowMetaData,
 				new TaskMetaData[0]);
 

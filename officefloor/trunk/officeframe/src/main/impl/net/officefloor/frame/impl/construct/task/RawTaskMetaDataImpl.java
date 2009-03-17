@@ -17,6 +17,7 @@
 package net.officefloor.frame.impl.construct.task;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,18 +41,20 @@ import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -159,13 +162,13 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 		}
 
 		// Obtain the managed objects used directly by this task
-		List<RawWorkManagedObjectMetaData> taskMos = new LinkedList<RawWorkManagedObjectMetaData>();
+		List<RawBoundManagedObjectMetaData<?>> taskMos = new LinkedList<RawBoundManagedObjectMetaData<?>>();
 		for (TaskManagedObjectConfiguration mo : configuration
 				.getManagedObjectConfiguration()) {
 
-			// Obtain the work bound managed object name
-			String workManagedObjectName = mo.getWorkManagedObjectName();
-			if (ConstructUtil.isBlank(workManagedObjectName)) {
+			// Obtain the scope managed object name
+			String scopeMoName = mo.getScopeManagedObjectName();
+			if (ConstructUtil.isBlank(scopeMoName)) {
 				issues
 						.addIssue(AssetType.TASK, taskName,
 								"No name for managed object at index "
@@ -173,59 +176,69 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				continue; // no managed object name
 			}
 
-			// Construct the work bound managed object
-			RawWorkManagedObjectMetaData workMo = rawWorkMetaData
-					.constructRawWorkManagedObjectMetaData(
-							workManagedObjectName, issues);
-			if (workMo == null) {
-				continue; // no work managed object
+			// Obtain the scope managed object
+			RawBoundManagedObjectMetaData<?> scopeMo = rawWorkMetaData
+					.getScopeManagedObjectMetaData(scopeMoName);
+			if (scopeMo == null) {
+				issues.addIssue(AssetType.TASK, taskName,
+						"Can not find scope managed object '" + scopeMoName
+								+ "'");
+				continue; // no scope managed object
 			}
 
-			// Add the work managed object
-			taskMos.add(workMo);
+			// Add the scope managed object
+			taskMos.add(scopeMo);
 		}
 
-		// Obtain indexes of all required managed objects
-		int[] taskToWorkMoTranslations = new int[taskMos.size()];
-		int taskToWorkMoIndex = 0;
-		Set<Integer> requiredManagedObjectIndexes = new HashSet<Integer>();
-		for (RawWorkManagedObjectMetaData workMo : taskMos) {
+		// Keep track of all the required managed object indexes
+		Set<ManagedObjectIndex> requiredManagedObjectIndexes = new HashSet<ManagedObjectIndex>();
 
-			// Obtain the work managed object index
-			int workManagedObjectIndex = workMo.getWorkManagedObjectIndex();
+		// Obtain translation indexes from task to work
+		ManagedObjectIndex[] taskToWorkMoTranslations = new ManagedObjectIndex[taskMos
+				.size()];
+		for (int i = 0; i < taskToWorkMoTranslations.length; i++) {
+			RawBoundManagedObjectMetaData<?> boundMo = taskMos.get(i);
 
-			// Specify work managed object index of task translation
-			taskToWorkMoTranslations[taskToWorkMoIndex++] = workManagedObjectIndex;
-
-			// Add the index of the work managed object
-			requiredManagedObjectIndexes
-					.add(new Integer(workManagedObjectIndex));
-
-			// Add the indexes for all dependencies
-			for (RawWorkManagedObjectMetaData dependencyMo : workMo
-					.getDependencies()) {
-				requiredManagedObjectIndexes.add(new Integer(dependencyMo
-						.getWorkManagedObjectIndex()));
-			}
+			// Specify index for task translation and load required indexes
+			taskToWorkMoTranslations[i] = this.loadRequiredManagedObjects(
+					boundMo, requiredManagedObjectIndexes);
 		}
-		Integer[] requiredManagedObjectIntegers = requiredManagedObjectIndexes
-				.toArray(new Integer[0]);
-		int[] requiredManagedObjects = new int[requiredManagedObjectIntegers.length];
-		for (int i = 0; i < requiredManagedObjects.length; i++) {
-			requiredManagedObjects[i] = requiredManagedObjectIntegers[i]
-					.intValue();
-		}
-		Arrays.sort(requiredManagedObjects); // deterministic order for testing
 
 		// Obtain the duties for this task
 		TaskDutyAssociation<?>[] preTaskDuties = this
 				.createTaskDutyAssociations(configuration
 						.getPreTaskAdministratorDutyConfiguration(),
-						rawWorkMetaData, issues, taskName, true);
+						rawWorkMetaData, issues, taskName, true,
+						requiredManagedObjectIndexes);
 		TaskDutyAssociation<?>[] postTaskDuties = this
 				.createTaskDutyAssociations(configuration
 						.getPostTaskAdministratorDutyConfiguration(),
-						rawWorkMetaData, issues, taskName, false);
+						rawWorkMetaData, issues, taskName, false,
+						requiredManagedObjectIndexes);
+
+		// Create the listing of required managed object indexes
+		ManagedObjectIndex[] requiredManagedObjects = new ManagedObjectIndex[requiredManagedObjectIndexes
+				.size()];
+		int i = 0;
+		for (ManagedObjectIndex requiredManagedObject : requiredManagedObjectIndexes) {
+			requiredManagedObjects[i++] = requiredManagedObject;
+		}
+
+		// Order to provide work, thread then process managed object loading
+		Arrays.sort(requiredManagedObjects,
+				new Comparator<ManagedObjectIndex>() {
+					@Override
+					public int compare(ManagedObjectIndex a,
+							ManagedObjectIndex b) {
+						int comparison = a.getManagedObjectScope().ordinal()
+								- b.getManagedObjectScope().ordinal();
+						if (comparison == 0) {
+							comparison = a.getIndexOfManagedObjectWithinScope()
+									- b.getIndexOfManagedObjectWithinScope();
+						}
+						return comparison;
+					}
+				});
 
 		// Create the task meta-data
 		TaskMetaDataImpl<p, w, m, f> taskMetaData = new TaskMetaDataImpl<p, w, m, f>(
@@ -235,6 +248,43 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 		// Return the raw task meta-data
 		return new RawTaskMetaDataImpl<p, w, m, f>(taskName, configuration,
 				taskMetaData, rawWorkMetaData);
+	}
+
+	/**
+	 * Recursively loads all the {@link ManagedObjectIndex} instances for the
+	 * {@link RawBoundManagedObjectMetaData}.
+	 * 
+	 * @param boundMo
+	 *            {@link RawBoundManagedObjectMetaData}.
+	 * @param requiredManagedObjectIndexes
+	 *            {@link Set} maintaining the unique {@link ManagedObjectIndex}
+	 *            instances required by the {@link Task}.
+	 * @return {@link ManagedObjectIndex} of the input
+	 *         {@link RawBoundManagedObjectMetaData}.
+	 */
+	private <D extends Enum<D>> ManagedObjectIndex loadRequiredManagedObjects(
+			RawBoundManagedObjectMetaData<D> boundMo,
+			Set<ManagedObjectIndex> requiredManagedObjectIndexes) {
+
+		// Obtain the bound managed object index
+		ManagedObjectIndex boundMoIndex = boundMo.getManagedObjectIndex();
+		if (!requiredManagedObjectIndexes.contains(boundMoIndex)) {
+
+			// Not yet required, so add and include all its dependencies
+			requiredManagedObjectIndexes.add(boundMoIndex);
+			D[] dependencyKeys = boundMo.getDependencyKeys();
+			if (dependencyKeys != null) {
+				for (D dependencyKey : dependencyKeys) {
+					RawBoundManagedObjectMetaData<?> dependency = boundMo
+							.getDependency(dependencyKey);
+					this.loadRequiredManagedObjects(dependency,
+							requiredManagedObjectIndexes);
+				}
+			}
+		}
+
+		// Return the managed object index for the bound managed object
+		return boundMoIndex;
 	}
 
 	/**
@@ -248,21 +298,25 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 	 *            {@link OfficeFloorIssues}.
 	 * @param isPreNotPost
 	 *            Flag indicating if pre {@link Task}.
+	 * @param requiredManagedObjectIndexes
+	 *            {@link Set} maintaining the unique {@link ManagedObjectIndex}
+	 *            instances required by the {@link Task}.
 	 * @return {@link TaskDutyAssociation} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	private TaskDutyAssociation<?>[] createTaskDutyAssociations(
 			TaskDutyConfiguration<?>[] configurations,
 			RawWorkMetaData<?> rawWorkMetaData, OfficeFloorIssues issues,
-			String taskName, boolean isPreNotPost) {
+			String taskName, boolean isPreNotPost,
+			Set<ManagedObjectIndex> requiredManagedObjectIndexes) {
 
 		// Create the listing of task duty associations
 		List<TaskDutyAssociation<?>> taskDuties = new LinkedList<TaskDutyAssociation<?>>();
 		for (TaskDutyConfiguration<?> duty : configurations) {
 
-			// Obtain the work bound administrator name
-			String workAdminName = duty.getWorkAdministratorName();
-			if (ConstructUtil.isBlank(workAdminName)) {
+			// Obtain the scope administrator name
+			String scopeAdminName = duty.getScopeAdministratorName();
+			if (ConstructUtil.isBlank(scopeAdminName)) {
 				issues.addIssue(AssetType.TASK, taskName,
 						"No administrator name for "
 								+ (isPreNotPost ? "pre" : "post")
@@ -270,12 +324,18 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				continue; // no administrator name
 			}
 
-			// Obtain the index for the administrator
-			AdministratorIndex adminIndex = rawWorkMetaData
-					.getAdministratorIndex(workAdminName, issues);
-			if (adminIndex == null) {
+			// Obtain the scope administrator
+			RawBoundAdministratorMetaData<?, ?> scopeAdmin = rawWorkMetaData
+					.getScopeAdministratorMetaData(scopeAdminName);
+			if (scopeAdmin == null) {
+				issues.addIssue(AssetType.TASK, taskName,
+						"Can not find scope administrator '" + scopeAdminName
+								+ "'");
 				continue; // no administrator
 			}
+
+			// Obtain the administrator index
+			AdministratorIndex adminIndex = scopeAdmin.getAdministratorIndex();
 
 			// Obtain the duty key
 			Enum<?> dutyKey = duty.getDuty();
@@ -284,6 +344,13 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 						+ (isPreNotPost ? "pre" : "post") + "-task at index "
 						+ taskDuties.size());
 				continue; // no duty
+			}
+
+			// Load the required managed object indexes for the administrator
+			for (RawBoundManagedObjectMetaData<?> administeredManagedObject : scopeAdmin
+					.getAdministeredRawBoundManagedObjects()) {
+				this.loadRequiredManagedObjects(administeredManagedObject,
+						requiredManagedObjectIndexes);
 			}
 
 			// Create and add the task duty association

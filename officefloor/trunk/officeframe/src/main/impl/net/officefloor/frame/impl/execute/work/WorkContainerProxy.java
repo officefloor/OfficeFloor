@@ -20,6 +20,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorContext;
 import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.internal.structure.WorkContainer;
@@ -57,7 +58,8 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public boolean isManagedObjectsReady(int[] managedObjectIndexes,
+	public boolean isManagedObjectsReady(
+			ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet) {
 		return this.delegate.isManagedObjectsReady(managedObjectIndexes,
@@ -65,7 +67,8 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public boolean loadManagedObjects(int[] managedObjectIndexes,
+	public boolean loadManagedObjects(
+			ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet) {
 		return this.delegate.loadManagedObjects(managedObjectIndexes,
@@ -73,7 +76,8 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public void coordinateManagedObjects(int[] managedObjectIndexes,
+	public void coordinateManagedObjects(
+			ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
 			JobActivateSet notifySet) {
 		this.delegate.coordinateManagedObjects(managedObjectIndexes,
@@ -87,7 +91,7 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public Object getObject(int moIndex, ThreadState threadState) {
+	public Object getObject(ManagedObjectIndex moIndex, ThreadState threadState) {
 		return this.delegate.getObject(moIndex, threadState);
 	}
 

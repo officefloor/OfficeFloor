@@ -28,6 +28,7 @@ import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobActivatableSet;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -37,8 +38,6 @@ import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
-import org.easymock.AbstractMatcher;
-import org.easymock.ArgumentsMatcher;
 import org.easymock.internal.AlwaysMatcher;
 
 /**
@@ -196,11 +195,6 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(EscalationJob.class);
 
 	/**
-	 * Required {@link ManagedObject} indexes.
-	 */
-	protected int[] lastRequiredManagedObjectIndexes = null;
-
-	/**
 	 * Records:
 	 * <ol>
 	 * <li>obtaining the {@link ThreadState}</li>
@@ -215,13 +209,14 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * This is always the first steps of executing a
 	 * {@link AbstractJobContainer}.
 	 * 
+	 * @param job
+	 *            {@link Job}.
 	 * @param threadFailure
 	 *            {@link ThreadState} failure.
-	 * @param requiredManagedObjectIndexes
-	 *            Required {@link ManagedObject} indexes.
 	 */
-	protected void record_JobContainer_initialSteps(Throwable threadFailure,
-			int... requiredManagedObjectIndexes) {
+	protected void record_JobContainer_initialSteps(Job job,
+			Throwable threadFailure) {
+		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
 		this.recordReturn(this.jobMetaData, this.jobMetaData
 				.createJobActivableSet(), this.jobActivatableSet);
 		this.recordReturn(this.flow, this.flow.getThreadState(),
@@ -237,8 +232,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			this.threadState.setFailure(null);
 		} else {
 			// No failure, so continue on to obtain managed object indexes
-			this.lastRequiredManagedObjectIndexes = requiredManagedObjectIndexes;
-			if (this.lastRequiredManagedObjectIndexes.length > 0) {
+			if (functionalityJob.requiredManagedObjectIndexes.length > 0) {
 				// Has managed objects, so lock on process to initiate them
 				this.recordReturn(this.processState, this.processState
 						.getProcessLock(), "Process Lock");
@@ -257,40 +251,12 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	protected void record_WorkContainer_loadManagedObjects(Job job,
 			boolean isLoaded) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
-		final int[] eMoIndexes = this.lastRequiredManagedObjectIndexes;
 		this.recordReturn(this.workContainer, this.workContainer
-				.loadManagedObjects(eMoIndexes, this.jobContext,
-						functionalityJob, this.jobActivatableSet), isLoaded,
-				new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] e, Object[] a) {
-						int[] aMoIndexes = (int[]) a[0];
-						assertEquals(
-								"Incorrect number of required managed objects",
-								eMoIndexes.length, aMoIndexes.length);
-						for (int i = 0; i < eMoIndexes.length; i++) {
-							assertEquals(
-									"Incorrect required managed object index "
-											+ i, eMoIndexes[i], aMoIndexes[i]);
-						}
-						assertEquals("Incorrect job context",
-								AbstractJobContainerTest.this.jobContext, a[1]);
-						assertEquals("Incorrect functionality job",
-								functionalityJob, a[2]);
-						assertEquals(
-								"Incorrect activatable set",
-								AbstractJobContainerTest.this.jobActivatableSet,
-								a[3]);
-						return true;
-					}
-				});
+				.loadManagedObjects(
+						functionalityJob.requiredManagedObjectIndexes,
+						this.jobContext, functionalityJob,
+						this.jobActivatableSet), isLoaded);
 	}
-
-	/**
-	 * Flag indicating if the {@link ArgumentsMatcher} has been set for the
-	 * <code>isManagedObjectsReady</code> recording.
-	 */
-	private boolean isManagedObjectsReaderMaterSet = false;
 
 	/**
 	 * Records checking {@link ManagedObject} instances are ready.
@@ -303,34 +269,11 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	protected void record_WorkContainer_isManagedObjectsReady(Job job,
 			boolean isReady) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
-		final int[] eMoIndexes = this.lastRequiredManagedObjectIndexes;
 		this.recordReturn(this.workContainer, this.workContainer
-				.isManagedObjectsReady(eMoIndexes, this.jobContext,
-						functionalityJob, this.jobActivatableSet), isReady);
-		if (!this.isManagedObjectsReaderMaterSet) {
-			this.control(this.workContainer).setMatcher(new AbstractMatcher() {
-				@Override
-				public boolean matches(Object[] e, Object[] a) {
-					int[] aMoIndexes = (int[]) a[0];
-					assertEquals(
-							"Incorrect number of required managed objects",
-							eMoIndexes.length, aMoIndexes.length);
-					for (int i = 0; i < eMoIndexes.length; i++) {
-						assertEquals("Incorrect required managed object index "
-								+ i, eMoIndexes[i], aMoIndexes[i]);
-					}
-					assertEquals("Incorrect job context",
-							AbstractJobContainerTest.this.jobContext, a[1]);
-					assertEquals("Incorrect functionality job",
-							functionalityJob, a[2]);
-					assertEquals("Incorrect activatable set",
-							AbstractJobContainerTest.this.jobActivatableSet,
-							a[3]);
-					return true;
-				}
-			});
-			this.isManagedObjectsReaderMaterSet = true;
-		}
+				.isManagedObjectsReady(
+						functionalityJob.requiredManagedObjectIndexes,
+						this.jobContext, functionalityJob,
+						this.jobActivatableSet), isReady);
 	}
 
 	/**
@@ -341,41 +284,21 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	protected void record_WorkContainer_coordinateManagedObjects(Job job) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) job;
-		final int[] eMoIndexes = this.lastRequiredManagedObjectIndexes;
-		this.workContainer.coordinateManagedObjects(eMoIndexes,
-				this.jobContext, functionalityJob, this.jobActivatableSet);
-		this.control(this.workContainer).setMatcher(new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] e, Object[] a) {
-				int[] aMoIndexes = (int[]) a[0];
-				assertEquals("Incorrect number of required managed objects",
-						eMoIndexes.length, aMoIndexes.length);
-				for (int i = 0; i < eMoIndexes.length; i++) {
-					assertEquals(
-							"Incorrect required managed object index " + i,
-							eMoIndexes[i], aMoIndexes[i]);
-				}
-				assertEquals("Incorrect job context",
-						AbstractJobContainerTest.this.jobContext, a[1]);
-				assertEquals("Incorrect functionality job", functionalityJob,
-						a[2]);
-				assertEquals("Incorrect activatable set",
-						AbstractJobContainerTest.this.jobActivatableSet, a[3]);
-				return true;
-			}
-		});
+		this.workContainer.coordinateManagedObjects(
+				functionalityJob.requiredManagedObjectIndexes, this.jobContext,
+				functionalityJob, this.jobActivatableSet);
 	}
 
 	/**
 	 * Records obtaining a {@link ManagedObject} object.
 	 * 
 	 * @param managedObjectIndex
-	 *            Index of the {@link ManagedObject}.
+	 *            {@link ManagedObjectIndex} of the {@link ManagedObject}.
 	 * @param moObject
 	 *            Object to return.
 	 */
-	protected void record_WorkContainer_getObject(int managedObjectIndex,
-			Object moObject) {
+	protected void record_WorkContainer_getObject(
+			ManagedObjectIndex managedObjectIndex, Object moObject) {
 		this.recordReturn(this.workContainer, this.workContainer.getObject(
 				managedObjectIndex, this.threadState), moObject);
 	}
@@ -728,8 +651,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	protected FunctionalityJob createJob(boolean hasParallelOwnerJob,
 			JobFunctionality... jobFunctionality) {
-		return this
-				.createJob(hasParallelOwnerJob, new int[0], jobFunctionality);
+		return this.createJob(hasParallelOwnerJob, new ManagedObjectIndex[0],
+				jobFunctionality);
 	}
 
 	/**
@@ -738,13 +661,14 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * @param hasParallelOwnerJob
 	 *            Flag indicating if to have a parallel owner {@link JobNode}.
 	 * @param requiredManagedObjects
-	 *            Required {@link ManagedObject} indexes.
+	 *            Required {@link ManagedObjectIndex} instances.
 	 * @param jobFunctionality
 	 *            {@link JobFunctionality} instances.
 	 * @return {@link Job}.
 	 */
 	protected FunctionalityJob createJob(boolean hasParallelOwnerJob,
-			int[] requiredManagedObjects, JobFunctionality... jobFunctionality) {
+			ManagedObjectIndex[] requiredManagedObjects,
+			JobFunctionality... jobFunctionality) {
 
 		// Obtain the parallel owner job
 		ParallelOwnerJob owner = (hasParallelOwnerJob ? this.parallelOwnerJob
@@ -752,7 +676,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		// Ensure have required managed object indexes
 		if (requiredManagedObjects == null) {
-			requiredManagedObjects = new int[0];
+			requiredManagedObjects = new ManagedObjectIndex[0];
 		}
 
 		// Return the created functionality job
@@ -817,6 +741,11 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		public final JobNode parallelOwnerJob;
 
 		/**
+		 * Requires {@link ManagedObjectIndex} instances.
+		 */
+		public final ManagedObjectIndex[] requiredManagedObjectIndexes;
+
+		/**
 		 * Flag indicating if the {@link Job} is executed.
 		 */
 		public boolean isJobExecuted = false;
@@ -827,19 +756,20 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 * @param parallelOwnerJob
 		 *            Parallel Owner {@link JobNode}.
 		 * @param requiredManagedObjectIndexes
-		 *            Required {@link ManagedObject} indexes.
+		 *            Required {@link ManagedObjectIndex} instances.
 		 * @param jobFunctionality
 		 *            {@link JobFunctionality}.
 		 */
 		public FunctionalityJob(JobNode parallelOwnerJob,
-				int[] requiredManagedObjectIndexes,
+				ManagedObjectIndex[] requiredManagedObjectIndexes,
 				JobFunctionality[] jobFunctionality) {
 			super(AbstractJobContainerTest.this.flow,
 					AbstractJobContainerTest.this.workContainer,
 					AbstractJobContainerTest.this.jobMetaData,
 					parallelOwnerJob, requiredManagedObjectIndexes);
-			this.parallelOwnerJob = parallelOwnerJob;
 			this.jobFunctionality = jobFunctionality;
+			this.parallelOwnerJob = parallelOwnerJob;
+			this.requiredManagedObjectIndexes = requiredManagedObjectIndexes;
 		}
 
 		/*
@@ -866,7 +796,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public Object getObject(int managedObjectIndex) {
+		public Object getObject(ManagedObjectIndex managedObjectIndex) {
 			return this.workContainer.getObject(managedObjectIndex,
 					AbstractJobContainerTest.this.threadState);
 		}
@@ -931,10 +861,10 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 * Obtains the {@link ManagedObject} instance's object.
 		 * 
 		 * @param managedObjectIndex
-		 *            Index of the {@link ManagedObject} on the {@link Job}.
+		 *            {@link ManagedObjectIndex} of the {@link ManagedObject}.
 		 * @return Object of the {@link ManagedObject}.
 		 */
-		Object getObject(int managedObjectIndex);
+		Object getObject(ManagedObjectIndex managedObjectIndex);
 
 		/**
 		 * Invokes a {@link Flow}.

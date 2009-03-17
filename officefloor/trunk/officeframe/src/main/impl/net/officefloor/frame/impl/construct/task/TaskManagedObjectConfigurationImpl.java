@@ -16,8 +16,8 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -29,18 +29,19 @@ public class TaskManagedObjectConfigurationImpl implements
 		TaskManagedObjectConfiguration {
 
 	/**
-	 * Name of {@link ManagedObject} within {@link Work}.
+	 * Name of {@link ManagedObject} within the {@link ManagedObjectScope}.
 	 */
-	protected final String workManagedObjectName;
+	protected final String scopeManagedObjectName;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param workManagedObjectName
-	 *            Name of {@link ManagedObject} within {@link Work}.
+	 * @param scopeManagedObjectName
+	 *            Name of {@link ManagedObject} within the
+	 *            {@link ManagedObjectScope}.
 	 */
-	public TaskManagedObjectConfigurationImpl(String workManagedObjectName) {
-		this.workManagedObjectName = workManagedObjectName;
+	public TaskManagedObjectConfigurationImpl(String scopeManagedObjectName) {
+		this.scopeManagedObjectName = scopeManagedObjectName;
 	}
 
 	/*
@@ -48,8 +49,8 @@ public class TaskManagedObjectConfigurationImpl implements
 	 */
 
 	@Override
-	public String getWorkManagedObjectName() {
-		return this.workManagedObjectName;
+	public String getScopeManagedObjectName() {
+		return this.scopeManagedObjectName;
 	}
 
 }

@@ -25,15 +25,12 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
-import net.officefloor.frame.internal.configuration.LinkedWorkAdministratorConfiguration;
-import net.officefloor.frame.internal.configuration.LinkedWorkManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
@@ -42,16 +39,12 @@ import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawWorkManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
-import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -184,9 +177,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Record no managed objects or administrators
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
 		this.record_tasks();
 
 		// Fully construct work
@@ -195,119 +186,13 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
 
-		// Ensure no managed objects
-		assertEquals("Should not have managed object indexes", 0, workMetaData
-				.getManagedObjectIndexes().length);
+		// Ensure no managed objects, administrators or tasks
 		assertEquals("Should not have managed object meta-data", 0,
 				workMetaData.getManagedObjectMetaData().length);
-
-		// Ensure no administrators
 		assertEquals("Should not have administrator meta-data", 0, workMetaData
 				.getAdministratorMetaData().length);
-
-		// Ensure no tasks
 		assertEquals("Should not have tasks", 0,
 				workMetaData.getTaskMetaData().length);
-	}
-
-	/**
-	 * Ensure issue if no {@link Work} {@link ManagedObject} name.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testNoWorkManagedObjectName() {
-
-		final LinkedWorkManagedObjectConfiguration workConfiguration = this
-				.createMock(LinkedWorkManagedObjectConfiguration.class);
-
-		// Record no work managed object name
-		this.record_workNameFactory();
-		this.record_workBoundManagedObjects();
-		this
-				.recordReturn(
-						this.configuration,
-						this.configuration
-								.getLinkedManagedObjectConfiguration(),
-						new LinkedWorkManagedObjectConfiguration[] { workConfiguration });
-		this.recordReturn(workConfiguration, workConfiguration
-				.getWorkManagedObjectName(), null);
-		this
-				.record_workIssue("No work managed object name provided for managed object");
-		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
-		this.record_tasks();
-
-		// Construct work
-		this.replayMockObjects();
-		this.fullyConstructRawWorkMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no bound {@link ManagedObject} name.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testNoBoundManagedObjectName() {
-
-		final LinkedWorkManagedObjectConfiguration workConfiguration = this
-				.createMock(LinkedWorkManagedObjectConfiguration.class);
-
-		// Record no bound managed object name
-		this.record_workNameFactory();
-		this.record_workBoundManagedObjects();
-		this
-				.recordReturn(
-						this.configuration,
-						this.configuration
-								.getLinkedManagedObjectConfiguration(),
-						new LinkedWorkManagedObjectConfiguration[] { workConfiguration });
-		this.recordReturn(workConfiguration, workConfiguration
-				.getWorkManagedObjectName(), "MO");
-		this.recordReturn(workConfiguration, workConfiguration
-				.getBoundManagedObjectName(), null);
-		this
-				.record_workIssue("No bound name provided for work managed object MO");
-		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
-		this.record_tasks();
-
-		// Construct work
-		this.replayMockObjects();
-		this.fullyConstructRawWorkMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no bound {@link ManagedObject}.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testNoBoundManagedObject() {
-
-		final LinkedWorkManagedObjectConfiguration workConfiguration = this
-				.createMock(LinkedWorkManagedObjectConfiguration.class);
-
-		// Record no bound managed object
-		this.record_workNameFactory();
-		this.record_workBoundManagedObjects();
-		this
-				.recordReturn(
-						this.configuration,
-						this.configuration
-								.getLinkedManagedObjectConfiguration(),
-						new LinkedWorkManagedObjectConfiguration[] { workConfiguration });
-		this.recordReturn(workConfiguration, workConfiguration
-				.getWorkManagedObjectName(), "MO");
-		this.recordReturn(workConfiguration, workConfiguration
-				.getBoundManagedObjectName(), "BOUND");
-		this
-				.record_workIssue("No bound managed object 'BOUND' found for work managed object MO");
-		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
-		this.record_tasks();
-
-		// Construct work
-		this.replayMockObjects();
-		this.fullyConstructRawWorkMetaData();
-		this.verifyMockObjects();
 	}
 
 	/**
@@ -317,8 +202,6 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testSingleWorkBoundManagedObject() {
 
-		final ManagedObjectIndex index = new ManagedObjectIndexImpl(
-				ManagedObjectScope.WORK, 0);
 		final RawBoundManagedObjectMetaData<?> rawMoMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
 		final ManagedObjectMetaData<?> moMetaData = this
@@ -329,21 +212,15 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			@Override
 			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
 					OfficeFloorIssues issues) {
-				rawWorkMetaData.constructRawWorkManagedObjectMetaData("MO",
-						issues);
+				assertEquals("Incorrect scope mo", rawMoMetaData,
+						rawWorkMetaData.getScopeManagedObjectMetaData("MO"));
 			}
 		});
 
 		// Record single work bound managed object
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects("MO", rawMoMetaData);
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
-		this.recordReturn(rawMoMetaData, rawMoMetaData.getManagedObjectIndex(),
-				index);
-		this.recordReturn(rawMoMetaData, rawMoMetaData.getDependencyKeys(),
-				new Enum[0]);
 		this.recordReturn(rawMoMetaData, rawMoMetaData
 				.getManagedObjectMetaData(), moMetaData);
 		this.record_tasks(task);
@@ -355,10 +232,6 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
 
 		// Verify work meta-data
-		ManagedObjectIndex[] moIndexes = workMetaData.getManagedObjectIndexes();
-		assertEquals("Should have a single managed object index", 1,
-				moIndexes.length);
-		assertEquals("Incorrect managed object index", index, moIndexes[0]);
 		ManagedObjectMetaData<?>[] workMoMetaData = workMetaData
 				.getManagedObjectMetaData();
 		assertEquals("Should have a work bound managed object meta-data", 1,
@@ -368,37 +241,30 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can construct {@link Work} with a single {@link Work} linked
+	 * Ensure can construct {@link Work} with a {@link Office} scoped
 	 * {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testSingleWorkLinkedManagedObject() {
+	public void testSingleOfficeScopedManagedObject() {
 
-		final ManagedObjectIndex index = new ManagedObjectIndexImpl(
-				ManagedObjectScope.THREAD, 0);
 		final RawBoundManagedObjectMetaData<?> rawMoMetaData = this
 				.createMock(RawBoundManagedObjectMetaData.class);
+		this.officeScopeManagedObjects.put("MO", rawMoMetaData);
 
 		// Task to use the work bound managed object
 		RecordedTask task = new RecordedTask("TASK", new TaskConstruction() {
 			@Override
 			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
 					OfficeFloorIssues issues) {
-				rawWorkMetaData.constructRawWorkManagedObjectMetaData("MO",
-						issues);
+				assertEquals("Incorrect scope mo", rawMoMetaData,
+						rawWorkMetaData.getScopeManagedObjectMetaData("MO"));
 			}
 		});
 
 		// Record work linked managed object
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects("MO", "bound", rawMoMetaData);
 		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
-		this.recordReturn(rawMoMetaData, rawMoMetaData.getManagedObjectIndex(),
-				index);
-		this.recordReturn(rawMoMetaData, rawMoMetaData.getDependencyKeys(),
-				new Enum[0]);
 		this.record_tasks(task);
 
 		// Construct work with task managed object
@@ -408,90 +274,11 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
 
 		// Verify work meta-data
-		ManagedObjectIndex[] moIndexes = workMetaData.getManagedObjectIndexes();
-		assertEquals("Should have a single managed object index", 1,
-				moIndexes.length);
-		assertEquals("Incorrect managed object index", index, moIndexes[0]);
 		ManagedObjectMetaData<?>[] workMoMetaData = workMetaData
 				.getManagedObjectMetaData();
-		assertEquals("Should not have managed object meta-data as linked", 0,
-				workMoMetaData.length);
-	}
-
-	/**
-	 * Ensure can construct {@link Work} with a {@link ManagedObject} having a
-	 * dependency.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testManagedObjectWithDependency() {
-
-		// Managed object used directly by the task
-		final ManagedObjectIndex indexOne = new ManagedObjectIndexImpl(
-				ManagedObjectScope.THREAD, 0);
-		final RawBoundManagedObjectMetaData<DependencyKey> rawMoMetaDataOne = this
-				.createMock(RawBoundManagedObjectMetaData.class);
-
-		// Managed object that is dependency
-		final ManagedObjectIndex indexTwo = new ManagedObjectIndexImpl(
-				ManagedObjectScope.PROCESS, 0);
-		final RawBoundManagedObjectMetaData<?> rawMoMetaDataTwo = this
-				.createMock(RawBoundManagedObjectMetaData.class);
-
-		// Task to use the work bound managed object
-		RecordedTask task = new RecordedTask("TASK", new TaskConstruction() {
-			@Override
-			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
-					OfficeFloorIssues issues) {
-				rawWorkMetaData.constructRawWorkManagedObjectMetaData("ONE",
-						issues);
-			}
-		});
-
-		// Record work linked managed object
-		this.record_workNameFactory();
-		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects("ONE", "one", rawMoMetaDataOne,
-				"TWO", "two", rawMoMetaDataTwo);
-		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
-		this.recordReturn(rawMoMetaDataOne, rawMoMetaDataOne
-				.getManagedObjectIndex(), indexOne);
-		this.recordReturn(rawMoMetaDataOne, rawMoMetaDataOne
-				.getDependencyKeys(), new Enum[] { DependencyKey.MO });
-		this.recordReturn(rawMoMetaDataOne, rawMoMetaDataOne
-				.getDependency(DependencyKey.MO), rawMoMetaDataTwo);
-		this.recordReturn(rawMoMetaDataTwo, rawMoMetaDataTwo
-				.getManagedObjectIndex(), indexTwo);
-		this.recordReturn(rawMoMetaDataTwo, rawMoMetaDataTwo
-				.getDependencyKeys(), new Enum[0]);
-		this.record_tasks(task);
-
-		// Construct work with task managed object
-		this.replayMockObjects();
-		RawWorkMetaData<W> metaData = this.constructRawWorkMetaData(true);
-		this.verifyMockObjects();
-		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
-
-		// Verify work meta-data
-		ManagedObjectIndex[] moIndexes = workMetaData.getManagedObjectIndexes();
 		assertEquals(
-				"Should have two managed object indexes (task used direct and its dependency)",
-				2, moIndexes.length);
-		assertEquals("Incorrect task used managed object index", indexOne,
-				moIndexes[0]);
-		assertEquals("Incorrect dependency managed object index", indexTwo,
-				moIndexes[1]);
-		ManagedObjectMetaData<?>[] workMoMetaData = workMetaData
-				.getManagedObjectMetaData();
-		assertEquals("Should not have managed object meta-data as all linked",
-				0, workMoMetaData.length);
-	}
-
-	/**
-	 * Dependency keys of the {@link ManagedObject}.
-	 */
-	private static enum DependencyKey {
-		MO
+				"Should not have managed object meta-data as office scoped", 0,
+				workMoMetaData.length);
 	}
 
 	/**
@@ -506,9 +293,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Record no managed object meta-data
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects("MO", rawMoMetaData);
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
 		this.record_tasks();
 		this.recordReturn(rawMoMetaData, rawMoMetaData
 				.getManagedObjectMetaData(), null);
@@ -524,7 +309,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no task scoped {@link ManagedObject}.
+	 * Ensure handle no {@link Task} scoped {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testNoTaskScopedManagedObject() {
@@ -534,121 +319,16 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			@Override
 			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
 					OfficeFloorIssues issues) {
-				RawWorkManagedObjectMetaData rawWorkMo = rawWorkMetaData
-						.constructRawWorkManagedObjectMetaData("MO", issues);
 				assertNull("Should not get raw work managed object meta-data",
-						rawWorkMo);
+						rawWorkMetaData.getScopeManagedObjectMetaData("MO"));
 			}
 		});
 
 		// Record no task scoped managed object
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
 		this.record_tasks(task);
-		this.record_workIssue("No work managed object for task by name 'MO'");
-
-		// Construct work
-		this.replayMockObjects();
-		this.fullyConstructRawWorkMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no {@link Work} {@link Administrator} name.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testNoWorkAdministratorName() {
-
-		final LinkedWorkAdministratorConfiguration workConfiguration = this
-				.createMock(LinkedWorkAdministratorConfiguration.class);
-
-		// Record no work administrator name
-		this.record_workNameFactory();
-		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
-		this.record_workBoundAdministrators();
-		this
-				.recordReturn(
-						this.configuration,
-						this.configuration
-								.getLinkedAdministratorConfiguration(),
-						new LinkedWorkAdministratorConfiguration[] { workConfiguration });
-		this.recordReturn(workConfiguration, workConfiguration
-				.getWorkAdministratorName(), null);
-		this
-				.record_workIssue("No work administrator name provided for administrator");
-		this.record_tasks();
-
-		// Construct work
-		this.replayMockObjects();
-		this.fullyConstructRawWorkMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no bound {@link Administrator} name.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testNoBoundAdministratorName() {
-
-		final LinkedWorkAdministratorConfiguration workConfiguration = this
-				.createMock(LinkedWorkAdministratorConfiguration.class);
-
-		// Record no work administrator name
-		this.record_workNameFactory();
-		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
-		this.record_workBoundAdministrators();
-		this
-				.recordReturn(
-						this.configuration,
-						this.configuration
-								.getLinkedAdministratorConfiguration(),
-						new LinkedWorkAdministratorConfiguration[] { workConfiguration });
-		this.recordReturn(workConfiguration, workConfiguration
-				.getWorkAdministratorName(), "ADMIN");
-		this.recordReturn(workConfiguration, workConfiguration
-				.getBoundAdministratorName(), null);
-		this
-				.record_workIssue("No bound name provided for work administrator ADMIN");
-		this.record_tasks();
-
-		// Construct work
-		this.replayMockObjects();
-		this.fullyConstructRawWorkMetaData();
-		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensure issue if no bound {@link Administrator}.
-	 */
-	@SuppressWarnings("unchecked")
-	public void testNoBoundAdministrator() {
-
-		final LinkedWorkAdministratorConfiguration workConfiguration = this
-				.createMock(LinkedWorkAdministratorConfiguration.class);
-
-		// Record no bound administrator
-		this.record_workNameFactory();
-		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
-		this.record_workBoundAdministrators();
-		this
-				.recordReturn(
-						this.configuration,
-						this.configuration
-								.getLinkedAdministratorConfiguration(),
-						new LinkedWorkAdministratorConfiguration[] { workConfiguration });
-		this.recordReturn(workConfiguration, workConfiguration
-				.getWorkAdministratorName(), "ADMIN");
-		this.recordReturn(workConfiguration, workConfiguration
-				.getBoundAdministratorName(), "BOUND");
-		this
-				.record_workIssue("No bound administrator 'BOUND' found for work administrator ADMIN");
-		this.record_tasks();
 
 		// Construct work
 		this.replayMockObjects();
@@ -663,8 +343,6 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testSingleWorkBoundAdministrator() {
 
-		final AdministratorIndex index = new AdministratorIndexImpl(
-				AdministratorScope.WORK, 0);
 		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
 				.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorMetaData<?, ?> adminMetaData = this
@@ -675,20 +353,15 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			@Override
 			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
 					OfficeFloorIssues issues) {
-				AdministratorIndex adminIndex = rawWorkMetaData
-						.getAdministratorIndex("ADMIN", issues);
-				assertEquals("Incorrect administrator index", index, adminIndex);
+				assertEquals("Incorrect administrator", rawAdminMetaData,
+						rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"));
 			}
 		});
 
 		// Record single work bound administrator
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators("ADMIN", rawAdminMetaData);
-		this.record_workLinkedAdministrators();
-		this.recordReturn(rawAdminMetaData, rawAdminMetaData
-				.getAdministratorIndex(), index);
 		this.recordReturn(rawAdminMetaData, rawAdminMetaData
 				.getAdministratorMetaData(), adminMetaData);
 		this.record_tasks(task);
@@ -709,38 +382,30 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can construct {@link Work} with a single {@link Work} linked
+	 * Ensure can construct {@link Work} with a single {@link Office} scoped
 	 * {@link Administrator}.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testSingleWorkLinkedAdministrator() {
+	public void testSingleOfficeScopeAdministrator() {
 
-		final AdministratorIndex index = new AdministratorIndexImpl(
-				AdministratorScope.PROCESS, 0);
 		final RawBoundAdministratorMetaData<?, ?> rawAdminMetaData = this
 				.createMock(RawBoundAdministratorMetaData.class);
+		this.officeScopeAdministrators.put("ADMIN", rawAdminMetaData);
 
 		// Task to use the work bound administrator
 		RecordedTask task = new RecordedTask("TASK", new TaskConstruction() {
 			@Override
 			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
 					OfficeFloorIssues issues) {
-				AdministratorIndex adminIndex = rawWorkMetaData
-						.getAdministratorIndex("ADMIN", issues);
-				assertEquals("Incorrect administrator index", index, adminIndex);
+				assertEquals("Incorrect administrator", rawAdminMetaData,
+						rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"));
 			}
 		});
 
 		// Record work linked administrator
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators();
-		this
-				.record_workLinkedAdministrators("ADMIN", "bound",
-						rawAdminMetaData);
-		this.recordReturn(rawAdminMetaData, rawAdminMetaData
-				.getAdministratorIndex(), index);
 		this.record_tasks(task);
 
 		// Construct work with task administrator
@@ -752,7 +417,8 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Verify work meta-data
 		AdministratorMetaData<?, ?>[] workAdminMetaData = workMetaData
 				.getAdministratorMetaData();
-		assertEquals("Should not have administrator meta-data as linked", 0,
+		assertEquals(
+				"Should not have administrator meta-data as office scoped", 0,
 				workAdminMetaData.length);
 	}
 
@@ -767,21 +433,16 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 			@Override
 			public void constructTask(RawWorkMetaData<?> rawWorkMetaData,
 					OfficeFloorIssues issues) {
-				AdministratorIndex adminIndex = rawWorkMetaData
-						.getAdministratorIndex("ADMIN", issues);
 				assertNull("Should not get work administrator index",
-						adminIndex);
+						rawWorkMetaData.getScopeAdministratorMetaData("ADMIN"));
 			}
 		});
 
 		// Record no task scoped administrator
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
 		this.record_tasks(task);
-		this.record_workIssue("No work administrator for task by name 'ADMIN'");
 
 		// Construct work
 		this.replayMockObjects();
@@ -800,9 +461,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Record a single task
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
 		this.record_tasks(task);
 
 		// Fully construct work
@@ -832,9 +491,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Record a initial task
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects();
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators();
-		this.record_workLinkedAdministrators();
 		this.record_tasks("TASK", initialFlowAssetManager, task);
 
 		// Fully construct work
@@ -876,9 +533,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		// Record a linking tasks
 		this.record_workNameFactory();
 		this.record_workBoundManagedObjects("MO", rawMoMetaData);
-		this.record_workLinkedManagedObjects();
 		this.record_workBoundAdministrators("ADMIN", rawAdminMetaData);
-		this.record_workLinkedAdministrators();
 		this.recordReturn(rawMoMetaData, rawMoMetaData
 				.getManagedObjectMetaData(), moMetaData);
 		this.recordReturn(rawAdminMetaData, rawAdminMetaData
@@ -970,51 +625,6 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records linking {@link ManagedObject} instances to the {@link Work}.
-	 * 
-	 * @param workNameBoundNameMoListing
-	 *            {@link ManagedObject} {@link Work} name, bound name and the
-	 *            {@link RawBoundManagedObjectMetaData} within the
-	 *            {@link Office} scope.
-	 */
-	private void record_workLinkedManagedObjects(
-			Object... workNameBoundNameMoListing) {
-
-		// Obtain the listing of work and bound names and managed objects
-		int moCount = workNameBoundNameMoListing.length / 3;
-		String[] workMoNames = new String[moCount];
-		String[] boundMoNames = new String[moCount];
-		RawBoundManagedObjectMetaData<?>[] workBoundMo = new RawBoundManagedObjectMetaData[moCount];
-		for (int i = 0; i < workNameBoundNameMoListing.length; i += 3) {
-			int loadIndex = i / 3;
-			workMoNames[loadIndex] = (String) workNameBoundNameMoListing[i];
-			boundMoNames[loadIndex] = (String) workNameBoundNameMoListing[i + 1];
-			workBoundMo[loadIndex] = (RawBoundManagedObjectMetaData<?>) workNameBoundNameMoListing[i + 2];
-		}
-
-		// Record linking the managed objects
-		LinkedWorkManagedObjectConfiguration[] moConfigurations = new LinkedWorkManagedObjectConfiguration[moCount];
-		for (int i = 0; i < moCount; i++) {
-			moConfigurations[i] = this
-					.createMock(LinkedWorkManagedObjectConfiguration.class);
-		}
-		this.recordReturn(this.configuration, this.configuration
-				.getLinkedManagedObjectConfiguration(), moConfigurations);
-		if (moConfigurations.length > 0) {
-			for (int i = 0; i < moCount; i++) {
-				this.recordReturn(moConfigurations[i], moConfigurations[i]
-						.getWorkManagedObjectName(), workMoNames[i]);
-				this.recordReturn(moConfigurations[i], moConfigurations[i]
-						.getBoundManagedObjectName(), boundMoNames[i]);
-
-				// Ensure the managed object available in office scope
-				this.officeScopeManagedObjects.put(boundMoNames[i],
-						workBoundMo[i]);
-			}
-		}
-	}
-
-	/**
 	 * Records bounding {@link Administrator} instances to the {@link Work}.
 	 * 
 	 * @param nameAdminPairs
@@ -1072,60 +682,13 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records linking {@link ManagedObject} instances of the {@link Work}.
-	 * 
-	 * @param workNameBoundNameAdminListing
-	 *            {@link ManagedObject} {@link Work} name, bound name and the
-	 *            {@link RawBoundAdministratorMetaData} within the
-	 *            {@link Office} scope.
-	 */
-	private void record_workLinkedAdministrators(
-			Object... workNameBoundNameAdminListing) {
-
-		// Obtain the listing of work and bound names and administrators
-		int adminCount = workNameBoundNameAdminListing.length / 3;
-		String[] workAdminNames = new String[adminCount];
-		String[] boundAdminNames = new String[adminCount];
-		RawBoundAdministratorMetaData<?, ?>[] workBoundAdmin = new RawBoundAdministratorMetaData[adminCount];
-		for (int i = 0; i < workNameBoundNameAdminListing.length; i += 3) {
-			int loadIndex = i / 3;
-			workAdminNames[loadIndex] = (String) workNameBoundNameAdminListing[i];
-			boundAdminNames[loadIndex] = (String) workNameBoundNameAdminListing[i + 1];
-			workBoundAdmin[loadIndex] = (RawBoundAdministratorMetaData<?, ?>) workNameBoundNameAdminListing[i + 2];
-		}
-
-		// Record linking the administrators
-		LinkedWorkAdministratorConfiguration[] adminConfigurations = new LinkedWorkAdministratorConfiguration[adminCount];
-		for (int i = 0; i < adminCount; i++) {
-			adminConfigurations[i] = this
-					.createMock(LinkedWorkAdministratorConfiguration.class);
-		}
-		this.recordReturn(this.configuration, this.configuration
-				.getLinkedAdministratorConfiguration(), adminConfigurations);
-		if (adminConfigurations.length > 0) {
-			for (int i = 0; i < adminCount; i++) {
-				this.recordReturn(adminConfigurations[i],
-						adminConfigurations[i].getWorkAdministratorName(),
-						workAdminNames[i]);
-				this.recordReturn(adminConfigurations[i],
-						adminConfigurations[i].getBoundAdministratorName(),
-						boundAdminNames[i]);
-
-				// Ensure the administrator available in office scope
-				this.officeScopeAdministrators.put(boundAdminNames[i],
-						workBoundAdmin[i]);
-			}
-		}
-	}
-
-	/**
 	 * Convenience method to record {@link Task} construction without an initial
 	 * {@link Task}.
 	 * 
 	 * @param tasks
 	 *            {@link RecordedTask} instances for each {@link Task}.
 	 */
-	private void record_tasks(RawWorkMetaDataTest<W>.RecordedTask... tasks) {
+	private void record_tasks(RecordedTask... tasks) {
 		this.record_tasks(null, null, tasks);
 	}
 
