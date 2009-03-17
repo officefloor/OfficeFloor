@@ -17,10 +17,9 @@
 package net.officefloor.work.clazz;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.execute.WorkContext;
 
 /**
- * {@link net.officefloor.frame.api.execute.Work} for the class.
+ * {@link Work} for the class.
  * 
  * @author Daniel
  */
@@ -48,15 +47,6 @@ public class ClassWork implements Work {
 	 */
 	public Object getObject() {
 		return this.workObject;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Work#setWorkContext(net.officefloor.frame.api.execute.WorkContext)
-	 */
-	public void setWorkContext(WorkContext context) throws Exception {
-		// Not need context
 	}
 
 }

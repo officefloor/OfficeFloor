@@ -9,6 +9,7 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officeeclipse</artifactId>
+    <name>Office Floor Eclipse IDE</name>
 	<description>Eclipse IDE plugin for Office Floor</description>
 	<properties>
 		<office_version>0.0.1</office_version>

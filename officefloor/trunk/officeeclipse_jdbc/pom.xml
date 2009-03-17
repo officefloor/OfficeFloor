@@ -7,7 +7,7 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officeeclipse_jdbc</artifactId>
-	<name>Office Floor JDBC eclipse</name>
+	<name>Office Floor Eclipse JDBC Extension</name>
 	<description>Provides extensions for JDBC configuration.</description>
     <properties>
         <office_version>0.0.1</office_version>

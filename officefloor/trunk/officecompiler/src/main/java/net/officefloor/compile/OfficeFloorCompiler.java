@@ -18,7 +18,6 @@ package net.officefloor.compile;
 
 import net.officefloor.LoaderContext;
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
@@ -26,14 +25,14 @@ import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.ModelRepository;
 
 /**
- * Compiles the {@link net.officefloor.model.officefloor.OfficeFloorModel} into
- * a {@link net.officefloor.frame.api.manage.OfficeFloor}.
+ * Compiles the {@link OfficeFloorModel} into an {@link OfficeFloor}.
  * 
  * @author Daniel
  */
@@ -62,22 +61,19 @@ public class OfficeFloorCompiler {
 	}
 
 	/**
-	 * Compiles the {@link OfficeFloor} from the
-	 * {@link net.officefloor.model.officefloor.OfficeFloorModel}.
+	 * Compiles the {@link OfficeFloor} from the {@link OfficeFloorModel}.
 	 * 
 	 * @param configuration
-	 *            Configuration containing the
-	 *            {@link net.officefloor.model.officefloor.OfficeFloorModel}.
-	 * @param builderFactory
-	 *            {@link BuilderFactory} to create the builders to build the
-	 *            {@link OfficeFloor}.
+	 *            Configuration containing the {@link OfficeFloorModel}.
+	 * @param officeFrame
+	 *            {@link OfficeFrame} to construct the {@link OfficeFloor}.
 	 * @param builderContext
 	 *            {@link LoaderContext} to use in building and compiling the
 	 *            {@link net.officefloor.model.officefloor.OfficeFloorModel}.
 	 * @return Compiled {@link OfficeFloor}.
 	 */
 	public OfficeFloor compileOfficeFloor(ConfigurationItem configuration,
-			BuilderFactory builderFactory, LoaderContext builderContext)
+			OfficeFrame officeFrame, LoaderContext builderContext)
 			throws Exception {
 
 		// Create the compiler context

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<artifactId>officefloor</artifactId>
@@ -9,6 +8,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>officework_spring</artifactId>
+	<name>Office Floor Spring Plug-in</name>
 	<description>
 		Integration with Spring to allow its beans to be used as Work.
 	</description>
@@ -16,21 +16,21 @@
 		<office_version>0.0.1</office_version>
 	</properties>
 	<dependencies>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officeframe</artifactId>
-            <version>${office_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officecompiler</artifactId>
-            <version>${office_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officemodel</artifactId>
-            <version>${office_version}</version>
-        </dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officeframe</artifactId>
+			<version>${office_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officecompiler</artifactId>
+			<version>${office_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officemodel</artifactId>
+			<version>${office_version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring</artifactId>

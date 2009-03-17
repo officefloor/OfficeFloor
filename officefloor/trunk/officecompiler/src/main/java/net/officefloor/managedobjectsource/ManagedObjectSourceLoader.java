@@ -18,7 +18,6 @@ package net.officefloor.managedobjectsource;
 
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,22 +26,17 @@ import java.util.Properties;
 import java.util.Set;
 
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.build.issue.OfficeIssuesListener;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.ClassLoaderResourceLocator;
-import net.officefloor.frame.impl.ManagedObjectSourceContextImpl;
-import net.officefloor.frame.impl.construct.BuilderFactoryImpl;
+import net.officefloor.frame.impl.construct.managedobjectsource.ClassLoaderResourceLocator;
+import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
@@ -97,22 +91,18 @@ public class ManagedObjectSourceLoader {
 		ResourceLocator projectResourceLoader = new ClassLoaderResourceLocator(
 				classLoader);
 
-		// Create an office frame to capture additional configuration
-		LoaderOfficeFrame officeFrame = new LoaderOfficeFrame();
-
-		// Create the managed object builder
-		ManagedObjectBuilder managedObjectBuilder = officeFrame
-				.getBuilderFactory().createManagedObjectBuilder(
-						managedObjectSource.getClass());
-
-		// Create the office builder
-		OfficeBuilder officeBuilder = officeFrame.getBuilderFactory()
-				.createOfficeBuilder();
+		// Create the managed object and office builder
+		OfficeFloorBuilder officeFloorBuilder = OfficeFrame
+				.createOfficeFloorBuilder();
+		ManagedObjectBuilder managedObjectBuilder = officeFloorBuilder
+				.addManagedObject(managedObjectSourceName, managedObjectSource
+						.getClass());
+		OfficeBuilder officeBuilder = officeFloorBuilder.addOffice("OFFICE");
 
 		// Initialise managed object to obtain addition configuration
 		managedObjectSource.init(new ManagedObjectSourceContextImpl(null,
 				properties, projectResourceLoader, managedObjectBuilder,
-				officeBuilder, officeFrame));
+				officeBuilder));
 
 		// Create the properties for the managed object source
 		List<PropertyModel> propertyModels = new LinkedList<PropertyModel>();
@@ -237,7 +227,7 @@ public class ManagedObjectSourceLoader {
 
 				// Obtain details of the task
 				String taskName = taskConfig.getTaskName();
-				String teamName = taskConfig.getTeamId();
+				String teamName = taskConfig.getOfficeTeamName();
 
 				// Add team if specified
 				if (teamName != null) {
@@ -288,55 +278,6 @@ public class ManagedObjectSourceLoader {
 
 		// Return the managed object source model
 		return managedObjectSourceModel;
-	}
-
-	/**
-	 * {@link OfficeFrame} for loading the {@link ManagedObjectSourceModel}.
-	 */
-	private static class LoaderOfficeFrame extends OfficeFrame {
-
-		/**
-		 * {@link BuilderFactory}.
-		 */
-		private final BuilderFactory builderFactory = new BuilderFactoryImpl();
-
-		/**
-		 * Registry of {@link OfficeFloorConfiguration} by office floor name.
-		 */
-		public final Map<String, OfficeFloorConfiguration> officeFloors = new HashMap<String, OfficeFloorConfiguration>();
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.api.OfficeFrame#getBuilderFactory()
-		 */
-		@Override
-		public BuilderFactory getBuilderFactory() {
-			return this.builderFactory;
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.api.OfficeFrame#registerOfficeFloor(java.lang
-		 * .String, net.officefloor.frame.api.build.OfficeFloorBuilder,
-		 * net.officefloor.frame.api.build.issue.OfficeIssuesListener)
-		 */
-		@Override
-		protected OfficeFloor registerOfficeFloor(String name,
-				OfficeFloorBuilder officeFloorBuilder,
-				OfficeIssuesListener issuesListener) throws Exception {
-
-			// Transform Office Floor Builder into Configuration
-			OfficeFloorConfiguration officeFloorConfiguration = (OfficeFloorConfiguration) officeFloorBuilder;
-
-			// Register the office floor configuration
-			this.officeFloors.put(name, officeFloorConfiguration);
-
-			// No office floor to be returned
-			return null;
-		}
 	}
 
 }

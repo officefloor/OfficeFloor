@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -9,19 +8,20 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officexml</artifactId>
+	<name>Office Floor XML Plug-in</name>
 	<description>
 		OXM (Object to XML Mapping) for the Office Floor
 	</description>
 	<dependencies>
 		<dependency>
-		  <groupId>net.officefloor</groupId>
-		  <artifactId>officemodel</artifactId>
-		  <version>0.0.1</version>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officemodel</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 		<dependency>
-		  <groupId>net.officefloor</groupId>
-		  <artifactId>officeframe</artifactId>
-		  <version>0.0.1</version>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officeframe</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

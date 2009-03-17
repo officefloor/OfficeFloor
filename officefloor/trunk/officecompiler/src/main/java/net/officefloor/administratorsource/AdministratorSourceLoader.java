@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.impl.AdministratorSourceContextImpl;
+import net.officefloor.frame.impl.construct.administrator.AdministratorSourceContextImpl;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;

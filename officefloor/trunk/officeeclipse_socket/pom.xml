@@ -7,31 +7,31 @@
 		<version>0.0.1</version>
 	</parent>
 	<artifactId>officeeclipse_socket</artifactId>
-	<name>Office Floor Socket eclipse</name>
+	<name>Office Floor Eclipse Socket Extension</name>
 	<description>Provides extensions for socket configuration.</description>
-    <properties>
-        <office_version>0.0.1</office_version>
-        <eclipse_version>[3,)</eclipse_version>
-        <eclipse_win_version>win32</eclipse_win_version>
-    </properties>
+	<properties>
+		<office_version>0.0.1</office_version>
+		<eclipse_version>[3,)</eclipse_version>
+		<eclipse_win_version>win32</eclipse_win_version>
+	</properties>
 	<dependencies>
 
-        <!-- Office Floor Dependencies -->
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officeeclipse</artifactId>
-            <version>${office_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officecompiler</artifactId>
-            <version>${office_version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.officefloor</groupId>
-            <artifactId>officeplugin_socket</artifactId>
-            <version>${office_version}</version>
-        </dependency>
+		<!-- Office Floor Dependencies -->
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officeeclipse</artifactId>
+			<version>${office_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officecompiler</artifactId>
+			<version>${office_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor</groupId>
+			<artifactId>officeplugin_socket</artifactId>
+			<version>${office_version}</version>
+		</dependency>
 
 	</dependencies>
 </project>
