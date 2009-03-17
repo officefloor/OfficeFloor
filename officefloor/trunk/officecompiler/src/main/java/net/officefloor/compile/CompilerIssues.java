@@ -14,32 +14,15 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.work;
+package net.officefloor.compile;
 
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.util.AbstractSingleTask;
-import net.officefloor.model.task.TaskFactoryManufacturer;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * Abstract {@link Work} that only has a single {@link Task} for use by a
- * {@link WorkLoader}.
+ * Notified of issues in compilation of the {@link OfficeFloor}.
  * 
  * @author Daniel
  */
-public abstract class AbstractSingleTaskWork<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends AbstractSingleTask<P, W, M, F> implements
-		TaskFactoryManufacturer {
-
-	/*
-	 * ================= TaskFactoryManufacturer =========================
-	 */
-
-	@Override
-	public TaskFactory<?, ?, ?, ?> createTaskFactory() {
-		return this;
-	}
+public interface CompilerIssues {
 
 }

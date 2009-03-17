@@ -14,14 +14,14 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.work;
+package net.officefloor.compile.impl.work.source;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.compile.work.WorkProperty;
-import net.officefloor.compile.work.WorkSpecification;
+import net.officefloor.compile.spi.work.source.WorkLoader;
+import net.officefloor.compile.spi.work.source.WorkProperty;
+import net.officefloor.compile.spi.work.source.WorkSpecification;
 
 /**
  * Abstract {@link WorkLoader}.

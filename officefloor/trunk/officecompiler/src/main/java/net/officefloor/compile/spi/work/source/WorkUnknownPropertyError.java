@@ -14,53 +14,45 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.work;
-
-import net.officefloor.compile.work.WorkProperty;
+package net.officefloor.compile.spi.work.source;
 
 /**
- * {@link WorkProperty} implementation.
+ * <p>
+ * Indicates a property was not configured within the
+ * {@link ManagedObjectSourceContext}.
+ * <p>
+ * This is a serious error as the {@link ManagedObjectSource} is requiring this
+ * property to initialise and subsequently start.
  * 
  * @author Daniel
  */
-public class WorkPropertyImpl implements WorkProperty {
+public class WorkUnknownPropertyError extends Error {
 
 	/**
-	 * Name.
+	 * Name of the unknown property.
 	 */
-	private final String name;
-
-	/**
-	 * Label.
-	 */
-	private final String label;
+	private final String unknownPropertyName;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param name
-	 *            Name.
-	 * @param label
-	 *            Label. Defaults to <code>name</code> if <code>null</code>.
+	 * @param message
+	 *            Message.
+	 * @param unknownPropertyName
+	 *            Name of the unknown property.
 	 */
-	public WorkPropertyImpl(String name, String label) {
-		this.name = name;
-		this.label = ((label == null) || (label.trim().length() == 0)) ? name
-				: label;
+	public WorkUnknownPropertyError(String message, String unknownPropertyName) {
+		super(message);
+		this.unknownPropertyName = unknownPropertyName;
 	}
 
-	/*
-	 * ====================== WorkProperty ==================================
+	/**
+	 * Obtains the name of the unknown property.
+	 * 
+	 * @return Name of the unknown property.
 	 */
-
-	@Override
-	public String getLabel() {
-		return this.label;
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
+	public String getUnknonwnPropertyName() {
+		return this.unknownPropertyName;
 	}
 
 }

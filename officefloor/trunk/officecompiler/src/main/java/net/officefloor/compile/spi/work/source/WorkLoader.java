@@ -14,31 +14,38 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.work;
+package net.officefloor.compile.spi.work.source;
 
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.work.WorkModel;
 
 /**
- * {@link TaskFactory} that is compiler aware.
+ * Loads the {@link WorkModel}.
  * 
  * @author Daniel
  */
-public interface CompilerAwareTaskFactory<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends TaskFactory<P, W, M, F> {
+public interface WorkLoader {
 
 	/**
-	 * Initialises the {@link TaskFactory}.
+	 * <p>
+	 * Obtains the {@link WorkSpecification} for this {@link WorkLoader}.
+	 * <p>
+	 * This enables the {@link WorkLoaderContext} to be populated with the
+	 * necessary details as per this {@link WorkSpecification} in loading the
+	 * {@link WorkModel}.
 	 * 
-	 * @param task
-	 *            {@link FlowItemModel} for the {@link TaskFactory}. A
-	 *            {@link FlowItemModel} is a particular instantiation of a
-	 *            {@link Task}.
-	 * @throws Exception
-	 *             If fails to initialise the {@link TaskFactory}.
+	 * @return {@link WorkSpecification}.
 	 */
-	void initialiseTaskFactory(FlowItemModel task) throws Exception;
+	WorkSpecification getSpecification();
+
+	/**
+	 * Loads the {@link WorkModel} from configuration.
+	 * 
+	 * @param context
+	 *            {@link WorkLoaderContext} to source details to load the
+	 *            {@link WorkModel}.
+	 * @throws Exception
+	 *             If fails.
+	 */
+	WorkModel<?> loadWork(WorkLoaderContext context) throws Exception;
 
 }

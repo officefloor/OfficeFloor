@@ -14,23 +14,32 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.work;
+package net.officefloor.compile.impl.work.source;
 
+import net.officefloor.compile.spi.work.source.WorkLoader;
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.model.task.TaskFactoryManufacturer;
 
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
+ * Abstract {@link Work} that only has a single {@link Task} for use by a
  * {@link WorkLoader}.
  * 
  * @author Daniel
  */
-public interface WorkSpecification {
+public abstract class AbstractSingleTaskWork<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
+		extends AbstractSingleTask<P, W, M, F> implements
+		TaskFactoryManufacturer {
 
-	/**
-	 * Obtains the specification of the properties for the {@link Work}.
-	 * 
-	 * @return Property specification.
+	/*
+	 * ================= TaskFactoryManufacturer =========================
 	 */
-	WorkProperty[] getProperties();
+
+	@Override
+	public TaskFactory<?, ?, ?, ?> createTaskFactory() {
+		return this;
+	}
 
 }

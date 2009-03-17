@@ -14,30 +14,53 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.mock;
+package net.officefloor.compile.impl.work.source;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
-import net.officefloor.work.clazz.Flow;
+import net.officefloor.compile.spi.work.source.WorkProperty;
 
 /**
- * Mock class for testing {@link net.officefloor.compile.spi.work.source.WorkLoader}.
+ * {@link WorkProperty} implementation.
  * 
  * @author Daniel
  */
-public class MockClass {
+public class WorkPropertyImpl implements WorkProperty {
 
-	public Object taskMethod(String parameter, Flow<?> flowSequential,
-			Flow<Object> flowParallel, Flow<String> flowAsynchronous)
-			throws IOException {
-		return null;
+	/**
+	 * Name.
+	 */
+	private final String name;
+
+	/**
+	 * Label.
+	 */
+	private final String label;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param label
+	 *            Label. Defaults to <code>name</code> if <code>null</code>.
+	 */
+	public WorkPropertyImpl(String name, String label) {
+		this.name = name;
+		this.label = ((label == null) || (label.trim().length() == 0)) ? name
+				: label;
 	}
 
-	public void anotherMethod() throws SQLException {
+	/*
+	 * ====================== WorkProperty ==================================
+	 */
+
+	@Override
+	public String getLabel() {
+		return this.label;
 	}
 
-	Object nonTaskMethod(Object parameter) {
-		return null;
+	@Override
+	public String getName() {
+		return this.name;
 	}
+
 }
