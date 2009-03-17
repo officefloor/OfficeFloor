@@ -473,16 +473,19 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 		// Create the sourcing asset manager
 		AssetManager sourcingAssetManager = assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT,
-						this.boundManagedObjectName, "sourcing", issues);
+				.createAssetManager(AssetType.MANAGED_OBJECT, this.index
+						.getManagedObjectScope()
+						+ ":" + this.boundManagedObjectName, "sourcing", issues);
 
 		// Create operations asset manager only if asynchronous
 		AssetManager operationsAssetManager = null;
 		if (isManagedObjectAsynchronous) {
 			// Asynchronous so provide operations manager
 			operationsAssetManager = assetManagerFactory.createAssetManager(
-					AssetType.MANAGED_OBJECT, this.boundManagedObjectName,
-					"operations", issues);
+					AssetType.MANAGED_OBJECT, this.index
+							.getManagedObjectScope()
+							+ ":" + this.boundManagedObjectName, "operations",
+					issues);
 		}
 
 		// Obtain the dependency mapping

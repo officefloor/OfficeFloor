@@ -33,6 +33,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
@@ -103,9 +104,6 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		officeBuilder.registerTeam("of-MO.tcp.connection.cleanup",
 				"of-CLEANUP_TEAM");
 
-		// Provide the process managed object to the office
-		officeBuilder.addProcessManagedObject("MO", "MO");
-
 		// Register team to do the work
 		this.constructTeam("WORKER", new OnePersonTeam(100));
 
@@ -114,7 +112,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 				new MessageWork(), "servicer", "service");
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("service",
 				"WORKER");
-		taskBuilder.buildObject("P-MO", "MO");
+		taskBuilder.buildObject("MO", ManagedObjectScope.PROCESS);
 		taskBuilder
 				.buildFlow("service", FlowInstigationStrategyEnum.SEQUENTIAL);
 

@@ -85,7 +85,7 @@ public class CoordinateManagedObjectTest extends
 		// Construct the task to obtain the coordinating mo
 		this.constructTeam("team", new PassiveTeam());
 		DependencyMappingBuilder mapper = workBuilder.buildTask("task", "team")
-				.buildObject("coordinate");
+				.buildObject("coordinate", ManagedObjectScope.WORK);
 		mapper.mapDependency(CoordinatingDependencyKey.WORK_ONE, "workOne");
 		mapper.mapDependency(CoordinatingDependencyKey.WORK_TWO, "workTwo");
 		mapper.mapDependency(CoordinatingDependencyKey.THREAD_ONE, "threadOne");

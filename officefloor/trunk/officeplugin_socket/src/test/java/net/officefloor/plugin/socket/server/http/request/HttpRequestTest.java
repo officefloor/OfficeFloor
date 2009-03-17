@@ -25,6 +25,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
@@ -89,7 +90,7 @@ public class HttpRequestTest extends AbstractOfficeConstructTestCase {
 							new RequestWork(), "servicer", "service");
 					ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask(
 							"service", "WORKER");
-					taskBuilder.buildObject("P-MO", "MO");
+					taskBuilder.buildObject("MO", ManagedObjectScope.PROCESS);
 
 					// Return the reference to the service task
 					return new TaskReference("servicer", "service");
