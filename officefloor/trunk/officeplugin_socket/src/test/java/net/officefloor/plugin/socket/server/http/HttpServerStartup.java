@@ -92,9 +92,6 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 		officeBuilder.registerTeam("of-MO.serversocket." + port
 				+ ".Listener.TEAM", "of-LISTENER_TEAM");
 
-		// Provide the process managed object to the office
-		officeBuilder.addProcessManagedObject("MO", "MO");
-
 		// Register the task to service the HTTP request
 		final TaskReference task = this.registerHttpServiceTask();
 

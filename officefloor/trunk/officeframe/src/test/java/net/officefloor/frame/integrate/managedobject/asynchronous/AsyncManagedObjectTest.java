@@ -21,6 +21,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -81,7 +82,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 				"WORK", "task");
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("task",
 				"TEAM");
-		taskBuilder.buildObject("MO");
+		taskBuilder.buildObject("MO", ManagedObjectScope.WORK);
 
 		// Construct team to run task
 		this.team = new TestTeam();

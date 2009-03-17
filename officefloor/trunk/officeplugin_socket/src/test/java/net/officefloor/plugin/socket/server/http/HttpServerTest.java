@@ -17,6 +17,7 @@
 package net.officefloor.plugin.socket.server.http;
 
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 
@@ -34,10 +35,9 @@ import org.apache.commons.httpclient.methods.PostMethod;
 public class HttpServerTest extends HttpServerStartup {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.http.HttpServerStartup#registerHttpServiceTask()
+	 * ================== HttpServerStartup ===============================
 	 */
+
 	@Override
 	protected TaskReference registerHttpServiceTask() throws Exception {
 		// Register team to do the work
@@ -48,7 +48,7 @@ public class HttpServerTest extends HttpServerStartup {
 				"servicer", "service");
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("service",
 				"WORKER");
-		taskBuilder.buildObject("P-MO", "MO");
+		taskBuilder.buildObject("MO", ManagedObjectScope.PROCESS);
 
 		// Return the reference to the service task
 		return new TaskReference("servicer", "service");
