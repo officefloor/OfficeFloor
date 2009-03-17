@@ -26,8 +26,7 @@ import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 import net.officefloor.plugin.hibernate.HibernateManagedObjectSource.HibernateDependenciesEnum;
 
 /**
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject} for the
- * Hibernate {@link org.hibernate.Session}.
+ * {@link ManagedObject} for the Hibernate {@link Session}.
  * 
  * @author Daniel
  */
@@ -50,37 +49,25 @@ public class HibernateManagedObject implements ManagedObject,
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObject
-	 * ====================================================================
+	 * ==================== ManagedObject =================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
-	 */
+	@Override
 	public Object getObject() throws Exception {
 		return this.session;
 	}
 
 	/*
-	 * ====================================================================
-	 * CoordinatingManagedObject
-	 * ====================================================================
+	 * ================= CoordinatingManagedObject ========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.CoordinatingManagedObject#loadObjects(net.officefloor.frame.spi.managedobject.ObjectRegistry)
-	 */
+	@Override
 	public void loadObjects(ObjectRegistry<HibernateDependenciesEnum> registry)
 			throws Exception {
 		// Obtain the connection
 		Connection connection = (Connection) registry
 				.getObject(HibernateDependenciesEnum.CONNECTION);
-		
+
 		// Load the connection onto the session
 		this.session.reconnect(connection);
 	}
