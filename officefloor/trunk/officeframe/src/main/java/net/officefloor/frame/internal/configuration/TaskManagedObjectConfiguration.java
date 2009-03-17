@@ -17,7 +17,7 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -28,10 +28,12 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface TaskManagedObjectConfiguration {
 
 	/**
-	 * Obtains the name local to the {@link Work} for the {@link ManagedObject}.
+	 * Obtains the name of the {@link ManagedObject} within the
+	 * {@link ManagedObjectScope}.
 	 * 
-	 * @return {@link ManagedObject} local to the {@link Work}.
+	 * @return Name of the {@link ManagedObject} within the
+	 *         {@link ManagedObjectScope}.
 	 */
-	String getWorkManagedObjectName();
+	String getScopeManagedObjectName();
 
 }

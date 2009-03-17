@@ -24,6 +24,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobActivatableSet;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -56,16 +57,17 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	private final Team team;
 
 	/**
-	 * Indexes identifying the {@link ManagedObject} instances that must be
-	 * ready before the {@link Task} can be executed.
+	 * {@link ManagedObjectIndex} instances identifying the
+	 * {@link ManagedObject} instances that must be loaded before the
+	 * {@link Task} may be executed.
 	 */
-	private final int[] requiredManagedObjects;
+	private final ManagedObjectIndex[] requiredManagedObjects;
 
 	/**
 	 * Translations of the {@link Task} {@link ManagedObject} index to the
-	 * {@link Work} {@link ManagedObject} index.
+	 * {@link Work} {@link ManagedObjectIndex}.
 	 */
-	private final int[] taskToWorkMoTranslations;
+	private final ManagedObjectIndex[] taskToWorkMoTranslations;
 
 	/**
 	 * {@link TaskDutyAssociation} specifying the {@link Duty} instances to be
@@ -120,11 +122,12 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 * @param team
 	 *            {@link Team} responsible for executing this {@link Task}.
 	 * @param requiredManagedObjects
-	 *            Indexes identifying the {@link ManagedObject} instances that
-	 *            must be ready before the {@link Task} can be executed.
+	 *            {@link ManagedObjectIndex} instances identifying the
+	 *            {@link ManagedObject} instances that must be loaded before the
+	 *            {@link Task} may be executed.
 	 * @param taskToWorkMoTranslations
 	 *            Translations of the {@link Task} {@link ManagedObject} index
-	 *            to the {@link Work} {@link ManagedObject} index.
+	 *            to the {@link Work} {@link ManagedObjectIndex}.
 	 * @param preTaskDuties
 	 *            {@link TaskDutyAssociation} specifying the {@link Duty}
 	 *            instances to be completed before executing the {@link Task}.
@@ -134,7 +137,8 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 */
 	public TaskMetaDataImpl(String taskName,
 			TaskFactory<P, W, M, F> taskFactory, Team team,
-			int[] requiredManagedObjects, int[] taskToWorkMoTranslations,
+			ManagedObjectIndex[] requiredManagedObjects,
+			ManagedObjectIndex[] taskToWorkMoTranslations,
 			TaskDutyAssociation<?>[] preTaskDuties,
 			TaskDutyAssociation<?>[] postTaskDuties) {
 		this.taskName = taskName;
@@ -196,12 +200,12 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	}
 
 	@Override
-	public int[] getRequiredManagedObjects() {
+	public ManagedObjectIndex[] getRequiredManagedObjects() {
 		return this.requiredManagedObjects;
 	}
 
 	@Override
-	public int translateManagedObjectIndexForWork(int taskMoIndex) {
+	public ManagedObjectIndex translateManagedObjectIndexForWork(int taskMoIndex) {
 		return this.taskToWorkMoTranslations[taskMoIndex];
 	}
 

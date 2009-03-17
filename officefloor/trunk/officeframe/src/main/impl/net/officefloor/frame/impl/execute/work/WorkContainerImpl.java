@@ -104,8 +104,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public boolean loadManagedObjects(int[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet) {
+	public boolean loadManagedObjects(
+			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
+			JobNode jobNode, JobActivateSet notifySet) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -117,12 +118,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		ProcessState processState = threadState.getProcessState();
 
 		// Load the managed objects
-		ManagedObjectIndex[] indexes = this.workMetaData
-				.getManagedObjectIndexes();
-		for (int moIndex : managedObjectIndexes) {
+		for (ManagedObjectIndex index : managedObjectIndexes) {
 
 			// Obtain the index of managed object within scope
-			ManagedObjectIndex index = indexes[moIndex];
 			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
 
 			// Obtain the managed object container
@@ -163,8 +161,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public void coordinateManagedObjects(int[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet) {
+	public void coordinateManagedObjects(
+			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
+			JobNode jobNode, JobActivateSet notifySet) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -174,12 +173,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		ProcessState processState = threadState.getProcessState();
 
 		// Coordinate the managed objects
-		ManagedObjectIndex[] indexes = this.workMetaData
-				.getManagedObjectIndexes();
-		for (int moIndex : managedObjectIndexes) {
+		for (ManagedObjectIndex index : managedObjectIndexes) {
 
 			// Obtain the index of managed object within scope
-			ManagedObjectIndex index = indexes[moIndex];
 			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
 
 			// Obtain the managed object container
@@ -210,8 +206,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public boolean isManagedObjectsReady(int[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet) {
+	public boolean isManagedObjectsReady(
+			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
+			JobNode jobNode, JobActivateSet notifySet) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -221,12 +218,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		ProcessState processState = threadState.getProcessState();
 
 		// Coordinate the managed objects
-		ManagedObjectIndex[] indexes = this.workMetaData
-				.getManagedObjectIndexes();
-		for (int moIndex : managedObjectIndexes) {
+		for (ManagedObjectIndex index : managedObjectIndexes) {
 
 			// Obtain the index of managed object within scope
-			ManagedObjectIndex index = indexes[moIndex];
 			int scopeIndex = index.getIndexOfManagedObjectWithinScope();
 
 			// Obtain the managed object container
@@ -286,7 +280,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			case WORK:
 				// Lazy create the administrator container. This is safe to lazy
 				// create as work containers are not shared between threads and
-				// this operates within the thread lock.
+				// this operates within the thread and process lock.
 				adminContainer = this.administrators[adminScopeIndex];
 				if (adminContainer == null) {
 					adminContainer = this.workMetaData
@@ -367,7 +361,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public Object getObject(int moIndex, ThreadState threadState) {
+	public Object getObject(ManagedObjectIndex index, ThreadState threadState) {
 
 		// Access Point: Job
 		// Locks: ThreadState
@@ -376,9 +370,6 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		ProcessState processState = threadState.getProcessState();
 
 		// Obtain the index of managed object within scope
-		ManagedObjectIndex[] indexes = this.workMetaData
-				.getManagedObjectIndexes();
-		ManagedObjectIndex index = indexes[moIndex];
 		int scopeIndex = index.getIndexOfManagedObjectWithinScope();
 
 		// Obtain the managed object container

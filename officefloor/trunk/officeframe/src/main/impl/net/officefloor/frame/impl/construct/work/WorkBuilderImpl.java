@@ -32,13 +32,9 @@ import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuild
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.task.TaskBuilderImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
-import net.officefloor.frame.internal.configuration.LinkedWorkAdministratorConfiguration;
-import net.officefloor.frame.internal.configuration.LinkedWorkManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -67,21 +63,9 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	private final List<ManagedObjectConfiguration<?>> workManagedObjects = new LinkedList<ManagedObjectConfiguration<?>>();
 
 	/**
-	 * Listing of {@link ProcessState} and {@link ThreadState} bound
-	 * {@link ManagedObject} configuration.
-	 */
-	private final List<LinkedWorkManagedObjectConfiguration> linkedManagedObjects = new LinkedList<LinkedWorkManagedObjectConfiguration>();
-
-	/**
 	 * Listing of {@link Work} bound {@link Administrator} configuration.
 	 */
 	private final List<AdministratorSourceConfiguration<?, ?>> workAdministrators = new LinkedList<AdministratorSourceConfiguration<?, ?>>();
-
-	/**
-	 * Listing of {@link ProcessState} and {@link ThreadState} bound
-	 * {@link Administrator} configuration.
-	 */
-	private final List<LinkedWorkAdministratorConfiguration> linkedAdministrators = new LinkedList<LinkedWorkAdministratorConfiguration>();
 
 	/**
 	 * Name of the initial {@link Task} for the {@link Work}.
@@ -137,14 +121,6 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	 */
 
 	@Override
-	public void linkManagedObject(String workManagedObjectName,
-			String threadProcessManagedObjectName) {
-		LinkedWorkManagedObjectConfigurationImpl link = new LinkedWorkManagedObjectConfigurationImpl(
-				workManagedObjectName, threadProcessManagedObjectName);
-		this.linkedManagedObjects.add(link);
-	}
-
-	@Override
 	@SuppressWarnings("unchecked")
 	public DependencyMappingBuilder addWorkManagedObject(
 			String workManagedObjectName, String officeManagedObjectName) {
@@ -152,14 +128,6 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 				workManagedObjectName, officeManagedObjectName);
 		this.workManagedObjects.add(builder);
 		return builder;
-	}
-
-	@Override
-	public void linkAdministrator(String workAdministratorName,
-			String threadProcessAdministratorName) {
-		LinkedWorkAdministratorConfigurationImpl link = new LinkedWorkAdministratorConfigurationImpl(
-				workAdministratorName, threadProcessAdministratorName);
-		this.linkedAdministrators.add(link);
 	}
 
 	@Override
@@ -200,21 +168,9 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	}
 
 	@Override
-	public LinkedWorkManagedObjectConfiguration[] getLinkedManagedObjectConfiguration() {
-		return this.linkedManagedObjects
-				.toArray(new LinkedWorkManagedObjectConfiguration[0]);
-	}
-
-	@Override
 	public ManagedObjectConfiguration<?>[] getManagedObjectConfiguration() {
 		return this.workManagedObjects
 				.toArray(new ManagedObjectConfiguration[0]);
-	}
-
-	@Override
-	public LinkedWorkAdministratorConfiguration[] getLinkedAdministratorConfiguration() {
-		return this.linkedAdministrators
-				.toArray(new LinkedWorkAdministratorConfiguration[0]);
 	}
 
 	@Override

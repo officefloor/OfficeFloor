@@ -17,25 +17,30 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * Configuration of a administration duty configuration for a {@link Task}.
+ * Configuration of a {@link Administrator} {@link Duty} for a {@link Task}.
  * 
  * @author Daniel
  */
 public interface TaskDutyConfiguration<A extends Enum<A>> {
 
 	/**
-	 * Obtains the name of the {@link Administrator} local to the {@link Work}.
+	 * Obtains the name of the {@link Administrator} within the
+	 * {@link AdministratorScope}.
 	 * 
-	 * @return Name of the {@link Administrator} local to the {@link Work}.
+	 * @return Name of the {@link Administrator} within the
+	 *         {@link AdministratorScope}.
 	 */
-	String getWorkAdministratorName();
+	String getScopeAdministratorName();
 
 	/**
-	 * Obtains the key identifying the duty to administer.
+	 * Obtains the key identifying the {@link Duty}.
 	 * 
-	 * @return Key identifying the duty to administer.
+	 * @return Key identifying the {@link Duty}.
 	 */
 	A getDuty();
 

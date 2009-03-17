@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -33,15 +34,18 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 	 */
 	public void testExecuteJobWithManagedObject() {
 
+		final ManagedObjectIndex moIndex = this
+				.createMock(ManagedObjectIndex.class);
+
 		// Create a job to use the managed object
 		final Object moObject = "ManagedObject Object";
-		Job job = this.createJob(false, new int[] { 0 },
+		Job job = this.createJob(false, new ManagedObjectIndex[] { moIndex },
 				new JobFunctionality() {
 					@Override
 					public Object executeFunctionality(
 							JobFunctionalityContext context) throws Throwable {
 						// Ensure get the managed object
-						Object object = context.getObject(0);
+						Object object = context.getObject(moIndex);
 						assertEquals("Incorrect managed object", moObject,
 								object);
 						return null;
@@ -49,11 +53,11 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 				});
 
 		// Record actions
-		this.record_JobContainer_initialSteps(null, 0);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_loadManagedObjects(job, true);
 		this.record_WorkContainer_coordinateManagedObjects(job);
 		this.record_WorkContainer_isManagedObjectsReady(job, true);
-		this.record_WorkContainer_getObject(0, moObject);
+		this.record_WorkContainer_getObject(moIndex, moObject);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_completeJob(job);
 		this.record_JobActivatableSet_activateJobs();
@@ -76,15 +80,18 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 	 */
 	public void testExecuteJobWithAsynchronousLoadManagedObject() {
 
+		final ManagedObjectIndex moIndex = this
+				.createMock(ManagedObjectIndex.class);
+
 		// Create a job to use the asynchronous managed object
 		final Object moObject = "AsynchronousManagedObject Object";
-		Job job = this.createJob(false, new int[] { 0 },
+		Job job = this.createJob(false, new ManagedObjectIndex[] { moIndex },
 				new JobFunctionality() {
 					@Override
 					public Object executeFunctionality(
 							JobFunctionalityContext context) throws Throwable {
 						// Ensure get the managed object
-						Object object = context.getObject(0);
+						Object object = context.getObject(moIndex);
 						assertEquals("Incorrect managed object", moObject,
 								object);
 						return null;
@@ -92,16 +99,16 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 				});
 
 		// Record actions of attempt to load managed objects
-		this.record_JobContainer_initialSteps(null, 0);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_loadManagedObjects(job, false);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Record actions on managed object now loaded
-		this.record_JobContainer_initialSteps(null, 0);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_isManagedObjectsReady(job, true);
 		this.record_WorkContainer_coordinateManagedObjects(job);
 		this.record_WorkContainer_isManagedObjectsReady(job, true);
-		this.record_WorkContainer_getObject(0, moObject);
+		this.record_WorkContainer_getObject(moIndex, moObject);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_completeJob(job);
 		this.record_JobActivatableSet_activateJobs();
@@ -128,15 +135,21 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 	 */
 	public void testExecuteJobWithTimelyCoordinateManagedObject() {
 
+		final ManagedObjectIndex moOne = this
+				.createMock(ManagedObjectIndex.class);
+		final ManagedObjectIndex moTwo = this
+				.createMock(ManagedObjectIndex.class);
+
 		// Create a job to use the asynchronous managed object
 		final Object moObject = "CoordinatingManagedObject Object";
-		Job job = this.createJob(false, new int[] { 0, 1 },
+		Job job = this.createJob(false,
+				new ManagedObjectIndex[] { moOne, moTwo },
 				new JobFunctionality() {
 					@Override
 					public Object executeFunctionality(
 							JobFunctionalityContext context) throws Throwable {
 						// Ensure get the managed object
-						Object object = context.getObject(1);
+						Object object = context.getObject(moTwo);
 						assertEquals("Incorrect managed object", moObject,
 								object);
 						return null;
@@ -144,16 +157,16 @@ public class ManagedObjectJobContainerTest extends AbstractJobContainerTest {
 				});
 
 		// Record actions of attempt to load managed objects
-		this.record_JobContainer_initialSteps(null, 0, 1);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_loadManagedObjects(job, true);
 		this.record_WorkContainer_coordinateManagedObjects(job);
 		this.record_WorkContainer_isManagedObjectsReady(job, false);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Record actions on managed object now loaded
-		this.record_JobContainer_initialSteps(null, 0, 1);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_WorkContainer_isManagedObjectsReady(job, true);
-		this.record_WorkContainer_getObject(1, moObject);
+		this.record_WorkContainer_getObject(moTwo, moObject);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_completeJob(job);
 		this.record_JobActivatableSet_activateJobs();

@@ -27,6 +27,7 @@ import net.officefloor.frame.spi.team.Job;
  * @author Daniel
  */
 public class AsynchronousJobContainerTest extends AbstractJobContainerTest {
+
 	/**
 	 * Ensures execution of a {@link Job} with an asynchronous {@link Flow}
 	 * invoked.
@@ -46,7 +47,7 @@ public class AsynchronousJobContainerTest extends AbstractJobContainerTest {
 		});
 
 		// Record invoking the asynchronous job.
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_doAsynchronousFlow(job, asynchronousFlowParameter);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_completeJob(job);

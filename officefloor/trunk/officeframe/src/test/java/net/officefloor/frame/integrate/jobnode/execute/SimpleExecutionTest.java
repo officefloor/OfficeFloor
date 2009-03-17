@@ -20,6 +20,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.integrate.jobnode.AbstractTaskNodeTestCase;
 import net.officefloor.frame.integrate.jobnode.ExecutionNode;
 import net.officefloor.frame.integrate.jobnode.ManagedObjectProcesser;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -52,8 +53,8 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 		final Object[] processObject = new Object[1];
 
 		// Flag use of the process managed object
-		this.getInitialNode().processManagedObject(PROCESS_MO_INDEX, OBJECT,
-				new ManagedObjectProcesser<Object>() {
+		this.getInitialNode().processManagedObject(ManagedObjectScope.PROCESS,
+				OBJECT, new ManagedObjectProcesser<Object>() {
 					public void process(Object object) {
 						processObject[0] = object;
 					}
@@ -76,8 +77,8 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 		final Object[] processObject = new Object[1];
 
 		// Flag use of the thread managed object
-		this.getInitialNode().processManagedObject(THREAD_MO_INDEX, OBJECT,
-				new ManagedObjectProcesser<Object>() {
+		this.getInitialNode().processManagedObject(ManagedObjectScope.THREAD,
+				OBJECT, new ManagedObjectProcesser<Object>() {
 					public void process(Object object) {
 						processObject[0] = object;
 					}
@@ -100,8 +101,8 @@ public class SimpleExecutionTest extends AbstractTaskNodeTestCase<Work> {
 		final Object[] processObject = new Object[1];
 
 		// Flag use of the process managed object
-		this.getInitialNode().processManagedObject(WORK_MO_INDEX, OBJECT,
-				new ManagedObjectProcesser<Object>() {
+		this.getInitialNode().processManagedObject(ManagedObjectScope.WORK,
+				OBJECT, new ManagedObjectProcesser<Object>() {
 					public void process(Object object) {
 						processObject[0] = object;
 					}

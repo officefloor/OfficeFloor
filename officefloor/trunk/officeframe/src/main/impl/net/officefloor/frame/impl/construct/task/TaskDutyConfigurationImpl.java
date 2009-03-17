@@ -16,8 +16,8 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
+import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
 
@@ -30,9 +30,9 @@ public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 		TaskDutyConfiguration<A> {
 
 	/**
-	 * Name of the {@link Administrator} within {@link Work}.
+	 * Name of the {@link Administrator} within the {@link AdministratorScope}.
 	 */
-	private final String workAdministratorName;
+	private final String scopeAdministratorName;
 
 	/**
 	 * Key identifying the {@link Duty} of the {@link Administrator}.
@@ -42,13 +42,14 @@ public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 	/**
 	 * Initiate.
 	 * 
-	 * @param workAdministratorName
-	 *            Name of the {@link Administrator} within {@link Work}.
+	 * @param scopeAdministratorName
+	 *            Name of the {@link Administrator} within the
+	 *            {@link AdministratorScope}.
 	 * @param dutyKey
 	 *            Key identifying the {@link Duty} of the {@link Administrator}.
 	 */
-	public TaskDutyConfigurationImpl(String workAdministratorName, A dutyKey) {
-		this.workAdministratorName = workAdministratorName;
+	public TaskDutyConfigurationImpl(String scopeAdministratorName, A dutyKey) {
+		this.scopeAdministratorName = scopeAdministratorName;
 		this.dutyKey = dutyKey;
 	}
 
@@ -57,13 +58,13 @@ public class TaskDutyConfigurationImpl<A extends Enum<A>> implements
 	 */
 
 	@Override
-	public A getDuty() {
-		return this.dutyKey;
+	public String getScopeAdministratorName() {
+		return this.scopeAdministratorName;
 	}
 
 	@Override
-	public String getWorkAdministratorName() {
-		return this.workAdministratorName;
+	public A getDuty() {
+		return this.dutyKey;
 	}
 
 }

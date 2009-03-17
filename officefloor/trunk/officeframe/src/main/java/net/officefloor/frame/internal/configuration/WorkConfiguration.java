@@ -19,8 +19,6 @@ package net.officefloor.frame.internal.configuration;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -46,15 +44,6 @@ public interface WorkConfiguration<W extends Work> {
 	WorkFactory<W> getWorkFactory();
 
 	/**
-	 * Obtains the {@link ProcessState} and {@link ThreadState} bound
-	 * {@link ManagedObject} instances for this {@link Work}.
-	 * 
-	 * @return Listing of {@link ManagedObject} configuration instances for this
-	 *         {@link Work}.
-	 */
-	LinkedWorkManagedObjectConfiguration[] getLinkedManagedObjectConfiguration();
-
-	/**
 	 * Obtains the configuration of the {@link Work} bound {@link ManagedObject}
 	 * instances.
 	 * 
@@ -62,15 +51,6 @@ public interface WorkConfiguration<W extends Work> {
 	 *         {@link Work}.
 	 */
 	ManagedObjectConfiguration<?>[] getManagedObjectConfiguration();
-
-	/**
-	 * Obtains the {@link ProcessState} and {@link ThreadState} bound
-	 * {@link Administrator} instances for this {@link Work}.
-	 * 
-	 * @return Listing of {@link Administrator} configuration instances for this
-	 *         {@link Work}.
-	 */
-	LinkedWorkAdministratorConfiguration[] getLinkedAdministratorConfiguration();
 
 	/**
 	 * Obtains the configuration of the {@link Work} bound {@link Administrator}

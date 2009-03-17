@@ -402,7 +402,8 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		// Create the dependency mappings
 		ManagedObjectDependencyConfiguration<d>[] dependencyMappings = moMetaData.managedObjectConfiguration
 				.getDependencyConfiguration();
-		Map<d, ManagedObjectDependencyConfiguration<d>> dependencies = new HashMap<d, ManagedObjectDependencyConfiguration<d>>();
+		Map<d, ManagedObjectDependencyConfiguration<d>> dependencies = new EnumMap<d, ManagedObjectDependencyConfiguration<d>>(
+				dependencyClass);
 		for (ManagedObjectDependencyConfiguration<d> dependencyMapping : dependencyMappings) {
 			dependencies.put(dependencyMapping.getDependencyKey(),
 					dependencyMapping);

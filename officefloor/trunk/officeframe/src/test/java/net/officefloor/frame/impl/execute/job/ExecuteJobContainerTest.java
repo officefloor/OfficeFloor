@@ -35,7 +35,7 @@ public class ExecuteJobContainerTest extends AbstractJobContainerTest {
 		Job job = this.createJob(false);
 
 		// Record actions
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_completeJob(job);
 		this.record_JobActivatableSet_activateJobs();
@@ -73,15 +73,15 @@ public class ExecuteJobContainerTest extends AbstractJobContainerTest {
 		});
 
 		// Record actions for first execution of job
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Record actions for second execution of job
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Record actions for third execution of job that completes
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_completeJob(job);
 		this.record_JobActivatableSet_activateJobs();
@@ -118,7 +118,7 @@ public class ExecuteJobContainerTest extends AbstractJobContainerTest {
 		});
 
 		// Record actions
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_JobMetaData_getNextTaskInFlow(true);
 		this.record_Flow_createJob(job, nextJobParameter);
 		this.record_completeJob(job);

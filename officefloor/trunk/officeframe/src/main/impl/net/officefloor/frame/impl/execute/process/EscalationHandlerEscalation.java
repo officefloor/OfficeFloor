@@ -70,14 +70,15 @@ public class EscalationHandlerEscalation implements Escalation {
 
 		// Create the escalation task meta-data
 		TaskMetaDataImpl<Throwable, EscalationHandlerTask, None, None> taskMetaData = new TaskMetaDataImpl<Throwable, EscalationHandlerTask, None, None>(
-				"Escalation Handler Task", task, team, new int[0], new int[0],
+				"Escalation Handler Task", task, team,
+				new ManagedObjectIndex[0], new ManagedObjectIndex[0],
 				new TaskDutyAssociation[0], new TaskDutyAssociation[0]);
 
 		// Create the escalation work meta-data (and load to task meta-data)
 		WorkMetaData<EscalationHandlerTask> workMetaData = new WorkMetaDataImpl<EscalationHandlerTask>(
-				"Escalation Handler Work", task, new ManagedObjectIndex[0],
-				new ManagedObjectMetaData[0], new AdministratorMetaData[0],
-				null, new TaskMetaData[] { taskMetaData });
+				"Escalation Handler Work", task, new ManagedObjectMetaData[0],
+				new AdministratorMetaData[0], null,
+				new TaskMetaData[] { taskMetaData });
 		taskMetaData.loadRemainingState(workMetaData, new FlowMetaData[0],
 				null, null);
 

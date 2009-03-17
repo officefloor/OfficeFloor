@@ -29,11 +29,15 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.job.JobActivatableSetImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobActivatableSet;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkMetaData;
@@ -125,15 +129,15 @@ public class ExecutionNode<W extends Work> implements
 	/**
 	 * Link in {@link ManagedObject} to be processed.
 	 * 
-	 * @param workMoIndex
-	 *            Index of the {@link ManagedObject} within the {@link Work}.
+	 * @param moScope
+	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
 	 * @param objectOfManagedObject
 	 *            Object to be managed by the {@link ManagedObject}.
 	 * @param processer
 	 *            {@link ManagedObjectProcesser} to process the
 	 *            {@link ManagedObject}.
 	 */
-	public <O> void processManagedObject(int workMoIndex,
+	public <O> void processManagedObject(ManagedObjectScope moScope,
 			O objectOfManagedObject, ManagedObjectProcesser<O> processer) {
 
 		ManagedObjectSource<?, ?> source;
@@ -141,28 +145,28 @@ public class ExecutionNode<W extends Work> implements
 		boolean isAsynchronous;
 
 		// Obtain the source and create the returned Managed Object
-		switch (workMoIndex) {
-		case AbstractTaskNodeTestCase.PROCESS_MO_INDEX:
+		switch (moScope) {
+		case PROCESS:
 			source = this.testCase.getProcessManagedObjectSource();
 			mo = this.testCase.createMock(AsynchronousManagedObject.class);
 			isAsynchronous = true;
 			break;
 
-		case AbstractTaskNodeTestCase.THREAD_MO_INDEX:
+		case THREAD:
 			source = this.testCase.getThreadManagedObjectSource();
 			mo = this.testCase.createMock(ManagedObject.class);
 			isAsynchronous = false;
 			break;
 
-		case AbstractTaskNodeTestCase.WORK_MO_INDEX:
+		case WORK:
 			source = this.testCase.getWorkManagedObjectSource();
 			mo = this.testCase.createMock(ManagedObject.class);
 			isAsynchronous = false;
 			break;
 
 		default:
-			throw new IllegalStateException("Unknown managed object index "
-					+ workMoIndex);
+			throw new IllegalStateException("Unknown managed object scope "
+					+ moScope);
 		}
 
 		// Record obtaining the Managed Object
@@ -197,8 +201,9 @@ public class ExecutionNode<W extends Work> implements
 		}
 
 		// Add to listing of processing for the Task
-		this.taskProcessing.add(new ManagedObjectTaskProcessItem<W, O>(
-				workMoIndex, isAsynchronous, processer));
+		this.taskProcessing.add(new ManagedObjectTaskProcessItem<O>(
+				new ManagedObjectIndexImpl(moScope, 0), isAsynchronous,
+				processer));
 	}
 
 	/**
@@ -212,8 +217,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	/**
-	 * Add a {@link net.officefloor.frame.internal.structure.Flow} to be
-	 * executed.
+	 * Add a {@link Flow} to be executed.
 	 * 
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum}.
@@ -223,7 +227,7 @@ public class ExecutionNode<W extends Work> implements
 	void addFlow(FlowInstigationStrategyEnum instigationStrategy,
 			TaskMetaData<?, W, ?, ?> initialTask) {
 		// Add to listing of processing for the Task
-		this.taskProcessing.add(new FlowTaskProcessItem<W>(instigationStrategy,
+		this.taskProcessing.add(new FlowTaskProcessItem(instigationStrategy,
 				initialTask, this.testCase));
 	}
 
@@ -235,7 +239,7 @@ public class ExecutionNode<W extends Work> implements
 	 */
 	void addJoin(ExecutionNode<W> futureNode) {
 		// Add to listing of processing for the Task
-		this.taskProcessing.add(new JoinTaskProcessItem<W>(futureNode,
+		this.taskProcessing.add(new JoinTaskProcessItem(futureNode,
 				this.testCase));
 	}
 
@@ -243,154 +247,72 @@ public class ExecutionNode<W extends Work> implements
 	 * ===================== TaskMetaData =================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getTaskName()
-	 */
 	@Override
 	public String getTaskName() {
 		return this.getClass().getName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobMetaData#createJobActivableSet
-	 * ()
-	 */
 	@Override
 	public JobActivatableSet createJobActivableSet() {
 		return new JobActivatableSetImpl();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskMetaData#getTaskFactory()
-	 */
 	@Override
 	public TaskFactory<Object, W, Indexed, Indexed> getTaskFactory() {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getTeam()
-	 */
 	@Override
 	public Team getTeam() {
 		return this.testCase;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.TaskMetaData#
-	 * getRequiredManagedObjects()
-	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public int[] getRequiredManagedObjects() {
+	public ManagedObjectIndex[] getRequiredManagedObjects() {
 		// Create the listing of required managed objects
-		List<Integer> moListing = new LinkedList<Integer>();
-		int i = 0;
+		List<ManagedObjectIndex> moListing = new LinkedList<ManagedObjectIndex>();
 		for (TaskProcessItem<W> item : this.taskProcessing) {
 			if (item instanceof ManagedObjectTaskProcessItem) {
-				ManagedObjectTaskProcessItem<W, ?> moItem = (ManagedObjectTaskProcessItem<W, ?>) item;
-				moListing.add(moItem.getWorkManagedObjectIndex());
+				ManagedObjectTaskProcessItem<?> moItem = (ManagedObjectTaskProcessItem<?>) item;
+				moListing.add(moItem.getManagedObjectIndex());
 			}
-			i++;
-		}
-
-		// Create the required managed objects
-		int[] requiredMo = new int[moListing.size()];
-		i = 0;
-		for (Integer integer : moListing) {
-			requiredMo[i++] = integer.intValue();
 		}
 
 		// Return the required managed objects
-		return requiredMo;
+		return moListing.toArray(new ManagedObjectIndex[0]);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.TaskMetaData#
-	 * translateManagedObjectIndexForWork(int)
-	 */
 	@Override
-	@SuppressWarnings("unchecked")
-	public int translateManagedObjectIndexForWork(int taskMoIndex) {
-		return ((ManagedObjectTaskProcessItem<W, ?>) this.taskProcessing
-				.get(taskMoIndex)).getWorkManagedObjectIndex();
+	public ManagedObjectIndex translateManagedObjectIndexForWork(int taskMoIndex) {
+		return ((ManagedObjectTaskProcessItem<?>) this.taskProcessing
+				.get(taskMoIndex)).getManagedObjectIndex();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMetaData#getFlow(int)
-	 */
 	@Override
 	public FlowMetaData<?> getFlow(int flowIndex) {
 		return (FlowMetaData<?>) this.taskProcessing.get(flowIndex);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskMetaData#getWorkMetaData()
-	 */
 	@Override
 	public WorkMetaData<W> getWorkMetaData() {
 		return this.workMetaData;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskMetaData#getEscalationProcedure
-	 * ()
-	 */
 	@Override
 	public EscalationProcedure getEscalationProcedure() {
 		return new EscalationProcedureImpl();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.TaskMetaData#getNextTaskInFlow()
-	 */
 	@Override
 	public TaskMetaData<?, ?, ?, ?> getNextTaskInFlow() {
 		return this.nextTask;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.TaskMetaData#
-	 * getPreAdministrationMetaData()
-	 */
 	@Override
 	public TaskDutyAssociation<?>[] getPreAdministrationMetaData() {
 		return new TaskDutyAssociation[0];
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.TaskMetaData#
-	 * getPostAdministrationMetaData()
-	 */
 	@Override
 	public TaskDutyAssociation<?>[] getPostAdministrationMetaData() {
 		return new TaskDutyAssociation[0];
@@ -400,11 +322,6 @@ public class ExecutionNode<W extends Work> implements
 	 * ===================== TaskFactory ======================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
-	 */
 	@Override
 	public Task<Object, W, Indexed, Indexed> createTask(W work) {
 
@@ -425,13 +342,6 @@ public class ExecutionNode<W extends Work> implements
 	 */
 	protected boolean isTaskProcessed = false;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
-	 * .execute.TaskContext)
-	 */
 	@Override
 	public Object doTask(TaskContext<Object, W, Indexed, Indexed> context)
 			throws Exception {
@@ -460,293 +370,247 @@ public class ExecutionNode<W extends Work> implements
 		return this.taskReturnValue;
 	}
 
-}
-
-/**
- * Contract for a process item of a
- * {@link net.officefloor.frame.api.execute.Task}.
- */
-interface TaskProcessItem<W extends Work> {
-
 	/**
-	 * Process.
-	 * 
-	 * @param itemIndex
-	 *            Index of this item.
-	 * @param context
-	 *            {@link TaskContext} in which to process.
-	 * @return Flag indicating whether the {@link Task} should be re-executed.
+	 * Contract for a process item of a {@link Task}.
 	 */
-	boolean process(int itemIndex,
-			TaskContext<Object, W, Indexed, Indexed> context);
+	private interface TaskProcessItem<W extends Work> {
 
-}
+		/**
+		 * Process.
+		 * 
+		 * @param itemIndex
+		 *            Index of this item.
+		 * @param context
+		 *            {@link TaskContext} in which to process.
+		 * @return Flag indicating whether the {@link Task} should be
+		 *         re-executed.
+		 */
+		boolean process(int itemIndex,
+				TaskContext<Object, W, Indexed, Indexed> context);
 
-/**
- * {@link TaskProcessItem} to process a
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
- */
-class ManagedObjectTaskProcessItem<W extends Work, O> implements
-		TaskProcessItem<W> {
-
-	/**
-	 * Index of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 */
-	protected final int workMoIndex;
-
-	/**
-	 * Specifies whether the {@link ManagedObject} is
-	 * {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}
-	 * .
-	 * 
-	 * @return Whether the {@link ManagedObject} is
-	 *         {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}
-	 *         .
-	 */
-	protected final boolean isAsynchronous;
-
-	/**
-	 * {@link ManagedObjectProcesser}.
-	 */
-	protected final ManagedObjectProcesser<O> processer;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param workMoIndex
-	 *            Index of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 * @param isAsynchronous
-	 *            <code>true</code> if the {@link ManagedObject} is
-	 *            {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}
-	 *            .
-	 * @param processer
-	 *            {@link ManagedObjectProcesser} for the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
-	 */
-	public ManagedObjectTaskProcessItem(int workMoIndex,
-			boolean isAsynchronous, ManagedObjectProcesser<O> processer) {
-		this.workMoIndex = workMoIndex;
-		this.isAsynchronous = isAsynchronous;
-		this.processer = processer;
 	}
 
 	/**
-	 * Obtains the index of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} to be
-	 * processed for the {@link Work}.
-	 * 
-	 * @return Index of the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject} to
-	 *         be processed for the {@link Work}.
+	 * {@link TaskProcessItem} to process a {@link ManagedObject}.
 	 */
-	public int getWorkManagedObjectIndex() {
-		return this.workMoIndex;
-	}
+	private class ManagedObjectTaskProcessItem<O> implements TaskProcessItem<W> {
 
-	/**
-	 * Obtains whether the {@link ManagedObject} is
-	 * {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}
-	 * .
-	 * 
-	 * @return <code>true</code> if the {@link ManagedObject} is
-	 *         {@link net.officefloor.frame.spi.managedobject.AsynchronousManagedObject}
-	 *         .
-	 */
-	public boolean isAsynchronous() {
-		return this.isAsynchronous;
-	}
+		/**
+		 * {@link ManagedObjectIndex}.
+		 */
+		protected final ManagedObjectIndex moIndex;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.execute.impl.TaskProcessItem#process(net.officefloor
-	 * .frame.api.execute.TaskContext)
-	 */
-	@SuppressWarnings("unchecked")
-	public boolean process(int itemIndex, TaskContext context) {
-		// Obtain the object of the Managed Object
-		O object = (O) context.getObject(itemIndex);
+		/**
+		 * Specifies whether the {@link ManagedObject} is
+		 * {@link AsynchronousManagedObject}.
+		 * 
+		 * @return Whether the {@link ManagedObject} is
+		 *         {@link AsynchronousManagedObject}.
+		 */
+		protected final boolean isAsynchronous;
 
-		// Process the item
-		this.processer.process(object);
+		/**
+		 * {@link ManagedObjectProcesser}.
+		 */
+		protected final ManagedObjectProcesser<O> processer;
 
-		// Processing complete
-		return true;
-	}
-
-}
-
-/**
- * {@link TaskProcessItem} to instigate a
- * {@link net.officefloor.frame.internal.structure.Flow}.
- */
-class FlowTaskProcessItem<W extends Work> implements TaskProcessItem<W>,
-		FlowMetaData<W> {
-
-	/**
-	 * {@link FlowInstigationStrategyEnum}.
-	 */
-	protected final FlowInstigationStrategyEnum instigationStrategy;
-
-	/**
-	 * {@link TaskMetaData}.
-	 */
-	protected final TaskMetaData<?, W, ?, ?> taskMetaData;
-
-	/**
-	 * {@link AbstractTaskNodeTestCase}.
-	 */
-	protected final AbstractTaskNodeTestCase<W> testCase;
-
-	/**
-	 * {@link AssetManager} to managed the
-	 * {@link net.officefloor.frame.internal.structure.Flow}.
-	 */
-	protected final AssetManager flowManager;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @param taskMetaData
-	 *            {@link TaskMetaData}.
-	 * @param testCase
-	 *            {@link AbstractTaskNodeTestCase}.
-	 */
-	public FlowTaskProcessItem(FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData<?, W, ?, ?> taskMetaData,
-			AbstractTaskNodeTestCase<W> testCase) {
-		this.instigationStrategy = instigationStrategy;
-		this.taskMetaData = taskMetaData;
-		this.testCase = testCase;
-
-		// Create the flow manager (only if asynchronous)
-		if (this.instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
-			this.flowManager = new AssetManagerImpl();
-		} else {
-			// No need for flow management
-			this.flowManager = null;
+		/**
+		 * Initiate.
+		 * 
+		 * @param moIndex
+		 *            {@link ManagedObjectIndex}.
+		 * @param isAsynchronous
+		 *            <code>true</code> if the {@link ManagedObject} is
+		 *            {@link AsynchronousManagedObject}.
+		 * @param processer
+		 *            {@link ManagedObjectProcesser} for the
+		 *            {@link ManagedObject}.
+		 */
+		public ManagedObjectTaskProcessItem(ManagedObjectIndex moIndex,
+				boolean isAsynchronous, ManagedObjectProcesser<O> processer) {
+			this.moIndex = moIndex;
+			this.isAsynchronous = isAsynchronous;
+			this.processer = processer;
 		}
+
+		/**
+		 * Obtains the {@link ManagedObjectIndex} of the {@link ManagedObject}.
+		 * 
+		 * @return {@link ManagedObjectIndex} of the {@link ManagedObject}.
+		 */
+		public ManagedObjectIndex getManagedObjectIndex() {
+			return this.moIndex;
+		}
+
+		/**
+		 * Obtains whether the {@link ManagedObject} is
+		 * {@link AsynchronousManagedObject}.
+		 * 
+		 * @return <code>true</code> if the {@link ManagedObject} is
+		 *         {@link AsynchronousManagedObject}.
+		 */
+		public boolean isAsynchronous() {
+			return this.isAsynchronous;
+		}
+
+		/*
+		 * ==================== TaskProcessItem ==========================
+		 */
+
+		@SuppressWarnings("unchecked")
+		public boolean process(int itemIndex, TaskContext context) {
+			// Obtain the object of the Managed Object
+			O object = (O) context.getObject(itemIndex);
+
+			// Process the item
+			this.processer.process(object);
+
+			// Processing complete
+			return true;
+		}
+
 	}
-
-	/*
-	 * ====================================================================
-	 * TaskProcessItem
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.execute.impl.TaskProcessItem#process(int,
-	 * net.officefloor.frame.api.execute.TaskContext)
-	 */
-	public boolean process(int itemIndex,
-			TaskContext<Object, W, Indexed, Indexed> context) {
-		// Do the particular flow
-		FlowFuture future = context.doFlow(itemIndex, null);
-
-		// Obtain the execution node just created for flow
-		ExecutionNode<?> flowNode = this.testCase.getLatestTaskNode();
-
-		// Register the flow future
-		this.testCase.registerFlowFuture(flowNode, future);
-
-		// Only complete if not parallel flow instigated
-		return (this.instigationStrategy != FlowInstigationStrategyEnum.PARALLEL);
-	}
-
-	/*
-	 * ====================================================================
-	 * FlowMetaData
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.FlowMetaData#getInstigationStrategy
-	 * ()
-	 */
-	public FlowInstigationStrategyEnum getInstigationStrategy() {
-		return this.instigationStrategy;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.FlowMetaData#getInitialTaskMetaData
-	 * ()
-	 */
-	public TaskMetaData<?, W, ?, ?> getInitialTaskMetaData() {
-		return this.taskMetaData;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.FlowMetaData#getFlowManager()
-	 */
-	public AssetManager getFlowManager() {
-		return this.flowManager;
-	}
-
-}
-
-/**
- * {@link TaskProcessItem} to join a
- * {@link net.officefloor.frame.api.execute.FlowFuture}.
- */
-class JoinTaskProcessItem<W extends Work> implements TaskProcessItem<W> {
 
 	/**
-	 * {@link ExecutionNode} for completion.
+	 * {@link TaskProcessItem} to instigate a {@link Flow}.
 	 */
-	protected final ExecutionNode<W> futureNode;
+	private class FlowTaskProcessItem implements TaskProcessItem<W>,
+			FlowMetaData<W> {
 
-	/**
-	 * {@link AbstractTaskNodeTestCase}.
-	 */
-	protected final AbstractTaskNodeTestCase<W> testCase;
+		/**
+		 * {@link FlowInstigationStrategyEnum}.
+		 */
+		protected final FlowInstigationStrategyEnum instigationStrategy;
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param futureNode
-	 *            {@link ExecutionNode} for completion.
-	 * @param testCase
-	 *            {@link AbstractTaskNodeTestCase}.
-	 */
-	public JoinTaskProcessItem(ExecutionNode<W> futureNode,
-			AbstractTaskNodeTestCase<W> testCase) {
-		this.futureNode = futureNode;
-		this.testCase = testCase;
+		/**
+		 * {@link TaskMetaData}.
+		 */
+		protected final TaskMetaData<?, W, ?, ?> taskMetaData;
+
+		/**
+		 * {@link AbstractTaskNodeTestCase}.
+		 */
+		protected final AbstractTaskNodeTestCase<W> testCase;
+
+		/**
+		 * {@link AssetManager} to managed the {@link Flow}.
+		 */
+		protected final AssetManager flowManager;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param instigationStrategy
+		 *            {@link FlowInstigationStrategyEnum}.
+		 * @param taskMetaData
+		 *            {@link TaskMetaData}.
+		 * @param testCase
+		 *            {@link AbstractTaskNodeTestCase}.
+		 */
+		public FlowTaskProcessItem(
+				FlowInstigationStrategyEnum instigationStrategy,
+				TaskMetaData<?, W, ?, ?> taskMetaData,
+				AbstractTaskNodeTestCase<W> testCase) {
+			this.instigationStrategy = instigationStrategy;
+			this.taskMetaData = taskMetaData;
+			this.testCase = testCase;
+
+			// Create the flow manager (only if asynchronous)
+			if (this.instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
+				this.flowManager = new AssetManagerImpl();
+			} else {
+				// No need for flow management
+				this.flowManager = null;
+			}
+		}
+
+		/*
+		 * =================== TaskProcessItem ===============================
+		 */
+
+		@Override
+		public boolean process(int itemIndex,
+				TaskContext<Object, W, Indexed, Indexed> context) {
+			// Do the particular flow
+			FlowFuture future = context.doFlow(itemIndex, null);
+
+			// Obtain the execution node just created for flow
+			ExecutionNode<?> flowNode = this.testCase.getLatestTaskNode();
+
+			// Register the flow future
+			this.testCase.registerFlowFuture(flowNode, future);
+
+			// Only complete if not parallel flow instigated
+			return (this.instigationStrategy != FlowInstigationStrategyEnum.PARALLEL);
+		}
+
+		/*
+		 * ==================== FlowMetaData ===============================
+		 */
+
+		@Override
+		public FlowInstigationStrategyEnum getInstigationStrategy() {
+			return this.instigationStrategy;
+		}
+
+		@Override
+		public TaskMetaData<?, W, ?, ?> getInitialTaskMetaData() {
+			return this.taskMetaData;
+		}
+
+		@Override
+		public AssetManager getFlowManager() {
+			return this.flowManager;
+		}
+
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.execute.impl.TaskProcessItem#process(int,
-	 * net.officefloor.frame.api.execute.TaskContext)
+	/**
+	 * {@link TaskProcessItem} to join a {@link FlowFuture}.
 	 */
-	public boolean process(int itemIndex,
-			TaskContext<Object, W, Indexed, Indexed> context) {
+	private class JoinTaskProcessItem implements TaskProcessItem<W> {
 
-		// Obtain the flow future for the completing node
-		FlowFuture future = this.testCase.getFlowFuture(this.futureNode);
+		/**
+		 * {@link ExecutionNode} for completion.
+		 */
+		protected final ExecutionNode<W> futureNode;
 
-		// Wait on flow future
-		context.join(future);
+		/**
+		 * {@link AbstractTaskNodeTestCase}.
+		 */
+		protected final AbstractTaskNodeTestCase<W> testCase;
 
-		// Not complete (execute again)
-		return false;
+		/**
+		 * Initiate.
+		 * 
+		 * @param futureNode
+		 *            {@link ExecutionNode} for completion.
+		 * @param testCase
+		 *            {@link AbstractTaskNodeTestCase}.
+		 */
+		public JoinTaskProcessItem(ExecutionNode<W> futureNode,
+				AbstractTaskNodeTestCase<W> testCase) {
+			this.futureNode = futureNode;
+			this.testCase = testCase;
+		}
+
+		/*
+		 * ================= TaskProcessItem ==================================
+		 */
+
+		@Override
+		public boolean process(int itemIndex,
+				TaskContext<Object, W, Indexed, Indexed> context) {
+
+			// Obtain the flow future for the completing node
+			FlowFuture future = this.testCase.getFlowFuture(this.futureNode);
+
+			// Wait on flow future
+			context.join(future);
+
+			// Not complete (execute again)
+			return false;
+		}
 	}
 
 }

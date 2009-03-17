@@ -25,6 +25,7 @@ import net.officefloor.frame.impl.execute.job.JobExecuteContext;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.team.Job;
@@ -78,13 +79,6 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 * ====================== JobContainer ==========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.impl.execute.JobContainer#executeJob(net.officefloor
-	 * .frame.impl.execute.JobExecuteContext)
-	 */
 	@Override
 	protected Object executeJob(JobExecuteContext context) throws Throwable {
 		// Execute the task
@@ -95,46 +89,25 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 * ====================== TaskContext ===========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getWork()
-	 */
 	@Override
 	public W getWork() {
 		return this.workContainer.getWork(this.flow.getThreadState());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getParameter()
-	 */
 	@Override
 	public P getParameter() {
 		return this.parameter;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.TaskContext#getObject(java.lang.Enum)
-	 */
 	@Override
 	public Object getObject(M key) {
 		return this.getObject(key.ordinal());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getObject(int)
-	 */
 	@Override
 	public Object getObject(int managedObjectIndex) {
 		// Obtain the work managed object index
-		int workMoIndex = this.nodeMetaData
+		ManagedObjectIndex workMoIndex = this.nodeMetaData
 				.translateManagedObjectIndexForWork(managedObjectIndex);
 
 		// Return the Object

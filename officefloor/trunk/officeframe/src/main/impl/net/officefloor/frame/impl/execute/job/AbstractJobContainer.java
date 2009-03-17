@@ -30,6 +30,7 @@ import net.officefloor.frame.internal.structure.JobActivatableSet;
 import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -69,10 +70,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	private JobState jobState = JobState.LOAD_MANAGED_OBJECTS;
 
 	/**
-	 * {@link work} indexes to the {@link ManagedObject} instances that must be
-	 * loaded before the {@link Task} may be executed.
+	 * {@link work} {@link ManagedObjectIndex} instances to the
+	 * {@link ManagedObject} instances that must be loaded before the
+	 * {@link Task} may be executed.
 	 */
-	private final int[] requiredManagedObjects;
+	private final ManagedObjectIndex[] requiredManagedObjects;
 
 	/**
 	 * Initiate.
@@ -86,14 +88,16 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 *            {@link JobMetaData} for this node.
 	 * @param parallelOwner
 	 *            If this is invoked as or a parallel {@link Task} or from a
-	 *            parallel {@link Task} this will be the invokee. If not
+	 *            parallel {@link Task} this will be the invoker. If not
 	 *            parallel then will be <code>null</code>.
 	 * @param requiredManagedObjects
-	 *            {@link work} indexes to the {@link ManagedObject} instances
-	 *            that must be loaded before the {@link Task} may be executed.
+	 *            {@link work} {@link ManagedObjectIndex} instances to the
+	 *            {@link ManagedObject} instances that must be loaded before the
+	 *            {@link Task} may be executed.
 	 */
 	public AbstractJobContainer(Flow flow, WorkContainer<W> workContainer,
-			N nodeMetaData, JobNode parallelOwner, int[] requiredManagedObjects) {
+			N nodeMetaData, JobNode parallelOwner,
+			ManagedObjectIndex[] requiredManagedObjects) {
 		this.flow = flow;
 		this.workContainer = workContainer;
 		this.nodeMetaData = nodeMetaData;

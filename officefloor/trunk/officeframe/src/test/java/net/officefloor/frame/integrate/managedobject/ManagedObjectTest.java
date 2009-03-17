@@ -30,6 +30,7 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
@@ -253,13 +254,6 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Scope for the {@link ManagedObject}.
-	 */
-	private enum ManagedObjectScope {
-		WORK, PROCESS
-	}
-
-	/**
 	 * Resets the {@link Task} to test invoking again.
 	 */
 	private void resetTask() {
@@ -363,33 +357,13 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			taskBuilder.buildParameter();
 		}
 		if (isManagedObjectInside) {
-			// Provide the invoked task dependent on process managed object
+			// Provide the invoked task dependent on managed object
 			ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask(
 					INVOKED_TASK, "TEAM");
 			taskBuilder.buildParameter();
-
-			// Register managed object to task based on scope
-			switch (scope) {
-			case PROCESS:
-				// Register as process managed object
-				taskBuilder.buildObject("DEPENDENCY", "MO_LINK");
-
-				// Register the process managed object within the office
-				this.getOfficeBuilder().addProcessManagedObject("MO_LINK",
-						"OFFICE_MO");
-				this.getOfficeBuilder().registerManagedObjectSource(
-						"OFFICE_MO", "MO");
-				break;
-			case WORK:
-				// Register as work bound managed object
-				taskBuilder.buildObject("MO");
-
-				// Register the managed object within the office
-				this.getOfficeBuilder().registerManagedObjectSource("MO", "MO");
-				break;
-			default:
-				fail("Unknown managed object scope " + scope);
-			}
+			this.getOfficeBuilder().registerManagedObjectSource("OFFICE_MO",
+					"MO");
+			taskBuilder.buildObject("OFFICE_MO", scope);
 		}
 		this.constructTeam("TEAM", new PassiveTeam());
 

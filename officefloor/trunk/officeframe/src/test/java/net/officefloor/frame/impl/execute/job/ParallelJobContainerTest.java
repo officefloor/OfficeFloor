@@ -37,7 +37,7 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 		Job job = this.createJob(true);
 
 		// Record actions
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_ParallelOwner_unlinkAndActivate();
 		this.record_completeJob(job);
@@ -74,7 +74,7 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 		});
 
 		// Record invoking the parallel job
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_doParallelFlow(job, parallelFlowParameter);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_parallelJob_getParallelNode(null);
@@ -82,7 +82,7 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 		this.record_JobActivatableSet_activateJobs();
 
 		// Record parallel job complete and now completing job
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_completeJob(job);
 		this.record_JobActivatableSet_activateJobs();
 
@@ -125,7 +125,7 @@ public class ParallelJobContainerTest extends AbstractJobContainerTest {
 
 		// Record invoking the parallel job.
 		// Parallel job is run immediately by a passive team.
-		this.record_JobContainer_initialSteps(null);
+		this.record_JobContainer_initialSteps(job, null);
 		this.record_doParallelFlow(job, parallelFlowParameter);
 		this.record_JobMetaData_getNextTaskInFlow(false);
 		this.record_parallelJob_getParallelNode(null);

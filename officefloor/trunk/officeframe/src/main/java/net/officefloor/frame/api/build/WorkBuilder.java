@@ -20,7 +20,6 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -31,20 +30,6 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * @author Daniel
  */
 public interface WorkBuilder<W extends Work> {
-
-	/**
-	 * Links a {@link ProcessState} or {@link ThreadState} bound
-	 * {@link ManagedObject} to this {@link Work}.
-	 * 
-	 * @param workManagedObjectName
-	 *            Name of the {@link ManagedObject} to be referenced locally by
-	 *            this {@link Work}.
-	 * @param threadProcessManagedObjectName
-	 *            {@link ProcessState} or {@link ThreadState} name of the
-	 *            {@link ManagedObject}.
-	 */
-	void linkManagedObject(String workManagedObjectName,
-			String threadProcessManagedObjectName);
 
 	/**
 	 * <p>
@@ -66,20 +51,6 @@ public interface WorkBuilder<W extends Work> {
 	 */
 	DependencyMappingBuilder addWorkManagedObject(String workManagedObjectName,
 			String officeManagedObjectName);
-
-	/**
-	 * Links a {@link ProcessState} or {@link ThreadState} bound
-	 * {@link Administrator} to this {@link Work}.
-	 * 
-	 * @param workAdministratorName
-	 *            Name of the {@link Administrator} to be referenced locally by
-	 *            this {@link Work}.
-	 * @param threadAdministratorName
-	 *            {@link ProcessState} or {@link ThreadState} name of the
-	 *            {@link Administrator}.
-	 */
-	void linkAdministrator(String workAdministratorName,
-			String threadProcessAdministratorName);
 
 	/**
 	 * Adds a {@link Work} bound {@link Administrator}.

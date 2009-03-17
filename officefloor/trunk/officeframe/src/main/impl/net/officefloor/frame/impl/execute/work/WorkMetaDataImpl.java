@@ -22,7 +22,6 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -47,12 +46,6 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 * {@link WorkFactory}.
 	 */
 	private final WorkFactory<W> workFactory;
-
-	/**
-	 * {@link ManagedObjectIndex} instances in the order the {@link Task}
-	 * instances of this {@link Work} expect.
-	 */
-	private final ManagedObjectIndex[] managedObjectIndexes;
 
 	/**
 	 * {@link ManagedObjectMetaData} of the {@link ManagedObject} instances
@@ -81,9 +74,6 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 * 
 	 * @param workFactory
 	 *            {@link WorkFactory}.
-	 * @param moIndexes
-	 *            {@link ManagedObjectIndex} instances in the order the
-	 *            {@link Task} instances of this {@link Work} expect.
 	 * @param moMetaData
 	 *            {@link ManagedObjectMetaData} of the {@link ManagedObject}
 	 *            instances bound to this {@link Work}.
@@ -98,14 +88,12 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	 *            {@link Work}.
 	 */
 	public WorkMetaDataImpl(String workName, WorkFactory<W> workFactory,
-			ManagedObjectIndex[] moIndexes,
 			ManagedObjectMetaData<?>[] moMetaData,
 			AdministratorMetaData<?, ?>[] adminMetaData,
 			FlowMetaData<W> initialFlowMetaData,
 			TaskMetaData<?, W, ?, ?>[] taskMetaData) {
 		this.workName = workName;
 		this.workFactory = workFactory;
-		this.managedObjectIndexes = moIndexes;
 		this.managedObjectMetaData = moMetaData;
 		this.administratorMetaData = adminMetaData;
 		this.initialFlowMetaData = initialFlowMetaData;
@@ -123,11 +111,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 
 	@Override
 	public WorkContainer<W> createWorkContainer(ProcessState processState) {
-
-		// Create the work
 		W work = this.workFactory.createWork();
-
-		// Create and return the work container for the work
 		return new WorkContainerImpl<W>(work, this, processState);
 	}
 
@@ -139,11 +123,6 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	@Override
 	public FlowMetaData<W> getInitialFlowMetaData() {
 		return this.initialFlowMetaData;
-	}
-
-	@Override
-	public ManagedObjectIndex[] getManagedObjectIndexes() {
-		return this.managedObjectIndexes;
 	}
 
 	@Override

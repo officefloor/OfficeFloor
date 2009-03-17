@@ -23,6 +23,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
  * Raw meta-data of a bound {@link Administrator}.
@@ -44,6 +45,15 @@ public interface RawBoundAdministratorMetaData<I, A extends Enum<A>> {
 	 * @return {@link AdministratorIndex}.
 	 */
 	AdministratorIndex getAdministratorIndex();
+
+	/**
+	 * Obtains the listing of the {@link RawBoundManagedObjectMetaData} of the
+	 * {@link ManagedObject} instances being administered.
+	 * 
+	 * @return Listing of the {@link RawBoundManagedObjectMetaData} of the
+	 *         {@link ManagedObject} instances being administered.
+	 */
+	RawBoundManagedObjectMetaData<?>[] getAdministeredRawBoundManagedObjects();
 
 	/**
 	 * Obtains the keys identifying the {@link Duty} instances for the

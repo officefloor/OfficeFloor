@@ -58,12 +58,6 @@ import net.officefloor.frame.test.match.TypeMatcher;
 public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 
 	/**
-	 * Listing of {@link ManagedObjectIndex} instances for the
-	 * {@link WorkMetaData}.
-	 */
-	private final List<ManagedObjectIndex> managedObjectIndexes = new ArrayList<ManagedObjectIndex>();
-
-	/**
 	 * {@link ManagedObjectScope#WORK} bound {@link ManagedObjectContainer}
 	 * instances.
 	 */
@@ -183,7 +177,6 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		// Create, add and return the managed object index
 		ManagedObjectIndex index = new ManagedObjectIndexImpl(scope,
 				scopeBoundIndex);
-		this.managedObjectIndexes.add(index);
 		return index;
 	}
 
@@ -330,10 +323,11 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * Records the loading of the {@link ManagedObject} instances.
 	 * 
 	 * @param managedObjectIndexes
-	 *            Indexes of the {@link ManagedObject} instances to load.
+	 *            {@link ManagedObjectIndex} instances specifying the
+	 *            {@link ManagedObject} instances to load.
 	 */
 	protected void record_WorkContainer_loadManagedObjects(
-			int... managedObjectIndexes) {
+			ManagedObjectIndex... managedObjectIndexes) {
 
 		// Obtain the states
 		this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
@@ -342,13 +336,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
 
-		// Obtain the managed object indexes
-		this.recordReturn(this.workMetaData, this.workMetaData
-				.getManagedObjectIndexes(), this.managedObjectIndexes
-				.toArray(new ManagedObjectIndex[0]));
-
 		// Load the managed objects
-		for (int managedObjectIndex : managedObjectIndexes) {
+		for (ManagedObjectIndex managedObjectIndex : managedObjectIndexes) {
 
 			// Record obtaining the managed object container
 			ManagedObjectContainer managedObjectContainer = this
@@ -365,10 +354,11 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * Records the coordinating of the {@link ManagedObject} instances.
 	 * 
 	 * @param managedObjectIndexes
-	 *            Indexes of the {@link ManagedObject} instances to coordinate.
+	 *            {@link ManagedObjectIndex} instances specifying the
+	 *            {@link ManagedObject} instances to coordinate.
 	 */
 	protected void record_WorkContainer_coordinateManagedObjects(
-			int... managedObjectIndexes) {
+			ManagedObjectIndex... managedObjectIndexes) {
 
 		// Obtain the states
 		this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
@@ -377,13 +367,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
 
-		// Obtain the managed object indexes
-		this.recordReturn(this.workMetaData, this.workMetaData
-				.getManagedObjectIndexes(), this.managedObjectIndexes
-				.toArray(new ManagedObjectIndex[0]));
-
 		// Load the managed objects
-		for (int managedObjectIndex : managedObjectIndexes) {
+		for (ManagedObjectIndex managedObjectIndex : managedObjectIndexes) {
 
 			// Record obtaining the managed object container
 			ManagedObjectContainer managedObjectContainer = this
@@ -408,11 +393,11 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * Records whether {@link ManagedObject} instances are ready.
 	 * 
 	 * @param managedObjectIndexes
-	 *            Indexes of the {@link ManagedObject} instances to check are
-	 *            ready.
+	 *            {@link ManagedObjectIndex} instances specifying the
+	 *            {@link ManagedObject} instances to check are ready.
 	 */
 	protected void record_WorkContainer_isManagedObjectsReady(
-			int... managedObjectIndexes) {
+			ManagedObjectIndex... managedObjectIndexes) {
 
 		// Obtain the states
 		this.recordReturn(this.jobNode, this.jobNode.getFlow(), this.flow);
@@ -421,13 +406,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
 
-		// Obtain the managed object indexes
-		this.recordReturn(this.workMetaData, this.workMetaData
-				.getManagedObjectIndexes(), this.managedObjectIndexes
-				.toArray(new ManagedObjectIndex[0]));
-
 		// Load the managed objects
-		for (int managedObjectIndex : managedObjectIndexes) {
+		for (ManagedObjectIndex managedObjectIndex : managedObjectIndexes) {
 
 			// Record obtaining the managed object container
 			ManagedObjectContainer managedObjectContainer = this
@@ -444,21 +424,17 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * Records obtaining the Object.
 	 * 
 	 * @param managedObjectIndex
-	 *            Index of the {@link ManagedObject} to obtain.
+	 *            {@link ManagedObjectIndex} instance specifying the
+	 *            {@link ManagedObject} to obtain.
 	 * @param object
 	 *            Object to return.
 	 */
-	protected void record_WorkContainer_getObject(int managedObjectIndex,
-			Object object) {
+	protected void record_WorkContainer_getObject(
+			ManagedObjectIndex managedObjectIndex, Object object) {
 
 		// Obtain the process state
 		this.recordReturn(this.threadState, this.threadState.getProcessState(),
 				this.processState);
-
-		// Obtain the managed object indexes
-		this.recordReturn(this.workMetaData, this.workMetaData
-				.getManagedObjectIndexes(), this.managedObjectIndexes
-				.toArray(new ManagedObjectIndex[0]));
 
 		// Record obtaining the managed object container
 		ManagedObjectContainer managedObjectContainer = this
@@ -594,25 +570,6 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * Records obtaining the {@link ManagedObjectContainer} for the
 	 * {@link ManagedObjectIndex}.
 	 * 
-	 * @param managedObjectIndex
-	 *            Index of the {@link ManagedObject}.
-	 * @param isLazyLoad
-	 *            Flag indicating if may lazy load the
-	 *            {@link ManagedObjectScope#WORK} bound
-	 *            {@link ManagedObjectContainer}.
-	 * @return {@link ManagedObjectContainer}.
-	 */
-	private ManagedObjectContainer record_getManagedObjectContainer(
-			int managedObjectIndex, boolean isLazyLoad) {
-		ManagedObjectIndex index = this.managedObjectIndexes
-				.get(managedObjectIndex);
-		return this.record_getManagedObjectContainer(index, true);
-	}
-
-	/**
-	 * Records obtaining the {@link ManagedObjectContainer} for the
-	 * {@link ManagedObjectIndex}.
-	 * 
 	 * @param index
 	 *            {@link ManagedObjectIndex}.
 	 * @param isLazyLoad
@@ -692,10 +649,12 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param managedObjectIndexes
-	 *            Indexes of the {@link ManagedObject} instances to load.
+	 *            {@link ManagedObjectIndex} instances specifying the
+	 *            {@link ManagedObject} instances to load.
 	 */
 	protected void loadManagedObjects(WorkContainer<?> workContainer,
-			boolean isExpectAllLoaded, int... managedObjectIndexes) {
+			boolean isExpectAllLoaded,
+			ManagedObjectIndex... managedObjectIndexes) {
 		boolean isAllLoaded = workContainer.loadManagedObjects(
 				managedObjectIndexes, this.jobContext, this.jobNode,
 				this.jobActivateSet);
@@ -712,10 +671,11 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 *            Flag indicating if expect {@link ManagedObject} instances to
 	 *            be ready.
 	 * @param managedObjectIndexes
-	 *            Indexes of the {@link ManagedObject} instances to check.
+	 *            {@link ManagedObjectIndex} instances specifying the
+	 *            {@link ManagedObject} instances to check.
 	 */
 	protected void isManagedObjectsReady(WorkContainer<?> workContainer,
-			boolean isExpectReady, int... managedObjectIndexes) {
+			boolean isExpectReady, ManagedObjectIndex... managedObjectIndexes) {
 		boolean isReady = workContainer.isManagedObjectsReady(
 				managedObjectIndexes, this.jobContext, this.jobNode,
 				this.jobActivateSet);
@@ -729,10 +689,11 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param managedObjectIndexes
-	 *            Indexes of the {@link ManagedObject} instances to coordinate.
+	 *            {@link ManagedObjectIndex} instances specifying the
+	 *            {@link ManagedObject} instances to coordinate.
 	 */
 	protected void coordinateManagedObject(WorkContainer<?> workContainer,
-			int... managedObjectIndexes) {
+			ManagedObjectIndex... managedObjectIndexes) {
 		workContainer.coordinateManagedObjects(managedObjectIndexes,
 				this.jobContext, this.jobNode, this.jobActivateSet);
 	}
@@ -757,12 +718,13 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 	 * @param work
 	 *            {@link WorkContainer}.
 	 * @param managedObjectIndex
-	 *            Index of the {@link ManagedObject}.
+	 *            {@link ManagedObjectIndex} instance specifying the
+	 *            {@link ManagedObject}.
 	 * @param expectedObject
 	 *            Expected object to be returned.
 	 */
-	protected void getObject(WorkContainer<?> work, int managedObjectIndex,
-			Object expectedObject) {
+	protected void getObject(WorkContainer<?> work,
+			ManagedObjectIndex managedObjectIndex, Object expectedObject) {
 		Object object = work.getObject(managedObjectIndex, this.threadState);
 		assertEquals("Incorrect returned object", expectedObject, object);
 	}
