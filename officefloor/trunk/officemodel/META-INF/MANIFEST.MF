@@ -9,8 +9,6 @@ Export-Package: net.officefloor.model,
  net.officefloor.model.handler,
  net.officefloor.model.office,
  net.officefloor.model.officefloor,
- net.officefloor.model.room,
- net.officefloor.model.task,
- net.officefloor.model.work
+ net.officefloor.model.room
 Require-Bundle: net.officefloor.frame
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

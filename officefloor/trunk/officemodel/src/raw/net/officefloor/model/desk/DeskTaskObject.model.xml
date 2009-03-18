@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<import>net.officefloor.model.work.TaskObjectModel</import>
-	<field type="String" name="object type"/>
-	<field type="boolean" name="is parameter"/>
-	<field type="TaskObjectModel&lt;?&gt;" name="task object"/>
-	<field type="DeskTaskObjectToExternalManagedObjectModel" name="managed object"/>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field type="String" name="object type" />
+	<field type="boolean" name="is parameter" />
+	<field type="DeskTaskObjectToExternalManagedObjectModel" name="managed object" />
 </model>
