@@ -16,11 +16,16 @@
  */
 package net.officefloor.frame.api.build;
 
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * {@link java.lang.Enum} indicating the:<il>
- * <li> {@link net.officefloor.frame.spi.managedobject.ManagedObject} instances</li>
- * <li>{@link net.officefloor.frame.internal.structure.Flow} instances</li>
- * </il> will be specified by index.
+ * {@link Enum} indicating the:
+ * <ol>
+ * <li> {@link ManagedObject} instances</li>
+ * <li>{@link Flow} instances</li>
+ * </ol>
+ * will be specified by an index rather than an {@link Enum}.
  * 
  * @author Daniel
  */
