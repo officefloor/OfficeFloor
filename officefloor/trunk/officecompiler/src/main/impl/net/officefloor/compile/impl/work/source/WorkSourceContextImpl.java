@@ -18,15 +18,15 @@ package net.officefloor.compile.impl.work.source;
 
 import java.util.Properties;
 
-import net.officefloor.compile.spi.work.source.WorkLoaderContext;
+import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkUnknownPropertyError;
 
 /**
- * {@link WorkLoaderContext} implementation.
+ * {@link WorkSourceContext} implementation.
  * 
  * @author Daniel
  */
-public class WorkLoaderContextImpl implements WorkLoaderContext {
+public class WorkSourceContextImpl implements WorkSourceContext {
 
 	/**
 	 * Names of the {@link Properties} in the order defined.
@@ -53,7 +53,7 @@ public class WorkLoaderContextImpl implements WorkLoaderContext {
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 */
-	public WorkLoaderContextImpl(String[] names, Properties properties,
+	public WorkSourceContextImpl(String[] names, Properties properties,
 			ClassLoader classLoader) {
 		this.names = names;
 		this.properties = properties;

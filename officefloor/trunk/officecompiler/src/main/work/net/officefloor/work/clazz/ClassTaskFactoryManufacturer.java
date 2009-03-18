@@ -18,15 +18,17 @@ package net.officefloor.work.clazz;
 
 import java.lang.reflect.Method;
 
+import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.model.task.TaskFactoryManufacturer;
 
 /**
  * {@link TaskFactoryManufacturer} for a {@link ClassTaskFactory}.
  * 
  * @author Daniel
  */
-public class ClassTaskFactoryManufacturer implements TaskFactoryManufacturer {
+public class ClassTaskFactoryManufacturer implements
+		TaskFactoryManufacturer<Object, ClassWork, Indexed, Indexed> {
 
 	/**
 	 * {@link Method}.
@@ -54,12 +56,11 @@ public class ClassTaskFactoryManufacturer implements TaskFactoryManufacturer {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.task.TaskFactoryManufacturer#createTaskFactory()
+	 * ================ TaskFactoryManufacturer ================================
 	 */
+
 	@Override
-	public TaskFactory<?, ?, ?, ?> createTaskFactory() {
+	public TaskFactory<Object, ClassWork, Indexed, Indexed> createTaskFactory() {
 
 		// Clone the parameters.
 		// Necessary for task used for two flow items.
@@ -71,4 +72,5 @@ public class ClassTaskFactoryManufacturer implements TaskFactoryManufacturer {
 		// Return a new task factory
 		return new ClassTaskFactory(this.method, clone);
 	}
+	
 }

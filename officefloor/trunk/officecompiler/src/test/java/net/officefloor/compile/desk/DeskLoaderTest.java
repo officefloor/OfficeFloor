@@ -44,7 +44,7 @@ import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.repository.ModelRepository;
 import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
-import net.officefloor.work.clazz.ClassWorkLoader;
+import net.officefloor.work.clazz.ClassWorkSource;
 
 /**
  * Ensure able to load the {@link DeskModel}.
@@ -121,14 +121,14 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate work
 		assertList(new String[] { "getId", "getLoader", "getX", "getY" }, desk
-				.getWorks(), new DeskWorkModel("work", ClassWorkLoader.class
+				.getWorks(), new DeskWorkModel("work", ClassWorkSource.class
 				.getName(), null, null, null, null, 40, 41));
 
 		// Validate properties of work
 		DeskWorkModel work = desk.getWorks().get(0);
 		assertList(new String[] { "getName", "getValue" },
 				work.getProperties(), new PropertyModel(
-						ClassWorkLoader.CLASS_NAME_PROPERTY_NAME,
+						ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
 						MockClass.class.getName()));
 
 		// Validate initial flow item

@@ -23,9 +23,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import net.officefloor.compile.LoaderContext;
-import net.officefloor.compile.impl.work.source.WorkLoaderContextImpl;
-import net.officefloor.compile.spi.work.source.WorkLoader;
-import net.officefloor.compile.spi.work.source.WorkLoaderContext;
+import net.officefloor.compile.impl.work.source.WorkSourceContextImpl;
+import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
@@ -134,7 +134,7 @@ public class DeskLoader {
 	 * Initiate.
 	 * 
 	 * @param loaderContext
-	 *            {@link LoaderContext} for loading classes of {@link WorkModel}
+	 *            {@link LoaderContext} for loading classes of {@link WorkType}
 	 *            .
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
@@ -149,7 +149,7 @@ public class DeskLoader {
 	 * Initiate.
 	 * 
 	 * @param loaderContext
-	 *            {@link LoaderContext} for loading classes of {@link WorkModel}
+	 *            {@link LoaderContext} for loading classes of {@link WorkType}
 	 *            .
 	 */
 	public DeskLoader(LoaderContext loaderContext) {
@@ -527,8 +527,8 @@ public class DeskLoader {
 		if (loaderClassName != null) {
 
 			// Create the work loader
-			WorkLoader workLoader = this.loaderContext.createInstance(
-					WorkLoader.class, loaderClassName);
+			WorkSource workLoader = this.loaderContext.createInstance(
+					WorkSource.class, loaderClassName);
 
 			// Create the listing of properties and their names
 			List<PropertyModel> propertyModels = work.getProperties();
@@ -546,11 +546,11 @@ public class DeskLoader {
 			ClassLoader classLoader = this.loaderContext.getClassLoader();
 
 			// Create the work loader context
-			WorkLoaderContext workLoaderContext = new WorkLoaderContextImpl(
+			WorkSourceContext workLoaderContext = new WorkSourceContextImpl(
 					propertyNames, properties, classLoader);
 
 			// Load the work model
-			WorkModel<?> workModel = workLoader.loadWork(workLoaderContext);
+			WorkType<?> workModel = workLoader.loadWork(workLoaderContext);
 
 			// Synchronise the work
 			WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,

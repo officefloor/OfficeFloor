@@ -27,7 +27,7 @@ import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.WorkModel;
 
 /**
- * Synchronises the {@link net.officefloor.model.work.WorkModel} to a
+ * Synchronises the {@link net.officefloor.model.WorkType.WorkModel} to a
  * {@link net.officefloor.model.desk.DeskWorkModel}.
  * 
  * @author Daniel
@@ -37,14 +37,14 @@ import net.officefloor.model.work.WorkModel;
 public class WorkToDeskWorkSynchroniser {
 
 	/**
-	 * Synchronise {@link WorkModel} onto the {@link DeskWorkModel}.
+	 * Synchronise {@link WorkType} onto the {@link DeskWorkModel}.
 	 * 
 	 * @param work
-	 *            {@link WorkModel}.
+	 *            {@link WorkType}.
 	 * @param deskWork
 	 *            {@link DeskWorkModel}.
 	 */
-	public static void synchroniseWorkOntoDeskWork(WorkModel<?> work,
+	public static void synchroniseWorkOntoDeskWork(WorkType<?> work,
 			DeskWorkModel deskWork) {
 
 		// Load work onto the desk work

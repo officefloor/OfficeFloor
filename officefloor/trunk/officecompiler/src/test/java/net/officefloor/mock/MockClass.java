@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import net.officefloor.work.clazz.Flow;
 
 /**
- * Mock class for testing {@link net.officefloor.compile.spi.work.source.WorkLoader}.
+ * Mock class for testing {@link net.officefloor.compile.spi.work.source.WorkSource}.
  * 
  * @author Daniel
  */

@@ -14,32 +14,24 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.work.source;
+package net.officefloor.work.clazz;
 
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.frame.api.execute.TaskContext;
 
 /**
- * Abstract {@link Work} that only has a single {@link Task} for use by a
- * {@link WorkSource}.
+ * Creates the parameter for the {@link ClassTask}.
  * 
  * @author Daniel
  */
-public abstract class AbstractSingleTaskWork<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends AbstractSingleTask<P, W, M, F> implements
-		TaskFactoryManufacturer<P, W, M, F> {
+public interface ParameterFactory {
 
-	/*
-	 * ================= TaskFactoryManufacturer =========================
+	/**
+	 * Creates the parameter from the {@link TaskContext}.
+	 * 
+	 * @param context
+	 *            {@link TaskContext}.
+	 * @return Parameter.
 	 */
-
-	@Override
-	public TaskFactory<P, W, M, F> createTaskFactory() {
-		return this;
-	}
+	Object createParameter(TaskContext<?, ?, ?, ?> context);
 
 }

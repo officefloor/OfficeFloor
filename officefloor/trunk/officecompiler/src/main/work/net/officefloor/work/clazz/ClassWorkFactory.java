@@ -20,7 +20,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * {@link net.officefloor.frame.api.execute.Work} from a {@link java.lang.Class}.
+ * {@link WorkFactory} for the {@link ClassWork}.
  * 
  * @author Daniel
  */
@@ -42,10 +42,10 @@ public class ClassWorkFactory implements WorkFactory<ClassWork> {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
+	 * ==================== WorkFactory ================================
 	 */
+
+	@Override
 	public ClassWork createWork() {
 		try {
 			return new ClassWork(this.workClass.newInstance());

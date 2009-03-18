@@ -81,7 +81,7 @@ public class WorkEntry<W extends Work> extends
 			OfficeFloorCompilerContext context) throws Exception {
 
 		// Obtain the work (and its details)
-		WorkModel work = OFCU.get(deskWork.getWork(),
+		WorkType work = OFCU.get(deskWork.getWork(),
 				"No work on desk work ${0}", deskWork.getId());
 		Class<W> typeOfWork = work.getTypeOfWork();
 
@@ -187,7 +187,7 @@ public class WorkEntry<W extends Work> extends
 	}
 
 	/**
-	 * Creates the canonical work name that this {@link WorkModel} is registered
+	 * Creates the canonical work name that this {@link WorkType} is registered
 	 * under.
 	 * 
 	 * @return Canonical work name.
@@ -247,7 +247,7 @@ public class WorkEntry<W extends Work> extends
 
 		// Obtain the work (and its details)
 		DeskWorkModel deskWork = this.getModel();
-		WorkModel work = deskWork.getWork();
+		WorkType work = deskWork.getWork();
 		WorkFactory<W> workFactory = (WorkFactory<W>) work.getWorkFactory();
 
 		// Determine if an initial flow

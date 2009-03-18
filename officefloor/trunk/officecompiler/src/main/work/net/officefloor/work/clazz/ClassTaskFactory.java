@@ -22,14 +22,14 @@ import java.util.List;
 
 import net.officefloor.compile.spi.work.source.CompilerAwareTaskFactory;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskTaskObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 
 /**
- * {@link net.officefloor.frame.api.build.TaskFactory} to invoke the method on
- * the {@link net.officefloor.frame.api.execute.Work} class.
+ * {@link TaskFactory} for the {@link ClassTask}.
  * 
  * @author Daniel
  */
@@ -60,10 +60,9 @@ public class ClassTaskFactory implements
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.work.CompilerAwareTaskFactory#initialiseTaskFactory(net.officefloor.model.desk.FlowItemModel)
+	 * =================== CompilerAwareTaskFactory ===========================
 	 */
+
 	@Override
 	public void initialiseTaskFactory(FlowItemModel task) throws Exception {
 
@@ -130,10 +129,10 @@ public class ClassTaskFactory implements
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.TaskFactory#createTask(W)
+	 * =============== TaskFactory ===========================================
 	 */
+
+	@Override
 	public ClassTask createTask(ClassWork work) {
 		return new ClassTask(work, this.method, this.parameters);
 	}

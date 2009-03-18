@@ -19,37 +19,65 @@ package net.officefloor.work.clazz;
 import net.officefloor.frame.api.execute.TaskContext;
 
 /**
- * {@link net.officefloor.work.clazz.ParameterFactory} for a
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * {@link ParameterFactory} to obtain the {@link Flow}.
  * 
  * @author Daniel
  */
-public class ManagedObjectParameterFactory implements ParameterFactory {
+public class FlowParameterFactory implements ParameterFactory {
 
 	/**
-	 * Index of the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * Index of the {@link Flow}.
 	 */
-	private final int managedObjectIndex;
+	private final int flowIndex;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectIndex
-	 *            Index of the
-	 *            {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * @param flowIndex
+	 *            Index of the {@link Flow}.
 	 */
-	public ManagedObjectParameterFactory(int managedObjectIndex) {
-		this.managedObjectIndex = managedObjectIndex;
+	public FlowParameterFactory(int flowIndex) {
+		this.flowIndex = flowIndex;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.work.clazz.ParameterFactory#createParameter(net.officefloor.frame.api.execute.TaskContext)
+	 * ==================== ParameterFactory ========================
 	 */
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public Object createParameter(TaskContext<?, ?, ?, ?> context) {
-		return context.getObject(this.managedObjectIndex);
+		return new FlowImpl(context);
+	}
+
+	/**
+	 * {@link Flow} implementation.
+	 */
+	private class FlowImpl<P> implements Flow<P> {
+
+		/**
+		 * {@link TaskContext}.
+		 */
+		private final TaskContext<P, ?, ?, ?> context;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param context
+		 *            {@link TaskContext}.
+		 */
+		public FlowImpl(TaskContext<P, ?, ?, ?> context) {
+			this.context = context;
+		}
+
+		/*
+		 * ====================== Flow ====================================
+		 */
+
+		@Override
+		public void invoke(P parameter) {
+			this.context.doFlow(FlowParameterFactory.this.flowIndex, parameter);
+		}
 	}
 
 }

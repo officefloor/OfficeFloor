@@ -14,15 +14,31 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile;
+package net.officefloor.compile.spi.work.source;
 
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.Escalation;
 
 /**
- * Notified of issues in compilation of the {@link OfficeFloor}.
+ * Provides means for the {@link WorkSource} to provide a
+ * <code>type definition</code> of a possible {@link Escalation} by the
+ * {@link Task}.
  * 
  * @author Daniel
  */
-public interface CompilerIssues {
+public interface TaskEscalationTypeBuilder {
+
+	/**
+	 * <p>
+	 * Provides means to specify a display label for the {@link Escalation}.
+	 * <p>
+	 * This need not be set as is only an aid to better identify the
+	 * {@link Escalation}. If not set it will use the <code>Simple</code> name
+	 * of the {@link Escalation} {@link Class}.
+	 * 
+	 * @param label
+	 *            Display label for the {@link Escalation}.
+	 */
+	void setLabel(String label);
 
 }

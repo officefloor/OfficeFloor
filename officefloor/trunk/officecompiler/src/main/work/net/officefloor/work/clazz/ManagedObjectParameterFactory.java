@@ -14,38 +14,40 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.work.clazz;
 
-import net.officefloor.model.work.WorkModel;
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Loads the {@link WorkModel}.
+ * {@link ParameterFactory} for a {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface WorkLoader {
+public class ManagedObjectParameterFactory implements ParameterFactory {
 
 	/**
-	 * <p>
-	 * Obtains the {@link WorkSpecification} for this {@link WorkLoader}.
-	 * <p>
-	 * This enables the {@link WorkLoaderContext} to be populated with the
-	 * necessary details as per this {@link WorkSpecification} in loading the
-	 * {@link WorkModel}.
-	 * 
-	 * @return {@link WorkSpecification}.
+	 * Index of the {@link ManagedObject}.
 	 */
-	WorkSpecification getSpecification();
+	private final int managedObjectIndex;
 
 	/**
-	 * Loads the {@link WorkModel} from configuration.
+	 * Initiate.
 	 * 
-	 * @param context
-	 *            {@link WorkLoaderContext} to source details to load the
-	 *            {@link WorkModel}.
-	 * @throws Exception
-	 *             If fails.
+	 * @param managedObjectIndex
+	 *            Index of the {@link ManagedObject}.
 	 */
-	WorkModel<?> loadWork(WorkLoaderContext context) throws Exception;
+	public ManagedObjectParameterFactory(int managedObjectIndex) {
+		this.managedObjectIndex = managedObjectIndex;
+	}
+
+	/*
+	 * ================== ParameterFactory ====================================
+	 */
+
+	@Override
+	public Object createParameter(TaskContext<?, ?, ?, ?> context) {
+		return context.getObject(this.managedObjectIndex);
+	}
 
 }

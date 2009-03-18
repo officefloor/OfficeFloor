@@ -14,32 +14,43 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.work.source;
+package net.officefloor.compile.impl.properties;
 
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.util.AbstractSingleTask;
+import java.util.LinkedList;
+import java.util.List;
+
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 
 /**
- * Abstract {@link Work} that only has a single {@link Task} for use by a
- * {@link WorkSource}.
+ * Implementation of the {@link PropertyList}.
  * 
  * @author Daniel
  */
-public abstract class AbstractSingleTaskWork<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends AbstractSingleTask<P, W, M, F> implements
-		TaskFactoryManufacturer<P, W, M, F> {
+public class PropertyListImpl implements PropertyList {
+
+	/**
+	 * List of {@link Property} instances.
+	 */
+	private final List<Property> properties = new LinkedList<Property>();
 
 	/*
-	 * ================= TaskFactoryManufacturer =========================
+	 * ================== PropertyList ======================================
 	 */
 
 	@Override
-	public TaskFactory<P, W, M, F> createTaskFactory() {
-		return this;
+	public List<Property> getPropertyList() {
+		return this.properties;
+	}
+
+	@Override
+	public void addProperty(String name, String label) {
+		this.properties.add(new PropertyImpl(name, label));
+	}
+
+	@Override
+	public void addProperty(String name) {
+		this.properties.add(new PropertyImpl(name));
 	}
 
 }

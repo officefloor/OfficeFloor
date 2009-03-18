@@ -153,10 +153,10 @@ public class FlowOutputLine {
 
 	/**
 	 * Indicates if the next {@link FlowItemModel} is on the same
-	 * {@link WorkModel}.
+	 * {@link WorkType}.
 	 * 
 	 * @return <code>true</code> if the next {@link FlowItemModel} is on the
-	 *         same {@link WorkModel}.
+	 *         same {@link WorkType}.
 	 */
 	public boolean isSameWork() {
 		// No external flow so on same desk and work matches

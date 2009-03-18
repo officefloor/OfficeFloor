@@ -20,7 +20,7 @@ import net.officefloor.frame.api.execute.Work;
 
 /**
  * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link WorkLoader}.
+ * {@link WorkSource}.
  * 
  * @author Daniel
  */
