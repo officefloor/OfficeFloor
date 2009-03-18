@@ -25,8 +25,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * {@link net.officefloor.frame.api.execute.Task} to invoke a method on the
- * {@link net.officefloor.frame.api.execute.Work} object.
+ * {@link Task} to invoke a method on the {@link Work} object.
  * 
  * @author Daniel
  */
@@ -35,21 +34,23 @@ class ClassTask implements Task<Object, ClassWork, Indexed, Indexed> {
 	/**
 	 * {@link Work}.
 	 */
-	protected final ClassWork work;
+	private final ClassWork work;
 
 	/**
-	 * Method to invoke for this task.
+	 * Method to invoke for this {@link Task}.
 	 */
-	protected final Method method;
+	private final Method method;
 
 	/**
 	 * Parameters.
 	 */
-	protected final ParameterFactory[] parameters;
+	private final ParameterFactory[] parameters;
 
 	/**
 	 * Initiate.
 	 * 
+	 * @param work
+	 *            {@link ClassWork}.
 	 * @param method
 	 *            Method to invoke for this {@link Task}.
 	 */
@@ -61,10 +62,10 @@ class ClassTask implements Task<Object, ClassWork, Indexed, Indexed> {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+	 * ========================= Task ==========================================
 	 */
+
+	@Override
 	public Object doTask(
 			TaskContext<Object, ClassWork, Indexed, Indexed> context)
 			throws Throwable {

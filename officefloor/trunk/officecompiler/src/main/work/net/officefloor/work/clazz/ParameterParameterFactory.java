@@ -16,22 +16,25 @@
  */
 package net.officefloor.work.clazz;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 
 /**
- * Creates the parameter for the
- * {@link net.officefloor.work.clazz.ClassTaskFactory}.
+ * {@link ParameterFactory} to obtain the parameter.
+ * 
+ * TODO look to remove the need from this by removing P from {@link Task}.
  * 
  * @author Daniel
  */
-public interface ParameterFactory {
+public class ParameterParameterFactory implements ParameterFactory {
 
-	/**
-	 * Creates the parameter from the {@link TaskContext}.
-	 * 
-	 * @param context
-	 *            {@link TaskContext}.
-	 * @return Parameter.
+	/*
+	 * ================== ParameterFactory ===========================
 	 */
-	Object createParameter(TaskContext<?, ?, ?, ?> context);
+
+	@Override
+	public Object createParameter(TaskContext<?, ?, ?, ?> context) {
+		return context.getParameter();
+	}
+
 }

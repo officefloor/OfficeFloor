@@ -14,43 +14,23 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work;
+package net.officefloor.compile.spi.work;
 
-import java.util.LinkedList;
-import java.util.List;
+import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Work;
 
 /**
- * Helpful object to construct a name/value pair list.
+ * <code>Type definition</code> of a {@link Work}.
  * 
  * @author Daniel
  */
-public class PropertyList {
+public interface WorkType<W extends Work> {
 
 	/**
-	 * Property listing in name/value pairing.
-	 */
-	private List<String> properties = new LinkedList<String>();
-
-	/**
-	 * Adds a property.
+	 * Obtains the {@link WorkFactory} to create the {@link Work} instances.
 	 * 
-	 * @param name
-	 *            Name of the property.
-	 * @param value
-	 *            Value of the property.
+	 * @return {@link WorkFactory}.
 	 */
-	public void addProperty(String name, String value) {
-		this.properties.add(name);
-		this.properties.add(value);
-	}
-
-	/**
-	 * Obtains the properties as a name/value pairing array.
-	 * 
-	 * @return Name/value pairing array.
-	 */
-	public String[] getNameValuePairs() {
-		return this.properties.toArray(new String[0]);
-	}
+	WorkFactory<W> getWorkFactory();
 
 }

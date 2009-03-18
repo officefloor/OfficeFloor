@@ -19,19 +19,21 @@ package net.officefloor.compile.impl.work.source;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.spi.work.source.WorkLoader;
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkProperty;
 import net.officefloor.compile.spi.work.source.WorkSpecification;
+import net.officefloor.frame.api.execute.Work;
 
 /**
- * Abstract {@link WorkLoader}.
+ * Abstract {@link WorkSource}.
  * 
  * @author Daniel
  */
-public abstract class AbstractWorkLoader implements WorkLoader {
+public abstract class AbstractWorkSource<W extends Work> implements
+		WorkSource<W> {
 
 	/*
-	 * =============== WorkLoader ==================================
+	 * =============== WorkSource ==================================
 	 */
 
 	@Override
@@ -127,8 +129,7 @@ public abstract class AbstractWorkLoader implements WorkLoader {
 	}
 
 	/**
-	 * {@link WorkLoader#loadWork(net.officefloor.compile.work.WorkLoaderContext)}
-	 * to be implemented.
+	 * <code>sourceWork</code> to be implemented.
 	 */
 
 }

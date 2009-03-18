@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import net.officefloor.compile.impl.work.source.WorkLoaderContextImpl;
-import net.officefloor.compile.spi.work.source.WorkLoaderContext;
+import net.officefloor.compile.impl.work.source.WorkSourceContextImpl;
+import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
@@ -31,7 +31,7 @@ import net.officefloor.model.work.TaskObjectModel;
 import net.officefloor.model.work.WorkModel;
 
 /**
- * Test the {@link net.officefloor.work.clazz.ClassWorkLoader}.
+ * Test the {@link net.officefloor.work.clazz.ClassWorkSource}.
  * 
  * @author Daniel
  */
@@ -48,14 +48,14 @@ public class ClassWorkLoaderTest extends OfficeFrameTestCase {
 
 		// Create the work loader context
 		Properties properties = new Properties();
-		properties.setProperty(ClassWorkLoader.CLASS_NAME_PROPERTY_NAME,
+		properties.setProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
-		WorkLoaderContext context = new WorkLoaderContextImpl(
-				new String[] { ClassWorkLoader.CLASS_NAME_PROPERTY_NAME },
+		WorkSourceContext context = new WorkSourceContextImpl(
+				new String[] { ClassWorkSource.CLASS_NAME_PROPERTY_NAME },
 				properties, this.getClass().getClassLoader());
 
 		// Load the work
-		WorkModel<ClassWork> work = new ClassWorkLoader().loadWork(context);
+		WorkType<ClassWork> work = new ClassWorkSource().loadWork(context);
 
 		// Verify functionality
 		this.verifyMockObjects();

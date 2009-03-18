@@ -17,9 +17,9 @@
 package net.officefloor.compile.desk;
 
 import net.officefloor.compile.desk.TaskToDeskTaskSynchroniser;
+import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.task.TaskFactoryManufacturer;
 import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
 

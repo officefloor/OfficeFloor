@@ -19,14 +19,13 @@ package net.officefloor.compile.spi.work.source;
 import java.util.Properties;
 
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.work.WorkModel;
 
 /**
- * Context for loading a {@link WorkModel}.
+ * Context for loading a {@link WorkType}.
  * 
  * @author Daniel
  */
-public interface WorkLoaderContext {
+public interface WorkSourceContext {
 
 	/**
 	 * <p>
@@ -72,9 +71,9 @@ public interface WorkLoaderContext {
 	Properties getProperties();
 
 	/**
-	 * Obtains the {@link ClassLoader} for loading the {@link WorkModel}.
+	 * Obtains the {@link ClassLoader} for loading the {@link WorkTypeBuilder}.
 	 * 
-	 * @return {@link ClassLoader} for loading the {@link WorkModel}.
+	 * @return {@link ClassLoader} for loading the {@link WorkTypeBuilder}.
 	 */
 	ClassLoader getClassLoader();
 

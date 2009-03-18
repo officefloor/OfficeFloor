@@ -83,7 +83,7 @@ public class WorkEntryTest extends OfficeFrameTestCase {
 		RoomEntry roomEntry = new RoomEntry("ROOM", room, officeEntry);
 
 		// Create the desk work
-		WorkModel<Work> work = new WorkModel<Work>();
+		WorkType<Work> work = new WorkType<Work>();
 		work.setTypeOfWork(Work.class);
 		work.setWorkFactory(this.workFactory);
 		DeskWorkModel deskWork = new DeskWorkModel();

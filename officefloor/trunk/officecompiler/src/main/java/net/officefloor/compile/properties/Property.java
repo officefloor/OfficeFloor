@@ -14,32 +14,42 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.work.source;
-
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.util.AbstractSingleTask;
+package net.officefloor.compile.properties;
 
 /**
- * Abstract {@link Work} that only has a single {@link Task} for use by a
- * {@link WorkSource}.
+ * Property.
  * 
  * @author Daniel
  */
-public abstract class AbstractSingleTaskWork<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends AbstractSingleTask<P, W, M, F> implements
-		TaskFactoryManufacturer<P, W, M, F> {
+public interface Property {
 
-	/*
-	 * ================= TaskFactoryManufacturer =========================
+	/**
+	 * Obtains the display label for the property.
+	 * 
+	 * @return Display label for the property.
 	 */
+	String getLabel();
 
-	@Override
-	public TaskFactory<P, W, M, F> createTaskFactory() {
-		return this;
-	}
+	/**
+	 * Obtains the name of the property.
+	 * 
+	 * @return Name of the property.
+	 */
+	String getName();
+
+	/**
+	 * Obtains the value of the property.
+	 * 
+	 * @return Value of the property.
+	 */
+	String getValue();
+
+	/**
+	 * Changes the value of the property.
+	 * 
+	 * @param value
+	 *            Value of the property.
+	 */
+	void setValue(String value);
 
 }

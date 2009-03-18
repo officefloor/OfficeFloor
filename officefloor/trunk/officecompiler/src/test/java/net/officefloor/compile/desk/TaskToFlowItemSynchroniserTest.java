@@ -22,11 +22,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.desk.TaskToFlowItemSynchroniser;
+import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
-import net.officefloor.model.task.TaskFactoryManufacturer;
 import net.officefloor.model.work.TaskEscalationModel;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;

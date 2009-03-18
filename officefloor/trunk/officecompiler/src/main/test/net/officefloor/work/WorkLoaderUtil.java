@@ -19,11 +19,11 @@ package net.officefloor.work;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.impl.work.source.WorkLoaderContextImpl;
-import net.officefloor.compile.spi.work.source.WorkLoader;
-import net.officefloor.compile.spi.work.source.WorkLoaderContext;
+import net.officefloor.compile.impl.work.source.WorkSourceContextImpl;
+import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
+import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.model.task.TaskFactoryManufacturer;
 import net.officefloor.model.work.TaskEscalationModel;
 import net.officefloor.model.work.TaskFlowModel;
 import net.officefloor.model.work.TaskModel;
@@ -31,29 +31,29 @@ import net.officefloor.model.work.TaskObjectModel;
 import net.officefloor.model.work.WorkModel;
 
 /**
- * Utility class for testing a {@link WorkLoader}.
+ * Utility class for testing a {@link WorkSource}.
  * 
  * @author Daniel
  */
 public class WorkLoaderUtil {
 
 	/**
-	 * Asserts the {@link WorkModel} instances match.
+	 * Asserts the {@link WorkType} instances match.
 	 * 
 	 * @param expected
-	 *            Expected {@link WorkModel}.
+	 *            Expected {@link WorkType}.
 	 * @param actual
-	 *            Actual {@link WorkModel}.
-	 * @see #assertWorkModelMatch(String, WorkModel, WorkModel)
+	 *            Actual {@link WorkType}.
+	 * @see #assertWorkModelMatch(String, WorkType, WorkType)
 	 */
-	public static void assertWorkModelMatch(WorkModel<?> expected,
-			WorkModel<?> actual) {
+	public static void assertWorkModelMatch(WorkType<?> expected,
+			WorkType<?> actual) {
 		assertWorkModelMatch("", expected, actual);
 	}
 
 	/**
 	 * <p>
-	 * Asserts the {@link WorkModel} instances match.
+	 * Asserts the {@link WorkType} instances match.
 	 * <p>
 	 * Note that this is not a complete equals as items such as
 	 * {@link WorkFactory} and {@link TaskFactoryManufacturer} are only checked
@@ -62,17 +62,17 @@ public class WorkLoaderUtil {
 	 * @param messagePrefix
 	 *            Prefix given to assertion messages.
 	 * @param expected
-	 *            Expected {@link WorkModel}.
+	 *            Expected {@link WorkType}.
 	 * @param actual
-	 *            Actual {@link WorkModel}.
+	 *            Actual {@link WorkType}.
 	 */
 	public static void assertWorkModelMatch(String messagePrefix,
-			WorkModel<?> expected, WorkModel<?> actual) {
+			WorkType<?> expected, WorkType<?> actual) {
 
 		// Provide smaller names to make code easier to read
 		final String p = messagePrefix;
-		final WorkModel<?> ew = expected;
-		final WorkModel<?> aw = actual;
+		final WorkType<?> ew = expected;
+		final WorkType<?> aw = actual;
 
 		// Validate work
 		TestCase.assertEquals(p + "incorrect type of work", ew.getTypeOfWork(),
@@ -171,44 +171,44 @@ public class WorkLoaderUtil {
 	}
 
 	/**
-	 * Convenience method that loads the {@link WorkModel} by instantiating an
-	 * instance of the {@link WorkModel} and deriving the {@link ClassLoader}
+	 * Convenience method that loads the {@link WorkType} by instantiating an
+	 * instance of the {@link WorkType} and deriving the {@link ClassLoader}
 	 * from it.
 	 * 
 	 * @param workLoaderClass
-	 *            Class of the {@link WorkLoader}.
+	 *            Class of the {@link WorkSource}.
 	 * @param propertyNameValues
 	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkLoader}.
-	 * @return Loaded {@link WorkModel}.
+	 *            the {@link WorkSource}.
+	 * @return Loaded {@link WorkType}.
 	 * @throws Exception
-	 *             If fails to load the {@link WorkModel}.
+	 *             If fails to load the {@link WorkType}.
 	 */
-	public static WorkModel<?> loadWork(
-			Class<? extends WorkLoader> workLoaderClass,
+	public static WorkType<?> loadWork(
+			Class<? extends WorkSource> workLoaderClass,
 			String... propertyNameValues) throws Exception {
 
 		// Create an instance of the work loader
-		WorkLoader workLoader = workLoaderClass.newInstance();
+		WorkSource workLoader = workLoaderClass.newInstance();
 
 		// Return the loaded work
 		return loadWork(workLoader, propertyNameValues);
 	}
 
 	/**
-	 * Convenience method that loads the {@link WorkModel} by obtaining the
-	 * {@link ClassLoader} from the {@link WorkLoader} class.
+	 * Convenience method that loads the {@link WorkType} by obtaining the
+	 * {@link ClassLoader} from the {@link WorkSource} class.
 	 * 
 	 * @param workLoader
-	 *            {@link WorkLoader}.
+	 *            {@link WorkSource}.
 	 * @param propertyNameValues
 	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkLoader}.
-	 * @return Loaded {@link WorkModel}.
+	 *            the {@link WorkSource}.
+	 * @return Loaded {@link WorkType}.
 	 * @throws Exception
-	 *             If fails to load the {@link WorkModel}.
+	 *             If fails to load the {@link WorkType}.
 	 */
-	public static WorkModel<?> loadWork(WorkLoader workLoader,
+	public static WorkType<?> loadWork(WorkSource workLoader,
 			String... propertyNameValues) throws Exception {
 
 		// Obtain the class loader from the work loader
@@ -219,21 +219,21 @@ public class WorkLoaderUtil {
 	}
 
 	/**
-	 * Loads the {@link WorkModel} for the {@link WorkLoader} given the input
+	 * Loads the {@link WorkType} for the {@link WorkSource} given the input
 	 * details.
 	 * 
 	 * @param workLoader
-	 *            {@link WorkLoader}.
+	 *            {@link WorkSource}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param propertyNameValues
 	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkLoader}.
-	 * @return Loaded {@link WorkModel}.
+	 *            the {@link WorkSource}.
+	 * @return Loaded {@link WorkType}.
 	 * @throws Exception
-	 *             If fails to load the {@link WorkModel}.
+	 *             If fails to load the {@link WorkType}.
 	 */
-	public static WorkModel<?> loadWork(WorkLoader workLoader,
+	public static WorkType<?> loadWork(WorkSource workLoader,
 			ClassLoader classLoader, String... propertyNameValues)
 			throws Exception {
 
@@ -252,11 +252,11 @@ public class WorkLoaderUtil {
 		}
 
 		// Create the work loader context
-		WorkLoaderContext context = new WorkLoaderContextImpl(propertyNames,
+		WorkSourceContext context = new WorkSourceContextImpl(propertyNames,
 				properties, classLoader);
 
 		// Load the work
-		WorkModel<?> work = workLoader.loadWork(context);
+		WorkType<?> work = workLoader.loadWork(context);
 
 		// Return the loaded work
 		return work;

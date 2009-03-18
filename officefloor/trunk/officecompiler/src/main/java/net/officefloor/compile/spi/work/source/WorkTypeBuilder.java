@@ -1,0 +1,69 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.compile.spi.work.source;
+
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.work.clazz.Flow;
+
+/**
+ * Provides means for the {@link WorkSource} to provide a
+ * <code>type definition</code> of the {@link Work}.
+ * 
+ * @author Daniel
+ */
+public interface WorkTypeBuilder<W extends Work> {
+
+	/**
+	 * Specifies the {@link WorkFactory} to create the {@link Work}.
+	 * 
+	 * @param workFactory
+	 *            {@link WorkFactory}.
+	 */
+	void setWorkFactory(WorkFactory<W> workFactory);
+
+	/**
+	 * Adds a {@link TaskTypeBuilder} to this {@link WorkTypeBuilder} definition.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param taskFactoryManufacturer
+	 *            {@link TaskFactoryManufacturer} to create the
+	 *            {@link TaskFactory}.
+	 * @param objectKeysClass
+	 *            {@link Enum} providing the keys of the dependent
+	 *            {@link Object} instances required by the {@link TaskTypeBuilder}.
+	 *            This may be <code>null</code> if the {@link TaskTypeBuilder} requires
+	 *            no dependent {@link Object} instances or they are
+	 *            {@link Indexed}.
+	 * @param flowKeysClass
+	 *            {@link Enum} providing the keys of the {@link Flow} instigated
+	 *            by the {@link TaskTypeBuilder}. This may be <code>null</code> if the
+	 *            {@link TaskTypeBuilder} does not instigate {@link Flow} instances or
+	 *            they are {@link Indexed}.
+	 * @return {@link TaskTypeBuilder} to provide <code>type definition</code> of the
+	 *         added {@link Task}.
+	 */
+	<M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<W, M, F> addTaskType(
+			String taskName,
+			TaskFactoryManufacturer<?, W, M, F> taskFactoryManufacturer,
+			Class<M> objectKeysClass, Class<F> flowKeysClass);
+
+}
