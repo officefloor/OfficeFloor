@@ -717,7 +717,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	/**
 	 * Initiate allowing specifying name of test.
 	 * 
-	 * @param name Test name.
+	 * @param name
+	 *            Test name.
 	 */
 	public OfficeFrameTestCase(String name) {
 		super(name);
@@ -885,6 +886,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		// Create the listing of paths to find the file
 		List<File> paths = new LinkedList<File>();
 		paths.add(new File(currentDirectory, relativePath));
+		paths.add(new File(new File(currentDirectory, "src/test/resources/"),
+				relativePath)); // use src as target resources not copied
 		paths.add(new File(new File(currentDirectory, "target/test-classes"),
 				relativePath));
 		paths.add(new File(new File(currentDirectory, "target/classes"),
