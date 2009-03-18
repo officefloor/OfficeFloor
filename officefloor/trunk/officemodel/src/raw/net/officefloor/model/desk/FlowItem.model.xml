@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<import>net.officefloor.model.work.TaskModel</import>
-	<field type="String" name="id"/>
-	<field type="boolean" name="is public"/>
-	<field type="String" name="work name"/>
-	<field type="String" name="task name"/>
-	<field type="TaskModel&lt;?,?&gt;" name="task"/>
-	<field type="DeskWorkToFlowItemModel" name="desk work"/>
-	<field type="DeskTaskToFlowItemModel" name="desk task"/>
-    <field type="FlowItemToNextExternalFlowModel" name="next external flow"/>
-    <field type="FlowItemToNextFlowItemModel" name="next flow item"/>
-    <list type="FlowItemToNextFlowItemModel" name="previous flow item"/>
-	<list type="FlowItemOutputModel" name="output" cascade-remove="true"/>
-	<list type="FlowItemOutputToFlowItemModel" name="input"/>
-	<list type="FlowItemEscalationModel" name="escalation" cascade-remove="true"/>
-    <list type="FlowItemEscalationToFlowItemModel" name="handled escalation"/>
+<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
+	<field type="String" name="id" />
+	<field type="boolean" name="is public" />
+	<field type="String" name="work name" />
+	<field type="String" name="task name" />
+	<field type="DeskWorkToFlowItemModel" name="desk work" />
+	<field type="DeskTaskToFlowItemModel" name="desk task" />
+	<field type="FlowItemToNextExternalFlowModel" name="next external flow" />
+	<field type="FlowItemToNextFlowItemModel" name="next flow item" />
+	<list type="FlowItemToNextFlowItemModel" name="previous flow item" />
+	<list type="FlowItemOutputModel" name="output" cascade-remove="true" />
+	<list type="FlowItemOutputToFlowItemModel" name="input" />
+	<list type="FlowItemEscalationModel" name="escalation"
+		cascade-remove="true" />
+	<list type="FlowItemEscalationToFlowItemModel" name="handled escalation" />
 </model>
