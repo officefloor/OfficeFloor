@@ -31,7 +31,7 @@ import net.officefloor.model.work.TaskObjectModel;
 import net.officefloor.model.work.WorkModel;
 
 /**
- * Test the {@link net.officefloor.work.clazz.ClassWorkSource}.
+ * Test the {@link ClassWorkSource}.
  * 
  * @author Daniel
  */

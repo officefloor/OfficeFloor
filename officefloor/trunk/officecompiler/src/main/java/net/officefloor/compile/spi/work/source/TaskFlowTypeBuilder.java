@@ -42,11 +42,23 @@ public interface TaskFlowTypeBuilder<F extends Enum<F>> {
 
 	/**
 	 * <p>
+	 * Specifies the type of the argument passed by the {@link Task} to the
+	 * {@link Flow}.
+	 * <p>
+	 * Should there be no argument, do not call this method.
+	 * 
+	 * @param parameterType
+	 *            Type of argument passed to {@link Flow}.
+	 */
+	void setArgumentType(Class<?> argumentType);
+
+	/**
+	 * <p>
 	 * Provides means to specify a display label for the {@link Flow}.
 	 * <p>
 	 * This need not be set as is only an aid to better identify the
-	 * {@link Flow}. If not set the {@link TaskTypeBuilder} will use the following
-	 * order to get a display label:
+	 * {@link Flow}. If not set the {@link TaskTypeBuilder} will use the
+	 * following order to get a display label:
 	 * <ol>
 	 * <li>{@link Enum} key name</li>
 	 * <li>index value</li>

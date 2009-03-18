@@ -18,6 +18,9 @@ package net.officefloor.compile.impl.work;
 
 import java.util.Properties;
 
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkUnknownPropertyError;
 
@@ -29,14 +32,9 @@ import net.officefloor.compile.spi.work.source.WorkUnknownPropertyError;
 public class WorkSourceContextImpl implements WorkSourceContext {
 
 	/**
-	 * Names of the {@link Properties} in the order defined.
+	 * {@link PropertyList}.
 	 */
-	private final String[] names;
-
-	/**
-	 * {@link Properties}.
-	 */
-	private final Properties properties;
+	private final PropertyList propertyList;
 
 	/**
 	 * {@link ClassLoader}.
@@ -46,17 +44,14 @@ public class WorkSourceContextImpl implements WorkSourceContext {
 	/**
 	 * Initiate.
 	 * 
-	 * @param names
-	 *            Names of the {@link Properties} in the order defined.
-	 * @param properties
-	 *            {@link Properties}.
+	 * @param propertyList
+	 *            {@link PropertyList}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 */
-	public WorkSourceContextImpl(String[] names, Properties properties,
+	public WorkSourceContextImpl(PropertyList propertyList,
 			ClassLoader classLoader) {
-		this.names = names;
-		this.properties = properties;
+		this.propertyList = propertyList;
 		this.classLoader = classLoader;
 	}
 
@@ -66,7 +61,7 @@ public class WorkSourceContextImpl implements WorkSourceContext {
 
 	@Override
 	public String[] getPropertyNames() {
-		return this.names;
+		return this.propertyList.getPropertyNames();
 	}
 
 	@Override
@@ -81,8 +76,9 @@ public class WorkSourceContextImpl implements WorkSourceContext {
 
 	@Override
 	public String getProperty(String name, String defaultValue) {
-		String value = this.properties.getProperty(name);
-		if ((value == null) || (value.trim().length() == 0)) {
+		Property property = this.propertyList.getProperty(name);
+		String value = (property != null ? property.getValue() : null);
+		if (CompileUtil.isBlank(value)) {
 			return defaultValue;
 		}
 		return value;
@@ -90,7 +86,7 @@ public class WorkSourceContextImpl implements WorkSourceContext {
 
 	@Override
 	public Properties getProperties() {
-		return this.properties;
+		return this.propertyList.getProperties();
 	}
 
 	@Override
