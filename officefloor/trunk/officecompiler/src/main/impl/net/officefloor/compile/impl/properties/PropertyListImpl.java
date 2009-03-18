@@ -18,6 +18,7 @@ package net.officefloor.compile.impl.properties;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -39,11 +40,6 @@ public class PropertyListImpl implements PropertyList {
 	 */
 
 	@Override
-	public List<Property> getPropertyList() {
-		return this.properties;
-	}
-
-	@Override
 	public Property addProperty(String name, String label) {
 		Property property = new PropertyImpl(name, label);
 		this.properties.add(property);
@@ -53,6 +49,53 @@ public class PropertyListImpl implements PropertyList {
 	@Override
 	public Property addProperty(String name) {
 		return this.addProperty(name, name);
+	}
+
+	@Override
+	public List<Property> getPropertyList() {
+		return this.properties;
+	}
+
+	@Override
+	public String[] getPropertyNames() {
+		// Create the listing of property names
+		String[] names = new String[this.properties.size()];
+		int nameIndex = 0;
+		for (Property property : this.properties) {
+			names[nameIndex++] = property.getName();
+		}
+		return names;
+	}
+
+	@Override
+	public Property getProperty(String name) {
+
+		// Ensure have property name
+		if (name == null) {
+			return null; // no property by null name
+		}
+
+		// Find the first matching property
+		for (Property property : this.properties) {
+			if (name.equals(property.getName())) {
+				return property; // found property
+			}
+		}
+
+		// No matching property if at this point
+		return null;
+	}
+
+	@Override
+	public Properties getProperties() {
+		// Create the properties.
+		// This is done in reverse order to ensure first properties override.
+		Properties utilProperties = new Properties();
+		for (int i = this.properties.size() - 1; i >= 0; i--) {
+			Property property = this.properties.get(i);
+			utilProperties.setProperty(property.getName(), property.getValue());
+		}
+		return utilProperties;
 	}
 
 }

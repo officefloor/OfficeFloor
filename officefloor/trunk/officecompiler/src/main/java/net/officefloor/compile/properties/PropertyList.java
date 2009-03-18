@@ -17,6 +17,7 @@
 package net.officefloor.compile.properties;
 
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Listing of {@link Property} instances.
@@ -24,14 +25,6 @@ import java.util.List;
  * @author Daniel
  */
 public interface PropertyList {
-
-	/**
-	 * Obtains the internal list of {@link Property} instances. Changing the
-	 * return list changes the state of this {@link PropertyList}.
-	 * 
-	 * @return Internal {@link Property} instances.
-	 */
-	List<Property> getPropertyList();
 
 	/**
 	 * Appends a {@link Property} to this {@link PropertyList}.
@@ -53,5 +46,39 @@ public interface PropertyList {
 	 * @return {@link Property} added.
 	 */
 	Property addProperty(String name);
+
+	/**
+	 * Obtains the internal list of {@link Property} instances. Changing the
+	 * return list changes the state of this {@link PropertyList}.
+	 * 
+	 * @return Internal {@link Property} instances.
+	 */
+	List<Property> getPropertyList();
+
+	/**
+	 * Obtains the names of the {@link Property} instances in the order they
+	 * were added.
+	 * 
+	 * @return Names of the {@link Property} instances.
+	 */
+	String[] getPropertyNames();
+
+	/**
+	 * Obtains the first {@link Property} by the input name.
+	 * 
+	 * @param name
+	 *            Name of the {@link Property} to return.
+	 * @return First {@link Property} by the input name, or <code>null</code> if
+	 *         no {@link Property} by the name.
+	 */
+	Property getProperty(String name);
+
+	/**
+	 * Obtains the {@link Properties} populated with the {@link Property}
+	 * values.
+	 * 
+	 * @return Populated {@link Properties}.
+	 */
+	Properties getProperties();
 
 }

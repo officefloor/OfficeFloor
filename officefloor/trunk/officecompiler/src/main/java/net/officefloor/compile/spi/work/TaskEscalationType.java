@@ -16,28 +16,29 @@
  */
 package net.officefloor.compile.spi.work;
 
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.Escalation;
 
 /**
- * <code>Type definition</code> of a {@link Work}.
+ * <code>Type definition</code> of a possible {@link Escalation} by the
+ * {@link Task}.
  * 
  * @author Daniel
  */
-public interface WorkType<W extends Work> {
+public interface TaskEscalationType {
 
 	/**
-	 * Obtains the {@link WorkFactory} to create the {@link Work} instances.
+	 * Obtains the name for the {@link TaskEscalationType}.
 	 * 
-	 * @return {@link WorkFactory}.
+	 * @return Name for the {@link TaskEscalationType}.
 	 */
-	WorkFactory<W> getWorkFactory();
+	String getEscalationName();
 
 	/**
-	 * Obtains the {@link TaskType} definitions for the {@link Work}.
+	 * Obtains the type of {@link Escalation} by the {@link Task}.
 	 * 
-	 * @return {@link TaskType} definitions for the {@link Work}.
+	 * @return Type of {@link Escalation} by the {@link Task}.
 	 */
-	TaskType<W, ?, ?>[] getTaskTypes();
+	<E extends Throwable> Class<E> getEscalationType();
 
 }
