@@ -27,18 +27,18 @@ import net.officefloor.compile.spi.work.source.WorkProperty;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSpecification;
+import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.work.WorkModel;
 
 /**
  * Tests the {@link WorkLoader}.
  * 
  * @author Daniel
  */
-public class WorkLoaderTest extends OfficeFrameTestCase {
+public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 
 	/**
 	 * Location of the {@link DeskModel} as {@link Work} is always done on a
@@ -401,11 +401,9 @@ public class WorkLoaderTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public WorkType<Work> sourceWork(WorkSourceContext context)
-				throws Exception {
-			// TODO Implement
-			throw new UnsupportedOperationException(
-					"TODO implement WorkSource<Work>.sourceWork");
+		public void sourceWork(WorkTypeBuilder<Work> workTypeBuilder,
+				WorkSourceContext context) throws Exception {
+			fail("Should not be invoked for obtaining specification");
 		}
 	}
 

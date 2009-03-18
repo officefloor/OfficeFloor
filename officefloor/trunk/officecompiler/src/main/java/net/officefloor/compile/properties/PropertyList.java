@@ -41,15 +41,17 @@ public interface PropertyList {
 	 * @param label
 	 *            Label of the {@link Property}. Should this be blank it will be
 	 *            defaulted to the name.
+	 * @return {@link Property} added.
 	 */
-	void addProperty(String name, String label);
+	Property addProperty(String name, String label);
 
 	/**
 	 * Appends a {@link Property} to this {@link PropertyList}.
 	 * 
 	 * @param name
 	 *            Name of the {@link Property} which is also used as the label.
+	 * @return {@link Property} added.
 	 */
-	void addProperty(String name);
+	Property addProperty(String name);
 
 }

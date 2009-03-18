@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.work.source;
+package net.officefloor.compile.spi.work.source.impl;
 
 import java.util.LinkedList;
 import java.util.List;

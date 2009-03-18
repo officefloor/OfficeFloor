@@ -19,11 +19,11 @@ package net.officefloor.work.clazz;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import net.officefloor.compile.impl.work.source.AbstractWorkSource;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;

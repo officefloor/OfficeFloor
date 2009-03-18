@@ -14,32 +14,53 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.work.source;
+package net.officefloor.compile.spi.work.source.impl;
 
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.util.AbstractSingleTask;
+import net.officefloor.compile.spi.work.source.WorkProperty;
 
 /**
- * Abstract {@link Work} that only has a single {@link Task} for use by a
- * {@link WorkSource}.
+ * {@link WorkProperty} implementation.
  * 
  * @author Daniel
  */
-public abstract class AbstractSingleTaskWork<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends AbstractSingleTask<P, W, M, F> implements
-		TaskFactoryManufacturer<P, W, M, F> {
+public class WorkPropertyImpl implements WorkProperty {
+
+	/**
+	 * Name.
+	 */
+	private final String name;
+
+	/**
+	 * Label.
+	 */
+	private final String label;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param name
+	 *            Name.
+	 * @param label
+	 *            Label. Defaults to <code>name</code> if <code>null</code>.
+	 */
+	public WorkPropertyImpl(String name, String label) {
+		this.name = name;
+		this.label = ((label == null) || (label.trim().length() == 0)) ? name
+				: label;
+	}
 
 	/*
-	 * ================= TaskFactoryManufacturer =========================
+	 * ====================== WorkProperty ==================================
 	 */
 
 	@Override
-	public TaskFactory<P, W, M, F> createTaskFactory() {
-		return this;
+	public String getLabel() {
+		return this.label;
+	}
+
+	@Override
+	public String getName() {
+		return this.name;
 	}
 
 }

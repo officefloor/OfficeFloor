@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import net.officefloor.compile.impl.work.source.WorkSourceContextImpl;
+import net.officefloor.compile.impl.work.WorkSourceContextImpl;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;

@@ -22,13 +22,13 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.WorkLoader;
+import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.WorkProperty;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSpecification;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.work.WorkModel;
 
 /**
  * {@link WorkLoader} implementation.
@@ -55,8 +55,8 @@ public class WorkLoaderImpl implements WorkLoader {
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 */
-	public WorkLoaderImpl(String deskName, String workName) {
-		this.deskLocation = deskName;
+	public WorkLoaderImpl(String deskLocation, String workName) {
+		this.deskLocation = deskLocation;
 		this.workName = workName;
 	}
 
