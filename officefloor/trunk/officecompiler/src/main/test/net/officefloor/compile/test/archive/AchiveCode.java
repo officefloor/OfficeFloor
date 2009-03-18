@@ -14,28 +14,21 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work;
-
-import java.util.Properties;
+package net.officefloor.compile.test.archive;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.impl.work.WorkSourceContextImpl;
+import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.model.work.TaskEscalationModel;
-import net.officefloor.model.work.TaskFlowModel;
-import net.officefloor.model.work.TaskModel;
-import net.officefloor.model.work.TaskObjectModel;
-import net.officefloor.model.work.WorkModel;
 
 /**
- * Utility class for testing a {@link WorkSource}.
+ * Archived code.
  * 
  * @author Daniel
  */
-public class WorkLoaderUtil {
+// Remove all this code once compiler finished
+@Deprecated
+public class AchiveCode {
 
 	/**
 	 * Asserts the {@link WorkType} instances match.
@@ -170,101 +163,4 @@ public class WorkLoaderUtil {
 		}
 	}
 
-	/**
-	 * Convenience method that loads the {@link WorkType} by instantiating an
-	 * instance of the {@link WorkType} and deriving the {@link ClassLoader}
-	 * from it.
-	 * 
-	 * @param workLoaderClass
-	 *            Class of the {@link WorkSource}.
-	 * @param propertyNameValues
-	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkSource}.
-	 * @return Loaded {@link WorkType}.
-	 * @throws Exception
-	 *             If fails to load the {@link WorkType}.
-	 */
-	public static WorkType<?> loadWork(
-			Class<? extends WorkSource> workLoaderClass,
-			String... propertyNameValues) throws Exception {
-
-		// Create an instance of the work loader
-		WorkSource workLoader = workLoaderClass.newInstance();
-
-		// Return the loaded work
-		return loadWork(workLoader, propertyNameValues);
-	}
-
-	/**
-	 * Convenience method that loads the {@link WorkType} by obtaining the
-	 * {@link ClassLoader} from the {@link WorkSource} class.
-	 * 
-	 * @param workLoader
-	 *            {@link WorkSource}.
-	 * @param propertyNameValues
-	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkSource}.
-	 * @return Loaded {@link WorkType}.
-	 * @throws Exception
-	 *             If fails to load the {@link WorkType}.
-	 */
-	public static WorkType<?> loadWork(WorkSource workLoader,
-			String... propertyNameValues) throws Exception {
-
-		// Obtain the class loader from the work loader
-		ClassLoader classLoader = workLoader.getClass().getClassLoader();
-
-		// Return the loaded work
-		return loadWork(workLoader, classLoader, propertyNameValues);
-	}
-
-	/**
-	 * Loads the {@link WorkType} for the {@link WorkSource} given the input
-	 * details.
-	 * 
-	 * @param workLoader
-	 *            {@link WorkSource}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
-	 * @param propertyNameValues
-	 *            Listing of name/value pairs that comprise the properties for
-	 *            the {@link WorkSource}.
-	 * @return Loaded {@link WorkType}.
-	 * @throws Exception
-	 *             If fails to load the {@link WorkType}.
-	 */
-	public static WorkType<?> loadWork(WorkSource workLoader,
-			ClassLoader classLoader, String... propertyNameValues)
-			throws Exception {
-
-		// Obtain the property name values
-		if ((propertyNameValues.length % 2) != 0) {
-			throw new IllegalArgumentException(
-					"Must have even listing of property name values");
-		}
-		String[] propertyNames = new String[propertyNameValues.length / 2];
-		Properties properties = new Properties();
-		for (int i = 0; i < propertyNameValues.length; i += 2) {
-			String propertyName = propertyNameValues[i];
-			String propertyValue = propertyNameValues[i + 1];
-			propertyNames[i / 2] = propertyName;
-			properties.setProperty(propertyName, propertyValue);
-		}
-
-		// Create the work loader context
-		WorkSourceContext context = new WorkSourceContextImpl(propertyNames,
-				properties, classLoader);
-
-		// Load the work
-		WorkType<?> work = workLoader.loadWork(context);
-
-		// Return the loaded work
-		return work;
-	}
-
-	/**
-	 * All access via static methods.
-	 */
-	private WorkLoaderUtil() {
-	}
 }

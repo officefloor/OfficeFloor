@@ -61,6 +61,15 @@ class ClassTask implements Task<Object, ClassWork, Indexed, Indexed> {
 		this.parameters = parameters;
 	}
 
+	/**
+	 * Returns the {@link Method} for the {@link Task}.
+	 * 
+	 * @return {@link Method} for the {@link Task}.
+	 */
+	public Method getMethod() {
+		return this.method;
+	}
+
 	/*
 	 * ========================= Task ==========================================
 	 */
