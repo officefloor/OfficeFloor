@@ -44,13 +44,15 @@ public class PropertyListImpl implements PropertyList {
 	}
 
 	@Override
-	public void addProperty(String name, String label) {
-		this.properties.add(new PropertyImpl(name, label));
+	public Property addProperty(String name, String label) {
+		Property property = new PropertyImpl(name, label);
+		this.properties.add(property);
+		return property;
 	}
 
 	@Override
-	public void addProperty(String name) {
-		this.properties.add(new PropertyImpl(name));
+	public Property addProperty(String name) {
+		return this.addProperty(name, name);
 	}
 
 }

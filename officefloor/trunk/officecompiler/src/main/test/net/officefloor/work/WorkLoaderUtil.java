@@ -19,7 +19,7 @@ package net.officefloor.work;
 import java.util.Properties;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.impl.work.source.WorkSourceContextImpl;
+import net.officefloor.compile.impl.work.WorkSourceContextImpl;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;

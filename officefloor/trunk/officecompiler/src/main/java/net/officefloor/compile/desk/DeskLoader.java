@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import net.officefloor.compile.LoaderContext;
-import net.officefloor.compile.impl.work.source.WorkSourceContextImpl;
+import net.officefloor.compile.impl.work.WorkSourceContextImpl;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
