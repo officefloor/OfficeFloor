@@ -14,23 +14,26 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.compile.spi.pool;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link WorkSource}.
+ * <p>
+ * <code>Type definition</code> of a {@link ManagedObjectPool}.
+ * <p>
+ * All {@link ManagedObjectPool} instances implement the same interface. They
+ * however differ in their characteristics which is internal to the
+ * {@link ManagedObjectPool}.
+ * <p>
+ * TODO Need to consider if necessary to provide criteria on a
+ * {@link ManagedObjectSource} to differentiate which {@link ManagedObjectPool}
+ * may pool its {@link ManagedObject} instances.
  * 
  * @author Daniel
  */
-public interface WorkSpecification {
-
-	/**
-	 * Obtains the specification of the properties for the {@link Work}.
-	 * 
-	 * @return Property specification.
-	 */
-	WorkSourceProperty[] getProperties();
+public interface ManagedObjectPoolType {
 
 }

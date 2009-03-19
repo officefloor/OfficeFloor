@@ -14,23 +14,38 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.compile.spi.managedobject;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link WorkSource}.
+ * <code>Type definition</code> of a dependency required by the
+ * {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface WorkSpecification {
+public interface ManagedObjectDependencyType<D extends Enum<D>> {
 
 	/**
-	 * Obtains the specification of the properties for the {@link Work}.
+	 * Obtains the name of the dependency.
 	 * 
-	 * @return Property specification.
+	 * @return Name of the dependency.
 	 */
-	WorkSourceProperty[] getProperties();
+	String getDependencyName();
+
+	/**
+	 * Obtains the key identifying the dependency.
+	 * 
+	 * @return Key identifying the dependency.
+	 */
+	D getKey();
+
+	/**
+	 * Obtains the {@link Class} that the dependent object must
+	 * extend/implement.
+	 * 
+	 * @return Type of the dependency.
+	 */
+	Class<?> getDependencyType();
 
 }

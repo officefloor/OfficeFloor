@@ -14,53 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source.impl;
-
-import net.officefloor.compile.spi.work.source.WorkProperty;
+package net.officefloor.compile.spi.pool.source;
 
 /**
- * {@link WorkProperty} implementation.
+ * Individual property of the {@link ManagedObjectPoolSourceSpecification}.
  * 
  * @author Daniel
  */
-public class WorkPropertyImpl implements WorkProperty {
+public interface ManagedObjectPoolSourceProperty {
 
 	/**
-	 * Name.
-	 */
-	private final String name;
-
-	/**
-	 * Label.
-	 */
-	private final String label;
-
-	/**
-	 * Initiate.
+	 * Obtains name of property.
 	 * 
-	 * @param name
-	 *            Name.
-	 * @param label
-	 *            Label. Defaults to <code>name</code> if <code>null</code>.
+	 * @return Name of property.
 	 */
-	public WorkPropertyImpl(String name, String label) {
-		this.name = name;
-		this.label = ((label == null) || (label.trim().length() == 0)) ? name
-				: label;
-	}
+	String getName();
 
-	/*
-	 * ====================== WorkProperty ==================================
+	/**
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
+	 * 
+	 * @return Display name of property.
 	 */
-
-	@Override
-	public String getLabel() {
-		return this.label;
-	}
-
-	@Override
-	public String getName() {
-		return this.name;
-	}
+	String getLabel();
 
 }

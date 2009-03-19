@@ -14,23 +14,24 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.compile.spi.managedobject;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link WorkSource}.
+ * <code>Type definition</code> of a {@link Team} required by the
+ * {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface WorkSpecification {
+public interface ManagedObjectTeamType {
 
 	/**
-	 * Obtains the specification of the properties for the {@link Work}.
+	 * Obtains the name to identify requirement of a {@link Team}.
 	 * 
-	 * @return Property specification.
+	 * @return Name to identify requirement of a {@link Team}.
 	 */
-	WorkSourceProperty[] getProperties();
+	String getTeamName();
 
 }

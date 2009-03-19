@@ -21,7 +21,7 @@ package net.officefloor.compile.spi.work.source;
  * 
  * @author Daniel
  */
-public interface WorkProperty {
+public interface WorkSourceProperty {
 
 	/**
 	 * Obtains the name of the property.

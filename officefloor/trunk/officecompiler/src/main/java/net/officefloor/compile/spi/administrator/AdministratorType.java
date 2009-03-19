@@ -14,23 +14,32 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.compile.spi.administrator;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link WorkSource}.
+ * <code>Type definition</code> of an {@link Administrator}.
  * 
  * @author Daniel
  */
-public interface WorkSpecification {
+public interface AdministratorType<I, A extends Enum<A>> {
 
 	/**
-	 * Obtains the specification of the properties for the {@link Work}.
+	 * Obtains the {@link Class} that the {@link ManagedObject} must provide as
+	 * an extension interface to be administered.
 	 * 
-	 * @return Property specification.
+	 * @return Extension interface for the {@link ManagedObject}.
 	 */
-	WorkSourceProperty[] getProperties();
+	Class<I> getExtensionInterface();
+
+	/**
+	 * Obtains the {@link DutyType} definitions for this
+	 * {@link AdministratorType}.
+	 * 
+	 * @return {@link DutyType} definitions for this {@link AdministratorType}.
+	 */
+	DutyType<A, ?>[] getDutyTypes();
 
 }
