@@ -14,23 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
-
-import net.officefloor.frame.api.execute.Work;
+package net.officefloor.compile.spi.handler.source;
 
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link WorkSource}.
+ * Property of the {@link HandlerSpecification}.
  * 
  * @author Daniel
  */
-public interface WorkSpecification {
+public interface HandlerSourceProperty {
 
 	/**
-	 * Obtains the specification of the properties for the {@link Work}.
+	 * Obtains the name of the property.
 	 * 
-	 * @return Property specification.
+	 * @return Name of the property.
 	 */
-	WorkSourceProperty[] getProperties();
+	String getName();
+
+	/**
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
+	 * 
+	 * @return Display name of property.
+	 */
+	String getLabel();
 
 }

@@ -14,23 +14,21 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
-
-import net.officefloor.frame.api.execute.Work;
+package net.officefloor.compile.spi.pool.source;
 
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link WorkSource}.
+ * Specification of a {@link ManagedObjectPoolSource}.
  * 
  * @author Daniel
  */
-public interface WorkSpecification {
+public interface ManagedObjectPoolSourceSpecification {
 
 	/**
-	 * Obtains the specification of the properties for the {@link Work}.
+	 * Obtains the specification of the properties for the
+	 * {@link ManagedObjectPoolSource}.
 	 * 
 	 * @return Property specification.
 	 */
-	WorkSourceProperty[] getProperties();
+	ManagedObjectPoolSourceProperty[] getProperties();
 
 }

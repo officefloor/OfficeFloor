@@ -1,0 +1,86 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.compile.spi.managedobject;
+
+import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
+
+/**
+ * <code>Type definition</code> of a {@link ManagedObject}.
+ * 
+ * @author Daniel
+ */
+public interface ManagedObjectType<D extends Enum<D>, H extends Enum<H>> {
+
+	/**
+	 * Obtains the {@link Class} of the object returned from
+	 * {@link ManagedObject}.
+	 * 
+	 * @return The {@link Class} of the object being managed by the
+	 *         {@link ManagedObject}.
+	 */
+	Class<?> getObjectClass();
+
+	/**
+	 * Obtains the {@link ManagedObjectDependencyType} definitions of the
+	 * required dependencies for the {@link ManagedObject}.
+	 * 
+	 * @return {@link ManagedObjectDependencyType} definitions of the required
+	 *         dependencies for the {@link ManagedObject}.
+	 */
+	ManagedObjectDependencyType<D>[] getDependencyTypes();
+
+	/**
+	 * Obtains the {@link ManagedObjectHandlerType} definitions of the required
+	 * {@link Handler} instances for the {@link ManagedObject}.
+	 * 
+	 * @return {@link ManagedObjectHandlerType} definitions of the required
+	 *         {@link Handler} instances for the {@link ManagedObject}.
+	 */
+	ManagedObjectHandlerType<H>[] getHandlerTypes();
+
+	/**
+	 * Obtains the {@link ManagedObjectFlowType} definitions of the {@link Flow}
+	 * instances instigated by {@link Task} instances of the
+	 * {@link ManagedObject}.
+	 * 
+	 * @return {@link ManagedObjectFlowType} definitions of the {@link Flow}
+	 *         instances instigated by {@link Task} instances of the
+	 *         {@link ManagedObject}.
+	 */
+	ManagedObjectFlowType<?>[] getFlowTypes();
+
+	/**
+	 * Obtains the {@link ManagedObjectTeamType} definitions of {@link Team}
+	 * instances required by the {@link ManagedObject}.
+	 * 
+	 * @return {@link ManagedObjectTeamType} definitions of {@link Team}
+	 *         instances required by the {@link ManagedObject}.
+	 */
+	ManagedObjectTeamType[] getTeamTypes();
+
+	/**
+	 * Obtains the extension interfaces supported by the {@link ManagedObject}.
+	 * 
+	 * @return Extension interfaces supported by the {@link ManagedObject}.
+	 */
+	Class<?>[] getExtensionInterfaces();
+
+}

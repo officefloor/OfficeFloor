@@ -23,7 +23,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.WorkLoader;
-import net.officefloor.compile.spi.work.source.WorkProperty;
+import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSpecification;
@@ -127,7 +127,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to obtain the {@link WorkProperty} instances.
+	 * Ensures issue if fails to obtain the {@link WorkSourceProperty} instances.
 	 */
 	public void testFailGetWorkProperties() {
 
@@ -148,7 +148,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures considers null {@link WorkProperty} array as no properties.
+	 * Ensures considers null {@link WorkSourceProperty} array as no properties.
 	 */
 	public void testNullWorkPropertiesArray() {
 
@@ -163,13 +163,13 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if element in {@link WorkProperty} array is null.
+	 * Ensures issue if element in {@link WorkSourceProperty} array is null.
 	 */
 	public void testNullWorkPropertyElement() {
 
 		// Record null work properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkProperty[] { null });
+				.getProperties(), new WorkSourceProperty[] { null });
 		this.record_issue("WorkProperty 0 is null from WorkSpecification for "
 				+ MockWorkSource.class.getName());
 
@@ -180,15 +180,15 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if <code>null</code> {@link WorkProperty} name.
+	 * Ensures issue if <code>null</code> {@link WorkSourceProperty} name.
 	 */
 	public void testNullWorkPropertyName() {
 
-		final WorkProperty property = this.createMock(WorkProperty.class);
+		final WorkSourceProperty property = this.createMock(WorkSourceProperty.class);
 
 		// Record obtaining work properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkProperty[] { property });
+				.getProperties(), new WorkSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
 		this
 				.record_issue("WorkProperty 0 provided blank name from WorkSpecification for "
@@ -201,17 +201,17 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link WorkProperty} name.
+	 * Ensures issue if fails to get the {@link WorkSourceProperty} name.
 	 */
 	public void testFailGetWorkPropertyName() {
 
 		final RuntimeException failure = new RuntimeException(
 				"Failed to get property name");
-		final WorkProperty property = this.createMock(WorkProperty.class);
+		final WorkSourceProperty property = this.createMock(WorkSourceProperty.class);
 
 		// Record obtaining work properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkProperty[] { property });
+				.getProperties(), new WorkSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.record_issue(
 				"Failed to get name for WorkProperty 0 from WorkSpecification for "
@@ -224,17 +224,17 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link WorkProperty} label.
+	 * Ensures issue if fails to get the {@link WorkSourceProperty} label.
 	 */
 	public void testFailGetWorkPropertyLabel() {
 
 		final RuntimeException failure = new RuntimeException(
 				"Failed to get property label");
-		final WorkProperty property = this.createMock(WorkProperty.class);
+		final WorkSourceProperty property = this.createMock(WorkSourceProperty.class);
 
 		// Record obtaining work properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkProperty[] { property });
+				.getProperties(), new WorkSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
 		this.record_issue(
@@ -252,14 +252,14 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 */
 	public void testLoadWorkSpecification() {
 
-		final WorkProperty propertyWithLabel = this
-				.createMock(WorkProperty.class);
-		final WorkProperty propertyWithoutLabel = this
-				.createMock(WorkProperty.class);
+		final WorkSourceProperty propertyWithLabel = this
+				.createMock(WorkSourceProperty.class);
+		final WorkSourceProperty propertyWithoutLabel = this
+				.createMock(WorkSourceProperty.class);
 
 		// Record obtaining work properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkProperty[] { propertyWithLabel,
+				.getProperties(), new WorkSourceProperty[] { propertyWithLabel,
 				propertyWithoutLabel });
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
 				"NAME");

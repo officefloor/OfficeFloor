@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkProperty;
+import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSpecification;
 import net.officefloor.frame.api.execute.Work;
 
@@ -81,9 +81,9 @@ public abstract class AbstractWorkSource<W extends Work> implements
 		 * Adds a property.
 		 * 
 		 * @param property
-		 *            {@link WorkProperty}.
+		 *            {@link WorkSourceProperty}.
 		 */
-		void addProperty(WorkProperty property);
+		void addProperty(WorkSourceProperty property);
 
 	}
 
@@ -95,9 +95,9 @@ public abstract class AbstractWorkSource<W extends Work> implements
 			WorkSpecification {
 
 		/**
-		 * {@link WorkProperty} instances.
+		 * {@link WorkSourceProperty} instances.
 		 */
-		private final List<WorkProperty> properties = new LinkedList<WorkProperty>();
+		private final List<WorkSourceProperty> properties = new LinkedList<WorkSourceProperty>();
 
 		/*
 		 * ================== SpecificationContext ===========================
@@ -105,16 +105,16 @@ public abstract class AbstractWorkSource<W extends Work> implements
 
 		@Override
 		public void addProperty(String name) {
-			this.properties.add(new WorkPropertyImpl(name, null));
+			this.properties.add(new WorkSourcePropertyImpl(name, null));
 		}
 
 		@Override
 		public void addProperty(String name, String label) {
-			this.properties.add(new WorkPropertyImpl(name, label));
+			this.properties.add(new WorkSourcePropertyImpl(name, label));
 		}
 
 		@Override
-		public void addProperty(WorkProperty property) {
+		public void addProperty(WorkSourceProperty property) {
 			this.properties.add(property);
 		}
 
@@ -123,8 +123,8 @@ public abstract class AbstractWorkSource<W extends Work> implements
 		 */
 
 		@Override
-		public WorkProperty[] getProperties() {
-			return this.properties.toArray(new WorkProperty[0]);
+		public WorkSourceProperty[] getProperties() {
+			return this.properties.toArray(new WorkSourceProperty[0]);
 		}
 	}
 

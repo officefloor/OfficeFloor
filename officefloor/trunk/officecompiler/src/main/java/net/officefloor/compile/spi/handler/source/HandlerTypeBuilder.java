@@ -14,23 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.compile.spi.handler.source;
 
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.Handler;
 
 /**
- * Provides the specification of the {@link Work} to be loaded by the particular
- * {@link WorkSource}.
+ * Provides means for the {@link HandlerSource} to provide a
+ * <code>type definition</code> of the {@link Handler}.
  * 
  * @author Daniel
  */
-public interface WorkSpecification {
-
-	/**
-	 * Obtains the specification of the properties for the {@link Work}.
-	 * 
-	 * @return Property specification.
-	 */
-	WorkSourceProperty[] getProperties();
+public interface HandlerTypeBuilder {
 
 }

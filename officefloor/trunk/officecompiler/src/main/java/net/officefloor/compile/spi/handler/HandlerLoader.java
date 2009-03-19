@@ -14,59 +14,58 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work;
+package net.officefloor.compile.spi.handler;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSourceProperty;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSpecification;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.compile.spi.handler.source.HandlerSourceProperty;
+import net.officefloor.compile.spi.handler.source.HandlerSource;
+import net.officefloor.compile.spi.handler.source.HandlerSpecification;
 
 /**
- * Loads the {@link WorkType} from the {@link WorkSource}.
+ * Loads the {@link HandlerType} from the {@link HandlerSource}.
  * 
  * @author Daniel
  */
-public interface WorkLoader {
+public interface HandlerLoader {
 
 	/**
 	 * Loads and returns the {@link PropertyList} from the
-	 * {@link WorkSpecification} for the {@link WorkSource}.
+	 * {@link HandlerSpecification} for the {@link HandlerSource}.
 	 * 
-	 * @param workSourceClass
-	 *            Class of the {@link WorkSource}.
+	 * @param handlerSourceClass
+	 *            Class of the {@link HandlerSource}.
 	 * @param issues
 	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link WorkSpecification} and obtaining the
+	 *            {@link HandlerSpecification} and obtaining the
 	 *            {@link PropertyList}.
-	 * @return {@link PropertyList} of the {@link WorkSourceProperty} instances of the
-	 *         {@link WorkSpecification} or <code>null</code> if issue, which is
-	 *         reported to the {@link CompilerIssues}.
+	 * @return {@link PropertyList} of the {@link HandlerSourceProperty} instances of
+	 *         the {@link HandlerSpecification} or <code>null</code> if issue,
+	 *         which are reported to the {@link CompilerIssues}.
 	 */
-	<W extends Work, WS extends WorkSource<W>> PropertyList loadSpecification(
-			Class<WS> workSourceClass, CompilerIssues issues);
+	<HS extends HandlerSource> PropertyList loadSpecification(
+			Class<HS> handlerSourceClass, CompilerIssues issues);
 
 	/**
-	 * Loads and returns the {@link WorkType} sourced from the
-	 * {@link WorkSource}.
+	 * Loads and returns the {@link HandlerType} sourced from the
+	 * {@link HandlerSource}.
 	 * 
-	 * @param workSourceClass
-	 *            Class of the {@link WorkSource}.
+	 * @param handlerSourceClass
+	 *            Class of the {@link HandlerSource}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link WorkType}.
+	 *            {@link HandlerType}.
 	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link WorkSource} may use in
+	 *            {@link ClassLoader} that the {@link HandlerSource} may use in
 	 *            obtaining necessary class path resources.
 	 * @param issues
 	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link WorkType}.
-	 * @return {@link WorkType} or <code>null</code> if issues, which is
+	 *            {@link HandlerType}.
+	 * @return {@link HandlerType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<W extends Work, WS extends WorkSource<W>> WorkType<W> loadWork(
-			Class<WS> workSourceClass, PropertyList propertyList,
+	<F extends Enum<F>, HS extends HandlerSource> HandlerType<F> loadHandler(
+			Class<HS> handlerSourceClass, PropertyList propertyList,
 			ClassLoader classLoader, CompilerIssues issues);
 
 }

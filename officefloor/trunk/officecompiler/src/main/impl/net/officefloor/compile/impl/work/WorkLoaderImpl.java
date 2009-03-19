@@ -31,7 +31,7 @@ import net.officefloor.compile.spi.work.TaskType;
 import net.officefloor.compile.spi.work.WorkLoader;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
-import net.officefloor.compile.spi.work.source.WorkProperty;
+import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSpecification;
@@ -108,12 +108,12 @@ public class WorkLoaderImpl implements WorkLoader {
 		}
 
 		// Obtain the properties
-		WorkProperty[] workProperties;
+		WorkSourceProperty[] workProperties;
 		try {
 			workProperties = specification.getProperties();
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain "
-					+ WorkProperty.class.getSimpleName() + " instances from "
+					+ WorkSourceProperty.class.getSimpleName() + " instances from "
 					+ WorkSpecification.class.getSimpleName() + " for "
 					+ workSourceClass.getName(), ex, issues);
 			return null; // failed to obtain properties
@@ -123,11 +123,11 @@ public class WorkLoaderImpl implements WorkLoader {
 		PropertyList propertyList = new PropertyListImpl();
 		if (workProperties != null) {
 			for (int i = 0; i < workProperties.length; i++) {
-				WorkProperty workProperty = workProperties[i];
+				WorkSourceProperty workProperty = workProperties[i];
 
 				// Ensure have the work property
 				if (workProperty == null) {
-					this.addIssue(WorkProperty.class.getSimpleName() + " " + i
+					this.addIssue(WorkSourceProperty.class.getSimpleName() + " " + i
 							+ " is null from "
 							+ WorkSpecification.class.getSimpleName() + " for "
 							+ workSourceClass.getName(), issues);
@@ -140,14 +140,14 @@ public class WorkLoaderImpl implements WorkLoader {
 					name = workProperty.getName();
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get name for "
-							+ WorkProperty.class.getSimpleName() + " " + i
+							+ WorkSourceProperty.class.getSimpleName() + " " + i
 							+ " from "
 							+ WorkSpecification.class.getSimpleName() + " for "
 							+ workSourceClass.getName(), ex, issues);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(WorkProperty.class.getSimpleName() + " " + i
+					this.addIssue(WorkSourceProperty.class.getSimpleName() + " " + i
 							+ " provided blank name from "
 							+ WorkSpecification.class.getSimpleName() + " for "
 							+ workSourceClass.getName(), issues);
@@ -160,7 +160,7 @@ public class WorkLoaderImpl implements WorkLoader {
 					label = workProperty.getLabel();
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get label for "
-							+ WorkProperty.class.getSimpleName() + " " + i
+							+ WorkSourceProperty.class.getSimpleName() + " " + i
 							+ " (" + name + ") from "
 							+ WorkSpecification.class.getSimpleName() + " for "
 							+ workSourceClass.getName(), ex, issues);
