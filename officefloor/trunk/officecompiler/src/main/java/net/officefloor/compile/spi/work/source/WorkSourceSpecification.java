@@ -16,26 +16,21 @@
  */
 package net.officefloor.compile.spi.work.source;
 
+import net.officefloor.frame.api.execute.Work;
+
 /**
- * Property of the {@link WorkSourceSpecification}.
+ * Provides the specification of the {@link Work} to be loaded by the particular
+ * {@link WorkSource}.
  * 
  * @author Daniel
  */
-public interface WorkSourceProperty {
+public interface WorkSourceSpecification {
 
 	/**
-	 * Obtains the name of the property.
+	 * Obtains the specification of the properties for the {@link Work}.
 	 * 
-	 * @return Name of the property.
+	 * @return Property specification.
 	 */
-	String getName();
-
-	/**
-	 * Obtains the display name of the property. If this returns
-	 * <code>null</code> then the return value of {@link #getName()} is used.
-	 * 
-	 * @return Display name of property.
-	 */
-	String getLabel();
+	WorkSourceProperty[] getProperties();
 
 }

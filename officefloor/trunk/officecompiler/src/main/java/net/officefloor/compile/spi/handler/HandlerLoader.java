@@ -20,7 +20,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.handler.source.HandlerSourceProperty;
 import net.officefloor.compile.spi.handler.source.HandlerSource;
-import net.officefloor.compile.spi.handler.source.HandlerSpecification;
+import net.officefloor.compile.spi.handler.source.HandlerSourceSpecification;
 
 /**
  * Loads the {@link HandlerType} from the {@link HandlerSource}.
@@ -31,16 +31,16 @@ public interface HandlerLoader {
 
 	/**
 	 * Loads and returns the {@link PropertyList} from the
-	 * {@link HandlerSpecification} for the {@link HandlerSource}.
+	 * {@link HandlerSourceSpecification} for the {@link HandlerSource}.
 	 * 
 	 * @param handlerSourceClass
 	 *            Class of the {@link HandlerSource}.
 	 * @param issues
 	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link HandlerSpecification} and obtaining the
+	 *            {@link HandlerSourceSpecification} and obtaining the
 	 *            {@link PropertyList}.
 	 * @return {@link PropertyList} of the {@link HandlerSourceProperty} instances of
-	 *         the {@link HandlerSpecification} or <code>null</code> if issue,
+	 *         the {@link HandlerSourceSpecification} or <code>null</code> if issue,
 	 *         which are reported to the {@link CompilerIssues}.
 	 */
 	<HS extends HandlerSource> PropertyList loadSpecification(

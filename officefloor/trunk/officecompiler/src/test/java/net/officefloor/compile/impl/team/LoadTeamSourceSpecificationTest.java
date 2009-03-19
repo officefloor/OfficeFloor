@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.work;
+package net.officefloor.compile.impl.team;
 
 import java.util.List;
 
@@ -22,34 +22,33 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.WorkLoader;
-import net.officefloor.compile.spi.work.source.WorkSourceProperty;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
-import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.team.TeamLoader;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.spi.team.source.TeamSourceContext;
+import net.officefloor.frame.spi.team.source.TeamSourceProperty;
+import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.officefloor.OfficeFloorModel;
 
 /**
- * Tests the {@link WorkLoader}.
+ * Tests the {@link TeamLoader}.
  * 
  * @author Daniel
  */
-public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
+public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link DeskModel} as {@link Work} is always done on a
-	 * desk.
+	 * Location of the {@link OfficeFloorModel} as {@link TeamSource} typically
+	 * used in an {@link OfficeFloorModel}.
 	 */
-	private final String DESK_LOCATION = "DESK";
+	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
 
 	/**
-	 * Name of the {@link Work}.
+	 * Name of the {@link Team}.
 	 */
-	private final String WORK_NAME = "WORK";
+	private final String TEAM_NAME = "TEAM";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -57,10 +56,10 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
 
 	/**
-	 * {@link WorkSourceSpecification}.
+	 * {@link TeamSourceSpecification}.
 	 */
-	private final WorkSourceSpecification specification = this
-			.createMock(WorkSourceSpecification.class);
+	private final TeamSourceSpecification specification = this
+			.createMock(TeamSourceSpecification.class);
 
 	/*
 	 * (non-Javadoc)
@@ -69,77 +68,80 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 */
 	@Override
 	protected void setUp() throws Exception {
-		MockWorkSource.reset(this.specification);
+		MockTeamSource.reset(this.specification);
 	}
 
 	/**
-	 * Ensures issue if fails to instantiate the {@link WorkSource}.
+	 * Ensures issue if fails to instantiate the {@link TeamSource}.
 	 */
-	public void testFailInstantiateForWorkSpecification() {
+	public void testFailInstantiateForTeamSourceSpecification() {
 
 		final RuntimeException failure = new RuntimeException(
 				"instantiate failure");
 
 		// Record failure to instantiate
 		this.record_issue("Failed to instantiate "
-				+ MockWorkSource.class.getName() + " by default constructor",
+				+ MockTeamSource.class.getName() + " by default constructor",
 				failure);
 
 		// Attempt to obtain specification
-		MockWorkSource.instantiateFailure = failure;
+		MockTeamSource.instantiateFailure = failure;
 		this.replayMockObjects();
 		this.loadSpecification(false);
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures issue if failure in obtaining the {@link WorkSourceSpecification}.
+	 * Ensures issue if failure in obtaining the {@link TeamSourceSpecification}
+	 * .
 	 */
-	public void testFailGetWorkSpecification() {
+	public void testFailGetTeamSourceSpecification() {
 
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to obtain WorkSpecification from "
-				+ MockWorkSource.class.getName(), failure);
+		this.record_issue("Failed to obtain TeamSourceSpecification from "
+				+ MockTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
-		MockWorkSource.specificationFailure = failure;
+		MockTeamSource.specificationFailure = failure;
 		this.replayMockObjects();
 		this.loadSpecification(false);
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures issue if no {@link WorkSourceSpecification} obtained.
+	 * Ensures issue if no {@link TeamSourceSpecification} obtained.
 	 */
-	public void testNoWorkSpecification() {
+	public void testNoTeamSourceSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No WorkSpecification returned from "
-				+ MockWorkSource.class.getName());
+		this.record_issue("No TeamSourceSpecification returned from "
+				+ MockTeamSource.class.getName());
 
 		// Attempt to obtain specification
-		MockWorkSource.specification = null;
+		MockTeamSource.specification = null;
 		this.replayMockObjects();
 		this.loadSpecification(false);
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Ensures issue if fails to obtain the {@link WorkSourceProperty} instances.
+	 * Ensures issue if fails to obtain the {@link TeamSourceProperty}
+	 * instances.
 	 */
-	public void testFailGetWorkProperties() {
+	public void testFailGetTeamSourceProperties() {
 
 		final NullPointerException failure = new NullPointerException(
-				"Fail to get work properties");
+				"Fail to get managed object source properties");
 
-		// Record null work properties
+		// Record null properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this.record_issue(
-				"Failed to obtain WorkProperty instances from WorkSpecification for "
-						+ MockWorkSource.class.getName(), failure);
+		this
+				.record_issue(
+						"Failed to obtain TeamSourceProperty instances from TeamSourceSpecification for "
+								+ MockTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -148,11 +150,11 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures considers null {@link WorkSourceProperty} array as no properties.
+	 * Ensures considers null {@link TeamSourceProperty} array as no properties.
 	 */
-	public void testNullWorkPropertiesArray() {
+	public void testNullTeamSourcePropertiesArray() {
 
-		// Record null work properties
+		// Record null properties
 		this.recordReturn(this.specification, this.specification
 				.getProperties(), null);
 
@@ -163,15 +165,16 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if element in {@link WorkSourceProperty} array is null.
+	 * Ensures issue if element in {@link TeamSourceProperty} array is null.
 	 */
-	public void testNullWorkPropertyElement() {
+	public void testNullTeamSourcePropertyElement() {
 
-		// Record null work properties
+		// Record null properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkSourceProperty[] { null });
-		this.record_issue("WorkProperty 0 is null from WorkSpecification for "
-				+ MockWorkSource.class.getName());
+				.getProperties(), new TeamSourceProperty[] { null });
+		this
+				.record_issue("TeamSourceProperty 0 is null from TeamSourceSpecification for "
+						+ MockTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -180,19 +183,20 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if <code>null</code> {@link WorkSourceProperty} name.
+	 * Ensures issue if <code>null</code> {@link TeamSourceProperty} name.
 	 */
-	public void testNullWorkPropertyName() {
+	public void testNullTeamSourcePropertyName() {
 
-		final WorkSourceProperty property = this.createMock(WorkSourceProperty.class);
+		final TeamSourceProperty property = this
+				.createMock(TeamSourceProperty.class);
 
-		// Record obtaining work properties
+		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkSourceProperty[] { property });
+				.getProperties(), new TeamSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
 		this
-				.record_issue("WorkProperty 0 provided blank name from WorkSpecification for "
-						+ MockWorkSource.class.getName());
+				.record_issue("TeamSourceProperty 0 provided blank name from TeamSourceSpecification for "
+						+ MockTeamSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -201,21 +205,22 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link WorkSourceProperty} name.
+	 * Ensures issue if fails to get the {@link TeamSourceProperty} name.
 	 */
-	public void testFailGetWorkPropertyName() {
+	public void testFailGetTeamSourcePropertyName() {
 
 		final RuntimeException failure = new RuntimeException(
 				"Failed to get property name");
-		final WorkSourceProperty property = this.createMock(WorkSourceProperty.class);
+		final TeamSourceProperty property = this
+				.createMock(TeamSourceProperty.class);
 
-		// Record obtaining work properties
+		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkSourceProperty[] { property });
+				.getProperties(), new TeamSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.record_issue(
-				"Failed to get name for WorkProperty 0 from WorkSpecification for "
-						+ MockWorkSource.class.getName(), failure);
+				"Failed to get name for TeamSourceProperty 0 from TeamSourceSpecification for "
+						+ MockTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -224,22 +229,24 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures issue if fails to get the {@link WorkSourceProperty} label.
+	 * Ensures issue if fails to get the {@link TeamSourceProperty} label.
 	 */
-	public void testFailGetWorkPropertyLabel() {
+	public void testFailGetTeamSourcePropertyLabel() {
 
 		final RuntimeException failure = new RuntimeException(
 				"Failed to get property label");
-		final WorkSourceProperty property = this.createMock(WorkSourceProperty.class);
+		final TeamSourceProperty property = this
+				.createMock(TeamSourceProperty.class);
 
-		// Record obtaining work properties
+		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkSourceProperty[] { property });
+				.getProperties(), new TeamSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
-				"Failed to get label for WorkProperty 0 (NAME) from WorkSpecification for "
-						+ MockWorkSource.class.getName(), failure);
+		this
+				.record_issue(
+						"Failed to get label for TeamSourceProperty 0 (NAME) from TeamSourceSpecification for "
+								+ MockTeamSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -248,18 +255,18 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures able to load the {@link WorkSourceSpecification}.
+	 * Ensures able to load the {@link TeamSourceSpecification}.
 	 */
-	public void testLoadWorkSpecification() {
+	public void testLoadTeamSourceSpecification() {
 
-		final WorkSourceProperty propertyWithLabel = this
-				.createMock(WorkSourceProperty.class);
-		final WorkSourceProperty propertyWithoutLabel = this
-				.createMock(WorkSourceProperty.class);
+		final TeamSourceProperty propertyWithLabel = this
+				.createMock(TeamSourceProperty.class);
+		final TeamSourceProperty propertyWithoutLabel = this
+				.createMock(TeamSourceProperty.class);
 
-		// Record obtaining work properties
+		// Record obtaining properties
 		this.recordReturn(this.specification, this.specification
-				.getProperties(), new WorkSourceProperty[] { propertyWithLabel,
+				.getProperties(), new TeamSourceProperty[] { propertyWithLabel,
 				propertyWithoutLabel });
 		this.recordReturn(propertyWithLabel, propertyWithLabel.getName(),
 				"NAME");
@@ -283,8 +290,8 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.DESK, DESK_LOCATION, AssetType.WORK,
-				WORK_NAME, issueDescription);
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
+				AssetType.TEAM, TEAM_NAME, issueDescription);
 	}
 
 	/**
@@ -296,26 +303,27 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.DESK, DESK_LOCATION, AssetType.WORK,
-				WORK_NAME, issueDescription, cause);
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
+				AssetType.TEAM, TEAM_NAME, issueDescription, cause);
 	}
 
 	/**
-	 * Loads the {@link WorkSourceSpecification}.
+	 * Loads the {@link TeamSourceSpecification}.
 	 * 
 	 * @param isExpectToLoad
 	 *            Flag indicating if expect to obtain the
-	 *            {@link WorkSourceSpecification}.
+	 *            {@link TeamSourceSpecification}.
 	 * @param propertyNames
 	 *            Expected {@link Property} names for being returned.
 	 */
 	private void loadSpecification(boolean isExpectToLoad,
 			String... propertyNameLabelPairs) {
 
-		// Load the work specification
-		WorkLoader workLoader = new WorkLoaderImpl(DESK_LOCATION, WORK_NAME);
-		PropertyList propertyList = workLoader.loadSpecification(
-				MockWorkSource.class, this.issues);
+		// Load the managed object specification specification
+		TeamLoader teamLoader = new TeamLoaderImpl(OFFICE_FLOOR_LOCATION,
+				TEAM_NAME);
+		PropertyList propertyList = teamLoader.loadSpecification(
+				MockTeamSource.class, this.issues);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {
@@ -343,9 +351,9 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Mock {@link WorkSource} for testing.
+	 * Mock {@link TeamSource} for testing.
 	 */
-	public static class MockWorkSource implements WorkSource<Work> {
+	public static class MockTeamSource implements TeamSource {
 
 		/**
 		 * Failure to instantiate an instance.
@@ -353,31 +361,31 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		public static RuntimeException instantiateFailure = null;
 
 		/**
-		 * Failure to obtain the {@link WorkSourceSpecification}.
+		 * Failure to obtain the {@link TeamSourceSpecification}.
 		 */
 		public static Error specificationFailure = null;
 
 		/**
-		 * {@link WorkSourceSpecification}.
+		 * {@link TeamSourceSpecification}.
 		 */
-		public static WorkSourceSpecification specification;
+		public static TeamSourceSpecification specification;
 
 		/**
 		 * Resets the state for next test.
 		 * 
 		 * @param specification
-		 *            {@link WorkSourceSpecification}.
+		 *            {@link TeamSourceSpecification}.
 		 */
-		public static void reset(WorkSourceSpecification specification) {
+		public static void reset(TeamSourceSpecification specification) {
 			instantiateFailure = null;
 			specificationFailure = null;
-			MockWorkSource.specification = specification;
+			MockTeamSource.specification = specification;
 		}
 
 		/**
 		 * Default constructor.
 		 */
-		public MockWorkSource() {
+		public MockTeamSource() {
 			// Determine if fail to instantiate
 			if (instantiateFailure != null) {
 				throw instantiateFailure;
@@ -385,12 +393,11 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		/*
-		 * ================ WorkSource ================================
+		 * ================ TeamSource ================================
 		 */
 
 		@Override
-		public WorkSourceSpecification getSpecification() {
-
+		public TeamSourceSpecification getSpecification() {
 			// Determine if failure to obtain
 			if (specificationFailure != null) {
 				throw specificationFailure;
@@ -401,9 +408,14 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceWork(WorkTypeBuilder<Work> workTypeBuilder,
-				WorkSourceContext context) throws Exception {
+		public void init(TeamSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
+		}
+
+		@Override
+		public Team createTeam() {
+			fail("Should not be invoked for obtaining specification");
+			return null;
 		}
 	}
 

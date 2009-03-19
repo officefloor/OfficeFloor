@@ -14,28 +14,20 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.compile.impl.handler;
+
+import net.officefloor.compile.spi.handler.HandlerType;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Property of the {@link WorkSourceSpecification}.
+ * Tests loading the {@link HandlerType}.
  * 
  * @author Daniel
  */
-public interface WorkSourceProperty {
+public class LoadHandlerTypeTest extends OfficeFrameTestCase {
 
-	/**
-	 * Obtains the name of the property.
-	 * 
-	 * @return Name of the property.
-	 */
-	String getName();
-
-	/**
-	 * Obtains the display name of the property. If this returns
-	 * <code>null</code> then the return value of {@link #getName()} is used.
-	 * 
-	 * @return Display name of property.
-	 */
-	String getLabel();
+	public void testImplement() {
+		fail("TODO implement testing for loading the HandlerType via the HandlerLoader");
+	}
 
 }

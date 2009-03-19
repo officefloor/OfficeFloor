@@ -28,15 +28,15 @@ public interface HandlerSource {
 
 	/**
 	 * <p>
-	 * Obtains the {@link HandlerSpecification} for this {@link HandlerSource}.
+	 * Obtains the {@link HandlerSourceSpecification} for this {@link HandlerSource}.
 	 * <p>
 	 * This enables the {@link HandlerSourceContext} to be populated with the
-	 * necessary details as per this {@link HandlerSpecification} in loading the
+	 * necessary details as per this {@link HandlerSourceSpecification} in loading the
 	 * {@link HandlerType}.
 	 * 
-	 * @return {@link HandlerSpecification}.
+	 * @return {@link HandlerSourceSpecification}.
 	 */
-	HandlerSpecification getSpecification();
+	HandlerSourceSpecification getSpecification();
 
 	/**
 	 * Sources the {@link HandlerType} by populating it via the input
