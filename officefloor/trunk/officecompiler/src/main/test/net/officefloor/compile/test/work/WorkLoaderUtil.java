@@ -27,7 +27,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.WorkLoader;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSpecification;
+import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.test.issues.FailCompilerIssues;
 import net.officefloor.frame.api.execute.Work;
 
@@ -39,7 +39,7 @@ import net.officefloor.frame.api.execute.Work;
 public class WorkLoaderUtil {
 
 	/**
-	 * Validates the {@link WorkSpecification} for the {@link WorkSource}.
+	 * Validates the {@link WorkSourceSpecification} for the {@link WorkSource}.
 	 * 
 	 * @param workSourceClass
 	 *            {@link WorkSource} class.

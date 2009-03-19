@@ -21,7 +21,7 @@ import java.util.List;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceProperty;
-import net.officefloor.compile.spi.work.source.WorkSpecification;
+import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -37,7 +37,7 @@ public abstract class AbstractWorkSource<W extends Work> implements
 	 */
 
 	@Override
-	public WorkSpecification getSpecification() {
+	public WorkSourceSpecification getSpecification() {
 		// Create and load the specification
 		Specification specification = new Specification();
 		this.loadSpecification(specification);
@@ -47,7 +47,7 @@ public abstract class AbstractWorkSource<W extends Work> implements
 	}
 
 	/**
-	 * Loads the {@link WorkSpecification}.
+	 * Loads the {@link WorkSourceSpecification}.
 	 * 
 	 * @param context
 	 *            {@link SpecificationContext}.
@@ -89,10 +89,10 @@ public abstract class AbstractWorkSource<W extends Work> implements
 
 	/**
 	 * {@link SpecificationContext} providing the detail of the
-	 * {@link WorkSpecification}.
+	 * {@link WorkSourceSpecification}.
 	 */
 	private static class Specification implements SpecificationContext,
-			WorkSpecification {
+			WorkSourceSpecification {
 
 		/**
 		 * {@link WorkSourceProperty} instances.

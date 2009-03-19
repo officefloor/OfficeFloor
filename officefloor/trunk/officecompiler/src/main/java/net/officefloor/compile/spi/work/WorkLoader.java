@@ -20,7 +20,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSpecification;
+import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.frame.api.execute.Work;
 
 /**
@@ -32,16 +32,16 @@ public interface WorkLoader {
 
 	/**
 	 * Loads and returns the {@link PropertyList} from the
-	 * {@link WorkSpecification} for the {@link WorkSource}.
+	 * {@link WorkSourceSpecification} for the {@link WorkSource}.
 	 * 
 	 * @param workSourceClass
 	 *            Class of the {@link WorkSource}.
 	 * @param issues
 	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link WorkSpecification} and obtaining the
+	 *            {@link WorkSourceSpecification} and obtaining the
 	 *            {@link PropertyList}.
 	 * @return {@link PropertyList} of the {@link WorkSourceProperty} instances of the
-	 *         {@link WorkSpecification} or <code>null</code> if issue, which is
+	 *         {@link WorkSourceSpecification} or <code>null</code> if issue, which is
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<W extends Work, WS extends WorkSource<W>> PropertyList loadSpecification(

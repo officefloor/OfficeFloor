@@ -35,7 +35,7 @@ import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
-import net.officefloor.compile.spi.work.source.WorkSpecification;
+import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.WorkFactory;
@@ -963,7 +963,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public WorkSpecification getSpecification() {
+		public WorkSourceSpecification getSpecification() {
 			fail("Should not be invoked in obtaining work type");
 			return null;
 		}

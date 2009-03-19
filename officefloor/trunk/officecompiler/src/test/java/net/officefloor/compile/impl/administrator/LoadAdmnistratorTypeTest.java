@@ -14,16 +14,20 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.handler.source;
+package net.officefloor.compile.impl.administrator;
 
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.compile.spi.administrator.AdministratorType;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Provides the specification of the {@link Handler} to be loaded by the particular
- * {@link HandlerSource}.
+ * Tests loading the {@link AdministratorType}.
  * 
  * @author Daniel
  */
-public interface HandlerSpecification {
+public class LoadAdmnistratorTypeTest extends OfficeFrameTestCase {
+
+	public void testImplement() {
+		fail("TODO implement testing for loading the AdministratorType via the AdministratorLoader");
+	}
 
 }

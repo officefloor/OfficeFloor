@@ -17,7 +17,7 @@
 package net.officefloor.compile.spi.handler.source;
 
 /**
- * Property of the {@link HandlerSpecification}.
+ * Property of the {@link HandlerSourceSpecification}.
  * 
  * @author Daniel
  */

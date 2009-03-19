@@ -27,15 +27,15 @@ public interface WorkSource<W extends Work> {
 
 	/**
 	 * <p>
-	 * Obtains the {@link WorkSpecification} for this {@link WorkSource}.
+	 * Obtains the {@link WorkSourceSpecification} for this {@link WorkSource}.
 	 * <p>
 	 * This enables the {@link WorkSourceContext} to be populated with the
-	 * necessary details as per this {@link WorkSpecification} in loading the
+	 * necessary details as per this {@link WorkSourceSpecification} in loading the
 	 * {@link WorkType}.
 	 * 
-	 * @return {@link WorkSpecification}.
+	 * @return {@link WorkSourceSpecification}.
 	 */
-	WorkSpecification getSpecification();
+	WorkSourceSpecification getSpecification();
 
 	/**
 	 * Sources the {@link WorkType} by populating it via the input
