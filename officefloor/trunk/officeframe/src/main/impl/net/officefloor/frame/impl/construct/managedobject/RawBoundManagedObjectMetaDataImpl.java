@@ -461,6 +461,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		}
 
 		// Obtain the details of the managed object
+		Class<?> objectType = this.rawMoMetaData.getObjectType();
 		ManagedObjectSource<D, ?> managedObjectSource = this.rawMoMetaData
 				.getManagedObjectSource();
 		ManagedObjectPool managedObjectPool = this.rawMoMetaData
@@ -500,12 +501,16 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 						dependencyKeyClass);
 			}
 
-			// Load the dependency
+			// Obtain the dependency
 			RawBoundManagedObjectMetaData<?> dependency = this.dependencies
 					.get(dependencyKey);
 			if (dependency == null) {
 				continue; // dependency not available
 			}
+
+			// TODO validate the dependency object is of correct type
+
+			// Load the dependency
 			dependencyMapping.put(dependencyKey, dependency
 					.getManagedObjectIndex());
 		}
@@ -516,7 +521,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 		// Create and specify the managed object meta-data
 		this.managedObjectMetaData = new ManagedObjectMetaDataImpl<D>(
-				this.boundManagedObjectName, managedObjectSource,
+				this.boundManagedObjectName, objectType, managedObjectSource,
 				managedObjectPool, sourcingAssetManager,
 				isManagedObjectAsynchronous, operationsAssetManager,
 				isManagedObjectCoordinating, dependencyMapping, timeout);

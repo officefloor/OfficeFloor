@@ -33,7 +33,6 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.managedobject.HandlerContextImpl;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
@@ -43,12 +42,10 @@ import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawOfficeManagingManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
-import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -81,7 +78,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	@SuppressWarnings("unchecked")
 	public static RawManagedObjectMetaDataFactory getFactory() {
 		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1,
-				null, false, false, null, null, null, null, null);
+				null, null, false, false, null, null, null, null, null);
 	}
 
 	/**
@@ -114,6 +111,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 * {@link ManagedObjectPool}.
 	 */
 	private final ManagedObjectPool managedObjectPool;
+
+	/**
+	 * Type of the {@link Object} returned from the {@link ManagedObject}.
+	 */
+	private final Class<?> objectType;
 
 	/**
 	 * Flag indicating if {@link AsynchronousManagedObject}.
@@ -167,6 +169,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 *            asynchronous operations on the {@link ManagedObject}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
+	 * @param objectType
+	 *            Type of the {@link Object} returned from the
+	 *            {@link ManagedObject}.
 	 * @param isAsynchronous
 	 *            Flag indicating if {@link AsynchronousManagedObject}.
 	 * @param isCoordinating
@@ -190,15 +195,17 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			ManagedObjectSource<D, H> managedObjectSource,
 			ManagedObjectSourceMetaData<D, H> managedObjectSourceMetaData,
 			long defaultTimeout, ManagedObjectPool managedObjectPool,
-			boolean isAsynchronous, boolean isCoordinating,
-			String managingOfficeName, String processBoundManagedObjectName,
-			Class<H> handlerKeysClass, H[] handlerKeys, String recycleWorkName) {
+			Class<?> objectType, boolean isAsynchronous,
+			boolean isCoordinating, String managingOfficeName,
+			String processBoundManagedObjectName, Class<H> handlerKeysClass,
+			H[] handlerKeys, String recycleWorkName) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
 		this.managedObjectSourceMetaData = managedObjectSourceMetaData;
 		this.defaultTimeout = defaultTimeout;
 		this.managedObjectPool = managedObjectPool;
+		this.objectType = objectType;
 		this.isAsynchronous = isAsynchronous;
 		this.isCoordinating = isCoordinating;
 		this.rawOfficeManagingManagedObjectMetaData = new RawOfficeManagingManagedObjectMetaDataImpl(
@@ -319,6 +326,14 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			return null; // can not carry on
 		}
 
+		// Obtain the object type
+		Class<?> objectType = metaData.getObjectClass();
+		if (objectType == null) {
+			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+					"No object type provided");
+			return null; // can not carry on
+		}
+
 		// Obtain managed object type to determine details
 		Class<?> managedObjectClass = metaData.getManagedObjectClass();
 		if (managedObjectClass == null) {
@@ -369,7 +384,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		// Return the created raw managed object meta data
 		return new RawManagedObjectMetaDataImpl<d, h>(managedObjectSourceName,
 				configuration, managedObjectSource, metaData, defaultTimeout,
-				managedObjectPool, isManagedObjectAsynchronous,
+				managedObjectPool, objectType, isManagedObjectAsynchronous,
 				isManagedObjectCoordinating, managingOfficeName,
 				processBoundManagedObjectName, handlerKeysClass, handlerKeys,
 				recycleWorkName);
@@ -424,6 +439,11 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	@Override
 	public ManagedObjectPool getManagedObjectPool() {
 		return this.managedObjectPool;
+	}
+
+	@Override
+	public Class<?> getObjectType() {
+		return this.objectType;
 	}
 
 	@Override
@@ -663,16 +683,12 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 				return null; // can not link in flow
 			}
 
-			// Create the asset manager for the flow
-			AssetManager flowAssetManager = assetManagerFactory
-					.createAssetManager(AssetType.MANAGED_OBJECT,
-							this.managedObjectName, "Handler " + handlerKey
-									+ " Flow " + i, issues);
-
 			// Create and register the flow meta-data
-			FlowMetaData<?> flowMetaData = this.newFlowMetaData(flowTask,
-					flowAssetManager);
-			processLinks[i] = flowMetaData;
+			processLinks[i] = ConstructUtil.newFlowMetaData(
+					FlowInstigationStrategyEnum.ASYNCHRONOUS, flowTask,
+					assetManagerFactory, AssetType.MANAGED_OBJECT,
+					this.managedObjectName, "Handler " + handlerKey + " Flow "
+							+ i, issues);
 		}
 
 		// Create the handler context
@@ -692,22 +708,6 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 
 		// Return the handler
 		return handler;
-	}
-
-	/**
-	 * Creates a new {@link FlowMetaData} for a {@link Handler} {@link Flow}.
-	 * 
-	 * @param taskMetaData
-	 *            {@link TaskMetaData} for the {@link FlowMetaData}.
-	 * @param assetManager
-	 *            {@link AssetManager}.
-	 * @return {@link FlowMetaData}.
-	 */
-	private <W extends Work> FlowMetaData<W> newFlowMetaData(
-			TaskMetaData<?, W, ?, ?> taskMetaData, AssetManager assetManager) {
-		return new FlowMetaDataImpl<W>(
-				FlowInstigationStrategyEnum.ASYNCHRONOUS, taskMetaData,
-				assetManager);
 	}
 
 	@Override

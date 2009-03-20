@@ -312,9 +312,12 @@ public class ManagedObjectSourceContextImpl<H extends Enum<H>> implements
 		}
 
 		@Override
-		public void linkProcess(F key, String workName, String taskName) {
+		public void linkProcess(F key, String workName, String taskName,
+				Class<?> argumentType) {
 
-			// Obtain the namespaced names
+			// TODO only require name spacing of the work (not task)
+
+			// Obtain the name spaced names
 			String namespacedWorkName = ManagedObjectSourceContextImpl.this
 					.getNamespacedName(workName);
 			String namespacedTaskName = ManagedObjectSourceContextImpl.this
@@ -322,14 +325,16 @@ public class ManagedObjectSourceContextImpl<H extends Enum<H>> implements
 
 			// Link the process
 			this.delegate.linkProcess(key, namespacedWorkName,
-					namespacedTaskName);
+					namespacedTaskName, argumentType);
 		}
 
 		@Override
 		public void linkProcess(int processIndex, String workName,
-				String taskName) {
+				String taskName, Class<?> argumentType) {
 
-			// Obtain the namespaced names
+			// TODO only require name spacing of the work (not task)
+
+			// Obtain the name spaced names
 			String namespacedWorkName = ManagedObjectSourceContextImpl.this
 					.getNamespacedName(workName);
 			String namespacedTaskName = ManagedObjectSourceContextImpl.this
@@ -337,7 +342,7 @@ public class ManagedObjectSourceContextImpl<H extends Enum<H>> implements
 
 			// Link the process
 			this.delegate.linkProcess(processIndex, namespacedWorkName,
-					namespacedTaskName);
+					namespacedTaskName, argumentType);
 		}
 	}
 
@@ -421,59 +426,70 @@ public class ManagedObjectSourceContextImpl<H extends Enum<H>> implements
 		 */
 
 		@Override
-		public void setNextTaskInFlow(String taskName) {
-			this.taskBuilder
-					.setNextTaskInFlow(ManagedObjectSourceContextImpl.this
-							.getNamespacedName(taskName));
+		public void setNextTaskInFlow(String taskName, Class<?> argumentType) {
+			// TODO only require name spacing of the work (not task)
+			this.taskBuilder.setNextTaskInFlow(
+					ManagedObjectSourceContextImpl.this
+							.getNamespacedName(taskName), argumentType);
 		}
 
 		@Override
-		public void setNextTaskInFlow(String workName, String taskName) {
+		public void setNextTaskInFlow(String workName, String taskName,
+				Class<?> argumentType) {
+			// TODO only require name spacing of the work (not task)
 			this.taskBuilder.setNextTaskInFlow(
 					ManagedObjectSourceContextImpl.this
 							.getNamespacedName(workName),
 					ManagedObjectSourceContextImpl.this
-							.getNamespacedName(taskName));
+							.getNamespacedName(taskName), argumentType);
 		}
 
 		@Override
 		public void setTeam(String teamName) {
+			// TODO Should not require to name space team (as reference point)
 			this.taskBuilder.setTeam(ManagedObjectSourceContextImpl.this
 					.getNamespacedName(teamName));
 		}
 
 		@Override
 		public void linkFlow(F key, String taskName,
-				FlowInstigationStrategyEnum strategy) {
+				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+			// TODO only require name spacing of the work (not task)
 			this.taskBuilder.linkFlow(key, ManagedObjectSourceContextImpl.this
-					.getNamespacedName(taskName), strategy);
+					.getNamespacedName(taskName), strategy, argumentType);
 		}
 
 		@Override
 		public void linkFlow(int flowIndex, String taskName,
-				FlowInstigationStrategyEnum strategy) {
+				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+			// TODO only require name spacing of the work (not task)
 			this.taskBuilder.linkFlow(flowIndex,
 					ManagedObjectSourceContextImpl.this
-							.getNamespacedName(taskName), strategy);
+							.getNamespacedName(taskName), strategy,
+					argumentType);
 		}
 
 		@Override
 		public void linkFlow(F key, String workName, String taskName,
-				FlowInstigationStrategyEnum strategy) {
+				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+			// TODO only require name spacing of the work (not task)
 			this.taskBuilder.linkFlow(key, ManagedObjectSourceContextImpl.this
 					.getNamespacedName(workName),
 					ManagedObjectSourceContextImpl.this
-							.getNamespacedName(taskName), strategy);
+							.getNamespacedName(taskName), strategy,
+					argumentType);
 		}
 
 		@Override
 		public void linkFlow(int flowIndex, String workName, String taskName,
-				FlowInstigationStrategyEnum strategy) {
+				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+			// TODO only require name spacing of the work (not task)
 			this.taskBuilder.linkFlow(flowIndex,
 					ManagedObjectSourceContextImpl.this
 							.getNamespacedName(workName),
 					ManagedObjectSourceContextImpl.this
-							.getNamespacedName(taskName), strategy);
+							.getNamespacedName(taskName), strategy,
+					argumentType);
 		}
 
 		@Override
@@ -494,4 +510,5 @@ public class ManagedObjectSourceContextImpl<H extends Enum<H>> implements
 							.getNamespacedName(taskName));
 		}
 	}
+
 }

@@ -24,9 +24,14 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 
 /**
@@ -170,8 +175,8 @@ public class ConstructUtil {
 	 * @param isWorkNameRequired
 	 *            Flags indicating if {@link Work} name is required.
 	 *            <code>false</code> indicates that the
-	 *            {@link OfficeMetaDataLocator} has a default {@link Work} to find
-	 *            {@link TaskMetaData}.
+	 *            {@link OfficeMetaDataLocator} has a default {@link Work} to
+	 *            find {@link TaskMetaData}.
 	 * @return {@link TaskMetaData} or <code>null</code> if not found with
 	 *         issues reported to the {@link OfficeFloorIssues}.
 	 */
@@ -223,8 +228,72 @@ public class ConstructUtil {
 			return null; // must find the task meta-data
 		}
 
+		// Ensure correct argument type as parameter for the task
+		Class<?> argumentType = taskNodeReference.getArgumentType();
+		Class<?> parameterType = taskMetaData.getParameterType();
+		if ((argumentType != null) && (parameterType != null)) {
+			// Ensure argument may be passed as a parameter to the task
+			if (!parameterType.isAssignableFrom(argumentType)) {
+
+				// Ensure have the name of the work being searched
+				if (!isHaveWorkName) {
+					workName = taskLocator.getDefaultWorkMetaData()
+							.getWorkName();
+				}
+
+				// Indicate issue that incompatible types
+				issues.addIssue(assetType, assetName,
+						"Argument is not compatible with task parameter (argument="
+								+ argumentType.getName() + ", parameter="
+								+ parameterType.getName() + ", work="
+								+ workName + ", task=" + taskName + ") for "
+								+ forItemDescription);
+				return null; // must have compatible argument to parameter
+			}
+		}
+
 		// Return the task meta-data
 		return taskMetaData;
+	}
+
+	/**
+	 * <p>
+	 * Creates a new {@link FlowMetaData}.
+	 * <p>
+	 * This provides generic type safe creation.
+	 * 
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 * @param taskMetaData
+	 *            {@link TaskMetaData}.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory}.
+	 * @param assetType
+	 *            {@link AssetType} requiring the {@link FlowMetaData}.
+	 * @param assetName
+	 *            Name of the {@link Asset} requiring the {@link FlowMetaData}.
+	 * @param responsibility
+	 *            Responsibility for the possible {@link AssetManager}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 * @return New {@link FlowMetaData}.
+	 */
+	public static <W extends Work> FlowMetaData<W> newFlowMetaData(
+			FlowInstigationStrategyEnum instigationStrategy,
+			TaskMetaData<?, W, ?, ?> taskMetaData,
+			AssetManagerFactory assetManagerFactory, AssetType assetType,
+			String assetName, String responsibility, OfficeFloorIssues issues) {
+
+		// Only create the asset manager if asynchronous flow
+		AssetManager flowAssetManager = null;
+		if (instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
+			flowAssetManager = assetManagerFactory.createAssetManager(
+					assetType, assetName, responsibility, issues);
+		}
+
+		// Create and return the flow meta-data
+		return new FlowMetaDataImpl<W>(instigationStrategy, taskMetaData,
+				flowAssetManager);
 	}
 
 	/**

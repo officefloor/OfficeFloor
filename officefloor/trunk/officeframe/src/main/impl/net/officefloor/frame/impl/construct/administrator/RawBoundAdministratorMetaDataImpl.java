@@ -27,7 +27,6 @@ import java.util.Properties;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.administrator.AdministratorIndexImpl;
@@ -35,24 +34,21 @@ import net.officefloor.frame.impl.execute.administrator.AdministratorMetaDataImp
 import net.officefloor.frame.impl.execute.administrator.ExtensionInterfaceMetaDataImpl;
 import net.officefloor.frame.impl.execute.duty.DutyMetaDataImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -478,14 +474,13 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 					return; // no task
 				}
 
-				// Obtain the asset manager
-				AssetManager flowManager = assetManagerFactory
-						.createAssetManager(AssetType.ADMINISTRATOR,
-								this.boundAdministratorName, "Duty " + dutyKey
-										+ " Flow " + i, issues);
-
-				// Create and register the flow for the duty
-				dutyFlows[i] = this.newFlowMetaData(taskMetaData, flowManager);
+				// Create and register the flow for the duty.
+				// All direct duty flows are invoked in parallel.
+				dutyFlows[i] = ConstructUtil.newFlowMetaData(
+						FlowInstigationStrategyEnum.PARALLEL, taskMetaData,
+						assetManagerFactory, AssetType.ADMINISTRATOR,
+						this.boundAdministratorName, "Duty " + dutyKey
+								+ " Flow " + i, issues);
 			}
 
 			// Create and register the duty meta-data
@@ -494,22 +489,6 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 
 		// Load the duties to the administrator meta-data
 		this.adminMetaData.loadRemainingState(dutyMetaData);
-	}
-
-	/**
-	 * Creates a new {@link FlowMetaData}.
-	 * 
-	 * @param taskMetaData
-	 *            {@link TaskMetaData} for the {@link Flow}.
-	 * @param assetManager
-	 *            {@link AssetManager} for the {@link Flow}.
-	 * @return New {@link FlowMetaData}.
-	 */
-	private <W extends Work> FlowMetaData<W> newFlowMetaData(
-			TaskMetaData<?, W, ?, ?> taskMetaData, AssetManager assetManager) {
-		// All direct duty flows are invoked in parallel
-		return new FlowMetaDataImpl<W>(FlowInstigationStrategyEnum.PARALLEL,
-				taskMetaData, assetManager);
 	}
 
 	@Override

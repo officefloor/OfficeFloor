@@ -33,6 +33,26 @@ public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>
 		extends FlowNodeBuilder<F> {
 
 	/**
+	 * Links in the parameter for this {@link Task}.
+	 * 
+	 * @param key
+	 *            Key identifying the parameter.
+	 * @param parameterType
+	 *            Type of the parameter.
+	 */
+	void linkParameter(M key, Class<?> parameterType);
+
+	/**
+	 * Links in the parameter for this {@link Task}.
+	 * 
+	 * @param index
+	 *            Index identifying the parameter.
+	 * @param parameterType
+	 *            Type of the parameter.
+	 */
+	void linkParameter(int index, Class<?> parameterType);
+
+	/**
 	 * Links in a {@link ManagedObject} to this {@link Task}.
 	 * 
 	 * @param key
@@ -40,8 +60,11 @@ public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>
 	 * @param scopeManagedObjectName
 	 *            Name of the {@link ManagedObject} within the
 	 *            {@link ManagedObjectScope}.
+	 * @param objectType
+	 *            Type required by the {@link Task}.
 	 */
-	void linkManagedObject(M key, String scopeManagedObjectName);
+	void linkManagedObject(M key, String scopeManagedObjectName,
+			Class<?> objectType);
 
 	/**
 	 * Links in a {@link ManagedObject} to this {@link Task}.
@@ -51,8 +74,11 @@ public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>
 	 * @param scopeManagedObjectName
 	 *            Name of the {@link ManagedObject} within the
 	 *            {@link ManagedObjectScope}.
+	 * @param objectType
+	 *            Type required by the {@link Task}.
 	 */
-	void linkManagedObject(int managedObjectIndex, String scopeManagedObjectName);
+	void linkManagedObject(int managedObjectIndex,
+			String scopeManagedObjectName, Class<?> objectType);
 
 	/**
 	 * Links in a {@link Duty} to be executed before the {@link Task}.

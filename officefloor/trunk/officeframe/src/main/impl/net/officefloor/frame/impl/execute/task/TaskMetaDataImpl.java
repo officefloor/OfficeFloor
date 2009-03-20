@@ -52,6 +52,11 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	private final TaskFactory<P, W, M, F> taskFactory;
 
 	/**
+	 * Parameter type of this {@link Task}.
+	 */
+	private final Class<?> parameterType;
+
+	/**
 	 * {@link Team} responsible for executing this {@link Task}.
 	 */
 	private final Team team;
@@ -119,6 +124,8 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 * @param taskFactory
 	 *            {@link TaskFactory} to create the {@link Task} of the
 	 *            {@link TaskMetaData}.
+	 * @param parameterType
+	 *            Parameter type of this {@link Task}.
 	 * @param team
 	 *            {@link Team} responsible for executing this {@link Task}.
 	 * @param requiredManagedObjects
@@ -136,13 +143,14 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 *            instances to be completed after executing the {@link Task}.
 	 */
 	public TaskMetaDataImpl(String taskName,
-			TaskFactory<P, W, M, F> taskFactory, Team team,
-			ManagedObjectIndex[] requiredManagedObjects,
+			TaskFactory<P, W, M, F> taskFactory, Class<?> parameterType,
+			Team team, ManagedObjectIndex[] requiredManagedObjects,
 			ManagedObjectIndex[] taskToWorkMoTranslations,
 			TaskDutyAssociation<?>[] preTaskDuties,
 			TaskDutyAssociation<?>[] postTaskDuties) {
 		this.taskName = taskName;
 		this.taskFactory = taskFactory;
+		this.parameterType = parameterType;
 		this.team = team;
 		this.requiredManagedObjects = requiredManagedObjects;
 		this.taskToWorkMoTranslations = taskToWorkMoTranslations;
@@ -187,6 +195,11 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	@Override
 	public TaskFactory<P, W, M, F> getTaskFactory() {
 		return this.taskFactory;
+	}
+
+	@Override
+	public Class<?> getParameterType() {
+		return this.parameterType;
 	}
 
 	@Override

@@ -19,6 +19,7 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
@@ -46,8 +47,13 @@ public interface HandlerBuilder<F extends Enum<F>> {
 	 *            Name of the {@link Work} that the {@link Task} resides on.
 	 * @param taskName
 	 *            Name of {@link Task}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link Flow} of the
+	 *            invoked {@link ProcessState}. May be <code>null</code> to
+	 *            indicate no argument.
 	 */
-	void linkProcess(F key, String workName, String taskName);
+	void linkProcess(F key, String workName, String taskName,
+			Class<?> argumentType);
 
 	/**
 	 * Links in a {@link ProcessState} by specifying the first {@link Task} of
@@ -59,7 +65,12 @@ public interface HandlerBuilder<F extends Enum<F>> {
 	 *            Name of the {@link Work} that the {@link Task} resides on.
 	 * @param taskName
 	 *            Name of {@link Task}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link Flow} of the
+	 *            invoked {@link ProcessState}. May be <code>null</code> to
+	 *            indicate no argument.
 	 */
-	void linkProcess(int processIndex, String workName, String taskName);
+	void linkProcess(int processIndex, String workName, String taskName,
+			Class<?> argumentType);
 
 }

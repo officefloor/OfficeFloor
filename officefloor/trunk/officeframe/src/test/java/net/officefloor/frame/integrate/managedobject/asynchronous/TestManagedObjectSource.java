@@ -55,38 +55,22 @@ public class TestManagedObjectSource extends
 	}
 
 	/*
-	 * ===============================================================================
-	 * AbstractAsyncManagedObjectSource
-	 * ===============================================================================
+	 * ================ AbstractAsyncManagedObjectSource =======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
-	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		// No specification
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
-	 */
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context)
 			throws Exception {
 		// Asynchronous managed object
 		context.setManagedObjectClass(AsynchronousManagedObject.class);
+		context.setObjectClass(Object.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.ManagedObjectSource#sourceManagedObject(net.officefloor.frame.spi.managedobject.source.ManagedObjectUser)
-	 */
 	@Override
 	public void sourceManagedObject(ManagedObjectUser user) {
 		managedObjectUser = user;

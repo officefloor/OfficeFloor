@@ -226,12 +226,14 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	public void addEscalation(Class<? extends Throwable> typeOfCause,
 			String workName, String taskName) {
 		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
-				new TaskNodeReferenceImpl(workName, taskName)));
+				new TaskNodeReferenceImpl(workName, taskName, typeOfCause)));
 	}
 
 	@Override
 	public void addStartupTask(String workName, String taskName) {
-		this.startupTasks.add(new TaskNodeReferenceImpl(workName, taskName));
+		// No argument to a start up task
+		this.startupTasks.add(new TaskNodeReferenceImpl(workName, taskName,
+				null));
 	}
 
 	/*

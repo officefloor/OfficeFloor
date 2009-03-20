@@ -29,6 +29,8 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ProcessState;
 
 /**
  * Implementation of the {@link HandlerBuilder}.
@@ -83,13 +85,15 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 	}
 
 	@Override
-	public void linkProcess(F key, String workName, String taskName) {
-		this.linkProcess(key.ordinal(), key, workName, taskName);
+	public void linkProcess(F key, String workName, String taskName,
+			Class<?> argumentType) {
+		this.linkProcess(key.ordinal(), key, workName, taskName, argumentType);
 	}
 
 	@Override
-	public void linkProcess(int processIndex, String workName, String taskName) {
-		this.linkProcess(processIndex, null, workName, taskName);
+	public void linkProcess(int processIndex, String workName, String taskName,
+			Class<?> argumentType) {
+		this.linkProcess(processIndex, null, workName, taskName, argumentType);
 	}
 
 	/**
@@ -103,9 +107,12 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 	 *            Name of the {@link Work}.
 	 * @param taskName
 	 *            Name of the {@link Task}.
+	 * @param argumentType
+	 *            Type of argument passed to instigated {@link Flow} of the
+	 *            invoked {@link ProcessState}.
 	 */
 	private void linkProcess(int processIndex, F flowKey, String workName,
-			String taskName) {
+			String taskName, Class<?> argumentType) {
 
 		// Determine the name of the flow
 		String flowName = (flowKey != null ? flowKey.toString() : String
@@ -113,7 +120,7 @@ public class HandlerBuilderImpl<H extends Enum<H>, F extends Enum<F>>
 
 		// Create the task node reference
 		TaskNodeReferenceImpl taskNodeReference = (taskName == null ? null
-				: new TaskNodeReferenceImpl(workName, taskName));
+				: new TaskNodeReferenceImpl(workName, taskName, argumentType));
 
 		// Create the handler flow configuration
 		HandlerFlowConfigurationImpl handlerFlow = new HandlerFlowConfigurationImpl(

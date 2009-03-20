@@ -47,6 +47,14 @@ public interface TaskMetaData<P, W extends Work, M extends Enum<M>, F extends En
 	TaskFactory<P, W, M, F> getTaskFactory();
 
 	/**
+	 * Obtains the parameter type for the {@link Task}.
+	 * 
+	 * @return Parameter type for the {@link Task}. May be <code>null</code> to
+	 *         indicate no parameter.
+	 */
+	Class<?> getParameterType();
+
+	/**
 	 * Obtains the {@link ManagedObjectIndex} instances identifying the
 	 * {@link ManagedObject} instances that must be loaded before the
 	 * {@link Task} may be executed.

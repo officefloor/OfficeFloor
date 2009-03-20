@@ -40,4 +40,12 @@ public interface TaskNodeReference {
 	 * @return Name of the {@link Task}.
 	 */
 	String getTaskName();
+
+	/**
+	 * Obtains the type of argument to be passed to the referenced {@link Task}.
+	 * 
+	 * @return Type of argument to be passed to the referenced {@link Task}.
+	 */
+	Class<?> getArgumentType();
+
 }

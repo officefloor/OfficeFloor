@@ -31,6 +31,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -166,6 +167,11 @@ public class ReflectiveWorkBuilder implements Work,
 		private final Method method;
 
 		/**
+		 * Types for the parameters of the {@link Method}.
+		 */
+		private final Class<?>[] parameterTypes;
+
+		/**
 		 * {@link TaskBuilder}.
 		 */
 		private TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder;
@@ -200,8 +206,8 @@ public class ReflectiveWorkBuilder implements Work,
 			this.method = method;
 
 			// Create the parameter factories for the method
-			this.parameterFactories = new ParameterFactory[this.method
-					.getParameterTypes().length];
+			this.parameterTypes = this.method.getParameterTypes();
+			this.parameterFactories = new ParameterFactory[this.parameterTypes.length];
 		}
 
 		/**
@@ -228,10 +234,17 @@ public class ReflectiveWorkBuilder implements Work,
 		 * Builds the parameter.
 		 */
 		public void buildParameter() {
-			// Link in the parameter
-			this.parameterFactories[this.parameterIndex] = new ParameterParameterFactory();
 
-			// Set for next parameter
+			// Obtain the type of the parameter
+			Class<?> parameterType = this.parameterTypes[this.parameterIndex];
+
+			// Link parameter and setup to return
+			this.taskBuilder.linkParameter(this.objectIndex, parameterType);
+			this.parameterFactories[this.parameterIndex] = new ObjectParameterFactory(
+					this.objectIndex);
+
+			// Set for next object and parameter
+			this.objectIndex++;
 			this.parameterIndex++;
 		}
 
@@ -243,13 +256,16 @@ public class ReflectiveWorkBuilder implements Work,
 		 */
 		public void buildObject(String scopeManagedObjectName) {
 
+			// Obtain the type of the object
+			Class<?> objectType = this.parameterTypes[this.parameterIndex];
+
 			// Link to task and setup to return
 			this.taskBuilder.linkManagedObject(this.objectIndex,
-					scopeManagedObjectName);
+					scopeManagedObjectName, objectType);
 			this.parameterFactories[this.parameterIndex] = new ObjectParameterFactory(
 					this.objectIndex);
 
-			// Set for next managed object and parameter
+			// Set for next object and parameter
 			this.objectIndex++;
 			this.parameterIndex++;
 		}
@@ -293,15 +309,8 @@ public class ReflectiveWorkBuilder implements Work,
 				return null;
 			}
 
-			// Link to task and setup to return
-			this.taskBuilder.linkManagedObject(this.objectIndex,
-					officeManagedObjectName);
-			this.parameterFactories[this.parameterIndex] = new ObjectParameterFactory(
-					this.objectIndex);
-
-			// Set for next managed object and parameter
-			this.objectIndex++;
-			this.parameterIndex++;
+			// Link to object to task
+			this.buildObject(officeManagedObjectName);
 
 			// Return the dependency mapping builder
 			return mappingBuilder;
@@ -314,10 +323,12 @@ public class ReflectiveWorkBuilder implements Work,
 		 *            Task name.
 		 * @param strategy
 		 *            {@link FlowInstigationStrategyEnum}.
+		 * @param argumentType
+		 *            Type of argument passed to the {@link Flow}.
 		 */
 		public void buildFlow(String taskName,
-				FlowInstigationStrategyEnum strategy) {
-			this.buildFlow(null, taskName, strategy);
+				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+			this.buildFlow(null, taskName, strategy, argumentType);
 		}
 
 		/**
@@ -329,15 +340,18 @@ public class ReflectiveWorkBuilder implements Work,
 		 *            Task name.
 		 * @param strategy
 		 *            {@link FlowInstigationStrategyEnum}.
+		 * @param argumentType
+		 *            Type of argument passed to the {@link Flow}.
 		 */
 		public void buildFlow(String workName, String taskName,
-				FlowInstigationStrategyEnum strategy) {
+				FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
 			// Link in the flow and allow for invocation
 			if (workName != null) {
 				this.taskBuilder.linkFlow(this.flowIndex, workName, taskName,
-						strategy);
+						strategy, argumentType);
 			} else {
-				this.taskBuilder.linkFlow(this.flowIndex, taskName, strategy);
+				this.taskBuilder.linkFlow(this.flowIndex, taskName, strategy,
+						argumentType);
 			}
 			this.parameterFactories[this.parameterIndex] = new ReflectiveFlowParameterFactory(
 					this.flowIndex);
@@ -345,6 +359,43 @@ public class ReflectiveWorkBuilder implements Work,
 			// Set for next flow and parameter
 			this.flowIndex++;
 			this.parameterIndex++;
+		}
+
+		/**
+		 * Specifies the next {@link Task} using the return type of the
+		 * {@link Method} as the argument type.
+		 * 
+		 * @param taskName
+		 *            Task name.
+		 */
+		public void setNextTaskInFlow(String taskName) {
+			this.setNextTaskInFlow(null, taskName);
+		}
+
+		/**
+		 * Specifies the next {@link Task} using the return type of the
+		 * {@link Method} as the argument type.
+		 * 
+		 * @param workName
+		 *            Work name.
+		 * @param taskName
+		 *            Task name.
+		 */
+		public void setNextTaskInFlow(String workName, String taskName) {
+
+			// Obtain the method return type
+			Class<?> returnType = this.method.getReturnType();
+			if (returnType == Void.class) {
+				returnType = null; // null if no argument type
+			}
+
+			// Specify the next task
+			if (workName != null) {
+				this.taskBuilder.setNextTaskInFlow(workName, taskName,
+						returnType);
+			} else {
+				this.taskBuilder.setNextTaskInFlow(taskName, returnType);
+			}
 		}
 
 		/*
@@ -378,13 +429,17 @@ public class ReflectiveWorkBuilder implements Work,
 					.recordReflectiveTaskMethodInvoked(this.method.getName());
 
 			// Invoke the method on work object to get return
+			Object returnValue;
 			try {
-				return this.method.invoke(
+				returnValue = this.method.invoke(
 						ReflectiveWorkBuilder.this.workObject, parameters);
 			} catch (InvocationTargetException ex) {
 				// Throw cause of exception
 				throw ex.getCause();
 			}
+
+			// Return the value from method
+			return returnValue;
 		}
 	}
 
@@ -395,18 +450,6 @@ public class ReflectiveWorkBuilder implements Work,
 	private static interface ParameterFactory {
 		Object createParamater(
 				TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context);
-	}
-
-	/**
-	 * {@link ParameterFactory} to create the parameter.
-	 */
-	private static class ParameterParameterFactory implements ParameterFactory {
-
-		@Override
-		public Object createParamater(
-				TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context) {
-			return context.getParameter();
-		}
 	}
 
 	/**

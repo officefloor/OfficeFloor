@@ -881,6 +881,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.getWorkName(), "WORK");
 		this.recordReturn(startupTaskReference, startupTaskReference
 				.getTaskName(), "TASK");
+		this.recordReturn(startupTaskReference, startupTaskReference
+				.getArgumentType(), null);
+		this.recordReturn(taskMetaData, taskMetaData.getParameterType(), null);
 		this.record_linkTasksForWork(rawWorkMetaData);
 
 		// Construct the office
@@ -1009,6 +1012,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.getWorkName(), "WORK");
 		this.recordReturn(escalationTaskReference, escalationTaskReference
 				.getTaskName(), "TASK");
+		this.recordReturn(escalationTaskReference, escalationTaskReference
+				.getArgumentType(), failure.getClass());
+		this.recordReturn(taskMetaData, taskMetaData.getParameterType(),
+				Exception.class);
 		this.record_linkTasksForWork(rawWorkMetaData);
 
 		// Construct the office

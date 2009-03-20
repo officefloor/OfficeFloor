@@ -263,6 +263,11 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
+	public Class<?> getParameterType() {
+		return Object.class;
+	}
+
+	@Override
 	public Team getTeam() {
 		return this.testCase;
 	}

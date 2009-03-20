@@ -70,7 +70,7 @@ public class EscalationHandlerEscalation implements Escalation {
 
 		// Create the escalation task meta-data
 		TaskMetaDataImpl<Throwable, EscalationHandlerTask, None, None> taskMetaData = new TaskMetaDataImpl<Throwable, EscalationHandlerTask, None, None>(
-				"Escalation Handler Task", task, team,
+				"Escalation Handler Task", task, Throwable.class, team,
 				new ManagedObjectIndex[0], new ManagedObjectIndex[0],
 				new TaskDutyAssociation[0], new TaskDutyAssociation[0]);
 

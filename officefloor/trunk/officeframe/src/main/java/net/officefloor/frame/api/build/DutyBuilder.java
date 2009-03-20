@@ -42,8 +42,11 @@ public interface DutyBuilder<F extends Enum<F>> {
 	 *            {@link Flow} resides on.
 	 * @param taskName
 	 *            Name of {@link Task} that resides on the {@link Work}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
-	void linkFlow(F key, String workName, String taskName);
+	void linkFlow(F key, String workName, String taskName, Class<?> argumentType);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the
@@ -56,7 +59,11 @@ public interface DutyBuilder<F extends Enum<F>> {
 	 *            {@link Flow} resides on.
 	 * @param taskName
 	 *            Name of {@link Task} that resides on the {@link Work}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
-	void linkFlow(int flowIndex, String workName, String taskName);
+	void linkFlow(int flowIndex, String workName, String taskName,
+			Class<?> argumentType);
 
 }

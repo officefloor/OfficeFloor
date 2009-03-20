@@ -343,7 +343,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			HandlerBuilder<HandlerProcess> handlerBuilder = moHandlerBuilder
 					.registerHandler(HandlerKey.HANDLER, HandlerProcess.class);
 			handlerBuilder.linkProcess(HandlerProcess.TASK, "WORK",
-					EXTERNAL_EVENT_TASK);
+					EXTERNAL_EVENT_TASK, Object.class);
 		}
 
 		// Create and register the work
@@ -476,6 +476,9 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 			// Specify the managed object class
 			context.setManagedObjectClass(managedObjectClass);
+
+			// Object for testing
+			context.setObjectClass(TestManagedObjectSource.class);
 
 			// Determine if load the handlers
 			if (isLoadHandler) {

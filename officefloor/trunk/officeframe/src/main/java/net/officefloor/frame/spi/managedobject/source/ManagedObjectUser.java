@@ -19,8 +19,7 @@ package net.officefloor.frame.spi.managedobject.source;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * User interested in using the
- * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+ * User interested in using the {@link ManagedObject}.
  * 
  * @author Daniel
  */
@@ -40,11 +39,11 @@ public interface ManagedObjectUser {
 	void setManagedObject(ManagedObject managedObject);
 
 	/**
-	 * <p>
 	 * Indicates failure to obtain the {@link ManagedObject}.
 	 * 
 	 * @param cause
 	 *            Cause of the failure.
 	 */
 	void setFailure(Throwable cause);
+
 }

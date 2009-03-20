@@ -21,7 +21,6 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -69,13 +68,13 @@ public interface TaskConfiguration<P extends Object, W extends Work, M extends E
 	FlowConfiguration[] getFlowConfiguration();
 
 	/**
-	 * Obtains the configuration of the {@link ManagedObject} instances for this
-	 * {@link Task}.
+	 * Obtains the configuration of the dependent {@link Object} instances for
+	 * this {@link Task}.
 	 * 
-	 * @return Configuration of the {@link ManagedObject} instances for this
-	 *         {@link Task} .
+	 * @return Configuration of the dependent {@link Object} instances for this
+	 *         {@link Task}.
 	 */
-	TaskManagedObjectConfiguration[] getManagedObjectConfiguration();
+	TaskObjectConfiguration[] getObjectConfiguration();
 
 	/**
 	 * Obtains the listing of the {@link TaskDutyConfiguration} for the

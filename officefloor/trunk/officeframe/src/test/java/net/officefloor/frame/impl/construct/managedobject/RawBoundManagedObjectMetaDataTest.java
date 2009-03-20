@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.construct.managedobject;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -309,6 +310,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Verify the managed object meta-data contents
+		assertEquals("Incorrect object type", Connection.class, moMetaData
+				.getObjectType());
 		assertEquals("Incorrect managed object source",
 				this.managedObjectSource, moMetaData.getManagedObjectSource());
 		assertEquals("Incorrect managed object pool", this.managedObjectPool,
@@ -1066,6 +1069,8 @@ public class RawBoundManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	private void record_getManagedObjectDetails(String boundMoName,
 			RawManagedObjectMetaData<?, ?> rawMoMetaData,
 			ManagedObjectScope scope, boolean isAsynchronous) {
+		this.recordReturn(rawMoMetaData, rawMoMetaData.getObjectType(),
+				Connection.class);
 		this.recordReturn(rawMoMetaData,
 				rawMoMetaData.getManagedObjectSource(),
 				this.managedObjectSource);

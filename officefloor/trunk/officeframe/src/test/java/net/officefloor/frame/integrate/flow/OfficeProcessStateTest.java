@@ -25,11 +25,12 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Tests the {@link net.officefloor.frame.internal.structure.ProcessState} is
- * appropriately passed between {@link net.officefloor.frame.api.execute.Work}
+ * Tests the {@link ProcessState} is appropriately passed between {@link Work}
  * instances of the Office.
  * 
  * @author Daniel
@@ -37,8 +38,7 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Validate {@link net.officefloor.frame.internal.structure.ProcessState} is
-	 * passed between {@link net.officefloor.frame.api.execute.Work} instances.
+	 * Validate {@link ProcessState} is passed between {@link Work} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testProcessState() throws Exception {
@@ -61,12 +61,13 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 				workOne, "SENDER");
 		workOneBuilder.addWorkManagedObject("mo-one", "MANAGED_OBJECT");
 		TaskBuilder<Object, WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> taskOneBuilder = this
-				.constructTask("SENDER", workOne, "TEAM", null);
+				.constructTask("SENDER", workOne, "TEAM", null, null);
 		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
-				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL);
+				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL,
+				Object.class);
 		taskOneBuilder.linkManagedObject(
 				WorkOneManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(),
-				"mo-one");
+				"mo-one", ManagedObjectOne.class);
 
 		// Add the second work
 		WorkTwo workTwo = new WorkTwo();
@@ -74,10 +75,10 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 				workTwo, "RECEIVER");
 		workTwoBuilder.addWorkManagedObject("mo-two", "MANAGED_OBJECT");
 		TaskBuilder<Object, WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> taskTwoBuilder = this
-				.constructTask("RECEIVER", workTwo, "TEAM", null);
+				.constructTask("RECEIVER", workTwo, "TEAM", null, null);
 		taskTwoBuilder.linkManagedObject(
 				WorkTwoManagedObjectsEnum.MANAGED_OBJECT_ONE.ordinal(),
-				"mo-two");
+				"mo-two", ManagedObjectOne.class);
 
 		// Register and open the office floor
 		OfficeFloor officeFloor = this.constructOfficeFloor();
@@ -127,12 +128,10 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
-		 * .api.execute.TaskContext)
+		 * ==================== Task ==========================================
 		 */
+
+		@Override
 		public Object doTask(
 				TaskContext<Object, WorkOne, WorkOneManagedObjectsEnum, WorkOneDelegatesEnum> context)
 				throws Exception {
@@ -184,12 +183,10 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
-		 * .api.execute.TaskContext)
+		 * ==================== Task ==========================================
 		 */
+
+		@Override
 		public Object doTask(
 				TaskContext<Object, WorkTwo, WorkTwoManagedObjectsEnum, NoDelegatesEnum> context)
 				throws Exception {
@@ -219,7 +216,7 @@ public class OfficeProcessStateTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject}.
+	 * {@link ManagedObject}.
 	 */
 	private class ManagedObjectOne {
 

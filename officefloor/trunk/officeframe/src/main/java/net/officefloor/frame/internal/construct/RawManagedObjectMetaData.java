@@ -97,6 +97,15 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	ManagedObjectPool getManagedObjectPool();
 
 	/**
+	 * Obtains the type of {@link Object} returned from the
+	 * {@link ManagedObject}.
+	 * 
+	 * @return Obtains the type of {@link Object} returned from the
+	 *         {@link ManagedObject}.
+	 */
+	Class<?> getObjectType();
+
+	/**
 	 * Indicates if {@link AsynchronousManagedObject}.
 	 * 
 	 * @return <code>true</code> if {@link AsynchronousManagedObject}.

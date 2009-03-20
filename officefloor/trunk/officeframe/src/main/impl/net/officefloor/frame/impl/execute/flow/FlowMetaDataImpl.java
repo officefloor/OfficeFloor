@@ -16,15 +16,16 @@
  */
 package net.officefloor.frame.impl.execute.flow;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 
 /**
- * Implementation of the
- * {@link net.officefloor.frame.internal.structure.FlowMetaData}.
+ * Implementation of the {@link FlowMetaData}.
  * 
  * @author Daniel
  */
@@ -33,20 +34,17 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	/**
 	 * {@link FlowInstigationStrategyEnum}.
 	 */
-	protected final FlowInstigationStrategyEnum strategy;
+	private final FlowInstigationStrategyEnum strategy;
 
 	/**
-	 * {@link TaskMetaData} of the initial
-	 * {@link net.officefloor.frame.api.execute.Task} of the
-	 * {@link net.officefloor.frame.internal.structure.Flow}.
+	 * {@link TaskMetaData} of the initial {@link Task} of the {@link Flow}.
 	 */
-	protected final TaskMetaData<?, W, ?, ?> initialTaskMetaData;
+	private final TaskMetaData<?, W, ?, ?> initialTaskMetaData;
 
 	/**
-	 * {@link AssetManager} to managed this
-	 * {@link net.officefloor.frame.internal.structure.Flow}.
+	 * {@link AssetManager} to managed this {@link Flow}.
 	 */
-	protected final AssetManager flowManager;
+	private final AssetManager flowManager;
 
 	/**
 	 * Initiate.
@@ -54,12 +52,10 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param initialTaskMetaData
-	 *            {@link TaskMetaData} of the initial
-	 *            {@link net.officefloor.frame.api.execute.Task} of the
-	 *            {@link net.officefloor.frame.internal.structure.Flow}.
+	 *            {@link TaskMetaData} of the initial {@link Task} of the
+	 *            {@link Flow}.
 	 * @param flowManager
-	 *            {@link AssetManager} to managed this
-	 *            {@link net.officefloor.frame.internal.structure.Flow}.
+	 *            {@link AssetManager} to managed this {@link Flow}.
 	 */
 	public FlowMetaDataImpl(FlowInstigationStrategyEnum strategy,
 			TaskMetaData<?, W, ?, ?> initialTaskMetaData,
@@ -70,28 +66,20 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.FlowMetaData#getInstigationStrategy()
+	 * =================== FlowMetaData ======================================
 	 */
+
+	@Override
 	public FlowInstigationStrategyEnum getInstigationStrategy() {
 		return this.strategy;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.FlowMetaData#getInitialTaskMetaData()
-	 */
+	@Override
 	public TaskMetaData<?, W, ?, ?> getInitialTaskMetaData() {
 		return this.initialTaskMetaData;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.FlowMetaData#getFlowManager()
-	 */
+	@Override
 	public AssetManager getFlowManager() {
 		return this.flowManager;
 	}

@@ -48,8 +48,11 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 * 
 	 * @param taskName
 	 *            Name of the next {@link Task} in the {@link Flow}.
+	 * @param argumentType
+	 *            Type of argument passed to the next {@link Task}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
-	void setNextTaskInFlow(String taskName);
+	void setNextTaskInFlow(String taskName, Class<?> argumentType);
 
 	/**
 	 * Specifies the next {@link Task} in the {@link Flow} ({@link Task} may
@@ -59,8 +62,12 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            Name of {@link Work} containing the {@link Task}.
 	 * @param taskName
 	 *            Name of the next {@link Task} in the {@link Flow}.
+	 * @param argumentType
+	 *            Type of argument passed to the next {@link Task}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
-	void setNextTaskInFlow(String workName, String taskName);
+	void setNextTaskInFlow(String workName, String taskName,
+			Class<?> argumentType);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the
@@ -73,8 +80,12 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            {@link Task}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
-	void linkFlow(F key, String taskName, FlowInstigationStrategyEnum strategy);
+	void linkFlow(F key, String taskName, FlowInstigationStrategyEnum strategy,
+			Class<?> argumentType);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the
@@ -87,9 +98,12 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            {@link Task}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
 	void linkFlow(int flowIndex, String taskName,
-			FlowInstigationStrategyEnum strategy);
+			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the
@@ -105,9 +119,12 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            as this {@link Task}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
 	void linkFlow(F key, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy);
+			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
 
 	/**
 	 * Links in a {@link Flow} by specifying the first {@link Task} of the
@@ -123,9 +140,12 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	 *            as this {@link Task}.
 	 * @param strategy
 	 *            Strategy to instigate the {@link Flow}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link Flow}. May be
+	 *            <code>null</code> to indicate no argument.
 	 */
 	void linkFlow(int flowIndex, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy);
+			FlowInstigationStrategyEnum strategy, Class<?> argumentType);
 
 	/**
 	 * <p>

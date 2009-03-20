@@ -14,43 +14,46 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.construct.task;
+package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link TaskManagedObjectConfiguration} implementation.
+ * Configuration for a dependent {@link Object} of a {@link Task}.
  * 
  * @author Daniel
  */
-public class TaskManagedObjectConfigurationImpl implements
-		TaskManagedObjectConfiguration {
+public interface TaskObjectConfiguration {
 
 	/**
-	 * Name of {@link ManagedObject} within the {@link ManagedObjectScope}.
-	 */
-	protected final String scopeManagedObjectName;
-
-	/**
-	 * Initiate.
+	 * Indicates if this dependent {@link Object} is the argument passed to the
+	 * {@link Task}.
 	 * 
-	 * @param scopeManagedObjectName
-	 *            Name of {@link ManagedObject} within the
-	 *            {@link ManagedObjectScope}.
+	 * @return <code>true</code> if is argument passed to the {@link Task}.
+	 *         <code>false</code> indicates it is a {@link ManagedObject}
+	 *         dependency.
 	 */
-	public TaskManagedObjectConfigurationImpl(String scopeManagedObjectName) {
-		this.scopeManagedObjectName = scopeManagedObjectName;
-	}
+	boolean isParameter();
 
-	/*
-	 * =================== TaskManagedObjectConfiguration =====================
+	/**
+	 * <p>
+	 * Obtains the name of the {@link ManagedObject} within the
+	 * {@link ManagedObjectScope}.
+	 * <p>
+	 * This must return a value if not a parameter.
+	 * 
+	 * @return Name of the {@link ManagedObject} within the
+	 *         {@link ManagedObjectScope}.
 	 */
+	String getScopeManagedObjectName();
 
-	@Override
-	public String getScopeManagedObjectName() {
-		return this.scopeManagedObjectName;
-	}
+	/**
+	 * Obtains the type of {@link Object} required by the {@link Task}.
+	 * 
+	 * @return Type of {@link Object} required by the {@link Task}.
+	 */
+	Class<?> getObjectType();
 
 }

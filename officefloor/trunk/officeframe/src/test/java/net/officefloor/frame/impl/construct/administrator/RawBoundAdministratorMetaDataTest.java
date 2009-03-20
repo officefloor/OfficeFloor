@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.construct.administrator;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -28,14 +29,13 @@ import net.officefloor.frame.internal.configuration.AdministratorSourceConfigura
 import net.officefloor.frame.internal.configuration.DutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
@@ -680,7 +680,6 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.createMock(TaskNodeReference.class);
 		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
-		final AssetManager assetManager = this.createMock(AssetManager.class);
 
 		// Record construction of bound administrator meta-data
 		this.record_init();
@@ -704,11 +703,12 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 				.getLinkedProcessConfiguration(), new TaskNodeReference[0]);
 		this.recordReturn(taskReference, taskReference.getWorkName(), "WORK");
 		this.recordReturn(taskReference, taskReference.getTaskName(), "TASK");
+		this.recordReturn(taskReference, taskReference.getArgumentType(),
+				Connection.class);
+		this.recordReturn(taskMetaData, taskMetaData.getParameterType(),
+				Connection.class);
 		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
 				.getTaskMetaData("WORK", "TASK"), taskMetaData);
-		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
-				.createAssetManager(AssetType.ADMINISTRATOR, "ADMIN", "Duty "
-						+ DutyKey.ONE + " Flow 0", this.issues), assetManager);
 
 		// Construct the administrator and link tasks
 		this.replayMockObjects();
@@ -731,8 +731,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 						.getInstigationStrategy());
 		assertEquals("Incorrect task meta-data", taskMetaData, flow
 				.getInitialTaskMetaData());
-		assertEquals("Incorrect flow asset manager", assetManager, flow
-				.getFlowManager());
+		assertNull(
+				"Parallel instigation so should not have flow asset manager",
+				flow.getFlowManager());
 	}
 
 	/**

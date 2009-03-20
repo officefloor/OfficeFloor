@@ -56,12 +56,13 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 		HandlerBuilder handlerBuilder = moHandlersBuilder
 				.registerHandler(Handlers.INPUT);
 		handlerBuilder.setHandlerFactory(new MockHandler());
-		handlerBuilder.linkProcess(0, "WORK", "TASK");
+		handlerBuilder.linkProcess(0, "WORK", "TASK", Object.class);
 
 		// Provide task for handler input
 		InputTask inputTask = new InputTask();
 		this.constructWork("WORK", inputTask, "TASK");
-		this.constructTask("TASK", inputTask, "TEAM", "INPUT", null);
+		this.constructTask("TASK", inputTask, "TEAM", "INPUT", Object.class,
+				null, null);
 
 		// Register the team
 		this.constructTeam("TEAM", new PassiveTeam());
@@ -136,7 +137,6 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 			// No return
 			return null;
 		}
-
 	}
 
 }

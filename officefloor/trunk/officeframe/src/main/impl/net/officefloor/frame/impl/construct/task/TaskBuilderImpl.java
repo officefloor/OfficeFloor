@@ -30,13 +30,12 @@ import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
-import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -58,9 +57,9 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	private final TaskFactory<P, W, M, F> taskFactory;
 
 	/**
-	 * {@link ManagedObject} instances to be linked to this {@link Task}.
+	 * {@link Object} instances to be linked to this {@link Task}.
 	 */
-	private final Map<Integer, TaskManagedObjectConfigurationImpl> managedObjects = new HashMap<Integer, TaskManagedObjectConfigurationImpl>();
+	private final Map<Integer, TaskObjectConfigurationImpl> objects = new HashMap<Integer, TaskObjectConfigurationImpl>();
 
 	/**
 	 * {@link Flow} instances to be linked to this {@link Task}.
@@ -119,25 +118,40 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	}
 
 	@Override
-	public void setNextTaskInFlow(String taskName) {
-		this.nextTaskInFlow = new TaskNodeReferenceImpl(taskName);
+	public void setNextTaskInFlow(String taskName, Class<?> argumentType) {
+		this.nextTaskInFlow = new TaskNodeReferenceImpl(taskName, argumentType);
 	}
 
 	@Override
-	public void setNextTaskInFlow(String workName, String taskName) {
-		this.nextTaskInFlow = new TaskNodeReferenceImpl(workName, taskName);
+	public void setNextTaskInFlow(String workName, String taskName,
+			Class<?> argumentType) {
+		this.nextTaskInFlow = new TaskNodeReferenceImpl(workName, taskName,
+				argumentType);
 	}
 
 	@Override
-	public void linkManagedObject(M key, String scopeManagedObjectName) {
-		this.linkManagedObject(key.ordinal(), scopeManagedObjectName);
+	public void linkParameter(M key, Class<?> parameterType) {
+		this.linkParameter(key.ordinal(), parameterType);
 	}
 
 	@Override
-	public void linkManagedObject(int managedObjectIndex,
-			String scopeManagedObjectName) {
-		this.managedObjects.put(new Integer(managedObjectIndex),
-				new TaskManagedObjectConfigurationImpl(scopeManagedObjectName));
+	public void linkParameter(int index, Class<?> parameterType) {
+		this.objects.put(new Integer(index), new TaskObjectConfigurationImpl(
+				true, null, parameterType));
+	}
+
+	@Override
+	public void linkManagedObject(M key, String scopeManagedObjectName,
+			Class<?> objectType) {
+		this.linkManagedObject(key.ordinal(), scopeManagedObjectName,
+				objectType);
+	}
+
+	@Override
+	public void linkManagedObject(int index, String scopeManagedObjectName,
+			Class<?> objectType) {
+		this.objects.put(new Integer(index), new TaskObjectConfigurationImpl(
+				false, scopeManagedObjectName, objectType));
 	}
 
 	@Override
@@ -156,26 +170,29 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 
 	@Override
 	public void linkFlow(F key, String taskName,
-			FlowInstigationStrategyEnum strategy) {
-		this.linkFlow(key.ordinal(), key, null, taskName, strategy);
+			FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+		this.linkFlow(key.ordinal(), key, null, taskName, strategy,
+				argumentType);
 	}
 
 	@Override
 	public void linkFlow(int flowIndex, String taskName,
-			FlowInstigationStrategyEnum strategy) {
-		this.linkFlow(flowIndex, null, null, taskName, strategy);
+			FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+		this.linkFlow(flowIndex, null, null, taskName, strategy, argumentType);
 	}
 
 	@Override
 	public void linkFlow(F key, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy) {
-		this.linkFlow(key.ordinal(), key, workName, taskName, strategy);
+			FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+		this.linkFlow(key.ordinal(), key, workName, taskName, strategy,
+				argumentType);
 	}
 
 	@Override
 	public void linkFlow(int flowIndex, String workName, String taskName,
-			FlowInstigationStrategyEnum strategy) {
-		this.linkFlow(flowIndex, null, workName, taskName, strategy);
+			FlowInstigationStrategyEnum strategy, Class<?> argumentType) {
+		this.linkFlow(flowIndex, null, workName, taskName, strategy,
+				argumentType);
 	}
 
 	/**
@@ -193,9 +210,12 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 *            Name of the {@link Task}.
 	 * @param strategy
 	 *            {@link FlowInstigationStrategyEnum}.
+	 * @param argumentType
+	 *            Type of argument passed to the instigated {@link Flow}.
 	 */
 	private void linkFlow(int flowIndex, F flowKey, String workName,
-			String taskName, FlowInstigationStrategyEnum strategy) {
+			String taskName, FlowInstigationStrategyEnum strategy,
+			Class<?> argumentType) {
 
 		// Determine the flow name
 		String flowName = (flowKey != null ? flowKey.name() : String
@@ -203,7 +223,7 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 
 		// Create the task node reference (no task name, no reference)
 		TaskNodeReferenceImpl taskNode = (taskName == null ? null
-				: new TaskNodeReferenceImpl(workName, taskName));
+				: new TaskNodeReferenceImpl(workName, taskName, argumentType));
 
 		// Create the flow configuration
 		FlowConfigurationImpl flow = new FlowConfigurationImpl(flowName,
@@ -217,14 +237,14 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	public void addEscalation(Class<? extends Throwable> typeOfCause,
 			String taskName) {
 		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
-				new TaskNodeReferenceImpl(taskName)));
+				new TaskNodeReferenceImpl(taskName, typeOfCause)));
 	}
 
 	@Override
 	public void addEscalation(Class<? extends Throwable> typeOfCause,
 			String workName, String taskName) {
 		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
-				new TaskNodeReferenceImpl(workName, taskName)));
+				new TaskNodeReferenceImpl(workName, taskName, typeOfCause)));
 	}
 
 	/*
@@ -247,9 +267,9 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	}
 
 	@Override
-	public TaskManagedObjectConfiguration[] getManagedObjectConfiguration() {
-		return ConstructUtil.toArray(this.managedObjects,
-				new TaskManagedObjectConfiguration[0]);
+	public TaskObjectConfiguration[] getObjectConfiguration() {
+		return ConstructUtil.toArray(this.objects,
+				new TaskObjectConfiguration[0]);
 	}
 
 	@Override
