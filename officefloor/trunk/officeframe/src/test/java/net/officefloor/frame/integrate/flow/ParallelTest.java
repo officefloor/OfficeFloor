@@ -66,8 +66,8 @@ public class ParallelTest extends AbstractOfficeConstructTestCase {
 		ReflectiveTaskBuilder firstTaskBuilder = workBuilder.buildTask("first",
 				"team");
 		firstTaskBuilder.buildFlow("parallel",
-				FlowInstigationStrategyEnum.PARALLEL);
-		firstTaskBuilder.getBuilder().setNextTaskInFlow("second");
+				FlowInstigationStrategyEnum.PARALLEL, Object.class);
+		firstTaskBuilder.setNextTaskInFlow("second");
 		ReflectiveTaskBuilder parallelTaskBuilder = workBuilder.buildTask(
 				"parallel", "team");
 		parallelTaskBuilder.buildParameter();

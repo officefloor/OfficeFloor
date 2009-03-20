@@ -22,6 +22,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -52,7 +53,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		// Construct work
 		ReflectiveWorkBuilder workBuilder = this.constructWork(
 				new EscalationHandlerWork(escalation), "WORK", "task");
-		workBuilder.buildTask("task", "TEAM");
+		workBuilder.buildTask("task", "TEAM").buildParameter();
 		this.constructTeam("TEAM", new PassiveTeam());
 
 		// Execute the task to have escalation handled
@@ -85,7 +86,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
 		ReflectiveWorkBuilder workBuilder = this.constructWork(work, "WORK",
 				"task");
-		workBuilder.buildTask("task", "TEAM");
+		workBuilder.buildTask("task", "TEAM").buildParameter();
 		ReflectiveTaskBuilder officeEscalation = workBuilder.buildTask(
 				"officeEscalation", "TEAM");
 		officeEscalation.buildParameter();
@@ -119,19 +120,26 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		HandlerBuilder<Indexed> handlerBuilder = moHandlerBuilder
 				.registerHandler(EscalationManagedObjectSource.Handlers.ESCALATE);
 		handlerBuilder.setHandlerFactory(new EscalationManagedObjectSource());
-		handlerBuilder.linkProcess(0, "WORK", "task");
+		handlerBuilder.linkProcess(0, "WORK", "task", String.class);
 
 		// Construct the work
-		ReflectiveWorkBuilder workBuilder = this.constructWork(
-				new EscalationHandlerWork(escalation), "WORK", "task");
-		workBuilder.buildTask("task", "TEAM");
+		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
+		ReflectiveWorkBuilder workBuilder = this.constructWork(work, "WORK",
+				"task");
+		workBuilder.buildTask("task", "TEAM").buildParameter();
 		this.constructTeam("TEAM", new PassiveTeam());
 
 		// Create and open the office
 		this.constructOfficeFloor().openOfficeFloor();
 
+		final String HANDLER_ARGUMENT = "HANDLER_ARGUMENT";
+
 		// Invoke processing from the managed object
-		EscalationManagedObjectSource.invokeProcessing();
+		EscalationManagedObjectSource.invokeProcessing(HANDLER_ARGUMENT);
+
+		// Ensure argument passed to task
+		assertEquals("Incorrect parameter value for task", HANDLER_ARGUMENT,
+				work.taskParameter);
 
 		// Ensure escalation is handled by managed object escalation handler
 		try {
@@ -160,6 +168,11 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		private final Throwable escalation;
 
 		/**
+		 * Parameter on invoking the task method.
+		 */
+		public String taskParameter;
+
+		/**
 		 * Exception handled by the {@link Office}.
 		 */
 		public RuntimeException officeException;
@@ -177,10 +190,13 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		/**
 		 * Task causing an escalation.
 		 * 
+		 * @param parameter
+		 *            Argument passed from the {@link Handler}.
 		 * @throws Throwable
 		 *             Escalation.
 		 */
-		public void task() throws Throwable {
+		public void task(String parameter) throws Throwable {
+			this.taskParameter = parameter;
 			throw this.escalation;
 		}
 

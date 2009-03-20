@@ -26,7 +26,6 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
@@ -45,7 +44,6 @@ import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -280,14 +278,11 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 				return null; // must have initial task meta-data
 			}
 
-			// Obtain the asset manager to initiate the flow
-			AssetManager assetManager = assetManagerFactory.createAssetManager(
-					AssetType.WORK, workName, "InitialFlow", issues);
-
 			// Construct the initial flow meta-data
-			initialFlowMetaData = new FlowMetaDataImpl<w>(
+			initialFlowMetaData = ConstructUtil.newFlowMetaData(
 					FlowInstigationStrategyEnum.ASYNCHRONOUS,
-					initialTaskMetaData, assetManager);
+					initialTaskMetaData, assetManagerFactory, AssetType.WORK,
+					workName, "InitialFlow", issues);
 		}
 
 		// Create the listing of work bound managed object meta-data

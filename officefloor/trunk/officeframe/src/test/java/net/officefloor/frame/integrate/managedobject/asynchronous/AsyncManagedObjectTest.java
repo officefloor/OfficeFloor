@@ -246,12 +246,9 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		public boolean isAssignedTask = false;
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame
-		 * .spi.team.TaskContainer)
+		 * ==================== Team ================================
 		 */
+
 		@Override
 		public void assignJob(Job task) {
 			// Determine if setup call
@@ -271,21 +268,11 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 			this.isAssignedTask = true;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.team.Team#startWorking()
-		 */
 		@Override
 		public void startWorking() {
 			// Mock, so do nothing
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.team.Team#stopWorking()
-		 */
 		@Override
 		public void stopWorking() {
 			// Mock, so do nothing
@@ -317,32 +304,15 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/*
-		 * ======================================================================
-		 * ====== AsynchronousManagedObject
-		 * ======================================
-		 * ======================================
+		 * ================= AsynchronousManagedObject =======================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.spi.managedobject.AsynchronousManagedObject
-		 * #registerAsynchronousCompletionListener
-		 * (net.officefloor.frame.spi.managedobject.AsynchronousListener)
-		 */
 		@Override
 		public void registerAsynchronousCompletionListener(
 				AsynchronousListener listener) {
 			this.listener = listener;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
-		 */
 		@Override
 		public Object getObject() throws Exception {
 			return this;

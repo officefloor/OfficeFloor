@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 
@@ -37,16 +38,25 @@ public class TaskNodeReferenceImpl implements TaskNodeReference {
 	private final String taskName;
 
 	/**
+	 * Type of argument to be passed to the referenced {@link Task}.
+	 */
+	private final Class<?> argumentType;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param workName
 	 *            Name identifying the {@link Work} containing the {@link Task}.
 	 * @param taskName
 	 *            Name of the {@link Task}.
+	 * @param argumentType
+	 *            Type of argument to be passed to the referenced {@link Task}.
 	 */
-	public TaskNodeReferenceImpl(String workName, String taskName) {
+	public TaskNodeReferenceImpl(String workName, String taskName,
+			Class<?> argumentType) {
 		this.workName = workName;
 		this.taskName = taskName;
+		this.argumentType = argumentType;
 	}
 
 	/**
@@ -54,10 +64,11 @@ public class TaskNodeReferenceImpl implements TaskNodeReference {
 	 * 
 	 * @param taskName
 	 *            Name of the {@link Task}.
+	 * @param argumentType
+	 *            Type of argument to be passed to the referenced {@link Task}.
 	 */
-	public TaskNodeReferenceImpl(String taskName) {
-		this.workName = null;
-		this.taskName = taskName;
+	public TaskNodeReferenceImpl(String taskName, Class<?> argumentType) {
+		this(null, taskName, argumentType);
 	}
 
 	/*
@@ -72,6 +83,11 @@ public class TaskNodeReferenceImpl implements TaskNodeReference {
 	@Override
 	public String getTaskName() {
 		return this.taskName;
+	}
+
+	@Override
+	public Class<?> getArgumentType() {
+		return this.argumentType;
 	}
 
 }

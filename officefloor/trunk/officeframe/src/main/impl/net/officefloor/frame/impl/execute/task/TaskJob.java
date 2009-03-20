@@ -28,6 +28,7 @@ import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkContainer;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.Job;
 
 /**
@@ -40,14 +41,24 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 		TaskContext<P, W, M, F> {
 
 	/**
+	 * <p>
+	 * Scope index of the {@link ManagedObjectIndex} indicating the parameter
+	 * rather than the object of the {@link ManagedObject}.
+	 * <p>
+	 * As {@link ManagedObjectIndex} are indexes into arrays, the negative value
+	 * is safe to use as a parameter index.
+	 */
+	public static final int PARAMETER_INDEX = -1;
+
+	/**
 	 * {@link Task} to be done.
 	 */
-	protected final Task<P, W, M, F> task;
+	private final Task<P, W, M, F> task;
 
 	/**
 	 * Parameter of the current {@link Task} being managed.
 	 */
-	protected final P parameter;
+	private final P parameter;
 
 	/**
 	 * Initiate.
@@ -106,32 +117,25 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 
 	@Override
 	public Object getObject(int managedObjectIndex) {
+
 		// Obtain the work managed object index
-		ManagedObjectIndex workMoIndex = this.nodeMetaData
+		ManagedObjectIndex index = this.nodeMetaData
 				.translateManagedObjectIndexForWork(managedObjectIndex);
 
+		// Determine if a parameter
+		if (index.getIndexOfManagedObjectWithinScope() == PARAMETER_INDEX) {
+			return this.parameter; // parameter, so return the parameter
+		}
+
 		// Return the Object
-		return this.workContainer.getObject(workMoIndex, this.flow
-				.getThreadState());
+		return this.workContainer.getObject(index, this.flow.getThreadState());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#doFlow(java.lang.Enum,
-	 * java.lang.Object)
-	 */
 	@Override
 	public FlowFuture doFlow(F key, Object parameter) {
 		return this.doFlow(key.ordinal(), parameter);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#doFlow(int,
-	 * java.lang.Object)
-	 */
 	@Override
 	public FlowFuture doFlow(int flowIndex, Object parameter) {
 		// Obtain the Flow meta-data and do the flow
@@ -139,33 +143,16 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 		return this.doFlow(flowMetaData, parameter);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.TaskContext#join(net.officefloor.frame
-	 * .api.execute.FlowFuture)
-	 */
 	@Override
 	public void join(FlowFuture flowFuture) {
 		this.joinFlow(flowFuture);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getProcessLock()
-	 */
 	@Override
 	public Object getProcessLock() {
 		return this.flow.getThreadState().getProcessState().getProcessLock();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#setComplete(boolean)
-	 */
 	@Override
 	public void setComplete(boolean isComplete) {
 		this.setJobComplete(isComplete);

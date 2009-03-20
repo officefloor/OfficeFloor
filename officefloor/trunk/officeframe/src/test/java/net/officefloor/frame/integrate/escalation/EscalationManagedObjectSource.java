@@ -47,10 +47,13 @@ public class EscalationManagedObjectSource
 
 	/**
 	 * Invokes processing.
+	 * 
+	 * @param argument
+	 *            Argument passed by {@link Handler}.
 	 */
-	public static void invokeProcessing() {
+	public static void invokeProcessing(String argument) {
 		// Invoke processing
-		INSTANCE.handlerContext.invokeProcess(0, null, INSTANCE, INSTANCE);
+		INSTANCE.handlerContext.invokeProcess(0, argument, INSTANCE, INSTANCE);
 	}
 
 	/**
@@ -99,20 +102,13 @@ public class EscalationManagedObjectSource
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.HandlerFactory#createHandler()
+	 * ======================= Handler ========================================
 	 */
 	@Override
 	public Handler<Indexed> createHandler() {
 		return INSTANCE;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor.frame.api.execute.HandlerContext)
-	 */
 	@Override
 	public void setHandlerContext(HandlerContext<Indexed> context)
 			throws Exception {
@@ -120,20 +116,18 @@ public class EscalationManagedObjectSource
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
+	 * ================== ManagedObject ========================================
 	 */
+
 	@Override
 	public Object getObject() throws Exception {
 		return this;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.EscalationHandler#handleEscalation(java.lang.Throwable)
+	 * ================= EscalationHandler ====================================
 	 */
+
 	@Override
 	public void handleEscalation(Throwable escalation) throws Throwable {
 		this.escalation = escalation;

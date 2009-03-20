@@ -23,7 +23,6 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactoryImpl;
@@ -31,7 +30,6 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeStartupTaskImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
@@ -61,10 +59,8 @@ import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -497,16 +493,12 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				continue; // startup task not found
 			}
 
-			// Obtain the flow asset manager
-			AssetManager startupFlowAssetManager = officeAssetManagerFactory
-					.createAssetManager(AssetType.OFFICE, officeName,
-							"StartupTask" + i, issues);
-
 			// Create the startup flow meta-data.
 			// Always asynchronous as runs in own process.
-			FlowMetaData<?> startupFlow = this.newFlowMetaData(
+			FlowMetaData<?> startupFlow = ConstructUtil.newFlowMetaData(
 					FlowInstigationStrategyEnum.ASYNCHRONOUS,
-					startupTaskMetaData, startupFlowAssetManager);
+					startupTaskMetaData, officeAssetManagerFactory,
+					AssetType.OFFICE, officeName, "StartupTask" + i, issues);
 
 			// TODO consider providing a parameter to the startup task
 			Object parameter = null;
@@ -541,9 +533,11 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			}
 
 			// Create flow meta-data (always use thread's flow asset manager)
-			FlowMetaData<?> escalationFlow = this.newFlowMetaData(
+			FlowMetaData<?> escalationFlow = ConstructUtil.newFlowMetaData(
 					FlowInstigationStrategyEnum.PARALLEL,
-					escalationTaskMetaData, null);
+					escalationTaskMetaData, officeAssetManagerFactory,
+					AssetType.OFFICE, officeName, "Office Escalation " + i,
+					issues);
 
 			// Create and load the escalation
 			officeEscalations[i] = new EscalationImpl(typeOfCause,
@@ -649,24 +643,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			rawBoundAdministrator.linkTasks(taskMetaDataLocator,
 					assetManagerFactory, issues);
 		}
-	}
-
-	/**
-	 * Creates a new {@link FlowMetaData}.
-	 * 
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @param taskMetaData
-	 *            {@link TaskMetaData}.
-	 * @param assetManager
-	 *            {@link Flow} {@link AssetManager}.
-	 * @return New {@link FlowMetaData}.
-	 */
-	private <W extends Work> FlowMetaData<W> newFlowMetaData(
-			FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData<?, W, ?, ?> taskMetaData, AssetManager assetManager) {
-		return new FlowMetaDataImpl<W>(instigationStrategy, taskMetaData,
-				assetManager);
 	}
 
 	/*

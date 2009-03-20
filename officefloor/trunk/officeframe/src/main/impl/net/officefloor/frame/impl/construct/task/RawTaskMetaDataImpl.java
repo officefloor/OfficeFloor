@@ -32,14 +32,15 @@ import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.duty.TaskDutyAssociationImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
+import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
-import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
@@ -49,7 +50,6 @@ import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -161,18 +161,63 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 			return null; // no team
 		}
 
-		// Obtain the managed objects used directly by this task
-		List<RawBoundManagedObjectMetaData<?>> taskMos = new LinkedList<RawBoundManagedObjectMetaData<?>>();
-		for (TaskManagedObjectConfiguration mo : configuration
-				.getManagedObjectConfiguration()) {
+		// Keep track of all the required managed object indexes
+		Set<ManagedObjectIndex> requiredManagedObjectIndexes = new HashSet<ManagedObjectIndex>();
+
+		// Obtain the managed objects used directly by this task.
+		// Also obtain the parameter type for the task if specified.
+		TaskObjectConfiguration[] objectConfigurations = configuration
+				.getObjectConfiguration();
+		ManagedObjectIndex[] taskToWorkMoTranslations = new ManagedObjectIndex[objectConfigurations.length];
+		Class<?> parameterType = null;
+		for (int i = 0; i < objectConfigurations.length; i++) {
+			TaskObjectConfiguration objectConfiguration = objectConfigurations[i];
+
+			// Obtain the type of object required
+			Class<?> objectType = objectConfiguration.getObjectType();
+			if (objectType == null) {
+				issues.addIssue(AssetType.TASK, taskName,
+						"No type for object at index " + i);
+				continue; // must have object type
+			}
+
+			// Determine if a parameter
+			if (objectConfiguration.isParameter()) {
+				// Parameter so use parameter index (note has no scope)
+				taskToWorkMoTranslations[i] = new ManagedObjectIndexImpl(null,
+						TaskJob.PARAMETER_INDEX);
+
+				// Specify the parameter type
+				if (parameterType == null) {
+					// Specify as not yet set
+					parameterType = objectType;
+
+				} else {
+					// Parameter already used, so use most specific type
+					if (parameterType.isAssignableFrom(objectType)) {
+						// Just linked object is more specific type
+						parameterType = objectType;
+					} else if (objectType.isAssignableFrom(parameterType)) {
+						// Existing parameter type is more specific
+					} else {
+						// Parameter use is incompatible
+						issues.addIssue(AssetType.TASK, taskName,
+								"Incompatible parameter types ("
+										+ parameterType.getName() + ", "
+										+ objectType.getName() + ")");
+					}
+				}
+
+				// Specified as parameter
+				continue;
+			}
 
 			// Obtain the scope managed object name
-			String scopeMoName = mo.getScopeManagedObjectName();
+			String scopeMoName = objectConfiguration
+					.getScopeManagedObjectName();
 			if (ConstructUtil.isBlank(scopeMoName)) {
-				issues
-						.addIssue(AssetType.TASK, taskName,
-								"No name for managed object at index "
-										+ taskMos.size());
+				issues.addIssue(AssetType.TASK, taskName,
+						"No name for managed object at index " + i);
 				continue; // no managed object name
 			}
 
@@ -186,22 +231,21 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				continue; // no scope managed object
 			}
 
-			// Add the scope managed object
-			taskMos.add(scopeMo);
-		}
-
-		// Keep track of all the required managed object indexes
-		Set<ManagedObjectIndex> requiredManagedObjectIndexes = new HashSet<ManagedObjectIndex>();
-
-		// Obtain translation indexes from task to work
-		ManagedObjectIndex[] taskToWorkMoTranslations = new ManagedObjectIndex[taskMos
-				.size()];
-		for (int i = 0; i < taskToWorkMoTranslations.length; i++) {
-			RawBoundManagedObjectMetaData<?> boundMo = taskMos.get(i);
+			// Ensure the object from managed object is compatible
+			Class<?> moObjectType = scopeMo.getRawManagedObjectMetaData()
+					.getObjectType();
+			if (!objectType.isAssignableFrom(moObjectType)) {
+				issues.addIssue(AssetType.TASK, taskName, "Managed object "
+						+ scopeMoName + " is incompatible (require="
+						+ objectType.getName()
+						+ ", object of managed object type="
+						+ moObjectType.getName() + ")");
+				continue; // incompatible managed object
+			}
 
 			// Specify index for task translation and load required indexes
 			taskToWorkMoTranslations[i] = this.loadRequiredManagedObjects(
-					boundMo, requiredManagedObjectIndexes);
+					scopeMo, requiredManagedObjectIndexes);
 		}
 
 		// Obtain the duties for this task
@@ -224,7 +268,8 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 			requiredManagedObjects[i++] = requiredManagedObject;
 		}
 
-		// Order to provide work, thread then process managed object loading
+		// Order to provide work, thread then process managed object loading.
+		// This stops deadlock/starvation as retrieval will now be ordered.
 		Arrays.sort(requiredManagedObjects,
 				new Comparator<ManagedObjectIndex>() {
 					@Override
@@ -242,8 +287,9 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 
 		// Create the task meta-data
 		TaskMetaDataImpl<p, w, m, f> taskMetaData = new TaskMetaDataImpl<p, w, m, f>(
-				taskName, taskFactory, team, requiredManagedObjects,
-				taskToWorkMoTranslations, preTaskDuties, postTaskDuties);
+				taskName, taskFactory, parameterType, team,
+				requiredManagedObjects, taskToWorkMoTranslations,
+				preTaskDuties, postTaskDuties);
 
 		// Return the raw task meta-data
 		return new RawTaskMetaDataImpl<p, w, m, f>(taskName, configuration,
@@ -429,14 +475,10 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				continue; // no instigation strategy
 			}
 
-			// Provide asset manager for instigation of flow
-			AssetManager flowAssetManager = assetManagerFactory
-					.createAssetManager(AssetType.TASK, assetName, "Flow" + i,
-							issues);
-
 			// Create and add the flow meta-data
-			flowMetaDatas[i] = this.newFlowMetaData(instigationStrategy,
-					taskMetaData, flowAssetManager);
+			flowMetaDatas[i] = ConstructUtil.newFlowMetaData(
+					instigationStrategy, taskMetaData, assetManagerFactory,
+					AssetType.TASK, assetName, "Flow" + i, issues);
 		}
 
 		// Obtain the next task in flow
@@ -481,15 +523,15 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				continue; // no escalation handler
 			}
 
-			// Provide asset manager for instigation of escalation
-			AssetManager escalationAssetManager = assetManagerFactory
-					.createAssetManager(AssetType.TASK, assetName, "Escalation"
-							+ i, issues);
+			// Create the escalation flow meta-data
+			FlowMetaData<?> escalationFlowMetaData = ConstructUtil
+					.newFlowMetaData(FlowInstigationStrategyEnum.PARALLEL,
+							escalationTaskMetaData, assetManagerFactory,
+							AssetType.TASK, assetName, "Escalation" + i, issues);
 
 			// Create and add the escalation
-			escalations[i] = new EscalationImpl(typeOfCause, this
-					.newFlowMetaData(FlowInstigationStrategyEnum.PARALLEL,
-							escalationTaskMetaData, escalationAssetManager));
+			escalations[i] = new EscalationImpl(typeOfCause,
+					escalationFlowMetaData);
 		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(
 				escalations);
@@ -497,24 +539,6 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 		// Load the remaining state for the task meta-data
 		this.taskMetaData.loadRemainingState(workMetaData, flowMetaDatas,
 				nextTaskInFlow, escalationProcedure);
-	}
-
-	/**
-	 * Creates a new {@link FlowMetaData}.
-	 * 
-	 * @param instigationStrategy
-	 *            {@link FlowInstigationStrategyEnum}.
-	 * @param taskMetaData
-	 *            {@link TaskMetaData}.
-	 * @param assetManager
-	 *            {@link AssetManager}.
-	 * @return New {@link FlowMetaData}.
-	 */
-	private <w extends Work> FlowMetaData<w> newFlowMetaData(
-			FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData<?, w, ?, ?> taskMetaData, AssetManager assetManager) {
-		return new FlowMetaDataImpl<w>(instigationStrategy, taskMetaData,
-				assetManager);
 	}
 
 }

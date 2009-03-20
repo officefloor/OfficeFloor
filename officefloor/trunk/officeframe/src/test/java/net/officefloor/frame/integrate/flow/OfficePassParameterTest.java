@@ -51,14 +51,15 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		WorkOne workOne = new WorkOne(parameter);
 		this.constructWork("WORK_ONE", workOne, "SENDER");
 		TaskBuilder<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> taskBuilder = this
-				.constructTask("SENDER", workOne, "TEAM", null);
+				.constructTask("SENDER", workOne, "TEAM", null, null);
 		taskBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
-				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL);
+				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL,
+				Object.class);
 
 		// Add the second work
 		WorkTwo workTwo = new WorkTwo();
 		this.constructWork("WORK_TWO", workTwo, "RECEIVER");
-		this.constructTask("RECEIVER", workTwo, "TEAM", null);
+		this.constructTask("RECEIVER", workTwo, "TEAM", null, null);
 
 		// Register and open the office floor
 		String officeName = this.getOfficeName();
@@ -81,7 +82,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * First {@link net.officefloor.frame.api.execute.Work} type for testing.
+	 * First {@link Work} type for testing.
 	 */
 	private class WorkOne implements Work,
 			Task<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> {
@@ -102,12 +103,10 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
-		 * .api.execute.TaskContext)
+		 * ==================== Task ==========================================
 		 */
+
+		@Override
 		public Object doTask(
 				TaskContext<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> context)
 				throws Exception {
@@ -146,12 +145,10 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
-		 * .api.execute.TaskContext)
+		 * ==================== Task ==========================================
 		 */
+
+		@Override
 		public Object doTask(
 				TaskContext<Object, WorkTwo, NoManagedObjectsEnum, NoDelegatesEnum> context)
 				throws Exception {

@@ -136,6 +136,7 @@ public class CoordinateManagedObjectTest extends
 				throws Exception {
 			// Loads the meta-data
 			context.setManagedObjectClass(CoordinatingManagedObject.class);
+			context.setObjectClass(CoordinatingMo.class);
 			context.getDependencyLoader(CoordinatingDependencyKey.class);
 		}
 

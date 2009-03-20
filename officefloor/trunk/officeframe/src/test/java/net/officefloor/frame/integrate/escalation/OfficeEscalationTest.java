@@ -47,7 +47,7 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 				"work", "causeEscalation");
 		ReflectiveTaskBuilder causeEscalation = workBuilder.buildTask(
 				"causeEscalation", "team");
-		causeEscalation.getBuilder().setNextTaskInFlow("nextTask");
+		causeEscalation.setNextTaskInFlow("nextTask");
 		causeEscalation.getBuilder().addEscalation(
 				workObject.failure.getClass(), "handleEscalation");
 		workBuilder.buildTask("nextTask", "team");
@@ -88,7 +88,7 @@ public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 		ReflectiveTaskBuilder parallelOwner = workBuilder.buildTask(
 				"parallelOwner", "team");
 		parallelOwner.buildFlow("causeEscalation",
-				FlowInstigationStrategyEnum.PARALLEL);
+				FlowInstigationStrategyEnum.PARALLEL, null);
 		parallelOwner.getBuilder().addEscalation(workObject.failure.getClass(),
 				"handleEscalation");
 		workBuilder.buildTask("causeEscalation", "team");

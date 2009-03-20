@@ -404,12 +404,30 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures issue if no {@link Object} type.
+	 */
+	public void testNoObjectType() {
+
+		// Record no object type
+		this.record_initManagedObject();
+		this.recordReturn(this.metaData, this.metaData.getObjectClass(), null);
+		this.record_issue("No object type provided");
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensures issue if no {@link ManagedObject} class.
 	 */
 	public void testNoManagedObjectClass() {
 
 		// Record no managed object class
 		this.record_initManagedObject();
+		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
+				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				null);
 		this.record_issue("No managed object class provided");
@@ -427,6 +445,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record negative default timeout
 		this.record_initManagedObject();
+		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
+				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				ManagedObject.class);
 		this.recordReturn(this.configuration, this.configuration
@@ -446,6 +466,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record no process bound name
 		this.record_initManagedObject();
+		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
+				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				ManagedObject.class);
 		this.recordReturn(this.configuration, this.configuration
@@ -1170,6 +1192,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				"WORK");
 		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
 				"TASK");
+		this.recordReturn(taskNodeReference, taskNodeReference
+				.getArgumentType(), String.class);
+		this.recordReturn(taskMetaData, taskMetaData.getParameterType(),
+				Object.class);
 		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
 				.getTaskMetaData("WORK", "TASK"), taskMetaData);
 		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
@@ -1292,6 +1318,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record completing creating raw meta data
 		this.recordReturn(this.configuration, this.configuration
 				.getDefaultTimeout(), 0);
+		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
+				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				managedObjectClass);
 		this.recordReturn(this.metaData, this.metaData.getHandlerKeys(),

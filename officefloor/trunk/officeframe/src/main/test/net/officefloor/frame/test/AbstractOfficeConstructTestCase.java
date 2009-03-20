@@ -325,7 +325,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 	@SuppressWarnings("unchecked")
 	protected <P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> TaskBuilder<P, W, M, F> constructTask(
 			String taskName, TaskFactory<P, W, M, F> taskFactory,
-			String teamName, String moName, String nextTaskName) {
+			String teamName, String moName, Class<?> moType,
+			String nextTaskName, Class<?> nextTaskArgumentType) {
 
 		// Create the Task Builder
 		TaskBuilder taskBuilder = ((WorkBuilder) this.workBuilder).addTask(
@@ -334,10 +335,10 @@ public abstract class AbstractOfficeConstructTestCase extends
 		// Construct the task
 		taskBuilder.setTeam(teamName);
 		if (nextTaskName != null) {
-			taskBuilder.setNextTaskInFlow(nextTaskName);
+			taskBuilder.setNextTaskInFlow(nextTaskName, nextTaskArgumentType);
 		}
 		if (moName != null) {
-			taskBuilder.linkManagedObject(0, moName);
+			taskBuilder.linkManagedObject(0, moName, moType);
 		}
 
 		// Return the task builder
@@ -352,7 +353,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	@SuppressWarnings("unchecked")
 	protected <P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> TaskBuilder constructTask(
 			String taskName, final Task<P, W, M, F> task, String teamName,
-			String nextTaskName) {
+			String nextTaskName, Class<?> nextTaskArgumentType) {
 
 		// Create the Task Factory
 		TaskFactory<P, W, M, F> taskFactory = new TaskFactory<P, W, M, F>() {
@@ -362,8 +363,8 @@ public abstract class AbstractOfficeConstructTestCase extends
 		};
 
 		// Construct and return the Task
-		return this.constructTask(taskName, taskFactory, teamName, null,
-				nextTaskName);
+		return this.constructTask(taskName, taskFactory, teamName, null, null,
+				nextTaskName, nextTaskArgumentType);
 	}
 
 	/**

@@ -60,14 +60,16 @@ public class DutyBuilderImpl<A extends Enum<A>, F extends Enum<F>> implements
 	 */
 
 	@Override
-	public void linkFlow(F key, String workName, String taskName) {
-		this.linkFlow(key.ordinal(), workName, taskName);
+	public void linkFlow(F key, String workName, String taskName,
+			Class<?> argumentType) {
+		this.linkFlow(key.ordinal(), workName, taskName, argumentType);
 	}
 
 	@Override
-	public void linkFlow(int flowIndex, String workName, String taskName) {
+	public void linkFlow(int flowIndex, String workName, String taskName,
+			Class<?> argumentType) {
 		this.flows.put(new Integer(flowIndex), new TaskNodeReferenceImpl(
-				workName, taskName));
+				workName, taskName, argumentType));
 	}
 
 	/*

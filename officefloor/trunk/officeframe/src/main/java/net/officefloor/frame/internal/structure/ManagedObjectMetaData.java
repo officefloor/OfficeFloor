@@ -42,6 +42,15 @@ public interface ManagedObjectMetaData<D extends Enum<D>> {
 	String getBoundManagedObjectName();
 
 	/**
+	 * Obtains the type of the {@link Object} returned from the
+	 * {@link ManagedObject}.
+	 * 
+	 * @return Type of the {@link Object} returned from the
+	 *         {@link ManagedObject}.
+	 */
+	Class<?> getObjectType();
+
+	/**
 	 * Creates a new {@link ManagedObjectContainer}.
 	 * 
 	 * @param processState

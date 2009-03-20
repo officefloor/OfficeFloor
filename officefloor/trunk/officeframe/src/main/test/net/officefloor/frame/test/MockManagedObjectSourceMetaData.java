@@ -19,6 +19,8 @@ package net.officefloor.frame.test;
 import java.util.EnumMap;
 import java.util.Map;
 
+import junit.framework.TestCase;
+
 import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
@@ -73,7 +75,13 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 */
 	public MockManagedObjectSourceMetaData(ManagedObject managedObject) {
 		this.managedObjectClass = managedObject.getClass();
-		this.objectClass = Object.class;
+		try {
+			this.objectClass = managedObject.getObject().getClass();
+		} catch (Exception ex) {
+			TestCase.fail("Failed to obtain object type from managed object "
+					+ ex.getMessage());
+			throw new Error("Only for compiling as fail above will throw");
+		}
 		this.dependencyKeys = null;
 		this.dependencyMetaData = null;
 		this.handlerKeys = null;

@@ -17,6 +17,7 @@
 package net.officefloor.frame.impl.construct.task;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,16 +27,18 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
+import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
 import net.officefloor.frame.internal.configuration.FlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
-import net.officefloor.frame.internal.configuration.TaskManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
+import net.officefloor.frame.internal.configuration.TaskObjectConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
@@ -246,18 +249,175 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
-	 * Ensure issue if no {@link ManagedObject} name.
+	 * Ensure issue if no {@link Object} type.
 	 */
-	public void testNoScopeManagedObjectName() {
+	public void testNoObjectType() {
 
-		final TaskManagedObjectConfiguration moConfiguration = this
-				.createMock(TaskManagedObjectConfiguration.class);
+		final TaskObjectConfiguration moConfiguration = this
+				.createMock(TaskObjectConfiguration.class);
 
 		// Record no managed object name
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration, this.configuration
-				.getManagedObjectConfiguration(),
-				new TaskManagedObjectConfiguration[] { moConfiguration });
+				.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { moConfiguration });
+		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
+				null);
+		this.record_taskIssue("No type for object at index 0");
+		this.record_NoAdministration();
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		this.constructRawTaskMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to link in a parameter.
+	 */
+	public void testParameter() {
+
+		final Class<?> parameterType = Connection.class;
+		final TaskObjectConfiguration moConfiguration = this
+				.createMock(TaskObjectConfiguration.class);
+
+		// Record parameter
+		this.record_taskNameFactoryTeam();
+		this.recordReturn(this.configuration, this.configuration
+				.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { moConfiguration });
+		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
+				parameterType);
+		this.recordReturn(moConfiguration, moConfiguration.isParameter(), true);
+		this.record_NoAdministration();
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawTaskMetaData<P, W, M, F> rawMetaData = this
+				.constructRawTaskMetaData(true);
+		TaskMetaData<P, W, M, F> metaData = rawMetaData.getTaskMetaData();
+		this.verifyMockObjects();
+
+		// Ensure have parameter
+		assertEquals("Should have no required objects", 0, metaData
+				.getRequiredManagedObjects().length);
+		assertEquals("Incorrect parameter type", parameterType, metaData
+				.getParameterType());
+
+		// Ensure can translate to parameter
+		ManagedObjectIndex parameterIndex = metaData
+				.translateManagedObjectIndexForWork(0);
+		assertEquals("Incorrect translation to parameter",
+				TaskJob.PARAMETER_INDEX, parameterIndex
+						.getIndexOfManagedObjectWithinScope());
+		assertNull("Should not have scope for parameter index", parameterIndex
+				.getManagedObjectScope());
+	}
+
+	/**
+	 * Ensure able to link in the parameter being used twice.
+	 */
+	public void testParameterUsedTwice() {
+
+		final Class<?> parameterType = Connection.class;
+
+		// Parameter will be Connection but can be passed as Object
+		final Class<?> paramTypeOne = Connection.class;
+		final TaskObjectConfiguration paramConfigOne = this
+				.createMock(TaskObjectConfiguration.class);
+		final Class<?> paramTypeTwo = Object.class;
+		final TaskObjectConfiguration paramConfigTwo = this
+				.createMock(TaskObjectConfiguration.class);
+
+		// Record parameter used twice
+		this.record_taskNameFactoryTeam();
+		this.recordReturn(this.configuration, this.configuration
+				.getObjectConfiguration(), new TaskObjectConfiguration[] {
+				paramConfigOne, paramConfigTwo });
+		this.recordReturn(paramConfigOne, paramConfigOne.getObjectType(),
+				paramTypeOne);
+		this.recordReturn(paramConfigOne, paramConfigOne.isParameter(), true);
+		this.recordReturn(paramConfigTwo, paramConfigTwo.getObjectType(),
+				paramTypeTwo);
+		this.recordReturn(paramConfigTwo, paramConfigTwo.isParameter(), true);
+		this.record_NoAdministration();
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawTaskMetaData<P, W, M, F> rawMetaData = this
+				.constructRawTaskMetaData(true);
+		TaskMetaData<P, W, M, F> metaData = rawMetaData.getTaskMetaData();
+		this.verifyMockObjects();
+
+		// Ensure have parameter
+		assertEquals("Should have no required objects", 0, metaData
+				.getRequiredManagedObjects().length);
+		assertEquals("Parameter type should be most specific", parameterType,
+				metaData.getParameterType());
+
+		// Ensure can translate to parameters
+		assertEquals("Incorrect translation to parameter one",
+				TaskJob.PARAMETER_INDEX, metaData
+						.translateManagedObjectIndexForWork(0)
+						.getIndexOfManagedObjectWithinScope());
+		assertEquals("Incorrect translation to parameter two",
+				TaskJob.PARAMETER_INDEX, metaData
+						.translateManagedObjectIndexForWork(1)
+						.getIndexOfManagedObjectWithinScope());
+	}
+
+	/**
+	 * Ensure issue if parameter used twice with incompatible types.
+	 */
+	public void testIncompatibleParameters() {
+
+		// Parameter types are incompatible
+		final Class<?> paramTypeOne = Integer.class;
+		final TaskObjectConfiguration paramConfigOne = this
+				.createMock(TaskObjectConfiguration.class);
+		final Class<?> paramTypeTwo = String.class;
+		final TaskObjectConfiguration paramConfigTwo = this
+				.createMock(TaskObjectConfiguration.class);
+
+		// Record parameters incompatible
+		this.record_taskNameFactoryTeam();
+		this.recordReturn(this.configuration, this.configuration
+				.getObjectConfiguration(), new TaskObjectConfiguration[] {
+				paramConfigOne, paramConfigTwo });
+		this.recordReturn(paramConfigOne, paramConfigOne.getObjectType(),
+				paramTypeOne);
+		this.recordReturn(paramConfigOne, paramConfigOne.isParameter(), true);
+		this.recordReturn(paramConfigTwo, paramConfigTwo.getObjectType(),
+				paramTypeTwo);
+		this.recordReturn(paramConfigTwo, paramConfigTwo.isParameter(), true);
+		this.record_taskIssue("Incompatible parameter types ("
+				+ paramTypeOne.getName() + ", " + paramTypeTwo.getName() + ")");
+		this.record_NoAdministration();
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		this.constructRawTaskMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if no {@link ManagedObject} name.
+	 */
+	public void testNoScopeManagedObjectName() {
+
+		final TaskObjectConfiguration moConfiguration = this
+				.createMock(TaskObjectConfiguration.class);
+
+		// Record no managed object name
+		this.record_taskNameFactoryTeam();
+		this.recordReturn(this.configuration, this.configuration
+				.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { moConfiguration });
+		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
+				Object.class);
+		this
+				.recordReturn(moConfiguration, moConfiguration.isParameter(),
+						false);
 		this.recordReturn(moConfiguration, moConfiguration
 				.getScopeManagedObjectName(), null);
 		this.record_taskIssue("No name for managed object at index 0");
@@ -274,14 +434,19 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	public void testUnknownManagedObject() {
 
-		final TaskManagedObjectConfiguration moConfiguration = this
-				.createMock(TaskManagedObjectConfiguration.class);
+		final TaskObjectConfiguration moConfiguration = this
+				.createMock(TaskObjectConfiguration.class);
 
 		// Record unknown managed object
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration, this.configuration
-				.getManagedObjectConfiguration(),
-				new TaskManagedObjectConfiguration[] { moConfiguration });
+				.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { moConfiguration });
+		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
+				Object.class);
+		this
+				.recordReturn(moConfiguration, moConfiguration.isParameter(),
+						false);
 		this.recordReturn(moConfiguration, moConfiguration
 				.getScopeManagedObjectName(), "MO");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
@@ -301,15 +466,64 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
+	 * Ensure issue {@link Object} required is incompatible with {@link Object}
+	 * from the {@link ManagedObject}.
+	 */
+	public void testIncompatibleManagedObject() {
+
+		final TaskObjectConfiguration moConfiguration = this
+				.createMock(TaskObjectConfiguration.class);
+		final RawBoundManagedObjectMetaData<?> rawWorkMo = this
+				.createMock(RawBoundManagedObjectMetaData.class);
+		final RawManagedObjectMetaData<?, ?> rawMo = this
+				.createMock(RawManagedObjectMetaData.class);
+
+		// Record incompatible managed object type
+		this.record_taskNameFactoryTeam();
+		this.recordReturn(this.configuration, this.configuration
+				.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { moConfiguration });
+		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
+				Connection.class); // require Connection but Integer
+		this
+				.recordReturn(moConfiguration, moConfiguration.isParameter(),
+						false);
+		this.recordReturn(moConfiguration, moConfiguration
+				.getScopeManagedObjectName(), "MO");
+		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
+				.getScopeManagedObjectMetaData("MO"), rawWorkMo);
+		this.recordReturn(rawWorkMo, rawWorkMo.getRawManagedObjectMetaData(),
+				rawMo);
+		this.recordReturn(rawMo, rawMo.getObjectType(), Integer.class);
+		this.record_taskIssue("Managed object MO is incompatible (require="
+				+ Connection.class.getName()
+				+ ", object of managed object type=" + Integer.class.getName()
+				+ ")");
+		this.record_NoAdministration();
+
+		// Attempt to construct task meta-data
+		this.replayMockObjects();
+		RawTaskMetaData<P, W, M, F> metaData = this
+				.constructRawTaskMetaData(true);
+		this.verifyMockObjects();
+
+		// Ensure no managed objects
+		assertEquals("Should be no managed objects", 0, metaData
+				.getTaskMetaData().getRequiredManagedObjects().length);
+	}
+
+	/**
 	 * Ensure able to link in {@link ManagedObject} dependency.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testManagedObjectDependency() {
 
-		final TaskManagedObjectConfiguration moConfiguration = this
-				.createMock(TaskManagedObjectConfiguration.class);
+		final TaskObjectConfiguration moConfiguration = this
+				.createMock(TaskObjectConfiguration.class);
 		final RawBoundManagedObjectMetaData<DependencyKey> rawWorkMo = this
 				.createMock(RawBoundManagedObjectMetaData.class);
+		final RawManagedObjectMetaData<?, ?> workMo = this
+				.createMock(RawManagedObjectMetaData.class);
 		final ManagedObjectIndex workMoIndex = new ManagedObjectIndexImpl(
 				ManagedObjectScope.THREAD, 0);
 		final RawBoundManagedObjectMetaData<?> dependencyWorkMo = this
@@ -320,12 +534,20 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		// Record unknown managed object
 		this.record_taskNameFactoryTeam();
 		this.recordReturn(this.configuration, this.configuration
-				.getManagedObjectConfiguration(),
-				new TaskManagedObjectConfiguration[] { moConfiguration });
+				.getObjectConfiguration(),
+				new TaskObjectConfiguration[] { moConfiguration });
+		this.recordReturn(moConfiguration, moConfiguration.getObjectType(),
+				Object.class);
+		this
+				.recordReturn(moConfiguration, moConfiguration.isParameter(),
+						false);
 		this.recordReturn(moConfiguration, moConfiguration
 				.getScopeManagedObjectName(), "MO");
 		this.recordReturn(this.rawWorkMetaData, this.rawWorkMetaData
 				.getScopeManagedObjectMetaData("MO"), rawWorkMo);
+		this.recordReturn(rawWorkMo, rawWorkMo.getRawManagedObjectMetaData(),
+				workMo);
+		this.recordReturn(workMo, workMo.getObjectType(), Connection.class);
 		this.recordReturn(rawWorkMo, rawWorkMo.getManagedObjectIndex(),
 				workMoIndex);
 		this.recordReturn(rawWorkMo, rawWorkMo.getDependencyKeys(),
@@ -754,6 +976,53 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
+	 * Ensure issue if argument to {@link Flow} is not compatible.
+	 */
+	public void testIncompatibleFlowArgument() {
+
+		final FlowConfiguration flowConfiguration = this
+				.createMock(FlowConfiguration.class);
+		final TaskNodeReference taskNodeReference = this
+				.createMock(TaskNodeReference.class);
+		final TaskMetaData<?, ?, ?, ?> flowTaskMetaData = this
+				.createMock(TaskMetaData.class);
+
+		// Record incompatible flow argument
+		this.record_taskNameFactoryTeam();
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+		this.record_createWorkSpecificTaskMetaDataLocator();
+		this.recordReturn(this.configuration, this.configuration
+				.getFlowConfiguration(),
+				new FlowConfiguration[] { flowConfiguration });
+		this.recordReturn(flowConfiguration,
+				flowConfiguration.getInitialTask(), taskNodeReference);
+		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
+				"WORK");
+		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
+				"TASK");
+		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
+				"WORK", "TASK"), flowTaskMetaData);
+		this.recordReturn(taskNodeReference, taskNodeReference
+				.getArgumentType(), Connection.class);
+		this.recordReturn(flowTaskMetaData,
+				flowTaskMetaData.getParameterType(), Integer.class);
+		this
+				.record_taskIssue("Argument is not compatible with task parameter (argument="
+						+ Connection.class.getName()
+						+ ", parameter="
+						+ Integer.class.getName()
+						+ ", work=WORK, task=TASK) for flow index 0");
+		this.record_NoNextTask();
+		this.record_NoEscalations();
+
+		// Fully construct task meta-data
+		this.replayMockObjects();
+		this.fullyConstructRawTaskMetaData();
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure issue if no {@link FlowInstigationStrategyEnum}.
 	 */
 	public void testNoFlowInstigationStrategy() {
@@ -781,6 +1050,10 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				"TASK");
 		this.recordReturn(this.taskLocator, this.taskLocator
 				.getTaskMetaData("TASK"), flowTaskMetaData);
+		this.recordReturn(taskNodeReference, taskNodeReference
+				.getArgumentType(), Connection.class);
+		this.recordReturn(flowTaskMetaData,
+				flowTaskMetaData.getParameterType(), null);
 		this.recordReturn(flowConfiguration, flowConfiguration
 				.getInstigationStrategy(), null);
 		this
@@ -795,9 +1068,31 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
+	 * Ensure able to construct an asynchronous {@link Flow}.
+	 */
+	public void testConstructAsynchronousFlow() {
+		this.doConstructFlowTest(FlowInstigationStrategyEnum.ASYNCHRONOUS);
+	}
+
+	/**
+	 * Ensure able to construct a parallel {@link Flow}.
+	 */
+	public void testConstructParallelFlow() {
+		this.doConstructFlowTest(FlowInstigationStrategyEnum.PARALLEL);
+	}
+
+	/**
+	 * Ensure able to construct a sequential {@link Flow}.
+	 */
+	public void testConstructSequentialFlow() {
+		this.doConstructFlowTest(FlowInstigationStrategyEnum.SEQUENTIAL);
+	}
+
+	/**
 	 * Ensure able to construct {@link Flow}.
 	 */
-	public void testConstructFlow() {
+	public void doConstructFlowTest(
+			FlowInstigationStrategyEnum instigationStrategy) {
 
 		final FlowConfiguration flowConfiguration = this
 				.createMock(FlowConfiguration.class);
@@ -823,13 +1118,18 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				"TASK");
 		this.recordReturn(this.taskLocator, this.taskLocator
 				.getTaskMetaData("TASK"), flowTaskMetaData);
-		this
-				.recordReturn(flowConfiguration, flowConfiguration
-						.getInstigationStrategy(),
-						FlowInstigationStrategyEnum.PARALLEL);
-		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
-				.createAssetManager(AssetType.TASK, DEFAULT_WORK_NAME + "."
-						+ TASK_NAME, "Flow0", this.issues), assetManager);
+		this.recordReturn(taskNodeReference, taskNodeReference
+				.getArgumentType(), Connection.class);
+		this.recordReturn(flowTaskMetaData,
+				flowTaskMetaData.getParameterType(), Connection.class);
+		this.recordReturn(flowConfiguration, flowConfiguration
+				.getInstigationStrategy(), instigationStrategy);
+		if (instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
+			this.recordReturn(this.assetManagerFactory,
+					this.assetManagerFactory.createAssetManager(AssetType.TASK,
+							DEFAULT_WORK_NAME + "." + TASK_NAME, "Flow0",
+							this.issues), assetManager);
+		}
 		this.record_NoNextTask();
 		this.record_NoEscalations();
 
@@ -843,13 +1143,19 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		FlowMetaData<?> flowMetaData = metaData.getTaskMetaData().getFlow(0);
 		assertEquals("Incorrect initial task meta-data", flowTaskMetaData,
 				flowMetaData.getInitialTaskMetaData());
-		assertEquals("Incorrect instigation strategy",
-				FlowInstigationStrategyEnum.PARALLEL, flowMetaData
-						.getInstigationStrategy());
+		assertEquals("Incorrect instigation strategy", instigationStrategy,
+				flowMetaData.getInstigationStrategy());
 
 		// Ensure correct flow manager
-		assertEquals("Incorrect flow manager", assetManager, flowMetaData
-				.getFlowManager());
+		if (instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
+			// Asynchronous so should have flow manager
+			assertEquals("Incorrect flow manager", assetManager, flowMetaData
+					.getFlowManager());
+		} else {
+			// Not asynchronous so not require flow manager
+			assertNull("Should not require flow manager", flowMetaData
+					.getFlowManager());
+		}
 	}
 
 	/**
@@ -882,6 +1188,48 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
+	 * Ensure issue if argument to next {@link Task} is incompatible.
+	 */
+	public void testIncompatibleNextTaskArgument() {
+
+		final TaskNodeReference taskNodeReference = this
+				.createMock(TaskNodeReference.class);
+		final TaskMetaData<?, ?, ?, ?> nextTaskMetaData = this
+				.createMock(TaskMetaData.class);
+
+		// Record construct next task (which is on another work)
+		this.record_taskNameFactoryTeam();
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+		this.record_createWorkSpecificTaskMetaDataLocator();
+		this.record_NoFlows();
+		this.recordReturn(this.configuration, this.configuration
+				.getNextTaskInFlow(), taskNodeReference);
+		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
+				"ANOTHER_WORK");
+		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
+				"NEXT_TASK");
+		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
+				"ANOTHER_WORK", "NEXT_TASK"), nextTaskMetaData);
+		this.recordReturn(taskNodeReference, taskNodeReference
+				.getArgumentType(), Integer.class);
+		this.recordReturn(nextTaskMetaData,
+				nextTaskMetaData.getParameterType(), Connection.class);
+		this
+				.record_taskIssue("Argument is not compatible with task parameter (argument="
+						+ Integer.class.getName()
+						+ ", parameter="
+						+ Connection.class.getName()
+						+ ", work=ANOTHER_WORK, task=NEXT_TASK) for next task");
+		this.record_NoEscalations();
+
+		// Fully construct task meta-data
+		this.replayMockObjects();
+		this.fullyConstructRawTaskMetaData();
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure able to construct next {@link TaskMetaData}.
 	 */
 	public void testConstructNextTask() {
@@ -905,6 +1253,10 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				"NEXT_TASK");
 		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
 				"ANOTHER_WORK", "NEXT_TASK"), nextTaskMetaData);
+		this.recordReturn(taskNodeReference, taskNodeReference
+				.getArgumentType(), null);
+		this.recordReturn(nextTaskMetaData,
+				nextTaskMetaData.getParameterType(), null);
 		this.record_NoEscalations();
 
 		// Fully construct task meta-data
@@ -1015,6 +1367,55 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	/**
+	 * Ensure issue if incompatible {@link Escalation}.
+	 */
+	public void testIncompatibleEscalation() {
+
+		final EscalationConfiguration escalationConfiguration = this
+				.createMock(EscalationConfiguration.class);
+		final TaskNodeReference taskNodeReference = this
+				.createMock(TaskNodeReference.class);
+		final TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = this
+				.createMock(TaskMetaData.class);
+
+		// Record construct escalation
+		this.record_taskNameFactoryTeam();
+		this.record_NoManagedObjects();
+		this.record_NoAdministration();
+		this.record_createWorkSpecificTaskMetaDataLocator();
+		this.record_NoFlows();
+		this.record_NoNextTask();
+		this.recordReturn(this.configuration, this.configuration
+				.getEscalations(),
+				new EscalationConfiguration[] { escalationConfiguration });
+		this.recordReturn(escalationConfiguration, escalationConfiguration
+				.getTypeOfCause(), IOException.class);
+		this.recordReturn(escalationConfiguration, escalationConfiguration
+				.getTaskNodeReference(), taskNodeReference);
+		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
+				"WORK");
+		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
+				"ESCALATION_HANDLER");
+		this.recordReturn(this.taskLocator, this.taskLocator.getTaskMetaData(
+				"WORK", "ESCALATION_HANDLER"), escalationTaskMetaData);
+		this.recordReturn(taskNodeReference, taskNodeReference
+				.getArgumentType(), NullPointerException.class);
+		this.recordReturn(escalationTaskMetaData, escalationTaskMetaData
+				.getParameterType(), Integer.class);
+		this
+				.record_taskIssue("Argument is not compatible with task parameter (argument="
+						+ NullPointerException.class.getName()
+						+ ", parameter="
+						+ Integer.class.getName()
+						+ ", work=WORK, task=ESCALATION_HANDLER) for escalation index 0");
+
+		// Fully construct task meta-data
+		this.replayMockObjects();
+		this.fullyConstructRawTaskMetaData();
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure able to construct {@link Escalation}.
 	 */
 	public void testConstructEscalation() {
@@ -1025,7 +1426,6 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(TaskNodeReference.class);
 		final TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = this
 				.createMock(TaskMetaData.class);
-		final AssetManager assetManager = this.createMock(AssetManager.class);
 
 		// Record construct escalation
 		this.record_taskNameFactoryTeam();
@@ -1047,9 +1447,10 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				"ESCALATION_HANDLER");
 		this.recordReturn(this.taskLocator, this.taskLocator
 				.getTaskMetaData("ESCALATION_HANDLER"), escalationTaskMetaData);
-		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
-				.createAssetManager(AssetType.TASK, DEFAULT_WORK_NAME + "."
-						+ TASK_NAME, "Escalation0", this.issues), assetManager);
+		this.recordReturn(taskNodeReference, taskNodeReference
+				.getArgumentType(), NullPointerException.class);
+		this.recordReturn(escalationTaskMetaData, escalationTaskMetaData
+				.getParameterType(), RuntimeException.class);
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
@@ -1070,6 +1471,8 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		assertEquals("Incorrect instigation strategy",
 				FlowInstigationStrategyEnum.PARALLEL, flowMetaData
 						.getInstigationStrategy());
+		assertNull("Should not have flow manager as always parallel",
+				flowMetaData.getFlowManager());
 	}
 
 	/**
@@ -1096,8 +1499,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 */
 	private void record_NoManagedObjects() {
 		this.recordReturn(this.configuration, this.configuration
-				.getManagedObjectConfiguration(),
-				new TaskManagedObjectConfiguration[0]);
+				.getObjectConfiguration(), new TaskObjectConfiguration[0]);
 	}
 
 	/**
