@@ -17,15 +17,12 @@
 package net.officefloor.frame.impl.construct.office;
 
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
-import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
 
 /**
@@ -45,16 +42,13 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 	 * @param issues
 	 *            {@link OfficeFloorIssues} to provide issues in enhancing the
 	 *            {@link OfficeConfiguration}.
-	 * @param rawOfficeFloorMetaData
-	 *            {@link RawOfficeFloorMetaData}.
 	 */
 	public static void enhanceOffice(String officeName,
-			OfficeConfiguration officeConfiguration, OfficeFloorIssues issues,
-			RawOfficeFloorMetaData rawOfficeFloorMetaData) {
+			OfficeConfiguration officeConfiguration, OfficeFloorIssues issues) {
 
 		// Create the context to enhance
 		OfficeEnhancerContext context = new OfficeEnhancerContextImpl(
-				officeConfiguration, rawOfficeFloorMetaData);
+				officeConfiguration);
 
 		// Enhance the office
 		for (OfficeEnhancer enhancer : officeConfiguration.getOfficeEnhancers()) {
@@ -75,11 +69,6 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 	private final OfficeConfiguration officeConfiguration;
 
 	/**
-	 * {@link RawOfficeFloorMetaData}.
-	 */
-	private final RawOfficeFloorMetaData rawOfficeFloorMetaData;
-
-	/**
 	 * Initiate.
 	 * 
 	 * @param officeConfiguration
@@ -87,10 +76,8 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 	 * @param rawOfficeFloorMetaData
 	 *            {@link RawOfficeFloorMetaData}.
 	 */
-	private OfficeEnhancerContextImpl(OfficeConfiguration officeConfiguration,
-			RawOfficeFloorMetaData rawOfficeFloorMetaData) {
+	private OfficeEnhancerContextImpl(OfficeConfiguration officeConfiguration) {
 		this.officeConfiguration = officeConfiguration;
-		this.rawOfficeFloorMetaData = rawOfficeFloorMetaData;
 	}
 
 	/*
@@ -114,30 +101,6 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 					+ "' not available for enhancement");
 		}
 		return flowBuilder;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public <H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
-			String managedObjectSourceName, Class<H> handlerKeys) {
-
-		// Obtain the managed object source
-		RawManagedObjectMetaData<?, ?> rawManagedObjectMetaData = this.rawOfficeFloorMetaData
-				.getRawManagedObjectMetaData(managedObjectSourceName);
-		if (rawManagedObjectMetaData == null) {
-			throw new OfficeEnhancerError("Managed Object Source '"
-					+ managedObjectSourceName
-					+ "' not available for enhancement");
-		}
-
-		// Obtain the managed object handler builder
-		ManagedObjectSourceConfiguration<?, ?> mosConfig = rawManagedObjectMetaData
-				.getManagedObjectSourceConfiguration();
-		ManagedObjectHandlerBuilder<?> handlerBuilder = mosConfig
-				.getHandlerBuilder();
-
-		// Return the managed object handler builder
-		return (ManagedObjectHandlerBuilder<H>) handlerBuilder;
 	}
 
 	/**

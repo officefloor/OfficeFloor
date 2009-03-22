@@ -18,7 +18,6 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -85,13 +84,14 @@ public interface ProcessState extends FlowFuture {
 
 	/**
 	 * Obtains the {@link Escalation} for the {@link EscalationHandler} provided
-	 * by the {@link ManagedObjectSource} {@link Handler}.
+	 * by the {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link Escalation} or <code>null</code> if {@link Handler} did
-	 *         not provide a {@link EscalationHandler} or this
-	 *         {@link ProcessState} not invoked by a {@link Handler}.
+	 * @return {@link Escalation} or <code>null</code> if
+	 *         {@link ManagedObjectSource} did not provide a
+	 *         {@link EscalationHandler} or this {@link ProcessState} was not
+	 *         invoked by a {@link ManagedObjectSource}.
 	 */
-	Escalation getManagedObjectSourceHandlerEscalation();
+	Escalation getManagedObjectSourceEscalation();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link Office}.

@@ -43,8 +43,8 @@ public interface RawManagedObjectMetaDataFactory {
 	 * @return {@link RawManagedObjectMetaDataImpl} or <code>null</code> if
 	 *         issue.
 	 */
-	<D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> RawManagedObjectMetaData<D, H> constructRawManagedObjectMetaData(
-			ManagedObjectSourceConfiguration<H, MS> configuration,
+	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> RawManagedObjectMetaData<D, F> constructRawManagedObjectMetaData(
+			ManagedObjectSourceConfiguration<F, MS> configuration,
 			OfficeFloorIssues issues,
 			OfficeFloorConfiguration officeFloorConfiguration);
 

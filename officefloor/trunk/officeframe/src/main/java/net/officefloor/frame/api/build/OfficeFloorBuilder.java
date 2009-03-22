@@ -39,7 +39,7 @@ public interface OfficeFloorBuilder {
 	 * @param managedObjectSourceClass
 	 *            Class of the {@link ManagedObjectSource}.
 	 */
-	<D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> addManagedObject(
+	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> addManagedObject(
 			String managedObjectSourceName, Class<MS> managedObjectSourceClass);
 
 	/**

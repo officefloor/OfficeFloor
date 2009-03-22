@@ -16,17 +16,19 @@
  */
 package net.officefloor.frame.spi.managedobject.source.impl;
 
-import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.impl.construct.util.ConstructUtil;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
@@ -34,13 +36,13 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourcePropert
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 
 /**
- * Abstract {@link ManagedObjectSource} allowing asynchronous sourcing of a
+ * Abstract {@link ManagedObjectSource} allowing to asynchronously source the
  * {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		implements ManagedObjectSource<D, H> {
+public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F extends Enum<F>>
+		implements ManagedObjectSource<D, F> {
 
 	/*
 	 * ================ ManagedObjectSource ===========================
@@ -145,7 +147,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 	private MetaData metaData = null;
 
 	@Override
-	public void init(ManagedObjectSourceContext<H> context) throws Exception {
+	public void init(ManagedObjectSourceContext<F> context) throws Exception {
 
 		// Create the meta-data
 		this.metaData = new MetaData(context);
@@ -162,20 +164,20 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 	 * @throws Exception
 	 *             If fails to load the meta-data.
 	 */
-	protected abstract void loadMetaData(MetaDataContext<D, H> context)
+	protected abstract void loadMetaData(MetaDataContext<D, F> context)
 			throws Exception;
 
 	/**
 	 * Context for the {@link ManagedObjectSource#getMetaData()}.
 	 */
-	public static interface MetaDataContext<D extends Enum<D>, H extends Enum<H>> {
+	public static interface MetaDataContext<D extends Enum<D>, F extends Enum<F>> {
 
 		/**
 		 * Obtains the {@link ManagedObjectSourceContext}.
 		 * 
 		 * @return {@link ManagedObjectSourceContext}.
 		 */
-		ManagedObjectSourceContext<H> getManagedObjectSourceContext();
+		ManagedObjectSourceContext<F> getManagedObjectSourceContext();
 
 		/**
 		 * Specifies the type of the object returned from the
@@ -196,34 +198,53 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 				Class<? extends ManagedObject> managedObjectClass);
 
 		/**
-		 * <p>
-		 * Obtains the {@link DependencyLoader}.
-		 * <p>
-		 * Calling this overwrites the previous dependencies loaded.
+		 * Adds a required dependency identified by the key.
 		 * 
-		 * @param keys
-		 *            {@link Enum} specifying the dependency keys.
-		 * @return {@link DependencyLoader}.
+		 * @param key
+		 *            {@link Enum} to identify the dependency.
+		 * @param dependencyType
+		 *            Type the dependency is required to extend/implement.
+		 * @return {@link Labeller} to possibly label the required dependency.
 		 */
-		DependencyLoader<D> getDependencyLoader(Class<D> keys);
+		Labeller addDependency(D key, Class<?> dependencyType);
 
 		/**
-		 * <p>
-		 * Obtains the {@link HandlerLoader}.
-		 * <p>
-		 * Calling this overwrites the previous handlers loaded.
+		 * Adds a required dependency identified by an index into the order the
+		 * dependency was added.
 		 * 
-		 * @param keys
-		 *            {@link Enum} specifying the handler keys.
-		 * @return {@link HandlerLoader}.
+		 * @param dependencyType
+		 *            Type the dependency is required to extend/implement.
+		 * @return {@link Labeller} to possibly label the required dependency.
 		 */
-		HandlerLoader<H> getHandlerLoader(Class<H> keys);
+		Labeller addDependency(Class<?> dependencyType);
+
+		/**
+		 * Adds a required {@link Flow} identified by the key.
+		 * 
+		 * @param key
+		 *            {@link Enum} to identify the {@link Flow}.
+		 * @param argumentType
+		 *            Type of argument passed to the {@link Flow}.
+		 * @return {@link Labeller} to possibly label the {@link Flow}.
+		 */
+		Labeller addFlow(F key, Class<?> argumentType);
+
+		/**
+		 * Adds a required {@link Flow} identified by an index into the order
+		 * the {@link Flow} was added.
+		 * 
+		 * @param argumentType
+		 *            Type of argument passed to the {@link Flow}.
+		 * @return {@link Labeller} to possibly label the {@link Flow}.
+		 */
+		Labeller addFlow(Class<?> argumentType);
 
 		/**
 		 * Adds a {@link ManagedObjectExtensionInterfaceMetaData} instance.
 		 * 
 		 * @param interfaceType
-		 *            Interface type.
+		 *            Type of the extension interface supported by the
+		 *            {@link ManagedObject} instances.
 		 * @param extensionInterfaceFactory
 		 *            {@link ExtensionInterfaceFactory}.
 		 */
@@ -232,49 +253,29 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 	}
 
 	/**
-	 * Dependency loader.
+	 * Provides the ability to label the required dependency or {@link Flow}.
 	 */
-	public static interface DependencyLoader<D extends Enum<D>> {
+	public static interface Labeller {
 
 		/**
-		 * Maps in the dependency type for the key.
+		 * Specifies the label.
 		 * 
-		 * @param key
-		 *            Dependency key.
-		 * @param type
-		 *            Type mapped to the dependency.
+		 * @param label
+		 *            Label.
 		 */
-		void mapDependencyType(D key, Class<?> type);
-	}
-
-	/**
-	 * Handler loader.
-	 */
-	public static interface HandlerLoader<H extends Enum<H>> {
-
-		/**
-		 * Maps in the handler type for the key.
-		 * 
-		 * @param key
-		 *            Handler key.
-		 * @param type
-		 *            Type mapped to the handler.
-		 */
-		@SuppressWarnings("unchecked")
-		void mapHandlerType(H key, Class<? extends Handler> type);
+		void setLabel(String label);
 	}
 
 	/**
 	 * Meta-data for the {@link ManagedObjectSource}.
 	 */
-	private class MetaData implements MetaDataContext<D, H>,
-			DependencyLoader<D>, HandlerLoader<H>,
-			ManagedObjectSourceMetaData<D, H> {
+	private class MetaData implements MetaDataContext<D, F>,
+			ManagedObjectSourceMetaData<D, F> {
 
 		/**
 		 * {@link ManagedObjectSourceContext}.
 		 */
-		private final ManagedObjectSourceContext<H> context;
+		private final ManagedObjectSourceContext<F> context;
 
 		/**
 		 * Object {@link Class}.
@@ -288,25 +289,14 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		private Class<? extends ManagedObject> managedObjectClass = ManagedObject.class;
 
 		/**
-		 * {@link Enum} specifying dependency keys.
+		 * {@link ManagedObjectDependencyMetaData} instances.
 		 */
-		private Class<D> dependencyKeys = null;
+		private Map<Integer, ManagedObjectDependencyMetaData<D>> dependencies = new HashMap<Integer, ManagedObjectDependencyMetaData<D>>();
 
 		/**
-		 * Types for each dependency key.
+		 * {@link ManagedObjectFlowMetaData} instances.
 		 */
-		private Map<D, Class<?>> dependencyTypes = null;
-
-		/**
-		 * {@link Enum} specifying handler keys.
-		 */
-		private Class<H> handlerKeys = null;
-
-		/**
-		 * Handler for each handler key.
-		 */
-		@SuppressWarnings("unchecked")
-		private Map<H, Class<? extends Handler>> handlerTypes = null;
+		private Map<Integer, ManagedObjectFlowMetaData<F>> flows = new HashMap<Integer, ManagedObjectFlowMetaData<F>>();
 
 		/**
 		 * {@link ManagedObjectExtensionInterfaceMetaData} instances.
@@ -319,7 +309,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		 * @param context
 		 *            {@link ManagedObjectSourceContext}.
 		 */
-		public MetaData(ManagedObjectSourceContext<H> context) {
+		public MetaData(ManagedObjectSourceContext<F> context) {
 			this.context = context;
 		}
 
@@ -328,7 +318,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		 */
 
 		@Override
-		public ManagedObjectSourceContext<H> getManagedObjectSourceContext() {
+		public ManagedObjectSourceContext<F> getManagedObjectSourceContext() {
 			return this.context;
 		}
 
@@ -344,27 +334,86 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		}
 
 		@Override
-		public DependencyLoader<D> getDependencyLoader(Class<D> keys) {
-
-			// Specify details
-			this.dependencyKeys = keys;
-			this.dependencyTypes = new EnumMap<D, Class<?>>(this.dependencyKeys);
-
-			// Return this to allow loading dependencies
-			return this;
+		public Labeller addDependency(D key, Class<?> dependencyType) {
+			// Use ordinal of key to index the dependency
+			return this.addDependency(key.ordinal(), key, dependencyType);
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
-		public HandlerLoader<H> getHandlerLoader(Class<H> keys) {
+		public Labeller addDependency(Class<?> dependencyType) {
+			// Indexed, so use next index (size will increase with indexing)
+			return this.addDependency(this.dependencies.size(), null,
+					dependencyType);
+		}
 
-			// Specify details
-			this.handlerKeys = keys;
-			this.handlerTypes = new EnumMap<H, Class<? extends Handler>>(
-					this.handlerKeys);
+		/**
+		 * Adds a dependency.
+		 * 
+		 * @param index
+		 *            Index to add the dependency under.
+		 * @param key
+		 *            Key for the dependency. May be <code>null</code>.
+		 * @param dependencyType
+		 *            Type of dependency.
+		 * @return {@link Labeller} for the dependency.
+		 */
+		private Labeller addDependency(int index, D key, Class<?> dependencyType) {
 
-			// Return this to allow loading handlers
-			return this;
+			// Create the dependency meta-data
+			final ManagedObjectDependencyMetaDataImpl<D> dependency = new ManagedObjectDependencyMetaDataImpl<D>(
+					key, dependencyType);
+
+			// Register the dependency at the index
+			this.dependencies.put(new Integer(index), dependency);
+
+			// Return the labeller for the dependency
+			return new Labeller() {
+				@Override
+				public void setLabel(String label) {
+					dependency.setLabel(label);
+				}
+			};
+		}
+
+		@Override
+		public Labeller addFlow(F key, Class<?> argumentType) {
+			// Use ordinal of key to index the handler
+			return this.addFlow(key.ordinal(), key, argumentType);
+		}
+
+		@Override
+		public Labeller addFlow(Class<?> argumentType) {
+			// Indexed, so use next index (size will increase with indexing)
+			return this.addFlow(this.flows.size(), null, argumentType);
+		}
+
+		/**
+		 * Adds a {@link Flow}.
+		 * 
+		 * @param index
+		 *            Index to add the {@link Flow} under.
+		 * @param key
+		 *            Key for the {@link Flow}. May be <code>null</code>.
+		 * @param argumentType
+		 *            Type of the argument passed to the {@link Flow}.
+		 * @return {@link Labeller} for the {@link Flow}.
+		 */
+		private Labeller addFlow(int index, F key, Class<?> argumentType) {
+
+			// Create the flow meta-data
+			final ManagedObjectFlowMetaDataImpl<F> handler = new ManagedObjectFlowMetaDataImpl<F>(
+					key, argumentType);
+
+			// Register the flow at the index
+			this.flows.put(new Integer(index), handler);
+
+			// Return the labeller for the flow
+			return new Labeller() {
+				@Override
+				public void setLabel(String label) {
+					handler.setLabel(label);
+				}
+			};
 		}
 
 		@Override
@@ -374,25 +423,6 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 			this.externsionInterfaces
 					.add(new ManagedObjectExtensionInterfaceMetaDataImpl<I>(
 							interfaceType, extensionInterfaceFactory));
-		}
-
-		/*
-		 * ============== DependencyLoader =========================
-		 */
-
-		@Override
-		public void mapDependencyType(D key, Class<?> type) {
-			this.dependencyTypes.put(key, type);
-		}
-
-		/*
-		 * ============== HandlerLoader =============================
-		 */
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public void mapHandlerType(H key, Class<? extends Handler> type) {
-			this.handlerTypes.put(key, type);
 		}
 
 		/*
@@ -410,25 +440,15 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 		}
 
 		@Override
-		public Class<D> getDependencyKeys() {
-			return this.dependencyKeys;
+		public ManagedObjectDependencyMetaData<D>[] getDependencyMetaData() {
+			return ConstructUtil.toArray(this.dependencies,
+					new ManagedObjectDependencyMetaData[0]);
 		}
 
 		@Override
-		public ManagedObjectDependencyMetaData getDependencyMetaData(D key) {
-			return new ManagedObjectDependencyMetaDataImpl(this.dependencyTypes
-					.get(key));
-		}
-
-		@Override
-		public Class<H> getHandlerKeys() {
-			return this.handlerKeys;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public Class<? extends Handler> getHandlerType(H key) {
-			return this.handlerTypes.get(key);
+		public ManagedObjectFlowMetaData<F>[] getFlowMetaData() {
+			return ConstructUtil.toArray(this.flows,
+					new ManagedObjectFlowMetaData[0]);
 		}
 
 		@Override
@@ -436,68 +456,16 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, H exte
 			return this.externsionInterfaces
 					.toArray(new ManagedObjectExtensionInterfaceMetaData[0]);
 		}
-
 	}
 
 	@Override
-	public ManagedObjectSourceMetaData<D, H> getMetaData() {
+	public ManagedObjectSourceMetaData<D, F> getMetaData() {
 		return this.metaData;
 	}
 
 	@Override
-	public void start(final ManagedObjectExecuteContext<H> context)
-			throws Exception {
-		// Invoke start
-		this.start(new StartContext<H>() {
-			@Override
-			public ManagedObjectExecuteContext<H> getContext(
-					Class<H> handlerKeys) {
-
-				// Ensure the same handler keys
-				if (handlerKeys != AbstractAsyncManagedObjectSource.this
-						.getMetaData().getHandlerKeys()) {
-					throw new IllegalStateException(
-							"Incorrect handler keys [expecting "
-									+ AbstractAsyncManagedObjectSource.this
-											.getMetaData().getHandlerKeys()
-									+ ", actual " + handlerKeys + "]");
-				}
-
-				// Return the execute context
-				return context;
-			}
-		});
-	}
-
-	/**
-	 * Override to provide start functionality.
-	 * 
-	 * @param startContext
-	 *            {@link StartContext}.
-	 * @throws Exception
-	 *             If fails to start.
-	 */
-	protected void start(StartContext<H> startContext) throws Exception {
-		// Do nothing by default
-	}
-
-	/**
-	 * Context for
-	 * {@link AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)}
-	 * .
-	 */
-	public static interface StartContext<H extends Enum<H>> {
-
-		/**
-		 * Obtains the {@link ManagedObjectExecuteContext}.
-		 * 
-		 * @param handlerKeys
-		 *            Keys for the {@link Handler} instances that <b>MUST</b>
-		 *            match {@link ManagedObjectSourceMetaData#getHandlerKeys()}
-		 *            .
-		 * @return {@link ManagedObjectExecuteContext}.
-		 */
-		ManagedObjectExecuteContext<H> getContext(Class<H> handlerKeys);
+	public void start(ManagedObjectExecuteContext<F> context) throws Exception {
+		// Override to provide start functionality
 	}
 
 	/**

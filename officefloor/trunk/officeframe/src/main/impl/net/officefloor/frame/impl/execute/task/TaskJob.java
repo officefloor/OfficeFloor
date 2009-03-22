@@ -22,10 +22,12 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.impl.execute.job.JobExecuteContext;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.WorkContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -49,6 +51,12 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 * is safe to use as a parameter index.
 	 */
 	public static final int PARAMETER_INDEX = -1;
+
+	/**
+	 * {@link ManagedObjectIndex} for the parameter.
+	 */
+	public static final ManagedObjectIndex PARAMETER_MANAGED_OBJECT_INDEX = new ManagedObjectIndexImpl(
+			ManagedObjectScope.WORK, PARAMETER_INDEX);
 
 	/**
 	 * {@link Task} to be done.

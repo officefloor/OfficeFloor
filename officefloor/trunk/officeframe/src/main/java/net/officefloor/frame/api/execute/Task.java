@@ -21,6 +21,8 @@ import net.officefloor.frame.internal.structure.Flow;
 /**
  * Task of the {@link Work}.
  * 
+ * TODO remove P from Task.
+ * 
  * @author Daniel
  */
 public interface Task<P, W extends Work, M extends Enum<M>, F extends Enum<F>> {

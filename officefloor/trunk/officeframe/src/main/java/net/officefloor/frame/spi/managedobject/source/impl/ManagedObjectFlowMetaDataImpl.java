@@ -16,28 +16,29 @@
  */
 package net.officefloor.frame.spi.managedobject.source.impl;
 
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 
 /**
- * Implementation of the {@link ManagedObjectDependencyMetaData}.
+ * {@link ManagedObjectFlowMetaData} implementation.
  * 
  * @author Daniel
  */
-public class ManagedObjectDependencyMetaDataImpl<D extends Enum<D>> implements
-		ManagedObjectDependencyMetaData<D> {
+public class ManagedObjectFlowMetaDataImpl<F extends Enum<F>> implements
+		ManagedObjectFlowMetaData<F> {
 
 	/**
-	 * Key identifying the dependency.
+	 * Key identifying the {@link Flow}.
 	 */
-	private final D key;
+	private final F key;
 
 	/**
-	 * Type of dependency required.
+	 * Type of argument passed to the {@link Flow}.
 	 */
-	private final Class<?> type;
+	private final Class<?> argumentType;
 
 	/**
-	 * Optional label to describe the dependency.
+	 * Optional label to describe the {@link Flow}.
 	 */
 	private String label = null;
 
@@ -45,37 +46,37 @@ public class ManagedObjectDependencyMetaDataImpl<D extends Enum<D>> implements
 	 * Initiate.
 	 * 
 	 * @param key
-	 *            Key identifying the dependency.
-	 * @param type
-	 *            Type of dependency.
+	 *            Key identifying the {@link Flow}.
+	 * @param argumentType
+	 *            Type of argument passed to the {@link Flow}.
 	 */
-	public ManagedObjectDependencyMetaDataImpl(D key, Class<?> type) {
+	public ManagedObjectFlowMetaDataImpl(F key, Class<?> argumentType) {
 		this.key = key;
-		this.type = type;
+		this.argumentType = argumentType;
 	}
 
 	/**
-	 * Specifies a label to describe the dependency.
+	 * Specifies a label to describe the {@link Flow}.
 	 * 
 	 * @param label
-	 *            Label to describe the dependency.
+	 *            Label to describe the {@link Flow}.
 	 */
 	public void setLabel(String label) {
 		this.label = label;
 	}
 
 	/*
-	 * ================= ManagedObjectDependencyMetaData =================
+	 * ==================== ManagedObjectFlowMetaData ======================
 	 */
 
 	@Override
-	public D getKey() {
+	public F getKey() {
 		return this.key;
 	}
 
 	@Override
-	public Class<?> getType() {
-		return this.type;
+	public Class<?> getArgumentType() {
+		return this.argumentType;
 	}
 
 	@Override

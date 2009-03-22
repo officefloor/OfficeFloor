@@ -16,41 +16,37 @@
  */
 package net.officefloor.frame.internal.configuration;
 
-import net.officefloor.frame.api.build.HandlerFactory;
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Configuration of a {@link Handler}.
+ * Configuration of a {@link Flow} instigated by a {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
-public interface HandlerConfiguration<H extends Enum<H>, F extends Enum<F>> {
+public interface ManagedObjectFlowConfiguration<F extends Enum<F>> {
 
 	/**
-	 * Obtains the key linking this {@link Handler} to the
-	 * {@link ManagedObjectSource}.
+	 * Obtains the name to identify this {@link Flow}.
 	 * 
-	 * @return Key linking this {@link Handler} to the
-	 *         {@link ManagedObjectSource}.
+	 * @return Name identifying this {@link Flow}.
 	 */
-	H getHandlerKey();
+	String getFlowName();
 
 	/**
-	 * Obtains the {@link HandlerFactory} for the {@link Handler}.
+	 * Obtains the key for this {@link Flow}.
 	 * 
-	 * @return {@link HandlerFactory}.
+	 * @return Key for this flow. May be <code>null</code> if {@link Flow}
+	 *         instances are {@link Indexed}.
 	 */
-	HandlerFactory<F> getHandlerFactory();
+	F getFlowKey();
 
 	/**
-	 * Obtains the configuration for the processes invoked by the
-	 * {@link Handler}.
+	 * Obtains the {@link TaskNodeReference} for this {@link Flow}.
 	 * 
-	 * @return {@link HandlerFlowConfiguration} specifying the first
-	 *         {@link Task} of the linked process.
+	 * @return {@link TaskNodeReference} to the {@link Flow}.
 	 */
-	HandlerFlowConfiguration<F>[] getLinkedProcessConfiguration();
+	TaskNodeReference getTaskNodeReference();
 
 }

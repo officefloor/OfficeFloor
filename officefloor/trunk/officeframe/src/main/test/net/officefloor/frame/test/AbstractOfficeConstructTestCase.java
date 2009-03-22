@@ -371,6 +371,28 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to register a {@link ManagedObject}.
 	 */
 	protected <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> constructManagedObject(
+			String managedObjectName, Class<MS> managedObjectSourceClass) {
+
+		// Obtain the managed object source name
+		String managedObjectSourceName = "of-" + managedObjectName;
+
+		// Create the Managed Object Builder
+		ManagedObjectBuilder<H> managedObjectBuilder = this
+				.getOfficeFloorBuilder().addManagedObject(
+						managedObjectSourceName, managedObjectSourceClass);
+
+		// Link into the Office
+		this.officeBuilder.registerManagedObjectSource(managedObjectName,
+				managedObjectSourceName);
+
+		// Return the Managed Object Builder
+		return managedObjectBuilder;
+	}
+
+	/**
+	 * Facade method to register a {@link ManagedObject}.
+	 */
+	protected <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectBuilder<H> constructManagedObject(
 			String managedObjectName, Class<MS> managedObjectSourceClass,
 			String managingOffice) {
 

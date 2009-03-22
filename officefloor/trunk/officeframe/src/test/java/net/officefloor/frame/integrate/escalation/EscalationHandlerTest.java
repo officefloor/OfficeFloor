@@ -17,12 +17,9 @@
 package net.officefloor.frame.integrate.escalation;
 
 import junit.framework.AssertionFailedError;
-import net.officefloor.frame.api.build.HandlerBuilder;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.execute.EscalationHandler;
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -112,15 +109,17 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		String officeName = this.getOfficeName();
 
 		// Construct the managed object source
-		ManagedObjectBuilder<EscalationManagedObjectSource.Handlers> moBuilder = this
+		ManagedObjectBuilder<EscalationManagedObjectSource.Flows> moBuilder = this
 				.constructManagedObject("MO",
-						EscalationManagedObjectSource.class, officeName);
-		ManagedObjectHandlerBuilder<EscalationManagedObjectSource.Handlers> moHandlerBuilder = moBuilder
-				.getManagedObjectHandlerBuilder();
-		HandlerBuilder<Indexed> handlerBuilder = moHandlerBuilder
-				.registerHandler(EscalationManagedObjectSource.Handlers.ESCALATE);
-		handlerBuilder.setHandlerFactory(new EscalationManagedObjectSource());
-		handlerBuilder.linkProcess(0, "WORK", "task", String.class);
+						EscalationManagedObjectSource.class);
+
+		// Flag managing office and invocation of flow
+		ManagingOfficeBuilder<EscalationManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
+				.setManagingOffice(officeName);
+		managingOfficeBuilder.setProcessBoundManagedObjectName("MO");
+		managingOfficeBuilder.linkProcess(
+				EscalationManagedObjectSource.Flows.TASK_TO_ESCALATE, "WORK",
+				"task");
 
 		// Construct the work
 		EscalationHandlerWork work = new EscalationHandlerWork(escalation);
@@ -191,7 +190,7 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		 * Task causing an escalation.
 		 * 
 		 * @param parameter
-		 *            Argument passed from the {@link Handler}.
+		 *            Argument passed from the {@link ManagedObjectSource}.
 		 * @throws Throwable
 		 *             Escalation.
 		 */

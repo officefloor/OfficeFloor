@@ -16,11 +16,9 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
-import java.util.Map;
-
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -28,19 +26,18 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel
  */
-public class ManagedObjectSourceInstanceImpl<H extends Enum<H>> implements
-		ManagedObjectSourceInstance<H> {
+public class ManagedObjectSourceInstanceImpl<F extends Enum<F>> implements
+		ManagedObjectSourceInstance<F> {
 
 	/**
 	 * {@link ManagedObjectSource}.
 	 */
-	private final ManagedObjectSource<?, H> managedObjectSource;
+	private final ManagedObjectSource<?, F> managedObjectSource;
 
 	/**
-	 * {@link Handler} instances by their key for the
-	 * {@link ManagedObjectSource}.
+	 * {@link ManagedObjectExecuteContext} for the {@link ManagedObjectSource}.
 	 */
-	private final Map<H, Handler<?>> handlers;
+	private final ManagedObjectExecuteContext<F> managedObjectExecuteContext;
 
 	/**
 	 * {@link ManagedObjectPool}.
@@ -52,17 +49,18 @@ public class ManagedObjectSourceInstanceImpl<H extends Enum<H>> implements
 	 * 
 	 * @param managedObjectSource
 	 *            {@link ManagedObjectSource}.
-	 * @param handlers
-	 *            {@link Handler} instances by their key for the
+	 * @param managedObjectExecuteContext
+	 *            {@link ManagedObjectExecuteContext} for the
 	 *            {@link ManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
 	 */
 	public ManagedObjectSourceInstanceImpl(
-			ManagedObjectSource<?, H> managedObjectSource,
-			Map<H, Handler<?>> handlers, ManagedObjectPool managedObjectPool) {
+			ManagedObjectSource<?, F> managedObjectSource,
+			ManagedObjectExecuteContext<F> managedObjectExecuteContext,
+			ManagedObjectPool managedObjectPool) {
 		this.managedObjectSource = managedObjectSource;
-		this.handlers = handlers;
+		this.managedObjectExecuteContext = managedObjectExecuteContext;
 		this.managedObjectPool = managedObjectPool;
 	}
 
@@ -71,13 +69,13 @@ public class ManagedObjectSourceInstanceImpl<H extends Enum<H>> implements
 	 */
 
 	@Override
-	public ManagedObjectSource<?, H> getManagedObjectSource() {
+	public ManagedObjectSource<?, F> getManagedObjectSource() {
 		return this.managedObjectSource;
 	}
 
 	@Override
-	public Map<H, Handler<?>> getHandlers() {
-		return this.handlers;
+	public ManagedObjectExecuteContext<F> getManagedObjectExecuteContext() {
+		return this.managedObjectExecuteContext;
 	}
 
 	@Override

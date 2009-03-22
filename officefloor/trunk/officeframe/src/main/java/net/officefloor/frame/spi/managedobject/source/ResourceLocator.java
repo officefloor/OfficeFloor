@@ -8,13 +8,10 @@ import java.net.URL;
 
 /**
  * <p>
- * Enables a
- * {@link net.officefloor.frame.spi.managedobject.source.ManagedObjectSource} to
- * access resources to configure itself.
- * </p>
+ * Enables a {@link ManagedObjectSource} to access resources to configure
+ * itself.
  * <p>
- * This is provided by the Office Floor implemenation.
- * </p>
+ * This is provided by the Office Floor implementation.
  * 
  * @author Daniel
  */
@@ -39,4 +36,5 @@ public interface ResourceLocator {
 	 *         will return <code>null</code>.
 	 */
 	URL locateURL(String name);
+
 }

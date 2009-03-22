@@ -16,11 +16,8 @@
  */
 package net.officefloor.frame.internal.construct;
 
-import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -45,6 +42,15 @@ public interface RawBoundManagedObjectMetaData<D extends Enum<D>> {
 	ManagedObjectIndex getManagedObjectIndex();
 
 	/**
+	 * Obtains the {@link RawBoundManagedObjectMetaData} for the dependencies of
+	 * this {@link ManagedObject}.
+	 * 
+	 * @return {@link RawBoundManagedObjectMetaData} for the dependencies of
+	 *         this {@link ManagedObject}
+	 */
+	RawBoundManagedObjectMetaData<?>[] getDependencies();
+
+	/**
 	 * Obtains the {@link RawManagedObjectMetaData}.
 	 * 
 	 * @return {@link RawManagedObjectMetaData}.
@@ -52,40 +58,10 @@ public interface RawBoundManagedObjectMetaData<D extends Enum<D>> {
 	RawManagedObjectMetaData<D, ?> getRawManagedObjectMetaData();
 
 	/**
-	 * Obtains the keys of the dependencies for this {@link ManagedObject}.
+	 * Obtains the {@link ManagedObjectMetaData}.
 	 * 
-	 * @return Keys of the dependencies for this {@link ManagedObject}.
-	 */
-	D[] getDependencyKeys();
-
-	/**
-	 * Obtains the {@link RawBoundManagedObjectMetaData} for the dependency.
-	 * 
-	 * @param dependencyKey
-	 *            Dependency key.
-	 * @return {@link RawBoundManagedObjectMetaData} for the dependency.
-	 */
-	RawBoundManagedObjectMetaData<?> getDependency(D dependencyKey);
-
-	/**
-	 * Obtains the {@link ManagedObjectMetaData} for this
-	 * {@link RawBoundManagedObjectMetaData}.
-	 * 
-	 * @return {@link ManagedObjectMetaData} for this
-	 *         {@link RawBoundManagedObjectMetaData}.
+	 * @return {@link ManagedObjectMetaData}.
 	 */
 	ManagedObjectMetaData<D> getManagedObjectMetaData();
-
-	/**
-	 * Links the {@link TaskMetaData} instances to create {@link Flow} of
-	 * execution.
-	 * 
-	 * @param taskMetaDataLocator
-	 *            {@link OfficeMetaDataLocator}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 */
-	void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
-			OfficeFloorIssues issues);
 
 }

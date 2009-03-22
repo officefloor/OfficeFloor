@@ -318,11 +318,10 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 
 			// Not yet required, so add and include all its dependencies
 			requiredManagedObjectIndexes.add(boundMoIndex);
-			D[] dependencyKeys = boundMo.getDependencyKeys();
-			if (dependencyKeys != null) {
-				for (D dependencyKey : dependencyKeys) {
-					RawBoundManagedObjectMetaData<?> dependency = boundMo
-							.getDependency(dependencyKey);
+			RawBoundManagedObjectMetaData<?>[] dependencies = boundMo
+					.getDependencies();
+			if (dependencies != null) {
+				for (RawBoundManagedObjectMetaData<?> dependency : dependencies) {
 					this.loadRequiredManagedObjects(dependency,
 							requiredManagedObjectIndexes);
 				}

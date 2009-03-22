@@ -16,13 +16,9 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 
 /**
  * Context for the {@link OfficeEnhancer}.
@@ -36,48 +32,28 @@ public interface OfficeEnhancerContext {
 	 * {@link Work} and {@link Task} names.
 	 * 
 	 * @param workName
-	 *            Name of {@link Work}.
+	 *            Name of the {@link Work}.
 	 * @param taskName
-	 *            Name of {@link Task}.
+	 *            Name of the {@link Task}.
 	 * @return {@link FlowNodeBuilder}.
 	 */
 	FlowNodeBuilder<?> getFlowNodeBuilder(String workName, String taskName);
 
 	/**
-	 * Obtains the {@link FlowNodeBuilder} registered under the input
-	 * {@link Work} and {@link Task} names.
-	 * 
-	 * @param namespace
-	 *            Namespace to find the {@link FlowNodeBuilder}. This is
-	 *            generally the {@link ManagedObjectSource} name registered with
-	 *            the {@link OfficeFloorBuilder}.
-	 * @param workName
-	 *            Name of {@link Work}.
-	 * @param taskName
-	 *            Name of {@link Task}.
-	 * @return {@link FlowNodeBuilder}.
-	 */
-	FlowNodeBuilder<?> getFlowNodeBuilder(String namespace, String workName,
-			String taskName);
-
-	/**
-	 * <p>
-	 * Obtains the {@link ManagedObjectHandlerBuilder} for the input
-	 * {@link ManagedObject} id.
-	 * <p>
-	 * It is anticipated that the {@link ManagedObjectSource} is being managed
-	 * by the {@link Office} that this {@link OfficeEnhancer} was added.
+	 * Obtains the {@link FlowNodeBuilder} registered by the
+	 * {@link ManagedObjectSource} under the input {@link Work} and {@link Task}
+	 * names.
 	 * 
 	 * @param managedObjectSourceName
-	 *            Name of the {@link ManagedObjectSource} registered with the
+	 *            {@link ManagedObjectSource} name registered with the
 	 *            {@link OfficeFloorBuilder}.
-	 * @param handlerKeys
-	 *            {@link Enum} specifying the {@link Handler} instances. This
-	 *            MUST match the {@link Enum} from the
-	 *            {@link ManagedObjectSourceMetaData#getHandlerKeys()}.
-	 * @return {@link ManagedObjectHandlerBuilder}.
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @return {@link FlowNodeBuilder}.
 	 */
-	<H extends Enum<H>> ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder(
-			String managedObjectSourceName, Class<H> handlerKeys);
+	FlowNodeBuilder<?> getFlowNodeBuilder(String managedObjectSourceName,
+			String workName, String taskName);
 
 }

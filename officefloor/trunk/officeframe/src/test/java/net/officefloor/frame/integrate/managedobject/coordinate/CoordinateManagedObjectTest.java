@@ -137,7 +137,18 @@ public class CoordinateManagedObjectTest extends
 			// Loads the meta-data
 			context.setManagedObjectClass(CoordinatingManagedObject.class);
 			context.setObjectClass(CoordinatingMo.class);
-			context.getDependencyLoader(CoordinatingDependencyKey.class);
+			context.addDependency(CoordinatingDependencyKey.WORK_ONE,
+					String.class);
+			context.addDependency(CoordinatingDependencyKey.WORK_TWO,
+					String.class);
+			context.addDependency(CoordinatingDependencyKey.THREAD_ONE,
+					String.class);
+			context.addDependency(CoordinatingDependencyKey.THREAD_TWO,
+					String.class);
+			context.addDependency(CoordinatingDependencyKey.PROCESS_ONE,
+					String.class);
+			context.addDependency(CoordinatingDependencyKey.PROCESS_TWO,
+					String.class);
 		}
 
 		@Override

@@ -16,46 +16,33 @@
  */
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-import net.officefloor.frame.api.build.HandlerFactory;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.HandlerContext;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
-import net.officefloor.frame.impl.execute.managedobject.HandlerContextImpl;
-import net.officefloor.frame.internal.configuration.HandlerConfiguration;
-import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
+import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaDataFactory;
-import net.officefloor.frame.internal.construct.RawOfficeManagingManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.internal.structure.FlowMetaData;
+import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
+import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
@@ -66,9 +53,9 @@ import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
  * 
  * @author Daniel
  */
-public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
+public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		implements RawManagedObjectMetaDataFactory,
-		RawManagedObjectMetaData<D, H> {
+		RawManagedObjectMetaData<D, F> {
 
 	/**
 	 * Obtains the {@link RawManagedObjectMetaDataFactory}.
@@ -78,7 +65,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	@SuppressWarnings("unchecked")
 	public static RawManagedObjectMetaDataFactory getFactory() {
 		return new RawManagedObjectMetaDataImpl(null, null, null, null, -1,
-				null, null, false, false, null, null, null, null, null);
+				null, null, false, false, null);
 	}
 
 	/**
@@ -89,17 +76,17 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	/**
 	 * {@link ManagedObjectSourceConfiguration}.
 	 */
-	private final ManagedObjectSourceConfiguration<H, ?> managedObjectSourceConfiguration;
+	private final ManagedObjectSourceConfiguration<F, ?> managedObjectSourceConfiguration;
 
 	/**
 	 * {@link ManagedObjectSource}.
 	 */
-	private final ManagedObjectSource<D, H> managedObjectSource;
+	private final ManagedObjectSource<D, F> managedObjectSource;
 
 	/**
 	 * {@link ManagedObjectSourceMetaData} for the {@link ManagedObjectSource}.
 	 */
-	private final ManagedObjectSourceMetaData<D, H> managedObjectSourceMetaData;
+	private final ManagedObjectSourceMetaData<D, F> managedObjectSourceMetaData;
 
 	/**
 	 * Default timeout for sourcing the {@link ManagedObject} and asynchronous
@@ -128,29 +115,9 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	private final boolean isCoordinating;
 
 	/**
-	 * {@link RawOfficeManagingManagedObjectMetaData}.
+	 * {@link RawManagingOfficeMetaData}.
 	 */
-	private final RawOfficeManagingManagedObjectMetaData rawOfficeManagingManagedObjectMetaData;
-
-	/**
-	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
-	 */
-	private final String recycleWorkName;
-
-	/**
-	 * Class providing the {@link Handler} keys for the {@link ManagedObject}.
-	 */
-	private final Class<H> handlerKeysClass;
-
-	/**
-	 * {@link Handler} keys for the {@link ManagedObjectSource}.
-	 */
-	private final H[] handlerKeys;
-
-	/**
-	 * {@link Handler} instances for the {@link ManagedObjectSource}.
-	 */
-	private Map<H, Handler<?>> handlers;
+	private final RawManagingOfficeMetaDataImpl<F> rawManagingOfficeMetaData;
 
 	/**
 	 * Initiate.
@@ -165,8 +132,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 *            {@link ManagedObjectSourceMetaData} for the
 	 *            {@link ManagedObjectSource}.
 	 * @param defaultTimeout
-	 *            Default timeout for sourcing the {@link ManagedObject} and
-	 *            asynchronous operations on the {@link ManagedObject}.
+	 *            Default timeout for the {@link ManagedObjectSource}.
 	 * @param managedObjectPool
 	 *            {@link ManagedObjectPool}.
 	 * @param objectType
@@ -176,29 +142,18 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	 *            Flag indicating if {@link AsynchronousManagedObject}.
 	 * @param isCoordinating
 	 *            Flag indicating if {@link CoordinatingManagedObject}.
-	 * @param managingOfficeName
-	 *            Name of the managing {@link Office}.
-	 * @param processBoundManagedObjectName
-	 *            Name to bind the {@link ManagedObject} to the
-	 *            {@link ProcessState} of the {@link Office}.
-	 * @param handlerKeysClass
-	 *            Class providing the {@link Handler} keys for the
-	 *            {@link ManagedObject}.
-	 * @param recycleWorkName
-	 *            Name of the {@link Work} to recycle the {@link ManagedObject}.
-	 * @param handlerKeys
-	 *            {@link Handler} keys for the {@link ManagedObjectSource}.
+	 * @param rawManagingOfficeMetaData
+	 *            {@link RawManagingOfficeMetaData}.
 	 */
 	private RawManagedObjectMetaDataImpl(
 			String managedObjectName,
-			ManagedObjectSourceConfiguration<H, ?> managedObjectSourceConfiguration,
-			ManagedObjectSource<D, H> managedObjectSource,
-			ManagedObjectSourceMetaData<D, H> managedObjectSourceMetaData,
+			ManagedObjectSourceConfiguration<F, ?> managedObjectSourceConfiguration,
+			ManagedObjectSource<D, F> managedObjectSource,
+			ManagedObjectSourceMetaData<D, F> managedObjectSourceMetaData,
 			long defaultTimeout, ManagedObjectPool managedObjectPool,
 			Class<?> objectType, boolean isAsynchronous,
-			boolean isCoordinating, String managingOfficeName,
-			String processBoundManagedObjectName, Class<H> handlerKeysClass,
-			H[] handlerKeys, String recycleWorkName) {
+			boolean isCoordinating,
+			RawManagingOfficeMetaDataImpl<F> rawManagingOfficeMetaData) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceConfiguration = managedObjectSourceConfiguration;
 		this.managedObjectSource = managedObjectSource;
@@ -208,11 +163,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		this.objectType = objectType;
 		this.isAsynchronous = isAsynchronous;
 		this.isCoordinating = isCoordinating;
-		this.rawOfficeManagingManagedObjectMetaData = new RawOfficeManagingManagedObjectMetaDataImpl(
-				managingOfficeName, processBoundManagedObjectName, this);
-		this.handlerKeysClass = handlerKeysClass;
-		this.handlerKeys = handlerKeys;
-		this.recycleWorkName = recycleWorkName;
+		this.rawManagingOfficeMetaData = rawManagingOfficeMetaData;
 	}
 
 	/*
@@ -258,44 +209,41 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		// Obtain the properties to initialise the managed object source
 		Properties properties = configuration.getProperties();
 
-		// Obtain the managed object builder
-		ManagedObjectBuilder<h> managedObjectBuilder = configuration
-				.getBuilder();
-
 		// Obtain the managing office for the managed object source
-		ManagingOfficeConfiguration managingOfficeConfiguration = configuration
+		ManagingOfficeConfiguration<h> managingOfficeConfiguration = configuration
 				.getManagingOfficeConfiguration();
 		if (managingOfficeConfiguration == null) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 					"No managing office configuration");
 			return null; // can not carry on
 		}
-		String managingOfficeName = managingOfficeConfiguration.getOfficeName();
-		if (ConstructUtil.isBlank(managingOfficeName)) {
+		String officeName = managingOfficeConfiguration.getOfficeName();
+		if (ConstructUtil.isBlank(officeName)) {
 			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
 					"No managing office specified");
 			return null; // can not carry on
 		}
-		OfficeBuilder managingOfficeBuilder = null;
+		OfficeBuilder officeBuilder = null;
 		for (OfficeConfiguration officeConfiguration : officeFloorConfiguration
 				.getOfficeConfiguration()) {
-			if (managingOfficeName.equals(officeConfiguration.getOfficeName())) {
-				managingOfficeBuilder = officeConfiguration.getBuilder();
+			if (officeName.equals(officeConfiguration.getOfficeName())) {
+				officeBuilder = officeConfiguration.getBuilder();
 			}
 		}
-		if (managingOfficeBuilder == null) {
-			issues
-					.addIssue(AssetType.MANAGED_OBJECT,
-							managedObjectSourceName,
-							"Can not find managing office '"
-									+ managingOfficeName + "'");
+		if (officeBuilder == null) {
+			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+					"Can not find managing office '" + officeName + "'");
 			return null; // can not carry on
 		}
+
+		// Obtain the managing office builder
+		ManagingOfficeBuilder<h> managingOfficeBuilder = managingOfficeConfiguration
+				.getBuilder();
 
 		// Create the context for the managed object source
 		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(
 				managedObjectSourceName, properties, resourceLocator,
-				managedObjectBuilder, managingOfficeBuilder);
+				managingOfficeBuilder, officeBuilder);
 
 		try {
 			// Initialise the managed object source
@@ -356,12 +304,14 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 			return null; // can not carry on
 		}
 
-		// Determine if the managed object requires binding to process of office
-		Class<h> handlerKeysClass = metaData.getHandlerKeys();
-		h[] handlerKeys = this.getEnumConstants(handlerKeysClass);
+		// Obtain the flow meta-data
+		ManagedObjectFlowMetaData<h>[] flowMetaDatas = metaData
+				.getFlowMetaData();
+
+		// Required process bound name if requires flows
 		String processBoundManagedObjectName = null;
-		if (handlerKeys.length > 0) {
-			// Has handlers, so requires to be bound to process of office
+		if (RawManagingOfficeMetaDataImpl.isRequireFlows(flowMetaDatas)) {
+			// Requires handlers, so must be bound to process of office
 			processBoundManagedObjectName = managingOfficeConfiguration
 					.getProcessBoundManagedObjectName();
 			if (ConstructUtil.isBlank(processBoundManagedObjectName)) {
@@ -381,30 +331,23 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 		// Obtain the recycle work name
 		String recycleWorkName = context.getRecycleWorkName();
 
-		// Return the created raw managed object meta data
-		return new RawManagedObjectMetaDataImpl<d, h>(managedObjectSourceName,
-				configuration, managedObjectSource, metaData, defaultTimeout,
-				managedObjectPool, objectType, isManagedObjectAsynchronous,
-				isManagedObjectCoordinating, managingOfficeName,
-				processBoundManagedObjectName, handlerKeysClass, handlerKeys,
-				recycleWorkName);
-	}
+		// Create the raw managing office meta-data
+		RawManagingOfficeMetaDataImpl<h> rawManagingOfficeMetaData = new RawManagingOfficeMetaDataImpl<h>(
+				officeName, processBoundManagedObjectName, recycleWorkName,
+				flowMetaDatas, managingOfficeConfiguration);
 
-	/**
-	 * Provides type safe way to always obtain a constant {@link Enum} array.
-	 * 
-	 * @param enumClass
-	 *            {@link Enum} class. May be <code>null</code>.
-	 * @return {@link Enum} constants.
-	 */
-	@SuppressWarnings("unchecked")
-	private <e extends Enum<e>> e[] getEnumConstants(Class<e> enumClass) {
-		e[] constants = (enumClass != null ? enumClass.getEnumConstants()
-				: null);
-		if (constants == null) {
-			constants = (e[]) new Enum[0];
-		}
-		return constants;
+		// Created raw managed object meta-data
+		RawManagedObjectMetaDataImpl<d, h> rawMoMetaData = new RawManagedObjectMetaDataImpl<d, h>(
+				managedObjectSourceName, configuration, managedObjectSource,
+				metaData, defaultTimeout, managedObjectPool, objectType,
+				isManagedObjectAsynchronous, isManagedObjectCoordinating,
+				rawManagingOfficeMetaData);
+
+		// Make raw managed object available to the raw managing office
+		rawManagingOfficeMetaData.setRawManagedObjectMetaData(rawMoMetaData);
+
+		// Return the raw managed object meta-data
+		return rawMoMetaData;
 	}
 
 	/*
@@ -417,17 +360,17 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	}
 
 	@Override
-	public ManagedObjectSourceConfiguration<H, ?> getManagedObjectSourceConfiguration() {
+	public ManagedObjectSourceConfiguration<F, ?> getManagedObjectSourceConfiguration() {
 		return this.managedObjectSourceConfiguration;
 	}
 
 	@Override
-	public ManagedObjectSource<D, H> getManagedObjectSource() {
+	public ManagedObjectSource<D, F> getManagedObjectSource() {
 		return this.managedObjectSource;
 	}
 
 	@Override
-	public ManagedObjectSourceMetaData<D, H> getManagedObjectSourceMetaData() {
+	public ManagedObjectSourceMetaData<D, F> getManagedObjectSourceMetaData() {
 		return this.managedObjectSourceMetaData;
 	}
 
@@ -457,323 +400,47 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, H extends Enum<H>>
 	}
 
 	@Override
-	public RawOfficeManagingManagedObjectMetaData getManagingOfficeMetaData() {
-		return this.rawOfficeManagingManagedObjectMetaData;
+	public RawManagingOfficeMetaData<F> getRawManagingOfficeMetaData() {
+		return this.rawManagingOfficeMetaData;
 	}
 
 	@Override
-	public String getRecycleWorkName() {
-		return this.recycleWorkName;
-	}
-
-	@Override
-	public H[] getHandlerKeys() {
-		return this.handlerKeys;
-	}
-
-	@Override
-	public void manageByOffice(OfficeMetaDataLocator taskLocator,
+	public ManagedObjectMetaData<D> createManagedObjectMetaData(
+			RawBoundManagedObjectMetaData<D> boundMetaData,
+			ManagedObjectIndex[] dependencyMappings,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
-		// Obtain the handler configurations
-		HandlerConfiguration<H, ?>[] handlerConfigurations = this.managedObjectSourceConfiguration
-				.getHandlerConfiguration();
+		// Obtain the bound name and scope
+		String boundName = boundMetaData.getBoundManagedObjectName();
+		ManagedObjectScope scope = boundMetaData.getManagedObjectIndex()
+				.getManagedObjectScope();
 
-		// Obtain the handler class providing the keys
-		if ((this.handlerKeys == null) || (this.handlerKeys.length == 0)) {
-			// Ensure no handlers configured
-			if (handlerConfigurations.length > 0) {
-				issues
-						.addIssue(
-								AssetType.MANAGED_OBJECT,
-								this.managedObjectName,
-								"Managed Object Source meta-data specifies no handlers but handlers configured for it");
-			}
+		// Create the source managed object asset manager
+		AssetManager sourcingAssetManager = assetManagerFactory
+				.createAssetManager(AssetType.MANAGED_OBJECT, scope + ":"
+						+ boundName, "sourcing", issues);
 
-			// No handlers
-			this.handlers = Collections.emptyMap();
-			return;
+		// Create operations asset manager only if asynchronous
+		AssetManager operationsAssetManager = null;
+		if (this.isAsynchronous) {
+			// Asynchronous so provide operations manager
+			operationsAssetManager = assetManagerFactory.createAssetManager(
+					AssetType.MANAGED_OBJECT, scope + ":" + boundName,
+					"operations", issues);
 		}
 
-		// Obtain the office meta-data
-		OfficeMetaData officeMetaData = taskLocator.getOfficeMetaData();
+		// Create the managed object meta-data
+		ManagedObjectMetaDataImpl<D> moMetaData = new ManagedObjectMetaDataImpl<D>(
+				boundName, this.objectType, this.managedObjectSource,
+				this.managedObjectPool, sourcingAssetManager,
+				this.isAsynchronous, operationsAssetManager,
+				this.isCoordinating, dependencyMappings, this.defaultTimeout);
 
-		// Obtain map of process managed object name to process bound index
-		ManagedObjectMetaData<?>[] moMetaDatas = officeMetaData
-				.getProcessMetaData().getManagedObjectMetaData();
-		Map<String, Integer> processMoNameToIndex = new HashMap<String, Integer>();
-		for (int i = 0; i < moMetaDatas.length; i++) {
-			processMoNameToIndex.put(
-					moMetaDatas[i].getBoundManagedObjectName(), i);
-		}
+		// Have the managed object managed by its managing office
+		this.rawManagingOfficeMetaData.manageManagedObject(moMetaData);
 
-		// Obtain the index of the managed object in the office
-		String processBoundName = this.rawOfficeManagingManagedObjectMetaData
-				.getProcessBoundName();
-		Integer processBoundIndex = processMoNameToIndex.get(processBoundName);
-		if (processBoundIndex == null) {
-			issues.addIssue(AssetType.MANAGED_OBJECT, this.managedObjectName,
-					"Managed Object Source by process bound name '"
-							+ processBoundName + "' not managed by Office "
-							+ officeMetaData.getOfficeName());
-
-			// No handlers
-			this.handlers = Collections.emptyMap();
-			return; // managed object not in office
-		}
-
-		// Obtain the configuration for the handlers
-		Map<H, HandlerConfiguration<H, ?>> handlerConfigurationMap = new EnumMap<H, HandlerConfiguration<H, ?>>(
-				this.handlerKeysClass);
-		for (HandlerConfiguration<H, ?> handlerConfiguration : handlerConfigurations) {
-
-			// Obtain the handler key
-			H handlerKey = handlerConfiguration.getHandlerKey();
-			if (handlerKey == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.managedObjectName, "Handler Key not provided");
-				continue; // must have key
-			}
-			if (!this.handlerKeysClass.isInstance(handlerKey)) {
-				issues
-						.addIssue(
-								AssetType.MANAGED_OBJECT,
-								this.managedObjectName,
-								"Handler key "
-										+ handlerKey
-										+ " is not of type specified by Managed Object Source meta-data ("
-										+ this.handlerKeysClass.getName() + ")");
-				continue; // must be of right type
-			}
-
-			// Load the hander configuration
-			handlerConfigurationMap.put(handlerKey, handlerConfiguration);
-		}
-
-		// Create the handlers
-		Map<H, Handler<?>> handlers = new EnumMap<H, Handler<?>>(
-				this.handlerKeysClass);
-		for (H handlerKey : this.handlerKeysClass.getEnumConstants()) {
-
-			// Obtain the handler configuration
-			HandlerConfiguration<H, ?> configuration = handlerConfigurationMap
-					.get(handlerKey);
-			if (configuration == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.managedObjectName,
-						"No handler configured for key " + handlerKey);
-				continue; // no configuration, no handler
-			}
-
-			// Create the Handler
-			Handler<?> handler = this.createHandler(handlerKey, configuration,
-					officeMetaData, taskLocator, assetManagerFactory,
-					processBoundIndex.intValue(), issues);
-			if (handler == null) {
-				continue; // could not create handler
-			}
-
-			// Register the handler
-			handlers.put(handlerKey, handler);
-		}
-
-		// Specify the handlers
-		this.handlers = handlers;
-	}
-
-	/**
-	 * Create the {@link Handler}.
-	 * 
-	 * @param handlerKey
-	 *            Key identifying the {@link Handler}.
-	 * @param configuration
-	 *            {@link HandlerConfiguration}.
-	 * @param officeMetaData
-	 *            {@link OfficeMetaData}.
-	 * @param taskLocator
-	 *            {@link OfficeMetaDataLocator}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
-	 * @param indexOfManagedObjectInProcessState
-	 *            Index of the {@link ManagedObject} within the
-	 *            {@link ProcessState} of the {@link Office}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 * @return {@link Handler} or <code>null</code> if could not create.
-	 */
-	private <F extends Enum<F>> Handler<F> createHandler(H handlerKey,
-			HandlerConfiguration<H, F> configuration,
-			OfficeMetaData officeMetaData, OfficeMetaDataLocator taskLocator,
-			AssetManagerFactory assetManagerFactory,
-			int indexOfManagedObjectInProcessState, OfficeFloorIssues issues) {
-
-		// Obtain the handler factory
-		HandlerFactory<F> handlerFactory = configuration.getHandlerFactory();
-		if (handlerFactory == null) {
-			issues.addIssue(AssetType.MANAGED_OBJECT, this.managedObjectName,
-					"Handler Factory must be provided for handler key "
-							+ handlerKey);
-			return null; // must have factory
-		}
-
-		// Create the handler
-		Handler<F> handler;
-		try {
-			handler = handlerFactory.createHandler();
-		} catch (Throwable ex) {
-			issues.addIssue(AssetType.MANAGED_OBJECT, this.managedObjectName,
-					"Handler Factory failed creating the Handler (handler key "
-							+ handlerKey + ")", ex);
-			return null; // must create handler
-		}
-		if (handler == null) {
-			issues.addIssue(AssetType.MANAGED_OBJECT, this.managedObjectName,
-					"Handler Factory must create a Handler (handler key "
-							+ handlerKey + ")");
-			return null; // must create handler
-		}
-
-		// Obtain the process links
-		HandlerFlowConfiguration<F>[] flowConfigurations = configuration
-				.getLinkedProcessConfiguration();
-		FlowMetaData<?>[] processLinks = new FlowMetaData[flowConfigurations.length];
-		for (int i = 0; i < processLinks.length; i++) {
-			HandlerFlowConfiguration<F> flowConfiguration = flowConfigurations[i];
-
-			// Obtain the flow name
-			String flowName = flowConfiguration.getFlowName();
-			if (ConstructUtil.isBlank(flowName)) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.managedObjectName,
-						"No flow name provided for flow " + i + " of handler "
-								+ handlerKey);
-				return null; // can not link in flow
-			}
-
-			// Obtain the flow key
-			F flowKey = flowConfiguration.getFlowKey();
-			if (flowKey != null) {
-				// Ensure the flow key's ordinal value matches index
-				if (flowKey.ordinal() != i) {
-					issues.addIssue(AssetType.MANAGED_OBJECT,
-							this.managedObjectName,
-							"Flow keys are out of sync for handler "
-									+ handlerKey);
-					return null; // can not link in flow
-				}
-			}
-
-			// Obtain the flow task
-			TaskNodeReference flowTaskReference = flowConfiguration
-					.getTaskNodeReference();
-			if (flowTaskReference == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.managedObjectName,
-						"No task reference provided on flow " + flowName
-								+ " for handler " + handlerKey);
-				return null; // can not link in flow
-			}
-
-			// Obtain the task meta-data
-			TaskMetaData<?, ?, ?, ?> flowTask = ConstructUtil.getTaskMetaData(
-					flowTaskReference, taskLocator, issues,
-					AssetType.MANAGED_OBJECT, this.managedObjectName, "flow "
-							+ flowName + " of handler " + handlerKey, true);
-			if (flowTask == null) {
-				return null; // can not link in flow
-			}
-
-			// Create and register the flow meta-data
-			processLinks[i] = ConstructUtil.newFlowMetaData(
-					FlowInstigationStrategyEnum.ASYNCHRONOUS, flowTask,
-					assetManagerFactory, AssetType.MANAGED_OBJECT,
-					this.managedObjectName, "Handler " + handlerKey + " Flow "
-							+ i, issues);
-		}
-
-		// Create the handler context
-		HandlerContext<F> context = new HandlerContextImpl<F>(
-				indexOfManagedObjectInProcessState, processLinks,
-				officeMetaData);
-
-		// Provide the handler its context
-		try {
-			handler.setHandlerContext(context);
-		} catch (Throwable ex) {
-			issues.addIssue(AssetType.MANAGED_OBJECT, this.managedObjectName,
-					"Failed to set Handler Context for handler " + handlerKey,
-					ex);
-			return null; // must successfully set context
-		}
-
-		// Return the handler
-		return handler;
-	}
-
-	@Override
-	public Map<H, Handler<?>> getHandlers() {
-		return this.handlers;
-	}
-
-	/**
-	 * {@link RawOfficeManagingManagedObjectMetaData} implementation.
-	 */
-	private static class RawOfficeManagingManagedObjectMetaDataImpl implements
-			RawOfficeManagingManagedObjectMetaData {
-
-		/**
-		 * Name of the managing {@link Office}.
-		 */
-		private final String managingOfficeName;
-
-		/**
-		 * {@link ProcessState} bound name for the {@link ManagedObject} within
-		 * the {@link Office}.
-		 */
-		private final String processBoundName;
-
-		/**
-		 * {@link RawManagedObjectMetaData}.
-		 */
-		private final RawManagedObjectMetaData<?, ?> rawManagedObjectMetaData;
-
-		/**
-		 * Initialise.
-		 * 
-		 * @param managingOfficeName
-		 *            Name of the managing {@link Office}.
-		 * @param processBoundName
-		 *            {@link ProcessState} bound name for the
-		 *            {@link ManagedObject} within the {@link Office}.
-		 * @param rawManagedObjectMetaData
-		 *            {@link RawManagedObjectMetaData}.
-		 */
-		public RawOfficeManagingManagedObjectMetaDataImpl(
-				String managingOfficeName, String processBoundName,
-				RawManagedObjectMetaData<?, ?> rawManagedObjectMetaData) {
-			this.managingOfficeName = managingOfficeName;
-			this.processBoundName = processBoundName;
-			this.rawManagedObjectMetaData = rawManagedObjectMetaData;
-		}
-
-		/*
-		 * =========== RawOfficeManagingManagedObjectMetaData =================
-		 */
-
-		@Override
-		public String getManagingOfficeName() {
-			return this.managingOfficeName;
-		}
-
-		@Override
-		public String getProcessBoundName() {
-			return this.processBoundName;
-		}
-
-		@Override
-		public RawManagedObjectMetaData<?, ?> getRawManagedObjectMetaData() {
-			return this.rawManagedObjectMetaData;
-		}
+		// Return the managed object meta-data
+		return moMetaData;
 	}
 
 }

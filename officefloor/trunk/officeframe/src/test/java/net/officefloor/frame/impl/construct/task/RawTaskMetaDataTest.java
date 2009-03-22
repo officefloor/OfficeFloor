@@ -515,12 +515,11 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	/**
 	 * Ensure able to link in {@link ManagedObject} dependency.
 	 */
-	@SuppressWarnings("unchecked")
 	public void testManagedObjectDependency() {
 
 		final TaskObjectConfiguration moConfiguration = this
 				.createMock(TaskObjectConfiguration.class);
-		final RawBoundManagedObjectMetaData<DependencyKey> rawWorkMo = this
+		final RawBoundManagedObjectMetaData<?> rawWorkMo = this
 				.createMock(RawBoundManagedObjectMetaData.class);
 		final RawManagedObjectMetaData<?, ?> workMo = this
 				.createMock(RawManagedObjectMetaData.class);
@@ -550,14 +549,12 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		this.recordReturn(workMo, workMo.getObjectType(), Connection.class);
 		this.recordReturn(rawWorkMo, rawWorkMo.getManagedObjectIndex(),
 				workMoIndex);
-		this.recordReturn(rawWorkMo, rawWorkMo.getDependencyKeys(),
-				DependencyKey.class.getEnumConstants());
-		this.recordReturn(rawWorkMo,
-				rawWorkMo.getDependency(DependencyKey.KEY), dependencyWorkMo);
+		this.recordReturn(rawWorkMo, rawWorkMo.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { dependencyWorkMo });
 		this.recordReturn(dependencyWorkMo, dependencyWorkMo
 				.getManagedObjectIndex(), dependencyMoIndex);
-		this.recordReturn(dependencyWorkMo, dependencyWorkMo
-				.getDependencyKeys(), null);
+		this.recordReturn(dependencyWorkMo, dependencyWorkMo.getDependencies(),
+				null);
 		this.record_NoAdministration();
 
 		// Attempt to construct task meta-data
@@ -579,13 +576,6 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 		// Ensure can translate
 		assertEquals("Incorrect task managed object", workMoIndex, metaData
 				.getTaskMetaData().translateManagedObjectIndexForWork(0));
-	}
-
-	/**
-	 * Dependency keys.
-	 */
-	private enum DependencyKey {
-		KEY
 	}
 
 	/**
@@ -729,7 +719,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getAdministeredRawBoundManagedObjects(),
 				new RawBoundManagedObjectMetaData[] { rawMo });
 		this.recordReturn(rawMo, rawMo.getManagedObjectIndex(), moIndex);
-		this.recordReturn(rawMo, rawMo.getDependencyKeys(), null);
+		this.recordReturn(rawMo, rawMo.getDependencies(), null);
 		this.recordReturn(this.configuration, this.configuration
 				.getPostTaskAdministratorDutyConfiguration(),
 				new TaskDutyConfiguration[0]);
@@ -761,7 +751,6 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 * Ensures that dependency of administered {@link ManagedObject} is also
 	 * included in required {@link ManagedObjectIndex} instances.
 	 */
-	@SuppressWarnings("unchecked")
 	public void testPostTaskDutyWithAdministeredManagedObjectDependency() {
 
 		final TaskDutyConfiguration<?> dutyConfiguration = this
@@ -770,7 +759,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(RawBoundAdministratorMetaData.class);
 		final AdministratorIndex adminIndex = this
 				.createMock(AdministratorIndex.class);
-		final RawBoundManagedObjectMetaData<DependencyKey> rawMo = this
+		final RawBoundManagedObjectMetaData<?> rawMo = this
 				.createMock(RawBoundManagedObjectMetaData.class);
 		final ManagedObjectIndex moIndex = new ManagedObjectIndexImpl(
 				ManagedObjectScope.THREAD, 0);
@@ -800,14 +789,11 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.getAdministeredRawBoundManagedObjects(),
 				new RawBoundManagedObjectMetaData[] { rawMo });
 		this.recordReturn(rawMo, rawMo.getManagedObjectIndex(), moIndex);
-		this.recordReturn(rawMo, rawMo.getDependencyKeys(), DependencyKey.class
-				.getEnumConstants());
-		this.recordReturn(rawMo, rawMo.getDependency(DependencyKey.KEY),
-				rawDependency);
+		this.recordReturn(rawMo, rawMo.getDependencies(),
+				new RawBoundManagedObjectMetaData[] { rawDependency });
 		this.recordReturn(rawDependency, rawDependency.getManagedObjectIndex(),
 				dependencyIndex);
-		this.recordReturn(rawDependency, rawDependency.getDependencyKeys(),
-				null);
+		this.recordReturn(rawDependency, rawDependency.getDependencies(), null);
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();

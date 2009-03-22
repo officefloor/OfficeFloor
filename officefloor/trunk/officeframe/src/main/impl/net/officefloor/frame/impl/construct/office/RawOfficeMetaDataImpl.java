@@ -50,7 +50,7 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeManagingManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
@@ -213,9 +213,8 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 	@Override
 	public RawOfficeMetaData constructRawOfficeMetaData(
-			OfficeConfiguration configuration,
-			OfficeFloorIssues issues,
-			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
+			OfficeConfiguration configuration, OfficeFloorIssues issues,
+			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects,
 			RawOfficeFloorMetaData rawOfficeFloorMetaData,
 			RawBoundManagedObjectMetaDataFactory rawBoundManagedObjectFactory,
 			RawBoundAdministratorMetaDataFactory rawBoundAdministratorFactory,
@@ -246,7 +245,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Enhance the office
 		OfficeEnhancerContextImpl.enhanceOffice(officeName, configuration,
-				issues, rawOfficeFloorMetaData);
+				issues);
 
 		// Register the teams to office
 		Map<String, Team> officeTeams = new HashMap<String, Team>();
@@ -549,18 +548,15 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			rawWorkMetaData.linkTasks(metaDataLocator,
 					officeAssetManagerFactory, issues);
 		}
-		this.linkTasks(metaDataLocator, threadBoundManagedObjects, issues);
 		this.linkTasks(metaDataLocator, officeAssetManagerFactory,
 				threadBoundAdministrators, issues);
-		this.linkTasks(metaDataLocator, processBoundManagedObjects, issues);
 		this.linkTasks(metaDataLocator, officeAssetManagerFactory,
 				processBoundAdministrators, issues);
 
 		// Have the managed objects managed by the office
-		for (RawOfficeManagingManagedObjectMetaData officeManagingManagedObject : officeManagingManagedObjects) {
-			officeManagingManagedObject.getRawManagedObjectMetaData()
-					.manageByOffice(metaDataLocator, officeAssetManagerFactory,
-							issues);
+		for (RawManagingOfficeMetaData<?> officeManagingManagedObject : officeManagingManagedObjects) {
+			officeManagingManagedObject.manageByOffice(metaDataLocator,
+					officeAssetManagerFactory, issues);
 		}
 
 		// Return the raw office meta-data
@@ -583,25 +579,6 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 					.getManagedObjectMetaData();
 		}
 		return moMetaData;
-	}
-
-	/**
-	 * Links the {@link TaskMetaData} instances into the
-	 * {@link RawBoundManagedObjectMetaData} instances.
-	 * 
-	 * @param taskMetaDataLocator
-	 *            {@link OfficeMetaDataLocator}.
-	 * @param rawBoundManagedObjects
-	 *            {@link RawBoundManagedObjectMetaData} instances.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 */
-	private void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
-			RawBoundManagedObjectMetaData<?>[] rawBoundManagedObjects,
-			OfficeFloorIssues issues) {
-		for (RawBoundManagedObjectMetaData<?> rawBoundManagedObject : rawBoundManagedObjects) {
-			rawBoundManagedObject.linkTasks(taskMetaDataLocator, issues);
-		}
 	}
 
 	/**

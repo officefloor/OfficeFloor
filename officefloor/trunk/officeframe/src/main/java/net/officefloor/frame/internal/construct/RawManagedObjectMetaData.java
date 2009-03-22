@@ -16,13 +16,11 @@
  */
 package net.officefloor.frame.internal.construct;
 
-import java.util.Map;
-
 import net.officefloor.frame.api.build.OfficeFloorIssues;
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
+import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -35,7 +33,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaDat
  * 
  * @author Daniel
  */
-public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> {
+public interface RawManagedObjectMetaData<D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject}.
@@ -45,48 +43,32 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	String getManagedObjectName();
 
 	/**
-	 * Sets up the {@link ManagedObjectSource} to be managed by the
-	 * {@link Office} of the input {@link OfficeMetaDataLocator}.
-	 * 
-	 * @param taskMetaDataLocator
-	 *            {@link OfficeMetaDataLocator} for the {@link Office} managing
-	 *            the {@link ManagedObject}.
-	 * @param assetManagerFactory
-	 *            {@link AssetManagerFactory}.
-	 * @param issues
-	 *            {@link OfficeFloorIssues}.
-	 */
-	void manageByOffice(OfficeMetaDataLocator taskMetaDataLocator,
-			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
-
-	/**
 	 * Obtains the {@link ManagedObjectSourceConfiguration}.
 	 * 
 	 * @return {@link ManagedObjectSourceConfiguration}.
 	 */
-	ManagedObjectSourceConfiguration<H, ?> getManagedObjectSourceConfiguration();
+	ManagedObjectSourceConfiguration<F, ?> getManagedObjectSourceConfiguration();
 
 	/**
 	 * Obtains the {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link ManagedObjectSource}.
 	 */
-	ManagedObjectSource<D, H> getManagedObjectSource();
+	ManagedObjectSource<D, F> getManagedObjectSource();
 
 	/**
 	 * Obtains the {@link ManagedObjectSourceMetaData}.
 	 * 
 	 * @return {@link ManagedObjectSourceMetaData}.
 	 */
-	ManagedObjectSourceMetaData<D, H> getManagedObjectSourceMetaData();
+	ManagedObjectSourceMetaData<D, F> getManagedObjectSourceMetaData();
 
 	/**
-	 * Obtains the default timeout for sourcing the {@link ManagedObject} and
-	 * asynchronous operations.
+	 * Obtains the default timeout for the {@link ManagedObject}.
 	 * 
-	 * @return Default timeout for sourcing the {@link ManagedObject} and
-	 *         asynchronous operations.
+	 * @return Default timeout for the {@link ManagedObject}.
 	 */
+	@Deprecated
 	long getDefaultTimeout();
 
 	/**
@@ -110,6 +92,7 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	 * 
 	 * @return <code>true</code> if {@link AsynchronousManagedObject}.
 	 */
+	@Deprecated
 	boolean isAsynchronous();
 
 	/**
@@ -117,39 +100,37 @@ public interface RawManagedObjectMetaData<D extends Enum<D>, H extends Enum<H>> 
 	 * 
 	 * @return <code>true</code> if {@link CoordinatingManagedObject}.
 	 */
+	@Deprecated
 	boolean isCoordinating();
 
 	/**
-	 * Obtains the {@link RawOfficeManagingManagedObjectMetaData} of the
-	 * {@link Office} managing this {@link ManagedObject}.
+	 * Obtains the {@link RawManagingOfficeMetaData} of the {@link Office}
+	 * managing this {@link ManagedObject}.
 	 * 
-	 * @return {@link RawOfficeManagingManagedObjectMetaData} of the
-	 *         {@link Office} managing this {@link ManagedObject}.
+	 * @return {@link RawManagingOfficeMetaData} of the {@link Office} managing
+	 *         this {@link ManagedObject}.
 	 */
-	RawOfficeManagingManagedObjectMetaData getManagingOfficeMetaData();
+	RawManagingOfficeMetaData<F> getRawManagingOfficeMetaData();
 
 	/**
-	 * Obtains the name of the {@link Work} responsible for recycling this
-	 * {@link ManagedObject}.
+	 * Creates the {@link ManagedObjectMetaData}.
 	 * 
-	 * @return Name of {@link Work} to recycle this {@link ManagedObject} or
-	 *         <code>null</code> if not recycled.
+	 * @param boundMetaData
+	 *            {@link RawBoundManagedObjectMetaData}.
+	 * @param dependencyMappings
+	 *            {@link ManagedObjectIndex} instances identifying the dependent
+	 *            {@link ManagedObject} instances in dependency index order
+	 *            required.
+	 * @param assetManagerFactory
+	 *            {@link AssetManagerFactory} of the {@link Office} using the
+	 *            {@link ManagedObject}.
+	 * @param issues
+	 *            {@link OfficeFloorIssues}.
+	 * @return {@link ManagedObjectMetaData}.
 	 */
-	String getRecycleWorkName();
-
-	/**
-	 * Obtains the {@link Handler} keys for the {@link ManagedObjectSource}.
-	 * 
-	 * @return {@link Handler} keys for the {@link ManagedObjectSource}.
-	 */
-	H[] getHandlerKeys();
-
-	/**
-	 * Obtains the {@link Handler} instances for the {@link ManagedObjectSource}
-	 * by the respective {@link Handler} key.
-	 * 
-	 * @return {@link Handler} instances for the {@link ManagedObjectSource}.
-	 */
-	Map<H, Handler<?>> getHandlers();
+	ManagedObjectMetaData<D> createManagedObjectMetaData(
+			RawBoundManagedObjectMetaData<D> boundMetaData,
+			ManagedObjectIndex[] dependencyMappings,
+			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 }

@@ -16,10 +16,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import java.util.Map;
-
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -27,23 +25,23 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel
  */
-public interface ManagedObjectSourceInstance<H extends Enum<H>> {
+public interface ManagedObjectSourceInstance<F extends Enum<F>> {
 
 	/**
 	 * Obtains the {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link ManagedObjectSource}.
 	 */
-	ManagedObjectSource<?, H> getManagedObjectSource();
+	ManagedObjectSource<?, F> getManagedObjectSource();
 
 	/**
-	 * Obtains the map of {@link Handler} instances for the
+	 * Obtains the {@link ManagedObjectExecuteContext} for the
 	 * {@link ManagedObjectSource}.
 	 * 
-	 * @return Map of {@link Handler} instances for the
+	 * @return {@link ManagedObjectExecuteContext} for the
 	 *         {@link ManagedObjectSource}.
 	 */
-	Map<H, Handler<?>> getHandlers();
+	ManagedObjectExecuteContext<F> getManagedObjectExecuteContext();
 
 	/**
 	 * Obtains the {@link ManagedObjectPool}.

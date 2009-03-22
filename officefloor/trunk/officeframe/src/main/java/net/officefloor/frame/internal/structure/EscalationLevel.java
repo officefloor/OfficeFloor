@@ -17,7 +17,6 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.EscalationHandler;
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -37,8 +36,7 @@ public enum EscalationLevel {
 
 	/**
 	 * {@link ThreadState} invoking {@link EscalationHandler} provided by the
-	 * {@link Handler} of the {@link ManagedObjectSource} triggering the
-	 * {@link ProcessState}.
+	 * {@link ManagedObjectSource} instigating a {@link Flow}.
 	 */
 	MANAGED_OBJECT_SOURCE_HANDLER,
 

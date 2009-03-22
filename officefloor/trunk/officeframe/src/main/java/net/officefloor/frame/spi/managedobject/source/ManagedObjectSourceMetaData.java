@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.spi.managedobject.source;
 
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -25,12 +25,12 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel
  */
-public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H>> {
+public interface ManagedObjectSourceMetaData<D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Obtains the {@link Class} of the {@link ManagedObject} returned from
-	 * {@link ManagedObjectSource#getManagedObject()}.
+	 * Obtains the {@link Class} of the {@link ManagedObject} instances from the
+	 * {@link ManagedObjectSource}.
 	 * <p>
 	 * This is to enable coupled configuration rather than specifying in a
 	 * possibly unrelated configuration file.
@@ -40,7 +40,7 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * specify this. {@link Class} must however be the same given the same
 	 * configuration.
 	 * 
-	 * @return {@link Class} of the {@link ManagedObject} sourced.
+	 * @return {@link Class} of the {@link ManagedObject}.
 	 */
 	Class<? extends ManagedObject> getManagedObjectClass();
 
@@ -56,7 +56,6 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 * {@link ManagedObjectSource#init(ManagedObjectSourceContext)} method to
 	 * specify this. {@link Class} must however be the same given the same
 	 * configuration.
-	 * </p>
 	 * 
 	 * @return The {@link Class} of the object being managed by the
 	 *         {@link ManagedObject}.
@@ -64,52 +63,23 @@ public interface ManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	Class<?> getObjectClass();
 
 	/**
-	 * <p>
-	 * Obtains the {@link Enum} specifying the dependencies for the
-	 * {@link ManagedObject}.
-	 * <p>
-	 * If there are no dependencies return <code>null</code>.
-	 * 
-	 * @return {@link Enum} specifying the dependencies for the
-	 *         {@link ManagedObject}.
-	 */
-	Class<D> getDependencyKeys();
-
-	/**
 	 * Obtains the list of {@link ManagedObjectDependencyMetaData} instances
 	 * should this {@link ManagedObjectSource} provide a
 	 * {@link CoordinatingManagedObject}.
 	 * 
-	 * @return Description of the dependencies for this
+	 * @return Meta-data of the required dependencies for this
 	 *         {@link ManagedObjectSource}.
-	 * @see #getDependencyKeys()
 	 */
-	ManagedObjectDependencyMetaData getDependencyMetaData(D key);
+	ManagedObjectDependencyMetaData<D>[] getDependencyMetaData();
 
 	/**
-	 * <p>
-	 * Obtains the {@link Enum} specifying the {@link Handler} instances
-	 * required.
-	 * <p>
-	 * If there are no {@link Handler} instances required then return
-	 * <code>null</code>.
+	 * Obtains the list of {@link ManagedObjectFlowMetaData} instances should
+	 * this {@link ManagedObjectSource} require instigating a {@link Flow}.
 	 * 
-	 * @return {@link Enum} specifying the {@link Handler} instances required.
+	 * @return Meta-data of {@link Flow} instances instigated by this
+	 *         {@link ManagedObjectSource}.
 	 */
-	Class<H> getHandlerKeys();
-
-	/**
-	 * Obtains the {@link Class} type that the {@link Handler} for the specified
-	 * key must implement.
-	 * 
-	 * @param key
-	 *            Key identifying the {@link Handler}.
-	 * @return {@link Class} type that the {@link Handler} for the specified key
-	 *         must implement.
-	 * @see #getHandlerKeys()
-	 */
-	@SuppressWarnings("unchecked")
-	Class<? extends Handler> getHandlerType(H key);
+	ManagedObjectFlowMetaData<F>[] getFlowMetaData();
 
 	/**
 	 * Obtains the meta-data regarding the extension interfaces that this

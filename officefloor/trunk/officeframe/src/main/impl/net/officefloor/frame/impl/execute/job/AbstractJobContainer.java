@@ -458,7 +458,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							case FLOW:
 								// Obtain the managed object source escalation
 								globalEscalation = processState
-										.getManagedObjectSourceHandlerEscalation();
+										.getManagedObjectSourceEscalation();
 								if (globalEscalation != null) {
 									threadState
 											.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);

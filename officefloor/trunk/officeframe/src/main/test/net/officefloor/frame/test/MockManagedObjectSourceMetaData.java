@@ -16,17 +16,17 @@
  */
 package net.officefloor.frame.test;
 
-import java.util.EnumMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
-
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectDependencyMetaDataImpl;
+import net.officefloor.frame.spi.managedobject.source.impl.ManagedObjectFlowMetaDataImpl;
 
 /**
  * Mock {@link ManagedObjectSourceMetaData}.
@@ -39,33 +39,22 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	/**
 	 * {@link Class} of the {@link ManagedObject}.
 	 */
-	@SuppressWarnings("unchecked")
-	protected final Class managedObjectClass;
+	private final Class<? extends ManagedObject> managedObjectClass;
 
 	/**
 	 * Class of object being managed.
 	 */
-	protected final Class<?> objectClass;
-
-	/**
-	 * Dependency keys.
-	 */
-	protected final Class<D> dependencyKeys;
+	private final Class<?> objectClass;
 
 	/**
 	 * Dependency meta-data.
 	 */
-	protected final Map<D, ManagedObjectDependencyMetaData> dependencyMetaData;
+	private final ManagedObjectDependencyMetaData<D>[] dependencyMetaData;
 
 	/**
-	 * Handler keys.
+	 * {@link Flow} meta-data.
 	 */
-	protected final Class<H> handlerKeys;
-
-	/**
-	 * Handler meta-data.
-	 */
-	protected final Map<H, Class<?>> handlerMetaData;
+	private final ManagedObjectFlowMetaData<H>[] flowMetaData;
 
 	/**
 	 * Initiate from the {@link ManagedObject}.
@@ -82,10 +71,8 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 					+ ex.getMessage());
 			throw new Error("Only for compiling as fail above will throw");
 		}
-		this.dependencyKeys = null;
 		this.dependencyMetaData = null;
-		this.handlerKeys = null;
-		this.handlerMetaData = null;
+		this.flowMetaData = null;
 	}
 
 	/**
@@ -100,33 +87,26 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	public <MO extends ManagedObject> MockManagedObjectSourceMetaData(
 			Class<MO> managedObjectClass, Class<?> objectClass,
 			Class<D> dependencyKeys, Map<D, Class<?>> dependencyClasses,
-			Class<H> handlerKeys, Map<H, Class<?>> handlerClasses) {
+			Class<H> flowKeys, Map<H, Class<?>> flowClasses) {
 		this.managedObjectClass = managedObjectClass;
 		this.objectClass = objectClass;
 
 		// Load the dependency meta-data
-		this.dependencyKeys = dependencyKeys;
-		if (this.dependencyKeys == null) {
-			this.dependencyMetaData = null;
-		} else {
-			this.dependencyMetaData = new EnumMap<D, ManagedObjectDependencyMetaData>(
-					this.dependencyKeys);
-			for (D key : this.dependencyKeys.getEnumConstants()) {
-				this.dependencyMetaData.put(key,
-						new ManagedObjectDependencyMetaDataImpl(
-								dependencyClasses.get(key)));
-			}
+		D[] keysForDependencies = dependencyKeys.getEnumConstants();
+		this.dependencyMetaData = new ManagedObjectDependencyMetaData[keysForDependencies.length];
+		for (int i = 0; i < keysForDependencies.length; i++) {
+			D keyForDependency = keysForDependencies[i];
+			this.dependencyMetaData[i] = new ManagedObjectDependencyMetaDataImpl<D>(
+					keyForDependency, dependencyClasses.get(keyForDependency));
 		}
 
-		// Load the handler meta-data
-		this.handlerKeys = handlerKeys;
-		if (this.handlerKeys == null) {
-			this.handlerMetaData = null;
-		} else {
-			this.handlerMetaData = new EnumMap(this.handlerKeys);
-			for (H key : this.handlerKeys.getEnumConstants()) {
-				this.handlerMetaData.put(key, handlerClasses.get(key));
-			}
+		// Load the flow meta-data
+		H[] keysForHandlers = flowKeys.getEnumConstants();
+		this.flowMetaData = new ManagedObjectFlowMetaData[keysForHandlers.length];
+		for (int i = 0; i < keysForHandlers.length; i++) {
+			H keyForHandler = keysForHandlers[i];
+			this.flowMetaData[i] = new ManagedObjectFlowMetaDataImpl<H>(
+					keyForHandler, flowClasses.get(keyForHandler));
 		}
 	}
 
@@ -135,7 +115,6 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Class<? extends ManagedObject> getManagedObjectClass() {
 		return this.managedObjectClass;
 	}
@@ -146,24 +125,13 @@ public class MockManagedObjectSourceMetaData<D extends Enum<D>, H extends Enum<H
 	}
 
 	@Override
-	public Class<D> getDependencyKeys() {
-		return this.dependencyKeys;
+	public ManagedObjectDependencyMetaData<D>[] getDependencyMetaData() {
+		return this.dependencyMetaData;
 	}
 
 	@Override
-	public ManagedObjectDependencyMetaData getDependencyMetaData(D key) {
-		return this.dependencyMetaData.get(key);
-	}
-
-	@Override
-	public Class<H> getHandlerKeys() {
-		return this.handlerKeys;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public Class<? extends Handler<?>> getHandlerType(H key) {
-		return (Class) this.handlerMetaData.get(key);
+	public ManagedObjectFlowMetaData<H>[] getFlowMetaData() {
+		return this.flowMetaData;
 	}
 
 	@Override

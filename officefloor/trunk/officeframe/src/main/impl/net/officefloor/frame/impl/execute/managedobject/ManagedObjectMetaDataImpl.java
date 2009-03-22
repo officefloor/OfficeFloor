@@ -16,8 +16,6 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
-import java.util.Map;
-
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AssetManager;
@@ -83,9 +81,10 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private final boolean isCoordinatingManagedObject;
 
 	/**
-	 * Mappings for dependencies of this {@link ManagedObject}.
+	 * {@link ManagedObjectIndex} for the dependencies in the index order
+	 * required.
 	 */
-	private final Map<D, ManagedObjectIndex> dependencyMapping;
+	private final ManagedObjectIndex[] dependencyMapping;
 
 	/**
 	 * {@link ManagedObjectPool} of the {@link ManagedObject}.
@@ -146,7 +145,8 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 *            <code>true</code> if the {@link ManagedObject} is
 	 *            {@link CoordinatingManagedObject}.
 	 * @param dependencyMapping
-	 *            Mappings for dependencies of this {@link ManagedObject}.
+	 *            {@link ManagedObjectIndex} for the dependencies in the index
+	 *            order required.
 	 * @param timeout
 	 *            Timeout of an asynchronous operation by the
 	 *            {@link ManagedObject} being managed.
@@ -157,7 +157,7 @@ public class ManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			boolean isManagedObjectAsynchronous,
 			AssetManager operationsManager,
 			boolean isCoordinatingManagedObject,
-			Map<D, ManagedObjectIndex> dependencyMapping, long timeout) {
+			ManagedObjectIndex[] dependencyMapping, long timeout) {
 		this.boundManagedObjectName = boundManagedObjectName;
 		this.objectType = objectType;
 		this.source = source;

@@ -21,7 +21,6 @@ import java.util.List;
 
 import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
@@ -77,10 +76,9 @@ public class ProcessStateImpl implements ProcessState {
 	/**
 	 * {@link EscalationHandlerEscalation} containing the
 	 * {@link EscalationHandler} provided by the {@link ManagedObjectSource}
-	 * {@link Handler} that invoked this {@link ProcessState}. May be
-	 * <code>null</code>.
+	 * that invoked this {@link ProcessState}. May be <code>null</code>.
 	 */
-	private final EscalationHandlerEscalation managedObjectSourceHandlerEscalation;
+	private final EscalationHandlerEscalation managedObjectSourceEscalation;
 
 	/**
 	 * {@link OfficeFloor} {@link Escalation}.
@@ -149,8 +147,8 @@ public class ProcessStateImpl implements ProcessState {
 		// TODO allow configuring the team responsible for MO handling
 		Team team = new PassiveTeam();
 
-		// Escalation handled by managed object source handler
-		this.managedObjectSourceHandlerEscalation = (managedObjectEscalationHandler == null ? null
+		// Escalation handled by managed object source
+		this.managedObjectSourceEscalation = (managedObjectEscalationHandler == null ? null
 				: new EscalationHandlerEscalation(
 						managedObjectEscalationHandler, team));
 	}
@@ -219,8 +217,8 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public Escalation getManagedObjectSourceHandlerEscalation() {
-		return this.managedObjectSourceHandlerEscalation;
+	public Escalation getManagedObjectSourceEscalation() {
+		return this.managedObjectSourceEscalation;
 	}
 
 	@Override

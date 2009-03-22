@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel
  */
-public interface ManagedObjectBuilder<H extends Enum<H>> {
+public interface ManagedObjectBuilder<F extends Enum<F>> {
 
 	/**
 	 * Specifies a property for the {@link ManagedObjectSource}.
@@ -47,8 +47,11 @@ public interface ManagedObjectBuilder<H extends Enum<H>> {
 	void setManagedObjectPool(ManagedObjectPool pool);
 
 	/**
-	 * Specifies the default timeout for asynchronous operations on the
-	 * {@link ManagedObject}.
+	 * Specifies the default timeout to:
+	 * <ol>
+	 * <li>to source the {@link ManagedObject}</li>
+	 * <li>have asynchronous operations on the {@link ManagedObject} complete</li>
+	 * </ol>
 	 * 
 	 * @param timeout
 	 *            Default timeout.
@@ -62,13 +65,6 @@ public interface ManagedObjectBuilder<H extends Enum<H>> {
 	 *            Name of the {@link Office}.
 	 * @return {@link ManagingOfficeBuilder}.
 	 */
-	ManagingOfficeBuilder setManagingOffice(String officeName);
-
-	/**
-	 * Obtains the {@link ManagedObjectHandlerBuilder}.
-	 * 
-	 * @return {@link ManagedObjectHandlerBuilder}.
-	 */
-	ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder();
+	ManagingOfficeBuilder<F> setManagingOffice(String officeName);
 
 }

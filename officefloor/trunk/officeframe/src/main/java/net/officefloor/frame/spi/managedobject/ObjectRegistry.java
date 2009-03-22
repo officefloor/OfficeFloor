@@ -15,12 +15,25 @@ package net.officefloor.frame.spi.managedobject;
 public interface ObjectRegistry<D extends Enum<D>> {
 
 	/**
-	 * Obtains the Object by the dependency key.
+	 * Obtains the dependency {@link Object} for the dependency key.
 	 * 
 	 * @param key
-	 *            Dependency key of the Object to obtain.
-	 * @return Object from the specified {@link ManagedObject}.
+	 *            Key identifying the dependency {@link Object}.
+	 * @return Dependency {@link Object} for the key.
 	 */
 	Object getObject(D key);
+
+	/**
+	 * <p>
+	 * Obtains the dependency {@link Object} by its index.
+	 * <p>
+	 * This enables a dynamic number of dependencies for the
+	 * {@link ManagedObject}.
+	 * 
+	 * @param index
+	 *            Index identifying the dependency {@link Object}.
+	 * @return Dependency {@link Object} for the index.
+	 */
+	Object getObject(int index);
 
 }
