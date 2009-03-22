@@ -22,7 +22,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 
 /**
  * <p>
- * Abstract {@link ManagedObjectSource} that allows synchronous sourcing of a
+ * Abstract {@link ManagedObjectSource} that allows to synchronously source the
  * {@link ManagedObject}.
  * <p>
  * For asynchronous sourcing of a {@link ManagedObject} use
@@ -32,8 +32,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
  * 
  * @author Daniel
  */
-public abstract class AbstractManagedObjectSource<D extends Enum<D>, H extends Enum<H>>
-		extends AbstractAsyncManagedObjectSource<D, H> {
+public abstract class AbstractManagedObjectSource<D extends Enum<D>, F extends Enum<F>>
+		extends AbstractAsyncManagedObjectSource<D, F> {
 
 	/*
 	 * ============= ManagedObjectSource ===================================

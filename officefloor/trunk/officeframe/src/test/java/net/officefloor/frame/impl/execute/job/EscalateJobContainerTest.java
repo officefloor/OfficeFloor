@@ -17,7 +17,6 @@
 package net.officefloor.frame.impl.execute.job;
 
 import net.officefloor.frame.api.execute.EscalationHandler;
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationLevel;
@@ -87,8 +86,8 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensure {@link ManagedObjectSource} {@link Handler}
-	 * {@link EscalationHandler} handles the escalation.
+	 * Ensure {@link ManagedObjectSource} {@link EscalationHandler} handles the
+	 * escalation.
 	 */
 	public void testFailureHandledManagedObjectSourceEscalationHandler() {
 

@@ -18,12 +18,12 @@ package net.officefloor.frame.spi.managedobject.source;
 
 import java.util.Properties;
 
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 
@@ -32,7 +32,7 @@ import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
  * 
  * @author Daniel
  */
-public interface ManagedObjectSourceContext<H extends Enum<H>> {
+public interface ManagedObjectSourceContext<F extends Enum<F>> {
 
 	/**
 	 * Obtains a required property value.
@@ -79,11 +79,37 @@ public interface ManagedObjectSourceContext<H extends Enum<H>> {
 	ResourceLocator getResourceLocator();
 
 	/**
-	 * Obtains the {@link ManagedObjectHandlerBuilder}.
+	 * <p>
+	 * Links in a {@link Flow} by specifying the first {@link Task} of the
+	 * {@link Flow}.
+	 * <p>
+	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link ManagedObjectHandlerBuilder}.
+	 * @param key
+	 *            Key identifying {@link Flow} being invoked by the
+	 *            {@link ManagedObjectSource}.
+	 * @param workName
+	 *            Name of the {@link Work} that the {@link Task} resides on.
+	 * @param taskName
+	 *            Name of {@link Task}.
 	 */
-	ManagedObjectHandlerBuilder<H> getHandlerBuilder();
+	void linkProcess(F key, String workName, String taskName);
+
+	/**
+	 * <p>
+	 * Links in a {@link Flow} by specifying the first {@link Task} of the
+	 * {@link Flow}.
+	 * <p>
+	 * The {@link Task} must be registered by this {@link ManagedObjectSource}.
+	 * 
+	 * @param flowIndex
+	 *            Index identifying the {@link Flow}.
+	 * @param workName
+	 *            Name of the {@link Work} that the {@link Task} resides on.
+	 * @param taskName
+	 *            Name of {@link Task}.
+	 */
+	void linkProcess(int flowIndex, String workName, String taskName);
 
 	/**
 	 * <p>

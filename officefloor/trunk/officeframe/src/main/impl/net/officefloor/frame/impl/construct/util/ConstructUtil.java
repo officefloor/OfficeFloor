@@ -113,7 +113,7 @@ public class ConstructUtil {
 	@SuppressWarnings("unchecked")
 	public static <O> O[] toArray(Map<Integer, ? extends O> map, Object[] type) {
 
-		// Obtain the array size
+		// Obtain the array size (by finding max index)
 		int arraySize = -1;
 		for (Integer key : map.keySet()) {
 			int index = key.intValue();

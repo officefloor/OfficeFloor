@@ -43,6 +43,8 @@ public interface TaskContext<P extends Object, W extends Work, M extends Enum<M>
 	 * 
 	 * @return Parameter for the {@link Task}.
 	 */
+	// TODO obtain parameter via getObject
+	@Deprecated
 	P getParameter();
 
 	/**

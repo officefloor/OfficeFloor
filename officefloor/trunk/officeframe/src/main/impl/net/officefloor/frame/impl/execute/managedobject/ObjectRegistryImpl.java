@@ -16,8 +16,6 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
-import java.util.Map;
-
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -38,9 +36,10 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 	private final WorkContainer<?> workContainer;
 
 	/**
-	 * Map of dependency key to the {@link ManagedObjectIndex}.
+	 * {@link ManagedObjectIndex} for the dependencies in the index order
+	 * required.
 	 */
-	private final Map<D, ManagedObjectIndex> dependencies;
+	private final ManagedObjectIndex[] dependencies;
 
 	/**
 	 * {@link ThreadState} requesting the coordinating of the
@@ -55,34 +54,41 @@ public class ObjectRegistryImpl<D extends Enum<D>> implements ObjectRegistry<D> 
 	 *            {@link WorkContainer} to obtain the coordinating
 	 *            {@link ManagedObject}.
 	 * @param dependencies
-	 *            Map of dependency key to {@link ManagedObjectIndex}.
+	 *            {@link ManagedObjectIndex} for the dependencies in the index
+	 *            order required.
 	 * @param threadState
 	 *            {@link ThreadState} requesting the coordinating of the
 	 *            {@link ManagedObject}. This is used to access the
 	 *            {@link ProcessState} bound {@link ManagedObject} instances.
 	 */
 	public ObjectRegistryImpl(WorkContainer<?> workContainer,
-			Map<D, ManagedObjectIndex> dependencies, ThreadState threadState) {
+			ManagedObjectIndex[] dependencies, ThreadState threadState) {
 		this.workContainer = workContainer;
 		this.dependencies = dependencies;
 		this.threadState = threadState;
 	}
 
 	/*
-	 * ===================== ManagedObjectMetaData ===================
+	 * ===================== ObjectRegistry ===============================
 	 */
 
 	@Override
 	public Object getObject(D key) {
+		return this.getObject(key.ordinal());
+	}
+
+	@Override
+	public Object getObject(int index) {
 
 		// Obtain the managed object index for the dependency
-		ManagedObjectIndex index = this.dependencies.get(key);
+		ManagedObjectIndex moIndex = this.dependencies[index];
 
-		// Obtain the Object
-		Object object = this.workContainer.getObject(index, this.threadState);
+		// Obtain the dependency
+		Object dependency = this.workContainer.getObject(moIndex,
+				this.threadState);
 
-		// Return the Object
-		return object;
+		// Return the dependency
+		return dependency;
 	}
 
 }

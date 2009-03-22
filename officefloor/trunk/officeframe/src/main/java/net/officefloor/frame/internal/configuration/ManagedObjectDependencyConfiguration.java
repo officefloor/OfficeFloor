@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -30,7 +31,8 @@ public interface ManagedObjectDependencyConfiguration<D extends Enum<D>> {
 	 * Obtains the dependency key of the {@link ManagedObject} for which this
 	 * maps the dependent {@link ManagedObject}.
 	 * 
-	 * @return Dependency key.
+	 * @return Dependency key or <code>null</code> if dependencies are
+	 *         {@link Indexed}.
 	 */
 	D getDependencyKey();
 
@@ -42,4 +44,5 @@ public interface ManagedObjectDependencyConfiguration<D extends Enum<D>> {
 	 *         the scope the {@link ManagedObject} is bound.
 	 */
 	String getScopeManagedObjectName();
+
 }

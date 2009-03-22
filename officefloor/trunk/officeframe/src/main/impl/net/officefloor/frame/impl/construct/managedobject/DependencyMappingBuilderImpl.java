@@ -16,11 +16,12 @@
  */
 package net.officefloor.frame.impl.construct.managedobject;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -44,9 +45,9 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	private final String officeManagedObjectName;
 
 	/**
-	 * Listing of {@link ManagedObjectDependencyConfiguration}.
+	 * {@link ManagedObjectDependencyConfiguration} by index of dependency.
 	 */
-	private final List<ManagedObjectDependencyConfiguration<D>> dependencies = new LinkedList<ManagedObjectDependencyConfiguration<D>>();
+	private final Map<Integer, ManagedObjectDependencyConfiguration<D>> dependencies = new HashMap<Integer, ManagedObjectDependencyConfiguration<D>>();
 
 	/**
 	 * Initiate.
@@ -67,17 +68,40 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <d extends Enum<d>> void mapDependency(d key,
+			String scopeManagedObjectName) {
+		// Use ordinal of key to index the dependency
+		this.mapDependency(key.ordinal(), key, scopeManagedObjectName);
+	}
+
+	@Override
+	public void mapDependency(int index, String scopeManagedObjectName) {
+		this.mapDependency(index, (D) null, scopeManagedObjectName);
+	}
+
+	/**
+	 * Maps in the dependency.
+	 * 
+	 * @param index
+	 *            Index to map the dependency under.
+	 * @param key
+	 *            Key for the dependency. May be <code>null</code>.
+	 * @param scopeManagedObjectName
+	 *            Scope name for the {@link ManagedObject}.
+	 */
+	@SuppressWarnings("unchecked")
+	private <d extends Enum<d>> void mapDependency(int index, d key,
 			String scopeManagedObjectName) {
 
 		// Cast key to expected type
 		D castKey = (D) key;
 
-		// Add the dependency
+		// Create the dependency
 		ManagedObjectDependencyConfigurationImpl dependency = new ManagedObjectDependencyConfigurationImpl(
 				castKey, scopeManagedObjectName);
-		this.dependencies.add(dependency);
+
+		// Map the dependency at the index
+		this.dependencies.put(new Integer(index), dependency);
 	}
 
 	/*
@@ -95,10 +119,9 @@ public class DependencyMappingBuilderImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public ManagedObjectDependencyConfiguration<D>[] getDependencyConfiguration() {
-		return this.dependencies
-				.toArray(new ManagedObjectDependencyConfiguration[0]);
+		return ConstructUtil.toArray(this.dependencies,
+				new ManagedObjectDependencyConfiguration[0]);
 	}
 
 	/**

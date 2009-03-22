@@ -41,4 +41,16 @@ public interface DependencyMappingBuilder {
 	 */
 	<D extends Enum<D>> void mapDependency(D key, String scopeManagedObjectName);
 
+	/**
+	 * Specifies the {@link ManagedObject} for the index identifying the
+	 * dependency.
+	 * 
+	 * @param index
+	 *            Index identifying the dependency.
+	 * @param scopeManagedObjectName
+	 *            Name of the {@link ManagedObject} within the scope that this
+	 *            {@link DependencyMappingBuilder} was created.
+	 */
+	void mapDependency(int index, String scopeManagedObjectName);
+
 }

@@ -21,6 +21,7 @@ import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
+import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
@@ -68,10 +69,14 @@ public class EscalationHandlerEscalation implements Escalation {
 		// Create the escalation task
 		EscalationHandlerTask task = new EscalationHandlerTask();
 
+		// Create the dependencies to obtain exception as parameter
+		ManagedObjectIndex[] dependencies = new ManagedObjectIndex[1];
+		dependencies[EscalationKey.EXCEPTION.ordinal()] = TaskJob.PARAMETER_MANAGED_OBJECT_INDEX;
+
 		// Create the escalation task meta-data
-		TaskMetaDataImpl<Throwable, EscalationHandlerTask, None, None> taskMetaData = new TaskMetaDataImpl<Throwable, EscalationHandlerTask, None, None>(
+		TaskMetaDataImpl<Throwable, EscalationHandlerTask, EscalationKey, None> taskMetaData = new TaskMetaDataImpl<Throwable, EscalationHandlerTask, EscalationKey, None>(
 				"Escalation Handler Task", task, Throwable.class, team,
-				new ManagedObjectIndex[0], new ManagedObjectIndex[0],
+				new ManagedObjectIndex[0], dependencies,
 				new TaskDutyAssociation[0], new TaskDutyAssociation[0]);
 
 		// Create the escalation work meta-data (and load to task meta-data)
@@ -111,10 +116,18 @@ public class EscalationHandlerEscalation implements Escalation {
 	}
 
 	/**
+	 * Key identifying the {@link Exception} for the {@link Escalation}.
+	 */
+	private enum EscalationKey {
+		EXCEPTION
+	}
+
+	/**
 	 * {@link Task} to execute the {@link EscalationHandler}.
 	 */
-	private class EscalationHandlerTask extends
-			AbstractSingleTask<Throwable, EscalationHandlerTask, None, None> {
+	private class EscalationHandlerTask
+			extends
+			AbstractSingleTask<Throwable, EscalationHandlerTask, EscalationKey, None> {
 
 		/*
 		 * ================== Task ============================================
@@ -122,11 +135,12 @@ public class EscalationHandlerEscalation implements Escalation {
 
 		@Override
 		public Object doTask(
-				TaskContext<Throwable, EscalationHandlerTask, None, None> context)
+				TaskContext<Throwable, EscalationHandlerTask, EscalationKey, None> context)
 				throws Throwable {
 
 			// Obtain the exception
-			Throwable exception = context.getParameter();
+			Throwable exception = (Throwable) context
+					.getObject(EscalationKey.EXCEPTION);
 
 			// Handle the exception
 			EscalationHandlerEscalation.this.escalationHandler

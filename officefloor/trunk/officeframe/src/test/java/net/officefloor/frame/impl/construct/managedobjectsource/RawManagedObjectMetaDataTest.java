@@ -17,16 +17,10 @@
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import java.io.InputStream;
-import java.util.Map;
 import java.util.Properties;
 
-import org.easymock.AbstractMatcher;
-
-import net.officefloor.frame.api.build.HandlerBuilder;
-import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -35,35 +29,24 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.configuration.HandlerConfiguration;
-import net.officefloor.frame.internal.configuration.HandlerFlowConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
-import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
+import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
-import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.ProcessMetaData;
-import net.officefloor.frame.internal.structure.ProcessState;
-import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
@@ -71,7 +54,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.test.match.TypeMatcher;
 
 /**
  * Tests the creation of a {@link RawManagedObjectMetaDataImpl}.
@@ -124,17 +106,16 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			.createMock(ManagedObjectPool.class);
 
 	/**
-	 * {@link ManagedObjectBuilder}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final ManagedObjectBuilder managedObjectBuilder = this
-			.createMock(ManagedObjectBuilder.class);
-
-	/**
 	 * {@link ManagingOfficeConfiguration}.
 	 */
-	private final ManagingOfficeConfiguration managingOfficeConfiguration = this
+	private final ManagingOfficeConfiguration<?> managingOfficeConfiguration = this
 			.createMock(ManagingOfficeConfiguration.class);
+
+	/**
+	 * {@link ManagingOfficeBuilder}.
+	 */
+	private final ManagingOfficeBuilder<?> managingOfficeBuilder = this
+			.createMock(ManagingOfficeBuilder.class);
 
 	/**
 	 * {@link OfficeConfiguration}.
@@ -147,20 +128,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private final OfficeBuilder officeBuilder = this
 			.createMock(OfficeBuilder.class);
-
-	/**
-	 * {@link ManagedObjectHandlerBuilder}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final ManagedObjectHandlerBuilder<HandlerKey> managedObjectHandlerBuilder = this
-			.createMock(ManagedObjectHandlerBuilder.class);
-
-	/**
-	 * {@link HandlerBuilder}.
-	 */
-	@SuppressWarnings("unchecked")
-	private final HandlerBuilder<Indexed> handlerBuilder = this
-			.createMock(HandlerBuilder.class);
 
 	/**
 	 * {@link WorkBuilder}.
@@ -189,18 +156,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	private final TaskFactory<Object, Work, None, Indexed> taskFactory = this
 			.createMock(TaskFactory.class);
-
-	/**
-	 * {@link OfficeMetaDataLocator}.
-	 */
-	private final OfficeMetaDataLocator taskMetaDataLocator = this
-			.createMock(OfficeMetaDataLocator.class);
-
-	/**
-	 * {@link OfficeMetaData}.
-	 */
-	private final OfficeMetaData officeMetaData = this
-			.createMock(OfficeMetaData.class);
 
 	/*
 	 * (non-Javadoc)
@@ -283,8 +238,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.getManagedObjectSourceClass(), MockManagedObjectSource.class);
 		this.recordReturn(this.configuration, this.configuration
 				.getProperties(), new Properties());
-		this.recordReturn(this.configuration, this.configuration.getBuilder(),
-				this.managedObjectBuilder);
 		this.recordReturn(this.configuration, this.configuration
 				.getManagingOfficeConfiguration(), null);
 		this.record_issue("No managing office configuration");
@@ -307,8 +260,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.getManagedObjectSourceClass(), MockManagedObjectSource.class);
 		this.recordReturn(this.configuration, this.configuration
 				.getProperties(), new Properties());
-		this.recordReturn(this.configuration, this.configuration.getBuilder(),
-				this.managedObjectBuilder);
 		this.recordReturn(this.configuration, this.configuration
 				.getManagingOfficeConfiguration(),
 				this.managingOfficeConfiguration);
@@ -334,8 +285,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.getManagedObjectSourceClass(), MockManagedObjectSource.class);
 		this.recordReturn(this.configuration, this.configuration
 				.getProperties(), new Properties());
-		this.recordReturn(this.configuration, this.configuration.getBuilder(),
-				this.managedObjectBuilder);
 		this.recordReturn(this.configuration, this.configuration
 				.getManagingOfficeConfiguration(),
 				this.managingOfficeConfiguration);
@@ -464,6 +413,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoProcessBoundName() {
 
+		ManagedObjectFlowMetaData<?> flowMetaData = this
+				.createMock(ManagedObjectFlowMetaData.class);
+
 		// Record no process bound name
 		this.record_initManagedObject();
 		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
@@ -472,8 +424,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				ManagedObject.class);
 		this.recordReturn(this.configuration, this.configuration
 				.getDefaultTimeout(), 0);
-		this.recordReturn(this.metaData, this.metaData.getHandlerKeys(),
-				HandlerKey.class);
+		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
+				new ManagedObjectFlowMetaData[] { flowMetaData });
 		this.recordReturn(this.managingOfficeConfiguration,
 				this.managingOfficeConfiguration
 						.getProcessBoundManagedObjectName(), null);
@@ -501,7 +453,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.workBuilder, this.workBuilder.addTask(TASK_NAME,
 				this.taskFactory), this.taskBuilder);
 		this.workBuilder.setInitialTask(TASK_NAME);
-		this.record_createRawMetaData(ManagedObject.class, null, null);
+		this.record_createRawMetaData(ManagedObject.class, null);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -509,37 +461,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		MockManagedObjectSource.addTaskName = "TASK";
 		this.constructRawManagedObjectMetaData(true);
 		this.verifyMockObjects();
-	}
-
-	/**
-	 * Ensures able add the recycle {@link Task}.
-	 */
-	public void testRecycleTask() {
-
-		String recycleWorkName = MANAGED_OBJECT_NAME
-				+ "."
-				+ ManagedObjectSourceContextImpl.MANAGED_OBJECT_CLEAN_UP_WORK_NAME;
-		String recycleTaskName = MANAGED_OBJECT_NAME + ".TASK";
-
-		// Record adding the recycle task
-		this.record_initManagedObject();
-		this.recordReturn(this.officeBuilder, this.officeBuilder.addWork(
-				recycleWorkName, this.workFactory), this.workBuilder);
-		this.recordReturn(this.workBuilder, this.workBuilder.addTask(
-				recycleTaskName, this.taskFactory), this.taskBuilder);
-		this.workBuilder.setInitialTask(recycleTaskName);
-		this.record_createRawMetaData(ManagedObject.class, null, null);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.recycleWorkFactory = this.workFactory;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.constructRawManagedObjectMetaData(true);
-		this.verifyMockObjects();
-
-		// Verify the recycle name is correct
-		assertEquals("Incorrect recycle work name", recycleWorkName,
-				rawMetaData.getRecycleWorkName());
 	}
 
 	/**
@@ -553,7 +474,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record registering a start up task
 		this.record_initManagedObject();
 		this.officeBuilder.addStartupTask(STARTUP_WORK_NAME, STARTUP_TASK_NAME);
-		this.record_createRawMetaData(ManagedObject.class, null, null);
+		this.record_createRawMetaData(ManagedObject.class, null);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -567,16 +488,24 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 * Ensures able to handle plain {@link ManagedObject} (ie not
 	 * {@link AsynchronousManagedObject} or {@link CoordinatingManagedObject}).
 	 */
+	@SuppressWarnings("unchecked")
 	public void testPlainManagedObject() {
+
+		final RawBoundManagedObjectMetaData<?> boundMetaData = this
+				.createMock(RawBoundManagedObjectMetaData.class);
 
 		// Record plain managed object
 		this.record_initManagedObject();
-		this.record_createRawMetaData(ManagedObject.class, null, null);
+		this.record_createRawMetaData(ManagedObject.class, null);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
+		RawManagedObjectMetaData rawMetaData = this
 				.constructRawManagedObjectMetaData(true);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData
+				.createManagedObjectMetaData(boundMetaData,
+						new ManagedObjectIndex[0], this.assetManagerFactory,
+						this.issues);
 		this.verifyMockObjects();
 
 		// Verify the content of the raw meta data
@@ -589,671 +518,79 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.getManagedObjectSource() instanceof MockManagedObjectSource));
 		assertEquals("Incorrect source meta-data", this.metaData, rawMetaData
 				.getManagedObjectSourceMetaData());
-		assertEquals("Incorrect default timeout", 0, rawMetaData
-				.getDefaultTimeout());
-		assertFalse("Should not be asynchronous", rawMetaData.isAsynchronous());
-		assertFalse("Should not be coordinating", rawMetaData.isCoordinating());
 		assertEquals("Incorrect managed object pool", this.managedObjectPool,
 				rawMetaData.getManagedObjectPool());
 		assertEquals("Ensure round trip managing office details", rawMetaData,
-				rawMetaData.getManagingOfficeMetaData()
+				rawMetaData.getRawManagingOfficeMetaData()
 						.getRawManagedObjectMetaData());
-		assertEquals("Should not have handler keys", 0, rawMetaData
-				.getHandlerKeys().length);
+
+		// Verify managed object meta-data
+		assertEquals("Incorrect timeout", 0, moMetaData.getTimeout());
+		assertFalse("Should not be asynchronous", moMetaData
+				.isManagedObjectAsynchronous());
+		assertFalse("Should not be coordinating", moMetaData
+				.isCoordinatingManagedObject());
+		// TODO verify the source asset manager
+		assertNull("Not asynchronous so no operations asset manager",
+				moMetaData.getOperationsManager());
+		// TODO verify other details of managed object meta-data
 	}
 
 	/**
 	 * Ensures flag asynchronous for {@link AsynchronousManagedObject}.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testAsynchronousManagedObject() {
+
+		final RawBoundManagedObjectMetaData<?> boundMetaData = this
+				.createMock(RawBoundManagedObjectMetaData.class);
 
 		// Record asynchronous managed object
 		this.record_initManagedObject();
-		this.record_createRawMetaData(AsynchronousManagedObject.class, null,
-				null);
+		this.record_createRawMetaData(AsynchronousManagedObject.class, null);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
+		RawManagedObjectMetaData rawMetaData = this
 				.constructRawManagedObjectMetaData(true);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData
+				.createManagedObjectMetaData(boundMetaData,
+						new ManagedObjectIndex[0], this.assetManagerFactory,
+						this.issues);
 		this.verifyMockObjects();
 
-		// Verify flagged as asynchronous
-		assertTrue("Should be asynchronous", rawMetaData.isAsynchronous());
+		// Verify is asynchronous with operations manager
+		assertTrue("Should be asynchronous", moMetaData
+				.isManagedObjectAsynchronous());
+		// TODO verify the operations asset manager
 	}
 
 	/**
 	 * Ensures flag coordinating for {@link CoordinatingManagedObject}.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testCoordinatingManagedObject() {
+
+		final RawBoundManagedObjectMetaData<?> boundMetaData = this
+				.createMock(RawBoundManagedObjectMetaData.class);
 
 		// Record coordinating managed object
 		this.record_initManagedObject();
-		this.record_createRawMetaData(CoordinatingManagedObject.class, null,
-				null);
+		this.record_createRawMetaData(CoordinatingManagedObject.class, null);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
+		RawManagedObjectMetaData rawMetaData = this
 				.constructRawManagedObjectMetaData(true);
+		ManagedObjectMetaData<?> moMetaData = rawMetaData
+				.createManagedObjectMetaData(boundMetaData,
+						new ManagedObjectIndex[0], this.assetManagerFactory,
+						this.issues);
 		this.verifyMockObjects();
 
 		// Verify flagged as coordinating
-		assertTrue("Should be coordinating", rawMetaData.isCoordinating());
-	}
-
-	/**
-	 * Ensures issues if {@link Handler} instances configured but no
-	 * {@link Handler} instances required.
-	 */
-	public void testNoHandlersButHandlersConfigured() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-
-		// Record handlers configured but none required
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, null, null);
-		this.recordReturn(this.configuration, this.configuration
-				.getHandlerConfiguration(),
-				new HandlerConfiguration[] { handlerConfiguration });
-		this
-				.record_issue("Managed Object Source meta-data specifies no handlers but handlers configured for it");
-
-		// Attempt to construct managed object and have it managed
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issues if {@link ManagedObject} is not managed by the
-	 * {@link Office}.
-	 */
-	public void testNotManagedByOffice() {
-
-		final OfficeMetaData officeMetaData = this
-				.createMock(OfficeMetaData.class);
-		final ProcessMetaData processMetaData = this
-				.createMock(ProcessMetaData.class);
-
-		// Record managed object not managed by office
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.recordReturn(this.configuration, this.configuration
-				.getHandlerConfiguration(), new HandlerConfiguration[0]);
-		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
-				.getOfficeMetaData(), officeMetaData);
-		this.recordReturn(officeMetaData, officeMetaData.getProcessMetaData(),
-				processMetaData);
-		this.recordReturn(processMetaData, processMetaData
-				.getManagedObjectMetaData(), new ManagedObjectMetaData[0]);
-		this.recordReturn(officeMetaData, officeMetaData.getOfficeName(),
-				"OFFICE");
-		this
-				.record_issue("Managed Object Source by process bound name 'BOUND_MO' not managed by Office OFFICE");
-
-		// Attempt to construct managed object and have it managed
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issue if no {@link Handler} key from the
-	 * {@link HandlerConfiguration}.
-	 */
-	public void testNoHandlerKey() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-
-		// Record no handler key for handler configuration
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.recordReturn(this.configuration, this.configuration
-				.getHandlerConfiguration(),
-				new HandlerConfiguration[] { handlerConfiguration });
-		this.record_bindToProcess("BOUND_MO");
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerKey(), null);
-		this.record_issue("Handler Key not provided");
-		this.record_issue("No handler configured for key " + HandlerKey.KEY);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issue if configured {@link Handler} key is not of correct type.
-	 */
-	public void testWrongHandlerKeyType() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-
-		// Record wrong handler key type
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.recordReturn(this.configuration, this.configuration
-				.getHandlerConfiguration(),
-				new HandlerConfiguration[] { handlerConfiguration });
-		this.record_bindToProcess("BOUND_MO");
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerKey(), WrongHandlerKeyType.WRONG_KEY);
-		this
-				.record_issue("Handler key "
-						+ WrongHandlerKeyType.WRONG_KEY
-						+ " is not of type specified by Managed Object Source meta-data ("
-						+ HandlerKey.class.getName() + ")");
-		this.record_issue("No handler configured for key " + HandlerKey.KEY);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * {@link Handler} key of wrong type.
-	 */
-	private enum WrongHandlerKeyType {
-		WRONG_KEY
-	};
-
-	/**
-	 * Ensures issue if no {@link Handler} is configured.
-	 */
-	public void testNoHandlerConfigured() {
-
-		// Record no handler configured
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.recordReturn(this.configuration, this.configuration
-				.getHandlerConfiguration(), new HandlerConfiguration[0]);
-		this.record_bindToProcess("BOUND_MO");
-		this.record_issue("No handler configured for key " + HandlerKey.KEY);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issue if no {@link HandlerFactory}.
-	 */
-	public void testNoHandlerFactory() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-
-		// Record no handler factory
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.recordReturn(this.configuration, this.configuration
-				.getHandlerConfiguration(),
-				new HandlerConfiguration[] { handlerConfiguration });
-		this.record_bindToProcess("BOUND_MO");
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerKey(), HandlerKey.KEY);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerFactory(), null);
-		this.record_issue("Handler Factory must be provided for handler key "
-				+ HandlerKey.KEY);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issue if the {@link HandlerFactory} does not create a
-	 * {@link Handler}.
-	 */
-	public void testHandlerNotCreated() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-		final HandlerFactory<?> handlerFactory = this
-				.createMock(HandlerFactory.class);
-
-		// Record no handler factory
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.recordReturn(this.configuration, this.configuration
-				.getHandlerConfiguration(),
-				new HandlerConfiguration[] { handlerConfiguration });
-		this.record_bindToProcess("BOUND_MO");
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerKey(), HandlerKey.KEY);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerFactory(), handlerFactory);
-		this.recordReturn(handlerFactory, handlerFactory.createHandler(), null);
-		this.record_issue("Handler Factory must create a Handler (handler key "
-				+ HandlerKey.KEY + ")");
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issue if the {@link HandlerFactory} fails in creating the
-	 * {@link Handler}.
-	 */
-	public void testHandlerCreationFailure() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-		final HandlerFactory<?> handlerFactory = this
-				.createMock(HandlerFactory.class);
-		final RuntimeException createFailure = new RuntimeException(
-				"Create failure");
-
-		// Record no handler factory
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.recordReturn(this.configuration, this.configuration
-				.getHandlerConfiguration(),
-				new HandlerConfiguration[] { handlerConfiguration });
-		this.record_bindToProcess("BOUND_MO");
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerKey(), HandlerKey.KEY);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerFactory(), handlerFactory);
-		this.control(handlerFactory).expectAndThrow(
-				handlerFactory.createHandler(), createFailure);
-		this.record_issue(
-				"Handler Factory failed creating the Handler (handler key "
-						+ HandlerKey.KEY + ")", createFailure);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issue if no {@link Flow} name for {@link Handler}.
-	 */
-	public void testNoFlowName() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-		final HandlerFlowConfiguration<?> flowConfiguration = this
-				.createMock(HandlerFlowConfiguration.class);
-
-		// Record no flow name for handler
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.record_manageByOfficeAndCreateHandler("BOUND_MO",
-				handlerConfiguration);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getLinkedProcessConfiguration(),
-				new HandlerFlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowName(),
-				null);
-		this.record_issue("No flow name provided for flow 0 of handler "
-				+ HandlerKey.KEY);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issue {@link Flow} key out of sync.
-	 */
-	public void testFlowKeyOutOfSync() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-		final HandlerFlowConfiguration<?> flowConfiguration = this
-				.createMock(HandlerFlowConfiguration.class);
-
-		// Record no flow name for handler
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.record_manageByOfficeAndCreateHandler("BOUND_MO",
-				handlerConfiguration);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getLinkedProcessConfiguration(),
-				new HandlerFlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowName(),
-				"FLOW");
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(),
-				OutOfSyncFlowKey.OUT_OF_SYNC_KEY);
-		this.record_issue("Flow keys are out of sync for handler "
-				+ HandlerKey.KEY);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * {@link Flow} key that is out of sync for {@link Handler}.
-	 */
-	private enum OutOfSyncFlowKey {
-		IN_SYNC_KEY, OUT_OF_SYNC_KEY
-	}
-
-	/**
-	 * Ensures issue no {@link TaskNodeReference} for the {@link Flow}.
-	 */
-	public void testFlowTaskReference() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-		final HandlerFlowConfiguration<?> flowConfiguration = this
-				.createMock(HandlerFlowConfiguration.class);
-
-		// Record no flow name for handler
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.record_manageByOfficeAndCreateHandler("BOUND_MO",
-				handlerConfiguration);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getLinkedProcessConfiguration(),
-				new HandlerFlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowName(),
-				"FLOW");
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(),
-				null);
-		this.recordReturn(flowConfiguration, flowConfiguration
-				.getTaskNodeReference(), null);
-		this
-				.record_issue("No task reference provided on flow FLOW for handler "
-						+ HandlerKey.KEY);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issue if no {@link TaskMetaData} for the {@link Flow}.
-	 */
-	public void testNoFlowTask() {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-		final HandlerFlowConfiguration<?> flowConfiguration = this
-				.createMock(HandlerFlowConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
-
-		// Record no flow name for handler
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		this.record_manageByOfficeAndCreateHandler("BOUND_MO",
-				handlerConfiguration);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getLinkedProcessConfiguration(),
-				new HandlerFlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowName(),
-				"FLOW");
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(),
-				null);
-		this.recordReturn(flowConfiguration, flowConfiguration
-				.getTaskNodeReference(), taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
-				"WORK");
-		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
-				"TASK");
-		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
-				.getTaskMetaData("WORK", "TASK"), null);
-		this
-				.record_issue("Can not find task meta-data (work=WORK, task=TASK) for flow FLOW of handler "
-						+ HandlerKey.KEY);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures issue if fails to set the {@link HandlerContext}.
-	 */
-	public void testFailSettingHandlerContext() throws Exception {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-		Error handlerFailure = new Error("Set Handler Context Failure");
-
-		// Record fail to set handler context
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		Handler<?> handler = this.record_manageByOfficeAndCreateHandler(
-				"BOUND_MO", handlerConfiguration);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getLinkedProcessConfiguration(),
-				new HandlerFlowConfiguration[0]);
-		handler.setHandlerContext(null);
-		this.control(handler).setMatcher(new TypeMatcher(HandlerContext.class));
-		this.control(handler).expectAndThrow(null, handlerFailure);
-		this.record_issue("Failed to set Handler Context for handler "
-				+ HandlerKey.KEY, handlerFailure);
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be no handlers", 0, handlers.size());
-	}
-
-	/**
-	 * Ensures {@link HandlerContext} contains correct details.
-	 */
-	public void testHandlerContextCorrect() throws Exception {
-
-		final HandlerConfiguration<?, ?> handlerConfiguration = this
-				.createMock(HandlerConfiguration.class);
-		final HandlerFlowConfiguration<?> flowConfiguration = this
-				.createMock(HandlerFlowConfiguration.class);
-		final TaskNodeReference taskNodeReference = this
-				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
-				.createMock(TaskMetaData.class);
-		final AssetManager assetManager = this.createMock(AssetManager.class);
-		final Object parameter = new Object();
-		final ManagedObject managedObject = this
-				.createMock(ManagedObject.class);
-		final JobNode jobNode = this.createMock(JobNode.class);
-
-		// Record no flow name for handler
-		this.record_initManagedObject();
-		this.record_registerHandler();
-		this.record_createRawMetaData(ManagedObject.class, HandlerKey.class,
-				"BOUND_MO");
-		Handler<?> handler = this.record_manageByOfficeAndCreateHandler(
-				"BOUND_MO", handlerConfiguration);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getLinkedProcessConfiguration(),
-				new HandlerFlowConfiguration[] { flowConfiguration });
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowName(),
-				"FLOW");
-		this.recordReturn(flowConfiguration, flowConfiguration.getFlowKey(),
-				null);
-		this.recordReturn(flowConfiguration, flowConfiguration
-				.getTaskNodeReference(), taskNodeReference);
-		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
-				"WORK");
-		this.recordReturn(taskNodeReference, taskNodeReference.getTaskName(),
-				"TASK");
-		this.recordReturn(taskNodeReference, taskNodeReference
-				.getArgumentType(), String.class);
-		this.recordReturn(taskMetaData, taskMetaData.getParameterType(),
-				Object.class);
-		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
-				.getTaskMetaData("WORK", "TASK"), taskMetaData);
-		this.recordReturn(this.assetManagerFactory, this.assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT,
-						MANAGED_OBJECT_NAME, "Handler " + HandlerKey.KEY
-								+ " Flow 0", this.issues), assetManager);
-		handler.setHandlerContext(null);
-		this.control(handler).setMatcher(new AbstractMatcher() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public boolean matches(Object[] expected, Object[] actual) {
-				// Invoke the process to validate details
-				HandlerContext<HandlerKey> handlerContext = (HandlerContext<HandlerKey>) actual[0];
-				handlerContext.invokeProcess(HandlerKey.KEY, parameter,
-						managedObject);
-				return true;
-			}
-		});
-		this.recordReturn(this.officeMetaData, this.officeMetaData
-				.createProcess(null, parameter, managedObject, 0, null),
-				jobNode, new AbstractMatcher() {
-					@Override
-					public boolean matches(Object[] expected, Object[] actual) {
-						FlowMetaData<?> flowMetaData = (FlowMetaData<?>) actual[0];
-						assertEquals("Incorrect parameter", parameter,
-								actual[1]);
-						assertEquals("Incorrect managed object", managedObject,
-								actual[2]);
-						assertEquals("Incorrect process index", 0, actual[3]);
-						assertNull("Should not have escalation handler",
-								actual[4]);
-
-						// Validate flow meta-data
-						assertEquals("Incorrect task meta-data", taskMetaData,
-								flowMetaData.getInitialTaskMetaData());
-						assertEquals("Incorrect asset manager", assetManager,
-								flowMetaData.getFlowManager());
-
-						// Matches if at this point
-						return true;
-					}
-				});
-		jobNode.activateJob();
-
-		// Attempt to construct managed object
-		this.replayMockObjects();
-		MockManagedObjectSource.handlerKey = HandlerKey.KEY;
-		RawManagedObjectMetaData<?, ?> rawMetaData = this
-				.fullyConstructRawManagedObjectMetaData();
-		this.verifyMockObjects();
-
-		// Verify the content of the raw meta data
-		Object[] handlerKeys = rawMetaData.getHandlerKeys();
-		assertEquals("Should have a handler key", 1, handlerKeys.length);
-		assertEquals("Incorrect handler key", HandlerKey.KEY, handlerKeys[0]);
-		Map<?, Handler<?>> handlers = rawMetaData.getHandlers();
-		assertEquals("Should be a handler", 1, handlers.size());
-		assertEquals("Incorrect handler", handler, handlers.get(HandlerKey.KEY));
+		assertTrue("Should be coordinating", moMetaData
+				.isCoordinatingManagedObject());
 	}
 
 	/**
@@ -1270,8 +607,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record obtaining details from configuration to init
 		this.recordReturn(this.configuration, this.configuration
 				.getProperties(), new Properties());
-		this.recordReturn(this.configuration, this.configuration.getBuilder(),
-				this.managedObjectBuilder);
 
 		// Record obtaining the managing office
 		final String managingOfficeName = "OFFICE";
@@ -1281,6 +616,9 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.managingOfficeConfiguration,
 				this.managingOfficeConfiguration.getOfficeName(),
 				managingOfficeName);
+		this.recordReturn(this.managingOfficeConfiguration,
+				this.managingOfficeConfiguration.getBuilder(),
+				this.managingOfficeBuilder);
 		this.recordReturn(this.officeFloorConfiguration,
 				this.officeFloorConfiguration.getOfficeConfiguration(),
 				new OfficeConfiguration[] { this.officeConfiguration });
@@ -1291,30 +629,15 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Registers the {@link Handler}.
-	 */
-	private void record_registerHandler() {
-		this.recordReturn(this.managedObjectBuilder, this.managedObjectBuilder
-				.getManagedObjectHandlerBuilder(),
-				this.managedObjectHandlerBuilder);
-		this.recordReturn(this.managedObjectHandlerBuilder,
-				this.managedObjectHandlerBuilder
-						.registerHandler(HandlerKey.KEY), this.handlerBuilder);
-	}
-
-	/**
 	 * Records creating the {@link RawManagedObjectMetaData} after initialising.
 	 * 
 	 * @param managedObjectClass
 	 *            {@link ManagedObject} class.
-	 * @param handlerKeyClass
-	 *            Handler key class.
 	 * @param processBoundName
 	 *            Process bound name for {@link ManagedObject}.
 	 */
 	private <M extends ManagedObject> void record_createRawMetaData(
-			Class<M> managedObjectClass, Class<?> handlerKeyClass,
-			String processBoundName) {
+			Class<M> managedObjectClass, String processBoundName) {
 		// Record completing creating raw meta data
 		this.recordReturn(this.configuration, this.configuration
 				.getDefaultTimeout(), 0);
@@ -1322,9 +645,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				Object.class);
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				managedObjectClass);
-		this.recordReturn(this.metaData, this.metaData.getHandlerKeys(),
-				handlerKeyClass);
-		if (handlerKeyClass != null) {
+		if (processBoundName != null) {
 			this.recordReturn(this.managingOfficeConfiguration,
 					this.managingOfficeConfiguration
 							.getProcessBoundManagedObjectName(),
@@ -1332,61 +653,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		}
 		this.recordReturn(this.configuration, this.configuration
 				.getManagedObjectPool(), this.managedObjectPool);
-	}
-
-	/**
-	 * Records binding to the {@link ProcessState} of the managing
-	 * {@link Office}.
-	 */
-	private void record_bindToProcess(String processBoundName) {
-
-		final ProcessMetaData processMetaData = this
-				.createMock(ProcessMetaData.class);
-		final ManagedObjectMetaData<?> managedObjectMetaData = this
-				.createMock(ManagedObjectMetaData.class);
-
-		this.recordReturn(this.taskMetaDataLocator, this.taskMetaDataLocator
-				.getOfficeMetaData(), this.officeMetaData);
-		this.recordReturn(this.officeMetaData, this.officeMetaData
-				.getProcessMetaData(), processMetaData);
-		this.recordReturn(processMetaData, processMetaData
-				.getManagedObjectMetaData(),
-				new ManagedObjectMetaData[] { managedObjectMetaData });
-		this.recordReturn(managedObjectMetaData, managedObjectMetaData
-				.getBoundManagedObjectName(), processBoundName);
-	}
-
-	/**
-	 * Records creating the {@link Handler}.
-	 * 
-	 * @param processBoundName
-	 *            Name that {@link ManagedObject} bound to {@link ProcessState}
-	 *            of the {@link Office}.
-	 * @param handlerConfiguration
-	 *            {@link HandlerConfiguration}.
-	 */
-	private Handler<?> record_manageByOfficeAndCreateHandler(
-			String processBoundName,
-			HandlerConfiguration<?, ?> handlerConfiguration) {
-
-		final HandlerFactory<?> handlerFactory = this
-				.createMock(HandlerFactory.class);
-		final Handler<?> handler = this.createMock(Handler.class);
-
-		// Record creating the handler
-		this.recordReturn(this.configuration, this.configuration
-				.getHandlerConfiguration(),
-				new HandlerConfiguration[] { handlerConfiguration });
-		this.record_bindToProcess(processBoundName);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerKey(), HandlerKey.KEY);
-		this.recordReturn(handlerConfiguration, handlerConfiguration
-				.getHandlerFactory(), handlerFactory);
-		this.recordReturn(handlerFactory, handlerFactory.createHandler(),
-				handler);
-
-		// Return the handler
-		return handler;
 	}
 
 	/**
@@ -1435,11 +701,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		 * Name of required property.
 		 */
 		public static String requiredPropertyName = null;
-
-		/**
-		 * Handler key.
-		 */
-		public static HandlerKey handlerKey = null;
 
 		/**
 		 * Recycle {@link WorkFactory}.
@@ -1499,7 +760,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				ManagedObjectSourceMetaData<Indexed, HandlerKey> metaData) {
 			instantiateFailure = null;
 			requiredPropertyName = null;
-			handlerKey = null;
 			recycleWorkFactory = null;
 			addWorkName = null;
 			addTaskName = null;
@@ -1546,15 +806,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			// Obtain the required property
 			if (requiredPropertyName != null) {
 				context.getProperty(requiredPropertyName);
-			}
-
-			// Obtain and register handler
-			if (handlerKey != null) {
-				ManagedObjectHandlerBuilder managedObjectHandlerBuilder = context
-						.getHandlerBuilder();
-				HandlerBuilder<?> handlerBuilder = managedObjectHandlerBuilder
-						.registerHandler(handlerKey);
-				assertNotNull("Must have handler builder", handlerBuilder);
 			}
 
 			// Register the recycle work
@@ -1621,27 +872,6 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		} else {
 			assertNull("Should not construct meta-data", metaData);
 		}
-
-		// Return the meta-data
-		return metaData;
-	}
-
-	/**
-	 * Constructs the {@link RawManagedObjectMetaData} and has it managed by its
-	 * {@link Office}.
-	 * 
-	 * @return {@link RawManagedObjectMetaData}.
-	 */
-	@SuppressWarnings("unchecked")
-	private RawManagedObjectMetaData fullyConstructRawManagedObjectMetaData() {
-
-		// Attempt to construct
-		RawManagedObjectMetaData metaData = this
-				.constructRawManagedObjectMetaData(true);
-
-		// Manage by the office
-		metaData.manageByOffice(this.taskMetaDataLocator,
-				this.assetManagerFactory, this.issues);
 
 		// Return the meta-data
 		return metaData;

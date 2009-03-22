@@ -26,12 +26,13 @@ import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.frame.api.OfficeFrame;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
@@ -41,7 +42,7 @@ import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
  * 
  * @author Daniel
  */
-public class ManagedObjectSourceLoader {
+public class ManagedObjectSourceStandAlone {
 
 	/**
 	 * Name of the {@link ManagedObjectSource} being loaded.
@@ -134,12 +135,6 @@ public class ManagedObjectSourceLoader {
 	};
 
 	/**
-	 * Default constructor.
-	 */
-	public ManagedObjectSourceLoader() {
-	}
-
-	/**
 	 * Adds a property for the {@link ManagedObjectSource}.
 	 * 
 	 * @param name
@@ -171,7 +166,7 @@ public class ManagedObjectSourceLoader {
 	 *             If fails to initialise {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> MS initManagedObjectSource(
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> MS initManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Create a new instance of the managed object source
@@ -180,16 +175,17 @@ public class ManagedObjectSourceLoader {
 		// Create necessary builders
 		OfficeFloorBuilder officeFloorBuilder = OfficeFrame
 				.createOfficeFloorBuilder();
-		ManagedObjectBuilder<H> managedObjectBuilder = officeFloorBuilder
+		ManagingOfficeBuilder<F> managingOfficeBuilder = officeFloorBuilder
 				.addManagedObject(STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME,
-						managedObjectSourceClass);
+						managedObjectSourceClass).setManagingOffice(
+						"STAND ALONE");
 		OfficeBuilder officeBuilder = officeFloorBuilder
 				.addOffice(STAND_ALONE_MANAGING_OFFICE_NAME);
 
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(
 				STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, this.properties,
-				this.resourceLocator, managedObjectBuilder, officeBuilder);
+				this.resourceLocator, managingOfficeBuilder, officeBuilder);
 		moSource.init(sourceContext);
 
 		// Return the initialised managed object source
@@ -205,7 +201,7 @@ public class ManagedObjectSourceLoader {
 	 *             If fails to start the {@link ManagedObjectSource}.
 	 */
 	@SuppressWarnings("unchecked")
-	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> void startManagedObjectSource(
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> void startManagedObjectSource(
 			MS managedObjectSource) throws Exception {
 		// Start the managed object source
 		managedObjectSource.start(new LoadExecuteContext());
@@ -218,7 +214,7 @@ public class ManagedObjectSourceLoader {
 	 * @throws Exception
 	 *             If fails to init and start the {@link ManagedObjectSource}.
 	 */
-	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> MS loadManagedObjectSource(
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> MS loadManagedObjectSource(
 			Class<MS> managedObjectSourceClass) throws Exception {
 
 		// Initialise the managed object source
@@ -234,13 +230,43 @@ public class ManagedObjectSourceLoader {
 	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
-	private class LoadExecuteContext<H extends Enum<H>> implements
-			ManagedObjectExecuteContext<H> {
+	private class LoadExecuteContext<F extends Enum<F>> implements
+			ManagedObjectExecuteContext<F> {
+
+		/*
+		 * ================ ManagedObjectExecuteContext =====================
+		 */
 
 		@Override
-		public Handler<?> getHandler(H key) {
+		public void invokeProcess(F key, Object parameter,
+				ManagedObject managedObject) {
 			throw new UnsupportedOperationException(
-					"Managed Object Source may not use Handlers when running stand-alone");
+					ManagedObjectSourceStandAlone.class.getSimpleName()
+							+ " does not support invoking processes");
+		}
+
+		@Override
+		public void invokeProcess(int flowIndex, Object parameter,
+				ManagedObject managedObject) {
+			throw new UnsupportedOperationException(
+					ManagedObjectSourceStandAlone.class.getSimpleName()
+							+ " does not support invoking processes");
+		}
+
+		@Override
+		public void invokeProcess(F key, Object parameter,
+				ManagedObject managedObject, EscalationHandler escalationHandler) {
+			throw new UnsupportedOperationException(
+					ManagedObjectSourceStandAlone.class.getSimpleName()
+							+ " does not support invoking processes");
+		}
+
+		@Override
+		public void invokeProcess(int flowIndex, Object parameter,
+				ManagedObject managedObject, EscalationHandler escalationHandler) {
+			throw new UnsupportedOperationException(
+					ManagedObjectSourceStandAlone.class.getSimpleName()
+							+ " does not support invoking processes");
 		}
 	}
 

@@ -16,21 +16,23 @@
  */
 package net.officefloor.frame.api.build;
 
-import net.officefloor.frame.api.execute.Handler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>
  * Enables enhancing the {@link Office}.
  * <p>
- * This enables:<il>
+ * This enables:
+ * <ol>
  * <li>linking in the {@link Task} instances created by the
- * {@link ManagedObjectSource}</li>
- * <li>providing {@link Handler} instances for a {@link ManagedObjectSource}</li>
- * <li>linking in {@link Task} instances for the {@link Handler} instances</li>
- * </il>
+ * {@link ManagedObjectSource} to other {@link Task} instances within the
+ * {@link Office}</li>
+ * <li>linking the {@link Flow} instances instigated by the
+ * {@link ManagedObjectSource} to a {@link Task} within the {@link Office}</li>
+ * </ol>
  * 
  * @author Daniel
  */
@@ -43,4 +45,5 @@ public interface OfficeEnhancer {
 	 *            {@link OfficeEnhancerContext}.
 	 */
 	void enhanceOffice(OfficeEnhancerContext context);
+
 }

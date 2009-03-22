@@ -523,10 +523,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		// Handled by the managed object source handler escalation handler
 		if (handledLevel == EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER) {
-			this
-					.recordReturn(this.processState, this.processState
-							.getManagedObjectSourceHandlerEscalation(),
-							this.escalation);
+			this.recordReturn(this.processState, this.processState
+					.getManagedObjectSourceEscalation(), this.escalation);
 			this.threadState
 					.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
 			this.record_JobContainer_createEscalationJob(failure, null);
@@ -534,7 +532,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			return;
 		}
 		this.recordReturn(this.processState, this.processState
-				.getManagedObjectSourceHandlerEscalation(), null);
+				.getManagedObjectSourceEscalation(), null);
 
 		// Handled by the office escalation procedure
 		this.recordReturn(this.processState, this.processState

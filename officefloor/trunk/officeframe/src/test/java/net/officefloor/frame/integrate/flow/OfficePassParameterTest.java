@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.integrate.flow;
 
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -27,16 +28,14 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Validates passing a parameter between two
- * {@link net.officefloor.frame.api.execute.Work} instances of a office.
+ * Validates passing a parameter between two {@link Work} instances of a office.
  * 
  * @author Daniel
  */
 public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Validates that able to pass parameters between
-	 * {@link net.officefloor.frame.api.execute.Work} instances.
+	 * Validates that able to pass parameters between {@link Work} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testPassParameterBetweenWork() throws Exception {
@@ -50,7 +49,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		// Add the first work
 		WorkOne workOne = new WorkOne(parameter);
 		this.constructWork("WORK_ONE", workOne, "SENDER");
-		TaskBuilder<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> taskBuilder = this
+		TaskBuilder<Object, WorkOne, None, WorkOneDelegatesEnum> taskBuilder = this
 				.constructTask("SENDER", workOne, "TEAM", null, null);
 		taskBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL,
@@ -85,7 +84,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 	 * First {@link Work} type for testing.
 	 */
 	private class WorkOne implements Work,
-			Task<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> {
+			Task<Object, WorkOne, None, WorkOneDelegatesEnum> {
 
 		/**
 		 * Parameter to invoke delegate work with.
@@ -108,7 +107,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 
 		@Override
 		public Object doTask(
-				TaskContext<Object, WorkOne, NoManagedObjectsEnum, WorkOneDelegatesEnum> context)
+				TaskContext<Object, WorkOne, None, WorkOneDelegatesEnum> context)
 				throws Exception {
 
 			// Delegate to the work
@@ -117,7 +116,6 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 			// No parameter
 			return null;
 		}
-
 	}
 
 	private enum WorkOneDelegatesEnum {
@@ -125,10 +123,9 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Second {@link net.officefloor.frame.api.execute.Work} type for testing.
+	 * Second {@link Work} type for testing.
 	 */
-	private class WorkTwo implements Work,
-			Task<Object, WorkTwo, NoManagedObjectsEnum, NoDelegatesEnum> {
+	private class WorkTwo implements Work, Task<Object, WorkTwo, None, None> {
 
 		/**
 		 * Parameter received when {@link Work} invoked.
@@ -149,8 +146,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Object doTask(
-				TaskContext<Object, WorkTwo, NoManagedObjectsEnum, NoDelegatesEnum> context)
+		public Object doTask(TaskContext<Object, WorkTwo, None, None> context)
 				throws Exception {
 
 			// Store the parameter
@@ -160,12 +156,6 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 			return null;
 		}
 
-	}
-
-	private enum NoDelegatesEnum {
-	}
-
-	private enum NoManagedObjectsEnum {
 	}
 
 }

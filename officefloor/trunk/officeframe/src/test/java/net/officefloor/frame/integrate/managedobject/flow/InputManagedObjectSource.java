@@ -14,14 +14,12 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.integrate.handler;
+package net.officefloor.frame.integrate.managedobject.flow;
 
-import java.util.Map;
-
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.impl.AbstractMockManagedObjectSource;
-import net.officefloor.frame.impl.PassByReference;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
  * Invokes handlers to input data to Office.
@@ -29,12 +27,24 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * @author Daniel
  */
 public class InputManagedObjectSource<D extends Enum<D>> extends
-		AbstractMockManagedObjectSource<D, Handlers> {
+		AbstractManagedObjectSource<D, InputManagedObjectSource.Flows> {
+
+	/**
+	 * Keys of {@link Flow} instances instigated.
+	 */
+	public enum Flows {
+		INPUT
+	}
 
 	/**
 	 * Instance.
 	 */
 	private static InputManagedObjectSource<?> INSTANCE;
+
+	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	private ManagedObjectExecuteContext<Flows> executeContext;
 
 	/**
 	 * Inputs a parameter into the Office.
@@ -48,28 +58,6 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	}
 
 	/**
-	 * Store the instance.
-	 */
-	protected void init() throws Exception {
-		INSTANCE = this;
-	}
-
-	/**
-	 * Initiate handlers.
-	 * 
-	 * @param handlerKeys
-	 *            Handler.
-	 * @param handlers
-	 *            Handlers.
-	 */
-	@Override
-	protected void initHandlers(PassByReference<Class<Handlers>> handlerKeys,
-			Map<Handlers, Class<?>> handlers) {
-		handlerKeys.setValue(Handlers.class);
-		handlers.put(Handlers.INPUT, HandlerExecutionTest.MockHandler.class);
-	}
-
-	/**
 	 * Inputs the parameter.
 	 * 
 	 * @param parameter
@@ -77,15 +65,37 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	 * @param managedObject
 	 *            {@link ManagedObject}.
 	 */
-	@SuppressWarnings("unchecked")
 	public void inputParameter(Object parameter, ManagedObject managedObject) {
-		// Obtain the handler
-		Handler<?> handler = this.getExecuteContext()
-				.getHandler(Handlers.INPUT);
-		HandlerExecutionTest.MockHandler mockHandler = (HandlerExecutionTest.MockHandler) handler;
+		// Execute the flow
+		this.executeContext
+				.invokeProcess(Flows.INPUT, parameter, managedObject);
+	}
 
-		// Input the parameter
-		mockHandler.handle(parameter, managedObject);
+	/*
+	 * ==================== AbstractManagedObjectSource ========================
+	 */
+
+	@Override
+	protected void loadSpecification(SpecificationContext context) {
+		INSTANCE = this;
+	}
+
+	@Override
+	protected void loadMetaData(MetaDataContext<D, Flows> context)
+			throws Exception {
+		context.setObjectClass(this.getClass());
+		context.addFlow(Flows.INPUT, Object.class);
+	}
+
+	@Override
+	public void start(ManagedObjectExecuteContext<Flows> context)
+			throws Exception {
+		this.executeContext = context;
+	}
+
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
+		return null;
 	}
 
 }

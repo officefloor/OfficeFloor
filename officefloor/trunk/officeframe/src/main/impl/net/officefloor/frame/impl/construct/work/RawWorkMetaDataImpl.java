@@ -350,11 +350,6 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	public void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
-		// Link tasks of work bound managed objects
-		for (RawBoundManagedObjectMetaData<?> rawBoundMoMetaData : this.workManagedObjects) {
-			rawBoundMoMetaData.linkTasks(taskMetaDataLocator, issues);
-		}
-
 		// Link tasks of work bound administrators
 		for (RawBoundAdministratorMetaData<?, ?> rawBoundAdminMetaData : this.workAdministrators) {
 			rawBoundAdminMetaData.linkTasks(taskMetaDataLocator,

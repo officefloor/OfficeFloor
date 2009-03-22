@@ -120,13 +120,12 @@ public class OfficeFloorImpl implements OfficeFloor {
 	 * @throws Exception
 	 *             If fails to start the {@link ManagedObjectSourceInstance}.
 	 */
-	private <H extends Enum<H>> void startManagedObjectSourceInstance(
-			ManagedObjectSourceInstance<H> mosInstance) throws Exception {
+	private <F extends Enum<F>> void startManagedObjectSourceInstance(
+			ManagedObjectSourceInstance<F> mosInstance) throws Exception {
 
 		// Start the managed object source
-		ManagedObjectSource<?, H> mos = mosInstance.getManagedObjectSource();
-		mos.start(new ManagedObjectExecuteContextImpl<H>(mosInstance
-				.getHandlers()));
+		ManagedObjectSource<?, F> mos = mosInstance.getManagedObjectSource();
+		mos.start(mosInstance.getManagedObjectExecuteContext());
 
 		// Determine if pooled
 		ManagedObjectPool pool = mosInstance.getManagedObjectPool();

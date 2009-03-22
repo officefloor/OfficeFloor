@@ -16,25 +16,22 @@
  */
 package net.officefloor.frame.integrate.managedobject;
 
-import net.officefloor.frame.api.build.HandlerBuilder;
-import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -315,10 +312,10 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		String officeName = this.getOfficeName();
 
 		// Create and register the managed object source
-		ManagedObjectBuilder<HandlerKey> managedObjectBuilder = this
+		ManagedObjectBuilder<Flows> managedObjectBuilder = this
 				.getOfficeFloorBuilder().addManagedObject("MO",
 						TestManagedObjectSource.class);
-		ManagingOfficeBuilder managingOfficeBuilder = managedObjectBuilder
+		ManagingOfficeBuilder<Flows> managingOfficeBuilder = managedObjectBuilder
 				.setManagingOffice(officeName);
 		if (isManagedObjectOutside) {
 			managingOfficeBuilder.setProcessBoundManagedObjectName("OFFICE_MO");
@@ -328,22 +325,17 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		if (defaultTimeout > 0) {
 			// Asynchronous managed object
 			managedObjectBuilder.setDefaultTimeout(defaultTimeout);
-			TestManagedObjectSource
-					.setManagedObjectClass(AsynchronousManagedObject.class);
+			TestManagedObjectSource.managedObjectClass = AsynchronousManagedObject.class;
 		} else {
 			// Not asynchronous managed object
-			TestManagedObjectSource.setManagedObjectClass(ManagedObject.class);
+			TestManagedObjectSource.managedObjectClass = ManagedObject.class;
 		}
 
 		// Only provide handler if outside
-		TestManagedObjectSource.setLoadHandler(isManagedObjectOutside);
+		TestManagedObjectSource.isLoadFlow = isManagedObjectOutside;
 		if (isManagedObjectOutside) {
-			ManagedObjectHandlerBuilder<HandlerKey> moHandlerBuilder = managedObjectBuilder
-					.getManagedObjectHandlerBuilder();
-			HandlerBuilder<HandlerProcess> handlerBuilder = moHandlerBuilder
-					.registerHandler(HandlerKey.HANDLER, HandlerProcess.class);
-			handlerBuilder.linkProcess(HandlerProcess.TASK, "WORK",
-					EXTERNAL_EVENT_TASK, Object.class);
+			managingOfficeBuilder.linkProcess(Flows.FLOW, "WORK",
+					EXTERNAL_EVENT_TASK);
 		}
 
 		// Create and register the work
@@ -370,81 +362,38 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		// Construct and open the office floor
 		this.officeFloor = this.constructOfficeFloor();
 		this.officeFloor.openOfficeFloor();
-
-		// Ensure the managed object source and handler created
-		assertNotNull("Managed Object Source not created", managedObjectSource);
-		if (isManagedObjectOutside) {
-			assertNotNull("Handler not created", managedObjectSource
-					.getHandler());
-		} else {
-			assertNull("Handler should not be created", managedObjectSource
-					.getHandler());
-		}
 	}
 
 	/**
 	 * Test {@link ManagedObjectSource}.
 	 */
 	public static class TestManagedObjectSource extends
-			AbstractManagedObjectSource<None, HandlerKey> implements
-			ManagedObject, AsynchronousManagedObject {
+			AbstractManagedObjectSource<None, Flows> implements ManagedObject,
+			AsynchronousManagedObject {
 
 		/**
 		 * {@link ManagedObject} class.
 		 */
-		private static Class<? extends ManagedObject> managedObjectClass = ManagedObject.class;
+		public static Class<? extends ManagedObject> managedObjectClass = ManagedObject.class;
 
 		/**
-		 * Flag indicating to load the {@link Handler}.
+		 * Flag indicating to link the {@link Flow}.
 		 */
-		private static boolean isLoadHandler = true;
+		public static boolean isLoadFlow = true;
 
 		/**
-		 * Specifies the {@link ManagedObject} class.
-		 * 
-		 * @param managedObjectClass
-		 *            {@link ManagedObject} class.
+		 * {@link ManagedObjectExecuteContext}.
 		 */
-		public static void setManagedObjectClass(
-				Class<? extends ManagedObject> managedObjectClass) {
-			TestManagedObjectSource.managedObjectClass = managedObjectClass;
-		}
-
-		/**
-		 * Flags whether to load the {@link Handler}.
-		 * 
-		 * @param isLoadHandler
-		 *            <code>true</code> to load the {@link Handler}.
-		 */
-		public static void setLoadHandler(boolean isLoadHandler) {
-			TestManagedObjectSource.isLoadHandler = isLoadHandler;
-		}
-
-		/**
-		 * {@link Handler}.
-		 */
-		private TestHandler handler;
+		private ManagedObjectExecuteContext<Flows> executeContext;
 
 		/**
 		 * Initiate.
 		 */
 		public TestManagedObjectSource() {
-
 			// Should only be instantiated once
 			assertNull("Managd Object Source should only be instantiated once",
 					ManagedObjectTest.managedObjectSource);
-
-			// Specify managed object source
 			ManagedObjectTest.managedObjectSource = this;
-		}
-
-		/**
-		 * Obtains the {@link TestHandler}.
-		 * 
-		 * @return {@link TestHandler}.
-		 */
-		public TestHandler getHandler() {
-			return this.handler;
 		}
 
 		/**
@@ -456,9 +405,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		 *            the initial {@link Task}.
 		 */
 		public void triggerByExternalEvent(Object parameter) {
-			HandlerContext<HandlerProcess> handlerContext = this.handler
-					.getHandlerContext();
-			handlerContext.invokeProcess(HandlerProcess.TASK, parameter, this);
+			executeContext.invokeProcess(Flows.FLOW, parameter, this);
 		}
 
 		/*
@@ -471,7 +418,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 		}
 
 		@Override
-		protected void loadMetaData(MetaDataContext<None, HandlerKey> context)
+		protected void loadMetaData(MetaDataContext<None, Flows> context)
 				throws Exception {
 
 			// Specify the managed object class
@@ -480,31 +427,17 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			// Object for testing
 			context.setObjectClass(TestManagedObjectSource.class);
 
-			// Determine if load the handlers
-			if (isLoadHandler) {
-				// Load the handlers
-				HandlerLoader<HandlerKey> handlerLoader = context
-						.getHandlerLoader(HandlerKey.class);
-				handlerLoader.mapHandlerType(HandlerKey.HANDLER, Handler.class);
-
-				// Provide the handler
-				ManagedObjectHandlerBuilder<HandlerKey> moHandlerBuilder = context
-						.getManagedObjectSourceContext().getHandlerBuilder();
-				HandlerBuilder<HandlerProcess> handlerBuilder = moHandlerBuilder
-						.registerHandler(HandlerKey.HANDLER,
-								HandlerProcess.class);
-				handlerBuilder.setHandlerFactory(new TestHandler());
+			// Determine if load the flow
+			if (isLoadFlow) {
+				// Load the flow
+				context.addFlow(Flows.FLOW, Object.class);
 			}
 		}
 
 		@Override
-		protected void start(StartContext<HandlerKey> startContext)
+		public void start(ManagedObjectExecuteContext<Flows> context)
 				throws Exception {
-			if (isLoadHandler) {
-				// Obtain the handler
-				this.handler = (TestHandler) startContext.getContext(
-						HandlerKey.class).getHandler(HandlerKey.HANDLER);
-			}
+			this.executeContext = context;
 		}
 
 		@Override
@@ -533,57 +466,10 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Test {@link Handler} keys.
+	 * {@link Flow} keys.
 	 */
-	public enum HandlerKey {
-		HANDLER
-	}
-
-	/**
-	 * Test {@link Handler} flows.
-	 */
-	public enum HandlerProcess {
-		TASK
-	}
-
-	/**
-	 * Test {@link Handler}.
-	 */
-	private static class TestHandler implements HandlerFactory<HandlerProcess>,
-			Handler<HandlerProcess> {
-
-		/**
-		 * {@link HandlerContext}.
-		 */
-		private HandlerContext<HandlerProcess> context;
-
-		/**
-		 * Obtains the {@link HandlerContext}.
-		 * 
-		 * @return {@link HandlerContext}.
-		 */
-		public HandlerContext<HandlerProcess> getHandlerContext() {
-			return this.context;
-		}
-
-		/*
-		 * =============== HandlerFactory ==================
-		 */
-
-		@Override
-		public Handler<HandlerProcess> createHandler() {
-			return this;
-		}
-
-		/*
-		 * =============== Handler ==================
-		 */
-
-		@Override
-		public void setHandlerContext(HandlerContext<HandlerProcess> context)
-				throws Exception {
-			this.context = context;
-		}
+	public enum Flows {
+		FLOW
 	}
 
 	/**

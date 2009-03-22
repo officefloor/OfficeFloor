@@ -14,26 +14,27 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.integrate.handler;
+package net.officefloor.frame.integrate.managedobject.flow;
 
-import net.officefloor.frame.api.build.HandlerBuilder;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.AbstractMockHandler;
-import net.officefloor.frame.impl.AbstractMockTask;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
-import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
+import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
- * Tests {@link Handler} invoking a {@link ProcessState}.
+ * Tests {@link ManagedObjectSource} invoking a {@link Flow}.
  * 
  * @author Daniel
  */
-public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
+public class ManagedObjectSourceInstigateFlowTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Ensures handler invokes process.
@@ -44,19 +45,17 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 		String officeName = this.getOfficeName();
 
 		// Construct the managed object
-		ManagedObjectBuilder moBuilder = this.constructManagedObject("INPUT",
-				InputManagedObjectSource.class, officeName);
+		ManagedObjectBuilder<InputManagedObjectSource.Flows> moBuilder = this
+				.constructManagedObject("INPUT", InputManagedObjectSource.class);
 
 		// Make process bound managed object
 		this.getOfficeBuilder().addProcessManagedObject("INPUT", "INPUT");
 
-		// Provide handler for input managed object
-		ManagedObjectHandlerBuilder<Handlers> moHandlersBuilder = moBuilder
-				.getManagedObjectHandlerBuilder();
-		HandlerBuilder handlerBuilder = moHandlersBuilder
-				.registerHandler(Handlers.INPUT);
-		handlerBuilder.setHandlerFactory(new MockHandler());
-		handlerBuilder.linkProcess(0, "WORK", "TASK", Object.class);
+		// Provide flow for input managed object
+		ManagingOfficeBuilder<InputManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
+				.setManagingOffice(officeName);
+		managingOfficeBuilder.linkProcess(InputManagedObjectSource.Flows.INPUT,
+				"WORK", "TASK");
 
 		// Provide task for handler input
 		InputTask inputTask = new InputTask();
@@ -92,29 +91,10 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
-	 * Mock {@link Handler}.
-	 */
-	public static class MockHandler<H extends Enum<H>> extends
-			AbstractMockHandler<H> {
-
-		/**
-		 * Handles the {@link ManagedObject}.
-		 * 
-		 * @param parameter
-		 *            Parameter.
-		 * @param managedObject
-		 *            {@link ManagedObject}.
-		 */
-		public void handle(Object parameter, ManagedObject managedObject) {
-			// Invoke the process
-			this.getContext().invokeProcess(0, parameter, managedObject);
-		}
-	}
-
-	/**
 	 * Task to process handler input.
 	 */
-	private static class InputTask extends AbstractMockTask<Object> {
+	private static class InputTask extends
+			AbstractSingleTask<Object, Work, Indexed, Indexed> {
 
 		/**
 		 * Parameter.
@@ -126,13 +106,18 @@ public class HandlerExecutionTest extends AbstractOfficeConstructTestCase {
 		 */
 		protected volatile Object object;
 
+		/*
+		 * ===================== Task ======================================
+		 */
+
 		@Override
-		protected Object doTask() throws Exception {
+		public Object doTask(TaskContext<Object, Work, Indexed, Indexed> context)
+				throws Throwable {
 			// Obtain the parameter
-			this.parameter = this.getTaskContext().getParameter();
+			this.parameter = context.getParameter();
 
 			// Obtain the object
-			this.object = this.getTaskContext().getObject(0);
+			this.object = context.getObject(0);
 
 			// No return
 			return null;

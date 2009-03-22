@@ -16,20 +16,12 @@
  */
 package net.officefloor.frame.impl.construct.managedobjectsource;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-import net.officefloor.frame.api.build.HandlerBuilder;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.configuration.HandlerConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagingOfficeConfiguration;
-import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -39,9 +31,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel
  */
-public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>>
-		implements ManagedObjectBuilder<H>,
-		ManagedObjectSourceConfiguration<H, MS> {
+public class ManagedObjectBuilderImpl<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>>
+		implements ManagedObjectBuilder<F>,
+		ManagedObjectSourceConfiguration<F, MS> {
 
 	/**
 	 * Name of {@link ManagedObjectSource}.
@@ -56,8 +48,7 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 	/**
 	 * {@link ManagingOfficeConfiguration} for this {@link ManagedObject}.
 	 */
-	private ManagingOfficeConfiguration managingOfficeConfiguration = new ManagingOfficeConfigurationImpl(
-			null);
+	private ManagingOfficeConfiguration<F> managingOfficeConfiguration;
 
 	/**
 	 * {@link Properties} for the {@link ManagedObjectSource}.
@@ -73,11 +64,6 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 	 * Default timeout for asynchronous operations on the {@link ManagedObject}.
 	 */
 	private long defaultTimeout = 0;
-
-	/**
-	 * {@link ManagedObjectHandlerBuilder} implementation.
-	 */
-	private final ManagedObjectHandlerBuilderImpl handlersBuilder = new ManagedObjectHandlerBuilderImpl();
 
 	/**
 	 * Initiate.
@@ -113,16 +99,11 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 	}
 
 	@Override
-	public ManagingOfficeBuilder setManagingOffice(String officeName) {
-		ManagingOfficeConfigurationImpl managingOfficeBuilder = new ManagingOfficeConfigurationImpl(
+	public ManagingOfficeBuilder<F> setManagingOffice(String officeName) {
+		ManagingOfficeBuilderImpl<F> managingOfficeBuilder = new ManagingOfficeBuilderImpl<F>(
 				officeName);
 		this.managingOfficeConfiguration = managingOfficeBuilder;
 		return managingOfficeBuilder;
-	}
-
-	@Override
-	public ManagedObjectHandlerBuilder<H> getManagedObjectHandlerBuilder() {
-		return this.handlersBuilder;
 	}
 
 	/*
@@ -135,12 +116,7 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 	}
 
 	@Override
-	public ManagedObjectBuilder<H> getBuilder() {
-		return this;
-	}
-
-	@Override
-	public ManagingOfficeConfiguration getManagingOfficeConfiguration() {
+	public ManagingOfficeConfiguration<F> getManagingOfficeConfiguration() {
 		return this.managingOfficeConfiguration;
 	}
 
@@ -162,172 +138,6 @@ public class ManagedObjectBuilderImpl<D extends Enum<D>, H extends Enum<H>, MS e
 	@Override
 	public long getDefaultTimeout() {
 		return this.defaultTimeout;
-	}
-
-	@Override
-	public ManagedObjectHandlerBuilder<H> getHandlerBuilder() {
-		return this.getManagedObjectHandlerBuilder();
-	}
-
-	@Override
-	public HandlerConfiguration<H, ?>[] getHandlerConfiguration() {
-		return this.handlersBuilder.getHandlerConfiguration();
-	}
-
-	/**
-	 * {@link ManagedObjectHandlerBuilder} implementation.
-	 */
-	protected class ManagedObjectHandlerBuilderImpl implements
-			ManagedObjectHandlerBuilder<H> {
-
-		/**
-		 * Handlers.
-		 */
-		private final Map<H, HandlerBuilderImpl<H, ?>> handlers;
-
-		/**
-		 * Initiate.
-		 */
-		public ManagedObjectHandlerBuilderImpl() {
-			this.handlers = new HashMap<H, HandlerBuilderImpl<H, ?>>();
-		}
-
-		/**
-		 * Obtains the {@link HandlerConfiguration} instances.
-		 * 
-		 * @return {@link HandlerConfiguration} instances.
-		 */
-		@SuppressWarnings("unchecked")
-		public HandlerConfiguration<H, ?>[] getHandlerConfiguration() {
-
-			// Obtain the size of array
-			int arraySize = -1;
-			for (H handlerKey : this.handlers.keySet()) {
-				int handlerIndex = handlerKey.ordinal();
-				if (handlerIndex > arraySize) {
-					arraySize = handlerIndex;
-				}
-			}
-			arraySize += 1; // size is max index + 1
-
-			// Create the listing of handler configurations
-			HandlerConfiguration<H, ?>[] handlerConfigurations = new HandlerConfiguration[arraySize];
-			for (H handlerKey : this.handlers.keySet()) {
-
-				// Obtain the handler configuration
-				HandlerConfiguration<H, ?> handlerConfiguration = this.handlers
-						.get(handlerKey);
-				if (handlerConfiguration == null) {
-
-					// Ensure handler configuration available
-					handlerConfiguration = new HandlerBuilderImpl(handlerKey,
-							Indexed.class);
-				}
-
-				// Provide at ordinal position for the key
-				handlerConfigurations[handlerKey.ordinal()] = handlerConfiguration;
-			}
-
-			// Return the handler configuration
-			return handlerConfigurations;
-		}
-
-		/*
-		 * ================ ManagedObjectHandlerBuilder =====================
-		 */
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public HandlerBuilder<Indexed> registerHandler(H handlerKey) {
-
-			// Obtain the handler builder
-			HandlerBuilderImpl handlerBuilder = this.handlers.get(handlerKey);
-			if (handlerBuilder == null) {
-				// Create the handler builder
-				handlerBuilder = new HandlerBuilderImpl<H, Indexed>(handlerKey,
-						null);
-
-				// Register the handler
-				this.handlers.put(handlerKey, handlerBuilder);
-			}
-
-			// Return the builder
-			return (HandlerBuilder<Indexed>) handlerBuilder;
-		}
-
-		@Override
-		@SuppressWarnings("unchecked")
-		public <F extends Enum<F>> HandlerBuilder<F> registerHandler(
-				H handlerKey, Class<F> processListingEnum) {
-
-			// Obtain the handler builder
-			HandlerBuilderImpl<H, ?> handlerBuilder = this.handlers
-					.get(handlerKey);
-			if (handlerBuilder == null) {
-				// Create the handler builder
-				handlerBuilder = new HandlerBuilderImpl<H, F>(handlerKey,
-						processListingEnum);
-
-				// Register the handler
-				this.handlers.put(handlerKey, handlerBuilder);
-			}
-
-			// Return the builder
-			return (HandlerBuilder<F>) handlerBuilder;
-		}
-	}
-
-	/**
-	 * {@link ManagingOfficeConfiguration} implementation.
-	 */
-	private static class ManagingOfficeConfigurationImpl implements
-			ManagingOfficeBuilder, ManagingOfficeConfiguration {
-
-		/**
-		 * Name of the {@link Office} managing the {@link ManagedObject}.
-		 */
-		private final String officeName;
-
-		/**
-		 * Name to bind the {@link ManagedObject} within the
-		 * {@link ProcessState} of the managing {@link Office}.
-		 */
-		private String processBoundManagedObjectName = null;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param officeName
-		 *            Name of the {@link Office} managing the
-		 *            {@link ManagedObject}.
-		 */
-		public ManagingOfficeConfigurationImpl(String officeName) {
-			this.officeName = officeName;
-		}
-
-		/*
-		 * ============== ManagingOfficeBuilder ===============================
-		 */
-
-		@Override
-		public void setProcessBoundManagedObjectName(
-				String processBoundManagedObjectName) {
-			this.processBoundManagedObjectName = processBoundManagedObjectName;
-		}
-
-		/*
-		 * ============= ManagingOfficeConfiguration ==========================
-		 */
-
-		@Override
-		public String getOfficeName() {
-			return this.officeName;
-		}
-
-		@Override
-		public String getProcessBoundManagedObjectName() {
-			return this.processBoundManagedObjectName;
-		}
 	}
 
 }

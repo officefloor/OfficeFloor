@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -47,8 +46,8 @@ import net.officefloor.frame.internal.construct.RawBoundAdministratorMetaDataFac
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeFloorMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeManagingManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawOfficeMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
@@ -149,9 +148,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			.createMock(LinkedManagedObjectSourceConfiguration.class);
 
 	/**
-	 * {@link RawOfficeManagingManagedObjectMetaData} instances.
+	 * {@link RawManagingOfficeMetaData} instances.
 	 */
-	private final List<RawOfficeManagingManagedObjectMetaData> officeManagingManagedObjects = new LinkedList<RawOfficeManagingManagedObjectMetaData>();
+	private final List<RawManagingOfficeMetaData<?>> officeManagingManagedObjects = new LinkedList<RawManagingOfficeMetaData<?>>();
 
 	/**
 	 * {@link RawWorkMetaDataFactory}.
@@ -293,16 +292,15 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no managed object to be enhanced.
+	 * Ensure issue if no managed object task in {@link Office}.
 	 */
-	public void testNoManagedObjectForOfficeEnhancing() {
+	public void testNoManagedObjectTaskForOfficeEnhancing() {
 
 		// Office enhancer
 		OfficeEnhancer enhancer = new OfficeEnhancer() {
 			@Override
 			public void enhanceOffice(OfficeEnhancerContext context) {
-				context.getManagedObjectHandlerBuilder("MANAGED_OBJECT",
-						None.class);
+				context.getFlowNodeBuilder("MANAGED_OBJECT", "WORK", "TASK");
 				fail("Should not continue on flow node not available");
 			}
 		};
@@ -314,11 +312,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.getMonitorOfficeInterval(), 1000);
 		this.recordReturn(this.configuration, this.configuration
 				.getOfficeEnhancers(), new OfficeEnhancer[] { enhancer });
-		this.recordReturn(this.rawOfficeFloorMetaData,
-				this.rawOfficeFloorMetaData
-						.getRawManagedObjectMetaData("MANAGED_OBJECT"), null);
+		this.recordReturn(this.configuration, this.configuration
+				.getFlowNodeBuilder("MANAGED_OBJECT", "WORK", "TASK"), null);
 		this
-				.record_issue("Managed Object Source 'MANAGED_OBJECT' not available for enhancement");
+				.record_issue("Task 'TASK' of work 'MANAGED_OBJECT.WORK' not available for enhancement");
 		this.record_teams();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_work();
@@ -540,8 +537,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects,
 				"BOUND_MO");
-		this.record_linkTasksForManagedObjects(processManagedObjects,
-				"BOUND_MO");
 
 		// Construct the office
 		this.replayMockObjects();
@@ -554,8 +549,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testAffixProcessManagedObject() {
 
-		final RawOfficeManagingManagedObjectMetaData affixManagedObject = this
-				.createMock(RawOfficeManagingManagedObjectMetaData.class);
+		final RawManagingOfficeMetaData<?> affixManagedObject = this
+				.createMock(RawManagingOfficeMetaData.class);
 		this.officeManagingManagedObjects.add(affixManagedObject);
 
 		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this
@@ -575,11 +570,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(processManagedObjects,
 				"OFFICE_MO_0");
-		this.record_linkTasksForManagedObjects(processManagedObjects,
-				"OFFICE_MO_0");
-		this.recordReturn(affixManagedObject, affixManagedObject
-				.getRawManagedObjectMetaData(), rawMoMetaData);
-		rawMoMetaData.manageByOffice(null, null, this.issues);
+		affixManagedObject.manageByOffice(null, null, this.issues);
 		this.control(rawMoMetaData).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
@@ -624,9 +615,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeEscalationHandler();
 		this.record_constructManagedObjectMetaData(threadManagedObjects,
 				"BOUND_MO");
-		this
-				.record_linkTasksForManagedObjects(threadManagedObjects,
-						"BOUND_MO");
 
 		// Construct the office
 		this.replayMockObjects();
@@ -661,10 +649,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				"THREAD");
 		this.record_constructManagedObjectMetaData(processManagedObjects,
 				"PROCESS");
-		this.record_linkTasksForManagedObjects(threadManagedObjects, "THREAD");
-		this
-				.record_linkTasksForManagedObjects(processManagedObjects,
-						"PROCESS");
 
 		// Construct the office
 		this.replayMockObjects();
@@ -698,8 +682,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				"BOUND_MO");
 		this.record_constructAdministratorMetaData(processAdministrators,
 				"BOUND_ADMIN");
-		this.record_linkTasksForManagedObjects(processManagedObjects,
-				"BOUND_MO");
 		this.record_linkTasksForAdministrators(processAdministrators,
 				"BOUND_ADMIN");
 
@@ -743,10 +725,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				"THREAD_MO");
 		this.record_constructAdministratorMetaData(threadAdministrators,
 				"BOUND_ADMIN");
-		this.record_linkTasksForManagedObjects(processManagedObjects,
-				"PROCESS_MO");
-		this.record_linkTasksForManagedObjects(threadManagedObjects,
-				"THREAD_MO");
 		this.record_linkTasksForAdministrators(threadAdministrators,
 				"BOUND_ADMIN");
 
@@ -1210,13 +1188,12 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records affixing {@link RawOfficeManagingManagedObjectMetaData}
-	 * instances.
+	 * Records affixing {@link RawManagingOfficeMetaData} instances.
 	 */
 	private void record_affixOfficeManagingManagedObjects(
 			final String expectedOfficeName,
 			final RawBoundManagedObjectMetaData<?>[] expectedBoundMo,
-			final RawOfficeManagingManagedObjectMetaData[] expectedOfficeMo,
+			final RawManagingOfficeMetaData<?>[] expectedOfficeMo,
 			RawBoundManagedObjectMetaData<?>[] returnBoundManagedObjectMetaData) {
 		this.recordReturn(this.rawBoundManagedObjectFactory,
 				this.rawBoundManagedObjectFactory
@@ -1251,7 +1228,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 						}
 
 						// Ensure correct office managed objects
-						RawOfficeManagingManagedObjectMetaData[] actualOfficeMo = (RawOfficeManagingManagedObjectMetaData[]) actual[2];
+						RawManagingOfficeMetaData<?>[] actualOfficeMo = (RawManagingOfficeMetaData[]) actual[2];
 						if (expectedOfficeMo == null) {
 							// null is simple no managed objects
 							assertEquals("No office managed objects expected",
@@ -1298,8 +1275,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final String OFFICE_MANAGING_PREFIX = "OFFICE_MO_";
 
 		// Create the mock objects to register the process bound managed objects
-		final RawOfficeManagingManagedObjectMetaData[] officeManagedObjects = this.officeManagingManagedObjects
-				.toArray(new RawOfficeManagingManagedObjectMetaData[0]);
+		final RawManagingOfficeMetaData<?>[] officeManagedObjects = this.officeManagingManagedObjects
+				.toArray(new RawManagingOfficeMetaData[0]);
 		final ManagedObjectConfiguration<?>[] moConfigurations = new ManagedObjectConfiguration[processBoundNames.length];
 		final RawBoundManagedObjectMetaData<?>[] rawBoundMoMetaDatas = new RawBoundManagedObjectMetaData[processBoundNames.length];
 		final RawBoundManagedObjectMetaData<?>[] officeBoundMoMetaDatas = new RawBoundManagedObjectMetaData[officeManagedObjects.length];
@@ -1595,29 +1572,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Links the {@link Task} instances for the {@link ManagedObject} instances.
-	 * 
-	 * @param boundManagedObjects
-	 *            {@link RawBoundManagedObjectMetaData} instances by their bound
-	 *            names.
-	 * @param managedObjectNames
-	 *            Names of the {@link RawBoundManagedObjectMetaData} to have
-	 *            their {@link Task} instances linked.
-	 */
-	private void record_linkTasksForManagedObjects(
-			Map<String, RawBoundManagedObjectMetaData<?>> boundManagedObjects,
-			String... managedObjectNames) {
-		for (int i = 0; i < managedObjectNames.length; i++) {
-			RawBoundManagedObjectMetaData<?> rawBoundMo = boundManagedObjects
-					.get(managedObjectNames[i]);
-			rawBoundMo.linkTasks(null, this.issues);
-			this.control(rawBoundMo).setMatcher(
-					new TypeMatcher(OfficeMetaDataLocator.class,
-							OfficeFloorIssues.class));
-		}
-	}
-
-	/**
 	 * Links the {@link Task} instances for the {@link Administrator} instances.
 	 * 
 	 * @param boundAdministrators
@@ -1785,8 +1739,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			boolean isExpectConstruct) {
 
 		// Obtain the office managing managed objects
-		RawOfficeManagingManagedObjectMetaData[] officeMos = this.officeManagingManagedObjects
-				.toArray(new RawOfficeManagingManagedObjectMetaData[0]);
+		RawManagingOfficeMetaData<?>[] officeMos = this.officeManagingManagedObjects
+				.toArray(new RawManagingOfficeMetaData[0]);
 
 		// Construct the meta-data
 		RawOfficeMetaData metaData = RawOfficeMetaDataImpl.getFactory()

@@ -93,20 +93,20 @@ public interface RawBoundManagedObjectMetaDataFactory {
 	 *            {@link RawBoundManagedObjectMetaData} instances bound to the
 	 *            {@link ProcessState} of the {@link Office}.
 	 * @param officeManagingManagedObjects
-	 *            {@link RawOfficeManagingManagedObjectMetaData} instances.
+	 *            {@link RawManagingOfficeMetaData} instances.
 	 * @param assetManagerFactory
 	 *            {@link AssetManagerFactory}.
 	 * @param issues
 	 *            {@link OfficeFloorIssues}.
 	 * @return Resulting new list of {@link RawBoundManagedObjectMetaData}
-	 *         instances affixing in the
-	 *         {@link RawOfficeManagingManagedObjectMetaData} instances to the
-	 *         original {@link RawBoundManagedObjectMetaData} list.
+	 *         instances affixing in the {@link RawManagingOfficeMetaData}
+	 *         instances to the original {@link RawBoundManagedObjectMetaData}
+	 *         list.
 	 */
 	RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
 			String officeName,
 			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
-			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
+			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues);
 
 }

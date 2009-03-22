@@ -539,7 +539,6 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		this.recordReturn(rawAdminMetaData, rawAdminMetaData
 				.getAdministratorMetaData(), adminMetaData);
 		this.record_tasks(task);
-		rawMoMetaData.linkTasks(taskLocator, this.issues);
 		rawAdminMetaData.linkTasks(taskLocator, this.assetManagerFactory,
 				this.issues);
 		task.rawTaskMetaData.linkTasks(taskLocator, null,

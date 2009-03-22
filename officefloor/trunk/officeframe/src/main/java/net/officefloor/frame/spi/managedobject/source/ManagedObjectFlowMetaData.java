@@ -16,39 +16,41 @@
  */
 package net.officefloor.frame.spi.managedobject.source;
 
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Describes an object which the {@link ManagedObject} for the
- * {@link ManagedObjectSource} is dependent upon.
+ * Describes a {@link Flow} required by the {@link ManagedObjectSource}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectDependencyMetaData<D extends Enum<D>> {
+public interface ManagedObjectFlowMetaData<F extends Enum<F>> {
 
 	/**
-	 * Obtains the {@link Enum} key identifying this dependency. If
-	 * <code>null</code> then dependency will be referenced by this instance's
+	 * Obtains the {@link Enum} key identifying this {@link Flow}. If
+	 * <code>null</code> then {@link Flow} will be referenced by this instance's
 	 * index in the array returned from {@link ManagedObjectSourceMetaData}.
 	 * 
-	 * @return {@link Enum} key identifying the dependency or <code>null</code>
-	 *         indicating identified by an index.
+	 * @return {@link Enum} key identifying the {@link Flow} or
+	 *         <code>null</code> indicating identified by an index.
 	 */
-	D getKey();
+	F getKey();
 
 	/**
-	 * Obtains the {@link Class} that the dependent object must
-	 * extend/implement.
+	 * <p>
+	 * Obtains the {@link Class} of the argument that is passed to the
+	 * {@link Flow}.
+	 * <p>
+	 * This may be <code>null</code> to indicate no argument is passed.
 	 * 
-	 * @return Type of the dependency.
+	 * @return Type of the argument that is passed to the {@link Flow}.
 	 */
-	Class<?> getType();
+	Class<?> getArgumentType();
 
 	/**
-	 * Provides a descriptive name for this dependency. This is useful to better
-	 * describe the dependency.
+	 * Provides a descriptive name for this {@link Flow}. This is useful to
+	 * better describe the {@link Flow}.
 	 * 
-	 * @return Descriptive name for this dependency.
+	 * @return Descriptive name for this {@link Flow}.
 	 */
 	String getLabel();
 

@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.internal.configuration;
 
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -27,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel
  */
-public interface ManagingOfficeConfiguration {
+public interface ManagingOfficeConfiguration<F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link Office} managing this
@@ -46,5 +47,26 @@ public interface ManagingOfficeConfiguration {
 	 *         {@link ProcessState} of the managing {@link Office}.
 	 */
 	String getProcessBoundManagedObjectName();
+
+	/**
+	 * <p>
+	 * Obtains the {@link ManagingOfficeBuilder} for this
+	 * {@link ManagedObjectSource}.
+	 * <p>
+	 * This is to enable the {@link ManagedObjectSource} to provide additional
+	 * configuration for itself.
+	 * 
+	 * @return {@link ManagingOfficeBuilder}.
+	 */
+	ManagingOfficeBuilder<F> getBuilder();
+
+	/**
+	 * Obtains the {@link ManagedObjectFlowConfiguration} for the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ManagedObjectFlowConfiguration} for the
+	 *         {@link ManagedObjectSource}.
+	 */
+	ManagedObjectFlowConfiguration<F>[] getFlowConfiguration();
 
 }

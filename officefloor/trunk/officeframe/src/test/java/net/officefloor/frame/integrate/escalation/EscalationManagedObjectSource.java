@@ -16,29 +16,21 @@
  */
 package net.officefloor.frame.integrate.escalation;
 
-import java.util.Map;
-
-import net.officefloor.frame.api.build.HandlerFactory;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.EscalationHandler;
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.HandlerContext;
-import net.officefloor.frame.impl.AbstractMockManagedObjectSource;
-import net.officefloor.frame.impl.PassByReference;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
- * Invokes handler with an {@link EscalationHandler}.
+ * Invokes flow with an {@link EscalationHandler}.
  * 
  * @author Daniel
  */
-public class EscalationManagedObjectSource
-		extends
-		AbstractMockManagedObjectSource<None, EscalationManagedObjectSource.Handlers>
-		implements HandlerFactory<Indexed>, Handler<Indexed>, ManagedObject,
-		EscalationHandler {
+public class EscalationManagedObjectSource extends
+		AbstractManagedObjectSource<None, EscalationManagedObjectSource.Flows>
+		implements ManagedObject, EscalationHandler {
 
 	/**
 	 * Instance.
@@ -49,11 +41,12 @@ public class EscalationManagedObjectSource
 	 * Invokes processing.
 	 * 
 	 * @param argument
-	 *            Argument passed by {@link Handler}.
+	 *            Argument passed by {@link ManagedObjectSource}.
 	 */
 	public static void invokeProcessing(String argument) {
 		// Invoke processing
-		INSTANCE.handlerContext.invokeProcess(0, argument, INSTANCE, INSTANCE);
+		INSTANCE.handlerContext.invokeProcess(Flows.TASK_TO_ESCALATE, argument,
+				INSTANCE, INSTANCE);
 	}
 
 	/**
@@ -70,49 +63,34 @@ public class EscalationManagedObjectSource
 	}
 
 	/**
-	 * Store the instance.
+	 * {@link ManagedObjectExecuteContext}.
 	 */
-	protected void init() throws Exception {
-		INSTANCE = this;
-	}
-
-	/**
-	 * {@link HandlerContext}.
-	 */
-	private HandlerContext<Indexed> handlerContext;
+	private ManagedObjectExecuteContext<Flows> handlerContext;
 
 	/**
 	 * Escalation.
 	 */
 	private Throwable escalation = null;
 
-	/**
-	 * Initiate handlers.
-	 * 
-	 * @param handlerKeys
-	 *            Handler.
-	 * @param handlers
-	 *            Handlers.
-	 */
-	@Override
-	protected void initHandlers(PassByReference<Class<Handlers>> handlerKeys,
-			Map<Handlers, Class<?>> handlers) {
-		handlerKeys.setValue(Handlers.class);
-		handlers.put(Handlers.ESCALATE, this.getClass());
-	}
-
 	/*
-	 * ======================= Handler ========================================
+	 * ================= AbstractManagedObjectSource ===========================
 	 */
+
 	@Override
-	public Handler<Indexed> createHandler() {
-		return INSTANCE;
+	protected void loadSpecification(SpecificationContext context) {
+		INSTANCE = this;
 	}
 
 	@Override
-	public void setHandlerContext(HandlerContext<Indexed> context)
+	protected void loadMetaData(MetaDataContext<None, Flows> context)
 			throws Exception {
-		this.handlerContext = context;
+		context.setObjectClass(EscalationManagedObjectSource.class);
+		context.addFlow(Flows.TASK_TO_ESCALATE, String.class);
+	}
+
+	@Override
+	protected ManagedObject getManagedObject() throws Throwable {
+		return this;
 	}
 
 	/*
@@ -134,10 +112,10 @@ public class EscalationManagedObjectSource
 	}
 
 	/**
-	 * Handlers.
+	 * Flows.
 	 */
-	public static enum Handlers {
-		ESCALATE
+	public static enum Flows {
+		TASK_TO_ESCALATE
 	}
 
 }

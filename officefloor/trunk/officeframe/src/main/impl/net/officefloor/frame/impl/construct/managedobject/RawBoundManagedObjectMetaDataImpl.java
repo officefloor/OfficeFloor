@@ -18,8 +18,6 @@ package net.officefloor.frame.impl.construct.managedobject;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,26 +27,19 @@ import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectMetaDataImpl;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectDependencyConfiguration;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
-import net.officefloor.frame.internal.construct.OfficeMetaDataLocator;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
-import net.officefloor.frame.internal.construct.RawOfficeManagingManagedObjectMetaData;
+import net.officefloor.frame.internal.construct.RawManagingOfficeMetaData;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
-import net.officefloor.frame.internal.structure.OfficeMetaData;
-import net.officefloor.frame.internal.structure.WorkMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectDependencyMetaData;
 
 /**
  * Raw meta-data for a bound {@link ManagedObject}.
@@ -89,20 +80,14 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	private final RawManagedObjectMetaData<D, ?> rawMoMetaData;
 
 	/**
-	 * Dependency keys.
-	 */
-	@SuppressWarnings("unchecked")
-	private D[] dependencyKeys = (D[]) new Enum[0];
-
-	/**
 	 * Dependencies.
 	 */
-	private final Map<D, RawBoundManagedObjectMetaData<?>> dependencies = new HashMap<D, RawBoundManagedObjectMetaData<?>>();
+	private RawBoundManagedObjectMetaData<?>[] dependencies;
 
 	/**
-	 * {@link ManagedObjectMetaData} of this {@link RawManagedObjectMetaData}.
+	 * {@link ManagedObjectMetaData}.
 	 */
-	private ManagedObjectMetaDataImpl<D> managedObjectMetaData;
+	private ManagedObjectMetaData<D> managedObjectMetaData;
 
 	/**
 	 * Initiate.
@@ -215,7 +200,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	public RawBoundManagedObjectMetaData<?>[] affixOfficeManagingManagedObjects(
 			String officeName,
 			RawBoundManagedObjectMetaData<?>[] processBoundManagedObjectMetaData,
-			RawOfficeManagingManagedObjectMetaData[] officeManagingManagedObjects,
+			RawManagingOfficeMetaData<?>[] officeManagingManagedObjects,
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
 		// Create the map of process bound managed objects.
@@ -250,22 +235,11 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 		managedObjects.addAll(Arrays.asList(processBoundManagedObjectMetaData));
 
 		// Append additional process bound managed objects
-		for (RawOfficeManagingManagedObjectMetaData officeMo : officeManagingManagedObjects) {
+		for (RawManagingOfficeMetaData<?> officeMo : officeManagingManagedObjects) {
 
-			// Obtain the raw managed object meta-data
-			RawManagedObjectMetaData<?, ?> rawMoMetaData = officeMo
-					.getRawManagedObjectMetaData();
-			if (rawMoMetaData == null) {
-				issues
-						.addIssue(AssetType.OFFICE, officeName,
-								"Must provide raw managed object meta-data for office managed object");
-				continue; // Must have raw managed object meta-data
-			}
-
-			// Only bind to process state if have handler keys
-			Object[] handlerKeys = rawMoMetaData.getHandlerKeys();
-			if ((handlerKeys == null) || (handlerKeys.length == 0)) {
-				continue; // no handlers so do not bind to process state
+			// Only bind to process state if require flows
+			if (!officeMo.isRequireFlows()) {
+				continue; // no flows required so do not bind to process state
 			}
 
 			// Obtain the process bound name
@@ -316,37 +290,6 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	/**
-	 * Specifies the dependency keys.
-	 * 
-	 * @param dependencyKeyClass
-	 *            Class specifying the dependency keys.
-	 */
-	private void setDependencyKeys(Class<D> dependencyKeyClass) {
-		// Specify the dependencies in ordinal order
-		this.dependencyKeys = dependencyKeyClass.getEnumConstants();
-		Arrays.sort(this.dependencyKeys, new Comparator<D>() {
-			@Override
-			public int compare(D a, D b) {
-				return a.ordinal() - b.ordinal();
-			}
-		});
-	}
-
-	/**
-	 * Maps in the dependency.
-	 * 
-	 * @param dependencyKey
-	 *            Dependency key.
-	 * @param dependentManagedObject
-	 *            {@link RawBoundManagedObjectMetaData} of the dependent
-	 *            {@link ManagedObject}.
-	 */
-	private void mapDependency(D dependencyKey,
-			RawBoundManagedObjectMetaData<?> dependentManagedObject) {
-		this.dependencies.put(dependencyKey, dependentManagedObject);
-	}
-
-	/**
 	 * Wraps construction of {@link RawBoundManagedObjectMetaDataImpl} to avoid
 	 * generic type safe issues.
 	 * 
@@ -389,69 +332,127 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			OfficeFloorIssues issues, AssetType assetType, String assetName,
 			Map<String, RawBoundManagedObjectMetaData<?>> boundMo) {
 
+		// Obtain the dependency meta-data
+		ManagedObjectDependencyMetaData<d>[] dependencyMetaDatas = moMetaData
+				.getRawManagedObjectMetaData().getManagedObjectSourceMetaData()
+				.getDependencyMetaData();
+
+		// Obtain the dependency configuration
+		ManagedObjectDependencyConfiguration<d>[] dependencyConfigurations = moMetaData.managedObjectConfiguration
+				.getDependencyConfiguration();
+
 		// Determine if dependencies for managed object
-		Class<d> dependencyClass = moMetaData.getRawManagedObjectMetaData()
-				.getManagedObjectSourceMetaData().getDependencyKeys();
-		if (dependencyClass == null) {
-			return; // no dependencies for managed object
+		if ((dependencyMetaDatas == null) || (dependencyMetaDatas.length == 0)) {
+
+			// No dependencies but issue if dependencies configured
+			if ((dependencyConfigurations != null)
+					&& (dependencyConfigurations.length > 0)) {
+				issues.addIssue(assetType, assetName,
+						"No dependencies required but dependencies configured");
+			}
+
+			// No dependencies for managed object
+			moMetaData.dependencies = new RawBoundManagedObjectMetaData[0];
+			return;
 		}
 
-		// Specify the dependencies
-		moMetaData.setDependencyKeys(dependencyClass);
+		// Create the dependency mappings for the configuration
+		Map<Integer, ManagedObjectDependencyConfiguration<d>> dependencyMappings = new HashMap<Integer, ManagedObjectDependencyConfiguration<d>>();
+		for (int i = 0; i < dependencyConfigurations.length; i++) {
+			ManagedObjectDependencyConfiguration<d> dependencyConfiguration = dependencyConfigurations[i];
 
-		// Create the dependency mappings
-		ManagedObjectDependencyConfiguration<d>[] dependencyMappings = moMetaData.managedObjectConfiguration
-				.getDependencyConfiguration();
-		Map<d, ManagedObjectDependencyConfiguration<d>> dependencies = new EnumMap<d, ManagedObjectDependencyConfiguration<d>>(
-				dependencyClass);
-		for (ManagedObjectDependencyConfiguration<d> dependencyMapping : dependencyMappings) {
-			dependencies.put(dependencyMapping.getDependencyKey(),
-					dependencyMapping);
+			// Obtain the index to identify the dependency
+			d dependencyKey = dependencyConfiguration.getDependencyKey();
+			int index = (dependencyKey != null ? dependencyKey.ordinal() : i);
+
+			// Load the dependency at its index
+			dependencyMappings.put(new Integer(index), dependencyConfiguration);
 		}
 
 		// Load the dependencies
-		for (d dependencyKey : dependencyClass.getEnumConstants()) {
+		Map<Integer, RawBoundManagedObjectMetaData<?>> dependencies = new HashMap<Integer, RawBoundManagedObjectMetaData<?>>();
+		for (int i = 0; i < dependencyMetaDatas.length; i++) {
+			ManagedObjectDependencyMetaData<d> dependencyMetaData = dependencyMetaDatas[i];
 
-			// Obtain the dependency mapping for the key
-			ManagedObjectDependencyConfiguration<d> dependencyMapping = dependencies
-					.get(dependencyKey);
+			// Obtain the index to identify the dependency
+			d dependencyKey = dependencyMetaData.getKey();
+			int index = (dependencyKey != null ? dependencyKey.ordinal() : i);
+
+			// Create name to identify dependency
+			String label = dependencyMetaData.getLabel();
+			String dependencyLabel = "dependency "
+					+ index
+					+ " (key="
+					+ (dependencyKey != null ? dependencyKey.toString()
+							: "<indexed>") + ", label="
+					+ (!ConstructUtil.isBlank(label) ? label : "<no label>")
+					+ ")";
+
+			// Obtain the mapping for the dependency
+			ManagedObjectDependencyConfiguration<d> dependencyMapping = dependencyMappings
+					.get(new Integer(index));
 			if (dependencyMapping == null) {
-				issues.addIssue(assetType, assetName,
-						"No mapping for dependency key '" + dependencyKey
-								+ "' of managed object "
-								+ moMetaData.boundManagedObjectName);
+				issues.addIssue(assetType, assetName, "No mapping for "
+						+ dependencyLabel + " of "
+						+ ManagedObject.class.getSimpleName() + " "
+						+ moMetaData.boundManagedObjectName);
 				return; // no dependency mapping
 			}
+
+			// Remove configuration for later check no extra configured
+			dependencyMappings.remove(new Integer(index));
 
 			// Obtain the dependent managed object
 			String dependentMoName = dependencyMapping
 					.getScopeManagedObjectName();
 			if (ConstructUtil.isBlank(dependentMoName)) {
 				issues.addIssue(assetType, assetName,
-						"No dependency name specified for dependency key '"
-								+ dependencyKey + "' of managed object "
-								+ moMetaData.boundManagedObjectName);
+						"No dependency name specified for " + dependencyLabel
+								+ " of " + ManagedObject.class.getSimpleName()
+								+ " " + moMetaData.boundManagedObjectName);
 				return; // no dependency specified
 			}
-			RawBoundManagedObjectMetaData<?> dependencyMetaData = boundMo
+			RawBoundManagedObjectMetaData<?> dependency = boundMo
 					.get(dependentMoName);
 			if (dependencyMetaData == null) {
-				issues.addIssue(assetType, assetName,
-						"No dependent managed object by name '"
-								+ dependentMoName + "'");
+				issues.addIssue(assetType, assetName, "No dependent "
+						+ ManagedObject.class.getSimpleName() + " by name '"
+						+ dependentMoName + "' for " + dependencyLabel);
 				return; // no dependency
 			}
 
+			// Ensure the dependency object is of correct type
+			Class<?> requiredType = dependencyMetaData.getType();
+			Class<?> dependencyType = dependency.getRawManagedObjectMetaData()
+					.getObjectType();
+			if (!requiredType.isAssignableFrom(dependencyType)) {
+				issues.addIssue(assetType, assetName, "Dependency object for "
+						+ dependencyLabel + " is incompatible (required type="
+						+ requiredType.getName() + ", dependency type="
+						+ dependencyType.getName() + ")");
+				return; // incompatible dependency
+			}
+
 			// Load the dependency
-			moMetaData.mapDependency(dependencyKey, dependencyMetaData);
+			dependencies.put(new Integer(index), dependency);
 		}
+
+		// Ensure there are no additional dependencies configured
+		if (dependencyMappings.size() > 0) {
+			issues.addIssue(assetType, assetName,
+					"Extra dependencies configured");
+			return; // additional dependencies configured
+		}
+
+		// Specify the dependencies on the bound managed object
+		moMetaData.dependencies = ConstructUtil.toArray(dependencies,
+				new RawBoundManagedObjectMetaData[0]);
 	}
 
 	/**
 	 * Loads the {@link ManagedObjectMetaData} for the
 	 * {@link RawBoundManagedObjectMetaData}.
 	 */
-	@SuppressWarnings("unchecked")
 	private void loadManagedObjectMetaData(
 			AssetManagerFactory assetManagerFactory, OfficeFloorIssues issues) {
 
@@ -460,71 +461,28 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			return; // already loaded
 		}
 
-		// Obtain the details of the managed object
-		Class<?> objectType = this.rawMoMetaData.getObjectType();
-		ManagedObjectSource<D, ?> managedObjectSource = this.rawMoMetaData
-				.getManagedObjectSource();
-		ManagedObjectPool managedObjectPool = this.rawMoMetaData
-				.getManagedObjectPool();
-		boolean isManagedObjectAsynchronous = this.rawMoMetaData
-				.isAsynchronous();
-		boolean isManagedObjectCoordinating = this.rawMoMetaData
-				.isCoordinating();
-		long timeout = this.rawMoMetaData.getDefaultTimeout();
+		// Obtain the dependency mappings
+		ManagedObjectIndex[] dependencyMappings = null;
+		if (this.dependencies != null) {
+			// Have dependencies so load them
+			dependencyMappings = new ManagedObjectIndex[this.dependencies.length];
+			for (int i = 0; i < dependencyMappings.length; i++) {
+				RawBoundManagedObjectMetaData<?> dependency = this.dependencies[i];
 
-		// Create the sourcing asset manager
-		AssetManager sourcingAssetManager = assetManagerFactory
-				.createAssetManager(AssetType.MANAGED_OBJECT, this.index
-						.getManagedObjectScope()
-						+ ":" + this.boundManagedObjectName, "sourcing", issues);
+				// Do not map if not have dependency
+				if (dependency == null) {
+					continue;
+				}
 
-		// Create operations asset manager only if asynchronous
-		AssetManager operationsAssetManager = null;
-		if (isManagedObjectAsynchronous) {
-			// Asynchronous so provide operations manager
-			operationsAssetManager = assetManagerFactory.createAssetManager(
-					AssetType.MANAGED_OBJECT, this.index
-							.getManagedObjectScope()
-							+ ":" + this.boundManagedObjectName, "operations",
-					issues);
-		}
-
-		// Obtain the dependency mapping
-		Map<D, ManagedObjectIndex> dependencyMapping = null;
-		for (D dependencyKey : this.dependencyKeys) {
-
-			// Lazy create the dependency mapping based on key type
-			if (dependencyMapping == null) {
-				Class<D> dependencyKeyClass = (Class<D>) dependencyKey
-						.getClass();
-				dependencyMapping = new EnumMap<D, ManagedObjectIndex>(
-						dependencyKeyClass);
+				// Map in the dependency
+				dependencyMappings[i] = dependency.getManagedObjectIndex();
 			}
-
-			// Obtain the dependency
-			RawBoundManagedObjectMetaData<?> dependency = this.dependencies
-					.get(dependencyKey);
-			if (dependency == null) {
-				continue; // dependency not available
-			}
-
-			// TODO validate the dependency object is of correct type
-
-			// Load the dependency
-			dependencyMapping.put(dependencyKey, dependency
-					.getManagedObjectIndex());
-		}
-		if (dependencyMapping == null) {
-			// Ensure have a dependency map
-			dependencyMapping = Collections.emptyMap();
 		}
 
 		// Create and specify the managed object meta-data
-		this.managedObjectMetaData = new ManagedObjectMetaDataImpl<D>(
-				this.boundManagedObjectName, objectType, managedObjectSource,
-				managedObjectPool, sourcingAssetManager,
-				isManagedObjectAsynchronous, operationsAssetManager,
-				isManagedObjectCoordinating, dependencyMapping, timeout);
+		this.managedObjectMetaData = this.rawMoMetaData
+				.createManagedObjectMetaData(this, dependencyMappings,
+						assetManagerFactory, issues);
 	}
 
 	/*
@@ -547,56 +505,13 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	}
 
 	@Override
-	public D[] getDependencyKeys() {
-		return this.dependencyKeys;
-	}
-
-	@Override
-	public RawBoundManagedObjectMetaData<?> getDependency(D dependencyKey) {
-		return this.dependencies.get(dependencyKey);
+	public RawBoundManagedObjectMetaData<?>[] getDependencies() {
+		return this.dependencies;
 	}
 
 	@Override
 	public ManagedObjectMetaData<D> getManagedObjectMetaData() {
 		return this.managedObjectMetaData;
-	}
-
-	@Override
-	public void linkTasks(OfficeMetaDataLocator taskMetaDataLocator,
-			OfficeFloorIssues issues) {
-
-		// Obtain the office meta-data
-		OfficeMetaData officeMetaData = taskMetaDataLocator.getOfficeMetaData();
-
-		// Obtain the recycle task meta-data
-		FlowMetaData<?> recycleFlowMetaData = null;
-		String recycleWorkName = this.rawMoMetaData.getRecycleWorkName();
-		NO_RECYCLE_TASK: if (recycleWorkName != null) {
-
-			// Locate the work meta-data
-			WorkMetaData<?> workMetaData = taskMetaDataLocator
-					.getWorkMetaData(recycleWorkName);
-			if (workMetaData == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.boundManagedObjectName, "Recycle work '"
-								+ recycleWorkName + "' not found");
-				break NO_RECYCLE_TASK;
-			}
-
-			// Obtain the initial flow of work as recycle flow
-			recycleFlowMetaData = workMetaData.getInitialFlowMetaData();
-			if (recycleFlowMetaData == null) {
-				issues.addIssue(AssetType.MANAGED_OBJECT,
-						this.boundManagedObjectName,
-						"No initial flow on work '" + recycleWorkName
-								+ "' for recycle task");
-				break NO_RECYCLE_TASK;
-			}
-		}
-
-		// Load the remaining state of the managed object meta-data
-		this.managedObjectMetaData.loadRemainingState(officeMetaData,
-				recycleFlowMetaData);
 	}
 
 }

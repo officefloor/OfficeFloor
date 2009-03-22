@@ -18,8 +18,6 @@ package net.officefloor.frame.internal.configuration;
 
 import java.util.Properties;
 
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
@@ -30,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel
  */
-public interface ManagedObjectSourceConfiguration<H extends Enum<H>, MS extends ManagedObjectSource<?, H>> {
+public interface ManagedObjectSourceConfiguration<F extends Enum<F>, MS extends ManagedObjectSource<?, F>> {
 
 	/**
 	 * Obtains the name of this {@link ManagedObjectSource}.
@@ -38,26 +36,6 @@ public interface ManagedObjectSourceConfiguration<H extends Enum<H>, MS extends 
 	 * @return Name of this {@link ManagedObjectSource}.
 	 */
 	String getManagedObjectSourceName();
-
-	/**
-	 * <p>
-	 * Obtains the {@link ManagedObjectBuilder} for this
-	 * {@link ManagedObjectSource}.
-	 * <p>
-	 * This is to enable the {@link ManagedObjectSource} to provide additional
-	 * configuration for itself.
-	 * 
-	 * @return {@link ManagedObjectBuilder}.
-	 */
-	ManagedObjectBuilder<H> getBuilder();
-
-	/**
-	 * Obtains the {@link ManagingOfficeConfiguration} detailing the
-	 * {@link Office} responsible for managing this {@link ManagedObjectSource}.
-	 * 
-	 * @return {@link ManagingOfficeConfiguration}.
-	 */
-	ManagingOfficeConfiguration getManagingOfficeConfiguration();
 
 	/**
 	 * Obtains the {@link Class} of the {@link ManagedObjectSource}.
@@ -74,6 +52,14 @@ public interface ManagedObjectSourceConfiguration<H extends Enum<H>, MS extends 
 	Properties getProperties();
 
 	/**
+	 * Obtains the {@link ManagingOfficeConfiguration} detailing the
+	 * {@link Office} responsible for managing this {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ManagingOfficeConfiguration}.
+	 */
+	ManagingOfficeConfiguration<F> getManagingOfficeConfiguration();
+
+	/**
 	 * Obtains the {@link ManagedObjectPool} for this
 	 * {@link ManagedObjectSource}.
 	 * 
@@ -83,27 +69,14 @@ public interface ManagedObjectSourceConfiguration<H extends Enum<H>, MS extends 
 	ManagedObjectPool getManagedObjectPool();
 
 	/**
-	 * Obtains the default timeout for asynchronous operations on the
-	 * {@link ManagedObject}.
+	 * Obtains the default timeout default timeout to:
+	 * <ol>
+	 * <li>to source the {@link ManagedObject}</li>
+	 * <li>have asynchronous operations on the {@link ManagedObject} complete</li>
+	 * </ol>
 	 * 
-	 * @return Default timeout for asynchronous operations on the
-	 *         {@link ManagedObject}.
+	 * @return Default timeout.
 	 */
 	long getDefaultTimeout();
-
-	/**
-	 * Obtains the {@link ManagedObjectHandlerBuilder} to allow enhancing.
-	 * 
-	 * @return {@link ManagedObjectHandlerBuilder}.
-	 */
-	ManagedObjectHandlerBuilder<H> getHandlerBuilder();
-
-	/**
-	 * Obtains the {@link HandlerConfiguration} for the
-	 * {@link ManagedObjectSource}.
-	 * 
-	 * @return {@link HandlerConfiguration} for the {@link ManagedObjectSource}.
-	 */
-	HandlerConfiguration<H, ?>[] getHandlerConfiguration();
 
 }
