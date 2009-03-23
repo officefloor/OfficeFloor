@@ -41,6 +41,7 @@ import net.officefloor.frame.internal.construct.RawBoundManagedObjectMetaData;
 import net.officefloor.frame.internal.construct.RawManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
@@ -54,6 +55,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -467,6 +469,65 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to link a parameter to the added {@link Task}.
+	 */
+	public void testLinkParameterToAddedTask() {
+
+		final String WORK_NAME = MANAGED_OBJECT_NAME + ".WORK";
+		final String TASK_NAME = "TASK";
+		final Class<?> parameterType = String.class;
+
+		// Record linking a parameter to the added task
+		this.record_initManagedObject();
+		this.recordReturn(this.officeBuilder, this.officeBuilder.addWork(
+				WORK_NAME, this.workFactory), this.workBuilder);
+		this.recordReturn(this.workBuilder, this.workBuilder.addTask(TASK_NAME,
+				this.taskFactory), this.taskBuilder);
+		this.workBuilder.setInitialTask(TASK_NAME);
+		this.taskBuilder.linkParameter(0, parameterType);
+		this.record_createRawMetaData(ManagedObject.class, null);
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		MockManagedObjectSource.addWorkName = "WORK";
+		MockManagedObjectSource.addTaskName = TASK_NAME;
+		MockManagedObjectSource.addTaskLinkedParameter = parameterType;
+		this.constructRawManagedObjectMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to link a parameter to the added {@link Task}.
+	 */
+	public void testLinkFlowToAddedTask() {
+
+		final String WORK_NAME = MANAGED_OBJECT_NAME + ".WORK";
+		final String TASK_NAME = "TASK";
+		final String LINK_WORK_NAME = MANAGED_OBJECT_NAME + ".LINK_WORK";
+		final String LINK_TASK_NAME = "LINK_TASK";
+
+		// Record linking a parameter to the added task
+		this.record_initManagedObject();
+		this.recordReturn(this.officeBuilder, this.officeBuilder.addWork(
+				WORK_NAME, this.workFactory), this.workBuilder);
+		this.recordReturn(this.workBuilder, this.workBuilder.addTask(TASK_NAME,
+				this.taskFactory), this.taskBuilder);
+		this.workBuilder.setInitialTask(TASK_NAME);
+		this.taskBuilder.linkFlow(0, LINK_WORK_NAME, LINK_TASK_NAME,
+				FlowInstigationStrategyEnum.SEQUENTIAL, Object.class);
+		this.record_createRawMetaData(ManagedObject.class, null);
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		MockManagedObjectSource.addWorkName = "WORK";
+		MockManagedObjectSource.addTaskName = TASK_NAME;
+		MockManagedObjectSource.addTaskLinkWorkName = "LINK_WORK";
+		MockManagedObjectSource.addTaskLinkTaskName = LINK_TASK_NAME;
+		this.constructRawManagedObjectMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure able to add a startup {@link Task}.
 	 */
 	public void testAddStartupTask() {
@@ -783,6 +844,21 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		public static String addTaskName = null;
 
 		/**
+		 * Parameter type for a linked parameter to the {@link Task}.
+		 */
+		public static Class<?> addTaskLinkedParameter = null;
+
+		/**
+		 * Name of {@link Flow} to link to the added {@link Task}.
+		 */
+		public static String addTaskLinkWorkName = null;
+
+		/**
+		 * Name of {@link Flow} to link to the added {@link Task}.
+		 */
+		public static String addTaskLinkTaskName = null;
+
+		/**
 		 * {@link WorkFactory}.
 		 */
 		public static WorkFactory<?> workFactory = null;
@@ -828,6 +904,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			recycleWorkFactory = null;
 			addWorkName = null;
 			addTaskName = null;
+			addTaskLinkedParameter = null;
+			addTaskLinkTaskName = null;
 			MockManagedObjectSource.workFactory = workFactory;
 			MockManagedObjectSource.taskFactory = taskFactory;
 			initFailure = null;
@@ -884,8 +962,22 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			// Add a task
 			if (addWorkName != null) {
 				// Add work and task that should have name spaced names
-				context.addWork(addWorkName, workFactory).addTask(addTaskName,
+				ManagedObjectTaskBuilder<?, ?> taskBuilder = context.addWork(
+						addWorkName, workFactory).addTask(addTaskName,
 						taskFactory);
+
+				// Link in the parameter
+				if (addTaskLinkedParameter != null) {
+					taskBuilder.linkParameter(0, addTaskLinkedParameter);
+				}
+
+				// Link in the flow
+				if (addTaskLinkWorkName != null) {
+					taskBuilder.linkFlow(0, addTaskLinkWorkName,
+							addTaskLinkTaskName,
+							FlowInstigationStrategyEnum.SEQUENTIAL,
+							Object.class);
+				}
 			}
 
 			// Register the startup task

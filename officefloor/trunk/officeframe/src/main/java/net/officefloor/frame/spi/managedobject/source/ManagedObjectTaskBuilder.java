@@ -24,6 +24,27 @@ import net.officefloor.frame.api.execute.Task;
  * 
  * @author Daniel
  */
-public interface ManagedObjectTaskBuilder<F extends Enum<F>> extends
-		FlowNodeBuilder<F> {
+public interface ManagedObjectTaskBuilder<D extends Enum<D>, F extends Enum<F>>
+		extends FlowNodeBuilder<F> {
+
+	/**
+	 * Links in the parameter for this {@link Task}.
+	 * 
+	 * @param key
+	 *            Key identifying the parameter.
+	 * @param parameterType
+	 *            Type of the parameter.
+	 */
+	void linkParameter(D key, Class<?> parameterType);
+
+	/**
+	 * Links in the parameter for this {@link Task}.
+	 * 
+	 * @param index
+	 *            Index identifying the parameter.
+	 * @param parameterType
+	 *            Type of the parameter.
+	 */
+	void linkParameter(int index, Class<?> parameterType);
+
 }

@@ -19,7 +19,6 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 import java.util.Properties;
 
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
@@ -268,11 +267,11 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 		 */
 
 		@Override
-		public <P, f extends Enum<f>> ManagedObjectTaskBuilder<f> addTask(
-				String taskName, TaskFactory<W, None, f> taskFactory) {
+		public <d extends Enum<d>, f extends Enum<f>> ManagedObjectTaskBuilder<d, f> addTask(
+				String taskName, TaskFactory<W, d, f> taskFactory) {
 
 			// Create and initialise the task
-			TaskBuilder<W, None, f> taskBuilder = this.workBuilder.addTask(
+			TaskBuilder<W, d, f> taskBuilder = this.workBuilder.addTask(
 					taskName, taskFactory);
 
 			// Register as initial task of work if first task
@@ -282,20 +281,20 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 			}
 
 			// Return the task builder for the managed object source
-			return new ManagedObjectTaskBuilderImpl<f>(taskBuilder);
+			return new ManagedObjectTaskBuilderImpl<d, f>(taskBuilder);
 		}
 	}
 
 	/**
 	 * {@link ManagedObjectTaskBuilder} implementation.
 	 */
-	private class ManagedObjectTaskBuilderImpl<f extends Enum<f>> implements
-			ManagedObjectTaskBuilder<f> {
+	private class ManagedObjectTaskBuilderImpl<d extends Enum<d>, f extends Enum<f>>
+			implements ManagedObjectTaskBuilder<d, f> {
 
 		/**
 		 * {@link TaskBuilder}.
 		 */
-		private final TaskBuilder<?, None, f> taskBuilder;
+		private final TaskBuilder<?, d, f> taskBuilder;
 
 		/**
 		 * Initiate.
@@ -303,13 +302,23 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 		 * @param taskBuilder
 		 *            {@link TaskBuilder}.
 		 */
-		public ManagedObjectTaskBuilderImpl(TaskBuilder<?, None, f> taskBuilder) {
+		public ManagedObjectTaskBuilderImpl(TaskBuilder<?, d, f> taskBuilder) {
 			this.taskBuilder = taskBuilder;
 		}
 
 		/*
 		 * ============== ManagedObjectTaskBuilder =====================
 		 */
+
+		@Override
+		public void linkParameter(d key, Class<?> parameterType) {
+			this.taskBuilder.linkParameter(key, parameterType);
+		}
+
+		@Override
+		public void linkParameter(int index, Class<?> parameterType) {
+			this.taskBuilder.linkParameter(index, parameterType);
+		}
 
 		@Override
 		public void setTeam(String teamName) {
