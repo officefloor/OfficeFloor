@@ -19,7 +19,7 @@ package net.officefloor.plugin.xml.marshall.tree;
 import java.io.InputStream;
 
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
-import net.officefloor.frame.util.ManagedObjectSourceLoader;
+import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 
 /**
@@ -33,7 +33,7 @@ public class TreeXmlMarshallerManagedObjectSourceTest extends
 	/*
 	 * =============== AbstractTreeXmlMarshallerTestCase ==================
 	 */
-	
+
 	@Override
 	protected TreeXmlMarshaller createFlatMarshaller() throws Throwable {
 		return this.createMarshaller("FlatMetaData.xml");
@@ -93,7 +93,7 @@ public class TreeXmlMarshallerManagedObjectSourceTest extends
 		this.replayMockObjects();
 
 		// Source the managed object
-		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
+		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		loader
 				.addProperty(
 						TreeXmlMarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME,

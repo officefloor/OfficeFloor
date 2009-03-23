@@ -15,11 +15,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.officefloor</groupId>
-			<artifactId>officemodel</artifactId>
-			<version>0.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor</groupId>
 			<artifactId>officeframe</artifactId>
 			<version>0.0.1</version>
 		</dependency>
@@ -33,6 +28,7 @@
 			<groupId>easymock</groupId>
 			<artifactId>easymock</artifactId>
 			<version>1.1</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

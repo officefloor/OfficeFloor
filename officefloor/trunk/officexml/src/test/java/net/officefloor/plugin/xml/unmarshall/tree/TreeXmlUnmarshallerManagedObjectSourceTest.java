@@ -19,7 +19,7 @@ package net.officefloor.plugin.xml.unmarshall.tree;
 import java.io.InputStream;
 
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
-import net.officefloor.frame.util.ManagedObjectSourceLoader;
+import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 
 /**
@@ -74,7 +74,7 @@ public class TreeXmlUnmarshallerManagedObjectSourceTest extends
 		this.replayMockObjects();
 
 		// Load the managed object source
-		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
+		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		loader
 				.addProperty(
 						TreeXmlUnmarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME,
