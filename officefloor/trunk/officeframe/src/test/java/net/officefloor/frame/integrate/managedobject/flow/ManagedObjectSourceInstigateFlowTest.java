@@ -19,6 +19,7 @@ package net.officefloor.frame.integrate.managedobject.flow;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -34,13 +35,14 @@ import net.officefloor.frame.util.AbstractSingleTask;
  * 
  * @author Daniel
  */
-public class ManagedObjectSourceInstigateFlowTest extends AbstractOfficeConstructTestCase {
+public class ManagedObjectSourceInstigateFlowTest extends
+		AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensures handler invokes process.
+	 * Ensures {@link ManagedObjectSource} invokes process.
 	 */
 	@SuppressWarnings("unchecked")
-	public void testHandler() throws Exception {
+	public void testInvokeFlow() throws Exception {
 
 		String officeName = this.getOfficeName();
 
@@ -54,14 +56,16 @@ public class ManagedObjectSourceInstigateFlowTest extends AbstractOfficeConstruc
 		// Provide flow for input managed object
 		ManagingOfficeBuilder<InputManagedObjectSource.Flows> managingOfficeBuilder = moBuilder
 				.setManagingOffice(officeName);
+		managingOfficeBuilder.setProcessBoundManagedObjectName("INPUT");
 		managingOfficeBuilder.linkProcess(InputManagedObjectSource.Flows.INPUT,
 				"WORK", "TASK");
 
-		// Provide task for handler input
+		// Provide task for managed object source input
 		InputTask inputTask = new InputTask();
 		this.constructWork("WORK", inputTask, "TASK");
-		this.constructTask("TASK", inputTask, "TEAM", "INPUT", Object.class,
-				null, null);
+		TaskBuilder<?, ?, ?, ?> taskBuilder = this.constructTask("TASK",
+				inputTask, "TEAM", "INPUT", Object.class, null, null);
+		taskBuilder.linkParameter(1, Object.class);
 
 		// Register the team
 		this.constructTeam("TEAM", new PassiveTeam());
@@ -91,7 +95,7 @@ public class ManagedObjectSourceInstigateFlowTest extends AbstractOfficeConstruc
 	}
 
 	/**
-	 * Task to process handler input.
+	 * Task to process {@link ManagedObjectSource} input.
 	 */
 	private static class InputTask extends
 			AbstractSingleTask<Object, Work, Indexed, Indexed> {
@@ -113,11 +117,12 @@ public class ManagedObjectSourceInstigateFlowTest extends AbstractOfficeConstruc
 		@Override
 		public Object doTask(TaskContext<Object, Work, Indexed, Indexed> context)
 				throws Throwable {
-			// Obtain the parameter
-			this.parameter = context.getParameter();
 
 			// Obtain the object
 			this.object = context.getObject(0);
+
+			// Obtain the parameter
+			this.parameter = context.getObject(1);
 
 			// No return
 			return null;

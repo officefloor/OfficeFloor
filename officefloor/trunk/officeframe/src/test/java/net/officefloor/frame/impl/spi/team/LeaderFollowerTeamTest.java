@@ -21,7 +21,7 @@ import net.officefloor.frame.impl.spi.team.TeamMember;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link net.officefloor.frame.impl.spi.team.LeaderFollowerTeam}.
+ * Tests the {@link LeaderFollowerTeam}.
  * 
  * @author Daniel
  */
@@ -68,7 +68,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	 */
 	private void leaderFollowerTest(int teamMemberCount, int taskCount) {
 		// Create the team
-		team = new LeaderFollowerTeam("Test", teamMemberCount, 10);
+		this.team = new LeaderFollowerTeam("Test", teamMemberCount, 10);
 
 		// Start the team
 		this.team.startWorking();

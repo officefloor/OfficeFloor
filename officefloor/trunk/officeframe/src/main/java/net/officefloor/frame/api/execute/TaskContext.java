@@ -17,6 +17,8 @@
 package net.officefloor.frame.api.execute;
 
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
@@ -56,17 +58,17 @@ public interface TaskContext<P extends Object, W extends Work, M extends Enum<M>
 
 	/**
 	 * <p>
-	 * Obtains the lock for the process containing the thread executing this
-	 * {@link Task}.
+	 * Obtains the lock for the {@link ProcessState} containing the
+	 * {@link ThreadState} executing this {@link Task}.
 	 * <p>
-	 * This enables different threads of the process to co-ordinate.
+	 * This enables different {@link ThreadState} instances of a
+	 * {@link ProcessState} to coordinate.
 	 * 
-	 * @return Process level lock.
+	 * @return {@link ProcessState} lock.
 	 */
 	Object getProcessLock();
 
 	/**
-	 * <p>
 	 * Obtains the object of the specified {@link ManagedObject}.
 	 * 
 	 * @param key
@@ -125,7 +127,6 @@ public interface TaskContext<P extends Object, W extends Work, M extends Enum<M>
 	FlowFuture doFlow(int flowIndex, Object parameter);
 
 	/**
-	 * <p>
 	 * Stops this {@link Task} from proceeding to the next {@link Task} in its
 	 * {@link Flow} until the {@link Flow} of the input {@link FlowFuture} is
 	 * complete.

@@ -311,15 +311,14 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		// Required process bound name if requires flows
 		String processBoundManagedObjectName = null;
 		if (RawManagingOfficeMetaDataImpl.isRequireFlows(flowMetaDatas)) {
-			// Requires handlers, so must be bound to process of office
+			// Requires flows, so must be bound to process of office
 			processBoundManagedObjectName = managingOfficeConfiguration
 					.getProcessBoundManagedObjectName();
 			if (ConstructUtil.isBlank(processBoundManagedObjectName)) {
 				issues
-						.addIssue(
-								AssetType.MANAGED_OBJECT,
+						.addIssue(AssetType.MANAGED_OBJECT,
 								managedObjectSourceName,
-								"Must specify the process bound name as Managed Object Source requires handlers");
+								"Must specify the process bound name as Managed Object Source requires flows");
 				return null; // can not carry on
 			}
 		}
@@ -418,7 +417,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 		// Create the source managed object asset manager
 		AssetManager sourcingAssetManager = assetManagerFactory
 				.createAssetManager(AssetType.MANAGED_OBJECT, scope + ":"
-						+ boundName, "sourcing", issues);
+						+ boundName, "source", issues);
 
 		// Create operations asset manager only if asynchronous
 		AssetManager operationsAssetManager = null;

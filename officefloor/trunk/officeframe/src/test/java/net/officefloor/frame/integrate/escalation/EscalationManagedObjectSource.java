@@ -45,7 +45,7 @@ public class EscalationManagedObjectSource extends
 	 */
 	public static void invokeProcessing(String argument) {
 		// Invoke processing
-		INSTANCE.handlerContext.invokeProcess(Flows.TASK_TO_ESCALATE, argument,
+		INSTANCE.executeContext.invokeProcess(Flows.TASK_TO_ESCALATE, argument,
 				INSTANCE, INSTANCE);
 	}
 
@@ -65,12 +65,19 @@ public class EscalationManagedObjectSource extends
 	/**
 	 * {@link ManagedObjectExecuteContext}.
 	 */
-	private ManagedObjectExecuteContext<Flows> handlerContext;
+	private ManagedObjectExecuteContext<Flows> executeContext;
 
 	/**
 	 * Escalation.
 	 */
 	private Throwable escalation = null;
+
+	/**
+	 * Initiate and allow for invoking processes.
+	 */
+	public EscalationManagedObjectSource() {
+		INSTANCE = this;
+	}
 
 	/*
 	 * ================= AbstractManagedObjectSource ===========================
@@ -86,6 +93,12 @@ public class EscalationManagedObjectSource extends
 			throws Exception {
 		context.setObjectClass(EscalationManagedObjectSource.class);
 		context.addFlow(Flows.TASK_TO_ESCALATE, String.class);
+	}
+
+	@Override
+	public void start(ManagedObjectExecuteContext<Flows> context)
+			throws Exception {
+		this.executeContext = context;
 	}
 
 	@Override

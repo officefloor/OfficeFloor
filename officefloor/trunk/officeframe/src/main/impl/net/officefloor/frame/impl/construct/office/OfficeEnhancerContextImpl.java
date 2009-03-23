@@ -97,7 +97,7 @@ public class OfficeEnhancerContextImpl implements OfficeEnhancerContext {
 				.getFlowNodeBuilder(namespace, workName, taskName);
 		if (flowBuilder == null) {
 			throw new OfficeEnhancerError("Task '" + taskName + "' of work '"
-					+ (namespace == null ? "" : namespace + ":") + workName
+					+ OfficeBuilderImpl.getNamespacedName(namespace, workName)
 					+ "' not available for enhancement");
 		}
 		return flowBuilder;
