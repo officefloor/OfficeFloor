@@ -29,7 +29,6 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
-import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.task.TaskBuilderImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
@@ -102,16 +101,14 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	public TaskBuilder<W, ?, ?> getTaskBuilder(String namespace, String taskName) {
 
 		// Obtain the task builder
-		String namespacedTaskName = OfficeBuilderImpl.getNamespacedName(
-				namespace, taskName);
 		TaskBuilderImpl<W, ?, ?> taskBuilder = null;
 		for (TaskBuilderImpl<W, ?, ?> task : this.tasks) {
-			if (namespacedTaskName.equals(task.getTaskName())) {
+			if (taskName.equals(task.getTaskName())) {
 				taskBuilder = task;
 			}
 		}
 
-		// Return the task builder (whether have or not)s
+		// Return the task builder (whether have or not)
 		return taskBuilder;
 	}
 
