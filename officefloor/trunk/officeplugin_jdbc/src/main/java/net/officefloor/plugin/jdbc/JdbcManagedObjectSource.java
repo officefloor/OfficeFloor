@@ -18,6 +18,7 @@ import javax.sql.PooledConnection;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
@@ -209,7 +210,8 @@ public class JdbcManagedObjectSource extends
 	}
 
 	@Override
-	protected void start(StartContext<None> startContext) throws Exception {
+	public void start(ManagedObjectExecuteContext<None> context)
+			throws Exception {
 
 		// Obtain a connection to the database (to ensure working)
 		PooledConnection connection = this.dataSource.getPooledConnection();

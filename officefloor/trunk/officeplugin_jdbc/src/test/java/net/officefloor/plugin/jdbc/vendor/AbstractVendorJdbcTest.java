@@ -30,7 +30,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.frame.util.ManagedObjectSourceLoader;
+import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.plugin.jdbc.ConnectionValidator;
 import net.officefloor.plugin.jdbc.JdbcDataSourceAccess;
 import net.officefloor.plugin.jdbc.JdbcManagedObjectSource;
@@ -60,7 +60,7 @@ public abstract class AbstractVendorJdbcTest extends
 		super.setUp();
 
 		// Obtain the connection pool data source
-		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
+		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 		Properties properties = this.getDataSourceProperties();
 		for (String name : properties.stringPropertyNames()) {
 			String value = properties.getProperty(name);

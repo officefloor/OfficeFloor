@@ -22,31 +22,30 @@ import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParam
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
- * Recycles the {@link net.officefloor.plugin.jdbc.JdbcManagedObject}.
+ * Recycles the {@link JdbcManagedObject}.
  * 
  * @author Daniel
  */
-public class RecycleJdbcTask
-		extends
-		AbstractSingleTask<RecycleManagedObjectParameter<JdbcManagedObject>, RecycleJdbcTask, Indexed, Indexed> {
+public class RecycleJdbcTask extends
+		AbstractSingleTask<RecycleJdbcTask, Indexed, Indexed> {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+	 * ===================== Task =============================================
 	 */
-	public Object doTask(
-			TaskContext<RecycleManagedObjectParameter<JdbcManagedObject>, RecycleJdbcTask, Indexed, Indexed> context)
+
+	@Override
+	public Object doTask(TaskContext<RecycleJdbcTask, Indexed, Indexed> context)
 			throws Exception {
 
 		// Obtain the recycle parameter
-		RecycleManagedObjectParameter<JdbcManagedObject> recycleParameter = context
-				.getParameter();
+		RecycleManagedObjectParameter<JdbcManagedObject> recycleParameter = this
+				.getRecycleManagedObjectParameter(context,
+						JdbcManagedObject.class);
 
-		// Obtain the jdbc managed object
+		// Obtain the JDBC managed object
 		JdbcManagedObject mo = recycleParameter.getManagedObject();
 
-		// Recycle the jdbc managed object
+		// Recycle the JDBC managed object
 		mo.recycle();
 
 		// Recycled, may reuse
