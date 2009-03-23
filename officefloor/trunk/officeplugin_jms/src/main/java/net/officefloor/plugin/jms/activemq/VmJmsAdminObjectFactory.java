@@ -93,8 +93,12 @@ public class VmJmsAdminObjectFactory implements JmsAdminObjectFactory {
 	 *             If fails to stop.
 	 */
 	public synchronized static void stop() throws Exception {
+
 		// Stop the broker
 		service.stop();
+
+		// Allow time for the broker to stop
+		Thread.sleep(200);
 
 		// Release the services
 		service = null;

@@ -36,22 +36,22 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	/**
 	 * {@link JmsServerManagedObjectSource}.
 	 */
-	protected final JmsServerManagedObjectSource moSource;
+	private final JmsServerManagedObjectSource moSource;
 
 	/**
 	 * {@link Session}.
 	 */
-	protected final Session session;
+	private final Session session;
 
 	/**
 	 * {@link Message} to be processed.
 	 */
-	protected Message message = null;
+	private Message message = null;
 
 	/**
 	 * Flag indicating if this has been committed.
 	 */
-	protected boolean isCommitted = false;
+	private boolean isCommitted = false;
 
 	/**
 	 * Initiate.
@@ -65,7 +65,6 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	 */
 	protected JmsServerManagedObject(JmsServerManagedObjectSource moSource,
 			Session session) throws JMSException {
-		// Store state
 		this.moSource = moSource;
 		this.session = session;
 
@@ -86,7 +85,7 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 			// Flag not committed
 			this.isCommitted = false;
 
-			// Rollback any action on this session
+			// Roll back any action on this session
 			this.session.rollback();
 
 			// Release the message
@@ -104,82 +103,48 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 	}
 
 	/*
-	 * ====================================================================
-	 * ManagedObject
-	 * ====================================================================
+	 * ================== ManagedObject ===================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
-	 */
+	@Override
 	public synchronized Object getObject() throws Exception {
 		// Return the message being processed
 		return this.message;
 	}
 
 	/*
-	 * ====================================================================
-	 * ServerSession
-	 * ====================================================================
+	 * ================== ServerSession ===================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.jms.ServerSession#getSession()
-	 */
+	@Override
 	public Session getSession() throws JMSException {
 		return this.session;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.jms.ServerSession#start()
-	 */
+	@Override
 	public void start() throws JMSException {
-		// Run the session
 		this.moSource.runSession(this);
 	}
 
 	/*
-	 * ====================================================================
-	 * ServerSession
-	 * ====================================================================
+	 * ================ MessageListener ===================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
-	 */
+	@Override
 	public synchronized void onMessage(Message message) {
-		// Store the message
 		this.message = message;
 	}
 
 	/*
-	 * ====================================================================
-	 * Transaction
-	 * ====================================================================
+	 * ================ Transaction =======================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.ei.transaction.Transaction#begin()
-	 */
+	@Override
 	public void begin() throws Exception {
 		// Always within a transaction
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.ei.transaction.Transaction#commit()
-	 */
+	@Override
 	public synchronized void commit() throws Exception {
 		// Commit the transaction
 		this.session.commit();
@@ -188,13 +153,9 @@ public class JmsServerManagedObject implements ManagedObject, ServerSession,
 		this.isCommitted = true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.ei.transaction.Transaction#rollback()
-	 */
+	@Override
 	public synchronized void rollback() throws Exception {
-		// Rollback the transaction
+		// Roll back the transaction
 		this.session.rollback();
 	}
 

@@ -102,13 +102,13 @@ public class TransactionAdministratorSource extends
 	}
 
 	/**
-	 * {@link Duty} to rollback the transaction.
+	 * {@link Duty} to roll back the transaction.
 	 */
 	private class RollbackDuty implements Duty<Transaction, Indexed> {
 		@Override
 		public void doDuty(DutyContext<Transaction, Indexed> context)
 				throws Exception {
-			// Rollback the transaction
+			// Roll back the transaction
 			for (Transaction transaction : context.getExtensionInterfaces()) {
 				transaction.rollback();
 			}

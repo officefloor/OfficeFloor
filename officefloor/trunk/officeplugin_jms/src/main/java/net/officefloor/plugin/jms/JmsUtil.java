@@ -29,7 +29,7 @@ public class JmsUtil {
 	/**
 	 * Property name to obtain the class of the {@link JmsAdminObjectFactory}.
 	 */
-	public static final String JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY = "net.officefloor.plugin.jms.adminobjectfactory";
+	public static final String JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY = "jms.adminobjectfactory";
 
 	/**
 	 * <p>
@@ -51,14 +51,6 @@ public class JmsUtil {
 		// Obtain the name of the JMS admin object factory
 		String className = context
 				.getProperty(JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY);
-
-		// Ensure have the class name
-		if (className == null) {
-			throw new Exception("Must specify property "
-					+ JMS_ADMIN_OBJECT_FACTORY_CLASS_PROPERTY
-					+ " with the implementing class of the "
-					+ JmsAdminObjectFactory.class.getName());
-		}
 
 		// Create an instance of the JMS admin object factory
 		JmsAdminObjectFactory jmsAdminObjectFactory = (JmsAdminObjectFactory) Class

@@ -17,23 +17,23 @@
 package net.officefloor.plugin.jms.server;
 
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
- * Recycles the {@link net.officefloor.plugin.jms.server.JmsServerManagedObject}.
+ * Recycles the {@link JmsServerManagedObject}.
  * 
  * @author Daniel
  */
-class RecycleJmsServerTask
-		extends
-		AbstractSingleTask<RecycleManagedObjectParameter<JmsServerManagedObject>, RecycleJmsServerTask, Indexed, Indexed> {
+public class RecycleJmsServerTask extends
+		AbstractSingleTask<RecycleJmsServerTask, Indexed, None> {
 
 	/**
 	 * {@link JmsServerManagedObjectSource}.
 	 */
-	protected final JmsServerManagedObjectSource source;
+	private final JmsServerManagedObjectSource source;
 
 	/**
 	 * Initiate.
@@ -46,19 +46,20 @@ class RecycleJmsServerTask
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+	 * ===================== Task ===========================================
 	 */
+
+	@Override
 	public Object doTask(
-			TaskContext<RecycleManagedObjectParameter<JmsServerManagedObject>, RecycleJmsServerTask, Indexed, Indexed> context)
+			TaskContext<RecycleJmsServerTask, Indexed, None> context)
 			throws Exception {
 
 		// Obtain the recycle parameter
-		RecycleManagedObjectParameter<JmsServerManagedObject> recycleParameter = context
-				.getParameter();
+		RecycleManagedObjectParameter<JmsServerManagedObject> recycleParameter = this
+				.getRecycleManagedObjectParameter(context,
+						JmsServerManagedObject.class);
 
-		// Obtain the Jms Server Managed Object
+		// Obtain the JMS Server Managed Object
 		JmsServerManagedObject mo = recycleParameter.getManagedObject();
 
 		// Reset the session
