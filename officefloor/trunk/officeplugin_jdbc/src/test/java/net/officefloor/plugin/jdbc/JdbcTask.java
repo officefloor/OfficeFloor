@@ -20,6 +20,7 @@ import java.sql.Connection;
 
 import junit.framework.TestCase;
 
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -36,7 +37,7 @@ import net.officefloor.frame.util.AbstractSingleTask;
  * 
  * @author Daniel
  */
-public class JdbcTask extends AbstractSingleTask<Object, Work, None, None> {
+public class JdbcTask extends AbstractSingleTask<Work, Indexed, None> {
 
 	/**
 	 * {@link ConnectionValidator}.
@@ -76,13 +77,14 @@ public class JdbcTask extends AbstractSingleTask<Object, Work, None, None> {
 		String workName = namePrefix + "Work";
 
 		// Configure the Work
-		WorkBuilder<?> workBuilder = this.registerWork(workName, officeBuilder);
+		WorkBuilder<Work> workBuilder = this.registerWork(workName,
+				officeBuilder);
 		workBuilder.addWorkManagedObject("mo", jdbcMoName);
 
 		// Configure the Task
-		TaskBuilder<?, ?, ?, ?> taskBuilder = this.registerTask("Task",
-				teamName, workBuilder);
-		taskBuilder.linkManagedObject(0, "mo");
+		TaskBuilder<Work, Indexed, None> taskBuilder = this.registerTask(
+				"Task", teamName, workBuilder);
+		taskBuilder.linkManagedObject(0, "mo", Connection.class);
 
 		// Return the work name
 		return workName;
@@ -92,14 +94,8 @@ public class JdbcTask extends AbstractSingleTask<Object, Work, None, None> {
 	 * =================== AbstractSingleTask =========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame
-	 * .api.execute.TaskContext)
-	 */
 	@Override
-	public Object doTask(TaskContext<Object, Work, None, None> context)
+	public Object doTask(TaskContext<Work, Indexed, None> context)
 			throws Throwable {
 
 		// Obtain the Connection
