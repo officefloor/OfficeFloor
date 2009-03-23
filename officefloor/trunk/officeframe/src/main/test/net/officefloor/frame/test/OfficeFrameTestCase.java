@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -1173,6 +1174,14 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *            Message to be printed.
 	 */
 	public void printMessage(String message) {
+
+		// Determine if show messages
+		if (!Boolean.parseBoolean(System.getProperty("print.messages",
+				Boolean.FALSE.toString()))) {
+			return; // do no print messages
+		}
+
+		// Print the message
 		System.out.println(this.getClass().getSimpleName() + "."
 				+ this.getName() + ": " + message);
 	}
@@ -1198,9 +1207,11 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 *             If fails to print message.
 	 */
 	public void printMessage(Reader message) throws IOException {
-		int value;
-		while ((value = message.read()) != -1) {
-			System.out.print((char) value);
+		StringWriter buffer = new StringWriter();
+		for (int value = message.read(); value != -1; value = message.read()) {
+			buffer.append((char) value);
 		}
+		this.printMessage(buffer.toString());
 	}
+
 }

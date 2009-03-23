@@ -23,8 +23,9 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>
- * Provides means for a {@link Handler} to handle a {@link Throwable} that is
- * not handled by the {@link EscalationProcedure} of the {@link Flow}.
+ * Provides means for a {@link ManagedObjectSource} to handle a
+ * {@link Throwable} that is not handled by the {@link EscalationProcedure} of
+ * the {@link Flow}.
  * <p>
  * An example of this would be a HTTP server {@link ManagedObjectSource} that
  * would send a status 500 on a {@link Throwable}.

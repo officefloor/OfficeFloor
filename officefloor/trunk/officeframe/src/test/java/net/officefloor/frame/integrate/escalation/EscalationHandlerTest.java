@@ -131,13 +131,13 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		// Create and open the office
 		this.constructOfficeFloor().openOfficeFloor();
 
-		final String HANDLER_ARGUMENT = "HANDLER_ARGUMENT";
+		final String FLOW_ARGUMENT = "FLOW_ARGUMENT";
 
 		// Invoke processing from the managed object
-		EscalationManagedObjectSource.invokeProcessing(HANDLER_ARGUMENT);
+		EscalationManagedObjectSource.invokeProcessing(FLOW_ARGUMENT);
 
 		// Ensure argument passed to task
-		assertEquals("Incorrect parameter value for task", HANDLER_ARGUMENT,
+		assertEquals("Incorrect parameter value for task", FLOW_ARGUMENT,
 				work.taskParameter);
 
 		// Ensure escalation is handled by managed object escalation handler

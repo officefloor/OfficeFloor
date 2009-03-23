@@ -377,7 +377,7 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 
 		@Override
 		public Labeller addFlow(F key, Class<?> argumentType) {
-			// Use ordinal of key to index the handler
+			// Use ordinal of key to index the flow
 			return this.addFlow(key.ordinal(), key, argumentType);
 		}
 
@@ -401,17 +401,17 @@ public abstract class AbstractAsyncManagedObjectSource<D extends Enum<D>, F exte
 		private Labeller addFlow(int index, F key, Class<?> argumentType) {
 
 			// Create the flow meta-data
-			final ManagedObjectFlowMetaDataImpl<F> handler = new ManagedObjectFlowMetaDataImpl<F>(
+			final ManagedObjectFlowMetaDataImpl<F> flow = new ManagedObjectFlowMetaDataImpl<F>(
 					key, argumentType);
 
 			// Register the flow at the index
-			this.flows.put(new Integer(index), handler);
+			this.flows.put(new Integer(index), flow);
 
 			// Return the labeller for the flow
 			return new Labeller() {
 				@Override
 				public void setLabel(String label) {
-					handler.setLabel(label);
+					flow.setLabel(label);
 				}
 			};
 		}

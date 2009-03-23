@@ -22,7 +22,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
 /**
- * Invokes handlers to input data to Office.
+ * Invokes flows to input data to Office.
  * 
  * @author Daniel
  */
@@ -54,21 +54,15 @@ public class InputManagedObjectSource<D extends Enum<D>> extends
 	 */
 	public static void input(Object parameter, ManagedObject managedObject) {
 		// Input the parameter
-		INSTANCE.inputParameter(parameter, managedObject);
+		INSTANCE.executeContext.invokeProcess(Flows.INPUT, parameter,
+				managedObject);
 	}
 
 	/**
-	 * Inputs the parameter.
-	 * 
-	 * @param parameter
-	 *            Parameter.
-	 * @param managedObject
-	 *            {@link ManagedObject}.
+	 * Initialise and make available to invoke a process.
 	 */
-	public void inputParameter(Object parameter, ManagedObject managedObject) {
-		// Execute the flow
-		this.executeContext
-				.invokeProcess(Flows.INPUT, parameter, managedObject);
+	public InputManagedObjectSource() {
+		INSTANCE = this;
 	}
 
 	/*

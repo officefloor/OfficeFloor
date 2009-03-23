@@ -521,7 +521,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.threadState, this.threadState
 				.getEscalationLevel(), EscalationLevel.FLOW);
 
-		// Handled by the managed object source handler escalation handler
+		// Handled by the managed object source escalation handler
 		if (handledLevel == EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER) {
 			this.recordReturn(this.processState, this.processState
 					.getManagedObjectSourceEscalation(), this.escalation);

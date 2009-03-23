@@ -553,9 +553,6 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(RawManagingOfficeMetaData.class);
 		this.officeManagingManagedObjects.add(affixManagedObject);
 
-		final RawManagedObjectMetaData<?, ?> rawMoMetaData = this
-				.createMock(RawManagedObjectMetaData.class);
-
 		// Record affixing a process managed object
 		this.record_enhanceOffice();
 		this.record_teams();
@@ -571,7 +568,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_constructManagedObjectMetaData(processManagedObjects,
 				"OFFICE_MO_0");
 		affixManagedObject.manageByOffice(null, null, this.issues);
-		this.control(rawMoMetaData).setMatcher(new AbstractMatcher() {
+		this.control(affixManagedObject).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				OfficeMetaDataLocator metaDataLocator = (OfficeMetaDataLocator) actual[0];

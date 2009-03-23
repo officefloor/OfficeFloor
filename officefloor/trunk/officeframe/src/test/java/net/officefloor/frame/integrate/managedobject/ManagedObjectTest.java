@@ -331,7 +331,7 @@ public class ManagedObjectTest extends AbstractOfficeConstructTestCase {
 			TestManagedObjectSource.managedObjectClass = ManagedObject.class;
 		}
 
-		// Only provide handler if outside
+		// Only provide flow if outside
 		TestManagedObjectSource.isLoadFlow = isManagedObjectOutside;
 		if (isManagedObjectOutside) {
 			managingOfficeBuilder.linkProcess(Flows.FLOW, "WORK",

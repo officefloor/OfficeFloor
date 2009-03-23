@@ -185,8 +185,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			dependencyMo.putAll(boundMo); // bound possibly overwrite scope
 
 			// Load the dependencies
-			this.loadDependencies(moMetaData, issues, assetType, assetName,
-					dependencyMo);
+			this.loadDependencies(moMetaData, issues, dependencyMo);
 
 			// Load the meta-data
 			moMetaData.loadManagedObjectMetaData(assetManagerFactory, issues);
@@ -242,12 +241,18 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 				continue; // no flows required so do not bind to process state
 			}
 
+			// Obtain the raw managed object meta-data
+			RawManagedObjectMetaData<?, ?> rawMoMetaData = officeMo
+					.getRawManagedObjectMetaData();
+			String managedObjectSourceName = rawMoMetaData
+					.getManagedObjectName();
+
 			// Obtain the process bound name
 			String processBoundName = officeMo.getProcessBoundName();
 			if (ConstructUtil.isBlank(processBoundName)) {
 				issues
-						.addIssue(AssetType.MANAGED_OBJECT, rawMoMetaData
-								.getManagedObjectName(),
+						.addIssue(AssetType.MANAGED_OBJECT,
+								managedObjectSourceName,
 								"Must provide process bound name as requires managing by an office");
 				continue; // Must have process bound name
 			}
@@ -257,29 +262,52 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 					.get(processBoundName);
 			if (rawBoundMo != null) {
 				// Already bound, so confirm the same managed object
-				if (rawMoMetaData != rawBoundMo.getRawManagedObjectMetaData()) {
+				RawManagedObjectMetaData<?, ?> rawMo = rawBoundMo
+						.getRawManagedObjectMetaData();
+				if (rawMoMetaData != rawMo) {
 					issues
 							.addIssue(
-									AssetType.OFFICE,
-									officeName,
-									"Managed Object "
+									AssetType.MANAGED_OBJECT,
+									managedObjectSourceName,
+									"Process bound ManagedObject "
 											+ processBoundName
-											+ " is being managed by Office by Process bound Managed Object by name is different");
+											+ " is different (bound managed object source="
+											+ rawMo.getManagedObjectName()
+											+ ")");
 				}
+
 			} else {
-				// Not bound, so create bound managed object meta-data
+				// Not bound, so create process bound managed object meta-data
+
+				// Must not have dependencies. If requires dependencies should
+				// have been added to ProcessState of the Office with
+				// dependencies configured.
+				ManagedObjectDependencyMetaData<?>[] dependencyMetaData = rawMoMetaData
+						.getManagedObjectSourceMetaData()
+						.getDependencyMetaData();
+				if ((dependencyMetaData != null)
+						&& (dependencyMetaData.length > 0)) {
+					issues
+							.addIssue(
+									AssetType.MANAGED_OBJECT,
+									managedObjectSourceName,
+									"Must map dependencies for affixed ManagedObjectSource. Please add to process and map dependencies.");
+					continue; // can not have dependencies
+				}
+
+				// Create the process bound index for the managed object
 				ManagedObjectIndex moIndex = new ManagedObjectIndexImpl(
 						ManagedObjectScope.PROCESS, nextProcessBoundIndex++);
+
+				// Create process bound managed object meta-data
 				RawBoundManagedObjectMetaDataImpl<?> rawBoundMoImpl = this
 						.newRawBoundManagedObjectMetaDataImpl(processBoundName,
 								moIndex, null, rawMoMetaData);
-
-				// Ensure the managed object meta-data is loaded
 				rawBoundMoImpl.loadManagedObjectMetaData(assetManagerFactory,
 						issues);
+				rawBoundMo = rawBoundMoImpl;
 
 				// Append to listing and map to make next office aware
-				rawBoundMo = rawBoundMoImpl;
 				managedObjects.add(rawBoundMo);
 				processBoundMos.put(processBoundName, rawBoundMo);
 			}
@@ -329,7 +357,7 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 	 */
 	private <d extends Enum<d>> void loadDependencies(
 			RawBoundManagedObjectMetaDataImpl<d> moMetaData,
-			OfficeFloorIssues issues, AssetType assetType, String assetName,
+			OfficeFloorIssues issues,
 			Map<String, RawBoundManagedObjectMetaData<?>> boundMo) {
 
 		// Obtain the dependency meta-data
@@ -347,7 +375,8 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			// No dependencies but issue if dependencies configured
 			if ((dependencyConfigurations != null)
 					&& (dependencyConfigurations.length > 0)) {
-				issues.addIssue(assetType, assetName,
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						moMetaData.boundManagedObjectName,
 						"No dependencies required but dependencies configured");
 			}
 
@@ -392,10 +421,9 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			ManagedObjectDependencyConfiguration<d> dependencyMapping = dependencyMappings
 					.get(new Integer(index));
 			if (dependencyMapping == null) {
-				issues.addIssue(assetType, assetName, "No mapping for "
-						+ dependencyLabel + " of "
-						+ ManagedObject.class.getSimpleName() + " "
-						+ moMetaData.boundManagedObjectName);
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						moMetaData.boundManagedObjectName,
+						"No mapping configured for " + dependencyLabel);
 				return; // no dependency mapping
 			}
 
@@ -406,18 +434,19 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			String dependentMoName = dependencyMapping
 					.getScopeManagedObjectName();
 			if (ConstructUtil.isBlank(dependentMoName)) {
-				issues.addIssue(assetType, assetName,
-						"No dependency name specified for " + dependencyLabel
-								+ " of " + ManagedObject.class.getSimpleName()
-								+ " " + moMetaData.boundManagedObjectName);
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						moMetaData.boundManagedObjectName,
+						"No dependency name configured for " + dependencyLabel);
 				return; // no dependency specified
 			}
 			RawBoundManagedObjectMetaData<?> dependency = boundMo
 					.get(dependentMoName);
-			if (dependencyMetaData == null) {
-				issues.addIssue(assetType, assetName, "No dependent "
-						+ ManagedObject.class.getSimpleName() + " by name '"
-						+ dependentMoName + "' for " + dependencyLabel);
+			if (dependency == null) {
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						moMetaData.boundManagedObjectName, "No dependent "
+								+ ManagedObject.class.getSimpleName()
+								+ " by name '" + dependentMoName + "' for "
+								+ dependencyLabel);
 				return; // no dependency
 			}
 
@@ -426,10 +455,12 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 			Class<?> dependencyType = dependency.getRawManagedObjectMetaData()
 					.getObjectType();
 			if (!requiredType.isAssignableFrom(dependencyType)) {
-				issues.addIssue(assetType, assetName, "Dependency object for "
-						+ dependencyLabel + " is incompatible (required type="
-						+ requiredType.getName() + ", dependency type="
-						+ dependencyType.getName() + ")");
+				issues.addIssue(AssetType.MANAGED_OBJECT,
+						moMetaData.boundManagedObjectName,
+						"Incompatible dependency for " + dependencyLabel
+								+ " (required type=" + requiredType.getName()
+								+ ", dependency type="
+								+ dependencyType.getName() + ")");
 				return; // incompatible dependency
 			}
 
@@ -439,8 +470,10 @@ public class RawBoundManagedObjectMetaDataImpl<D extends Enum<D>> implements
 
 		// Ensure there are no additional dependencies configured
 		if (dependencyMappings.size() > 0) {
-			issues.addIssue(assetType, assetName,
-					"Extra dependencies configured");
+			issues
+					.addIssue(AssetType.MANAGED_OBJECT,
+							moMetaData.boundManagedObjectName,
+							"Extra dependencies configured than required by ManagedObjectSourceMetaData");
 			return; // additional dependencies configured
 		}
 

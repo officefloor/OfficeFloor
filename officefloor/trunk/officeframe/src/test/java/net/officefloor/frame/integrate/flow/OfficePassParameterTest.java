@@ -49,16 +49,18 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		// Add the first work
 		WorkOne workOne = new WorkOne(parameter);
 		this.constructWork("WORK_ONE", workOne, "SENDER");
-		TaskBuilder<Object, WorkOne, None, WorkOneDelegatesEnum> taskBuilder = this
+		TaskBuilder<Object, WorkOne, None, WorkOneDelegatesEnum> taskOneBuilder = this
 				.constructTask("SENDER", workOne, "TEAM", null, null);
-		taskBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
+		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL,
 				Object.class);
 
 		// Add the second work
 		WorkTwo workTwo = new WorkTwo();
 		this.constructWork("WORK_TWO", workTwo, "RECEIVER");
-		this.constructTask("RECEIVER", workTwo, "TEAM", null, null);
+		TaskBuilder<?, ?, ?, ?> taskTwoBuilder = this.constructTask("RECEIVER",
+				workTwo, "TEAM", null, null);
+		taskTwoBuilder.linkParameter(0, Object.class);
 
 		// Register and open the office floor
 		String officeName = this.getOfficeName();
@@ -150,12 +152,11 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 				throws Exception {
 
 			// Store the parameter
-			this.parameter = context.getParameter();
+			this.parameter = context.getObject(0);
 
 			// No parameter
 			return null;
 		}
-
 	}
 
 }

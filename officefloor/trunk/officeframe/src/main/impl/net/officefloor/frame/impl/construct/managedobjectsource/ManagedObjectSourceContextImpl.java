@@ -46,9 +46,9 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 		ManagedObjectSourceContext<F> {
 
 	/**
-	 * Name of the {@link Work} to clean up the {@link ManagedObject}.
+	 * Name of the {@link Work} to recycle the {@link ManagedObject}.
 	 */
-	public static final String MANAGED_OBJECT_CLEAN_UP_WORK_NAME = "#managed.object.cleanup#";
+	public static final String MANAGED_OBJECT_RECYCLE_WORK_NAME = "#recycle#";
 
 	/**
 	 * Name of the {@link ManagedObject}.
@@ -200,24 +200,22 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 
 		// Name the recycle work
 		this.recycleWorkName = this
-				.getNamespacedName(MANAGED_OBJECT_CLEAN_UP_WORK_NAME);
+				.getNamespacedName(MANAGED_OBJECT_RECYCLE_WORK_NAME);
 
 		// Add and return the recycle work
-		return this.addWork(MANAGED_OBJECT_CLEAN_UP_WORK_NAME, workFactory);
+		return this.addWork(MANAGED_OBJECT_RECYCLE_WORK_NAME, workFactory);
 	}
 
 	@Override
 	public void linkProcess(F key, String workName, String taskName) {
-		this.managingOfficeBuilder
-				.linkProcess(key, ManagedObjectSourceContextImpl.this
-						.getNamespacedName(workName), taskName);
+		this.managingOfficeBuilder.linkProcess(key, this
+				.getNamespacedName(workName), taskName);
 	}
 
 	@Override
 	public void linkProcess(int flowIndex, String workName, String taskName) {
-		this.managingOfficeBuilder
-				.linkProcess(flowIndex, ManagedObjectSourceContextImpl.this
-						.getNamespacedName(workName), taskName);
+		this.managingOfficeBuilder.linkProcess(flowIndex, this
+				.getNamespacedName(workName), taskName);
 	}
 
 	@Override
@@ -234,7 +232,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 	 *            Name to add name space.
 	 * @return Name including the name space.
 	 */
-	protected String getNamespacedName(String name) {
+	private String getNamespacedName(String name) {
 		return OfficeBuilderImpl
 				.getNamespacedName(this.managedObjectName, name);
 	}
@@ -291,7 +289,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 	/**
 	 * {@link ManagedObjectTaskBuilder} implementation.
 	 */
-	public class ManagedObjectTaskBuilderImpl<f extends Enum<f>> implements
+	private class ManagedObjectTaskBuilderImpl<f extends Enum<f>> implements
 			ManagedObjectTaskBuilder<f> {
 
 		/**

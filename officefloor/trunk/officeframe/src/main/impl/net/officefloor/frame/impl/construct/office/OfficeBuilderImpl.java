@@ -33,6 +33,7 @@ import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderIm
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
 import net.officefloor.frame.impl.construct.task.EscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
+import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.construct.work.WorkBuilderImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
 import net.officefloor.frame.internal.configuration.EscalationConfiguration;
@@ -71,8 +72,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 			return null;
 		}
 
-		// Return the namspaced name
-		return (namespace == null ? "" : namespace + ".") + name;
+		// Return the name spaced name
+		return (ConstructUtil.isBlank(namespace) ? "" : namespace + ".") + name;
 	}
 
 	/**
