@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.frame.api.build.FlowNodeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -316,6 +317,47 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 				.getFlowNodeBuilder("MANAGED_OBJECT", "WORK", "TASK"), null);
 		this
 				.record_issue("Task 'TASK' of work 'MANAGED_OBJECT.WORK' not available for enhancement");
+		this.record_teams();
+		this.record_noManagedObjectsAndAdministrators();
+		this.record_work();
+		this.record_noOfficeStartupTasks();
+		this.record_noOfficeEscalationHandler();
+
+		// Construct the office
+		this.replayMockObjects();
+		this.constructRawOfficeMetaData(true);
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure able to obtain {@link FlowNodeBuilder} for an
+	 * {@link OfficeEnhancer}.
+	 */
+	public void testGetFlowNodeBuilderForOfficeEnhancing() {
+
+		final FlowNodeBuilder<?> flowNodeBuilder = this
+				.createMock(FlowNodeBuilder.class);
+
+		// Office enhancer
+		OfficeEnhancer enhancer = new OfficeEnhancer() {
+			@Override
+			public void enhanceOffice(OfficeEnhancerContext context) {
+				assertEquals("Incorrect flow node builder", flowNodeBuilder,
+						context.getFlowNodeBuilder("MANAGED_OBJECT", "WORK",
+								"TASK"));
+			}
+		};
+
+		// Record attempting to enhance office
+		this.recordReturn(this.configuration, this.configuration
+				.getOfficeName(), OFFICE_NAME);
+		this.recordReturn(this.configuration, this.configuration
+				.getMonitorOfficeInterval(), 1000);
+		this.recordReturn(this.configuration, this.configuration
+				.getOfficeEnhancers(), new OfficeEnhancer[] { enhancer });
+		this.recordReturn(this.configuration, this.configuration
+				.getFlowNodeBuilder("MANAGED_OBJECT", "WORK", "TASK"),
+				flowNodeBuilder);
 		this.record_teams();
 		this.record_noManagedObjectsAndAdministrators();
 		this.record_work();
