@@ -18,10 +18,9 @@ package net.officefloor.plugin.jms.server;
 
 import javax.jms.Message;
 
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
@@ -29,20 +28,37 @@ import net.officefloor.frame.util.AbstractSingleTask;
  * 
  * @author Daniel
  */
-class OnMessageTask extends
-		AbstractSingleTask<JmsServerManagedObject, Work, None, Indexed> {
+public class OnMessageTask
+		extends
+		AbstractSingleTask<Work, OnMessageTask.OnMessageDependencies, OnMessageTask.OnMessageFlows> {
+
+	/**
+	 * Keys for the {@link OnMessageTask} dependencies.
+	 */
+	public enum OnMessageDependencies {
+		JMS_SERVER_MANAGED_OBJECT
+	}
+
+	/**
+	 * Keys for {@link Flow} instigated by the {@link OnMessageTask} with the
+	 * {@link Message} as argument.
+	 */
+	public enum OnMessageFlows {
+		ON_MESSAGE
+	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api.execute.TaskContext)
+	 * =========================== Task ================================
 	 */
+
+	@Override
 	public Object doTask(
-			TaskContext<JmsServerManagedObject, Work, None, Indexed> context)
+			TaskContext<Work, OnMessageDependencies, OnMessageFlows> context)
 			throws Exception {
 
 		// Obtain the JMS Server Managed Object
-		JmsServerManagedObject mo = context.getParameter();
+		JmsServerManagedObject mo = (JmsServerManagedObject) context
+				.getObject(OnMessageDependencies.JMS_SERVER_MANAGED_OBJECT);
 
 		// Run the session to source the message
 		mo.getSession().run();
@@ -51,7 +67,7 @@ class OnMessageTask extends
 		Message message = mo.getMessage();
 
 		// Process the message
-		context.doFlow(0, message);
+		context.doFlow(OnMessageFlows.ON_MESSAGE, message);
 
 		// Not expected to have next task
 		return null;

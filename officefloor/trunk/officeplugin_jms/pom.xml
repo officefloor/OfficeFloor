@@ -16,11 +16,11 @@
 			<artifactId>officeframe</artifactId>
 			<version>0.0.1</version>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-core</artifactId>
-			<version>4.1.1</version>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-core</artifactId>
+            <version>5.1.0</version>
+        </dependency>
 		<dependency>
 			<groupId>jms</groupId>
 			<artifactId>jms</artifactId>
@@ -38,4 +38,3 @@
 		</dependency>
 	</dependencies>
 </project>
-

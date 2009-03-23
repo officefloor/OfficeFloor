@@ -10,6 +10,7 @@ import javax.jms.Session;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 
@@ -24,45 +25,26 @@ public class JmsManagedObjectSource extends
 	/**
 	 * Connection Factory for the JMS connection.
 	 */
-	protected ConnectionFactory connectionFactory;
+	private ConnectionFactory connectionFactory;
 
 	/**
 	 * Destination to send messages.
 	 */
-	protected Destination destination;
+	private Destination destination;
 
 	/**
 	 * {@link Connection} that is lazy created.
 	 */
-	protected Connection connection;
-
-	/**
-	 * Default constructor as required.
-	 */
-	public JmsManagedObjectSource() {
-	}
+	private Connection connection;
 
 	/*
-	 * ====================================================================
-	 * AbstractManagedObjectSource
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
+	 * ================ AbstractManagedObjectSource =======================
 	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		// No specification
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
-	 */
 	@Override
 	protected void loadMetaData(MetaDataContext<None, None> context)
 			throws Exception {
@@ -84,23 +66,14 @@ public class JmsManagedObjectSource extends
 		this.destination = jmsAdminObjectFactory.createDestination();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#start(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.StartContext)
-	 */
 	@Override
-	protected void start(StartContext<None> startContext) throws Exception {
+	public void start(ManagedObjectExecuteContext<None> context)
+			throws Exception {
 		// Start the connection
 		this.connection = this.connectionFactory.createConnection();
 		this.connection.start();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource#getManagedObject()
-	 */
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
 		// Create the session
