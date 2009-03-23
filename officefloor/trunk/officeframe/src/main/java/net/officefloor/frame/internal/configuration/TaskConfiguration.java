@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public interface TaskConfiguration<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface TaskConfiguration<W extends Work, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of this {@link Task} local to its {@link Work}.
@@ -42,7 +42,7 @@ public interface TaskConfiguration<P extends Object, W extends Work, M extends E
 	 * 
 	 * @return {@link TaskFactory}.
 	 */
-	TaskFactory<P, W, M, F> getTaskFactory();
+	TaskFactory<W, D, F> getTaskFactory();
 
 	/**
 	 * Obtains the name of {@link Office} registered {@link Team} responsible

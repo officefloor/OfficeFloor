@@ -123,7 +123,7 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?, ?> getTaskMetaData(String workName,
+	public TaskMetaData<?, ?, ?> getTaskMetaData(String workName,
 			String taskName) {
 		WorkEntry workEntry = (workName != null ? this.officeWork.get(workName)
 				: this.defaultWorkEntry);
@@ -131,7 +131,7 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?, ?> getTaskMetaData(String taskName) {
+	public TaskMetaData<?, ?, ?> getTaskMetaData(String taskName) {
 		return (this.defaultWorkEntry != null ? this.defaultWorkEntry.tasks
 				.get(taskName) : null);
 	}
@@ -149,7 +149,7 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 		/**
 		 * {@link TaskMetaData} entries by their {@link Task} names.
 		 */
-		public final Map<String, TaskMetaData<?, ?, ?, ?>> tasks = new HashMap<String, TaskMetaData<?, ?, ?, ?>>();
+		public final Map<String, TaskMetaData<?, ?, ?>> tasks = new HashMap<String, TaskMetaData<?, ?, ?>>();
 
 		/**
 		 * Initiate.
@@ -161,7 +161,7 @@ public class OfficeMetaDataLocatorImpl implements OfficeMetaDataLocator {
 			this.workMetaData = workMetaData;
 
 			// Load the tasks
-			for (TaskMetaData<?, ?, ?, ?> taskMetaData : workMetaData
+			for (TaskMetaData<?, ?, ?> taskMetaData : workMetaData
 					.getTaskMetaData()) {
 				String taskName = taskMetaData.getTaskName();
 				this.tasks.put(taskName, taskMetaData);

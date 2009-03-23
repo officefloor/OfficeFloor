@@ -40,7 +40,7 @@ public interface FlowMetaData<W extends Work> {
 	 * @return {@link TaskMetaData} of the initial {@link Task} within the
 	 *         {@link Flow}.
 	 */
-	TaskMetaData<?, W, ?, ?> getInitialTaskMetaData();
+	TaskMetaData<W, ?, ?> getInitialTaskMetaData();
 
 	/**
 	 * Obtains the {@link AssetManager} to managed this {@link Flow}.

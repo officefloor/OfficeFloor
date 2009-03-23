@@ -74,7 +74,7 @@ public class EscalationHandlerEscalation implements Escalation {
 		dependencies[EscalationKey.EXCEPTION.ordinal()] = TaskJob.PARAMETER_MANAGED_OBJECT_INDEX;
 
 		// Create the escalation task meta-data
-		TaskMetaDataImpl<Throwable, EscalationHandlerTask, EscalationKey, None> taskMetaData = new TaskMetaDataImpl<Throwable, EscalationHandlerTask, EscalationKey, None>(
+		TaskMetaDataImpl<EscalationHandlerTask, EscalationKey, None> taskMetaData = new TaskMetaDataImpl<EscalationHandlerTask, EscalationKey, None>(
 				"Escalation Handler Task", task, Throwable.class, team,
 				new ManagedObjectIndex[0], dependencies,
 				new TaskDutyAssociation[0], new TaskDutyAssociation[0]);
@@ -125,9 +125,8 @@ public class EscalationHandlerEscalation implements Escalation {
 	/**
 	 * {@link Task} to execute the {@link EscalationHandler}.
 	 */
-	private class EscalationHandlerTask
-			extends
-			AbstractSingleTask<Throwable, EscalationHandlerTask, EscalationKey, None> {
+	private class EscalationHandlerTask extends
+			AbstractSingleTask<EscalationHandlerTask, EscalationKey, None> {
 
 		/*
 		 * ================== Task ============================================
@@ -135,7 +134,7 @@ public class EscalationHandlerEscalation implements Escalation {
 
 		@Override
 		public Object doTask(
-				TaskContext<Throwable, EscalationHandlerTask, EscalationKey, None> context)
+				TaskContext<EscalationHandlerTask, EscalationKey, None> context)
 				throws Throwable {
 
 			// Obtain the exception

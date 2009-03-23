@@ -143,7 +143,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 * {@link TaskBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskBuilder<Object, Work, None, Indexed> taskBuilder = this
+	private final TaskBuilder<Work, None, Indexed> taskBuilder = this
 			.createMock(TaskBuilder.class);
 
 	/**
@@ -157,7 +157,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 * {@link TaskFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskFactory<Object, Work, None, Indexed> taskFactory = this
+	private final TaskFactory<Work, None, Indexed> taskFactory = this
 			.createMock(TaskFactory.class);
 
 	/*
@@ -698,8 +698,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 * @param {@link ManagedObjectFlowMetaData} for the
 	 *        {@link ManagedObjectSource}.
 	 */
-	private <M extends ManagedObject> void record_createRawMetaData(
-			Class<M> managedObjectClass, String processBoundName,
+	private <MO extends ManagedObject> void record_createRawMetaData(
+			Class<MO> managedObjectClass, String processBoundName,
 			ManagedObjectFlowMetaData<?>... moFlowMetaData) {
 		// Record completing creating raw meta data
 		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
@@ -790,7 +790,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		/**
 		 * {@link TaskFactory}.
 		 */
-		public static TaskFactory<Object, Work, None, Indexed> taskFactory = null;
+		public static TaskFactory<Work, None, Indexed> taskFactory = null;
 
 		/**
 		 * Init exception.
@@ -821,7 +821,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		 *            {@link ManagedObjectSourceMetaData}.
 		 */
 		public static void reset(WorkFactory<Work> workFactory,
-				TaskFactory<Object, Work, None, Indexed> taskFactory,
+				TaskFactory<Work, None, Indexed> taskFactory,
 				ManagedObjectSourceMetaData<Indexed, FlowKey> metaData) {
 			instantiateFailure = null;
 			requiredPropertyName = null;

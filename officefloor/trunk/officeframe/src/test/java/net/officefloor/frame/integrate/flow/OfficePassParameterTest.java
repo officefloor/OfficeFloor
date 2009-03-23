@@ -49,7 +49,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		// Add the first work
 		WorkOne workOne = new WorkOne(parameter);
 		this.constructWork("WORK_ONE", workOne, "SENDER");
-		TaskBuilder<Object, WorkOne, None, WorkOneDelegatesEnum> taskOneBuilder = this
+		TaskBuilder<WorkOne, None, WorkOneDelegatesEnum> taskOneBuilder = this
 				.constructTask("SENDER", workOne, "TEAM", null, null);
 		taskOneBuilder.linkFlow(WorkOneDelegatesEnum.WORK_TWO.ordinal(),
 				"WORK_TWO", "RECEIVER", FlowInstigationStrategyEnum.SEQUENTIAL,
@@ -58,9 +58,10 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		// Add the second work
 		WorkTwo workTwo = new WorkTwo();
 		this.constructWork("WORK_TWO", workTwo, "RECEIVER");
-		TaskBuilder<?, ?, ?, ?> taskTwoBuilder = this.constructTask("RECEIVER",
-				workTwo, "TEAM", null, null);
-		taskTwoBuilder.linkParameter(0, Object.class);
+		TaskBuilder<WorkTwo, WorkTwoDependenciesEnum, None> taskTwoBuilder = this
+				.constructTask("RECEIVER", workTwo, "TEAM", null, null);
+		taskTwoBuilder.linkParameter(WorkTwoDependenciesEnum.PARAMETER,
+				Object.class);
 
 		// Register and open the office floor
 		String officeName = this.getOfficeName();
@@ -86,7 +87,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 	 * First {@link Work} type for testing.
 	 */
 	private class WorkOne implements Work,
-			Task<Object, WorkOne, None, WorkOneDelegatesEnum> {
+			Task<WorkOne, None, WorkOneDelegatesEnum> {
 
 		/**
 		 * Parameter to invoke delegate work with.
@@ -109,7 +110,7 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 
 		@Override
 		public Object doTask(
-				TaskContext<Object, WorkOne, None, WorkOneDelegatesEnum> context)
+				TaskContext<WorkOne, None, WorkOneDelegatesEnum> context)
 				throws Exception {
 
 			// Delegate to the work
@@ -127,7 +128,8 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Second {@link Work} type for testing.
 	 */
-	private class WorkTwo implements Work, Task<Object, WorkTwo, None, None> {
+	private class WorkTwo implements Work,
+			Task<WorkTwo, WorkTwoDependenciesEnum, None> {
 
 		/**
 		 * Parameter received when {@link Work} invoked.
@@ -148,15 +150,21 @@ public class OfficePassParameterTest extends AbstractOfficeConstructTestCase {
 		 */
 
 		@Override
-		public Object doTask(TaskContext<Object, WorkTwo, None, None> context)
+		public Object doTask(
+				TaskContext<WorkTwo, WorkTwoDependenciesEnum, None> context)
 				throws Exception {
 
 			// Store the parameter
-			this.parameter = context.getObject(0);
+			this.parameter = context
+					.getObject(WorkTwoDependenciesEnum.PARAMETER);
 
 			// No parameter
 			return null;
 		}
+	}
+
+	private enum WorkTwoDependenciesEnum {
+		PARAMETER
 	}
 
 }

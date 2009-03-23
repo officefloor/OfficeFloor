@@ -484,7 +484,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		for (int i = 0; i < startupTasksLength; i++) {
 
 			// Obtain the task meta-data for the startup task
-			TaskMetaData<?, ?, ?, ?> startupTaskMetaData = ConstructUtil
+			TaskMetaData<?, ?, ?> startupTaskMetaData = ConstructUtil
 					.getTaskMetaData(startupTaskReferences[i], metaDataLocator,
 							issues, AssetType.OFFICE, officeName,
 							"Startup Task " + i, true);
@@ -522,7 +522,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 			}
 
 			// Obtain the task meta-data for the escalation
-			TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = ConstructUtil
+			TaskMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil
 					.getTaskMetaData(officeEscalationConfigurations[i]
 							.getTaskNodeReference(), metaDataLocator, issues,
 							AssetType.OFFICE, officeName, "Office Escalation "

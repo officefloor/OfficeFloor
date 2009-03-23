@@ -39,7 +39,7 @@ public interface Flow extends FlowFuture, LinkedListEntry<Flow, JobActivateSet> 
 	 *            Parameter for the {@link JobNode}.
 	 * @return New configured {@link JobNode}.
 	 */
-	JobNode createJobNode(TaskMetaData<?, ?, ?, ?> taskMetaData,
+	JobNode createJobNode(TaskMetaData<?, ?, ?> taskMetaData,
 			JobNode parallelNodeOwner, Object parameter);
 
 	/**

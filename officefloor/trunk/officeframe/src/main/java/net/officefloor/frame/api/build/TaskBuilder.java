@@ -29,7 +29,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel
  */
-public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>>
+public interface TaskBuilder<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		extends FlowNodeBuilder<F> {
 
 	/**
@@ -40,7 +40,7 @@ public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>
 	 * @param parameterType
 	 *            Type of the parameter.
 	 */
-	void linkParameter(M key, Class<?> parameterType);
+	void linkParameter(D key, Class<?> parameterType);
 
 	/**
 	 * Links in the parameter for this {@link Task}.
@@ -63,7 +63,7 @@ public interface TaskBuilder<P extends Object, W extends Work, M extends Enum<M>
 	 * @param objectType
 	 *            Type required by the {@link Task}.
 	 */
-	void linkManagedObject(M key, String scopeManagedObjectName,
+	void linkManagedObject(D key, String scopeManagedObjectName,
 			Class<?> objectType);
 
 	/**

@@ -38,9 +38,9 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel
  */
-public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends AbstractJobContainer<W, TaskMetaData<P, W, M, F>> implements
-		TaskContext<P, W, M, F> {
+public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
+		extends AbstractJobContainer<W, TaskMetaData<W, D, F>> implements
+		TaskContext<W, D, F> {
 
 	/**
 	 * <p>
@@ -61,12 +61,12 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	/**
 	 * {@link Task} to be done.
 	 */
-	private final Task<P, W, M, F> task;
+	private final Task<W, D, F> task;
 
 	/**
 	 * Parameter of the current {@link Task} being managed.
 	 */
-	private final P parameter;
+	private final Object parameter;
 
 	/**
 	 * Initiate.
@@ -83,8 +83,8 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 *            Parameter for the {@link Task}.
 	 */
 	public TaskJob(Flow flow, WorkContainer<W> workContainer,
-			TaskMetaData<P, W, M, F> taskMetaData, JobNode parallelOwner,
-			P parameter) {
+			TaskMetaData<W, D, F> taskMetaData, JobNode parallelOwner,
+			Object parameter) {
 		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData
 				.getRequiredManagedObjects());
 		this.parameter = parameter;
@@ -114,12 +114,7 @@ public class TaskJob<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public P getParameter() {
-		return this.parameter;
-	}
-
-	@Override
-	public Object getObject(M key) {
+	public Object getObject(D key) {
 		return this.getObject(key.ordinal());
 	}
 

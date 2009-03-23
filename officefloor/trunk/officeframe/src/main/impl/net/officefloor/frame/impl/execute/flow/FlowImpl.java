@@ -79,7 +79,7 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public JobNode createJobNode(TaskMetaData<?, ?, ?, ?> taskMetaData,
+	public JobNode createJobNode(TaskMetaData<?, ?, ?> taskMetaData,
 			JobNode parallelNodeOwner, Object parameter) {
 
 		// Obtain the work meta-data
@@ -159,7 +159,7 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 			WorkMetaData<?> workMetaData, WorkContainer<?> actualWorkContainer,
 			WorkContainerProxy<?> proxyWorkContainer,
 			JobNode parallelNodeOwner,
-			TaskMetaData<?, ?, ?, ?> administeringTaskMetaData) {
+			TaskMetaData<?, ?, ?> administeringTaskMetaData) {
 
 		// Load the duty jobs
 		for (int i = 0; i < taskDutyAssociations.length; i++) {

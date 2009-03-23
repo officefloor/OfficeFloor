@@ -252,7 +252,7 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 			}
 
 			// Obtain the parameter type for the recycle task
-			TaskMetaData<?, ?, ?, ?> recycleTaskMetaData = recycleFlowMetaData
+			TaskMetaData<?, ?, ?> recycleTaskMetaData = recycleFlowMetaData
 					.getInitialTaskMetaData();
 			Class<?> parameterType = recycleTaskMetaData.getParameterType();
 			if (parameterType != null) {
@@ -390,10 +390,10 @@ public class RawManagingOfficeMetaDataImpl<F extends Enum<F>> implements
 					configurationTaskReference.getTaskName(), argumentType);
 
 			// Obtain the task meta-data of flow meta-data
-			TaskMetaData<?, ?, ?, ?> taskMetaData = ConstructUtil
-					.getTaskMetaData(flowTaskReference, metaDataLocator,
-							issues, AssetType.MANAGED_OBJECT,
-							managedObjectSourceName, flowLabel, true);
+			TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(
+					flowTaskReference, metaDataLocator, issues,
+					AssetType.MANAGED_OBJECT, managedObjectSourceName,
+					flowLabel, true);
 			if (taskMetaData == null) {
 				return; // can not find task of flow
 			}

@@ -79,7 +79,7 @@ public interface OfficeMetaDataLocator {
 	 *            Name of the {@link Task}.
 	 * @return {@link TaskMetaData} or <code>null</code> if not found.
 	 */
-	TaskMetaData<?, ?, ?, ?> getTaskMetaData(String workName, String taskName);
+	TaskMetaData<?, ?, ?> getTaskMetaData(String workName, String taskName);
 
 	/**
 	 * Obtains the {@link TaskMetaData} on the default {@link WorkMetaData}. If
@@ -90,6 +90,6 @@ public interface OfficeMetaDataLocator {
 	 *            Name of the {@link Task} on the default {@link Work}.
 	 * @return {@link TaskMetaData} or <code>null</code> if not found.
 	 */
-	TaskMetaData<?, ?, ?, ?> getTaskMetaData(String taskName);
+	TaskMetaData<?, ?, ?> getTaskMetaData(String taskName);
 
 }

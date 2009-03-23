@@ -65,8 +65,8 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		implements RawTaskMetaDataFactory, RawTaskMetaData<P, W, M, F> {
+public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
+		implements RawTaskMetaDataFactory, RawTaskMetaData<W, D, F> {
 
 	/**
 	 * Obtains the {@link RawTaskMetaDataFactory}.
@@ -86,12 +86,12 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 	/**
 	 * {@link TaskConfiguration}.
 	 */
-	private final TaskConfiguration<P, W, M, F> configuration;
+	private final TaskConfiguration<W, D, F> configuration;
 
 	/**
 	 * {@link TaskMetaDataImpl}.
 	 */
-	private final TaskMetaDataImpl<P, W, M, F> taskMetaData;
+	private final TaskMetaDataImpl<W, D, F> taskMetaData;
 
 	/**
 	 * {@link RawWorkMetaData}.
@@ -111,8 +111,8 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 	 *            {@link RawWorkMetaData}.
 	 */
 	private RawTaskMetaDataImpl(String taskName,
-			TaskConfiguration<P, W, M, F> configuration,
-			TaskMetaDataImpl<P, W, M, F> taskMetaData,
+			TaskConfiguration<W, D, F> configuration,
+			TaskMetaDataImpl<W, D, F> taskMetaData,
 			RawWorkMetaData<W> rawWorkMetaData) {
 		this.taskName = taskName;
 		this.configuration = configuration;
@@ -125,9 +125,9 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 	 */
 
 	@Override
-	public <p, w extends Work, m extends Enum<m>, f extends Enum<f>> RawTaskMetaData<p, w, m, f> constructRawTaskMetaData(
-			TaskConfiguration<p, w, m, f> configuration,
-			OfficeFloorIssues issues, RawWorkMetaData<w> rawWorkMetaData) {
+	public <w extends Work, d extends Enum<d>, f extends Enum<f>> RawTaskMetaData<w, d, f> constructRawTaskMetaData(
+			TaskConfiguration<w, d, f> configuration, OfficeFloorIssues issues,
+			RawWorkMetaData<w> rawWorkMetaData) {
 
 		// Obtain the task name
 		String taskName = configuration.getTaskName();
@@ -138,7 +138,7 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 		}
 
 		// Obtain the task factory
-		TaskFactory<p, w, m, f> taskFactory = configuration.getTaskFactory();
+		TaskFactory<w, d, f> taskFactory = configuration.getTaskFactory();
 		if (taskFactory == null) {
 			issues.addIssue(AssetType.TASK, taskName, "No "
 					+ TaskFactory.class.getSimpleName() + " provided");
@@ -286,13 +286,13 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 				});
 
 		// Create the task meta-data
-		TaskMetaDataImpl<p, w, m, f> taskMetaData = new TaskMetaDataImpl<p, w, m, f>(
+		TaskMetaDataImpl<w, d, f> taskMetaData = new TaskMetaDataImpl<w, d, f>(
 				taskName, taskFactory, parameterType, team,
 				requiredManagedObjects, taskToWorkMoTranslations,
 				preTaskDuties, postTaskDuties);
 
 		// Return the raw task meta-data
-		return new RawTaskMetaDataImpl<p, w, m, f>(taskName, configuration,
+		return new RawTaskMetaDataImpl<w, d, f>(taskName, configuration,
 				taskMetaData, rawWorkMetaData);
 	}
 
@@ -308,8 +308,8 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 	 * @return {@link ManagedObjectIndex} of the input
 	 *         {@link RawBoundManagedObjectMetaData}.
 	 */
-	private <D extends Enum<D>> ManagedObjectIndex loadRequiredManagedObjects(
-			RawBoundManagedObjectMetaData<D> boundMo,
+	private <d extends Enum<d>> ManagedObjectIndex loadRequiredManagedObjects(
+			RawBoundManagedObjectMetaData<d> boundMo,
 			Set<ManagedObjectIndex> requiredManagedObjectIndexes) {
 
 		// Obtain the bound managed object index
@@ -423,7 +423,7 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 	}
 
 	@Override
-	public TaskMetaData<P, W, M, F> getTaskMetaData() {
+	public TaskMetaData<W, D, F> getTaskMetaData() {
 		return this.taskMetaData;
 	}
 
@@ -457,10 +457,9 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 			}
 
 			// Obtain the task meta-data
-			TaskMetaData<?, ?, ?, ?> taskMetaData = ConstructUtil
-					.getTaskMetaData(taskNodeReference, taskLocator, issues,
-							AssetType.TASK, this.getTaskName(), "flow index "
-									+ i, false);
+			TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil.getTaskMetaData(
+					taskNodeReference, taskLocator, issues, AssetType.TASK,
+					this.getTaskName(), "flow index " + i, false);
 			if (taskMetaData == null) {
 				continue; // no initial task for flow
 			}
@@ -483,7 +482,7 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 		// Obtain the next task in flow
 		TaskNodeReference nextTaskNodeReference = this.configuration
 				.getNextTaskInFlow();
-		TaskMetaData<?, ?, ?, ?> nextTaskInFlow = null;
+		TaskMetaData<?, ?, ?> nextTaskInFlow = null;
 		if (nextTaskNodeReference != null) {
 			nextTaskInFlow = ConstructUtil.getTaskMetaData(
 					nextTaskNodeReference, taskLocator, issues, AssetType.TASK,
@@ -514,7 +513,7 @@ public class RawTaskMetaDataImpl<P, W extends Work, M extends Enum<M>, F extends
 						"No task referenced for escalation index 0");
 				continue; // no escalation handler referenced
 			}
-			TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = ConstructUtil
+			TaskMetaData<?, ?, ?> escalationTaskMetaData = ConstructUtil
 					.getTaskMetaData(escalationReference, taskLocator, issues,
 							AssetType.TASK, this.getTaskName(),
 							"escalation index " + i, false);

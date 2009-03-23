@@ -180,7 +180,7 @@ public class ConstructUtil {
 	 * @return {@link TaskMetaData} or <code>null</code> if not found with
 	 *         issues reported to the {@link OfficeFloorIssues}.
 	 */
-	public static TaskMetaData<?, ?, ?, ?> getTaskMetaData(
+	public static TaskMetaData<?, ?, ?> getTaskMetaData(
 			TaskNodeReference taskNodeReference,
 			OfficeMetaDataLocator taskLocator, OfficeFloorIssues issues,
 			AssetType assetType, String assetName, String forItemDescription,
@@ -206,7 +206,7 @@ public class ConstructUtil {
 		}
 
 		// Obtain the task meta-data
-		TaskMetaData<?, ?, ?, ?> taskMetaData;
+		TaskMetaData<?, ?, ?> taskMetaData;
 		if (isHaveWorkName) {
 			taskMetaData = taskLocator.getTaskMetaData(workName, taskName);
 		} else {
@@ -280,7 +280,7 @@ public class ConstructUtil {
 	 */
 	public static <W extends Work> FlowMetaData<W> newFlowMetaData(
 			FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData<?, W, ?, ?> taskMetaData,
+			TaskMetaData<W, ?, ?> taskMetaData,
 			AssetManagerFactory assetManagerFactory, AssetType assetType,
 			String assetName, String responsibility, OfficeFloorIssues issues) {
 

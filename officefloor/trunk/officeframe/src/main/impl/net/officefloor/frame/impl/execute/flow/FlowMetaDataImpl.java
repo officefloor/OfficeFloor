@@ -39,7 +39,7 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	/**
 	 * {@link TaskMetaData} of the initial {@link Task} of the {@link Flow}.
 	 */
-	private final TaskMetaData<?, W, ?, ?> initialTaskMetaData;
+	private final TaskMetaData<W, ?, ?> initialTaskMetaData;
 
 	/**
 	 * {@link AssetManager} to managed this {@link Flow}.
@@ -58,8 +58,7 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	 *            {@link AssetManager} to managed this {@link Flow}.
 	 */
 	public FlowMetaDataImpl(FlowInstigationStrategyEnum strategy,
-			TaskMetaData<?, W, ?, ?> initialTaskMetaData,
-			AssetManager flowManager) {
+			TaskMetaData<W, ?, ?> initialTaskMetaData, AssetManager flowManager) {
 		this.strategy = strategy;
 		this.initialTaskMetaData = initialTaskMetaData;
 		this.flowManager = flowManager;
@@ -75,7 +74,7 @@ public class FlowMetaDataImpl<W extends Work> implements FlowMetaData<W> {
 	}
 
 	@Override
-	public TaskMetaData<?, W, ?, ?> getInitialTaskMetaData() {
+	public TaskMetaData<W, ?, ?> getInitialTaskMetaData() {
 		return this.initialTaskMetaData;
 	}
 

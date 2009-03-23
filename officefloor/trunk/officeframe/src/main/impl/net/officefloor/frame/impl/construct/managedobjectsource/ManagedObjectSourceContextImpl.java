@@ -269,10 +269,10 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 
 		@Override
 		public <P, f extends Enum<f>> ManagedObjectTaskBuilder<f> addTask(
-				String taskName, TaskFactory<P, W, None, f> taskFactory) {
+				String taskName, TaskFactory<W, None, f> taskFactory) {
 
 			// Create and initialise the task
-			TaskBuilder<P, W, None, f> taskBuilder = this.workBuilder.addTask(
+			TaskBuilder<W, None, f> taskBuilder = this.workBuilder.addTask(
 					taskName, taskFactory);
 
 			// Register as initial task of work if first task
@@ -295,7 +295,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 		/**
 		 * {@link TaskBuilder}.
 		 */
-		private final TaskBuilder<?, ?, None, f> taskBuilder;
+		private final TaskBuilder<?, None, f> taskBuilder;
 
 		/**
 		 * Initiate.
@@ -303,8 +303,7 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 		 * @param taskBuilder
 		 *            {@link TaskBuilder}.
 		 */
-		public ManagedObjectTaskBuilderImpl(
-				TaskBuilder<?, ?, None, f> taskBuilder) {
+		public ManagedObjectTaskBuilderImpl(TaskBuilder<?, None, f> taskBuilder) {
 			this.taskBuilder = taskBuilder;
 		}
 

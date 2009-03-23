@@ -471,8 +471,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		WorkMetaData<W> workMetaData = metaData.getWorkMetaData();
 
 		// Ensure contains the task
-		TaskMetaData<?, ?, ?, ?>[] taskMetaDatas = workMetaData
-				.getTaskMetaData();
+		TaskMetaData<?, ?, ?>[] taskMetaDatas = workMetaData.getTaskMetaData();
 		assertEquals("Should have a single task", 1, taskMetaDatas.length);
 		assertEquals("Incorrect task meta-data", task.taskMetaData,
 				taskMetaDatas[0]);
@@ -711,7 +710,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 				.getInitialTaskName(), initialTaskName);
 
 		// Create a task configuration for each task
-		TaskConfiguration<?, ?, ?, ?>[] taskConfigurations = new TaskConfiguration[tasks.length];
+		TaskConfiguration<?, ?, ?>[] taskConfigurations = new TaskConfiguration[tasks.length];
 		for (int i = 0; i < taskConfigurations.length; i++) {
 			taskConfigurations[i] = this.createMock(TaskConfiguration.class);
 		}
@@ -722,7 +721,7 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		for (int i = 0; i < taskConfigurations.length; i++) {
 
 			// Make available to use in matcher
-			final TaskConfiguration<?, ?, ?, ?> taskConfiguration = taskConfigurations[i];
+			final TaskConfiguration<?, ?, ?> taskConfiguration = taskConfigurations[i];
 			final RecordedTask task = tasks[i];
 
 			// Record constructing the raw task meta-data
@@ -789,13 +788,13 @@ public class RawWorkMetaDataTest<W extends Work> extends OfficeFrameTestCase {
 		/**
 		 * {@link RawTaskMetaData}.
 		 */
-		public final RawTaskMetaData<?, ?, ?, ?> rawTaskMetaData = RawWorkMetaDataTest.this
+		public final RawTaskMetaData<?, ?, ?> rawTaskMetaData = RawWorkMetaDataTest.this
 				.createMock(RawTaskMetaData.class);
 
 		/**
 		 * {@link TaskMetaData}.
 		 */
-		public final TaskMetaData<?, ?, ?, ?> taskMetaData = RawWorkMetaDataTest.this
+		public final TaskMetaData<?, ?, ?> taskMetaData = RawWorkMetaDataTest.this
 				.createMock(TaskMetaData.class);
 
 		/**

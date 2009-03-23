@@ -75,7 +75,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	/**
 	 * Listing of {@link TaskConfiguration}.
 	 */
-	private final List<TaskBuilderImpl<?, W, ?, ?>> tasks = new LinkedList<TaskBuilderImpl<?, W, ?, ?>>();
+	private final List<TaskBuilderImpl<W, ?, ?>> tasks = new LinkedList<TaskBuilderImpl<W, ?, ?>>();
 
 	/**
 	 * Initiate.
@@ -94,19 +94,18 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	 * Obtains the {@link TaskBuilder}.
 	 * 
 	 * @param namespace
-	 *            Namespace to identify the {@link TaskBuilder}.
+	 *            Name space to identify the {@link TaskBuilder}.
 	 * @param taskName
 	 *            Name of the {@link TaskBuilder}.
 	 * @return {@link TaskBuilder}.
 	 */
-	public TaskBuilder<?, W, ?, ?> getTaskBuilder(String namespace,
-			String taskName) {
+	public TaskBuilder<W, ?, ?> getTaskBuilder(String namespace, String taskName) {
 
 		// Obtain the task builder
 		String namespacedTaskName = OfficeBuilderImpl.getNamespacedName(
 				namespace, taskName);
-		TaskBuilderImpl<?, W, ?, ?> taskBuilder = null;
-		for (TaskBuilderImpl<?, W, ?, ?> task : this.tasks) {
+		TaskBuilderImpl<W, ?, ?> taskBuilder = null;
+		for (TaskBuilderImpl<W, ?, ?> task : this.tasks) {
 			if (namespacedTaskName.equals(task.getTaskName())) {
 				taskBuilder = task;
 			}
@@ -145,9 +144,9 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	}
 
 	@Override
-	public <P, M extends Enum<M>, F extends Enum<F>> TaskBuilder<P, W, M, F> addTask(
-			String taskName, TaskFactory<P, W, M, F> taskFactory) {
-		TaskBuilderImpl<P, W, M, F> builder = new TaskBuilderImpl<P, W, M, F>(
+	public <D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> addTask(
+			String taskName, TaskFactory<W, D, F> taskFactory) {
+		TaskBuilderImpl<W, D, F> builder = new TaskBuilderImpl<W, D, F>(
 				taskName, taskFactory);
 		this.tasks.add(builder);
 		return builder;
@@ -186,7 +185,7 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public TaskConfiguration<?, W, ?, ?>[] getTaskConfiguration() {
+	public TaskConfiguration<W, ?, ?>[] getTaskConfiguration() {
 		return this.tasks.toArray(new TaskConfiguration[0]);
 	}
 

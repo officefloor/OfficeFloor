@@ -143,7 +143,7 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?, ?> getNextTaskInFlow() {
+	public TaskMetaData<?, ?, ?> getNextTaskInFlow() {
 		// Never a next task for an administrator duty
 		return null;
 	}

@@ -24,86 +24,80 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 /**
  * Context in which the {@link Task} is done.
  * 
- * @param P
- *            Type for the parameter to the {@link Task}.
  * @param W
  *            Specific {@link Work}.
- * @param M
- *            Type providing the keys to the {@link ManagedObject} instances.
+ * @param D
+ *            Type providing the keys for the dependencies. Dependencies may
+ *            either be:
+ *            <ol>
+ *            <li>{@link Object} of a {@link ManagedObject}</li>
+ *            <li>Parameter for the {@link Task}</li>
+ *            </ol>
  * @param F
- *            Type providing the keys to the {@link Flow} instances.
+ *            Type providing the keys to the possible {@link Flow} instances
+ *            instigated by this {@link Task}.
  * 
  * @author Daniel
  */
-public interface TaskContext<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface TaskContext<W extends Work, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
-	 * <p>
-	 * Obtains the parameter for the {@link Task}.
-	 * <p>
-	 * Parameter the {@link Task} was invoked with.
+	 * Obtains the {@link Work} of the {@link Task}.
 	 * 
-	 * @return Parameter for the {@link Task}.
-	 */
-	// TODO obtain parameter via getObject
-	@Deprecated
-	P getParameter();
-
-	/**
-	 * Obtains the {@link Work} of the {@link Task} being executed.
-	 * 
-	 * @return {@link Work} of the {@link Task} being executed.
+	 * @return {@link Work} of the {@link Task}.
 	 */
 	W getWork();
 
 	/**
 	 * <p>
 	 * Obtains the lock for the {@link ProcessState} containing the
-	 * {@link ThreadState} executing this {@link Task}.
+	 * {@link ThreadState} executing the {@link Task}.
 	 * <p>
 	 * This enables different {@link ThreadState} instances of a
-	 * {@link ProcessState} to coordinate.
+	 * {@link ProcessState} to have critical sections.
 	 * 
 	 * @return {@link ProcessState} lock.
 	 */
 	Object getProcessLock();
 
 	/**
-	 * Obtains the object of the specified {@link ManagedObject}.
+	 * Obtains the dependency object.
 	 * 
 	 * @param key
-	 *            Key identifying the {@link ManagedObject}.
-	 * @return Object of the specified {@link ManagedObject}.
+	 *            Key identifying the dependency.
+	 * @return Dependency object.
 	 */
-	Object getObject(M key);
+	Object getObject(D key);
 
 	/**
 	 * <p>
-	 * Similar to {@link #getObject(M)} except that allows dynamically obtaining
-	 * the objects of the {@link ManagedObject} instances.
+	 * Similar to {@link #getObject(D)} except allows dynamically obtaining the
+	 * dependencies.
+	 * <p>
+	 * In other words, an {@link Enum} is not required to define the possible
+	 * dependencies available.
 	 * 
-	 * @param managedObjectIndex
-	 *            Index identifying the {@link ManagedObject}.
-	 * @return Object of the specified {@link ManagedObject}.
+	 * @param dependencyIndex
+	 *            Index identifying the dependency.
+	 * @return Dependency object.
 	 */
-	Object getObject(int managedObjectIndex);
+	Object getObject(int dependencyIndex);
 
 	/**
 	 * <p>
-	 * Instigates a flow to be run.
+	 * Instigates a {@link Flow} to be run.
 	 * <p>
 	 * The returned {@link FlowFuture} may not complete while the current
-	 * {@link Task} is still executing. However it is available to register with
-	 * the {@link Work} for later checking by other {@link Task} instances.
+	 * {@link Task} is executing. However it is available to register for later
+	 * checking by other {@link Task} instances.
 	 * 
 	 * @param key
-	 *            Key identifying the flow to instigate.
+	 *            Key identifying the {@link Flow} to instigate.
 	 * @param parameter
-	 *            Parameter that will be available from the
-	 *            {@link TaskContext#getParameter()} of the first {@link Task}
-	 *            of the flow to be run.
-	 * @return {@link FlowFuture} to indicate when the instigated flow has
-	 *         completed.
+	 *            Parameter for the first {@link Task} of the {@link Flow}
+	 *            instigated.
+	 * @return {@link FlowFuture} to indicate when the instigated {@link Flow}
+	 *         has completed.
 	 */
 	FlowFuture doFlow(F key, Object parameter);
 
@@ -113,16 +107,15 @@ public interface TaskContext<P extends Object, W extends Work, M extends Enum<M>
 	 * instigation of flows.
 	 * <p>
 	 * In other words, an {@link Enum} is not required to define the possible
-	 * flows available.
+	 * {@link Flow} instances available.
 	 * 
 	 * @param flowIndex
-	 *            Index identifying the flow to instigate.
+	 *            Index identifying the {@link Flow} to instigate.
 	 * @param parameter
-	 *            Parameter that will be available from the
-	 *            {@link TaskContext#getParameter()} of the first {@link Task}
-	 *            of the flow to be run.
-	 * @return {@link FlowFuture} to indicate when the instigated flow has
-	 *         completed.
+	 *            Parameter that will be available for the first {@link Task} of
+	 *            the {@link Flow} to be run.
+	 * @return {@link FlowFuture} to indicate when the instigated {@link Flow}
+	 *         has completed.
 	 */
 	FlowFuture doFlow(int flowIndex, Object parameter);
 

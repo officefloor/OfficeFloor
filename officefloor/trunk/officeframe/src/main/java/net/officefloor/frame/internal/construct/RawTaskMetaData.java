@@ -29,7 +29,7 @@ import net.officefloor.frame.internal.structure.WorkMetaData;
  * 
  * @author Daniel
  */
-public interface RawTaskMetaData<P, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface RawTaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * Obtains the name of the {@link Task}.
@@ -51,7 +51,7 @@ public interface RawTaskMetaData<P, W extends Work, M extends Enum<M>, F extends
 	 * 
 	 * @return {@link TaskMetaData}.
 	 */
-	TaskMetaData<P, W, M, F> getTaskMetaData();
+	TaskMetaData<W, D, F> getTaskMetaData();
 
 	/**
 	 * Links the {@link TaskMetaData} instances to create {@link Flow} of

@@ -65,7 +65,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * 
  * @author Daniel
  */
-public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
+public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		extends OfficeFrameTestCase {
 
 	/**
@@ -82,7 +82,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 * {@link TaskConfiguration}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskConfiguration<P, W, M, F> configuration = this
+	private final TaskConfiguration<W, D, F> configuration = this
 			.createMock(TaskConfiguration.class);
 
 	/**
@@ -102,7 +102,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 * {@link TaskFactory}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskFactory<P, W, M, F> taskFactory = this
+	private final TaskFactory<W, D, F> taskFactory = this
 			.createMock(TaskFactory.class);
 
 	/**
@@ -234,8 +234,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
-				.constructRawTaskMetaData(true);
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Verify initial details
@@ -293,9 +292,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> rawMetaData = this
+		RawTaskMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
-		TaskMetaData<P, W, M, F> metaData = rawMetaData.getTaskMetaData();
+		TaskMetaData<W, D, F> metaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have parameter
@@ -344,9 +343,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> rawMetaData = this
+		RawTaskMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
-		TaskMetaData<P, W, M, F> metaData = rawMetaData.getTaskMetaData();
+		TaskMetaData<W, D, F> metaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have parameter
@@ -456,8 +455,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
-				.constructRawTaskMetaData(true);
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure no managed objects
@@ -503,8 +501,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
-				.constructRawTaskMetaData(true);
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure no managed objects
@@ -559,8 +556,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
-				.constructRawTaskMetaData(true);
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// Ensure have managed object
@@ -601,8 +597,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
-				.constructRawTaskMetaData(true);
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// No duties
@@ -635,8 +630,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
-				.constructRawTaskMetaData(true);
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// No duties
@@ -676,8 +670,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
-				.constructRawTaskMetaData(true);
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 		this.verifyMockObjects();
 
 		// No duties
@@ -726,9 +719,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> rawMetaData = this
+		RawTaskMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
-		TaskMetaData<P, W, M, F> taskMetaData = rawMetaData.getTaskMetaData();
+		TaskMetaData<W, D, F> taskMetaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have duty
@@ -797,9 +790,9 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Attempt to construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> rawMetaData = this
+		RawTaskMetaData<W, D, F> rawMetaData = this
 				.constructRawTaskMetaData(true);
-		TaskMetaData<P, W, M, F> taskMetaData = rawMetaData.getTaskMetaData();
+		TaskMetaData<W, D, F> taskMetaData = rawMetaData.getTaskMetaData();
 		this.verifyMockObjects();
 
 		// Ensure have duty
@@ -970,7 +963,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(FlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> flowTaskMetaData = this
+		final TaskMetaData<?, ?, ?> flowTaskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record incompatible flow argument
@@ -1017,7 +1010,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(FlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> flowTaskMetaData = this
+		final TaskMetaData<?, ?, ?> flowTaskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record no instigation strategy
@@ -1084,7 +1077,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(FlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> flowTaskMetaData = this
+		final TaskMetaData<?, ?, ?> flowTaskMetaData = this
 				.createMock(TaskMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
 
@@ -1121,7 +1114,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
+		RawTaskMetaData<W, D, F> metaData = this
 				.fullyConstructRawTaskMetaData();
 		this.verifyMockObjects();
 
@@ -1180,7 +1173,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> nextTaskMetaData = this
+		final TaskMetaData<?, ?, ?> nextTaskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record construct next task (which is on another work)
@@ -1222,7 +1215,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> nextTaskMetaData = this
+		final TaskMetaData<?, ?, ?> nextTaskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record construct next task (which is on another work)
@@ -1247,12 +1240,12 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
+		RawTaskMetaData<W, D, F> metaData = this
 				.fullyConstructRawTaskMetaData();
 		this.verifyMockObjects();
 
 		// Verify constructed next task
-		TaskMetaData<?, ?, ?, ?> nextTask = metaData.getTaskMetaData()
+		TaskMetaData<?, ?, ?> nextTask = metaData.getTaskMetaData()
 				.getNextTaskInFlow();
 		assertEquals("Incorrect next task meta-data", nextTaskMetaData,
 				nextTask);
@@ -1361,7 +1354,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(EscalationConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = this
+		final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record construct escalation
@@ -1410,7 +1403,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 				.createMock(EscalationConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = this
+		final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record construct escalation
@@ -1440,7 +1433,7 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 
 		// Fully construct task meta-data
 		this.replayMockObjects();
-		RawTaskMetaData<P, W, M, F> metaData = this
+		RawTaskMetaData<W, D, F> metaData = this
 				.fullyConstructRawTaskMetaData();
 		this.verifyMockObjects();
 
@@ -1562,11 +1555,11 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 *            If expected to be constructed.
 	 * @return {@link RawTaskMetaData}.
 	 */
-	private RawTaskMetaData<P, W, M, F> constructRawTaskMetaData(
+	private RawTaskMetaData<W, D, F> constructRawTaskMetaData(
 			boolean isExpectConstruct) {
 
 		// Construct the raw task meta-data
-		RawTaskMetaData<P, W, M, F> metaData = RawTaskMetaDataImpl.getFactory()
+		RawTaskMetaData<W, D, F> metaData = RawTaskMetaDataImpl.getFactory()
 				.constructRawTaskMetaData(this.configuration, this.issues,
 						this.rawWorkMetaData);
 		if (isExpectConstruct) {
@@ -1585,11 +1578,10 @@ public class RawTaskMetaDataTest<P, W extends Work, M extends Enum<M>, F extends
 	 * 
 	 * @return {@link RawTaskMetaData}.
 	 */
-	private RawTaskMetaData<P, W, M, F> fullyConstructRawTaskMetaData() {
+	private RawTaskMetaData<W, D, F> fullyConstructRawTaskMetaData() {
 
 		// Construct the raw task meta-data
-		RawTaskMetaData<P, W, M, F> metaData = this
-				.constructRawTaskMetaData(true);
+		RawTaskMetaData<W, D, F> metaData = this.constructRawTaskMetaData(true);
 
 		// Other tasks and work expected to be constructed between these steps
 

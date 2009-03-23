@@ -28,7 +28,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel
  */
-public interface TaskMetaData<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
+public interface TaskMetaData<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		extends JobMetaData {
 
 	/**
@@ -44,7 +44,7 @@ public interface TaskMetaData<P, W extends Work, M extends Enum<M>, F extends En
 	 * 
 	 * @return {@link TaskFactory}
 	 */
-	TaskFactory<P, W, M, F> getTaskFactory();
+	TaskFactory<W, D, F> getTaskFactory();
 
 	/**
 	 * Obtains the parameter type for the {@link Task}.
