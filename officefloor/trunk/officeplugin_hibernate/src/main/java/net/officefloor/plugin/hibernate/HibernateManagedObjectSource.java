@@ -51,26 +51,13 @@ public class HibernateManagedObjectSource
 	private Connection dummyConnection;
 
 	/*
-	 * ====================================================================
-	 * AbstractManagedObjectSource
-	 * ====================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadSpecification(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.SpecificationContext)
+	 * ================ AbstractAsyncManagedObjectSource =======================
 	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		// No specification
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource#loadMetaData(net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext)
-	 */
 	@Override
 	protected void loadMetaData(
 			MetaDataContext<HibernateDependenciesEnum, None> context)
@@ -97,9 +84,8 @@ public class HibernateManagedObjectSource
 				});
 
 		// Require connection dependency
-		context.getDependencyLoader(HibernateDependenciesEnum.class)
-				.mapDependencyType(HibernateDependenciesEnum.CONNECTION,
-						Connection.class);
+		context.addDependency(HibernateDependenciesEnum.CONNECTION,
+				Connection.class);
 
 		// Create the Session Factory
 		this.sessionFactory = new Configuration().configure(
@@ -107,15 +93,9 @@ public class HibernateManagedObjectSource
 						.locateURL(configFilePath)).buildSessionFactory();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource#getManagedObject()
-	 */
 	@Override
 	protected ManagedObject getManagedObject() throws Throwable {
-		// Create the Session (tricking it to believe it has a user supplied
-		// connection)
+		// Create the Session (with user supplied connection)
 		Session session = this.sessionFactory.openSession(this.dummyConnection);
 
 		// Create the Managed Object
