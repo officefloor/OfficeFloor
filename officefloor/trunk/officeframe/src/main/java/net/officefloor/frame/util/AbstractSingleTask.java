@@ -22,8 +22,10 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.recycle.RecycleManagedObjectParameter;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
@@ -118,7 +120,7 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	 * @return {@link ManagedObjectTaskBuilder} to configure the {@link Task}.
 	 */
 	@SuppressWarnings("unchecked")
-	public ManagedObjectTaskBuilder<F> registerTask(String workName,
+	public ManagedObjectTaskBuilder<D, F> registerTask(String workName,
 			String taskName, String teamName,
 			ManagedObjectSourceContext<F> context) {
 
@@ -126,7 +128,7 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 		ManagedObjectWorkBuilder work = context.addWork(workName, this);
 
 		// Create the the task builder
-		ManagedObjectTaskBuilder<F> task = work.addTask(taskName, this);
+		ManagedObjectTaskBuilder<D, F> task = work.addTask(taskName, this);
 		task.setTeam(teamName);
 
 		// Return the task builder
@@ -134,13 +136,13 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	}
 
 	/**
-	 * Registers this {@link Task} as the recycler for the
-	 * {@link ManagedObjectSourceContext}.
+	 * Registers this {@link Task} to recycle the {@link ManagedObject}.
 	 * 
 	 * @param context
 	 *            {@link ManagedObjectSourceContext}.
 	 * @param teamName
 	 *            Name of the {@link Team} to recycle the {@link ManagedObject}.
+	 * @see #getRecycleManagedObjectParameter(TaskContext)
 	 */
 	@SuppressWarnings("unchecked")
 	public void registerAsRecycleTask(ManagedObjectSourceContext context,
@@ -153,6 +155,20 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 		ManagedObjectTaskBuilder recycleTask = recycleWork.addTask("recycle",
 				this);
 		recycleTask.setTeam(teamName);
+		recycleTask.linkParameter(0, RecycleManagedObjectParameter.class);
+	}
+
+	/**
+	 * Obtains the {@link RecycleManagedObjectParameter}.
+	 * 
+	 * @param context
+	 *            {@link TaskContext}.
+	 * @return {@link RecycleManagedObjectParameter}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <MO extends ManagedObject> RecycleManagedObjectParameter<MO> getRecycleManagedObjectParameter(
+			TaskContext<W, D, F> context, Class<MO> managedObjectClass) {
+		return (RecycleManagedObjectParameter<MO>) context.getObject(0);
 	}
 
 	/*
