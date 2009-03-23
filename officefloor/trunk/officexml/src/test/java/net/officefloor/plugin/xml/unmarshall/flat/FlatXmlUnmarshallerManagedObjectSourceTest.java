@@ -21,7 +21,7 @@ import java.io.FileInputStream;
 
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.frame.util.ManagedObjectSourceLoader;
+import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
 
@@ -64,7 +64,7 @@ public class FlatXmlUnmarshallerManagedObjectSourceTest extends
 		this.targetObject = new TargetObject();
 
 		// Initiate the loader
-		ManagedObjectSourceLoader loader = new ManagedObjectSourceLoader();
+		ManagedObjectSourceStandAlone loader = new ManagedObjectSourceStandAlone();
 
 		// Specify methods
 		loader.addProperty("string-value", "setString");
