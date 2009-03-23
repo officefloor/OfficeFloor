@@ -108,7 +108,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 	/**
 	 * {@link RawTaskMetaData} instances of this {@link Work}.
 	 */
-	private List<RawTaskMetaData<?, W, ?, ?>> rawTaskMetaDatas = null;
+	private List<RawTaskMetaData<W, ?, ?>> rawTaskMetaDatas = null;
 
 	/**
 	 * {@link WorkMetaData}.
@@ -236,16 +236,16 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 
 		// Obtain the name of the task for the initial flow of work
 		String initialTaskName = configuration.getInitialTaskName();
-		TaskMetaData<?, w, ?, ?> initialTaskMetaData = null;
+		TaskMetaData<w, ?, ?> initialTaskMetaData = null;
 
 		// Construct the task meta-data of this work (also find initial task)
-		rawWorkMetaData.rawTaskMetaDatas = new LinkedList<RawTaskMetaData<?, w, ?, ?>>();
-		List<TaskMetaData<?, w, ?, ?>> taskMetaDatas = new LinkedList<TaskMetaData<?, w, ?, ?>>();
-		for (TaskConfiguration<?, w, ?, ?> taskConfiguration : configuration
+		rawWorkMetaData.rawTaskMetaDatas = new LinkedList<RawTaskMetaData<w, ?, ?>>();
+		List<TaskMetaData<w, ?, ?>> taskMetaDatas = new LinkedList<TaskMetaData<w, ?, ?>>();
+		for (TaskConfiguration<w, ?, ?> taskConfiguration : configuration
 				.getTaskConfiguration()) {
 
 			// Construct and register the raw task meta-data
-			RawTaskMetaData<?, w, ?, ?> rawTaskMetaData = rawTaskFactory
+			RawTaskMetaData<w, ?, ?> rawTaskMetaData = rawTaskFactory
 					.constructRawTaskMetaData(taskConfiguration, issues,
 							rawWorkMetaData);
 			if (rawTaskMetaData == null) {
@@ -254,7 +254,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 			rawWorkMetaData.rawTaskMetaDatas.add(rawTaskMetaData);
 
 			// Construct and register the task meta-data
-			TaskMetaData<?, w, ?, ?> taskMetaData = rawTaskMetaData
+			TaskMetaData<w, ?, ?> taskMetaData = rawTaskMetaData
 					.getTaskMetaData();
 			taskMetaDatas.add(taskMetaData);
 
@@ -357,7 +357,7 @@ public class RawWorkMetaDataImpl<W extends Work> implements
 		}
 
 		// Link the tasks of this work
-		for (RawTaskMetaData<?, W, ?, ?> rawTaskMetaData : this.rawTaskMetaDatas) {
+		for (RawTaskMetaData<W, ?, ?> rawTaskMetaData : this.rawTaskMetaDatas) {
 			rawTaskMetaData.linkTasks(taskMetaDataLocator, this.workMetaData,
 					assetManagerFactory, issues);
 		}

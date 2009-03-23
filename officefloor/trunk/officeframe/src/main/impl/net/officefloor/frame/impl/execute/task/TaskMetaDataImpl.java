@@ -37,8 +37,8 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		implements TaskMetaData<P, W, M, F> {
+public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
+		implements TaskMetaData<W, D, F> {
 
 	/**
 	 * Name of the {@link Task}.
@@ -49,7 +49,7 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 * {@link TaskFactory} to create the {@link Task} of the
 	 * {@link TaskMetaData}.
 	 */
-	private final TaskFactory<P, W, M, F> taskFactory;
+	private final TaskFactory<W, D, F> taskFactory;
 
 	/**
 	 * Parameter type of this {@link Task}.
@@ -108,7 +108,7 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 * <p>
 	 * Acts as <code>final</code> but specified after constructor.
 	 */
-	private TaskMetaData<?, ?, ?, ?> nextTaskInFlow;
+	private TaskMetaData<?, ?, ?> nextTaskInFlow;
 
 	/**
 	 * {@link EscalationProcedure} for exceptions of the {@link Task} of this
@@ -142,9 +142,9 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 *            {@link TaskDutyAssociation} specifying the {@link Duty}
 	 *            instances to be completed after executing the {@link Task}.
 	 */
-	public TaskMetaDataImpl(String taskName,
-			TaskFactory<P, W, M, F> taskFactory, Class<?> parameterType,
-			Team team, ManagedObjectIndex[] requiredManagedObjects,
+	public TaskMetaDataImpl(String taskName, TaskFactory<W, D, F> taskFactory,
+			Class<?> parameterType, Team team,
+			ManagedObjectIndex[] requiredManagedObjects,
 			ManagedObjectIndex[] taskToWorkMoTranslations,
 			TaskDutyAssociation<?>[] preTaskDuties,
 			TaskDutyAssociation<?>[] postTaskDuties) {
@@ -175,7 +175,7 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	 */
 	public void loadRemainingState(WorkMetaData<W> workMetaData,
 			FlowMetaData<?>[] flowMetaData,
-			TaskMetaData<?, ?, ?, ?> nextTaskInFlow,
+			TaskMetaData<?, ?, ?> nextTaskInFlow,
 			EscalationProcedure escalationProcedure) {
 		this.workMetaData = workMetaData;
 		this.flowMetaData = flowMetaData;
@@ -193,7 +193,7 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	}
 
 	@Override
-	public TaskFactory<P, W, M, F> getTaskFactory() {
+	public TaskFactory<W, D, F> getTaskFactory() {
 		return this.taskFactory;
 	}
 
@@ -238,7 +238,7 @@ public class TaskMetaDataImpl<P extends Object, W extends Work, M extends Enum<M
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?, ?> getNextTaskInFlow() {
+	public TaskMetaData<?, ?, ?> getNextTaskInFlow() {
 		return this.nextTaskInFlow;
 	}
 

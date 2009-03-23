@@ -63,7 +63,7 @@ public class ManagedObjectSourceInstigateFlowTest extends
 		// Provide task for managed object source input
 		InputTask inputTask = new InputTask();
 		this.constructWork("WORK", inputTask, "TASK");
-		TaskBuilder<?, ?, ?, ?> taskBuilder = this.constructTask("TASK",
+		TaskBuilder<?, ?, ?> taskBuilder = this.constructTask("TASK",
 				inputTask, "TEAM", "INPUT", Object.class, null, null);
 		taskBuilder.linkParameter(1, Object.class);
 
@@ -98,7 +98,7 @@ public class ManagedObjectSourceInstigateFlowTest extends
 	 * Task to process {@link ManagedObjectSource} input.
 	 */
 	private static class InputTask extends
-			AbstractSingleTask<Object, Work, Indexed, Indexed> {
+			AbstractSingleTask<Work, Indexed, Indexed> {
 
 		/**
 		 * Parameter.
@@ -115,7 +115,7 @@ public class ManagedObjectSourceInstigateFlowTest extends
 		 */
 
 		@Override
-		public Object doTask(TaskContext<Object, Work, Indexed, Indexed> context)
+		public Object doTask(TaskContext<Work, Indexed, Indexed> context)
 				throws Throwable {
 
 			// Obtain the object

@@ -178,7 +178,7 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 		Flow flow = processState.createThread(flowMetaData);
 
 		// Obtain the task meta-data
-		TaskMetaData<?, W, ?, ?> taskMetaData = flowMetaData
+		TaskMetaData<W, ?, ?> taskMetaData = flowMetaData
 				.getInitialTaskMetaData();
 
 		// Create the Job Node for the initial job

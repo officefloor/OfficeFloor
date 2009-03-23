@@ -50,7 +50,7 @@ public interface JobMetaData {
 	 * @return {@link TaskMetaData} of the first {@link Task} within the
 	 *         specified {@link Flow}.
 	 */
-	TaskMetaData<?, ?, ?, ?> getNextTaskInFlow();
+	TaskMetaData<?, ?, ?> getNextTaskInFlow();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link Job} of this

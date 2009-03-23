@@ -317,7 +317,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							// Load next job if no sequential job invoked
 							if (!this.isSequentialJobInvoked) {
 								// No sequential node, load next task of flow
-								TaskMetaData<?, ?, ?, ?> nextTaskMetaData = this.nodeMetaData
+								TaskMetaData<?, ?, ?> nextTaskMetaData = this.nodeMetaData
 										.getNextTaskInFlow();
 								if (nextTaskMetaData != null) {
 									// Create next task
@@ -752,7 +752,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			Object parameter, JobNode parallelOwner) {
 
 		// Obtain the task meta-data for instigating the flow
-		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
+		TaskMetaData<?, ?, ?> initTaskMetaData = flowMetaData
 				.getInitialTaskMetaData();
 
 		// Create a new flow for execution
@@ -780,7 +780,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			Object parameter) {
 
 		// Obtain the task meta-data for instigating the flow
-		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
+		TaskMetaData<?, ?, ?> initTaskMetaData = flowMetaData
 				.getInitialTaskMetaData();
 
 		// Create thread to execute asynchronously
@@ -812,7 +812,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			Object parameter) {
 
 		// Obtain the task meta-data for instigating the flow
-		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
+		TaskMetaData<?, ?, ?> initTaskMetaData = flowMetaData
 				.getInitialTaskMetaData();
 
 		// Create a new flow for execution
@@ -843,7 +843,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 			Object parameter) {
 
 		// Obtain the task meta-data for instigating the flow
-		TaskMetaData<?, ?, ?, ?> initTaskMetaData = flowMetaData
+		TaskMetaData<?, ?, ?> initTaskMetaData = flowMetaData
 				.getInitialTaskMetaData();
 
 		// Create the job node on the same flow as this job node

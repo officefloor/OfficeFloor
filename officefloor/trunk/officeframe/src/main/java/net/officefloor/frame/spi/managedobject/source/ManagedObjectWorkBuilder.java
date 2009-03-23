@@ -39,6 +39,6 @@ public interface ManagedObjectWorkBuilder<W extends Work> {
 	 * @return Specific {@link ManagedObjectTaskBuilder}.
 	 */
 	<P extends Object, F extends Enum<F>> ManagedObjectTaskBuilder<F> addTask(
-			String taskName, TaskFactory<P, W, None, F> taskFactory);
+			String taskName, TaskFactory<W, None, F> taskFactory);
 
 }

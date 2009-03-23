@@ -95,7 +95,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Next {@link TaskMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?, ?> nextTaskMetaData = this
+	private final TaskMetaData<?, ?, ?> nextTaskMetaData = this
 			.createMock(TaskMetaData.class);
 
 	/**
@@ -112,7 +112,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Sequential {@link TaskMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?, ?> sequentialTaskMetaData = this
+	private final TaskMetaData<?, ?, ?> sequentialTaskMetaData = this
 			.createMock(TaskMetaData.class);
 
 	/**
@@ -130,7 +130,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Parallel {@link TaskMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?, ?> parallelTaskMetaData = this
+	private final TaskMetaData<?, ?, ?> parallelTaskMetaData = this
 			.createMock(TaskMetaData.class);
 
 	/**
@@ -152,7 +152,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * Asynchronous {@link TaskMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?, ?> asynchronousTaskMetaData = this
+	private final TaskMetaData<?, ?, ?> asynchronousTaskMetaData = this
 			.createMock(TaskMetaData.class);
 
 	/**
@@ -180,7 +180,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link Escalation} {@link TaskMetaData}.
 	 */
-	private final TaskMetaData<?, ?, ?, ?> escalationTaskMetaData = this
+	private final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
 			.createMock(TaskMetaData.class);
 
 	/**
@@ -362,7 +362,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 */
 	protected void record_JobMetaData_getNextTaskInFlow(boolean hasNextJob) {
 		// Determine if next task
-		TaskMetaData<?, ?, ?, ?> taskMetaData = (hasNextJob ? this.nextTaskMetaData
+		TaskMetaData<?, ?, ?> taskMetaData = (hasNextJob ? this.nextTaskMetaData
 				: null);
 		this.recordReturn(this.jobMetaData, this.jobMetaData
 				.getNextTaskInFlow(), taskMetaData);

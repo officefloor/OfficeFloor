@@ -678,7 +678,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record construction of bound administrator meta-data

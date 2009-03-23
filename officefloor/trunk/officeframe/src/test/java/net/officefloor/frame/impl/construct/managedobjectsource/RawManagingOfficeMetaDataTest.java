@@ -176,7 +176,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(WorkMetaData.class);
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record recycle task has incompatible parameter
@@ -216,7 +216,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(WorkMetaData.class);
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
@@ -269,7 +269,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(WorkMetaData.class);
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 		final ManagedObjectMetaDataImpl<?> moMetaData = this.createMoMetaData();
 		final ManagedObject managedObject = this
@@ -466,7 +466,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record incompatible argument
@@ -511,7 +511,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
 		final ManagedObjectFlowConfiguration<?> flowConfigurationTwo = this
@@ -559,7 +559,7 @@ public class RawManagingOfficeMetaDataTest extends OfficeFrameTestCase {
 				.createMock(ManagedObjectFlowConfiguration.class);
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 		final AssetManager assetManager = this.createMock(AssetManager.class);
 		final String parameter = "PARAMETER";

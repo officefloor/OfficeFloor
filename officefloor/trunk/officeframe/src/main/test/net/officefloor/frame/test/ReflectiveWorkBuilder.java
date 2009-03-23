@@ -129,7 +129,7 @@ public class ReflectiveWorkBuilder implements Work,
 				taskMethod);
 
 		// Create the task builder (parameter type Object)
-		TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder = this.workBuilder
+		TaskBuilder<ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder = this.workBuilder
 				.addTask(methodName, taskMetaData);
 		taskMetaData.setTaskBuilder(taskBuilder);
 
@@ -158,8 +158,8 @@ public class ReflectiveWorkBuilder implements Work,
 	 * Reflective {@link Task} meta-data.
 	 */
 	public class ReflectiveTaskBuilder implements
-			TaskFactory<Object, ReflectiveWorkBuilder, Indexed, Indexed>,
-			Task<Object, ReflectiveWorkBuilder, Indexed, Indexed> {
+			TaskFactory<ReflectiveWorkBuilder, Indexed, Indexed>,
+			Task<ReflectiveWorkBuilder, Indexed, Indexed> {
 
 		/**
 		 * {@link Method} on work object to invoke.
@@ -174,7 +174,7 @@ public class ReflectiveWorkBuilder implements Work,
 		/**
 		 * {@link TaskBuilder}.
 		 */
-		private TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder;
+		private TaskBuilder<ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder;
 
 		/**
 		 * {@link ParameterFactory} instances for the method.
@@ -217,7 +217,7 @@ public class ReflectiveWorkBuilder implements Work,
 		 *            {@link TaskBuilder}.
 		 */
 		void setTaskBuilder(
-				TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder) {
+				TaskBuilder<ReflectiveWorkBuilder, Indexed, Indexed> taskBuilder) {
 			this.taskBuilder = taskBuilder;
 		}
 
@@ -226,7 +226,7 @@ public class ReflectiveWorkBuilder implements Work,
 		 * 
 		 * @return {@link TaskBuilder}.
 		 */
-		public TaskBuilder<Object, ReflectiveWorkBuilder, Indexed, Indexed> getBuilder() {
+		public TaskBuilder<ReflectiveWorkBuilder, Indexed, Indexed> getBuilder() {
 			return this.taskBuilder;
 		}
 
@@ -403,7 +403,7 @@ public class ReflectiveWorkBuilder implements Work,
 		 */
 
 		@Override
-		public Task<Object, ReflectiveWorkBuilder, Indexed, Indexed> createTask(
+		public Task<ReflectiveWorkBuilder, Indexed, Indexed> createTask(
 				ReflectiveWorkBuilder work) {
 			return this;
 		}
@@ -414,7 +414,7 @@ public class ReflectiveWorkBuilder implements Work,
 
 		@Override
 		public Object doTask(
-				TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context)
+				TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context)
 				throws Throwable {
 
 			// Create the parameters
@@ -449,7 +449,7 @@ public class ReflectiveWorkBuilder implements Work,
 	 */
 	private static interface ParameterFactory {
 		Object createParamater(
-				TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context);
+				TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context);
 	}
 
 	/**
@@ -474,7 +474,7 @@ public class ReflectiveWorkBuilder implements Work,
 
 		@Override
 		public Object createParamater(
-				TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context) {
+				TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
 			// Return the managed object
 			return context.getObject(index);
 		}
@@ -502,7 +502,7 @@ public class ReflectiveWorkBuilder implements Work,
 
 		@Override
 		public Object createParamater(
-				final TaskContext<Object, ReflectiveWorkBuilder, Indexed, Indexed> context) {
+				final TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
 			return new ReflectiveFlow() {
 				@Override
 				public void doFlow(Object parameter) {

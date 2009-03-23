@@ -83,7 +83,7 @@ public interface WorkBuilder<W extends Work> {
 	 *            {@link TaskFactory} to create the {@link Task}.
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
-	<P extends Object, M extends Enum<M>, F extends Enum<F>> TaskBuilder<P, W, M, F> addTask(
-			String taskName, TaskFactory<P, W, M, F> taskFactory);
+	<D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> addTask(
+			String taskName, TaskFactory<W, D, F> taskFactory);
 
 }

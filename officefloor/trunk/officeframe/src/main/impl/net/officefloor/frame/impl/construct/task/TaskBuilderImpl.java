@@ -43,8 +43,8 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		implements TaskBuilder<P, W, M, F>, TaskConfiguration<P, W, M, F> {
+public class TaskBuilderImpl<W extends Work, D extends Enum<D>, F extends Enum<F>>
+		implements TaskBuilder<W, D, F>, TaskConfiguration<W, D, F> {
 
 	/**
 	 * Name of this {@link Task}.
@@ -54,7 +54,7 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	/**
 	 * {@link TaskFactory}.
 	 */
-	private final TaskFactory<P, W, M, F> taskFactory;
+	private final TaskFactory<W, D, F> taskFactory;
 
 	/**
 	 * {@link Object} instances to be linked to this {@link Task}.
@@ -103,7 +103,7 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	 * @param taskFactory
 	 *            {@link TaskFactory}.
 	 */
-	public TaskBuilderImpl(String taskName, TaskFactory<P, W, M, F> taskFactory) {
+	public TaskBuilderImpl(String taskName, TaskFactory<W, D, F> taskFactory) {
 		this.taskName = taskName;
 		this.taskFactory = taskFactory;
 	}
@@ -130,7 +130,7 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	}
 
 	@Override
-	public void linkParameter(M key, Class<?> parameterType) {
+	public void linkParameter(D key, Class<?> parameterType) {
 		this.linkParameter(key.ordinal(), parameterType);
 	}
 
@@ -141,7 +141,7 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	}
 
 	@Override
-	public void linkManagedObject(M key, String scopeManagedObjectName,
+	public void linkManagedObject(D key, String scopeManagedObjectName,
 			Class<?> objectType) {
 		this.linkManagedObject(key.ordinal(), scopeManagedObjectName,
 				objectType);
@@ -257,7 +257,7 @@ public class TaskBuilderImpl<P extends Object, W extends Work, M extends Enum<M>
 	}
 
 	@Override
-	public TaskFactory<P, W, M, F> getTaskFactory() {
+	public TaskFactory<W, D, F> getTaskFactory() {
 		return this.taskFactory;
 	}
 

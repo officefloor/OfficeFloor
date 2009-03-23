@@ -323,10 +323,10 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> TaskBuilder<P, W, M, F> constructTask(
-			String taskName, TaskFactory<P, W, M, F> taskFactory,
-			String teamName, String moName, Class<?> moType,
-			String nextTaskName, Class<?> nextTaskArgumentType) {
+	protected <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> constructTask(
+			String taskName, TaskFactory<W, D, F> taskFactory, String teamName,
+			String moName, Class<?> moType, String nextTaskName,
+			Class<?> nextTaskArgumentType) {
 
 		// Create the Task Builder
 		TaskBuilder taskBuilder = ((WorkBuilder) this.workBuilder).addTask(
@@ -351,13 +351,13 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @return {@link TaskBuilder} for the {@link Task}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> TaskBuilder constructTask(
-			String taskName, final Task<P, W, M, F> task, String teamName,
+	protected <W extends Work, D extends Enum<D>, F extends Enum<F>> TaskBuilder constructTask(
+			String taskName, final Task<W, D, F> task, String teamName,
 			String nextTaskName, Class<?> nextTaskArgumentType) {
 
 		// Create the Task Factory
-		TaskFactory<P, W, M, F> taskFactory = new TaskFactory<P, W, M, F>() {
-			public Task<P, W, M, F> createTask(W work) {
+		TaskFactory<W, D, F> taskFactory = new TaskFactory<W, D, F>() {
+			public Task<W, D, F> createTask(W work) {
 				return task;
 			}
 		};

@@ -834,7 +834,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final RawWorkMetaData<?> rawWorkMetaData = this
 				.createMock(RawWorkMetaData.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 		final TaskNodeReference startupTaskReference = this
 				.createMock(TaskNodeReference.class);
@@ -960,7 +960,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		final TaskNodeReference escalationTaskReference = this
 				.createMock(TaskNodeReference.class);
 		final Class<?> typeOfCause = failure.getClass();
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 
 		// Record adding office escalation
@@ -1023,16 +1023,16 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
-		final TaskMetaData<?, ?, ?, ?> taskMetaData = this
+		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 		final WorkMetaData<?> workMetaData = this
 				.createMock(WorkMetaData.class);
 		final WorkContainer<?> workContainer = this
 				.createMock(WorkContainer.class);
-		final TaskFactory<?, Work, ?, ?> taskFactory = this
+		final TaskFactory<Work, ?, ?> taskFactory = this
 				.createMock(TaskFactory.class);
 		final Work work = this.createMock(Work.class);
-		final Task<?, Work, ?, ?> task = this.createMock(Task.class);
+		final Task<Work, ?, ?> task = this.createMock(Task.class);
 
 		// Record creating a process
 		this.record_enhanceOffice();

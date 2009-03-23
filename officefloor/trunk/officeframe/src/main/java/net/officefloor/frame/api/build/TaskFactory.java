@@ -20,17 +20,11 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 
 /**
- * <p>
  * Creates the {@link Task} to be done.
- * </p>
- * <p>
- * Clients must provide the implementation of this to
- * {@link TaskBuilder#setTaskFactory(TaskFactory)}.
- * </p>
  * 
  * @author Daniel
  */
-public interface TaskFactory<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface TaskFactory<W extends Work, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * Creates the {@link Task}.
@@ -39,6 +33,6 @@ public interface TaskFactory<P extends Object, W extends Work, M extends Enum<M>
 	 *            {@link Work} for the {@link Task}.
 	 * @return {@link Task} to be done for the {@link Work}.
 	 */
-	Task<P, W, M, F> createTask(W work);
+	Task<W, D, F> createTask(W work);
 
 }

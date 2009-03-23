@@ -69,7 +69,7 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	public DutyJob(Flow flow, WorkContainer<W> workContainer,
 			AdministratorMetaData<I, A> adminMetaData,
 			TaskDutyAssociation<A> taskDutyAssociation, JobNode parallelOwner,
-			TaskMetaData<?, ?, ?, ?> administeringTaskMetaData) {
+			TaskMetaData<?, ?, ?> administeringTaskMetaData) {
 		super(flow, workContainer, adminMetaData, parallelOwner,
 				administeringTaskMetaData.getRequiredManagedObjects());
 		this.taskDutyAssociation = taskDutyAssociation;

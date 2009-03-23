@@ -73,6 +73,6 @@ public interface WorkConfiguration<W extends Work> {
 	 * 
 	 * @return Configuration for the {@link Task} instances of the {@link Work}.
 	 */
-	TaskConfiguration<?, W, ?, ?>[] getTaskConfiguration();
+	TaskConfiguration<W, ?, ?>[] getTaskConfiguration();
 
 }

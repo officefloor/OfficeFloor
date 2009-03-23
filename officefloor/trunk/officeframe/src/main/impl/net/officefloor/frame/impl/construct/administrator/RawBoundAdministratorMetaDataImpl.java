@@ -465,7 +465,7 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 				TaskNodeReference taskReference = dutyTaskReferences[i];
 
 				// Obtain the task meta-data for the flow
-				TaskMetaData<?, ?, ?, ?> taskMetaData = ConstructUtil
+				TaskMetaData<?, ?, ?> taskMetaData = ConstructUtil
 						.getTaskMetaData(taskReference, taskLocator, issues,
 								AssetType.ADMINISTRATOR,
 								this.boundAdministratorName, "Duty " + dutyKey

@@ -67,7 +67,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	/**
 	 * {@link TaskMetaData} of the {@link Task} instances of this {@link Work}.
 	 */
-	private final TaskMetaData<?, W, ?, ?>[] taskMetaData;
+	private final TaskMetaData<W, ?, ?>[] taskMetaData;
 
 	/**
 	 * Initiate.
@@ -91,7 +91,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 			ManagedObjectMetaData<?>[] moMetaData,
 			AdministratorMetaData<?, ?>[] adminMetaData,
 			FlowMetaData<W> initialFlowMetaData,
-			TaskMetaData<?, W, ?, ?>[] taskMetaData) {
+			TaskMetaData<W, ?, ?>[] taskMetaData) {
 		this.workName = workName;
 		this.workFactory = workFactory;
 		this.managedObjectMetaData = moMetaData;
@@ -136,7 +136,7 @@ public class WorkMetaDataImpl<W extends Work> implements WorkMetaData<W> {
 	}
 
 	@Override
-	public TaskMetaData<?, W, ?, ?>[] getTaskMetaData() {
+	public TaskMetaData<W, ?, ?>[] getTaskMetaData() {
 		return this.taskMetaData;
 	}
 

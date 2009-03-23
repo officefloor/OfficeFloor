@@ -21,24 +21,20 @@ import net.officefloor.frame.internal.structure.Flow;
 /**
  * Task of the {@link Work}.
  * 
- * TODO remove P from Task.
- * 
  * @author Daniel
  */
-public interface Task<P, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface Task<W extends Work, D extends Enum<D>, F extends Enum<F>> {
 
 	/**
 	 * Does the task.
 	 * 
 	 * @param context
-	 *            Context for the {@link Task}.
+	 *            {@link TaskContext} for the {@link Task}.
 	 * @return Parameter for the next {@link Task}. This allows stringing
 	 *         {@link Task} instances together into a {@link Flow}.
 	 * @throws Throwable
-	 *             Indicating failure of the {@link Task}. A thrown
-	 *             {@link Throwable} will also flag this {@link Task} and all
-	 *             its next and parallel {@link Task} instances to not execute.
+	 *             Indicating failure of the {@link Task}.
 	 */
-	Object doTask(TaskContext<P, W, M, F> context) throws Throwable;
+	Object doTask(TaskContext<W, D, F> context) throws Throwable;
 
 }

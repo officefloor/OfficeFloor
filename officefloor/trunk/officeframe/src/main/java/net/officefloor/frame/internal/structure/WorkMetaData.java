@@ -87,6 +87,6 @@ public interface WorkMetaData<W extends Work> {
 	 * @return {@link TaskMetaData} for the {@link Task} instances of this
 	 *         {@link Work}.
 	 */
-	TaskMetaData<?, W, ?, ?>[] getTaskMetaData();
+	TaskMetaData<W, ?, ?>[] getTaskMetaData();
 
 }

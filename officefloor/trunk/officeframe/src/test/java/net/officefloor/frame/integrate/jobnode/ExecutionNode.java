@@ -55,9 +55,8 @@ import org.easymock.internal.AlwaysMatcher;
  * @author Daniel
  */
 public class ExecutionNode<W extends Work> implements
-		TaskMetaData<Object, W, Indexed, Indexed>,
-		TaskFactory<Object, W, Indexed, Indexed>,
-		Task<Object, W, Indexed, Indexed> {
+		TaskMetaData<W, Indexed, Indexed>, TaskFactory<W, Indexed, Indexed>,
+		Task<W, Indexed, Indexed> {
 
 	/**
 	 * Test case utilising this {@link ExecutionNode} to test execution of a
@@ -88,7 +87,7 @@ public class ExecutionNode<W extends Work> implements
 	/**
 	 * {@link TaskMetaData} of the next {@link Task}.
 	 */
-	private TaskMetaData<?, ?, ?, ?> nextTask = null;
+	private TaskMetaData<?, ?, ?> nextTask = null;
 
 	/**
 	 * Initiate.
@@ -212,7 +211,7 @@ public class ExecutionNode<W extends Work> implements
 	 * @param nextTask
 	 *            {@link TaskMetaData} of the next {@link Task}.
 	 */
-	void setNextTask(TaskMetaData<?, W, ?, ?> nextTask) {
+	void setNextTask(TaskMetaData<W, ?, ?> nextTask) {
 		this.nextTask = nextTask;
 	}
 
@@ -225,7 +224,7 @@ public class ExecutionNode<W extends Work> implements
 	 *            {@link TaskMetaData} of the initial {@link Task}.
 	 */
 	void addFlow(FlowInstigationStrategyEnum instigationStrategy,
-			TaskMetaData<?, W, ?, ?> initialTask) {
+			TaskMetaData<W, ?, ?> initialTask) {
 		// Add to listing of processing for the Task
 		this.taskProcessing.add(new FlowTaskProcessItem(instigationStrategy,
 				initialTask, this.testCase));
@@ -258,7 +257,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public TaskFactory<Object, W, Indexed, Indexed> getTaskFactory() {
+	public TaskFactory<W, Indexed, Indexed> getTaskFactory() {
 		return this;
 	}
 
@@ -309,7 +308,7 @@ public class ExecutionNode<W extends Work> implements
 	}
 
 	@Override
-	public TaskMetaData<?, ?, ?, ?> getNextTaskInFlow() {
+	public TaskMetaData<?, ?, ?> getNextTaskInFlow() {
 		return this.nextTask;
 	}
 
@@ -328,7 +327,7 @@ public class ExecutionNode<W extends Work> implements
 	 */
 
 	@Override
-	public Task<Object, W, Indexed, Indexed> createTask(W work) {
+	public Task<W, Indexed, Indexed> createTask(W work) {
 
 		// Flag this as latest execution task node
 		this.testCase.setLatestTaskNode(this);
@@ -348,7 +347,7 @@ public class ExecutionNode<W extends Work> implements
 	protected boolean isTaskProcessed = false;
 
 	@Override
-	public Object doTask(TaskContext<Object, W, Indexed, Indexed> context)
+	public Object doTask(TaskContext<W, Indexed, Indexed> context)
 			throws Exception {
 
 		// Flag that this task is being executed
@@ -390,8 +389,7 @@ public class ExecutionNode<W extends Work> implements
 		 * @return Flag indicating whether the {@link Task} should be
 		 *         re-executed.
 		 */
-		boolean process(int itemIndex,
-				TaskContext<Object, W, Indexed, Indexed> context);
+		boolean process(int itemIndex, TaskContext<W, Indexed, Indexed> context);
 
 	}
 
@@ -490,7 +488,7 @@ public class ExecutionNode<W extends Work> implements
 		/**
 		 * {@link TaskMetaData}.
 		 */
-		protected final TaskMetaData<?, W, ?, ?> taskMetaData;
+		protected final TaskMetaData<W, ?, ?> taskMetaData;
 
 		/**
 		 * {@link AbstractTaskNodeTestCase}.
@@ -514,7 +512,7 @@ public class ExecutionNode<W extends Work> implements
 		 */
 		public FlowTaskProcessItem(
 				FlowInstigationStrategyEnum instigationStrategy,
-				TaskMetaData<?, W, ?, ?> taskMetaData,
+				TaskMetaData<W, ?, ?> taskMetaData,
 				AbstractTaskNodeTestCase<W> testCase) {
 			this.instigationStrategy = instigationStrategy;
 			this.taskMetaData = taskMetaData;
@@ -535,7 +533,7 @@ public class ExecutionNode<W extends Work> implements
 
 		@Override
 		public boolean process(int itemIndex,
-				TaskContext<Object, W, Indexed, Indexed> context) {
+				TaskContext<W, Indexed, Indexed> context) {
 			// Do the particular flow
 			FlowFuture future = context.doFlow(itemIndex, null);
 
@@ -559,7 +557,7 @@ public class ExecutionNode<W extends Work> implements
 		}
 
 		@Override
-		public TaskMetaData<?, W, ?, ?> getInitialTaskMetaData() {
+		public TaskMetaData<W, ?, ?> getInitialTaskMetaData() {
 			return this.taskMetaData;
 		}
 
@@ -605,7 +603,7 @@ public class ExecutionNode<W extends Work> implements
 
 		@Override
 		public boolean process(int itemIndex,
-				TaskContext<Object, W, Indexed, Indexed> context) {
+				TaskContext<W, Indexed, Indexed> context) {
 
 			// Obtain the flow future for the completing node
 			FlowFuture future = this.testCase.getFlowFuture(this.futureNode);

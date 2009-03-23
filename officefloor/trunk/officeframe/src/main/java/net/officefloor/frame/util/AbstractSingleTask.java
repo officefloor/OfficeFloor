@@ -34,9 +34,8 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public abstract class AbstractSingleTask<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		implements WorkFactory<W>, Work, TaskFactory<P, W, M, F>,
-		Task<P, W, M, F> {
+public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F extends Enum<F>>
+		implements WorkFactory<W>, Work, TaskFactory<W, D, F>, Task<W, D, F> {
 
 	/**
 	 * Registers this {@link Work} with the input {@link OfficeBuilder}.
@@ -47,9 +46,9 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 *            {@link OfficeBuilder}.
 	 * @return {@link WorkBuilder} to configure the {@link Work}.
 	 */
-	@SuppressWarnings("unchecked")
-	public WorkBuilder registerWork(String workName, OfficeBuilder officeBuilder) {
-		WorkBuilder work = officeBuilder.addWork(workName, this);
+	public WorkBuilder<W> registerWork(String workName,
+			OfficeBuilder officeBuilder) {
+		WorkBuilder<W> work = officeBuilder.addWork(workName, this);
 		return work;
 	}
 
@@ -64,15 +63,14 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 *            {@link WorkBuilder}.
 	 * @return {@link TaskBuilder} to configure the {@link Task}.
 	 */
-	@SuppressWarnings("unchecked")
-	public TaskBuilder registerTask(String taskName, String teamName,
-			WorkBuilder workBuilder) {
+	public TaskBuilder<W, D, F> registerTask(String taskName, String teamName,
+			WorkBuilder<W> workBuilder) {
 
 		// Configure the work builder
 		workBuilder.setInitialTask(taskName);
 
 		// Configure this as a task
-		TaskBuilder task = workBuilder.addTask(taskName, this);
+		TaskBuilder<W, D, F> task = workBuilder.addTask(taskName, this);
 		task.setTeam(teamName);
 
 		// Return the task builder
@@ -92,14 +90,14 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 *            {@link OfficeBuilder}.
 	 * @return {@link TaskBuilder} to configure the {@link Task}.
 	 */
-	@SuppressWarnings("unchecked")
-	public TaskBuilder registerTask(String workName, String taskName,
+	public TaskBuilder<W, D, F> registerTask(String workName, String taskName,
 			String teamName, OfficeBuilder officeBuilder) {
+
 		// Create and register the work builder
-		WorkBuilder work = this.registerWork(workName, officeBuilder);
+		WorkBuilder<W> work = this.registerWork(workName, officeBuilder);
 
 		// Create and register the task builder
-		TaskBuilder task = this.registerTask(taskName, teamName, work);
+		TaskBuilder<W, D, F> task = this.registerTask(taskName, teamName, work);
 
 		// Return the task builder
 		return task;
@@ -120,14 +118,15 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 	 * @return {@link ManagedObjectTaskBuilder} to configure the {@link Task}.
 	 */
 	@SuppressWarnings("unchecked")
-	public ManagedObjectTaskBuilder registerTask(String workName,
-			String taskName, String teamName, ManagedObjectSourceContext context) {
+	public ManagedObjectTaskBuilder<F> registerTask(String workName,
+			String taskName, String teamName,
+			ManagedObjectSourceContext<F> context) {
 
 		// Create and initialise the work builder
 		ManagedObjectWorkBuilder work = context.addWork(workName, this);
 
 		// Create the the task builder
-		ManagedObjectTaskBuilder task = work.addTask(taskName, this);
+		ManagedObjectTaskBuilder<F> task = work.addTask(taskName, this);
 		task.setTeam(teamName);
 
 		// Return the task builder
@@ -172,8 +171,8 @@ public abstract class AbstractSingleTask<P extends Object, W extends Work, M ext
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Task<P, W, M, F> createTask(W work) {
-		return (Task<P, W, M, F>) work;
+	public Task<W, D, F> createTask(W work) {
+		return (Task<W, D, F>) work;
 	}
 
 }
