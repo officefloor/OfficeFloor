@@ -82,12 +82,6 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		serverSocketBuilder.addProperty(
 				TcpServerSocketManagedObjectSource.PROPERTY_PORT, String
 						.valueOf(PORT));
-		serverSocketBuilder
-				.addProperty(
-						TcpServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
-						"1024");
-		serverSocketBuilder.addProperty(
-				TcpServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE, "3");
 		serverSocketBuilder.setDefaultTimeout(3000);
 
 		// Register the necessary teams for socket listening
@@ -149,7 +143,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 	 * Ensures able to handle multiple requests.
 	 */
 	public void testMultipleRequests() throws Exception {
-		this.doRequests("", 10, true);
+		this.doRequests("", 100, true);
 	}
 
 	/**
