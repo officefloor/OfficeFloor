@@ -13,8 +13,8 @@ Export-Package: net.officefloor.plugin.impl.socket.server,
  net.officefloor.plugin.socket.server.spi,
  net.officefloor.plugin.socket.server.tcp,
  net.officefloor.plugin.socket.server.tcp.api,
- net.officefloor.work.http.file,
- net.officefloor.work.http.route
+ net.officefloor.plugin.work.http.file,
+ net.officefloor.plugin.work.http.route
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: net.officefloor.compiler;bundle-version="1.0.0",
  net.officefloor.frame;bundle-version="1.0.0",

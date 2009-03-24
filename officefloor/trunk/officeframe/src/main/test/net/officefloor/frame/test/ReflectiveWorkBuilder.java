@@ -231,6 +231,24 @@ public class ReflectiveWorkBuilder implements Work,
 		}
 
 		/**
+		 * Builds the {@link TaskContext}.
+		 */
+		public void buildTaskContext() {
+
+			// Ensure parameter is TaskContext
+			Class<?> parameterType = this.parameterTypes[this.parameterIndex];
+			TestCase.assertTrue("Parameter " + this.parameterIndex
+					+ " must be " + TaskContext.class.getSimpleName(),
+					TaskContext.class.isAssignableFrom(parameterType));
+
+			// Link TaskContext
+			this.parameterFactories[this.parameterIndex] = new TaskContextParameterFactory();
+
+			// Set for next parameter
+			this.parameterIndex++;
+		}
+
+		/**
 		 * Builds the parameter.
 		 */
 		public void buildParameter() {
@@ -453,7 +471,20 @@ public class ReflectiveWorkBuilder implements Work,
 	}
 
 	/**
-	 * {@link ParameterFactory} to obtain the object of a managed object.
+	 * {@link ParameterFactory} to obtain the {@link TaskContext}.
+	 */
+	private static class TaskContextParameterFactory implements
+			ParameterFactory {
+
+		@Override
+		public Object createParamater(
+				TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
+			return context;
+		}
+	}
+
+	/**
+	 * {@link ParameterFactory} to obtain a dependency.
 	 */
 	private static class ObjectParameterFactory implements ParameterFactory {
 
