@@ -141,10 +141,10 @@ public class WorkBuilderImpl<W extends Work> implements WorkBuilder<W>,
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <D extends Enum<D>, F extends Enum<F>> TaskBuilder<W, D, F> addTask(
-			String taskName, TaskFactory<W, D, F> taskFactory) {
-		TaskBuilderImpl<W, D, F> builder = new TaskBuilderImpl<W, D, F>(
-				taskName, taskFactory);
+			String taskName, TaskFactory<? super W, D, F> taskFactory) {
+		TaskBuilderImpl builder = new TaskBuilderImpl(taskName, taskFactory);
 		this.tasks.add(builder);
 		return builder;
 	}
