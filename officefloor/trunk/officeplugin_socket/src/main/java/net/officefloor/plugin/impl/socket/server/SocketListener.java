@@ -57,6 +57,12 @@ class SocketListener
 	}
 
 	/**
+	 * Value to indicate an unbounded number of {@link Connection} instances can
+	 * be registered.
+	 */
+	public static final int UNBOUNDED_MAX_CONNECTIONS = 0;
+
+	/**
 	 * Maximum number of {@link Connection} instances that can be registered
 	 * with this {@link SocketListener}.
 	 */
@@ -94,8 +100,7 @@ class SocketListener
 	 * Number of registered {@link Connection} instances within this
 	 * {@link SocketListener}.
 	 * <p>
-	 * Initially 1 for the {@link Connection} from the
-	 * {@link TaskContext#getParameter()}.
+	 * Initially 1 for the {@link Connection} passed as a parameter.
 	 */
 	private int registeredConnections = 1;
 
@@ -136,9 +141,11 @@ class SocketListener
 		}
 
 		// Determine if space to register input connection
-		if (this.registeredConnections >= this.maxConnections) {
-			// Can not register connection
-			return false;
+		if (this.maxConnections > UNBOUNDED_MAX_CONNECTIONS) {
+			if (this.registeredConnections >= this.maxConnections) {
+				// Can not register connection
+				return false;
+			}
 		}
 
 		// Add just registered listing

@@ -61,7 +61,7 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 	/**
 	 * Maximum connections property name.
 	 */
-	public static final String PROPERTY_MAXIMUM_CONNECTIONS = "max.connections";
+	public static final String PROPERTY_MAXIMUM_CONNECTIONS = "max.connections.per.listener";
 
 	/**
 	 * Strategy for {@link MessageSegmentPool}.
@@ -111,11 +111,6 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_PORT);
-		context.addProperty(PROPERTY_BUFFER_SIZE, "Buffer size");
-		context.addProperty(PROPERTY_MESSAGE_SIZE,
-				"Recommended segments per message");
-		context.addProperty(PROPERTY_MAXIMUM_CONNECTIONS,
-				"Maximum connextions per listener");
 	}
 
 	@Override
@@ -128,12 +123,13 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 
 		// Obtain the configuration
 		int port = Integer.parseInt(mosContext.getProperty(PROPERTY_PORT));
-		int bufferSize = Integer.parseInt(mosContext
-				.getProperty(PROPERTY_BUFFER_SIZE));
-		int recommendedSegmentCount = Integer.parseInt(mosContext
-				.getProperty(PROPERTY_MESSAGE_SIZE));
+		int bufferSize = Integer.parseInt(mosContext.getProperty(
+				PROPERTY_BUFFER_SIZE, "1024"));
+		int recommendedSegmentCount = Integer.parseInt(mosContext.getProperty(
+				PROPERTY_MESSAGE_SIZE, "1024"));
 		int maxConn = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_MAXIMUM_CONNECTIONS, "63"));
+				PROPERTY_MAXIMUM_CONNECTIONS, String
+						.valueOf(SocketListener.UNBOUNDED_MAX_CONNECTIONS)));
 		String messageSegmentPoolStrategy = mosContext.getProperty(
 				PROPERTY_MESSAGE_SEGMENT_POOL_STRATEGY, "heap");
 
