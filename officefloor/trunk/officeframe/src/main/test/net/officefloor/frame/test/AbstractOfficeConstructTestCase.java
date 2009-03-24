@@ -613,8 +613,9 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/**
-	 * Facade method to invoke work of an office. It will create the office
-	 * floor if necessary.
+	 * Facade method to invoke work of an office. It will create the
+	 * {@link OfficeFloor} if necessary and times out after 3 seconds if invoked
+	 * {@link Work} is not complete.
 	 * 
 	 * @param workName
 	 *            Name of the work to invoke.
@@ -625,6 +626,24 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 */
 	protected void invokeWork(String workName, Object parameter)
 			throws Exception {
+		this.invokeWork(workName, parameter, 3);
+	}
+
+	/**
+	 * Facade method to invoke work of an office. It will create the office
+	 * floor if necessary.
+	 * 
+	 * @param workName
+	 *            Name of the work to invoke.
+	 * @param parameter
+	 *            Parameter.
+	 * @param secondsToRun
+	 *            Seconds to run.
+	 * @throws Exception
+	 *             If fails to construct office or work invocation failure.
+	 */
+	protected void invokeWork(String workName, Object parameter,
+			int secondsToRun) throws Exception {
 
 		// Obtain the name of the office being constructed
 		String officeName = this.getOfficeName();
@@ -651,10 +670,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 			Thread.sleep(100);
 
 			// Timeout after two seconds
-			long currentTime = System.currentTimeMillis();
-			if ((currentTime - startBlockTime) > 2000) {
-				fail("Timing out test as taking too long");
-			}
+			this.timeout(startBlockTime, secondsToRun);
 		}
 	}
 

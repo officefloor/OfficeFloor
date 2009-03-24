@@ -144,11 +144,6 @@ public class ReflectiveWorkBuilder implements Work,
 	 * ============== WorkFactory =====================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.build.WorkFactory#createWork()
-	 */
 	@Override
 	public ReflectiveWorkBuilder createWork() {
 		return this;

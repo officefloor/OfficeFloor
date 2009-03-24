@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,6 +33,11 @@ import net.officefloor.frame.internal.structure.OfficeManager;
 public class OfficeManagerImpl implements OfficeManager {
 
 	/**
+	 * Name of the {@link Office} being managed.
+	 */
+	private final String officeName;
+
+	/**
 	 * Interval in milliseconds between each check of the {@link Office}.
 	 */
 	private final long monitorInterval;
@@ -40,29 +45,26 @@ public class OfficeManagerImpl implements OfficeManager {
 	/**
 	 * List of {@link AssetManager} instances to be managed.
 	 */
-	private final List<AssetManager> assetManagers = new LinkedList<AssetManager>();
+	private final List<AssetManager> assetManagers = new ArrayList<AssetManager>();
 
 	/**
-	 * {@link Timer} to monitor the {@link Office}.
+	 * {@link ManageOfficeThread} that does the managing of the {@link Office}.
 	 */
-	private Timer timer = null;
-
-	/**
-	 * {@link ManageOfficeTimerTask} that does the managing of the
-	 * {@link Office}.
-	 */
-	private ManageOfficeTimerTask manageTask = null;
+	private ManageOfficeThread manageOfficeThread = null;
 
 	/**
 	 * Initiate.
 	 * 
+	 * @param officeName
+	 *            Name of the {@link Office} being managed.
 	 * @param monitorInterval
 	 *            Interval in milliseconds between each check of the
 	 *            {@link Office}. Setting this high reduces overhead of managing
 	 *            the {@link Office}, however setting lower increases
 	 *            responsiveness of the {@link Office}.
 	 */
-	public OfficeManagerImpl(long monitorInterval) {
+	public OfficeManagerImpl(String officeName, long monitorInterval) {
+		this.officeName = officeName;
 		this.monitorInterval = monitorInterval;
 	}
 
@@ -75,7 +77,7 @@ public class OfficeManagerImpl implements OfficeManager {
 	public synchronized void addAssetManager(AssetManager assetManager) {
 
 		// May only add asset manager when not managing the office
-		if (this.timer != null) {
+		if (this.manageOfficeThread != null) {
 			throw new IllegalStateException(
 					"Office being managed so can not add another Asset Manager");
 		}
@@ -101,70 +103,97 @@ public class OfficeManagerImpl implements OfficeManager {
 	public synchronized void startManaging() {
 
 		// Ensure not already managing office
-		if (this.timer != null) {
+		if (this.manageOfficeThread != null) {
 			throw new IllegalStateException("Office already being managed");
 		}
 
-		// Create the timer to monitor the office
-		this.timer = new Timer(true);
-
-		// Create the manage office task and schedule for running
-		this.manageTask = new ManageOfficeTimerTask();
-		this.timer.schedule(this.manageTask, this.monitorInterval,
-				this.monitorInterval);
+		// Create the manage office task and start running
+		this.manageOfficeThread = new ManageOfficeThread();
+		this.manageOfficeThread.start();
 	}
 
 	@Override
 	public synchronized void manage() {
 
 		// Ensure office being managed
-		if (this.timer == null) {
+		if (this.manageOfficeThread == null) {
 			throw new IllegalStateException("Office not being managed");
 		}
 
 		// Manage the office
-		this.manageTask.run();
+		this.manageOfficeThread.manageOffice();
 	}
 
 	@Override
 	public synchronized void stopManaging() {
 
 		// Do nothing if not managing the office
-		if (this.timer == null) {
+		if (this.manageOfficeThread == null) {
 			return;
 		}
 
 		// Stop managing the office
 		try {
-			this.timer.cancel();
+			this.manageOfficeThread.interrupt();
 		} finally {
 			// Ensure flag no longer managing office
-			this.timer = null;
-			this.manageTask = null;
+			this.manageOfficeThread = null;
 		}
 	}
 
 	/**
+	 * <p>
 	 * {@link TimerTask} to manage the {@link Office}.
+	 * <p>
+	 * Using a dedicated {@link Thread} rather than {@link Timer} to not require
+	 * creating possible additional {@link Thread} instances. This ensures only
+	 * one {@link Thread} for managing the {@link Office}.
 	 */
-	private class ManageOfficeTimerTask extends TimerTask {
+	private class ManageOfficeThread extends Thread {
+
+		/**
+		 * Initiate.
+		 */
+		public ManageOfficeThread() {
+			super("Manage office " + OfficeManagerImpl.this.officeName);
+		}
 
 		@Override
 		public void run() {
+			// Loop forever
+			for (;;) {
+				// Lock on the office manager to ensure safe
+				synchronized (OfficeManagerImpl.this) {
 
-			// Lock on the office manager to ensure safe
-			synchronized (OfficeManagerImpl.this) {
-
-				// Manage the assets
-				for (AssetManager assetManager : OfficeManagerImpl.this.assetManagers) {
+					// Wait interval before doing next manage run
 					try {
-						assetManager.manageAssets();
-					} catch (Throwable ex) {
-						// TODO provide better logging for manageAssets failure
-						System.err.println("Failed managing asset: "
-								+ ex.getMessage() + " ["
-								+ ex.getClass().getName() + "]");
+						OfficeManagerImpl.this
+								.wait(OfficeManagerImpl.this.monitorInterval);
+					} catch (InterruptedException ex) {
+						return; // stopped managing office
 					}
+
+					// Do a managing run of the office
+					this.manageOffice();
+				}
+			}
+		}
+
+		/**
+		 * Does a managing run of the {@link Office}.
+		 */
+		public void manageOffice() {
+
+			// Manage the assets
+			for (AssetManager assetManager : OfficeManagerImpl.this.assetManagers) {
+				try {
+					assetManager.manageAssets();
+				} catch (Throwable ex) {
+					// TODO provide better logging for manageAssets
+					// failure
+					System.err.println("Failed managing asset: "
+							+ ex.getMessage() + " [" + ex.getClass().getName()
+							+ "]");
 				}
 			}
 		}

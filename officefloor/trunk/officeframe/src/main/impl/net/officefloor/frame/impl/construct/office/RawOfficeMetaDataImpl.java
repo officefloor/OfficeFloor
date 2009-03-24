@@ -238,7 +238,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		}
 
 		// Create the office manager and asset manager factory
-		OfficeManagerImpl officeManager = new OfficeManagerImpl(
+		OfficeManagerImpl officeManager = new OfficeManagerImpl(officeName,
 				monitorOfficeInterval);
 		AssetManagerFactoryImpl officeAssetManagerFactory = new AssetManagerFactoryImpl(
 				officeManager);

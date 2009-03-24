@@ -959,12 +959,14 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 				return;
 			}
 
-			// Flag that queued
+			// Flag that queued.
+			// This blocks other job nodes of thread from being queued until
+			// this job node is executed.
 			this.isQueuedWithTeam = true;
-
-			// Activate this Task
-			this.nodeMetaData.getTeam().assignJob(this);
 		}
+
+		// Activate this Job (outside thread lock)
+		this.nodeMetaData.getTeam().assignJob(this);
 	}
 
 	@Override
