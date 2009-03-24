@@ -18,6 +18,9 @@ package net.officefloor.plugin.socket.server.spi;
 
 import java.io.IOException;
 
+import net.officefloor.frame.internal.structure.ProcessState;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+
 /**
  * <p>
  * {@link Server} to input {@link ReadMessage}.
@@ -26,7 +29,18 @@ import java.io.IOException;
  * 
  * @author Daniel
  */
-public interface Server {
+public interface Server<F extends Enum<F>> {
+
+	/**
+	 * Provides the {@link Server} the {@link ManagedObjectExecuteContext} to
+	 * enable it to invoke {@link ProcessState} instances to process
+	 * {@link ReadMessage}.
+	 * 
+	 * @param executeContext
+	 *            {@link ManagedObjectExecuteContext}.
+	 */
+	void setManagedObjectExecuteContext(
+			ManagedObjectExecuteContext<F> executeContext);
 
 	/**
 	 * Starts the processing the {@link ReadMessage} with the {@link Server}.

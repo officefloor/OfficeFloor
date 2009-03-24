@@ -23,7 +23,7 @@ import java.nio.channels.Selector;
 import junit.framework.TestCase;
 
 /**
- * Test {@link SelectionKey}.
+ * Mock {@link SelectionKey}.
  * 
  * @author Daniel
  */
@@ -40,78 +40,41 @@ public class MockSelectionKey extends SelectionKey {
 	private boolean isValidNotCancelled = true;
 
 	/*
-	 * ========================================================================
-	 * SelectionKey
-	 * ========================================================================
+	 * ==================== SelectionKey ========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.SelectionKey#isValid()
-	 */
 	@Override
 	public boolean isValid() {
 		return this.isValidNotCancelled;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.SelectionKey#readyOps()
-	 */
 	@Override
 	public int readyOps() {
 		return this.readyAndInterestOps;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.SelectionKey#interestOps()
-	 */
 	@Override
 	public int interestOps() {
 		return this.readyAndInterestOps;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.SelectionKey#interestOps(int)
-	 */
 	@Override
 	public SelectionKey interestOps(int ops) {
 		this.readyAndInterestOps = ops;
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.SelectionKey#cancel()
-	 */
 	@Override
 	public void cancel() {
 		this.isValidNotCancelled = false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.SelectionKey#selector()
-	 */
 	@Override
 	public Selector selector() {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.SelectionKey#channel()
-	 */
 	@Override
 	public SelectableChannel channel() {
 		TestCase.fail("Should not be invoked");

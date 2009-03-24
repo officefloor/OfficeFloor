@@ -123,13 +123,6 @@ public class HttpConnectionHandler implements ConnectionHandler {
 	 */
 	private final byte[] buffer = new byte[1024];
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleRead
-	 * (net.officefloor.plugin.socket.server.spi.ReadContext)
-	 */
 	@Override
 	public void handleRead(ReadContext context) {
 		try {
@@ -179,26 +172,12 @@ public class HttpConnectionHandler implements ConnectionHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleWrite
-	 * (net.officefloor.plugin.socket.server.spi.WriteContext)
-	 */
 	@Override
 	public void handleWrite(WriteContext context) {
 		// New last interaction time
 		this.lastInteractionTime = context.getTime();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.socket.server.spi.ConnectionHandler#
-	 * handleIdleConnection
-	 * (net.officefloor.plugin.socket.server.spi.IdleContext)
-	 */
 	@Override
 	public void handleIdleConnection(IdleContext context) {
 

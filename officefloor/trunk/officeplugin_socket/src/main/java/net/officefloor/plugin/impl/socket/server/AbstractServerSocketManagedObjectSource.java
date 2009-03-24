@@ -16,7 +16,6 @@
  */
 package net.officefloor.plugin.impl.socket.server;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 
@@ -28,27 +27,21 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContex
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.plugin.impl.socket.server.SocketListener.SocketListenerDependencies;
 import net.officefloor.plugin.impl.socket.server.messagesegment.DirectBufferMessageSegmentPool;
 import net.officefloor.plugin.impl.socket.server.messagesegment.HeapBufferMessageSegmentPool;
 import net.officefloor.plugin.impl.socket.server.messagesegment.NotPoolMessageSegmentPool;
-import net.officefloor.plugin.socket.server.spi.ReadMessage;
 import net.officefloor.plugin.socket.server.spi.Server;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
 
 /**
- * <p>
- * {@link ManagedObjectSource} for a {@link ServerSocket}.
- * <p>
- * This provides the functionality for the spi interfaces. Please consider using
- * one of the {@link ManagedObjectSource} inheriting from this that provide a
- * protocol specific api.
+ * Abstract {@link ManagedObjectSource} for a {@link ServerSocket}.
  * 
  * @author Daniel
  */
-public class ServerSocketManagedObjectSource extends
-		AbstractManagedObjectSource<None, ServerSocketHandlerEnum> {
+public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
+		extends AbstractManagedObjectSource<None, F> {
 
 	/**
 	 * Port property name.
@@ -76,24 +69,19 @@ public class ServerSocketManagedObjectSource extends
 	public static final String PROPERTY_MESSAGE_SEGMENT_POOL_STRATEGY = "message.segment.pool.technique";
 
 	/**
-	 * {@link ServerSocketAccepter} listening for connections.
-	 */
-	private ServerSocketAccepter serverSocketAccepter;
-
-	/**
-	 * {@link Server}.
-	 */
-	protected Server server;
-
-	/**
 	 * {@link SelectorFactory}.
 	 */
 	private final SelectorFactory selectorFactory;
 
 	/**
+	 * {@link Server}.
+	 */
+	private Server<F> server;
+
+	/**
 	 * Default constructor necessary as per {@link ManagedObjectSource}.
 	 */
-	public ServerSocketManagedObjectSource() {
+	public AbstractServerSocketManagedObjectSource() {
 		this(new SelectorFactory());
 	}
 
@@ -103,7 +91,7 @@ public class ServerSocketManagedObjectSource extends
 	 * @param selectorFactory
 	 *            {@link SelectorFactory}.
 	 */
-	ServerSocketManagedObjectSource(SelectorFactory selectorFactory) {
+	AbstractServerSocketManagedObjectSource(SelectorFactory selectorFactory) {
 		this.selectorFactory = selectorFactory;
 	}
 
@@ -114,20 +102,6 @@ public class ServerSocketManagedObjectSource extends
 	 */
 	SelectorFactory getSelectorFactory() {
 		return this.selectorFactory;
-	}
-
-	/**
-	 * Processes the completely read {@link ReadMessage}.
-	 * 
-	 * @param readMessage
-	 *            {@link ReadMessage}.
-	 * @throws IOException
-	 *             If fails to process {@link ReadMessage}.
-	 */
-	void processMessage(ReadMessageImpl readMessage) throws IOException {
-		// Process the message
-		this.server.processReadMessage(readMessage,
-				readMessage.stream.connection.connectionHandler);
 	}
 
 	/*
@@ -145,12 +119,11 @@ public class ServerSocketManagedObjectSource extends
 	}
 
 	@Override
-	protected void loadMetaData(
-			MetaDataContext<None, ServerSocketHandlerEnum> context)
+	protected void loadMetaData(MetaDataContext<None, F> context)
 			throws Exception {
 
 		// Obtain the managed object source context
-		ManagedObjectSourceContext<ServerSocketHandlerEnum> mosContext = context
+		ManagedObjectSourceContext<F> mosContext = context
 				.getManagedObjectSourceContext();
 
 		// Obtain the configuration
@@ -163,9 +136,6 @@ public class ServerSocketManagedObjectSource extends
 				PROPERTY_MAXIMUM_CONNECTIONS, "63"));
 		String messageSegmentPoolStrategy = mosContext.getProperty(
 				PROPERTY_MESSAGE_SEGMENT_POOL_STRATEGY, "heap");
-
-		// Create prefix name
-		String prefix = "serversocket." + port + ".";
 
 		// Create the message segment pool based on specified strategy
 		MessageSegmentPool messageSegmentPool;
@@ -181,76 +151,43 @@ public class ServerSocketManagedObjectSource extends
 					+ messageSegmentPoolStrategy + "'");
 		}
 
+		// Create the server socket handler and create the server
+		ServerSocketHandler<F> serverSocketHandler = this
+				.createServerSocketHandler(context);
+		this.server = serverSocketHandler.createServer();
+
 		// Create the connection manager
-		ConnectionManager connectionManager = new ConnectionManager(this,
-				maxConn);
+		ConnectionManager connectionManager = new ConnectionManager(
+				this.selectorFactory, this.server, maxConn);
 
 		// Register the accepter of connections
-		this.serverSocketAccepter = new ServerSocketAccepter(
-				new InetSocketAddress(port), connectionManager,
-				recommendedSegmentCount, messageSegmentPool);
-		ManagedObjectWorkBuilder<ServerSocketAccepter> accepterWork = mosContext
-				.addWork(prefix + "Accepter", this.serverSocketAccepter);
-		ManagedObjectTaskBuilder<Indexed> accepterTask = accepterWork.addTask(
-				"Accepter", this.serverSocketAccepter);
-		accepterTask.setTeam(prefix + "Accepter.TEAM");
-		accepterTask.linkFlow(0, (prefix + "Listener"), "Listener",
-				FlowInstigationStrategyEnum.ASYNCHRONOUS);
+		ServerSocketAccepter accepter = new ServerSocketAccepter(
+				new InetSocketAddress(port), serverSocketHandler,
+				connectionManager, recommendedSegmentCount, messageSegmentPool);
+		ManagedObjectTaskBuilder<None, ServerSocketAccepter.ServerSocketAccepterFlows> accepterTask = mosContext
+				.addWork("accepter", accepter).addTask("accepter", accepter);
+		accepterTask.setTeam("accepter");
+		accepterTask.linkFlow(
+				ServerSocketAccepter.ServerSocketAccepterFlows.LISTEN,
+				"listener", "listener",
+				FlowInstigationStrategyEnum.ASYNCHRONOUS, ConnectionImpl.class);
 
 		// Register the listening of connections
-		ManagedObjectWorkBuilder<ConnectionManager> listenerWork = mosContext
-				.addWork(prefix + "Listener", connectionManager);
-		ManagedObjectTaskBuilder<Indexed> listenerTask = listenerWork.addTask(
-				"Listener", connectionManager);
-		listenerTask.setTeam(prefix + "Listener.TEAM");
+		ManagedObjectTaskBuilder<SocketListenerDependencies, Indexed> listenerTask = mosContext
+				.addWork("listener", connectionManager).addTask("listener",
+						connectionManager);
+		listenerTask.linkParameter(SocketListenerDependencies.CONNECTION,
+				ConnectionImpl.class);
+		listenerTask.setTeam("listener");
 
 		// Flag to start accepter on server start up
-		mosContext.addStartupTask(prefix + "Accepter", "Accepter");
-
-		// Provide for linking in a Server Socket handler
-		context.getHandlerLoader(ServerSocketHandlerEnum.class).mapHandlerType(
-				ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER,
-				ServerSocketHandler.class);
-
-		// Register the server socket handler
-		this.registerServerSocketHandler(context);
-	}
-
-	/**
-	 * <p>
-	 * Registers the {@link ServerSocketHandler}. By default specifies for a
-	 * {@link ServerSocketHandler} to be configured in.
-	 * <p>
-	 * A specific protocol {@link ServerSocketManagedObjectSource} should
-	 * override this method to provide a specific {@link ServerSocketHandler}.
-	 * <p>
-	 * Protocol specific overriding should at minimum provide:<il>
-	 * <li>Type of object</li>
-	 * <li>{@link ServerSocketHandler} implementation</li> </il>
-	 * 
-	 * @param context
-	 *            {@link MetaDataContext}.
-	 * @throws Exception
-	 *             If fails.
-	 */
-	protected void registerServerSocketHandler(
-			MetaDataContext<None, ServerSocketHandlerEnum> context)
-			throws Exception {
-		// By default do not register
+		mosContext.addStartupTask("accepter", "accepter");
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public void start(ManagedObjectExecuteContext context) throws Exception {
-		// Obtain the handler
-		ServerSocketHandler serverSocketHandler = (ServerSocketHandler) context
-				.getHandler(ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER);
-
-		// Specify the server
-		this.server = serverSocketHandler.createServer();
-
-		// Bind to socket and start handling connections
-		this.serverSocketAccepter.bind(serverSocketHandler);
+	public void start(ManagedObjectExecuteContext<F> context) throws Exception {
+		// Make the execute context available to the server
+		this.server.setManagedObjectExecuteContext(context);
 	}
 
 	@Override
@@ -259,5 +196,16 @@ public class ServerSocketManagedObjectSource extends
 		throw new IllegalStateException("Can not source managed object from a "
 				+ this.getClass().getSimpleName());
 	}
+
+	/**
+	 * Creates the {@link ServerSocketHandler}.
+	 * 
+	 * @param context
+	 *            {@link MetaDataContext}.
+	 * @throws Exception
+	 *             If fails to create the {@link ServerSocketHandler}.
+	 */
+	protected abstract ServerSocketHandler<F> createServerSocketHandler(
+			MetaDataContext<None, F> context) throws Exception;
 
 }

@@ -186,9 +186,8 @@ public abstract class AbstractSingleTask<W extends Work, D extends Enum<D>, F ex
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Task<W, D, F> createTask(W work) {
-		return (Task<W, D, F>) work;
+		return this;
 	}
 
 }

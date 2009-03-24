@@ -18,16 +18,10 @@ package net.officefloor.plugin.socket.server.http;
 
 import java.io.OutputStream;
 
-import net.officefloor.frame.api.build.HandlerBuilder;
-import net.officefloor.frame.api.build.HandlerFactory;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.plugin.impl.socket.server.ServerSocketHandlerEnum;
-import net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource;
+import net.officefloor.plugin.impl.socket.server.AbstractServerSocketManagedObjectSource;
+import net.officefloor.plugin.socket.server.http.HttpServer.HttpServerFlows;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.spi.Connection;
@@ -42,8 +36,8 @@ import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
  * @author Daniel
  */
 public class HttpServerSocketManagedObjectSource extends
-		ServerSocketManagedObjectSource implements HandlerFactory<Indexed>,
-		ServerSocketHandler<Indexed> {
+		AbstractServerSocketManagedObjectSource<HttpServerFlows> implements
+		ServerSocketHandler<HttpServerFlows> {
 
 	/**
 	 * Initial size in bytes of the buffer to contain the {@link HttpRequest}
@@ -110,45 +104,23 @@ public class HttpServerSocketManagedObjectSource extends
 	}
 
 	/*
-	 * ================= ServerSocketManagedObjectSource ==================
+	 * ============= AbstractServerSocketManagedObjectSource ===============
 	 */
 
 	@Override
-	protected void registerServerSocketHandler(
-			MetaDataContext<None, ServerSocketHandlerEnum> context)
-			throws Exception {
-		ManagedObjectSourceContext<ServerSocketHandlerEnum> mosContext = context
-				.getManagedObjectSourceContext();
+	protected ServerSocketHandler<HttpServerFlows> createServerSocketHandler(
+			MetaDataContext<None, HttpServerFlows> context) throws Exception {
 
 		// Specify types
 		context.setManagedObjectClass(HttpManagedObject.class);
 		context.setObjectClass(ServerHttpConnection.class);
 
-		// Provide the handler
-		HandlerBuilder<Indexed> handlerBuilder = mosContext.getHandlerBuilder()
-				.registerHandler(ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER);
-		handlerBuilder.setHandlerFactory(this);
-		handlerBuilder.linkProcess(0, null, null); // handles the message
-	}
+		// Provide the flow to handle the HTTP request
+		context.addFlow(HttpServerFlows.HANDLE_HTTP_REQUEST,
+				ServerHttpConnection.class);
 
-	/*
-	 * ================== Handler ========================================
-	 */
-
-	@Override
-	public Handler<Indexed> createHandler() {
+		// Return this as the server socket handler
 		return this;
-	}
-
-	/**
-	 * {@link HandlerContext}.
-	 */
-	private HandlerContext<Indexed> handlerContext;
-
-	@Override
-	public void setHandlerContext(HandlerContext<Indexed> context)
-			throws Exception {
-		this.handlerContext = context;
 	}
 
 	/*
@@ -156,8 +128,8 @@ public class HttpServerSocketManagedObjectSource extends
 	 */
 
 	@Override
-	public Server createServer() {
-		return new HttpServer(this.handlerContext);
+	public Server<HttpServerFlows> createServer() {
+		return new HttpServer();
 	}
 
 	@Override

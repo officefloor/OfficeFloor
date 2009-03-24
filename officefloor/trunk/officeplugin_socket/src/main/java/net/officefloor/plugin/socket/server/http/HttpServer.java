@@ -18,8 +18,9 @@ package net.officefloor.plugin.socket.server.http;
 
 import java.io.IOException;
 
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.HandlerContext;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
 import net.officefloor.plugin.socket.server.spi.Server;
@@ -29,29 +30,30 @@ import net.officefloor.plugin.socket.server.spi.Server;
  * 
  * @author Daniel
  */
-public class HttpServer implements Server {
+public class HttpServer implements Server<HttpServer.HttpServerFlows> {
 
 	/**
-	 * {@link HandlerContext}.
+	 * {@link Flow} to handle the {@link HttpRequest}.
 	 */
-	private final HandlerContext<Indexed> handlerContext;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param handlerContext
-	 *            {@link HandlerContext}.
-	 */
-	public HttpServer(HandlerContext<Indexed> handlerContext) {
-		this.handlerContext = handlerContext;
+	public static enum HttpServerFlows {
+		HANDLE_HTTP_REQUEST
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Server#processReadMessage(net.officefloor.plugin.socket.server.spi.ReadMessage,
-	 *      net.officefloor.plugin.socket.server.spi.ConnectionHandler)
+	/**
+	 * {@link ManagedObjectExecuteContext}.
 	 */
+	private ManagedObjectExecuteContext<HttpServerFlows> executeContext;
+
+	/*
+	 * ====================== Server ==================================
+	 */
+
+	@Override
+	public void setManagedObjectExecuteContext(
+			ManagedObjectExecuteContext<HttpServerFlows> executeContext) {
+		this.executeContext = executeContext;
+	}
+
 	@Override
 	public void processReadMessage(ReadMessage message,
 			ConnectionHandler connectionHandler) throws IOException {
@@ -66,8 +68,8 @@ public class HttpServer implements Server {
 		httpConnHandler.resetForNextRequest();
 
 		// Invoke with the managed object
-		this.handlerContext.invokeProcess(0, managedObject, managedObject,
-				managedObject);
+		this.executeContext.invokeProcess(HttpServerFlows.HANDLE_HTTP_REQUEST,
+				managedObject, managedObject, managedObject);
 	}
 
 }

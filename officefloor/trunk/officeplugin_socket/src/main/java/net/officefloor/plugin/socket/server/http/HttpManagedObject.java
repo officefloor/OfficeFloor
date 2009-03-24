@@ -73,11 +73,6 @@ public class HttpManagedObject implements ServerHttpConnection, ManagedObject,
 	 * =============== ServerHttpConnection =================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
-	 */
 	@Override
 	public Object getObject() throws Exception {
 		return this;
@@ -87,22 +82,11 @@ public class HttpManagedObject implements ServerHttpConnection, ManagedObject,
 	 * ================== ServerHttpConnection =========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.socket.server.http.api.ServerHttpConnection#
-	 * getHttpRequest()
-	 */
+	@Override
 	public synchronized HttpRequest getHttpRequest() {
 		return this.request;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.socket.server.http.api.ServerHttpConnection#
-	 * getHttpResponse()
-	 */
 	@Override
 	public HttpResponse getHttpResponse() {
 		return this.response;
@@ -112,13 +96,6 @@ public class HttpManagedObject implements ServerHttpConnection, ManagedObject,
 	 * ================== EscalationHandler =============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.EscalationHandler#handleEscalation(
-	 * java.lang.Throwable)
-	 */
 	@Override
 	public void handleEscalation(Throwable escalation) throws Throwable {
 		// Indicate failure to handle request
@@ -170,74 +147,38 @@ public class HttpManagedObject implements ServerHttpConnection, ManagedObject,
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getMethod()
+		 * ================ HttpRequest ================================
 		 */
+		
 		@Override
 		public String getMethod() {
 			return this.method;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getPath()
-		 */
 		@Override
 		public String getPath() {
 			return this.path;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getVersion
-		 * ()
-		 */
 		@Override
 		public String getVersion() {
 			return this.version;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getHeaderNames
-		 * ()
-		 */
 		@Override
 		public Set<String> getHeaderNames() {
 			return this.headers.keySet();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getHeader
-		 * (java.lang.String)
-		 */
 		@Override
 		public String getHeader(String name) {
 			return this.headers.get(name.toUpperCase());
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.plugin.socket.server.http.api.HttpRequest#getBody()
-		 */
 		@Override
 		public InputStream getBody() {
 			return new ByteArrayInputStream(this.body);
 		}
-
 	}
 
 }

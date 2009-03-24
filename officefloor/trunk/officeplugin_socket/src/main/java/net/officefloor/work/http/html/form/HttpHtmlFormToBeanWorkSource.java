@@ -19,24 +19,23 @@ package net.officefloor.work.http.html.form;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.compile.spi.work.WorkLoader;
+import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
+import net.officefloor.compile.spi.work.source.WorkSourceContext;
+import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.model.work.TaskEscalationModel;
-import net.officefloor.model.work.TaskModel;
-import net.officefloor.model.work.TaskObjectModel;
-import net.officefloor.model.work.WorkModel;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
-import net.officefloor.work.AbstractWorkLoader;
-import net.officefloor.work.WorkLoader;
-import net.officefloor.work.WorkLoaderContext;
 import net.officefloor.work.http.HttpException;
+import net.officefloor.work.http.html.form.HttpHtmlFormToBeanTask.HttpHtmlFormToBeanTaskDependencies;
 
 /**
  * {@link WorkLoader} for the {@link HttpHtmlFormToBeanTask}.
  * 
  * @author Daniel
  */
-public class HttpHtmlFormToBeanWorkLoader extends AbstractWorkLoader {
+public class HttpHtmlFormToBeanWorkSource extends
+		AbstractWorkSource<HttpHtmlFormToBeanTask> {
 
 	/**
 	 * Property specifying the class of the bean.
@@ -49,25 +48,18 @@ public class HttpHtmlFormToBeanWorkLoader extends AbstractWorkLoader {
 	public static final String ALIAS_PROPERTY_PREFIX = "alias.";
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.work.AbstractWorkLoader#loadSpecification(net.officefloor
-	 * .work.AbstractWorkLoader.SpecificationContext)
+	 * ================== AbstractWorkSource ================================
 	 */
+
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty(BEAN_CLASS_PROPERTY);
+		context.addProperty(BEAN_CLASS_PROPERTY, "Bean Class");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.work.WorkLoader#loadWork(net.officefloor.work.
-	 * WorkLoaderContext)
-	 */
 	@Override
-	public WorkModel<?> loadWork(WorkLoaderContext context) throws Exception {
+	public void sourceWork(
+			WorkTypeBuilder<HttpHtmlFormToBeanTask> workTypeBuilder,
+			WorkSourceContext context) throws Exception {
 
 		// Obtain the bean class
 		String beanClassName = context.getProperty(BEAN_CLASS_PROPERTY);
@@ -90,34 +82,19 @@ public class HttpHtmlFormToBeanWorkLoader extends AbstractWorkLoader {
 			aliases.put(alias, propertyName);
 		}
 
-		// Create the work factory
-		HttpHtmlFormToBeanTask workFactory = new HttpHtmlFormToBeanTask(
+		// Create the task
+		HttpHtmlFormToBeanTask formToBeanTask = new HttpHtmlFormToBeanTask(
 				beanClass, aliases);
 
-		// Create the work model
-		WorkModel<HttpHtmlFormToBeanTask> work = new WorkModel<HttpHtmlFormToBeanTask>();
-		work.setTypeOfWork(HttpHtmlFormToBeanTask.class);
-		work.setWorkFactory(workFactory);
-
-		// Create the task model
-		TaskModel<Indexed, None> task = new TaskModel<Indexed, None>();
-		task.setTaskName("MapFormToBean");
-		task.setTaskFactoryManufacturer(workFactory);
-		work.addTask(task);
-
-		// Link to HTTP connection for request
-		TaskObjectModel<Indexed> object = new TaskObjectModel<Indexed>();
-		object.setObjectType(ServerHttpConnection.class.getName());
-		task.addObject(object);
-
-		// Add the escalations
-		task.addEscalation(new TaskEscalationModel(HttpException.class
-				.getName()));
-		task.addEscalation(new TaskEscalationModel(BeanMapException.class
-				.getName()));
-
-		// Return the work
-		return work;
+		// Define the work
+		workTypeBuilder.setWorkFactory(formToBeanTask);
+		TaskTypeBuilder<HttpHtmlFormToBeanTaskDependencies, None> taskBuilder = workTypeBuilder
+				.addTaskType("MapFormToBean", formToBeanTask,
+						HttpHtmlFormToBeanTaskDependencies.class, None.class);
+		taskBuilder.addObject(ServerHttpConnection.class).setKey(
+				HttpHtmlFormToBeanTaskDependencies.SERVER_HTTP_CONNECTION);
+		taskBuilder.addEscalation(HttpException.class);
+		taskBuilder.addEscalation(BeanMapException.class);
 	}
 
 }

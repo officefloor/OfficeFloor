@@ -73,7 +73,7 @@ class ConnectionImpl<F extends Enum<F>> implements Connection {
 	/**
 	 * Flags if this {@link Connection} has been cancelled.
 	 */
-	private boolean isCancelled = false;
+	private volatile boolean isCancelled = false;
 
 	/**
 	 * Initiate.
@@ -88,10 +88,9 @@ class ConnectionImpl<F extends Enum<F>> implements Connection {
 	 *            {@link MessageSegmentPool}.
 	 */
 	ConnectionImpl(NonblockingSocketChannel nonblockingSocketChannel,
-			ServerSocketHandler<F> serverSocketHandler,
+			ServerSocketHandler<?> serverSocketHandler,
 			int recommendedSegmentCount, MessageSegmentPool messageSegmentPool) {
 
-		// Store state
 		this.socketChannel = nonblockingSocketChannel;
 		this.recommendedSegmentCount = recommendedSegmentCount;
 		this.messageSegmentPool = messageSegmentPool;
@@ -128,7 +127,9 @@ class ConnectionImpl<F extends Enum<F>> implements Connection {
 	 *            {@link SocketListener} handling this {@link Connection}.
 	 */
 	void setSocketListener(SocketListener socketListener) {
-		this.socketListener = socketListener;
+		synchronized (this) {
+			this.socketListener = socketListener;
+		}
 	}
 
 	/**
@@ -140,8 +141,16 @@ class ConnectionImpl<F extends Enum<F>> implements Connection {
 	 * the writes.
 	 */
 	void wakeupSocketListener() {
-		if (this.socketListener != null) {
-			this.socketListener.wakeup();
+
+		// Obtain the socket listener
+		SocketListener socketListener;
+		synchronized (this) {
+			socketListener = this.socketListener;
+		}
+
+		// Wake up the socket listener if available
+		if (socketListener != null) {
+			socketListener.wakeup();
 		}
 	}
 
@@ -165,108 +174,63 @@ class ConnectionImpl<F extends Enum<F>> implements Connection {
 		// Flag the connection as cancelled
 		this.isCancelled = true;
 
-		// Wakeup socket listener to process closing
+		// Wake up socket listener to process closing
 		this.wakeupSocketListener();
 	}
 
 	/**
 	 * Indicates if this {@link Connection} has been flagged for closing.
 	 * 
-	 * @return <code>true</code> if this {@link Connection} flagged for
-	 *         closing.
+	 * @return <code>true</code> if this {@link Connection} flagged for closing.
 	 */
 	boolean isCancelled() {
 		return this.isCancelled;
 	}
 
 	/*
-	 * ====================================================================
-	 * Connection
-	 * ====================================================================
+	 * ================= Connection =======================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Connection#getLock()
-	 */
 	@Override
 	public Object getLock() {
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Connection#getFirstReadMessage()
-	 */
 	@Override
 	public ReadMessageImpl getFirstReadMessage() {
 		return this.readStream.getFirstMessage();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Connection#read(byte[],
-	 *      int, int)
-	 */
 	@Override
 	public int read(byte[] buffer, int offset, int length) throws IOException {
 		// Read data from the read stream
 		return this.readStream.read(buffer, offset, length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Connection#getActiveWriteMessage()
-	 */
 	@Override
 	public WriteMessageImpl getActiveWriteMessage() {
 		// Last write message is the active write message
 		return this.writeStream.getLastMessage();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Connection#write(byte[],
-	 *      int, int)
-	 */
 	@Override
 	public void write(byte[] data, int offset, int length) throws IOException {
 		// Write data to the write stream
 		this.writeStream.write(data, offset, length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Connection#write(java.nio.ByteBuffer)
-	 */
 	@Override
 	public void write(ByteBuffer data) throws IOException {
 		// Append data to the write stream
 		this.writeStream.write(data);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Connection#flush()
-	 */
 	@Override
 	public void flush() {
 		// Flush write stream
 		this.writeStream.flush();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Connection#createWriteMessage()
-	 */
 	@Override
 	public WriteMessageImpl createWriteMessage(WriteMessageListener listener)
 			throws IOException {

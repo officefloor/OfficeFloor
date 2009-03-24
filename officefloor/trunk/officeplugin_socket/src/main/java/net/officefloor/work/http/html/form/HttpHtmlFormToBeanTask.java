@@ -26,13 +26,12 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.compile.util.AbstractSingleTaskWork;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.http.HttpStatus;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
-import net.officefloor.work.AbstractSingleTaskWork;
 import net.officefloor.work.http.HttpException;
 
 /**
@@ -41,19 +40,27 @@ import net.officefloor.work.http.HttpException;
  * 
  * @author Daniel
  */
-public class HttpHtmlFormToBeanTask extends
-		AbstractSingleTaskWork<Object, HttpHtmlFormToBeanTask, Indexed, None> {
+public class HttpHtmlFormToBeanTask
+		extends
+		AbstractSingleTaskWork<HttpHtmlFormToBeanTask, HttpHtmlFormToBeanTask.HttpHtmlFormToBeanTaskDependencies, None> {
+
+	/**
+	 * Dependencies for the {@link HttpHtmlFormToBeanTask}.
+	 */
+	public static enum HttpHtmlFormToBeanTaskDependencies {
+		SERVER_HTTP_CONNECTION
+	}
 
 	/**
 	 * Bean {@link Class}.
 	 */
-	protected final Class<?> beanClass;
+	private final Class<?> beanClass;
 
 	/**
 	 * {@link Method} instances by property name to load values onto the bean
 	 * instance.
 	 */
-	protected final Map<String, Method> beanProperties;
+	private final Map<String, Method> beanProperties;
 
 	/**
 	 * Initiate.
@@ -152,20 +159,17 @@ public class HttpHtmlFormToBeanTask extends
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
-	 * .execute.TaskContext)
+	 * ==================== Task ===========================================
 	 */
+
 	@Override
 	public Object doTask(
-			TaskContext<Object, HttpHtmlFormToBeanTask, Indexed, None> context)
+			TaskContext<HttpHtmlFormToBeanTask, HttpHtmlFormToBeanTaskDependencies, None> context)
 			throws HttpException, BeanMapException {
 
 		// Obtain the HTTP request
 		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(0);
+				.getObject(HttpHtmlFormToBeanTaskDependencies.SERVER_HTTP_CONNECTION);
 		HttpRequest request = connection.getHttpRequest();
 
 		// Obtain the HTTP method and path

@@ -18,7 +18,6 @@ package net.officefloor.plugin.impl.socket.server;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
 import net.officefloor.plugin.socket.server.spi.Server;
@@ -47,41 +46,18 @@ public class MockServerSocketHandler implements ServerSocketHandler<Indexed> {
 	}
 
 	/*
-	 * ============================================================================
-	 * ServerSocketHandler
-	 * ============================================================================
+	 * ================ ServerSocketHandler ==================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createConnectionHandler(net.officefloor.plugin.socket.server.spi.Connection)
-	 */
 	@Override
-	public ConnectionHandler createConnectionHandler(Connection connection) {
-		return this.connectionHandler;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ServerSocketHandler#createServer()
-	 */
-	@Override
-	public Server createServer() {
+	public Server<Indexed> createServer() {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.Handler#setHandlerContext(net.officefloor.frame.api.execute.HandlerContext)
-	 */
 	@Override
-	public void setHandlerContext(HandlerContext<Indexed> context)
-			throws Exception {
-		TestCase.fail("Should not be invoked");
+	public ConnectionHandler createConnectionHandler(Connection connection) {
+		return this.connectionHandler;
 	}
 
 }

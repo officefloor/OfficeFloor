@@ -18,26 +18,34 @@ package net.officefloor.work.http.route;
 
 import java.util.regex.Pattern;
 
+import net.officefloor.compile.util.AbstractSingleTaskWork;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
-import net.officefloor.work.AbstractSingleTaskWork;
 
 /**
  * {@link Work} and {@link Task} for routing HTTP requests.
  * 
  * @author Daniel
  */
-public class HttpRouteTask extends
-		AbstractSingleTaskWork<Object, HttpRouteTask, Indexed, Indexed> {
+public class HttpRouteTask
+		extends
+		AbstractSingleTaskWork<HttpRouteTask, HttpRouteTask.HttpRouteTaskDependencies, Indexed> {
+
+	/**
+	 * Dependencies for the {@link HttpRouteTask}.
+	 */
+	public static enum HttpRouteTaskDependencies {
+		SERVER_HTTP_CONNECTION
+	}
 
 	/**
 	 * {@link Pattern} match against paths to route the {@link HttpRequest}.
 	 */
-	protected final Pattern[] routings;
+	private final Pattern[] routings;
 
 	/**
 	 * Initiate.
@@ -51,15 +59,12 @@ public class HttpRouteTask extends
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
-	 * .execute.TaskContext)
+	 * ======================== Task =================================
 	 */
+
 	@Override
 	public Object doTask(
-			TaskContext<Object, HttpRouteTask, Indexed, Indexed> context)
+			TaskContext<HttpRouteTask, HttpRouteTaskDependencies, Indexed> context)
 			throws Throwable {
 
 		// Obtain the request to route it

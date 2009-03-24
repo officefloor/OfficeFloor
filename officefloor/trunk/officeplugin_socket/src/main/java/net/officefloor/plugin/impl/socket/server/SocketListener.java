@@ -17,6 +17,7 @@
 package net.officefloor.plugin.impl.socket.server;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.plugin.socket.server.spi.Connection;
@@ -35,16 +35,26 @@ import net.officefloor.plugin.socket.server.spi.IdleContext;
 import net.officefloor.plugin.socket.server.spi.MessageSegment;
 import net.officefloor.plugin.socket.server.spi.ReadContext;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
+import net.officefloor.plugin.socket.server.spi.Server;
 import net.officefloor.plugin.socket.server.spi.WriteContext;
 import net.officefloor.plugin.socket.server.spi.WriteMessage;
 
 /**
- * Listens to {@link java.net.Socket} instances.
+ * Listens to {@link Socket} instances.
  * 
  * @author Daniel
  */
-class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
+class SocketListener
+		implements
+		Task<ConnectionManager, SocketListener.SocketListenerDependencies, Indexed>,
 		ReadContext, WriteContext, IdleContext {
+
+	/**
+	 * Keys for the dependencies for the {@link SocketListener}.
+	 */
+	public static enum SocketListenerDependencies {
+		CONNECTION
+	}
 
 	/**
 	 * Maximum number of {@link Connection} instances that can be registered
@@ -53,9 +63,14 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	private final int maxConnections;
 
 	/**
-	 * {@link ServerSocketManagedObjectSource}.
+	 * {@link Server}.
 	 */
-	private final ServerSocketManagedObjectSource moSource;
+	private final Server<?> server;
+
+	/**
+	 * {@link SelectorFactory}.
+	 */
+	private final SelectorFactory selectorFactory;
 
 	/**
 	 * List of {@link InternalCommunication} just registered.
@@ -87,15 +102,18 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	/**
 	 * Initiate.
 	 * 
-	 * @param moSource
-	 *            {@link ServerSocketManagedObjectSource}.
+	 * @param selectorFactory
+	 *            {@link SelectorFactory}.
+	 * @param server
+	 *            {@link Server}.
 	 * @param maxCommunications
 	 *            Maximum number of {@link Connection} instances that can be
 	 *            registered with this {@link SocketListener}.
 	 */
-	SocketListener(ServerSocketManagedObjectSource moSource,
+	SocketListener(SelectorFactory selectorFactory, Server<?> server,
 			int maxCommunications) {
-		this.moSource = moSource;
+		this.selectorFactory = selectorFactory;
+		this.server = server;
 		this.maxConnections = maxCommunications;
 	}
 
@@ -129,8 +147,11 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 		// Increment the number registered with this listener
 		this.registeredConnections++;
 
-		// Wake up the selector (to pick up this communication)
-		this.selector.wakeup();
+		// May not yet be initialised
+		if (this.selector != null) {
+			// Wake up the selector (to pick up this connection)
+			this.selector.wakeup();
+		}
 
 		// Registered
 		return true;
@@ -145,39 +166,45 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
-	 * .execute.TaskContext)
+	 * ====================== Task =======================================
 	 */
+
+	@Override
 	public Object doTask(
-			TaskContext<Object, ConnectionManager, None, Indexed> context)
+			TaskContext<ConnectionManager, SocketListenerDependencies, Indexed> context)
 			throws Exception {
 
 		// Flag to loop forever
 		context.setComplete(false);
 
-		// Determine if require initialising
+		// Double check lock to determine if initialised
 		if (!this.isInitialised) {
-			// Create the selector
-			this.selector = this.moSource.getSelectorFactory().createSelector();
+			synchronized (this) {
+				if (!this.isInitialised) {
+					// Requires initialising
 
-			// Obtain the Connection
-			ConnectionImpl<?> connection = (ConnectionImpl<?>) context
-					.getParameter();
+					// Create the selector
+					this.selector = this.selectorFactory.createSelector();
 
-			// Listen to the connection
-			this.listenToConnection(connection);
+					// Obtain the Connection
+					ConnectionImpl<?> connection = (ConnectionImpl<?>) context
+							.getObject(SocketListenerDependencies.CONNECTION);
 
-			// Flag initialised
-			this.isInitialised = true;
+					// Listen to the connection
+					this.listenToConnection(connection);
+
+					// Flag initialised
+					this.isInitialised = true;
+				}
+			}
 		}
 
-		// Listen to sockets
+		// Listen on the socket.
+		// This is outside locks so that other connections may be registered
+		// while waiting. On registering a connection this will be waked up.
 		this.selector.select(1000);
 
-		// Synchronizing at this point as may be removing connections altering
+		// Synchronising at this point as may be removing connections altering
 		// counts that the registerConnection utilises.
 		synchronized (this) {
 
@@ -194,7 +221,7 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 				ConnectionImpl<?> connection = (ConnectionImpl<?>) key
 						.attachment();
 
-				// Synchronize on connection to reduce locking
+				// Synchronise on connection to reduce locking
 				synchronized (connection.getLock()) {
 					try {
 
@@ -236,8 +263,10 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 									// Handle completed read
 									if (this.completedReadMessage != null) {
 										// Process the read message
-										this.moSource
-												.processMessage(this.completedReadMessage);
+										this.server
+												.processReadMessage(
+														this.completedReadMessage,
+														this.completedReadMessage.stream.connection.connectionHandler);
 									}
 
 									// Determine if to continue reading
@@ -327,12 +356,7 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 				}
 			}
 
-			// Flag that complete if no further connections
-			if (this.registeredConnections <= 0) {
-				context.setComplete(true);
-			}
-
-			// Start listening to the just registered communications
+			// Start listening to the just registered connections
 			for (Iterator<ConnectionImpl<?>> iterator = this.justRegistered
 					.iterator(); iterator.hasNext();) {
 
@@ -342,9 +366,18 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 				// Remove from just registered
 				iterator.remove();
 			}
+
+			// Flag that complete if no further connections
+			if (this.registeredConnections <= 0) {
+				// Allow task to complete
+				context.setComplete(true);
+
+				// Unregister the socket listener from connection manager
+				context.getWork().socketListenerComplete(this);
+			}
 		}
 
-		// No return (as will loop forever)
+		// No return (as should be looping)
 		return null;
 	}
 
@@ -413,18 +446,20 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	private void listenToConnection(ConnectionImpl<?> connection)
 			throws IOException {
 
-		// Link connection into this socket listener
-		synchronized (connection.getLock()) {
-			connection.setSocketListener(this);
-		}
-
 		// On listening to a connection, always read a message
 		int operation = SelectionKey.OP_READ;
 
-		// Determine if writing message
-		if (connection.writeStream.getFirstMessage() != null) {
-			// Also writing a message
-			operation = operation | SelectionKey.OP_WRITE;
+		// Ensure safe to manipulate the connection
+		synchronized (connection.getLock()) {
+
+			// Link connection into this socket listener
+			connection.setSocketListener(this);
+
+			// Determine if writing message
+			if (connection.writeStream.getFirstMessage() != null) {
+				// Also writing a message
+				operation = operation | SelectionKey.OP_WRITE;
+			}
 		}
 
 		// Register the socket to listen on the communication
@@ -636,13 +671,7 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 		this.isCloseConnection = false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ReadContext#setCloseConnection
-	 * (boolean)
-	 */
+	@Override
 	public void setCloseConnection(boolean isClose) {
 		this.isCloseConnection = isClose;
 	}
@@ -655,11 +684,6 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 	 */
 	private long currentTime = -1;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.IdleContext#getTime()
-	 */
 	@Override
 	public long getTime() {
 		// Lazy obtain the time
@@ -703,23 +727,12 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 		this.isContinueReading = true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ReadContext#getReadMessage()
-	 */
+	@Override
 	public ReadMessage getReadMessage() {
 		return this.readMessage;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ReadContext#setReadComplete(
-	 * boolean)
-	 */
+	@Override
 	public void setReadComplete(boolean isComplete) {
 		if (isComplete) {
 			// Current read message is complete
@@ -730,13 +743,7 @@ class SocketListener implements Task<Object, ConnectionManager, None, Indexed>,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.spi.ReadContext#setContinueReading
-	 * (boolean)
-	 */
+	@Override
 	public void setContinueReading(boolean isContinue) {
 		this.isContinueReading = isContinue;
 	}

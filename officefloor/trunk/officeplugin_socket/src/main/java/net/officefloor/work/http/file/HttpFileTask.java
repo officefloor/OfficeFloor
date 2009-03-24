@@ -17,11 +17,12 @@
 package net.officefloor.work.http.file;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.compile.util.AbstractSingleTaskWork;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -30,31 +31,36 @@ import net.officefloor.plugin.socket.server.http.HttpStatus;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
-import net.officefloor.work.AbstractSingleTaskWork;
+import net.officefloor.work.http.HttpException;
 
 /**
  * {@link Work} and {@link Task} for serving {@link File} content as response.
  * 
  * @author Daniel
  */
-public class HttpFileTask extends
-		AbstractSingleTaskWork<Object, HttpFileTask, Indexed, None> {
+public class HttpFileTask
+		extends
+		AbstractSingleTaskWork<HttpFileTask, HttpFileTask.HttpFileTaskDependencies, None> {
+
+	/**
+	 * Dependencies for the {@link HttpFileTask}.
+	 */
+	public static enum HttpFileTaskDependencies {
+		SERVER_HTTP_CONNECTION
+	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
-	 * .execute.TaskContext)
+	 * ================== Task ==========================================
 	 */
+
 	@Override
 	public Object doTask(
-			TaskContext<Object, HttpFileTask, Indexed, None> context)
-			throws Throwable {
+			TaskContext<HttpFileTask, HttpFileTaskDependencies, None> context)
+			throws HttpException, IOException {
 
-		// Obtain the request to route it
+		// Obtain the HTTP request to obtain path for file
 		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(0);
+				.getObject(HttpFileTaskDependencies.SERVER_HTTP_CONNECTION);
 		HttpRequest request = connection.getHttpRequest();
 
 		// Obtain the path from the request
@@ -92,4 +98,5 @@ public class HttpFileTask extends
 		// Should expect no further processing
 		return null;
 	}
+
 }

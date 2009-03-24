@@ -22,15 +22,14 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
-import net.officefloor.frame.api.build.HandlerFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
@@ -44,38 +43,50 @@ import net.officefloor.plugin.socket.server.spi.WriteMessage;
 import net.officefloor.plugin.socket.server.spi.WriteMessageListener;
 
 /**
- * Tests the {@link ServerSocketManagedObjectSource}.
+ * Tests the {@link AbstractServerSocketManagedObjectSource}.
  * 
  * @author Daniel
  */
 public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
-		HandlerFactory<Indexed>, ServerSocketHandler<Indexed>,
-		ConnectionHandler, WriteMessageListener, Server {
+		ServerSocketHandler<Indexed>, Server<Indexed>, ConnectionHandler,
+		WriteMessageListener {
 
 	/**
 	 * Request message.
 	 */
-	protected static final byte[] REQUEST_MSG = new byte[] { 1, 2, 3, 4, 5 };
+	private static final byte[] REQUEST_MSG = new byte[] { 1, 2, 3, 4, 5 };
 
 	/**
 	 * Response message.
 	 */
-	protected static final byte[] RESPONSE_MSG = new byte[] { 6, 7, 8, 9, 10 };
+	private static final byte[] RESPONSE_MSG = new byte[] { 6, 7, 8, 9, 10 };
+
+	/**
+	 * Current instance executing.
+	 */
+	private static ServerSocketTest INSTANCE;
 
 	/**
 	 * {@link ReadMessage} to be processed by the {@link Server}.
 	 */
-	protected volatile ReadMessageImpl readMessage;
+	private volatile ReadMessageImpl readMessage;
 
 	/**
 	 * {@link WriteMessage} created to write the response.
 	 */
-	protected volatile WriteMessage writeMessage;
+	private volatile WriteMessage writeMessage;
 
 	/**
 	 * {@link WriteMessage} notified to be written.
 	 */
-	protected volatile WriteMessage writtenMessage;
+	private volatile WriteMessage writtenMessage;
+
+	/**
+	 * Initiate and make current instance available.
+	 */
+	public ServerSocketTest() {
+		INSTANCE = this;
+	}
 
 	/**
 	 * Ensures a message is sent and received by the server.
@@ -83,33 +94,28 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	@SuppressWarnings("unchecked")
 	public void testSendingMessage() throws Exception {
 
-		// Obtain the office name
+		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
+		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 
 		// Register the Server Socket Managed Object
 		ManagedObjectBuilder serverSocketBuilder = this.constructManagedObject(
-				"MO", ServerSocketManagedObjectSource.class, officeName);
+				"MO", MockServerSocketManagedObjectSource.class, officeName);
 		serverSocketBuilder.addProperty(
-				ServerSocketManagedObjectSource.PROPERTY_PORT, "12345");
+				AbstractServerSocketManagedObjectSource.PROPERTY_PORT, "12345");
 		serverSocketBuilder.addProperty(
-				ServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE, "2");
+				AbstractServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE,
+				"2");
 		serverSocketBuilder.addProperty(
-				ServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE, "16");
+				AbstractServerSocketManagedObjectSource.PROPERTY_BUFFER_SIZE,
+				"16");
 		serverSocketBuilder.setDefaultTimeout(3000);
-
-		// Register the handler of the Server Socket
-		serverSocketBuilder.getManagedObjectHandlerBuilder().registerHandler(
-				ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER)
-				.setHandlerFactory(this);
 
 		// Register the necessary teams
 		this.constructTeam("ACCEPTER_TEAM", new OnePersonTeam(100));
+		officeBuilder.registerTeam("of-MO.accepter", "of-ACCEPTER_TEAM");
 		this.constructTeam("LISTENER_TEAM", new WorkerPerTaskTeam("Listener"));
-		OfficeBuilder officeBuilder = this.getOfficeBuilder();
-		officeBuilder.registerTeam("of-MO.serversocket.12345.Accepter.TEAM",
-				"of-ACCEPTER_TEAM");
-		officeBuilder.registerTeam("of-MO.serversocket.12345.Listener.TEAM",
-				"of-LISTENER_TEAM");
+		officeBuilder.registerTeam("of-MO.listener", "of-LISTENER_TEAM");
 
 		// Create and open the Office Floor
 		OfficeFloor officeFloor = this.constructOfficeFloor();
@@ -144,26 +150,11 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	}
 
 	/*
-	 * =========================== Handler =================================
+	 * =================== ServerSocketHandler ===========================
 	 */
 
 	@Override
-	public Handler<Indexed> createHandler() {
-		return this;
-	}
-
-	@Override
-	public void setHandlerContext(HandlerContext<Indexed> context)
-			throws Exception {
-		// Do nothing with context
-	}
-
-	/*
-	 * =================== ServerSocketHandler#createServer ===============
-	 */
-
-	@Override
-	public Server createServer() {
+	public Server<Indexed> createServer() {
 		return this;
 	}
 
@@ -210,7 +201,7 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 
 	@Override
 	public void handleIdleConnection(IdleContext context) {
-		System.out.println("Connection is idle");
+		this.printMessage("Connection is idle");
 	}
 
 	/*
@@ -231,10 +222,16 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 	 */
 
 	@Override
+	public void setManagedObjectExecuteContext(
+			ManagedObjectExecuteContext<Indexed> executeContext) {
+		// Do nothing
+	}
+
+	@Override
 	public void processReadMessage(ReadMessage message,
 			ConnectionHandler connectionHandler) throws IOException {
 
-		// Ensure connection handler is this
+		// Ensure connection handler
 		assertSame("Incorrect connection handler", this, connectionHandler);
 
 		// Specify the read message
@@ -245,6 +242,24 @@ public class ServerSocketTest extends AbstractOfficeConstructTestCase implements
 				.createWriteMessage(this);
 		this.writeMessage.appendSegment().getBuffer().put(RESPONSE_MSG);
 		this.writeMessage.write();
+	}
+
+	/**
+	 * Mock {@link AbstractServerSocketManagedObjectSource}.
+	 */
+	public static class MockServerSocketManagedObjectSource extends
+			AbstractServerSocketManagedObjectSource<Indexed> {
+
+		/*
+		 * ========== AbstractServerSocketManagedObjectSource ============
+		 */
+
+		@Override
+		protected ServerSocketHandler<Indexed> createServerSocketHandler(
+				MetaDataContext<None, Indexed> context) throws Exception {
+			context.setObjectClass(Object.class);
+			return ServerSocketTest.INSTANCE;
+		}
 	}
 
 }

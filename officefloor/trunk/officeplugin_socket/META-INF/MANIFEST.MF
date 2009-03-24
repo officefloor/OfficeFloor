@@ -17,7 +17,6 @@ Export-Package: net.officefloor.plugin.impl.socket.server,
  net.officefloor.work.http.route
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: net.officefloor.compiler;bundle-version="1.0.0",
- net.officefloor.model;bundle-version="1.0.0",
  net.officefloor.frame;bundle-version="1.0.0",
  org.junit;bundle-version="3.8.2",
  net.officefloor.eclipse.jars;bundle-version="1.0.0",

@@ -18,8 +18,6 @@ package net.officefloor.plugin.socket.server.spi;
 
 import java.net.ServerSocket;
 
-import net.officefloor.frame.api.execute.Handler;
-
 /**
  * <p>
  * Handler for a {@link ServerSocket}.
@@ -28,14 +26,14 @@ import net.officefloor.frame.api.execute.Handler;
  * 
  * @author Daniel
  */
-public interface ServerSocketHandler<F extends Enum<F>> extends Handler<F> {
+public interface ServerSocketHandler<F extends Enum<F>> {
 
 	/**
 	 * Creates the {@link Server} to handle {@link ReadMessage} instances.
 	 * 
 	 * @return {@link Server} to handle {@link ReadMessage} instances.
 	 */
-	Server createServer();
+	Server<F> createServer();
 
 	/**
 	 * Creates a {@link ConnectionHandler} for a new {@link Connection}.

@@ -40,19 +40,10 @@ public class MessageWork {
 			throws Throwable {
 		try {
 
-			// TODO remove
-			System.out.println(this.getClass().getSimpleName()
-					+ ": serving connection");
-
 			// Obtain the index
 			byte[] buffer = new byte[1];
 			int readSize = connection.read(buffer);
 			if (readSize == 0) {
-
-				// TODO remove
-				// Thread.sleep(100);
-				System.out.println(this.getClass().getSimpleName()
-						+ ": no data, wait for data");
 
 				// No message, wait for one to come
 				connection.waitOnClientData();
@@ -61,17 +52,9 @@ public class MessageWork {
 			}
 			int index = (int) buffer[0];
 
-			// TODO remove
-			System.out.println(this.getClass().getSimpleName() + ": index "
-					+ index);
-
 			// Handle message
 			switch (index) {
 			case -1:
-				
-				// TODO remove
-				System.out.println("Closing connection");
-				
 				// Close connection (do not process further messages)
 				connection.close();
 				break;
@@ -101,7 +84,7 @@ public class MessageWork {
 			}
 
 		} catch (Throwable ex) {
-			// TODO Indicate failure and close connection
+			// Indicate failure and close connection
 			ex.printStackTrace();
 			connection.close();
 

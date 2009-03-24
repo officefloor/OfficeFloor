@@ -22,12 +22,13 @@ import java.nio.channels.Selector;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.impl.socket.server.SocketListener.SocketListenerDependencies;
 import net.officefloor.plugin.impl.socket.server.messagesegment.DirectBufferMessageSegmentPool;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
+import net.officefloor.plugin.socket.server.spi.Server;
 
 /**
  * Abstract {@link TestCase} for setting up write/read testing.
@@ -39,64 +40,64 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	/**
 	 * Test {@link ConnectionHandler}.
 	 */
-	protected final MockConnectionHandler connectionHandler;
+	protected final MockConnectionHandler connectionHandler = new MockConnectionHandler();
 
 	/**
 	 * Test {@link SelectionKey}.
 	 */
-	protected final MockSelectionKey selectionKey;
+	protected final MockSelectionKey selectionKey = new MockSelectionKey();
 
 	/**
 	 * Test {@link NonblockingSocketChannel}.
 	 */
-	protected final MockSocketChannel socketChannel;
+	protected final MockSocketChannel socketChannel = new MockSocketChannel(
+			this.selectionKey);
 
 	/**
 	 * Test {@link Selector}.
 	 */
-	protected final MockSelector selector;
+	private final MockSelector selector = new MockSelector(this.selectionKey);
 
 	/**
-	 * {@link ServerSocketManagedObjectSource}.
+	 * {@link Server}.
 	 */
-	protected final ServerSocketManagedObjectSource mos;
+	private final Server<Indexed> server = new MockServer();
+
+	/**
+	 * {@link SelectorFactory}.
+	 */
+	private final SelectorFactory selectorFactory = new SelectorFactory() {
+		@Override
+		public Selector createSelector() throws IOException {
+			return AbstractWriteRead.this.selector;
+		}
+	};
 
 	/**
 	 * {@link SocketListener}.
 	 */
-	protected final SocketListener socketListener;
+	protected final SocketListener socketListener = new SocketListener(
+			this.selectorFactory, this.server, 1);
 
 	/**
 	 * {@link ConnectionImpl}.
 	 */
-	protected final ConnectionImpl<Indexed> connection;
+	protected final ConnectionImpl<Indexed> connection = new ConnectionImpl<Indexed>(
+			this.socketChannel, new MockServerSocketHandler(
+					this.connectionHandler), 10,
+			new DirectBufferMessageSegmentPool(100));
+
+	/**
+	 * {@link ConnectionManager}.
+	 */
+	private final ConnectionManager connectionManager = new ConnectionManager(
+			this.selectorFactory, this.server, 1);
 
 	/**
 	 * {@link TaskContext}.
 	 */
-	private final TaskContext<Object, ConnectionManager, None, Indexed> taskContext;
-
-	/**
-	 * Initiate.
-	 */
-	protected AbstractWriteRead() {
-		this.connectionHandler = new MockConnectionHandler();
-		this.selectionKey = new MockSelectionKey();
-		this.socketChannel = new MockSocketChannel(this.selectionKey);
-		this.selector = new MockSelector(this.selectionKey);
-		this.mos = new ServerSocketManagedObjectSource(new SelectorFactory() {
-			@Override
-			public Selector createSelector() throws IOException {
-				return AbstractWriteRead.this.selector;
-			}
-		});
-		this.mos.server = new MockServer();
-		this.socketListener = new SocketListener(this.mos, 1);
-		this.connection = new ConnectionImpl<Indexed>(this.socketChannel,
-				new MockServerSocketHandler(this.connectionHandler), 10,
-				new DirectBufferMessageSegmentPool(100));
-		this.taskContext = new MockTaskContext(this.connection);
-	}
+	private final TaskContext<ConnectionManager, SocketListenerDependencies, Indexed> taskContext = new MockTaskContext(
+			this.connectionManager, this.connection);
 
 	/**
 	 * Runs the {@link SocketListener}.
@@ -177,4 +178,5 @@ public abstract class AbstractWriteRead extends OfficeFrameTestCase {
 	protected void validateOutputToClient(String text) {
 		this.socketChannel.validateOutput(text);
 	}
+
 }

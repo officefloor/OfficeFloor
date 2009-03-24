@@ -26,6 +26,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.work.http.route.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
  * Tests the {@link HttpRouteTask}.
@@ -38,7 +39,7 @@ public class HttpRouteTaskTest extends OfficeFrameTestCase {
 	 * Mock {@link TaskContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private TaskContext<Object, HttpRouteTask, Indexed, Indexed> taskContext = this
+	private TaskContext<HttpRouteTask, HttpRouteTaskDependencies, Indexed> taskContext = this
 			.createMock(TaskContext.class);
 
 	/**

@@ -20,16 +20,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
 import net.officefloor.plugin.socket.server.spi.IdleContext;
 import net.officefloor.plugin.socket.server.spi.ReadContext;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
 import net.officefloor.plugin.socket.server.spi.WriteContext;
+import net.officefloor.plugin.socket.server.tcp.TcpServer.TcpServerFlows;
 import net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection;
 
 /**
@@ -45,11 +45,6 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * idle.
 	 */
 	private static final long NON_IDLE_SINCE_TIMESTAMP = -1;
-
-	/**
-	 * {@link HandlerContext}.
-	 */
-	private final HandlerContext<Indexed> handlerContext;
 
 	/**
 	 * {@link Connection}.
@@ -83,21 +78,17 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	private boolean isClose = false;
 
 	/**
-	 * Timestamp that the {@link Connection} when idle.
+	 * Time stamp that the {@link Connection} went idle.
 	 */
 	private long idleSinceTimestamp = NON_IDLE_SINCE_TIMESTAMP;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param handlerContext
-	 *            {@link HandlerContext}.
 	 * @param connection
 	 *            {@link Connection}.
 	 */
-	public TcpConnectionHandler(HandlerContext<Indexed> handlerContext,
-			Connection connection) {
-		this.handlerContext = handlerContext;
+	public TcpConnectionHandler(Connection connection) {
 		this.connection = connection;
 
 		// Create the output stream
@@ -114,13 +105,15 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * @param readMessage
 	 *            {@link ReadMessage}.
 	 */
-	public void invokeProcess(ReadMessage readMessage) {
+	public void invokeProcess(ReadMessage readMessage,
+			ManagedObjectExecuteContext<TcpServerFlows> executeContext) {
 
 		// Only invoke the process once
 		if (!this.isProcessStarted) {
 
 			// Invokes the process
-			this.handlerContext.invokeProcess(0, null, this);
+			executeContext.invokeProcess(TcpServerFlows.NEW_CONNECTION, this,
+					this);
 
 			// Indicate process started
 			this.isProcessStarted = true;
@@ -135,11 +128,6 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * ==================================================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleIdleConnection(net.officefloor.plugin.socket.server.spi.IdleContext)
-	 */
 	@Override
 	public void handleIdleConnection(IdleContext context) {
 
@@ -167,25 +155,14 @@ public class TcpConnectionHandler implements ConnectionHandler,
 				}
 			}
 		}
-
-		// TODO hook this into timeout on connection being idle.
-		System.err
-				.println(this.getClass().getSimpleName()
-						+ ": provide max idle time (closing conn="
-						+ this.isClose + ")");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleRead(net.officefloor.plugin.socket.server.spi.ReadContext)
-	 */
 	@Override
 	public void handleRead(ReadContext context) {
 
 		// Connection not idle
 		this.idleSinceTimestamp = NON_IDLE_SINCE_TIMESTAMP;
-		
+
 		// Indicate data available from client
 		if (this.asynchronousListener != null) {
 			this.asynchronousListener.notifyComplete();
@@ -210,11 +187,6 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleWrite(net.officefloor.plugin.socket.server.spi.WriteContext)
-	 */
 	@Override
 	public void handleWrite(WriteContext context) {
 
@@ -231,9 +203,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	}
 
 	/*
-	 * ==================================================================
-	 * AsynchronousManagedObject
-	 * ==================================================================
+	 * ================= AsynchronousManagedObject ======================
 	 */
 
 	/**
@@ -241,11 +211,6 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 */
 	private AsynchronousListener asynchronousListener;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.AsynchronousManagedObject#registerAsynchronousCompletionListener(net.officefloor.frame.spi.managedobject.AsynchronousListener)
-	 */
 	@Override
 	public void registerAsynchronousCompletionListener(
 			AsynchronousListener listener) {
@@ -254,37 +219,20 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.managedobject.ManagedObject#getObject()
-	 */
 	@Override
 	public Object getObject() throws Exception {
 		return this;
 	}
 
 	/*
-	 * ==================================================================
-	 * ServerTcpConnection
-	 * ==================================================================
+	 * ====================== ServerTcpConnection =======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection#getLock()
-	 */
 	@Override
 	public Object getLock() {
 		return this.connection.getLock();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection#close()
-	 */
 	@Override
 	public void close() throws IOException {
 		synchronized (this.getLock()) {
@@ -293,11 +241,6 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection#isClosed()
-	 */
 	@Override
 	public boolean isClosed() {
 		synchronized (this.getLock()) {
@@ -305,22 +248,11 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection#read(byte[])
-	 */
 	@Override
 	public int read(byte[] buffer) throws IOException {
 		return this.read(buffer, 0, buffer.length);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection#read(byte[],
-	 *      int, int)
-	 */
 	@Override
 	public int read(byte[] buffer, int offset, int length) throws IOException {
 		synchronized (this.getLock()) {
@@ -328,11 +260,6 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection#waitOnClientData()
-	 */
 	@Override
 	public void waitOnClientData() throws IOException {
 		synchronized (this.getLock()) {
@@ -357,21 +284,11 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection#getOutputStream()
-	 */
 	@Override
 	public OutputStream getOutputStream() throws IOException {
 		return this.outputStream;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection#write(java.nio.ByteBuffer)
-	 */
 	@Override
 	public void write(ByteBuffer buffer) throws IOException {
 		synchronized (this.getLock()) {
@@ -420,30 +337,19 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	private class TcpOutputStream extends OutputStream {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.io.OutputStream#write(int)
+		 * ========== OutputStream ==============================
 		 */
+
 		@Override
 		public void write(int b) throws IOException {
 			this.write(new byte[] { (byte) b });
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.io.OutputStream#write(byte[])
-		 */
 		@Override
 		public void write(byte[] b) throws IOException {
 			this.write(b, 0, b.length);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.io.OutputStream#write(byte[], int, int)
-		 */
 		@Override
 		public void write(byte[] b, int off, int len) throws IOException {
 			synchronized (TcpConnectionHandler.this.getLock()) {
@@ -451,11 +357,6 @@ public class TcpConnectionHandler implements ConnectionHandler,
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.io.OutputStream#flush()
-		 */
 		@Override
 		public void flush() throws IOException {
 			synchronized (TcpConnectionHandler.this.getLock()) {
@@ -463,11 +364,6 @@ public class TcpConnectionHandler implements ConnectionHandler,
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.io.OutputStream#close()
-		 */
 		@Override
 		public void close() throws IOException {
 			synchronized (TcpConnectionHandler.this.getLock()) {
