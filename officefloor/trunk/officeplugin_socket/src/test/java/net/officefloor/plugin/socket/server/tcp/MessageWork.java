@@ -18,7 +18,8 @@ package net.officefloor.plugin.socket.server.tcp;
 
 import java.io.OutputStream;
 
-import net.officefloor.frame.test.ReflectiveFlow;
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection;
 
 /**
@@ -29,16 +30,26 @@ import net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection;
 public class MessageWork {
 
 	/**
+	 * Start time of creating this {@link Work}.
+	 */
+	private final long startTime = System.currentTimeMillis();
+
+	/**
 	 * Obtains the input index of the message and responds with the message.
 	 * 
 	 * @param connection
 	 *            {@link ServerTcpConnection}.
-	 * @param flow
-	 *            {@link ReflectiveFlow} to invoke to continue processing.
+	 * @param taskContext
+	 *            {@link TaskContext}.
 	 */
-	public void service(ServerTcpConnection connection, ReflectiveFlow flow)
-			throws Throwable {
+	public void service(ServerTcpConnection connection,
+			TaskContext<?, ?, ?> taskContext) throws Throwable {
 		try {
+
+			// Ensure not waiting too long
+			if ((System.currentTimeMillis() - this.startTime) > 5000) {
+				throw new Exception("Waited too long for a message");
+			}
 
 			// Obtain the index
 			byte[] buffer = new byte[1];
@@ -47,7 +58,7 @@ public class MessageWork {
 
 				// No message, wait for one to come
 				connection.waitOnClientData();
-				flow.doFlow(null);
+				taskContext.setComplete(false);
 				return;
 			}
 			int index = (int) buffer[0];
@@ -78,7 +89,7 @@ public class MessageWork {
 
 				// Invoke flow to process another message when arrives
 				connection.waitOnClientData();
-				flow.doFlow(null);
+				taskContext.setComplete(false);
 
 				break;
 			}

@@ -269,8 +269,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 			if (readMessage != null) {
 				boolean isDataAvailable = readMessage.isDataAvailable();
 				if (!isDataAvailable) {
-					// No data on first message, data available if another
-					// message
+					// No data on first message, check if another message
 					isDataAvailable = (readMessage.getNextReadMessage() != null);
 				}
 				if (isDataAvailable) {

@@ -53,17 +53,22 @@ public class EscalationHandlerTest extends AbstractOfficeConstructTestCase {
 		workBuilder.buildTask("task", "TEAM").buildParameter();
 		this.constructTeam("TEAM", new PassiveTeam());
 
+		// Capture office floor escalation
+		final Throwable[] failure = new Throwable[1];
+		this.getOfficeFloorBuilder().setEscalationHandler(
+				new EscalationHandler() {
+					@Override
+					public void handleEscalation(Throwable escalation)
+							throws Throwable {
+						failure[0] = escalation;
+					}
+				});
+
 		// Execute the task to have escalation handled
 		this.invokeWork("WORK", null);
 
-		// Ensure escalation is handled by office floor escalation handler
-		try {
-			this.validateNoTopLevelEscalation();
-			fail("Should have a office floor escalation");
-		} catch (Throwable ex) {
-			// Ensure appropriate escalation is captured
-			assertEquals("Incorrect escalation", escalation, ex);
-		}
+		// Ensure escalation handled by office floor escalation handler
+		assertEquals("Incorrect escalation", escalation, failure[0]);
 	}
 
 	/**
