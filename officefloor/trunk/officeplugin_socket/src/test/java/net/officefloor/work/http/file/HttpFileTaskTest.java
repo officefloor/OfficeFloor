@@ -18,7 +18,6 @@ package net.officefloor.work.http.file;
 
 import java.io.ByteArrayOutputStream;
 
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -27,6 +26,7 @@ import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
 import net.officefloor.plugin.socket.server.http.parse.UsAsciiUtil;
+import net.officefloor.work.http.file.HttpFileTask.HttpFileTaskDependencies;
 
 /**
  * Tests the {@link HttpFileTask}.
@@ -39,7 +39,7 @@ public class HttpFileTaskTest extends OfficeFrameTestCase {
 	 * Mock {@link TaskContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private TaskContext<Object, HttpFileTask, Indexed, None> taskContext = this
+	private TaskContext<HttpFileTask, HttpFileTaskDependencies, None> taskContext = this
 			.createMock(TaskContext.class);
 
 	/**
@@ -106,7 +106,8 @@ public class HttpFileTaskTest extends OfficeFrameTestCase {
 		HttpFileTask task = new HttpFileTask();
 
 		// Record actions on mocks
-		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
+		this.recordReturn(this.taskContext, this.taskContext
+				.getObject(HttpFileTaskDependencies.SERVER_HTTP_CONNECTION),
 				this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.httpRequest);

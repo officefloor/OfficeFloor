@@ -21,12 +21,12 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
+import net.officefloor.work.http.html.form.HttpHtmlFormToBeanTask.HttpHtmlFormToBeanTaskDependencies;
 
 /**
  * Tests the {@link HttpHtmlFormToBeanTask}.
@@ -39,7 +39,7 @@ public class HttpHtmlFormToBeanTaskTest extends OfficeFrameTestCase {
 	 * Mock {@link TaskContext}.
 	 */
 	@SuppressWarnings("unchecked")
-	private TaskContext<Object, HttpHtmlFormToBeanTask, Indexed, None> taskContext = this
+	private TaskContext<HttpHtmlFormToBeanTask, HttpHtmlFormToBeanTaskDependencies, None> taskContext = this
 			.createMock(TaskContext.class);
 
 	/**
@@ -110,8 +110,12 @@ public class HttpHtmlFormToBeanTaskTest extends OfficeFrameTestCase {
 				HtmlFormBean.class, aliases);
 
 		// Record actions on mocks
-		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
-				this.connection);
+		this
+				.recordReturn(
+						this.taskContext,
+						this.taskContext
+								.getObject(HttpHtmlFormToBeanTaskDependencies.SERVER_HTTP_CONNECTION),
+						this.connection);
 		this.recordReturn(this.connection, this.connection.getHttpRequest(),
 				this.httpRequest);
 		this.recordReturn(this.httpRequest, this.httpRequest.getMethod(),

@@ -16,6 +16,9 @@
  */
 package net.officefloor.plugin.socket.server.tcp;
 
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
 import net.officefloor.plugin.socket.server.spi.Server;
@@ -25,14 +28,30 @@ import net.officefloor.plugin.socket.server.spi.Server;
  * 
  * @author Daniel
  */
-public class TcpServer implements Server {
+public class TcpServer implements Server<TcpServer.TcpServerFlows> {
+
+	/**
+	 * {@link Flow} instance to handle a new TCP {@link Connection}.
+	 */
+	public static enum TcpServerFlows {
+		NEW_CONNECTION
+	}
+
+	/**
+	 * {@link ManagedObjectExecuteContext}.
+	 */
+	private ManagedObjectExecuteContext<TcpServerFlows> executeContext;
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Server#processReadMessage(net.officefloor.plugin.socket.server.spi.ReadMessage,
-	 *      net.officefloor.plugin.socket.server.spi.ConnectionHandler)
+	 * ==================== Server ====================================
 	 */
+
+	@Override
+	public void setManagedObjectExecuteContext(
+			ManagedObjectExecuteContext<TcpServerFlows> executeContext) {
+		this.executeContext = executeContext;
+	}
+
 	@Override
 	public void processReadMessage(ReadMessage message,
 			ConnectionHandler connectionHandler) {
@@ -41,7 +60,7 @@ public class TcpServer implements Server {
 		TcpConnectionHandler tcpConnHandler = (TcpConnectionHandler) connectionHandler;
 
 		// Invoke the process to handle message
-		tcpConnHandler.invokeProcess(message);
+		tcpConnHandler.invokeProcess(message, this.executeContext);
 	}
 
 }

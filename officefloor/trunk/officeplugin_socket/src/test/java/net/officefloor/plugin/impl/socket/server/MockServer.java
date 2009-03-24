@@ -18,29 +18,29 @@ package net.officefloor.plugin.impl.socket.server;
 
 import java.io.IOException;
 
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
 import net.officefloor.plugin.socket.server.spi.ReadMessage;
 import net.officefloor.plugin.socket.server.spi.Server;
 
 /**
- * Test {@link Server}.
+ * Mock {@link Server}.
  * 
  * @author Daniel
  */
-public class MockServer implements Server {
+public class MockServer implements Server<Indexed> {
 
 	/*
-	 * ==========================================================================
-	 * Server
-	 * ==========================================================================
+	 * ================== Server ==============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.Server#processReadMessage(net.officefloor.plugin.socket.server.spi.ReadMessage,
-	 *      net.officefloor.plugin.socket.server.spi.ConnectionHandler)
-	 */
+	@Override
+	public void setManagedObjectExecuteContext(
+			ManagedObjectExecuteContext<Indexed> executeContext) {
+		// Do nothing
+	}
+
 	@Override
 	public void processReadMessage(ReadMessage message,
 			ConnectionHandler connectionHandler) throws IOException {

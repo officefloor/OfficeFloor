@@ -105,4 +105,5 @@ public interface HttpResponse {
 	 *             If fails to trigger sending the message.
 	 */
 	void send() throws IOException;
+
 }

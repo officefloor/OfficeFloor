@@ -119,15 +119,19 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.EscalationHandler#handleEscalation(
-	 * java.lang.Throwable)
+	 * =================== EscalationHandler =============================
 	 */
+
 	@Override
 	public synchronized void handleEscalation(Throwable escalation)
 			throws Throwable {
+
+		// Indicate a office floor level escalation
+		System.err.println("OFFICE FLOOR ESCALATION: "
+				+ escalation.getMessage() + " ["
+				+ escalation.getClass().getSimpleName() + " at "
+				+ escalation.getStackTrace()[0].toString() + "]");
+
 		// Record exception to be thrown later
 		this.exception = escalation;
 	}

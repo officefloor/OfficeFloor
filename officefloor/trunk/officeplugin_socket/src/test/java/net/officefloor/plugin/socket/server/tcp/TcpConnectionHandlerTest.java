@@ -33,7 +33,7 @@ public class TcpConnectionHandlerTest extends AbstractWriteRead {
 	 * {@link TcpConnectionHandler}.
 	 */
 	private TcpConnectionHandler tcpConnectionHandler = new TcpConnectionHandler(
-			null, this.connection);
+			this.connection);
 
 	/**
 	 * {@link ServerTcpConnection} which is implemented by the

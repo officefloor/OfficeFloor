@@ -20,22 +20,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import net.officefloor.compile.spi.work.WorkLoader;
+import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
+import net.officefloor.compile.spi.work.source.WorkSourceContext;
+import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.model.work.TaskFlowModel;
-import net.officefloor.model.work.TaskModel;
-import net.officefloor.model.work.TaskObjectModel;
-import net.officefloor.model.work.WorkModel;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
-import net.officefloor.work.AbstractWorkLoader;
-import net.officefloor.work.WorkLoader;
-import net.officefloor.work.WorkLoaderContext;
+import net.officefloor.work.http.route.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
  * {@link WorkLoader} to provide routing of HTTP requests.
  * 
  * @author Daniel
  */
-public class HttpRouteWorkLoader extends AbstractWorkLoader {
+public class HttpRouteWorkSource extends AbstractWorkSource<HttpRouteTask> {
 
 	/**
 	 * Property prefix for a routing entry.
@@ -43,25 +42,17 @@ public class HttpRouteWorkLoader extends AbstractWorkLoader {
 	public static final String ROUTE_PROPERTY_PREFIX = "route.";
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.work.AbstractWorkLoader#loadSpecification(net.officefloor
-	 * .work.AbstractWorkLoader.SpecificationContext)
+	 * ================== AbstractWorkSource ======================
 	 */
+
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		// All entries are dynamic
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.work.WorkLoader#loadWork(net.officefloor.work.
-	 * WorkLoaderContext)
-	 */
 	@Override
-	public WorkModel<?> loadWork(WorkLoaderContext context) throws Exception {
+	public void sourceWork(WorkTypeBuilder<HttpRouteTask> workTypeBuilder,
+			WorkSourceContext context) throws Exception {
 
 		// Iterate over the mappings creating the routings
 		List<String> routeNames = new LinkedList<String>();
@@ -94,29 +85,22 @@ public class HttpRouteWorkLoader extends AbstractWorkLoader {
 		HttpRouteTask task = new HttpRouteTask(routePatterns
 				.toArray(new Pattern[0]));
 
-		// Create the task for routing
-		TaskModel<Indexed, Indexed> taskModel = new TaskModel<Indexed, Indexed>();
-		taskModel.setTaskName("route");
-		taskModel.setTaskFactoryManufacturer(task);
-		taskModel.addObject(new TaskObjectModel<Indexed>(null,
-				ServerHttpConnection.class.getName()));
-		int index = 0;
+		// Define the task
+		workTypeBuilder.setWorkFactory(task);
+		TaskTypeBuilder<HttpRouteTaskDependencies, Indexed> taskBuilder = workTypeBuilder
+				.addTaskType("route", task, HttpRouteTaskDependencies.class,
+						Indexed.class);
+		taskBuilder.addObject(ServerHttpConnection.class).setKey(
+				HttpRouteTaskDependencies.SERVER_HTTP_CONNECTION);
+
+		// Create the routes for the task
 		for (String routeName : routeNames) {
 			// Flow for each routing entry
-			taskModel.addFlow(new TaskFlowModel<Indexed>(null, index++,
-					routeName));
+			taskBuilder.addFlow().setLabel(routeName);
 		}
 
 		// Create the default flow (if not match any routes)
-		taskModel.addFlow(new TaskFlowModel<Indexed>(null, index++, "default"));
-
-		// Create the work for routing
-		WorkModel<HttpRouteTask> workModel = new WorkModel<HttpRouteTask>();
-		workModel.setTypeOfWork(HttpRouteTask.class);
-		workModel.setWorkFactory(task);
-		workModel.addTask(taskModel);
-
-		// Return the work model
-		return workModel;
+		taskBuilder.addFlow().setLabel("default");
 	}
+
 }

@@ -27,32 +27,38 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.plugin.impl.socket.server.ServerSocketAccepter.ServerSocketAccepterFlows;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.Server;
 
 /**
  * Manages the {@link Connection} instances with the {@link Server}.
  * 
- * TODO handle cleaning up SocketListeners no longer listening to connections.
- * 
  * @author Daniel
  */
-class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
-		TaskFactory<Object, ConnectionManager, None, Indexed> {
+class ConnectionManager
+		implements
+		Work,
+		WorkFactory<ConnectionManager>,
+		TaskFactory<ConnectionManager, SocketListener.SocketListenerDependencies, Indexed> {
 
 	/**
-	 * {@link ServerSocketManagedObjectSource}.
+	 * {@link SelectorFactory}.
 	 */
-	private final ServerSocketManagedObjectSource moSource;
+	private final SelectorFactory selectorFactory;
 
 	/**
-	 * Maximum number of {@link Connection} instances per {@link SocketListener}
-	 * .
+	 * {@link Server}.
+	 */
+	private final Server<?> server;
+
+	/**
+	 * Maximum {@link Connection} instances per {@link SocketListener}.
 	 */
 	private final int maxConnPerListener;
 
 	/**
-	 * list of {@link SocketListener} instances.
+	 * Listing of active {@link SocketListener} instances.
 	 */
 	private final List<SocketListener> socketListeners = new ArrayList<SocketListener>();
 
@@ -60,16 +66,17 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 	 * Initiate.
 	 * 
 	 * @param moSource
-	 *            {@link ServerSocketManagedObjectSource}.
+	 *            {@link AbstractServerSocketManagedObjectSource}.
 	 * @param maxConnPerListener
 	 *            Maximum number of {@link Connection} instances per
 	 *            {@link SocketListener}.
 	 * @throws IOException
 	 *             If fails creation.
 	 */
-	ConnectionManager(ServerSocketManagedObjectSource moSource,
-			int maxConnPerListener) throws IOException {
-		this.moSource = moSource;
+	ConnectionManager(SelectorFactory selectorFactory, Server<?> server,
+			int maxConnPerListener) {
+		this.selectorFactory = selectorFactory;
+		this.server = server;
 		this.maxConnPerListener = maxConnPerListener;
 	}
 
@@ -83,11 +90,13 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 	 * @throws IOException
 	 *             If fails registering the {@link Connection}.
 	 */
-	void registerConnection(ConnectionImpl<?> connection,
-			TaskContext<?, ?, ?, ?> taskContext) throws IOException {
+	void registerConnection(
+			ConnectionImpl<?> connection,
+			TaskContext<ServerSocketAccepter, None, ServerSocketAccepterFlows> taskContext)
+			throws IOException {
 
-		// Attempt to register with existing socket listeners
-		synchronized (this) {
+		// Attempt to register with an existing socket listener
+		synchronized (this.socketListeners) {
 			for (SocketListener listener : this.socketListeners) {
 				if (listener.registerConnection(connection)) {
 					// Registered
@@ -97,11 +106,24 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 		}
 
 		// Not registered if at this point, therefore create a new listener
-		taskContext.doFlow(0, connection);
+		taskContext.doFlow(ServerSocketAccepterFlows.LISTEN, connection);
+	}
+
+	/**
+	 * Flags that the input {@link SocketListener} has completed and no further
+	 * {@link Connection} instances may be registered with it.
+	 * 
+	 * @param socketListener
+	 *            Completed {@link SocketListener}.
+	 */
+	void socketListenerComplete(SocketListener socketListener) {
+		synchronized (this.socketListeners) {
+			this.socketListeners.remove(socketListener);
+		}
 	}
 
 	/*
-	 * ===================== Work =========================================
+	 * ===================== WorkFactory =====================================
 	 */
 
 	@Override
@@ -109,11 +131,25 @@ class ConnectionManager implements Work, WorkFactory<ConnectionManager>,
 		return this;
 	}
 
+	/*
+	 * ===================== TaskFactory =====================================
+	 */
+
 	@Override
-	public Task<Object, ConnectionManager, None, Indexed> createTask(
+	public Task<ConnectionManager, SocketListener.SocketListenerDependencies, Indexed> createTask(
 			ConnectionManager work) {
-		// Return a new socket listener
-		return new SocketListener(this.moSource, this.maxConnPerListener);
+
+		// Create the socket listener
+		SocketListener socketListener = new SocketListener(
+				this.selectorFactory, this.server, this.maxConnPerListener);
+
+		// Register the socket listener
+		synchronized (this.socketListeners) {
+			this.socketListeners.add(socketListener);
+		}
+
+		// Return the socket listener
+		return socketListener;
 	}
 
 }

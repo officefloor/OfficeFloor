@@ -26,7 +26,7 @@ import java.util.LinkedList;
 import junit.framework.TestCase;
 
 /**
- * Test {@link NonblockingSocketChannel} that provides mock data.
+ * Mock {@link NonblockingSocketChannel} that provides mock data.
  * 
  * @author Daniel
  */
@@ -194,17 +194,9 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 	}
 
 	/*
-	 * =========================================================================
-	 * NonblockingSocketChannel
-	 * =========================================================================
+	 * ================= NonblockingSocketChannel ============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#register(java.nio.channels.Selector,
-	 *      int, java.lang.Object)
-	 */
 	@Override
 	public SelectionKey register(Selector selector, int ops, Object attachment)
 			throws IOException {
@@ -215,11 +207,6 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 		return this.selectionKey;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#read(java.nio.ByteBuffer)
-	 */
 	@Override
 	public int read(ByteBuffer buffer) throws IOException {
 		// Write data into buffer
@@ -243,11 +230,6 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#write(java.nio.ByteBuffer)
-	 */
 	@Override
 	public int write(ByteBuffer data) throws IOException {
 		// Write data out to mock client
@@ -260,11 +242,6 @@ public class MockSocketChannel implements NonblockingSocketChannel {
 		return writeSize;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.impl.socket.server.NonblockingSocketChannel#close()
-	 */
 	@Override
 	public void close() throws IOException {
 		this.isClosed = true;

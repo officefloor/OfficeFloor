@@ -270,50 +270,23 @@ public class HttpResponseImpl implements HttpResponse {
 	 * ================ HttpResponse =======================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#setStatus(int)
-	 */
 	@Override
 	public synchronized void setStatus(int status) {
 		this.status = status;
 		this.statusMessage = HttpStatus.getStatusMessage(status);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#setStatus(int,
-	 * java.lang.String)
-	 */
 	@Override
 	public synchronized void setStatus(int status, String statusMessage) {
 		this.status = status;
 		this.statusMessage = statusMessage;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#setVersion
-	 * (java.lang.String)
-	 */
 	@Override
 	public synchronized void setVersion(String version) {
 		this.version = version;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#addHeader(
-	 * java.lang.String, java.lang.String)
-	 */
 	@Override
 	public synchronized void addHeader(String name, String value) {
 
@@ -326,23 +299,11 @@ public class HttpResponseImpl implements HttpResponse {
 		this.headers.add(new Header(name, value));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#getBody()
-	 */
 	@Override
 	public synchronized OutputStream getBody() {
 		return this.bodyOutputStream;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.plugin.socket.server.http.api.HttpResponse#appendToBody
-	 * (java.nio.ByteBuffer)
-	 */
 	@Override
 	public synchronized void appendToBody(ByteBuffer content) {
 		// Append the content
@@ -374,11 +335,6 @@ public class HttpResponseImpl implements HttpResponse {
 		return HttpResponseImpl.this.currentBodyBuffer;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.http.api.HttpResponse#send()
-	 */
 	@Override
 	public synchronized void send() throws IOException {
 
@@ -427,10 +383,9 @@ public class HttpResponseImpl implements HttpResponse {
 	private class HttpOutputStream extends OutputStream {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.io.OutputStream#write(byte[], int, int)
+		 * ================ OutputStream =============================
 		 */
+
 		@Override
 		public void write(byte[] b, int off, int len) throws IOException {
 			synchronized (HttpResponseImpl.this) {
@@ -478,11 +433,6 @@ public class HttpResponseImpl implements HttpResponse {
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.io.OutputStream#write(int)
-		 */
 		@Override
 		public void write(int b) throws IOException {
 			synchronized (HttpResponseImpl.this) {
@@ -491,4 +441,5 @@ public class HttpResponseImpl implements HttpResponse {
 			}
 		}
 	}
+
 }

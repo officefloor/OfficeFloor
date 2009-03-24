@@ -26,32 +26,30 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.WorkFactory;
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.impl.socket.server.messagesegment.DirectBufferMessageSegmentPool;
 import net.officefloor.plugin.socket.server.spi.Message;
 import net.officefloor.plugin.socket.server.spi.MessageSegment;
-import net.officefloor.plugin.socket.server.spi.Server;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
+import net.officefloor.work.clazz.Flow;
 
 /**
  * Accepts connections.
  * 
  * @author Daniel
  */
-class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
-		Task<Object, ServerSocketAccepter, None, Indexed>,
-		TaskFactory<Object, ServerSocketAccepter, None, Indexed> {
+class ServerSocketAccepter
+		extends
+		AbstractSingleTask<ServerSocketAccepter, None, ServerSocketAccepter.ServerSocketAccepterFlows> {
 
 	/**
-	 * {@link InetSocketAddress}.
+	 * {@link Flow} instances for the {@link ServerSocketAccepter}.
 	 */
-	private final InetSocketAddress serverSocketAddress;
+	public static enum ServerSocketAccepterFlows {
+		LISTEN
+	}
 
 	/**
 	 * {@link ConnectionManager}.
@@ -72,25 +70,25 @@ class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 	/**
 	 * {@link ServerSocketChannel} to listen for connections.
 	 */
-	private ServerSocketChannel channel;
+	private final ServerSocketChannel channel;
 
 	/**
 	 * {@link Selector} to aid in listening for connections.
 	 */
-	private Selector selector;
+	private final Selector selector;
 
 	/**
 	 * {@link ServerSocketHandler}.
 	 */
-	private ServerSocketHandler<?> serverSocketHandler;
+	private final ServerSocketHandler<?> serverSocketHandler;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param server
-	 *            {@link Server}.
 	 * @param serverSocketAddress
 	 *            {@link InetSocketAddress} to listen for connections.
+	 * @param serverSocketHandler
+	 *            {@link ServerSocketHandler}.
 	 * @param connectionManager
 	 *            {@link ConnectionManager}.
 	 * @param recommendedSegmentCount
@@ -102,32 +100,18 @@ class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 	 *             If fails to set up the {@link ServerSocket}.
 	 */
 	ServerSocketAccepter(InetSocketAddress serverSocketAddress,
+			ServerSocketHandler<?> serverSocketHandler,
 			ConnectionManager connectionManager, int recommendedSegmentCount,
 			MessageSegmentPool messageSegmentPool) throws IOException {
-		this.serverSocketAddress = serverSocketAddress;
+		this.serverSocketHandler = serverSocketHandler;
 		this.connectionManager = connectionManager;
 		this.recommendedSegmentCount = recommendedSegmentCount;
 		this.messageSegmentPool = messageSegmentPool;
-	}
-
-	/**
-	 * Binds to the {@link ServerSocketChannel} and starts listening for
-	 * connections.
-	 * 
-	 * @param serverSocketHandler
-	 *            {@link ServerSocketHandler}.
-	 * @throws IOException
-	 *             If fails to bind.
-	 */
-	void bind(ServerSocketHandler<?> serverSocketHandler) throws IOException {
-
-		// Store reference to the server socket handler
-		this.serverSocketHandler = serverSocketHandler;
 
 		// Bind to the socket to start listening
 		this.channel = ServerSocketChannel.open();
 		this.channel.configureBlocking(false);
-		this.channel.socket().bind(this.serverSocketAddress);
+		this.channel.socket().bind(serverSocketAddress);
 
 		// Register the channel with the selector
 		this.selector = Selector.open();
@@ -135,24 +119,13 @@ class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 	}
 
 	/*
-	 * ======================= Work ============================================
+	 * ======================= Task ============================================
 	 */
-
-	@Override
-	public ServerSocketAccepter createWork() {
-		return this;
-	}
-
-	@Override
-	public Task<Object, ServerSocketAccepter, None, Indexed> createTask(
-			ServerSocketAccepter work) {
-		return work;
-	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object doTask(
-			TaskContext<Object, ServerSocketAccepter, None, Indexed> context)
+			TaskContext<ServerSocketAccepter, None, ServerSocketAccepterFlows> context)
 			throws Exception {
 
 		// Loop accepting connections
@@ -182,7 +155,7 @@ class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 							// Flag socket as unblocking
 							socketChannel.configureBlocking(false);
 
-							// Create the connection (registering itself)
+							// Create the connection
 							ConnectionImpl<?> connection = new ConnectionImpl(
 									new NonblockingSocketChannelImpl(
 											socketChannel),
@@ -224,7 +197,7 @@ class ServerSocketAccepter implements Work, WorkFactory<ServerSocketAccepter>,
 		/*
 		 * ======================= NonblockingSocketChannel ====================
 		 */
-		
+
 		@Override
 		public SelectionKey register(Selector selector, int ops,
 				Object attachment) throws IOException {

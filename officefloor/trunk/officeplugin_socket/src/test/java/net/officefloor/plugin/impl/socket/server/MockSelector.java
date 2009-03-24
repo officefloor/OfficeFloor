@@ -27,7 +27,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 
 /**
- * Test {@link Selector}.
+ * Mock {@link Selector}.
  * 
  * @author Daniel
  */
@@ -49,102 +49,55 @@ public class MockSelector extends Selector {
 	}
 
 	/*
-	 * =====================================================================
-	 * TestSelector
-	 * =====================================================================
+	 * ================= Selector ================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.Selector#select(long)
-	 */
 	@Override
 	public int select(long timeout) throws IOException {
 		// Always the one key
 		return 1;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.Selector#selectedKeys()
-	 */
 	@Override
 	public Set<SelectionKey> selectedKeys() {
 		return new HashSet<SelectionKey>(Arrays.asList(this.selectionKey));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.Selector#keys()
-	 */
 	@Override
 	public Set<SelectionKey> keys() {
 		return new HashSet<SelectionKey>(Arrays.asList(this.selectionKey));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.Selector#wakeup()
-	 */
 	@Override
 	public Selector wakeup() {
 		// Do nothing as mocking
 		return this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.Selector#isOpen()
-	 */
 	@Override
 	public boolean isOpen() {
 		TestCase.fail("Should not be invoked");
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.Selector#provider()
-	 */
 	@Override
 	public SelectorProvider provider() {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.Selector#select()
-	 */
 	@Override
 	public int select() throws IOException {
 		TestCase.fail("Should not be invoked");
 		return -1;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.Selector#selectNow()
-	 */
 	@Override
 	public int selectNow() throws IOException {
 		TestCase.fail("Should not be invoked");
 		return -1;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.nio.channels.Selector#close()
-	 */
 	@Override
 	public void close() throws IOException {
 		TestCase.fail("Should not be invoked");

@@ -16,20 +16,14 @@
  */
 package net.officefloor.plugin.socket.server.tcp;
 
-import net.officefloor.frame.api.build.HandlerBuilder;
-import net.officefloor.frame.api.build.HandlerFactory;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.HandlerContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
-import net.officefloor.plugin.impl.socket.server.ServerSocketHandlerEnum;
-import net.officefloor.plugin.impl.socket.server.ServerSocketManagedObjectSource;
+import net.officefloor.plugin.impl.socket.server.AbstractServerSocketManagedObjectSource;
 import net.officefloor.plugin.socket.server.spi.Connection;
 import net.officefloor.plugin.socket.server.spi.ConnectionHandler;
 import net.officefloor.plugin.socket.server.spi.Server;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
+import net.officefloor.plugin.socket.server.tcp.TcpServer.TcpServerFlows;
 import net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection;
 
 /**
@@ -38,53 +32,31 @@ import net.officefloor.plugin.socket.server.tcp.api.ServerTcpConnection;
  * @author Daniel
  */
 public class TcpServerSocketManagedObjectSource extends
-		ServerSocketManagedObjectSource implements HandlerFactory<Indexed>,
-		ServerSocketHandler<Indexed> {
+		AbstractServerSocketManagedObjectSource<TcpServerFlows> implements
+		ServerSocketHandler<TcpServerFlows> {
 
 	/*
-	 * ================== ServerSocketManagedObjectSource ===============
+	 * ============== AbstractServerSocketManagedObjectSource ===============
 	 */
 
 	@Override
-	protected void registerServerSocketHandler(
-			MetaDataContext<None, ServerSocketHandlerEnum> context)
-			throws Exception {
-		ManagedObjectSourceContext<ServerSocketHandlerEnum> mosContext = context
-				.getManagedObjectSourceContext();
+	protected ServerSocketHandler<TcpServerFlows> createServerSocketHandler(
+			MetaDataContext<None, TcpServerFlows> context) throws Exception {
 
 		// Specify types
 		context.setManagedObjectClass(TcpConnectionHandler.class);
 		context.setObjectClass(ServerTcpConnection.class);
 
-		// Provide the handler
-		HandlerBuilder<Indexed> handlerBuilder = mosContext.getHandlerBuilder()
-				.registerHandler(ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER);
-		handlerBuilder.setHandlerFactory(this);
-		handlerBuilder.linkProcess(0, null, null); // handles the message
+		// Provide the flow to process a new connection
+		context.addFlow(TcpServerFlows.NEW_CONNECTION,
+				ServerTcpConnection.class);
 
 		// Ensure connection is cleaned up when process finished
-		new CleanupTask().registerAsRecycleTask(mosContext,
-				"tcp.connection.cleanup");
-	}
+		new CleanupTask().registerAsRecycleTask(context
+				.getManagedObjectSourceContext(), "cleanup");
 
-	/*
-	 * ======================= Handler ===================================
-	 */
-
-	@Override
-	public Handler<Indexed> createHandler() {
+		// Return this as the server socket handler
 		return this;
-	}
-
-	/**
-	 * {@link HandlerContext}.
-	 */
-	private HandlerContext<Indexed> handlerContext;
-
-	@Override
-	public void setHandlerContext(HandlerContext<Indexed> context)
-			throws Exception {
-		this.handlerContext = context;
 	}
 
 	/*
@@ -92,13 +64,13 @@ public class TcpServerSocketManagedObjectSource extends
 	 */
 
 	@Override
-	public Server createServer() {
+	public Server<TcpServerFlows> createServer() {
 		return new TcpServer();
 	}
 
 	@Override
 	public ConnectionHandler createConnectionHandler(Connection connection) {
-		return new TcpConnectionHandler(this.handlerContext, connection);
+		return new TcpConnectionHandler(connection);
 	}
 
 }

@@ -24,10 +24,8 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -37,7 +35,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
-import net.officefloor.plugin.impl.socket.server.ServerSocketHandlerEnum;
+import net.officefloor.plugin.socket.server.tcp.TcpServer.TcpServerFlows;
 
 /**
  * Tests the {@link TcpServerSocketManagedObjectSource}.
@@ -74,13 +72,14 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		PORT = portStart;
 		portStart++; // increment for next test
 
-		// Obtain the office name
+		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
+		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 
 		// Register the Server Socket Managed Object
-		ManagedObjectBuilder<?> serverSocketBuilder = this
+		ManagedObjectBuilder<TcpServerFlows> serverSocketBuilder = this
 				.constructManagedObject("MO",
-						TcpServerSocketManagedObjectSource.class, officeName);
+						TcpServerSocketManagedObjectSource.class);
 		serverSocketBuilder.addProperty(
 				TcpServerSocketManagedObjectSource.PROPERTY_PORT, String
 						.valueOf(PORT));
@@ -96,16 +95,16 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		this.constructTeam("ACCEPTER_TEAM", new OnePersonTeam(100));
 		this.constructTeam("LISTENER_TEAM", new WorkerPerTaskTeam("Listener"));
 		this.constructTeam("CLEANUP_TEAM", new PassiveTeam());
-		OfficeBuilder officeBuilder = this.getOfficeBuilder();
-		officeBuilder.registerTeam("of-MO.serversocket." + PORT
-				+ ".Accepter.TEAM", "of-ACCEPTER_TEAM");
-		officeBuilder.registerTeam("of-MO.serversocket." + PORT
-				+ ".Listener.TEAM", "of-LISTENER_TEAM");
-		officeBuilder.registerTeam("of-MO.tcp.connection.cleanup",
-				"of-CLEANUP_TEAM");
+		officeBuilder.registerTeam("of-MO.accepter", "of-ACCEPTER_TEAM");
+		officeBuilder.registerTeam("of-MO.listener", "of-LISTENER_TEAM");
+		officeBuilder.registerTeam("of-MO.cleanup", "of-CLEANUP_TEAM");
 
-		// Register team to do the work
-		this.constructTeam("WORKER", new OnePersonTeam(100));
+		// Have server socket managed by office
+		ManagingOfficeBuilder<TcpServerFlows> managingOfficeBuilder = serverSocketBuilder
+				.setManagingOffice(officeName);
+		managingOfficeBuilder.setProcessBoundManagedObjectName("MO");
+		managingOfficeBuilder.linkProcess(TcpServerFlows.NEW_CONNECTION,
+				"servicer", "service");
 
 		// Register the work to process messages
 		ReflectiveWorkBuilder workBuilder = this.constructWork(
@@ -113,24 +112,9 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("service",
 				"WORKER");
 		taskBuilder.buildObject("MO", ManagedObjectScope.PROCESS);
-		taskBuilder
-				.buildFlow("service", FlowInstigationStrategyEnum.SEQUENTIAL);
-
-		// Link handler to task
-		officeBuilder.addOfficeEnhancer(new OfficeEnhancer() {
-			@Override
-			public void enhanceOffice(OfficeEnhancerContext context) {
-				// Obtain the managed object handler builder
-				ManagedObjectHandlerBuilder<ServerSocketHandlerEnum> handlerBuilder = context
-						.getManagedObjectHandlerBuilder("of-MO",
-								ServerSocketHandlerEnum.class);
-
-				// Link in the handler task
-				handlerBuilder.registerHandler(
-						ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER)
-						.linkProcess(0, "servicer", "service");
-			}
-		});
+		taskBuilder.buildFlow("service",
+				FlowInstigationStrategyEnum.SEQUENTIAL, null);
+		this.constructTeam("WORKER", new OnePersonTeam(100));
 
 		// Create and open the Office Floor
 		this.officeFloor = this.constructOfficeFloor();
@@ -149,6 +133,9 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		// Close the office
 		this.officeFloor.closeOfficeFloor();
 
+		// Allow some time for shutdown before starting next
+		Thread.sleep(500);
+
 		// Clean up
 		super.tearDown();
 	}
@@ -157,14 +144,14 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 	 * Ensure able to answer a request.
 	 */
 	public void testSingleRequest() throws Exception {
-		this.doRequests(1, true);
+		this.doRequests("", 1, true);
 	}
 
 	/**
 	 * Ensures able to handle multiple requests.
 	 */
 	public void testMultipleRequests() throws Exception {
-		this.doRequests(10, true);
+		this.doRequests("", 10, true);
 	}
 
 	/**
@@ -228,7 +215,8 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 					try {
 
 						// Execute the requested number of calls
-						TcpServerTest.this.doRequests(
+						TcpServerTest.this.doRequests(String
+								.valueOf(callerIndex),
 								numberOfRequestsPerCaller, isLog);
 
 					} catch (Throwable ex) {
@@ -277,13 +265,15 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Do the requests.
 	 * 
+	 * @param requesterId
+	 *            Id identifying the requester.
 	 * @param numberOfRequests
 	 *            Number of requests to make.
 	 * @param isLog
 	 *            Flag indicating whether to log details.
 	 */
-	private void doRequests(int numberOfRequests, boolean isLog)
-			throws Exception {
+	private void doRequests(String requesterId, int numberOfRequests,
+			boolean isLog) throws Exception {
 
 		// Open socket to Office
 		Socket socket = new Socket();
@@ -316,7 +306,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 			long endTime = System.currentTimeMillis();
 			String responseText = new String(response.toByteArray());
 			if (isLog) {
-				System.out.println("Message [" + requestIndex
+				System.out.println("Message [" + requesterId + ":" + i
 						+ "] processed in " + (endTime - startTime)
 						+ " milli-seconds (returned response '" + responseText
 						+ "')");

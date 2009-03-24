@@ -23,7 +23,7 @@ import net.officefloor.plugin.socket.server.spi.ReadContext;
 import net.officefloor.plugin.socket.server.spi.WriteContext;
 
 /**
- * Test {@link ConnectionHandler}.
+ * Mock {@link ConnectionHandler}.
  * 
  * @author Daniel
  */
@@ -57,16 +57,9 @@ public class MockConnectionHandler implements ConnectionHandler {
 	}
 
 	/*
-	 * =======================================================================
-	 * ConnectionHandler
-	 * =======================================================================
+	 * ================== ConnectionHandler ==============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleIdleConnection(net.officefloor.plugin.socket.server.spi.IdleContext)
-	 */
 	@Override
 	public void handleIdleConnection(IdleContext context) {
 
@@ -81,11 +74,6 @@ public class MockConnectionHandler implements ConnectionHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleRead(net.officefloor.plugin.socket.server.spi.ReadContext)
-	 */
 	@Override
 	public void handleRead(ReadContext context) {
 
@@ -100,11 +88,6 @@ public class MockConnectionHandler implements ConnectionHandler {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.plugin.socket.server.spi.ConnectionHandler#handleWrite(net.officefloor.plugin.socket.server.spi.WriteContext)
-	 */
 	@Override
 	public void handleWrite(WriteContext context) {
 

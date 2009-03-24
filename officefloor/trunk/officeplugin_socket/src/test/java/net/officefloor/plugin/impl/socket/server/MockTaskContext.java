@@ -18,9 +18,9 @@ package net.officefloor.plugin.impl.socket.server;
 
 import junit.framework.TestCase;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.plugin.impl.socket.server.SocketListener.SocketListenerDependencies;
 
 /**
  * Test {@link TaskContext}.
@@ -28,7 +28,12 @@ import net.officefloor.frame.api.execute.TaskContext;
  * @author Daniel
  */
 public class MockTaskContext implements
-		TaskContext<Object, ConnectionManager, None, Indexed> {
+		TaskContext<ConnectionManager, SocketListenerDependencies, Indexed> {
+
+	/**
+	 * {@link ConnectionManager}.
+	 */
+	private final ConnectionManager connectionManager;
 
 	/**
 	 * Parameter.
@@ -38,112 +43,59 @@ public class MockTaskContext implements
 	/**
 	 * Initiate.
 	 * 
+	 * @param connectionManager
+	 *            {@link ConnectionManager}.
 	 * @param parameter
 	 *            Parameter.
 	 */
-	public MockTaskContext(ConnectionImpl<Indexed> parameter) {
+	public MockTaskContext(ConnectionManager connectionManager,
+			ConnectionImpl<Indexed> parameter) {
+		this.connectionManager = connectionManager;
 		this.parameter = parameter;
 	}
 
 	/*
-	 * =============================================================================
-	 * TaskContext
-	 * =============================================================================
+	 * =================== TaskContext ================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#setComplete(boolean)
-	 */
 	@Override
 	public void setComplete(boolean isComplete) {
 		// Ignore
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getParameter()
-	 */
-	@Override
-	public Object getParameter() {
-		return this.parameter;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#doFlow(java.lang.Enum,
-	 *      java.lang.Object)
-	 */
 	@Override
 	public FlowFuture doFlow(Indexed key, Object parameter) {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#doFlow(int,
-	 *      java.lang.Object)
-	 */
 	@Override
 	public FlowFuture doFlow(int flowIndex, Object parameter) {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getObject(java.lang.Enum)
-	 */
 	@Override
-	public Object getObject(None key) {
-		TestCase.fail("Should not be invoked");
-		return null;
+	public Object getObject(SocketListenerDependencies key) {
+		return this.parameter;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getObject(int)
-	 */
 	@Override
 	public Object getObject(int managedObjectIndex) {
-		TestCase.fail("Should not be invoked");
-		return null;
+		return this.parameter;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getProcessLock()
-	 */
 	@Override
 	public Object getProcessLock() {
 		TestCase.fail("Should not be invoked");
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#getWork()
-	 */
 	@Override
 	public ConnectionManager getWork() {
-		TestCase.fail("Should not be invoked");
-		return null;
+		return this.connectionManager;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.api.execute.TaskContext#join(net.officefloor.frame.api.execute.FlowFuture)
-	 */
 	@Override
 	public void join(FlowFuture flowFuture) {
 		TestCase.fail("Should not be invoked");

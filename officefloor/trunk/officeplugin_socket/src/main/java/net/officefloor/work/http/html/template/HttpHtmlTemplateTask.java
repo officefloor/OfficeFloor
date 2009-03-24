@@ -20,12 +20,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.compile.util.AbstractSingleTaskWork;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.model.task.TaskFactoryManufacturer;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
 import net.officefloor.work.http.HttpException;
@@ -35,9 +33,16 @@ import net.officefloor.work.http.HttpException;
  * 
  * @author Daniel
  */
-public class HttpHtmlTemplateTask implements TaskFactoryManufacturer,
-		TaskFactory<Object, HttpHtmlTemplateWork, Indexed, None>,
-		Task<Object, HttpHtmlTemplateWork, Indexed, None> {
+public class HttpHtmlTemplateTask
+		extends
+		AbstractSingleTaskWork<HttpHtmlTemplateWork, HttpHtmlTemplateTask.HttpHtmlTemplateTaskDependencies, None> {
+
+	/**
+	 * Dependencies for the {@link HttpHtmlTemplateTask}.
+	 */
+	public static enum HttpHtmlTemplateTaskDependencies {
+		SERVER_HTTP_CONNECTION, BEAN
+	}
 
 	/**
 	 * Flag indicating if bean is required.
@@ -67,52 +72,21 @@ public class HttpHtmlTemplateTask implements TaskFactoryManufacturer,
 	 * ================= Task =====================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.model.task.TaskFactoryManufacturer#createTaskFactory()
-	 */
-	@Override
-	public TaskFactory<?, ?, ?, ?> createTaskFactory() {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.build.TaskFactory#createTask(net.officefloor
-	 * .frame.api.execute.Work)
-	 */
-	@Override
-	public Task<Object, HttpHtmlTemplateWork, Indexed, None> createTask(
-			HttpHtmlTemplateWork work) {
-		return this;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.api.execute.Task#doTask(net.officefloor.frame.api
-	 * .execute.TaskContext)
-	 */
 	@Override
 	public Object doTask(
-			TaskContext<Object, HttpHtmlTemplateWork, Indexed, None> context)
+			TaskContext<HttpHtmlTemplateWork, HttpHtmlTemplateTaskDependencies, None> context)
 			throws IOException, HttpException {
 
 		// Obtain the HTTP response
 		ServerHttpConnection connection = (ServerHttpConnection) context
-				.getObject(0);
+				.getObject(HttpHtmlTemplateTaskDependencies.SERVER_HTTP_CONNECTION);
 		HttpResponse response = connection.getHttpResponse();
 
 		// Obtain the bean and writer if required
 		Object bean = null;
 		Writer writer = null;
 		if (this.isRequireBean) {
-			bean = context.getParameter();
+			bean = context.getObject(HttpHtmlTemplateTaskDependencies.BEAN);
 			writer = new OutputStreamWriter(response.getBody());
 		}
 

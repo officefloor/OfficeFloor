@@ -17,10 +17,8 @@
 package net.officefloor.plugin.socket.server.http;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeEnhancer;
-import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -28,7 +26,7 @@ import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
-import net.officefloor.plugin.impl.socket.server.ServerSocketHandlerEnum;
+import net.officefloor.plugin.socket.server.http.HttpServer.HttpServerFlows;
 
 /**
  * Provides the startup of the {@link HttpServer} for testing.
@@ -65,13 +63,14 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 		port = portStart;
 		portStart++; // increment for next test
 
-		// Obtain the office name
+		// Obtain the office name and builder
 		String officeName = this.getOfficeName();
+		OfficeBuilder officeBuilder = this.getOfficeBuilder();
 
 		// Register the Server Socket Managed Object
-		ManagedObjectBuilder<?> serverSocketBuilder = this
+		ManagedObjectBuilder<HttpServerFlows> serverSocketBuilder = this
 				.constructManagedObject("MO",
-						HttpServerSocketManagedObjectSource.class, officeName);
+						HttpServerSocketManagedObjectSource.class);
 		serverSocketBuilder.addProperty(
 				HttpServerSocketManagedObjectSource.PROPERTY_PORT, String
 						.valueOf(port));
@@ -82,34 +81,22 @@ public abstract class HttpServerStartup extends AbstractOfficeConstructTestCase 
 				HttpServerSocketManagedObjectSource.PROPERTY_MESSAGE_SIZE, "3");
 		serverSocketBuilder.setDefaultTimeout(3000);
 
+		// Have server socket managed by office
+		ManagingOfficeBuilder<HttpServerFlows> managingOfficeBuilder = serverSocketBuilder
+				.setManagingOffice(officeName);
+		managingOfficeBuilder.setProcessBoundManagedObjectName("MO");
+
 		// Register the necessary teams for socket listening
 		this.constructTeam("ACCEPTER_TEAM", new OnePersonTeam(100));
+		officeBuilder.registerTeam("of-MO.accepter", "of-ACCEPTER_TEAM");
 		this.constructTeam("LISTENER_TEAM", new WorkerPerTaskTeam("Listener"));
+		officeBuilder.registerTeam("of-MO.listener", "of-LISTENER_TEAM");
 		this.constructTeam("CLEANUP_TEAM", new PassiveTeam());
-		OfficeBuilder officeBuilder = this.getOfficeBuilder();
-		officeBuilder.registerTeam("of-MO.serversocket." + port
-				+ ".Accepter.TEAM", "of-ACCEPTER_TEAM");
-		officeBuilder.registerTeam("of-MO.serversocket." + port
-				+ ".Listener.TEAM", "of-LISTENER_TEAM");
 
 		// Register the task to service the HTTP request
 		final TaskReference task = this.registerHttpServiceTask();
-
-		// Link handler to task
-		officeBuilder.addOfficeEnhancer(new OfficeEnhancer() {
-			@Override
-			public void enhanceOffice(OfficeEnhancerContext context) {
-				// Obtain the managed object handler builder
-				ManagedObjectHandlerBuilder<ServerSocketHandlerEnum> handlerBuilder = context
-						.getManagedObjectHandlerBuilder("of-MO",
-								ServerSocketHandlerEnum.class);
-
-				// Link in the handler task
-				handlerBuilder.registerHandler(
-						ServerSocketHandlerEnum.SERVER_SOCKET_HANDLER)
-						.linkProcess(0, task.workName, task.taskName);
-			}
-		});
+		managingOfficeBuilder.linkProcess(HttpServerFlows.HANDLE_HTTP_REQUEST,
+				task.workName, task.taskName);
 
 		// Create and open the Office Floor
 		this.officeFloor = this.constructOfficeFloor();

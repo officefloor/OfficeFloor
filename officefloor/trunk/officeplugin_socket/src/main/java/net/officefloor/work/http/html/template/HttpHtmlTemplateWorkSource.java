@@ -16,6 +16,7 @@
  */
 package net.officefloor.work.http.html.template;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -23,18 +24,17 @@ import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.compile.spi.work.WorkLoader;
+import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
+import net.officefloor.compile.spi.work.source.WorkSourceContext;
+import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.None;
-import net.officefloor.model.work.TaskEscalationModel;
-import net.officefloor.model.work.TaskModel;
-import net.officefloor.model.work.TaskObjectModel;
-import net.officefloor.model.work.WorkModel;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
-import net.officefloor.work.AbstractWorkLoader;
-import net.officefloor.work.WorkLoader;
-import net.officefloor.work.WorkLoaderContext;
 import net.officefloor.work.http.HttpException;
 import net.officefloor.work.http.HttpResponseSendTask;
+import net.officefloor.work.http.HttpResponseSendTask.HttpResponseSendTaskDependencies;
+import net.officefloor.work.http.html.template.HttpHtmlTemplateTask.HttpHtmlTemplateTaskDependencies;
 import net.officefloor.work.http.html.template.parse.ReferenceTemplateSectionContent;
 import net.officefloor.work.http.html.template.parse.StaticTemplateSectionContent;
 import net.officefloor.work.http.html.template.parse.Template;
@@ -46,7 +46,8 @@ import net.officefloor.work.http.html.template.parse.TemplateSectionContent;
  * 
  * @author Daniel
  */
-public class HttpHtmlTemplateWorkLoader extends AbstractWorkLoader {
+public class HttpHtmlTemplateWorkSource extends
+		AbstractWorkSource<HttpHtmlTemplateWork> {
 
 	/**
 	 * Property to specify the {@link Template} file.
@@ -59,29 +60,18 @@ public class HttpHtmlTemplateWorkLoader extends AbstractWorkLoader {
 	public static final String PROPERTY_BEAN_PREFIX = "bean.";
 
 	/*
-	 * =================== AbstractWorkLoader =========================
+	 * =================== AbstractWorkSource =========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.work.AbstractWorkLoader#loadSpecification(net.officefloor
-	 * .work.AbstractWorkLoader.SpecificationContext)
-	 */
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
 		context.addProperty(PROPERTY_TEMPLATE_FILE, "template");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.work.WorkLoader#loadWork(net.officefloor.work.
-	 * WorkLoaderContext)
-	 */
 	@Override
-	public WorkModel<?> loadWork(WorkLoaderContext context) throws Exception {
+	public void sourceWork(
+			WorkTypeBuilder<HttpHtmlTemplateWork> workTypeBuilder,
+			WorkSourceContext context) throws Exception {
 
 		// Obtain the template
 		String templateFilePath = context.getProperty(PROPERTY_TEMPLATE_FILE);
@@ -90,34 +80,19 @@ public class HttpHtmlTemplateWorkLoader extends AbstractWorkLoader {
 		InputStream configuration = context.getClassLoader()
 				.getResourceAsStream(templateFilePath);
 		if (configuration == null) {
-			throw new Exception("Can not find template '" + templateFilePath
-					+ "'");
+			throw new FileNotFoundException("Can not find template '"
+					+ templateFilePath + "'");
 		}
 		Template template = Template.parse(configuration);
 
-		// Create the tasks for each section of the template
-		List<TaskModel<Indexed, None>> tasks = new LinkedList<TaskModel<Indexed, None>>();
+		// Define the work factory
+		workTypeBuilder.setWorkFactory(new HttpHtmlTemplateWork());
+
+		// Define the tasks
 		for (TemplateSection section : template.getSections()) {
 
-			// Create the task model
+			// Obtain the section and task name
 			String sectionAndTaskName = section.getName();
-			TaskModel<Indexed, None> task = new TaskModel<Indexed, None>();
-			task.setTaskName(sectionAndTaskName);
-
-			// Reference the HTTP connection to write template
-			TaskObjectModel<Indexed> httpConnection = new TaskObjectModel<Indexed>();
-			httpConnection.setObjectType(ServerHttpConnection.class.getName());
-			task.addObject(httpConnection);
-
-			// Indicate the IO escalation from the task
-			TaskEscalationModel ioEscalation = new TaskEscalationModel();
-			ioEscalation.setEscalationType(IOException.class.getName());
-			task.addEscalation(ioEscalation);
-
-			// Indicate the HTTP escalation from the task
-			TaskEscalationModel httpEscalation = new TaskEscalationModel();
-			httpEscalation.setEscalationType(HttpException.class.getName());
-			task.addEscalation(httpEscalation);
 
 			// Create the content writers for the section
 			List<HttpHtmlTemplateContentWriter> contentWriters = new LinkedList<HttpHtmlTemplateContentWriter>();
@@ -144,11 +119,6 @@ public class HttpHtmlTemplateWorkLoader extends AbstractWorkLoader {
 						// Obtain the class
 						beanClass = context.getClassLoader().loadClass(
 								beanClassName);
-
-						// Add the task object to link in the bean
-						TaskObjectModel<Indexed> parameter = new TaskObjectModel<Indexed>();
-						parameter.setObjectType(beanClass.getName());
-						task.addObject(parameter);
 					}
 
 					// Obtain the method to get the bean property referenced
@@ -185,27 +155,37 @@ public class HttpHtmlTemplateWorkLoader extends AbstractWorkLoader {
 				}
 			}
 
-			// Create and load the task factory manufacturer for the section
+			// Create the task factory manufacturer for the section
 			boolean isRequireBean = (beanClass != null);
 			HttpHtmlTemplateTask taskFactoryManufacturer = new HttpHtmlTemplateTask(
 					isRequireBean, contentWriters
 							.toArray(new HttpHtmlTemplateContentWriter[0]));
-			task.setTaskFactoryManufacturer(taskFactoryManufacturer);
 
-			// Add the task
-			tasks.add(task);
+			// Default the bean class to Object if not require bean.
+			// This will allow any argument type to the task.
+			if (beanClass == null) {
+				beanClass = Object.class;
+			}
+
+			// Define the task for the section
+			TaskTypeBuilder<HttpHtmlTemplateTaskDependencies, None> taskBuilder = workTypeBuilder
+					.addTaskType(sectionAndTaskName, taskFactoryManufacturer,
+							HttpHtmlTemplateTaskDependencies.class, None.class);
+			taskBuilder.addObject(ServerHttpConnection.class).setKey(
+					HttpHtmlTemplateTaskDependencies.SERVER_HTTP_CONNECTION);
+			taskBuilder.addObject(beanClass).setKey(
+					HttpHtmlTemplateTaskDependencies.BEAN);
+			taskBuilder.addEscalation(HttpException.class);
+			taskBuilder.addEscalation(IOException.class);
 		}
 
-		// Add the send HTTP response task
-		tasks.add(HttpResponseSendTask.createTaskModel());
-
-		// Create the work
-		WorkModel<HttpHtmlTemplateWork> work = new WorkModel<HttpHtmlTemplateWork>(
-				HttpHtmlTemplateWork.class, new HttpHtmlTemplateWork(), tasks
-						.toArray(new TaskModel[0]));
-
-		// Return the work
-		return work;
+		// Include in the send response task
+		TaskTypeBuilder<HttpResponseSendTaskDependencies, None> sendTaskBuilder = workTypeBuilder
+				.addTaskType("SendHttpResponse", new HttpResponseSendTask(),
+						HttpResponseSendTaskDependencies.class, None.class);
+		sendTaskBuilder.addObject(ServerHttpConnection.class).setKey(
+				HttpResponseSendTaskDependencies.SERVER_HTTP_CONNECTION);
+		sendTaskBuilder.addEscalation(IOException.class);
 	}
 
 }
