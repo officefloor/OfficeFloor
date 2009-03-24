@@ -16,12 +16,11 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.impl.spi.team.OnePerson;
-import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.impl.spi.team.OnePersonTeam.OnePerson;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * Tests the {@link net.officefloor.frame.impl.spi.team.OnePersonTeam}.
+ * Tests the {@link OnePersonTeam}.
  * 
  * @author Daniel
  */

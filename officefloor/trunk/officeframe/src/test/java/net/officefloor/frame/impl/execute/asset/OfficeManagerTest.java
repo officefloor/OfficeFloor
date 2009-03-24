@@ -31,7 +31,7 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 	 * {@link OfficeManager}.
 	 */
 	private final OfficeManagerImpl officeManager = new OfficeManagerImpl(
-			100000); // so large that should not trigger a manage
+			"TEST", 100000); // so large that should not trigger a manage
 
 	/**
 	 * Ensures the {@link AssetManager} is managed.

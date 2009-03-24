@@ -35,7 +35,8 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OfficeManager}.
 	 */
-	private final OfficeManagerImpl officeManager = new OfficeManagerImpl(1000);
+	private final OfficeManagerImpl officeManager = new OfficeManagerImpl(
+			"TEST", 1000);
 
 	/**
 	 * {@link AssetManagerFactory}.

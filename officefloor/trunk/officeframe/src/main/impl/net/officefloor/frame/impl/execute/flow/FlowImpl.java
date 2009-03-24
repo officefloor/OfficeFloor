@@ -124,10 +124,10 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobActivateSet>
 				taskMetaData);
 
 		// Add the jobs to the job count for this flow
-		AbstractJobContainer<?, ?> job = firstLastJobs[0];
-		while (job != null) {
+		JobNode jobNode = firstLastJobs[0];
+		while (jobNode != null) {
 			this.activeJobCount++;
-			job = (AbstractJobContainer<?, ?>) job.getNextNode();
+			jobNode = jobNode.getNextNode();
 		}
 
 		// Return the starting job

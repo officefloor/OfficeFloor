@@ -70,7 +70,7 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	@Override
 	public void manageAssets() {
 
-		// Access Point: Project Manager
+		// Access Point: Office Manager
 		// Locks: None
 
 		// Obtain the list of monitors to manage

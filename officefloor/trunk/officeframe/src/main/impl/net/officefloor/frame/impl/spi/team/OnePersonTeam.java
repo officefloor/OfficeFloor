@@ -59,10 +59,10 @@ public class OnePersonTeam implements Team {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#startWorking()
+	 * =================== Team =========================================
 	 */
+
+	@Override
 	public synchronized void startWorking() {
 		if (this.person != null) {
 			throw new IllegalStateException("Team " + this.getClass().getName()
@@ -79,20 +79,12 @@ public class OnePersonTeam implements Team {
 		new Thread(this.person, this.getClass().getSimpleName()).start();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
-	 */
+	@Override
 	public void assignJob(Job task) {
 		this.taskQueue.enqueue(task);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#stopWorking()
-	 */
+	@Override
 	public synchronized void stopWorking() {
 		if (this.person != null) {
 			// Stop the Person working
@@ -108,102 +100,108 @@ public class OnePersonTeam implements Team {
 		}
 	}
 
-}
-
-/**
- * The individual comprising the {@link Team}.
- */
-class OnePerson implements Runnable, JobContext {
-
 	/**
-	 * {@link TaskQueue}.
+	 * The individual comprising the {@link Team}.
 	 */
-	protected final TaskQueue taskQueue;
+	public static class OnePerson implements Runnable, JobContext {
 
-	/**
-	 * Time to wait in milliseconds for a {@link Job}.
-	 */
-	protected final long waitTime;
+		/**
+		 * Indicates no time is set.
+		 */
+		private static final long NO_TIME = 0;
 
-	/**
-	 * Flag indicating to continue to work.
-	 */
-	protected volatile boolean continueWorking = true;
+		/**
+		 * {@link TaskQueue}.
+		 */
+		private final TaskQueue taskQueue;
 
-	/**
-	 * Flag to indicate finished.
-	 */
-	protected volatile boolean finished = false;
+		/**
+		 * Time to wait in milliseconds for a {@link Job}.
+		 */
+		private final long waitTime;
 
-	/**
-	 * Time.
-	 */
-	protected long time;
+		/**
+		 * Flag indicating to continue to work.
+		 */
+		private volatile boolean continueWorking = true;
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param taskQueue
-	 *            {@link TaskQueue}.
-	 * @param waitTime
-	 *            Time to wait in milliseconds for a {@link Job}.
-	 */
-	public OnePerson(TaskQueue taskQueue, long waitTime) {
-		// Store state
-		this.taskQueue = taskQueue;
-		this.waitTime = waitTime;
-	}
+		/**
+		 * Flag to indicate finished.
+		 */
+		protected volatile boolean finished = false;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
-	 */
-	public void run() {
-		try {
-			while (this.continueWorking) {
+		/**
+		 * Time.
+		 */
+		private long time = NO_TIME;
 
-				// Specify the time
-				this.time = System.currentTimeMillis();
+		/**
+		 * Initiate.
+		 * 
+		 * @param taskQueue
+		 *            {@link TaskQueue}.
+		 * @param waitTime
+		 *            Time to wait in milliseconds for a {@link Job}.
+		 */
+		public OnePerson(TaskQueue taskQueue, long waitTime) {
+			// Store state
+			this.taskQueue = taskQueue;
+			this.waitTime = waitTime;
+		}
 
-				// Obtain the next task
-				Job task = this.taskQueue
-						.dequeue(this, this.waitTime);
+		/*
+		 * ======================== Runnable =============================
+		 */
 
-				if (task == null) {
-					// Wait some time for a Task
-					this.taskQueue.waitForTask(this.waitTime);
+		@Override
+		public void run() {
+			try {
+				while (this.continueWorking) {
 
-				} else {
-					// Have task therefore execute it
-					if (!task.doJob(this)) {
-						// Task needs to be re-executed
-						this.taskQueue.enqueue(task);
+					// Reset to no time
+					this.time = NO_TIME;
+
+					// Obtain the next task
+					Job task = this.taskQueue.dequeue(this, this.waitTime);
+
+					if (task == null) {
+						// Wait some time for a Task
+						this.taskQueue.waitForTask(this.waitTime);
+
+					} else {
+						// Have task therefore execute it
+						if (!task.doJob(this)) {
+							// Task needs to be re-executed
+							this.taskQueue.enqueue(task);
+						}
 					}
 				}
+			} finally {
+				// Flag finished
+				this.finished = true;
 			}
-		} finally {
-			// Flag finished
-			this.finished = true;
 		}
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.ExecutionContext#getTime()
-	 */
-	public long getTime() {
-		return this.time;
-	}
+		/*
+		 * ==================== ExecutionContext ===========================
+		 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.ExecutionContext#continueExecution()
-	 */
-	public boolean continueExecution() {
-		return this.continueWorking;
+		@Override
+		public long getTime() {
+
+			// Ensure time is set
+			if (this.time == NO_TIME) {
+				this.time = System.currentTimeMillis();
+			}
+
+			// Return the time
+			return this.time;
+		}
+
+		@Override
+		public boolean continueExecution() {
+			return this.continueWorking;
+		}
 	}
 
 }

@@ -1168,6 +1168,30 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Facade method to timeout operations after 3 seconds.
+	 * 
+	 * @param startTime
+	 *            Start time from {@link System#currentTimeMillis()}.
+	 */
+	public void timeout(long startTime) {
+		this.timeout(startTime, 3);
+	}
+
+	/**
+	 * Facade method to timeout operations after a second.
+	 * 
+	 * @param startTime
+	 *            Start time from {@link System#currentTimeMillis()}.
+	 * @param millisecondsToRun
+	 *            Milliseconds to run before timeout.
+	 */
+	public void timeout(long startTime, int secondsToRun) {
+		if ((System.currentTimeMillis() - startTime) > (secondsToRun * 1000)) {
+			fail("TIME OUT after " + secondsToRun + " seconds");
+		}
+	}
+
+	/**
 	 * Prints a message regarding the test.
 	 * 
 	 * @param message
