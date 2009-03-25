@@ -21,12 +21,7 @@ import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * <p>
- * Team having only one person.
- * </p>
- * <p>
- * Single threaded execution pool.
- * </p>
+ * Team having only one {@link Thread}.
  * 
  * @author Daniel
  */
@@ -54,7 +49,6 @@ public class OnePersonTeam implements Team {
 	 *            Time to wait in milliseconds for a {@link Job}.
 	 */
 	public OnePersonTeam(long waitTime) {
-		// Store state
 		this.waitTime = waitTime;
 	}
 
@@ -144,7 +138,6 @@ public class OnePersonTeam implements Team {
 		 *            Time to wait in milliseconds for a {@link Job}.
 		 */
 		public OnePerson(TaskQueue taskQueue, long waitTime) {
-			// Store state
 			this.taskQueue = taskQueue;
 			this.waitTime = waitTime;
 		}
@@ -161,18 +154,13 @@ public class OnePersonTeam implements Team {
 					// Reset to no time
 					this.time = NO_TIME;
 
-					// Obtain the next task
-					Job task = this.taskQueue.dequeue(this, this.waitTime);
-
-					if (task == null) {
-						// Wait some time for a Task
-						this.taskQueue.waitForTask(this.waitTime);
-
-					} else {
-						// Have task therefore execute it
-						if (!task.doJob(this)) {
+					// Obtain the next job
+					Job job = this.taskQueue.dequeue(this, this.waitTime);
+					if (job != null) {
+						// Have job therefore execute it
+						if (!job.doJob(this)) {
 							// Task needs to be re-executed
-							this.taskQueue.enqueue(task);
+							this.taskQueue.enqueue(job);
 						}
 					}
 				}

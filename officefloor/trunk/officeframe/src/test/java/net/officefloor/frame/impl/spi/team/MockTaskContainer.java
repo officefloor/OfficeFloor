@@ -17,14 +17,12 @@
 package net.officefloor.frame.impl.spi.team;
 
 import junit.framework.Assert;
-import net.officefloor.frame.internal.structure.ThreadState;
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * Mock implementation of the
- * {@link net.officefloor.frame.spi.team.Job} for testing.
+ * Mock implementation of the {@link Job} for testing.
  * 
  * @author Daniel
  */
@@ -36,14 +34,14 @@ class MockTaskContainer implements Job {
 	protected final Object lock = new Object();
 
 	/**
-	 * Next {@link Job}.
-	 */
-	protected Job nextTask = null;
-
-	/**
 	 * {@link Team}.
 	 */
 	protected Team team;
+	
+	/**
+	 * Flag indicating to stop processing.
+	 */
+	public volatile boolean stopProcessing = false;
 
 	/**
 	 * Number of invocations of {@link #doJob(JobContext)}.
@@ -68,15 +66,15 @@ class MockTaskContainer implements Job {
 	 *            Wait time in seconds to return if
 	 *            {@link #isTaskReady(JobContext)} is not called.
 	 */
-	public void assignTaskToTeam(Team team, int waitTime) {
+	public void assignJobToTeam(Team team, int waitTime) {
 		synchronized (this.getLock()) {
 			// Store team
 			this.team = team;
 
-			// Assign task to team
+			// Assign job to team
 			this.team.assignJob(this);
 
-			// Wait on processing start
+			// Wait on processing to start
 			try {
 				this.getLock().wait(waitTime * 1000);
 			} catch (InterruptedException ex) {
@@ -86,13 +84,13 @@ class MockTaskContainer implements Job {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#doTask(net.officefloor.frame.spi.team.ExecutionContext)
+	 * ========================== Job ======================================
 	 */
+	
+	@Override
 	public boolean doJob(JobContext executionContext) {
 
-		// Notify running
+		// Notify processing so assignJobToTeam may return
 		synchronized (this.lock) {
 			this.lock.notify();
 		}
@@ -104,51 +102,28 @@ class MockTaskContainer implements Job {
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException ex) {
-			Assert.fail("Interrupted: Failed processing task - " + ex.getMessage());
+			Assert.fail("Interrupted: Failed processing task - "
+					+ ex.getMessage());
 		}
 
-		// Never complete
-		return false;
+		// Return when to stop processing
+		return this.stopProcessing;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#getThreadState()
+	/**
+	 * Next {@link Job}.
 	 */
-	public ThreadState getThreadState() {
-		// Possibly required but for current testing not implementing
-		throw new UnsupportedOperationException(
-				"Implement if necessary for testing");
+	protected Job nextJob = null;
+
+
+	@Override
+	public void setNextJob(Job job) {
+		this.nextJob = job;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#activeTask()
-	 */
-	public void activateJob() {
-		synchronized (this.getLock()) {
-			this.team.assignJob(this);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#setNextTask(net.officefloor.frame.spi.team.TaskContainer)
-	 */
-	public void setNextJob(Job task) {
-		this.nextTask = task;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TaskContainer#getNextTask()
-	 */
+	@Override
 	public Job getNextJob() {
-		return this.nextTask;
+		return this.nextJob;
 	}
 
 }

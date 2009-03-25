@@ -21,8 +21,8 @@ import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * {@link net.officefloor.frame.spi.team.Team} that hires a specific new worker
- * dedicated each new {@link net.officefloor.frame.api.execute.Task}.
+ * {@link Team} that uses a specific new worker dedicated to each new
+ * {@link Job}.
  * 
  * @author Daniel
  */
@@ -44,55 +44,45 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 	}
 
 	/*
-	 * ========================================================================
-	 * Team
-	 * ========================================================================
+	 * ======================== Team ==========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#startWorking()
-	 */
+	@Override
 	public void startWorking() {
 		// No initial workers as hired when required
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
-	 */
+	@Override
 	public void assignJob(Job task) {
 		// Hire worker to execute the task
 		new Thread(this, new DedicatedWorker(task)).start();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#stopWorking()
-	 */
+	@Override
 	public void stopWorking() {
 		// Flag to workers to stop working
 		this.continueWorking = false;
 	}
 
 	/**
-	 * Worker dedicated to executing a
-	 * {@link net.officefloor.frame.spi.team.Job}.
+	 * Worker dedicated to executing a {@link Job}.
 	 */
-	protected class DedicatedWorker implements Runnable, JobContext {
+	private class DedicatedWorker implements Runnable, JobContext {
+
+		/**
+		 * Indicates not obtained time.
+		 */
+		private static final long NO_TIME = 0;
 
 		/**
 		 * {@link Job} to execute.
 		 */
-		protected final Job taskContainer;
+		private final Job taskContainer;
 
 		/**
 		 * Current time for execution.
 		 */
-		protected long time;
+		private long time = NO_TIME;
 
 		/**
 		 * Initiate worker.
@@ -101,27 +91,20 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 		 *            {@link Job} to execute.
 		 */
 		public DedicatedWorker(Job taskContainer) {
-			// Store state
 			this.taskContainer = taskContainer;
 		}
 
 		/*
-		 * ========================================================================
-		 * Runnable
-		 * ========================================================================
+		 * ======================= Runnable =============================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.lang.Runnable#run()
-		 */
+		@Override
 		public void run() {
 			// Loop until task is complete or stop executing
 			do {
 
-				// Obtain current time
-				this.time = System.currentTimeMillis();
+				// Reset to no time
+				this.time = NO_TIME;
 
 				// Attempt to complete task
 				if (this.taskContainer.doJob(this)) {
@@ -129,36 +112,29 @@ public class WorkerPerTaskTeam extends ThreadGroup implements Team {
 					return;
 				}
 
-				// Allow other processing
-				Thread.yield();
-
-			} while (continueWorking);
+			} while (WorkerPerTaskTeam.this.continueWorking);
 		}
 
 		/*
-		 * ========================================================================
-		 * ExecutionContext
-		 * ========================================================================
+		 * ================ ExecutionContext ===============================
 		 */
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.team.ExecutionContext#getTime()
-		 */
+		@Override
 		public long getTime() {
+
+			// Ensure have the time
+			if (this.time == NO_TIME) {
+				this.time = System.currentTimeMillis();
+			}
+
+			// Return the time
 			return this.time;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.frame.spi.team.ExecutionContext#continueExecution()
-		 */
+		@Override
 		public boolean continueExecution() {
-			return continueWorking;
+			return WorkerPerTaskTeam.this.continueWorking;
 		}
-
 	}
 
 }

@@ -16,8 +16,7 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
-import net.officefloor.frame.impl.spi.team.TeamMember;
+import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam.TeamMember;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -35,7 +34,6 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Single member and single task.
 	 */
-	@StressTest
 	public void testSingleMemberOneTask() {
 		this.leaderFollowerTest(1, 1);
 	}
@@ -43,7 +41,6 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Multiple members and single task.
 	 */
-	@StressTest
 	public void testMultipleMembersOneTask() {
 		this.leaderFollowerTest(3, 1);
 	}
@@ -51,7 +48,6 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Single member and multiple tasks.
 	 */
-	@StressTest
 	public void testSingleMemberMultipleTasks() {
 		this.leaderFollowerTest(1, 6);
 	}
@@ -59,7 +55,6 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Multiple members and multiple tasks.
 	 */
-	@StressTest
 	public void testMulitpleMembersMultipleTasks() {
 		this.leaderFollowerTest(3, 6);
 	}
@@ -71,47 +66,37 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	 *            Count of workers in the team.
 	 */
 	private void leaderFollowerTest(int teamMemberCount, int taskCount) {
-		// Create the team
-		this.team = new LeaderFollowerTeam("Test", teamMemberCount, 10);
 
-		// Start the team
+		// Create the team and start it working
+		this.team = new LeaderFollowerTeam("Test", teamMemberCount, 10);
 		this.team.startWorking();
 
 		// Assign tasks and wait on them to be started for execution
 		MockTaskContainer[] tasks = new MockTaskContainer[taskCount];
 		for (int i = 0; i < taskCount; i++) {
 			tasks[i] = new MockTaskContainer();
-			tasks[i].assignTaskToTeam(this.team, 10);
+			tasks[i].assignJobToTeam(this.team, 10);
 		}
 
-		// Obtain the team member
-		TeamMember teamMember = this.team.teamMembers[0];
+		// Obtain the team members
+		TeamMember[] teamMembers = new TeamMember[this.team.teamMembers.length];
+		for (int i = 0; i < teamMembers.length; i++) {
+			teamMembers[i] = this.team.teamMembers[i];
+		}
 
-		// Allow some time for processing
-		this.sleep(1);
+		// Flag the tasks to stop processing
+		for (int i = 0; i < taskCount; i++) {
+			tasks[i].stopProcessing = true;
+		}
 
-		// Stop processing
+		// Stop processing (should have all teams finished)
 		this.team.stopWorking();
 
-		// Ensure person stopped working
-		assertTrue("Team member should be stopped working", teamMember.finished);
-
-		// Ensure each task run at least twice
-		int totalInvocations = 0;
-		StringBuffer message = new StringBuffer();
-		for (int i = 0; i < taskCount; i++) {
-			assertTrue("Task " + i + " must be run at least twice",
-					(tasks[i].doTaskInvocationCount >= 2));
-
-			// Indicate number of invocations
-			totalInvocations += tasks[i].doTaskInvocationCount;
-			message.append("\n invocations[" + i + "]="
-					+ tasks[i].doTaskInvocationCount);
+		// Ensure each team member has stopped working
+		for (int i = 0; i < teamMembers.length; i++) {
+			assertTrue("Team member " + i + " should be finished working",
+					teamMembers[i].finished);
 		}
-		if (taskCount > 1) {
-			message.append("\n total=" + totalInvocations);
-		}
-		this.printMessage(message.toString());
 	}
 
 }

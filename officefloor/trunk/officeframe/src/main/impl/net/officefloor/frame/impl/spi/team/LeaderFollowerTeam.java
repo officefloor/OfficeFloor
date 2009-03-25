@@ -16,13 +16,13 @@
  */
 package net.officefloor.frame.impl.spi.team;
 
-import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * {@link net.officefloor.frame.spi.team.Team} implementation of many
- * {@link java.lang.Thread} instances that follow the leader follower pattern.
+ * {@link Team} implementation of many {@link Thread} instances that follow the
+ * leader follower pattern.
  * 
  * @author Daniel
  */
@@ -36,12 +36,17 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	/**
 	 * {@link TeamMemberStack}.
 	 */
-	protected final TeamMemberStack teamMemberStack = new TeamMemberStack();
+	private final TeamMemberStack teamMemberStack = new TeamMemberStack();
 
 	/**
 	 * {@link TaskQueue}.
 	 */
-	protected final TaskQueue taskQueue = new TaskQueue();
+	private final TaskQueue taskQueue = new TaskQueue();
+
+	/**
+	 * Flag indicating to continue to work.
+	 */
+	private volatile boolean continueWorking = true;
 
 	/**
 	 * Initiate with the name of team.
@@ -68,43 +73,34 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	}
 
 	/*
-	 * ======================================================================
-	 * Team
-	 * ======================================================================
+	 * ====================== Team ==========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#startWorking()
-	 */
+	@Override
 	public synchronized void startWorking() {
-		// Start the team working
+
+		// Ensure indicate to continue working
+		this.continueWorking = true;
+
+		// Start the team members working
 		for (int i = 0; i < this.teamMembers.length; i++) {
-			// Start the Team Member
 			new Thread(this, this.teamMembers[i]).start();
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#assignTask(net.officefloor.frame.spi.team.TaskContainer)
-	 */
+	@Override
 	public void assignJob(Job task) {
 		this.taskQueue.enqueue(task);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.Team#stopWorking()
-	 */
+	@Override
 	public synchronized void stopWorking() {
+
+		// Flag team members to stop working
+		this.continueWorking = false;
+
 		// Stop the team workings
 		for (TeamMember teamMember : this.teamMembers) {
-			// Flag the team member to stop work
-			teamMember.continueWorking = false;
 
 			// Wait until team member is finished
 			while (!teamMember.finished) {
@@ -120,11 +116,10 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 	}
 
 	/*
-	 * ======================================================================
-	 * ThreadGroup
-	 * ======================================================================
+	 * ================== ThreadGroup =================================
 	 */
 
+	@Override
 	public void uncaughtException(Thread t, Throwable e) {
 		// Indicate failure
 		System.out.println(t.getName() + "[" + t.getId() + "]: "
@@ -132,290 +127,265 @@ public class LeaderFollowerTeam extends ThreadGroup implements Team {
 		e.printStackTrace();
 	}
 
-}
-
-/**
- * Team member of the {@link LeaderFollowerTeam}.
- * 
- * @author Daniel
- */
-class TeamMember implements Runnable, JobContext {
-
 	/**
-	 * Stack of the {@link TeamMember} instances.
+	 * Team member of the {@link LeaderFollowerTeam}.
 	 */
-	protected final TeamMemberStack teamMemberStack;
+	protected class TeamMember implements Runnable, JobContext {
 
-	/**
-	 * Queue of {@link Job} instances to execute.
-	 */
-	protected final TaskQueue taskQueue;
+		/**
+		 * Indicates no time.
+		 */
+		private static final int NO_TIME = 0;
 
-	/**
-	 * Time to wait in milliseconds for a {@link Job}.
-	 */
-	protected final long waitTime;
+		/**
+		 * Stack of the {@link TeamMember} instances.
+		 */
+		private final TeamMemberStack teamMemberStack;
 
-	/**
-	 * Previous {@link TeamMember}.
-	 */
-	protected TeamMember previous;
+		/**
+		 * Queue of {@link Job} instances to execute.
+		 */
+		private final TaskQueue taskQueue;
 
-	/**
-	 * Flag indicating to continue to work.
-	 */
-	protected volatile boolean continueWorking = true;
+		/**
+		 * Time to wait in milliseconds for a {@link Job}.
+		 */
+		private final long waitTime;
 
-	/**
-	 * Flag to indicate finished.
-	 */
-	protected volatile boolean finished = false;
+		/**
+		 * Used by {@link TeamMemberStack} to flag if leader.
+		 */
+		protected boolean isLeader = false;
 
-	/**
-	 * Time.
-	 */
-	protected long time;
+		/**
+		 * Previous {@link TeamMember} for {@link TeamMemberStack} to use.
+		 */
+		protected TeamMember previous = null;
 
-	/**
-	 * Initiate the {@link TeamMember}.
-	 * 
-	 * @param teamMemberStack
-	 *            {@link TeamMemberStack} for the {@link TeamMember} instances
-	 *            of this {@link Team}.
-	 * @param taskQueue
-	 *            {@link TaskQueue} of {@link Job} instances.
-	 * @param waitTime
-	 *            Time to wait in milliseconds for a {@link Job}.
-	 */
-	public TeamMember(TeamMemberStack teamMemberStack, TaskQueue taskQueue,
-			long waitTime) {
-		// Store state
-		this.teamMemberStack = teamMemberStack;
-		this.taskQueue = taskQueue;
-		this.waitTime = waitTime;
-	}
+		/**
+		 * Flag to indicate finished.
+		 */
+		protected volatile boolean finished = false;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
-	 */
-	public void run() {
-		try {
-			boolean isWork = true;
-			while (isWork) {
+		/**
+		 * Time for the {@link Job}.
+		 */
+		private long time;
 
-				// Become a follower
-				this.teamMemberStack.waitToBeLeader(this);
-
-				// Promoted to leader, check if working
-				if (!this.continueWorking) {
-					// Stop working
-					isWork = false;
-
-				} else {
-
-					// Promote another leader
-					this.teamMemberStack.promoteLeader();
-
-					// Obtain the execution time
-					this.time = System.currentTimeMillis();
-
-					// Obtain the next Task
-					Job task = this.taskQueue.dequeue(this,
-							this.waitTime);
-					if (task != null) {
-						// Have task therefore execute it
-						if (!task.doJob(this)) {
-							// Task needs to be re-executed
-							this.taskQueue.enqueue(task);
-						}
-					}
-				}
-			}
-		} finally {
-			// Flag finished
-			this.finished = true;
+		/**
+		 * Initiate the {@link TeamMember}.
+		 * 
+		 * @param teamMemberStack
+		 *            {@link TeamMemberStack} for the {@link TeamMember}
+		 *            instances of this {@link Team}.
+		 * @param taskQueue
+		 *            {@link TaskQueue} of {@link Job} instances.
+		 * @param waitTime
+		 *            Time to wait in milliseconds for a {@link Job}.
+		 */
+		public TeamMember(TeamMemberStack teamMemberStack, TaskQueue taskQueue,
+				long waitTime) {
+			this.teamMemberStack = teamMemberStack;
+			this.taskQueue = taskQueue;
+			this.waitTime = waitTime;
 		}
-	}
-
-	/*
-	 * ======================================================================
-	 * ExecutionContext
-	 * ======================================================================
-	 */
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.ExecutionContext#getTime()
-	 */
-	public long getTime() {
-		return this.time;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.ExecutionContext#continueExecution()
-	 */
-	public boolean continueExecution() {
-		return this.continueWorking;
-	}
-
-}
-
-/**
- * Stack of {@link TeamMember} instances.
- */
-class TeamMemberStack {
-
-	/**
-	 * Leader.
-	 */
-	protected TeamMember leader = null;
-
-	/**
-	 * Top of the Stack of followers.
-	 */
-	protected TeamMember top = null;
-
-	/**
-	 * Completion flag indicating the next leader is about to wait and can not
-	 * yet be notified to become the leader.
-	 */
-	protected volatile boolean isAboutToWait = false;
-
-	/**
-	 * <p>
-	 * Promotes the most recently added {@link TeamMember} to become leader.
-	 * </p>
-	 * <p>
-	 * Note the most recently added {@link TeamMember} is activated as likely to
-	 * be in memory.
-	 * </p>
-	 * 
-	 * @return {@link TeamMember}.
-	 */
-	public void promoteLeader() {
-
-		synchronized (this) {
-			// Notify the next follower to become leader
-			if (this.top == null) {
-				// No follower waiting to become leader
-				this.leader = null;
-
-			} else {
-				// Obtain the new leader
-				this.leader = this.top;
-				this.top = this.leader.previous;
-				this.leader.previous = null;
-
-				// Promote the new leader
-				boolean isNotified = false;
-				while (!isNotified) {
-					if (this.isAboutToWait) {
-						// Do not notify new leader until waiting
-						Thread.yield();
-					} else {
-						// New leader waiting
-						synchronized (this.leader) {
-							this.leader.notify();
-						}
-						isNotified = true;
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * <p>
-	 * Allow a {@link TeamMember} to be a follower until promoted to leader.
-	 * </p>
-	 */
-	public void waitToBeLeader(TeamMember follower) {
 
 		/*
-		 * Do not proceed until not about to wait. This is done outside
-		 * synchronize as promotion should be selected for execution over
-		 * becoming follower to gain greater throughput.
+		 * ================== Runnable ======================================
 		 */
-		while (this.isAboutToWait) {
-			Thread.yield();
-		}
 
-		// Followers may queue at this point
-		synchronized (this) {
-
-			// Do not proceed until not waiting
-			while (this.isAboutToWait) {
-				Thread.yield();
-			}
-
-			// Check if promoted immediately to leader
-			if (this.leader == null) {
-				// Promote to leader immediately
-				this.leader = follower;
-				return;
-			}
-
-			// Flag about to wait
-			this.isAboutToWait = true;
-
-			// Become a follower
-			if (this.top != null) {
-				follower.previous = this.top;
-			}
-			this.top = follower;
-		}
-
-		synchronized (follower) {
-			// Flag not waiting
-			this.isAboutToWait = false;
-
-			// Wait to become leader
+		@Override
+		public void run() {
 			try {
-				follower.wait();
-			} catch (InterruptedException ex) {
-				// Ignore
+				for (;;) {
+					// Obtain the next job to run
+					Job job = this.taskQueue.dequeue(this, this.waitTime);
+					if (job == null) {
+						// No job, so check if continue working
+						if (!LeaderFollowerTeam.this.continueWorking) {
+							// Stop working
+							return;
+						}
+
+						// Wait to be leader to try for another job
+						this.teamMemberStack.waitToBeLeader(this);
+
+					} else {
+						// Have job so promote leader for possible next job
+						this.teamMemberStack.promoteLeader(this);
+
+						// Reset for running the job
+						this.time = NO_TIME;
+
+						// Run the job
+						if (!job.doJob(this)) {
+							// Job needs to be re-run
+							this.taskQueue.enqueue(job);
+						}
+					}
+				}
+			} finally {
+				// Flag finished
+				this.finished = true;
 			}
 		}
 
+		/*
+		 * =================== ExecutionContext ===============================
+		 */
+
+		@Override
+		public long getTime() {
+
+			// Ensure have the time
+			if (this.time == NO_TIME) {
+				this.time = System.currentTimeMillis();
+			}
+
+			// Return the time
+			return this.time;
+		}
+
+		@Override
+		public boolean continueExecution() {
+			return LeaderFollowerTeam.this.continueWorking;
+		}
 	}
 
 	/**
-	 * Obtains the number of {@link TeamMember} instances on this
-	 * {@link TeamMemberStack}.
-	 * 
-	 * @return Number of {@link TeamMember} instances on this
-	 *         {@link TeamMemberStack}.
+	 * Stack of {@link TeamMember} instances.
 	 */
-	protected int size() {
-		synchronized (this) {
-			if (this.top == null) {
-				return 0;
+	private static class TeamMemberStack {
+
+		/**
+		 * Flag indicating if there is a current leader.
+		 */
+		private boolean isLeader = false;
+
+		/**
+		 * Top of the Stack of followers.
+		 */
+		private TeamMember top = null;
+
+		/**
+		 * Blocks the {@link TeamMember} until promoted to leader.
+		 * 
+		 * @param teamMember
+		 *            {@link TeamMember} waiting to be promoted to leader.
+		 */
+		public void waitToBeLeader(TeamMember teamMember) {
+			synchronized (teamMember) {
+
+				// Check to see if leader
+				if (!teamMember.isLeader) {
+
+					// Not leader, so determine if must wait
+					boolean isWait;
+					synchronized (this) {
+						// Only load as follower if no leader
+						if (!this.isLeader) {
+							// Promoted to leader as no other leader
+							this.isLeader = true;
+							isWait = false;
+
+						} else {
+							// Follower and must wait
+							isWait = true;
+							if (this.top != null) {
+								teamMember.previous = this.top;
+							}
+							this.top = teamMember;
+						}
+					}
+					if (isWait) {
+						// Wait to be promoted to leader
+						try {
+							teamMember.wait();
+						} catch (InterruptedException ex) {
+							// Ignore
+						}
+					}
+				}
+			}
+		}
+
+		/**
+		 * Promotes the next leader.
+		 * 
+		 * @param teamMember
+		 *            {@link TeamMember} that is current leader.
+		 */
+		public void promoteLeader(TeamMember teamMember) {
+
+			// Obtain the promoted leader
+			TeamMember promotedLeader;
+			synchronized (teamMember) {
+
+				// No longer leader as another leader promoted
+				teamMember.isLeader = false;
+
+				// Obtain the next follower to promote to leader
+				synchronized (this) {
+					if (this.top == null) {
+						// No followers, so flag no leader promoted
+						this.isLeader = false;
+						promotedLeader = null;
+
+					} else {
+						// Obtain the new leader
+						promotedLeader = this.top;
+						this.top = promotedLeader.previous;
+						promotedLeader.previous = null;
+
+						// Has new leader
+						this.isLeader = true;
+					}
+				}
+			}
+
+			// Promote the next leader (if there is one)
+			if (promotedLeader != null) {
+				synchronized (promotedLeader) {
+					// Flag as leader and notify to start running
+					promotedLeader.isLeader = true;
+					promotedLeader.notify();
+				}
+			}
+		}
+
+		/**
+		 * Obtains the number of {@link TeamMember} instances on this
+		 * {@link TeamMemberStack}.
+		 * 
+		 * @return Number of {@link TeamMember} instances on this
+		 *         {@link TeamMemberStack}.
+		 */
+		protected int size() {
+			synchronized (this) {
+				if (this.top == null) {
+					return 0;
+				} else {
+					return this.size(this.top, 1);
+				}
+			}
+		}
+
+		/**
+		 * Recursive count to obtain the size.
+		 * 
+		 * @param node
+		 *            Current node in recursion.
+		 * @param previousCount
+		 *            Count of previous recursed nodes.
+		 * @return Number of {@link TeamMember} instances on this
+		 *         {@link TeamMemberStack}.
+		 */
+		private int size(TeamMember node, int previousCount) {
+			if (node.previous != null) {
+				return size(node.previous, ++previousCount);
 			} else {
-				return this.size(this.top, 1);
+				return previousCount;
 			}
-		}
-	}
-
-	/**
-	 * Recursive count to obtain the size.
-	 * 
-	 * @param node
-	 *            Current node in recursion.
-	 * @param previousCount
-	 *            Count of previous recursed nodes.
-	 * @return Number of {@link TeamMember} instances on this
-	 *         {@link TeamMemberStack}.
-	 */
-	private int size(TeamMember node, int previousCount) {
-		if (node.previous != null) {
-			return size(node.previous, ++previousCount);
-		} else {
-			return previousCount;
 		}
 	}
 

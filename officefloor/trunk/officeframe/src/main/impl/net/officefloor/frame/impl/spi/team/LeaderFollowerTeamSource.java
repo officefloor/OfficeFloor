@@ -34,18 +34,18 @@ public class LeaderFollowerTeamSource extends AbstractTeamSource {
 
 	@Override
 	protected void loadSpecification(SpecificationContext context) {
-		context.addProperty("name");
-		context.addProperty("size");
-		context.addProperty("wait.time");
+		context.addProperty("name", "Name of team");
+		context.addProperty("size", "Number of threads in team");
 	}
 
 	@Override
 	protected Team createTeam(TeamSourceContext context) throws Exception {
 
-		// Obtain the configuration
-		String teamName = context.getProperty("name", LeaderFollowerTeam.class
-				.getSimpleName());
-		int teamSize = Integer.parseInt(context.getProperty("size", "10"));
+		// Obtain the required configuration
+		String teamName = context.getProperty("name");
+		int teamSize = Integer.parseInt(context.getProperty("size"));
+
+		// Obtain the optional configuration
 		long waitTime = Long.parseLong(context.getProperty("wait.time", "100"));
 
 		// Create and return the team
