@@ -31,12 +31,7 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
  * 
  * @author Daniel
  */
-public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase {
-
-	/**
-	 * Number of sequential calls made.
-	 */
-	private volatile int sequentialCallCount = 0;
+public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
 	 * Stress tests with the {@link OnePersonTeam}.
@@ -79,11 +74,13 @@ public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase 
 		this.constructTeam("TEAM", team);
 
 		// Run the repeats
-		this.invokeWork("work", new Integer(0), MAX_RUN_TIME);
+		this.invokeWork("work", new Integer(1), MAX_RUN_TIME);
 
 		// Ensure is complete
-		assertEquals("Did not complete all sequential calls", SEQUENTIAL_COUNT,
-				this.sequentialCallCount);
+		synchronized (sequential) {
+			assertEquals("Did not complete all sequential calls",
+					SEQUENTIAL_COUNT, sequential.sequentialCallCount);
+		}
 	}
 
 	/**
@@ -95,6 +92,11 @@ public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase 
 		 * Number of times to make a sequential call.
 		 */
 		private final int maxSequentialCalls;
+
+		/**
+		 * Number of sequential calls made.
+		 */
+		public int sequentialCallCount = 0;
 
 		/**
 		 * Initiate.
@@ -119,27 +121,21 @@ public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase 
 				ReflectiveFlow flow) {
 
 			// Indicate the number of sequential calls made
-			SequentialInvokeStressTest.this.sequentialCallCount = callCount
-					.intValue();
+			synchronized (this) {
+				this.sequentialCallCount++;
+			}
 
 			// Output heap sizes after garbage collection
 			if ((callCount.intValue() % 1000000) == 0) {
-				SequentialInvokeStressTest.this
-						.printMessage("Sequential Calls="
-								+ callCount.intValue());
+				SequentialTaskStressTest.this.printMessage("Sequential Calls="
+						+ callCount.intValue());
 			}
 
 			// Determine if enough sequential calls
-			if (callCount.intValue() >= this.maxSequentialCalls) {
-				// enough sequential calls
-				return;
+			if (callCount.intValue() < this.maxSequentialCalls) {
+				// Make another sequential call
+				flow.doFlow(new Integer(callCount.intValue() + 1));
 			}
-
-			// Increment the call count
-			Integer nextCallCount = new Integer(callCount + 1);
-
-			// Make the sequential call
-			flow.doFlow(nextCallCount);
 		}
 	}
 
