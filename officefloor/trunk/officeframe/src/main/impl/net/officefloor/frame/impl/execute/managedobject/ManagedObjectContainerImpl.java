@@ -516,6 +516,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Notify any tasks waiting on asynchronous operation
 			this.operationsMonitor.notifyTasks(notifySet);
 		}
+
+		// TODO give notified jobs to OfficeManager to do in safe thread
 		notifySet.activateJobs();
 	}
 

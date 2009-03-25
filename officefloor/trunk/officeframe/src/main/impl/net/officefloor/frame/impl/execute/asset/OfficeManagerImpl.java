@@ -189,8 +189,7 @@ public class OfficeManagerImpl implements OfficeManager {
 				try {
 					assetManager.manageAssets();
 				} catch (Throwable ex) {
-					// TODO provide better logging for manageAssets
-					// failure
+					// TODO use OfficeFloor EscalationHandler for Asset failures
 					System.err.println("Failed managing asset: "
 							+ ex.getMessage() + " [" + ex.getClass().getName()
 							+ "]");
