@@ -36,6 +36,8 @@ public class RepeatSingleTaskStressTest extends AbstractOfficeConstructTestCase 
 	public void testStressRepeat() throws Exception {
 
 		int REPEAT_COUNT = 1000000;
+		int MAX_RUN_TIME = 10;
+		this.setVerbose(true);
 
 		// Create the repeat
 		RepeatTask repeat = new RepeatTask(REPEAT_COUNT);
@@ -46,7 +48,7 @@ public class RepeatSingleTaskStressTest extends AbstractOfficeConstructTestCase 
 		this.constructTeam("TEAM", new OnePersonTeam(100));
 
 		// Run the repeats
-		this.invokeWork("work", null, 30);
+		this.invokeWork("work", null, MAX_RUN_TIME);
 
 		// Ensure correct number of repeats
 		assertEquals("Incorrect number of repeats", REPEAT_COUNT, repeat

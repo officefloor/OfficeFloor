@@ -34,6 +34,13 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 public class ParallelTest extends AbstractOfficeConstructTestCase {
 
 	/**
+	 * Flag to record task method invocations.
+	 */
+	public ParallelTest() {
+		this.setRecordReflectiveTaskMethodsInvoked(true);
+	}
+
+	/**
 	 * Ensures invokes parallel task with parallel team.
 	 */
 	public void testParallelWithPassiveTeam() throws Exception {

@@ -96,6 +96,17 @@ public abstract class AbstractOfficeConstructTestCase extends
 	private List<String> reflectiveTaskInvokedMethods = new LinkedList<String>();
 
 	/**
+	 * <p>
+	 * Flag indicating whether to record the invocations of the
+	 * {@link ReflectiveTaskBuilder} instances.
+	 * <p>
+	 * This is necessary as stress tests using the {@link ReflectiveTaskBuilder}
+	 * will get {@link OutOfMemoryError} issues should every {@link Task}
+	 * executed be recorded.
+	 */
+	private boolean isRecordReflectiveTaskMethodsInvoked = false;
+
+	/**
 	 * {@link ParentEscalationProcedure}.
 	 */
 	protected volatile Throwable exception = null;
@@ -296,6 +307,26 @@ public abstract class AbstractOfficeConstructTestCase extends
 	}
 
 	/**
+	 * <p>
+	 * Specifies whether to record the invocations of the
+	 * {@link ReflectiveTaskBuilder} instances.
+	 * <p>
+	 * This is necessary as stress tests using the {@link ReflectiveTaskBuilder}
+	 * will get {@link OutOfMemoryError} issues should every {@link Task}
+	 * executed be recorded.
+	 * <p>
+	 * By default this is <code>false</code> to not record.
+	 * 
+	 * @param isRecord
+	 *            <code>true</code> to record the {@link Task} instances
+	 *            invoked.
+	 */
+	protected synchronized void setRecordReflectiveTaskMethodsInvoked(
+			boolean isRecord) {
+		this.isRecordReflectiveTaskMethodsInvoked = isRecord;
+	}
+
+	/**
 	 * Invoked by the {@link ReflectiveTaskBuilder} when it executes the method.
 	 * 
 	 * @param methodName
@@ -303,7 +334,9 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 */
 	protected synchronized void recordReflectiveTaskMethodInvoked(
 			String methodName) {
-		this.reflectiveTaskInvokedMethods.add(methodName);
+		if (this.isRecordReflectiveTaskMethodsInvoked) {
+			this.reflectiveTaskInvokedMethods.add(methodName);
+		}
 	}
 
 	/**
@@ -312,6 +345,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * 
 	 * @param methodNames
 	 *            Order that the reflective methods should be invoked.
+	 * @see #setRecordReflectiveTaskMethodInvoked(boolean)
 	 */
 	protected synchronized void validateReflectiveMethodOrder(
 			String... methodNames) {
@@ -676,14 +710,26 @@ public abstract class AbstractOfficeConstructTestCase extends
 		FlowFuture flowFuture = workManager.invokeWork(parameter);
 
 		// Block until flow is complete (or times out)
+		int iteration = 0;
 		long startBlockTime = System.currentTimeMillis();
 		while (!flowFuture.isComplete()) {
 
 			// Wait some time as still executing
 			Thread.sleep(100);
 
-			// Timeout after two seconds
-			this.timeout(startBlockTime, secondsToRun);
+			// Only timeout if positive time to run
+			if (secondsToRun > 0) {
+				// Provide heap diagnostics and time out
+				this.printHeapMemoryDiagnostics();
+				this.timeout(startBlockTime, secondsToRun);
+			}
+
+			// Output heap diagnostics after every approximate 3 seconds
+			iteration++;
+			if ((iteration % 30) == 0) {
+				iteration = 0;
+				this.printHeapMemoryDiagnostics();
+			}
 		}
 	}
 

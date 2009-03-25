@@ -33,6 +33,13 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 public class OfficeEscalationTest extends AbstractOfficeConstructTestCase {
 
 	/**
+	 * Flag to record task method invocations.
+	 */
+	public OfficeEscalationTest() {
+		this.setRecordReflectiveTaskMethodsInvoked(true);
+	}
+
+	/**
 	 * Ensures handles escalation by same {@link Task}.
 	 */
 	public void testEscalationHandledBySameTask() throws Exception {
