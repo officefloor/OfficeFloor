@@ -16,9 +16,8 @@
  */
 package net.officefloor.frame.spi.team;
 
-
 /**
- * {@link Job} to executed by a {@link Team}.
+ * {@link Job} executed by a {@link Team}.
  * 
  * @author Daniel
  */

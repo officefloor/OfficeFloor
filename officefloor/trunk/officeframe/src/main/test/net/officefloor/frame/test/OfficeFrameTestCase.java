@@ -16,9 +16,15 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,11 +42,47 @@ import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
 
 /**
- * {@link junit.framework.TestCase}providing additional helper functions.
+ * {@link TestCase} providing additional helper functions.
  * 
  * @author Daniel
  */
 public abstract class OfficeFrameTestCase extends TestCase {
+
+	/*
+	 * ==================== TestCase =========================
+	 */
+
+	@Retention(RetentionPolicy.RUNTIME)
+	protected static @interface StressTest {
+	}
+
+	@Override
+	public void runBare() throws Throwable {
+
+		// Determine if a stress test
+		boolean isStressTest = false;
+		try {
+			Method testMethod = this.getClass().getMethod(this.getName());
+			if (testMethod.getAnnotation(StressTest.class) != null) {
+				isStressTest = true; // is s stress test
+			}
+		} catch (Throwable ex) {
+			// Ignore and not consider a stress test
+		}
+
+		// Determine if run the stress test
+		if (isStressTest) {
+			if (this.isIgnoreStressTests()) {
+				System.out.println("NOT RUNNING STRESS TEST "
+						+ this.getClass().getSimpleName() + "."
+						+ this.getName());
+				return;
+			}
+		}
+
+		// Run the test
+		super.runBare();
+	}
 
 	/**
 	 * Displays the graph of objects starting at root.
@@ -1192,6 +1234,88 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Determines if printing messages.
+	 * 
+	 * @return <code>true</code> to print messages.
+	 */
+	private boolean isPrintMessages() {
+		return Boolean.parseBoolean(System.getProperty("print.messages",
+				Boolean.FALSE.toString()))
+				|| this.isVerbose;
+	}
+
+	/**
+	 * <p>
+	 * Indicates if not to run stress tests.
+	 * <p>
+	 * Stress tests should normally be run, but in cases of quick unit testing
+	 * running for functionality the stress tests can reduce turn around time
+	 * and subsequently the effectiveness of the tests. This is therefore
+	 * provided to maintain effectiveness of unit tests.
+	 * 
+	 * @return <code>true</code> to ignore doing a stress test.
+	 */
+	private boolean isIgnoreStressTests() {
+		return Boolean.parseBoolean(System.getProperty("ignore.stress.tests",
+				Boolean.FALSE.toString()));
+	}
+
+	/**
+	 * Prints heap memory details.
+	 */
+	public void printHeapMemoryDiagnostics() {
+
+		// Only do heap diagnosis if print messages
+		if (!this.isPrintMessages()) {
+			return; // do not do heap diagnosis
+		}
+
+		// Obtain the memory management bean
+		MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+
+		// Do best to garbage collect to get clearer results
+		memoryBean.gc(); // puts objects on finalise queue
+		memoryBean.gc(); // clears the finalise queue
+
+		// Obtain the heap diagnosis details
+		MemoryUsage heap = memoryBean.getHeapMemoryUsage();
+		float usedPercentage = (heap.getUsed() / (float) heap.getMax());
+
+		// Print the results
+		NumberFormat format = NumberFormat.getPercentInstance();
+		this.printMessage("HEAP: " + format.format(usedPercentage) + " (used="
+				+ this.getMemorySize(heap.getUsed()) + ", max="
+				+ this.getMemorySize(heap.getMax()) + ", init="
+				+ this.getMemorySize(heap.getInit()) + ", commit="
+				+ this.getMemorySize(heap.getCommitted()) + ", fq="
+				+ memoryBean.getObjectPendingFinalizationCount() + ")");
+	}
+
+	/**
+	 * Obtains the memory size in human readable form.
+	 * 
+	 * @param memorySize
+	 *            Memory size in bytes.
+	 * @return Memory size in human readable form.
+	 */
+	private String getMemorySize(long memorySize) {
+
+		final long gigabyteSize = 1 << 30;
+		final long megabyteSize = 1 << 20;
+		final long kilobyteSize = 1 << 10;
+
+		if (memorySize >= gigabyteSize) {
+			return (memorySize / gigabyteSize) + "g";
+		} else if (memorySize >= megabyteSize) {
+			return (memorySize / megabyteSize) + "m";
+		} else if (memorySize >= kilobyteSize) {
+			return (memorySize / kilobyteSize) + "k";
+		} else {
+			return memorySize + "b";
+		}
+	}
+
+	/**
 	 * Prints a message regarding the test.
 	 * 
 	 * @param message
@@ -1200,8 +1324,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	public void printMessage(String message) {
 
 		// Determine if show messages
-		if (!Boolean.parseBoolean(System.getProperty("print.messages",
-				Boolean.FALSE.toString()))) {
+		if (!this.isPrintMessages()) {
 			return; // do no print messages
 		}
 
