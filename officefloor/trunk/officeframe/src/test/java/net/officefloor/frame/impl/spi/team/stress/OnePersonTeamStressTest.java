@@ -14,40 +14,22 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.spi.team;
+package net.officefloor.frame.impl.spi.team.stress;
 
-import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.util.TeamSourceStandAlone;
 
 /**
- * Tests the {@link WorkerPerTaskTeam}.
+ * Stress tests the {@link OnePersonTeamSource}.
  * 
  * @author Daniel
  */
-public class WorkerPerTaskTeamTest extends OfficeFrameTestCase {
+public class OnePersonTeamStressTest extends AbstractTeamStressTest {
 
-	/**
-	 * {@link WorkerPerTaskTeam} to test.
-	 */
-	private WorkerPerTaskTeam team = new WorkerPerTaskTeam("test");
-
-	/**
-	 * Ensures runs the tasks.
-	 */
-	public void testRunning() {
-
-		// Start processing
-		this.team.startWorking();
-
-		// Assign task and wait on it to be started for execution
-		MockTaskContainer task = new MockTaskContainer();
-		task.assignJobToTeam(this.team, 10);
-
-		// Flag tasks to stop working
-		task.stopProcessing = true;
-
-		// Stop processing
-		this.team.stopWorking();
+	@Override
+	protected Team getTeamToTest() throws Exception {
+		return new TeamSourceStandAlone().loadTeam(OnePersonTeamSource.class);
 	}
 
 }

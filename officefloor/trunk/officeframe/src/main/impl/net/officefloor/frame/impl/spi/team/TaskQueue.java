@@ -20,11 +20,11 @@ import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Queue of {@link net.officefloor.frame.spi.team.Job} instances.
+ * Queue of {@link Job} instances.
  * 
  * @author Daniel
  */
-class TaskQueue {
+public class TaskQueue {
 
 	/**
 	 * Object to lock and wait on.
@@ -44,27 +44,27 @@ class TaskQueue {
 	/**
 	 * Thread-safe enqueues a {@link Job} to the queue.
 	 * 
-	 * @param task
+	 * @param job
 	 *            {@link Job} to add to the queue.
 	 */
-	public void enqueue(Job task) {
+	public void enqueue(Job job) {
 		synchronized (this.lock) {
 			if (this.head == null) {
 				// Empty list, therefore make first
-				this.head = task;
-				this.tail = task;
+				this.head = job;
+				this.tail = job;
 
 				// Item just added to list thus notify the dequeuer
 				this.lock.notify();
 
 			} else {
 				// Non-empty list, therefore make last
-				this.tail.setNextJob(task);
-				this.tail = task;
+				this.tail.setNextJob(job);
+				this.tail = job;
 			}
 
-			// Last Task so ensure not point to another Task
-			task.setNextJob(null);
+			// Last job so ensure not point to another job
+			job.setNextJob(null);
 		}
 	}
 
@@ -72,7 +72,7 @@ class TaskQueue {
 	 * Thread-safe dequeuing the next {@link Job} to execute.
 	 * 
 	 * @param executionContext
-	 *            {@link JobContext} to determine if task is ready.
+	 *            {@link JobContext} to determine if {@link Job} is ready.
 	 * @return Next {@link Job} to execute.
 	 */
 	public Job dequeue(JobContext executionContext) {
@@ -82,28 +82,27 @@ class TaskQueue {
 	}
 
 	/**
-	 * Thread-safe dequeuing the next {@link Job} to execute. This
-	 * will block for <code>timeout</code> milliseconds for a
-	 * {@link Job} to become available.
+	 * Thread-safe dequeuing the next {@link Job} to execute. This will block
+	 * for <code>timeout</code> milliseconds for a {@link Job} to become
+	 * available.
 	 * 
 	 * @param executionContext
-	 *            {@link JobContext} to determine if task is ready.
+	 *            {@link JobContext} to determine if {@link Job} is ready.
 	 * @return Next {@link Job} to execute.
 	 */
 	public Job dequeue(JobContext executionContext, long timeout) {
 		synchronized (this.lock) {
 
-			// Wait on a Task to be in queue
+			// Wait on a job to be in queue
 			this.waitForTask0(timeout);
 
-			// Attempt to dequeue a Task
+			// Attempt to dequeue a job
 			return this.dequeue0(executionContext);
 		}
 	}
 
 	/**
-	 * Waits the input period of time for another {@link Job} to be
-	 * added.
+	 * Waits the input period of time for another {@link Job} to be added.
 	 * 
 	 * @param timeout
 	 *            Time to wait in milliseconds.
@@ -116,23 +115,20 @@ class TaskQueue {
 
 	/**
 	 * <p>
-	 * Waits the input period of time for another {@link Job} to be
-	 * added.
-	 * </p>
+	 * Waits the input period of time for another {@link Job} to be added.
 	 * <p>
-	 * Before invoking this method, the {@link #lock} must be synchronized on.
-	 * </p>
+	 * Before invoking this method, the {@link #lock} must be synchronised on.
 	 * 
 	 * @param timeout
 	 *            Time to wait in milliseconds.
 	 */
 	private void waitForTask0(long timeout) {
-		// Wait on a Task to be in queue
+		// Wait on a job to be in queue
 		if (this.head == null) {
 			try {
 				this.lock.wait(timeout);
 			} catch (InterruptedException ex) {
-				// Continue processing on interupt
+				// Continue processing on interrupt
 			}
 		}
 	}
@@ -141,36 +137,36 @@ class TaskQueue {
 	 * Dequeues the next {@link Job} to execute.
 	 * 
 	 * @param executionContext
-	 *            {@link JobContext} to determine if task is ready.
+	 *            {@link JobContext} to determine if {@link Job} is ready.
 	 * @return Next {@link Job} to execute.
 	 */
 	private Job dequeue0(JobContext executionContext) {
 
-		// Check if contains any tasks
+		// Check if contains any jobs
 		if (this.head == null) {
-			// No tasks
+			// No jobs
 			return null;
 		}
 
-		// Obtain task to return
-		Job returnTask = this.head;
+		// Obtain job to return
+		Job returnJob = this.head;
 
-		// Check if only task
+		// Check if only job
 		if (this.head == this.tail) {
-			// No further tasks
+			// No further jobs
 			this.head = null;
 			this.tail = null;
 
 		} else {
-			// Further tasks
+			// Further jobs
 			this.head = this.head.getNextJob();
 		}
 
-		// Return task has no next task as about to be executed
-		returnTask.setNextJob(null);
+		// Clear next job as about to be executed
+		returnJob.setNextJob(null);
 
-		// Return the return task
-		return returnTask;
+		// Return the return job
+		return returnJob;
 	}
 
 }

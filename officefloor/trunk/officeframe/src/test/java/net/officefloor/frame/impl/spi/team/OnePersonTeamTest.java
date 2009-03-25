@@ -41,26 +41,19 @@ public class OnePersonTeamTest extends OfficeFrameTestCase {
 
 		// Assign task and wait on it to be started for execution
 		MockTaskContainer task = new MockTaskContainer();
-		task.assignTaskToTeam(this.team, 10);
+		task.assignJobToTeam(this.team, 10);
 
 		// Obtain the person
 		OnePerson person = this.team.person;
 
-		// Allow some time for processing
-		this.sleep(1);
+		// Flag tasks to stop processing
+		task.stopProcessing = true;
 
-		// Stop processing
+		// Stop processing (should block until person stops working)
 		this.team.stopWorking();
 
 		// Ensure person stopped working
 		assertTrue("Person should be stopped working", person.finished);
-
-		// Ensure task run at least twice
-		assertTrue("Task must be run at least twice",
-				(task.doTaskInvocationCount >= 2));
-
-		// Indicate number of invocations
-		this.printMessage("invocations=" + task.doTaskInvocationCount);
 	}
 
 }

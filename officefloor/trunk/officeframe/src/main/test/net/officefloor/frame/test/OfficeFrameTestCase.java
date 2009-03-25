@@ -1316,6 +1316,31 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	}
 
 	/**
+	 * Obtains run time in human readable form.
+	 * 
+	 * @param startTime
+	 *            Start time of running.
+	 * @return Run time in human readable form.
+	 */
+	public String getDisplayRunTime(long startTime) {
+
+		// Obtain the run time in milliseconds
+		long runTime = (System.currentTimeMillis() - startTime);
+
+		final long milliseconds = 1;
+		final long seconds = (1000 * milliseconds);
+		final long minutes = (60 * seconds);
+
+		if (runTime < seconds) {
+			return (runTime) + "ms";
+		} else if (runTime < minutes) {
+			return (runTime / seconds) + "s";
+		} else {
+			return (runTime / minutes) + " minutes";
+		}
+	}
+
+	/**
 	 * Prints a message regarding the test.
 	 * 
 	 * @param message
