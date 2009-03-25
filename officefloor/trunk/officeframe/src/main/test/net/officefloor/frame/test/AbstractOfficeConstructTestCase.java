@@ -107,9 +107,14 @@ public abstract class AbstractOfficeConstructTestCase extends
 	private boolean isRecordReflectiveTaskMethodsInvoked = false;
 
 	/**
-	 * {@link ParentEscalationProcedure}.
+	 * {@link Throwable} for the {@link EscalationHandler}.
 	 */
-	protected volatile Throwable exception = null;
+	private Throwable exception = null;
+
+	/**
+	 * Lock for the {@link EscalationHandler}.
+	 */
+	private final Object exceptionLock = new Object();
 
 	/**
 	 * {@link OfficeFloor}.
@@ -140,17 +145,17 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 */
 
 	@Override
-	public synchronized void handleEscalation(Throwable escalation)
-			throws Throwable {
+	public void handleEscalation(Throwable escalation) throws Throwable {
+		synchronized (this.exceptionLock) {
+			// Indicate a office floor level escalation
+			System.err.println("OFFICE FLOOR ESCALATION: "
+					+ escalation.getMessage() + " ["
+					+ escalation.getClass().getSimpleName() + " at "
+					+ escalation.getStackTrace()[0].toString() + "]");
 
-		// Indicate a office floor level escalation
-		System.err.println("OFFICE FLOOR ESCALATION: "
-				+ escalation.getMessage() + " ["
-				+ escalation.getClass().getSimpleName() + " at "
-				+ escalation.getStackTrace()[0].toString() + "]");
-
-		// Record exception to be thrown later
-		this.exception = escalation;
+			// Record exception to be thrown later
+			this.exception = escalation;
+		}
 	}
 
 	/**
@@ -159,14 +164,16 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * <p>
 	 * This method will clear the escalation on exit.
 	 */
-	public synchronized void validateNoTopLevelEscalation() throws Throwable {
-		try {
-			if (this.exception != null) {
-				throw this.exception;
+	public void validateNoTopLevelEscalation() throws Throwable {
+		synchronized (this.exceptionLock) {
+			try {
+				if (this.exception != null) {
+					throw this.exception;
+				}
+			} finally {
+				// Exception thrown, so have it cleared
+				this.exception = null;
 			}
-		} finally {
-			// Exception thrown, so have it cleared
-			this.exception = null;
 		}
 	}
 
@@ -176,7 +183,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @see junit.framework.TestCase#tearDown()
 	 */
 	@Override
-	protected synchronized void tearDown() throws Exception {
+	protected void tearDown() throws Exception {
 		try {
 
 			// Close the constructed office floors
@@ -184,21 +191,25 @@ public abstract class AbstractOfficeConstructTestCase extends
 				officeFloor.closeOfficeFloor();
 			}
 
-			// Return if no failure
-			if (this.exception == null) {
-				return;
-			}
+			// Propagate possible failure
+			synchronized (this.exceptionLock) {
+				// Return if no failure
+				if (this.exception == null) {
+					return;
+				}
 
-			// Propagate failure
-			if (this.exception instanceof Exception) {
-				throw (Exception) this.exception;
-			} else if (this.exception instanceof Error) {
-				throw (Error) this.exception;
-			} else {
-				StringWriter buffer = new StringWriter();
-				this.exception.printStackTrace(new PrintWriter(buffer));
-				fail("Unknown failure " + this.exception.getClass().getName()
-						+ ": " + buffer.toString());
+				// Propagate failure
+				if (this.exception instanceof Exception) {
+					throw (Exception) this.exception;
+				} else if (this.exception instanceof Error) {
+					throw (Error) this.exception;
+				} else {
+					StringWriter buffer = new StringWriter();
+					this.exception.printStackTrace(new PrintWriter(buffer));
+					fail("Unknown failure "
+							+ this.exception.getClass().getName() + ": "
+							+ buffer.toString());
+				}
 			}
 		} finally {
 			super.tearDown();
@@ -321,9 +332,10 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            <code>true</code> to record the {@link Task} instances
 	 *            invoked.
 	 */
-	protected synchronized void setRecordReflectiveTaskMethodsInvoked(
-			boolean isRecord) {
-		this.isRecordReflectiveTaskMethodsInvoked = isRecord;
+	protected void setRecordReflectiveTaskMethodsInvoked(boolean isRecord) {
+		synchronized (this.reflectiveTaskInvokedMethods) {
+			this.isRecordReflectiveTaskMethodsInvoked = isRecord;
+		}
 	}
 
 	/**
@@ -332,10 +344,11 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * @param methodName
 	 *            Name of method being invoked.
 	 */
-	protected synchronized void recordReflectiveTaskMethodInvoked(
-			String methodName) {
-		if (this.isRecordReflectiveTaskMethodsInvoked) {
-			this.reflectiveTaskInvokedMethods.add(methodName);
+	protected void recordReflectiveTaskMethodInvoked(String methodName) {
+		synchronized (this.reflectiveTaskInvokedMethods) {
+			if (this.isRecordReflectiveTaskMethodsInvoked) {
+				this.reflectiveTaskInvokedMethods.add(methodName);
+			}
 		}
 	}
 
@@ -347,24 +360,26 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 *            Order that the reflective methods should be invoked.
 	 * @see #setRecordReflectiveTaskMethodInvoked(boolean)
 	 */
-	protected synchronized void validateReflectiveMethodOrder(
-			String... methodNames) {
+	protected void validateReflectiveMethodOrder(String... methodNames) {
+		synchronized (this.reflectiveTaskInvokedMethods) {
 
-		// Create expected method calls
-		StringBuilder actualMethods = new StringBuilder();
-		for (String methodName : methodNames) {
-			actualMethods.append(methodName.trim() + " ");
+			// Create expected method calls
+			StringBuilder actualMethods = new StringBuilder();
+			for (String methodName : methodNames) {
+				actualMethods.append(methodName.trim() + " ");
+			}
+
+			// Create the actual method calls
+			StringBuilder expectedMethods = new StringBuilder();
+			for (String methodName : this.reflectiveTaskInvokedMethods) {
+				expectedMethods.append(methodName.trim() + " ");
+			}
+
+			// Validate appropriate methods called
+			assertEquals("Incorrect methods invoked [ "
+					+ actualMethods.toString() + "]", actualMethods.toString(),
+					expectedMethods.toString());
 		}
-
-		// Create the actual method calls
-		StringBuilder expectedMethods = new StringBuilder();
-		for (String methodName : this.reflectiveTaskInvokedMethods) {
-			expectedMethods.append(methodName.trim() + " ");
-		}
-
-		// Validate appropriate methods called
-		assertEquals("Incorrect methods invoked [ " + actualMethods.toString()
-				+ "]", actualMethods.toString(), expectedMethods.toString());
 	}
 
 	/**
@@ -720,7 +735,6 @@ public abstract class AbstractOfficeConstructTestCase extends
 			// Only timeout if positive time to run
 			if (secondsToRun > 0) {
 				// Provide heap diagnostics and time out
-				this.printHeapMemoryDiagnostics();
 				this.timeout(startBlockTime, secondsToRun);
 			}
 

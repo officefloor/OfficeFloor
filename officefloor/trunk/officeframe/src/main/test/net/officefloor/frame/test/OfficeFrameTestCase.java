@@ -776,7 +776,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	public void setVerbose(boolean isVerbose) {
 		this.isVerbose = isVerbose;
 	}
-
+	
 	/**
 	 * Creates a mock object registering the {@link MockControl}of the mock
 	 * object with registry for management.

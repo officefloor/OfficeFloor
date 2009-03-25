@@ -17,9 +17,11 @@
 package net.officefloor.frame.integrate.stress;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveFlow;
 import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
@@ -37,13 +39,32 @@ public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase 
 	private volatile int sequentialCallCount = 0;
 
 	/**
-	 * Ensures no issues arising in stress sequentially invoking {@link Flow}
-	 * instances.
+	 * Stress tests with the {@link OnePersonTeam}.
 	 */
 	@StressTest
-	public void testStressSequentialCalls() throws Exception {
+	public void test_StressSequential_OnePersonTeam() throws Exception {
+		this.doTest(new OnePersonTeam(100));
+	}
 
-		int SEQUENTIAL_COUNT = 100000;
+	/**
+	 * Stress tests with the {@link OnePersonTeam}.
+	 */
+	@StressTest
+	public void test_StressSequential_LeaderFollowerTeam() throws Exception {
+		this.doTest(new LeaderFollowerTeam("TEST", 5, 100));
+	}
+
+	/**
+	 * Does the sequential call stress test with the {@link Team}.
+	 * 
+	 * @param team
+	 *            {@link Team}.
+	 */
+	public void doTest(Team team) throws Exception {
+
+		int SEQUENTIAL_COUNT = 10000000;
+		int MAX_RUN_TIME = 100;
+		this.setVerbose(true);
 
 		// Create the sequential
 		SequentialInvokeTask sequential = new SequentialInvokeTask(
@@ -55,10 +76,10 @@ public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase 
 		task.buildParameter();
 		task.buildFlow("sequential", FlowInstigationStrategyEnum.SEQUENTIAL,
 				Integer.class);
-		this.constructTeam("TEAM", new OnePersonTeam(100));
+		this.constructTeam("TEAM", team);
 
 		// Run the repeats
-		this.invokeWork("work", new Integer(0));
+		this.invokeWork("work", new Integer(0), MAX_RUN_TIME);
 
 		// Ensure is complete
 		assertEquals("Did not complete all sequential calls", SEQUENTIAL_COUNT,
@@ -102,8 +123,10 @@ public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase 
 					.intValue();
 
 			// Output heap sizes after garbage collection
-			if ((callCount.intValue() % 100000) == 0) {
-				SequentialInvokeStressTest.this.printHeapMemoryDiagnostics();
+			if ((callCount.intValue() % 1000000) == 0) {
+				SequentialInvokeStressTest.this
+						.printMessage("Sequential Calls="
+								+ callCount.intValue());
 			}
 
 			// Determine if enough sequential calls

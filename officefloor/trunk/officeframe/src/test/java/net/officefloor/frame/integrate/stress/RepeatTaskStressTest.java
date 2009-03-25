@@ -19,7 +19,9 @@ package net.officefloor.frame.integrate.stress;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.spi.team.LeaderFollowerTeam;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
@@ -27,16 +29,36 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
  * 
  * @author Daniel
  */
-public class RepeatSingleTaskStressTest extends AbstractOfficeConstructTestCase {
+public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * Ensures no issues arising in stress repeating a {@link Task}.
+	 * Ensures no issues arising in stress repeating a {@link Task} with a
+	 * {@link OnePersonTeam}.
 	 */
 	@StressTest
-	public void testStressRepeat() throws Exception {
+	public void test_StressRepeat_OnePersonTeam() throws Exception {
+		this.doTest(new OnePersonTeam(100));
+	}
 
-		int REPEAT_COUNT = 1000000;
-		int MAX_RUN_TIME = 10;
+	/**
+	 * Ensures no issues arising in stress repeating a {@link Task} with a
+	 * {@link LeaderFollowerTeam}.
+	 */
+	@StressTest
+	public void test_StressRepeat_LeaderFollowerTeam() throws Exception {
+		this.doTest(new LeaderFollowerTeam("TEST", 5, 100));
+	}
+
+	/**
+	 * Does the repeat stress test.
+	 * 
+	 * @param team
+	 *            {@link Team} to use to run the {@link Task} instances.
+	 */
+	private void doTest(Team team) throws Exception {
+
+		int REPEAT_COUNT = 10000000;
+		int MAX_RUN_TIME = 100;
 		this.setVerbose(true);
 
 		// Create the repeat
@@ -45,7 +67,7 @@ public class RepeatSingleTaskStressTest extends AbstractOfficeConstructTestCase 
 		// Register the repeat task
 		this.constructWork(repeat, "work", "repeat")
 				.buildTask("repeat", "TEAM").buildTaskContext();
-		this.constructTeam("TEAM", new OnePersonTeam(100));
+		this.constructTeam("TEAM", team);
 
 		// Run the repeats
 		this.invokeWork("work", null, MAX_RUN_TIME);
@@ -104,9 +126,10 @@ public class RepeatSingleTaskStressTest extends AbstractOfficeConstructTestCase 
 			this.repeatCount++;
 			context.setComplete(false);
 
-			// Output heap sizes after garbage collection
-			if ((this.repeatCount % 100000) == 0) {
-				RepeatSingleTaskStressTest.this.printHeapMemoryDiagnostics();
+			// Output progress
+			if ((this.repeatCount % 1000000) == 0) {
+				RepeatTaskStressTest.this.printMessage("Repeat Calls="
+						+ this.repeatCount);
 			}
 		}
 	}

@@ -88,24 +88,11 @@ public class AssetMonitorImpl extends
 	 * ================= AssetMonitor ==========================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.TaskMonitor#getAsset()
-	 */
 	@Override
 	public Asset getAsset() {
 		return this.asset;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.AssetMonitor#wait(net.officefloor
-	 * .frame.internal.structure.JobNode,
-	 * net.officefloor.frame.internal.structure.JobActivateSet)
-	 */
 	@Override
 	public boolean wait(JobNode jobNode, JobActivateSet notifySet) {
 
@@ -131,8 +118,22 @@ public class AssetMonitorImpl extends
 					this.assetManager.registerAssetMonitor(this);
 				}
 
-				// Add the monitored task
-				this.jobNodes.addLinkedListEntry(monitoredJobNode);
+				// TODO test not re-add a JobNode (ie only have it added once)
+				boolean isAlreadyAdded = false;
+				MonitoredJobNode entry = this.jobNodes.getHead();
+				CHECK_ALREADY_ADDED: while (entry != null) {
+					if (entry.jobNode == jobNode) {
+						System.out.println("Already added");
+						isAlreadyAdded = true;
+						break CHECK_ALREADY_ADDED;
+					}
+					entry = entry.getNext();
+				}
+
+				// Add the monitored task (it not already added)
+				if (!isAlreadyAdded) {
+					this.jobNodes.addLinkedListEntry(monitoredJobNode);
+				}
 			}
 		}
 
@@ -151,49 +152,21 @@ public class AssetMonitorImpl extends
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.AssetMonitor#notifyTasks(net
-	 * .officefloor.frame.internal.structure.AssetNotifySet)
-	 */
 	@Override
 	public void notifyTasks(JobActivateSet notifySet) {
 		this.notify(notifySet, false, null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.AssetMonitor#notifyPermanently
-	 * (net.officefloor.frame.internal.structure.AssetNotifySet)
-	 */
 	@Override
 	public void notifyPermanently(JobActivateSet notifySet) {
 		this.notify(notifySet, true, null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.internal.structure.AssetMonitor#failTasks(net.
-	 * officefloor.frame.internal.structure.AssetNotifySet, java.lang.Throwable)
-	 */
 	@Override
 	public void failTasks(JobActivateSet notifySet, Throwable failure) {
 		this.notify(notifySet, false, failure);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.AssetMonitor#failPermanently
-	 * (net.officefloor.frame.internal.structure.AssetNotifySet,
-	 * java.lang.Throwable)
-	 */
 	@Override
 	public void failPermanently(JobActivateSet notifySet, Throwable failure) {
 		this.notify(notifySet, true, failure);
