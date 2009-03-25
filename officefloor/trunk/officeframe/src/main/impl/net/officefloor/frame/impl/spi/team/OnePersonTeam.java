@@ -81,16 +81,22 @@ public class OnePersonTeam implements Team {
 	@Override
 	public synchronized void stopWorking() {
 		if (this.person != null) {
-			// Stop the Person working
-			this.person.continueWorking = false;
+			try {
+				// Stop the Person working
+				this.person.continueWorking = false;
 
-			// Wait on Person to stop working
-			while (!this.person.finished) {
-				Thread.yield();
+				// Wait on Person to stop working
+				while (!this.person.finished) {
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException ex) {
+						return;
+					}
+				}
+			} finally {
+				// Release the person
+				this.person = null;
 			}
-
-			// Fire the Person
-			this.person = null;
 		}
 	}
 
