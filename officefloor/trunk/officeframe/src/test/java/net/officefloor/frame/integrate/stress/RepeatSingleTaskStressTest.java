@@ -16,10 +16,6 @@
  */
 package net.officefloor.frame.integrate.stress;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
-
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
@@ -36,9 +32,10 @@ public class RepeatSingleTaskStressTest extends AbstractOfficeConstructTestCase 
 	/**
 	 * Ensures no issues arising in stress repeating a {@link Task}.
 	 */
+	@StressTest
 	public void testStressRepeat() throws Exception {
 
-		int REPEAT_COUNT = 10000000;
+		int REPEAT_COUNT = 1000000;
 
 		// Create the repeat
 		RepeatTask repeat = new RepeatTask(REPEAT_COUNT);
@@ -59,7 +56,7 @@ public class RepeatSingleTaskStressTest extends AbstractOfficeConstructTestCase 
 	/**
 	 * {@link Work}.
 	 */
-	public static class RepeatTask {
+	public class RepeatTask {
 
 		/**
 		 * Number of times to repeat.
@@ -107,14 +104,7 @@ public class RepeatSingleTaskStressTest extends AbstractOfficeConstructTestCase 
 
 			// Output heap sizes after garbage collection
 			if ((this.repeatCount % 100000) == 0) {
-				MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-				memoryBean.gc();
-				memoryBean.gc();
-				MemoryUsage heap = memoryBean.getHeapMemoryUsage();
-				System.out.println("HEAP: "
-						+ (heap.getUsed() / (double) heap.getMax())
-						+ " finalize queue count "
-						+ memoryBean.getObjectPendingFinalizationCount());
+				RepeatSingleTaskStressTest.this.printHeapMemoryDiagnostics();
 			}
 		}
 	}

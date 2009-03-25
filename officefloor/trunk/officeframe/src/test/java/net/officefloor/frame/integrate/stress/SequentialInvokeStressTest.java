@@ -16,10 +16,6 @@
  */
 package net.officefloor.frame.integrate.stress;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
-
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
 import net.officefloor.frame.internal.structure.Flow;
@@ -44,9 +40,10 @@ public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase 
 	 * Ensures no issues arising in stress sequentially invoking {@link Flow}
 	 * instances.
 	 */
+	@StressTest
 	public void testStressSequentialCalls() throws Exception {
 
-		int SEQUENTIAL_COUNT = 10000000;
+		int SEQUENTIAL_COUNT = 100000;
 
 		// Create the sequential
 		SequentialInvokeTask sequential = new SequentialInvokeTask(
@@ -61,7 +58,7 @@ public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase 
 		this.constructTeam("TEAM", new OnePersonTeam(100));
 
 		// Run the repeats
-		this.invokeWork("work", new Integer(0), 60);
+		this.invokeWork("work", new Integer(0));
 
 		// Ensure is complete
 		assertEquals("Did not complete all sequential calls", SEQUENTIAL_COUNT,
@@ -106,13 +103,7 @@ public class SequentialInvokeStressTest extends AbstractOfficeConstructTestCase 
 
 			// Output heap sizes after garbage collection
 			if ((callCount.intValue() % 100000) == 0) {
-				MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-				memoryBean.gc();
-				memoryBean.gc();
-				MemoryUsage heap = memoryBean.getHeapMemoryUsage();
-				System.out.println("HEAP: "
-						+ (heap.getUsed() / (double) heap.getMax())
-						+ " of max " + heap.getMax());
+				SequentialInvokeStressTest.this.printHeapMemoryDiagnostics();
 			}
 
 			// Determine if enough sequential calls

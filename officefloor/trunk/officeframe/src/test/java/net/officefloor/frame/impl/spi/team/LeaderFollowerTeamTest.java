@@ -35,6 +35,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Single member and single task.
 	 */
+	@StressTest
 	public void testSingleMemberOneTask() {
 		this.leaderFollowerTest(1, 1);
 	}
@@ -42,6 +43,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Multiple members and single task.
 	 */
+	@StressTest
 	public void testMultipleMembersOneTask() {
 		this.leaderFollowerTest(3, 1);
 	}
@@ -49,6 +51,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Single member and multiple tasks.
 	 */
+	@StressTest
 	public void testSingleMemberMultipleTasks() {
 		this.leaderFollowerTest(1, 6);
 	}
@@ -56,6 +59,7 @@ public class LeaderFollowerTeamTest extends OfficeFrameTestCase {
 	/**
 	 * Multiple members and multiple tasks.
 	 */
+	@StressTest
 	public void testMulitpleMembersMultipleTasks() {
 		this.leaderFollowerTest(3, 6);
 	}

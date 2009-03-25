@@ -69,6 +69,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 	private static int OFFICE_INDEX = 0;
 
 	/**
+	 * Constructed {@link OfficeFloor} instances that need to be closed on tear
+	 * down of tests.
+	 */
+	private final List<OfficeFloor> constructedOfficeFloors = new LinkedList<OfficeFloor>();
+
+	/**
 	 * {@link OfficeFloorBuilder}.
 	 */
 	private OfficeFloorBuilder officeFloorBuilder;
@@ -161,6 +167,12 @@ public abstract class AbstractOfficeConstructTestCase extends
 	@Override
 	protected synchronized void tearDown() throws Exception {
 		try {
+
+			// Close the constructed office floors
+			for (OfficeFloor officeFloor : this.constructedOfficeFloors) {
+				officeFloor.closeOfficeFloor();
+			}
+
 			// Return if no failure
 			if (this.exception == null) {
 				return;
@@ -599,6 +611,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 
 		// Construct the Office Floor
 		this.officeFloor = this.officeFloorBuilder.buildOfficeFloor();
+		this.constructedOfficeFloors.add(this.officeFloor);
 
 		// Initiate for constructing another office
 		OFFICE_FLOOR_INDEX++;

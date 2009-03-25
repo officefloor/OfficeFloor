@@ -48,22 +48,11 @@ public class TeamSourceContextImpl implements TeamSourceContext {
 	 * ===================== TeamSourceContext =========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TeamSourceContext#getProperties()
-	 */
 	@Override
 	public Properties getProperties() {
 		return this.properties;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TeamSourceContext#getProperty(java
-	 * .lang.String)
-	 */
 	@Override
 	public String getProperty(String name)
 			throws TeamSourceUnknownPropertyError {
@@ -79,12 +68,6 @@ public class TeamSourceContextImpl implements TeamSourceContext {
 		return value;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.spi.team.TeamSourceContext#getProperty(java
-	 * .lang.String, java.lang.String)
-	 */
 	@Override
 	public String getProperty(String name, String defaultValue) {
 		// Obtain the value
@@ -93,4 +76,5 @@ public class TeamSourceContextImpl implements TeamSourceContext {
 		// Return value (or default if no value)
 		return (value != null ? value : defaultValue);
 	}
+
 }
