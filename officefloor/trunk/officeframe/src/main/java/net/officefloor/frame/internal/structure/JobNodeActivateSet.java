@@ -17,25 +17,33 @@
 package net.officefloor.frame.internal.structure;
 
 /**
- * Report on the {@link net.officefloor.frame.internal.structure.Asset}.
+ * <p>
+ * Set of {@link JobNode} instances that are to be activated.
+ * <p>
+ * The {@link JobNode} instances added will be activated at a later time when
+ * locks are released to avoid dead-lock.
  * 
  * @author Daniel
  */
-public interface AssetReport {
+public interface JobNodeActivateSet {
 
 	/**
-	 * Obtains the time of the report.
+	 * Adds a {@link JobNode} to be activated.
 	 * 
-	 * @return Time of the report
+	 * @param jobNode
+	 *            {@link JobNode} to be activated.
 	 */
-	long getTime();
+	void addJobNode(JobNode jobNode);
 
 	/**
-	 * Flags a failure on the {@link Asset}.
+	 * Adds an {@link JobNode} to be activated with the failure set on the
+	 * {@link ThreadState} of the {@link JobNode}.
 	 * 
+	 * @param jobNode
+	 *            {@link JobNode} to be activated.
 	 * @param failure
-	 *            Failure of the {@link Asset}.
+	 *            Failure for the {@link JobNode} to handle.
 	 */
-	void setFailure(Throwable failure);
+	void addJobNode(JobNode jobNode, Throwable failure);
 
 }

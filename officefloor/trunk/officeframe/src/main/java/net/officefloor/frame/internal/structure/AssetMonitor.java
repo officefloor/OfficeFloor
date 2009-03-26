@@ -16,10 +16,9 @@
  */
 package net.officefloor.frame.internal.structure;
 
-
 /**
- * Monitor for 'synchronizing' the {@link ThreadState} instances via
- * {@link JobNode} on an {@link Asset}.
+ * Monitor for to allow {@link ThreadState} instances to wait until an
+ * {@link Asset} is completed processing.
  * 
  * @author Daniel
  */
@@ -33,66 +32,69 @@ public interface AssetMonitor extends LinkedListEntry<AssetMonitor, Object> {
 	Asset getAsset();
 
 	/**
-	 * Flags for the {@link ThreadState} of the input {@link JobNode} to wait
-	 * and on being notified wake up the input {@link JobNode}.
+	 * <p>
+	 * Flags for the {@link JobNode} (and more specifically the
+	 * {@link ThreadState} of the {@link JobNode}) to wait until the
+	 * {@link Asset} activates it.
+	 * <p>
+	 * This is typically because the {@link Asset} is doing some processing that
+	 * the {@link JobNode} requires completed before proceeding.
 	 * 
 	 * @param jobNode
-	 *            {@link JobNode} to be notified on waking up the
-	 *            {@link ThreadState}.
-	 * @param notifySet
-	 *            {@link JobActivateSet} that the {@link JobNode} is added to if
-	 *            this {@link AssetMonitor} is permanently notified.
-	 * @return <code>true</code> if the {@link JobNode} is waiting on this
-	 *         {@link AssetMonitor}.
+	 *            {@link JobNode} to be activated when {@link Asset} processing
+	 *            is complete.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} that the {@link JobNode} is added
+	 *            to if the {@link Asset} has permanently activated this
+	 *            {@link AssetMonitor}. This may be <code>null</code> to
+	 *            activate via the {@link OfficeManager} however it is much more
+	 *            efficient to provide a {@link JobNodeActivateSet}.
+	 * @return <code>true</code> if the {@link JobNode} is waiting on the
+	 *         {@link Asset}.
 	 */
-	boolean wait(JobNode jobNode, JobActivateSet notifySet);
+	boolean waitOnAsset(JobNode jobNode, JobNodeActivateSet activateSet);
 
 	/**
-	 * Adds all the {@link JobNode} instances waiting on this {@link AssetMonitor}
-	 * to the input {@link JobActivateSet}.
+	 * Adds all the {@link JobNode} instances waiting on the {@link Asset} to
+	 * the input {@link JobNodeActivateSet} to be activated.
 	 * 
-	 * @param notifySet
-	 *            {@link JobActivateSet}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} that will later activate the
+	 *            {@link JobNode} instances waiting on the {@link Asset}. This
+	 *            may be <code>null</code> to activate via the
+	 *            {@link OfficeManager} however it is much more efficient to
+	 *            provide a {@link JobNodeActivateSet}.
+	 * @param isPermanent
+	 *            <code>true</code> indicates that all {@link JobNode} instances
+	 *            added to the {@link AssetMonitor} from now on are activated
+	 *            immediately. It is useful to flag an {@link AssetMonitor} in
+	 *            this state when the {@link Asset} is no longer being used to
+	 *            stop a {@link JobNode} from waiting forever.
 	 */
-	void notifyTasks(JobActivateSet notifySet);
+	void activateJobNodes(JobNodeActivateSet activateSet, boolean isPermanent);
 
 	/**
-	 * <p>
-	 * Flags this {@link AssetMonitor} to permanently notify waiting {@link JobNode}
-	 * instances.
-	 * <p>
-	 * Also adds all the {@link JobNode} instances waiting on this
-	 * {@link AssetMonitor} to the input {@link JobActivateSet}.
+	 * Adds all the {@link JobNode} instances waiting on this {@link Asset} to
+	 * the input {@link JobNodeActivateSet} to be activated with the
+	 * {@link ThreadState} receiving the input failure.
 	 * 
-	 * @param notifySet
-	 *            {@link JobActivateSet}.
-	 */
-	void notifyPermanently(JobActivateSet notifySet);
-
-	/**
-	 * <p>
-	 * Flags each {@link JobNode} with the input failure.
-	 * <p>
-	 * Adds all the {@link JobNode} instances waiting on this {@link AssetMonitor}
-	 * to the {@link JobActivateSet} with the input {@link Throwable}.
-	 * 
-	 * @param notifySet
-	 *            {@link JobActivateSet}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} that will later activate the
+	 *            {@link JobNode} instances waiting on the {@link Asset}. This
+	 *            may be <code>null</code> to activate via the
+	 *            {@link OfficeManager} however it is much more efficient to
+	 *            provide a {@link JobNodeActivateSet}.
 	 * @param failure
-	 *            Failure to propagate to the {@link ThreadState} instances.
+	 *            Failure to propagate to the {@link ThreadState} of the
+	 *            {@link JobNode} instances waiting on the {@link Asset}.
+	 * @param isPermanent
+	 *            <code>true</code> indicates that all {@link JobNode} instances
+	 *            added to the {@link AssetMonitor} from now on are activated
+	 *            immediately with the input failure. It is useful to flag an
+	 *            {@link AssetMonitor} in this state when the {@link Asset} is
+	 *            in a failed state that can not be recovered from.
 	 */
-	void failTasks(JobActivateSet notifySet, Throwable failure);
-
-	/**
-	 * <p>
-	 * Flags each {@link JobNode} with the input failure and all subsequent
-	 * {@link JobNode} added via {@link #wait(JobNode, JobActivateSet)}.
-	 * 
-	 * @param notifySet
-	 *            {@link JobActivateSet}.
-	 * @param failure
-	 *            Failure to propagate to the {@link ThreadState} instance.
-	 */
-	void failPermanently(JobActivateSet notifySet, Throwable failure);
+	void failJobNodes(JobNodeActivateSet activateSet, Throwable failure,
+			boolean isPermanent);
 
 }

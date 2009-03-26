@@ -31,7 +31,7 @@ public interface Team {
 	/**
 	 * Assigns a {@link Job} to be executed by this {@link Team}.
 	 * 
-	 * @param task
+	 * @param job
 	 *            {@link Job}.
 	 */
 	void assignJob(Job job);

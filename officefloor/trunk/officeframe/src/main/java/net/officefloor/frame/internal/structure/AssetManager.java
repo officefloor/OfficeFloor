@@ -24,7 +24,14 @@ package net.officefloor.frame.internal.structure;
 public interface AssetManager {
 
 	/**
-	 * Creates a new {@link AssetMonitor}
+	 * <p>
+	 * Creates a new {@link AssetMonitor}.
+	 * <p>
+	 * The returned {@link AssetMonitor} is not being managed by this
+	 * {@link AssetManager}. To have the {@link AssetMonitor} managed, it must
+	 * be registered with this {@link AssetManager}. This allows for only the
+	 * list of {@link AssetMonitor} instances requiring management to be
+	 * managed.
 	 * 
 	 * @param asset
 	 *            {@link Asset} that {@link JobNode} instances will wait on.
@@ -33,12 +40,20 @@ public interface AssetManager {
 	AssetMonitor createAssetMonitor(Asset asset);
 
 	/**
-	 * Does a single pass management of the {@link AssetManager}.
+	 * Does a single check on the {@link Asset} instances of the registered
+	 * {@link AssetMonitor} instances for management.
+	 * 
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add all {@link JobNode}
+	 *            instances requiring activation from the check. A
+	 *            {@link AssetManager} should not activate {@link JobNode}
+	 *            instances itself.
 	 */
-	void manageAssets();
+	void checkOnAssets(JobNodeActivateSet activateSet);
 
 	/**
-	 * Registers a {@link AssetMonitor} within this {@link AssetManager}.
+	 * Registers a {@link AssetMonitor} to be managed by this
+	 * {@link AssetManager}.
 	 * 
 	 * @param monitor
 	 *            {@link AssetMonitor} to be managed by this
@@ -47,7 +62,8 @@ public interface AssetManager {
 	void registerAssetMonitor(AssetMonitor monitor);
 
 	/**
-	 * Unregisters a {@link AssetMonitor} from this {@link AssetManager}.
+	 * Unregisters a {@link AssetMonitor} from being managed by this
+	 * {@link AssetManager}.
 	 * 
 	 * @param monitor
 	 *            {@link AssetMonitor} no longer requiring managing.

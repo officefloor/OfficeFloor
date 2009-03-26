@@ -24,18 +24,11 @@ package net.officefloor.frame.internal.structure;
 public interface Asset {
 
 	/**
-	 * Obtains the lock for synchronising the {@link Asset}.
+	 * Checks on the {@link Asset}.
 	 * 
-	 * @return Lock for synchronising the {@link Asset}.
+	 * @param context
+	 *            {@link CheckAssetContext} for checking on the {@link Asset}.
 	 */
-	Object getAssetLock();
-
-	/**
-	 * Reports on the {@link Asset}.
-	 * 
-	 * @param report
-	 *            {@link AssetReport} to fill out on this {@link Asset}.
-	 */
-	void reportOnAsset(AssetReport report);
+	void checkOnAsset(CheckAssetContext context);
 
 }

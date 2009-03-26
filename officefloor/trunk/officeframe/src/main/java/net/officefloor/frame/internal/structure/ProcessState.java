@@ -18,22 +18,32 @@ package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
+ * <p>
  * State of a process within the {@link Office}.
+ * <p>
+ * {@link ProcessState} instances can not interact with each other. The reason
+ * this extends {@link FlowFuture} is to allow invocations of {@link Work}
+ * outside the {@link Office} to check when the {@link ProcessState} of the
+ * invoked {@link Work} has completed.
+ * <p>
+ * Passing this to {@link TaskContext#join(FlowFuture)} will result in an
+ * exception.
  * 
  * @author Daniel
  */
 public interface ProcessState extends FlowFuture {
 
 	/**
-	 * Obtains the lock for the process.
+	 * Obtains the lock for this {@link ProcessState}.
 	 * 
-	 * @return Lock of the process.
+	 * @return Lock of this {@link ProcessState}.
 	 */
 	Object getProcessLock();
 
@@ -46,12 +56,12 @@ public interface ProcessState extends FlowFuture {
 
 	/**
 	 * <p>
-	 * Creates a {@link Flow} for the new {@link ThreadState} bound to this
+	 * Creates a {@link Flow} for the new {@link ThreadState} contained in this
 	 * {@link ProcessState}.
 	 * <p>
 	 * The new {@link ThreadState} is available from the returned {@link Flow}.
 	 * 
-	 * @return {@link Flow} for the new {@link ThreadState} bound to this
+	 * @return {@link Flow} for the new {@link ThreadState} contained in this
 	 *         {@link ProcessState}.
 	 */
 	<W extends Work> Flow createThread(FlowMetaData<W> flowMetaData);

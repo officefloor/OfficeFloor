@@ -28,11 +28,11 @@ import net.officefloor.frame.spi.team.Team;
 public interface JobMetaData {
 
 	/**
-	 * Creates the {@link JobActivatableSet} for executing the {@link Job}.
+	 * Creates the {@link JobNodeActivatableSet} for executing the {@link Job}.
 	 * 
-	 * @return {@link JobActivatableSet}.
+	 * @return {@link JobNodeActivatableSet}.
 	 */
-	JobActivatableSet createJobActivableSet();
+	JobNodeActivatableSet createJobActivableSet();
 
 	/**
 	 * Obtains the {@link Team} responsible for completing the {@link Job}.

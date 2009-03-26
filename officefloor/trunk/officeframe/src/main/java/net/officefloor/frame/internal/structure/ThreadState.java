@@ -23,12 +23,12 @@ import net.officefloor.frame.api.execute.FlowFuture;
  * 
  * @author Daniel
  */
-public interface ThreadState extends FlowFuture {
+public interface ThreadState extends FlowAsset, FlowFuture {
 
 	/**
-	 * Obtains the lock for the thread of this {@link ThreadState}.
+	 * Obtains the lock for this {@link ThreadState}.
 	 * 
-	 * @return Lock for the thread of this {@link ThreadState}.
+	 * @return Lock for this {@link ThreadState}.
 	 */
 	Object getThreadLock();
 
@@ -56,7 +56,7 @@ public interface ThreadState extends FlowFuture {
 	void setFailure(Throwable cause);
 
 	/**
-	 * Creates a {@link Flow} bound to this {@link ThreadState}.
+	 * Creates a {@link Flow} contained in this {@link ThreadState}.
 	 * 
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} for the new {@link Flow}.
@@ -99,22 +99,23 @@ public interface ThreadState extends FlowFuture {
 	 * its {@link Flow} instances be closed and a new one will be created for
 	 * the {@link Escalation}.
 	 * 
-	 * @param currentTaskNode
+	 * @param currentJobNode
 	 *            Current {@link JobNode} being executed.
-	 * @param notifySet
-	 *            {@link JobActivateSet}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
 	 */
-	void escalationStart(JobNode currentTaskNode, JobActivateSet notifySet);
+	void escalationStart(JobNode currentJobNode, JobNodeActivateSet activateSet);
 
 	/**
 	 * Flags that escalation has complete on this {@link ThreadState}.
 	 * 
-	 * @param currentTaskNode
+	 * @param currentJobNode
 	 *            Current {@link JobNode} being executed.
-	 * @param notifySet
-	 *            {@link JobActivateSet}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
 	 */
-	void escalationComplete(JobNode currentTaskNode, JobActivateSet notifySet);
+	void escalationComplete(JobNode currentJobNode,
+			JobNodeActivateSet activateSet);
 
 	/**
 	 * Obtains the {@link EscalationLevel} of this {@link ThreadState}.

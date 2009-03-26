@@ -25,10 +25,11 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel
  */
-public interface Flow extends FlowFuture, LinkedListEntry<Flow, JobActivateSet> {
+public interface Flow extends FlowAsset, FlowFuture,
+		LinkedListEntry<Flow, JobNodeActivateSet> {
 
 	/**
-	 * Creates a new {@link JobNode} bound to this {@link Flow}.
+	 * Creates a new {@link JobNode} contained in this {@link Flow}.
 	 * 
 	 * @param taskMetaData
 	 *            {@link TaskMetaData} for the new {@link JobNode}.
@@ -37,26 +38,26 @@ public interface Flow extends FlowFuture, LinkedListEntry<Flow, JobActivateSet> 
 	 *            {@link JobNode}.
 	 * @param parameter
 	 *            Parameter for the {@link JobNode}.
-	 * @return New configured {@link JobNode}.
+	 * @return New {@link JobNode}.
 	 */
 	JobNode createJobNode(TaskMetaData<?, ?, ?> taskMetaData,
 			JobNode parallelNodeOwner, Object parameter);
 
 	/**
-	 * Flags that the input {@link Job} has completed.
+	 * Flags that the input {@link JobNode} has completed.
 	 * 
-	 * @param job
-	 *            {@link Job} that has completed.
-	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances waiting on
-	 *            this {@link Flow}.
+	 * @param jobNode
+	 *            {@link JobNode} that has completed.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
+	 *            waiting on this {@link Flow}.
 	 */
-	void jobComplete(Job job, JobActivateSet notifySet);
+	void jobNodeComplete(JobNode jobNode, JobNodeActivateSet activateSet);
 
 	/**
-	 * Obtains the {@link ThreadState} that this {@link Flow} is bound.
+	 * Obtains the {@link ThreadState} containing this {@link Flow}.
 	 * 
-	 * @return {@link ThreadState} that this {@link Flow} is bound.
+	 * @return {@link ThreadState} containing this {@link Flow}.
 	 */
 	ThreadState getThreadState();
 

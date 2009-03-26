@@ -126,8 +126,12 @@ public interface TaskContext<W extends Work, D extends Enum<D>, F extends Enum<F
 	 * 
 	 * @param flowFuture
 	 *            {@link FlowFuture} of the {@link Flow} that must complete.
+	 * @throws IllegalStateException
+	 *             If a {@link ProcessState} or unknown {@link FlowFuture}. Only
+	 *             {@link FlowFuture} instances returned from the
+	 *             <code>doFlow</code> methods are valid input.
 	 */
-	void join(FlowFuture flowFuture);
+	void join(FlowFuture flowFuture) throws IllegalArgumentException;
 
 	/**
 	 * <p>

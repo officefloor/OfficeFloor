@@ -17,9 +17,9 @@
 package net.officefloor.frame.internal.structure;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Container managing a {@link ManagedObject}.
@@ -36,17 +36,18 @@ public interface ManagedObjectContainer {
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} to be
 	 *            loaded.
-	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
+	 *            activate.
 	 * @return <code>true</code> if the {@link ManagedObject} was loaded,
-	 *         otherwise <code>false</code> indicating that waiting on a
-	 *         {@link ManagedObject}.
+	 *         otherwise <code>false</code> indicating that the {@link JobNode}
+	 *         is waiting on the {@link ManagedObject} to be loaded.
 	 */
 	boolean loadManagedObject(JobContext jobContext, JobNode jobNode,
-			JobActivateSet notifySet);
+			JobNodeActivateSet activateSet);
 
 	/**
-	 * Allows this {@link ManagedObject} to co-ordinate with the other
+	 * Allows this {@link ManagedObject} to coordinate with the other
 	 * {@link ManagedObject} instances.
 	 * 
 	 * @param workContainer
@@ -56,33 +57,39 @@ public interface ManagedObjectContainer {
 	 *            {@link JobContext}.
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} to
-	 *            co-ordinate.
-	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
+	 *            coordinate.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
+	 *            activate.
 	 */
 	<W extends Work> void coordinateManagedObject(
 			WorkContainer<W> workContainer, JobContext jobContext,
-			JobNode jobNode, JobActivateSet notifySet);
+			JobNode jobNode, JobNodeActivateSet activateSet);
 
 	/**
 	 * Indicates if the {@link ManagedObject} is ready. This is to ensure the
-	 * {@link ManagedObject} is not currently involved within an asynchronous
-	 * operation (ie {@link ManagedObject} completed execution and ready for
-	 * another operation).
+	 * {@link ManagedObject}:
+	 * <ol>
+	 * <li>is loaded, and</li>
+	 * <li>is not currently involved within an asynchronous operation (in other
+	 * words the {@link AsynchronousManagedObject} completed execution and ready
+	 * for another operation)</li>
+	 * </ol>
 	 * 
 	 * @param jobContext
 	 *            {@link JobContext}.
 	 * @param jobNode
 	 *            {@link JobNode} requiring the {@link ManagedObject} to be
 	 *            ready.
-	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
+	 *            activate.
 	 * @return <code>true</code> if the {@link ManagedObject} is ready,
 	 *         otherwise <code>false</code> indicating that waiting on a
 	 *         {@link ManagedObject}.
 	 */
 	boolean isManagedObjectReady(JobContext jobContext, JobNode jobNode,
-			JobActivateSet notifySet);
+			JobNodeActivateSet activateSet);
 
 	/**
 	 * Obtains the object being managed by the {@link ManagedObject}.
@@ -106,7 +113,11 @@ public interface ManagedObjectContainer {
 
 	/**
 	 * Unloads the {@link ManagedObject}.
+	 * 
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
+	 *            activate.
 	 */
-	void unloadManagedObject();
+	void unloadManagedObject(JobNodeActivateSet activateSet);
 
 }

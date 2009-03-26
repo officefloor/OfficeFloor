@@ -19,7 +19,6 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.team.JobContext;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Container managing the {@link Work}.
@@ -44,18 +43,20 @@ public interface WorkContainer<W extends Work> {
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances to be loaded.
 	 * @param jobContext
-	 *            Context for executing the {@link Job}.
+	 *            Context for executing the {@link JobNode}.
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} instances
 	 *            to be loaded.
-	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
+	 *            activate.
 	 * @return <code>true</code> if the {@link ManagedObject} instances were
 	 *         loaded, otherwise <code>false</code> indicating that waiting on
 	 *         the {@link ManagedObject} instances.
 	 */
 	boolean loadManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet);
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet);
 
 	/**
 	 * Coordinates the {@link ManagedObject} instances.
@@ -64,15 +65,17 @@ public interface WorkContainer<W extends Work> {
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances to be coordinated.
 	 * @param jobContext
-	 *            Context for executing the {@link Job}.
+	 *            Context for executing the {@link JobNode}.
 	 * @param jobNode
 	 *            {@link JobNode} requesting the {@link ManagedObject} instances
 	 *            to be coordinated.
-	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
+	 *            activate.
 	 */
 	void coordinateManagedObjects(ManagedObjectIndex[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet);
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet);
 
 	/**
 	 * Indicates if the particular {@link ManagedObject} is ready for use. In
@@ -83,18 +86,20 @@ public interface WorkContainer<W extends Work> {
 	 *            {@link ManagedObjectIndex} instances identifying the
 	 *            {@link ManagedObject} instances to check if ready.
 	 * @param jobContext
-	 *            Context for executing the {@link Job}.
+	 *            Context for executing the {@link JobNode}.
 	 * @param jobNode
 	 *            {@link JobNode} requiring the {@link ManagedObject} to be
 	 *            ready.
-	 * @param notifySet
-	 *            {@link JobActivateSet} to add {@link Job} instances to notify.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
+	 *            activate.
 	 * @return <code>true</code> if the {@link ManagedObject} is ready for use,
 	 *         otherwise <code>false</code> indicating that waiting on the
 	 *         {@link ManagedObject}.
 	 */
 	boolean isManagedObjectsReady(ManagedObjectIndex[] managedObjectIndexes,
-			JobContext jobContext, JobNode jobNode, JobActivateSet notifySet);
+			JobContext jobContext, JobNode jobNode,
+			JobNodeActivateSet activateSet);
 
 	/**
 	 * Administers the {@link ManagedObject} instances as per the input
@@ -124,7 +129,11 @@ public interface WorkContainer<W extends Work> {
 
 	/**
 	 * Unloads the {@link Work}.
+	 * 
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances to
+	 *            activate.
 	 */
-	void unloadWork();
+	void unloadWork(JobNodeActivateSet activateSet);
 
 }
