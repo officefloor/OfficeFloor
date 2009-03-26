@@ -111,7 +111,7 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 		this.administerManagedObjects(work);
 
 		// Unload the work
-		work.unloadWork();
+		this.unloadWork(work);
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -227,7 +227,7 @@ public class LifeCycleWorkContainerTest extends AbstractWorkContainerTest {
 		this.administerManagedObjects(work);
 
 		// Unload the work
-		work.unloadWork();
+		this.unloadWork(work);
 
 		// Verify mocks
 		this.verifyMockObjects();

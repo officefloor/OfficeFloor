@@ -35,7 +35,7 @@ public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 	/**
 	 * {@link JobNode} instances to be activated.
 	 */
-	private final LinkedList<ActivatedJobNode, Object> jobNodes = new AbstractLinkedList<ActivatedJobNode, Object>() {
+	protected final LinkedList<ActivatedJobNode, Object> jobNodes = new AbstractLinkedList<ActivatedJobNode, Object>() {
 		@Override
 		public void lastLinkedListEntryRemoved(Object removeParameter) {
 			// Do nothing, as list should never be emptied

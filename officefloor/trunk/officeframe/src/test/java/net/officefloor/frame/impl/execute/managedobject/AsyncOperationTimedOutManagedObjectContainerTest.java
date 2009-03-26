@@ -81,7 +81,7 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 				.record_MoContainer_isManagedObjectReady(ReadyState.ASYNC_OPERATION_TIMED_OUT);
 
 		// Record unloading managed object
-		this.record_MoContainer_unloadManagedObject();
+		this.record_MoContainer_unloadManagedObject(true);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -121,7 +121,7 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 		}
 
 		// Ensure can unload the managed object
-		mo.unloadManagedObject();
+		this.unloadManagedObject(mo);
 
 		// Verify mocks
 		this.verifyMockObjects();

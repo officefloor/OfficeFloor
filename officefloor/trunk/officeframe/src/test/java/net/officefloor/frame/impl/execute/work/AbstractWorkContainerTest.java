@@ -32,7 +32,7 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -276,10 +276,10 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			.createMock(ProcessState.class);
 
 	/**
-	 * {@link JobActivateSet}.
+	 * {@link JobNodeActivateSet}.
 	 */
-	private final JobActivateSet jobActivateSet = this
-			.createMock(JobActivateSet.class);
+	private final JobNodeActivateSet jobActivateSet = this
+			.createMock(JobNodeActivateSet.class);
 
 	/**
 	 * {@link TaskDutyAssociation}.
@@ -382,7 +382,7 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 				// Only set the matcher once
 				this.control(managedObjectContainer).setMatcher(
 						new TypeMatcher(WorkContainer.class, JobContext.class,
-								JobNode.class, JobActivateSet.class));
+								JobNode.class, JobNodeActivateSet.class));
 				this.coordinatedMangedObjectContainers
 						.add(managedObjectContainer);
 			}
@@ -561,7 +561,8 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 		// Only unload work managed objects that were loaded
 		for (int i = 0; i < this.isManagedObjectAvailable.length; i++) {
 			if (this.isManagedObjectAvailable[i]) {
-				this.workManagedObjectContainers.get(i).unloadManagedObject();
+				this.workManagedObjectContainers.get(i).unloadManagedObject(
+						this.jobActivateSet);
 			}
 		}
 	}
@@ -727,6 +728,16 @@ public abstract class AbstractWorkContainerTest extends OfficeFrameTestCase {
 			ManagedObjectIndex managedObjectIndex, Object expectedObject) {
 		Object object = work.getObject(managedObjectIndex, this.threadState);
 		assertEquals("Incorrect returned object", expectedObject, object);
+	}
+
+	/**
+	 * Unloads the {@link WorkContainer}.
+	 * 
+	 * @param work
+	 *            {@link WorkContainer}.
+	 */
+	protected void unloadWork(WorkContainer<?> work) {
+		work.unloadWork(this.jobActivateSet);
 	}
 
 }

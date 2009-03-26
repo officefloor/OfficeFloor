@@ -59,6 +59,9 @@ public class FailedThrowLoadManagedObjectContainerTest extends
 		// Record failure on checking if ready
 		this.record_MoContainer_isManagedObjectReady(ReadyState.FAILURE);
 
+		// Record activating the job nodes permanently
+		this.record_MoContainer_unloadManagedObject(false);
+
 		// Replay mock objects
 		this.replayMockObjects();
 
@@ -90,7 +93,7 @@ public class FailedThrowLoadManagedObjectContainerTest extends
 		}
 
 		// Unload the object
-		mo.unloadManagedObject();
+		this.unloadManagedObject(mo);
 
 		// Verify mock objects
 		this.verifyMockObjects();

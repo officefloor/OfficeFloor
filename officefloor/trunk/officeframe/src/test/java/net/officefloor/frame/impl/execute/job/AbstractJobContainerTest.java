@@ -19,15 +19,18 @@ package net.officefloor.frame.impl.execute.job;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobActivatableSet;
+import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -48,10 +51,21 @@ import org.easymock.internal.AlwaysMatcher;
 public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link JobActivatableSet}.
+	 * Active {@link JobNode} instances.
 	 */
-	private final JobActivatableSet jobActivatableSet = this
-			.createMock(JobActivatableSet.class);
+	private final LinkedList<JobNode, JobNodeActivateSet> activeJobNodes = new AbstractLinkedList<JobNode, JobNodeActivateSet>() {
+		@Override
+		public void lastLinkedListEntryRemoved(
+				JobNodeActivateSet removeParameter) {
+			// Do nothing
+		}
+	};
+
+	/**
+	 * {@link JobNodeActivatableSet}.
+	 */
+	private final JobNodeActivatableSet jobActivatableSet = this
+			.createMock(JobNodeActivatableSet.class);
 
 	/**
 	 * {@link ProcessState}.
@@ -200,7 +214,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * <li>obtaining the {@link ThreadState}</li>
 	 * <li>obtaining the {@link ProcessState}</li>
 	 * <li>
-	 * creating the {@link JobActivatableSet}</li>
+	 * creating the {@link JobNodeActivatableSet}</li>
 	 * <li>lock on the {@link ThreadState}</li>
 	 * <li>checking the {@link ThreadState} failure</li>
 	 * <li>obtaining required {@link ManagedObject} indexes, if no failure</li>
@@ -618,6 +632,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 *            {@link Job} being completed.
 	 */
 	protected void record_completeJob(Job job) {
+		FunctionalityJob functionalityJob = (FunctionalityJob) job;
+
 		// Obtain process lock as clean up may interact with ProcessState
 		this.recordReturn(this.flow, this.flow.getThreadState(),
 				this.threadState);
@@ -627,15 +643,15 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				this.processState.getProcessLock(), "Process Lock");
 
 		// Clean up job
-		this.workContainer.unloadWork();
-		this.flow.jobComplete(job, this.jobActivatableSet);
+		this.workContainer.unloadWork(this.jobActivatableSet);
+		this.flow.jobNodeComplete(functionalityJob, this.jobActivatableSet);
 	}
 
 	/**
-	 * Records activating the {@link JobActivatableSet}.
+	 * Records activating the {@link JobNodeActivatableSet}.
 	 */
 	protected void record_JobActivatableSet_activateJobs() {
-		this.jobActivatableSet.activateJobs();
+		this.jobActivatableSet.activateJobNodes();
 	}
 
 	/**
@@ -762,6 +778,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 				ManagedObjectIndex[] requiredManagedObjectIndexes,
 				JobFunctionality[] jobFunctionality) {
 			super(AbstractJobContainerTest.this.flow,
+					AbstractJobContainerTest.this.activeJobNodes,
 					AbstractJobContainerTest.this.workContainer,
 					AbstractJobContainerTest.this.jobMetaData,
 					parallelOwnerJob, requiredManagedObjectIndexes);

@@ -25,6 +25,7 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerIm
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Asset;
+import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.Escalation;
@@ -162,8 +163,8 @@ public class ThreadStateImpl extends
 		}
 
 		// Create the thread monitor
-		this.threadMonitor = flowMetaData.getFlowManager().createAssetMonitor(
-				this);
+		AssetManager flowAssetManager = flowMetaData.getFlowManager();
+		this.threadMonitor = flowAssetManager.createAssetMonitor(this);
 	}
 
 	/*
