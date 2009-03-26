@@ -16,17 +16,18 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.spi.team.Job;
-
 /**
- * {@link JobActivateSet} that allows activating the {@link Job} instance.
+ * {@link JobNodeActivateSet} that allows activating the {@link JobNode}
+ * instances.
  * 
  * @author Daniel
  */
-public interface JobActivatableSet extends JobActivateSet {
+public interface JobNodeActivatableSet extends JobNodeActivateSet {
 
 	/**
-	 * Activates the {@link Job} instances with in this {@link JobActivateSet}.
+	 * Activates the {@link JobNode} instances within this
+	 * {@link JobNodeActivateSet}.
 	 */
-	void activateJobs();
+	void activateJobNodes();
+
 }

@@ -19,7 +19,7 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.spi.team.Job;
 
 /**
- * Node within the tree of {@link JobNode} instances to execute.
+ * Node within the graph of {@link JobNode} instances to execute.
  * 
  * @author Daniel
  */
@@ -38,11 +38,11 @@ public interface JobNode {
 	boolean isJobNodeComplete();
 
 	/**
-	 * Obtains the {@link Flow} that this {@link JobNode} is bound. The returned
-	 * {@link Flow} provide access to the {@link ThreadState} and subsequent
+	 * Obtains the {@link Flow} containing this {@link JobNode}. The returned
+	 * {@link Flow} provides access to the {@link ThreadState} and subsequent
 	 * {@link ProcessState} that this {@link JobNode} is involved in.
 	 * 
-	 * @return {@link Flow} that this {@link JobNode} is bound.
+	 * @return {@link Flow} containing this {@link JobNode}.
 	 */
 	Flow getFlow();
 
@@ -60,7 +60,7 @@ public interface JobNode {
 	 * The input {@link JobNode} is executed once the current {@link Flow} that
 	 * this {@link JobNode} is involved with is complete.
 	 * 
-	 * @param taskNode
+	 * @param jobNode
 	 *            Parallel owner of this {@link JobNode}.
 	 */
 	void setParallelOwner(JobNode jobNode);
@@ -77,7 +77,7 @@ public interface JobNode {
 	 * The current {@link JobNode} will not complete until the input parallel
 	 * {@link JobNode} is complete.
 	 * 
-	 * @param taskNode
+	 * @param jobNode
 	 *            Parallel {@link JobNode}.
 	 */
 	void setParallelNode(JobNode jobNode);
@@ -93,7 +93,7 @@ public interface JobNode {
 	 * Specifies the next {@link JobNode} in the {@link Flow} to execute after
 	 * the current {@link JobNode} is completed.
 	 * 
-	 * @param taskNode
+	 * @param jobNode
 	 *            Next {@link JobNode}.
 	 */
 	void setNextNode(JobNode jobNode);
@@ -109,9 +109,9 @@ public interface JobNode {
 	/**
 	 * Clears the {@link JobNode} instances linked to this {@link JobNode}.
 	 * 
-	 * @param notifySet
-	 *            {@link JobActivateSet}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
 	 */
-	void clearNodes(JobActivateSet notifySet);
+	void clearNodes(JobNodeActivateSet activateSet);
 
 }
