@@ -14,42 +14,25 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.asset;
+package net.officefloor.frame.integrate.stress;
 
-import junit.framework.TestCase;
-import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
+import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 
 /**
- * Mock {@link Asset}.
+ * Tests {@link AsynchronousManagedObject} and {@link Task} instances waiting on
+ * it to be ready for use.
  * 
  * @author Daniel
  */
-public class MockAsset implements Asset {
+public class AsynchronousManagedObjectStressTest extends
+		AbstractOfficeConstructTestCase {
 
-	/**
-	 * Failure of this {@link Asset}.
-	 */
-	protected Throwable failure = null;
-
-	/**
-	 * Specifies the failure for this {@link Asset}.
-	 * 
-	 * @param failure
-	 *            Failure.
-	 */
-	public void setFailure(Throwable failure) {
-		this.failure = failure;
-	}
-
-	/*
-	 * ================= Asset ============================================
-	 */
-
-	@Override
-	public void checkOnAsset(CheckAssetContext context) {
-		TestCase
-				.fail("TODO checkOnAsset functionality changed and tests require changing");
+	// TODO stress test Asynchronous Managed Object start/complete
+	@StressTest
+	public void test_TODO_implement() {
+		fail("TODO implement");
 	}
 
 }

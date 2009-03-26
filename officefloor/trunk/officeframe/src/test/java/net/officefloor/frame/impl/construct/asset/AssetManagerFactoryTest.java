@@ -18,12 +18,13 @@ package net.officefloor.frame.impl.construct.asset;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link AssetManagerFactoryImpl}.
@@ -35,8 +36,8 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 	/**
 	 * {@link OfficeManager}.
 	 */
-	private final OfficeManagerImpl officeManager = new OfficeManagerImpl(
-			"TEST", 1000);
+	private final OfficeManager officeManager = this
+			.createMock(OfficeManager.class);
 
 	/**
 	 * {@link AssetManagerFactory}.
@@ -55,24 +56,27 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 	 */
 	public void testCreateAssetManager() {
 
-		// No recording
-		this.replayMockObjects();
+		// Record registering the asset manager
+		final AssetManager[] registeredAssetManager = new AssetManager[1];
+		this.officeManager.registerAssetManager(null);
+		this.control(this.officeManager).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				registeredAssetManager[0] = (AssetManager) actual[0];
+				return true;
+			}
+		});
 
 		// Create the Asset Manager
+		this.replayMockObjects();
 		AssetManager assetManager = this.factory.createAssetManager(
 				AssetType.MANAGED_OBJECT, "connection", "timeout", this.issues);
 		assertNotNull("Must create asset manager", assetManager);
-
-		// Verify mocks
 		this.verifyMockObjects();
 
-		// Ensure the asset manager was added the office manager
-		AssetManager[] officeAssetManagers = this.officeManager
-				.getAssetManagers();
-		assertEquals("Should only expect one asset manager", 1,
-				officeAssetManagers.length);
-		assertEquals("Incorrect asset manager", assetManager,
-				officeAssetManagers[0]);
+		// Ensure returned asset manager is also registered
+		assertEquals("Incorrect registered asset manager", assetManager,
+				registeredAssetManager[0]);
 	}
 
 	/**
@@ -84,7 +88,18 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 		final String assetName = "connection";
 		final String responsibility = "timeout";
 
-		// Record reporting an issue
+		// Record only creating the first of the duplicates
+		final AssetManager[] registeredAssetManager = new AssetManager[1];
+		this.officeManager.registerAssetManager(null);
+		this.control(this.officeManager).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertNull("Should only register first",
+						registeredAssetManager[0]);
+				registeredAssetManager[0] = (AssetManager) actual[0];
+				return true;
+			}
+		});
 		this.issues.addIssue(assetType, assetName,
 				"AssetManager already responsible for 'timeout'");
 
@@ -100,12 +115,9 @@ public class AssetManagerFactoryTest extends OfficeFrameTestCase {
 				assetManagerTwo);
 		this.verifyMockObjects();
 
-		// Ensure the only the first asset manager was added the office manager
-		AssetManager[] officeAssetManagers = this.officeManager
-				.getAssetManagers();
-		assertEquals("Should only expect one asset manager", 1,
-				officeAssetManagers.length);
-		assertEquals("Incorrect asset manager", assetManagerOne,
-				officeAssetManagers[0]);
+		// Ensure registered asset manager is the first
+		assertEquals("Incorrect registered asset manager", assetManagerOne,
+				registeredAssetManager[0]);
 	}
+
 }

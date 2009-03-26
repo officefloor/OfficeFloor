@@ -16,12 +16,12 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.impl.execute.job.JobActivatableSetImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -45,7 +45,8 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link AssetMonitor}.
 	 */
-	private AssetMonitor assetMonitor;
+	private AssetMonitor assetMonitor = this.assetManager
+			.createAssetMonitor(this.asset);
 
 	/**
 	 * {@link JobNode}.
@@ -63,12 +64,10 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 	private final ThreadState threadState = this.createMock(ThreadState.class);
 
 	/**
-	 * Setup.
+	 * {@link JobNodeActivateSet}.
 	 */
-	protected void setUp() throws Exception {
-		// Create the necessary helper objects
-		this.assetMonitor = this.assetManager.createAssetMonitor(this.asset);
-	}
+	private final JobNodeActivateSet activateSet = this
+			.createMock(JobNodeActivateSet.class);
 
 	/**
 	 * Tests the managing of the Assets.
@@ -94,16 +93,17 @@ public class AssetManagerTest extends OfficeFrameTestCase {
 		this.replayMockObjects();
 
 		// Wait on a Task
-		this.assetMonitor.wait(this.jobNode, new JobActivatableSetImpl());
+		this.assetMonitor.waitOnAsset(this.jobNode,
+				this.activateSet);
 
-		// Manage
-		this.assetManager.manageAssets();
+		// Check on assets
+		this.assetManager.checkOnAssets(this.activateSet);
 
 		// Flag the Asset failed
 		this.asset.setFailure(failure);
 
 		// Manage again (this time should be failing)
-		this.assetManager.manageAssets();
+		this.assetManager.checkOnAssets(this.activateSet);
 
 		// Verify
 		this.verifyMockObjects();

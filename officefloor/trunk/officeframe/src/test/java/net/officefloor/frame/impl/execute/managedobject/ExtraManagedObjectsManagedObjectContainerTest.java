@@ -58,10 +58,10 @@ public class ExtraManagedObjectsManagedObjectContainerTest extends
 
 		// Record another object that is immediately unloaded
 		this.record_MoUser_unloadedImmediately();
-		
+
 		// Unload the managed object (that is being used)
-		this.record_MoContainer_unloadManagedObject();
-		
+		this.record_MoContainer_unloadManagedObject(true);
+
 		// Record another object immediately unloaded as finished
 		this.record_MoUser_unloadedImmediately();
 
@@ -74,13 +74,13 @@ public class ExtraManagedObjectsManagedObjectContainerTest extends
 		this.coordinateManagedObject(mo);
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);
-		
+
 		// Attempt to load another managed object
 		this.managedObjectUser_setManagedObject(mo, "Another object");
-		
+
 		// Unload the managed object
-		mo.unloadManagedObject();
-		
+		this.unloadManagedObject(mo);
+
 		// Attempt to load managed object after complete
 		this.managedObjectUser_setManagedObject(mo, "Object after completion");
 

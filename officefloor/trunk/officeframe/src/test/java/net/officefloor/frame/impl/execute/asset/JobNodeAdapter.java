@@ -17,17 +17,19 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
+import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 
 /**
  * Provides default methods for the {@link JobNode}.
  * 
  * @author Daniel
  */
-public class JobNodeAdapter implements JobNode {
+public class JobNodeAdapter extends
+		AbstractLinkedListEntry<JobNode, JobNodeActivateSet> implements JobNode {
 
 	/**
 	 * {@link Flow}.
@@ -41,6 +43,7 @@ public class JobNodeAdapter implements JobNode {
 	 *            {@link Flow} is always required.
 	 */
 	public JobNodeAdapter(Flow flow) {
+		super(null);
 		this.flow = flow;
 	}
 
@@ -60,7 +63,7 @@ public class JobNodeAdapter implements JobNode {
 	}
 
 	@Override
-	public void clearNodes(JobActivateSet notifySet) {
+	public void clearNodes(JobNodeActivateSet notifySet) {
 		// Do nothing
 	}
 

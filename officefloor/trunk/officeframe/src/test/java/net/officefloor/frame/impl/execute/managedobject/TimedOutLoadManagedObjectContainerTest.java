@@ -60,6 +60,9 @@ public class TimedOutLoadManagedObjectContainerTest extends
 		this
 				.record_MoContainer_isManagedObjectReady(ReadyState.SOURCING_TIMEOUT);
 
+		// Record activating the job nodes permanently
+		this.record_MoContainer_unloadManagedObject(false);
+
 		// Replay mock objects
 		this.replayMockObjects();
 
@@ -83,7 +86,7 @@ public class TimedOutLoadManagedObjectContainerTest extends
 		}
 
 		// Unload the managed object (should only set state as not sourced)
-		mo.unloadManagedObject();
+		this.unloadManagedObject(mo);
 
 		// Verify mock objects
 		this.verifyMockObjects();

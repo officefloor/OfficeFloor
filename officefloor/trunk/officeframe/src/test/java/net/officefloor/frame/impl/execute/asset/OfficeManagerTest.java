@@ -17,8 +17,10 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.test.match.TypeMatcher;
 
 /**
  * Tests the {@link OfficeManager}.
@@ -40,14 +42,16 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 
 		final AssetManager assetManager = this.createMock(AssetManager.class);
 
-		// Record managing the assets
-		assetManager.manageAssets();
+		// Record checking the assets
+		assetManager.checkOnAssets(null);
+		this.control(assetManager).setMatcher(
+				new TypeMatcher(JobNodeActivateSet.class));
 
 		// Run managing the assets
 		this.replayMockObjects();
-		this.officeManager.addAssetManager(assetManager);
+		this.officeManager.registerAssetManager(assetManager);
 		this.officeManager.startManaging();
-		this.officeManager.manage();
+		this.officeManager.checkOnAssets();
 		this.officeManager.stopManaging();
 		this.verifyMockObjects();
 	}
@@ -63,17 +67,21 @@ public class OfficeManagerTest extends OfficeFrameTestCase {
 				.createMock(AssetManager.class);
 
 		// Record managing the assets with first failing
-		assetManagerOne.manageAssets();
+		assetManagerOne.checkOnAssets(null);
+		this.control(assetManagerOne).setMatcher(
+				new TypeMatcher(JobNodeActivateSet.class));
 		this.control(assetManagerOne).expectAndThrow(null,
 				new RuntimeException("Failure"));
-		assetManagerTwo.manageAssets();
+		assetManagerTwo.checkOnAssets(null);
+		this.control(assetManagerTwo).setMatcher(
+				new TypeMatcher(JobNodeActivateSet.class));
 
-		// Run managing the assets
+		// Run checking on the assets
 		this.replayMockObjects();
-		this.officeManager.addAssetManager(assetManagerOne);
-		this.officeManager.addAssetManager(assetManagerTwo);
+		this.officeManager.registerAssetManager(assetManagerOne);
+		this.officeManager.registerAssetManager(assetManagerTwo);
 		this.officeManager.startManaging();
-		this.officeManager.manage();
+		this.officeManager.checkOnAssets();
 		this.officeManager.stopManaging();
 		this.verifyMockObjects();
 	}

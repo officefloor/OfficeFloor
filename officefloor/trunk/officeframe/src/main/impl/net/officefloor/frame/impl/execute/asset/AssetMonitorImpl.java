@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
+import junit.framework.TestCase;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
 import net.officefloor.frame.internal.structure.Asset;
@@ -175,6 +176,11 @@ public class AssetMonitorImpl extends
 	 */
 	private void activate(JobNodeActivateSet activateSet, Throwable failure,
 			boolean isPermanent) {
+
+		// TODO handle null activateSet by sending to OfficeManager
+		if (activateSet == null) {
+			TestCase.fail("null activateSet should be sent to OfficeManager");
+		}
 
 		// Obtain the jobs to be notified
 		MonitoredJobNode monitoredJobNode;

@@ -60,7 +60,10 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 
 		// Record propagating failure in sourcing managed object
 		this.record_MoContainer_isManagedObjectReady(ReadyState.FAILURE);
-
+		
+		// Record flagging permanently activate jobs
+		this.record_MoContainer_unloadManagedObject(false);
+		
 		// Replay mock objects
 		this.replayMockObjects();
 
@@ -84,7 +87,7 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 		}
 
 		// Unload the managed object (should only set state as not sourced)
-		mo.unloadManagedObject();
+		this.unloadManagedObject(mo);
 
 		// Verify mock objects
 		this.verifyMockObjects();

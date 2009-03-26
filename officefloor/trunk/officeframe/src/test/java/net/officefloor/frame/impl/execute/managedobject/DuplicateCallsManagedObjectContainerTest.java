@@ -56,7 +56,7 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		this.record_MoUser_setManagedObject(true, object);
 		this.record_MoContainer_coordinateManagedObject(null);
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
-		this.record_MoContainer_unloadManagedObject();
+		this.record_MoContainer_unloadManagedObject(true);
 
 		// Replay mock objects
 		this.replayMockObjects();
@@ -79,7 +79,7 @@ public class DuplicateCallsManagedObjectContainerTest extends
 		// Should be ready and working
 		this.isManagedObjectReady(mo, true);
 		this.assert_getObject(mo, object);
-		mo.unloadManagedObject();
+		this.unloadManagedObject(mo);
 
 		// Verify mock objects
 		this.verifyMockObjects();

@@ -80,7 +80,7 @@ public class AsyncOperationManagedObjectContainerTest extends
 		this.record_MoContainer_isManagedObjectReady(ReadyState.READY);
 
 		// Record unloading managed object after use
-		this.record_MoContainer_unloadManagedObject();
+		this.record_MoContainer_unloadManagedObject(true);
 
 		// Replay mocks
 		this.replayMockObjects();
@@ -105,7 +105,7 @@ public class AsyncOperationManagedObjectContainerTest extends
 		this.isManagedObjectReady(mo, true);
 
 		// Unload the managed object after use
-		mo.unloadManagedObject();
+		this.unloadManagedObject(mo);
 
 		// Verify mocks
 		this.verifyMockObjects();

@@ -56,6 +56,8 @@ import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
+import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -1065,6 +1067,9 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final FlowMetaData<?> flowMetaData = this
 				.createMock(FlowMetaData.class);
+		final AssetManager flowAssetManager = this
+				.createMock(AssetManager.class);
+		final AssetMonitor threadMonitor = this.createMock(AssetMonitor.class);
 		final TaskMetaData<?, ?, ?> taskMetaData = this
 				.createMock(TaskMetaData.class);
 		final WorkMetaData<?> workMetaData = this
@@ -1083,7 +1088,11 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_work();
 		this.record_noOfficeStartupTasks();
 		this.record_noOfficeEscalationHandler();
-		this.recordReturn(flowMetaData, flowMetaData.getFlowManager(), null);
+		this.recordReturn(flowMetaData, flowMetaData.getFlowManager(),
+				flowAssetManager);
+		this.recordReturn(flowAssetManager, flowAssetManager
+				.createAssetMonitor(null), threadMonitor, new TypeMatcher(
+				ThreadState.class));
 		this.recordReturn(flowMetaData, flowMetaData.getInitialTaskMetaData(),
 				taskMetaData);
 		this.recordReturn(taskMetaData, taskMetaData.getWorkMetaData(),
