@@ -53,47 +53,35 @@ public class AbstractLinkedListEntry<E extends LinkedListEntry<E, R>, R>
 	}
 
 	/*
-	 * (non-Javadoc)
+	 * =================== LinkedListEntry =================================
 	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedListEntry#getPrev()
+	 * Methods are final to stop accidental overriding by other linking
+	 * structures.
 	 */
-	public E getPrev() {
+
+	@Override
+	public final E getPrev() {
 		return this.prev;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedListEntry#setPrev(E)
-	 */
-	public void setPrev(E entry) {
+	@Override
+	public final void setPrev(E entry) {
 		this.prev = entry;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedListEntry#getNext()
-	 */
-	public E getNext() {
+	@Override
+	public final E getNext() {
 		return this.next;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedListEntry#setNext(E)
-	 */
-	public void setNext(E entry) {
+	@Override
+	public final void setNext(E entry) {
 		this.next = entry;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedListEntry#removeFromLinkedList(java.lang.Object)
-	 */
-	public void removeFromLinkedList(R removeParameter) {
+	@Override
+	public final void removeFromLinkedList(R removeParameter) {
+		
 		// Flag indicating if last entry in linked list
 		boolean isLast = true;
 

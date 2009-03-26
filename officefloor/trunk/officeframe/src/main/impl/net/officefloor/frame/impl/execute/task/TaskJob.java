@@ -26,6 +26,8 @@ import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -73,6 +75,9 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 * 
 	 * @param flow
 	 *            {@link Flow}.
+	 * @param flowJobNodes
+	 *            {@link LinkedList} of the {@link JobNode} instances for the
+	 *            {@link Flow} containing this {@link Job}.
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param taskMetaData
@@ -82,11 +87,12 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 * @param parameter
 	 *            Parameter for the {@link Task}.
 	 */
-	public TaskJob(Flow flow, WorkContainer<W> workContainer,
-			TaskMetaData<W, D, F> taskMetaData, JobNode parallelOwner,
-			Object parameter) {
-		super(flow, workContainer, taskMetaData, parallelOwner, taskMetaData
-				.getRequiredManagedObjects());
+	public TaskJob(Flow flow,
+			LinkedList<JobNode, JobNodeActivateSet> flowJobNodes,
+			WorkContainer<W> workContainer, TaskMetaData<W, D, F> taskMetaData,
+			JobNode parallelOwner, Object parameter) {
+		super(flow, flowJobNodes, workContainer, taskMetaData, parallelOwner,
+				taskMetaData.getRequiredManagedObjects());
 		this.parameter = parameter;
 
 		// Create the task

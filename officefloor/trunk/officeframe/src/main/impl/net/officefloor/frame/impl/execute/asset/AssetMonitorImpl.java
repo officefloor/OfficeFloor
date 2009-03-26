@@ -21,10 +21,9 @@ import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
-import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.LinkedList;
-import net.officefloor.frame.spi.team.Job;
 
 /**
  * Implementation of the {@link AssetMonitor}.
@@ -37,30 +36,31 @@ public class AssetMonitorImpl extends
 	/**
 	 * {@link Asset} being monitored.
 	 */
-	protected final Asset asset;
+	private final Asset asset;
 
 	/**
-	 * {@link AssetManager} for managing this.
+	 * {@link AssetManager} to managed this {@link AssetMonitor}.
 	 */
-	protected final AssetManager assetManager;
+	private final AssetManager assetManager;
 
 	/**
-	 * Flag indicating to permanently notify waiting {@link Job} instances.
+	 * Flag indicating to permanently activate waiting {@link JobNode}
+	 * instances.
 	 */
-	protected boolean isPermanentlyNotify = false;
+	private boolean isPermanentlyActivate = false;
 
 	/**
-	 * Permanently failure of this {@link AssetMonitor}.
+	 * Permanent failure of the {@link Asset}.
 	 */
-	protected Throwable failure = null;
+	private Throwable failure = null;
 
 	/**
 	 * List of {@link JobNode} instances waiting on the {@link Asset}.
 	 */
-	protected final LinkedList<MonitoredJobNode, Object> jobNodes = new AbstractLinkedList<MonitoredJobNode, Object>() {
+	private final LinkedList<MonitoredJobNode, Object> jobNodes = new AbstractLinkedList<MonitoredJobNode, Object>() {
 		@Override
 		public void lastLinkedListEntryRemoved(Object removeParameter) {
-			// Unregister from the Asset Group
+			// Unregister from the Asset Manager
 			AssetMonitorImpl.this.assetManager
 					.unregisterAssetMonitor(AssetMonitorImpl.this);
 		}
@@ -78,8 +78,8 @@ public class AssetMonitorImpl extends
 	 *            the {@link AssetManager}.
 	 */
 	public AssetMonitorImpl(Asset asset, AssetManager assetManager,
-			LinkedList<AssetMonitor, Object> taskMonitors) {
-		super(taskMonitors);
+			LinkedList<AssetMonitor, Object> assetMonitors) {
+		super(assetMonitors);
 		this.asset = asset;
 		this.assetManager = assetManager;
 	}
@@ -94,22 +94,18 @@ public class AssetMonitorImpl extends
 	}
 
 	@Override
-	public boolean wait(JobNode jobNode, JobActivateSet notifySet) {
+	public boolean waitOnAsset(JobNode jobNode, JobNodeActivateSet activateSet) {
 
-		// Create the monitored item for the job node
-		MonitoredJobNode monitoredJobNode = new MonitoredJobNode(jobNode,
-				this.jobNodes);
-
-		// Only allow one wait at a time
-		JobNode wakeupJobNode = null;
-		Throwable wakeupFailure = null;
+		// Determine if to wait on the asset
+		JobNode activateJobNode = null;
+		Throwable activateFailure = null;
 		synchronized (this.jobNodes) {
 
 			// Determine action based on state
-			if (this.isPermanentlyNotify) {
-				// Permanently notifying, therefore wake up immediately
-				wakeupJobNode = jobNode;
-				wakeupFailure = this.failure;
+			if (this.isPermanentlyActivate) {
+				// Permanently activating, therefore activate immediately
+				activateJobNode = jobNode;
+				activateFailure = this.failure;
 
 			} else {
 				// Determine if first Task
@@ -130,62 +126,55 @@ public class AssetMonitorImpl extends
 					entry = entry.getNext();
 				}
 
-				// Add the monitored task (it not already added)
+				// Add the monitored job (it not already added)
 				if (!isAlreadyAdded) {
-					this.jobNodes.addLinkedListEntry(monitoredJobNode);
+					this.jobNodes.addLinkedListEntry(new MonitoredJobNode(
+							jobNode, this.jobNodes));
 				}
 			}
 		}
 
-		// Determine if wake up immediately
-		if (wakeupJobNode == null) {
-			// No job node to wake up, therefore waiting
+		// Determine if activate immediately
+		if (activateJobNode == null) {
+			// No job node to activate, therefore waiting
 			return true;
 		}
 
-		// Have task to wake up (as permanent wake up)
-		if (wakeupFailure == null) {
-			notifySet.addNotifiedJobNode(wakeupJobNode);
+		// Have job to activate (as permanent activate)
+		if (activateFailure == null) {
+			activateSet.addJobNode(activateJobNode);
 		} else {
-			notifySet.addFailedJobNode(wakeupJobNode, wakeupFailure);
+			activateSet.addJobNode(activateJobNode, activateFailure);
 		}
-		return false;
+		return false; // not waiting as activated
 	}
 
 	@Override
-	public void notifyTasks(JobActivateSet notifySet) {
-		this.notify(notifySet, false, null);
+	public void activateJobNodes(JobNodeActivateSet activateSet,
+			boolean isPermanent) {
+		this.activate(activateSet, null, isPermanent);
 	}
 
 	@Override
-	public void notifyPermanently(JobActivateSet notifySet) {
-		this.notify(notifySet, true, null);
-	}
-
-	@Override
-	public void failTasks(JobActivateSet notifySet, Throwable failure) {
-		this.notify(notifySet, false, failure);
-	}
-
-	@Override
-	public void failPermanently(JobActivateSet notifySet, Throwable failure) {
-		this.notify(notifySet, true, failure);
+	public void failJobNodes(JobNodeActivateSet activateSet, Throwable failure,
+			boolean isPermanent) {
+		this.activate(activateSet, failure, isPermanent);
 	}
 
 	/**
-	 * Purges the list of {@link MonitoredTask} instances, adding the
-	 * {@link JobNode} instances to the {@link JobActivateSet} with the possible
-	 * {@link Throwable} failure.
+	 * Purges the list of {@link MonitoredJobNode} instances, adding the
+	 * {@link JobNode} instances to the {@link JobNodeActivateSet} with the
+	 * possible {@link Throwable} failure.
 	 * 
-	 * @param notifySet
-	 *            {@link JobActivateSet}.
-	 * @param isPermanentlyNotify
-	 *            Flags whether to set into permanently notify state.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
 	 * @param failure
 	 *            Possible {@link Throwable} failure. May be <code>null</code>.
+	 * @param isPermanent
+	 *            Flags whether to set into permanently activate state.
 	 */
-	private void notify(JobActivateSet notifySet, boolean isPermanentlyNotify,
-			Throwable failure) {
+	private void activate(JobNodeActivateSet activateSet, Throwable failure,
+			boolean isPermanent) {
 
 		// Obtain the jobs to be notified
 		MonitoredJobNode monitoredJobNode;
@@ -193,19 +182,21 @@ public class AssetMonitorImpl extends
 			// Purge the list of tasks
 			monitoredJobNode = this.jobNodes.purgeLinkedList(null);
 
-			// Flag permanently notify (and possible failure)
-			if (isPermanentlyNotify) {
-				this.isPermanentlyNotify = true;
+			// Flag permanently activated (and possible failure).
+			// Can not reset once permanently activated.
+			if (isPermanent) {
+				this.isPermanentlyActivate = true;
+				// TODO once permanent failure of Asset can not clear failure
 				this.failure = failure;
 			}
 		}
 
-		// Add the job nodes for notifying
+		// Add the job nodes for activation
 		while (monitoredJobNode != null) {
 			if (failure == null) {
-				notifySet.addNotifiedJobNode(monitoredJobNode.jobNode);
+				activateSet.addJobNode(monitoredJobNode.jobNode);
 			} else {
-				notifySet.addFailedJobNode(monitoredJobNode.jobNode, failure);
+				activateSet.addJobNode(monitoredJobNode.jobNode, failure);
 			}
 			monitoredJobNode = monitoredJobNode.getNext();
 		}
@@ -220,7 +211,7 @@ public class AssetMonitorImpl extends
 		/**
 		 * {@link JobNode} being monitored.
 		 */
-		protected final JobNode jobNode;
+		public final JobNode jobNode;
 
 		/**
 		 * Initiate.

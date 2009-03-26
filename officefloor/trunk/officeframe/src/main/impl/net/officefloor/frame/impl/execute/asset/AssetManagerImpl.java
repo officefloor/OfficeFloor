@@ -16,13 +16,13 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.impl.execute.job.JobActivatableSetImpl;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.AssetReport;
-import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.LinkedListItem;
 
 /**
@@ -30,18 +30,17 @@ import net.officefloor.frame.internal.structure.LinkedListItem;
  * 
  * @author Daniel
  */
-public class AssetManagerImpl implements AssetManager, AssetReport {
+public class AssetManagerImpl implements AssetManager, CheckAssetContext {
 
 	/**
 	 * Indicates no current time has been specified.
 	 */
-	protected static final long NO_TIME = 0;
+	private static final long NO_TIME = 0;
 
 	/**
-	 * {@link LinkedList} of {@link AssetMonitor} instances requiring
-	 * monitoring.
+	 * {@link LinkedList} of {@link AssetMonitor} instances requiring managing.
 	 */
-	protected final LinkedList<AssetMonitor, Object> monitors = new AbstractLinkedList<AssetMonitor, Object>() {
+	private final LinkedList<AssetMonitor, Object> monitors = new AbstractLinkedList<AssetMonitor, Object>() {
 		@Override
 		public void lastLinkedListEntryRemoved(Object removeParameter) {
 			// No action required
@@ -49,14 +48,20 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	};
 
 	/**
-	 * Time for the {@link #getTime()} method.
+	 * Time for the {@link CheckAssetContext}.
 	 */
-	protected long time = 0;
+	private long time = NO_TIME;
 
 	/**
-	 * Failure of an {@link Asset}.
+	 * {@link JobNodeActivateSet} to use to check the current
+	 * {@link AssetMonitor} instances.
 	 */
-	protected Throwable failure = null;
+	private JobNodeActivateSet activateSet = null;
+
+	/**
+	 * {@link AssetMonitor} currently being checked.
+	 */
+	private AssetMonitor assetMonitor = null;
 
 	/*
 	 * ================ AssetManager ======================================
@@ -68,59 +73,45 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	}
 
 	@Override
-	public void manageAssets() {
+	public void checkOnAssets(JobNodeActivateSet activateSet) {
 
 		// Access Point: Office Manager
 		// Locks: None
 
-		// Obtain the list of monitors to manage
+		// Obtain the list of monitors to check on
 		LinkedListItem<AssetMonitor> item;
 		synchronized (this.monitors) {
 			item = this.monitors.copyLinkedList();
 		}
 
-		// Reset the Asset Report time
-		this.time = NO_TIME;
+		try {
+			// Set up for checking on the assets
+			this.time = NO_TIME;
+			this.activateSet = activateSet;
 
-		// Iterate over the monitors managing them
-		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
-		while (item != null) {
+			// Iterate over the monitors managing them
+			while (item != null) {
 
-			// Reset the Asset Report
-			this.failure = null;
+				// Specify the monitor about to be checked
+				this.assetMonitor = item.getEntry();
 
-			// Obtain the Monitor
-			AssetMonitor monitor = item.getEntry();
+				try {
+					// Check on the Asset for the monitor
+					this.assetMonitor.getAsset().checkOnAsset(this);
 
-			// Obtain the Asset
-			Asset asset = monitor.getAsset();
-
-			// Lock the Asset from changes
-			try {
-				synchronized (asset.getAssetLock()) {
-					// Report on the Asset
-					asset.reportOnAsset(this);
+				} catch (Throwable ex) {
+					// Fail jobs based on check failure
+					this.assetMonitor.failJobNodes(activateSet, ex, false);
 				}
-			} catch (Throwable ex) {
-				// Fail tasks based on failure
-				this.failure = ex;
+
+				// Next monitor
+				item = item.getNext();
 			}
-
-			// Determine if failure of asset
-			if (this.failure != null) {
-				// Fail the Asset Monitor
-				// (manages own locks and unregisters from this)
-				monitor.failTasks(notifySet, this.failure);
-			}
-
-			// TODO provide asset manager reporting
-
-			// Next iteration
-			item = item.getNext();
+		} finally {
+			// Ensure release references for current check
+			this.activateSet = null;
+			this.assetMonitor = null;
 		}
-
-		// Notify the failed tasks
-		notifySet.activateJobs();
 	}
 
 	@Override
@@ -138,26 +129,32 @@ public class AssetManagerImpl implements AssetManager, AssetReport {
 	}
 
 	/*
-	 * ================== AssetReport =====================================
+	 * ================== CheckAssetContext ==================================
 	 * 
 	 * No synchronising necessary as will be invoked by the same thread invoking
-	 * the manageAssets method.
+	 * the checkOnAsset method.
 	 */
 
 	@Override
 	public long getTime() {
-		// Lazy obtain current time
+
+		// Ensure have time
 		if (this.time == NO_TIME) {
 			this.time = System.currentTimeMillis();
 		}
 
-		// Return the current time
+		// Return the time
 		return this.time;
 	}
 
 	@Override
-	public void setFailure(Throwable failure) {
-		this.failure = failure;
+	public void activateJobNodes(boolean isPermanent) {
+		this.assetMonitor.activateJobNodes(this.activateSet, isPermanent);
+	}
+
+	@Override
+	public void failJobNodes(Throwable failure, boolean isPermanent) {
+		this.assetMonitor.failJobNodes(this.activateSet, failure, isPermanent);
 	}
 
 }

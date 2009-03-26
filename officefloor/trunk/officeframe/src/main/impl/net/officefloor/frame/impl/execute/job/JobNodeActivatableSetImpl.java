@@ -19,23 +19,23 @@ package net.officefloor.frame.impl.execute.job;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.JobActivatableSet;
-import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
- * Implementation of {@link JobActivateSet}.
+ * Implementation of {@link JobNodeActivateSet}.
  * 
  * @author Daniel
  */
-public class JobActivatableSetImpl implements JobActivatableSet {
+public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 
 	/**
 	 * {@link JobNode} instances to be activated.
 	 */
-	protected final LinkedList<NotifiedJobNode, Object> jobNodes = new AbstractLinkedList<NotifiedJobNode, Object>() {
+	private final LinkedList<ActivatedJobNode, Object> jobNodes = new AbstractLinkedList<ActivatedJobNode, Object>() {
 		@Override
 		public void lastLinkedListEntryRemoved(Object removeParameter) {
 			// Do nothing, as list should never be emptied
@@ -46,46 +46,26 @@ public class JobActivatableSetImpl implements JobActivatableSet {
 	 * ========================= JobActivatableSet ============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobActivateSet#addNotifiedJobNode
-	 * (net.officefloor.frame.internal.structure.JobNode)
-	 */
 	@Override
-	public void addNotifiedJobNode(JobNode notifiedJobNode) {
-		this.jobNodes.addLinkedListEntry(new NotifiedJobNode(this.jobNodes,
-				notifiedJobNode, null));
+	public void addJobNode(JobNode jobNode) {
+		this.jobNodes.addLinkedListEntry(new ActivatedJobNode(this.jobNodes,
+				jobNode, null));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobActivateSet#addFailedJobNode
-	 * (net.officefloor.frame.internal.structure.JobNode, java.lang.Throwable)
-	 */
 	@Override
-	public void addFailedJobNode(JobNode notifiedJobNode, Throwable failure) {
-		this.jobNodes.addLinkedListEntry(new NotifiedJobNode(this.jobNodes,
-				notifiedJobNode, failure));
+	public void addJobNode(JobNode jobNode, Throwable failure) {
+		this.jobNodes.addLinkedListEntry(new ActivatedJobNode(this.jobNodes,
+				jobNode, failure));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.internal.structure.JobActivatableSet#activateJobs()
-	 */
 	@Override
-	public void activateJobs() {
+	public void activateJobNodes() {
 
-		// Iterate over the tasks activating them
-		NotifiedJobNode notifiedJobNode = this.jobNodes.getHead();
+		// Iterate over the jobs activating them
+		ActivatedJobNode notifiedJobNode = this.jobNodes.getHead();
 		while (notifiedJobNode != null) {
 
-			// Synchronise on thread of task to ensure safe activation
+			// Synchronise on thread of job to ensure safe activation
 			ThreadState threadState = notifiedJobNode.jobNode.getFlow()
 					.getThreadState();
 			synchronized (threadState.getThreadLock()) {
@@ -99,7 +79,7 @@ public class JobActivatableSetImpl implements JobActivatableSet {
 				notifiedJobNode.jobNode.activateJob();
 			}
 
-			// Move to next task for activating
+			// Move to next job for activating
 			notifiedJobNode = notifiedJobNode.getNext();
 		}
 	}
@@ -107,8 +87,8 @@ public class JobActivatableSetImpl implements JobActivatableSet {
 	/**
 	 * {@link JobNode} to be activated.
 	 */
-	protected class NotifiedJobNode extends
-			AbstractLinkedListEntry<NotifiedJobNode, Object> {
+	private class ActivatedJobNode extends
+			AbstractLinkedListEntry<ActivatedJobNode, Object> {
 
 		/**
 		 * {@link JobNode} to be activated.
@@ -130,7 +110,8 @@ public class JobActivatableSetImpl implements JobActivatableSet {
 		 * @param failure
 		 *            Potential failure.
 		 */
-		public NotifiedJobNode(LinkedList<NotifiedJobNode, Object> linkedList,
+		public ActivatedJobNode(
+				LinkedList<ActivatedJobNode, Object> linkedList,
 				JobNode jobNode, Throwable failure) {
 			super(linkedList);
 			this.jobNode = jobNode;

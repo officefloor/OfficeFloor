@@ -25,6 +25,7 @@ import net.officefloor.frame.impl.execute.asset.AssetManagerImpl;
 import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
 import net.officefloor.frame.internal.construct.AssetManagerFactory;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.OfficeManager;
 
 /**
  * {@link AssetManagerFactory} implementation.
@@ -39,19 +40,19 @@ public class AssetManagerFactoryImpl implements AssetManagerFactory {
 	private final Map<String, AssetManager> registry = new HashMap<String, AssetManager>();
 
 	/**
-	 * {@link OfficeManagerImpl} to add the created {@link AssetManager}
+	 * {@link OfficeManagerImpl} to register the created {@link AssetManager}
 	 * instances.
 	 */
-	private final OfficeManagerImpl officeManager;
+	private final OfficeManager officeManager;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param officeManager
-	 *            {@link OfficeManagerImpl} to add the created
+	 *            {@link OfficeManager} to register the created
 	 *            {@link AssetManager} instances.
 	 */
-	public AssetManagerFactoryImpl(OfficeManagerImpl officeManager) {
+	public AssetManagerFactoryImpl(OfficeManager officeManager) {
 		this.officeManager = officeManager;
 	}
 
@@ -81,8 +82,8 @@ public class AssetManagerFactoryImpl implements AssetManagerFactory {
 		// Register the asset manager
 		this.registry.put(assetManagerName, assetManager);
 
-		// Add the asset manager to the office manager
-		this.officeManager.addAssetManager(assetManager);
+		// Register the asset manager with the office manager
+		this.officeManager.registerAssetManager(assetManager);
 
 		// Return the asset manager
 		return assetManager;

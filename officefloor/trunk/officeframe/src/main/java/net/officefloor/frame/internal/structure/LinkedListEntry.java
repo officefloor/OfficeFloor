@@ -19,6 +19,8 @@ package net.officefloor.frame.internal.structure;
 /**
  * Linked list entry.
  * 
+ * TODO change name to LinkedListSetEntry and change to be unique entries.
+ * 
  * @author Daniel
  */
 public interface LinkedListEntry<E extends LinkedListEntry<E, R>, R> {
@@ -62,4 +64,5 @@ public interface LinkedListEntry<E extends LinkedListEntry<E, R>, R> {
 	 *            it be invoked.
 	 */
 	void removeFromLinkedList(R lastRemovedParameter);
+
 }

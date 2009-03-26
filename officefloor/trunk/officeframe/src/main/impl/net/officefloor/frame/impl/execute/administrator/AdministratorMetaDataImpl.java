@@ -20,13 +20,13 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.job.JobActivatableSetImpl;
+import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.DutyMetaData;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.JobActivatableSet;
+import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -128,8 +128,8 @@ public class AdministratorMetaDataImpl<I extends Object, A extends Enum<A>>
 	}
 
 	@Override
-	public JobActivatableSet createJobActivableSet() {
-		return new JobActivatableSetImpl();
+	public JobNodeActivatableSet createJobActivableSet() {
+		return new JobNodeActivatableSetImpl();
 	}
 
 	@Override

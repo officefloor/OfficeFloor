@@ -19,11 +19,11 @@ package net.officefloor.frame.impl.execute.task;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.job.JobActivatableSetImpl;
+import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobActivatableSet;
+import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -203,8 +203,8 @@ public class TaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends Enum<
 	}
 
 	@Override
-	public JobActivatableSet createJobActivableSet() {
-		return new JobActivatableSetImpl();
+	public JobNodeActivatableSet createJobActivableSet() {
+		return new JobNodeActivatableSetImpl();
 	}
 
 	@Override
