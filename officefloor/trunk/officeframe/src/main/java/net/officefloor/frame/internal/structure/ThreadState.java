@@ -19,11 +19,16 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.api.execute.FlowFuture;
 
 /**
+ * <p>
  * State of a thread within the {@link ProcessState}.
+ * <p>
+ * May be used as a {@link LinkedListEntry} in a list of {@link ThreadState}
+ * instances for a {@link ProcessState}.
  * 
  * @author Daniel
  */
-public interface ThreadState extends FlowAsset, FlowFuture {
+public interface ThreadState extends FlowAsset, FlowFuture,
+		LinkedListEntry<ThreadState, JobNodeActivateSet> {
 
 	/**
 	 * Obtains the lock for this {@link ThreadState}.
@@ -63,6 +68,18 @@ public interface ThreadState extends FlowAsset, FlowFuture {
 	 * @return New {@link Flow}.
 	 */
 	Flow createFlow(FlowMetaData<?> flowMetaData);
+
+	/**
+	 * Flags that the input {@link Flow} has completed.
+	 * 
+	 * @param flow
+	 *            {@link Flow} that has completed.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
+	 *            waiting on this {@link ThreadState} if all {@link Flow}
+	 *            instances of this {@link ThreadState} are complete.
+	 */
+	void flowComplete(Flow flow, JobNodeActivateSet activateSet);
 
 	/**
 	 * Obtains the {@link ProcessState} of the process containing this

@@ -18,12 +18,11 @@ package net.officefloor.frame.impl.execute.managedobject;
 
 import net.officefloor.frame.impl.execute.error.ExecutionError;
 import net.officefloor.frame.impl.execute.error.ExecutionErrorEnum;
-import net.officefloor.frame.impl.execute.job.JobActivatableSetImpl;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetMonitor;
-import net.officefloor.frame.internal.structure.AssetReport;
-import net.officefloor.frame.internal.structure.JobActivateSet;
+import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -109,12 +108,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	private JobNode recycleJobNode;
 
 	/**
-	 * {@link JobActivateSet} that was passed to
-	 * {@link #loadManagedObject(JobContext, Job, JobActivateSet)} should the
-	 * {@link ManagedObjectSource} provide the {@link ManagedObject}
+	 * {@link JobNodeActivateSet} that was passed to
+	 * {@link #loadManagedObject(JobContext, Job, JobNodeActivateSet)} should
+	 * the {@link ManagedObjectSource} provide the {@link ManagedObject}
 	 * immediately.
 	 */
-	private JobActivateSet assetNotifySet = null;
+	private JobNodeActivateSet assetActivateSet = null;
 
 	/**
 	 * Initiate the container.
@@ -131,11 +130,11 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 		this.metaData = metaData;
 		this.lock = processState.getProcessLock();
 
-		// Create the Sourcing Monitor
+		// Create the monitor to source the managed object
 		this.sourcingMonitor = this.metaData.getSourcingManager()
 				.createAssetMonitor(this);
 
-		// Create the Operations Monitor (if needed)
+		// Create the monitor for asynchronous operations (if needed)
 		if (this.metaData.isManagedObjectAsynchronous()) {
 			// Requires operations managing
 			this.operationsMonitor = this.metaData.getOperationsManager()
@@ -218,7 +217,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	@Override
 	public boolean loadManagedObject(JobContext executionContext,
-			JobNode jobNode, JobActivateSet notifySet) {
+			JobNode jobNode, JobNodeActivateSet activateSet) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -229,12 +228,12 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Flag now loading the managed object
 			this.containerState = ManagedObjectContainerState.LOADING;
 
-			// Record the time the managed object is sourced
+			// Record the time attempting to source managed object
 			this.asynchronousStartTime = executionContext.getTime();
 
 			try {
-				// Ensure notify set available if loaded immediately
-				this.assetNotifySet = notifySet;
+				// Ensure activate set available if loaded immediately
+				this.assetActivateSet = activateSet;
 
 				// Not loaded therefore source the managed object
 				ManagedObjectPool pool = this.metaData.getManagedObjectPool();
@@ -247,23 +246,24 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 							.getManagedObjectSource();
 					managedObjectSource.sourceManagedObject(this);
 				}
+
 			} catch (Throwable ex) {
 				// Flag failure
 				this.failure = ex;
 
-				// Permanently notify of failure
-				this.sourcingMonitor.failPermanently(notifySet, ex);
+				// Permanently fail job nodes
+				this.sourcingMonitor.failJobNodes(activateSet, ex, true);
 				if (this.operationsMonitor != null) {
 					// Asynchronous so fail those waiting on operations
-					this.operationsMonitor.failPermanently(notifySet, ex);
+					this.operationsMonitor.failJobNodes(activateSet, ex, true);
 				}
 
 				// Propagate failure
 				throw new ExecutionError(
 						ExecutionErrorEnum.MANAGED_OBJECT_SOURCING_FAILURE, ex);
 			} finally {
-				// Ensure unset the notify set
-				this.assetNotifySet = null;
+				// Ensure clear activate set
+				this.assetActivateSet = null;
 			}
 
 		case LOADING:
@@ -283,7 +283,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 			} else {
 				// Not loaded therefore wait for being loaded
-				this.sourcingMonitor.wait(jobNode, notifySet);
+				this.sourcingMonitor.waitOnAsset(jobNode, activateSet);
 
 				// Waiting on managed object to be loaded
 				return false;
@@ -301,7 +301,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	@SuppressWarnings("unchecked")
 	public void coordinateManagedObject(WorkContainer workContainer,
 			JobContext executionContext, JobNode jobNode,
-			JobActivateSet notifySet) {
+			JobNodeActivateSet activateSet) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -320,7 +320,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 						"Managed Object must be loaded before its coordinated");
 			}
 
-			// Determine if co-ordinating managed object
+			// Determine if coordinating managed object
 			if (this.metaData.isCoordinatingManagedObject()) {
 
 				// Obtain the thread state
@@ -360,7 +360,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 	@Override
 	public boolean isManagedObjectReady(JobContext executionContext,
-			JobNode jobNode, JobActivateSet notifySet) {
+			JobNode jobNode, JobNodeActivateSet activateSet) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
@@ -410,7 +410,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 					// Determine if asynchronous operation
 					if (this.managedObject != null) {
 						// Not ready as waiting on asynchronous operation
-						this.operationsMonitor.wait(jobNode, notifySet);
+						this.operationsMonitor
+								.waitOnAsset(jobNode, activateSet);
 						return false;
 					}
 				}
@@ -419,7 +420,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			// Check if loaded
 			if (this.managedObject == null) {
 				// Wait on managed object to be loaded
-				this.sourcingMonitor.wait(jobNode, notifySet);
+				this.sourcingMonitor.waitOnAsset(jobNode, activateSet);
 
 				// Waiting on managed object to be loaded
 				return false;
@@ -440,7 +441,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	public Object getObject(ThreadState threadState) {
 
 		// Access Point: JobContainer via WorkContainer
-		// Locks: None (object treated as final)
+		// Locks: Unknown (object treated as final)
 
 		// Ensure is loaded and have object
 		if (this.object == null) {
@@ -456,24 +457,27 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	public ManagedObject getManagedObject(ThreadState threadState) {
 
 		// Access Point: JobContainer via WorkContainer
-		// Locks: None (managed object treated as final)
+		// Locks: Unknown (managed object treated as final)
 
 		return this.managedObject;
 	}
 
 	@Override
-	public void unloadManagedObject() {
+	public void unloadManagedObject(JobNodeActivateSet activateSet) {
 
 		// Access Point: JobContainer via WorkContainer
 		// Locks: ThreadState -> ProcessState
 
-		// Access Point: ThreadState via TaskContainer
-		// Locks: ThreadState -> Work/Process
-
 		// Flag that unloading
 		this.containerState = ManagedObjectContainerState.UNLOADING;
 
-		// Unload
+		// Activate jobs permanently as Asset no longer being used
+		this.sourcingMonitor.activateJobNodes(activateSet, true);
+		if (this.operationsMonitor != null) {
+			this.operationsMonitor.activateJobNodes(activateSet, true);
+		}
+
+		// Unload the managed object
 		this.unloadManagedObject(this.managedObject, this.recycleJobNode);
 	}
 
@@ -485,7 +489,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	public void notifyStarted() {
 
 		// Access Point: Managed Object (potentially anywhere)
-		// Locks: None (or potentially ThreadState)
+		// Locks: Unknown (as may be called by ManagedObject at any time)
 
 		// Flag asynchronous operation started
 		synchronized (this.lock) {
@@ -504,21 +508,18 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	public void notifyComplete() {
 
 		// Access Point: Managed Object (potentially anywhere)
-		// Locks: None (or potentially ThreadState)
+		// Locks: Unknown (as may be called by ManagedObject at any time)
 
 		// Flag asynchronous operation completed
-		JobActivatableSetImpl notifySet = new JobActivatableSetImpl();
 		synchronized (this.lock) {
 
 			// Flag no asynchronous operation occurring
 			this.asynchronousStartTime = NO_ASYNC_OPERATION;
 
-			// Notify any tasks waiting on asynchronous operation
-			this.operationsMonitor.notifyTasks(notifySet);
+			// Activate any jobs waiting on asynchronous operation.
+			// Can not activate jobs by this thread as not sure of locks.
+			this.operationsMonitor.activateJobNodes(null, false);
 		}
-
-		// TODO give notified jobs to OfficeManager to do in safe thread
-		notifySet.activateJobs();
 	}
 
 	/*
@@ -529,25 +530,15 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	public void setManagedObject(ManagedObject managedObject) {
 
 		// Access Point: ManagedObjectSource/ManagedObjectPool
-		// Locks: None (though possibly ManagedObjectPool)
+		// Locks: Unknown (as may be called by ManagedObjectSource at any time)
 
-		// Outside lock, as may need wake up
-		JobActivatableSetImpl notifySetImpl = null;
-
-		// Lock to ensure synchronised
+		// Lock to ensure synchronised.
 		// (may be invoked by another thread from the Managed Object Source)
 		synchronized (this.lock) {
 
-			// Determine if require waking up within this method
-			JobActivateSet notifySet;
-			if (this.assetNotifySet == null) {
-				// Invoked outside loadManagedObject call
-				notifySetImpl = new JobActivatableSetImpl();
-				notifySet = notifySetImpl;
-			} else {
-				// Invoked within loadManagedObject call
-				notifySet = this.assetNotifySet;
-			}
+			// Obtain the activate set.
+			// May be null if called by Managed Object Source at a later time.
+			JobNodeActivateSet activateSet = this.assetActivateSet;
 
 			// Handle base on state
 			switch (this.containerState) {
@@ -579,7 +570,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 						this.failure = ex;
 					}
 
-					// Flag no longer waiting on sourcing managed object
+					// Flag no longer waiting to source managed object
 					this.asynchronousStartTime = NO_ASYNC_OPERATION;
 
 					// Provide listener if asynchronous managed object
@@ -588,8 +579,8 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 								.registerAsynchronousCompletionListener(this);
 					}
 
-					// Wake up the tasks permanently as loaded
-					this.sourcingMonitor.notifyPermanently(notifySet);
+					// Wake up the jobs permanently as loaded
+					this.sourcingMonitor.activateJobNodes(activateSet, true);
 
 				} else {
 					// Managed object already loaded, thus unload
@@ -605,51 +596,31 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 						.createRecycleJobNode(managedObject));
 			}
 		}
-
-		// Determine if require to wake up tasks
-		if (notifySetImpl != null) {
-			notifySetImpl.activateJobs();
-		}
 	}
 
 	@Override
 	public void setFailure(Throwable cause) {
 
 		// Access Point: ManagedObjectSource/ManagedObjectPool
-		// Locks: None (though possibly ManagedObjectPool)
+		// Locks: Unknown (as may be called by ManagedObjectSource at any time)
 
-		// Outside lock, as may need wake up
-		JobActivatableSetImpl notifySetImpl = null;
-
-		// Lock to ensure synchronised and set failure before failing tasks
+		// Lock to ensure synchronised and set failure before failing jobs
 		// (may be invoked by another thread from the Managed Object Source)
 		synchronized (this.lock) {
+
+			// Obtain the activate set.
+			// May be null if called by Managed Object Source at a later time.
+			JobNodeActivateSet activateSet = this.assetActivateSet;
 
 			// Record failure
 			this.failure = cause;
 
-			// Determine if require waking up within this method
-			JobActivateSet notifySet;
-			if (this.assetNotifySet == null) {
-				// Invoked outside loadManagedObject call
-				notifySetImpl = new JobActivatableSetImpl();
-				notifySet = notifySetImpl;
-			} else {
-				// Invoked within loadManagedObject call
-				notifySet = this.assetNotifySet;
-			}
-
-			// Permanently notify of failure
-			this.sourcingMonitor.failPermanently(notifySet, cause);
+			// Permanently activate with failure
+			this.sourcingMonitor.failJobNodes(activateSet, cause, true);
 			if (this.operationsMonitor != null) {
 				// Asynchronous so fail those waiting on operations
-				this.operationsMonitor.failPermanently(notifySet, cause);
+				this.operationsMonitor.failJobNodes(activateSet, cause, true);
 			}
-		}
-
-		// Determine if require to wake up jobs
-		if (notifySetImpl != null) {
-			notifySetImpl.activateJobs();
 		}
 	}
 
@@ -658,44 +629,42 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 	 */
 
 	@Override
-	public Object getAssetLock() {
-		return this.lock;
-	}
+	public void checkOnAsset(CheckAssetContext context) {
+		synchronized (this.lock) {
 
-	@Override
-	public void reportOnAsset(AssetReport report) {
+			// Determine if failure
+			if (this.failure != null) {
+				// Fail job nodes waiting on this
+				context.failJobNodes(this.failure, true);
 
-		// Determine if failure
-		if (this.failure != null) {
-			// Report on the failure
-			report.setFailure(this.failure);
+				// No further reporting necessary
+				return;
+			}
 
-			// No further reporting necessary
-			return;
-		}
+			// Single access as volatile
+			long startTime = this.asynchronousStartTime;
 
-		// Single access as volatile
-		long startTime = this.asynchronousStartTime;
+			// Not ready if undertaking an asynchronous operation
+			if (startTime != NO_ASYNC_OPERATION) {
 
-		// Not ready if undertaking an asynchronous operation
-		if (startTime != NO_ASYNC_OPERATION) {
+				// Determine if asynchronous operation has timed out
+				if ((context.getTime() - startTime) < this.metaData
+						.getTimeout()) {
 
-			// Determine if asynchronous operation has timed out
-			if ((report.getTime() - startTime) < this.metaData.getTimeout()) {
+					// Flag timeout on the managed object
+					if (this.managedObject == null) {
+						// Sourcing failure
+						this.failure = new ExecutionError(
+								ExecutionErrorEnum.MANAGED_OBJECT_SOURCING_FAILURE);
+					} else {
+						// Asynchronous operation timeout
+						this.failure = new ExecutionError(
+								ExecutionErrorEnum.MANAGED_OBJECT_ASYNC_OPERATION_TIMED_OUT);
+					}
 
-				// Flag timeout on the managed object
-				if (this.managedObject == null) {
-					// Sourcing failure
-					this.failure = new ExecutionError(
-							ExecutionErrorEnum.MANAGED_OBJECT_SOURCING_FAILURE);
-				} else {
-					// Asynchronous operation timeout
-					this.failure = new ExecutionError(
-							ExecutionErrorEnum.MANAGED_OBJECT_ASYNC_OPERATION_TIMED_OUT);
+					// Fail job nodes waiting on this
+					context.failJobNodes(this.failure, true);
 				}
-
-				// Report the error
-				report.setFailure(this.failure);
 			}
 		}
 	}

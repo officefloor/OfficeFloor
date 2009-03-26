@@ -18,8 +18,8 @@ package net.officefloor.frame.impl.execute.work;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.AdministratorContext;
-import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -61,7 +61,7 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	public boolean isManagedObjectsReady(
 			ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
-			JobActivateSet notifySet) {
+			JobNodeActivateSet notifySet) {
 		return this.delegate.isManagedObjectsReady(managedObjectIndexes,
 				executionContext, jobNode, notifySet);
 	}
@@ -70,7 +70,7 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	public boolean loadManagedObjects(
 			ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
-			JobActivateSet notifySet) {
+			JobNodeActivateSet notifySet) {
 		return this.delegate.loadManagedObjects(managedObjectIndexes,
 				executionContext, jobNode, notifySet);
 	}
@@ -79,7 +79,7 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	public void coordinateManagedObjects(
 			ManagedObjectIndex[] managedObjectIndexes,
 			JobContext executionContext, JobNode jobNode,
-			JobActivateSet notifySet) {
+			JobNodeActivateSet notifySet) {
 		this.delegate.coordinateManagedObjects(managedObjectIndexes,
 				executionContext, jobNode, notifySet);
 	}
@@ -96,8 +96,8 @@ public class WorkContainerProxy<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public void unloadWork() {
-		// Not the last flow item for the work, so do not unload
+	public void unloadWork(JobNodeActivateSet activateSet) {
+		// Not the last job for the work, so do not unload
 	}
 
 }

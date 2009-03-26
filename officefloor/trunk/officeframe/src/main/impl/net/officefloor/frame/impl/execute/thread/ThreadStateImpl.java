@@ -20,19 +20,19 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
+import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
-import net.officefloor.frame.internal.structure.AssetReport;
+import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -45,23 +45,32 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * 
  * @author Daniel
  */
-public class ThreadStateImpl implements ThreadState, Asset {
+public class ThreadStateImpl extends
+		AbstractLinkedListEntry<ThreadState, JobNodeActivateSet> implements
+		ThreadState, Asset {
 
 	/**
-	 * {@link LinkedList} of the {@link Flow} instances for this
-	 * {@link ThreadState}.
+	 * Active {@link Flow} instances for this {@link ThreadState}.
 	 */
-	protected final LinkedList<Flow, JobActivateSet> flows = new AbstractLinkedList<Flow, JobActivateSet>() {
+	protected final LinkedList<Flow, JobNodeActivateSet> activeFlows = new AbstractLinkedList<Flow, JobNodeActivateSet>() {
 		@Override
-		public void lastLinkedListEntryRemoved(JobActivateSet notifySet) {
+		public void lastLinkedListEntryRemoved(JobNodeActivateSet notifySet) {
 
 			// Do nothing if searching for escalation
 			if (ThreadStateImpl.this.isEscalating) {
 				return;
 			}
 
-			// Complete the thread as not escalating and no more flows
-			ThreadStateImpl.this.completeThread(notifySet);
+			// Flow (thread) complete
+			ThreadStateImpl.this.isFlowComplete = true;
+
+			// Activate all jobs waiting on this thread permanently
+			ThreadStateImpl.this.threadMonitor
+					.activateJobNodes(notifySet, true);
+
+			// Thread complete
+			ThreadStateImpl.this.processState.threadComplete(
+					ThreadStateImpl.this, notifySet);
 		}
 	};
 
@@ -118,6 +127,9 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 * 
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
+	 * @param processThreads
+	 *            {@link LinkedList} of the {@link ThreadState} instances for
+	 *            the {@link ProcessState} containing this {@link ThreadState}.
 	 * @param processState
 	 *            {@link ProcessState} for this {@link ThreadState}.
 	 * @param flowMetaData
@@ -125,7 +137,9 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 */
 	@SuppressWarnings("unchecked")
 	public ThreadStateImpl(ThreadMetaData threadMetaData,
+			LinkedList<ThreadState, JobNodeActivateSet> processThreads,
 			ProcessState processState, FlowMetaData<?> flowMetaData) {
+		super(processThreads);
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
 
@@ -147,29 +161,9 @@ public class ThreadStateImpl implements ThreadState, Asset {
 					adminMetaData[i]);
 		}
 
-		// Create the thread monitor (if required)
-		AssetManager flowManager = flowMetaData.getFlowManager();
-		if (flowManager == null) {
-			this.threadMonitor = null;
-		} else {
-			this.threadMonitor = flowManager.createAssetMonitor(this);
-		}
-	}
-
-	/**
-	 * Completes this {@link ThreadState}.
-	 */
-	protected void completeThread(JobActivateSet notifySet) {
-		// Flow (thread) complete
-		this.isFlowComplete = true;
-
-		// Wake up all tasks waiting on this thread permanently
-		if (this.threadMonitor != null) {
-			this.threadMonitor.notifyPermanently(notifySet);
-		}
-
-		// Thread complete
-		this.processState.threadComplete(this);
+		// Create the thread monitor
+		this.threadMonitor = flowMetaData.getFlowManager().createAssetMonitor(
+				this);
 	}
 
 	/*
@@ -198,14 +192,20 @@ public class ThreadStateImpl implements ThreadState, Asset {
 
 	@Override
 	public Flow createFlow(FlowMetaData<?> flowMetaData) {
-		// Create the flow
-		Flow flow = new FlowImpl(this, this.flows);
 
-		// Add the active flows
-		this.flows.addLinkedListEntry(flow);
+		// Create and register the activate flow
+		Flow flow = new FlowImpl(this, this.activeFlows);
+		this.activeFlows.addLinkedListEntry(flow);
 
 		// Return the flow
 		return flow;
+	}
+
+	@Override
+	public void flowComplete(Flow flow, JobNodeActivateSet activateSet) {
+		// Remove flow from listing.
+		// Will trigger thread complete if last flow of thread.
+		flow.removeFromLinkedList(activateSet);
 	}
 
 	@Override
@@ -225,13 +225,13 @@ public class ThreadStateImpl implements ThreadState, Asset {
 
 	@Override
 	public void escalationStart(JobNode currentTaskNode,
-			JobActivateSet notifySet) {
+			JobNodeActivateSet notifySet) {
 		this.isEscalating = true;
 	}
 
 	@Override
 	public void escalationComplete(JobNode currentTaskNode,
-			JobActivateSet notifySet) {
+			JobNodeActivateSet notifySet) {
 		this.isEscalating = false;
 	}
 
@@ -259,7 +259,7 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 */
 
 	@Override
-	public boolean waitOnFlow(JobNode jobNode, JobActivateSet notifySet) {
+	public boolean waitOnFlow(JobNode jobNode, JobNodeActivateSet notifySet) {
 
 		// Determine if the same thread
 		if (this == jobNode.getFlow().getThreadState()) {
@@ -267,9 +267,9 @@ public class ThreadStateImpl implements ThreadState, Asset {
 			return false;
 		}
 
-		// Return whether task is waiting on this thread.
+		// Return whether job is waiting on this thread.
 		// Note: thread may already be complete.
-		return this.threadMonitor.wait(jobNode, notifySet);
+		return this.threadMonitor.waitOnAsset(jobNode, notifySet);
 	}
 
 	/*
@@ -277,13 +277,8 @@ public class ThreadStateImpl implements ThreadState, Asset {
 	 */
 
 	@Override
-	public Object getAssetLock() {
-		return this.getThreadLock();
-	}
-
-	@Override
-	public void reportOnAsset(AssetReport report) {
-		// TODO implement asset reporting on a ThreadState
+	public void checkOnAsset(CheckAssetContext report) {
+		// TODO implement checking on ThreadState as an Asset
 	}
 
 }

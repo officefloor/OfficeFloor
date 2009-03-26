@@ -39,47 +39,34 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E, R>, R>
 	private E tail = null;
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedList#getHead()
+	 * ====================== LinkedList ====================================
 	 */
+
+	@Override
 	public E getHead() {
 		return this.head;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedList#setHead(E)
-	 */
+	@Override
 	public void setHead(E head) {
 		this.head = head;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedList#getTail()
-	 */
+	@Override
 	public E getTail() {
 		return this.tail;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedList#setTail(E)
-	 */
+	@Override
 	public void setTail(E tail) {
 		this.tail = tail;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedList#addLinkedListEntry(E)
-	 */
+	@Override
 	public void addLinkedListEntry(E entry) {
+	
+		// TODO do not re-add entry to linked list
+		
 		// Append to end of linked list
 		if (this.head == null) {
 			// Empty linked list (first entry)
@@ -91,12 +78,9 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E, R>, R>
 		this.tail = entry;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedList#purgeLinkedList(java.lang.Object)
-	 */
+	@Override
 	public E purgeLinkedList(R removeParameter) {
+	
 		// Obtain the head of list
 		E entry = this.head;
 
@@ -113,12 +97,9 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E, R>, R>
 		return entry;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedList#copyLinkedList()
-	 */
+	@Override
 	public LinkedListItem<E> copyLinkedList() {
+		
 		// Determine if have items in list
 		if (this.head == null) {
 			// No items
@@ -141,54 +122,49 @@ public abstract class AbstractLinkedList<E extends LinkedListEntry<E, R>, R>
 		// Return the copied list
 		return currentItem;
 	}
-}
-
-/**
- * Implementation of the {@link LinkedListItem}.
- * 
- * @author Daniel
- */
-class LinkedListItemImpl<E extends LinkedListEntry<E, R>, R> implements
-		LinkedListItem<E> {
 
 	/**
-	 * {@link LinkedListEntry}.
+	 * Implementation of the {@link LinkedListItem}.
 	 */
-	protected final E entry;
+	private static class LinkedListItemImpl<E extends LinkedListEntry<E, R>, R>
+			implements LinkedListItem<E> {
 
-	/**
-	 * Next {@link LinkedListItem}.
-	 */
-	protected final LinkedListItem<E> next;
+		/**
+		 * {@link LinkedListEntry}.
+		 */
+		private final E entry;
 
-	/**
-	 * Initiate.
-	 * 
-	 * @param entry
-	 *            {@link LinkedListEntry}.
-	 * @param next
-	 *            Next {@link LinkedListItem}.
-	 */
-	LinkedListItemImpl(E entry, LinkedListItem<E> next) {
-		this.entry = entry;
-		this.next = next;
+		/**
+		 * Next {@link LinkedListItem}.
+		 */
+		private final LinkedListItem<E> next;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param entry
+		 *            {@link LinkedListEntry}.
+		 * @param next
+		 *            Next {@link LinkedListItem}.
+		 */
+		public LinkedListItemImpl(E entry, LinkedListItem<E> next) {
+			this.entry = entry;
+			this.next = next;
+		}
+
+		/*
+		 * ====================== LinkedListItem =============================
+		 */
+		
+		@Override
+		public E getEntry() {
+			return this.entry;
+		}
+
+		@Override
+		public LinkedListItem<E> getNext() {
+			return this.next;
+		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedListItem#getEntry()
-	 */
-	public E getEntry() {
-		return this.entry;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.frame.internal.structure.LinkedListItem#getNext()
-	 */
-	public LinkedListItem<E> getNext() {
-		return this.next;
-	}
 }

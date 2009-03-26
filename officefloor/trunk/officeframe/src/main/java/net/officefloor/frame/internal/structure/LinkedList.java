@@ -19,6 +19,8 @@ package net.officefloor.frame.internal.structure;
 /**
  * Linked List.
  * 
+ * TODO change name to LinkedListSet and change to be unique entries.
+ * 
  * @author Daniel
  */
 public interface LinkedList<E extends LinkedListEntry<E, R>, R> {
@@ -57,7 +59,8 @@ public interface LinkedList<E extends LinkedListEntry<E, R>, R> {
 	 * Adds a {@link LinkedListEntry} to this {@link LinkedList}.
 	 * 
 	 * @param entry
-	 *            {@link LinkedListEntry} to be added to this {@link LinkedList}.
+	 *            {@link LinkedListEntry} to be added to this {@link LinkedList}
+	 *            .
 	 */
 	void addLinkedListEntry(E entry);
 

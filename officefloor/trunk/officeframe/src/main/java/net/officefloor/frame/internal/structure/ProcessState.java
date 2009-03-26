@@ -22,6 +22,7 @@ import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
@@ -71,8 +72,16 @@ public interface ProcessState extends FlowFuture {
 	 * 
 	 * @param thread
 	 *            {@link ThreadState} that has completed.
+	 * @param activeSet
+	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
+	 *            waiting on this {@link ProcessState} if all
+	 *            {@link ThreadState} instances of this {@link ProcessState} are
+	 *            complete. This is unlikely to be used but is available for
+	 *            {@link ManagedObject} instances bound to this
+	 *            {@link ProcessState} requiring unloading (rather than relying
+	 *            on the {@link OfficeManager}).
 	 */
-	void threadComplete(ThreadState thread);
+	void threadComplete(ThreadState thread, JobNodeActivateSet activeSet);
 
 	/**
 	 * Obtains the {@link ManagedObjectContainer} for the input index.

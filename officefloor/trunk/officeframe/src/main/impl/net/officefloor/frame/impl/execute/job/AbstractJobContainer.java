@@ -20,16 +20,18 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.error.ExecutionError;
+import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowMetaData;
-import net.officefloor.frame.internal.structure.JobActivatableSet;
-import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -47,7 +49,8 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel
  */
 public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData>
-		implements Job, JobNode, JobExecuteContext {
+		extends AbstractLinkedListEntry<JobNode, JobNodeActivateSet> implements
+		Job, JobNode, JobExecuteContext {
 
 	/**
 	 * {@link Flow}.
@@ -80,7 +83,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * Initiate.
 	 * 
 	 * @param flow
-	 *            {@link Flow} that this {@link Task} resides within.
+	 *            {@link Flow} containing this {@link Job}.
+	 * @param flowJobNodes
+	 *            {@link LinkedList} of the {@link JobNode} instances for the
+	 *            {@link Flow} containing this {@link Job}.
 	 * @param workContainer
 	 *            {@link WorkContainer} of the {@link Work} for this
 	 *            {@link Task}.
@@ -95,9 +101,11 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 *            {@link ManagedObject} instances that must be loaded before the
 	 *            {@link Task} may be executed.
 	 */
-	public AbstractJobContainer(Flow flow, WorkContainer<W> workContainer,
-			N nodeMetaData, JobNode parallelOwner,
-			ManagedObjectIndex[] requiredManagedObjects) {
+	public AbstractJobContainer(Flow flow,
+			LinkedList<JobNode, JobNodeActivateSet> flowJobNodes,
+			WorkContainer<W> workContainer, N nodeMetaData,
+			JobNode parallelOwner, ManagedObjectIndex[] requiredManagedObjects) {
+		super(flowJobNodes);
 		this.flow = flow;
 		this.workContainer = workContainer;
 		this.nodeMetaData = nodeMetaData;
@@ -161,8 +169,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		// Access Point: Team
 		// Locks: None
 
-		// Ensure notify and wait on flow
-		JobActivatableSet notifySet = this.nodeMetaData.createJobActivableSet();
+		// Ensure activate and wait on flow
+		JobNodeActivatableSet activateSet = this.nodeMetaData
+				.createJobActivableSet();
 		FlowAsset waitOnFlowAsset = null;
 		try {
 
@@ -212,7 +221,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 											.loadManagedObjects(
 													this.requiredManagedObjects,
 													executionContext, this,
-													notifySet);
+													activateSet);
 
 									// Flag Managed Objects are being loaded
 									this.jobState = JobState.ENSURE_MANAGED_OBJECTS_LOADED;
@@ -234,7 +243,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 												.isManagedObjectsReady(
 														this.requiredManagedObjects,
 														executionContext, this,
-														notifySet)) {
+														activateSet)) {
 											// Wakened up when ready
 											return true;
 										}
@@ -245,7 +254,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 											.coordinateManagedObjects(
 													this.requiredManagedObjects,
 													executionContext, this,
-													notifySet);
+													activateSet);
 
 									// Flag Managed Objects are coordinated
 									this.jobState = JobState.EXECUTE_JOB;
@@ -256,7 +265,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 											.isManagedObjectsReady(
 													this.requiredManagedObjects,
 													executionContext, this,
-													notifySet)) {
+													activateSet)) {
 										// Wakened up when ready
 										return true;
 									}
@@ -353,7 +362,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							}
 
 							// Complete this job
-							this.completeJob(notifySet);
+							this.completeJob(activateSet);
 
 						case COMPLETED:
 							// Already complete, thus return immediately
@@ -402,10 +411,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						JobNode escalationNode = null;
 
 						// Inform thread of escalation search
-						threadState.escalationStart(this, notifySet);
+						threadState.escalationStart(this, activateSet);
 						try {
 							// Escalation from this node, so nothing further
-							this.clearNodes(notifySet);
+							this.clearNodes(activateSet);
 
 							// Search upwards for an escalation handler
 							JobNode node = this;
@@ -417,7 +426,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 										.getEscalation(escalationCause);
 								if (escalation == null) {
 									// Clear node as not handles escalation
-									node.clearNodes(notifySet);
+									node.clearNodes(activateSet);
 								} else {
 									// Create the node for the escalation
 									escalationNode = this
@@ -442,7 +451,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 						} finally {
 							// Inform thread escalation search over
-							threadState.escalationComplete(this, notifySet);
+							threadState.escalationComplete(this, activateSet);
 						}
 
 						// Note: invoking escalation node is done outside
@@ -533,21 +542,21 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 			// Wait on flow
 			if (waitOnFlowAsset != null) {
-				waitOnFlowAsset.waitOnFlow(this, notifySet);
+				waitOnFlowAsset.waitOnFlow(this, activateSet);
 			}
 
 			// Ensure activate jobs
-			notifySet.activateJobs();
+			activateSet.activateJobNodes();
 		}
 	}
 
 	/**
 	 * Completes this {@link Job}.
 	 * 
-	 * @param notifySet
-	 *            {@link JobActivateSet}.
+	 * @param activateSet
+	 *            {@link JobNodeActivateSet}.
 	 */
-	private void completeJob(JobActivateSet notifySet) {
+	private void completeJob(JobNodeActivateSet activateSet) {
 
 		// Do nothing if already complete
 		if (this.jobState == JobState.COMPLETED) {
@@ -561,8 +570,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		ProcessState processState = this.flow.getThreadState()
 				.getProcessState();
 		synchronized (processState.getProcessLock()) {
-			this.workContainer.unloadWork();
-			this.flow.jobComplete(this, notifySet);
+			this.workContainer.unloadWork(activateSet);
+			this.flow.jobNodeComplete(this, activateSet);
 		}
 	}
 
@@ -941,8 +950,8 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	@Override
 	public final void activateJob() {
 
-		// Access Point: TaskContainer, ManagedObjectSource/Pool, ProjectManager
-		// Locks: None (possibly on another ThreadState)
+		// Access Point: JobContainer (outside ThreadState lock), OfficeManager
+		// Locks: None (must be the case to avoid dead-lock)
 
 		// Lock to ensure only one activation
 		synchronized (this.flow.getThreadState().getThreadLock()) {
@@ -1016,23 +1025,23 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	@Override
-	public final void clearNodes(JobActivateSet notifySet) {
+	public final void clearNodes(JobNodeActivateSet activateSet) {
 
 		// Complete this job
-		this.completeJob(notifySet);
+		this.completeJob(activateSet);
 
 		// Clear all the parallel jobs from this node
 		JobNode parallel = this.getParallelNode();
 		this.setParallelNode(null);
 		if (parallel != null) {
-			parallel.clearNodes(notifySet);
+			parallel.clearNodes(activateSet);
 		}
 
 		// Clear all the sequential jobs from this node
 		JobNode sequential = this.getNextNode();
 		this.setNextNode(null);
 		if (sequential != null) {
-			sequential.clearNodes(notifySet);
+			sequential.clearNodes(activateSet);
 		}
 	}
 

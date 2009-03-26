@@ -18,9 +18,13 @@ package net.officefloor.frame.internal.structure;
 
 import java.util.List;
 
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+
 /**
- * Container for an
- * {@link net.officefloor.frame.spi.administration.Administrator}.
+ * Container for an {@link Administrator}.
  * 
  * @author Daniel
  */
@@ -28,34 +32,34 @@ public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
 
 	/**
 	 * Obtains the {@link ExtensionInterfaceMetaData} to obtain the
-	 * {@link net.officefloor.frame.spi.managedobject.ManagedObject} extension
-	 * interfaces to provide to
-	 * {@link #doDuty(TaskDutyAssociation, I[], AdministratorContext)}.
+	 * {@link ManagedObject} extension interfaces to provide to the {@link Duty}
+	 * .
 	 * 
 	 * @param context
-	 *            {@link AdministratorContext} to do the administration within.
+	 *            {@link AdministratorContext} for the {@link Administrator} to
+	 *            administer within.
 	 * @return {@link ExtensionInterfaceMetaData} to obtain the
-	 *         {@link net.officefloor.frame.spi.managedobject.ManagedObject}
-	 *         extension interfaces to provide to
-	 *         {@link #doDuty(TaskDutyAssociation, I[], AdministratorContext)}.
+	 *         {@link ManagedObject} extension interfaces to provide to the
+	 *         {@link Duty}.
 	 */
 	ExtensionInterfaceMetaData<I>[] getExtensionInterfaceMetaData(
 			AdministratorContext context);
 
 	/**
-	 * Executes the {@link net.officefloor.frame.spi.administration.Duty}.
+	 * Executes the {@link Duty}.
 	 * 
 	 * @param taskDutyAssociation
-	 *            {@link TaskDutyAssociation} of
-	 *            {@link net.officefloor.frame.spi.administration.Duty} to
-	 *            execute for the {@link net.officefloor.frame.api.execute.Task}.
+	 *            {@link TaskDutyAssociation} of {@link Duty} to execute for the
+	 *            {@link Task}.
 	 * @param extensionInterfaces
 	 *            Extension interfaces to be administered.
 	 * @param context
-	 *            {@link AdministratorContext} to do the administration within.
+	 *            {@link AdministratorContext} for the {@link Duty} be executed
+	 *            within.
 	 * @throws Throwable
-	 *             If duty fails.
+	 *             If {@link Duty} fails.
 	 */
+	// TODO provide extension interfaces as array to doDuty (rather than List)
 	void doDuty(TaskDutyAssociation<A> taskDutyAssociation,
 			List<I> extensionInterfaces, AdministratorContext context)
 			throws Throwable;

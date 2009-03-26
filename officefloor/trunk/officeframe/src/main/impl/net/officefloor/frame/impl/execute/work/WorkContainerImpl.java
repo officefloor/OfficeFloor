@@ -26,8 +26,8 @@ import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.ExtensionInterfaceMetaData;
-import net.officefloor.frame.internal.structure.JobActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
@@ -106,7 +106,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	@Override
 	public boolean loadManagedObjects(
 			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode, JobActivateSet notifySet) {
+			JobNode jobNode, JobNodeActivateSet notifySet) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -163,7 +163,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	@Override
 	public void coordinateManagedObjects(
 			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode, JobActivateSet notifySet) {
+			JobNode jobNode, JobNodeActivateSet notifySet) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -208,7 +208,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	@Override
 	public boolean isManagedObjectsReady(
 			ManagedObjectIndex[] managedObjectIndexes, JobContext jobContext,
-			JobNode jobNode, JobActivateSet notifySet) {
+			JobNode jobNode, JobNodeActivateSet notifySet) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -398,7 +398,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 	}
 
 	@Override
-	public void unloadWork() {
+	public void unloadWork(JobNodeActivateSet activateSet) {
 
 		// Access Point: Job
 		// Locks: ThreadState -> ProcessState
@@ -406,7 +406,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		// Unload the work bound managed objects
 		for (ManagedObjectContainer container : this.managedObjects) {
 			if (container != null) {
-				container.unloadManagedObject();
+				container.unloadManagedObject(activateSet);
 			}
 		}
 	}

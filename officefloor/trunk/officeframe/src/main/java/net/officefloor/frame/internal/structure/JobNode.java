@@ -19,11 +19,15 @@ package net.officefloor.frame.internal.structure;
 import net.officefloor.frame.spi.team.Job;
 
 /**
+ * <p>
  * Node within the graph of {@link JobNode} instances to execute.
+ * <p>
+ * May be used as a {@link LinkedListEntry} in a list of {@link JobNode}
+ * instances for a {@link Flow}.
  * 
  * @author Daniel
  */
-public interface JobNode {
+public interface JobNode extends LinkedListEntry<JobNode, JobNodeActivateSet> {
 
 	/**
 	 * Activates the {@link Job} for this {@link JobNode}.

@@ -20,8 +20,12 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.spi.team.Job;
 
 /**
+ * <p>
  * Represents a sequence of {@link Job} instances that are completed one after
  * another.
+ * <p>
+ * May be used as a {@link LinkedListEntry} in a list of {@link Flow} instances
+ * for a {@link ThreadState}.
  * 
  * @author Daniel
  */
@@ -50,7 +54,8 @@ public interface Flow extends FlowAsset, FlowFuture,
 	 *            {@link JobNode} that has completed.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to add {@link JobNode} instances
-	 *            waiting on this {@link Flow}.
+	 *            waiting on this {@link Flow} if all {@link JobNode} instances
+	 *            of this {@link Flow} are complete.
 	 */
 	void jobNodeComplete(JobNode jobNode, JobNodeActivateSet activateSet);
 
