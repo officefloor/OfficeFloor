@@ -513,23 +513,24 @@ public abstract class AbstractOfficeConstructTestCase extends
 	 * Facade method to register a {@link ManagedObject}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected void constructManagedObject(String managedObjectName,
-			ManagedObject managedObject, String managingOffice) {
+	protected ManagedObjectBuilder<?> constructManagedObject(
+			String managedObjectName, ManagedObject managedObject,
+			String managingOffice) {
 
 		// Create the mock Managed Object Source meta-data
 		ManagedObjectSourceMetaData<?, ?> metaData = new MockManagedObjectSourceMetaData(
 				managedObject);
 
 		// Register the Managed Object
-		this.constructManagedObject(managedObjectName, metaData, managedObject,
-				managingOffice);
+		return this.constructManagedObject(managedObjectName, metaData,
+				managedObject, managingOffice);
 	}
 
 	/**
 	 * Facade method to register a {@link ManagedObject}.
 	 */
-	protected void constructManagedObject(final Object object,
-			String managedObjectName, String managingOffice) {
+	protected ManagedObjectBuilder<?> constructManagedObject(
+			final Object object, String managedObjectName, String managingOffice) {
 
 		// Create the wrapping Managed Object
 		ManagedObject managedObject = new ManagedObject() {
@@ -539,7 +540,7 @@ public abstract class AbstractOfficeConstructTestCase extends
 		};
 
 		// Register the managed object
-		this.constructManagedObject(managedObjectName, managedObject,
+		return this.constructManagedObject(managedObjectName, managedObject,
 				managingOffice);
 	}
 
