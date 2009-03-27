@@ -648,7 +648,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 			if (startTime != NO_ASYNC_OPERATION) {
 
 				// Determine if asynchronous operation has timed out
-				if ((context.getTime() - startTime) < this.metaData
+				if ((context.getTime() - startTime) > this.metaData
 						.getTimeout()) {
 
 					// Flag timeout on the managed object
