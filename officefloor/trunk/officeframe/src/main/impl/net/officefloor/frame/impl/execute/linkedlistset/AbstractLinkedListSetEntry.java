@@ -14,42 +14,53 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.asset;
+package net.officefloor.frame.impl.execute.linkedlistset;
 
-import junit.framework.TestCase;
-import net.officefloor.frame.internal.structure.Asset;
-import net.officefloor.frame.internal.structure.CheckAssetContext;
+import net.officefloor.frame.internal.structure.LinkedListSetEntry;
 
 /**
- * Mock {@link Asset}.
+ * Abstract {@link LinkedListSetEntry}.
  * 
  * @author Daniel
  */
-public class MockAsset implements Asset {
+public abstract class AbstractLinkedListSetEntry<E extends LinkedListSetEntry<E, O>, O>
+		implements LinkedListSetEntry<E, O> {
 
 	/**
-	 * Failure of this {@link Asset}.
+	 * Previous entry in the linked list.
 	 */
-	protected Throwable failure = null;
+	private E prev = null;
 
 	/**
-	 * Specifies the failure for this {@link Asset}.
-	 * 
-	 * @param failure
-	 *            Failure.
+	 * Next entry in the linked list.
 	 */
-	public void setFailure(Throwable failure) {
-		this.failure = failure;
-	}
+	private E next = null;
 
 	/*
-	 * ================= Asset ============================================
+	 * =================== LinkedListEntry =================================
+	 * 
+	 * Methods are final to stop accidental overriding by other linking
+	 * structures.
 	 */
 
 	@Override
-	public void checkOnAsset(CheckAssetContext context) {
-		TestCase
-				.fail("TODO checkOnAsset functionality changed and tests require changing");
+	public final E getPrev() {
+		return this.prev;
+	}
+
+	@Override
+	public final void setPrev(E entry) {
+		this.prev = entry;
+	}
+
+	@Override
+	public final E getNext() {
+		return this.next;
+	}
+
+	@Override
+	public final void setNext(E entry) {
+		this.next = entry;
 	}
 
 }

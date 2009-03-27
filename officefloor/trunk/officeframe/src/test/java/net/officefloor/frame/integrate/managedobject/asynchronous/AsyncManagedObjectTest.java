@@ -17,16 +17,19 @@
 package net.officefloor.frame.integrate.managedobject.asynchronous;
 
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.JobContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource;
 import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
 import net.officefloor.frame.test.ReflectiveWorkBuilder;
@@ -40,11 +43,6 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 
 	/**
-	 * {@link OfficeFloor}.
-	 */
-	private OfficeFloor officeFloor;
-
-	/**
 	 * {@link TestWork}.
 	 */
 	private TestWork work;
@@ -54,11 +52,6 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 */
 	private TestTeam team;
 
-	/**
-	 * {@link Job}.
-	 */
-	private Job taskContainer;
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -66,9 +59,9 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	 */
 	@Override
 	protected void setUp() throws Exception {
-		// Setup
 		super.setUp();
 
+		// Obtain the office name
 		String officeName = this.getOfficeName();
 
 		// Construct the managed object
@@ -83,156 +76,69 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		ReflectiveTaskBuilder taskBuilder = workBuilder.buildTask("task",
 				"TEAM");
 		taskBuilder.buildObject("MO", ManagedObjectScope.WORK);
+		taskBuilder.buildTaskContext();
 
 		// Construct team to run task
 		this.team = new TestTeam();
 		this.constructTeam("TEAM", this.team);
 
-		// Open the Office Floor
-		this.officeFloor = this.constructOfficeFloor();
-		this.officeFloor.openOfficeFloor();
-
-		// Execute the task (to obtain the task container)
-		WorkManager workManager = this.officeFloor.getOffice(officeName)
-				.getWorkManager("WORK");
-		workManager.invokeWork(null);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
-	 */
-	@Override
-	protected void tearDown() throws Exception {
-
-		// Close the Office Floor
-		this.officeFloor.closeOfficeFloor();
-
-		// Tear down
-		super.tearDown();
+		// Open the Office Floor and invoke work
+		OfficeFloor officeFloor = this.constructOfficeFloor();
+		officeFloor.openOfficeFloor();
+		officeFloor.getOffice(officeName).getWorkManager("WORK").invokeWork(
+				null);
 	}
 
 	/**
 	 * Ensures that able to load {@link ManagedObject} asynchronously.
 	 */
-	public void testAsynchronousLoadManagedObject() {
+	public void testAsynchronousSourceManagedObject() throws Exception {
 
-		// Execute task, attempting to load managed object
-		this.executeTask(false, true);
+		// Execute Job, attempting to load managed object
+		this.team.executeJob(false, true);
 
-		// Asynchronously load the task, ensuring task wakes up
-		this.loadManagedObject(new TestManagedObject(), true);
+		// Load managed object later, waiting for activation by OfficeManager
+		synchronized (this.team) {
+			this.team.isAssignedJob = false;
+			TestManagedObjectSource.loadManagedObject(new TestManagedObject());
+			this.team.wait(1000);
+			assertTrue("Job should be activated by OfficeManager",
+					this.team.isAssignedJob);
+		}
 
-		// Task awake, so on execution should complete
-		this.executeTask(true, true);
+		// Managed Object available, so should complete on next execution
+		this.team.executeJob(true, true);
 	}
 
 	/**
 	 * Ensures able to handle asynchronous operations by the
 	 * {@link ManagedObject}.
 	 */
-	public void testAsynchronousOperation() {
+	public void testAsynchronousOperation() throws Exception {
 
 		final TestManagedObject mo = new TestManagedObject();
 
-		// Load the managed object
-		this.executeTask(false, true);
-		this.loadManagedObject(mo, true);
+		// Load managed object and trigger asynchronous operation
+		TestManagedObjectSource.loadManagedObject(mo);
+		this.work.isTriggerAsynchronousOperation = true;
+		this.team.executeJob(true, false); // execute and need re-executing
 
-		// Indicate asynchronous operation, so should not execute task
-		mo.startAsynchronousOperation();
-		this.executeTask(false, true);
+		// Asynchronous operation in progress, so should not execute Job
+		this.team.executeJob(false, true);
 
-		// Asynchronous operation over, wake up the task
-		this.team.isAssignedTask = false;
-		mo.completeAsynchronousOperation();
-		assertTrue("Ensure task woken on asynchronous operation completion",
-				this.team.isAssignedTask);
-	}
-
-	/**
-	 * Executes the {@link Job}.
-	 * 
-	 * @param isExpectExecute
-	 *            Flag indicating whether the {@link TestWork} task should be
-	 *            executed.
-	 * @param isExpectComplete
-	 *            Flag indicating the expected return of
-	 *            {@link Job#doJob(JobContext)}.
-	 */
-	private void executeTask(boolean isExpectExecute, boolean isExpectComplete) {
-
-		// Reset the task being executed
-		this.work.isTaskExecuted = false;
-
-		// Execute the task
-		boolean isComplete = this.taskContainer.doJob(new JobContext() {
-
-			@Override
-			public boolean continueExecution() {
-				return true;
-			}
-
-			@Override
-			public long getTime() {
-				return System.currentTimeMillis();
-			}
-		});
-
-		// Ensure correct completion value
-		assertEquals("Task incorrect completion return", isExpectComplete,
-				isComplete);
-
-		// Ensure whether task should be executed
-		assertEquals("Task incorrect execution", isExpectExecute,
-				this.work.isTaskExecuted);
-	}
-
-	/**
-	 * Loads the {@link ManagedObject}.
-	 * 
-	 * @param managedObject
-	 *            {@link AsynchronousManagedObject}.
-	 * @param isExpectWakeup
-	 *            Flag indicating if {@link Task} is to be assigned to a
-	 *            {@link Team} (ultimately being waken).
-	 */
-	private void loadManagedObject(AsynchronousManagedObject managedObject,
-			boolean isExpectWakeup) {
-
-		// Reset task being assigned
-		this.team.isAssignedTask = false;
-
-		// Load the managed object
-		TestManagedObjectSource.loadManagedObject(managedObject);
-
-		// Ensure wake up of task
-		assertEquals("Task incorrect wakeup", isExpectWakeup,
-				this.team.isAssignedTask);
-	}
-
-	/**
-	 * Test {@link Work}.
-	 */
-	public class TestWork {
-
-		/**
-		 * Flag indicating if the task was executed.
-		 */
-		public boolean isTaskExecuted = false;
-
-		/**
-		 * Task for execution.
-		 * 
-		 * @param object
-		 *            Object from the {@link ManagedObject}.
-		 */
-		public void task(Object object) {
-			// Flag that the task was executed
-			this.isTaskExecuted = true;
+		// Notify asynchronous operation over, activate by OfficeManager
+		synchronized (this.team) {
+			// Indicate asynchronous operation over
+			this.team.isAssignedJob = false;
+			mo.listener.notifyComplete();
+			this.team.wait(1000);
+			assertTrue(
+					"On completion of async operation, Job should be activated by OfficeManager",
+					this.team.isAssignedJob);
 		}
+
+		// Asynchronous operation over, so should complete on next execution
+		this.team.executeJob(true, true);
 	}
 
 	/**
@@ -241,31 +147,73 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	private class TestTeam implements Team {
 
 		/**
-		 * Flag indicating if task was assigned to this {@link Team}.
+		 * {@link Job}.
 		 */
-		public boolean isAssignedTask = false;
+		private Job job;
+
+		/**
+		 * Flag indicating if {@link Job} was assigned to this {@link Team}.
+		 */
+		public boolean isAssignedJob = false;
+
+		/**
+		 * Executes the {@link Job}.
+		 * 
+		 * @param isExpectExecute
+		 *            Flag indicating whether the {@link TestWork} should be
+		 *            executed.
+		 * @param isExpectComplete
+		 *            Flag indicating the expected return of
+		 *            {@link Job#doJob(JobContext)}.
+		 */
+		public synchronized void executeJob(boolean isExpectExecute,
+				boolean isExpectComplete) {
+
+			// Reset the Job to not be executed
+			AsyncManagedObjectTest.this.work.isJobExecuted = false;
+
+			// Execute the job
+			boolean isComplete = this.job.doJob(new JobContext() {
+				@Override
+				public boolean continueExecution() {
+					return true;
+				}
+
+				@Override
+				public long getTime() {
+					return System.currentTimeMillis();
+				}
+			});
+
+			// Validate details
+			assertEquals("doJob return incorrect", isExpectComplete, isComplete);
+			assertEquals("Job execution incorrect", isExpectExecute,
+					AsyncManagedObjectTest.this.work.isJobExecuted);
+		}
 
 		/*
 		 * ==================== Team ================================
 		 */
 
 		@Override
-		public void assignJob(Job task) {
-			// Determine if setup call
-			if (AsyncManagedObjectTest.this.taskContainer == null) {
-				// Setup call, specify task and return
-				AsyncManagedObjectTest.this.taskContainer = task;
+		public synchronized void assignJob(Job job) {
+
+			// Determine if invoke Work assignment
+			if (this.job == null) {
+				this.job = job;
 				return;
 			}
 
-			// Ensure always the same task (as only one)
-			assertEquals("Incorrect task",
-					AsyncManagedObjectTest.this.taskContainer, task);
+			// Assignment after managed object source change
+			assertEquals("Incorrect job", this.job, job);
 
-			// Indicate task assigned to this team
-			assertEquals("Only 1 assigning of task expected", false,
-					this.isAssignedTask);
-			this.isAssignedTask = true;
+			// Indicate Job assigned to this team
+			assertEquals("Only 1 assigning of Job expected", false,
+					this.isAssignedJob);
+			this.isAssignedJob = true;
+
+			// Notify test waiting for OfficeManager activation
+			this.notify();
 		}
 
 		@Override
@@ -280,6 +228,118 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 	}
 
 	/**
+	 * Test {@link Work}.
+	 */
+	public class TestWork {
+
+		/**
+		 * Flag indicating if the {@link Job} was executed.
+		 */
+		public boolean isJobExecuted = false;
+
+		/**
+		 * Flag indicating if the {@link Job} will trigger an asynchronous
+		 * operation and not complete.
+		 */
+		public boolean isTriggerAsynchronousOperation = false;
+
+		/**
+		 * {@link Job} for execution.
+		 * 
+		 * @param object
+		 *            Object from the {@link ManagedObject}.
+		 * @param taskContext
+		 *            {@link TaskContext}.
+		 */
+		public void task(Object object, TaskContext<?, ?, ?> taskContext) {
+
+			// Flag that the Job was executed
+			this.isJobExecuted = true;
+
+			// Determine if trigger an asynchronous operation
+			if (this.isTriggerAsynchronousOperation) {
+				// Trigger asynchronous operation and not complete
+				TestManagedObject mo = (TestManagedObject) object;
+				mo.listener.notifyStarted();
+				taskContext.setComplete(false);
+
+				// Clear trigger flag (as triggered)
+				this.isTriggerAsynchronousOperation = false;
+			}
+		}
+	}
+
+	/**
+	 * Test {@link ManagedObjectSource}.
+	 */
+	public static class TestManagedObjectSource extends
+			AbstractAsyncManagedObjectSource<None, None> {
+
+		/**
+		 * {@link ManagedObjectUser}.
+		 */
+		private static ManagedObjectUser managedObjectUser = null;
+
+		/**
+		 * {@link ManagedObject} to be loaded immediately.
+		 */
+		private static ManagedObject managedObject = null;
+
+		/**
+		 * Loads the {@link ManagedObject}.
+		 * 
+		 * @param managedObject
+		 *            {@link ManagedObject}.
+		 */
+		public static void loadManagedObject(ManagedObject managedObject) {
+			if (managedObjectUser != null) {
+				// Load managed object
+				managedObjectUser.setManagedObject(managedObject);
+			} else {
+				// Store to source immediately
+				TestManagedObjectSource.managedObject = managedObject;
+			}
+		}
+
+		/**
+		 * Initiate.
+		 */
+		public TestManagedObjectSource() {
+			// Reset for next test
+			managedObjectUser = null;
+			managedObject = null;
+		}
+
+		/*
+		 * ============== AbstractAsyncManagedObjectSource =====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context)
+				throws Exception {
+			context.setManagedObjectClass(TestManagedObject.class);
+			context.setObjectClass(Object.class);
+		}
+
+		@Override
+		public void sourceManagedObject(ManagedObjectUser user) {
+			// Determine if load immediately
+			if (managedObject != null) {
+				// Load immediately
+				user.setManagedObject(managedObject);
+			} else {
+				// Store for later loading
+				managedObjectUser = user;
+			}
+		}
+	}
+
+	/**
 	 * Test {@link AsynchronousManagedObject}.
 	 */
 	private class TestManagedObject implements AsynchronousManagedObject {
@@ -287,21 +347,7 @@ public class AsyncManagedObjectTest extends AbstractOfficeConstructTestCase {
 		/**
 		 * {@link AsynchronousListener}.
 		 */
-		private AsynchronousListener listener;
-
-		/**
-		 * Flag started an asynchronous operation.
-		 */
-		public void startAsynchronousOperation() {
-			this.listener.notifyStarted();
-		}
-
-		/**
-		 * Flag completed an asynchronous operation.
-		 */
-		public void completeAsynchronousOperation() {
-			this.listener.notifyComplete();
-		}
+		public AsynchronousListener listener;
 
 		/*
 		 * ================= AsynchronousManagedObject =======================

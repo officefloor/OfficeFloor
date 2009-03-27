@@ -17,7 +17,7 @@
 package net.officefloor.frame.impl.execute.asset;
 
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
@@ -28,14 +28,14 @@ import net.officefloor.frame.internal.structure.JobNodeActivateSet;
  * 
  * @author Daniel
  */
-public class JobNodeAdapter extends
-		AbstractLinkedListEntry<JobNode, JobNodeActivateSet> implements JobNode {
+public class JobNodeAdapter extends AbstractLinkedListSetEntry<JobNode, Flow>
+		implements JobNode {
 
 	/**
 	 * {@link Flow}.
 	 */
 	private final Flow flow;
-
+	
 	/**
 	 * Initiate.
 	 * 
@@ -43,8 +43,16 @@ public class JobNodeAdapter extends
 	 *            {@link Flow} is always required.
 	 */
 	public JobNodeAdapter(Flow flow) {
-		super(null);
 		this.flow = flow;
+	}
+
+	/*
+	 * ==================== LinkedListSetEntry =========================
+	 */
+
+	@Override
+	public Flow getLinkedListSetOwner() {
+		return this.flow;
 	}
 
 	/*

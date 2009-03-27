@@ -16,21 +16,25 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.LinkedList;
-import net.officefloor.frame.internal.structure.LinkedListItem;
+import net.officefloor.frame.internal.structure.LinkedListSet;
+import net.officefloor.frame.internal.structure.LinkedListSetItem;
+import net.officefloor.frame.internal.structure.OfficeManager;
 
 /**
  * Implementation of the {@link AssetManager}.
  * 
  * @author Daniel
  */
-public class AssetManagerImpl implements AssetManager, CheckAssetContext {
+public class AssetManagerImpl extends
+		AbstractLinkedListSetEntry<AssetManager, OfficeManager> implements
+		AssetManager, CheckAssetContext {
 
 	/**
 	 * Indicates no current time has been specified.
@@ -38,12 +42,18 @@ public class AssetManagerImpl implements AssetManager, CheckAssetContext {
 	private static final long NO_TIME = 0;
 
 	/**
-	 * {@link LinkedList} of {@link AssetMonitor} instances requiring managing.
+	 * {@link OfficeManager} for this {@link AssetManager}.
 	 */
-	private final LinkedList<AssetMonitor, Object> monitors = new AbstractLinkedList<AssetMonitor, Object>() {
+	private final OfficeManager officeManager;
+
+	/**
+	 * {@link LinkedListSet} of {@link AssetMonitor} instances requiring
+	 * managing.
+	 */
+	private final LinkedListSet<AssetMonitor, AssetManager> monitors = new StrictLinkedListSet<AssetMonitor, AssetManager>() {
 		@Override
-		public void lastLinkedListEntryRemoved(Object removeParameter) {
-			// No action required
+		protected AssetManager getOwner() {
+			return AssetManagerImpl.this;
 		}
 	};
 
@@ -63,13 +73,51 @@ public class AssetManagerImpl implements AssetManager, CheckAssetContext {
 	 */
 	private AssetMonitor assetMonitor = null;
 
+	/**
+	 * Initiate.
+	 * 
+	 * @param officeManager
+	 *            {@link OfficeManager} for this {@link AssetManager}.
+	 */
+	public AssetManagerImpl(OfficeManager officeManager) {
+		this.officeManager = officeManager;
+	}
+
+	/*
+	 * ==================== LinkedListSetEntry ============================
+	 */
+
+	@Override
+	public OfficeManager getLinkedListSetOwner() {
+		return this.officeManager;
+	}
+
 	/*
 	 * ================ AssetManager ======================================
 	 */
 
 	@Override
+	public OfficeManager getOfficeManager() {
+		return this.officeManager;
+	}
+
+	@Override
 	public AssetMonitor createAssetMonitor(Asset asset) {
-		return new AssetMonitorImpl(asset, this, this.monitors);
+		return new AssetMonitorImpl(asset, this);
+	}
+
+	@Override
+	public void registerAssetMonitor(AssetMonitor monitor) {
+		synchronized (this.monitors) {
+			this.monitors.addEntry(monitor);
+		}
+	}
+
+	@Override
+	public void unregisterAssetMonitor(AssetMonitor monitor) {
+		synchronized (this.monitors) {
+			this.monitors.removeEntry(monitor);
+		}
 	}
 
 	@Override
@@ -79,9 +127,9 @@ public class AssetManagerImpl implements AssetManager, CheckAssetContext {
 		// Locks: None
 
 		// Obtain the list of monitors to check on
-		LinkedListItem<AssetMonitor> item;
+		LinkedListSetItem<AssetMonitor> item;
 		synchronized (this.monitors) {
-			item = this.monitors.copyLinkedList();
+			item = this.monitors.copyEntries();
 		}
 
 		try {
@@ -111,20 +159,6 @@ public class AssetManagerImpl implements AssetManager, CheckAssetContext {
 			// Ensure release references for current check
 			this.activateSet = null;
 			this.assetMonitor = null;
-		}
-	}
-
-	@Override
-	public void registerAssetMonitor(AssetMonitor monitor) {
-		synchronized (this.monitors) {
-			this.monitors.addLinkedListEntry(monitor);
-		}
-	}
-
-	@Override
-	public void unregisterAssetMonitor(AssetMonitor monitor) {
-		synchronized (this.monitors) {
-			monitor.removeFromLinkedList(null);
 		}
 	}
 

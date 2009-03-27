@@ -17,26 +17,28 @@
 package net.officefloor.frame.internal.structure;
 
 /**
- * Item copied out of a
- * {@link net.officefloor.frame.internal.structure.LinkedList}.
+ * Item copied out of a {@link LinkedListSet}.
  * 
  * @author Daniel
  */
-public interface LinkedListItem<E> {
+public interface LinkedListSetItem<E> {
 
 	/**
-	 * Obtains the {@link LinkedListEntry} copied out of the {@link LinkedList}.
+	 * Obtains the {@link LinkedListSetEntry} copied out of the
+	 * {@link LinkedListSet}.
 	 * 
-	 * @return {@link LinkedListEntry} copied out of the {@link LinkedList}.
+	 * @return {@link LinkedListSetEntry} copied out of the
+	 *         {@link LinkedListSet}.
 	 */
 	E getEntry();
 
 	/**
-	 * Obtains the next {@link LinkedListItem} copied out of the
-	 * {@link LinkedList}.
+	 * Obtains the next {@link LinkedListSetItem} copied out of the
+	 * {@link LinkedListSet}.
 	 * 
-	 * @return Next {@link LinkedListItem} copied out of the {@link LinkedList}.
+	 * @return Next {@link LinkedListSetItem} copied out of the
+	 *         {@link LinkedListSet}.
 	 */
-	LinkedListItem<E> getNext();
+	LinkedListSetItem<E> getNext();
 
 }

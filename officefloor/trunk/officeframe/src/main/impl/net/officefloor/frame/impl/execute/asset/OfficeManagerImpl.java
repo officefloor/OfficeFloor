@@ -20,15 +20,14 @@ import java.util.Timer;
 
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
-import net.officefloor.frame.internal.structure.LinkedList;
-import net.officefloor.frame.internal.structure.LinkedListEntry;
-import net.officefloor.frame.internal.structure.LinkedListItem;
+import net.officefloor.frame.internal.structure.LinkedListSet;
+import net.officefloor.frame.internal.structure.LinkedListSetEntry;
 import net.officefloor.frame.internal.structure.OfficeManager;
 
 /**
@@ -51,10 +50,10 @@ public class OfficeManagerImpl implements OfficeManager {
 	/**
 	 * List of {@link AssetManager} instances to be managed.
 	 */
-	private final LinkedList<OfficeAssetManager, Object> officeAssetManagers = new AbstractLinkedList<OfficeAssetManager, Object>() {
+	private final LinkedListSet<AssetManager, OfficeManager> assetManagers = new StrictLinkedListSet<AssetManager, OfficeManager>() {
 		@Override
-		public void lastLinkedListEntryRemoved(Object removeParameter) {
-			// Do nothing
+		protected OfficeManager getOwner() {
+			return OfficeManagerImpl.this;
 		}
 	};
 
@@ -62,10 +61,10 @@ public class OfficeManagerImpl implements OfficeManager {
 	 * Listing of {@link JobNodeActivatableSet} instances to be activated by the
 	 * {@link ManageOfficeThread}.
 	 */
-	private final LinkedList<ActivateJobNodes, Object> activateJobNodeSets = new AbstractLinkedList<ActivateJobNodes, Object>() {
+	private final LinkedListSet<ActivateJobNodes, OfficeManager> activateJobNodeSets = new StrictLinkedListSet<ActivateJobNodes, OfficeManager>() {
 		@Override
-		public void lastLinkedListEntryRemoved(Object removeParameter) {
-			// Do nothing
+		protected OfficeManager getOwner() {
+			return OfficeManagerImpl.this;
 		}
 	};
 
@@ -104,8 +103,7 @@ public class OfficeManagerImpl implements OfficeManager {
 		}
 
 		// Add the asset manager to be managed by this office manager
-		this.officeAssetManagers.addLinkedListEntry(new OfficeAssetManager(
-				assetManager));
+		this.assetManagers.addEntry(assetManager);
 	}
 
 	@Override
@@ -115,6 +113,10 @@ public class OfficeManagerImpl implements OfficeManager {
 		if (this.manageOfficeThread != null) {
 			throw new IllegalStateException("Office already being managed");
 		}
+
+		// Note: once the managing office thread is set no further AssetManagers
+		// can be added. As both methods are synchronised, the listing of
+		// AssetManagers is safe to use read only by the managing office thread.
 
 		// Create the manage office task and start running
 		this.manageOfficeThread = new ManageOfficeThread();
@@ -140,8 +142,12 @@ public class OfficeManagerImpl implements OfficeManager {
 	@Override
 	public synchronized void activateJobNodes(
 			JobNodeActivatableSet activatableSet) {
-		this.activateJobNodeSets.addLinkedListEntry(new ActivateJobNodes(
-				activatableSet));
+
+		// Add the jobs to activate
+		this.activateJobNodeSets.addEntry(new ActivateJobNodes(activatableSet));
+
+		// Notify the office manager thread to active jobs
+		this.notify();
 	}
 
 	@Override
@@ -203,18 +209,27 @@ public class OfficeManagerImpl implements OfficeManager {
 					nextCheckTime = System.currentTimeMillis() + remainingTime;
 				}
 
-				// Wait remaining time or need to activate jobs
+				// Wait remaining time or until need to activate jobs
 				ActivateJobNodes activateJobNodes;
 				synchronized (OfficeManagerImpl.this) {
-					try {
-						OfficeManagerImpl.this.wait(remainingTime);
-					} catch (InterruptedException ex) {
-						return; // stop managing office
-					}
 
-					// Obtain the list of job nodes to activate (while in lock)
+					// Before waiting, ensure no jobs require being activated.
+					// Jobs may have been added while checking on assets.
 					activateJobNodes = OfficeManagerImpl.this.activateJobNodeSets
-							.purgeLinkedList(null);
+							.purgeEntries();
+					if (activateJobNodes == null) {
+
+						// No jobs to activate, so wait
+						try {
+							OfficeManagerImpl.this.wait(remainingTime);
+						} catch (InterruptedException ex) {
+							return; // stop managing office
+						}
+
+						// Obtain jobs to activate (while in lock)
+						activateJobNodes = OfficeManagerImpl.this.activateJobNodeSets
+								.purgeEntries();
+					}
 				}
 
 				// First thing, activate jobs to progress office processing
@@ -235,26 +250,19 @@ public class OfficeManagerImpl implements OfficeManager {
 			JobNodeActivatableSetImpl activatableSet = new JobNodeActivatableSetImpl();
 			try {
 
-				// Obtain the list of asset managers to check
-				// TODO save memory by not copying Office AssetManager list
-				LinkedListItem<OfficeAssetManager> officeAssetManager;
-				synchronized (OfficeManagerImpl.this) {
-					officeAssetManager = OfficeManagerImpl.this.officeAssetManagers
-							.copyLinkedList();
-				}
-
 				// Check the assets of each asset manager
-				while (officeAssetManager != null) {
+				AssetManager assetManager = OfficeManagerImpl.this.assetManagers
+						.getHead();
+				while (assetManager != null) {
 					try {
-						officeAssetManager.getEntry().assetManager
-								.checkOnAssets(activatableSet);
+						assetManager.checkOnAssets(activatableSet);
 					} catch (Throwable ex) {
 						// TODO OfficeFloor EscalationHandler for Asset failures
 						System.err.println("Failed managing asset: "
 								+ ex.getMessage() + " ["
 								+ ex.getClass().getName() + "]");
 					}
-					officeAssetManager = officeAssetManager.getNext();
+					assetManager = assetManager.getNext();
 				}
 
 			} finally {
@@ -265,36 +273,11 @@ public class OfficeManagerImpl implements OfficeManager {
 	}
 
 	/**
-	 * {@link LinkedListEntry} containing the {@link AssetManager} instances
-	 * registered with this {@link OfficeManager}.
-	 */
-	private class OfficeAssetManager extends
-			AbstractLinkedListEntry<OfficeAssetManager, Object> {
-
-		/**
-		 * {@link AssetManager} registered with this {@link OfficeManager}.
-		 */
-		public final AssetManager assetManager;
-
-		/**
-		 * Initialise.
-		 * 
-		 * @param assetManager
-		 *            {@link AssetManager} registered with this
-		 *            {@link OfficeManager}.
-		 */
-		public OfficeAssetManager(AssetManager assetManager) {
-			super(OfficeManagerImpl.this.officeAssetManagers);
-			this.assetManager = assetManager;
-		}
-	}
-
-	/**
-	 * {@link LinkedListEntry} containing the {@link JobNodeActivatableSet} to
-	 * activate.
+	 * {@link LinkedListSetEntry} containing the {@link JobNodeActivatableSet}
+	 * to activate.
 	 */
 	private class ActivateJobNodes extends
-			AbstractLinkedListEntry<ActivateJobNodes, Object> {
+			AbstractLinkedListSetEntry<ActivateJobNodes, OfficeManager> {
 
 		/**
 		 * {@link JobNodeActivatableSet} to activate.
@@ -308,8 +291,12 @@ public class OfficeManagerImpl implements OfficeManager {
 		 *            {@link JobNodeActivatableSet} to activate.
 		 */
 		public ActivateJobNodes(JobNodeActivatableSet activatableSet) {
-			super(OfficeManagerImpl.this.activateJobNodeSets);
 			this.activatableSet = activatableSet;
+		}
+
+		@Override
+		public OfficeManager getLinkedListSetOwner() {
+			return OfficeManagerImpl.this;
 		}
 	}
 

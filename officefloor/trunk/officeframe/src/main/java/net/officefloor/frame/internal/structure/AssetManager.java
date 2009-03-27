@@ -17,11 +17,23 @@
 package net.officefloor.frame.internal.structure;
 
 /**
+ * <p>
  * {@link AssetManager} to manage {@link Asset} instances.
+ * <p>
+ * May be used as a {@link LinkedListSetEntry} in a list of {@link AssetManager}
+ * instances for a {@link OfficeManager}.
  * 
  * @author Daniel
  */
-public interface AssetManager {
+public interface AssetManager extends
+		LinkedListSetEntry<AssetManager, OfficeManager> {
+
+	/**
+	 * Obtains the {@link OfficeManager} managing this {@link AssetManager}.
+	 * 
+	 * @return {@link OfficeManager} managing this {@link AssetManager}.
+	 */
+	OfficeManager getOfficeManager();
 
 	/**
 	 * <p>

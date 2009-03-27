@@ -24,13 +24,13 @@ import net.officefloor.frame.spi.team.Job;
  * Represents a sequence of {@link Job} instances that are completed one after
  * another.
  * <p>
- * May be used as a {@link LinkedListEntry} in a list of {@link Flow} instances
- * for a {@link ThreadState}.
+ * May be used as a {@link LinkedListSetEntry} in a list of {@link Flow}
+ * instances for a {@link ThreadState}.
  * 
  * @author Daniel
  */
 public interface Flow extends FlowAsset, FlowFuture,
-		LinkedListEntry<Flow, JobNodeActivateSet> {
+		LinkedListSetEntry<Flow, ThreadState> {
 
 	/**
 	 * Creates a new {@link JobNode} contained in this {@link Flow}.

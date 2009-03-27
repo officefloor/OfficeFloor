@@ -77,7 +77,7 @@ public class AssetManagerFactoryImpl implements AssetManagerFactory {
 		}
 
 		// Create the asset manager
-		AssetManager assetManager = new AssetManagerImpl();
+		AssetManager assetManager = new AssetManagerImpl(this.officeManager);
 
 		// Register the asset manager
 		this.registry.put(assetManagerName, assetManager);

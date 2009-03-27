@@ -16,15 +16,16 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import junit.framework.TestCase;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
+import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.JobNode;
+import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.LinkedList;
+import net.officefloor.frame.internal.structure.LinkedListSet;
 
 /**
  * Implementation of the {@link AssetMonitor}.
@@ -32,7 +33,8 @@ import net.officefloor.frame.internal.structure.LinkedList;
  * @author Daniel
  */
 public class AssetMonitorImpl extends
-		AbstractLinkedListEntry<AssetMonitor, Object> implements AssetMonitor {
+		AbstractLinkedListSetEntry<AssetMonitor, AssetManager> implements
+		AssetMonitor {
 
 	/**
 	 * {@link Asset} being monitored.
@@ -56,14 +58,18 @@ public class AssetMonitorImpl extends
 	private Throwable failure = null;
 
 	/**
-	 * List of {@link JobNode} instances waiting on the {@link Asset}.
+	 * Set of {@link JobNode} instances waiting on the {@link Asset}.
 	 */
-	private final LinkedList<MonitoredJobNode, Object> jobNodes = new AbstractLinkedList<MonitoredJobNode, Object>() {
+	private final LinkedListSet<MonitoredJobNode, AssetMonitor> jobNodes = new ComparatorLinkedListSet<MonitoredJobNode, AssetMonitor>() {
 		@Override
-		public void lastLinkedListEntryRemoved(Object removeParameter) {
-			// Unregister from the Asset Manager
-			AssetMonitorImpl.this.assetManager
-					.unregisterAssetMonitor(AssetMonitorImpl.this);
+		protected AssetMonitor getOwner() {
+			return AssetMonitorImpl.this;
+		}
+
+		@Override
+		protected boolean isEqual(MonitoredJobNode entryA,
+				MonitoredJobNode entryB) {
+			return (entryA.jobNode == entryB.jobNode);
 		}
 	};
 
@@ -74,15 +80,19 @@ public class AssetMonitorImpl extends
 	 *            {@link Asset} to be managed.
 	 * @param assetManager
 	 *            {@link AssetManager} for managing this.
-	 * @param assetMonitors
-	 *            {@link LinkedList} of the {@link AssetMonitor} instances for
-	 *            the {@link AssetManager}.
 	 */
-	public AssetMonitorImpl(Asset asset, AssetManager assetManager,
-			LinkedList<AssetMonitor, Object> assetMonitors) {
-		super(assetMonitors);
+	public AssetMonitorImpl(Asset asset, AssetManager assetManager) {
 		this.asset = asset;
 		this.assetManager = assetManager;
+	}
+
+	/*
+	 * ======================= LinkedListSetEntry ==============================
+	 */
+
+	@Override
+	public AssetManager getLinkedListSetOwner() {
+		return this.assetManager;
 	}
 
 	/*
@@ -109,29 +119,14 @@ public class AssetMonitorImpl extends
 				activateFailure = this.failure;
 
 			} else {
-				// Determine if first Task
+				// Determine if first Job
 				if (this.jobNodes.getHead() == null) {
-					// Require monitoring, therefore register for monitoring
+					// Require monitoring, therefore register for management
 					this.assetManager.registerAssetMonitor(this);
 				}
 
-				// TODO test not re-add a JobNode (ie only have it added once)
-				boolean isAlreadyAdded = false;
-				MonitoredJobNode entry = this.jobNodes.getHead();
-				CHECK_ALREADY_ADDED: while (entry != null) {
-					if (entry.jobNode == jobNode) {
-						System.out.println("Already added");
-						isAlreadyAdded = true;
-						break CHECK_ALREADY_ADDED;
-					}
-					entry = entry.getNext();
-				}
-
-				// Add the monitored job (it not already added)
-				if (!isAlreadyAdded) {
-					this.jobNodes.addLinkedListEntry(new MonitoredJobNode(
-							jobNode, this.jobNodes));
-				}
+				// Add the monitored job (ensures job only added once)
+				this.jobNodes.addEntry(new MonitoredJobNode(jobNode));
 			}
 		}
 
@@ -177,25 +172,38 @@ public class AssetMonitorImpl extends
 	private void activate(JobNodeActivateSet activateSet, Throwable failure,
 			boolean isPermanent) {
 
-		// TODO handle null activateSet by sending to OfficeManager
+		// Determine if require OfficeManager to activate jobs
+		JobNodeActivatableSet activatableSet = null;
 		if (activateSet == null) {
-			TestCase.fail("null activateSet should be sent to OfficeManager");
+			// Require OfficeManager
+			activatableSet = new JobNodeActivatableSetImpl();
+			activateSet = activatableSet;
 		}
 
 		// Obtain the jobs to be notified
 		MonitoredJobNode monitoredJobNode;
 		synchronized (this.jobNodes) {
-			// Purge the list of tasks
-			monitoredJobNode = this.jobNodes.purgeLinkedList(null);
+
+			// Purge the list of jobs
+			monitoredJobNode = this.jobNodes.purgeEntries();
+
+			// Unregister from management if have jobs (as was managed)
+			if (monitoredJobNode != null) {
+				this.assetManager.unregisterAssetMonitor(this);
+			}
 
 			// Flag permanently activated (and possible failure).
 			// Can not reset once permanently activated.
 			if (isPermanent) {
 				this.isPermanentlyActivate = true;
-				// TODO once permanent failure of Asset can not clear failure
-				this.failure = failure;
+				if (failure != null) {
+					this.failure = failure;
+				}
 			}
 		}
+
+		// Determine if jobs to activate
+		boolean isJobsToActivate = (monitoredJobNode != null);
 
 		// Add the job nodes for activation
 		while (monitoredJobNode != null) {
@@ -206,13 +214,19 @@ public class AssetMonitorImpl extends
 			}
 			monitoredJobNode = monitoredJobNode.getNext();
 		}
+
+		// Use OfficeManager to activate if no activate set provided
+		if ((activatableSet != null) && (isJobsToActivate)) {
+			this.assetManager.getOfficeManager().activateJobNodes(
+					activatableSet);
+		}
 	}
 
 	/**
 	 * {@link JobNode} being monitored by the {@link AssetMonitor}.
 	 */
 	private class MonitoredJobNode extends
-			AbstractLinkedListEntry<MonitoredJobNode, Object> {
+			AbstractLinkedListSetEntry<MonitoredJobNode, AssetMonitor> {
 
 		/**
 		 * {@link JobNode} being monitored.
@@ -225,12 +239,15 @@ public class AssetMonitorImpl extends
 		 * @param jobNode
 		 *            {@link JobNode} being monitored.
 		 * @param linkedList
-		 *            {@link LinkedList}.
+		 *            {@link LinkedListSet}.
 		 */
-		public MonitoredJobNode(JobNode jobNode,
-				LinkedList<MonitoredJobNode, Object> linkedList) {
-			super(linkedList);
+		public MonitoredJobNode(JobNode jobNode) {
 			this.jobNode = jobNode;
+		}
+
+		@Override
+		public AssetMonitor getLinkedListSetOwner() {
+			return AssetMonitorImpl.this;
 		}
 	}
 

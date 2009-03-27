@@ -57,7 +57,7 @@ public class SequentialTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	public void doTest(Team team) throws Exception {
 
-		int SEQUENTIAL_COUNT = 10000000;
+		int SEQUENTIAL_COUNT = 1000000;
 		int MAX_RUN_TIME = 100;
 		this.setVerbose(true);
 

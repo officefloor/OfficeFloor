@@ -21,9 +21,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -776,13 +778,13 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	public void setVerbose(boolean isVerbose) {
 		this.isVerbose = isVerbose;
 	}
-	
+
 	/**
 	 * Creates a mock object registering the {@link MockControl}of the mock
 	 * object with registry for management.
 	 * 
 	 * @param classToMock
-	 *            {@link Class}to be mocked.
+	 *            {@link Class} to be mocked.
 	 * @return Mock object.
 	 */
 	@SuppressWarnings( { "unchecked" })
@@ -805,6 +807,40 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		// Return the mocked object
 		return mockObject;
+	}
+
+	/**
+	 * Creates a mock object that synchronises on its {@link MockControl} before
+	 * making any method calls.
+	 * 
+	 * @param interfaceToMock
+	 *            {@link Class} to mock.
+	 * @return Mock object.
+	 */
+	@SuppressWarnings("unchecked")
+	public final <M> M createSynchronizedMock(Class<M> interfaceToMock) {
+
+		// Create the mock object
+		final M mockObject = this.createMock(interfaceToMock);
+
+		// Obtain the control for the mock to synchronise on
+		final MockControl control = this.control(mockObject);
+
+		// Create a synchronised proxy wrapper around mock
+		M proxy = (M) Proxy.newProxyInstance(interfaceToMock.getClassLoader(),
+				new Class[] { interfaceToMock }, new InvocationHandler() {
+					@Override
+					public Object invoke(Object proxy, Method method,
+							Object[] args) throws Throwable {
+						// Invoke method with lock on control
+						synchronized (control) {
+							return method.invoke(mockObject, args);
+						}
+					}
+				});
+
+		// Return the synchronised proxy
+		return proxy;
 	}
 
 	/**
@@ -846,25 +882,30 @@ public abstract class OfficeFrameTestCase extends TestCase {
 			T recordedReturn) {
 		// Obtain the control
 		MockControl control = this.control(mockObject);
+		synchronized (control) {
 
-		// Handle primitive types
-		if (recordedReturn instanceof Boolean) {
-			control.setReturnValue(((Boolean) recordedReturn).booleanValue());
-		} else if (recordedReturn instanceof Character) {
-			control.setReturnValue(((Character) recordedReturn).charValue());
-		} else if (recordedReturn instanceof Short) {
-			control.setReturnValue(((Short) recordedReturn).shortValue());
-		} else if (recordedReturn instanceof Integer) {
-			control.setReturnValue(((Integer) recordedReturn).intValue());
-		} else if (recordedReturn instanceof Long) {
-			control.setReturnValue(((Long) recordedReturn).longValue());
-		} else if (recordedReturn instanceof Float) {
-			control.setReturnValue(((Float) recordedReturn).floatValue());
-		} else if (recordedReturn instanceof Double) {
-			control.setReturnValue(((Double) recordedReturn).doubleValue());
-		} else {
-			// Not primitive, so record as object
-			control.setReturnValue(recordedReturn);
+			// Handle primitive types
+			if (recordedReturn instanceof Boolean) {
+				control.setReturnValue(((Boolean) recordedReturn)
+						.booleanValue());
+			} else if (recordedReturn instanceof Character) {
+				control
+						.setReturnValue(((Character) recordedReturn)
+								.charValue());
+			} else if (recordedReturn instanceof Short) {
+				control.setReturnValue(((Short) recordedReturn).shortValue());
+			} else if (recordedReturn instanceof Integer) {
+				control.setReturnValue(((Integer) recordedReturn).intValue());
+			} else if (recordedReturn instanceof Long) {
+				control.setReturnValue(((Long) recordedReturn).longValue());
+			} else if (recordedReturn instanceof Float) {
+				control.setReturnValue(((Float) recordedReturn).floatValue());
+			} else if (recordedReturn instanceof Double) {
+				control.setReturnValue(((Double) recordedReturn).doubleValue());
+			} else {
+				// Not primitive, so record as object
+				control.setReturnValue(recordedReturn);
+			}
 		}
 	}
 
@@ -884,12 +925,16 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public final <T> void recordReturn(Object mockObject, T ignore,
 			T recordedReturn, ArgumentsMatcher matcher) {
+		// Obtain the control
+		MockControl control = this.control(mockObject);
+		synchronized (control) {
 
-		// Record the arguments matcher
-		this.control(mockObject).setMatcher(matcher);
+			// Record the arguments matcher
+			control.setMatcher(matcher);
 
-		// Record the return
-		this.recordReturn(mockObject, ignore, recordedReturn);
+			// Record the return
+			this.recordReturn(mockObject, ignore, recordedReturn);
+		}
 	}
 
 	/**
@@ -898,7 +943,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	protected final void replayMockObjects() {
 		// Flag all mock objects to be replayed
 		for (MockControl control : this.registry.values()) {
-			control.replay();
+			synchronized (control) {
+				control.replay();
+			}
 		}
 	}
 
@@ -908,7 +955,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	protected final void verifyMockObjects() {
 		// Verify all mock objects
 		for (MockControl control : this.registry.values()) {
-			control.verify();
+			synchronized (control) {
+				control.verify();
+			}
 		}
 	}
 

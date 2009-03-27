@@ -16,18 +16,19 @@
  */
 package net.officefloor.frame.impl.execute.asset;
 
-import net.officefloor.frame.impl.execute.job.AssetNotifySetImplAccess;
-import net.officefloor.frame.impl.execute.job.JobNodeActivatableSetImpl;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
+import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.LinkedList;
-import net.officefloor.frame.internal.structure.AssetMonitor;
+import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
+import net.officefloor.frame.internal.structure.JobNodeActivateSet;
+import net.officefloor.frame.internal.structure.OfficeManager;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.team.Job;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link AssetMonitor}.
@@ -35,21 +36,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class AssetMonitorTest extends OfficeFrameTestCase {
-
-	/**
-	 * {@link AssetMonitor} being tested.
-	 */
-	private AssetMonitor assetMonitor;
-
-	/**
-	 * {@link LinkedList} of the {@link AssetMonitor} instances.
-	 */
-	private final LinkedList<AssetMonitor, Object> monitors = new AbstractLinkedList<AssetMonitor, Object>() {
-		@Override
-		public void lastLinkedListEntryRemoved(Object removeParameter) {
-			// No action
-		}
-	};
 
 	/**
 	 * {@link Asset}.
@@ -63,31 +49,27 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 			.createMock(AssetManager.class);
 
 	/**
-	 * {@link Flow}.
+	 * {@link OfficeManager}.
 	 */
-	private final Flow flow = this.createMock(Flow.class);
+	private final OfficeManager officeManager = this
+			.createMock(OfficeManager.class);
 
 	/**
-	 * {@link ThreadState}.
+	 * {@link AssetMonitor} being tested.
 	 */
-	private final ThreadState threadState = this.createMock(ThreadState.class);
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
-	 */
-	@Override
-	protected void setUp() throws Exception {
-		// Create the Task Monitor
-		this.assetMonitor = new AssetMonitorImpl(this.asset, this.assetManager,
-				this.monitors);
-	}
+	private final AssetMonitor assetMonitor = new AssetMonitorImpl(this.asset,
+			this.assetManager);
 
 	/**
-	 * Ensure correct items are returned.
+	 * {@link JobNodeActivateSet}.
 	 */
-	public void testGetters() {
+	private final JobNodeActivateSet activateSet = this
+			.createMock(JobNodeActivateSet.class);
+
+	/**
+	 * Ensure correct {@link Asset} is returned.
+	 */
+	public void testGetAsset() {
 		assertEquals("Incorrect assset", this.asset, this.assetMonitor
 				.getAsset());
 	}
@@ -96,9 +78,8 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 * Ensure activate no {@link Job} instances.
 	 */
 	public void testActivateNoJobs() {
-		// Notify jobs (should do nothing)
 		this.replayMockObjects();
-		this.doActivateJobNodes(false);
+		this.assetMonitor.activateJobNodes(this.activateSet, false);
 		this.verifyMockObjects();
 	}
 
@@ -106,30 +87,42 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 * Ensure activates the {@link Job} instances.
 	 */
 	public void testActivateJobs() {
-		// Create the Job Nodes
-		MockJobNode taskOne = new MockJobNode(this.flow);
-		MockJobNode taskTwo = new MockJobNode(this.flow);
 
-		// Record mock objects
-		this.recordAssetManagerRegistration();
-		this.recordJobNodeActivation(taskOne);
-		this.recordJobNodeActivation(taskTwo);
+		// Only first job should cause registering with AssetManager
+		final JobNode jobOne = this.createMock(JobNode.class);
+		final JobNode jobTwo = this.createMock(JobNode.class);
 
-		// Replay
+		// Record
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(jobOne);
+		this.activateSet.addJobNode(jobTwo);
+
+		// Add both jobs and activate them
 		this.replayMockObjects();
+		this.assetMonitor.waitOnAsset(jobOne, this.activateSet);
+		this.assetMonitor.waitOnAsset(jobTwo, this.activateSet);
+		this.assetMonitor.activateJobNodes(this.activateSet, false);
+		this.verifyMockObjects();
+	}
 
-		// Tasks to wait on monitor
-		this.doWait(taskOne, true);
-		this.doWait(taskTwo, true);
-		assertFalse("Task one should not be activated", taskOne.isActivated);
-		assertFalse("Task two should not be activated", taskTwo.isActivated);
+	/**
+	 * Ensure {@link JobNode} only added once on waiting.
+	 */
+	public void testWaitOnJobTwice() {
 
-		// Notify the tasks
-		this.doActivateJobNodes(false);
-		assertTrue("Task one should be activated", taskOne.isActivated);
-		assertTrue("Task two should be activated", taskTwo.isActivated);
+		final JobNode job = this.createMock(JobNode.class);
 
-		// Verify
+		// Record
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(job);
+
+		// Add job, add job again, activate
+		this.replayMockObjects();
+		this.assetMonitor.waitOnAsset(job, this.activateSet);
+		this.assetMonitor.waitOnAsset(job, this.activateSet);
+		this.assetMonitor.activateJobNodes(this.activateSet, false);
 		this.verifyMockObjects();
 	}
 
@@ -137,61 +130,92 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 * Ensure able to reuse the {@link AssetMonitor}.
 	 */
 	public void testActivateJobAgain() {
-		// Create the Job Nodes
-		MockJobNode taskOne = new MockJobNode(this.flow);
-		MockJobNode taskTwo = new MockJobNode(this.flow);
 
-		// Record waiting on tasks twice (for each wait/notify)
-		this.recordAssetManagerRegistration();
-		this.recordJobNodeActivation(taskOne);
-		this.recordAssetManagerRegistration();
-		this.recordJobNodeActivation(taskTwo);
+		final JobNode jobOne = this.createMock(JobNode.class);
+		final JobNode jobTwo = this.createMock(JobNode.class);
+		final AssetMonitor markPosition = this.createMock(AssetMonitor.class);
 
-		// Replay
+		// Record
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(jobOne);
+		this.assetManager.registerAssetMonitor(markPosition); // mark call
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(jobTwo);
+
+		// Add job, activate, add another job, activate
 		this.replayMockObjects();
+		this.assetMonitor.waitOnAsset(jobOne, this.activateSet);
+		this.assetMonitor.activateJobNodes(this.activateSet, false);
+		this.assetManager.registerAssetMonitor(markPosition); // mark call
+		this.assetMonitor.waitOnAsset(jobTwo, this.activateSet);
+		this.assetMonitor.activateJobNodes(this.activateSet, false);
+		this.verifyMockObjects();
+	}
 
-		// Wait and notify on first task
-		this.doWait(taskOne, true);
-		this.doActivateJobNodes(false);
-		assertTrue("Task one should be activated", taskOne.isActivated);
+	/**
+	 * Ensure activate {@link JobNode} and then on activate again do nothing.
+	 */
+	public void testActivateJobThenActivateNothing() {
 
-		// Wait and notify on second task
-		this.doWait(taskTwo, true);
-		this.doActivateJobNodes(false);
-		assertTrue("Task two should be activated", taskOne.isActivated);
+		final JobNode jobOne = this.createMock(JobNode.class);
 
-		// Verify
+		// Record
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(jobOne);
+
+		// Add job, activate, activate again
+		this.replayMockObjects();
+		this.assetMonitor.waitOnAsset(jobOne, this.activateSet);
+		this.assetMonitor.activateJobNodes(this.activateSet, false);
+		this.assetMonitor.activateJobNodes(this.activateSet, false);
 		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure activates the {@link Job} instances permanently.
 	 */
-	public void testActivatePermantly() {
-		// Create the Job Nodes
-		MockJobNode taskOne = new MockJobNode(this.flow);
-		MockJobNode taskTwo = new MockJobNode(this.flow);
+	public void testActivatePermanently() {
 
-		// Record waiting on tasks only once
-		this.recordAssetManagerRegistration();
-		this.recordJobNodeActivation(taskOne);
+		final JobNode jobOne = this.createMock(JobNode.class);
+		final JobNode jobTwo = this.createMock(JobNode.class);
 
-		// Replay
+		// Record
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(jobOne);
+		this.activateSet.addJobNode(jobTwo);
+
+		// Add job, activate permanently, add another job
 		this.replayMockObjects();
+		this.assetMonitor.waitOnAsset(jobOne, this.activateSet);
+		this.assetMonitor.activateJobNodes(this.activateSet, true);
+		this.assetMonitor.waitOnAsset(jobTwo, this.activateSet);
+		this.verifyMockObjects();
+	}
 
-		// Wait and permanently notify task one
-		this.doWait(taskOne, true);
-		assertFalse("Task one should not be activated", taskOne.isActivated);
-		this.doActivateJobNodes(true);
-		assertTrue("Task one should be activated", taskOne.isActivated);
+	/**
+	 * Ensure activates the {@link Job} instances permanently.
+	 */
+	public void testOncePermanentAlwaysPermanent() {
 
-		// Can no longer wait on monitor (and not register with Asset Manager)
-		this.doWait(taskTwo, false);
-		assertFalse("Task two should not be activated", taskTwo.isActivated);
-		this.doActivateJobNodes(false);
-		assertFalse("Task two should not be activated", taskTwo.isActivated);
+		final JobNode jobOne = this.createMock(JobNode.class);
+		final JobNode jobTwo = this.createMock(JobNode.class);
 
-		// Verify
+		// Record
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(jobOne);
+		this.activateSet.addJobNode(jobTwo);
+
+		// Add job, activate permanently, activate, add another job
+		this.replayMockObjects();
+		this.assetMonitor.waitOnAsset(jobOne, this.activateSet);
+		this.assetMonitor.activateJobNodes(this.activateSet, true);
+		this.assetMonitor.activateJobNodes(this.activateSet, false);
+		this.assetMonitor.waitOnAsset(jobTwo, this.activateSet);
 		this.verifyMockObjects();
 	}
 
@@ -200,33 +224,21 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testFailJobs() {
 
-		// Create the failure
 		Throwable failure = new Exception();
+		final JobNode jobOne = this.createMock(JobNode.class);
+		final JobNode jobTwo = this.createMock(JobNode.class);
 
-		// Create the Job Nodes
-		MockJobNode taskOne = new MockJobNode(this.flow);
-		MockJobNode taskTwo = new MockJobNode(this.flow);
+		// Record
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(jobOne, failure);
+		this.activateSet.addJobNode(jobTwo, failure);
 
-		// Record waiting on tasks only once
-		this.recordAssetManagerRegistration();
-		this.recordJobNodeActivation(taskOne, failure);
-		this.recordJobNodeActivation(taskTwo, failure);
-
-		// Replay
+		// Add both jobs and fail them
 		this.replayMockObjects();
-
-		// Wait on task containers
-		this.doWait(taskOne, true);
-		this.doWait(taskTwo, true);
-		assertFalse("Task one should not be activated", taskOne.isActivated);
-		assertFalse("Task two should not be activated", taskTwo.isActivated);
-
-		// Notify the tasks of failure
-		this.doFailJobNodes(failure, false);
-		assertTrue("Task one should be activated", taskOne.isActivated);
-		assertTrue("Task two should be activated", taskTwo.isActivated);
-
-		// Verify
+		this.assetMonitor.waitOnAsset(jobOne, this.activateSet);
+		this.assetMonitor.waitOnAsset(jobTwo, this.activateSet);
+		this.assetMonitor.failJobNodes(this.activateSet, failure, false);
 		this.verifyMockObjects();
 	}
 
@@ -235,147 +247,97 @@ public class AssetMonitorTest extends OfficeFrameTestCase {
 	 */
 	public void testFailPermanently() {
 
-		// Create the failure
 		Throwable failure = new Exception();
+		final JobNode jobOne = this.createMock(JobNode.class);
+		final JobNode jobTwo = this.createMock(JobNode.class);
 
-		// Create the Job Nodes
-		MockJobNode taskOne = new MockJobNode(this.flow);
-		MockJobNode taskTwo = new MockJobNode(this.flow);
+		// Record
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(jobOne, failure);
+		this.activateSet.addJobNode(jobTwo, failure);
 
-		// Record waiting on tasks only once
-		this.recordAssetManagerRegistration();
-		this.recordJobNodeActivation(taskOne, failure);
-
-		// Replay
+		// Add job, fail permanently, add another job
 		this.replayMockObjects();
-
-		// Wait and permanently fail task one
-		this.doWait(taskOne, true);
-		assertFalse("Task one should not be activated", taskOne.isActivated);
-		this.doFailJobNodes(failure, true);
-		assertTrue("Task one should be activated", taskOne.isActivated);
-
-		// Can no longer wait on monitor (and not register with Asset Manager)
-		this.doWait(taskTwo, false);
-		assertFalse("Task two should not be activated", taskTwo.isActivated);
-		this.doActivateJobNodes(false);
-		assertFalse("Task two should not be activated", taskTwo.isActivated);
-
-		// Verify
+		this.assetMonitor.waitOnAsset(jobOne, this.activateSet);
+		this.assetMonitor.failJobNodes(this.activateSet, failure, true);
+		this.assetMonitor.waitOnAsset(jobTwo, this.activateSet);
 		this.verifyMockObjects();
 	}
 
 	/**
-	 * Records {@link AssetManager} registration.
+	 * Ensure activates the {@link Job} instances permanently with a failure.
 	 */
-	private void recordAssetManagerRegistration() {
+	public void testOncePermanentFailureAlwaysFailure() {
+
+		Throwable failure = new Exception();
+		final JobNode jobOne = this.createMock(JobNode.class);
+		final JobNode jobTwo = this.createMock(JobNode.class);
+
+		// Record
 		this.assetManager.registerAssetMonitor(this.assetMonitor);
 		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.activateSet.addJobNode(jobOne, failure);
+		this.activateSet.addJobNode(jobTwo, failure);
+
+		// Add job, fail permanently, activate permanently, add another job
+		this.replayMockObjects();
+		this.assetMonitor.waitOnAsset(jobOne, this.activateSet);
+		this.assetMonitor.failJobNodes(this.activateSet, failure, true);
+		this.assetMonitor.activateJobNodes(this.activateSet, true);
+		this.assetMonitor.waitOnAsset(jobTwo, this.activateSet);
+		this.verifyMockObjects();
 	}
 
 	/**
-	 * Records {@link JobNode} activation.
-	 * 
-	 * @param jobNode
-	 *            {@link JobNode}.
+	 * Ensure on <code>null</code> {@link JobNodeActivateSet} that uses
+	 * {@link OfficeManager} to activate {@link JobNode} instances.
 	 */
-	private void recordJobNodeActivation(JobNode jobNode) {
-		this.recordReturn(this.flow, this.flow.getThreadState(),
-				this.threadState);
-		this.recordReturn(this.threadState, this.threadState.getThreadLock(),
-				"Thread lock");
+	public void testActivateByOfficeManager() {
+
+		final JobNode job = this.createMock(JobNode.class);
+		final Flow flow = this.createMock(Flow.class);
+		final ThreadState threadState = this.createMock(ThreadState.class);
+
+		// Record
+		this.assetManager.registerAssetMonitor(this.assetMonitor);
+		this.assetManager.unregisterAssetMonitor(this.assetMonitor);
+		this.recordReturn(this.assetManager, this.assetManager
+				.getOfficeManager(), this.officeManager);
+		this.officeManager.activateJobNodes(null);
+		this.control(this.officeManager).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				JobNodeActivatableSet activatableSet = (JobNodeActivatableSet) actual[0];
+				activatableSet.activateJobNodes(); // verify in set
+				return true;
+			}
+		});
+		this.recordReturn(job, job.getFlow(), flow);
+		this.recordReturn(flow, flow.getThreadState(), threadState);
+		this.recordReturn(threadState, threadState.getThreadLock(),
+				"THREAD LOCK");
+		job.activateJob(); // triggered to indicate in set
+
+		// Add job and activate with no activate set
+		this.replayMockObjects();
+		this.assetMonitor.waitOnAsset(job, this.activateSet);
+		this.assetMonitor.activateJobNodes(null, false);
+		this.verifyMockObjects();
 	}
 
 	/**
-	 * Records {@link JobNode} activation.
-	 * 
-	 * @param jobNode
-	 *            {@link JobNode}.
-	 * @param cause
-	 *            {@link Throwable}.
+	 * To keep the {@link OfficeManager} contention down only use
+	 * {@link OfficeManager} if have {@link JobNode} instances to activate.
 	 */
-	private void recordJobNodeActivation(JobNode jobNode, Throwable cause) {
-		this.recordJobNodeActivation(jobNode);
-		this.threadState.setFailure(cause);
-	}
+	public void testUseOfficeManagerOnlyIfJobToActivate() {
 
-	/**
-	 * Has the {@link JobNode} wait on the {@link AssetMonitor}.
-	 * 
-	 * @param jobNode
-	 *            {@link JobNode}.
-	 * @param isExpectedWaitReturn
-	 *            Expected return from {@link AssetMonitor#wait(Job)}.
-	 */
-	private void doWait(JobNode jobNode, boolean isExpectedWaitReturn) {
-		JobNodeActivatableSetImpl notifySet = new JobNodeActivatableSetImpl();
-		assertEquals("Incorrect waiting", isExpectedWaitReturn,
-				this.assetMonitor.waitOnAsset(jobNode, notifySet));
-		if (isExpectedWaitReturn) {
-			// Waiting so should not be added
-			assertNull("Task should not be added for notifying",
-					AssetNotifySetImplAccess.tasks(notifySet).getHead());
-		} else {
-			// Ensure added as task to notify
-			assertNotNull("Task should be added for notifying",
-					AssetNotifySetImplAccess.tasks(notifySet).getHead());
-		}
-	}
+		// Nothing to record as should not do anything
 
-	/**
-	 * Activates the {@link JobNode} instances within the {@link AssetMonitor}.
-	 * 
-	 * @param isPermanent
-	 *            <code>true</code> if permanently activate.
-	 */
-	private void doActivateJobNodes(boolean isPermanent) {
-		JobNodeActivatableSetImpl activateSet = new JobNodeActivatableSetImpl();
-		this.assetMonitor.activateJobNodes(activateSet, isPermanent);
-		activateSet.activateJobNodes();
-	}
-
-	/**
-	 * Fails the {@link JobNode} instances within the {@link AssetMonitor}.
-	 * 
-	 * @param failure
-	 *            {@link Throwable} to fail {@link Job} instances with.
-	 * @param isPermanent
-	 *            <code>true</code> if permanently fail.
-	 */
-	private void doFailJobNodes(Throwable failure, boolean isPermanent) {
-		JobNodeActivatableSetImpl activateSet = new JobNodeActivatableSetImpl();
-		this.assetMonitor.failJobNodes(activateSet, failure, isPermanent);
-		activateSet.activateJobNodes();
-	}
-
-	/**
-	 * Mock {@link JobNode}.
-	 */
-	private static class MockJobNode extends JobNodeAdapter {
-
-		/**
-		 * Flag indicated if activated.
-		 */
-		public boolean isActivated = false;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param flow
-		 *            {@link Flow}.
-		 */
-		public MockJobNode(Flow flow) {
-			super(flow);
-		}
-
-		/*
-		 * ================== JobNodeAdapter ===============================
-		 */
-
-		@Override
-		public void activateJob() {
-			this.isActivated = true;
-		}
+		// No jobs and no activate set passed
+		this.replayMockObjects();
+		this.assetMonitor.activateJobNodes(null, true);
+		this.verifyMockObjects();
 	}
 
 }

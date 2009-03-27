@@ -107,13 +107,13 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		// Create the Initial Flow
 		FlowMetaData initialFlowMetaData = new FlowMetaDataImpl(
 				FlowInstigationStrategyEnum.ASYNCHRONOUS,
-				this.getInitialNode(), new AssetManagerImpl());
+				this.getInitialNode(), new AssetManagerImpl(null));
 
 		// Create the Work Managed Object meta-data
 		ManagedObjectMetaDataImpl workMo = new ManagedObjectMetaDataImpl(
 				"WORK_MO", Object.class, this.workMoSource, null,
-				new AssetManagerImpl(), false, new AssetManagerImpl(), false,
-				null, 1000);
+				new AssetManagerImpl(null), false, new AssetManagerImpl(null),
+				false, null, 1000);
 		workMo.loadRemainingState(null, null);
 
 		// Create the Work meta-data
@@ -282,8 +282,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		// Consider the thread meta-data
 		ManagedObjectMetaDataImpl<?> threadMoMetaData = new ManagedObjectMetaDataImpl(
 				"THREAD_MO", Object.class, this.threadMoSource, null,
-				new AssetManagerImpl(), false, new AssetManagerImpl(), false,
-				null, 1000);
+				new AssetManagerImpl(null), false, new AssetManagerImpl(null),
+				false, null, 1000);
 		ThreadMetaData threadMetaData = new ThreadMetaDataImpl(
 				new ManagedObjectMetaData[] { threadMoMetaData },
 				new AdministratorMetaData[0]);
@@ -291,8 +291,8 @@ public abstract class AbstractTaskNodeTestCase<W extends Work> extends
 		// Create the process meta-data
 		ManagedObjectMetaDataImpl<?> processMoMetaData = new ManagedObjectMetaDataImpl(
 				"PROCESS_MO", Object.class, this.processMoSource, null,
-				new AssetManagerImpl(), true, new AssetManagerImpl(), false,
-				null, 1000);
+				new AssetManagerImpl(null), true, new AssetManagerImpl(null),
+				false, null, 1000);
 		processMoMetaData.loadRemainingState(null, null);
 		ProcessMetaData processMetaData = new ProcessMetaDataImpl(
 				new ManagedObjectMetaData[] { processMoMetaData },
