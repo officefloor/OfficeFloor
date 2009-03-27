@@ -25,8 +25,6 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -57,9 +55,6 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 * 
 	 * @param flow
 	 *            {@link Flow}.
-	 * @param flowJobNodes
-	 *            {@link LinkedList} of the {@link JobNode} instances for the
-	 *            {@link Flow} containing this {@link Job}.
 	 * @param workContainer
 	 *            {@link WorkContainer}.
 	 * @param adminMetaData
@@ -71,13 +66,11 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 * @param administeringTaskMetaData
 	 *            {@link TaskMetaData} of the {@link Task} being administered.
 	 */
-	public DutyJob(Flow flow,
-			LinkedList<JobNode, JobNodeActivateSet> flowJobNodes,
-			WorkContainer<W> workContainer,
+	public DutyJob(Flow flow, WorkContainer<W> workContainer,
 			AdministratorMetaData<I, A> adminMetaData,
 			TaskDutyAssociation<A> taskDutyAssociation, JobNode parallelOwner,
 			TaskMetaData<?, ?, ?> administeringTaskMetaData) {
-		super(flow, flowJobNodes, workContainer, adminMetaData, parallelOwner,
+		super(flow, workContainer, adminMetaData, parallelOwner,
 				administeringTaskMetaData.getRequiredManagedObjects());
 		this.taskDutyAssociation = taskDutyAssociation;
 	}

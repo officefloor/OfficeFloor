@@ -57,7 +57,7 @@ public class RepeatTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	private void doTest(Team team) throws Exception {
 
-		int REPEAT_COUNT = 10000000;
+		int REPEAT_COUNT = 1000000;
 		int MAX_RUN_TIME = 100;
 		this.setVerbose(true);
 

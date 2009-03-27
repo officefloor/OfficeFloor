@@ -19,8 +19,8 @@ package net.officefloor.frame.impl.execute.flow;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.impl.execute.duty.DutyJob;
 import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.work.WorkContainerProxy;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
@@ -28,7 +28,7 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.LinkedList;
+import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.TaskDutyAssociation;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -41,18 +41,16 @@ import net.officefloor.frame.spi.team.Job;
  * 
  * @author Daniel
  */
-public class FlowImpl extends AbstractLinkedListEntry<Flow, JobNodeActivateSet>
+public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 		implements Flow {
 
 	/**
 	 * Activate {@link JobNode} instances for this {@link Flow}.
 	 */
-	private final LinkedList<JobNode, JobNodeActivateSet> activeJobNodes = new AbstractLinkedList<JobNode, JobNodeActivateSet>() {
+	private final LinkedListSet<JobNode, Flow> activeJobNodes = new StrictLinkedListSet<JobNode, Flow>() {
 		@Override
-		public void lastLinkedListEntryRemoved(JobNodeActivateSet activateSet) {
-			// Flow complete
-			FlowImpl.this.isFlowComplete = true;
-			FlowImpl.this.threadState.flowComplete(FlowImpl.this, activateSet);
+		protected Flow getOwner() {
+			return FlowImpl.this;
 		}
 	};
 
@@ -71,14 +69,18 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobNodeActivateSet>
 	 * 
 	 * @param threadState
 	 *            {@link ThreadState} containing this {@link Flow}.
-	 * @param threadFlows
-	 *            {@link LinkedList} of the {@link Flow} instances for the
-	 *            {@link ThreadState} containing this {@link Flow}.
 	 */
-	public FlowImpl(ThreadState threadState,
-			LinkedList<Flow, JobNodeActivateSet> threadFlows) {
-		super(threadFlows);
+	public FlowImpl(ThreadState threadState) {
 		this.threadState = threadState;
+	}
+
+	/*
+	 * ================== LinkedListSetEntry ================================
+	 */
+
+	@Override
+	public ThreadState getLinkedListSetOwner() {
+		return this.threadState;
 	}
 
 	/*
@@ -123,9 +125,8 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobNodeActivateSet>
 
 		// Create and register the active task job
 		AbstractJobContainer<?, ?> taskJob = new TaskJob(this,
-				this.activeJobNodes, taskWorkContainer, taskMetaData,
-				parallelNodeOwner, parameter);
-		this.activeJobNodes.addLinkedListEntry(taskJob);
+				taskWorkContainer, taskMetaData, parallelNodeOwner, parameter);
+		this.activeJobNodes.addEntry(taskJob);
 
 		// Load the task job
 		this.loadJob(firstLastJobs, taskJob);
@@ -205,10 +206,9 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobNodeActivateSet>
 
 			// Create and register the active duty job
 			AbstractJobContainer<?, ?> dutyJob = new DutyJob(this,
-					this.activeJobNodes, workContainer, adminMetaData,
-					taskDutyAssociation, parallelNodeOwner,
-					administeringTaskMetaData);
-			this.activeJobNodes.addLinkedListEntry(dutyJob);
+					workContainer, adminMetaData, taskDutyAssociation,
+					parallelNodeOwner, administeringTaskMetaData);
+			this.activeJobNodes.addEntry(dutyJob);
 
 			// Load the duty job
 			this.loadJob(firstLastJobs, dutyJob);
@@ -239,9 +239,12 @@ public class FlowImpl extends AbstractLinkedListEntry<Flow, JobNodeActivateSet>
 
 	@Override
 	public void jobNodeComplete(JobNode jobNode, JobNodeActivateSet activateSet) {
-		// Remove job node from listing.
-		// Will trigger flow complete if last job node of flow.
-		jobNode.removeFromLinkedList(activateSet);
+		// Remove JobNode from active JobNode listing
+		if (this.activeJobNodes.removeEntry(jobNode)) {
+			// Last active JobNode so flow is now complete
+			this.isFlowComplete = true;
+			this.threadState.flowComplete(this, activateSet);
+		}
 	}
 
 	@Override

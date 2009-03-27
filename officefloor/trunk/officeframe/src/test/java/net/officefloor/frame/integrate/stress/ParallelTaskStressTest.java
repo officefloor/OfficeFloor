@@ -61,7 +61,7 @@ public class ParallelTaskStressTest extends AbstractOfficeConstructTestCase {
 	 */
 	private void doTest(Team team) throws Exception {
 
-		int TRIGGER_COUNT = 1000;
+		int TRIGGER_COUNT = 100;
 		int PARALLEL_COUNT = 10000;
 		int MAX_RUN_TIME = 100;
 		this.setVerbose(true);

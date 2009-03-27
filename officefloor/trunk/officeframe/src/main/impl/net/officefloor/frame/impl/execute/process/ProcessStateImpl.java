@@ -23,7 +23,7 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
+import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
@@ -34,7 +34,7 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.LinkedList;
+import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -56,26 +56,10 @@ public class ProcessStateImpl implements ProcessState {
 	/**
 	 * Active {@link ThreadState} instances for this {@link ProcessState}.
 	 */
-	private final LinkedList<ThreadState, JobNodeActivateSet> activeThreads = new AbstractLinkedList<ThreadState, JobNodeActivateSet>() {
+	private final LinkedListSet<ThreadState, ProcessState> activeThreads = new StrictLinkedListSet<ThreadState, ProcessState>() {
 		@Override
-		public void lastLinkedListEntryRemoved(JobNodeActivateSet activateSet) {
-			// Process complete
-			synchronized (ProcessStateImpl.this.getProcessLock()) {
-
-				// Unload managed objects
-				for (int i = 0; i < ProcessStateImpl.this.managedObjectContainers.length; i++) {
-					ProcessStateImpl.this.managedObjectContainers[i]
-							.unloadManagedObject(activateSet);
-				}
-
-				// Notify process complete
-				for (ProcessCompletionListener listener : ProcessStateImpl.this.completionListeners) {
-					listener.processComplete();
-				}
-
-				// Flag the process now complete
-				ProcessStateImpl.this.isComplete = true;
-			}
+		protected ProcessState getOwner() {
+			return ProcessStateImpl.this;
 		}
 	};
 
@@ -192,11 +176,11 @@ public class ProcessStateImpl implements ProcessState {
 
 		// Create the thread
 		ThreadState threadState = new ThreadStateImpl(this.processMetaData
-				.getThreadMetaData(), this.activeThreads, this, flowMetaData);
+				.getThreadMetaData(), this, flowMetaData);
 
 		// Register as active thread
 		synchronized (this.getProcessLock()) {
-			this.activeThreads.addLinkedListEntry(threadState);
+			this.activeThreads.addEntry(threadState);
 		}
 
 		// Return the flow for the new thread
@@ -206,9 +190,28 @@ public class ProcessStateImpl implements ProcessState {
 	@Override
 	public void threadComplete(ThreadState thread,
 			JobNodeActivateSet activateSet) {
-		// Remove thread from listing.
-		// Will trigger process complete if last thread of process.
-		thread.removeFromLinkedList(activateSet);
+
+		// Remove thread from active thread listing
+		if (this.activeThreads.removeEntry(thread)) {
+
+			// No more active threads so process is complete
+			synchronized (this.getProcessLock()) {
+
+				// Notify process complete
+				for (ProcessCompletionListener listener : this.completionListeners) {
+					listener.processComplete();
+				}
+
+				// Unload managed objects
+				for (int i = 0; i < this.managedObjectContainers.length; i++) {
+					this.managedObjectContainers[i]
+							.unloadManagedObject(activateSet);
+				}
+
+				// Flag the process now complete
+				this.isComplete = true;
+			}
+		}
 	}
 
 	@Override

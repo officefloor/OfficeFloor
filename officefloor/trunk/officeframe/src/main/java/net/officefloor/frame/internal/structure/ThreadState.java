@@ -22,13 +22,13 @@ import net.officefloor.frame.api.execute.FlowFuture;
  * <p>
  * State of a thread within the {@link ProcessState}.
  * <p>
- * May be used as a {@link LinkedListEntry} in a list of {@link ThreadState}
+ * May be used as a {@link LinkedListSetEntry} in a list of {@link ThreadState}
  * instances for a {@link ProcessState}.
  * 
  * @author Daniel
  */
 public interface ThreadState extends FlowAsset, FlowFuture,
-		LinkedListEntry<ThreadState, JobNodeActivateSet> {
+		LinkedListSetEntry<ThreadState, ProcessState> {
 
 	/**
 	 * Obtains the lock for this {@link ThreadState}.

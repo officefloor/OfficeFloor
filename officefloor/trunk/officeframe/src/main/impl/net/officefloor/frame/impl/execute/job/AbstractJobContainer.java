@@ -20,7 +20,7 @@ import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.error.ExecutionError;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
@@ -31,7 +31,6 @@ import net.officefloor.frame.internal.structure.JobMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.LinkedList;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.TaskMetaData;
@@ -49,8 +48,8 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel
  */
 public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData>
-		extends AbstractLinkedListEntry<JobNode, JobNodeActivateSet> implements
-		Job, JobNode, JobExecuteContext {
+		extends AbstractLinkedListSetEntry<JobNode, Flow> implements Job,
+		JobNode, JobExecuteContext {
 
 	/**
 	 * {@link Flow}.
@@ -84,9 +83,6 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * 
 	 * @param flow
 	 *            {@link Flow} containing this {@link Job}.
-	 * @param flowJobNodes
-	 *            {@link LinkedList} of the {@link JobNode} instances for the
-	 *            {@link Flow} containing this {@link Job}.
 	 * @param workContainer
 	 *            {@link WorkContainer} of the {@link Work} for this
 	 *            {@link Task}.
@@ -101,11 +97,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 *            {@link ManagedObject} instances that must be loaded before the
 	 *            {@link Task} may be executed.
 	 */
-	public AbstractJobContainer(Flow flow,
-			LinkedList<JobNode, JobNodeActivateSet> flowJobNodes,
-			WorkContainer<W> workContainer, N nodeMetaData,
-			JobNode parallelOwner, ManagedObjectIndex[] requiredManagedObjects) {
-		super(flowJobNodes);
+	public AbstractJobContainer(Flow flow, WorkContainer<W> workContainer,
+			N nodeMetaData, JobNode parallelOwner,
+			ManagedObjectIndex[] requiredManagedObjects) {
 		this.flow = flow;
 		this.workContainer = workContainer;
 		this.nodeMetaData = nodeMetaData;
@@ -122,6 +116,15 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 */
 	protected abstract Object executeJob(JobExecuteContext context)
 			throws Throwable;
+
+	/*
+	 * =================== LinkedListSetEntry ================================
+	 */
+
+	@Override
+	public Flow getLinkedListSetOwner() {
+		return this.flow;
+	}
 
 	/*
 	 * ======================== Job ==========================================
@@ -566,13 +569,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		// Complete the job
 		this.jobState = JobState.COMPLETED;
 
-		// Clean up state, may interact with process state
-		ProcessState processState = this.flow.getThreadState()
-				.getProcessState();
-		synchronized (processState.getProcessLock()) {
-			this.workContainer.unloadWork(activateSet);
-			this.flow.jobNodeComplete(this, activateSet);
-		}
+		// Clean up state
+		this.workContainer.unloadWork(activateSet);
+		this.flow.jobNodeComplete(this, activateSet);
 	}
 
 	/**

@@ -17,12 +17,17 @@
 package net.officefloor.frame.internal.structure;
 
 /**
+ * <p>
  * Monitor for to allow {@link ThreadState} instances to wait until an
  * {@link Asset} is completed processing.
+ * <p>
+ * May be used as a {@link LinkedListSetEntry} in a list of {@link AssetMonitor}
+ * instances for an {@link AssetManager}.
  * 
  * @author Daniel
  */
-public interface AssetMonitor extends LinkedListEntry<AssetMonitor, Object> {
+public interface AssetMonitor extends
+		LinkedListSetEntry<AssetMonitor, AssetManager> {
 
 	/**
 	 * Obtains the {@link Asset} for this {@link AssetMonitor}.

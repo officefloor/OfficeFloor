@@ -22,12 +22,12 @@ import net.officefloor.frame.spi.team.Job;
  * <p>
  * Node within the graph of {@link JobNode} instances to execute.
  * <p>
- * May be used as a {@link LinkedListEntry} in a list of {@link JobNode}
+ * May be used as a {@link LinkedListSetEntry} in a list of {@link JobNode}
  * instances for a {@link Flow}.
  * 
  * @author Daniel
  */
-public interface JobNode extends LinkedListEntry<JobNode, JobNodeActivateSet> {
+public interface JobNode extends LinkedListSetEntry<JobNode, Flow> {
 
 	/**
 	 * Activates the {@link Job} for this {@link JobNode}.

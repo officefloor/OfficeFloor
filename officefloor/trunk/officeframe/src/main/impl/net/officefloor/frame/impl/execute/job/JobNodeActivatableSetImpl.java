@@ -16,13 +16,13 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
 import net.officefloor.frame.internal.structure.JobNode;
-import net.officefloor.frame.internal.structure.LinkedList;
+import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ThreadState;
 
 /**
@@ -33,12 +33,12 @@ import net.officefloor.frame.internal.structure.ThreadState;
 public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 
 	/**
-	 * {@link JobNode} instances to be activated.
+	 * {@link JobNode} instances to be activated. 
 	 */
-	protected final LinkedList<ActivatedJobNode, Object> jobNodes = new AbstractLinkedList<ActivatedJobNode, Object>() {
+	private final LinkedListSet<ActivatedJobNode, JobNodeActivatableSet> jobNodes = new StrictLinkedListSet<ActivatedJobNode, JobNodeActivatableSet>() {
 		@Override
-		public void lastLinkedListEntryRemoved(Object removeParameter) {
-			// Do nothing, as list should never be emptied
+		protected JobNodeActivatableSet getOwner() {
+			return JobNodeActivatableSetImpl.this;
 		}
 	};
 
@@ -48,14 +48,12 @@ public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 
 	@Override
 	public void addJobNode(JobNode jobNode) {
-		this.jobNodes.addLinkedListEntry(new ActivatedJobNode(this.jobNodes,
-				jobNode, null));
+		this.jobNodes.addEntry(new ActivatedJobNode(jobNode, null));
 	}
 
 	@Override
 	public void addJobNode(JobNode jobNode, Throwable failure) {
-		this.jobNodes.addLinkedListEntry(new ActivatedJobNode(this.jobNodes,
-				jobNode, failure));
+		this.jobNodes.addEntry(new ActivatedJobNode(jobNode, failure));
 	}
 
 	@Override
@@ -88,7 +86,7 @@ public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 	 * {@link JobNode} to be activated.
 	 */
 	private class ActivatedJobNode extends
-			AbstractLinkedListEntry<ActivatedJobNode, Object> {
+			AbstractLinkedListSetEntry<ActivatedJobNode, JobNodeActivatableSet> {
 
 		/**
 		 * {@link JobNode} to be activated.
@@ -103,19 +101,19 @@ public class JobNodeActivatableSetImpl implements JobNodeActivatableSet {
 		/**
 		 * Initiate.
 		 * 
-		 * @param linkedList
-		 *            {@link LinkedList}.
 		 * @param jobNode
 		 *            {@link JobNode} to be notified.
 		 * @param failure
 		 *            Potential failure.
 		 */
-		public ActivatedJobNode(
-				LinkedList<ActivatedJobNode, Object> linkedList,
-				JobNode jobNode, Throwable failure) {
-			super(linkedList);
+		public ActivatedJobNode(JobNode jobNode, Throwable failure) {
 			this.jobNode = jobNode;
 			this.failure = failure;
+		}
+
+		@Override
+		public JobNodeActivatableSet getLinkedListSetOwner() {
+			return JobNodeActivatableSetImpl.this;
 		}
 	}
 

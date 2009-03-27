@@ -520,7 +520,7 @@ public class ExecutionNode<W extends Work> implements
 
 			// Create the flow manager (only if asynchronous)
 			if (this.instigationStrategy == FlowInstigationStrategyEnum.ASYNCHRONOUS) {
-				this.flowManager = new AssetManagerImpl();
+				this.flowManager = new AssetManagerImpl(null);
 			} else {
 				// No need for flow management
 				this.flowManager = null;

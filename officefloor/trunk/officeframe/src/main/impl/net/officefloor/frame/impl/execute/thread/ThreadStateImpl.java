@@ -19,8 +19,8 @@ package net.officefloor.frame.impl.execute.thread;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedList;
-import net.officefloor.frame.impl.execute.linkedlist.AbstractLinkedListEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
@@ -34,7 +34,7 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.LinkedList;
+import net.officefloor.frame.internal.structure.LinkedListSet;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -47,31 +47,16 @@ import net.officefloor.frame.internal.structure.ThreadState;
  * @author Daniel
  */
 public class ThreadStateImpl extends
-		AbstractLinkedListEntry<ThreadState, JobNodeActivateSet> implements
+		AbstractLinkedListSetEntry<ThreadState, ProcessState> implements
 		ThreadState, Asset {
 
 	/**
 	 * Active {@link Flow} instances for this {@link ThreadState}.
 	 */
-	protected final LinkedList<Flow, JobNodeActivateSet> activeFlows = new AbstractLinkedList<Flow, JobNodeActivateSet>() {
+	protected final LinkedListSet<Flow, ThreadState> activeFlows = new StrictLinkedListSet<Flow, ThreadState>() {
 		@Override
-		public void lastLinkedListEntryRemoved(JobNodeActivateSet notifySet) {
-
-			// Do nothing if searching for escalation
-			if (ThreadStateImpl.this.isEscalating) {
-				return;
-			}
-
-			// Flow (thread) complete
-			ThreadStateImpl.this.isFlowComplete = true;
-
-			// Activate all jobs waiting on this thread permanently
-			ThreadStateImpl.this.threadMonitor
-					.activateJobNodes(notifySet, true);
-
-			// Thread complete
-			ThreadStateImpl.this.processState.threadComplete(
-					ThreadStateImpl.this, notifySet);
+		protected ThreadState getOwner() {
+			return ThreadStateImpl.this;
 		}
 	};
 
@@ -128,9 +113,6 @@ public class ThreadStateImpl extends
 	 * 
 	 * @param threadMetaData
 	 *            {@link ThreadMetaData} for this {@link ThreadState}.
-	 * @param processThreads
-	 *            {@link LinkedList} of the {@link ThreadState} instances for
-	 *            the {@link ProcessState} containing this {@link ThreadState}.
 	 * @param processState
 	 *            {@link ProcessState} for this {@link ThreadState}.
 	 * @param flowMetaData
@@ -138,9 +120,7 @@ public class ThreadStateImpl extends
 	 */
 	@SuppressWarnings("unchecked")
 	public ThreadStateImpl(ThreadMetaData threadMetaData,
-			LinkedList<ThreadState, JobNodeActivateSet> processThreads,
 			ProcessState processState, FlowMetaData<?> flowMetaData) {
-		super(processThreads);
 		this.threadMetaData = threadMetaData;
 		this.processState = processState;
 
@@ -165,6 +145,15 @@ public class ThreadStateImpl extends
 		// Create the thread monitor
 		AssetManager flowAssetManager = flowMetaData.getFlowManager();
 		this.threadMonitor = flowAssetManager.createAssetMonitor(this);
+	}
+
+	/*
+	 * ====================== LinkedListSetEntry ===========================
+	 */
+
+	@Override
+	public ProcessState getLinkedListSetOwner() {
+		return this.processState;
 	}
 
 	/*
@@ -195,8 +184,8 @@ public class ThreadStateImpl extends
 	public Flow createFlow(FlowMetaData<?> flowMetaData) {
 
 		// Create and register the activate flow
-		Flow flow = new FlowImpl(this, this.activeFlows);
-		this.activeFlows.addLinkedListEntry(flow);
+		Flow flow = new FlowImpl(this);
+		this.activeFlows.addEntry(flow);
 
 		// Return the flow
 		return flow;
@@ -204,9 +193,29 @@ public class ThreadStateImpl extends
 
 	@Override
 	public void flowComplete(Flow flow, JobNodeActivateSet activateSet) {
-		// Remove flow from listing.
-		// Will trigger thread complete if last flow of thread.
-		flow.removeFromLinkedList(activateSet);
+		// Remove flow from active flow listing
+		if (this.activeFlows.removeEntry(flow)) {
+
+			// Do nothing if searching for escalation
+			if (this.isEscalating) {
+				return;
+			}
+
+			// No more active flows so thread is complete
+			this.isFlowComplete = true;
+
+			// Unload managed objects
+			for (int i = 0; i < this.managedObjectContainers.length; i++) {
+				this.managedObjectContainers[i]
+						.unloadManagedObject(activateSet);
+			}
+
+			// Activate all jobs waiting on this thread permanently
+			this.threadMonitor.activateJobNodes(activateSet, true);
+
+			// Thread complete
+			this.processState.threadComplete(this, activateSet);
+		}
 	}
 
 	@Override
