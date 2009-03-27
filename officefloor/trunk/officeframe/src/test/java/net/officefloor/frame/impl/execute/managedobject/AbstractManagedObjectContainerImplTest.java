@@ -496,29 +496,6 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		} else {
 			// Managed object source loaded at later time, so no activate set
 			this.sourcingAssetMonitor.activateJobNodes(null, true);
-
-			// TODO remove once testing passes
-			// this.control(this.sourcingAssetMonitor).setMatcher(
-			// new AlwaysMatcher() {
-			// @Override
-			// public boolean matches(Object[] expected,
-			// Object[] actual) {
-			// // Notify adds job node to activate set
-			// JobNodeActivateSet activateSet = (JobNodeActivateSet) actual[0];
-			// activateSet
-			// .addNotifiedJobNode(AbstractManagedObjectContainerImplTest.this.jobNode);
-			// return true;
-			// }
-			// });
-			//
-			// // Record activating the job node (takes lock on job)
-			// this.recordReturn(this.jobNode, this.jobNode.getFlow(),
-			// this.flow);
-			// this.recordReturn(this.flow, this.flow.getThreadState(),
-			// this.threadState);
-			// this.recordReturn(this.threadState, this.threadState
-			// .getThreadLock(), "ThreadState lock");
-			// this.jobNode.activateJob();
 		}
 	}
 
@@ -541,40 +518,9 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		} else {
 			// Managed object source failed at later time, so no activate set
 			this.sourcingAssetMonitor.failJobNodes(null, failure, true);
-			// TODO remove once tests passing
-			// this.control(this.sourcingAssetMonitor).setMatcher(
-			// new AlwaysMatcher() {
-			// @Override
-			// public boolean matches(Object[] expected,
-			// Object[] actual) {
-			// // Notify adds job node to activate set
-			// JobNodeActivateSet activateSet = (JobNodeActivateSet) actual[0];
-			// activateSet
-			// .addFailedJobNode(
-			// AbstractManagedObjectContainerImplTest.this.jobNode,
-			// failure);
-			// return true;
-			// }
-			// });
-
 			if (this.isAsynchronous) {
 				this.operationsAssetMonitor.failJobNodes(null, failure, true);
-				// TODO remove once tests passing
-				// this.control(this.operationsAssetMonitor).setMatcher(
-				// new TypeMatcher(JobNodeActivatableSet.class, failure
-				// .getClass()));
 			}
-
-			// TODO remove once tests passing
-			// // Record activating the job node (takes lock on job)
-			// this.recordReturn(this.jobNode, this.jobNode.getFlow(),
-			// this.flow);
-			// this.recordReturn(this.flow, this.flow.getThreadState(),
-			// this.threadState);
-			// this.recordReturn(this.threadState, this.threadState
-			// .getThreadLock(), "ThreadState lock");
-			// this.threadState.setFailure(failure);
-			// this.jobNode.activateJob();
 		}
 	}
 
@@ -756,10 +702,6 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		// Record waking up job nodes on the operations monitor.
 		// Never has an activate job set as relies on Office Manager.
 		this.operationsAssetMonitor.activateJobNodes(null, false);
-
-		// TODO remove when tests passing
-		// this.control(this.operationsAssetMonitor).setMatcher(
-		// new TypeMatcher(JobNodeActivatableSet.class));
 	}
 
 	/**
