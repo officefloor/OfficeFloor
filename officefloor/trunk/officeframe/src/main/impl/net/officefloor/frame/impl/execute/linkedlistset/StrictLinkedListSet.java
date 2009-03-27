@@ -62,8 +62,6 @@ public abstract class StrictLinkedListSet<E extends LinkedListSetEntry<E, O>, O>
 	@Override
 	public void addEntry(E entry) {
 
-		// TODO provide comparator LinkedListSet to check entry content
-
 		// Ensure the same owner
 		if (entry.getLinkedListSetOwner() != this.getOwner()) {
 			throw new IllegalStateException("Invalid "

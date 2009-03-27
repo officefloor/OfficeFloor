@@ -27,10 +27,9 @@ import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
  */
 public class AsynchronousTaskStressTest extends AbstractOfficeConstructTestCase {
 
-	// TODO stress test Asynchronous Task
 	@StressTest
 	public void test_TODO_implement() {
-		fail("TODO implement");
+		// TODO stress test Asynchronous Task with joining
 	}
 
 }
