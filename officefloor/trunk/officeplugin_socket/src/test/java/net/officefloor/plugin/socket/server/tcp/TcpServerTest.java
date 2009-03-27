@@ -28,7 +28,6 @@ import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeam;
-import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.impl.spi.team.WorkerPerTaskTeam;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.test.AbstractOfficeConstructTestCase;
@@ -67,6 +66,8 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
+		this.setVerbose(true);
+
 		// Specify the port
 		PORT = portStart;
 		portStart++; // increment for next test
@@ -87,7 +88,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		// Register the necessary teams for socket listening
 		this.constructTeam("ACCEPTER_TEAM", new OnePersonTeam(100));
 		this.constructTeam("LISTENER_TEAM", new WorkerPerTaskTeam("Listener"));
-		this.constructTeam("CLEANUP_TEAM", new PassiveTeam());
+		this.constructTeam("CLEANUP_TEAM", new OnePersonTeam(100));
 		officeBuilder.registerTeam("of-MO.accepter", "of-ACCEPTER_TEAM");
 		officeBuilder.registerTeam("of-MO.listener", "of-LISTENER_TEAM");
 		officeBuilder.registerTeam("of-MO.cleanup", "of-CLEANUP_TEAM");
@@ -113,25 +114,6 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		this.officeFloor.openOfficeFloor();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.test.AbstractOfficeConstructTestCase#tearDown()
-	 */
-	@Override
-	protected void tearDown() throws Exception {
-
-		// Close the office
-		this.officeFloor.closeOfficeFloor();
-
-		// Allow some time for shutdown before starting next
-		Thread.sleep(200);
-
-		// Clean up
-		super.tearDown();
-	}
-
 	/**
 	 * Ensure able to answer a request.
 	 */
@@ -149,6 +131,7 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensures can handle parallel requests.
 	 */
+	@StressTest
 	public void testParallelRequests() throws Throwable {
 		this.doParallelRequests(3, 10, true);
 	}
@@ -156,8 +139,8 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 	/**
 	 * Ensures can handle heavy load of requests.
 	 */
-	// TODO find out why heavy load is causing out of memory
-	public void _testHeavyLoad() throws Throwable {
+	@StressTest
+	public void testHeavyLoad() throws Throwable {
 		final int CALLERS = 100;
 		final int REQUESTS = 100;
 		long startTime = System.currentTimeMillis();
@@ -233,10 +216,13 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 		// Wait for all callers to be complete
 		boolean isComplete = false;
 		while (!isComplete) {
+
+			// Allow processing to complete
 			Thread.sleep(100);
+
+			// Determine if complete
 			isComplete = true;
 			synchronized (isCompleteFlags) {
-				// Determine if complete
 				for (boolean isCompleteFlag : isCompleteFlags) {
 					if (!isCompleteFlag) {
 						isComplete = false;
@@ -247,6 +233,23 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 
 		// Propagate first caller failure
 		synchronized (isCompleteFlags) {
+
+			// Provide a report on which completed
+			if (isLog) {
+				System.out.println("Completed:");
+				for (int i = 0; i < failures.length; i++) {
+					System.out.println("   "
+							+ i
+							+ (failures[i] == null ? " successful"
+									: " failed: "
+											+ failures[i].getMessage()
+											+ " ["
+											+ failures[i].getClass()
+													.getSimpleName() + "]"));
+				}
+			}
+
+			// Propagate the first failure
 			for (Throwable failure : failures) {
 				if (failure != null) {
 					throw failure;
@@ -320,8 +323,10 @@ public class TcpServerTest extends AbstractOfficeConstructTestCase {
 
 		// Indicate time to close connection
 		long endTime = System.currentTimeMillis();
-		System.out.println("Message [-1] processed in " + (endTime - startTime)
-				+ " milli-seconds");
+		if (isLog) {
+			System.out.println("Message [-1] processed in "
+					+ (endTime - startTime) + " milli-seconds");
+		}
 	}
 
 }

@@ -50,46 +50,21 @@ public class NotPoolMessageSegmentPool implements MessageSegmentPool {
 	 * ================ NotPoolMessageSegmentPool ==================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.impl.socket.server.MessageSegmentPool#
-	 * getMessageSegmentBufferSize()
-	 */
 	@Override
 	public int getMessageSegmentBufferSize() {
 		return this.bufferSize;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.impl.socket.server.MessageSegmentPool#
-	 * getMessageSegment()
-	 */
 	@Override
 	public PooledMessageSegment getMessageSegment() {
 		return new InstanceMessageSegment(ByteBuffer.allocate(this.bufferSize));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.impl.socket.server.MessageSegmentPool#
-	 * getMessageSegment(java.nio.ByteBuffer)
-	 */
 	@Override
 	public PooledMessageSegment getMessageSegment(ByteBuffer buffer) {
 		return new InstanceMessageSegment(buffer);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.plugin.impl.socket.server.MessageSegmentPool#
-	 * returnMessageSegments
-	 * (net.officefloor.plugin.impl.socket.server.PooledMessageSegment)
-	 */
 	@Override
 	public void returnMessageSegments(PooledMessageSegment segment) {
 		// Do nothing as not pooling

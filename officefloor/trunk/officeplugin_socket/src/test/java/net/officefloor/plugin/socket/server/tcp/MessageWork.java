@@ -47,7 +47,7 @@ public class MessageWork {
 		try {
 
 			// Ensure not waiting too long
-			if ((System.currentTimeMillis() - this.startTime) > 5000) {
+			if ((System.currentTimeMillis() - this.startTime) > 20000) {
 				throw new Exception("Waited too long for a message");
 			}
 
