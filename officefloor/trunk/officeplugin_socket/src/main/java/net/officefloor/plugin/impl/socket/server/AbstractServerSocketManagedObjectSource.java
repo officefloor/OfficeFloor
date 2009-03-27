@@ -126,12 +126,12 @@ public abstract class AbstractServerSocketManagedObjectSource<F extends Enum<F>>
 		int bufferSize = Integer.parseInt(mosContext.getProperty(
 				PROPERTY_BUFFER_SIZE, "1024"));
 		int recommendedSegmentCount = Integer.parseInt(mosContext.getProperty(
-				PROPERTY_MESSAGE_SIZE, "1024"));
+				PROPERTY_MESSAGE_SIZE, "3"));
 		int maxConn = Integer.parseInt(mosContext.getProperty(
 				PROPERTY_MAXIMUM_CONNECTIONS, String
 						.valueOf(SocketListener.UNBOUNDED_MAX_CONNECTIONS)));
 		String messageSegmentPoolStrategy = mosContext.getProperty(
-				PROPERTY_MESSAGE_SEGMENT_POOL_STRATEGY, "heap");
+				PROPERTY_MESSAGE_SEGMENT_POOL_STRATEGY, "none");
 
 		// Create the message segment pool based on specified strategy
 		MessageSegmentPool messageSegmentPool;

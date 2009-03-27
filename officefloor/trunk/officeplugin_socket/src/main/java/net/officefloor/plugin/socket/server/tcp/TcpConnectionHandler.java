@@ -19,6 +19,7 @@ package net.officefloor.plugin.socket.server.tcp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 
 import net.officefloor.frame.spi.managedobject.AsynchronousListener;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
@@ -150,8 +151,10 @@ public class TcpConnectionHandler implements ConnectionHandler,
 				context.setCloseConnection(true);
 
 				// Awake potential waiting process on client data
-				if (this.asynchronousListener != null) {
-					this.asynchronousListener.notifyComplete();
+				synchronized (this.getLock()) {
+					if (this.asynchronousListener != null) {
+						this.asynchronousListener.notifyComplete();
+					}
 				}
 			}
 		}
@@ -164,8 +167,10 @@ public class TcpConnectionHandler implements ConnectionHandler,
 		this.idleSinceTimestamp = NON_IDLE_SINCE_TIMESTAMP;
 
 		// Indicate data available from client
-		if (this.asynchronousListener != null) {
-			this.asynchronousListener.notifyComplete();
+		synchronized (this.getLock()) {
+			if (this.asynchronousListener != null) {
+				this.asynchronousListener.notifyComplete();
+			}
 		}
 
 		// Determine if close connection
@@ -228,6 +233,15 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 * ====================== ServerTcpConnection =======================
 	 */
 
+	/**
+	 * Ensures the connection is open.
+	 */
+	private void ensureConnectionOpen() throws IOException {
+		if (this.isClose) {
+			throw new ClosedChannelException();
+		}
+	}
+
 	@Override
 	public Object getLock() {
 		return this.connection.getLock();
@@ -256,6 +270,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	@Override
 	public int read(byte[] buffer, int offset, int length) throws IOException {
 		synchronized (this.getLock()) {
+			this.ensureConnectionOpen();
 			return this.connection.read(buffer, offset, length);
 		}
 	}
@@ -263,6 +278,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	@Override
 	public void waitOnClientData() throws IOException {
 		synchronized (this.getLock()) {
+			this.ensureConnectionOpen();
 
 			// Determine if data available to read
 			ReadMessage readMessage = this.connection.getFirstReadMessage();
@@ -291,6 +307,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	@Override
 	public void write(ByteBuffer buffer) throws IOException {
 		synchronized (this.getLock()) {
+			this.ensureConnectionOpen();
 			this.connection.write(buffer);
 		}
 	}
@@ -307,6 +324,7 @@ public class TcpConnectionHandler implements ConnectionHandler,
 	 */
 	private void write(byte[] data, int offset, int length) throws IOException {
 		synchronized (this.getLock()) {
+			this.ensureConnectionOpen();
 			this.connection.write(data, offset, length);
 		}
 	}
