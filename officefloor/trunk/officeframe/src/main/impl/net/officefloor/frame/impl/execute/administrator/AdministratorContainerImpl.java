@@ -35,17 +35,22 @@ import net.officefloor.frame.spi.administration.DutyContext;
  * @author Daniel
  */
 public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F extends Enum<F>>
-		implements AdministratorContainer<I, A>, DutyContext<I, F> {
+		implements AdministratorContainer<I, A> {
+
+	/**
+	 * {@link DutyContext} that exposes only the required functionality.
+	 */
+	private final DutyContext<I, F> dutyContextToken = new DutyContextToken();
 
 	/**
 	 * {@link AdministratorMetaData}.
 	 */
-	protected final AdministratorMetaData<I, A> metaData;
+	private final AdministratorMetaData<I, A> metaData;
 
 	/**
 	 * {@link Administrator}.
 	 */
-	protected Administrator<I, A> administrator;
+	private Administrator<I, A> administrator;
 
 	/**
 	 * Initiate.
@@ -67,14 +72,29 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		return this.metaData.getExtensionInterfaceMetaData();
 	}
 
+	/**
+	 * {@link AdministratorContext}.
+	 */
+	private AdministratorContext adminContext;
+
+	/**
+	 * Extension interfaces.
+	 */
+	private List<I> extensionInterfaces;
+
+	/**
+	 * {@link DutyMetaData}.
+	 */
+	private DutyMetaData dutyMetaData;
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public void doDuty(TaskDutyAssociation<A> taskDuty,
 			List<I> extensionInterfaces, AdministratorContext context)
 			throws Throwable {
 
-		// Access Point: TaskContainer
-		// Locks: ThreadState -> ProcessState
+		// Access Point: JobContainer -> WorkContainer
+		// Locks: ThreadState
 
 		// Lazy create the administrator
 		if (this.administrator == null) {
@@ -94,46 +114,44 @@ public class AdministratorContainerImpl<I extends Object, A extends Enum<A>, F e
 		this.dutyMetaData = this.metaData.getDutyMetaData(key);
 
 		// Execute the duty
-		duty.doDuty(this);
+		duty.doDuty(this.dutyContextToken);
 	}
 
-	/*
-	 * ==================== DutyContext ===================================
-	 */
-
 	/**
-	 * {@link AdministratorContext}.
+	 * <p>
+	 * Token class given to the {@link Duty}.
+	 * <p>
+	 * As application code will be provided a {@link DutyContext} this exposes
+	 * just the necessary functionality and prevents access to internals of the
+	 * framework.
 	 */
-	private AdministratorContext adminContext;
+	private final class DutyContextToken implements DutyContext<I, F> {
 
-	/**
-	 * Extension interfaces.
-	 */
-	private List<I> extensionInterfaces;
+		/*
+		 * ==================== DutyContext ===================================
+		 */
 
-	/**
-	 * {@link DutyMetaData}.
-	 */
-	private DutyMetaData dutyMetaData;
+		@Override
+		public List<I> getExtensionInterfaces() {
+			return AdministratorContainerImpl.this.extensionInterfaces;
+		}
 
-	@Override
-	public List<I> getExtensionInterfaces() {
-		return this.extensionInterfaces;
-	}
+		@Override
+		public void doFlow(F key, Object parameter) {
+			// Delegate with index of key
+			this.doFlow(key.ordinal(), parameter);
+		}
 
-	@Override
-	public void doFlow(F key, Object parameter) {
-		// Delegate with index of key
-		this.doFlow(key.ordinal(), parameter);
-	}
+		@Override
+		public void doFlow(int flowIndex, Object parameter) {
+			// Obtain the flow meta-data
+			FlowMetaData<?> flowMetaData = AdministratorContainerImpl.this.dutyMetaData
+					.getFlow(flowIndex);
 
-	@Override
-	public void doFlow(int flowIndex, Object parameter) {
-		// Obtain the flow meta-data
-		FlowMetaData<?> flowMetaData = this.dutyMetaData.getFlow(flowIndex);
-
-		// Do the flow
-		this.adminContext.doFlow(flowMetaData, parameter);
+			// Do the flow
+			AdministratorContainerImpl.this.adminContext.doFlow(flowMetaData,
+					parameter);
+		}
 	}
 
 }

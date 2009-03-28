@@ -20,6 +20,8 @@ import java.util.List;
 
 import net.officefloor.frame.api.execute.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
@@ -52,6 +54,16 @@ import net.officefloor.frame.spi.team.Team;
  * @author Daniel
  */
 public class ProcessStateImpl implements ProcessState {
+
+	/**
+	 * <p>
+	 * Lock {@link Object} for the {@link ProcessState} to lock on.
+	 * <p>
+	 * As the {@link TaskContext} provides this to {@link Task} instances
+	 * (application code) it is a simple {@link Object} to prevent being used to
+	 * access internals of the framework.
+	 */
+	private final Object processLock = new Object();
 
 	/**
 	 * Active {@link ThreadState} instances for this {@link ProcessState}.
@@ -163,7 +175,7 @@ public class ProcessStateImpl implements ProcessState {
 
 	@Override
 	public Object getProcessLock() {
-		return this;
+		return this.processLock;
 	}
 
 	@Override

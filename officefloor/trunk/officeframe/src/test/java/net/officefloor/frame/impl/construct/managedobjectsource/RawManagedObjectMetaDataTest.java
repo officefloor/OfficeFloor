@@ -414,6 +414,28 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures issue if {@link AsynchronousManagedObject} but 0 timeout.
+	 */
+	public void testAsynchronousManagedObjectWithZeroTimeout() {
+
+		// Record asynchronous managed object with no timeout
+		this.record_initManagedObject();
+		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
+				Object.class);
+		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
+				AsynchronousManagedObject.class);
+		this.recordReturn(this.configuration, this.configuration
+				.getDefaultTimeout(), 0);
+		this
+				.record_issue("Non-zero timeout must be provided for AsynchronousManagedObject");
+
+		// Attempt to construct managed object
+		this.replayMockObjects();
+		this.constructRawManagedObjectMetaData(false);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensures issue if no process bound name when required.
 	 */
 	public void testNoProcessBoundName() {
@@ -458,7 +480,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.workBuilder, this.workBuilder.addTask(TASK_NAME,
 				this.taskFactory), this.taskBuilder);
 		this.workBuilder.setInitialTask(TASK_NAME);
-		this.record_createRawMetaData(ManagedObject.class, null);
+		this.record_createRawMetaData(ManagedObject.class, 0, null);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -485,7 +507,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				this.taskFactory), this.taskBuilder);
 		this.workBuilder.setInitialTask(TASK_NAME);
 		this.taskBuilder.linkParameter(0, parameterType);
-		this.record_createRawMetaData(ManagedObject.class, null);
+		this.record_createRawMetaData(ManagedObject.class, 0, null);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -515,7 +537,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.workBuilder.setInitialTask(TASK_NAME);
 		this.taskBuilder.linkFlow(0, LINK_WORK_NAME, LINK_TASK_NAME,
 				FlowInstigationStrategyEnum.SEQUENTIAL, Object.class);
-		this.record_createRawMetaData(ManagedObject.class, null);
+		this.record_createRawMetaData(ManagedObject.class, 0, null);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -538,7 +560,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		// Record registering a start up task
 		this.record_initManagedObject();
 		this.officeBuilder.addStartupTask(STARTUP_WORK_NAME, STARTUP_TASK_NAME);
-		this.record_createRawMetaData(ManagedObject.class, null);
+		this.record_createRawMetaData(ManagedObject.class, 0, null);
 
 		// Attempt to construct managed object
 		this.replayMockObjects();
@@ -564,7 +586,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record plain managed object
 		this.record_initManagedObject();
-		this.record_createRawMetaData(ManagedObject.class, null);
+		this.record_createRawMetaData(ManagedObject.class, 0, null);
 		this.recordReturn(boundMetaData, boundMetaData
 				.getBoundManagedObjectName(), BOUND_NAME);
 		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(),
@@ -638,7 +660,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record asynchronous managed object
 		this.record_initManagedObject();
-		this.record_createRawMetaData(AsynchronousManagedObject.class, null);
+		this.record_createRawMetaData(AsynchronousManagedObject.class, 1000,
+				null);
 		this.recordReturn(boundMetaData, boundMetaData
 				.getBoundManagedObjectName(), BOUND_NAME);
 		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(),
@@ -669,6 +692,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				.isManagedObjectAsynchronous());
 		assertEquals("Incorrect operations asset manager",
 				operationsAssetManager, moMetaData.getOperationsManager());
+		assertEquals("Incorrect timeout", 1000, moMetaData.getTimeout());
 	}
 
 	/**
@@ -687,7 +711,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 
 		// Record coordinating managed object
 		this.record_initManagedObject();
-		this.record_createRawMetaData(CoordinatingManagedObject.class, null);
+		this.record_createRawMetaData(CoordinatingManagedObject.class, 0, null);
 		this.recordReturn(boundMetaData, boundMetaData
 				.getBoundManagedObjectName(), BOUND_NAME);
 		this.recordReturn(boundMetaData, boundMetaData.getManagedObjectIndex(),
@@ -754,13 +778,16 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 	 * 
 	 * @param managedObjectClass
 	 *            {@link ManagedObject} class.
+	 * @param timeout
+	 *            Timeout for the {@link ManagedObjectSource}.
 	 * @param processBoundName
 	 *            Process bound name for {@link ManagedObject}.
 	 * @param {@link ManagedObjectFlowMetaData} for the
 	 *        {@link ManagedObjectSource}.
 	 */
 	private <MO extends ManagedObject> void record_createRawMetaData(
-			Class<MO> managedObjectClass, String processBoundName,
+			Class<MO> managedObjectClass, long timeout,
+			String processBoundName,
 			ManagedObjectFlowMetaData<?>... moFlowMetaData) {
 		// Record completing creating raw meta data
 		this.recordReturn(this.metaData, this.metaData.getObjectClass(),
@@ -768,7 +795,7 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 		this.recordReturn(this.metaData, this.metaData.getManagedObjectClass(),
 				managedObjectClass);
 		this.recordReturn(this.configuration, this.configuration
-				.getDefaultTimeout(), 0);
+				.getDefaultTimeout(), timeout);
 		this.recordReturn(this.metaData, this.metaData.getFlowMetaData(),
 				moFlowMetaData);
 		if (moFlowMetaData.length > 0) {

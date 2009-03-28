@@ -39,9 +39,6 @@ import net.officefloor.frame.test.ReflectiveWorkBuilder.ReflectiveTaskBuilder;
 public class AsynchronousOperationStressTest extends
 		AbstractOfficeConstructTestCase {
 
-	// TODO ensure timeout for AsynchronousManagedObject in construction
-	// TODO test timing out Asynchronous Operation by check on Asset
-
 	/**
 	 * Ensures no issues arising in stress asynchronous operations with a
 	 * {@link OnePersonTeam}.

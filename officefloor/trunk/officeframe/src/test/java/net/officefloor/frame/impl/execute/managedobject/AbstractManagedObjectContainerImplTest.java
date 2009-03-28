@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.execute.managedobject;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.Flow;
@@ -702,6 +703,17 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		// Record waking up job nodes on the operations monitor.
 		// Never has an activate job set as relies on Office Manager.
 		this.operationsAssetMonitor.activateJobNodes(null, false);
+	}
+
+	/**
+	 * Records a check on the {@link ManagedObjectContainer} {@link Asset}.
+	 * 
+	 * @param timeout
+	 *            Timeout for the {@link ManagedObject}.
+	 */
+	protected void record_Asset_checkOnAsset(long timeout) {
+		this.recordReturn(this.managedObjectMetaData,
+				this.managedObjectMetaData.getTimeout(), timeout);
 	}
 
 	/**

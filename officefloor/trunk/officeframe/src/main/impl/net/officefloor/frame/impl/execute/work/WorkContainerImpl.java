@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.work;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.officefloor.frame.api.execute.Work;
@@ -274,7 +274,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 		// Obtain the administrator container.
 		// Must be done within process lock as may be changing state of process.
 		AdministratorContainer adminContainer;
-		List ei = new LinkedList();
+		List ei;
 		synchronized (processState.getProcessLock()) {
 			switch (adminScope) {
 			case WORK:
@@ -308,6 +308,7 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 			// Obtain the extension interfaces to be managed
 			ExtensionInterfaceMetaData<?>[] eiMetaDatas = adminContainer
 					.getExtensionInterfaceMetaData(adminContext);
+			ei = new ArrayList(eiMetaDatas.length); // create to size
 			for (int i = 0; i < eiMetaDatas.length; i++) {
 				ExtensionInterfaceMetaData<?> eiMetaData = eiMetaDatas[i];
 
@@ -338,17 +339,9 @@ public class WorkContainerImpl<W extends Work> implements WorkContainer<W> {
 									+ moIndex.getManagedObjectScope());
 				}
 
-				// Ensure have the container
-				if (container == null) {
-					continue; // no container so no managed object to administer
-				}
-
 				// Obtain the managed object
 				ManagedObject managedObject = container
 						.getManagedObject(threadState);
-				if (managedObject == null) {
-					continue; // no managed object to administer
-				}
 
 				// Obtain and load the extension interface
 				ei.add(eiMetaData.getExtensionInterfaceFactory()
