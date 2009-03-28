@@ -79,13 +79,6 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	 * ======================= JobContainer ==========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.impl.execute.JobImpl#executeJob(net.officefloor
-	 * .frame.impl.execute.JobExecuteContext)
-	 */
 	@Override
 	protected Object executeJob(JobExecuteContext context) throws Throwable {
 
@@ -103,24 +96,14 @@ public class DutyJob<W extends Work, I, A extends Enum<A>> extends
 	private class AdministratorContextImpl implements AdministratorContext {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @seenet.officefloor.frame.internal.structure.AdministratorContext#
-		 * getThreadState()
+		 * ======================= AdministratorContext =======================
 		 */
+		
 		@Override
 		public ThreadState getThreadState() {
 			return DutyJob.this.flow.getThreadState();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.frame.internal.structure.AdministratorContext#doFlow
-		 * (net.officefloor.frame.internal.structure.FlowMetaData,
-		 * java.lang.Object)
-		 */
 		@Override
 		public void doFlow(FlowMetaData<?> flowMetaData, Object parameter) {
 			DutyJob.this.doFlow(flowMetaData, parameter);

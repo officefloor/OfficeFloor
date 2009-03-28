@@ -653,7 +653,7 @@ public class ManagedObjectContainerImpl implements ManagedObjectContainer,
 
 					// Flag timeout on the managed object
 					if (this.managedObject == null) {
-						// Sourcing failure
+						// Source failure
 						this.failure = new ExecutionError(
 								ExecutionErrorEnum.MANAGED_OBJECT_SOURCING_FAILURE);
 					} else {

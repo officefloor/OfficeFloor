@@ -39,8 +39,7 @@ import net.officefloor.frame.spi.team.Job;
  * @author Daniel
  */
 public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
-		extends AbstractJobContainer<W, TaskMetaData<W, D, F>> implements
-		TaskContext<W, D, F> {
+		extends AbstractJobContainer<W, TaskMetaData<W, D, F>> {
 
 	/**
 	 * <p>
@@ -57,6 +56,11 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	 */
 	public static final ManagedObjectIndex PARAMETER_MANAGED_OBJECT_INDEX = new ManagedObjectIndexImpl(
 			ManagedObjectScope.WORK, PARAMETER_INDEX);
+
+	/**
+	 * {@link TaskContext} that exposes only the required functionality.
+	 */
+	private final TaskContext<W, D, F> taskContextToken = new TaskContextToken();
 
 	/**
 	 * {@link Task} to be done.
@@ -101,64 +105,80 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 	@Override
 	protected Object executeJob(JobExecuteContext context) throws Throwable {
 		// Execute the task
-		return this.task.doTask(this);
+		return this.task.doTask(this.taskContextToken);
 	}
 
-	/*
-	 * ====================== TaskContext ===========================
+	/**
+	 * <p>
+	 * Token class given to the {@link Task}.
+	 * <p>
+	 * As application code will be provided a {@link TaskContext} this exposes
+	 * just the necessary functionality and prevents access to internals of the
+	 * framework.
 	 */
+	private final class TaskContextToken implements TaskContext<W, D, F> {
 
-	@Override
-	public W getWork() {
-		return this.workContainer.getWork(this.flow.getThreadState());
-	}
+		/*
+		 * ====================== TaskContext ===========================
+		 */
 
-	@Override
-	public Object getObject(D key) {
-		return this.getObject(key.ordinal());
-	}
-
-	@Override
-	public Object getObject(int managedObjectIndex) {
-
-		// Obtain the work managed object index
-		ManagedObjectIndex index = this.nodeMetaData
-				.translateManagedObjectIndexForWork(managedObjectIndex);
-
-		// Determine if a parameter
-		if (index.getIndexOfManagedObjectWithinScope() == PARAMETER_INDEX) {
-			return this.parameter; // parameter, so return the parameter
+		@Override
+		public W getWork() {
+			return TaskJob.this.workContainer.getWork(TaskJob.this.flow
+					.getThreadState());
 		}
 
-		// Return the Object
-		return this.workContainer.getObject(index, this.flow.getThreadState());
-	}
+		@Override
+		public Object getObject(D key) {
+			return this.getObject(key.ordinal());
+		}
 
-	@Override
-	public FlowFuture doFlow(F key, Object parameter) {
-		return this.doFlow(key.ordinal(), parameter);
-	}
+		@Override
+		public Object getObject(int managedObjectIndex) {
 
-	@Override
-	public FlowFuture doFlow(int flowIndex, Object parameter) {
-		// Obtain the Flow meta-data and do the flow
-		FlowMetaData<?> flowMetaData = this.nodeMetaData.getFlow(flowIndex);
-		return this.doFlow(flowMetaData, parameter);
-	}
+			// Obtain the work managed object index
+			ManagedObjectIndex index = TaskJob.this.nodeMetaData
+					.translateManagedObjectIndexForWork(managedObjectIndex);
 
-	@Override
-	public void join(FlowFuture flowFuture) {
-		this.joinFlow(flowFuture);
-	}
+			// Determine if a parameter
+			if (index.getIndexOfManagedObjectWithinScope() == PARAMETER_INDEX) {
+				return TaskJob.this.parameter; // parameter, so return the
+				// parameter
+			}
 
-	@Override
-	public Object getProcessLock() {
-		return this.flow.getThreadState().getProcessState().getProcessLock();
-	}
+			// Return the Object
+			return TaskJob.this.workContainer.getObject(index,
+					TaskJob.this.flow.getThreadState());
+		}
 
-	@Override
-	public void setComplete(boolean isComplete) {
-		this.setJobComplete(isComplete);
+		@Override
+		public FlowFuture doFlow(F key, Object parameter) {
+			return this.doFlow(key.ordinal(), parameter);
+		}
+
+		@Override
+		public FlowFuture doFlow(int flowIndex, Object parameter) {
+			// Obtain the Flow meta-data and do the flow
+			FlowMetaData<?> flowMetaData = TaskJob.this.nodeMetaData
+					.getFlow(flowIndex);
+			return TaskJob.this.doFlow(flowMetaData, parameter);
+		}
+
+		@Override
+		public void join(FlowFuture flowFuture) {
+			TaskJob.this.joinFlow(flowFuture);
+		}
+
+		@Override
+		public Object getProcessLock() {
+			return TaskJob.this.flow.getThreadState().getProcessState()
+					.getProcessLock();
+		}
+
+		@Override
+		public void setComplete(boolean isComplete) {
+			TaskJob.this.setJobComplete(isComplete);
+		}
 	}
 
 }

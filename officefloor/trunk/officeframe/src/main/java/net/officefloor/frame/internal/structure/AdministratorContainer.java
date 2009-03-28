@@ -59,7 +59,6 @@ public interface AdministratorContainer<I extends Object, A extends Enum<A>> {
 	 * @throws Throwable
 	 *             If {@link Duty} fails.
 	 */
-	// TODO provide extension interfaces as array to doDuty (rather than List)
 	void doDuty(TaskDutyAssociation<A> taskDutyAssociation,
 			List<I> extensionInterfaces, AdministratorContext context)
 			throws Throwable;

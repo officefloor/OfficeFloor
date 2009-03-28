@@ -48,7 +48,7 @@ public class SequentialJobContainerTest extends AbstractJobContainerTest {
 
 		// Record actions
 		this.record_JobContainer_initialSteps(job, null);
-		this.record_doSequentialFlow(job, sequentialFlowParameter);
+		this.record_doSequentialFlow(job, sequentialFlowParameter, true);
 		this.record_completeJob(job);
 		this.record_JobActivatableSet_activateJobs();
 

@@ -56,7 +56,7 @@ public class AsynchronousJobContainerTest extends AbstractJobContainerTest {
 		// Replay mocks
 		this.replayMockObjects();
 
-		// Execute to invoke the parallel job
+		// Execute to invoke the asynchronous job
 		this.doJob(job, true);
 
 		// Verify mocks

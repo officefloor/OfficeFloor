@@ -303,6 +303,12 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 					"Must not have negative default timeout");
 			return null; // can not carry on
 		}
+		if ((isManagedObjectAsynchronous) && (defaultTimeout <= 0)) {
+			issues.addIssue(AssetType.MANAGED_OBJECT, managedObjectSourceName,
+					"Non-zero timeout must be provided for "
+							+ AsynchronousManagedObject.class.getSimpleName());
+			return null; // can not carry on
+		}
 
 		// Obtain the flow meta-data
 		ManagedObjectFlowMetaData<h>[] flowMetaDatas = metaData

@@ -23,6 +23,7 @@ import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowAsset;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobMetaData;
@@ -310,9 +311,12 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 *            Current {@link Job}.
 	 * @param sequentialFlowParameter
 	 *            Sequential {@link Flow} parameter.
+	 * @param isActivateFlow
+	 *            Flag indicating if required to activate the first
+	 *            {@link JobNode} of the instigated sequential {@link Flow}.
 	 */
 	protected void record_doSequentialFlow(Job currentJob,
-			Object sequentialFlowParameter) {
+			Object sequentialFlowParameter, boolean isActivateFlow) {
 		FunctionalityJob functionalityJob = (FunctionalityJob) currentJob;
 		this.recordReturn(this.sequentialFlowMetaData,
 				this.sequentialFlowMetaData.getInstigationStrategy(),
@@ -323,7 +327,9 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.flow, this.flow.createJobNode(
 				this.sequentialTaskMetaData, functionalityJob.parallelOwnerJob,
 				sequentialFlowParameter), this.sequentialJob);
-		this.sequentialJob.activateJob();
+		if (isActivateFlow) {
+			this.sequentialJob.activateJob();
+		}
 	}
 
 	/**
@@ -582,6 +588,45 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records waiting on a joined {@link Flow}.
+	 * 
+	 * @param currentJob
+	 *            Current {@link Job}.
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum} of the {@link Flow} being
+	 *            joined on.
+	 */
+	protected void record_JobContainer_waitOnFlow(Job currentJob,
+			FlowInstigationStrategyEnum instigationStrategy) {
+		final FunctionalityJob functionalityJob = (FunctionalityJob) currentJob;
+
+		// Obtain the flow instigated
+		FlowAsset instigatedFlowAsset;
+		boolean isWaitingOnFlow;
+		switch (instigationStrategy) {
+		case SEQUENTIAL:
+			instigatedFlowAsset = this.flow;
+			isWaitingOnFlow = false;
+			break;
+		case PARALLEL:
+			instigatedFlowAsset = this.parallelFlow;
+			isWaitingOnFlow = false;
+			break;
+		case ASYNCHRONOUS:
+			instigatedFlowAsset = this.asynchronousThreadState;
+			isWaitingOnFlow = true;
+			break;
+		default:
+			fail("Unknown flow instigation strategy: " + instigationStrategy);
+			return;
+		}
+
+		// Record waiting on the flow
+		this.recordReturn(instigatedFlowAsset, instigatedFlowAsset.waitOnFlow(
+				functionalityJob, this.jobActivatableSet), isWaitingOnFlow);
+	}
+
+	/**
 	 * Records creating a {@link Job}.
 	 * 
 	 * @param currentJob
@@ -819,6 +864,11 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
+		public void join(FlowFuture flowFuture) {
+			this.joinFlow(flowFuture);
+		}
+
+		@Override
 		public void setComplete(boolean isComplete) {
 			this.setJobComplete(isComplete);
 		}
@@ -872,6 +922,14 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		FlowFuture doFlow(int flowIndex,
 				FlowInstigationStrategyEnum instigationStrategy,
 				Object parameter);
+
+		/**
+		 * Joins on the {@link FlowFuture}.
+		 * 
+		 * @param flowFuture
+		 *            {@link FlowFuture}.
+		 */
+		void join(FlowFuture flowFuture);
 
 		/**
 		 * Flags whether the {@link Job} is complete, or requires re-invoking.
