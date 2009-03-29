@@ -284,8 +284,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
 				work.addTaskType("TASK",
-						(TaskFactoryManufacturer<?, Work, ?, ?>) null, null,
-						null);
+						(TaskFactoryManufacturer<Work, ?, ?>) null, null, null);
 			}
 		});
 	}
@@ -297,7 +296,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testMissingObjectForKey() {
 
-		final TaskFactoryManufacturer<?, Work, ObjectKey, Indexed> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, ObjectKey, Indexed> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record no tasks
@@ -323,7 +322,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testNoKeyForObject() {
 
-		final TaskFactoryManufacturer<?, Work, ObjectKey, Indexed> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, ObjectKey, Indexed> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record no tasks
@@ -337,8 +336,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<Work, ObjectKey, ?> task = work.addTaskType(
-						"TASK", taskFactoryManufacturer, ObjectKey.class, null);
+				TaskTypeBuilder<ObjectKey, ?> task = work.addTaskType("TASK",
+						taskFactoryManufacturer, ObjectKey.class, null);
 
 				// Add task without key
 				task.addObject(Connection.class);
@@ -353,7 +352,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testIncorrectKeyTypeForObject() {
 
-		final TaskFactoryManufacturer<?, Work, ObjectKey, Indexed> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, ObjectKey, Indexed> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record no tasks
@@ -384,7 +383,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testMoreObjectsThanKeys() {
 
-		final TaskFactoryManufacturer<?, Work, ObjectKey, Indexed> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, ObjectKey, Indexed> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record no tasks
@@ -415,7 +414,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testObjectHasKeyButNoKeyClass() {
 
-		final TaskFactoryManufacturer<?, Work, ObjectKey, Indexed> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, ObjectKey, Indexed> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record indexes out of order
@@ -454,7 +453,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<Work, ?, ?> task = work.addTaskType("TASK",
+				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
 						taskFactoryManufacturer, null, null);
 
 				// Add task wit no object type
@@ -470,7 +469,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testKeyOrderingForObjectType() {
 
-		final TaskFactoryManufacturer<?, Work, ObjectKey, Indexed> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, ObjectKey, Indexed> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 		final Class<?> oneType = String.class;
 		final Class<?> twoType = Connection.class;
@@ -481,8 +480,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<Work, ObjectKey, ?> task = work.addTaskType(
-						"TASK", taskFactoryManufacturer, ObjectKey.class, null);
+				TaskTypeBuilder<ObjectKey, ?> task = work.addTaskType("TASK",
+						taskFactoryManufacturer, ObjectKey.class, null);
 
 				// Add in wrong order
 				task.addObject(twoType).setKey(ObjectKey.TWO);
@@ -528,7 +527,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testMissingFlowForKey() {
 
-		final TaskFactoryManufacturer<?, Work, Indexed, FlowKey> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, Indexed, FlowKey> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record no tasks
@@ -554,7 +553,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testNoKeyForFlow() {
 
-		final TaskFactoryManufacturer<?, Work, Indexed, ObjectKey> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, Indexed, ObjectKey> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record no tasks
@@ -568,8 +567,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<Work, ?, ObjectKey> task = work.addTaskType(
-						"TASK", taskFactoryManufacturer, null, ObjectKey.class);
+				TaskTypeBuilder<?, ObjectKey> task = work.addTaskType("TASK",
+						taskFactoryManufacturer, null, ObjectKey.class);
 
 				// Add task without key
 				task.addFlow();
@@ -584,7 +583,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testIncorrectKeyTypeForFlow() {
 
-		final TaskFactoryManufacturer<?, Work, Indexed, FlowKey> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, Indexed, FlowKey> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record no tasks
@@ -615,7 +614,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testMoreFlowsThanKeys() {
 
-		final TaskFactoryManufacturer<?, Work, Indexed, FlowKey> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, Indexed, FlowKey> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record no tasks
@@ -646,7 +645,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testFlowHasKeyButNoKeyClass() {
 
-		final TaskFactoryManufacturer<?, Work, Indexed, FlowKey> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, Indexed, FlowKey> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 
 		// Record indexes out of order
@@ -676,7 +675,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testKeyOrderingForFlowType() {
 
-		final TaskFactoryManufacturer<?, Work, Indexed, FlowKey> taskFactoryManufacturer = this
+		final TaskFactoryManufacturer<Work, Indexed, FlowKey> taskFactoryManufacturer = this
 				.createMock(TaskFactoryManufacturer.class);
 		final Class<?> oneType = String.class;
 
@@ -686,8 +685,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<Work, ?, FlowKey> task = work.addTaskType(
-						"TASK", taskFactoryManufacturer, null, FlowKey.class);
+				TaskTypeBuilder<?, FlowKey> task = work.addTaskType("TASK",
+						taskFactoryManufacturer, null, FlowKey.class);
 
 				// Add in wrong order
 				task.addFlow().setKey(FlowKey.TWO);
@@ -745,7 +744,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?, ?> task = work.addTaskType("TASK",
+				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
 						taskFactoryManufacturer, null, null);
 
 				// Add no escalation type
@@ -765,7 +764,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?, ?> task = work.addTaskType("TASK",
+				TaskTypeBuilder<?, ?> task = work.addTaskType("TASK",
 						taskFactoryManufacturer, null, null);
 
 				// Add escalations
@@ -804,7 +803,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 			public void sourceWork(WorkTypeBuilder<Work> work,
 					WorkSourceContext context) throws Exception {
 				work.setWorkFactory(workFactory);
-				TaskTypeBuilder<?, ?, ?> task = work.addTaskType(TASK_NAME,
+				TaskTypeBuilder<?, ?> task = work.addTaskType(TASK_NAME,
 						taskFactoryManufacturer, null, null);
 
 				// Add object, flow, escalation labels
