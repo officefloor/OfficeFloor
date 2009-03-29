@@ -24,9 +24,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
@@ -133,7 +131,6 @@ public class ProcessStateImpl implements ProcessState {
 	 * @param officeFloorEscalaion
 	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
-	@SuppressWarnings("unchecked")
 	public ProcessStateImpl(ProcessMetaData processMetaData,
 			OfficeMetaData officeMetaData,
 			EscalationHandler managedObjectEscalationHandler,
@@ -147,8 +144,8 @@ public class ProcessStateImpl implements ProcessState {
 				.getManagedObjectMetaData();
 		this.managedObjectContainers = new ManagedObjectContainer[managedObjectMetaData.length];
 		for (int i = 0; i < this.managedObjectContainers.length; i++) {
-			this.managedObjectContainers[i] = new ManagedObjectContainerImpl(
-					managedObjectMetaData[i], this);
+			this.managedObjectContainers[i] = managedObjectMetaData[i]
+					.createManagedObjectContainer(this);
 		}
 
 		// Administrators
@@ -156,8 +153,8 @@ public class ProcessStateImpl implements ProcessState {
 				.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[administratorMetaData.length];
 		for (int i = 0; i < this.administratorContainers.length; i++) {
-			this.administratorContainers[i] = new AdministratorContainerImpl(
-					administratorMetaData[i]);
+			this.administratorContainers[i] = administratorMetaData[i]
+					.createAdministratorContainer();
 		}
 
 		// TODO allow configuring the team responsible for MO handling

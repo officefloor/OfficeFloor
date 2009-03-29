@@ -460,7 +460,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	/**
 	 * {@link EscalationFlow}.
 	 */
-	private final EscalationFlow escalation = this.createMock(EscalationFlow.class);
+	private final EscalationFlow escalation = this
+			.createMock(EscalationFlow.class);
 
 	/**
 	 * Records handling an {@link EscalationFlow}.
@@ -595,9 +596,14 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	 * @param instigationStrategy
 	 *            {@link FlowInstigationStrategyEnum} of the {@link Flow} being
 	 *            joined on.
+	 * @param timeout
+	 *            Timeout in milliseconds for the {@link Flow} join.
+	 * @param token
+	 *            {@link Flow} join token.
 	 */
 	protected void record_JobContainer_waitOnFlow(Job currentJob,
-			FlowInstigationStrategyEnum instigationStrategy) {
+			FlowInstigationStrategyEnum instigationStrategy, long timeout,
+			Object token) {
 		final FunctionalityJob functionalityJob = (FunctionalityJob) currentJob;
 
 		// Obtain the flow instigated
@@ -623,7 +629,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 
 		// Record waiting on the flow
 		this.recordReturn(instigatedFlowAsset, instigatedFlowAsset.waitOnFlow(
-				functionalityJob, this.jobActivatableSet), isWaitingOnFlow);
+				functionalityJob, timeout, token, this.jobActivatableSet),
+				isWaitingOnFlow);
 	}
 
 	/**
@@ -864,8 +871,8 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void join(FlowFuture flowFuture) {
-			this.joinFlow(flowFuture);
+		public void join(FlowFuture flowFuture, long timeout, Object token) {
+			this.joinFlow(flowFuture, timeout, token);
 		}
 
 		@Override
@@ -928,8 +935,14 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		 * 
 		 * @param flowFuture
 		 *            {@link FlowFuture}.
+		 * @param timeout
+		 *            The maximum time to wait in milliseconds for the
+		 *            {@link Flow} to complete.
+		 * @param token
+		 *            A token identifying which {@link Flow} join timed out. May
+		 *            be <code>null</code>.
 		 */
-		void join(FlowFuture flowFuture);
+		void join(FlowFuture flowFuture, long timeout, Object token);
 
 		/**
 		 * Flags whether the {@link Job} is complete, or requires re-invoking.

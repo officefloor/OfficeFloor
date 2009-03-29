@@ -16,6 +16,8 @@
  */
 package net.officefloor.frame.internal.structure;
 
+import net.officefloor.frame.api.escalate.FlowJoinTimedOutEscalation;
+
 /**
  * {@link Flow} {@link Asset}.
  * 
@@ -34,6 +36,13 @@ public interface FlowAsset {
 	 * 
 	 * @param jobNode
 	 *            {@link JobNode} to wait on this {@link Flow}.
+	 * @param timeout
+	 *            The maximum time to wait in milliseconds for the {@link Flow}
+	 *            to complete.
+	 * @param token
+	 *            A token added to the {@link FlowJoinTimedOutEscalation} to aid
+	 *            in identifying which {@link Flow} join timed out. May be
+	 *            <code>null</code>.
 	 * @param activateSet
 	 *            {@link JobNodeActivateSet} to activate the {@link JobNode}
 	 *            instances should {@link Flow} be completed.
@@ -41,6 +50,7 @@ public interface FlowAsset {
 	 *         <code>false</code> if {@link Flow} has already completed and not
 	 *         waiting.
 	 */
-	boolean waitOnFlow(JobNode jobNode, JobNodeActivateSet activateSet);
+	boolean waitOnFlow(JobNode jobNode, long timeout, Object token,
+			JobNodeActivateSet activateSet);
 
 }

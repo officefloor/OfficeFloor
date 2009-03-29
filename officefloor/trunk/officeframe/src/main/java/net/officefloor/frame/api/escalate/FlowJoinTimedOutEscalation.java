@@ -28,11 +28,6 @@ import net.officefloor.frame.internal.structure.Flow;
 public class FlowJoinTimedOutEscalation extends Escalation {
 
 	/**
-	 * Timeout specified by the join on the {@link Flow}.
-	 */
-	private final long timeout;
-
-	/**
 	 * Token provided to the join on the {@link Flow}.
 	 */
 	private final Object token;
@@ -40,23 +35,11 @@ public class FlowJoinTimedOutEscalation extends Escalation {
 	/**
 	 * Initiate.
 	 * 
-	 * @param timeout
-	 *            Timeout specified by the join on the {@link Flow}.
 	 * @param token
 	 *            Token provided to the join on the {@link Flow}.
 	 */
-	public FlowJoinTimedOutEscalation(long timeout, Object token) {
-		this.timeout = timeout;
+	public FlowJoinTimedOutEscalation(Object token) {
 		this.token = token;
-	}
-
-	/**
-	 * Obtains the timeout specified by the join on the {@link Flow}.
-	 * 
-	 * @return Timeout specified by the join on the {@link Flow}.
-	 */
-	public long getTimeout() {
-		return this.timeout;
 	}
 
 	/**

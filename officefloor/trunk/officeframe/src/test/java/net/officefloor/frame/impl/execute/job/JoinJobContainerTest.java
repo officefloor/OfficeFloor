@@ -60,6 +60,8 @@ public class JoinJobContainerTest extends AbstractJobContainerTest {
 			final FlowInstigationStrategyEnum instigationStrategy) {
 
 		final Object parameter = "FLOW PARAMETER";
+		final long timeout = 1000;
+		final Object token = "FLOW JOIN TOKEN";
 
 		// Create a job invoking a flow and joining on it
 		FunctionalityJob job = this.createJob(false, new JobFunctionality() {
@@ -68,7 +70,7 @@ public class JoinJobContainerTest extends AbstractJobContainerTest {
 					throws Throwable {
 				FlowFuture flowFuture = context.doFlow(0, instigationStrategy,
 						parameter);
-				context.join(flowFuture);
+				context.join(flowFuture, timeout, token);
 				return null;
 			}
 		});
@@ -88,7 +90,8 @@ public class JoinJobContainerTest extends AbstractJobContainerTest {
 		default:
 			fail("Unknown instigation strategy: " + instigationStrategy);
 		}
-		this.record_JobContainer_waitOnFlow(job, instigationStrategy);
+		this.record_JobContainer_waitOnFlow(job, instigationStrategy, timeout,
+				token);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Replay mocks
@@ -118,12 +121,12 @@ public class JoinJobContainerTest extends AbstractJobContainerTest {
 						FlowInstigationStrategyEnum.SEQUENTIAL, "SEQUENTIAL");
 				FlowFuture parallel = context.doFlow(0,
 						FlowInstigationStrategyEnum.PARALLEL, "PARALLEL");
-				context.join(sequential); // mix up doing flows and joining
+				context.join(sequential, 1, "SEQUENTIAL"); // mix up
 				FlowFuture asynchronous = context.doFlow(0,
 						FlowInstigationStrategyEnum.ASYNCHRONOUS,
 						"ASYNCHRONOUS");
-				context.join(parallel);
-				context.join(asynchronous);
+				context.join(parallel, 2, "PARALLEL");
+				context.join(asynchronous, 3, "ASYNCHRONOUS");
 				return null;
 			}
 		});
@@ -134,11 +137,11 @@ public class JoinJobContainerTest extends AbstractJobContainerTest {
 		this.record_doParallelFlow(job, "PARALLEL");
 		this.record_doAsynchronousFlow(job, "ASYNCHRONOUS");
 		this.record_JobContainer_waitOnFlow(job,
-				FlowInstigationStrategyEnum.SEQUENTIAL);
+				FlowInstigationStrategyEnum.SEQUENTIAL, 1, "SEQUENTIAL");
 		this.record_JobContainer_waitOnFlow(job,
-				FlowInstigationStrategyEnum.PARALLEL);
+				FlowInstigationStrategyEnum.PARALLEL, 2, "PARALLEL");
 		this.record_JobContainer_waitOnFlow(job,
-				FlowInstigationStrategyEnum.ASYNCHRONOUS);
+				FlowInstigationStrategyEnum.ASYNCHRONOUS, 3, "ASYNCHRONOUS");
 		this.record_JobActivatableSet_activateJobs();
 
 		// Execute to invoke the flows and join on them
@@ -163,9 +166,9 @@ public class JoinJobContainerTest extends AbstractJobContainerTest {
 					throws Throwable {
 				FlowFuture sameFlow = context.doFlow(0,
 						FlowInstigationStrategyEnum.ASYNCHRONOUS, "SAME FLOW");
-				context.join(sameFlow);
-				context.join(sameFlow);
-				context.join(sameFlow);
+				context.join(sameFlow, 1000, "REGISTERED");
+				context.join(sameFlow, 2000, "NOT REGISTERED");
+				context.join(sameFlow, 3000, "NOT REGISTERED AGAIN");
 				return null;
 			}
 		});
@@ -174,7 +177,7 @@ public class JoinJobContainerTest extends AbstractJobContainerTest {
 		this.record_JobContainer_initialSteps(job, null);
 		this.record_doAsynchronousFlow(job, "SAME FLOW");
 		this.record_JobContainer_waitOnFlow(job,
-				FlowInstigationStrategyEnum.ASYNCHRONOUS);
+				FlowInstigationStrategyEnum.ASYNCHRONOUS, 1000, "REGISTERED");
 		this.record_JobActivatableSet_activateJobs();
 
 		// Execute to join on invoked flows and wait only once

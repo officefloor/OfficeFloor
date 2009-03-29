@@ -16,12 +16,12 @@
  */
 package net.officefloor.frame.impl.execute.thread;
 
+import net.officefloor.frame.api.escalate.FlowJoinTimedOutEscalation;
 import net.officefloor.frame.api.execute.FlowFuture;
-import net.officefloor.frame.impl.execute.administrator.AdministratorContainerImpl;
 import net.officefloor.frame.impl.execute.flow.FlowImpl;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
+import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
 import net.officefloor.frame.impl.execute.linkedlistset.StrictLinkedListSet;
-import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.Asset;
@@ -48,7 +48,7 @@ import net.officefloor.frame.internal.structure.ThreadState;
  */
 public class ThreadStateImpl extends
 		AbstractLinkedListSetEntry<ThreadState, ProcessState> implements
-		ThreadState, Asset {
+		ThreadState {
 
 	/**
 	 * Active {@link Flow} instances for this {@link ThreadState}.
@@ -57,6 +57,22 @@ public class ThreadStateImpl extends
 		@Override
 		protected ThreadState getOwner() {
 			return ThreadStateImpl.this;
+		}
+	};
+
+	/**
+	 * Unique set of joined {@link JobNode} instances to this
+	 * {@link ThreadState}.
+	 */
+	private final LinkedListSet<JoinedJobNode, ThreadState> joinedJobNodes = new ComparatorLinkedListSet<JoinedJobNode, ThreadState>() {
+		@Override
+		protected ThreadState getOwner() {
+			return ThreadStateImpl.this;
+		}
+
+		@Override
+		protected boolean isEqual(JoinedJobNode entryA, JoinedJobNode entryB) {
+			return (entryA.jobNode == entryB.jobNode);
 		}
 	};
 
@@ -81,9 +97,9 @@ public class ThreadStateImpl extends
 	private final ProcessState processState;
 
 	/**
-	 * {@link AssetMonitor} for monitoring this {@link ThreadState}.
+	 * {@link AssetManager} for monitoring this {@link ThreadState}.
 	 */
-	private final AssetMonitor threadMonitor;
+	private final AssetManager threadManager;
 
 	/**
 	 * Flag indicating that looking for {@link EscalationFlow}.
@@ -118,7 +134,6 @@ public class ThreadStateImpl extends
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} for this {@link ThreadState}.
 	 */
-	@SuppressWarnings("unchecked")
 	public ThreadStateImpl(ThreadMetaData threadMetaData,
 			ProcessState processState, FlowMetaData<?> flowMetaData) {
 		this.threadMetaData = threadMetaData;
@@ -129,8 +144,8 @@ public class ThreadStateImpl extends
 				.getManagedObjectMetaData();
 		this.managedObjectContainers = new ManagedObjectContainer[moMetaData.length];
 		for (int i = 0; i < this.managedObjectContainers.length; i++) {
-			this.managedObjectContainers[i] = new ManagedObjectContainerImpl(
-					moMetaData[i], this.processState);
+			this.managedObjectContainers[i] = moMetaData[i]
+					.createManagedObjectContainer(this.processState);
 		}
 
 		// Create the administrator containers
@@ -138,13 +153,12 @@ public class ThreadStateImpl extends
 				.getAdministratorMetaData();
 		this.administratorContainers = new AdministratorContainer[adminMetaData.length];
 		for (int i = 0; i < this.administratorContainers.length; i++) {
-			this.administratorContainers[i] = new AdministratorContainerImpl(
-					adminMetaData[i]);
+			this.administratorContainers[i] = adminMetaData[i]
+					.createAdministratorContainer();
 		}
 
-		// Create the thread monitor
-		AssetManager flowAssetManager = flowMetaData.getFlowManager();
-		this.threadMonitor = flowAssetManager.createAssetMonitor(this);
+		// Obtain the thread manager
+		this.threadManager = flowMetaData.getFlowManager();
 	}
 
 	/*
@@ -214,7 +228,11 @@ public class ThreadStateImpl extends
 			}
 
 			// Activate all jobs waiting on this thread permanently
-			this.threadMonitor.activateJobNodes(activateSet, true);
+			JoinedJobNode joinedJobNode = this.joinedJobNodes.purgeEntries();
+			while (joinedJobNode != null) {
+				joinedJobNode.assetMonitor.activateJobNodes(activateSet, true);
+				joinedJobNode = joinedJobNode.getNext();
+			}
 
 			// Thread complete
 			this.processState.threadComplete(this, activateSet);
@@ -272,20 +290,32 @@ public class ThreadStateImpl extends
 	 */
 
 	@Override
-	public boolean waitOnFlow(JobNode jobNode, JobNodeActivateSet activateSet) {
+	public boolean waitOnFlow(JobNode jobNode, long timeout, Object token,
+			JobNodeActivateSet activateSet) {
 		// Need to synchronise as will be called by other ThreadStates
 		synchronized (this.getThreadLock()) {
 
-			// Determine if the same thread
-			if (this == jobNode.getFlow().getThreadState()) {
-				// Do not wait on this thread (and activate immediately)
+			// Determine if already complete
+			if (this.isFlowComplete) {
+				// Thread already complete (so activate job immediately)
 				activateSet.addJobNode(jobNode);
-				return false;
+				return false; // not waiting
 			}
 
-			// Return whether job is waiting on this thread.
-			// Note: thread may already be complete.
-			return this.threadMonitor.waitOnAsset(jobNode, activateSet);
+			// Determine if the same thread
+			if (this == jobNode.getFlow().getThreadState()) {
+				// Do not wait on this thread (activate job immediately)
+				activateSet.addJobNode(jobNode);
+				return false; // not waiting
+			}
+
+			// Create and add the joined job node
+			JoinedJobNode joinedJobNode = new JoinedJobNode(jobNode, timeout,
+					token);
+			this.joinedJobNodes.addEntry(joinedJobNode);
+
+			// Have job node wait on thread to complete (should always wait)
+			return joinedJobNode.assetMonitor.waitOnAsset(jobNode, activateSet);
 		}
 	}
 
@@ -293,9 +323,93 @@ public class ThreadStateImpl extends
 	 * =================== Asset ==========================================
 	 */
 
-	@Override
-	public void checkOnAsset(CheckAssetContext report) {
-		// TODO implement checking on ThreadState as an Asset
+	/**
+	 * Contains details of the joined {@link JobNode} to this
+	 * {@link ThreadState}.
+	 */
+	private class JoinedJobNode extends
+			AbstractLinkedListSetEntry<JoinedJobNode, ThreadState> implements
+			Asset {
+
+		/**
+		 * {@link JobNode} waiting for this {@link ThreadState} to complete.
+		 */
+		public final JobNode jobNode;
+
+		/**
+		 * {@link AssetMonitor} to monitor this join.
+		 */
+		public final AssetMonitor assetMonitor;
+
+		/**
+		 * Time by which this {@link ThreadState} must complete for this joined
+		 * {@link JobNode}.
+		 */
+		public final long timeoutTime;
+
+		/**
+		 * Token identifying the join.
+		 */
+		public final Object token;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param jobNode
+		 *            {@link JobNode} waiting for this {@link ThreadState} to
+		 *            complete.
+		 * @param assetMonitor
+		 *            {@link AssetMonitor} to monitor this join.
+		 * @param timeoutTime
+		 *            The maximum time to wait in milliseconds for the
+		 *            {@link Flow} to complete.
+		 * @param token
+		 *            Token identifying the join.
+		 */
+		public JoinedJobNode(JobNode jobNode, long timeout, Object token) {
+			this.jobNode = jobNode;
+			this.token = token;
+
+			// Create and register the monitor for the join
+			this.assetMonitor = ThreadStateImpl.this.threadManager
+					.createAssetMonitor(this);
+
+			// Calculate the time that join should time out
+			this.timeoutTime = System.currentTimeMillis() + timeout;
+		}
+
+		/*
+		 * ==================== LinkedListSetEntry ======================
+		 */
+
+		@Override
+		public ThreadState getLinkedListSetOwner() {
+			return ThreadStateImpl.this;
+		}
+
+		/*
+		 * ========================= Asset ===============================
+		 */
+
+		@Override
+		public void checkOnAsset(CheckAssetContext context) {
+			synchronized (ThreadStateImpl.this.getThreadLock()) {
+
+				// Obtain the current time
+				long currentTime = context.getTime();
+
+				// Check if time past join completion time
+				if (currentTime > this.timeoutTime) {
+
+					// Fail the job due to join time out
+					context.failJobNodes(new FlowJoinTimedOutEscalation(
+							this.token), true);
+
+					// Remove job node from the list (as no longer joined)
+					ThreadStateImpl.this.joinedJobNodes.removeEntry(this);
+				}
+			}
+		}
 	}
 
 }

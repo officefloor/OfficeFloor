@@ -41,8 +41,12 @@ public interface JobExecuteContext {
 	 * 
 	 * @param flowFuture
 	 *            {@link FlowFuture} of the {@link Flow} to join.
+	 * @param timeout
+	 *            Timeout in milliseconds for the {@link Flow} join.
+	 * @param token
+	 *            {@link Flow} join token.
 	 */
-	void joinFlow(FlowFuture flowFuture);
+	void joinFlow(FlowFuture flowFuture, long timeout, Object token);
 
 	/**
 	 * Invokes the {@link Flow} for the input {@link FlowMetaData}.

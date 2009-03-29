@@ -27,6 +27,7 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
@@ -531,9 +532,10 @@ public class ReflectiveWorkBuilder implements Work,
 				final TaskContext<ReflectiveWorkBuilder, Indexed, Indexed> context) {
 			return new ReflectiveFlow() {
 				@Override
-				public void doFlow(Object parameter) {
-					// Invoke the flow
-					context.doFlow(ReflectiveFlowParameterFactory.this.index,
+				public FlowFuture doFlow(Object parameter) {
+					// Invoke the flow and return the flow future
+					return context.doFlow(
+							ReflectiveFlowParameterFactory.this.index,
 							parameter);
 				}
 			};
