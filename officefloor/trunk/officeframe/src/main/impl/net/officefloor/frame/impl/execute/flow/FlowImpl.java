@@ -96,6 +96,7 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 		WorkMetaData workMetaData = taskMetaData.getWorkMetaData();
 
 		// Create the work container for a new work
+		// TODO provide scopes for Work (task, thread, process)
 		WorkContainer workContainer = workMetaData
 				.createWorkContainer(this.threadState.getProcessState());
 
@@ -266,9 +267,11 @@ public class FlowImpl extends AbstractLinkedListSetEntry<Flow, ThreadState>
 	 */
 
 	@Override
-	public boolean waitOnFlow(JobNode jobNode, JobNodeActivateSet activateSet) {
+	public boolean waitOnFlow(JobNode jobNode, long timeout, Object token,
+			JobNodeActivateSet activateSet) {
 		// Delegate to the thread
-		return this.threadState.waitOnFlow(jobNode, activateSet);
+		return this.threadState
+				.waitOnFlow(jobNode, timeout, token, activateSet);
 	}
 
 }

@@ -551,7 +551,9 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 
 			// Join to any required flow assets
 			while (headJoinOnFlowAsset != null) {
-				headJoinOnFlowAsset.flowAsset.waitOnFlow(this, activateSet);
+				headJoinOnFlowAsset.flowAsset.waitOnFlow(this,
+						headJoinOnFlowAsset.timeout, headJoinOnFlowAsset.token,
+						activateSet);
 				headJoinOnFlowAsset = headJoinOnFlowAsset.getNext();
 			}
 
@@ -704,7 +706,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	/*
-	 * ======================= JobContext =================================
+	 * ======================= JobExecuteContext ==========================
 	 * 
 	 * All methods will be guarded by lock taken in the doJob method.
 	 * Furthermore the JobContext methods do not require synchronised
@@ -717,7 +719,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	@Override
-	public final void joinFlow(FlowFuture flowFuture) {
+	public final void joinFlow(FlowFuture flowFuture, long timeout, Object token) {
 
 		// Flow future must be a FlowFutureToken
 		if (!(flowFuture instanceof FlowFutureToken)) {
@@ -729,13 +731,14 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		}
 
 		// Obtain the flow future token
-		FlowFutureToken token = (FlowFutureToken) flowFuture;
+		FlowFutureToken flowFurtureToken = (FlowFutureToken) flowFuture;
 
 		// Transform actual flow future to its flow asset
-		FlowAsset flowAsset = (FlowAsset) token.flowFuture;
+		FlowAsset flowAsset = (FlowAsset) flowFurtureToken.flowFuture;
 
 		// Add flow asset to be joined on at completion of this job
-		this.joinFlowAssets.addEntry(new JoinFlowAsset(flowAsset));
+		this.joinFlowAssets.addEntry(new JoinFlowAsset(flowAsset, timeout,
+				token));
 	}
 
 	@Override
@@ -1125,13 +1128,29 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 		public final FlowAsset flowAsset;
 
 		/**
+		 * Timeout in milliseconds for the {@link Flow} join.
+		 */
+		public final long timeout;
+
+		/**
+		 * {@link Flow} join token.
+		 */
+		public final Object token;
+
+		/**
 		 * Initiate.
 		 * 
 		 * @param flowAsset
 		 *            {@link FlowAsset} that this {@link JobNode} is to join on.
+		 * @param timeout
+		 *            Timeout in milliseconds for the {@link Flow} join.
+		 * @param token
+		 *            {@link Flow} join token.
 		 */
-		public JoinFlowAsset(FlowAsset flowAsset) {
+		public JoinFlowAsset(FlowAsset flowAsset, long timeout, Object token) {
 			this.flowAsset = flowAsset;
+			this.timeout = timeout;
+			this.token = token;
 		}
 
 		/*

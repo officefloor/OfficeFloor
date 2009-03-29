@@ -121,9 +121,13 @@ public interface TaskContext<W extends Work, D extends Enum<D>, F extends Enum<F
 	FlowFuture doFlow(int flowIndex, Object parameter);
 
 	/**
+	 * <p>
 	 * Stops this {@link Task} from proceeding to the next {@link Task} in its
 	 * {@link Flow} until the {@link Flow} of the input {@link FlowFuture} is
 	 * complete.
+	 * <p>
+	 * Should the same {@link Flow} be joined on twice, only the first join is
+	 * registered - second join of same {@link Flow} will be ignored.
 	 * 
 	 * @param flowFuture
 	 *            {@link FlowFuture} of the {@link Flow} that must complete.
@@ -133,9 +137,10 @@ public interface TaskContext<W extends Work, D extends Enum<D>, F extends Enum<F
 	 *            timeout, a {@link FlowJoinTimedOutEscalation} is escalated
 	 *            from this {@link Task}.
 	 * @param token
-	 *            A token added to the {@link FlowJoinTimedOutEscalation} to aid
-	 *            in identifying which {@link Flow} join timed out. May be
-	 *            <code>null</code>.
+	 *            Should a {@link FlowJoinTimedOutEscalation} be escalated the
+	 *            token will be added to the escalated
+	 *            {@link FlowJoinTimedOutEscalation} to aid in identifying which
+	 *            {@link Flow} join timed out. May be <code>null</code>.
 	 * @throws IllegalStateException
 	 *             If a {@link ProcessState} or unknown {@link FlowFuture}. Only
 	 *             {@link FlowFuture} instances returned from the
