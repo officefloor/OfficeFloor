@@ -44,7 +44,7 @@ import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
 import net.officefloor.frame.internal.structure.AssetManager;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -1252,7 +1252,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link Escalation} type.
+	 * Ensure issue if no {@link EscalationFlow} type.
 	 */
 	public void testNoEscalationType() {
 
@@ -1280,7 +1280,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link TaskNodeReference} for {@link Escalation}.
+	 * Ensure issue if no {@link TaskNodeReference} for {@link EscalationFlow}.
 	 */
 	public void testNoEscalationTaskNodeReference() {
 
@@ -1310,7 +1310,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if no {@link Task} name for {@link Escalation}.
+	 * Ensure issue if no {@link Task} name for {@link EscalationFlow}.
 	 */
 	public void testNoEscalationTaskName() {
 
@@ -1346,7 +1346,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure issue if incompatible {@link Escalation}.
+	 * Ensure issue if incompatible {@link EscalationFlow}.
 	 */
 	public void testIncompatibleEscalation() {
 
@@ -1395,7 +1395,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Ensure able to construct {@link Escalation}.
+	 * Ensure able to construct {@link EscalationFlow}.
 	 */
 	public void testConstructEscalation() {
 
@@ -1440,7 +1440,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		// Verify constructed escalation
 		EscalationProcedure escalationProcedure = metaData.getTaskMetaData()
 				.getEscalationProcedure();
-		Escalation escalation = escalationProcedure
+		EscalationFlow escalation = escalationProcedure
 				.getEscalation(new IOException("test"));
 		assertEquals("Incorrect type of cause", IOException.class, escalation
 				.getTypeOfCause());
@@ -1531,7 +1531,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	}
 
 	/**
-	 * Records no {@link Escalation}.
+	 * Records no {@link EscalationFlow}.
 	 */
 	private void record_NoEscalations() {
 		this.recordReturn(this.configuration, this.configuration

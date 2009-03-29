@@ -16,10 +16,12 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import java.sql.Connection;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import net.officefloor.frame.impl.execute.error.ExecutionError;
-import net.officefloor.frame.impl.execute.error.ExecutionErrorEnum;
+import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
+import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -50,7 +52,7 @@ public class TimedOutLoadManagedObjectContainerTest extends
 	protected void runTest() throws Throwable {
 
 		// Record loading managed object (that is delayed)
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(Connection.class);
 		this.record_MoContainer_sourceManagedObject(false, null);
 
 		// Record attempting to check managed object available
@@ -78,11 +80,11 @@ public class TimedOutLoadManagedObjectContainerTest extends
 			// Check if loaded but is now timed out
 			this.isManagedObjectReady(mo, false);
 			fail("Check should not return as load timed out");
-		} catch (ExecutionError ex) {
+		} catch (PropagateEscalationError ex) {
 			// Ensure correct error type
-			assertEquals("Incorrect error type",
-					ExecutionErrorEnum.MANAGED_OBJECT_SOURCING_FAILURE, ex
-							.getErrorType());
+			this.assert_ManagedObjectEscalation(ex,
+					SourceManagedObjectTimedOutEscalation.class,
+					Connection.class);
 		}
 
 		// Unload the managed object (should only set state as not sourced)

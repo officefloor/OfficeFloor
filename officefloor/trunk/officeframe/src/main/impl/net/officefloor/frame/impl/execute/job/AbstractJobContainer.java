@@ -19,10 +19,10 @@ package net.officefloor.frame.impl.execute.job;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.impl.execute.error.ExecutionError;
+import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.impl.execute.linkedlistset.AbstractLinkedListSetEntry;
 import net.officefloor.frame.impl.execute.linkedlistset.ComparatorLinkedListSet;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
@@ -401,36 +401,24 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							throw new IllegalStateException(
 									"Should not be in state " + this.jobState);
 						}
-					} catch (ExecutionError ex) {
-
-						// Task failed
-						this.jobState = JobState.FAILED;
-
-						// Handle the execution error
-						switch (ex.getErrorType()) {
-						case MANAGED_OBJECT_ASYNC_OPERATION_TIMED_OUT:
-						case MANAGED_OBJECT_FAILED_PROVIDING_OBJECT:
-						case MANAGED_OBJECT_NOT_LOADED:
-						case MANAGED_OBJECT_SOURCING_FAILURE:
-						default:
-							// Flag for escalation
-							escalationCause = ex.getCause();
-							if (escalationCause == null) {
-								escalationCause = ex;
-							}
+					} catch (PropagateEscalationError ex) {
+						// Obtain the cause of the escalation
+						escalationCause = ex.getCause();
+						if (escalationCause == null) {
+							// May have been thrown by application code
+							escalationCause = ex;
 						}
 
 					} catch (Throwable ex) {
-
-						// Task failed
-						this.jobState = JobState.FAILED;
-
 						// Flag for escalation
 						escalationCause = ex;
 					}
 
-					// Handle failure
+					// Job failure
+					this.jobState = JobState.FAILED;
 					try {
+
+						// TODO escalation path takes account many sequential
 
 						// Obtain the node to handle the escalation
 						JobNode escalationNode = null;
@@ -446,7 +434,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 							JobNode escalationOwnerNode = this
 									.getParallelOwner();
 							do {
-								Escalation escalation = node
+								EscalationFlow escalation = node
 										.getEscalationProcedure()
 										.getEscalation(escalationCause);
 								if (escalation == null) {
@@ -487,20 +475,10 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 						// Determine if require a global escalation
 						if (escalationNode == null) {
 							// No escalation, so use global escalation
-							Escalation globalEscalation = null;
+							EscalationFlow globalEscalation = null;
 							switch (threadState.getEscalationLevel()) {
 							case FLOW:
-								// Obtain the managed object source escalation
-								globalEscalation = processState
-										.getManagedObjectSourceEscalation();
-								if (globalEscalation != null) {
-									threadState
-											.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
-									break;
-								}
-
-							case MANAGED_OBJECT_SOURCE_HANDLER:
-								// Tried managed object, now at office
+								// Obtain the Office escalation
 								globalEscalation = processState
 										.getOfficeEscalationProcedure()
 										.getEscalation(escalationCause);
@@ -511,15 +489,21 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 								}
 
 							case OFFICE:
-								// Tried office, now at office floor
+								// Tried office, now at managed object source
 								globalEscalation = processState
-										.getOfficeFloorEscalation();
+										.getManagedObjectSourceEscalation();
+								if (globalEscalation != null) {
+									threadState
+											.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
+									break;
+								}
 
-								// Always now at office floor escalation level
+							case MANAGED_OBJECT_SOURCE_HANDLER:
+								// Tried managed object, always at office floor
 								threadState
 										.setEscalationLevel(EscalationLevel.OFFICE_FLOOR);
-
-								// Attempt to use office floor escalation
+								globalEscalation = processState
+										.getOfficeFloorEscalation();
 								if (globalEscalation != null) {
 									break;
 								}
@@ -785,7 +769,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	}
 
 	/**
-	 * Creates an {@link Escalation} {@link JobNode} from the input
+	 * Creates an {@link EscalationFlow} {@link JobNode} from the input
 	 * {@link FlowMetaData}.
 	 * 
 	 * @param flowMetaData
@@ -793,7 +777,7 @@ public abstract class AbstractJobContainer<W extends Work, N extends JobMetaData
 	 * @param parameter
 	 *            Parameter.
 	 * @param parallelOwner
-	 *            Parallel owner for the {@link Escalation} {@link JobNode}.
+	 *            Parallel owner for the {@link EscalationFlow} {@link JobNode}.
 	 * @return {@link JobNode}.
 	 */
 	private JobNode createEscalationJobNode(FlowMetaData<?> flowMetaData,

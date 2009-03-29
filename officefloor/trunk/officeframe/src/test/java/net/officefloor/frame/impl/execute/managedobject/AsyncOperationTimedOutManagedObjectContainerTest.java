@@ -16,10 +16,12 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import java.sql.Connection;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import net.officefloor.frame.impl.execute.error.ExecutionError;
-import net.officefloor.frame.impl.execute.error.ExecutionErrorEnum;
+import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
+import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 
@@ -60,10 +62,10 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 	@Override
 	protected void runTest() throws Throwable {
 
-		final Object object = "object";
+		final Connection object = this.createMock(Connection.class);
 
 		// Record making the managed object available
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(Connection.class);
 		this.record_MoContainer_sourceManagedObject(true, null);
 		this.record_MoUser_setManagedObject(true, object);
 		this.record_MoContainer_coordinateManagedObject(null);
@@ -77,8 +79,7 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 				.record_MoContainer_isManagedObjectReady(ReadyState.ASYNC_OPERATION_TIMED_OUT);
 
 		// Record continue to report asynchronous operation timed out
-		this
-				.record_MoContainer_isManagedObjectReady(ReadyState.ASYNC_OPERATION_TIMED_OUT);
+		this.record_MoContainer_isManagedObjectReady(ReadyState.FAILURE);
 
 		// Record unloading managed object
 		this.record_MoContainer_unloadManagedObject(true);
@@ -100,24 +101,22 @@ public class AsyncOperationTimedOutManagedObjectContainerTest extends
 			// Checking results in propagating timeout failure
 			this.isManagedObjectReady(mo, false);
 			fail("Should not return on asynchronous timeout");
-		} catch (ExecutionError ex) {
+		} catch (PropagateEscalationError ex) {
 			// Ensure correct type
-			assertEquals(
-					"Incorrect execution error",
-					ExecutionErrorEnum.MANAGED_OBJECT_ASYNC_OPERATION_TIMED_OUT,
-					ex.getErrorType());
+			this.assert_ManagedObjectEscalation(ex,
+					ManagedObjectOperationTimedOutEscalation.class,
+					Connection.class);
 		}
 
 		try {
-			// Checking against should also result in propagating timeout
+			// Checking again should also result in propagating timeout
 			this.isManagedObjectReady(mo, false);
 			fail("Should not return on asynchronous timeout");
-		} catch (ExecutionError ex) {
+		} catch (PropagateEscalationError ex) {
 			// Ensure correct type
-			assertEquals(
-					"Incorrect execution error",
-					ExecutionErrorEnum.MANAGED_OBJECT_ASYNC_OPERATION_TIMED_OUT,
-					ex.getErrorType());
+			this.assert_ManagedObjectEscalation(ex,
+					ManagedObjectOperationTimedOutEscalation.class,
+					Connection.class);
 		}
 
 		// Ensure can unload the managed object

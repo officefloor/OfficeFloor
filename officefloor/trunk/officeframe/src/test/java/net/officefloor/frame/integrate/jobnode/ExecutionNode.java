@@ -183,20 +183,20 @@ public class ExecutionNode<W extends Work> implements
 			}
 		});
 
-		// Record obtaining the object of the Managed Object
-		try {
-			mo.getObject();
-			this.testCase.control(mo).setReturnValue(objectOfManagedObject);
-		} catch (Exception ex) {
-			Assert.fail("Recording - should not fail: " + ex.getMessage());
-		}
-
 		// If asynchronous must be registered with container
 		if (isAsynchronous) {
 			// Register with container
 			AsynchronousManagedObject amo = (AsynchronousManagedObject) mo;
 			amo.registerAsynchronousCompletionListener(null);
 			this.testCase.control(mo).setDefaultMatcher(new AlwaysMatcher());
+		}
+
+		// Record obtaining the object of the Managed Object
+		try {
+			mo.getObject();
+			this.testCase.control(mo).setReturnValue(objectOfManagedObject);
+		} catch (Exception ex) {
+			Assert.fail("Recording - should not fail: " + ex.getMessage());
 		}
 
 		// Add to listing of processing for the Task
@@ -609,7 +609,7 @@ public class ExecutionNode<W extends Work> implements
 			FlowFuture future = this.testCase.getFlowFuture(this.futureNode);
 
 			// Wait on flow future
-			context.join(future);
+			context.join(future, 1000, null);
 
 			// Not complete (execute again)
 			return false;

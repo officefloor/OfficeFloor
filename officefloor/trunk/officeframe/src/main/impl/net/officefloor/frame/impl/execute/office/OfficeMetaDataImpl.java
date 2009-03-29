@@ -16,13 +16,13 @@
  */
 package net.officefloor.frame.impl.execute.office;
 
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectContainerImpl;
 import net.officefloor.frame.impl.execute.process.ProcessStateImpl;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -76,9 +76,9 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	private final EscalationProcedure escalationProcedure;
 
 	/**
-	 * {@link OfficeFloor} {@link Escalation}.
+	 * {@link OfficeFloor} {@link EscalationFlow}.
 	 */
-	private final Escalation officeFloorEscalation;
+	private final EscalationFlow officeFloorEscalation;
 
 	/**
 	 * Initiate.
@@ -98,13 +98,13 @@ public class OfficeMetaDataImpl implements OfficeMetaData {
 	 * @param escalationProcedure
 	 *            {@link EscalationProcedure} for the {@link Office}.
 	 * @param officeFloorEscalation
-	 *            {@link OfficeFloor} {@link Escalation}.
+	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	public OfficeMetaDataImpl(String officeName, OfficeManager officeManager,
 			WorkMetaData<?>[] workMetaDatas, ProcessMetaData processMetaData,
 			OfficeStartupTask[] startupTasks,
 			EscalationProcedure escalationProcedure,
-			Escalation officeFloorEscalation) {
+			EscalationFlow officeFloorEscalation) {
 		this.officeName = officeName;
 		this.officeManager = officeManager;
 		this.workMetaDatas = workMetaDatas;

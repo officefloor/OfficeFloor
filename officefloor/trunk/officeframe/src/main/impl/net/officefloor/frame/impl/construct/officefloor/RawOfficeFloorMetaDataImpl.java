@@ -23,7 +23,7 @@ import java.util.Map;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
@@ -48,7 +48,7 @@ import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
@@ -85,9 +85,9 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	private final Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry;
 
 	/**
-	 * {@link Escalation} for the {@link OfficeFloor}.
+	 * {@link EscalationFlow} for the {@link OfficeFloor}.
 	 */
-	private final Escalation officeFloorEscalation;
+	private final EscalationFlow officeFloorEscalation;
 
 	/**
 	 * {@link OfficeFloorMetaData}.
@@ -108,7 +108,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	private RawOfficeFloorMetaDataImpl(
 			Map<String, RawTeamMetaData> teamRegistry,
 			Map<String, RawManagedObjectMetaData<?, ?>> mosRegistry,
-			Escalation officeFloorEscalation) {
+			EscalationFlow officeFloorEscalation) {
 		this.teamRegistry = teamRegistry;
 		this.mosRegistry = mosRegistry;
 		this.officeFloorEscalation = officeFloorEscalation;
@@ -236,7 +236,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 			// Provide default office floor escalation handler
 			officeFloorEscalationHandler = new DefaultOfficeFloorEscalationHandler();
 		}
-		Escalation officeFloorEscalation = new EscalationHandlerEscalation(
+		EscalationFlow officeFloorEscalation = new EscalationHandlerEscalation(
 				officeFloorEscalationHandler, new PassiveTeam());
 
 		// Create the raw office floor meta-data
@@ -336,7 +336,7 @@ public class RawOfficeFloorMetaDataImpl implements RawOfficeFloorMetaData,
 	}
 
 	@Override
-	public Escalation getOfficeFloorEscalation() {
+	public EscalationFlow getOfficeFloorEscalation() {
 		return this.officeFloorEscalation;
 	}
 

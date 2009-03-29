@@ -17,7 +17,7 @@
 package net.officefloor.frame.impl.execute.process;
 
 import net.officefloor.frame.api.build.None;
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.impl.execute.flow.FlowMetaDataImpl;
@@ -25,7 +25,7 @@ import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
 import net.officefloor.frame.impl.execute.work.WorkMetaDataImpl;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.ManagedObjectIndex;
@@ -37,11 +37,11 @@ import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.util.AbstractSingleTask;
 
 /**
- * {@link Escalation} for an {@link EscalationHandler}.
+ * {@link EscalationFlow} for an {@link EscalationHandler}.
  * 
  * @author Daniel
  */
-public class EscalationHandlerEscalation implements Escalation {
+public class EscalationHandlerEscalation implements EscalationFlow {
 
 	/**
 	 * {@link EscalationHandler}.
@@ -59,7 +59,7 @@ public class EscalationHandlerEscalation implements Escalation {
 	 * @param escalationHandler
 	 *            {@link EscalationHandler}.
 	 * @param team
-	 *            {@link Team} responsible to undertake the {@link Escalation}.
+	 *            {@link Team} responsible to undertake the {@link EscalationFlow}.
 	 */
 	@SuppressWarnings("unchecked")
 	public EscalationHandlerEscalation(EscalationHandler escalationHandler,
@@ -116,7 +116,7 @@ public class EscalationHandlerEscalation implements Escalation {
 	}
 
 	/**
-	 * Key identifying the {@link Exception} for the {@link Escalation}.
+	 * Key identifying the {@link Exception} for the {@link EscalationFlow}.
 	 */
 	private enum EscalationKey {
 		EXCEPTION

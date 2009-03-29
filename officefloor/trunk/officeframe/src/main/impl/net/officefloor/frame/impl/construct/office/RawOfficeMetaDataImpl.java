@@ -28,7 +28,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.asset.AssetManagerFactoryImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.asset.OfficeManagerImpl;
-import net.officefloor.frame.impl.execute.escalation.EscalationImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.office.OfficeMetaDataImpl;
 import net.officefloor.frame.impl.execute.office.OfficeStartupTaskImpl;
@@ -59,7 +59,7 @@ import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -451,12 +451,12 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 				.getEscalationConfiguration();
 		int officeEscalationsLength = (officeEscalationConfigurations == null ? 0
 				: officeEscalationConfigurations.length);
-		Escalation[] officeEscalations = new Escalation[officeEscalationsLength];
+		EscalationFlow[] officeEscalations = new EscalationFlow[officeEscalationsLength];
 		EscalationProcedure officeEscalationProcedure = new EscalationProcedureImpl(
 				officeEscalations);
 
 		// Obtain the office floor escalation
-		Escalation officeFloorEscalation = rawOfficeFloorMetaData
+		EscalationFlow officeFloorEscalation = rawOfficeFloorMetaData
 				.getOfficeFloorEscalation();
 
 		// Create the thread meta-data
@@ -539,7 +539,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 					issues);
 
 			// Create and load the escalation
-			officeEscalations[i] = new EscalationImpl(typeOfCause,
+			officeEscalations[i] = new EscalationFlowImpl(typeOfCause,
 					escalationFlow);
 		}
 

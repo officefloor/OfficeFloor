@@ -19,7 +19,7 @@ package net.officefloor.frame.api.build;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -149,16 +149,16 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Adds an {@link Escalation} to the {@link EscalationProcedure} for the
+	 * Adds an {@link EscalationFlow} to the {@link EscalationProcedure} for the
 	 * {@link Task}.
 	 * <p>
-	 * The order in which the {@link Escalation} instances are added is the
+	 * The order in which the {@link EscalationFlow} instances are added is the
 	 * order in which they are checked for handling escalation. Only one
-	 * {@link Escalation} is used to handle escalation and the first one
+	 * {@link EscalationFlow} is used to handle escalation and the first one
 	 * covering the cause will be used.
 	 * 
 	 * @param typeOfCause
-	 *            Type of cause handled by this {@link Escalation}.
+	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param taskName
 	 *            Name of the {@link Task} that resides on the same {@link Work}
 	 *            as this {@link Task}.
@@ -167,11 +167,11 @@ public interface FlowNodeBuilder<F extends Enum<F>> {
 	void addEscalation(Class<? extends Throwable> typeOfCause, String taskName);
 
 	/**
-	 * Adds an {@link Escalation} to the {@link EscalationProcedure} for the
+	 * Adds an {@link EscalationFlow} to the {@link EscalationProcedure} for the
 	 * {@link Task}.
 	 * 
 	 * @param typeOfCause
-	 *            Type of cause handled by this {@link Escalation}.
+	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param workName
 	 *            Name of the {@link Work} that the first {@link Task} of the
 	 *            {@link Flow} resides on.

@@ -49,7 +49,7 @@ public class LifeCycleManagedObjectContainerTest extends
 		final Object object = "object";
 
 		// Record loading managed object
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(true, null);
 		this.record_MoUser_setManagedObject(true, object);
 		this.record_MoContainer_coordinateManagedObject(null);

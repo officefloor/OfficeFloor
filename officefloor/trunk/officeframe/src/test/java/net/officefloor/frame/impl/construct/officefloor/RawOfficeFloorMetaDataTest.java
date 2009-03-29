@@ -21,7 +21,7 @@ import java.util.List;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.execute.officefloor.DefaultOfficeFloorEscalationHandler;
@@ -42,7 +42,7 @@ import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawTeamMetaData;
 import net.officefloor.frame.internal.construct.RawTeamMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaDataFactory;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.ManagedObjectSourceInstance;
 import net.officefloor.frame.internal.structure.OfficeMetaData;
@@ -684,7 +684,7 @@ public class RawOfficeFloorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records construction of the {@link Escalation} for the
+	 * Records construction of the {@link EscalationFlow} for the
 	 * {@link OfficeFloor}.
 	 */
 	private void record_constructEscalation() {

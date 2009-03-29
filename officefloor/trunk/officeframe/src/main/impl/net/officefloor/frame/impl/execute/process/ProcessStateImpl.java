@@ -18,7 +18,7 @@ package net.officefloor.frame.impl.execute.process;
 
 import java.util.List;
 
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -31,7 +31,7 @@ import net.officefloor.frame.impl.execute.thread.ThreadStateImpl;
 import net.officefloor.frame.impl.spi.team.PassiveTeam;
 import net.officefloor.frame.internal.structure.AdministratorContainer;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -103,9 +103,9 @@ public class ProcessStateImpl implements ProcessState {
 	private final EscalationHandlerEscalation managedObjectSourceEscalation;
 
 	/**
-	 * {@link OfficeFloor} {@link Escalation}.
+	 * {@link OfficeFloor} {@link EscalationFlow}.
 	 */
-	private final Escalation officeFloorEscalation;
+	private final EscalationFlow officeFloorEscalation;
 
 	/**
 	 * Listing of {@link ProcessCompletionListener} instances.
@@ -131,13 +131,13 @@ public class ProcessStateImpl implements ProcessState {
 	 *            {@link EscalationHandler} provided by the
 	 *            {@link ManagedObject} that invoked this {@link ProcessState}.
 	 * @param officeFloorEscalaion
-	 *            {@link OfficeFloor} {@link Escalation}.
+	 *            {@link OfficeFloor} {@link EscalationFlow}.
 	 */
 	@SuppressWarnings("unchecked")
 	public ProcessStateImpl(ProcessMetaData processMetaData,
 			OfficeMetaData officeMetaData,
 			EscalationHandler managedObjectEscalationHandler,
-			Escalation officeFloorEscalaion) {
+			EscalationFlow officeFloorEscalaion) {
 		this.processMetaData = processMetaData;
 		this.officeMetaData = officeMetaData;
 		this.officeFloorEscalation = officeFloorEscalaion;
@@ -237,7 +237,7 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public Escalation getManagedObjectSourceEscalation() {
+	public EscalationFlow getManagedObjectSourceEscalation() {
 		return this.managedObjectSourceEscalation;
 	}
 
@@ -247,7 +247,7 @@ public class ProcessStateImpl implements ProcessState {
 	}
 
 	@Override
-	public Escalation getOfficeFloorEscalation() {
+	public EscalationFlow getOfficeFloorEscalation() {
 		return this.officeFloorEscalation;
 	}
 

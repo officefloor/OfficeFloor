@@ -18,7 +18,7 @@ package net.officefloor.frame.internal.construct;
 
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.OfficeFloorMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
@@ -53,11 +53,11 @@ public interface RawOfficeFloorMetaData {
 			String managedObjectSourceName);
 
 	/**
-	 * Obtains the {@link Escalation} for the {@link OfficeFloor}.
+	 * Obtains the {@link EscalationFlow} for the {@link OfficeFloor}.
 	 * 
-	 * @return {@link Escalation}.
+	 * @return {@link EscalationFlow}.
 	 */
-	Escalation getOfficeFloorEscalation();
+	EscalationFlow getOfficeFloorEscalation();
 
 	/**
 	 * Obtains the {@link OfficeFloorMetaData}.

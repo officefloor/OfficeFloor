@@ -14,46 +14,35 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.impl.execute.escalation;
 
 import net.officefloor.frame.api.escalate.Escalation;
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.execute.job.AbstractJobContainer;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>
- * Escalation levels for a {@link ThreadState}.
+ * Propagates the {@link Escalation} to allow the {@link AbstractJobContainer}
+ * to catch and handle it.
  * <p>
- * The order of {@link Escalation} handling is as listed below.
+ * The {@link Escalation} (/{@link Throwable}) may be obtained from
+ * {@link #getCause()}.
  * 
  * @author Daniel
  */
-public enum EscalationLevel {
+public class PropagateEscalationError extends Error {
 
 	/**
-	 * {@link ThreadState} executing the {@link Flow} instances with all
-	 * {@link Escalation} instances handled by {@link Flow}.
+	 * Initiate.
+	 * 
+	 * @param escalation
+	 *            {@link Throwable} to be propagated to the
+	 *            {@link AbstractJobContainer} to be handled. Is
+	 *            {@link Throwable} as may be failures from a
+	 *            {@link ManagedObjectSource} that requires to be handled.
 	 */
-	FLOW,
-
-	/**
-	 * {@link ThreadState} invoking {@link Escalation} provided by the
-	 * {@link Office}.
-	 */
-	OFFICE,
-
-	/**
-	 * {@link ThreadState} invoking {@link EscalationHandler} provided by the
-	 * {@link ManagedObjectSource} instigating a {@link Flow}.
-	 */
-	MANAGED_OBJECT_SOURCE_HANDLER,
-
-	/**
-	 * {@link ThreadState} invoking catch all {@link Escalation} provided by the
-	 * {@link OfficeFloor}.
-	 */
-	OFFICE_FLOOR
+	public PropagateEscalationError(Throwable escalation) {
+		super(escalation);
+	}
 
 }

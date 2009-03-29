@@ -43,7 +43,7 @@ import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
 import net.officefloor.frame.internal.configuration.OfficeConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.configuration.WorkConfiguration;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
 import net.officefloor.frame.spi.administration.Administrator;
@@ -122,7 +122,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	private final List<OfficeEnhancer> officeEnhancers = new LinkedList<OfficeEnhancer>();
 
 	/**
-	 * Listing of the {@link Escalation} instances.
+	 * Listing of the {@link EscalationFlow} instances.
 	 */
 	private final List<EscalationConfiguration> escalations = new LinkedList<EscalationConfiguration>();
 

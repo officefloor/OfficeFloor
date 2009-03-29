@@ -27,7 +27,7 @@ import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -58,7 +58,7 @@ import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.internal.structure.AdministratorScope;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -168,10 +168,10 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 			.createMock(RawTaskMetaDataFactory.class);
 
 	/**
-	 * {@link OfficeFloor} {@link Escalation}.
+	 * {@link OfficeFloor} {@link EscalationFlow}.
 	 */
-	private final Escalation officeFloorEscalation = this
-			.createMock(Escalation.class);
+	private final EscalationFlow officeFloorEscalation = this
+			.createMock(EscalationFlow.class);
 
 	/**
 	 * Ensure issue if no {@link Office} name.
@@ -923,7 +923,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no type of cause for {@link Office} {@link Escalation}.
+	 * Ensure issue if no type of cause for {@link Office} {@link EscalationFlow}.
 	 */
 	public void testNoTypeOfCauseForOfficeEscalation() {
 
@@ -954,7 +954,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure issue if unknown {@link Task} for {@link Office}
-	 * {@link Escalation}.
+	 * {@link EscalationFlow}.
 	 */
 	public void testUnknownTaskForOfficeEscalation() {
 
@@ -991,7 +991,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure able to link in an {@link Office} {@link Escalation}.
+	 * Ensure able to link in an {@link Office} {@link EscalationFlow}.
 	 */
 	public void testConstructOfficeEscalation() {
 
@@ -1047,7 +1047,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		// Verify office escalation loaded
 		EscalationProcedure escalationProcedure = officeMetaData
 				.getEscalationProcedure();
-		Escalation escalation = escalationProcedure.getEscalation(failure);
+		EscalationFlow escalation = escalationProcedure.getEscalation(failure);
 		FlowMetaData<?> escalationFlowMetaData = escalation.getFlowMetaData();
 		assertEquals("Incorrect escalation task meta-data", taskMetaData,
 				escalationFlowMetaData.getInitialTaskMetaData());
@@ -1060,7 +1060,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to create a {@link ProcessState} and obtain the
-	 * {@link OfficeFloor} {@link Escalation}
+	 * {@link OfficeFloor} {@link EscalationFlow}
 	 */
 	@SuppressWarnings("unchecked")
 	public void testCreateProcessAndOfficeFloorEscalation() {

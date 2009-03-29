@@ -21,6 +21,8 @@ package net.officefloor.frame.impl.execute.error;
  * 
  * @author Daniel
  */
+// TODO delete ExecutionErrorEnum once using Escalation instances
+@Deprecated
 public enum ExecutionErrorEnum {
 
 	/**

@@ -30,7 +30,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.execute.duty.TaskDutyAssociationImpl;
-import net.officefloor.frame.impl.execute.escalation.EscalationImpl;
+import net.officefloor.frame.impl.execute.escalation.EscalationFlowImpl;
 import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
@@ -50,7 +50,7 @@ import net.officefloor.frame.internal.construct.RawTaskMetaData;
 import net.officefloor.frame.internal.construct.RawTaskMetaDataFactory;
 import net.officefloor.frame.internal.construct.RawWorkMetaData;
 import net.officefloor.frame.internal.structure.AdministratorIndex;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -492,7 +492,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		// Create the escalation procedure
 		EscalationConfiguration[] escalationConfigurations = this.configuration
 				.getEscalations();
-		Escalation[] escalations = new Escalation[escalationConfigurations.length];
+		EscalationFlow[] escalations = new EscalationFlow[escalationConfigurations.length];
 		for (int i = 0; i < escalations.length; i++) {
 			EscalationConfiguration escalationConfiguration = escalationConfigurations[i];
 
@@ -528,7 +528,7 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 							AssetType.TASK, assetName, "Escalation" + i, issues);
 
 			// Create and add the escalation
-			escalations[i] = new EscalationImpl(typeOfCause,
+			escalations[i] = new EscalationFlowImpl(typeOfCause,
 					escalationFlowMetaData);
 		}
 		EscalationProcedure escalationProcedure = new EscalationProcedureImpl(

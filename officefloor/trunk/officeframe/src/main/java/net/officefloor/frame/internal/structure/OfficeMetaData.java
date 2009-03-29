@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
