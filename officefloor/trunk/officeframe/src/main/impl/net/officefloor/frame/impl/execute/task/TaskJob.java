@@ -165,7 +165,8 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		}
 
 		@Override
-		public void join(FlowFuture flowFuture) {
+		public void join(FlowFuture flowFuture, long timeout, Object token) {
+			// TODO provide timeout and token to joining on a Flow
 			TaskJob.this.joinFlow(flowFuture);
 		}
 
@@ -179,6 +180,7 @@ public class TaskJob<W extends Work, D extends Enum<D>, F extends Enum<F>>
 		public void setComplete(boolean isComplete) {
 			TaskJob.this.setJobComplete(isComplete);
 		}
+
 	}
 
 }

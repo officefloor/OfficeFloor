@@ -14,36 +14,29 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.officefloor;
+package net.officefloor.frame.internal.structure;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.escalate.Escalation;
 
 /**
- * Default {@link OfficeFloor} {@link EscalationHandler} that prints issue to
- * {@link System#err}.
+ * {@link Flow} to handle an {@link Escalation} from a {@link JobNode}.
  * 
  * @author Daniel
  */
-public class DefaultOfficeFloorEscalationHandler implements EscalationHandler {
+public interface EscalationFlow {
 
-	/*
-	 * =================== EscalationHandler ==================================
+	/**
+	 * Obtains the type of cause handled by this {@link EscalationFlow}.
+	 * 
+	 * @return Type of cause handled by this {@link EscalationFlow}.
 	 */
+	Class<? extends Throwable> getTypeOfCause();
 
-	@Override
-	public void handleEscalation(Throwable escalation) throws Throwable {
-
-		// Obtain the stack trace
-		StringWriter stackTrace = new StringWriter();
-		escalation.printStackTrace(new PrintWriter(stackTrace));
-
-		// Prints details of the error
-		System.err.println("FAILURE: Office not handling:\n"
-				+ stackTrace.toString());
-	}
+	/**
+	 * Obtains the {@link FlowMetaData} of the escalation handling.
+	 * 
+	 * @return {@link FlowMetaData} of the escalation handling.
+	 */
+	FlowMetaData<?> getFlowMetaData();
 
 }

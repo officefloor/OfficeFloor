@@ -16,23 +16,23 @@
  */
 package net.officefloor.frame.impl.execute.escalation;
 
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 
 /**
- * Implementation of {@link Escalation}.
+ * Implementation of {@link EscalationFlow}.
  * 
  * @author Daniel
  */
-public class EscalationImpl implements Escalation {
+public class EscalationFlowImpl implements EscalationFlow {
 
 	/**
-	 * Type of cause handled by this {@link Escalation}.
+	 * Type of cause handled by this {@link EscalationFlow}.
 	 */
 	private final Class<? extends Throwable> typeOfCause;
 
 	/**
-	 * {@link FlowMetaData} determine the actions for this {@link Escalation}.
+	 * {@link FlowMetaData} determine the actions for this {@link EscalationFlow}.
 	 */
 	private final FlowMetaData<?> flowMetaData;
 
@@ -40,12 +40,12 @@ public class EscalationImpl implements Escalation {
 	 * Initiate.
 	 * 
 	 * @param typeOfCause
-	 *            Type of cause handled by this {@link Escalation}.
+	 *            Type of cause handled by this {@link EscalationFlow}.
 	 * @param flowMetaData
 	 *            {@link FlowMetaData} determine the actions for this
-	 *            {@link Escalation}.
+	 *            {@link EscalationFlow}.
 	 */
-	public EscalationImpl(Class<? extends Throwable> typeOfCause,
+	public EscalationFlowImpl(Class<? extends Throwable> typeOfCause,
 			FlowMetaData<?> flowMetaData) {
 		this.typeOfCause = typeOfCause;
 		this.flowMetaData = flowMetaData;

@@ -14,34 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.api.execute;
+package net.officefloor.frame.api.escalate;
 
-import net.officefloor.frame.internal.structure.Escalation;
-import net.officefloor.frame.internal.structure.EscalationProcedure;
-import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>
- * Provides means for a {@link ManagedObjectSource} to handle a
- * {@link Throwable} that is not handled by the {@link EscalationProcedure} of
- * the {@link Flow}.
+ * {@link Escalation} that the {@link ManagedObjectSource} indicated a failure
+ * and could not provide a {@link ManagedObject} or its corresponding
+ * {@link Object} for processing.
  * <p>
- * An example of this would be a HTTP server {@link ManagedObjectSource} that
- * would send a status 500 on a {@link Throwable}.
+ * The failure to source the {@link ManagedObject} can be obtained from
+ * {@link #getCause()}.
  * 
  * @author Daniel
  */
-public interface EscalationHandler {
+public class FailedToSourceManagedObjectEscalation extends
+		ManagedObjectEscalation {
 
 	/**
-	 * Handles the {@link Throwable}.
+	 * Initiate.
 	 * 
-	 * @param escalation
-	 *            Escalation.
-	 * @throws Throwable
-	 *             If fails to handle {@link Escalation}.
+	 * @param objectType
+	 *            {@link Class} of the {@link Object} returned from the failed
+	 *            {@link ManagedObject}.
+	 * @param cause
+	 *            Cause from the {@link ManagedObjectSource} on why it could not
+	 *            source a {@link ManagedObject} or its corresponding
+	 *            {@link Object} for processing.
 	 */
-	void handleEscalation(Throwable escalation) throws Throwable;
+	public FailedToSourceManagedObjectEscalation(Class<?> objectType,
+			Throwable cause) {
+		super(objectType, cause);
+	}
 
 }

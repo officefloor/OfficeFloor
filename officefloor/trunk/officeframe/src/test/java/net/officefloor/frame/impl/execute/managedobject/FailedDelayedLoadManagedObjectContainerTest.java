@@ -18,8 +18,8 @@ package net.officefloor.frame.impl.execute.managedobject;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import net.officefloor.frame.impl.execute.error.ExecutionError;
-import net.officefloor.frame.impl.execute.error.ExecutionErrorEnum;
+import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
+import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -52,7 +52,7 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 		final Throwable failure = new Throwable("sourcing failure");
 
 		// Record loading managed object (that is delayed)
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(Object.class);
 		this.record_MoContainer_sourceManagedObject(false, null);
 
 		// Record later failure in sourcing managed object
@@ -60,10 +60,10 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 
 		// Record propagating failure in sourcing managed object
 		this.record_MoContainer_isManagedObjectReady(ReadyState.FAILURE);
-		
+
 		// Record flagging permanently activate jobs
 		this.record_MoContainer_unloadManagedObject(false);
-		
+
 		// Replay mock objects
 		this.replayMockObjects();
 
@@ -78,12 +78,11 @@ public class FailedDelayedLoadManagedObjectContainerTest extends
 			// Check ready should report failure to load
 			this.isManagedObjectReady(mo, false);
 			fail("Should propagate failure to source");
-		} catch (ExecutionError ex) {
+		} catch (PropagateEscalationError ex) {
 			// Ensure exception details correct
-			assertEquals("Incorrect error type",
-					ExecutionErrorEnum.MANAGED_OBJECT_SOURCING_FAILURE, ex
-							.getErrorType());
-			assertEquals("Incorrect sourcing cause", failure, ex.getCause());
+			Throwable cause = this.assert_ManagedObjectEscalation(ex,
+					FailedToSourceManagedObjectEscalation.class, Object.class);
+			assertEquals("Incorrect sourcing cause", failure, cause);
 		}
 
 		// Unload the managed object (should only set state as not sourced)

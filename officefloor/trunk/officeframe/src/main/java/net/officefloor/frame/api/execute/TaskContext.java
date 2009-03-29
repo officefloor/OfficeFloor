@@ -16,6 +16,7 @@
  */
 package net.officefloor.frame.api.execute;
 
+import net.officefloor.frame.api.escalate.FlowJoinTimedOutEscalation;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.internal.structure.ThreadState;
@@ -126,12 +127,22 @@ public interface TaskContext<W extends Work, D extends Enum<D>, F extends Enum<F
 	 * 
 	 * @param flowFuture
 	 *            {@link FlowFuture} of the {@link Flow} that must complete.
+	 * @param timeout
+	 *            The maximum time to wait in milliseconds for the {@link Flow}
+	 *            to complete. Should the {@link Flow} not complete in this
+	 *            timeout, a {@link FlowJoinTimedOutEscalation} is escalated
+	 *            from this {@link Task}.
+	 * @param token
+	 *            A token added to the {@link FlowJoinTimedOutEscalation} to aid
+	 *            in identifying which {@link Flow} join timed out. May be
+	 *            <code>null</code>.
 	 * @throws IllegalStateException
 	 *             If a {@link ProcessState} or unknown {@link FlowFuture}. Only
 	 *             {@link FlowFuture} instances returned from the
 	 *             <code>doFlow</code> methods are valid input.
 	 */
-	void join(FlowFuture flowFuture) throws IllegalArgumentException;
+	void join(FlowFuture flowFuture, long timeout, Object token)
+			throws IllegalArgumentException;
 
 	/**
 	 * <p>

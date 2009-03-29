@@ -50,7 +50,7 @@ public class DelayedLoadManagedObjectContainerTest extends
 		final Object object = "object";
 
 		// Record loading managed object (that is delayed)
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(object.getClass());
 		this.record_MoContainer_sourceManagedObject(false, null);
 
 		// Record attempting to check managed object available

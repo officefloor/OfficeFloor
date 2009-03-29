@@ -17,19 +17,19 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
- * Configuration for the {@link Escalation}.
+ * Configuration for the {@link EscalationFlow}.
  * 
  * @author Daniel
  */
 public interface EscalationConfiguration {
 
 	/**
-	 * Obtains the type of cause handled by this {@link Escalation}.
+	 * Obtains the type of cause handled by this {@link EscalationFlow}.
 	 * 
-	 * @return Type of cause handled by this {@link Escalation}.
+	 * @return Type of cause handled by this {@link EscalationFlow}.
 	 */
 	Class<? extends Throwable> getTypeOfCause();
 

@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.escalation;
 
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 
 /**
@@ -27,18 +27,18 @@ import net.officefloor.frame.internal.structure.EscalationProcedure;
 public class EscalationProcedureImpl implements EscalationProcedure {
 
 	/**
-	 * {@link Escalation} instances in order for this procedure.
+	 * {@link EscalationFlow} instances in order for this procedure.
 	 */
-	private final Escalation[] escalations;
+	private final EscalationFlow[] escalations;
 
 	/**
-	 * Initiate with {@link Escalation} details.
+	 * Initiate with {@link EscalationFlow} details.
 	 * 
 	 * @param escalations
-	 *            {@link Escalation} instances in order to be taken for this
+	 *            {@link EscalationFlow} instances in order to be taken for this
 	 *            procedure.
 	 */
-	public EscalationProcedureImpl(Escalation... escalations) {
+	public EscalationProcedureImpl(EscalationFlow... escalations) {
 		this.escalations = escalations;
 	}
 
@@ -47,10 +47,10 @@ public class EscalationProcedureImpl implements EscalationProcedure {
 	 */
 
 	@Override
-	public Escalation getEscalation(Throwable cause) {
+	public EscalationFlow getEscalation(Throwable cause) {
 
 		// Find the first matching escalation
-		for (Escalation escalation : this.escalations) {
+		for (EscalationFlow escalation : this.escalations) {
 			if (escalation.getTypeOfCause().isInstance(cause)) {
 				// Use first matching
 				return escalation;

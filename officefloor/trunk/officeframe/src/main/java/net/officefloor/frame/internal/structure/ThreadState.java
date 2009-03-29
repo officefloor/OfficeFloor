@@ -114,7 +114,7 @@ public interface ThreadState extends FlowAsset, FlowFuture,
 	 * <p>
 	 * This allows the {@link ThreadState} to know not to clean up should all
 	 * its {@link Flow} instances be closed and a new one will be created for
-	 * the {@link Escalation}.
+	 * the {@link EscalationFlow}.
 	 * 
 	 * @param currentJobNode
 	 *            Current {@link JobNode} being executed.

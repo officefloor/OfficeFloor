@@ -25,7 +25,7 @@ import net.officefloor.frame.api.build.OfficeFloorBuildException;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.TeamBuilder;
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.construct.administrator.RawBoundAdministratorMetaDataImpl;
 import net.officefloor.frame.impl.construct.managedobject.RawBoundManagedObjectMetaDataImpl;

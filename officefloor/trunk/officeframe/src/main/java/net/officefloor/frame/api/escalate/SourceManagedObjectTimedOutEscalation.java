@@ -14,27 +14,29 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.internal.structure;
+package net.officefloor.frame.api.escalate;
+
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Escalation for a {@link JobNode}.
+ * {@link Escalation} indicating that the {@link ManagedObjectSource} was timed
+ * out in providing a {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface Escalation {
+public class SourceManagedObjectTimedOutEscalation extends
+		ManagedObjectEscalation {
 
 	/**
-	 * Obtains the type of cause handled by this {@link Escalation}.
+	 * Initiate.
 	 * 
-	 * @return Type of cause handled by this {@link Escalation}.
+	 * @param objectType
+	 *            {@link Class} of the {@link Object} returned from the timed
+	 *            out {@link ManagedObject}.
 	 */
-	Class<? extends Throwable> getTypeOfCause();
-
-	/**
-	 * Obtains the {@link FlowMetaData} of the escalation.
-	 * 
-	 * @return {@link FlowMetaData} of the escalation.
-	 */
-	FlowMetaData<?> getFlowMetaData();
+	public SourceManagedObjectTimedOutEscalation(Class<?> objectType) {
+		super(objectType);
+	}
 
 }

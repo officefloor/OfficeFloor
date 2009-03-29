@@ -16,7 +16,10 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
-import net.officefloor.frame.impl.execute.error.ExecutionError;
+import java.sql.Connection;
+
+import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
+import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
@@ -47,11 +50,23 @@ public class CheckOnAssetManagedObjectContainerTest extends
 		final Exception failure = new Exception("Existing failure");
 
 		// Record create managed object container and specify failure
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(Connection.class);
 		this.record_MoUser_setFailure(false, failure);
 
-		// Record failing job nodes on asset check
-		this.check.failJobNodes(failure, true);
+		// Should fail immediately and not check
+		this.check.failJobNodes(null, true);
+		this.control(this.check).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				FailedToSourceManagedObjectEscalation escalation = (FailedToSourceManagedObjectEscalation) actual[0];
+				assertEquals("Incorrect failure", failure, escalation
+						.getCause());
+				assertEquals("Incorrect object type", Connection.class,
+						escalation.getObjectType());
+				assertEquals("Should be permanent failure", true, actual[1]);
+				return true;
+			}
+		});
 
 		// Test
 		this.replayMockObjects();
@@ -72,7 +87,7 @@ public class CheckOnAssetManagedObjectContainerTest extends
 	public void testNoAsynchronousOperation() {
 
 		// Record create managed object container
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(Object.class);
 		// Check should do nothing
 
 		// Test
@@ -90,7 +105,7 @@ public class CheckOnAssetManagedObjectContainerTest extends
 		final long notTimeoutTime = System.currentTimeMillis();
 
 		// Record create and in asynchronous operation
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(Object.class);
 
 		// Record check that does not time out
 		this.recordReturn(this.check, this.check.getTime(), notTimeoutTime);
@@ -110,7 +125,7 @@ public class CheckOnAssetManagedObjectContainerTest extends
 	public void testTimedOut() {
 
 		// Record create and in asynchronous operation
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(Connection.class);
 
 		// Record check that times out
 		this.recordReturn(this.check, this.check.getTime(), this
@@ -120,12 +135,15 @@ public class CheckOnAssetManagedObjectContainerTest extends
 		this.control(this.check).setMatcher(new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
-				assertTrue("Incorrect failure",
-						actual[0] instanceof ExecutionError);
+				assertTrue(
+						"Incorrect failure",
+						actual[0] instanceof SourceManagedObjectTimedOutEscalation);
 				assertEquals("Failure should be permanent", true, actual[1]);
 				return true;
 			}
 		});
+		this.record_setFailedState(SourceManagedObjectTimedOutEscalation.class,
+				null);
 
 		// Test
 		this.replayMockObjects();

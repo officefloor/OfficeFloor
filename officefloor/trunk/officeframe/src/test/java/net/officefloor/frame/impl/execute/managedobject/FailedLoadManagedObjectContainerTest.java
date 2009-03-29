@@ -16,10 +16,12 @@
  */
 package net.officefloor.frame.impl.execute.managedobject;
 
+import java.sql.Connection;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import net.officefloor.frame.impl.execute.error.ExecutionError;
-import net.officefloor.frame.impl.execute.error.ExecutionErrorEnum;
+import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
+import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -52,13 +54,13 @@ public class FailedLoadManagedObjectContainerTest extends
 		final Exception failure = new Exception("Load failure");
 
 		// Record indicating failure
-		this.record_MoContainer_init();
+		this.record_MoContainer_init(Connection.class);
 		this.record_MoContainer_sourceManagedObject(false, failure);
 		this.record_MoUser_setFailure(true, failure);
 
 		// Record failure on checking if ready
 		this.record_MoContainer_isManagedObjectReady(ReadyState.FAILURE);
-		
+
 		// Record activating the job nodes permanently
 		this.record_MoContainer_unloadManagedObject(false);
 
@@ -72,24 +74,24 @@ public class FailedLoadManagedObjectContainerTest extends
 			// Loading managed object fails
 			this.loadManagedObject(mo, true);
 			fail("Should fail on loading object");
-		} catch (ExecutionError ex) {
-			// Indicate correct error
-			assertEquals("Incorrect error type",
-					ExecutionErrorEnum.MANAGED_OBJECT_SOURCING_FAILURE, ex
-							.getErrorType());
-			assertEquals("Incorrect cause", failure, ex.getCause());
+		} catch (PropagateEscalationError ex) {
+			// Ensure correct error
+			Throwable cause = this.assert_ManagedObjectEscalation(ex,
+					FailedToSourceManagedObjectEscalation.class,
+					Connection.class);
+			assertEquals("Incorrect cause", failure, cause);
 		}
 
 		try {
 			// Checking if ready fails
 			this.isManagedObjectReady(mo, false);
 			fail("Should fail on checking object");
-		} catch (ExecutionError ex) {
-			// Indicate correct error
-			assertEquals("Incorrect error type",
-					ExecutionErrorEnum.MANAGED_OBJECT_SOURCING_FAILURE, ex
-							.getErrorType());
-			assertEquals("Incorrect cause", failure, ex.getCause());
+		} catch (PropagateEscalationError ex) {
+			// Ensure correct error
+			Throwable cause = this.assert_ManagedObjectEscalation(ex,
+					FailedToSourceManagedObjectEscalation.class,
+					Connection.class);
+			assertEquals("Incorrect cause", failure, cause);
 		}
 
 		// Unload the object

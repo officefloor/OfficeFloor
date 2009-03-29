@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.officefloor;
 
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.internal.structure.FlowMetaData;
 import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.OfficeMetaData;

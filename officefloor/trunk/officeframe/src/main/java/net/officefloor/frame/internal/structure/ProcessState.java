@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.internal.structure;
 
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
@@ -102,15 +102,15 @@ public interface ProcessState extends FlowFuture {
 	AdministratorContainer<?, ?> getAdministratorContainer(int index);
 
 	/**
-	 * Obtains the {@link Escalation} for the {@link EscalationHandler} provided
+	 * Obtains the {@link EscalationFlow} for the {@link EscalationHandler} provided
 	 * by the {@link ManagedObjectSource}.
 	 * 
-	 * @return {@link Escalation} or <code>null</code> if
+	 * @return {@link EscalationFlow} or <code>null</code> if
 	 *         {@link ManagedObjectSource} did not provide a
 	 *         {@link EscalationHandler} or this {@link ProcessState} was not
 	 *         invoked by a {@link ManagedObjectSource}.
 	 */
-	Escalation getManagedObjectSourceEscalation();
+	EscalationFlow getManagedObjectSourceEscalation();
 
 	/**
 	 * Obtains the {@link EscalationProcedure} for the {@link Office}.
@@ -120,11 +120,11 @@ public interface ProcessState extends FlowFuture {
 	EscalationProcedure getOfficeEscalationProcedure();
 
 	/**
-	 * Obtains the catch all {@link Escalation} for the {@link OfficeFloor}.
+	 * Obtains the catch all {@link EscalationFlow} for the {@link OfficeFloor}.
 	 * 
-	 * @return Catch all {@link Escalation} for the {@link OfficeFloor}.
+	 * @return Catch all {@link EscalationFlow} for the {@link OfficeFloor}.
 	 */
-	Escalation getOfficeFloorEscalation();
+	EscalationFlow getOfficeFloorEscalation();
 
 	/**
 	 * Registers a {@link ProcessCompletionListener} with this

@@ -25,13 +25,13 @@ package net.officefloor.frame.internal.structure;
 public interface EscalationProcedure {
 
 	/**
-	 * Obtains the {@link Escalation} for the cause within this
+	 * Obtains the {@link EscalationFlow} for the cause within this
 	 * {@link EscalationProcedure}.
 	 * 
 	 * @param cause
 	 *            Cause.
-	 * @return {@link Escalation} for the cause.
+	 * @return {@link EscalationFlow} for the cause.
 	 */
-	Escalation getEscalation(Throwable cause);
+	EscalationFlow getEscalation(Throwable cause);
 
 }

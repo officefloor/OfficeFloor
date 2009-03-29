@@ -19,13 +19,19 @@ package net.officefloor.frame.impl.execute.managedobject;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.escalate.Escalation;
+import net.officefloor.frame.api.escalate.FailedToSourceManagedObjectEscalation;
+import net.officefloor.frame.api.escalate.ManagedObjectEscalation;
+import net.officefloor.frame.api.escalate.ManagedObjectOperationTimedOutEscalation;
+import net.officefloor.frame.api.escalate.SourceManagedObjectTimedOutEscalation;
+import net.officefloor.frame.impl.execute.escalation.PropagateEscalationError;
 import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.JobNodeActivatableSet;
 import net.officefloor.frame.internal.structure.JobNodeActivateSet;
-import net.officefloor.frame.internal.structure.JobNode;
 import net.officefloor.frame.internal.structure.ManagedObjectContainer;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.internal.structure.ProcessState;
@@ -43,9 +49,9 @@ import net.officefloor.frame.spi.team.JobContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 
+import org.easymock.AbstractMatcher;
 import org.easymock.ArgumentsMatcher;
 import org.easymock.MockControl;
-import org.easymock.internal.AlwaysMatcher;
 
 /**
  * Contains functionality for testing the {@link ManagedObjectContainerImpl}.
@@ -296,6 +302,11 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	private boolean isInitialised = false;
 
 	/**
+	 * Type of {@link Object} returned from the {@link ManagedObject}.
+	 */
+	private Class<?> objectType;
+
+	/**
 	 * Checks that not initialised.
 	 */
 	private void checkNotInitialised() {
@@ -339,10 +350,11 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	/**
 	 * Records initialising the {@link ManagedObjectContainer}.
 	 */
-	protected void record_MoContainer_init() {
+	protected void record_MoContainer_init(Class<?> objectType) {
 
 		// Flag now initialised
 		this.isInitialised = true;
+		this.objectType = objectType;
 
 		// Obtains the process lock
 		this.recordReturn(this.processState,
@@ -386,18 +398,13 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	protected void record_MoContainer_sourceManagedObject(
 			final boolean isSourced, final Throwable failure) {
 
-		// Determine the current time for testing
-		long currentTime = System.currentTimeMillis();
-
 		// Record set up to source the managed object
-		this.recordReturn(this.jobContext, this.jobContext.getTime(),
-				currentTime);
 		this.recordReturn(this.managedObjectMetaData,
 				this.managedObjectMetaData.getManagedObjectPool(),
 				(this.isPooled ? this.managedObjectPool : null));
 
 		// Create the matcher for attempting to source the managed object
-		ArgumentsMatcher sourceMatcher = new AlwaysMatcher() {
+		ArgumentsMatcher sourceMatcher = new AbstractMatcher() {
 			@Override
 			public boolean matches(Object[] expected, Object[] actual) {
 				ManagedObjectUser user = (ManagedObjectUser) actual[0];
@@ -444,6 +451,12 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 		} else {
 			// Not sourced, so wait on managed object to source
 			if (!isSourced) {
+				// Record obtaining time attempting to source managed object
+				long currentTime = System.currentTimeMillis();
+				this.recordReturn(this.jobContext, this.jobContext.getTime(),
+						currentTime);
+
+				// Record waiting to source the managed object
 				this.recordReturn(this.sourcingAssetMonitor,
 						this.sourcingAssetMonitor.waitOnAsset(this.jobNode,
 								this.jobActivateSet), true);
@@ -465,20 +478,6 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	protected void record_MoUser_setManagedObject(boolean isInLoadScope,
 			Object object) {
 
-		// Indicates if recycled
-		this.recordReturn(this.managedObjectMetaData,
-				this.managedObjectMetaData
-						.createRecycleJobNode(this.managedObject),
-				(this.isRecycled ? this.recycleJobNode : null));
-
-		// Obtain the object
-		try {
-			this.recordReturn(this.managedObject, this.managedObject
-					.getObject(), object);
-		} catch (Throwable ex) {
-			fail("Should not have exception: " + ex.getMessage());
-		}
-
 		// Indicate if asynchronous
 		this.recordReturn(this.managedObjectMetaData,
 				this.managedObjectMetaData.isManagedObjectAsynchronous(),
@@ -488,6 +487,20 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			this.control(this.managedObject).setMatcher(
 					new TypeMatcher(ManagedObjectContainerImpl.class));
 		}
+
+		// Obtain the object
+		try {
+			this.recordReturn(this.managedObject, this.managedObject
+					.getObject(), object);
+		} catch (Throwable ex) {
+			fail("Should not have exception: " + ex.getMessage());
+		}
+
+		// Indicates if recycled
+		this.recordReturn(this.managedObjectMetaData,
+				this.managedObjectMetaData
+						.createRecycleJobNode(this.managedObject),
+				(this.isRecycled ? this.recycleJobNode : null));
 
 		// Obtained managed object
 		if (isInLoadScope) {
@@ -506,23 +519,9 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	protected void record_MoUser_setFailure(boolean isInLoadScope,
 			final Throwable failure) {
 
-		// Obtained managed object
-		if (isInLoadScope) {
-			// Using activate set from job container
-			this.sourcingAssetMonitor.failJobNodes(this.jobActivateSet,
-					failure, true);
-			if (this.isAsynchronous) {
-				this.operationsAssetMonitor.failJobNodes(this.jobActivateSet,
-						failure, true);
-			}
-
-		} else {
-			// Managed object source failed at later time, so no activate set
-			this.sourcingAssetMonitor.failJobNodes(null, failure, true);
-			if (this.isAsynchronous) {
-				this.operationsAssetMonitor.failJobNodes(null, failure, true);
-			}
-		}
+		// Record in failed state (no activate set if not in load scope)
+		this.record_setFailedState(FailedToSourceManagedObjectEscalation.class,
+				(isInLoadScope ? this.jobActivateSet : null));
 	}
 
 	/**
@@ -670,6 +669,12 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 
 			// Escalates if timed out
 			if (isTimedOut) {
+				// Record setting into a failed state
+				this
+						.record_setFailedState(
+								((!isSourced) ? SourceManagedObjectTimedOutEscalation.class
+										: ManagedObjectOperationTimedOutEscalation.class),
+								this.jobActivateSet);
 				return;
 			}
 		}
@@ -686,6 +691,52 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 			this.recordReturn(this.sourcingAssetMonitor,
 					this.sourcingAssetMonitor.waitOnAsset(this.jobNode,
 							this.jobActivateSet), true);
+		}
+	}
+
+	/**
+	 * Records setting in a failed state.
+	 */
+	protected <E extends ManagedObjectEscalation> void record_setFailedState(
+			final Class<E> escalationType, final JobNodeActivateSet activateSet) {
+		// Record obtaining the object type for the escalation
+		this.recordReturn(this.managedObjectMetaData,
+				this.managedObjectMetaData.getObjectType(), this.objectType);
+
+		// Record failing to source the managed object permanently
+		this.sourcingAssetMonitor.failJobNodes(this.jobActivateSet, null, true);
+		this.control(this.sourcingAssetMonitor).setMatcher(
+				new AbstractMatcher() {
+					@Override
+					public boolean matches(Object[] expected, Object[] actual) {
+						assertEquals("Incorrect activate set", activateSet,
+								actual[0]);
+						assertTrue("Incorrect escalation type", escalationType
+								.isInstance(actual[1]));
+						assertEquals("Incorrect permanent flag", true,
+								actual[2]);
+						return true;
+					}
+				});
+
+		// Record failing operations on managed object permanently
+		if (this.isAsynchronous) {
+			this.operationsAssetMonitor.failJobNodes(this.jobActivateSet, null,
+					true);
+			this.control(this.operationsAssetMonitor).setMatcher(
+					new AbstractMatcher() {
+						@Override
+						public boolean matches(Object[] expected,
+								Object[] actual) {
+							assertEquals("Incorrect activate set", activateSet,
+									actual[0]);
+							assertTrue("Incorrect escalation type",
+									escalationType.isInstance(actual[1]));
+							assertEquals("Incorrect permanent flag", true,
+									actual[2]);
+							return true;
+						}
+					});
 		}
 	}
 
@@ -903,6 +954,60 @@ public abstract class AbstractManagedObjectContainerImplTest extends
 	protected void asynchronousListener_notifyComplete(ManagedObjectContainer mo) {
 		ManagedObjectContainerImpl impl = (ManagedObjectContainerImpl) mo;
 		impl.notifyComplete();
+	}
+
+	/**
+	 * Asserts the correct {@link Escalation} returning the {@link Escalation}.
+	 * 
+	 * @param propagate
+	 *            {@link PropagateEscalationError}.
+	 * @param escalationType
+	 *            Type of {@link Escalation} expected.
+	 * @return Specific {@link Escalation}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <E extends Escalation> E assert_Escalation(
+			PropagateEscalationError propagate, Class<E> escalationType) {
+
+		// Obtain the escalation and ensure correct type
+		Throwable failure = propagate.getCause();
+		assertNotNull("No escalation for propagate", failure);
+		assertEquals("Incorrect escalation type", escalationType, failure
+				.getClass());
+
+		// Cast to escalation
+		E escalation = (E) failure;
+
+		// Return the escalation
+		return escalation;
+	}
+
+	/**
+	 * Asserts the correct {@link ManagedObjectEscalation} returning the cause
+	 * of the {@link ManagedObjectEscalation}.
+	 * 
+	 * @param propagate
+	 *            {@link PropagateEscalationError}.
+	 * @param escalationType
+	 *            Type of {@link ManagedObjectEscalation} expected.
+	 * @param objectType
+	 *            {@link Object} type expected on the
+	 *            {@link ManagedObjectEscalation}.
+	 * @return Cause of the {@link ManagedObjectEscalation}.
+	 */
+	protected <E extends ManagedObjectEscalation> Throwable assert_ManagedObjectEscalation(
+			PropagateEscalationError propagate, Class<E> escalationType,
+			Class<?> objectType) {
+
+		// Assert escalation is correct
+		E escalation = this.assert_Escalation(propagate, escalationType);
+
+		// Asset the correct object type
+		assertEquals("Incorrect object type", objectType, escalation
+				.getObjectType());
+
+		// Return the cause of the escalation
+		return escalation.getCause();
 	}
 
 	/**

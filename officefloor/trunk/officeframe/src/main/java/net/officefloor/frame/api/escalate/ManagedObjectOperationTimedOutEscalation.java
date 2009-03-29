@@ -14,36 +14,29 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.frame.impl.execute.officefloor;
+package net.officefloor.frame.api.escalate;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import net.officefloor.frame.api.escalate.EscalationHandler;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Default {@link OfficeFloor} {@link EscalationHandler} that prints issue to
- * {@link System#err}.
+ * {@link Escalation} indicating that an operation by the {@link ManagedObject}
+ * was timed out.
  * 
  * @author Daniel
  */
-public class DefaultOfficeFloorEscalationHandler implements EscalationHandler {
+public class ManagedObjectOperationTimedOutEscalation extends
+		ManagedObjectEscalation {
 
-	/*
-	 * =================== EscalationHandler ==================================
+	/**
+	 * Initiate.
+	 * 
+	 * @param objectType
+	 *            {@link Class} of the {@link Object} returned from the
+	 *            {@link ManagedObject} which had its asynchronous operation
+	 *            timeout.
 	 */
-
-	@Override
-	public void handleEscalation(Throwable escalation) throws Throwable {
-
-		// Obtain the stack trace
-		StringWriter stackTrace = new StringWriter();
-		escalation.printStackTrace(new PrintWriter(stackTrace));
-
-		// Prints details of the error
-		System.err.println("FAILURE: Office not handling:\n"
-				+ stackTrace.toString());
+	public ManagedObjectOperationTimedOutEscalation(Class<?> objectType) {
+		super(objectType);
 	}
 
 }

@@ -19,7 +19,7 @@ package net.officefloor.frame.impl.execute.job;
 import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.EscalationProcedure;
 import net.officefloor.frame.internal.structure.Flow;
@@ -173,24 +173,24 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(ThreadState.class);
 
 	/**
-	 * {@link Escalation} {@link FlowMetaData}.
+	 * {@link EscalationFlow} {@link FlowMetaData}.
 	 */
 	private final FlowMetaData<?> escalationFlowMetaData = this
 			.createMock(FlowMetaData.class);
 
 	/**
-	 * {@link Escalation} {@link TaskMetaData}.
+	 * {@link EscalationFlow} {@link TaskMetaData}.
 	 */
 	private final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
 			.createMock(TaskMetaData.class);
 
 	/**
-	 * {@link Escalation} {@link Flow}.
+	 * {@link EscalationFlow} {@link Flow}.
 	 */
 	private final Flow escalationFlow = this.createMock(Flow.class);
 
 	/**
-	 * {@link Escalation} {@link Job}.
+	 * {@link EscalationFlow} {@link Job}.
 	 */
 	private final EscalationJob escalationJob = this
 			.createMock(EscalationJob.class);
@@ -458,19 +458,19 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			.createMock(EscalationProcedure.class);
 
 	/**
-	 * {@link Escalation}.
+	 * {@link EscalationFlow}.
 	 */
-	private final Escalation escalation = this.createMock(Escalation.class);
+	private final EscalationFlow escalation = this.createMock(EscalationFlow.class);
 
 	/**
-	 * Records handling an {@link Escalation}.
+	 * Records handling an {@link EscalationFlow}.
 	 * 
 	 * @param job
 	 *            {@link Job}.
 	 * @param failure
 	 *            {@link Throwable} causing escalation.
 	 * @param isHandled
-	 *            Flag indicating if the {@link Escalation} is handled.
+	 *            Flag indicating if the {@link EscalationFlow} is handled.
 	 */
 	protected void record_JobContainer_handleEscalation(Job job,
 			Throwable failure, boolean isHandled) {
@@ -480,7 +480,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.record_completeJob(job);
 		this.recordReturn(this.jobMetaData, this.jobMetaData
 				.getEscalationProcedure(), this.escalationProcedure);
-		Escalation escalation = (isHandled ? this.escalation : null);
+		EscalationFlow escalation = (isHandled ? this.escalation : null);
 		if (functionalityJob.parallelOwnerJob == null) {
 			// No parallel owner, so handle by job
 			this
@@ -513,7 +513,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records handling an {@link Escalation}.
+	 * Records handling an {@link EscalationFlow}.
 	 * 
 	 * @param job
 	 *            {@link Job}.
@@ -526,19 +526,6 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 			Throwable failure, EscalationLevel handledLevel) {
 		this.recordReturn(this.threadState, this.threadState
 				.getEscalationLevel(), EscalationLevel.FLOW);
-
-		// Handled by the managed object source escalation handler
-		if (handledLevel == EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER) {
-			this.recordReturn(this.processState, this.processState
-					.getManagedObjectSourceEscalation(), this.escalation);
-			this.threadState
-					.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
-			this.record_JobContainer_createEscalationJob(failure, null);
-			this.escalationJob.activateJob();
-			return;
-		}
-		this.recordReturn(this.processState, this.processState
-				.getManagedObjectSourceEscalation(), null);
 
 		// Handled by the office escalation procedure
 		this.recordReturn(this.processState, this.processState
@@ -555,6 +542,19 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 		this.recordReturn(this.escalationProcedure, this.escalationProcedure
 				.getEscalation(failure), null);
 
+		// Handled by the managed object source escalation handler
+		if (handledLevel == EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER) {
+			this.recordReturn(this.processState, this.processState
+					.getManagedObjectSourceEscalation(), this.escalation);
+			this.threadState
+					.setEscalationLevel(EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
+			this.record_JobContainer_createEscalationJob(failure, null);
+			this.escalationJob.activateJob();
+			return;
+		}
+		this.recordReturn(this.processState, this.processState
+				.getManagedObjectSourceEscalation(), null);
+
 		// Handled by the office floor escalation
 		this.recordReturn(this.processState, this.processState
 				.getOfficeFloorEscalation(), this.escalation);
@@ -564,12 +564,12 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Records the creation of the {@link Escalation} {@link JobNode}.
+	 * Records the creation of the {@link EscalationFlow} {@link JobNode}.
 	 * 
 	 * @param failure
 	 *            {@link Throwable} causing escalation.
 	 * @param parallelOwner
-	 *            Parallel owner of {@link Escalation} {@link JobNode}.
+	 *            Parallel owner of {@link EscalationFlow} {@link JobNode}.
 	 */
 	private void record_JobContainer_createEscalationJob(Throwable failure,
 			JobNode parallelOwner) {
@@ -965,7 +965,7 @@ public abstract class AbstractJobContainerTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * {@link Escalation} {@link Job}.
+	 * {@link EscalationFlow} {@link Job}.
 	 */
 	private static interface EscalationJob extends Job, JobNode {
 	}

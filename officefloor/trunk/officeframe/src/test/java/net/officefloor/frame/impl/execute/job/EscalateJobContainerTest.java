@@ -16,7 +16,7 @@
  */
 package net.officefloor.frame.impl.execute.job;
 
-import net.officefloor.frame.api.execute.EscalationHandler;
+import net.officefloor.frame.api.escalate.EscalationHandler;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.EscalationLevel;
@@ -86,10 +86,9 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensure {@link ManagedObjectSource} {@link EscalationHandler} handles the
-	 * escalation.
+	 * Ensure {@link Office} {@link EscalationProcedure} can handle escalation.
 	 */
-	public void testFailureHandledManagedObjectSourceEscalationHandler() {
+	public void testFailureHandledByOfficeEscalationProcedure() {
 
 		// Create job with thread failure
 		final Throwable failure = new Throwable("Thread failure");
@@ -99,7 +98,7 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 		this.record_JobContainer_initialSteps(job, failure);
 		this.record_JobContainer_handleEscalation(job, failure, false);
 		this.record_JobContainer_globalEscalation(job, failure,
-				EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
+				EscalationLevel.OFFICE);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Replay mocks
@@ -116,9 +115,10 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 	}
 
 	/**
-	 * Ensure {@link Office} {@link EscalationProcedure} can handle escalation.
+	 * Ensure {@link ManagedObjectSource} {@link EscalationHandler} handles the
+	 * escalation.
 	 */
-	public void testFailureHandledByOfficeEscalationProcedure() {
+	public void testFailureHandledManagedObjectSourceEscalationHandler() {
 
 		// Create job with thread failure
 		final Throwable failure = new Throwable("Thread failure");
@@ -128,7 +128,7 @@ public class EscalateJobContainerTest extends AbstractJobContainerTest {
 		this.record_JobContainer_initialSteps(job, failure);
 		this.record_JobContainer_handleEscalation(job, failure, false);
 		this.record_JobContainer_globalEscalation(job, failure,
-				EscalationLevel.OFFICE);
+				EscalationLevel.MANAGED_OBJECT_SOURCE_HANDLER);
 		this.record_JobActivatableSet_activateJobs();
 
 		// Replay mocks

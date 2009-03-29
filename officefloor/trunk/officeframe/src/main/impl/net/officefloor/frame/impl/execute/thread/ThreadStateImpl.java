@@ -28,7 +28,7 @@ import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.internal.structure.AssetManager;
 import net.officefloor.frame.internal.structure.AssetMonitor;
 import net.officefloor.frame.internal.structure.CheckAssetContext;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.EscalationLevel;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowMetaData;
@@ -86,7 +86,7 @@ public class ThreadStateImpl extends
 	private final AssetMonitor threadMonitor;
 
 	/**
-	 * Flag indicating that looking for {@link Escalation}.
+	 * Flag indicating that looking for {@link EscalationFlow}.
 	 */
 	private boolean isEscalating = false;
 
@@ -158,6 +158,9 @@ public class ThreadStateImpl extends
 
 	/*
 	 * ===================== ThreadState ==================================
+	 * 
+	 * Methods do not requiring synchronising as will all be called within the
+	 * ThreadState lock taken by the JobContainer.
 	 */
 
 	@Override
@@ -269,17 +272,21 @@ public class ThreadStateImpl extends
 	 */
 
 	@Override
-	public boolean waitOnFlow(JobNode jobNode, JobNodeActivateSet notifySet) {
+	public boolean waitOnFlow(JobNode jobNode, JobNodeActivateSet activateSet) {
+		// Need to synchronise as will be called by other ThreadStates
+		synchronized (this.getThreadLock()) {
 
-		// Determine if the same thread
-		if (this == jobNode.getFlow().getThreadState()) {
-			// Do not wait on this thread
-			return false;
+			// Determine if the same thread
+			if (this == jobNode.getFlow().getThreadState()) {
+				// Do not wait on this thread (and activate immediately)
+				activateSet.addJobNode(jobNode);
+				return false;
+			}
+
+			// Return whether job is waiting on this thread.
+			// Note: thread may already be complete.
+			return this.threadMonitor.waitOnAsset(jobNode, activateSet);
 		}
-
-		// Return whether job is waiting on this thread.
-		// Note: thread may already be complete.
-		return this.threadMonitor.waitOnAsset(jobNode, notifySet);
 	}
 
 	/*
