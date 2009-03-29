@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work.clazz;
+package net.officefloor.plugin.work.clazz;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -27,6 +27,7 @@ import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.work.clazz.Flow;
 
 /**
  * {@link WorkSource} for a {@link Class} having the {@link Object} as the
@@ -82,7 +83,7 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> {
 			ParameterFactory[] parameters = new ParameterFactory[paramTypes.length];
 
 			// Include method as task in type definition
-			TaskTypeBuilder<ClassWork, Indexed, Indexed> taskTypeBuilder = workTypeBuilder
+			TaskTypeBuilder<Indexed, Indexed> taskTypeBuilder = workTypeBuilder
 					.addTaskType(methodName, new ClassTaskFactoryManufacturer(
 							method, parameters), null, null);
 

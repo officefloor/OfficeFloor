@@ -17,10 +17,10 @@
 package net.officefloor.compile.spi.work;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
- * <code>Type definition</code> of a possible {@link Escalation} by the
+ * <code>Type definition</code> of a possible {@link EscalationFlow} by the
  * {@link Task}.
  * 
  * @author Daniel
@@ -35,9 +35,9 @@ public interface TaskEscalationType {
 	String getEscalationName();
 
 	/**
-	 * Obtains the type of {@link Escalation} by the {@link Task}.
+	 * Obtains the type of {@link EscalationFlow} by the {@link Task}.
 	 * 
-	 * @return Type of {@link Escalation} by the {@link Task}.
+	 * @return Type of {@link EscalationFlow} by the {@link Task}.
 	 */
 	<E extends Throwable> Class<E> getEscalationType();
 

@@ -18,8 +18,7 @@ package net.officefloor.compile.spi.work.source;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -28,11 +27,12 @@ import net.officefloor.frame.internal.structure.Flow;
  * 
  * @author Daniel
  */
-public interface TaskTypeBuilder<W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface TaskTypeBuilder<M extends Enum<M>, F extends Enum<F>> {
 
 	/**
 	 * <p>
-	 * Adds a {@link TaskObjectTypeBuilder} to the {@link TaskTypeBuilder} definition.
+	 * Adds a {@link TaskObjectTypeBuilder} to the {@link TaskTypeBuilder}
+	 * definition.
 	 * <p>
 	 * Should the dependent {@link Object} instances be {@link Indexed}, the
 	 * order they are added is the order of indexing (starting at 0).
@@ -47,24 +47,26 @@ public interface TaskTypeBuilder<W extends Work, M extends Enum<M>, F extends En
 
 	/**
 	 * <p>
-	 * Adds a {@link TaskFlowTypeBuilder} to the {@link TaskTypeBuilder} definition.
+	 * Adds a {@link TaskFlowTypeBuilder} to the {@link TaskTypeBuilder}
+	 * definition.
 	 * <p>
 	 * Should the {@link Flow} instigation be {@link Indexed}, the order they
 	 * are added is the order of indexing (starting at 0).
 	 * 
-	 * @return {@link TaskFlowTypeBuilder} to provide the <code>type definition</code>
-	 *         of the possible instigated {@link Flow} by the {@link Task}.
+	 * @return {@link TaskFlowTypeBuilder} to provide the
+	 *         <code>type definition</code> of the possible instigated
+	 *         {@link Flow} by the {@link Task}.
 	 */
 	TaskFlowTypeBuilder<F> addFlow();
 
 	/**
-	 * Adds a {@link TaskEscalationTypeBuilder} to the {@link TaskTypeBuilder} definition.
+	 * Adds a {@link TaskEscalationTypeBuilder} to the {@link TaskTypeBuilder}
+	 * definition.
 	 * 
 	 * @param escalationType
-	 *            Type of possible {@link Escalation}.
+	 *            Type to be handled by an {@link EscalationFlow}.
 	 * @return {@link TaskEscalationTypeBuilder} to provide the
-	 *         <code>type definition</code> of the possible {@link Escalation}
-	 *         by the {@link Task}.
+	 *         <code>type definition</code>.
 	 */
 	<E extends Throwable> TaskEscalationTypeBuilder addEscalation(
 			Class<E> escalationType);

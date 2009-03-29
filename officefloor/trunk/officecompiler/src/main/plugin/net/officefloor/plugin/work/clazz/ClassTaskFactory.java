@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work.clazz;
+package net.officefloor.plugin.work.clazz;
 
 import java.lang.reflect.Method;
 import java.util.LinkedList;
@@ -34,7 +34,7 @@ import net.officefloor.model.desk.FlowItemOutputModel;
  * @author Daniel
  */
 public class ClassTaskFactory implements
-		CompilerAwareTaskFactory<Object, ClassWork, Indexed, Indexed> {
+		CompilerAwareTaskFactory<ClassWork, Indexed, Indexed> {
 
 	/**
 	 * Method to invoke for this task.

@@ -14,9 +14,10 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work.clazz;
+package net.officefloor.plugin.work.clazz;
 
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.work.clazz.Flow;
 
 /**
  * {@link ParameterFactory} to obtain the {@link Flow}.
@@ -46,7 +47,7 @@ public class FlowParameterFactory implements ParameterFactory {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object createParameter(TaskContext<?, ?, ?, ?> context) {
+	public Object createParameter(TaskContext<?, ?, ?> context) {
 		return new FlowImpl(context);
 	}
 
@@ -58,7 +59,7 @@ public class FlowParameterFactory implements ParameterFactory {
 		/**
 		 * {@link TaskContext}.
 		 */
-		private final TaskContext<P, ?, ?, ?> context;
+		private final TaskContext<?, ?, ?> context;
 
 		/**
 		 * Initiate.
@@ -66,7 +67,7 @@ public class FlowParameterFactory implements ParameterFactory {
 		 * @param context
 		 *            {@link TaskContext}.
 		 */
-		public FlowImpl(TaskContext<P, ?, ?, ?> context) {
+		public FlowImpl(TaskContext<?, ?, ?> context) {
 			this.context = context;
 		}
 

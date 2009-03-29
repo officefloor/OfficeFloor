@@ -26,8 +26,8 @@ import net.officefloor.model.desk.FlowItemModel;
  * 
  * @author Daniel
  */
-public interface CompilerAwareTaskFactory<P extends Object, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends TaskFactory<P, W, M, F> {
+public interface CompilerAwareTaskFactory<W extends Work, M extends Enum<M>, F extends Enum<F>>
+		extends TaskFactory<W, M, F> {
 
 	/**
 	 * Initialises the {@link TaskFactory}.

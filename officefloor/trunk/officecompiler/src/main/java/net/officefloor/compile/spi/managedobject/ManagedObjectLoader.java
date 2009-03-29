@@ -47,7 +47,7 @@ public interface ManagedObjectLoader {
 			Class<MS> managedObjectSourceClass, CompilerIssues issues);
 
 	/**
-	 * Loads and returns the {@link ManagedObjectType} sourced from the
+	 * Loads and returns the {@link ManagedObjectType} for the
 	 * {@link ManagedObjectSource}.
 	 * 
 	 * @param managedObjectSourceClass

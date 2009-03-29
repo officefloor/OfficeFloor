@@ -55,11 +55,12 @@ public class WorkTypeImpl<W extends Work> implements WorkType<W>,
 	}
 
 	@Override
-	public <M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<W, M, F> addTaskType(
+	@SuppressWarnings("unchecked")
+	public <M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<M, F> addTaskType(
 			String taskName,
-			TaskFactoryManufacturer<?, W, M, F> taskFactoryManufacturer,
+			TaskFactoryManufacturer<? super W, M, F> taskFactoryManufacturer,
 			Class<M> objectKeysClass, Class<F> flowKeysClass) {
-		TaskTypeImpl<W, M, F> taskType = new TaskTypeImpl<W, M, F>(taskName,
+		TaskTypeImpl taskType = new TaskTypeImpl(taskName,
 				taskFactoryManufacturer, objectKeysClass, flowKeysClass);
 		this.tasks.add(taskType);
 		return taskType;

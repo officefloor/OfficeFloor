@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work.clazz;
+package net.officefloor.plugin.work.clazz;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,7 +29,7 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel
  */
-class ClassTask implements Task<Object, ClassWork, Indexed, Indexed> {
+class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 
 	/**
 	 * {@link Work}.
@@ -76,7 +76,7 @@ class ClassTask implements Task<Object, ClassWork, Indexed, Indexed> {
 
 	@Override
 	public Object doTask(
-			TaskContext<Object, ClassWork, Indexed, Indexed> context)
+			TaskContext<ClassWork, Indexed, Indexed> context)
 			throws Throwable {
 
 		// Create the listing of parameters

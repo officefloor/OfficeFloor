@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work.clazz;
+package net.officefloor.plugin.work.clazz;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -26,6 +26,10 @@ import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.plugin.work.clazz.ClassTask;
+import net.officefloor.plugin.work.clazz.ClassWork;
+import net.officefloor.plugin.work.clazz.ClassWorkSource;
+import net.officefloor.work.clazz.Flow;
 
 /**
  * Test the {@link ClassWorkSource}.
@@ -75,7 +79,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		// Verify the first task
 		assertEquals("Incorrect task name", "anotherMethod", taskOne
 				.getTaskName());
-		TaskFactory<?, ClassWork, ?, ?> taskFactoryOne = taskOne
+		TaskFactory<ClassWork, ?, ?> taskFactoryOne = taskOne
 				.getTaskFactoryManufacturer().createTaskFactory();
 		ClassTask classTaskOne = (ClassTask) taskFactoryOne
 				.createTask(classWork);
@@ -92,7 +96,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// Verify the second task
 		assertEquals("Incorrect task name", "taskMethod", taskTwo.getTaskName());
-		TaskFactory<?, ClassWork, ?, ?> taskFactoryTwo = taskTwo
+		TaskFactory<ClassWork, ?, ?> taskFactoryTwo = taskTwo
 				.getTaskFactoryManufacturer().createTaskFactory();
 		ClassTask classTaskTwo = (ClassTask) taskFactoryTwo
 				.createTask(classWork);

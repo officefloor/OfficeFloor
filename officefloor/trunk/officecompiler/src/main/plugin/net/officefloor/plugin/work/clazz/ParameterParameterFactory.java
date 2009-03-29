@@ -14,23 +14,27 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.handler.source;
+package net.officefloor.plugin.work.clazz;
 
-import net.officefloor.frame.api.execute.Handler;
+import net.officefloor.frame.api.execute.TaskContext;
 
 /**
- * Provides the specification of the {@link Handler} to be loaded by the
- * particular {@link HandlerSource}.
+ * {@link ParameterFactory} to obtain the parameter.
  * 
  * @author Daniel
  */
-public interface HandlerSourceSpecification {
+// TODO remove this class as use getObject
+@Deprecated
+public class ParameterParameterFactory implements ParameterFactory {
 
-	/**
-	 * Obtains the specification of the properties for the {@link Handler}.
-	 * 
-	 * @return Property specification.
+	/*
+	 * ================== ParameterFactory ===========================
 	 */
-	HandlerSourceProperty[] getProperties();
+
+	@Override
+	public Object createParameter(TaskContext<?, ?, ?> context) {
+		throw new UnsupportedOperationException(
+				"TODO getParameter no longer supported, use getObject");
+	}
 
 }

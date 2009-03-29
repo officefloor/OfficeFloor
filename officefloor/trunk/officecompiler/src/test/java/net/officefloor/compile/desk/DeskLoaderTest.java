@@ -42,9 +42,9 @@ import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.plugin.work.clazz.ClassWorkSource;
 import net.officefloor.repository.ModelRepository;
 import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
-import net.officefloor.work.clazz.ClassWorkSource;
 
 /**
  * Ensure able to load the {@link DeskModel}.

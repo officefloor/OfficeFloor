@@ -16,10 +16,9 @@
  */
 package net.officefloor.compile.spi.managedobject;
 
-import net.officefloor.frame.api.execute.Handler;
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 
 /**
@@ -48,22 +47,11 @@ public interface ManagedObjectType<D extends Enum<D>, H extends Enum<H>> {
 	ManagedObjectDependencyType<D>[] getDependencyTypes();
 
 	/**
-	 * Obtains the {@link ManagedObjectHandlerType} definitions of the required
-	 * {@link Handler} instances for the {@link ManagedObject}.
-	 * 
-	 * @return {@link ManagedObjectHandlerType} definitions of the required
-	 *         {@link Handler} instances for the {@link ManagedObject}.
-	 */
-	ManagedObjectHandlerType<H>[] getHandlerTypes();
-
-	/**
 	 * Obtains the {@link ManagedObjectFlowType} definitions of the {@link Flow}
-	 * instances instigated by {@link Task} instances of the
-	 * {@link ManagedObject}.
+	 * instances instigated by the {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link ManagedObjectFlowType} definitions of the {@link Flow}
-	 *         instances instigated by {@link Task} instances of the
-	 *         {@link ManagedObject}.
+	 *         instances instigated the {@link ManagedObjectSource}.
 	 */
 	ManagedObjectFlowType<?>[] getFlowTypes();
 

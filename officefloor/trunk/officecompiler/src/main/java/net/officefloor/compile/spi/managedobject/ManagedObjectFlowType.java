@@ -18,17 +18,11 @@ package net.officefloor.compile.spi.managedobject;
 
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * <p>
- * <code>Type definition</code> of a {@link Flow} instigated by a
- * {@link ManagedObject}.
- * <p>
- * It is not the {@link ManagedObject} itself instigating the {@link Flow} but
- * rather a {@link Task} added by the {@link ManagedObjectSource} to manage the
- * {@link ManagedObject}. An example is the recycle {@link Task}.
+ * <code>Type definition</code> of a {@link Flow} instigated by the
+ * {@link ManagedObjectSource} or one of its {@link Task} instances.
  * 
  * @author Daniel
  */
