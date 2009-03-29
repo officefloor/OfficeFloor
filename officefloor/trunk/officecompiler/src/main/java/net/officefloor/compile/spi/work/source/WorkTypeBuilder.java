@@ -40,7 +40,8 @@ public interface WorkTypeBuilder<W extends Work> {
 	void setWorkFactory(WorkFactory<W> workFactory);
 
 	/**
-	 * Adds a {@link TaskTypeBuilder} to this {@link WorkTypeBuilder} definition.
+	 * Adds a {@link TaskTypeBuilder} to this {@link WorkTypeBuilder}
+	 * definition.
 	 * 
 	 * @param taskName
 	 *            Name of the {@link Task}.
@@ -49,21 +50,21 @@ public interface WorkTypeBuilder<W extends Work> {
 	 *            {@link TaskFactory}.
 	 * @param objectKeysClass
 	 *            {@link Enum} providing the keys of the dependent
-	 *            {@link Object} instances required by the {@link TaskTypeBuilder}.
-	 *            This may be <code>null</code> if the {@link TaskTypeBuilder} requires
-	 *            no dependent {@link Object} instances or they are
-	 *            {@link Indexed}.
+	 *            {@link Object} instances required by the
+	 *            {@link TaskTypeBuilder}. This may be <code>null</code> if the
+	 *            {@link TaskTypeBuilder} requires no dependent {@link Object}
+	 *            instances or they are {@link Indexed}.
 	 * @param flowKeysClass
 	 *            {@link Enum} providing the keys of the {@link Flow} instigated
-	 *            by the {@link TaskTypeBuilder}. This may be <code>null</code> if the
-	 *            {@link TaskTypeBuilder} does not instigate {@link Flow} instances or
-	 *            they are {@link Indexed}.
-	 * @return {@link TaskTypeBuilder} to provide <code>type definition</code> of the
-	 *         added {@link Task}.
+	 *            by the {@link TaskTypeBuilder}. This may be <code>null</code>
+	 *            if the {@link TaskTypeBuilder} does not instigate {@link Flow}
+	 *            instances or they are {@link Indexed}.
+	 * @return {@link TaskTypeBuilder} to provide <code>type definition</code>
+	 *         of the added {@link Task}.
 	 */
-	<M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<W, M, F> addTaskType(
+	<M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<M, F> addTaskType(
 			String taskName,
-			TaskFactoryManufacturer<?, W, M, F> taskFactoryManufacturer,
+			TaskFactoryManufacturer<? super W, M, F> taskFactoryManufacturer,
 			Class<M> objectKeysClass, Class<F> flowKeysClass);
 
 }

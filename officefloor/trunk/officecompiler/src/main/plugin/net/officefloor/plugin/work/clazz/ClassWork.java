@@ -14,28 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.handler;
+package net.officefloor.plugin.work.clazz;
 
-import net.officefloor.model.handler.HandlerModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
+import net.officefloor.frame.api.execute.Work;
 
 /**
- * Loads the {@link ManagedObjectHandlerInstanceModel}.
+ * {@link Work} for the class.
  * 
  * @author Daniel
  */
-public interface HandlerLoader {
+public class ClassWork implements Work {
 
 	/**
-	 * Loads the {@link HandlerModel} from configuration.
-	 * 
-	 * @param context
-	 *            {@link HandlerLoaderContext} to source details to load the
-	 *            {@link HandlerModel}.
-	 * @return {@link HandlerModel}.
-	 * @throws Exception
-	 *             If fails.
+	 * Object to invoke methods (via tasks) on.
 	 */
-	HandlerModel<?> loadHandler(HandlerLoaderContext context) throws Exception;
+	private final Object workObject;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param workObject
+	 *            Object to invoke methods (via tasks) on.
+	 */
+	public ClassWork(Object workObject) {
+		this.workObject = workObject;
+	}
+
+	/**
+	 * Obtains the object to invoke methods (via tasks) on.
+	 * 
+	 * @return Object to invoke methods (via tasks) on.
+	 */
+	public Object getObject() {
+		return this.workObject;
+	}
 
 }

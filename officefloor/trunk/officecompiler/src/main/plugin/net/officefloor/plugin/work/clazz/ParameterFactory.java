@@ -14,40 +14,24 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work.clazz;
+package net.officefloor.plugin.work.clazz;
 
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link ParameterFactory} for a {@link ManagedObject}.
+ * Creates the parameter for the {@link ClassTask}.
  * 
  * @author Daniel
  */
-public class ManagedObjectParameterFactory implements ParameterFactory {
+public interface ParameterFactory {
 
 	/**
-	 * Index of the {@link ManagedObject}.
-	 */
-	private final int managedObjectIndex;
-
-	/**
-	 * Initiate.
+	 * Creates the parameter from the {@link TaskContext}.
 	 * 
-	 * @param managedObjectIndex
-	 *            Index of the {@link ManagedObject}.
+	 * @param context
+	 *            {@link TaskContext}.
+	 * @return Parameter.
 	 */
-	public ManagedObjectParameterFactory(int managedObjectIndex) {
-		this.managedObjectIndex = managedObjectIndex;
-	}
-
-	/*
-	 * ================== ParameterFactory ====================================
-	 */
-
-	@Override
-	public Object createParameter(TaskContext<?, ?, ?, ?> context) {
-		return context.getObject(this.managedObjectIndex);
-	}
+	Object createParameter(TaskContext<?, ?, ?> context);
 
 }

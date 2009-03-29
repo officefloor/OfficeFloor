@@ -29,16 +29,16 @@ import net.officefloor.frame.util.AbstractSingleTask;
  * 
  * @author Daniel
  */
-public abstract class AbstractSingleTaskWork<P, W extends Work, M extends Enum<M>, F extends Enum<F>>
-		extends AbstractSingleTask<P, W, M, F> implements
-		TaskFactoryManufacturer<P, W, M, F> {
+public abstract class AbstractSingleTaskWork<W extends Work, M extends Enum<M>, F extends Enum<F>>
+		extends AbstractSingleTask<W, M, F> implements
+		TaskFactoryManufacturer<W, M, F> {
 
 	/*
 	 * ================= TaskFactoryManufacturer =========================
 	 */
 
 	@Override
-	public TaskFactory<P, W, M, F> createTaskFactory() {
+	public TaskFactory<W, M, F> createTaskFactory() {
 		return this;
 	}
 

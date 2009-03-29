@@ -20,7 +20,7 @@ import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**
@@ -42,7 +42,7 @@ public interface TaskType<W extends Work, M extends Enum<M>, F extends Enum<F>> 
 	 * 
 	 * @return {@link TaskFactoryManufacturer}.
 	 */
-	TaskFactoryManufacturer<?, W, M, F> getTaskFactoryManufacturer();
+	TaskFactoryManufacturer<W, M, F> getTaskFactoryManufacturer();
 
 	/**
 	 * Obtains the {@link Enum} providing the keys for the dependent
@@ -83,10 +83,10 @@ public interface TaskType<W extends Work, M extends Enum<M>, F extends Enum<F>> 
 
 	/**
 	 * Obtains the {@link TaskEscalationType} definitions for the possible
-	 * {@link Escalation} instances by the {@link Task}.
+	 * {@link EscalationFlow} instances by the {@link Task}.
 	 * 
 	 * @return {@link TaskEscalationType} definitions for the possible
-	 *         {@link Escalation} instances by the {@link Task}.
+	 *         {@link EscalationFlow} instances by the {@link Task}.
 	 */
 	TaskEscalationType[] getEscalationTypes();
 

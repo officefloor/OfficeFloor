@@ -28,7 +28,7 @@
 						<configuration>
 							<sources>
 								<source>src/main/impl</source>
-								<source>src/main/work</source>
+								<source>src/main/plugin</source>
 								<source>src/main/test</source>
 								<source>src/main/archive</source>
 							</sources>

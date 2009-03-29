@@ -24,13 +24,13 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel
  */
-public interface TaskFactoryManufacturer<P, W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public interface TaskFactoryManufacturer<W extends Work, M extends Enum<M>, F extends Enum<F>> {
 
 	/**
 	 * Creates the {@link TaskFactory}.
 	 * 
 	 * @return {@link TaskFactory}.
 	 */
-	TaskFactory<P, W, M, F> createTaskFactory();
+	TaskFactory<W, M, F> createTaskFactory();
 
 }

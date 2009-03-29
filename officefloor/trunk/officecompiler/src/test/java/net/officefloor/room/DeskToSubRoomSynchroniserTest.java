@@ -53,11 +53,11 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 		desk.addExternalManagedObject(new ExternalManagedObjectModel("MO-TWO",
 				"java.sql.Connection", null));
 		desk.addFlowItem(new FlowItemModel("IF-ONE", true, "work", "task",
-				null, null, null, null, null, null, null, null, null, null));
+				null, null, null, null, null, null, null, null, null));
 		desk.addFlowItem(new FlowItemModel("IF-TWO", false, "work", "task",
-				null, null, null, null, null, null, null, null, null, null));
+				null, null, null, null, null, null, null, null, null));
 		desk.addFlowItem(new FlowItemModel("IF-THREE", true, "work", "task",
-				null, null, null, null, null, null, null, null, null, null));
+				null, null, null, null, null, null, null, null, null));
 		desk.addExternalFlow(new ExternalFlowModel("OF-ONE", null, null));
 		desk.addExternalFlow(new ExternalFlowModel("OF-TWO", null, null));
 		desk.addExternalEscalation(new ExternalEscalationModel("ES-ONE",
@@ -128,9 +128,9 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 		desk.addExternalManagedObject(new ExternalManagedObjectModel(
 				"MO-THREE", "java.lang.Integer", null));
 		desk.addFlowItem(new FlowItemModel("IF-FOUR", false, "work", "task",
-				null, null, null, null, null, null, null, null, null, null));
+				null, null, null, null, null, null, null, null, null));
 		desk.addFlowItem(new FlowItemModel("IF-FIVE", true, "work", "task",
-				null, null, null, null, null, null, null, null, null, null));
+				null, null, null, null, null, null, null, null, null));
 		desk.addExternalFlow(new ExternalFlowModel("OF-THREE", null, null));
 		desk.addExternalEscalation(new ExternalEscalationModel("ES-THREE",
 				"java.lang.NullPointerException", null));

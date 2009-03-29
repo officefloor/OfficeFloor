@@ -40,7 +40,7 @@ import net.officefloor.frame.internal.structure.Flow;
  * @author Daniel
  */
 public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
-		implements TaskType<W, M, F>, TaskTypeBuilder<W, M, F> {
+		implements TaskType<W, M, F>, TaskTypeBuilder<M, F> {
 
 	/**
 	 * Name of the {@link Task}.
@@ -50,7 +50,7 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	/**
 	 * {@link TaskFactoryManufacturer}.
 	 */
-	private final TaskFactoryManufacturer<?, W, M, F> taskFactoryManufacturer;
+	private final TaskFactoryManufacturer<W, M, F> taskFactoryManufacturer;
 
 	/**
 	 * {@link Enum} providing keys for dependent {@link Object} instances.
@@ -92,7 +92,7 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 *            instances.
 	 */
 	public TaskTypeImpl(String taskName,
-			TaskFactoryManufacturer<?, W, M, F> taskFactoryManufacturer,
+			TaskFactoryManufacturer<W, M, F> taskFactoryManufacturer,
 			Class<M> objectKeyClass, Class<F> flowKeyClass) {
 		this.taskName = taskName;
 		this.taskFactoryManufacturer = taskFactoryManufacturer;
@@ -138,7 +138,7 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public TaskFactoryManufacturer<?, W, M, F> getTaskFactoryManufacturer() {
+	public TaskFactoryManufacturer<W, M, F> getTaskFactoryManufacturer() {
 		return this.taskFactoryManufacturer;
 	}
 

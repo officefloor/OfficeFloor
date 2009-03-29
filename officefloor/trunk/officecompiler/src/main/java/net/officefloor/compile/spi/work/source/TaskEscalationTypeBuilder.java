@@ -17,11 +17,11 @@
 package net.officefloor.compile.spi.work.source;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
  * Provides means for the {@link WorkSource} to provide a
- * <code>type definition</code> of a possible {@link Escalation} by the
+ * <code>type definition</code> of a possible {@link EscalationFlow} by the
  * {@link Task}.
  * 
  * @author Daniel
@@ -30,14 +30,14 @@ public interface TaskEscalationTypeBuilder {
 
 	/**
 	 * <p>
-	 * Provides means to specify a display label for the {@link Escalation}.
+	 * Provides means to specify a display label for the {@link EscalationFlow}.
 	 * <p>
 	 * This need not be set as is only an aid to better identify the
-	 * {@link Escalation}. If not set it will use the <code>Simple</code> name
-	 * of the {@link Escalation} {@link Class}.
+	 * {@link EscalationFlow}. If not set it will use the <code>Simple</code>
+	 * name of the {@link EscalationFlow} {@link Class}.
 	 * 
 	 * @param label
-	 *            Display label for the {@link Escalation}.
+	 *            Display label for the {@link EscalationFlow}.
 	 */
 	void setLabel(String label);
 

@@ -19,7 +19,7 @@ package net.officefloor.compile.impl.work;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.work.TaskEscalationType;
 import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
  * {@link TaskEscalationType} implementation.
@@ -30,12 +30,12 @@ public class TaskEscalationTypeImpl implements TaskEscalationType,
 		TaskEscalationTypeBuilder {
 
 	/**
-	 * Type of the {@link Escalation}.
+	 * Type of the {@link EscalationFlow}.
 	 */
 	private final Class<?> escalationType;
 
 	/**
-	 * Label of the {@link Escalation}.
+	 * Label of the {@link EscalationFlow}.
 	 */
 	private String label = null;
 
@@ -43,7 +43,7 @@ public class TaskEscalationTypeImpl implements TaskEscalationType,
 	 * Initiate.
 	 * 
 	 * @param escalationType
-	 *            Type of the {@link Escalation}.
+	 *            Type of the {@link EscalationFlow}.
 	 */
 	public TaskEscalationTypeImpl(Class<?> escalationType) {
 		this.escalationType = escalationType;

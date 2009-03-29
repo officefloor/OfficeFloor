@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.work.clazz;
+package net.officefloor.plugin.work.clazz;
 
 import java.lang.reflect.Method;
 
@@ -28,7 +28,7 @@ import net.officefloor.frame.api.build.TaskFactory;
  * @author Daniel
  */
 public class ClassTaskFactoryManufacturer implements
-		TaskFactoryManufacturer<Object, ClassWork, Indexed, Indexed> {
+		TaskFactoryManufacturer<ClassWork, Indexed, Indexed> {
 
 	/**
 	 * {@link Method}.
@@ -60,7 +60,7 @@ public class ClassTaskFactoryManufacturer implements
 	 */
 
 	@Override
-	public TaskFactory<Object, ClassWork, Indexed, Indexed> createTaskFactory() {
+	public TaskFactory<ClassWork, Indexed, Indexed> createTaskFactory() {
 
 		// Clone the parameters.
 		// Necessary for task used for two flow items.
@@ -72,5 +72,5 @@ public class ClassTaskFactoryManufacturer implements
 		// Return a new task factory
 		return new ClassTaskFactory(this.method, clone);
 	}
-	
+
 }

@@ -42,7 +42,6 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.internal.structure.Escalation;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
 
@@ -79,7 +78,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	 * {@link TaskFactoryManufacturer}.
 	 */
 	@SuppressWarnings("unchecked")
-	private final TaskFactoryManufacturer<?, Work, Indexed, Indexed> taskFactoryManufacturer = this
+	private final TaskFactoryManufacturer<Work, Indexed, Indexed> taskFactoryManufacturer = this
 			.createMock(TaskFactoryManufacturer.class);
 
 	/*
@@ -731,7 +730,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if no {@link Escalation} type.
+	 * Ensure issue if no escalation type.
 	 */
 	public void testNoEscalationType() {
 
@@ -756,7 +755,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure can include {@link Escalation}.
+	 * Ensure can include escalation.
 	 */
 	public void testEscalation() {
 

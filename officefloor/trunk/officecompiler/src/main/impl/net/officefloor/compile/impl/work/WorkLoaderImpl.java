@@ -113,7 +113,8 @@ public class WorkLoaderImpl implements WorkLoader {
 			workProperties = specification.getProperties();
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain "
-					+ WorkSourceProperty.class.getSimpleName() + " instances from "
+					+ WorkSourceProperty.class.getSimpleName()
+					+ " instances from "
 					+ WorkSourceSpecification.class.getSimpleName() + " for "
 					+ workSourceClass.getName(), ex, issues);
 			return null; // failed to obtain properties
@@ -127,10 +128,10 @@ public class WorkLoaderImpl implements WorkLoader {
 
 				// Ensure have the work property
 				if (workProperty == null) {
-					this.addIssue(WorkSourceProperty.class.getSimpleName() + " " + i
-							+ " is null from "
-							+ WorkSourceSpecification.class.getSimpleName() + " for "
-							+ workSourceClass.getName(), issues);
+					this.addIssue(WorkSourceProperty.class.getSimpleName()
+							+ " " + i + " is null from "
+							+ WorkSourceSpecification.class.getSimpleName()
+							+ " for " + workSourceClass.getName(), issues);
 					return null; // must have complete property details
 				}
 
@@ -140,17 +141,17 @@ public class WorkLoaderImpl implements WorkLoader {
 					name = workProperty.getName();
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get name for "
-							+ WorkSourceProperty.class.getSimpleName() + " " + i
-							+ " from "
-							+ WorkSourceSpecification.class.getSimpleName() + " for "
-							+ workSourceClass.getName(), ex, issues);
+							+ WorkSourceProperty.class.getSimpleName() + " "
+							+ i + " from "
+							+ WorkSourceSpecification.class.getSimpleName()
+							+ " for " + workSourceClass.getName(), ex, issues);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
-					this.addIssue(WorkSourceProperty.class.getSimpleName() + " " + i
-							+ " provided blank name from "
-							+ WorkSourceSpecification.class.getSimpleName() + " for "
-							+ workSourceClass.getName(), issues);
+					this.addIssue(WorkSourceProperty.class.getSimpleName()
+							+ " " + i + " provided blank name from "
+							+ WorkSourceSpecification.class.getSimpleName()
+							+ " for " + workSourceClass.getName(), issues);
 					return null; // must have complete property details
 				}
 
@@ -160,10 +161,10 @@ public class WorkLoaderImpl implements WorkLoader {
 					label = workProperty.getLabel();
 				} catch (Throwable ex) {
 					this.addIssue("Failed to get label for "
-							+ WorkSourceProperty.class.getSimpleName() + " " + i
-							+ " (" + name + ") from "
-							+ WorkSourceSpecification.class.getSimpleName() + " for "
-							+ workSourceClass.getName(), ex, issues);
+							+ WorkSourceProperty.class.getSimpleName() + " "
+							+ i + " (" + name + ") from "
+							+ WorkSourceSpecification.class.getSimpleName()
+							+ " for " + workSourceClass.getName(), ex, issues);
 					return null; // must have complete property details
 				}
 
@@ -276,9 +277,10 @@ public class WorkLoaderImpl implements WorkLoader {
 			return false; // must have complete type
 		}
 
-		// Obtain the object keys class
+		// Obtain the object keys class (taking into account Indexed)
 		Class<M> objectKeysClass = taskType.getObjectKeyClass();
-		if (objectKeysClass != null) {
+		if ((objectKeysClass != null)
+				&& (!objectKeysClass.equals(Indexed.class))) {
 			// Is valid by keys
 			if (!this.isValidObjects(taskType, objectKeysClass, taskIndex,
 					taskName, workSourceClass, issues)) {
@@ -312,9 +314,9 @@ public class WorkLoaderImpl implements WorkLoader {
 			}
 		}
 
-		// Obtain the flow keys class
+		// Obtain the flow keys class (taking into account Indexed)
 		Class<F> flowKeysClass = taskType.getFlowKeyClass();
-		if (flowKeysClass != null) {
+		if ((flowKeysClass != null) && (!flowKeysClass.equals(Indexed.class))) {
 			// Is valid by keys
 			if (!this.isValidFlows(taskType, flowKeysClass, taskIndex,
 					taskName, workSourceClass, issues)) {

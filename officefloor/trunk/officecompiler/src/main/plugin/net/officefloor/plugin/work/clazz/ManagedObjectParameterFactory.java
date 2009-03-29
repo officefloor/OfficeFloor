@@ -14,37 +14,40 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.handler;
+package net.officefloor.plugin.work.clazz;
 
-import net.officefloor.model.handler.HandlerModel;
-import net.officefloor.repository.ConfigurationContext;
+import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * Context for the {@link HandlerLoader}.
+ * {@link ParameterFactory} for a {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface HandlerLoaderContext {
+public class ManagedObjectParameterFactory implements ParameterFactory {
 
 	/**
-	 * Obtains the configuration string.
-	 * 
-	 * @return Configuration string.
+	 * Index of the {@link ManagedObject}.
 	 */
-	String getConfiguration();
+	private final int managedObjectIndex;
 
 	/**
-	 * Obtains the {@link ConfigurationContext}.
+	 * Initiate.
 	 * 
-	 * @return {@link ConfigurationContext}.
+	 * @param managedObjectIndex
+	 *            Index of the {@link ManagedObject}.
 	 */
-	ConfigurationContext getConfigurationContext();
+	public ManagedObjectParameterFactory(int managedObjectIndex) {
+		this.managedObjectIndex = managedObjectIndex;
+	}
 
-	/**
-	 * Obtains the {@link ClassLoader} for loading the {@link HandlerModel}.
-	 * 
-	 * @return {@link ClassLoader} for loading the {@link HandlerModel}.
+	/*
+	 * ================== ParameterFactory ====================================
 	 */
-	ClassLoader getClassLoader();
+
+	@Override
+	public Object createParameter(TaskContext<?, ?, ?> context) {
+		return context.getObject(this.managedObjectIndex);
+	}
 
 }
