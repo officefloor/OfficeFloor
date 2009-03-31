@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.model.repository;
+package net.officefloor.model.impl.repository;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -25,6 +25,9 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ModelRepository;
 import net.officefloor.plugin.xml.XmlMarshaller;
 import net.officefloor.plugin.xml.XmlOutput;
 import net.officefloor.plugin.xml.XmlUnmarshaller;
@@ -34,21 +37,21 @@ import net.officefloor.plugin.xml.unmarshall.designate.DesignateXmlUnmarshaller;
 import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
 
 /**
- * Repository to Models.
+ * {@link ModelRepository} implementation.
  * 
  * @author Daniel
  */
-public class ModelRepositoryImpl {
+public class ModelRepositoryImpl implements ModelRepository {
 
 	/**
 	 * Registry of {@link XmlUnmarshaller} instances to the class type they
-	 * unmarshall.
+	 * unmarshal.
 	 */
 	private final Map<Class<?>, XmlUnmarshaller> unmarshallers = new HashMap<Class<?>, XmlUnmarshaller>();
 
 	/**
 	 * Registry of {@link XmlMarshaller} instances to the class type they
-	 * marshall.
+	 * marshal.
 	 */
 	private final Map<Class<?>, XmlMarshaller> marshallers = new HashMap<Class<?>, XmlMarshaller>();
 
@@ -57,16 +60,7 @@ public class ModelRepositoryImpl {
 	 */
 	private final DesignateXmlUnmarshaller designateUnmarshaller = new DesignateXmlUnmarshaller();
 
-	/**
-	 * Stores the model within the input configuration.
-	 * 
-	 * @param model
-	 *            Model to be stored.
-	 * @param configuration
-	 *            Configuration to contain the Model.
-	 * @throws Exception
-	 *             If fails to store the Model.
-	 */
+	@Override
 	public void store(Object model, ConfigurationItem configuration)
 			throws Exception {
 
@@ -96,19 +90,7 @@ public class ModelRepositoryImpl {
 				.toByteArray()));
 	}
 
-	/**
-	 * Creates the {@link ConfigurationItem} to hold the Model for the input Id.
-	 * 
-	 * @param id
-	 *            Id to create the {@link ConfigurationItem}.
-	 * @param model
-	 *            Model to be stored in the created {@link ConfigurationItem}.
-	 * @param context
-	 *            {@link ConfigurationContext}.
-	 * @return {@link ConfigurationItem} created for the Model.
-	 * @throws Exception
-	 *             If fails to create the {@link ConfigurationItem}.
-	 */
+	@Override
 	public ConfigurationItem create(String id, Object model,
 			ConfigurationContext context) throws Exception {
 
@@ -138,17 +120,7 @@ public class ModelRepositoryImpl {
 				marshalledModel.toByteArray()));
 	}
 
-	/**
-	 * Configures the input Model from the input configuration.
-	 * 
-	 * @param model
-	 *            Model to be configured.
-	 * @param configuration
-	 *            Configuration of the Model.
-	 * @return Configured Model.
-	 * @throws Exception
-	 *             If fails to configure the Model.
-	 */
+	@Override
 	public <O> O retrieve(O model, ConfigurationItem configuration)
 			throws Exception {
 
@@ -171,14 +143,7 @@ public class ModelRepositoryImpl {
 		return model;
 	}
 
-	/**
-	 * Registers meta-data for a model to be retrieved.
-	 * 
-	 * @param modelType
-	 *            {@link Class} of the model.
-	 * @throws Exception
-	 *             If fails to configure the {@link DesignateXmlUnmarshaller}.
-	 */
+	@Override
 	public void registerModel(Class<?> modelType) throws Exception {
 		// Register the model
 		synchronized (this) {
@@ -197,19 +162,7 @@ public class ModelRepositoryImpl {
 		}
 	}
 
-	/**
-	 * <p>
-	 * Retrieves the model from the input configuration.
-	 * <p>
-	 * Only models successfully registered by {@link #registerModel(Class)} may
-	 * be retrieved by this method.
-	 * 
-	 * @param configuration
-	 *            Configuration of the model.
-	 * @return Model of the configuration.
-	 * @throws Exception
-	 *             If fails to retrieve the model.
-	 */
+	@Override
 	public Object retrieve(ConfigurationItem configuration) throws Exception {
 		return this.designateUnmarshaller.unmarshall(configuration
 				.getConfiguration());
@@ -263,7 +216,8 @@ public class ModelRepositoryImpl {
 	 * @throws Exception
 	 *             If fails to obtain the {@link XmlMarshaller}.
 	 */
-	private XmlMarshaller obtainMarshaller(Class<?> modelClass) throws Exception {
+	private XmlMarshaller obtainMarshaller(Class<?> modelClass)
+			throws Exception {
 		// Obtain the xml marshaller to save office (lazy load)
 		XmlMarshaller marshaller = null;
 		synchronized (this) {

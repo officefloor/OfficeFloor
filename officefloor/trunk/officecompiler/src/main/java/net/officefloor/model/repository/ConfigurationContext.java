@@ -19,51 +19,56 @@ package net.officefloor.model.repository;
 import java.io.InputStream;
 
 /**
- * Context of the {@link net.officefloor.model.repository.persistence.ConfigurationItem}
- * instances.
+ * Context of the {@link ConfigurationItem} instances.
  * 
  * @author Daniel
  */
 public interface ConfigurationContext {
 
 	/**
-	 * Obtains the Identifier for this configuration context. This value is used
-	 * in the equality of configuration contexts.
+	 * <p>
+	 * Obtains the location for this {@link ConfigurationContext}.
+	 * <p>
+	 * This value is used in the equality of {@link ConfigurationContext}
+	 * instances.
 	 * 
-	 * @return Identifier for this configuration context.
+	 * @return Location for this {@link ConfigurationContext}.
 	 */
-	String getId();
+	String getLocation();
 
 	/**
-	 * Obtains the class path for the Context.
+	 * Obtains the class path for the context.
 	 * 
-	 * @return Class path for the Context.
+	 * @return Class path for the context.
 	 */
+	@Deprecated
 	String[] getClasspath();
 
 	/**
-	 * Obtains the {@link ConfigurationItem} identified by its Id.
+	 * Obtains the {@link ConfigurationItem} at the relative location.
 	 * 
-	 * @param id
-	 *            Id of the {@link ConfigurationItem} to obtain.
+	 * @param relativeLocation
+	 *            Relative location of the {@link ConfigurationItem} to obtain.
 	 * @return {@link ConfigurationItem}.
 	 * @throws Exception
-	 *             If the configuration does not exist.
+	 *             If can not obtain a {@link ConfigurationItem} at the relative
+	 *             location.
 	 */
-	ConfigurationItem getConfigurationItem(String id)
+	ConfigurationItem getConfigurationItem(String relativeLocation)
 			throws Exception;
 
 	/**
-	 * Creates a new {@link ConfigurationItem} identified by the input Id.
+	 * Creates a new {@link ConfigurationItem} at the relative location.
 	 * 
-	 * @param id
-	 *            Id of the {@link ConfigurationItem} to create.
+	 * @param relativeLocation
+	 *            Relative location of the {@link ConfigurationItem} to create.
 	 * @param configuration
 	 *            Configuration for the {@link ConfigurationItem}.
 	 * @return The created {@link ConfigurationItem}.
 	 * @throws Exception
-	 *             If fails to create the {@link ConfigurationItem}.s
+	 *             If fails to create the {@link ConfigurationItem}.
 	 */
-	ConfigurationItem createConfigurationItem(String id,
+	ConfigurationItem createConfigurationItem(String relativeLocation,
 			InputStream configuration) throws Exception;
+
 }

@@ -84,10 +84,10 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 		// Create the room entry
 		RoomEntry roomEntry;
 		if (parentOfficeEntry != null) {
-			roomEntry = new RoomEntry(configurationItem.getId(), roomModel,
+			roomEntry = new RoomEntry(configurationItem.getLocation(), roomModel,
 					parentOfficeEntry);
 		} else {
-			roomEntry = new RoomEntry(configurationItem.getId(), roomName,
+			roomEntry = new RoomEntry(configurationItem.getLocation(), roomName,
 					roomModel, parentRoomEntry);
 		}
 

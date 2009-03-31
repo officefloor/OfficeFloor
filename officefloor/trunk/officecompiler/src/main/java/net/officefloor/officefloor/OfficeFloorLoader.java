@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.FlowItemModel;
 import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
@@ -47,7 +48,6 @@ import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
 import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.ModelRepositoryImpl;
 import net.officefloor.office.OfficeLoader;
 import net.officefloor.util.DoubleKeyMap;
 
@@ -314,7 +314,7 @@ public class OfficeFloorLoader {
 		// Synchronise the office onto the office floor office
 		OfficeToOfficeFloorOfficeSynchroniser
 				.synchroniseOfficeOntoOfficeFloorOffice(configurationItem
-						.getId(), office, officeFloorOffice);
+						.getLocation(), office, officeFloorOffice);
 
 		// Return the office floor office
 		return officeFloorOffice;

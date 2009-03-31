@@ -19,9 +19,9 @@ package net.officefloor.model.generate.model;
 import java.io.InputStream;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.ModelRepositoryImpl;
 
 /**
  * Ensures able to unmarshall
@@ -41,7 +41,7 @@ public class ModelMetaDataUnmarshallTest extends OfficeFrameTestCase {
 				"Test.model.xml");
 		ConfigurationItem configuration = new ConfigurationItem() {
 
-			public String getId() {
+			public String getLocation() {
 				// TODO Auto-generated method stub
 				throw new UnsupportedOperationException("TODO implement");
 			}
