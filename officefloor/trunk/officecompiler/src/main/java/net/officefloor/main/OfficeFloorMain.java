@@ -24,9 +24,9 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
+import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.classloader.ClassLoaderConfigurationContext;
 
 /**
  * Starting point to compile and run an {@link OfficeFloor}.
