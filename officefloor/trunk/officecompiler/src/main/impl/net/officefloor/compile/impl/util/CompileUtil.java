@@ -16,6 +16,8 @@
  */
 package net.officefloor.compile.impl.util;
 
+import java.util.List;
+
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -40,6 +42,22 @@ public class CompileUtil {
 	}
 
 	/**
+	 * Convenience method for {@link List#toArray(Object[])} to pass compiler
+	 * warnings for generic typed array.
+	 * 
+	 * @param list
+	 *            List to transform into an array.
+	 * @param type
+	 *            Type of the array.
+	 * @return List as an array.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T[] toArray(List<T> list, Object[] type) {
+		Object[] array = list.toArray(type);
+		return (T[]) array;
+	}
+
+	/**
 	 * Instantiates a new instance of the input {@link Class} by its default
 	 * constructor. If fails to instantiate, then reports issue via
 	 * {@link CompilerIssues}.
@@ -50,8 +68,8 @@ public class CompileUtil {
 	 *            Expected type that is to be instantiated.
 	 * @param locationType
 	 *            {@link LocationType}.
-	 * @param locationName
-	 *            Name of the location.
+	 * @param location
+	 *            Location.
 	 * @param assetType
 	 *            {@link AssetType}.
 	 * @param assetName
@@ -61,8 +79,8 @@ public class CompileUtil {
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T, E> T newInstance(Class<T> clazz, Class<E> expectedType,
-			LocationType locationType, String locationName,
-			AssetType assetType, String assetName, CompilerIssues issues) {
+			LocationType locationType, String location, AssetType assetType,
+			String assetName, CompilerIssues issues) {
 		try {
 			// Create the instance
 			T instance = clazz.newInstance();
@@ -70,10 +88,9 @@ public class CompileUtil {
 			// Ensure the instance is of the expected type
 			if (!expectedType.isInstance(instance)) {
 				// Indicate issue
-				issues.addIssue(locationType, locationName, assetType,
-						assetName, "Must implement "
-								+ expectedType.getSimpleName() + " (class="
-								+ clazz.getName() + ")");
+				issues.addIssue(locationType, location, assetType, assetName,
+						"Must implement " + expectedType.getSimpleName()
+								+ " (class=" + clazz.getName() + ")");
 				return null; // instance not of type
 			}
 
@@ -82,7 +99,7 @@ public class CompileUtil {
 
 		} catch (Throwable ex) {
 			// Indicate issue (catching exception from constructor)
-			issues.addIssue(locationType, locationName, assetType, assetName,
+			issues.addIssue(locationType, location, assetType, assetName,
 					"Failed to instantiate " + clazz.getName()
 							+ " by default constructor", ex);
 			return null; // no instance

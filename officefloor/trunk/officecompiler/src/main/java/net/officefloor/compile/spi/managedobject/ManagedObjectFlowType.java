@@ -17,6 +17,7 @@
 package net.officefloor.compile.spi.managedobject;
 
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -36,6 +37,33 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 	String getFlowName();
 
 	/**
+	 * Obtains the name of the {@link Work} instigating the {@link Flow}. Should
+	 * the {@link Flow} be instigated by the {@link ManagedObjectSource}
+	 * directly (rather than a {@link Task} it added) this will return
+	 * <code>null</code>.
+	 * 
+	 * @return {@link Work} name or <code>null</code>.
+	 */
+	String getWorkName();
+
+	/**
+	 * Obtains the name of the {@link Task} instigating the {@link Flow}. Should
+	 * the {@link Flow} be instigated by the {@link ManagedObjectSource}
+	 * directly (rather than a {@link Task} it added) this will return
+	 * <code>null</code>.
+	 * 
+	 * @return {@link Task} name or <code>null</code>.
+	 */
+	String getTaskName();
+
+	/**
+	 * Obtains the key identifying the {@link Flow}.
+	 * 
+	 * @return Key identifying the {@link Flow}.
+	 */
+	F getKey();
+
+	/**
 	 * Obtains the index identifying the {@link Flow}.
 	 * 
 	 * @return Index identifying the {@link Flow}.
@@ -49,12 +77,5 @@ public interface ManagedObjectFlowType<F extends Enum<F>> {
 	 *         <code>null</code> to indicate no argument.
 	 */
 	Class<?> getArgumentType();
-
-	/**
-	 * Obtains the key identifying the {@link Flow}.
-	 * 
-	 * @return Key identifying the {@link Flow}.
-	 */
-	F getKey();
 
 }

@@ -14,9 +14,8 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.desk;
+package net.officefloor.compile.test.archive;
 
-import net.officefloor.compile.desk.TaskToDeskTaskSynchroniser;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskTaskModel;
@@ -24,7 +23,7 @@ import net.officefloor.model.work.TaskModel;
 import net.officefloor.model.work.TaskObjectModel;
 
 /**
- * Tests the {@link net.officefloor.compile.desk.TaskToDeskTaskSynchroniser}.
+ * Tests the {@link net.officefloor.compile.test.archive.TaskToDeskTaskSynchroniser}.
  * 
  * @author Daniel
  */

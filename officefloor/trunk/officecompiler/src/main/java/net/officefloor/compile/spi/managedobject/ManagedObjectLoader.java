@@ -43,7 +43,7 @@ public interface ManagedObjectLoader {
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
-	<D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> PropertyList loadSpecification(
+	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> PropertyList loadSpecification(
 			Class<MS> managedObjectSourceClass, CompilerIssues issues);
 
 	/**
@@ -64,7 +64,7 @@ public interface ManagedObjectLoader {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issues, which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
-	<D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> ManagedObjectType<D, H> loadManagedObject(
+	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObject(
 			Class<MS> managedObjectSourceClass, PropertyList propertyList,
 			ClassLoader classLoader, CompilerIssues issues);
 
