@@ -28,8 +28,8 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
-import net.officefloor.frame.internal.configuration.FlowConfiguration;
+import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
@@ -252,7 +252,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoObjectType() {
 
-		final TaskObjectConfiguration moConfiguration = this
+		final TaskObjectConfiguration<?> moConfiguration = this
 				.createMock(TaskObjectConfiguration.class);
 
 		// Record no managed object name
@@ -277,7 +277,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	public void testParameter() {
 
 		final Class<?> parameterType = Connection.class;
-		final TaskObjectConfiguration moConfiguration = this
+		final TaskObjectConfiguration<?> moConfiguration = this
 				.createMock(TaskObjectConfiguration.class);
 
 		// Record parameter
@@ -322,10 +322,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Parameter will be Connection but can be passed as Object
 		final Class<?> paramTypeOne = Connection.class;
-		final TaskObjectConfiguration paramConfigOne = this
+		final TaskObjectConfiguration<?> paramConfigOne = this
 				.createMock(TaskObjectConfiguration.class);
 		final Class<?> paramTypeTwo = Object.class;
-		final TaskObjectConfiguration paramConfigTwo = this
+		final TaskObjectConfiguration<?> paramConfigTwo = this
 				.createMock(TaskObjectConfiguration.class);
 
 		// Record parameter used twice
@@ -372,10 +372,10 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 
 		// Parameter types are incompatible
 		final Class<?> paramTypeOne = Integer.class;
-		final TaskObjectConfiguration paramConfigOne = this
+		final TaskObjectConfiguration<?> paramConfigOne = this
 				.createMock(TaskObjectConfiguration.class);
 		final Class<?> paramTypeTwo = String.class;
-		final TaskObjectConfiguration paramConfigTwo = this
+		final TaskObjectConfiguration<?> paramConfigTwo = this
 				.createMock(TaskObjectConfiguration.class);
 
 		// Record parameters incompatible
@@ -404,7 +404,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoScopeManagedObjectName() {
 
-		final TaskObjectConfiguration moConfiguration = this
+		final TaskObjectConfiguration<?> moConfiguration = this
 				.createMock(TaskObjectConfiguration.class);
 
 		// Record no managed object name
@@ -433,7 +433,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testUnknownManagedObject() {
 
-		final TaskObjectConfiguration moConfiguration = this
+		final TaskObjectConfiguration<?> moConfiguration = this
 				.createMock(TaskObjectConfiguration.class);
 
 		// Record unknown managed object
@@ -469,7 +469,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testIncompatibleManagedObject() {
 
-		final TaskObjectConfiguration moConfiguration = this
+		final TaskObjectConfiguration<?> moConfiguration = this
 				.createMock(TaskObjectConfiguration.class);
 		final RawBoundManagedObjectMetaData<?> rawWorkMo = this
 				.createMock(RawBoundManagedObjectMetaData.class);
@@ -514,7 +514,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testManagedObjectDependency() {
 
-		final TaskObjectConfiguration moConfiguration = this
+		final TaskObjectConfiguration<?> moConfiguration = this
 				.createMock(TaskObjectConfiguration.class);
 		final RawBoundManagedObjectMetaData<?> rawWorkMo = this
 				.createMock(RawBoundManagedObjectMetaData.class);
@@ -818,8 +818,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoFlowTaskNodeReference() {
 
-		final FlowConfiguration flowConfiguration = this
-				.createMock(FlowConfiguration.class);
+		final TaskFlowConfiguration<?> flowConfiguration = this
+				.createMock(TaskFlowConfiguration.class);
 
 		// Record no task node reference
 		this.record_taskNameFactoryTeam();
@@ -828,7 +828,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
+				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), null);
 		this.record_taskIssue("No task referenced for flow index 0");
@@ -846,8 +846,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoFlowTaskName() {
 
-		final FlowConfiguration flowConfiguration = this
-				.createMock(FlowConfiguration.class);
+		final TaskFlowConfiguration<?> flowConfiguration = this
+				.createMock(TaskFlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
 
@@ -858,7 +858,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
+				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -881,8 +881,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testUnknownFlowWork() {
 
-		final FlowConfiguration flowConfiguration = this
-				.createMock(FlowConfiguration.class);
+		final TaskFlowConfiguration<?> flowConfiguration = this
+				.createMock(TaskFlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
 
@@ -893,7 +893,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
+				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -918,8 +918,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testUnknownFlowTask() {
 
-		final FlowConfiguration flowConfiguration = this
-				.createMock(FlowConfiguration.class);
+		final TaskFlowConfiguration<?> flowConfiguration = this
+				.createMock(TaskFlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
 
@@ -930,7 +930,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
+				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -959,8 +959,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testIncompatibleFlowArgument() {
 
-		final FlowConfiguration flowConfiguration = this
-				.createMock(FlowConfiguration.class);
+		final TaskFlowConfiguration<?> flowConfiguration = this
+				.createMock(TaskFlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
 		final TaskMetaData<?, ?, ?> flowTaskMetaData = this
@@ -973,7 +973,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
+				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -1006,8 +1006,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoFlowInstigationStrategy() {
 
-		final FlowConfiguration flowConfiguration = this
-				.createMock(FlowConfiguration.class);
+		final TaskFlowConfiguration<?> flowConfiguration = this
+				.createMock(TaskFlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
 		final TaskMetaData<?, ?, ?> flowTaskMetaData = this
@@ -1020,7 +1020,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
+				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -1073,8 +1073,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	public void doConstructFlowTest(
 			FlowInstigationStrategyEnum instigationStrategy) {
 
-		final FlowConfiguration flowConfiguration = this
-				.createMock(FlowConfiguration.class);
+		final TaskFlowConfiguration<?> flowConfiguration = this
+				.createMock(TaskFlowConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
 		final TaskMetaData<?, ?, ?> flowTaskMetaData = this
@@ -1088,7 +1088,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_createWorkSpecificTaskMetaDataLocator();
 		this.recordReturn(this.configuration, this.configuration
 				.getFlowConfiguration(),
-				new FlowConfiguration[] { flowConfiguration });
+				new TaskFlowConfiguration[] { flowConfiguration });
 		this.recordReturn(flowConfiguration,
 				flowConfiguration.getInitialTask(), taskNodeReference);
 		this.recordReturn(taskNodeReference, taskNodeReference.getWorkName(),
@@ -1256,8 +1256,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoEscalationType() {
 
-		final EscalationConfiguration escalationConfiguration = this
-				.createMock(EscalationConfiguration.class);
+		final TaskEscalationConfiguration escalationConfiguration = this
+				.createMock(TaskEscalationConfiguration.class);
 
 		// Record no escalation type
 		this.record_taskNameFactoryTeam();
@@ -1268,7 +1268,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
+				new TaskEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration
 				.getTypeOfCause(), null);
 		this.record_taskIssue("No escalation type for escalation index 0");
@@ -1284,8 +1284,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoEscalationTaskNodeReference() {
 
-		final EscalationConfiguration escalationConfiguration = this
-				.createMock(EscalationConfiguration.class);
+		final TaskEscalationConfiguration escalationConfiguration = this
+				.createMock(TaskEscalationConfiguration.class);
 
 		// Record no task referenced
 		this.record_taskNameFactoryTeam();
@@ -1296,7 +1296,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
+				new TaskEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration
 				.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration
@@ -1314,8 +1314,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testNoEscalationTaskName() {
 
-		final EscalationConfiguration escalationConfiguration = this
-				.createMock(EscalationConfiguration.class);
+		final TaskEscalationConfiguration escalationConfiguration = this
+				.createMock(TaskEscalationConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
 
@@ -1328,7 +1328,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
+				new TaskEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration
 				.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration
@@ -1350,8 +1350,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testIncompatibleEscalation() {
 
-		final EscalationConfiguration escalationConfiguration = this
-				.createMock(EscalationConfiguration.class);
+		final TaskEscalationConfiguration escalationConfiguration = this
+				.createMock(TaskEscalationConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
 		final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
@@ -1366,7 +1366,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
+				new TaskEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration
 				.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration
@@ -1399,8 +1399,8 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	public void testConstructEscalation() {
 
-		final EscalationConfiguration escalationConfiguration = this
-				.createMock(EscalationConfiguration.class);
+		final TaskEscalationConfiguration escalationConfiguration = this
+				.createMock(TaskEscalationConfiguration.class);
 		final TaskNodeReference taskNodeReference = this
 				.createMock(TaskNodeReference.class);
 		final TaskMetaData<?, ?, ?> escalationTaskMetaData = this
@@ -1415,7 +1415,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 		this.record_NoNextTask();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalations(),
-				new EscalationConfiguration[] { escalationConfiguration });
+				new TaskEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(escalationConfiguration, escalationConfiguration
 				.getTypeOfCause(), IOException.class);
 		this.recordReturn(escalationConfiguration, escalationConfiguration
@@ -1519,7 +1519,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	private void record_NoFlows() {
 		this.recordReturn(this.configuration, this.configuration
-				.getFlowConfiguration(), new FlowConfiguration[0]);
+				.getFlowConfiguration(), new TaskFlowConfiguration[0]);
 	}
 
 	/**
@@ -1535,7 +1535,7 @@ public class RawTaskMetaDataTest<W extends Work, D extends Enum<D>, F extends En
 	 */
 	private void record_NoEscalations() {
 		this.recordReturn(this.configuration, this.configuration
-				.getEscalations(), new EscalationConfiguration[0]);
+				.getEscalations(), new TaskEscalationConfiguration[0]);
 	}
 
 	/**

@@ -17,17 +17,18 @@
 package net.officefloor.frame.impl.construct.task;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.configuration.FlowConfiguration;
+import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
- * {@link FlowConfiguration} implementation.
+ * {@link TaskFlowConfiguration} implementation.
  * 
  * @author Daniel
  */
-public class FlowConfigurationImpl implements FlowConfiguration {
+public class TaskFlowConfigurationImpl<F extends Enum<F>> implements
+		TaskFlowConfiguration<F> {
 
 	/**
 	 * Name of the {@link Flow}.
@@ -45,6 +46,16 @@ public class FlowConfigurationImpl implements FlowConfiguration {
 	private final TaskNodeReference taskNodeRef;
 
 	/**
+	 * Index of the {@link Flow}.
+	 */
+	private final int index;
+
+	/**
+	 * Key of the {@link Flow}.
+	 */
+	private final F key;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param flowName
@@ -53,12 +64,19 @@ public class FlowConfigurationImpl implements FlowConfiguration {
 	 *            {@link FlowInstigationStrategyEnum}.
 	 * @param taskNodeRef
 	 *            Reference to the initial {@link Task} of this {@link Flow}.
+	 * @param index
+	 *            Index of this {@link Flow}.
+	 * @param key
+	 *            Key of the {@link Flow}.
 	 */
-	public FlowConfigurationImpl(String flowName,
-			FlowInstigationStrategyEnum strategy, TaskNodeReference taskNodeRef) {
+	public TaskFlowConfigurationImpl(String flowName,
+			FlowInstigationStrategyEnum strategy,
+			TaskNodeReference taskNodeRef, int index, F key) {
 		this.flowName = flowName;
 		this.strategy = strategy;
 		this.taskNodeRef = taskNodeRef;
+		this.index = index;
+		this.key = key;
 	}
 
 	/*
@@ -78,6 +96,16 @@ public class FlowConfigurationImpl implements FlowConfiguration {
 	@Override
 	public TaskNodeReference getInitialTask() {
 		return this.taskNodeRef;
+	}
+
+	@Override
+	public int getIndex() {
+		return this.index;
+	}
+
+	@Override
+	public F getKey() {
+		return this.key;
 	}
 
 }

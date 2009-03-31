@@ -17,35 +17,29 @@
 package net.officefloor.frame.internal.configuration;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**
- * Configuration for a {@link Flow}.
+ * Configuration for the {@link EscalationFlow}.
  * 
  * @author Daniel
  */
-public interface FlowConfiguration {
+public interface TaskEscalationConfiguration {
 
 	/**
-	 * Obtains the name of this {@link Flow}.
+	 * Obtains the type of cause handled by this {@link EscalationFlow}.
 	 * 
-	 * @return Name of this {@link Flow}.
+	 * @return Type of cause handled by this {@link EscalationFlow}.
 	 */
-	String getFlowName();
+	Class<? extends Throwable> getTypeOfCause();
 
 	/**
-	 * Obtains the strategy to instigate this {@link Flow}.
+	 * Obtains the {@link TaskNodeReference} for the {@link Task} handling the
+	 * escalation.
 	 * 
-	 * @return Strategy to instigate this {@link Flow}.
+	 * @return {@link TaskNodeReference} for the {@link Task} handling the
+	 *         escalation.
 	 */
-	FlowInstigationStrategyEnum getInstigationStrategy();
-
-	/**
-	 * Obtains the reference to the initial {@link Task} of this {@link Flow}.
-	 * 
-	 * @return Reference to the initial {@link Task} of this {@link Flow}.
-	 */
-	TaskNodeReference getInitialTask();
-
+	TaskNodeReference getTaskNodeReference();
+	
 }

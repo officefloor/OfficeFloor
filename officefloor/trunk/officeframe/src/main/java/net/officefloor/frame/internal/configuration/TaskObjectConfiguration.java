@@ -25,7 +25,7 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel
  */
-public interface TaskObjectConfiguration {
+public interface TaskObjectConfiguration<D> {
 
 	/**
 	 * Indicates if this dependent {@link Object} is the argument passed to the
@@ -55,5 +55,20 @@ public interface TaskObjectConfiguration {
 	 * @return Type of {@link Object} required by the {@link Task}.
 	 */
 	Class<?> getObjectType();
+
+	/**
+	 * Obtains the index identifying the dependent {@link Object}.
+	 * 
+	 * @return Index identifying the dependent {@link Object}.
+	 */
+	int getIndex();
+
+	/**
+	 * Obtains the key identifying the dependent {@link Object}.
+	 * 
+	 * @return Key identifying the dependent {@link Object}. <code>null</code>
+	 *         if indexed.
+	 */
+	D getKey();
 
 }
