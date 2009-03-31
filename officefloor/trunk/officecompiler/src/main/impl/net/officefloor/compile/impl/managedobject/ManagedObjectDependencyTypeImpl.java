@@ -1,0 +1,102 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.compile.impl.managedobject;
+
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.spi.managedobject.ManagedObjectDependencyType;
+
+/**
+ * {@link ManagedObjectDependencyType} implementation.
+ * 
+ * @author Daniel
+ */
+public class ManagedObjectDependencyTypeImpl<D extends Enum<D>> implements
+		ManagedObjectDependencyType<D> {
+
+	/**
+	 * Name describing this dependency.
+	 */
+	private final String name;
+
+	/**
+	 * Index identifying this dependency.
+	 */
+	private final int index;
+
+	/**
+	 * Type required of the dependency.
+	 */
+	private final Class<?> type;
+
+	/**
+	 * Key identifying this dependency.
+	 */
+	private final D key;
+
+	/**
+	 * Initialise.
+	 * 
+	 * @param index
+	 *            Index identifying this dependency.
+	 * @param type
+	 *            Type required of the dependency.
+	 * @param key
+	 *            Key identifying this dependency. May be <code>null</code>.
+	 * @param label
+	 *            Label describing the dependency. May be <code>null</code>.
+	 */
+	public ManagedObjectDependencyTypeImpl(int index, Class<?> type, D key,
+			String label) {
+		this.index = index;
+		this.type = type;
+		this.key = key;
+
+		// Determine the name
+		if (!CompileUtil.isBlank(label)) {
+			this.name = label;
+		} else if (this.key != null) {
+			this.name = this.key.toString();
+		} else {
+			this.name = this.type.getSimpleName();
+		}
+	}
+
+	/*
+	 * ==================== ManagedObjectDependencyType =======================
+	 */
+
+	@Override
+	public String getDependencyName() {
+		return this.name;
+	}
+
+	@Override
+	public int getIndex() {
+		return this.index;
+	}
+
+	@Override
+	public Class<?> getDependencyType() {
+		return this.type;
+	}
+
+	@Override
+	public D getKey() {
+		return this.key;
+	}
+
+}

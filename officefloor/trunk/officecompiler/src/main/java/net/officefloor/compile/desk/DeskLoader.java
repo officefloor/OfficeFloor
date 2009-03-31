@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import net.officefloor.compile.LoaderContext;
 import net.officefloor.compile.impl.work.WorkSourceContextImpl;
+import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -47,8 +48,6 @@ import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.work.TaskFlowModel;
-import net.officefloor.model.work.WorkModel;
 import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.repository.ModelRepository;
@@ -109,25 +108,6 @@ public class DeskLoader {
 					"Unknown flow instigation strategy for link type '"
 							+ linkType + "'");
 		}
-	}
-
-	/**
-	 * Obtains the Id for the input {@link FlowItemModel}.
-	 * 
-	 * @param flowItem
-	 *            {@link FlowItemModel}.
-	 * @return Id of the input {@link FlowItemModel}.
-	 */
-	public static String getFlowItemOutputId(TaskFlowModel<?> taskFlow) {
-		// Enumeration takes priority over index
-		Enum<?> enumValue = taskFlow.getFlowKey();
-		if (enumValue != null) {
-			return enumValue.toString();
-		}
-
-		// Fall back to the index
-		int index = taskFlow.getFlowIndex();
-		return String.valueOf(index);
 	}
 
 	/**
@@ -389,35 +369,38 @@ public class DeskLoader {
 	 * @throws Exception
 	 *             If fails.
 	 */
+	// TODO synchronise should create do/undo object
+	@Deprecated
 	public DeskModel loadDeskAndSynchronise(ConfigurationItem configuration)
 			throws Exception {
 
 		// Load the desk model
 		DeskModel desk = this.loadDesk(configuration);
 
-		// Obtain the context
-		ConfigurationContext context = configuration.getContext();
-
-		// Load the work for the desk
-		for (DeskWorkModel work : desk.getWorks()) {
-			this.loadWork(work, context);
-		}
-
-		// Load the flow for the desk
-		List<FlowItemModel> removeFlowItems = new LinkedList<FlowItemModel>();
-		for (FlowItemModel flowItem : desk.getFlowItems()) {
-			if (!this.loadFlowItem(flowItem, desk)) {
-				// Add flow item to remove
-				removeFlowItems.add(flowItem);
-			}
-		}
-
-		// Remove no longer existing flows
-		for (FlowItemModel flowItem : removeFlowItems) {
-			// Remove connection and flow
-			flowItem.removeConnections();
-			desk.removeFlowItem(flowItem);
-		}
+// TODO synchronise should create do/undo object
+//		// Obtain the context
+//		ConfigurationContext context = configuration.getContext();
+//
+//		// Load the work for the desk
+//		for (DeskWorkModel work : desk.getWorks()) {
+//			this.loadWork(work, context);
+//		}
+//
+//		// Load the flow for the desk
+//		List<FlowItemModel> removeFlowItems = new LinkedList<FlowItemModel>();
+//		for (FlowItemModel flowItem : desk.getFlowItems()) {
+//			if (!this.loadFlowItem(flowItem, desk)) {
+//				// Add flow item to remove
+//				removeFlowItems.add(flowItem);
+//			}
+//		}
+//
+//		// Remove no longer existing flows
+//		for (FlowItemModel flowItem : removeFlowItems) {
+//			// Remove connection and flow
+//			flowItem.removeConnections();
+//			desk.removeFlowItem(flowItem);
+//		}
 
 		// Return the desk model
 		return desk;
@@ -511,96 +494,97 @@ public class DeskLoader {
 		this.modelRepository.store(desk, configuration);
 	}
 
-	/**
-	 * Loads the {@link DeskWorkModel}.
-	 * 
-	 * @param work
-	 *            {@link DeskWorkModel}.
-	 * @param context
-	 *            {@link ConfigurationContext}.
-	 */
-	public void loadWork(final DeskWorkModel work, ConfigurationContext context)
-			throws Exception {
-
-		// Obtain the name of the loader
-		String loaderClassName = work.getLoader();
-		if (loaderClassName != null) {
-
-			// Create the work loader
-			WorkSource workLoader = this.loaderContext.createInstance(
-					WorkSource.class, loaderClassName);
-
-			// Create the listing of properties and their names
-			List<PropertyModel> propertyModels = work.getProperties();
-			String[] propertyNames = new String[propertyModels.size()];
-			Properties properties = new Properties();
-			int index = 0;
-			for (PropertyModel property : work.getProperties()) {
-				String name = property.getName();
-				String value = property.getValue();
-				propertyNames[index++] = name;
-				properties.setProperty(name, value);
-			}
-
-			// Obtain the class loader
-			ClassLoader classLoader = this.loaderContext.getClassLoader();
-
-			// Create the work loader context
-			WorkSourceContext workLoaderContext = new WorkSourceContextImpl(
-					propertyNames, properties, classLoader);
-
-			// Load the work model
-			WorkType<?> workModel = workLoader.loadWork(workLoaderContext);
-
-			// Synchronise the work
-			WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
-					work);
-		}
-	}
-
-	/**
-	 * Loads the {@link FlowItemModel}.
-	 * 
-	 * @param flowItem
-	 *            {@link FlowItemModel}.
-	 * @param desk
-	 *            {@link DeskModel}.
-	 * @return <code>true</code> if {@link FlowItemModel} should exist on work.
-	 */
-	private boolean loadFlowItem(FlowItemModel flowItem, DeskModel desk)
-			throws Exception {
-
-		// Obtain the work for the flow item
-		DeskWorkModel work = null;
-		for (DeskWorkModel model : desk.getWorks()) {
-			String workName = flowItem.getWorkName();
-			if ((workName != null) && (workName.equals(model.getId()))) {
-				work = model;
-			}
-		}
-		if (work == null) {
-			// Work not found therefore do not load
-			return false;
-		}
-
-		// Obtain the task for the flow item
-		DeskTaskModel task = null;
-		for (DeskTaskModel model : work.getTasks()) {
-			if (flowItem.getTaskName().equals(model.getName())) {
-				task = model;
-			}
-		}
-		if (task == null) {
-			// Task not found therefore do not load
-			return false;
-		}
-
-		// Synchronise task to flow item
-		TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task.getTask(),
-				flowItem);
-
-		// Should keep flow item
-		return true;
-	}
+// TODO use WorkType (and remove below)
+//	/**
+//	 * Loads the {@link DeskWorkModel}.
+//	 * 
+//	 * @param work
+//	 *            {@link DeskWorkModel}.
+//	 * @param context
+//	 *            {@link ConfigurationContext}.
+//	 */
+//	public void loadWork(final DeskWorkModel work, ConfigurationContext context)
+//			throws Exception {
+//
+//		// Obtain the name of the loader
+//		String loaderClassName = work.getLoader();
+//		if (loaderClassName != null) {
+//
+//			// Create the work loader
+//			WorkSource workLoader = this.loaderContext.createInstance(
+//					WorkSource.class, loaderClassName);
+//
+//			// Create the listing of properties and their names
+//			List<PropertyModel> propertyModels = work.getProperties();
+//			String[] propertyNames = new String[propertyModels.size()];
+//			Properties properties = new Properties();
+//			int index = 0;
+//			for (PropertyModel property : work.getProperties()) {
+//				String name = property.getName();
+//				String value = property.getValue();
+//				propertyNames[index++] = name;
+//				properties.setProperty(name, value);
+//			}
+//
+//			// Obtain the class loader
+//			ClassLoader classLoader = this.loaderContext.getClassLoader();
+//
+//			// Create the work loader context
+//			WorkSourceContext workLoaderContext = new WorkSourceContextImpl(
+//					propertyNames, properties, classLoader);
+//
+//			// Load the work model
+//			WorkType<?> workModel = workLoader.loadWork(workLoaderContext);
+//
+//			// Synchronise the work
+//			WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
+//					work);
+//		}
+//	}
+//
+//	/**
+//	 * Loads the {@link FlowItemModel}.
+//	 * 
+//	 * @param flowItem
+//	 *            {@link FlowItemModel}.
+//	 * @param desk
+//	 *            {@link DeskModel}.
+//	 * @return <code>true</code> if {@link FlowItemModel} should exist on work.
+//	 */
+//	private boolean loadFlowItem(FlowItemModel flowItem, DeskModel desk)
+//			throws Exception {
+//
+//		// Obtain the work for the flow item
+//		DeskWorkModel work = null;
+//		for (DeskWorkModel model : desk.getWorks()) {
+//			String workName = flowItem.getWorkName();
+//			if ((workName != null) && (workName.equals(model.getId()))) {
+//				work = model;
+//			}
+//		}
+//		if (work == null) {
+//			// Work not found therefore do not load
+//			return false;
+//		}
+//
+//		// Obtain the task for the flow item
+//		DeskTaskModel task = null;
+//		for (DeskTaskModel model : work.getTasks()) {
+//			if (flowItem.getTaskName().equals(model.getName())) {
+//				task = model;
+//			}
+//		}
+//		if (task == null) {
+//			// Task not found therefore do not load
+//			return false;
+//		}
+//
+//		// Synchronise task to flow item
+//		TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task.getTask(),
+//				flowItem);
+//
+//		// Should keep flow item
+//		return true;
+//	}
 
 }

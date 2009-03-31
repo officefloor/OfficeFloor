@@ -26,7 +26,7 @@ import net.officefloor.frame.spi.team.Team;
  * 
  * @author Daniel
  */
-public interface ManagedObjectType<D extends Enum<D>, H extends Enum<H>> {
+public interface ManagedObjectType<D extends Enum<D>> {
 
 	/**
 	 * Obtains the {@link Class} of the object returned from
@@ -48,10 +48,11 @@ public interface ManagedObjectType<D extends Enum<D>, H extends Enum<H>> {
 
 	/**
 	 * Obtains the {@link ManagedObjectFlowType} definitions of the {@link Flow}
-	 * instances instigated by the {@link ManagedObjectSource}.
+	 * instances required to be linked for the {@link ManagedObjectSource}.
 	 * 
 	 * @return {@link ManagedObjectFlowType} definitions of the {@link Flow}
-	 *         instances instigated the {@link ManagedObjectSource}.
+	 *         instances required to be linked for the
+	 *         {@link ManagedObjectSource}.
 	 */
 	ManagedObjectFlowType<?>[] getFlowTypes();
 

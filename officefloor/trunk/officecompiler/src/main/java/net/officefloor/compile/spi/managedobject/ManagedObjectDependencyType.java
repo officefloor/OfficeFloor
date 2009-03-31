@@ -34,11 +34,11 @@ public interface ManagedObjectDependencyType<D extends Enum<D>> {
 	String getDependencyName();
 
 	/**
-	 * Obtains the key identifying the dependency.
+	 * Obtains the index identifying the dependency.
 	 * 
-	 * @return Key identifying the dependency.
+	 * @return Index identifying the dependency.
 	 */
-	D getKey();
+	int getIndex();
 
 	/**
 	 * Obtains the {@link Class} that the dependent object must
@@ -47,5 +47,12 @@ public interface ManagedObjectDependencyType<D extends Enum<D>> {
 	 * @return Type of the dependency.
 	 */
 	Class<?> getDependencyType();
+
+	/**
+	 * Obtains the key identifying the dependency.
+	 * 
+	 * @return Key identifying the dependency.
+	 */
+	D getKey();
 
 }

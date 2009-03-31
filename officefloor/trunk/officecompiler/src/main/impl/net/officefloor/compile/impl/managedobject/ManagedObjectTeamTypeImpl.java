@@ -14,16 +14,40 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.administratorsource;
+package net.officefloor.compile.impl.managedobject;
 
-import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.compile.spi.managedobject.ManagedObjectTeamType;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * {@link Duty} flow keys for the {@link TestAdministratorSource}.
+ * {@link ManagedObjectTeamType} implementation.
  * 
  * @author Daniel
  */
-public enum MockDutyFlowKeys {
+public class ManagedObjectTeamTypeImpl implements ManagedObjectTeamType {
 
-	FLOW_ONE, FLOW_TWO
+	/**
+	 * Name of the {@link Team}.
+	 */
+	private final String teamName;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 */
+	public ManagedObjectTeamTypeImpl(String teamName) {
+		this.teamName = teamName;
+	}
+
+	/*
+	 * ================= ManagedObjectTeamType ===========================
+	 */
+
+	@Override
+	public String getTeamName() {
+		return this.teamName;
+	}
+
 }

@@ -106,6 +106,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 		// Attempt to obtain specification
 		MockWorkSource.instantiateFailure = failure;
+		this.loadWorkType(false, null);
 	}
 
 	/**
