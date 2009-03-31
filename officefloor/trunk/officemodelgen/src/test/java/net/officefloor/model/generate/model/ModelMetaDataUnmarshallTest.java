@@ -19,9 +19,9 @@ package net.officefloor.model.generate.model;
 import java.io.InputStream;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.repository.ModelRepository;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ModelRepositoryImpl;
 
 /**
  * Ensures able to unmarshall
@@ -64,7 +64,7 @@ public class ModelMetaDataUnmarshallTest extends OfficeFrameTestCase {
 		};
 
 		// Unmarshal the model
-		ModelRepository repository = new ModelRepository();
+		ModelRepositoryImpl repository = new ModelRepositoryImpl();
 		ModelMetaData model = repository.retrieve(new ModelMetaData(),
 				configuration);
 

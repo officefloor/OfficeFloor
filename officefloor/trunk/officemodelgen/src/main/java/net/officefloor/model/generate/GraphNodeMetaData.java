@@ -19,8 +19,8 @@ package net.officefloor.model.generate;
 import java.io.File;
 
 import net.officefloor.model.generate.model.ModelMetaData;
-import net.officefloor.repository.ModelRepository;
-import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
+import net.officefloor.model.repository.ModelRepositoryImpl;
+import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
 
 /**
  * Provides generic meta-data for generating a Model.
@@ -146,9 +146,9 @@ public class GraphNodeMetaData {
 	private static final String MODEL_EXTENSION = ".model.xml";
 
 	/**
-	 * {@link ModelRepository}.
+	 * {@link ModelRepositoryImpl}.
 	 */
-	private static final ModelRepository repository = new ModelRepository();
+	private static final ModelRepositoryImpl repository = new ModelRepositoryImpl();
 
 	/**
 	 * License text.
