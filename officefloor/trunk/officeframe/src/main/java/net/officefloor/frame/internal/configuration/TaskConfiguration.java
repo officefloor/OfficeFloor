@@ -65,7 +65,7 @@ public interface TaskConfiguration<W extends Work, D extends Enum<D>, F extends 
 	 * 
 	 * @return Configuration of {@link Flow} instances for this {@link Task}.
 	 */
-	FlowConfiguration[] getFlowConfiguration();
+	TaskFlowConfiguration<F>[] getFlowConfiguration();
 
 	/**
 	 * Obtains the configuration of the dependent {@link Object} instances for
@@ -74,7 +74,7 @@ public interface TaskConfiguration<W extends Work, D extends Enum<D>, F extends 
 	 * @return Configuration of the dependent {@link Object} instances for this
 	 *         {@link Task}.
 	 */
-	TaskObjectConfiguration[] getObjectConfiguration();
+	TaskObjectConfiguration<D>[] getObjectConfiguration();
 
 	/**
 	 * Obtains the listing of the {@link TaskDutyConfiguration} for the
@@ -95,11 +95,11 @@ public interface TaskConfiguration<W extends Work, D extends Enum<D>, F extends 
 	TaskDutyConfiguration<?>[] getPostTaskAdministratorDutyConfiguration();
 
 	/**
-	 * Obtains the {@link EscalationConfiguration} instances in escalation
+	 * Obtains the {@link TaskEscalationConfiguration} instances in escalation
 	 * order. Index 0 being first, index 1 second and so forth.
 	 * 
-	 * @return {@link EscalationConfiguration} instances.
+	 * @return {@link TaskEscalationConfiguration} instances.
 	 */
-	EscalationConfiguration[] getEscalations();
+	TaskEscalationConfiguration[] getEscalations();
 
 }

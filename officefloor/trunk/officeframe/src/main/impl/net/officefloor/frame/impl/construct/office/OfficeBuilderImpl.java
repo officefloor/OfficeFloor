@@ -31,12 +31,12 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.construct.administrator.AdministratorBuilderImpl;
 import net.officefloor.frame.impl.construct.managedobject.DependencyMappingBuilderImpl;
-import net.officefloor.frame.impl.construct.task.EscalationConfigurationImpl;
+import net.officefloor.frame.impl.construct.task.TaskEscalationConfigurationImpl;
 import net.officefloor.frame.impl.construct.task.TaskNodeReferenceImpl;
 import net.officefloor.frame.impl.construct.util.ConstructUtil;
 import net.officefloor.frame.impl.construct.work.WorkBuilderImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
+import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
@@ -124,7 +124,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	/**
 	 * Listing of the {@link EscalationFlow} instances.
 	 */
-	private final List<EscalationConfiguration> escalations = new LinkedList<EscalationConfiguration>();
+	private final List<TaskEscalationConfiguration> escalations = new LinkedList<TaskEscalationConfiguration>();
 
 	/**
 	 * List of start up {@link Task} instances for the {@link Office}.
@@ -226,7 +226,7 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	@Override
 	public void addEscalation(Class<? extends Throwable> typeOfCause,
 			String workName, String taskName) {
-		this.escalations.add(new EscalationConfigurationImpl(typeOfCause,
+		this.escalations.add(new TaskEscalationConfigurationImpl(typeOfCause,
 				new TaskNodeReferenceImpl(workName, taskName, typeOfCause)));
 	}
 
@@ -303,8 +303,8 @@ public class OfficeBuilderImpl implements OfficeBuilder, OfficeConfiguration {
 	}
 
 	@Override
-	public EscalationConfiguration[] getEscalationConfiguration() {
-		return this.escalations.toArray(new EscalationConfiguration[0]);
+	public TaskEscalationConfiguration[] getEscalationConfiguration() {
+		return this.escalations.toArray(new TaskEscalationConfiguration[0]);
 	}
 
 	@Override

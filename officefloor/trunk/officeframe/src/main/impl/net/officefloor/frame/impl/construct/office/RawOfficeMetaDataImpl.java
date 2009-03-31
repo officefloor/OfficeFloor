@@ -35,7 +35,7 @@ import net.officefloor.frame.impl.execute.office.OfficeStartupTaskImpl;
 import net.officefloor.frame.impl.execute.process.ProcessMetaDataImpl;
 import net.officefloor.frame.impl.execute.thread.ThreadMetaDataImpl;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
+import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
@@ -447,7 +447,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 		OfficeStartupTask[] startupTasks = new OfficeStartupTask[startupTasksLength];
 
 		// Create the listing of escalations to later populate
-		EscalationConfiguration[] officeEscalationConfigurations = configuration
+		TaskEscalationConfiguration[] officeEscalationConfigurations = configuration
 				.getEscalationConfiguration();
 		int officeEscalationsLength = (officeEscalationConfigurations == null ? 0
 				: officeEscalationConfigurations.length);
@@ -508,7 +508,7 @@ public class RawOfficeMetaDataImpl implements RawOfficeMetaDataFactory,
 
 		// Load the office escalations
 		for (int i = 0; i < officeEscalationsLength; i++) {
-			EscalationConfiguration escalationConfiguration = officeEscalationConfigurations[i];
+			TaskEscalationConfiguration escalationConfiguration = officeEscalationConfigurations[i];
 
 			// Obtain the type of issue being handled by escalation
 			Class<? extends Throwable> typeOfCause = escalationConfiguration

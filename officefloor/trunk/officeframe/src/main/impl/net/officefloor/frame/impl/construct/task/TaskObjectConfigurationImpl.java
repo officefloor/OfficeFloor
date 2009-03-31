@@ -26,7 +26,8 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
  * 
  * @author Daniel
  */
-public class TaskObjectConfigurationImpl implements TaskObjectConfiguration {
+public class TaskObjectConfigurationImpl<D extends Enum<D>> implements
+		TaskObjectConfiguration<D> {
 
 	/**
 	 * Flag indicating if this is a parameter.
@@ -44,6 +45,16 @@ public class TaskObjectConfigurationImpl implements TaskObjectConfiguration {
 	private final Class<?> objectType;
 
 	/**
+	 * Index of this {@link Object}.
+	 */
+	private final int index;
+
+	/**
+	 * Key of this {@link Object}.
+	 */
+	private final D key;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param isParameter
@@ -51,12 +62,19 @@ public class TaskObjectConfigurationImpl implements TaskObjectConfiguration {
 	 *            Name of {@link ManagedObject} within the
 	 *            {@link ManagedObjectScope}.
 	 * @param objectType
+	 *            Type required of the dependent {@link Object}.
+	 * @param index
+	 *            Index of this {@link Object}.
+	 * @param key
+	 *            Key of this {@link Object}.
 	 */
 	public TaskObjectConfigurationImpl(boolean isParameter,
-			String scopeManagedObjectName, Class<?> objectType) {
+			String scopeManagedObjectName, Class<?> objectType, int index, D key) {
 		this.isParameter = isParameter;
 		this.scopeManagedObjectName = scopeManagedObjectName;
 		this.objectType = objectType;
+		this.index = index;
+		this.key = key;
 	}
 
 	/*
@@ -76,6 +94,16 @@ public class TaskObjectConfigurationImpl implements TaskObjectConfiguration {
 	@Override
 	public Class<?> getObjectType() {
 		return this.objectType;
+	}
+
+	@Override
+	public int getIndex() {
+		return this.index;
+	}
+
+	@Override
+	public D getKey() {
+		return this.key;
 	}
 
 }

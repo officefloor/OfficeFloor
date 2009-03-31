@@ -33,7 +33,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.configuration.AdministratorSourceConfiguration;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
+import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedManagedObjectSourceConfiguration;
 import net.officefloor.frame.internal.configuration.LinkedTeamConfiguration;
 import net.officefloor.frame.internal.configuration.ManagedObjectConfiguration;
@@ -926,8 +926,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testNoTypeOfCauseForOfficeEscalation() {
 
-		final EscalationConfiguration escalationConfiguration = this
-				.createMock(EscalationConfiguration.class);
+		final TaskEscalationConfiguration escalationConfiguration = this
+				.createMock(TaskEscalationConfiguration.class);
 
 		// Record no type of cause
 		this.record_enhanceOffice();
@@ -937,7 +937,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupTasks();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalationConfiguration(),
-				new EscalationConfiguration[] { escalationConfiguration });
+				new TaskEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(this.rawOfficeFloorMetaData,
 				this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
@@ -957,8 +957,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	public void testUnknownTaskForOfficeEscalation() {
 
-		final EscalationConfiguration escalationConfiguration = this
-				.createMock(EscalationConfiguration.class);
+		final TaskEscalationConfiguration escalationConfiguration = this
+				.createMock(TaskEscalationConfiguration.class);
 		final TaskNodeReference taskReference = this
 				.createMock(TaskNodeReference.class);
 
@@ -970,7 +970,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupTasks();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalationConfiguration(),
-				new EscalationConfiguration[] { escalationConfiguration });
+				new TaskEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(this.rawOfficeFloorMetaData,
 				this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
@@ -998,8 +998,8 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 
 		final RawWorkMetaData<?> rawWorkMetaData = this
 				.createMock(RawWorkMetaData.class);
-		final EscalationConfiguration escalationConfiguration = this
-				.createMock(EscalationConfiguration.class);
+		final TaskEscalationConfiguration escalationConfiguration = this
+				.createMock(TaskEscalationConfiguration.class);
 		final TaskNodeReference escalationTaskReference = this
 				.createMock(TaskNodeReference.class);
 		final Class<?> typeOfCause = failure.getClass();
@@ -1018,7 +1018,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 		this.record_noOfficeStartupTasks();
 		this.recordReturn(this.configuration, this.configuration
 				.getEscalationConfiguration(),
-				new EscalationConfiguration[] { escalationConfiguration });
+				new TaskEscalationConfiguration[] { escalationConfiguration });
 		this.recordReturn(this.rawOfficeFloorMetaData,
 				this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);
@@ -1742,7 +1742,7 @@ public class RawOfficeMetaDataTest extends OfficeFrameTestCase {
 	 */
 	private void record_noOfficeEscalationHandler() {
 		this.recordReturn(this.configuration, this.configuration
-				.getEscalationConfiguration(), new EscalationConfiguration[0]);
+				.getEscalationConfiguration(), new TaskEscalationConfiguration[0]);
 		this.recordReturn(this.rawOfficeFloorMetaData,
 				this.rawOfficeFloorMetaData.getOfficeFloorEscalation(),
 				this.officeFloorEscalation);

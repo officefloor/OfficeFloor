@@ -35,8 +35,8 @@ import net.officefloor.frame.impl.execute.escalation.EscalationProcedureImpl;
 import net.officefloor.frame.impl.execute.managedobject.ManagedObjectIndexImpl;
 import net.officefloor.frame.impl.execute.task.TaskJob;
 import net.officefloor.frame.impl.execute.task.TaskMetaDataImpl;
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
-import net.officefloor.frame.internal.configuration.FlowConfiguration;
+import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
+import net.officefloor.frame.internal.configuration.TaskFlowConfiguration;
 import net.officefloor.frame.internal.configuration.TaskConfiguration;
 import net.officefloor.frame.internal.configuration.TaskDutyConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
@@ -166,12 +166,12 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 
 		// Obtain the managed objects used directly by this task.
 		// Also obtain the parameter type for the task if specified.
-		TaskObjectConfiguration[] objectConfigurations = configuration
+		TaskObjectConfiguration<d>[] objectConfigurations = configuration
 				.getObjectConfiguration();
 		ManagedObjectIndex[] taskToWorkMoTranslations = new ManagedObjectIndex[objectConfigurations.length];
 		Class<?> parameterType = null;
 		for (int i = 0; i < objectConfigurations.length; i++) {
-			TaskObjectConfiguration objectConfiguration = objectConfigurations[i];
+			TaskObjectConfiguration<d> objectConfiguration = objectConfigurations[i];
 
 			// Obtain the type of object required
 			Class<?> objectType = objectConfiguration.getObjectType();
@@ -441,11 +441,11 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		String assetName = workName + "." + this.getTaskName();
 
 		// Obtain the listing of flow meta-data
-		FlowConfiguration[] flowConfigurations = this.configuration
+		TaskFlowConfiguration<F>[] flowConfigurations = this.configuration
 				.getFlowConfiguration();
 		FlowMetaData<?>[] flowMetaDatas = new FlowMetaData[flowConfigurations.length];
 		for (int i = 0; i < flowMetaDatas.length; i++) {
-			FlowConfiguration flowConfiguration = flowConfigurations[i];
+			TaskFlowConfiguration<F> flowConfiguration = flowConfigurations[i];
 
 			// Obtain the task reference
 			TaskNodeReference taskNodeReference = flowConfiguration
@@ -490,11 +490,11 @@ public class RawTaskMetaDataImpl<W extends Work, D extends Enum<D>, F extends En
 		}
 
 		// Create the escalation procedure
-		EscalationConfiguration[] escalationConfigurations = this.configuration
+		TaskEscalationConfiguration[] escalationConfigurations = this.configuration
 				.getEscalations();
 		EscalationFlow[] escalations = new EscalationFlow[escalationConfigurations.length];
 		for (int i = 0; i < escalations.length; i++) {
-			EscalationConfiguration escalationConfiguration = escalationConfigurations[i];
+			TaskEscalationConfiguration escalationConfiguration = escalationConfigurations[i];
 
 			// Obtain the type of cause
 			Class<? extends Throwable> typeOfCause = escalationConfiguration

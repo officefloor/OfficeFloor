@@ -16,15 +16,15 @@
  */
 package net.officefloor.frame.impl.construct.task;
 
-import net.officefloor.frame.internal.configuration.EscalationConfiguration;
+import net.officefloor.frame.internal.configuration.TaskEscalationConfiguration;
 import net.officefloor.frame.internal.configuration.TaskNodeReference;
 
 /**
- * Implementation of the {@link EscalationConfiguration}.
+ * Implementation of the {@link TaskEscalationConfiguration}.
  * 
  * @author Daniel
  */
-public class EscalationConfigurationImpl implements EscalationConfiguration {
+public class TaskEscalationConfigurationImpl implements TaskEscalationConfiguration {
 
 	/**
 	 * Type of cause.
@@ -44,7 +44,7 @@ public class EscalationConfigurationImpl implements EscalationConfiguration {
 	 * @param taskNodeReference
 	 *            {@link TaskNodeReference}.
 	 */
-	public EscalationConfigurationImpl(Class<? extends Throwable> typeOfCause,
+	public TaskEscalationConfigurationImpl(Class<? extends Throwable> typeOfCause,
 			TaskNodeReference taskNodeReference) {
 		this.typeOfCause = typeOfCause;
 		this.taskNodeReference = taskNodeReference;

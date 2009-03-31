@@ -135,12 +135,12 @@ public interface OfficeConfiguration {
 	OfficeEnhancer[] getOfficeEnhancers();
 
 	/**
-	 * Obtains the {@link EscalationConfiguration} instances for the
+	 * Obtains the {@link TaskEscalationConfiguration} instances for the
 	 * {@link Office}.
 	 * 
-	 * @return {@link EscalationConfiguration} instances for the {@link Office}.
+	 * @return {@link TaskEscalationConfiguration} instances for the {@link Office}.
 	 */
-	EscalationConfiguration[] getEscalationConfiguration();
+	TaskEscalationConfiguration[] getEscalationConfiguration();
 
 	/**
 	 * <p>
