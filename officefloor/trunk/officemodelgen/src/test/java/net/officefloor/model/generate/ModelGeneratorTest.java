@@ -27,8 +27,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.generate.model.FieldMetaData;
 import net.officefloor.model.generate.model.ListMetaData;
 import net.officefloor.model.generate.model.ModelMetaData;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Tests the {@link net.officefloor.model.generate.ModelGenerator}.
