@@ -280,7 +280,7 @@ public class WorkLoaderUtil {
 		WorkLoader workLoader = new WorkLoaderImpl("TEST", "TEST");
 
 		// Return the loaded work
-		return workLoader.loadWork(workSourceClass, propertyList, classLoader,
+		return workLoader.loadWorkType(workSourceClass, propertyList, classLoader,
 				new FailCompilerIssues());
 	}
 

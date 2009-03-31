@@ -17,9 +17,9 @@
 package net.officefloor.room;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 
 /**
  * Tests loading a {@link net.officefloor.model.room.SubRoomModel}.

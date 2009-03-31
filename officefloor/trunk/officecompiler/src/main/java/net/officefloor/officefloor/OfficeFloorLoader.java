@@ -45,10 +45,10 @@ import net.officefloor.model.officefloor.OfficeTaskModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
 import net.officefloor.model.officefloor.TeamModel;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ModelRepositoryImpl;
 import net.officefloor.office.OfficeLoader;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.repository.ModelRepository;
 import net.officefloor.util.DoubleKeyMap;
 
 /**
@@ -59,24 +59,24 @@ import net.officefloor.util.DoubleKeyMap;
 public class OfficeFloorLoader {
 
 	/**
-	 * {@link ModelRepository}.
+	 * {@link ModelRepositoryImpl}.
 	 */
-	private final ModelRepository modelRepository;
+	private final ModelRepositoryImpl modelRepository;
 
 	/**
 	 * Default constructor.
 	 */
 	public OfficeFloorLoader() {
-		this.modelRepository = new ModelRepository();
+		this.modelRepository = new ModelRepositoryImpl();
 	}
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param modelRepository
-	 *            {@link ModelRepository}.
+	 *            {@link ModelRepositoryImpl}.
 	 */
-	public OfficeFloorLoader(ModelRepository modelRepository) {
+	public OfficeFloorLoader(ModelRepositoryImpl modelRepository) {
 		this.modelRepository = modelRepository;
 	}
 

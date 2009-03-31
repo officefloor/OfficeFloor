@@ -40,16 +40,15 @@ public interface WorkLoader {
 	 *            {@link CompilerIssues} to report issues in loading the
 	 *            {@link WorkSourceSpecification} and obtaining the
 	 *            {@link PropertyList}.
-	 * @return {@link PropertyList} of the {@link WorkSourceProperty} instances of the
-	 *         {@link WorkSourceSpecification} or <code>null</code> if issue, which is
-	 *         reported to the {@link CompilerIssues}.
+	 * @return {@link PropertyList} of the {@link WorkSourceProperty} instances
+	 *         of the {@link WorkSourceSpecification} or <code>null</code> if
+	 *         issue, which is reported to the {@link CompilerIssues}.
 	 */
 	<W extends Work, WS extends WorkSource<W>> PropertyList loadSpecification(
 			Class<WS> workSourceClass, CompilerIssues issues);
 
 	/**
-	 * Loads and returns the {@link WorkType} sourced from the
-	 * {@link WorkSource}.
+	 * Loads and returns the {@link WorkType} from the {@link WorkSource}.
 	 * 
 	 * @param workSourceClass
 	 *            Class of the {@link WorkSource}.
@@ -65,7 +64,7 @@ public interface WorkLoader {
 	 * @return {@link WorkType} or <code>null</code> if issues, which is
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<W extends Work, WS extends WorkSource<W>> WorkType<W> loadWork(
+	<W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
 			Class<WS> workSourceClass, PropertyList propertyList,
 			ClassLoader classLoader, CompilerIssues issues);
 

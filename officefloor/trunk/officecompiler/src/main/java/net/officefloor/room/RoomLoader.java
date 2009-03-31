@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ModelRepositoryImpl;
 import net.officefloor.model.room.EscalationToExternalEscalationModel;
 import net.officefloor.model.room.EscalationToInputFlowModel;
 import net.officefloor.model.room.ExternalEscalationModel;
@@ -34,9 +37,6 @@ import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.repository.ModelRepository;
 import net.officefloor.util.DoubleKeyMap;
 
 /**
@@ -47,9 +47,9 @@ import net.officefloor.util.DoubleKeyMap;
 public class RoomLoader {
 
 	/**
-	 * {@link ModelRepository}.
+	 * {@link ModelRepositoryImpl}.
 	 */
-	private final ModelRepository modelRepository;
+	private final ModelRepositoryImpl modelRepository;
 
 	/**
 	 * Flag indicating if the {@link SubRoomModel} models have been registered.
@@ -60,16 +60,16 @@ public class RoomLoader {
 	 * Default constructor.
 	 */
 	public RoomLoader() {
-		this(new ModelRepository());
+		this(new ModelRepositoryImpl());
 	}
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param modelRepository
-	 *            {@link ModelRepository}.
+	 *            {@link ModelRepositoryImpl}.
 	 */
-	public RoomLoader(ModelRepository modelRepository) {
+	public RoomLoader(ModelRepositoryImpl modelRepository) {
 		this.modelRepository = modelRepository;
 	}
 

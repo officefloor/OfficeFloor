@@ -34,11 +34,11 @@ import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.office.PropertyModel;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.filesystem.FileSystemConfigurationContext;
+import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.room.RoomModel;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
-import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.room.RoomLoader;
 
 /**

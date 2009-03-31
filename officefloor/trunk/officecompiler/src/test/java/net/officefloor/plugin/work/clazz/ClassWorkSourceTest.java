@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.work.TaskObjectType;
 import net.officefloor.compile.spi.work.TaskType;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.work.clazz.ClassTask;
@@ -49,6 +50,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to load {@link WorkType} for the {@link ClassWorkSource}.
 	 */
+	@SuppressWarnings("unchecked")
 	public void testWorkLoader() throws Exception {
 
 		// Load the work type
@@ -66,9 +68,9 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 				workType.getTaskTypes().length);
 
 		// Obtain the tasks
-		TaskType<ClassWork, ?, ?> taskOne = null;
-		TaskType<ClassWork, ?, ?> taskTwo = null;
-		for (TaskType<ClassWork, ?, ?> task : workType.getTaskTypes()) {
+		TaskType<ClassWork, Indexed, Indexed> taskOne = null;
+		TaskType<ClassWork, Indexed, Indexed> taskTwo = null;
+		for (TaskType task : workType.getTaskTypes()) {
 			if ("anotherMethod".equals(task.getTaskName())) {
 				taskOne = task;
 			} else if ("taskMethod".equals(task.getTaskName())) {
@@ -79,7 +81,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		// Verify the first task
 		assertEquals("Incorrect task name", "anotherMethod", taskOne
 				.getTaskName());
-		TaskFactory<ClassWork, ?, ?> taskFactoryOne = taskOne
+		TaskFactory<ClassWork, Indexed, Indexed> taskFactoryOne = taskOne
 				.getTaskFactoryManufacturer().createTaskFactory();
 		ClassTask classTaskOne = (ClassTask) taskFactoryOne
 				.createTask(classWork);
@@ -96,7 +98,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 
 		// Verify the second task
 		assertEquals("Incorrect task name", "taskMethod", taskTwo.getTaskName());
-		TaskFactory<ClassWork, ?, ?> taskFactoryTwo = taskTwo
+		TaskFactory<ClassWork, Indexed, Indexed> taskFactoryTwo = taskTwo
 				.getTaskFactoryManufacturer().createTaskFactory();
 		ClassTask classTaskTwo = (ClassTask) taskFactoryTwo
 				.createTask(classWork);

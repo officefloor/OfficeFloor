@@ -19,12 +19,12 @@ package net.officefloor.compile;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel;
-import net.officefloor.repository.ConfigurationItem;
 import net.officefloor.room.RoomLoader;
 
 /**

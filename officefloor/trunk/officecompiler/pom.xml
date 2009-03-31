@@ -50,11 +50,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor</groupId>
-			<artifactId>officexml</artifactId>
-			<version>${office_version}</version>
-		</dependency>
-		<dependency>
-			<groupId>net.officefloor</groupId>
 			<artifactId>officeapi</artifactId>
 			<version>${office_version}</version>
 		</dependency>

@@ -22,6 +22,7 @@ import java.sql.SQLException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.room.EscalationToInputFlowModel;
 import net.officefloor.model.room.ExternalEscalationModel;
 import net.officefloor.model.room.ExternalFlowModel;
@@ -35,7 +36,6 @@ import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel;
-import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 
 /**
  * Tests the {@link net.officefloor.room.RoomLoader}.
@@ -50,7 +50,7 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 	private RoomLoader roomLoader;
 
 	/**
-	 * {@link net.officefloor.repository.ConfigurationItem} to the
+	 * {@link net.net.officefloor.model.repository.ConfigurationItem} to the
 	 * {@link RoomModel}.
 	 */
 	private FileSystemConfigurationItem configurationItem;

@@ -16,8 +16,8 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ModelRepository;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ModelRepositoryImpl;
 
 /**
  * Context for compiling the
@@ -37,9 +37,9 @@ public class OfficeFloorCompilerContext {
 	private final ConfigurationContext configurationContext;
 
 	/**
-	 * {@link ModelRepository}.
+	 * {@link ModelRepositoryImpl}.
 	 */
-	private final ModelRepository modelRepository;
+	private final ModelRepositoryImpl modelRepository;
 
 	/**
 	 * {@link LoaderContext}.
@@ -52,13 +52,13 @@ public class OfficeFloorCompilerContext {
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
 	 * @param modelRepository
-	 *            {@link ModelRepository}.
+	 *            {@link ModelRepositoryImpl}.
 	 * @param loaderContext
 	 *            {@link LoaderContext}.
 	 */
 	public OfficeFloorCompilerContext(
 			ConfigurationContext configurationContext,
-			ModelRepository modelRepository, 
+			ModelRepositoryImpl modelRepository, 
 			LoaderContext loaderContext) {
 		this.configurationContext = configurationContext;
 		this.modelRepository = modelRepository;
@@ -75,11 +75,11 @@ public class OfficeFloorCompilerContext {
 	}
 
 	/**
-	 * Obtains the {@link ModelRepository}.
+	 * Obtains the {@link ModelRepositoryImpl}.
 	 * 
-	 * @return {@link ModelRepository}.
+	 * @return {@link ModelRepositoryImpl}.
 	 */
-	public ModelRepository getModelRepository() {
+	public ModelRepositoryImpl getModelRepository() {
 		return this.modelRepository;
 	}
 

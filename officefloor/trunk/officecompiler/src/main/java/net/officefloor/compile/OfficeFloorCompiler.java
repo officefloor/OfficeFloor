@@ -27,8 +27,8 @@ import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.TeamModel;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.repository.ModelRepository;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ModelRepositoryImpl;
 
 /**
  * Compiles the {@link OfficeFloorModel} into an {@link OfficeFloor}.
@@ -38,24 +38,24 @@ import net.officefloor.repository.ModelRepository;
 public class OfficeFloorCompiler {
 
 	/**
-	 * {@link ModelRepository}.
+	 * {@link ModelRepositoryImpl}.
 	 */
-	private final ModelRepository repository;
+	private final ModelRepositoryImpl repository;
 
 	/**
 	 * Default constructor.
 	 */
 	public OfficeFloorCompiler() {
-		this(new ModelRepository());
+		this(new ModelRepositoryImpl());
 	}
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param repository
-	 *            {@link ModelRepository}.
+	 *            {@link ModelRepositoryImpl}.
 	 */
-	public OfficeFloorCompiler(ModelRepository repository) {
+	public OfficeFloorCompiler(ModelRepositoryImpl repository) {
 		this.repository = repository;
 	}
 

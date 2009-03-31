@@ -28,8 +28,8 @@ import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
+import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.office.OfficeLoader;
-import net.officefloor.repository.ConfigurationItem;
 
 /**
  * {@link OfficeModel} entry for the {@link Office}.

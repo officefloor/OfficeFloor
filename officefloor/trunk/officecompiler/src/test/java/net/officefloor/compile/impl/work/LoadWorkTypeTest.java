@@ -888,7 +888,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		// Create the work loader and load the work
 		WorkLoader workLoader = new WorkLoaderImpl(DESK_LOCATION, WORK_NAME);
 		MockWorkSource.loader = loader;
-		WorkType<Work> workType = workLoader.loadWork(MockWorkSource.class,
+		WorkType<Work> workType = workLoader.loadWorkType(MockWorkSource.class,
 				propertyList, LoadWorkTypeTest.class.getClassLoader(),
 				this.issues);
 
