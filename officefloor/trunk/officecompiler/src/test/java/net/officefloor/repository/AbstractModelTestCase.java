@@ -19,9 +19,9 @@ package net.officefloor.repository;
 import java.io.File;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ModelRepository;
-import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ModelRepositoryImpl;
+import net.officefloor.model.repository.filesystem.FileSystemConfigurationContext;
 
 /**
  * Abstract test for a model.
@@ -36,9 +36,9 @@ public abstract class AbstractModelTestCase extends OfficeFrameTestCase {
 	private ConfigurationContext context;
 
 	/**
-	 * {@link ModelRepository}.
+	 * {@link ModelRepositoryImpl}.
 	 */
-	private ModelRepository repository;
+	private ModelRepositoryImpl repository;
 
 	/**
 	 * Initiate the file system model repository.
@@ -53,7 +53,7 @@ public abstract class AbstractModelTestCase extends OfficeFrameTestCase {
 
 		// Create the model repository
 		this.context = new FileSystemConfigurationContext(rootDir);
-		this.repository = new ModelRepository();
+		this.repository = new ModelRepositoryImpl();
 	}
 
 	/**
@@ -66,11 +66,11 @@ public abstract class AbstractModelTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Obtains the {@link ModelRepository}.
+	 * Obtains the {@link ModelRepositoryImpl}.
 	 * 
-	 * @return {@link ModelRepository}.
+	 * @return {@link ModelRepositoryImpl}.
 	 */
-	protected ModelRepository getModelRepository() {
+	protected ModelRepositoryImpl getModelRepository() {
 		return this.repository;
 	}
 

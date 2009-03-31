@@ -24,6 +24,7 @@ import net.officefloor.model.officefloor.OfficeManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TeamModel;
+import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Tests the storing and retrieving of the

@@ -42,9 +42,9 @@ import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.repository.ModelRepositoryImpl;
+import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.repository.ModelRepository;
-import net.officefloor.repository.filesystem.FileSystemConfigurationItem;
 
 /**
  * Ensure able to load the {@link DeskModel}.
@@ -73,7 +73,7 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Create the desk loader to test
 		this.deskLoader = new DeskLoader(new LoaderContext(this.getClass()
-				.getClassLoader()), new ModelRepository());
+				.getClassLoader()), new ModelRepositoryImpl());
 
 		// Specify location of configuration file
 		this.configurationItem = new FileSystemConfigurationItem(this.findFile(

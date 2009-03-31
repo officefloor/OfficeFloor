@@ -20,7 +20,7 @@ import net.officefloor.compile.desk.DeskLoader;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link net.officefloor.model.desk.DeskModel} entry for the

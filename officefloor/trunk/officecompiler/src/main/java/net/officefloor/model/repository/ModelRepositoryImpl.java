@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.repository;
+package net.officefloor.model.repository;
 
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -38,7 +38,7 @@ import net.officefloor.plugin.xml.unmarshall.tree.TreeXmlUnmarshallerFactory;
  * 
  * @author Daniel
  */
-public class ModelRepository {
+public class ModelRepositoryImpl {
 
 	/**
 	 * Registry of {@link XmlUnmarshaller} instances to the class type they

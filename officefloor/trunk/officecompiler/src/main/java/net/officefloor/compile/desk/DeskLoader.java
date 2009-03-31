@@ -48,9 +48,9 @@ import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
 import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
 import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.repository.ModelRepository;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.repository.ModelRepositoryImpl;
 import net.officefloor.util.DoubleKeyMap;
 
 /**
@@ -81,9 +81,9 @@ public class DeskLoader {
 	private final LoaderContext loaderContext;
 
 	/**
-	 * {@link ModelRepository}.
+	 * {@link ModelRepositoryImpl}.
 	 */
-	private final ModelRepository modelRepository;
+	private final ModelRepositoryImpl modelRepository;
 
 	/**
 	 * Obtains the {@link FlowInstigationStrategyEnum} for the input link type.
@@ -117,10 +117,10 @@ public class DeskLoader {
 	 *            {@link LoaderContext} for loading classes of {@link WorkType}
 	 *            .
 	 * @param modelRepository
-	 *            {@link ModelRepository}.
+	 *            {@link ModelRepositoryImpl}.
 	 */
 	public DeskLoader(LoaderContext loaderContext,
-			ModelRepository modelRepository) {
+			ModelRepositoryImpl modelRepository) {
 		this.loaderContext = loaderContext;
 		this.modelRepository = modelRepository;
 	}
@@ -133,7 +133,7 @@ public class DeskLoader {
 	 *            .
 	 */
 	public DeskLoader(LoaderContext loaderContext) {
-		this(loaderContext, new ModelRepository());
+		this(loaderContext, new ModelRepositoryImpl());
 	}
 
 	/**

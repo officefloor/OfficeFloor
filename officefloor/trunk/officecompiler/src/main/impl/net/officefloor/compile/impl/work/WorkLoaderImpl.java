@@ -178,7 +178,7 @@ public class WorkLoaderImpl implements WorkLoader {
 	}
 
 	@Override
-	public <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWork(
+	public <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
 			Class<WS> workSourceClass, PropertyList propertyList,
 			ClassLoader classLoader, CompilerIssues issues) {
 

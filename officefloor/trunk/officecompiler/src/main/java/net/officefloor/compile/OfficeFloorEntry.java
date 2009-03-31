@@ -30,8 +30,8 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeTeamModel;
 import net.officefloor.model.officefloor.TeamModel;
+import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.officefloor.OfficeFloorLoader;
-import net.officefloor.repository.ConfigurationItem;
 
 /**
  * {@link net.officefloor.model.officefloor.OfficeFloorModel} entry for the
