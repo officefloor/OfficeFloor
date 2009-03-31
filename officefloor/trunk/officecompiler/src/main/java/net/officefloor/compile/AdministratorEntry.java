@@ -64,8 +64,9 @@ public class AdministratorEntry<A extends Enum<A>> extends
 				.obtainClass(configuration.getSource());
 
 		// Create the builder
-		AdministratorBuilder<?> builder = context.getBuilderFactory()
-				.createAdministratorBuilder(administratorSourceClass);
+		AdministratorBuilder<?> builder = officeEntry.getBuilder()
+				.addProcessAdministrator(configuration.getId(),
+						administratorSourceClass);
 
 		// Create the administrator entry
 		AdministratorEntry entry = new AdministratorEntry(
@@ -157,8 +158,7 @@ public class AdministratorEntry<A extends Enum<A>> extends
 			if (flowKeysClassName != null) {
 				// Create the duty builder
 				Class flowKeysClass = context.obtainClass(flowKeysClassName);
-				dutyBuilder = this.getBuilder().registerDutyBuilder(dutyKey,
-						flowKeysClass);
+				dutyBuilder = this.getBuilder().addDuty(dutyKey, flowKeysClass);
 
 				// Link in the flows
 				for (DutyFlowModel dutyFlow : duty.getFlows()) {
@@ -167,12 +167,12 @@ public class AdministratorEntry<A extends Enum<A>> extends
 					FlowItemModel flowItem = dutyFlow.getFlowItem()
 							.getFlowItem();
 					dutyBuilder.linkFlow(flowKey, flowItem.getWorkName(),
-							flowItem.getTaskName());
+							flowItem.getTaskName(), TODO.class);
 				}
 
 			} else {
 				// Create the duty builder
-				dutyBuilder = this.getBuilder().registerDutyBuilder(dutyKey);
+				dutyBuilder = this.getBuilder().addDuty(dutyKey);
 
 				// Link in the flows
 				for (DutyFlowModel dutyFlow : duty.getFlows()) {
@@ -180,13 +180,10 @@ public class AdministratorEntry<A extends Enum<A>> extends
 					FlowItemModel flowItem = dutyFlow.getFlowItem()
 							.getFlowItem();
 					dutyBuilder.linkFlow(index, flowItem.getWorkName(),
-							flowItem.getTaskName());
+							flowItem.getTaskName(), TODO.class);
 				}
 			}
 		}
-
-		// Register the administrator
-		this.officeEntry.getBuilder().addAdministrator(this.getModel().getId(),
-				this.getBuilder());
 	}
+
 }

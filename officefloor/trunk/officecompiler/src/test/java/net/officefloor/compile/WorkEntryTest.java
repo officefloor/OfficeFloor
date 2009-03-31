@@ -16,7 +16,7 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.frame.api.build.BuilderFactory;
+import net.officefloor.compile.impl.work.WorkTypeImpl;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
@@ -27,7 +27,6 @@ import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.work.WorkModel;
 
 /**
  * Tests the {@link WorkEntry}.
@@ -35,12 +34,6 @@ import net.officefloor.model.work.WorkModel;
  * @author Daniel
  */
 public class WorkEntryTest extends OfficeFrameTestCase {
-
-	/**
-	 * Mock {@link BuilderFactory}.
-	 */
-	private BuilderFactory builderFactory = this
-			.createMock(BuilderFactory.class);
 
 	/**
 	 * Mock {@link WorkBuilder}.
@@ -65,10 +58,7 @@ public class WorkEntryTest extends OfficeFrameTestCase {
 	public void testNoInitialTask() throws Exception {
 
 		// Record mock objects
-		this.builderFactory.createWorkBuilder(Work.class);
-		this.control(this.builderFactory).setReturnValue(this.workBuilder);
-		this.officeBuilder.addWork("DESK.WORK", this.workBuilder);
-		this.workBuilder.setWorkFactory(this.workFactory);
+		this.officeBuilder.addWork("DESK.WORK", this.workFactory);
 
 		// Replay mock objects
 		this.replayMockObjects();
@@ -83,12 +73,10 @@ public class WorkEntryTest extends OfficeFrameTestCase {
 		RoomEntry roomEntry = new RoomEntry("ROOM", room, officeEntry);
 
 		// Create the desk work
-		WorkType<Work> work = new WorkType<Work>();
-		work.setTypeOfWork(Work.class);
+		WorkTypeImpl<Work> work = new WorkTypeImpl<Work>();
 		work.setWorkFactory(this.workFactory);
 		DeskWorkModel deskWork = new DeskWorkModel();
 		deskWork.setId("WORK");
-		deskWork.setWork(work);
 		deskWork.setInitialFlowItem(null);	// no initial task
 
 		// Create the desk entry
@@ -98,7 +86,7 @@ public class WorkEntryTest extends OfficeFrameTestCase {
 
 		// Create the office floor compiler context
 		OfficeFloorCompilerContext context = new OfficeFloorCompilerContext(
-				null, null, this.builderFactory, null);
+				null, null, null);
 
 		// Load the work
 		WorkEntry<?> workEntry = WorkEntry.loadWork(deskWork, deskEntry,

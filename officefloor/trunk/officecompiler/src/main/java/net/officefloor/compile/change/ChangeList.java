@@ -14,15 +14,34 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile;
-
+package net.officefloor.compile.change;
 
 /**
- * Mock key.
+ * List of {@link Change} instances.
  * 
  * @author Daniel
  */
-@Deprecated
-public enum MockHandlerKey {
-	KEY_ONE, KEY_TWO
+public interface ChangeList {
+
+	/**
+	 * Obtains the {@link Change} instances within this {@link ChangeList}.
+	 * 
+	 * @return {@link Change} instances within this {@link ChangeList}.
+	 */
+	Change[] getChanges();
+
+	/**
+	 * Applies all {@link Change} instances within this {@link ChangeList}.
+	 */
+	void apply();
+
+	/**
+	 * <p>
+	 * Reverts all {@link Change} instances within this {@link ChangeList}
+	 * (after being applied).
+	 * <p>
+	 * This enables do/undo functionality.
+	 */
+	void revert();
+
 }

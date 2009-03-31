@@ -17,14 +17,14 @@
 package net.officefloor.compile;
 
 import net.officefloor.compile.FlowLineUtil.LinkedFlow;
-import net.officefloor.frame.internal.structure.Escalation;
+import net.officefloor.compile.spi.work.WorkType;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
 import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
 import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.work.WorkModel;
 
 /**
  * Contains the various items on the line from the

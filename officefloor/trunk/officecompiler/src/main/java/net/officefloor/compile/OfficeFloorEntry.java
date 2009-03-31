@@ -19,6 +19,7 @@ package net.officefloor.compile;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.office.ExternalTeamModel;
@@ -58,10 +59,13 @@ public class OfficeFloorEntry extends
 		OfficeFloorModel officeFloorModel = new OfficeFloorLoader(context
 				.getModelRepository()).loadOfficeFloor(configuration);
 
+		// Create the office floor builder
+		OfficeFloorBuilder builder = OfficeFrame.getInstance()
+				.createOfficeFloorBuilder(configuration.getId());
+
 		// Create the Office Floor entry
 		OfficeFloorEntry officeFloorEntry = new OfficeFloorEntry(configuration
-				.getId(), context.getBuilderFactory()
-				.createOfficeFloorBuilder(), officeFloorModel);
+				.getId(), builder, officeFloorModel);
 
 		// Load the Managed Object Source instances
 		for (ManagedObjectSourceModel mosModel : officeFloorModel

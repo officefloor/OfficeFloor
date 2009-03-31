@@ -61,8 +61,8 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 				.loadOffice(configurationItem);
 
 		// Create the builder
-		OfficeBuilder builder = context.getBuilderFactory()
-				.createOfficeBuilder();
+		OfficeBuilder builder = officeFloorEntry.getBuilder().addOffice(
+				officeId);
 
 		// Create the office entry
 		OfficeEntry officeEntry = new OfficeEntry(officeId, builder, model,
@@ -186,7 +186,7 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 			String managedObjectId = mo.getManagedObjectSource()
 					.getManagedObjectSourceId();
 			String managedObjectName = mo.getManagedObjectName();
-			this.getBuilder().registerManagedObject(managedObjectName,
+			this.getBuilder().registerManagedObjectSource(managedObjectName,
 					managedObjectId);
 		}
 
@@ -200,10 +200,6 @@ public class OfficeEntry extends AbstractEntry<OfficeBuilder, OfficeModel> {
 			String teamId = team.getTeam().getTeamId();
 			this.getBuilder().registerTeam(team.getTeamName(), teamId);
 		}
-
-		// Register office with the office floor
-		this.getOfficeFloorEntry().getBuilder().addOffice(this.getId(),
-				this.getBuilder());
 	}
 
 }

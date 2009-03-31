@@ -16,13 +16,31 @@
  */
 package net.officefloor.compile;
 
+import net.officefloor.compile.issues.CompilerIssues;
 
 /**
- * Mock key.
+ * TODO exception (that is focus to be removed in light of using
+ * {@link CompilerIssues}).
  * 
  * @author Daniel
  */
-@Deprecated
-public enum MockHandlerKey {
-	KEY_ONE, KEY_TWO
+public class TODOException extends RuntimeException {
+
+	/**
+	 * Initiate.
+	 */
+	public TODOException() {
+		super();
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param message
+	 *            Message.
+	 */
+	public TODOException(String message) {
+		super(message);
+	}
+
 }

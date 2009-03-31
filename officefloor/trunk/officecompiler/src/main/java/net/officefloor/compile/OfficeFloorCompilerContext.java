@@ -16,7 +16,6 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.repository.ConfigurationContext;
 import net.officefloor.repository.ModelRepository;
 
@@ -43,11 +42,6 @@ public class OfficeFloorCompilerContext {
 	private final ModelRepository modelRepository;
 
 	/**
-	 * {@link BuilderFactory}.
-	 */
-	private final BuilderFactory builderFactory;
-
-	/**
 	 * {@link LoaderContext}.
 	 */
 	private final LoaderContext loaderContext;
@@ -59,18 +53,15 @@ public class OfficeFloorCompilerContext {
 	 *            {@link ConfigurationContext}.
 	 * @param modelRepository
 	 *            {@link ModelRepository}.
-	 * @param builderFactory
-	 *            {@link BuilderFactory}.
 	 * @param loaderContext
 	 *            {@link LoaderContext}.
 	 */
 	public OfficeFloorCompilerContext(
 			ConfigurationContext configurationContext,
-			ModelRepository modelRepository, BuilderFactory builderFactory,
+			ModelRepository modelRepository, 
 			LoaderContext loaderContext) {
 		this.configurationContext = configurationContext;
 		this.modelRepository = modelRepository;
-		this.builderFactory = builderFactory;
 		this.loaderContext = loaderContext;
 	}
 
@@ -90,15 +81,6 @@ public class OfficeFloorCompilerContext {
 	 */
 	public ModelRepository getModelRepository() {
 		return this.modelRepository;
-	}
-
-	/**
-	 * Obtains the {@link BuilderFactory}.
-	 * 
-	 * @return {@link BuilderFactory}.
-	 */
-	public BuilderFactory getBuilderFactory() {
-		return this.builderFactory;
 	}
 
 	/**

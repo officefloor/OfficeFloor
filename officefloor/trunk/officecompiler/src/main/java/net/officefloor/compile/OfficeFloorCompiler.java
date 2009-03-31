@@ -77,8 +77,7 @@ public class OfficeFloorCompiler {
 
 		// Create the compiler context
 		OfficeFloorCompilerContext context = new OfficeFloorCompilerContext(
-				configuration.getContext(), this.repository, builderFactory,
-				builderContext);
+				configuration.getContext(), this.repository, builderContext);
 
 		// Load the office floor
 		OfficeFloorEntry officeFloorEntry = OfficeFloorEntry.loadOfficeFloor(
@@ -148,10 +147,10 @@ public class OfficeFloorCompiler {
 		for (TeamEntry teamEntry : officeFloorEntry.getTeamEntries()) {
 			teamEntry.build(builderContext);
 		}
-
-		// Return the created Office Floor
-		return OfficeFrame.getInstance().registerOfficeFloor(
-				configuration.getId(), officeFloorEntry.getBuilder());
+		
+		// Return the built office
+		// TODO use OfficeFloorIssues to record construct failures
+		return officeFloorEntry.getBuilder().buildOfficeFloor();
 	}
 
 }

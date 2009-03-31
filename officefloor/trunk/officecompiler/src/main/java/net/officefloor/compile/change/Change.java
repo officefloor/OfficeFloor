@@ -14,15 +14,41 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile;
-
+package net.officefloor.compile.change;
 
 /**
- * Mock key.
+ * A distinct change in a type to a use of the type as an instance.
  * 
  * @author Daniel
  */
-@Deprecated
-public enum MockHandlerKey {
-	KEY_ONE, KEY_TWO
+public interface Change {
+
+	/**
+	 * Target instance of the type which requires a {@link Change} to adhere to
+	 * the type.
+	 * 
+	 * @return Target instance of the type.
+	 */
+	Object getTarget();
+
+	/**
+	 * Obtains a description of the {@link Change}.
+	 * 
+	 * @return Description of the {@link Change}.
+	 */
+	String getDescription();
+
+	/**
+	 * Applies this {@link Change} to the type instance.
+	 */
+	void apply();
+
+	/**
+	 * <p>
+	 * Reverts this {@link Change} to the type instance (after being applied).
+	 * <p>
+	 * This enables do/undo functionality.
+	 */
+	void revert();
+
 }

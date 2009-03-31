@@ -16,16 +16,12 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.HandlerBuilder;
-import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.impl.construct.OfficeBuilderImpl;
+import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
@@ -75,14 +71,14 @@ public class ManagedObjectSourceEntry extends
 		String managedObjectSourceId = configuration.getId();
 		if ((managedObjectSourceId == null)
 				|| (managedObjectSourceId.trim().length() == 0)) {
-			throw new BuildException("No id provided for "
+			throw new TODOException("No id provided for "
 					+ ManagedObjectSource.class.getSimpleName());
 		}
 
 		// Obtain the managed object source class name
 		String sourceClassName = configuration.getSource();
 		if ((sourceClassName == null) || (sourceClassName.trim().length() == 0)) {
-			throw new BuildException("No class name provided for "
+			throw new TODOException("No class name provided for "
 					+ ManagedObjectSource.class.getSimpleName() + " ");
 		}
 
@@ -91,8 +87,9 @@ public class ManagedObjectSourceEntry extends
 				.obtainClass(sourceClassName);
 
 		// Create the builder
-		ManagedObjectBuilder<?> builder = context.getBuilderFactory()
-				.createManagedObjectBuilder(managedObjectSourceClass);
+		ManagedObjectBuilder<?> builder = officeFloorEntry.getBuilder()
+				.addManagedObject(managedObjectSourceId,
+						managedObjectSourceClass);
 
 		// Create the entry
 		ManagedObjectSourceEntry mosEntry = new ManagedObjectSourceEntry(
@@ -188,7 +185,7 @@ public class ManagedObjectSourceEntry extends
 				new OfficeEnhancer() {
 					@Override
 					public void enhanceOffice(OfficeEnhancerContext context)
-							throws BuildException {
+							throws TODOException {
 						// TODO implement
 						System.err.println("TODO ["
 								+ ManagedObjectSourceEntry.class
@@ -207,7 +204,7 @@ public class ManagedObjectSourceEntry extends
 							String handlerKeyName = handler.getHandlerKey();
 							if ((handlerKeyName == null)
 									|| (handlerKeyName.trim().length() == 0)) {
-								throw new BuildException(
+								throw new TODOException(
 										"Handle without key name on managed object source "
 												+ managedObjectId);
 							}
@@ -219,7 +216,7 @@ public class ManagedObjectSourceEntry extends
 										.getHandlerKeyClass();
 								if ((handlerKeyClassName == null)
 										|| (handlerKeyClassName.trim().length() == 0)) {
-									throw new BuildException(
+									throw new TODOException(
 											"No key class on handler "
 													+ handlerKeyName
 													+ " for managed object source "
@@ -228,10 +225,10 @@ public class ManagedObjectSourceEntry extends
 								handlerKeyClass = builderUtil
 										.obtainClass(handlerKeyClassName);
 							} catch (Exception ex) {
-								if (ex instanceof BuildException) {
-									throw (BuildException) ex;
+								if (ex instanceof TODOException) {
+									throw (TODOException) ex;
 								}
-								throw new BuildException(OFCU.exMsg(ex));
+								throw new TODOException(OFCU.exMsg(ex));
 							}
 
 							// Obtain the handler key
@@ -244,14 +241,8 @@ public class ManagedObjectSourceEntry extends
 								}
 							}
 
-							// Obtain the handler builder
-							ManagedObjectHandlerBuilder moHandlerBuilder = context
-									.getManagedObjectHandlerBuilder(
-											managedObjectId, handlerKeyClass);
-							HandlerBuilder<Indexed> handlerBuilder = moHandlerBuilder
-									.registerHandler(handlerKey);
-
 							// Link in the processes
+							// TODO fix linking mo processes to use flows
 							ManagedObjectHandlerInstanceModel handlerInstance = handler
 									.getHandlerInstance();
 							if (handlerInstance != null) {
@@ -266,7 +257,7 @@ public class ManagedObjectSourceEntry extends
 										linkProcessIndex = Integer
 												.parseInt(linkProcessId);
 									} catch (NumberFormatException ex) {
-										throw new BuildException(
+										throw new TODOException(
 												"Link process id '"
 														+ linkProcessId
 														+ "' for handler "
@@ -282,10 +273,11 @@ public class ManagedObjectSourceEntry extends
 									if (officeTaskConnection != null) {
 										OfficeTaskModel officeTask = officeTaskConnection
 												.getOfficeTask();
-										handlerBuilder.linkProcess(
-												linkProcessIndex, officeTask
-														.getWorkName(),
-												officeTask.getTaskName());
+										// TODO do after managed object construction
+//										handlerBuilder.linkProcess(
+//												linkProcessIndex, officeTask
+//														.getWorkName(),
+//												officeTask.getTaskName());
 									}
 								}
 							}
@@ -318,15 +310,12 @@ public class ManagedObjectSourceEntry extends
 													flowIndex,
 													officeTask.getWorkName(),
 													officeTask.getTaskName(),
-													FlowInstigationStrategyEnum.SEQUENTIAL);
+													FlowInstigationStrategyEnum.SEQUENTIAL,
+													TODO.class);
 								}
 							}
 						}
 					}
 				});
-
-		// Register managed object source with the office floor
-		this.officeFloorEntry.getBuilder().addManagedObject(this.getId(),
-				this.getBuilder());
 	}
 }
