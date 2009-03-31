@@ -16,7 +16,7 @@ Export-Package:
  net.officefloor.mock,
  net.officefloor.model.impl.repository.classloader,
  net.officefloor.model.repository,
- net.officefloor.model.repository.filesystem,
+ net.officefloor.model.impl.repository.filesystem,
  net.officefloor.office,
  net.officefloor.officefloor,
  net.officefloor.plugin.work.clazz,

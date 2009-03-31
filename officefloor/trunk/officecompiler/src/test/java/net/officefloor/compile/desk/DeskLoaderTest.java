@@ -42,8 +42,8 @@ import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.repository.ModelRepositoryImpl;
-import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
