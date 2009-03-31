@@ -23,8 +23,8 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.filesystem.FileSystemConfigurationContext;
 
 /**
  * Tests the building and running of an

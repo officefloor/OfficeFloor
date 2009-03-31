@@ -19,8 +19,8 @@ package net.officefloor.model.generate;
 import java.io.File;
 
 import net.officefloor.model.generate.model.ModelMetaData;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.filesystem.FileSystemConfigurationContext;
 
 /**
  * Generates all the models.

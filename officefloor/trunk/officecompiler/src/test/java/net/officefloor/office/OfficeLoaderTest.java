@@ -21,6 +21,8 @@ import java.io.File;
 import net.officefloor.compile.WorkEntry;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationContext;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
 import net.officefloor.model.office.DutyFlowModel;
@@ -36,8 +38,6 @@ import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.filesystem.FileSystemConfigurationContext;
-import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.room.RoomLoader;
 

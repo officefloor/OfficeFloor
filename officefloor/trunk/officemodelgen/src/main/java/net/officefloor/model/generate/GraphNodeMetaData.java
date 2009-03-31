@@ -19,8 +19,8 @@ package net.officefloor.model.generate;
 import java.io.File;
 
 import net.officefloor.model.generate.model.ModelMetaData;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.repository.ModelRepositoryImpl;
-import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
 
 /**
  * Provides generic meta-data for generating a Model.

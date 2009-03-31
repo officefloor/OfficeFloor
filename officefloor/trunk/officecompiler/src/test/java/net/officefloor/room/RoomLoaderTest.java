@@ -22,7 +22,7 @@ import java.sql.SQLException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.room.EscalationToInputFlowModel;
 import net.officefloor.model.room.ExternalEscalationModel;
 import net.officefloor.model.room.ExternalFlowModel;

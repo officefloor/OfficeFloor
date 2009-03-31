@@ -21,6 +21,8 @@ import java.sql.Connection;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationContext;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
 import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
 import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
@@ -44,8 +46,6 @@ import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.filesystem.FileSystemConfigurationContext;
-import net.officefloor.model.repository.filesystem.FileSystemConfigurationItem;
 
 /**
  * Tests loading the {@link OfficeFloorLoader}.
