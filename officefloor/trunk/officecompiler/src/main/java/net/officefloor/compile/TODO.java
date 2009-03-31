@@ -16,13 +16,14 @@
  */
 package net.officefloor.compile;
 
-
 /**
- * Mock key.
+ * Used as parameter/argument/object types to indicate to pull in type.
+ * 
+ * TODO focus to remove this.
  * 
  * @author Daniel
  */
-@Deprecated
-public enum MockHandlerKey {
-	KEY_ONE, KEY_TWO
+public final class TODO {
+	private TODO() {
+	}
 }

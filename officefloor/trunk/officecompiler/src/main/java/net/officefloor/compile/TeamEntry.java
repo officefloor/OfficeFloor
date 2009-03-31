@@ -16,12 +16,11 @@
  */
 package net.officefloor.compile;
 
-import java.util.Properties;
-
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamFactory;
+import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.TeamModel;
 
@@ -93,20 +92,15 @@ public class TeamEntry extends AbstractEntry<OfficeFloorBuilder, TeamModel> {
 	 */
 	public void build(LoaderContext builderUtil) throws Exception {
 
-		// Obtain the factory for the team
-		TeamFactory factory = builderUtil.createInstance(TeamFactory.class,
-				this.getModel().getTeamFactory());
-
-		// Obtain the properties for the team
-		Properties properties = new Properties();
-		for (PropertyModel property : this.getModel().getProperties()) {
-			properties.setProperty(property.getName(), property.getValue());
-		}
-
-		// Create the team
-		Team team = factory.createTeam(properties);
+		// Obtain the source for the team
+		Class<? extends TeamSource> teamSource = builderUtil.obtainClass(this
+				.getModel().getTeamFactory(), TeamSource.class);
 
 		// Build the team
-		this.getBuilder().addTeam(this.getId(), team);
+		TeamBuilder<?> teamBuilder = this.getBuilder().addTeam(this.getId(),
+				teamSource);
+		for (PropertyModel property : this.getModel().getProperties()) {
+			teamBuilder.addProperty(property.getName(), property.getValue());
+		}
 	}
 }

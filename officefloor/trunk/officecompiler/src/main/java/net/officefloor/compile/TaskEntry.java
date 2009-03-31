@@ -23,8 +23,6 @@ import java.util.Map;
 
 import net.officefloor.compile.AdministrationLine.ManagedObjectUnderAdministration;
 import net.officefloor.compile.spi.work.source.CompilerAwareTaskFactory;
-import net.officefloor.frame.api.build.AdministrationBuilder;
-import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
@@ -38,7 +36,6 @@ import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemEscalationModel;
 import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
-import net.officefloor.model.work.TaskModel;
 
 /**
  * {@link Task} for the {@link Work}.
@@ -46,7 +43,7 @@ import net.officefloor.model.work.TaskModel;
  * @author Daniel
  */
 public class TaskEntry<W extends Work> extends
-		AbstractEntry<TaskBuilder<Object, W, Indexed, Indexed>, FlowItemModel> {
+		AbstractEntry<TaskBuilder<W, Indexed, Indexed>, FlowItemModel> {
 
 	/**
 	 * Loads the {@link TaskEntry}.
@@ -77,9 +74,12 @@ public class TaskEntry<W extends Work> extends
 			}
 		}
 
+		// TODO obtain the task factory manufacturer
+		TaskFactory<W, Indexed, Indexed> taskFactory = null;
+
 		// Create the builder
-		TaskBuilder<Object, W, Indexed, Indexed> taskBuilder = workEntry
-				.getBuilder().addTask(flowItem.getId(), parameterType);
+		TaskBuilder<W, Indexed, Indexed> taskBuilder = workEntry.getBuilder()
+				.addTask(flowItem.getId(), taskFactory);
 
 		// Create the task entry
 		TaskEntry<W> taskEntry = new TaskEntry<W>(taskBuilder, flowItem,
@@ -126,7 +126,7 @@ public class TaskEntry<W extends Work> extends
 	 * @param loaderContext
 	 *            {@link LoaderContext}.
 	 */
-	public TaskEntry(TaskBuilder<Object, W, Indexed, Indexed> builder,
+	public TaskEntry(TaskBuilder<W, Indexed, Indexed> builder,
 			FlowItemModel flowItem, DeskTaskModel deskTask,
 			WorkEntry<W> workEntry, LoaderContext loaderContext) {
 		super(flowItem.getId(), builder, flowItem);
@@ -162,19 +162,13 @@ public class TaskEntry<W extends Work> extends
 	@SuppressWarnings("unchecked")
 	public void build() throws Exception {
 
-		// Obtain task and its details
-		TaskModel<?, ?> task = this.deskTask.getTask();
-		TaskFactory taskFactory = task.getTaskFactoryManufacturer()
-				.createTaskFactory();
-
+		// TODO determine if need compiler aware factory
+		TaskFactory<?, ?, ?> taskFactory = null;
 		// Initiate the task factory if necessary
 		if (taskFactory instanceof CompilerAwareTaskFactory) {
 			((CompilerAwareTaskFactory) taskFactory).initialiseTaskFactory(this
 					.getModel());
 		}
-
-		// Load details of task
-		this.getBuilder().setTaskFactory(taskFactory);
 
 		// Create the line for the task
 		TaskLine<W> line = new TaskLine<W>(this.getModel(), this);
@@ -211,7 +205,7 @@ public class TaskEntry<W extends Work> extends
 	 * @throws BuildException
 	 *             If fails to link in the {@link ManagedObject} instances.
 	 */
-	private void linkManagedObjects() throws BuildException {
+	private void linkManagedObjects() throws TODOException {
 		// Bind the task objects in order
 		for (DeskTaskObjectModel taskObject : this.deskTask.getObjects()) {
 
@@ -238,7 +232,7 @@ public class TaskEntry<W extends Work> extends
 	 *             If fails to link {@link ManagedObject} to this {@link Task}.
 	 */
 	private void linkManagedObject(ExternalManagedObjectModel workManagedObject)
-			throws BuildException {
+			throws TODOException {
 
 		// Determine if already linked
 		if (this.managedObjectIndexes.containsKey(workManagedObject)) {
@@ -252,7 +246,8 @@ public class TaskEntry<W extends Work> extends
 
 		// Link in the managed object
 		String workManagedObjectName = workManagedObject.getName();
-		this.getBuilder().linkManagedObject(index, workManagedObjectName);
+		this.getBuilder().linkManagedObject(index, workManagedObjectName,
+				TODO.class);
 	}
 
 	/**
@@ -278,11 +273,11 @@ public class TaskEntry<W extends Work> extends
 			if (line.isSameWork()) {
 				// Same work
 				this.getBuilder().linkFlow(flowIndex, taskName,
-						line.flowInstigationStrategy);
+						line.flowInstigationStrategy, TODO.class);
 			} else {
 				// Different work
 				this.getBuilder().linkFlow(flowIndex, workName, taskName,
-						line.flowInstigationStrategy);
+						line.flowInstigationStrategy, TODO.class);
 			}
 
 			// Increment flow index for next iteration
@@ -314,10 +309,10 @@ public class TaskEntry<W extends Work> extends
 		// Link in the output flow item
 		if (line.isSameWork()) {
 			// Same work
-			this.getBuilder().setNextTaskInFlow(taskName);
+			this.getBuilder().setNextTaskInFlow(taskName, TODO.class);
 		} else {
 			// Different work
-			this.getBuilder().setNextTaskInFlow(workName, taskName);
+			this.getBuilder().setNextTaskInFlow(workName, taskName, TODO.class);
 		}
 	}
 
@@ -352,12 +347,11 @@ public class TaskEntry<W extends Work> extends
 				// Link in escalation handler
 				if (line.isSameWork()) {
 					// Same work
-					this.getBuilder().addEscalation(escalationType, true,
-							taskName);
+					this.getBuilder().addEscalation(escalationType, taskName);
 				} else {
 					// Different work
-					this.getBuilder().addEscalation(escalationType, true,
-							workName, taskName);
+					this.getBuilder().addEscalation(escalationType, workName,
+							taskName);
 				}
 			}
 		}
@@ -384,9 +378,11 @@ public class TaskEntry<W extends Work> extends
 			// Link the administrator to work
 			String administratorId = adminLine.administrator.getId();
 			String workAdministratorName = "work:" + administratorId;
-			AdministrationBuilder adminBuilder = this.workEntry.getBuilder()
-					.registerAdministration(workAdministratorName,
-							administratorId);
+			
+			// TODO handle work bound administrator
+//			AdministrationBuilder adminBuilder = this.workEntry.getBuilder()
+//					.registerAdministration(workAdministratorName,
+//							administratorId);
 
 			// Create the listing of work managed objects to administer
 			List<String> workManagedObjectNames = new LinkedList<String>();
@@ -418,8 +414,9 @@ public class TaskEntry<W extends Work> extends
 			}
 
 			// Link in the managed objects under administration
-			adminBuilder.setManagedObjects(workManagedObjectNames
-					.toArray(new String[0]));
+			// TODO handle work bound administrator
+//			adminBuilder.setManagedObjects(workManagedObjectNames
+//					.toArray(new String[0]));
 
 			// Obtain the duty key
 			Enum dutyKey = adminLine.dutyKey;

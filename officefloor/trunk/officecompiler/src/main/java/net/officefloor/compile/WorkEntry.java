@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
@@ -34,8 +35,6 @@ import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.work.WorkModel;
-import net.officefloor.util.OFCU;
 
 /**
  * {@link net.officefloor.frame.api.execute.Work} entry for the
@@ -81,13 +80,16 @@ public class WorkEntry<W extends Work> extends
 			OfficeFloorCompilerContext context) throws Exception {
 
 		// Obtain the work (and its details)
-		WorkType work = OFCU.get(deskWork.getWork(),
-				"No work on desk work ${0}", deskWork.getId());
-		Class<W> typeOfWork = work.getTypeOfWork();
+		// TODO use WorkLoader to obtain WorkType (and subsequent WorkFactory)
+		WorkType<W> work = null;
+		WorkFactory<W> workFactory = null;
+		// OFCU.get(deskWork.getWork(),
+		// "No work on desk work ${0}", deskWork.getId());
+		// Class<W> typeOfWork = work.getTypeOfWork();
 
 		// Create the work builder
-		WorkBuilder<W> builder = context.getBuilderFactory().createWorkBuilder(
-				typeOfWork);
+		WorkBuilder<W> builder = deskEntry.getParentRoom().getOffice()
+				.getBuilder().addWork(deskWork.getId(), workFactory);
 
 		// Create the work entry
 		WorkEntry<W> workEntry = new WorkEntry<W>(deskWork.getId(), deskWork,
@@ -243,11 +245,12 @@ public class WorkEntry<W extends Work> extends
 
 		// Register this work with its office
 		OfficeEntry officeEntry = this.getOfficeEntry();
-		officeEntry.getBuilder().addWork(canonicalWorkName, this.getBuilder());
 
 		// Obtain the work (and its details)
 		DeskWorkModel deskWork = this.getModel();
-		WorkType work = deskWork.getWork();
+
+		// TODO use WorkLoader to obtain WorkType
+		WorkType work = null;
 		WorkFactory<W> workFactory = (WorkFactory<W>) work.getWorkFactory();
 
 		// Determine if an initial flow
@@ -259,7 +262,6 @@ public class WorkEntry<W extends Work> extends
 		}
 
 		// Load details of work
-		this.getBuilder().setWorkFactory(workFactory);
 		if (initialFlowItem != null) {
 			this.getBuilder().setInitialTask(initialFlowItem.getId());
 		}
@@ -335,7 +337,7 @@ public class WorkEntry<W extends Work> extends
 				workMoName);
 
 		// Register the managed object to the office
-		line.officeEntry.getBuilder().registerManagedObject(officeMoName,
+		line.officeEntry.getBuilder().registerManagedObjectSource(officeMoName,
 				line.managedObjectSource.getId());
 	}
 
@@ -364,18 +366,13 @@ public class WorkEntry<W extends Work> extends
 
 		// Obtain the office managed object name
 		String officeManagedObjectName = officeManagedObject.getName();
-		String processLinkedName = "p:" + officeManagedObjectName;
 
 		// Obtain the office entry
 		OfficeEntry officeEntry = this.getOfficeEntry();
 
 		// Register the process managed object within this office
-		officeEntry.getBuilder().addProcessManagedObject(processLinkedName,
+		officeEntry.getBuilder().addProcessManagedObject(workManagedObjectName,
 				officeManagedObjectName);
-
-		// Register the process managed object to this work
-		this.getBuilder().registerProcessManagedObject(workManagedObjectName,
-				processLinkedName);
 	}
 
 	/**

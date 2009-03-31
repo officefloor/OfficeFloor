@@ -16,7 +16,6 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskTaskModel;
@@ -111,7 +110,7 @@ public class ManagedObjectLine<W extends Work> {
 
 		// Do generate line for parameters
 		if (this.deskTaskObject.getIsParameter()) {
-			throw new BuildException("Can not create "
+			throw new TODOException("Can not create "
 					+ this.getClass().getSimpleName() + " for a parameter");
 		}
 

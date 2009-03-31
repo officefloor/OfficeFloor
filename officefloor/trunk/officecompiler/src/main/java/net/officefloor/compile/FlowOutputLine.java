@@ -18,6 +18,7 @@ package net.officefloor.compile;
 
 import net.officefloor.compile.FlowLineUtil.LinkedFlow;
 import net.officefloor.compile.desk.DeskLoader;
+import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
@@ -25,7 +26,6 @@ import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.FlowItemOutputModel;
 import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
 import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
-import net.officefloor.model.work.WorkModel;
 
 /**
  * Contains the various items on the line from the {@link FlowItemOutputModel}

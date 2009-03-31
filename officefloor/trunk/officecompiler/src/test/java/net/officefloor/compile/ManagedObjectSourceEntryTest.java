@@ -19,12 +19,9 @@ package net.officefloor.compile;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.frame.api.build.BuilderFactory;
 import net.officefloor.frame.api.build.FlowNodeBuilder;
-import net.officefloor.frame.api.build.HandlerBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
-import net.officefloor.frame.api.build.ManagedObjectHandlerBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeEnhancer;
 import net.officefloor.frame.api.build.OfficeEnhancerContext;
@@ -62,12 +59,6 @@ import org.easymock.internal.AlwaysMatcher;
 public class ManagedObjectSourceEntryTest extends OfficeFrameTestCase {
 
 	/**
-	 * Mock {@link BuilderFactory}.
-	 */
-	private BuilderFactory builderFactory = this
-			.createMock(BuilderFactory.class);
-
-	/**
 	 * Mock {@link ManagedObjectBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
@@ -90,20 +81,6 @@ public class ManagedObjectSourceEntryTest extends OfficeFrameTestCase {
 	 */
 	private OfficeEnhancerContext officeEnhancerContext = this
 			.createMock(OfficeEnhancerContext.class);
-
-	/**
-	 * Mock {@link ManagedObjectHandlerBuilder}.
-	 */
-	@SuppressWarnings("unchecked")
-	private ManagedObjectHandlerBuilder<MockHandlerKey> managedObjectHandlerBuilder = this
-			.createMock(ManagedObjectHandlerBuilder.class);
-
-	/**
-	 * Mock {@link HandlerBuilder}.
-	 */
-	@SuppressWarnings("unchecked")
-	private HandlerBuilder<Indexed> handlerBuilder = this
-			.createMock(HandlerBuilder.class);
 
 	/**
 	 * Mock {@link FlowNodeBuilder}.
@@ -195,7 +172,7 @@ public class ManagedObjectSourceEntryTest extends OfficeFrameTestCase {
 		// Create the office floor compiler context
 		this.loaderContext = new LoaderContext(this.getClass().getClassLoader());
 		this.compilerContext = new OfficeFloorCompilerContext(null, null,
-				this.builderFactory, this.loaderContext);
+				this.loaderContext);
 	}
 
 	/**
@@ -378,10 +355,6 @@ public class ManagedObjectSourceEntryTest extends OfficeFrameTestCase {
 	private void doTest() throws Exception {
 
 		// Record managed objects
-		this.builderFactory
-				.createManagedObjectBuilder(MockManagedObjectSource.class);
-		this.control(this.builderFactory).setReturnValue(
-				this.managedObjectBuilder);
 		this.managedObjectBuilder.setManagingOffice("OFFICE");
 
 		// Handle default timeout
@@ -418,36 +391,38 @@ public class ManagedObjectSourceEntryTest extends OfficeFrameTestCase {
 		});
 
 		// Add the managed object to the office floor
+		// TODO provide test managed object source
 		this.officeFloorBuilder.addManagedObject("MANAGED_OBJECT_SOURCE_ID",
-				this.managedObjectBuilder);
+				ManagedObjectSource.class);
 
 		// Interaction with office enhancement (occurs later)
 
 		// Add the handlers via office enhancement
-		for (ManagedObjectHandlerModel handler : this.handlers) {
-			this.managedObjectSourceModel.addHandler(handler);
-			this.officeEnhancerContext.getManagedObjectHandlerBuilder(
-					"MANAGED_OBJECT_SOURCE_ID", MockHandlerKey.class);
-			this.control(this.officeEnhancerContext).setReturnValue(
-					this.managedObjectHandlerBuilder);
-			MockHandlerKey handlerKey = MockHandlerKey.valueOf(handler
-					.getHandlerKey());
-			this.managedObjectHandlerBuilder.registerHandler(handlerKey);
-			this.control(this.managedObjectHandlerBuilder).setReturnValue(
-					this.handlerBuilder);
-			ManagedObjectHandlerInstanceModel instance = handler
-					.getHandlerInstance();
-			if (instance != null) {
-				ManagedObjectHandlerLinkProcessModel linkProcess = instance
-						.getLinkProcesses().get(0);
-				int processIndex = Integer.parseInt(linkProcess
-						.getLinkProcessId());
-				OfficeTaskModel officeTask = linkProcess.getOfficeTask()
-						.getOfficeTask();
-				this.handlerBuilder.linkProcess(processIndex, officeTask
-						.getWorkName(), officeTask.getTaskName());
-			}
-		}
+		// TODO handlers have been deprecated (use flows)
+//		for (ManagedObjectHandlerModel handler : this.handlers) {
+//			this.managedObjectSourceModel.addHandler(handler);
+//			this.officeEnhancerContext.getManagedObjectHandlerBuilder(
+//					"MANAGED_OBJECT_SOURCE_ID", MockHandlerKey.class);
+//			this.control(this.officeEnhancerContext).setReturnValue(
+//					this.managedObjectHandlerBuilder);
+//			MockHandlerKey handlerKey = MockHandlerKey.valueOf(handler
+//					.getHandlerKey());
+//			this.managedObjectHandlerBuilder.registerHandler(handlerKey);
+//			this.control(this.managedObjectHandlerBuilder).setReturnValue(
+//					this.handlerBuilder);
+//			ManagedObjectHandlerInstanceModel instance = handler
+//					.getHandlerInstance();
+//			if (instance != null) {
+//				ManagedObjectHandlerLinkProcessModel linkProcess = instance
+//						.getLinkProcesses().get(0);
+//				int processIndex = Integer.parseInt(linkProcess
+//						.getLinkProcessId());
+//				OfficeTaskModel officeTask = linkProcess.getOfficeTask()
+//						.getOfficeTask();
+//				this.handlerBuilder.linkProcess(processIndex, officeTask
+//						.getWorkName(), officeTask.getTaskName());
+//			}
+//		}
 
 		// Add the teams via office enhancement
 		for (ManagedObjectTaskModel task : this.tasks) {
@@ -462,7 +437,7 @@ public class ManagedObjectSourceEntryTest extends OfficeFrameTestCase {
 			OfficeTaskModel officeTask = flow.getOfficeTask().getOfficeTask();
 			this.flowNodeBuilder.linkFlow(flowIndex, officeTask.getWorkName(),
 					officeTask.getTaskName(),
-					FlowInstigationStrategyEnum.SEQUENTIAL);
+					FlowInstigationStrategyEnum.SEQUENTIAL, TODO.class);
 		}
 
 		// Replay mock objects

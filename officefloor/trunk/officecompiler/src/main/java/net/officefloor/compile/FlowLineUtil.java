@@ -16,7 +16,6 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.frame.api.build.BuildException;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalEscalationModel;
@@ -123,7 +122,7 @@ public class FlowLineUtil {
 				EscalationToInputFlowModel inputFlowConnection = escalation
 						.getInputFlow();
 				if (inputFlowConnection == null) {
-					throw new BuildException("Escalation '"
+					throw new TODOException("Escalation '"
 							+ externalEscalationName + "' on sub room '"
 							+ subRoom.getId() + " is not handled");
 				}
@@ -247,7 +246,7 @@ public class FlowLineUtil {
 				// TODO reduce coupling of room hierarchy.
 				// Decode the sub room and input flow
 				if (!inputFlowName.contains("-")) {
-					throw new BuildException("Invalid input flow name '"
+					throw new TODOException("Invalid input flow name '"
 							+ inputFlowName + "' as must contain '-'");
 				}
 				subRoomName = inputFlowName.split("-")[0];
@@ -265,7 +264,7 @@ public class FlowLineUtil {
 					}
 				}
 				if (inputFlow == null) {
-					throw new BuildException("Can not find input flow '"
+					throw new TODOException("Can not find input flow '"
 							+ inputFlowName + "' on sub room '" + subRoomName
 							+ "' of room " + roomEntry.getId());
 				}
@@ -293,7 +292,7 @@ public class FlowLineUtil {
 			}
 		}
 		if (flowItem == null) {
-			throw new BuildException("Can not find flow item '" + inputFlowName
+			throw new TODOException("Can not find flow item '" + inputFlowName
 					+ "' on desk " + deskEntry.getId());
 		}
 
