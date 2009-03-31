@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.ModelRepositoryImpl;
 import net.officefloor.model.room.EscalationToExternalEscalationModel;
 import net.officefloor.model.room.EscalationToInputFlowModel;
 import net.officefloor.model.room.ExternalEscalationModel;
@@ -370,13 +370,13 @@ public class RoomLoader {
 			// Synchronise the desk onto the model
 			DeskModel desk = (DeskModel) model;
 			DeskToSubRoomSynchroniser.synchroniseDeskOntoSubRoom(desk, subRoom);
-			subRoom.setDesk(configurationItem.getId());
+			subRoom.setDesk(configurationItem.getLocation());
 
 		} else if (model instanceof RoomModel) {
 			// Synchronise the room onto the model
 			RoomModel room = (RoomModel) model;
 			RoomToSubRoomSynchroniser.synchroniseRoomOntoSubRoom(room, subRoom);
-			subRoom.setRoom(configurationItem.getId());
+			subRoom.setRoom(configurationItem.getLocation());
 
 		} else {
 			// Unknown model

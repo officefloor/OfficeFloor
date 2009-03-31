@@ -21,6 +21,7 @@ import java.util.Map;
 
 import net.officefloor.compile.desk.DeskLoader;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
 import net.officefloor.model.office.AdministratorToTeamModel;
@@ -38,7 +39,6 @@ import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.ModelRepositoryImpl;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.room.RoomLoader;
 import net.officefloor.util.DoubleKeyMap;

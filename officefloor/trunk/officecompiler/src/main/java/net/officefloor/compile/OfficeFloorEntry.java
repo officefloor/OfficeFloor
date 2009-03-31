@@ -61,11 +61,11 @@ public class OfficeFloorEntry extends
 
 		// Create the office floor builder
 		OfficeFloorBuilder builder = OfficeFrame.getInstance()
-				.createOfficeFloorBuilder(configuration.getId());
+				.createOfficeFloorBuilder(configuration.getLocation());
 
 		// Create the Office Floor entry
 		OfficeFloorEntry officeFloorEntry = new OfficeFloorEntry(configuration
-				.getId(), builder, officeFloorModel);
+				.getLocation(), builder, officeFloorModel);
 
 		// Load the Managed Object Source instances
 		for (ManagedObjectSourceModel mosModel : officeFloorModel

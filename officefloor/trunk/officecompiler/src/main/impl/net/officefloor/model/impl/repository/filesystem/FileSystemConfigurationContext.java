@@ -24,7 +24,7 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
- * File system {@link net.net.officefloor.model.repository.ConfigurationContext}.
+ * File system {@link ConfigurationContext}.
  * 
  * @author Daniel
  */
@@ -60,29 +60,21 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationContext#getId()
+	 * ================== ConfigurationContext ================================
 	 */
-	public String getId() {
+	
+	@Override
+	public String getLocation() {
 		return this.id;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationContext#getClasspath()
-	 */
+	@Override
 	public String[] getClasspath() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationContext#getConfigurationItem(java.lang.String)
-	 */
+	@Override
 	public ConfigurationItem getConfigurationItem(String id) throws Exception {
 		// Create the file
 		File file = new File(this.rootDir, id);
@@ -91,12 +83,7 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 		return new FileSystemConfigurationItem(id, file, this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationContext#createConfigurationItem(java.lang.String,
-	 *      java.io.InputStream)
-	 */
+	@Override
 	public ConfigurationItem createConfigurationItem(String id,
 			InputStream configuration) throws Exception {
 		// Create the file

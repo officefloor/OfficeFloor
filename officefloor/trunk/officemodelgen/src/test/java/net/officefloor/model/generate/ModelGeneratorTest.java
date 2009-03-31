@@ -67,7 +67,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 
 		// Validate file name
 		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java",
-				item.getId());
+				item.getLocation());
 		
 		// Validate content
 		String content = this.getFileContents(this.findFile(this.getClass(),
@@ -100,7 +100,7 @@ public class ModelGeneratorTest extends OfficeFrameTestCase {
 
 		// Validate file name
 		assertEquals("Incorrect file name", "net/officefloor/ClassModel.java",
-				item.getId());
+				item.getLocation());
 
 		// Validate content
 		String content = this.getFileContents(this.findFile(this.getClass(),
@@ -138,7 +138,7 @@ class MockConfigurationContext implements ConfigurationContext,
 	 * 
 	 * @see net.officefloor.model.repository.ConfigurationContext#getId()
 	 */
-	public String getId() {
+	public String getLocation() {
 		return this.id;
 	}
 

@@ -22,13 +22,13 @@ import net.officefloor.model.desk.DeskTaskModel;
 import net.officefloor.model.desk.DeskTaskToFlowItemModel;
 import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.repository.ModelRepositoryImpl;
 
 /**
  * Compiles the {@link OfficeFloorModel} into an {@link OfficeFloor}.

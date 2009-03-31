@@ -233,7 +233,7 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 
 		// Load the office room
 		OfficeRoomModel actualRoom = this.officeLoader.loadOfficeRoom(
-				roomConfigItem.getId(), "OFFICE ROOM", rawRoom, context, this
+				roomConfigItem.getLocation(), "OFFICE ROOM", rawRoom, context, this
 						.getClass().getClassLoader());
 
 		// Create the expected office room

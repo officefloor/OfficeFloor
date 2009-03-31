@@ -19,19 +19,24 @@ package net.officefloor.model.repository;
 import java.io.InputStream;
 
 /**
- * Item of configuration for the Office Floor.
+ * Item of configuration within a {@link ConfigurationContext}.
  * 
  * @author Daniel
  */
 public interface ConfigurationItem {
 
 	/**
-	 * Obtains the Identifier for this configuration item. This value is used in
-	 * the equality of configuration items.
+	 * <p>
+	 * Obtains the relative location for this {@link ConfigurationItem} within
+	 * its {@link ConfigurationContext}.
+	 * <p>
+	 * This value is used in the equality of {@link ConfigurationItem} instances
+	 * within the {@link ConfigurationContext}.
 	 * 
-	 * @return Identifier for this configuration item.
+	 * @return Relative location for this {@link ConfigurationItem} within its
+	 *         {@link ConfigurationContext}.
 	 */
-	String getId();
+	String getLocation();
 
 	/**
 	 * Obtains the configuration that this represents.
@@ -43,7 +48,7 @@ public interface ConfigurationItem {
 	InputStream getConfiguration() throws Exception;
 
 	/**
-	 * Specifies the configuration that this represents.
+	 * Specifies the configuration that this is to represent.
 	 * 
 	 * @param configuration
 	 *            Configuration.
@@ -53,9 +58,11 @@ public interface ConfigurationItem {
 	void setConfiguration(InputStream configuration) throws Exception;
 
 	/**
-	 * Obtains the context for this configuration.
+	 * Obtains the {@link ConfigurationContext} for this
+	 * {@link ConfigurationItem}.
 	 * 
-	 * @return Context of this configuration.
+	 * @return {@link ConfigurationContext} for this {@link ConfigurationItem}.
 	 */
 	ConfigurationContext getContext();
+
 }

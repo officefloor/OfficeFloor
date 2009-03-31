@@ -16,8 +16,8 @@
  */
 package net.officefloor.compile;
 
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ModelRepositoryImpl;
 
 /**
  * Context for compiling the

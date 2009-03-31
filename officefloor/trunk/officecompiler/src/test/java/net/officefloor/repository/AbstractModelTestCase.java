@@ -19,9 +19,9 @@ package net.officefloor.repository;
 import java.io.File;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ModelRepositoryImpl;
 
 /**
  * Abstract test for a model.

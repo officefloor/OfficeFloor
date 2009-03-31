@@ -61,30 +61,19 @@ public class ClassLoaderConfigurationItem implements ConfigurationItem {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.repository.ConfigurationItem#getId()
+	 * ====================== ConfigurationItem ================================
 	 */
+
 	@Override
-	public String getId() {
+	public String getLocation() {
 		return this.id;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.repository.ConfigurationItem#getConfiguration()
-	 */
 	@Override
 	public InputStream getConfiguration() throws Exception {
 		return this.inputStream;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.repository.ConfigurationItem#setConfiguration(java.io.InputStream)
-	 */
 	@Override
 	public void setConfiguration(InputStream configuration) throws Exception {
 		throw new UnsupportedOperationException(
@@ -92,11 +81,6 @@ public class ClassLoaderConfigurationItem implements ConfigurationItem {
 						+ this.getClass().getSimpleName());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.repository.ConfigurationItem#getContext()
-	 */
 	@Override
 	public ConfigurationContext getContext() {
 		return this.context;

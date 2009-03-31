@@ -25,7 +25,7 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
- * File system {@link net.net.officefloor.model.repository.ConfigurationItem}.
+ * File system {@link ConfigurationItem}.
  * 
  * @author Daniel
  */
@@ -109,43 +109,26 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	}
 
 	/*
-	 * ==============================================================================
-	 * ConfigurationItem
-	 * ==============================================================================
+	 * ======================= ConfigurationItem
+	 * ==================================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationItem#getId()
-	 */
-	public String getId() {
+	@Override
+	public String getLocation() {
 		return this.id;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationItem#getConfiguration()
-	 */
+	@Override
 	public InputStream getConfiguration() throws Exception {
 		return new FileInputStream(this.file);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationItem#setConfiguration(java.io.InputStream)
-	 */
+	@Override
 	public void setConfiguration(InputStream configuration) throws Exception {
 		writeConfiguration(this.file, configuration);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.repository.ConfigurationItem#getContext()
-	 */
+	@Override
 	public ConfigurationContext getContext() {
 		return this.configurationContext;
 	}
