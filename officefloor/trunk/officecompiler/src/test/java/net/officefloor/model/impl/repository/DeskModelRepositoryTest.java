@@ -20,7 +20,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.desk.DeskLoader;
+import net.officefloor.compile.impl.desk.DeskLoaderImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
@@ -99,10 +99,10 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 
 		// Validate work tasks
 		List<WorkTaskModel> workTasks = new LinkedList<WorkTaskModel>();
-		workTasks.add(new WorkTaskModel("workTaskOne", null, null));
-		workTasks.add(new WorkTaskModel("workTaskTwo", null, null));
-		workTasks.add(new WorkTaskModel("workTaskThree", null, null));
-		workTasks.add(new WorkTaskModel("workTaskFour", null, null));
+		workTasks.add(new WorkTaskModel("workTaskOne"));
+		workTasks.add(new WorkTaskModel("workTaskTwo"));
+		workTasks.add(new WorkTaskModel("workTaskThree"));
+		workTasks.add(new WorkTaskModel("workTaskFour"));
 		assertList(new String[] { "getWorkTaskName" }, desk.getWorks().get(0)
 				.getWorkTasks(), workTasks.toArray(new WorkTaskModel[0]));
 		WorkTaskModel workTaskOne = work.getWorkTasks().get(0);
@@ -117,12 +117,11 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 				new WorkTaskObjectModel("ONE", "ONE", "java.lang.String",
 						false, null));
 		assertList(objectValidate, workTaskTwo.getTaskObjects(),
-				new WorkTaskObjectModel("0", null, "java.lang.Integer", true,
-						null), new WorkTaskObjectModel("1", null,
-						"java.lang.String", false, null));
+				new WorkTaskObjectModel("0", null, "java.lang.Integer", true),
+				new WorkTaskObjectModel("1", null, "java.lang.String", false));
 		assertList(objectValidate, workTaskThree.getTaskObjects(),
 				new WorkTaskObjectModel("parameter", null,
-						"java.lang.Throwable", true, null));
+						"java.lang.Throwable", true));
 		assertList(objectValidate, workTaskFour.getTaskObjects());
 
 		// Validate task object connections
@@ -164,55 +163,52 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		String[] flowValidation = new String[] { "getFlowName", "getKey",
 				"getArgumentType" };
 		assertList(flowValidation, taskOne.getTaskFlows(), new TaskFlowModel(
-				"First", "ONE", "java.lang.Double", null, null),
-				new TaskFlowModel("Second", "TWO", "java.lang.Integer", null,
-						null), new TaskFlowModel("Third", "THREE", null, null,
-						null));
+				"First", "ONE", "java.lang.Double"), new TaskFlowModel(
+				"Second", "TWO", "java.lang.Integer"), new TaskFlowModel(
+				"Third", "THREE", null));
 		assertEquals(0, taskTwo.getTaskFlows().size());
 		assertList(flowValidation, taskThree.getTaskFlows(), new TaskFlowModel(
-				"0", null, "java.lang.Integer", null, null), new TaskFlowModel(
-				"1", null, "java.lang.Double", null, null));
+				"0", null, "java.lang.Integer"), new TaskFlowModel("1", null,
+				"java.lang.Double"));
 		assertEquals(0, taskFour.getTaskFlows().size());
 
 		// Validate the flow connections
 		TaskFlowModel taskOneFirst = taskOne.getTaskFlows().get(0);
-		assertProperties(new TaskFlowToExternalFlowModel("flow", null, null,
-				DeskLoader.SEQUENTIAL_LINK_TYPE), taskOneFirst
+		assertProperties(new TaskFlowToExternalFlowModel("flow",
+				DeskLoaderImpl.SEQUENTIAL_LINK_TYPE), taskOneFirst
 				.getExternalFlow(), "getExternalFlowName", "getLinkType");
 		assertNull(taskOneFirst.getTask());
 		TaskFlowModel taskOneSecond = taskOne.getTaskFlows().get(1);
 		assertNull(taskOneSecond.getExternalFlow());
-		assertProperties(new TaskFlowToTaskModel("taskTwo", null, null,
-				DeskLoader.PARALLEL_LINK_TYPE), taskOneSecond.getTask(),
+		assertProperties(new TaskFlowToTaskModel("taskTwo",
+				DeskLoaderImpl.PARALLEL_LINK_TYPE), taskOneSecond.getTask(),
 				"getTaskName", "getLinkType");
 
 		// Validate next flows
-		assertProperties(new TaskToNextTaskModel("taskTwo", null, null),
-				taskOne.getNextTask(), "getNextTaskName");
+		assertProperties(new TaskToNextTaskModel("taskTwo"), taskOne
+				.getNextTask(), "getNextTaskName");
 		assertNull(taskOne.getNextExternalFlow());
 		assertNull(taskTwo.getNextTask());
-		assertProperties(new TaskToNextExternalFlowModel("flow", null, null),
-				taskTwo.getNextExternalFlow(), "getExternalFlowName");
+		assertProperties(new TaskToNextExternalFlowModel("flow"), taskTwo
+				.getNextExternalFlow(), "getExternalFlowName");
 
 		// Validate escalations
 		String[] escalationValidate = new String[] { "getEscalationType" };
 		assertList(escalationValidate, taskOne.getTaskEscalations(),
-				new TaskEscalationModel("java.io.IOException", null, null),
-				new TaskEscalationModel("java.sql.SQLException", null, null),
-				new TaskEscalationModel("java.lang.NullPointerException", null,
-						null));
+				new TaskEscalationModel("java.io.IOException"),
+				new TaskEscalationModel("java.sql.SQLException"),
+				new TaskEscalationModel("java.lang.NullPointerException"));
 		assertList(escalationValidate, taskTwo.getTaskEscalations());
 
 		// Validate escalation connections
 		TaskEscalationModel taskOneIO = taskOne.getTaskEscalations().get(0);
 		assertProperties(taskOneIO.getTask(), new TaskEscalationToTaskModel(
-				"taskThree", null, null), "getTaskName");
+				"taskThree"), "getTaskName");
 		assertNull(taskOneIO.getExternalFlow());
 		TaskEscalationModel taskOneSQL = taskOne.getTaskEscalations().get(1);
 		assertNull(taskOneSQL.getTask());
-		assertProperties(
-				taskOneSQL.getExternalFlow(),
-				new TaskEscalationToExternalFlowModel("escalation", null, null),
+		assertProperties(taskOneSQL.getExternalFlow(),
+				new TaskEscalationToExternalFlowModel("escalation"),
 				"getExternalFlowName");
 		TaskEscalationModel taskOneNull = taskOne.getTaskEscalations().get(2);
 		assertNull(taskOneNull.getTask());

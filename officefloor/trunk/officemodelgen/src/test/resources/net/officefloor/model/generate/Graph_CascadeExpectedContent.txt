@@ -3,10 +3,13 @@
  */
 package graph.test;
 
+import javax.annotation.Generated;
+
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
+@Generated("net.officefloor.model.generate.ModelGenerator")
 public class CascadeModel extends AbstractModel implements ItemModel<CascadeModel> {
 
     public static enum CascadeEvent {

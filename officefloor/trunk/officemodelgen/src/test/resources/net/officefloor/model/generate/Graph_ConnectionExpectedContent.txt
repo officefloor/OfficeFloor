@@ -3,9 +3,12 @@
  */
 package graph.test;
 
+import javax.annotation.Generated;
+
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ConnectionModel;
 
+@Generated("net.officefloor.model.generate.ModelGenerator")
 public class ConnectionModel extends AbstractModel implements ConnectionModel {
 
     public static enum ConnectionEvent {

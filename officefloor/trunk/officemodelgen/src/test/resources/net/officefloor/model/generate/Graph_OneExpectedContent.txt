@@ -6,14 +6,17 @@ package graph.test;
 import java.util.List;
 import java.util.LinkedList;
 
+import javax.annotation.Generated;
+
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
+@Generated("net.officefloor.model.generate.ModelGenerator")
 public class OneModel extends AbstractModel implements ItemModel<OneModel> {
 
     public static enum OneEvent {
-     CHANGE_TWO_FIELD, CHANGE_CASCADE_FIELD, ADD_CASCADE_LIST, REMOVE_CASCADE_LIST
+     CHANGE_NON_MODEL_FIELD, CHANGE_TWO_FIELD, CHANGE_CASCADE_FIELD, ADD_CASCADE_LIST, REMOVE_CASCADE_LIST
     }
 
     /**
@@ -23,13 +26,24 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
     }
 
     /**
+     * Convenience constructor for new non-linked instance.
+     */
+    public OneModel(
+      String nonModelField
+    ) {
+        this.nonModelField = nonModelField;
+    }
+
+    /**
      * Convenience constructor.
      */
     public OneModel(
-      ConnectionModel twoField
+      String nonModelField
+    , ConnectionModel twoField
     , CascadeModel cascadeField
     , CascadeModel[] cascadeList
     ) {
+        this.nonModelField = nonModelField;
         this.twoField = twoField;
         this.cascadeField = cascadeField;
         if (cascadeList != null) {
@@ -43,12 +57,14 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
      * Convenience constructor allowing XY initialising.
      */
     public OneModel(
-      ConnectionModel twoField
+      String nonModelField
+    , ConnectionModel twoField
     , CascadeModel cascadeField
     , CascadeModel[] cascadeList
     , int x
     , int y
     ) {
+        this.nonModelField = nonModelField;
         this.twoField = twoField;
         this.cascadeField = cascadeField;
         if (cascadeList != null) {
@@ -58,6 +74,21 @@ public class OneModel extends AbstractModel implements ItemModel<OneModel> {
         }
         this.setX(x);
         this.setY(y);
+    }
+
+    /**
+     * Non model field.
+     */
+    private String nonModelField;
+
+    public String getNonModelField() {
+        return this.nonModelField;
+    }
+
+    public void setNonModelField(String nonModelField) {
+        String oldValue = this.nonModelField;
+        this.nonModelField = nonModelField;
+        this.changeField(oldValue, this.nonModelField, OneEvent.CHANGE_NON_MODEL_FIELD);
     }
 
     /**

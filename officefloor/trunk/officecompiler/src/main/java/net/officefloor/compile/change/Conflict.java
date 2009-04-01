@@ -17,17 +17,17 @@
 package net.officefloor.compile.change;
 
 /**
- * List of {@link Change} instances.
+ * Obtains a {@link Conflict} preventing a {@link Change} from being applied.
  * 
  * @author Daniel
  */
-public interface ChangeList<T> extends Change<T> {
+public interface Conflict {
 
 	/**
-	 * Obtains the {@link Change} instances within this {@link ChangeList}.
+	 * Obtains a description of the {@link Conflict}.
 	 * 
-	 * @return {@link Change} instances within this {@link ChangeList}.
+	 * @return Description of the {@link Conflict}.
 	 */
-	Change<?>[] getChanges();
+	String getConflictDescription();
 
 }

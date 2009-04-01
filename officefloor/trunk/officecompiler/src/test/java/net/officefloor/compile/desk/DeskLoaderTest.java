@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.LoaderContext;
+import net.officefloor.compile.impl.desk.DeskLoaderImpl;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
 import net.officefloor.model.RemoveConnectionsAction;
@@ -51,9 +52,9 @@ import net.officefloor.plugin.work.clazz.ClassWorkSource;
 public class DeskLoaderTest extends OfficeFrameTestCase {
 
 	/**
-	 * {@link DeskLoader} being tested.
+	 * {@link DeskLoaderImpl} being tested.
 	 */
-	private DeskLoader deskLoader;
+	private DeskLoaderImpl deskLoader;
 
 	/**
 	 * Access to configuration.
@@ -69,7 +70,7 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 	protected void setUp() throws Exception {
 
 		// Create the desk loader to test
-		this.deskLoader = new DeskLoader(new LoaderContext(this.getClass()
+		this.deskLoader = new DeskLoaderImpl(new LoaderContext(this.getClass()
 				.getClassLoader()), new ModelRepositoryImpl());
 
 		// Specify location of configuration file
@@ -220,14 +221,14 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate link types of the first flow item
 		assertEquals("Incorrect link type (sequential)",
-				DeskLoader.SEQUENTIAL_LINK_TYPE, flowItemOne.getTaskFlows()
+				DeskLoaderImpl.SEQUENTIAL_LINK_TYPE, flowItemOne.getTaskFlows()
 						.get(0).getExternalFlow().getLinkType());
 		assertEquals("Incorrect link type (parallel)",
-				DeskLoader.PARALLEL_LINK_TYPE, flowItemOne.getTaskFlows()
+				DeskLoaderImpl.PARALLEL_LINK_TYPE, flowItemOne.getTaskFlows()
 						.get(1).getTask().getLinkType());
 		if (!isSynchronised) {
 			assertProperties(new TaskFlowToTaskModel("3", null, null,
-					DeskLoader.ASYNCHRONOUS_LINK_TYPE), flowItemOne
+					DeskLoaderImpl.ASYNCHRONOUS_LINK_TYPE), flowItemOne
 					.getTaskFlows().get(2).getTask(), "getId", "getLinkType");
 		} else {
 			assertNull("Should lose link to non-existant task", flowItemOne
@@ -280,11 +281,11 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 			// Validate link types of the second flow item
 			assertEquals("Incorrect link type (asynchronous)",
-					DeskLoader.ASYNCHRONOUS_LINK_TYPE, flowItemThree
+					DeskLoaderImpl.ASYNCHRONOUS_LINK_TYPE, flowItemThree
 							.getTaskFlows().get(0).getExternalFlow()
 							.getLinkType());
 			assertEquals("Incorrect link type (parallel)",
-					DeskLoader.PARALLEL_LINK_TYPE, flowItemThree.getTaskFlows()
+					DeskLoaderImpl.PARALLEL_LINK_TYPE, flowItemThree.getTaskFlows()
 							.get(1).getTask().getLinkType());
 
 			// Validate escalations of third flow item

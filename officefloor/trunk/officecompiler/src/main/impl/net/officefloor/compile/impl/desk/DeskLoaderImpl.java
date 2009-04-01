@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.desk;
+package net.officefloor.compile.impl.desk;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +49,7 @@ import net.officefloor.util.DoubleKeyMap;
  * 
  * @author Daniel
  */
-public class DeskLoader {
+public class DeskLoaderImpl {
 
 	/**
 	 * Sequential link type.
@@ -110,7 +110,7 @@ public class DeskLoader {
 	 * @param modelRepository
 	 *            {@link ModelRepositoryImpl}.
 	 */
-	public DeskLoader(LoaderContext loaderContext,
+	public DeskLoaderImpl(LoaderContext loaderContext,
 			ModelRepositoryImpl modelRepository) {
 		this.loaderContext = loaderContext;
 		this.modelRepository = modelRepository;
@@ -123,7 +123,7 @@ public class DeskLoader {
 	 *            {@link LoaderContext} for loading classes of {@link WorkType}
 	 *            .
 	 */
-	public DeskLoader(LoaderContext loaderContext) {
+	public DeskLoaderImpl(LoaderContext loaderContext) {
 		this(loaderContext, new ModelRepositoryImpl());
 	}
 
@@ -133,7 +133,7 @@ public class DeskLoader {
 	 * @param classLoader
 	 *            {@link java.lang.ClassLoader}.
 	 */
-	public DeskLoader(ClassLoader classLoader) {
+	public DeskLoaderImpl(ClassLoader classLoader) {
 		this(new LoaderContext(classLoader));
 	}
 
