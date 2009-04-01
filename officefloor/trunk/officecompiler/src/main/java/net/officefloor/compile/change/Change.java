@@ -17,38 +17,65 @@
 package net.officefloor.compile.change;
 
 /**
- * A distinct change in a type to a use of the type as an instance.
+ * <p>
+ * A change to be applied/reverted.
+ * <p>
+ * All operations utilise this to enable do/undo functionality.
  * 
  * @author Daniel
  */
-public interface Change {
+public interface Change<T> {
 
 	/**
-	 * Target instance of the type which requires a {@link Change} to adhere to
-	 * the type.
+	 * Obtains the target to which this {@link Change} applies.
 	 * 
-	 * @return Target instance of the type.
+	 * @return Target to which this {@link Change} applies.
 	 */
-	Object getTarget();
+	T getTarget();
 
 	/**
 	 * Obtains a description of the {@link Change}.
 	 * 
 	 * @return Description of the {@link Change}.
 	 */
-	String getDescription();
+	String getChangeDescription();
 
 	/**
-	 * Applies this {@link Change} to the type instance.
+	 * <p>
+	 * Indicates if can apply this {@link Change}.
+	 * <p>
+	 * Typically there will be {@link Conflict} instances providing detail on
+	 * why the {@link Change} can not be applied.
+	 * 
+	 * @return <code>true</code> if can apply this {@link Change}.
+	 * 
+	 * @see #getConflicts()
+	 */
+	boolean canApply();
+
+	/**
+	 * Applies this {@link Change}.
 	 */
 	void apply();
 
 	/**
 	 * <p>
-	 * Reverts this {@link Change} to the type instance (after being applied).
+	 * Reverts this {@link Change} (after being applied).
 	 * <p>
 	 * This enables do/undo functionality.
 	 */
 	void revert();
+
+	/**
+	 * <p>
+	 * Obtains the {@link Conflict} instances preventing this {@link Change}
+	 * from being applied.
+	 * <p>
+	 * A {@link Change} can only be applied if this returns an empty array.
+	 * 
+	 * @return Any {@link Conflict} instances preventing applying this
+	 *         {@link Change}.
+	 */
+	Conflict[] getConflicts();
 
 }

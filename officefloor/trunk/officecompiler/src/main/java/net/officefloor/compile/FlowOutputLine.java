@@ -17,7 +17,7 @@
 package net.officefloor.compile;
 
 import net.officefloor.compile.FlowLineUtil.LinkedFlow;
-import net.officefloor.compile.desk.DeskLoader;
+import net.officefloor.compile.impl.desk.DeskLoaderImpl;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
@@ -141,7 +141,7 @@ public class FlowOutputLine {
 		}
 
 		// Indicate the instigation strategy
-		this.flowInstigationStrategy = DeskLoader
+		this.flowInstigationStrategy = DeskLoaderImpl
 				.getFlowInstigationStrategyEnum(instigationType);
 
 		// Specify the target details

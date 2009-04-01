@@ -16,7 +16,7 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.compile.desk.DeskLoader;
+import net.officefloor.compile.impl.desk.DeskLoaderImpl;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.TaskModel;
@@ -52,7 +52,7 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 			OfficeFloorCompilerContext context) throws Exception {
 
 		// Load the desk model
-		DeskModel deskModel = new DeskLoader(context.getLoaderContext(),
+		DeskModel deskModel = new DeskLoaderImpl(context.getLoaderContext(),
 				context.getModelRepository())
 				.loadDeskAndSynchronise(configurationItem);
 

@@ -6,10 +6,13 @@ package graph.test;
 import java.util.List;
 import java.util.LinkedList;
 
+import javax.annotation.Generated;
+
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
+@Generated("net.officefloor.model.generate.ModelGenerator")
 public class TwoModel extends AbstractModel implements ItemModel<TwoModel> {
 
     public static enum TwoEvent {

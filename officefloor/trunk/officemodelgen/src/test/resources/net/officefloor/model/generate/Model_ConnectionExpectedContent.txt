@@ -3,9 +3,12 @@
  */
 package net.officefloor;
 
+import javax.annotation.Generated;
+
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ConnectionModel;
 
+@Generated("net.officefloor.model.generate.ModelGenerator")
 public class ClassModel extends AbstractModel implements ConnectionModel {
 
     public static enum ClassEvent {

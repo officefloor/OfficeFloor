@@ -19,7 +19,7 @@ package net.officefloor.office;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.desk.DeskLoader;
+import net.officefloor.compile.impl.desk.DeskLoaderImpl;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministratorModel;
@@ -251,7 +251,7 @@ public class OfficeLoader {
 
 		// Create the loaders
 		RoomLoader roomLoader = new RoomLoader();
-		DeskLoader deskLoader = new DeskLoader(classLoader);
+		DeskLoaderImpl deskLoader = new DeskLoaderImpl(classLoader);
 
 		// Synchronise room
 		RoomToOfficeRoomSynchroniser.synchroniseRoomOntoOfficeRoom(rawRoomId,
@@ -282,7 +282,7 @@ public class OfficeLoader {
 
 		// Create the loaders
 		RoomLoader roomLoader = new RoomLoader();
-		DeskLoader deskLoader = new DeskLoader(classLoader);
+		DeskLoaderImpl deskLoader = new DeskLoaderImpl(classLoader);
 
 		// Recursively load the sub rooms/desks
 		this.recursiveLoadSubRooms(officeRoom, roomLoader, deskLoader, context);
@@ -303,7 +303,7 @@ public class OfficeLoader {
 	 *             If fails to load the sub rooms/desks.
 	 */
 	private void recursiveLoadSubRooms(OfficeRoomModel room,
-			RoomLoader roomLoader, DeskLoader deskLoader,
+			RoomLoader roomLoader, DeskLoaderImpl deskLoader,
 			ConfigurationContext context) throws Exception {
 
 		// Load the sub rooms

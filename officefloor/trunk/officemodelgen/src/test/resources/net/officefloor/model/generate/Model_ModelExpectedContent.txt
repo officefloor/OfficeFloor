@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.LinkedList;
 
 import net.officefloor.test.SpecialType;
+import javax.annotation.Generated;
+
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ItemModel;
 import net.officefloor.model.RemoveConnectionsAction;
 
+@Generated("net.officefloor.model.generate.ModelGenerator")
 public class ClassModel extends AbstractModel implements ItemModel<ClassModel> {
 
     public static enum ClassEvent {

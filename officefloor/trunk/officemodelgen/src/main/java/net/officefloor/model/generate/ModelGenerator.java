@@ -123,6 +123,8 @@ public class ModelGenerator {
 			writeLine("import " + importClass + ";");
 		}
 		// Write necessary extension
+		writeLine("import javax.annotation.Generated;");
+		writeLine();
 		writeLine("import net.officefloor.model.AbstractModel;");
 		if (this.metaData.isConnectionModel()) {
 			writeLine("import net.officefloor.model.ConnectionModel;");
@@ -145,7 +147,10 @@ public class ModelGenerator {
 				writeLine("@SuppressWarnings(\"unchecked\")");
 			}
 		}
-		
+
+		// Provide generated annotation
+		writeLine("@Generated(\"" + this.getClass().getName() + "\")");
+
 		// Class signature
 		writeLine("public class "
 				+ this.metaData.getClassName()
@@ -161,6 +166,9 @@ public class ModelGenerator {
 		writeLine();
 		this.defaultConstructor();
 		writeLine();
+		if (this.nonLinkedConstructor()) {
+			writeLine();
+		}
 		this.convenienceConstructor();
 		writeLine();
 		this.convenienceXyConstructor();
@@ -210,6 +218,105 @@ public class ModelGenerator {
 		writeLine("     */");
 		writeLine("    public " + this.metaData.getClassName() + "() {");
 		writeLine("    }");
+	}
+
+	/**
+	 * Convenience constructor for a new non-linked instance.
+	 * 
+	 * @return <code>true</code> if constructor written.
+	 */
+	@SuppressWarnings("unchecked")
+	private boolean nonLinkedConstructor() throws Exception {
+
+		final String MODEL_TYPE_SUFFIX = "Model";
+
+		// Determine if links
+		boolean isLinks = false;
+		boolean isOnlyLinks = true;
+		for (FieldMetaData field : this.metaData.getFields()) {
+			if (field.getType().endsWith(MODEL_TYPE_SUFFIX)) {
+				isLinks = true;
+			} else {
+				isOnlyLinks = false;
+			}
+		}
+		for (ListMetaData list : this.metaData.getLists()) {
+			if (list.getType().endsWith(MODEL_TYPE_SUFFIX)) {
+				isLinks = true;
+			} else {
+				isOnlyLinks = false;
+			}
+		}
+
+		// Determine if not linked
+		if (!isLinks) {
+			return false; // not linked (already constructor written)
+		}
+
+		// Determine if all links
+		if (isOnlyLinks) {
+			return false; // default constructor (already written)
+		}
+
+		// Write the non-linked construct
+		writeLine("    /**");
+		writeLine("     * Convenience constructor for new non-linked instance.");
+		writeLine("     */");
+		writeLine("    public " + this.metaData.getClassName() + "(");
+
+		// Parameters
+		boolean isFirst = true;
+		for (FieldMetaData field : this.metaData.getFields()) {
+			if (!field.getType().endsWith(MODEL_TYPE_SUFFIX)) {
+				if (isFirst) {
+					write("      ");
+					isFirst = false;
+				} else {
+					write("    , ");
+				}
+				writeLine(field.getType() + " " + field.getPropertyName());
+			}
+		}
+		for (ListMetaData list : this.metaData.getLists()) {
+			if (!list.getType().endsWith(MODEL_TYPE_SUFFIX)) {
+				if (isFirst) {
+					write("      ");
+					isFirst = false;
+				} else {
+					write("    , ");
+				}
+				writeLine(list.getType() + " " + list.getPropertyName());
+			}
+		}
+		writeLine("    ) {");
+
+		// Specify values
+		writeListing("", new WriteAction() {
+			protected void writeField(FieldMetaData field) {
+				if (!field.getType().endsWith(MODEL_TYPE_SUFFIX)) {
+					writeLine("        this." + field.getPropertyName() + " = "
+							+ field.getPropertyName() + ";");
+				}
+			}
+
+			protected void writeList(ListMetaData list) {
+				if (!list.getType().endsWith(MODEL_TYPE_SUFFIX)) {
+					writeLine("        if (" + list.getPropertyName()
+							+ " != null) {");
+					writeLine("            for (" + list.getType()
+							+ " model : " + list.getPropertyName() + ") {");
+					writeLine("                this." + list.getPropertyName()
+							+ ".add(model);");
+					writeLine("            }");
+					writeLine("        }");
+				}
+			}
+		}, this.metaData.getFields(), this.metaData.getLists());
+
+		writeLine("    }");
+
+		// Return indicating constructor written
+		return true;
 	}
 
 	/**
