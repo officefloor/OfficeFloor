@@ -24,7 +24,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.room.RoomModel;
 
@@ -75,9 +75,9 @@ public class WorkEntryTest extends OfficeFrameTestCase {
 		// Create the desk work
 		WorkTypeImpl<Work> work = new WorkTypeImpl<Work>();
 		work.setWorkFactory(this.workFactory);
-		DeskWorkModel deskWork = new DeskWorkModel();
-		deskWork.setId("WORK");
-		deskWork.setInitialFlowItem(null);	// no initial task
+		WorkModel deskWork = new WorkModel();
+		deskWork.setWorkName("WORK");
+		deskWork.setInitialTask(null);	// no initial task
 
 		// Create the desk entry
 		DeskModel desk = new DeskModel();

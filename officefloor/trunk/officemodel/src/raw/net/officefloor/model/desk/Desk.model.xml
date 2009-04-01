@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<list name="external managed object" type="ExternalManagedObjectModel"/>
-	<list name="work" type="DeskWorkModel"/>
-	<list name="flow item" type="FlowItemModel"/>
-	<list name="external flow" type="ExternalFlowModel"/>
-	<list name="external escalation" type="ExternalEscalationModel"/>
+<model>
+	<list name="external managed object" type="ExternalManagedObjectModel" />
+	<list name="work" type="WorkModel" />
+	<list name="task" type="TaskModel" />
+	<list name="external flow" type="ExternalFlowModel" />
 </model>

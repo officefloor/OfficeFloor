@@ -36,7 +36,7 @@ import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.issues.FailCompilerIssues;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.WorkModel;
 
 /**
  * Utility class for testing a {@link WorkSource}.
@@ -100,7 +100,7 @@ public class WorkLoaderUtil {
 
 	/**
 	 * Convenience method that validates the {@link WorkType} loaded from the
-	 * input {@link WorkSource} against the {@link DeskWorkModel}.
+	 * input {@link WorkSource} against the {@link WorkModel}.
 	 * 
 	 * @param expectedWorkType
 	 *            {@link WorkTypeBuilder} that has had the expected

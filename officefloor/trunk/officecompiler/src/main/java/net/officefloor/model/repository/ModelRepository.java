@@ -27,11 +27,11 @@ import net.officefloor.plugin.xml.unmarshall.designate.DesignateXmlUnmarshaller;
 public interface ModelRepository {
 
 	/**
-	 * Creates the {@link ConfigurationItem} to hold the {@link Model} for the
-	 * input Id.
+	 * Creates the {@link ConfigurationItem} to hold the {@link Model}.
 	 * 
-	 * @param id
-	 *            Id to create the {@link ConfigurationItem}.
+	 * @param location
+	 *            Relative location within the {@link ConfigurationContext} to
+	 *            create the {@link ConfigurationItem}.
 	 * @param model
 	 *            {@link Model} to be stored in the created
 	 *            {@link ConfigurationItem}.
@@ -41,7 +41,7 @@ public interface ModelRepository {
 	 * @throws Exception
 	 *             If fails to create the {@link ConfigurationItem}.
 	 */
-	ConfigurationItem create(String id, Object model,
+	ConfigurationItem create(String location, Object model,
 			ConfigurationContext context) throws Exception;
 
 	/**

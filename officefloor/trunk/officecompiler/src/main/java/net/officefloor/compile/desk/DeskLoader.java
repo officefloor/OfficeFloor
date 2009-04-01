@@ -17,39 +17,30 @@
 package net.officefloor.compile.desk;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import net.officefloor.compile.LoaderContext;
-import net.officefloor.compile.impl.work.WorkSourceContextImpl;
 import net.officefloor.compile.spi.work.WorkType;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskObjectModel;
-import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
-import net.officefloor.model.desk.DeskTaskToFlowItemModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.DeskWorkToFlowItemModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.FlowItemEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputModel;
-import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
-import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
-import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
-import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
-import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationToTaskModel;
+import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskToNextExternalFlowModel;
+import net.officefloor.model.desk.TaskToNextTaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.util.DoubleKeyMap;
 
@@ -164,24 +155,24 @@ public class DeskLoader {
 		// Create the set of external managed objects
 		Map<String, ExternalManagedObjectModel> externalManagedObjects = new HashMap<String, ExternalManagedObjectModel>();
 		for (ExternalManagedObjectModel mo : desk.getExternalManagedObjects()) {
-			externalManagedObjects.put(mo.getName(), mo);
+			externalManagedObjects.put(mo.getExternalManagedObjectName(), mo);
 		}
 
 		// Connect the task objects to external managed objects
-		for (DeskWorkModel work : desk.getWorks()) {
-			for (DeskTaskModel task : work.getTasks()) {
-				for (DeskTaskObjectModel taskObject : task.getObjects()) {
+		for (WorkModel work : desk.getWorks()) {
+			for (WorkTaskModel task : work.getWorkTasks()) {
+				for (WorkTaskObjectModel taskObject : task.getTaskObjects()) {
 					// Obtain the connection
-					DeskTaskObjectToExternalManagedObjectModel conn = taskObject
-							.getManagedObject();
+					WorkTaskObjectToExternalManagedObjectModel conn = taskObject
+							.getExternalManagedObject();
 					if (conn != null) {
 						// Obtain the external managed object
 						ExternalManagedObjectModel extMo = externalManagedObjects
-								.get(conn.getName());
+								.get(conn.getExternalManagedObjectName());
 						if (extMo != null) {
 							// Connect
 							conn.setTaskObject(taskObject);
-							conn.setManagedObject(extMo);
+							conn.setExternalManagedObject(extMo);
 							conn.connect();
 						}
 					}
@@ -192,22 +183,21 @@ public class DeskLoader {
 		// Create the set of external flows
 		Map<String, ExternalFlowModel> externalFlows = new HashMap<String, ExternalFlowModel>();
 		for (ExternalFlowModel flow : desk.getExternalFlows()) {
-			externalFlows.put(flow.getName(), flow);
+			externalFlows.put(flow.getExternalFlowName(), flow);
 		}
 
 		// Connect the flow item outputs to external flow
-		for (FlowItemModel flow : desk.getFlowItems()) {
-			for (FlowItemOutputModel output : flow.getOutputs()) {
+		for (TaskModel flow : desk.getTasks()) {
+			for (TaskFlowModel output : flow.getTaskFlows()) {
 				// Obtain the connection
-				FlowItemOutputToExternalFlowModel conn = output
-						.getExternalFlow();
+				TaskFlowToExternalFlowModel conn = output.getExternalFlow();
 				if (conn != null) {
 					// Obtain the external flow
 					ExternalFlowModel extFlow = externalFlows.get(conn
-							.getName());
+							.getExternalFlowName());
 					if (extFlow != null) {
 						// Connect
-						conn.setOutput(output);
+						conn.setTaskFlow(output);
 						conn.setExternalFlow(extFlow);
 						conn.connect();
 					}
@@ -216,16 +206,16 @@ public class DeskLoader {
 		}
 
 		// Connect the flow item to next external flow
-		for (FlowItemModel flow : desk.getFlowItems()) {
+		for (TaskModel flow : desk.getTasks()) {
 			// Obtain the connection
-			FlowItemToNextExternalFlowModel conn = flow.getNextExternalFlow();
+			TaskToNextExternalFlowModel conn = flow.getNextExternalFlow();
 			if (conn != null) {
 				// Obtain the external flow
 				ExternalFlowModel extFlow = externalFlows.get(conn
 						.getExternalFlowName());
 				if (extFlow != null) {
 					// Connect
-					conn.setPreviousFlowItem(flow);
+					conn.setPreviousTask(flow);
 					conn.setNextExternalFlow(extFlow);
 					conn.connect();
 				}
@@ -233,23 +223,23 @@ public class DeskLoader {
 		}
 
 		// Create the set of flows
-		Map<String, FlowItemModel> flowItems = new HashMap<String, FlowItemModel>();
-		for (FlowItemModel flowItem : desk.getFlowItems()) {
-			flowItems.put(flowItem.getId(), flowItem);
+		Map<String, TaskModel> flowItems = new HashMap<String, TaskModel>();
+		for (TaskModel flowItem : desk.getTasks()) {
+			flowItems.put(flowItem.getTaskName(), flowItem);
 		}
 
 		// Connect the flow item outputs to flow item
-		for (FlowItemModel flow : desk.getFlowItems()) {
-			for (FlowItemOutputModel output : flow.getOutputs()) {
+		for (TaskModel flow : desk.getTasks()) {
+			for (TaskFlowModel output : flow.getTaskFlows()) {
 				// Obtain the connection
-				FlowItemOutputToFlowItemModel conn = output.getFlowItem();
+				TaskFlowToTaskModel conn = output.getTask();
 				if (conn != null) {
 					// Obtain the flow item
-					FlowItemModel flowItem = flowItems.get(conn.getId());
+					TaskModel flowItem = flowItems.get(conn.getTaskName());
 					if (flowItem != null) {
 						// Connect
-						conn.setOutput(output);
-						conn.setFlowItem(flowItem);
+						conn.setTaskFlow(output);
+						conn.setTask(flowItem);
 						conn.connect();
 					}
 				}
@@ -257,46 +247,37 @@ public class DeskLoader {
 		}
 
 		// Connect the escalation to flow item
-		for (FlowItemModel flow : desk.getFlowItems()) {
-			for (FlowItemEscalationModel escalation : flow.getEscalations()) {
+		for (TaskModel flow : desk.getTasks()) {
+			for (TaskEscalationModel escalation : flow.getTaskEscalations()) {
 				// Obtain the connection
-				FlowItemEscalationToFlowItemModel conn = escalation
-						.getEscalationHandler();
+				TaskEscalationToTaskModel conn = escalation.getTask();
 				if (conn != null) {
 					// Obtain the handling flow
-					FlowItemModel flowItem = flowItems.get(conn.getId());
+					TaskModel flowItem = flowItems.get(conn.getTaskName());
 					if (flowItem != null) {
 						// Connect
 						conn.setEscalation(escalation);
-						conn.setHandler(flowItem);
+						conn.setTask(flowItem);
 						conn.connect();
 					}
 				}
 			}
 		}
 
-		// Create the set of external escalations
-		Map<String, ExternalEscalationModel> externalEscalations = new HashMap<String, ExternalEscalationModel>();
-		for (ExternalEscalationModel externalEscalation : desk
-				.getExternalEscalations()) {
-			externalEscalations.put(externalEscalation.getName(),
-					externalEscalation);
-		}
-
-		// Connect the escalation to external escalation
-		for (FlowItemModel flow : desk.getFlowItems()) {
-			for (FlowItemEscalationModel escalation : flow.getEscalations()) {
+		// Connect the escalation to external flows
+		for (TaskModel flow : desk.getTasks()) {
+			for (TaskEscalationModel escalation : flow.getTaskEscalations()) {
 				// Obtain the connection
-				FlowItemEscalationToExternalEscalationModel conn = escalation
-						.getExternalEscalation();
+				TaskEscalationToExternalFlowModel conn = escalation
+						.getExternalFlow();
 				if (conn != null) {
 					// Obtain the external escalation
-					ExternalEscalationModel externalEscalation = externalEscalations
-							.get(conn.getName());
+					ExternalFlowModel externalEscalation = externalFlows
+							.get(conn.getExternalFlowName());
 					if (externalEscalation != null) {
 						// Connect
-						conn.setEscalation(escalation);
-						conn.setExternalEscalation(externalEscalation);
+						conn.setTaskEscalation(escalation);
+						conn.setExternalFlow(externalEscalation);
 						conn.connect();
 					}
 				}
@@ -304,54 +285,54 @@ public class DeskLoader {
 		}
 
 		// Connect the work to initial flow item
-		for (DeskWorkModel deskWork : desk.getWorks()) {
+		for (WorkModel deskWork : desk.getWorks()) {
 			// Obtain the connection
-			DeskWorkToFlowItemModel conn = deskWork.getInitialFlowItem();
+			WorkToInitialTaskModel conn = deskWork.getInitialTask();
 			if (conn != null) {
 				// Obtain the initial flow item
-				FlowItemModel flowItem = flowItems.get(conn.getFlowItemId());
+				TaskModel flowItem = flowItems.get(conn.getInitialTaskName());
 				if (flowItem != null) {
 					// Connect
-					conn.setDeskWork(deskWork);
-					conn.setInitialFlowItem(flowItem);
+					conn.setWork(deskWork);
+					conn.setInitialTask(flowItem);
 					conn.connect();
 				}
 			}
 		}
 
 		// Connect the flow item to its next flow item
-		for (FlowItemModel previous : desk.getFlowItems()) {
+		for (TaskModel previous : desk.getTasks()) {
 			// Obtain the connection
-			FlowItemToNextFlowItemModel conn = previous.getNextFlowItem();
+			TaskToNextTaskModel conn = previous.getNextTask();
 			if (conn != null) {
 				// Obtain the flow item
-				FlowItemModel next = flowItems.get(conn.getId());
+				TaskModel next = flowItems.get(conn.getNextTaskName());
 				if (next != null) {
 					// Connect
-					conn.setPreviousFlowItem(previous);
-					conn.setNextFlowItem(next);
+					conn.setPreviousTask(previous);
+					conn.setNextTask(next);
 					conn.connect();
 				}
 			}
 		}
 
 		// Create the set of tasks
-		DoubleKeyMap<String, String, DeskTaskModel> taskRegistry = new DoubleKeyMap<String, String, DeskTaskModel>();
-		for (DeskWorkModel deskWork : desk.getWorks()) {
-			for (DeskTaskModel deskTask : deskWork.getTasks()) {
-				taskRegistry
-						.put(deskWork.getId(), deskTask.getName(), deskTask);
+		DoubleKeyMap<String, String, WorkTaskModel> taskRegistry = new DoubleKeyMap<String, String, WorkTaskModel>();
+		for (WorkModel deskWork : desk.getWorks()) {
+			for (WorkTaskModel deskTask : deskWork.getWorkTasks()) {
+				taskRegistry.put(deskWork.getWorkName(), deskTask
+						.getWorkTaskName(), deskTask);
 			}
 		}
 
 		// Connect the flows to their task
-		for (FlowItemModel flowItem : desk.getFlowItems()) {
+		for (TaskModel flowItem : desk.getTasks()) {
 			// Obtain the task
-			DeskTaskModel deskTask = taskRegistry.get(flowItem.getWorkName(),
-					flowItem.getTaskName());
+			WorkTaskModel deskTask = taskRegistry.get(flowItem.getWorkName(),
+					flowItem.getWorkTaskName());
 			if (deskTask != null) {
 				// Connect
-				new DeskTaskToFlowItemModel(flowItem, deskTask).connect();
+				new WorkTaskToTaskModel(flowItem, deskTask).connect();
 			}
 		}
 
@@ -377,30 +358,31 @@ public class DeskLoader {
 		// Load the desk model
 		DeskModel desk = this.loadDesk(configuration);
 
-// TODO synchronise should create do/undo object
-//		// Obtain the context
-//		ConfigurationContext context = configuration.getContext();
-//
-//		// Load the work for the desk
-//		for (DeskWorkModel work : desk.getWorks()) {
-//			this.loadWork(work, context);
-//		}
-//
-//		// Load the flow for the desk
-//		List<FlowItemModel> removeFlowItems = new LinkedList<FlowItemModel>();
-//		for (FlowItemModel flowItem : desk.getFlowItems()) {
-//			if (!this.loadFlowItem(flowItem, desk)) {
-//				// Add flow item to remove
-//				removeFlowItems.add(flowItem);
-//			}
-//		}
-//
-//		// Remove no longer existing flows
-//		for (FlowItemModel flowItem : removeFlowItems) {
-//			// Remove connection and flow
-//			flowItem.removeConnections();
-//			desk.removeFlowItem(flowItem);
-//		}
+		// TODO synchronise should create do/undo object
+		// // Obtain the context
+		// ConfigurationContext context = configuration.getContext();
+		//
+		// // Load the work for the desk
+		// for (DeskWorkModel work : desk.getWorks()) {
+		// this.loadWork(work, context);
+		// }
+		//
+		// // Load the flow for the desk
+		// List<FlowItemModel> removeFlowItems = new
+		// LinkedList<FlowItemModel>();
+		// for (FlowItemModel flowItem : desk.getFlowItems()) {
+		// if (!this.loadFlowItem(flowItem, desk)) {
+		// // Add flow item to remove
+		// removeFlowItems.add(flowItem);
+		// }
+		// }
+		//
+		// // Remove no longer existing flows
+		// for (FlowItemModel flowItem : removeFlowItems) {
+		// // Remove connection and flow
+		// flowItem.removeConnections();
+		// desk.removeFlowItem(flowItem);
+		// }
 
 		// Return the desk model
 		return desk;
@@ -420,72 +402,71 @@ public class DeskLoader {
 			throws Exception {
 
 		// Specify next flows
-		for (FlowItemModel previous : desk.getFlowItems()) {
-			FlowItemToNextFlowItemModel conn = previous.getNextFlowItem();
+		for (TaskModel previous : desk.getTasks()) {
+			TaskToNextTaskModel conn = previous.getNextTask();
 			if (conn != null) {
-				conn.setId(conn.getNextFlowItem().getId());
+				conn.setNextTaskName(conn.getNextTask().getTaskName());
 			}
 		}
 
 		// Specify next external flow
-		for (FlowItemModel previous : desk.getFlowItems()) {
-			FlowItemToNextExternalFlowModel conn = previous
-					.getNextExternalFlow();
+		for (TaskModel previous : desk.getTasks()) {
+			TaskToNextExternalFlowModel conn = previous.getNextExternalFlow();
 			if (conn != null) {
-				conn.setExternalFlowName(conn.getNextExternalFlow().getName());
+				conn.setExternalFlowName(conn.getNextExternalFlow()
+						.getExternalFlowName());
 			}
 		}
 
 		// Specify initial flow for work
-		for (DeskWorkModel work : desk.getWorks()) {
-			DeskWorkToFlowItemModel conn = work.getInitialFlowItem();
+		for (WorkModel work : desk.getWorks()) {
+			WorkToInitialTaskModel conn = work.getInitialTask();
 			if (conn != null) {
-				conn.setFlowItemId(conn.getInitialFlowItem().getId());
+				conn.setInitialTaskName(conn.getInitialTask().getTaskName());
 			}
 		}
 
 		// Specify flow links
-		for (FlowItemModel flowItem : desk.getFlowItems()) {
-			for (FlowItemOutputModel flowItemOutput : flowItem.getOutputs()) {
-				FlowItemOutputToFlowItemModel conn = flowItemOutput
-						.getFlowItem();
+		for (TaskModel flowItem : desk.getTasks()) {
+			for (TaskFlowModel flowItemOutput : flowItem.getTaskFlows()) {
+				TaskFlowToTaskModel conn = flowItemOutput.getTask();
 				if (conn != null) {
-					conn.setId(conn.getFlowItem().getId());
+					conn.setTaskName(conn.getTask().getTaskName());
 				}
 			}
 		}
 
 		// Specify flow external links
-		for (FlowItemModel flowItem : desk.getFlowItems()) {
-			for (FlowItemOutputModel flowItemOutput : flowItem.getOutputs()) {
-				FlowItemOutputToExternalFlowModel conn = flowItemOutput
+		for (TaskModel flowItem : desk.getTasks()) {
+			for (TaskFlowModel flowItemOutput : flowItem.getTaskFlows()) {
+				TaskFlowToExternalFlowModel conn = flowItemOutput
 						.getExternalFlow();
 				if (conn != null) {
-					conn.setName(conn.getExternalFlow().getName());
+					conn.setExternalFlowName(conn.getExternalFlow()
+							.getExternalFlowName());
 				}
 			}
 		}
 
 		// Specify escalation handlers
-		for (FlowItemModel flowItem : desk.getFlowItems()) {
-			for (FlowItemEscalationModel flowItemEscalation : flowItem
-					.getEscalations()) {
-				FlowItemEscalationToFlowItemModel conn = flowItemEscalation
-						.getEscalationHandler();
+		for (TaskModel flowItem : desk.getTasks()) {
+			for (TaskEscalationModel flowItemEscalation : flowItem
+					.getTaskEscalations()) {
+				TaskEscalationToTaskModel conn = flowItemEscalation.getTask();
 				if (conn != null) {
-					conn.setId(conn.getHandler().getId());
+					conn.setTaskName(conn.getTask().getTaskName());
 				}
 			}
 		}
 
 		// Specify external escalations
-		for (FlowItemModel flowItem : desk.getFlowItems()) {
-			for (FlowItemEscalationModel flowItemEscalation : flowItem
-					.getEscalations()) {
-				FlowItemEscalationToExternalEscalationModel conn = flowItemEscalation
-						.getExternalEscalation();
+		for (TaskModel flowItem : desk.getTasks()) {
+			for (TaskEscalationModel flowItemEscalation : flowItem
+					.getTaskEscalations()) {
+				TaskEscalationToExternalFlowModel conn = flowItemEscalation
+						.getExternalFlow();
 				if (conn != null) {
-					conn.setName(conn.getExternalEscalation().getName());
+					conn.setExternalFlowName(conn.getExternalFlow().getExternalFlowName());
 				}
 			}
 		}
@@ -494,97 +475,99 @@ public class DeskLoader {
 		this.modelRepository.store(desk, configuration);
 	}
 
-// TODO use WorkType (and remove below)
-//	/**
-//	 * Loads the {@link DeskWorkModel}.
-//	 * 
-//	 * @param work
-//	 *            {@link DeskWorkModel}.
-//	 * @param context
-//	 *            {@link ConfigurationContext}.
-//	 */
-//	public void loadWork(final DeskWorkModel work, ConfigurationContext context)
-//			throws Exception {
-//
-//		// Obtain the name of the loader
-//		String loaderClassName = work.getLoader();
-//		if (loaderClassName != null) {
-//
-//			// Create the work loader
-//			WorkSource workLoader = this.loaderContext.createInstance(
-//					WorkSource.class, loaderClassName);
-//
-//			// Create the listing of properties and their names
-//			List<PropertyModel> propertyModels = work.getProperties();
-//			String[] propertyNames = new String[propertyModels.size()];
-//			Properties properties = new Properties();
-//			int index = 0;
-//			for (PropertyModel property : work.getProperties()) {
-//				String name = property.getName();
-//				String value = property.getValue();
-//				propertyNames[index++] = name;
-//				properties.setProperty(name, value);
-//			}
-//
-//			// Obtain the class loader
-//			ClassLoader classLoader = this.loaderContext.getClassLoader();
-//
-//			// Create the work loader context
-//			WorkSourceContext workLoaderContext = new WorkSourceContextImpl(
-//					propertyNames, properties, classLoader);
-//
-//			// Load the work model
-//			WorkType<?> workModel = workLoader.loadWork(workLoaderContext);
-//
-//			// Synchronise the work
-//			WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
-//					work);
-//		}
-//	}
-//
-//	/**
-//	 * Loads the {@link FlowItemModel}.
-//	 * 
-//	 * @param flowItem
-//	 *            {@link FlowItemModel}.
-//	 * @param desk
-//	 *            {@link DeskModel}.
-//	 * @return <code>true</code> if {@link FlowItemModel} should exist on work.
-//	 */
-//	private boolean loadFlowItem(FlowItemModel flowItem, DeskModel desk)
-//			throws Exception {
-//
-//		// Obtain the work for the flow item
-//		DeskWorkModel work = null;
-//		for (DeskWorkModel model : desk.getWorks()) {
-//			String workName = flowItem.getWorkName();
-//			if ((workName != null) && (workName.equals(model.getId()))) {
-//				work = model;
-//			}
-//		}
-//		if (work == null) {
-//			// Work not found therefore do not load
-//			return false;
-//		}
-//
-//		// Obtain the task for the flow item
-//		DeskTaskModel task = null;
-//		for (DeskTaskModel model : work.getTasks()) {
-//			if (flowItem.getTaskName().equals(model.getName())) {
-//				task = model;
-//			}
-//		}
-//		if (task == null) {
-//			// Task not found therefore do not load
-//			return false;
-//		}
-//
-//		// Synchronise task to flow item
-//		TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task.getTask(),
-//				flowItem);
-//
-//		// Should keep flow item
-//		return true;
-//	}
+	// TODO use WorkType (and remove below)
+	// /**
+	// * Loads the {@link DeskWorkModel}.
+	// *
+	// * @param work
+	// * {@link DeskWorkModel}.
+	// * @param context
+	// * {@link ConfigurationContext}.
+	// */
+	// public void loadWork(final DeskWorkModel work, ConfigurationContext
+	// context)
+	// throws Exception {
+	//
+	// // Obtain the name of the loader
+	// String loaderClassName = work.getLoader();
+	// if (loaderClassName != null) {
+	//
+	// // Create the work loader
+	// WorkSource workLoader = this.loaderContext.createInstance(
+	// WorkSource.class, loaderClassName);
+	//
+	// // Create the listing of properties and their names
+	// List<PropertyModel> propertyModels = work.getProperties();
+	// String[] propertyNames = new String[propertyModels.size()];
+	// Properties properties = new Properties();
+	// int index = 0;
+	// for (PropertyModel property : work.getProperties()) {
+	// String name = property.getName();
+	// String value = property.getValue();
+	// propertyNames[index++] = name;
+	// properties.setProperty(name, value);
+	// }
+	//
+	// // Obtain the class loader
+	// ClassLoader classLoader = this.loaderContext.getClassLoader();
+	//
+	// // Create the work loader context
+	// WorkSourceContext workLoaderContext = new WorkSourceContextImpl(
+	// propertyNames, properties, classLoader);
+	//
+	// // Load the work model
+	// WorkType<?> workModel = workLoader.loadWork(workLoaderContext);
+	//
+	// // Synchronise the work
+	// WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
+	// work);
+	// }
+	// }
+	//
+	// /**
+	// * Loads the {@link FlowItemModel}.
+	// *
+	// * @param flowItem
+	// * {@link FlowItemModel}.
+	// * @param desk
+	// * {@link DeskModel}.
+	// * @return <code>true</code> if {@link FlowItemModel} should exist on
+	// work.
+	// */
+	// private boolean loadFlowItem(FlowItemModel flowItem, DeskModel desk)
+	// throws Exception {
+	//
+	// // Obtain the work for the flow item
+	// DeskWorkModel work = null;
+	// for (DeskWorkModel model : desk.getWorks()) {
+	// String workName = flowItem.getWorkName();
+	// if ((workName != null) && (workName.equals(model.getId()))) {
+	// work = model;
+	// }
+	// }
+	// if (work == null) {
+	// // Work not found therefore do not load
+	// return false;
+	// }
+	//
+	// // Obtain the task for the flow item
+	// DeskTaskModel task = null;
+	// for (DeskTaskModel model : work.getTasks()) {
+	// if (flowItem.getTaskName().equals(model.getName())) {
+	// task = model;
+	// }
+	// }
+	// if (task == null) {
+	// // Task not found therefore do not load
+	// return false;
+	// }
+	//
+	// // Synchronise task to flow item
+	// TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(task.getTask(),
+	// flowItem);
+	//
+	// // Should keep flow item
+	// return true;
+	// }
 
 }

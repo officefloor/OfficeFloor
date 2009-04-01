@@ -18,10 +18,10 @@ package net.officefloor.compile;
 
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskToFlowItemModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
@@ -95,22 +95,22 @@ public class OfficeFloorCompiler {
 			if (officeRoom != null) {
 				RoomEntry roomEntry = officeEntry.getRoomEntry(officeRoom);
 				for (DeskEntry deskEntry : roomEntry.getDeskEntries()) {
-					for (DeskWorkModel workModel : deskEntry.getModel()
+					for (WorkModel workModel : deskEntry.getModel()
 							.getWorks()) {
 						WorkEntry<?> workEntry = deskEntry
 								.getWorkEntry(workModel);
 						System.out.print("   "
 								+ workEntry.getCanonicalWorkName() + " [");
-						for (DeskTaskModel taskModel : workEntry.getModel()
-								.getTasks()) {
-							for (DeskTaskToFlowItemModel taskToFlow : taskModel
-									.getFlowItems()) {
-								FlowItemModel flowItemModel = taskToFlow
-										.getFlowItem();
+						for (WorkTaskModel taskModel : workEntry.getModel()
+								.getWorkTasks()) {
+							for (WorkTaskToTaskModel taskToFlow : taskModel
+									.getTasks()) {
+								TaskModel flowItemModel = taskToFlow
+										.getTask();
 								TaskEntry<?> taskEntry = workEntry
 										.getTaskEntry(flowItemModel);
 								System.out.print(" "
-										+ taskEntry.getModel().getId());
+										+ taskEntry.getModel().getTaskName());
 							}
 						}
 						System.out.println(" ]");

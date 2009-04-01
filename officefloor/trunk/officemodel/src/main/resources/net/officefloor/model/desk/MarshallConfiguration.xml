@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<marshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\..\..\src\schema\TreeXmlMarshaller.xsd"
-	type="net.officefloor.model.desk.DeskModel" element="desk">
+<marshall type="net.officefloor.model.desk.DeskModel" element="desk">
 	<!-- EXTERNAL MANAGED OBJECTS -->
 	<collection method="getExternalManagedObjects" element="external-managed-objects">
 		<item type="net.officefloor.model.desk.ExternalManagedObjectModel"
 			element="external-managed-object">
 			<attributes>
-				<attribute method="getName" attribute="name" />
+				<attribute method="getExternalManagedObjectName"
+					attribute="name" />
 				<attribute method="getObjectType" attribute="object-type" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
@@ -19,19 +18,8 @@
 		<item type="net.officefloor.model.desk.ExternalFlowModel"
 			element="external-flow">
 			<attributes>
-				<attribute method="getName" attribute="name" />
-				<attribute method="getX" attribute="x" />
-				<attribute method="getY" attribute="y" />
-			</attributes>
-		</item>
-	</collection>
-	<!-- EXTERNAL ESCALATIONS -->
-	<collection method="getExternalEscalations" element="external-escalations">
-		<item type="net.officefloor.model.desk.ExternalEscalationModel"
-			element="external-escalation">
-			<attributes>
-				<attribute method="getName" attribute="name" />
-				<attribute method="getEscalationType" attribute="escalation-type" />
+				<attribute method="getExternalFlowName" attribute="name" />
+				<attribute method="getArgumentType" attribute="argument-type" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -39,10 +27,10 @@
 	</collection>
 	<!-- WORKS -->
 	<collection method="getWorks" element="works">
-		<item type="net.officefloor.model.desk.DeskWorkModel" element="work">
+		<item type="net.officefloor.model.desk.WorkModel" element="work">
 			<attributes>
-				<attribute method="getId" attribute="id" />
-				<attribute method="getLoader" attribute="loader" />
+				<attribute method="getWorkName" attribute="name" />
+				<attribute method="getWorkSourceClassName" attribute="source" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
@@ -54,29 +42,30 @@
 					</attributes>
 				</item>
 			</collection>
-			<object method="getInitialFlowItem" element="initial-flow-item">
+			<object method="getInitialTask" element="initial-task">
 				<attributes>
-					<attribute method="getFlowItemId" attribute="id" />
+					<attribute method="getInitialTaskName" attribute="name" />
 				</attributes>
 			</object>
-			<collection method="getTasks">
-				<item type="net.officefloor.model.desk.DeskTaskModel" element="task">
+			<collection method="getWorkTasks">
+				<item type="net.officefloor.model.desk.WorkTaskModel" element="work-task">
 					<attributes>
-						<attribute method="getName" attribute="name" />
+						<attribute method="getWorkTaskName" attribute="name" />
 					</attributes>
-					<collection method="getObjects">
-						<item type="net.officefloor.model.desk.DeskTaskObjectModel"
+					<collection method="getTaskObjects">
+						<item type="net.officefloor.model.desk.WorkTaskObjectModel"
 							element="task-object">
 							<attributes>
+								<attribute method="getObjectName" attribute="name" />
+								<attribute method="getKey" attribute="key" />
 								<attribute method="getObjectType" attribute="object-type" />
 								<attribute method="getIsParameter" attribute="parameter" />
 							</attributes>
-							<object method="getManagedObject">
-								<object method="getManagedObject" element="external-managed-object">
-									<attributes>
-										<attribute method="getName" attribute="name" />
-									</attributes>
-								</object>
+							<object method="getExternalManagedObject" element="external-managed-object">
+								<attributes>
+									<attribute method="getExternalManagedObjectName"
+										attribute="name" />
+								</attributes>
 							</object>
 						</item>
 					</collection>
@@ -84,20 +73,41 @@
 			</collection>
 		</item>
 	</collection>
-	<!-- FLOW ITEMS -->
-	<collection method="getFlowItems" element="flow-items">
-		<item type="net.officefloor.model.desk.FlowItemModel" element="flow-item">
+	<!-- TASKS -->
+	<collection method="getTasks" element="tasks">
+		<item type="net.officefloor.model.desk.TaskModel" element="task">
 			<attributes>
-				<attribute method="getId" attribute="id" />
+				<attribute method="getTaskName" attribute="name" />
 				<attribute method="getIsPublic" attribute="public" />
 				<attribute method="getWorkName" attribute="work" />
-				<attribute method="getTaskName" attribute="task" />
+				<attribute method="getWorkTaskName" attribute="task" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
-			<object method="getNextFlowItem" element="next-flow">
+			<collection method="getTaskFlows">
+				<item type="net.officefloor.model.desk.TaskFlowModel" element="task-flow">
+					<attributes>
+						<attribute method="getFlowName" attribute="name" />
+						<attribute method="getKey" attribute="key" />
+						<attribute method="getArgumentType" attribute="argument-type" />
+					</attributes>
+					<object method="getExternalFlow" element="external-flow">
+						<attributes>
+							<attribute method="getExternalFlowName" attribute="name" />
+							<attribute method="getLinkType" attribute="link" />
+						</attributes>
+					</object>
+					<object method="getTask" element="task">
+						<attributes>
+							<attribute method="getTaskName" attribute="name" />
+							<attribute method="getLinkType" attribute="link" />
+						</attributes>
+					</object>
+				</item>
+			</collection>
+			<object method="getNextTask" element="next-task">
 				<attributes>
-					<attribute method="getId" attribute="id" />
+					<attribute method="getNextTaskName" attribute="name" />
 				</attributes>
 			</object>
 			<object method="getNextExternalFlow" element="next-external-flow">
@@ -105,41 +115,20 @@
 					<attribute method="getExternalFlowName" attribute="name" />
 				</attributes>
 			</object>
-			<collection method="getOutputs">
-				<item type="net.officefloor.model.desk.FlowItemOutputModel"
-					element="output">
-					<attributes>
-						<attribute method="getId" attribute="id" />
-						<attribute method="getLabel" attribute="label" />
-					</attributes>
-					<object method="getExternalFlow" element="external-flow">
-						<attributes>
-							<attribute method="getName" attribute="name" />
-							<attribute method="getLinkType" attribute="link" />
-						</attributes>
-					</object>
-					<object method="getFlowItem" element="flow-item">
-						<attributes>
-							<attribute method="getId" attribute="id" />
-							<attribute method="getLinkType" attribute="link" />
-						</attributes>
-					</object>
-				</item>
-			</collection>
-			<collection method="getEscalations">
-				<item type="net.officefloor.model.desk.FlowItemEscalationModel"
-					element="escalation">
+			<collection method="getTaskEscalations">
+				<item type="net.officefloor.model.desk.TaskEscalationModel"
+					element="task-escalation">
 					<attributes>
 						<attribute method="getEscalationType" attribute="escalation-type" />
 					</attributes>
-					<object method="getEscalationHandler" element="flow-item">
+					<object method="getTask" element="task">
 						<attributes>
-							<attribute method="getId" attribute="id" />
+							<attribute method="getTaskName" attribute="name" />
 						</attributes>
 					</object>
-					<object method="getExternalEscalation" element="external-escalation">
+					<object method="getExternalFlow" element="external-flow">
 						<attributes>
-							<attribute method="getName" attribute="name" />
+							<attribute method="getExternalFlowName" attribute="name" />
 						</attributes>
 					</object>
 				</item>

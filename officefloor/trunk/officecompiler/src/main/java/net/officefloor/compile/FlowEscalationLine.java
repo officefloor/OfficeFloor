@@ -20,30 +20,30 @@ import net.officefloor.compile.FlowLineUtil.LinkedFlow;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.ExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationToTaskModel;
+import net.officefloor.model.desk.TaskModel;
 
 /**
- * Contains the various items on the line from the
- * {@link FlowItemEscalationModel} through to its {@link FlowItemModel}.
+ * Contains the various items on the line from the {@link TaskEscalationModel}
+ * through to its {@link TaskModel}.
  * 
  * @author Daniel
  */
 public class FlowEscalationLine {
 
 	/**
-	 * Source {@link FlowItemEscalationModel}.
+	 * Source {@link TaskEscalationModel}.
 	 */
-	public final FlowItemEscalationModel sourceFlowItemEscalation;
+	public final TaskEscalationModel sourceFlowItemEscalation;
 
 	/**
-	 * Source {@link ExternalEscalationModel}. This will be <code>null</code> if
-	 * target {@link FlowItemModel} is on the same {@link DeskModel}.
+	 * Source {@link ExternalFlowModel}. This will be <code>null</code> if
+	 * target {@link TaskModel} is on the same {@link DeskModel}.
 	 */
-	public final ExternalEscalationModel sourceExternalEscalation;
+	public final ExternalFlowModel sourceExternalEscalation;
 
 	/**
 	 * Source {@link TaskEntry}.
@@ -79,23 +79,22 @@ public class FlowEscalationLine {
 	public final TaskEntry<?> targetTaskEntry;
 
 	/**
-	 * Target {@link FlowItemModel}. This will be <code>null</code> if handled
-	 * by top level {@link Escalation}.
+	 * Target {@link TaskModel}. This will be <code>null</code> if handled by
+	 * top level {@link Escalation}.
 	 */
-	public final FlowItemModel targetFlowItem;
+	public final TaskModel targetFlowItem;
 
 	/**
-	 * Initiate the line from the {@link FlowItemEscalationModel}.
+	 * Initiate the line from the {@link TaskEscalationModel}.
 	 * 
 	 * @param flowItemEscalation
-	 *            {@link FlowItemEscalationModel}.
+	 *            {@link TaskEscalationModel}.
 	 * @param taskEntry
-	 *            {@link TaskEntry} containing the
-	 *            {@link FlowItemEscalationModel}.
+	 *            {@link TaskEntry} containing the {@link TaskEscalationModel}.
 	 * @throws Exception
 	 *             If fails to create the line.
 	 */
-	public FlowEscalationLine(FlowItemEscalationModel flowItemEscalation,
+	public FlowEscalationLine(TaskEscalationModel flowItemEscalation,
 			TaskEntry<?> taskEntry) throws Exception {
 
 		// Store starting point
@@ -107,15 +106,15 @@ public class FlowEscalationLine {
 		this.sourceDeskEntry = this.sourceWorkEntry.getDeskEntry();
 
 		// Determine the where linked
-		FlowItemEscalationToFlowItemModel flowItemLink = this.sourceFlowItemEscalation
-				.getEscalationHandler();
-		FlowItemEscalationToExternalEscalationModel externalEscalationLink = this.sourceFlowItemEscalation
-				.getExternalEscalation();
+		TaskEscalationToTaskModel flowItemLink = this.sourceFlowItemEscalation
+				.getTask();
+		TaskEscalationToExternalFlowModel externalEscalationLink = this.sourceFlowItemEscalation
+				.getExternalFlow();
 		LinkedFlow target;
 		if (flowItemLink != null) {
 
 			// Handled by flow on same desk
-			FlowItemModel targetFlowItem = flowItemLink.getHandler();
+			TaskModel targetFlowItem = flowItemLink.getTask();
 			target = FlowLineUtil.getLinkedFlow(targetFlowItem,
 					this.sourceDeskEntry);
 
@@ -126,7 +125,7 @@ public class FlowEscalationLine {
 
 			// Handled by flow on another desk
 			this.sourceExternalEscalation = externalEscalationLink
-					.getExternalEscalation();
+					.getExternalFlow();
 			target = FlowLineUtil.getLinkedFlow(this.sourceExternalEscalation,
 					this.sourceDeskEntry);
 
@@ -146,11 +145,10 @@ public class FlowEscalationLine {
 	}
 
 	/**
-	 * Indicates if the next {@link FlowItemModel} is on the same
-	 * {@link WorkType}.
+	 * Indicates if the next {@link TaskModel} is on the same {@link WorkType}.
 	 * 
-	 * @return <code>true</code> if the next {@link FlowItemModel} is on the
-	 *         same {@link WorkType}.
+	 * @return <code>true</code> if the next {@link TaskModel} is on the same
+	 *         {@link WorkType}.
 	 */
 	public boolean isSameWork() {
 		// No external escalation so on same desk and work matches

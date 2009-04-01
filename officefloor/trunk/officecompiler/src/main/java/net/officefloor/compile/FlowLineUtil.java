@@ -17,15 +17,11 @@
 package net.officefloor.compile;
 
 import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.room.EscalationToExternalEscalationModel;
-import net.officefloor.model.room.EscalationToInputFlowModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.room.OutputFlowToExternalFlowModel;
 import net.officefloor.model.room.OutputFlowToInputFlowModel;
-import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.model.room.SubRoomOutputFlowModel;
@@ -38,21 +34,21 @@ import net.officefloor.model.room.SubRoomOutputFlowModel;
 public class FlowLineUtil {
 
 	/**
-	 * Obtains the {@link LinkedFlow} for the {@link FlowItemModel}.
+	 * Obtains the {@link LinkedFlow} for the {@link TaskModel}.
 	 * 
 	 * @param flowItem
-	 *            {@link FlowItemModel}.
+	 *            {@link TaskModel}.
 	 * @param deskEntry
-	 *            {@link DeskEntry} containing the {@link FlowItemModel}.
+	 *            {@link DeskEntry} containing the {@link TaskModel}.
 	 * @return {@link LinkedFlow}.
 	 * @throws Exception
 	 *             If fails to obtain the {@link LinkedFlow}.
 	 */
-	public static LinkedFlow getLinkedFlow(FlowItemModel flowItem,
+	public static LinkedFlow getLinkedFlow(TaskModel flowItem,
 			DeskEntry deskEntry) throws Exception {
 
 		// Obtain the target work entry
-		DeskWorkModel workModel = deskEntry
+		WorkModel workModel = deskEntry
 				.getWorkModel(flowItem.getWorkName());
 		WorkEntry<?> workEntry = deskEntry.getWorkEntry(workModel);
 
@@ -61,80 +57,6 @@ public class FlowLineUtil {
 
 		// Return the linked flow
 		return new LinkedFlow(flowItem, taskEntry, workEntry, deskEntry);
-	}
-
-	/**
-	 * Obtains the {@link LinkedFlow} for the {@link ExternalEscalationModel}.
-	 * 
-	 * @param externalEscalation
-	 *            {@link ExternalEscalationModel}.
-	 * @param deskEntry
-	 *            {@link DeskEntry} containing the
-	 *            {@link ExternalEscalationModel}.
-	 * @return {@link LinkedFlow}.
-	 * @throws Exception
-	 *             If fails to obtain the {@link LinkedFlow}.
-	 */
-	public static LinkedFlow getLinkedFlow(
-			ExternalEscalationModel externalEscalation, DeskEntry deskEntry)
-			throws Exception {
-
-		// Obtain the external escalation name
-		String externalEscalationName = externalEscalation.getName();
-
-		// Obtain room containing the desk
-		RoomEntry roomEntry = deskEntry.getParentRoom();
-
-		// Obtain the desk sub room
-		SubRoomModel subRoom = roomEntry.getSubRoom(deskEntry);
-
-		// Loop until:
-		// - reached room which starts linking down
-		// - reach top level room and linked to external escalation
-		SubRoomInputFlowModel inputFlow = null;
-		SubRoomEscalationModel escalation = null;
-		while (externalEscalationName != null) {
-
-			// Obtain the escalation within the room
-			escalation = roomEntry.getSubRoomEscalation(subRoom,
-					externalEscalationName);
-
-			// Follow escalation
-			EscalationToExternalEscalationModel extConn = escalation
-					.getExternalEscalation();
-			if (extConn != null) {
-				// External escalation (set details to find)
-				externalEscalationName = extConn.getExternalEscalation()
-						.getName();
-
-				// Determine if handled by top level escalation
-				if (roomEntry.getParentRoom() == null) {
-					// Handled by top level escalation
-					return new LinkedFlow(null, null, null, null);
-				}
-
-				// Obtain parent room to follow external escalation
-				subRoom = roomEntry.getParentRoom().getSubRoom(roomEntry);
-				roomEntry = roomEntry.getParentRoom();
-
-			} else {
-				// No linked to externally, so should be linked to flow
-				EscalationToInputFlowModel inputFlowConnection = escalation
-						.getInputFlow();
-				if (inputFlowConnection == null) {
-					throw new TODOException("Escalation '"
-							+ externalEscalationName + "' on sub room '"
-							+ subRoom.getId() + " is not handled");
-				}
-				inputFlow = inputFlowConnection.getInputFlow();
-
-				// No longer going to external escalation
-				externalEscalationName = null;
-			}
-		}
-
-		// Return the linked flow
-		return getLinkedFlow(roomEntry, inputFlow);
 	}
 
 	/**
@@ -158,7 +80,7 @@ public class FlowLineUtil {
 		SubRoomModel subRoom = roomEntry.getSubRoom(deskEntry);
 
 		// Obtain the starting external flow name
-		String externalFlowName = externalFlow.getName();
+		String externalFlowName = externalFlow.getExternalFlowName();
 
 		// Loop until reached room which starts linking down
 		SubRoomOutputFlowModel outputFlow = null;
@@ -195,7 +117,7 @@ public class FlowLineUtil {
 
 	/**
 	 * Searches down through rooms to desk to find the target
-	 * {@link FlowItemModel}.
+	 * {@link TaskModel}.
 	 * 
 	 * @param roomEntry
 	 *            {@link RoomEntry}.
@@ -283,10 +205,10 @@ public class FlowLineUtil {
 		}
 
 		// Obtain the target flow item on the desk
-		FlowItemModel flowItem = null;
-		FOUND_FLOW_ITEM: for (FlowItemModel fi : deskEntry.getModel()
-				.getFlowItems()) {
-			if (inputFlowName.equals(fi.getId())) {
+		TaskModel flowItem = null;
+		FOUND_FLOW_ITEM: for (TaskModel fi : deskEntry.getModel()
+				.getTasks()) {
+			if (inputFlowName.equals(fi.getTaskName())) {
 				flowItem = fi;
 				break FOUND_FLOW_ITEM;
 			}
@@ -306,9 +228,9 @@ public class FlowLineUtil {
 	public static class LinkedFlow {
 
 		/**
-		 * Target {@link FlowItemModel}.
+		 * Target {@link TaskModel}.
 		 */
-		public final FlowItemModel flowItem;
+		public final TaskModel flowItem;
 
 		/**
 		 * Target {@link TaskEntry}.
@@ -329,7 +251,7 @@ public class FlowLineUtil {
 		 * Initiate with target details.
 		 * 
 		 * @param flowItem
-		 *            Target {@link FlowItemModel}.
+		 *            Target {@link TaskModel}.
 		 * @param taskEntry
 		 *            Target {@link TaskEntry}.
 		 * @param workEntry
@@ -337,7 +259,7 @@ public class FlowLineUtil {
 		 * @param deskEntry
 		 *            Target {@link DeskEntry}.
 		 */
-		public LinkedFlow(FlowItemModel flowItem, TaskEntry<?> taskEntry,
+		public LinkedFlow(TaskModel flowItem, TaskEntry<?> taskEntry,
 				WorkEntry<?> workEntry, DeskEntry deskEntry) {
 			this.flowItem = flowItem;
 			this.taskEntry = taskEntry;

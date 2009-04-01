@@ -19,13 +19,12 @@ package net.officefloor.compile;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.room.EscalationToExternalEscalationModel;
+import net.officefloor.model.desk.ExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskEscalationToTaskModel;
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.room.EscalationToInputFlowModel;
+import net.officefloor.model.room.ExternalEscalationModel;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
@@ -50,12 +49,12 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 				"TASK_ESCALTING", workEntry);
 		TaskEntry<Work> taskHandling = EntryUtil.createTaskEntry(
 				"TASK_HANDLING", workEntry);
-		FlowItemEscalationModel escalation = EntryUtil
-				.createFlowItemEscalation(Exception.class, taskEscalating);
+		TaskEscalationModel escalation = EntryUtil.createFlowItemEscalation(
+				Exception.class, taskEscalating);
 
 		// Link escalation to handling task
-		new FlowItemEscalationToFlowItemModel(null, escalation, taskHandling
-				.getModel()).connect();
+		new TaskEscalationToTaskModel(null, escalation, taskHandling.getModel())
+				.connect();
 
 		// Create the flow escalation line
 		FlowEscalationLine line = new FlowEscalationLine(escalation,
@@ -78,16 +77,16 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 				"WORK_ESCALATING", Work.class, deskEntry);
 		TaskEntry<Work> taskEscalating = EntryUtil.createTaskEntry(
 				"TASK_ESCALATING", workEscalating);
-		FlowItemEscalationModel escalation = EntryUtil
-				.createFlowItemEscalation(Exception.class, taskEscalating);
+		TaskEscalationModel escalation = EntryUtil.createFlowItemEscalation(
+				Exception.class, taskEscalating);
 		WorkEntry<Work> workHandling = EntryUtil.createWorkEntry(
 				"WORK_HANDLING", Work.class, deskEntry);
 		TaskEntry<Work> taskHandling = EntryUtil.createTaskEntry(
 				"TASK_HANDLING", workHandling);
 
 		// Link escalation to handling task
-		new FlowItemEscalationToFlowItemModel(null, escalation, taskHandling
-				.getModel()).connect();
+		new TaskEscalationToTaskModel(null, escalation, taskHandling.getModel())
+				.connect();
 
 		// Create the flow escalation line
 		FlowEscalationLine line = new FlowEscalationLine(escalation,
@@ -115,15 +114,16 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 				"WORK_ESCALATING", Work.class, deskEscalating);
 		TaskEntry<Work> taskEscalating = EntryUtil.createTaskEntry(
 				"TASK_ESCALATING", workEscalating);
-		FlowItemEscalationModel escalation = EntryUtil
-				.createFlowItemEscalation(Exception.class, taskEscalating);
-		ExternalEscalationModel externalEscalation = EntryUtil
-				.createExternalEscalation("ESCALATION", Exception.class,
-						deskEscalating);
-		new FlowItemEscalationToExternalEscalationModel(null, escalation,
-				externalEscalation).connect();
-		SubRoomEscalationModel subRoomEscalation = EntryUtil
-				.createSubRoomEscalation(externalEscalation, deskEscalating);
+		TaskEscalationModel escalation = EntryUtil.createFlowItemEscalation(
+				Exception.class, taskEscalating);
+		// TODO fix up
+//		ExternalEscalationModel externalEscalation = EntryUtil
+//				.createExternalEscalation("ESCALATION", Exception.class,
+//						deskEscalating);
+//		new TaskEscalationToExternalFlowModel(null, escalation,
+//				externalEscalation).connect();
+//		SubRoomEscalationModel subRoomEscalation = EntryUtil
+//				.createSubRoomEscalation(externalEscalation, deskEscalating);
 
 		// Handling
 		DeskEntry deskHandling = EntryUtil.createDeskEntry("DESK_HANDLING",
@@ -134,6 +134,10 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 				"TASK_HANDLING", workHandling);
 		SubRoomInputFlowModel inputFlowHandling = EntryUtil
 				.createSubRoomInputFlow(taskHandling.getModel(), deskHandling);
+
+		// TODO implement obtaining
+		SubRoomEscalationModel subRoomEscalation = null;
+		ExternalFlowModel externalEscalation = null; // become an external flow
 
 		// Link the escalation to handling task
 		new EscalationToInputFlowModel(null, null, subRoomEscalation,
@@ -163,24 +167,28 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 				"WORK_ESCALATING", Work.class, deskEscalating);
 		TaskEntry<Work> taskEscalating = EntryUtil.createTaskEntry(
 				"TASK_ESCALATING", workEscalating);
-		FlowItemEscalationModel escalation = EntryUtil
-				.createFlowItemEscalation(Exception.class, taskEscalating);
-		ExternalEscalationModel deskExternalEscalation = EntryUtil
-				.createExternalEscalation("DESK_ESCALATION", Exception.class,
-						deskEscalating);
-		new FlowItemEscalationToExternalEscalationModel(null, escalation,
-				deskExternalEscalation).connect();
-		SubRoomEscalationModel subRoomEscalation = EntryUtil
-				.createSubRoomEscalation(deskExternalEscalation, deskEscalating);
-		net.officefloor.model.room.ExternalEscalationModel roomExternalEscalation = EntryUtil
-				.createExternalEscalation("ROOM_ESCALATION", Exception.class,
-						roomEntry);
-		new EscalationToExternalEscalationModel(null, subRoomEscalation,
-				roomExternalEscalation).connect();
+		TaskEscalationModel escalation = EntryUtil.createFlowItemEscalation(
+				Exception.class, taskEscalating);
+		// TODO fix up
+//		ExternalEscalationModel deskExternalEscalation = EntryUtil
+//				.createExternalEscalation("DESK_ESCALATION", Exception.class,
+//						deskEscalating);
+//		new TaskEscalationToExternalFlowModel(null, escalation,
+//				deskExternalEscalation).connect();
+//		SubRoomEscalationModel subRoomEscalation = EntryUtil
+//				.createSubRoomEscalation(deskExternalEscalation, deskEscalating);
+//		net.officefloor.model.room.ExternalEscalationModel roomExternalEscalation = EntryUtil
+//				.createExternalEscalation("ROOM_ESCALATION", Exception.class,
+//						roomEntry);
+//		new EscalationToExternalEscalationModel(null, subRoomEscalation,
+//				roomExternalEscalation).connect();
 
 		// Create the flow escalation line
 		FlowEscalationLine line = new FlowEscalationLine(escalation,
 				taskEscalating);
+
+		// TODO implement obtaining
+		ExternalFlowModel deskExternalEscalation = null; // become an external flow
 
 		// Verify line
 		this.verifyFlowEscalationLine(line, false, escalation,
@@ -205,22 +213,24 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 				"WORK_ESCALATING", Work.class, deskEscalating);
 		TaskEntry<Work> taskEscalating = EntryUtil.createTaskEntry(
 				"TASK_ESCALATING", workEscalating);
-		FlowItemEscalationModel escalation = EntryUtil
-				.createFlowItemEscalation(Exception.class, taskEscalating);
-		ExternalEscalationModel externalEscalation = EntryUtil
-				.createExternalEscalation("DESK_ESCALATION", Exception.class,
-						deskEscalating);
-		new FlowItemEscalationToExternalEscalationModel(null, escalation,
-				externalEscalation).connect();
-		SubRoomEscalationModel roomSubRoomEscalation = EntryUtil
-				.createSubRoomEscalation(externalEscalation, deskEscalating);
-		net.officefloor.model.room.ExternalEscalationModel roomExternalEscalation = EntryUtil
-				.createExternalEscalation("ROOM_ESCALATION", Exception.class,
-						roomEscalating);
-		new EscalationToExternalEscalationModel(null, roomSubRoomEscalation,
-				roomExternalEscalation).connect();
-		SubRoomEscalationModel topLevelSubRoomEscalation = EntryUtil
-				.createSubRoomEscalation(roomExternalEscalation, roomEscalating);
+		TaskEscalationModel escalation = EntryUtil.createFlowItemEscalation(
+				Exception.class, taskEscalating);
+		// TODO provide the necessary path to have work
+		// ExternalFlowModel externalEscalation = EntryUtil
+		// .createExternalFlow("DESK_ESCALATION", Exception.class,
+		// deskEscalating);
+		// new TaskEscalationToExternalFlowModel(null, escalation,
+		// externalEscalation).connect();
+		// SubRoomEscalationModel roomSubRoomEscalation = EntryUtil
+		// .createSubRoomEscalation(externalEscalation, deskEscalating);
+		// net.officefloor.model.room.ExternalEscalationModel
+		// roomExternalEscalation = EntryUtil
+		// .createExternalEscalation("ROOM_ESCALATION", Exception.class,
+		// roomEscalating);
+		// new EscalationToExternalEscalationModel(null, roomSubRoomEscalation,
+		// roomExternalEscalation).connect();
+		// SubRoomEscalationModel topLevelSubRoomEscalation = EntryUtil
+		// .createSubRoomEscalation(roomExternalEscalation, roomEscalating);
 
 		// Handling
 		RoomEntry roomHandling = EntryUtil.createRoomEntry("ROOM_HANDLING",
@@ -235,6 +245,10 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 				.createSubRoomInputFlow(taskHandling.getModel(), deskHandling);
 		SubRoomInputFlowModel topLevelInputFlowHandling = EntryUtil
 				.createSubRoomInputFlow(roomInputFlowHandling, deskHandling);
+
+		// TODO implement obtaining
+		SubRoomEscalationModel topLevelSubRoomEscalation = null;
+		ExternalFlowModel externalEscalation = null; // become an external flow
 
 		// Link for handling
 		new EscalationToInputFlowModel(null, null, topLevelSubRoomEscalation,
@@ -259,7 +273,7 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 	 * @param isSameWork
 	 *            Flag indicating same {@link Work}.
 	 * @param sourceFlowItemEscalation
-	 *            Expected source {@link FlowItemEscalationModel}.
+	 *            Expected source {@link TaskEscalationModel}.
 	 * @param sourceExternalEscalation
 	 *            Expected source {@link ExternalEscalationModel}.
 	 * @param sourceTask
@@ -269,7 +283,7 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 	 * @param sourceDesk
 	 *            Expected source {@link DeskEntry}.
 	 * @param targetFlowItem
-	 *            Expected target {@link FlowItemModel}.
+	 *            Expected target {@link TaskModel}.
 	 * @param targetTask
 	 *            Expected target {@link TaskEntry}.
 	 * @param targetWork
@@ -280,11 +294,10 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 	 *            Flag indicating if handled by top level.
 	 */
 	private void verifyFlowEscalationLine(FlowEscalationLine line,
-			boolean isSameWork,
-			FlowItemEscalationModel sourceFlowItemEscalation,
-			ExternalEscalationModel sourceExternalEscalation,
+			boolean isSameWork, TaskEscalationModel sourceFlowItemEscalation,
+			ExternalFlowModel sourceExternalEscalation,
 			TaskEntry<?> sourceTask, WorkEntry<?> sourceWork,
-			DeskEntry sourceDesk, FlowItemModel targetFlowItem,
+			DeskEntry sourceDesk, TaskModel targetFlowItem,
 			TaskEntry<?> targetTask, WorkEntry<?> targetWork,
 			DeskEntry targetDesk, boolean isTopLevelHandled) {
 		assertEquals("Incorrect isSameWork", isSameWork, line.isSameWork());
