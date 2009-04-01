@@ -18,8 +18,8 @@ package net.officefloor.compile;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
@@ -29,7 +29,7 @@ import net.officefloor.model.room.SubRoomModel;
 import net.officefloor.util.OFCU;
 
 /**
- * Contains the various items on the line from a {@link DeskTaskObjectModel}
+ * Contains the various items on the line from a {@link WorkTaskObjectModel}
  * through to its {@link ManagedObjectSourceModel}.
  * 
  * @author Daniel
@@ -37,14 +37,14 @@ import net.officefloor.util.OFCU;
 public class ManagedObjectLine<W extends Work> {
 
 	/**
-	 * {@link DeskTaskObjectModel}.
+	 * {@link WorkTaskObjectModel}.
 	 */
-	public final DeskTaskObjectModel deskTaskObject;
+	public final WorkTaskObjectModel deskTaskObject;
 
 	/**
-	 * {@link DeskTaskModel}.
+	 * {@link WorkTaskModel}.
 	 */
-	public final DeskTaskModel deskTask;
+	public final WorkTaskModel deskTask;
 
 	/**
 	 * {@link DeskModel} {@link ExternalManagedObjectModel}.
@@ -92,16 +92,16 @@ public class ManagedObjectLine<W extends Work> {
 	public final ManagedObjectSourceModel managedObjectSource;
 
 	/**
-	 * Initiate the line from {@link DeskTaskObjectModel}.
+	 * Initiate the line from {@link WorkTaskObjectModel}.
 	 * 
 	 * @param deskTaskObject
-	 *            {@link DeskTaskObjectModel}.
+	 *            {@link WorkTaskObjectModel}.
 	 * @param taskEntry
-	 *            {@link TaskEntry} for the {@link DeskTaskObjectModel}.
+	 *            {@link TaskEntry} for the {@link WorkTaskObjectModel}.
 	 * @throws Exception
 	 *             If fails to create the line.
 	 */
-	public ManagedObjectLine(DeskTaskObjectModel deskTaskObject,
+	public ManagedObjectLine(WorkTaskObjectModel deskTaskObject,
 			WorkEntry<W> workEntry) throws Exception {
 
 		// Store starting point
@@ -118,9 +118,9 @@ public class ManagedObjectLine<W extends Work> {
 		this.deskEntry = this.workEntry.getDeskEntry();
 
 		// Obtain the desk task for task object
-		DeskTaskModel deskTask = null;
-		for (DeskTaskModel task : this.workEntry.getModel().getTasks()) {
-			for (DeskTaskObjectModel object : task.getObjects()) {
+		WorkTaskModel deskTask = null;
+		for (WorkTaskModel task : this.workEntry.getModel().getWorkTasks()) {
+			for (WorkTaskObjectModel object : task.getTaskObjects()) {
 				if (object == this.deskTaskObject) {
 					deskTask = task;
 				}
@@ -136,13 +136,13 @@ public class ManagedObjectLine<W extends Work> {
 
 		// Obtain the corresponding desk external managed object
 		this.deskExternalManagedObject = OFCU.get(
-				this.deskTaskObject.getManagedObject(),
+				this.deskTaskObject.getExternalManagedObject(),
 				"No managed object for work ${0} task ${1} object ${2}",
-				this.workEntry.getId(), this.deskTask.getName(),
-				this.deskTaskObject.getObjectType()).getManagedObject();
+				this.workEntry.getId(), this.deskTask.getWorkTaskName(),
+				this.deskTaskObject.getObjectType()).getExternalManagedObject();
 
 		// Obtain the external managed object name
-		String externalMoName = this.deskExternalManagedObject.getName();
+		String externalMoName = this.deskExternalManagedObject.getExternalManagedObjectName();
 
 		// Obtain the room containing the desk
 		RoomEntry roomEntry = this.deskEntry.getParentRoom();

@@ -26,9 +26,9 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskObjectModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.AdministratorToManagedObjectModel;
 import net.officefloor.model.office.DutyModel;
@@ -38,7 +38,7 @@ import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
 import net.officefloor.util.OFCU;
 
 /**
- * Creates the line from the {@link FlowItemModel} through to its
+ * Creates the line from the {@link TaskModel} through to its
  * {@link AdministratorSource}.
  * 
  * @author Daniel
@@ -47,10 +47,10 @@ public class AdministrationLine<W extends Work> {
 
 	/**
 	 * Creates the {@link AdministrationLine} instances for the
-	 * {@link FlowItemModel} of the input {@link TaskLine}.
+	 * {@link TaskModel} of the input {@link TaskLine}.
 	 * 
 	 * @param taskLine
-	 *            {@link TaskLine} of the {@link FlowItemModel}.
+	 *            {@link TaskLine} of the {@link TaskModel}.
 	 * @return Listing of {@link AdministrationLine} instances.
 	 * @throws Exception
 	 *             If fails to create the lines.
@@ -112,7 +112,7 @@ public class AdministrationLine<W extends Work> {
 
 		// Create the mapping of office managed object to task managed objects
 		Map<ExternalManagedObjectModel, ManagedObjectLine<W>> officeMoToMoLine = new HashMap<ExternalManagedObjectModel, ManagedObjectLine<W>>();
-		for (DeskTaskObjectModel taskObject : taskLine.deskTask.getObjects()) {
+		for (WorkTaskObjectModel taskObject : taskLine.deskTask.getTaskObjects()) {
 			// Ignore parameters
 			if (taskObject.getIsParameter()) {
 				continue;
@@ -128,8 +128,8 @@ public class AdministrationLine<W extends Work> {
 		// Note duplicates are ignored to obtain the work bound managed objects
 		// as interest only to determine if bound to work.
 		Map<ExternalManagedObjectModel, ManagedObjectLine<W>> officeMoToWorkMo = new HashMap<ExternalManagedObjectModel, ManagedObjectLine<W>>();
-		for (DeskTaskModel deskTask : taskLine.workEntry.getModel().getTasks()) {
-			for (DeskTaskObjectModel taskObject : deskTask.getObjects()) {
+		for (WorkTaskModel deskTask : taskLine.workEntry.getModel().getWorkTasks()) {
+			for (WorkTaskObjectModel taskObject : deskTask.getTaskObjects()) {
 				// Ignore parameters
 				if (taskObject.getIsParameter()) {
 					continue;
@@ -187,7 +187,7 @@ public class AdministrationLine<W extends Work> {
 	}
 
 	/**
-	 * {@link TaskLine} containing the details of the {@link FlowItemModel}.
+	 * {@link TaskLine} containing the details of the {@link TaskModel}.
 	 */
 	public final TaskLine<W> taskLine;
 
@@ -226,7 +226,7 @@ public class AdministrationLine<W extends Work> {
 	 * Initiate.
 	 * 
 	 * @param taskLine
-	 *            {@link TaskLine} of the {@link FlowItemModel}.
+	 *            {@link TaskLine} of the {@link TaskModel}.
 	 * @param duty
 	 *            {@link DutyModel}.
 	 * @param dutyKey
@@ -272,10 +272,10 @@ public class AdministrationLine<W extends Work> {
 		public final net.officefloor.model.desk.ExternalManagedObjectModel deskManagedObject;
 
 		/**
-		 * {@link DeskTaskObjectModel} if {@link ManagedObject} being used by
+		 * {@link WorkTaskObjectModel} if {@link ManagedObject} being used by
 		 * the {@link Task}. May be <code>null</code>.
 		 */
-		public final DeskTaskObjectModel deskTaskObject;
+		public final WorkTaskObjectModel deskTaskObject;
 
 		/**
 		 * Initiate.
@@ -285,12 +285,12 @@ public class AdministrationLine<W extends Work> {
 		 * @param deskManagedObject
 		 *            {@link net.officefloor.model.desk.ExternalManagedObjectModel}.
 		 * @param deskTaskObject
-		 *            {@link DeskTaskObjectModel}.
+		 *            {@link WorkTaskObjectModel}.
 		 */
 		private ManagedObjectUnderAdministration(
 				ExternalManagedObjectModel officeManagedObject,
 				net.officefloor.model.desk.ExternalManagedObjectModel deskManagedObject,
-				DeskTaskObjectModel deskTaskObject) {
+				WorkTaskObjectModel deskTaskObject) {
 			this.officeManagedObject = officeManagedObject;
 			this.deskManagedObject = deskManagedObject;
 			this.deskTaskObject = deskTaskObject;

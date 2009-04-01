@@ -18,8 +18,8 @@ package net.officefloor.compile;
 
 import net.officefloor.compile.desk.DeskLoader;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -61,7 +61,7 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 				roomEntry);
 
 		// Load the work
-		for (DeskWorkModel deskWork : deskModel.getWorks()) {
+		for (WorkModel deskWork : deskModel.getWorks()) {
 			WorkEntry<?> workEntry = WorkEntry.loadWork(deskWork, deskEntry,
 					context);
 			deskEntry.workMap.put(deskWork, workEntry);
@@ -82,14 +82,14 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	private final RoomEntry parentRoom;
 
 	/**
-	 * {@link DeskWorkModel} to {@link DeskEntry} map.
+	 * {@link WorkModel} to {@link DeskEntry} map.
 	 */
-	protected final ModelEntryMap<DeskWorkModel, WorkEntry<?>> workMap = new ModelEntryMap<DeskWorkModel, WorkEntry<?>>();
+	protected final ModelEntryMap<WorkModel, WorkEntry<?>> workMap = new ModelEntryMap<WorkModel, WorkEntry<?>>();
 
 	/**
-	 * {@link FlowItemModel} to {@link TaskEntry} map.
+	 * {@link TaskModel} to {@link TaskEntry} map.
 	 */
-	protected final ModelEntryMap<FlowItemModel, TaskEntry<?>> taskMap = new ModelEntryMap<FlowItemModel, TaskEntry<?>>();
+	protected final ModelEntryMap<TaskModel, TaskEntry<?>> taskMap = new ModelEntryMap<TaskModel, TaskEntry<?>>();
 
 	/**
 	 * Initiate.
@@ -129,20 +129,20 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	}
 
 	/**
-	 * Obtains the {@link DeskWorkModel} for the name of the
-	 * {@link DeskWorkModel}.
+	 * Obtains the {@link WorkModel} for the name of the
+	 * {@link WorkModel}.
 	 * 
 	 * @param workName
-	 *            Name of the {@link DeskWorkModel}.
-	 * @return {@link DeskWorkModel}.
+	 *            Name of the {@link WorkModel}.
+	 * @return {@link WorkModel}.
 	 * @throws Exception
 	 *             If not found.
 	 */
-	public DeskWorkModel getWorkModel(String workName) throws Exception {
+	public WorkModel getWorkModel(String workName) throws Exception {
 
 		// Obtain the work model
-		for (DeskWorkModel workModel : this.getModel().getWorks()) {
-			if (workName.equals(workModel.getId())) {
+		for (WorkModel workModel : this.getModel().getWorks()) {
+			if (workName.equals(workModel.getWorkName())) {
 				return workModel;
 			}
 		}
@@ -153,43 +153,43 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 	}
 
 	/**
-	 * Obtains the {@link WorkEntry} for the {@link DeskWorkModel}.
+	 * Obtains the {@link WorkEntry} for the {@link WorkModel}.
 	 * 
 	 * @param workModel
-	 *            {@link DeskWorkModel}.
+	 *            {@link WorkModel}.
 	 * @return {@link WorkEntry}.
 	 * @throws Exception
 	 *             If not found.
 	 */
-	public WorkEntry<?> getWorkEntry(DeskWorkModel workModel) throws Exception {
+	public WorkEntry<?> getWorkEntry(WorkModel workModel) throws Exception {
 		return this.getEntry(workModel, this.workMap, "No work '"
-				+ workModel.getId() + "' on desk " + this.getId());
+				+ workModel.getWorkName() + "' on desk " + this.getId());
 	}
 
 	/**
-	 * Obtains the {@link TaskEntry} for the {@link FlowItemModel}.
+	 * Obtains the {@link TaskEntry} for the {@link TaskModel}.
 	 * 
 	 * @param flowItemModel
-	 *            {@link FlowItemModel}.
+	 *            {@link TaskModel}.
 	 * @return {@link TaskEntry}.
 	 * @throws Exception
 	 *             If not found.
 	 */
-	public TaskEntry<?> getTaskEntry(FlowItemModel flowItemModel)
+	public TaskEntry<?> getTaskEntry(TaskModel flowItemModel)
 			throws Exception {
 		return this.getEntry(flowItemModel, this.taskMap, "No flow item '"
-				+ flowItemModel.getId() + "' on desk " + this.getId());
+				+ flowItemModel.getTaskName() + "' on desk " + this.getId());
 	}
 
 	/**
 	 * Registers the {@link TaskEntry} with this {@link DeskEntry}.
 	 * 
 	 * @param flowItemModel
-	 *            {@link FlowItemModel}.
+	 *            {@link TaskModel}.
 	 * @param taskEntry
 	 *            {@link TaskEntry}.
 	 */
-	protected void registerTask(FlowItemModel flowItemModel,
+	protected void registerTask(TaskModel flowItemModel,
 			TaskEntry<?> taskEntry) {
 		this.taskMap.put(flowItemModel, taskEntry);
 	}

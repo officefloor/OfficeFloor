@@ -22,10 +22,9 @@ import java.sql.SQLException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
@@ -52,18 +51,24 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 				"java.lang.String", null));
 		desk.addExternalManagedObject(new ExternalManagedObjectModel("MO-TWO",
 				"java.sql.Connection", null));
-		desk.addFlowItem(new FlowItemModel("IF-ONE", true, "work", "task",
-				null, null, null, null, null, null, null, null, null));
-		desk.addFlowItem(new FlowItemModel("IF-TWO", false, "work", "task",
-				null, null, null, null, null, null, null, null, null));
-		desk.addFlowItem(new FlowItemModel("IF-THREE", true, "work", "task",
-				null, null, null, null, null, null, null, null, null));
-		desk.addExternalFlow(new ExternalFlowModel("OF-ONE", null, null));
-		desk.addExternalFlow(new ExternalFlowModel("OF-TWO", null, null));
-		desk.addExternalEscalation(new ExternalEscalationModel("ES-ONE",
-				SQLException.class.getName(), null));
-		desk.addExternalEscalation(new ExternalEscalationModel("ES-TWO",
-				IOException.class.getName(), null));
+		desk.addTask(new TaskModel("IF-ONE", true, "work", "task",
+				"java.lang.Object", null, null, null, null, null, null, null,
+				null, null));
+		desk.addTask(new TaskModel("IF-TWO", false, "work", "task",
+				"java.lang.Object", null, null, null, null, null, null, null,
+				null, null));
+		desk.addTask(new TaskModel("IF-THREE", true, "work", "task",
+				"java.lang.Object", null, null, null, null, null, null, null,
+				null, null));
+		desk.addExternalFlow(new ExternalFlowModel("OF-ONE", null, null, null,
+				null));
+		desk.addExternalFlow(new ExternalFlowModel("OF-TWO", null, null, null,
+				null));
+		// TODO correct test to handle
+		desk.addExternalFlow(new ExternalFlowModel("ES-ONE", null, null, null,
+				null)); // SQLException.class.getName()
+		desk.addExternalFlow(new ExternalFlowModel("ES-TWO", null, null, null,
+				null)); // IOException.class.getName()
 
 		// Create the SubRoom
 		SubRoomModel subRoom = new SubRoomModel();
@@ -98,9 +103,8 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 		// Remove one of each from desk
 		desk.removeExternalManagedObject(desk.getExternalManagedObjects()
 				.get(1));
-		desk.removeFlowItem(desk.getFlowItems().get(2));
+		desk.removeTask(desk.getTasks().get(2));
 		desk.removeExternalFlow(desk.getExternalFlows().get(1));
-		desk.removeExternalEscalation(desk.getExternalEscalations().get(1));
 
 		// Synchronise again
 		DeskToSubRoomSynchroniser.synchroniseDeskOntoSubRoom(desk, subRoom);
@@ -127,13 +131,14 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 		// Add one of each to desk
 		desk.addExternalManagedObject(new ExternalManagedObjectModel(
 				"MO-THREE", "java.lang.Integer", null));
-		desk.addFlowItem(new FlowItemModel("IF-FOUR", false, "work", "task",
-				null, null, null, null, null, null, null, null, null));
-		desk.addFlowItem(new FlowItemModel("IF-FIVE", true, "work", "task",
-				null, null, null, null, null, null, null, null, null));
-		desk.addExternalFlow(new ExternalFlowModel("OF-THREE", null, null));
-		desk.addExternalEscalation(new ExternalEscalationModel("ES-THREE",
-				"java.lang.NullPointerException", null));
+		desk.addTask(new TaskModel("IF-FOUR", false, "work", "task",
+				"java.lang.String", null, null, null, null, null, null, null,
+				null, null));
+		desk.addTask(new TaskModel("IF-FIVE", true, "work", "task",
+				"java.lang.String", null, null, null, null, null, null, null,
+				null, null));
+		desk.addExternalFlow(new ExternalFlowModel("OF-THREE", null, null,
+				null, null));
 
 		// Synchronise again
 		DeskToSubRoomSynchroniser.synchroniseDeskOntoSubRoom(desk, subRoom);

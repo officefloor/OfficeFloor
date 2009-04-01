@@ -20,26 +20,26 @@ import net.officefloor.compile.FlowLineUtil.LinkedFlow;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
-import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskToNextExternalFlowModel;
+import net.officefloor.model.desk.TaskToNextTaskModel;
 
 /**
- * Contains the various items on the line from the {@link FlowItemModel} through
- * to its next {@link FlowItemModel}.
+ * Contains the various items on the line from the {@link TaskModel} through
+ * to its next {@link TaskModel}.
  * 
  * @author Daniel
  */
 public class FlowNextLine {
 
 	/**
-	 * Source {@link FlowItemModel}.
+	 * Source {@link TaskModel}.
 	 */
-	public final FlowItemModel sourceFlowItem;
+	public final TaskModel sourceFlowItem;
 
 	/**
 	 * Source {@link ExternalFlowModel}. This will be <code>null</code> if
-	 * target {@link FlowItemModel} is on the same {@link DeskModel}.
+	 * target {@link TaskModel} is on the same {@link DeskModel}.
 	 */
 	public final ExternalFlowModel sourceExternalFlow;
 
@@ -60,39 +60,39 @@ public class FlowNextLine {
 
 	/**
 	 * Target {@link DeskEntry}. This will be <code>null</code> if no next
-	 * {@link FlowItemModel}.
+	 * {@link TaskModel}.
 	 */
 	public final DeskEntry targetDeskEntry;
 
 	/**
 	 * Target {@link WorkEntry}. This will be <code>null</code> if no next
-	 * {@link FlowItemModel}.
+	 * {@link TaskModel}.
 	 */
 	public final WorkEntry<?> targetWorkEntry;
 
 	/**
 	 * Target {@link TaskEntry}. This will be <code>null</code> if no next
-	 * {@link FlowItemModel}.
+	 * {@link TaskModel}.
 	 */
 	public final TaskEntry<?> targetTaskEntry;
 
 	/**
-	 * Target {@link FlowItemModel}. This will be <code>null</code> if no
-	 * next {@link FlowItemModel}.
+	 * Target {@link TaskModel}. This will be <code>null</code> if no
+	 * next {@link TaskModel}.
 	 */
-	public final FlowItemModel targetFlowItem;
+	public final TaskModel targetFlowItem;
 
 	/**
-	 * Initiate the line from the {@link FlowItemModel}.
+	 * Initiate the line from the {@link TaskModel}.
 	 * 
 	 * @param flowItem
-	 *            {@link FlowItemModel}.
+	 *            {@link TaskModel}.
 	 * @param taskEntry
-	 *            {@link TaskEntry} containing the {@link FlowItemModel}.
+	 *            {@link TaskEntry} containing the {@link TaskModel}.
 	 * @throws Exception
 	 *             If fails to create the line.
 	 */
-	public FlowNextLine(FlowItemModel flowItem, TaskEntry<?> taskEntry)
+	public FlowNextLine(TaskModel flowItem, TaskEntry<?> taskEntry)
 			throws Exception {
 
 		// Store starting point
@@ -104,15 +104,15 @@ public class FlowNextLine {
 		this.sourceDeskEntry = this.sourceWorkEntry.getDeskEntry();
 
 		// Determine if linked
-		FlowItemToNextFlowItemModel flowItemLink = this.sourceFlowItem
-				.getNextFlowItem();
-		FlowItemToNextExternalFlowModel externalFlowLink = this.sourceFlowItem
+		TaskToNextTaskModel flowItemLink = this.sourceFlowItem
+				.getNextTask();
+		TaskToNextExternalFlowModel externalFlowLink = this.sourceFlowItem
 				.getNextExternalFlow();
 		LinkedFlow target = null;
 		if (flowItemLink != null) {
 
 			// Linked to flow on same desk
-			FlowItemModel targetFlowItem = flowItemLink.getNextFlowItem();
+			TaskModel targetFlowItem = flowItemLink.getNextTask();
 			target = FlowLineUtil.getLinkedFlow(targetFlowItem,
 					this.sourceDeskEntry);
 
@@ -149,10 +149,10 @@ public class FlowNextLine {
 	}
 
 	/**
-	 * Indicates if the next {@link FlowItemModel} is on the same
+	 * Indicates if the next {@link TaskModel} is on the same
 	 * {@link WorkType}.
 	 * 
-	 * @return <code>true</code> if the next {@link FlowItemModel} is on the
+	 * @return <code>true</code> if the next {@link TaskModel} is on the
 	 *         same {@link WorkType}.
 	 */
 	public boolean isSameWork() {

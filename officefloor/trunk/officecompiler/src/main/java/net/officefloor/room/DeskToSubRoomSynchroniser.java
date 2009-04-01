@@ -20,10 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
 import net.officefloor.model.room.SubRoomManagedObjectModel;
@@ -61,16 +60,16 @@ public class DeskToSubRoomSynchroniser {
 
 			// Obtain the managed object
 			SubRoomManagedObjectModel mo = existingManagedObjects.get(deskMo
-					.getName());
+					.getExternalManagedObjectName());
 			if (mo == null) {
 				// Not exist therefore create and add
-				mo = new SubRoomManagedObjectModel(deskMo.getName(), deskMo
+				mo = new SubRoomManagedObjectModel(deskMo.getExternalManagedObjectName(), deskMo
 						.getObjectType(), null);
 				subRoom.addManagedObject(mo);
 			}
 
 			// Remove from existing list
-			existingManagedObjects.remove(deskMo.getName());
+			existingManagedObjects.remove(deskMo.getExternalManagedObjectName());
 		}
 
 		// Remove no longer existing managed objects
@@ -85,7 +84,7 @@ public class DeskToSubRoomSynchroniser {
 		}
 
 		// Add input flows as per desk
-		for (FlowItemModel flow : desk.getFlowItems()) {
+		for (TaskModel flow : desk.getTasks()) {
 
 			// Do not add non-public flow items
 			if (!flow.getIsPublic()) {
@@ -93,16 +92,16 @@ public class DeskToSubRoomSynchroniser {
 			}
 
 			// Obtain the input flow
-			SubRoomInputFlowModel inFlow = existingInputFlows.get(flow.getId());
+			SubRoomInputFlowModel inFlow = existingInputFlows.get(flow.getTaskName());
 			if (inFlow == null) {
 				// Not exist therefore create and add (defaultly not public)
-				inFlow = new SubRoomInputFlowModel(flow.getId(), false, null,
+				inFlow = new SubRoomInputFlowModel(flow.getTaskName(), false, null,
 						null);
 				subRoom.addInputFlow(inFlow);
 			}
 
 			// Remove from existing list
-			existingInputFlows.remove(flow.getId());
+			existingInputFlows.remove(flow.getTaskName());
 		}
 
 		// Remove no longer existing input flows
@@ -121,10 +120,10 @@ public class DeskToSubRoomSynchroniser {
 
 			// Obtain the output flow
 			SubRoomOutputFlowModel outFlow = existingOutputFlows.get(flow
-					.getName());
+					.getExternalFlowName());
 			if (outFlow == null) {
 				// Not exist therefore create and add
-				outFlow = new SubRoomOutputFlowModel(flow.getName(), null, null);
+				outFlow = new SubRoomOutputFlowModel(flow.getExternalFlowName(), null, null);
 				subRoom.addOutputFlow(outFlow);
 			}
 
@@ -141,25 +140,6 @@ public class DeskToSubRoomSynchroniser {
 		Map<String, SubRoomEscalationModel> existingEscalations = new HashMap<String, SubRoomEscalationModel>();
 		for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
 			existingEscalations.put(escalation.getName(), escalation);
-		}
-
-		// Add escalations as per desk
-		for (ExternalEscalationModel extEscalation : desk
-				.getExternalEscalations()) {
-
-			// Obtain the escalation
-			SubRoomEscalationModel escalation = existingEscalations
-					.get(extEscalation.getName());
-			if (escalation == null) {
-				// Not exist therefore create and add
-				escalation = new SubRoomEscalationModel(
-						extEscalation.getName(), extEscalation
-								.getEscalationType(), null, null);
-				subRoom.addEscalation(escalation);
-			}
-
-			// Remove from existing list
-			existingEscalations.remove(extEscalation.getName());
 		}
 
 		// Remove no longer existing escalations

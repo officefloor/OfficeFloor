@@ -30,12 +30,12 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.FlowItemEscalationModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskFlowModel;
 
 /**
  * {@link Task} for the {@link Work}.
@@ -43,15 +43,15 @@ import net.officefloor.model.desk.FlowItemOutputModel;
  * @author Daniel
  */
 public class TaskEntry<W extends Work> extends
-		AbstractEntry<TaskBuilder<W, Indexed, Indexed>, FlowItemModel> {
+		AbstractEntry<TaskBuilder<W, Indexed, Indexed>, TaskModel> {
 
 	/**
 	 * Loads the {@link TaskEntry}.
 	 * 
 	 * @param flowItem
-	 *            {@link FlowItemModel}.
+	 *            {@link TaskModel}.
 	 * @param deskTask
-	 *            {@link DeskTaskModel}.
+	 *            {@link WorkTaskModel}.
 	 * @param workEntry
 	 *            {@link WorkEntry}.
 	 * @param context
@@ -61,13 +61,13 @@ public class TaskEntry<W extends Work> extends
 	 *             If fails.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <W extends Work> TaskEntry loadTask(FlowItemModel flowItem,
-			DeskTaskModel deskTask, WorkEntry<W> workEntry,
+	public static <W extends Work> TaskEntry loadTask(TaskModel flowItem,
+			WorkTaskModel deskTask, WorkEntry<W> workEntry,
 			OfficeFloorCompilerContext context) throws Exception {
 
 		// Obtain the parameter type for the task
 		Class parameterType = null;
-		for (DeskTaskObjectModel taskObject : deskTask.getObjects()) {
+		for (WorkTaskObjectModel taskObject : deskTask.getTaskObjects()) {
 			if (taskObject.getIsParameter()) {
 				parameterType = context.getLoaderContext().obtainClass(
 						taskObject.getObjectType());
@@ -79,7 +79,7 @@ public class TaskEntry<W extends Work> extends
 
 		// Create the builder
 		TaskBuilder<W, Indexed, Indexed> taskBuilder = workEntry.getBuilder()
-				.addTask(flowItem.getId(), taskFactory);
+				.addTask(flowItem.getTaskName(), taskFactory);
 
 		// Create the task entry
 		TaskEntry<W> taskEntry = new TaskEntry<W>(taskBuilder, flowItem,
@@ -93,9 +93,9 @@ public class TaskEntry<W extends Work> extends
 	}
 
 	/**
-	 * {@link DeskTaskModel}.
+	 * {@link WorkTaskModel}.
 	 */
-	private final DeskTaskModel deskTask;
+	private final WorkTaskModel deskTask;
 
 	/**
 	 * {@link WorkEntry} for this {@link TaskEntry}.
@@ -118,29 +118,29 @@ public class TaskEntry<W extends Work> extends
 	 * @param builder
 	 *            {@link TaskBuilder}.
 	 * @param flowItem
-	 *            {@link FlowItemModel}.
+	 *            {@link TaskModel}.
 	 * @param deskTask
-	 *            {@link DeskTaskModel}.
+	 *            {@link WorkTaskModel}.
 	 * @param workEntry
 	 *            {@link WorkEntry} for this {@link TaskEntry}.
 	 * @param loaderContext
 	 *            {@link LoaderContext}.
 	 */
 	public TaskEntry(TaskBuilder<W, Indexed, Indexed> builder,
-			FlowItemModel flowItem, DeskTaskModel deskTask,
+			TaskModel flowItem, WorkTaskModel deskTask,
 			WorkEntry<W> workEntry, LoaderContext loaderContext) {
-		super(flowItem.getId(), builder, flowItem);
+		super(flowItem.getTaskName(), builder, flowItem);
 		this.deskTask = deskTask;
 		this.workEntry = workEntry;
 		this.loaderContext = loaderContext;
 	}
 
 	/**
-	 * Obtains the {@link DeskTaskModel}.
+	 * Obtains the {@link WorkTaskModel}.
 	 * 
-	 * @return {@link DeskTaskModel}.
+	 * @return {@link WorkTaskModel}.
 	 */
-	public DeskTaskModel getDeskTaskModel() {
+	public WorkTaskModel getDeskTaskModel() {
 		return this.deskTask;
 	}
 
@@ -207,7 +207,7 @@ public class TaskEntry<W extends Work> extends
 	 */
 	private void linkManagedObjects() throws TODOException {
 		// Bind the task objects in order
-		for (DeskTaskObjectModel taskObject : this.deskTask.getObjects()) {
+		for (WorkTaskObjectModel taskObject : this.deskTask.getTaskObjects()) {
 
 			// Do not include parameters
 			if (taskObject.getIsParameter()) {
@@ -216,7 +216,7 @@ public class TaskEntry<W extends Work> extends
 
 			// Obtain the work managed object
 			ExternalManagedObjectModel workManagedObject = taskObject
-					.getManagedObject().getManagedObject();
+					.getExternalManagedObject().getExternalManagedObject();
 
 			// Link in the managed object
 			this.linkManagedObject(workManagedObject);
@@ -245,7 +245,7 @@ public class TaskEntry<W extends Work> extends
 		this.managedObjectIndexes.put(workManagedObject, new Integer(index));
 
 		// Link in the managed object
-		String workManagedObjectName = workManagedObject.getName();
+		String workManagedObjectName = workManagedObject.getExternalManagedObjectName();
 		this.getBuilder().linkManagedObject(index, workManagedObjectName,
 				TODO.class);
 	}
@@ -260,14 +260,14 @@ public class TaskEntry<W extends Work> extends
 
 		// Specify the linked flows
 		int flowIndex = 0;
-		for (FlowItemOutputModel flowItemOutput : this.getModel().getOutputs()) {
+		for (TaskFlowModel flowItemOutput : this.getModel().getTaskFlows()) {
 
 			// Create the flow output line
 			FlowOutputLine line = new FlowOutputLine(flowItemOutput, this);
 
 			// Obtain the work and task names of linked flow
 			String workName = line.targetWorkEntry.getCanonicalWorkName();
-			String taskName = line.targetFlowItem.getId();
+			String taskName = line.targetFlowItem.getTaskName();
 
 			// Link in the output flow item
 			if (line.isSameWork()) {
@@ -304,7 +304,7 @@ public class TaskEntry<W extends Work> extends
 
 		// Obtain the work and task names of linked flow
 		String workName = line.targetWorkEntry.getCanonicalWorkName();
-		String taskName = line.targetFlowItem.getId();
+		String taskName = line.targetFlowItem.getTaskName();
 
 		// Link in the output flow item
 		if (line.isSameWork()) {
@@ -325,8 +325,8 @@ public class TaskEntry<W extends Work> extends
 	private void linkEscalations() throws Exception {
 
 		// Link in handling of each escalation
-		for (FlowItemEscalationModel flowItemEscalation : this.getModel()
-				.getEscalations()) {
+		for (TaskEscalationModel flowItemEscalation : this.getModel()
+				.getTaskEscalations()) {
 
 			// Obtain the escalation type
 			String escalationTypeName = flowItemEscalation.getEscalationType();
@@ -342,7 +342,7 @@ public class TaskEntry<W extends Work> extends
 
 				// Obtain the work and task names handling escalation
 				String workName = line.targetWorkEntry.getCanonicalWorkName();
-				String taskName = line.targetFlowItem.getId();
+				String taskName = line.targetFlowItem.getTaskName();
 
 				// Link in escalation handler
 				if (line.isSameWork()) {
@@ -393,12 +393,12 @@ public class TaskEntry<W extends Work> extends
 				if (managedObject.deskTaskObject != null) {
 					// Already being used by task
 					workManagedObjectName = managedObject.deskManagedObject
-							.getName();
+							.getExternalManagedObjectName();
 
 				} else if (managedObject.deskManagedObject != null) {
 					// Linked to work but not task
 					workManagedObjectName = managedObject.deskManagedObject
-							.getName();
+							.getExternalManagedObjectName();
 
 					// Link managed object to this task
 					this.linkManagedObject(managedObject.deskManagedObject);

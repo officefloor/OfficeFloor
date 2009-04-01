@@ -58,9 +58,9 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	private final File file;
 
 	/**
-	 * Id of this item.
+	 * Location of this item.
 	 */
-	private final String id;
+	private final String location;
 
 	/**
 	 * {@link ConfigurationContext}.
@@ -85,16 +85,17 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	/**
 	 * Initiate.
 	 * 
-	 * @param id
-	 *            Id (allows for relative path, rather than full file path).
+	 * @param location
+	 *            Relative location of the {@link File} within the
+	 *            {@link ConfigurationContext}.
 	 * @param file
 	 *            File containing the configuration.
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
 	 */
-	protected FileSystemConfigurationItem(String id, File file,
+	protected FileSystemConfigurationItem(String location, File file,
 			ConfigurationContext configurationContext) {
-		this.id = id;
+		this.location = location;
 		this.file = file;
 		this.configurationContext = configurationContext;
 	}
@@ -109,13 +110,12 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	}
 
 	/*
-	 * ======================= ConfigurationItem
-	 * ==================================
+	 * ==================== ConfigurationItem ==================================
 	 */
 
 	@Override
 	public String getLocation() {
-		return this.id;
+		return this.location;
 	}
 
 	@Override

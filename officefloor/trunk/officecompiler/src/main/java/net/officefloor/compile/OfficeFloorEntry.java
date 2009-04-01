@@ -21,7 +21,7 @@ import java.util.List;
 
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
@@ -255,7 +255,7 @@ public class OfficeFloorEntry extends
 			if (officeRoom != null) {
 				RoomEntry roomEntry = officeEntry.getRoomEntry(officeRoom);
 				for (DeskEntry deskEntry : roomEntry.getDeskEntries()) {
-					for (DeskWorkModel workModel : deskEntry.getModel()
+					for (WorkModel workModel : deskEntry.getModel()
 							.getWorks()) {
 						WorkEntry<?> workEntry = deskEntry
 								.getWorkEntry(workModel);

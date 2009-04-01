@@ -24,9 +24,9 @@ import net.officefloor.compile.spi.work.source.CompilerAwareTaskFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.DeskTaskObjectModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskFlowModel;
 
 /**
  * {@link TaskFactory} for the {@link ClassTask}.
@@ -64,7 +64,7 @@ public class ClassTaskFactory implements
 	 */
 
 	@Override
-	public void initialiseTaskFactory(FlowItemModel task) throws Exception {
+	public void initialiseTaskFactory(TaskModel task) throws Exception {
 
 		// Create the indexes of objects
 		List<Integer> objectIndexList = new LinkedList<Integer>();
@@ -78,19 +78,19 @@ public class ClassTaskFactory implements
 		Integer[] objectIndexes = objectIndexList.toArray(new Integer[0]);
 
 		// Ensure matching object configuration
-		List<DeskTaskObjectModel> objectList = task.getDeskTask().getTask()
-				.getObjects();
+		List<WorkTaskObjectModel> objectList = task.getTask().getWorkTask()
+				.getTaskObjects();
 		if (objectList.size() != objectIndexes.length) {
 			throw new Exception("Incorrect configuration as expect "
 					+ objectIndexes.length
 					+ " objects but provided configuration for "
 					+ objectList.size() + " objects");
 		}
-		DeskTaskObjectModel[] objects = objectList
-				.toArray(new DeskTaskObjectModel[0]);
+		WorkTaskObjectModel[] objects = objectList
+				.toArray(new WorkTaskObjectModel[0]);
 
 		// Ensure matching flow configuration (parameters after objects)
-		List<FlowItemOutputModel> flowList = task.getOutputs();
+		List<TaskFlowModel> flowList = task.getTaskFlows();
 		int flowOutputCount = this.parameters.length - objectIndexes.length;
 		if (flowList.size() != flowOutputCount) {
 			throw new Exception("Incorrect configuration as expect "
@@ -104,7 +104,7 @@ public class ClassTaskFactory implements
 		for (int i = 0; i < objectIndexes.length; i++) {
 
 			// Obtain the task object
-			DeskTaskObjectModel object = objects[i];
+			WorkTaskObjectModel object = objects[i];
 
 			// Obtain the parameter index
 			int paramIndex = objectIndexes[i].intValue();

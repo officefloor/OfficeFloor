@@ -18,11 +18,10 @@ package net.officefloor.compile;
 
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.room.RoomModel;
 import net.officefloor.model.room.SubRoomEscalationModel;
 import net.officefloor.model.room.SubRoomInputFlowModel;
@@ -124,8 +123,8 @@ public class EntryUtil {
 			Class<W> workType, DeskEntry parentDeskEntry) {
 
 		// Create the work entry
-		DeskWorkModel deskWork = new DeskWorkModel();
-		deskWork.setId(workId);
+		WorkModel deskWork = new WorkModel();
+		deskWork.setWorkName(workId);
 		WorkEntry<W> workEntry = new WorkEntry<W>(workId, deskWork, null,
 				parentDeskEntry);
 
@@ -150,7 +149,7 @@ public class EntryUtil {
 			String flowItemId, WorkEntry<W> parentWorkEntry) {
 
 		// Create the desk task
-		DeskTaskModel deskTask = new DeskTaskModel();
+		WorkTaskModel deskTask = new WorkTaskModel();
 
 		// Return with desk task
 		return createTaskEntry(flowItemId, deskTask, parentWorkEntry);
@@ -158,31 +157,31 @@ public class EntryUtil {
 
 	/**
 	 * Creates the {@link TaskEntry}, linking to an existing
-	 * {@link DeskTaskModel}.
+	 * {@link WorkTaskModel}.
 	 * 
 	 * @param flowItemId
 	 *            Id.
 	 * @param deskTask
-	 *            {@link DeskTaskModel}.
+	 *            {@link WorkTaskModel}.
 	 * @param parentWorkEntry
 	 *            Parent {@link WorkEntry}.
 	 * @return {@link TaskEntry}.
 	 */
 	public static <W extends Work> TaskEntry<W> createTaskEntry(
-			String flowItemId, DeskTaskModel deskTask,
+			String flowItemId, WorkTaskModel deskTask,
 			WorkEntry<W> parentWorkEntry) {
 
 		// Create the flow item
-		FlowItemModel flowItem = new FlowItemModel();
-		flowItem.setId(flowItemId);
-		flowItem.setWorkName(parentWorkEntry.getModel().getId());
+		TaskModel flowItem = new TaskModel();
+		flowItem.setTaskName(flowItemId);
+		flowItem.setWorkName(parentWorkEntry.getModel().getWorkName());
 
 		// Create the task entry
 		TaskEntry<W> task = new TaskEntry<W>(null, flowItem, deskTask,
 				parentWorkEntry, null);
 
 		// Link the flow item to the task on the parent work
-		parentWorkEntry.getDeskEntry().getModel().addFlowItem(flowItem);
+		parentWorkEntry.getDeskEntry().getModel().addTask(flowItem);
 		parentWorkEntry.taskMap.put(flowItem, task);
 
 		// Return the task entry
@@ -190,24 +189,24 @@ public class EntryUtil {
 	}
 
 	/**
-	 * Creates the {@link FlowItemEscalationModel}.
+	 * Creates the {@link TaskEscalationModel}.
 	 * 
 	 * @param escalationType
 	 *            Type of escalation.
 	 * @param parentTaskEntry
 	 *            Parent {@link TaskEntry}.
-	 * @return {@link FlowItemEscalationModel}.
+	 * @return {@link TaskEscalationModel}.
 	 */
-	public static <W extends Work> FlowItemEscalationModel createFlowItemEscalation(
+	public static <W extends Work> TaskEscalationModel createFlowItemEscalation(
 			Class<? extends Throwable> escalationType,
 			TaskEntry<W> parentTaskEntry) {
 
 		// Create the escalation
-		FlowItemEscalationModel flowItemEscalation = new FlowItemEscalationModel();
+		TaskEscalationModel flowItemEscalation = new TaskEscalationModel();
 		flowItemEscalation.setEscalationType(escalationType.getName());
 
 		// Add the escalation to the task
-		parentTaskEntry.getModel().addEscalation(flowItemEscalation);
+		parentTaskEntry.getModel().addTaskEscalation(flowItemEscalation);
 
 		// Return the flow item escalation
 		return flowItemEscalation;
@@ -217,33 +216,6 @@ public class EntryUtil {
 	 * All access via static methods.
 	 */
 	private EntryUtil() {
-	}
-
-	/**
-	 * Creates the {@link ExternalEscalationModel} for a {@link DeskModel}.
-	 * 
-	 * @param escalationName
-	 *            Name of {@link ExternalEscalationModel}.
-	 * @param escalationType
-	 *            Type of escalation.
-	 * @param parentDeskEntry
-	 *            Parent {@link DeskEntry}.
-	 * @return {@link ExternalEscalationModel}.
-	 */
-	public static ExternalEscalationModel createExternalEscalation(
-			String escalationName, Class<? extends Throwable> escalationType,
-			DeskEntry parentDeskEntry) {
-
-		// Create the external escalation
-		ExternalEscalationModel externalEscalation = new ExternalEscalationModel();
-		externalEscalation.setName(escalationName);
-		externalEscalation.setEscalationType(escalationType.getName());
-
-		// Add the escalation to the desk
-		parentDeskEntry.getModel().addExternalEscalation(externalEscalation);
-
-		// Return the external escalation
-		return externalEscalation;
 	}
 
 	/**
@@ -273,36 +245,6 @@ public class EntryUtil {
 
 		// Return the external escalation
 		return externalEscalation;
-	}
-
-	/**
-	 * Creates the {@link SubRoomEscalationModel}.
-	 * 
-	 * @param externalEscalation
-	 *            {@link ExternalEscalationModel} of the {@link DeskModel}.
-	 * @param deskEscalating
-	 *            {@link DeskEntry} of the {@link DeskModel}.
-	 * @return {@link SubRoomEscalationModel}.
-	 * @throws Exception
-	 *             If fails to add {@link SubRoomEscalationModel}.
-	 */
-	public static SubRoomEscalationModel createSubRoomEscalation(
-			ExternalEscalationModel externalEscalation, DeskEntry deskEscalating)
-			throws Exception {
-
-		// Create the sub room escalation
-		SubRoomEscalationModel subRoomEscalation = new SubRoomEscalationModel();
-		subRoomEscalation.setName(externalEscalation.getName());
-		subRoomEscalation.setEscalationType(externalEscalation
-				.getEscalationType());
-
-		// Add escalation to sub room for desk
-		RoomEntry roomEntry = deskEscalating.getParentRoom();
-		SubRoomModel subRoom = roomEntry.getSubRoom(deskEscalating);
-		subRoom.addEscalation(subRoomEscalation);
-
-		// Return the sub room escalation
-		return subRoomEscalation;
 	}
 
 	/**
@@ -340,23 +282,23 @@ public class EntryUtil {
 	 * Creates the {@link SubRoomInputFlowModel}.
 	 * 
 	 * @param flowItem
-	 *            {@link FlowItemModel} being made available as a
+	 *            {@link TaskModel} being made available as a
 	 *            {@link SubRoomInputFlowModel}.
 	 * @param parentDeskEntry
-	 *            Parent {@link DeskEntry} of the {@link FlowItemModel}.
+	 *            Parent {@link DeskEntry} of the {@link TaskModel}.
 	 * @return {@link SubRoomInputFlowModel}.
 	 * @throws Exception
 	 *             If fails to add {@link SubRoomInputFlowModel}.
 	 */
 	public static <W extends Work> SubRoomInputFlowModel createSubRoomInputFlow(
-			FlowItemModel flowItem, DeskEntry parentDeskEntry) throws Exception {
+			TaskModel flowItem, DeskEntry parentDeskEntry) throws Exception {
 
 		// Flag the flow item as public
 		flowItem.setIsPublic(true);
 
 		// Create the sub room input flow
 		SubRoomInputFlowModel subRoomInputFlow = new SubRoomInputFlowModel();
-		subRoomInputFlow.setName(flowItem.getId());
+		subRoomInputFlow.setName(flowItem.getTaskName());
 
 		// Add the input flow to sub room for desk
 		RoomEntry roomEntry = parentDeskEntry.getParentRoom();

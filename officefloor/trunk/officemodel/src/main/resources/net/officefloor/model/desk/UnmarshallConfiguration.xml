@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<unmarshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="../../../../../../../plugin/xml/src/schema/TreeXmlUnmarshaller.xsd"
-	node="desk" class="net.officefloor.model.desk.DeskModel">
+<unmarshall node="desk" class="net.officefloor.model.desk.DeskModel">
 	<!-- EXTERNAL MANAGED OBJECTS -->
 	<object method="addExternalManagedObject" node="external-managed-object"
 		class="net.officefloor.model.desk.ExternalManagedObjectModel">
-		<value method="setName" node="external-managed-object@name" />
+		<value method="setExternalManagedObjectName" node="external-managed-object@name" />
 		<value method="setObjectType" node="external-managed-object@object-type" />
 		<value method="setX" node="external-managed-object@x" />
 		<value method="setY" node="external-managed-object@y" />
@@ -13,23 +11,16 @@
 	<!-- EXTERNAL FLOWS -->
 	<object method="addExternalFlow" node="external-flow"
 		class="net.officefloor.model.desk.ExternalFlowModel">
-		<value method="setName" node="external-flow@name" />
+		<value method="setExternalFlowName" node="external-flow@name" />
+		<value method="setArgumentType" node="external-flow@argument-type" />
 		<value method="setX" node="external-flow@x" />
 		<value method="setY" node="external-flow@y" />
 	</object>
-	<!-- EXTERNAL ESCALATIONS -->
-	<object method="addExternalEscalation" node="external-escalation"
-		class="net.officefloor.model.desk.ExternalEscalationModel">
-		<value method="setName" node="external-escalation@name" />
-		<value method="setEscalationType" node="external-escalation@escalation-type" />
-		<value method="setX" node="external-escalation@x" />
-		<value method="setY" node="external-escalation@y" />
-	</object>
 	<!-- WORKS -->
 	<object method="addWork" node="work"
-		class="net.officefloor.model.desk.DeskWorkModel">
-		<value method="setId" node="work@id" />
-		<value method="setLoader" node="work@loader" />
+		class="net.officefloor.model.desk.WorkModel">
+		<value method="setWorkName" node="work@name" />
+		<value method="setWorkSourceClassName" node="work@source" />
 		<value method="setX" node="work@x" />
 		<value method="setY" node="work@y" />
 		<object method="addProperty" node="property"
@@ -37,66 +28,70 @@
 			<value method="setName" node="property@name" />
 			<value method="setValue" node="property@value" />
 		</object>
-		<object method="setInitialFlowItem" node="initial-flow-item"
-			class="net.officefloor.model.desk.DeskWorkToFlowItemModel">
-			<value method="setFlowItemId" node="initial-flow-item@id" />
+		<object method="setInitialTask" node="initial-task"
+			class="net.officefloor.model.desk.WorkToInitialTaskModel">
+			<value method="setInitialTaskName" node="initial-task@name" />
 		</object>
-		<object method="addTask" node="task"
-			class="net.officefloor.model.desk.DeskTaskModel">
-			<value method="setName" node="task@name" />
-			<object method="addObject" node="task-object"
-				class="net.officefloor.model.desk.DeskTaskObjectModel">
+		<object method="addWorkTask" node="work-task"
+			class="net.officefloor.model.desk.WorkTaskModel">
+			<value method="setWorkTaskName" node="work-task@name" />
+			<object method="addTaskObject" node="task-object"
+				class="net.officefloor.model.desk.WorkTaskObjectModel">
+				<value method="setObjectName" node="task-object@name" />
+				<value method="setKey" node="task-object@key" />
 				<value method="setObjectType" node="task-object@object-type" />
 				<value method="setIsParameter" node="task-object@parameter" />
-				<object method="setManagedObject" node="external-managed-object"
-					class="net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel">
-					<value method="setName" node="external-managed-object@name" />
+				<object method="setExternalManagedObject" node="external-managed-object"
+					class="net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel">
+					<value method="setExternalManagedObjectName" node="external-managed-object@name" />
 				</object>
 			</object>
 		</object>
 	</object>
-	<!-- FLOW ITEMS -->
-	<object method="addFlowItem" node="flow-item"
-		class="net.officefloor.model.desk.FlowItemModel">
-		<value method="setId" node="flow-item@id" />
-		<value method="setX" node="flow-item@x" />
-		<value method="setY" node="flow-item@y" />
-		<value method="setIsPublic" node="flow-item@public" />
-		<value method="setWorkName" node="flow-item@work" />
-		<value method="setTaskName" node="flow-item@task" />
-		<object method="setNextFlowItem" node="next-flow"
-			class="net.officefloor.model.desk.FlowItemToNextFlowItemModel">
-			<value method="setId" node="next-flow@id" />
-		</object>
-		<object method="setNextExternalFlow" node="next-external-flow"
-			class="net.officefloor.model.desk.FlowItemToNextExternalFlowModel">
-			<value method="setExternalFlowName" node="next-external-flow@name" />
-		</object>
-		<object method="addOutput" node="output"
-			class="net.officefloor.model.desk.FlowItemOutputModel">
-			<value method="setId" node="output@id" />
-			<value method="setLabel" node="output@label" />
+	<!-- TASKS -->
+	<object method="addTask" node="task"
+		class="net.officefloor.model.desk.TaskModel">
+		<value method="setTaskName" node="task@name" />
+		<value method="setIsPublic" node="task@public" />
+		<value method="setWorkName" node="task@work" />
+		<value method="setWorkTaskName" node="task@task" />
+		<value method="setReturnType" node="task@return-type" />
+		<value method="setX" node="task@x" />
+		<value method="setY" node="task@y" />
+		<object method="addTaskFlow" node="task-flow"
+			class="net.officefloor.model.desk.TaskFlowModel">
+			<value method="setFlowName" node="task-flow@name" />
+			<value method="setKey" node="task-flow@key" />
+			<value method="setArgumentType" node="task-flow@argument-type" />
 			<object method="setExternalFlow" node="external-flow"
-				class="net.officefloor.model.desk.FlowItemOutputToExternalFlowModel">
-				<value method="setName" node="external-flow@name" />
+				class="net.officefloor.model.desk.TaskFlowToExternalFlowModel">
+				<value method="setExternalFlowName" node="external-flow@name" />
 				<value method="setLinkType" node="external-flow@link" />
 			</object>
-			<object method="setFlowItem" node="flow-item"
-				class="net.officefloor.model.desk.FlowItemOutputToFlowItemModel">
-				<value method="setId" node="flow-item@id" />
-				<value method="setLinkType" node="flow-item@link" />
+			<object method="setTask" node="task"
+				class="net.officefloor.model.desk.TaskFlowToTaskModel">
+				<value method="setTaskName" node="task@name" />
+				<value method="setLinkType" node="task@link" />
 			</object>
 		</object>
-		<object method="addEscalation" node="escalation"
-			class="net.officefloor.model.desk.FlowItemEscalationModel">
-			<value method="setEscalationType" node="escalation@escalation-type" />
-			<object method="setEscalationHandler" node="flow-item"
-				class="net.officefloor.model.desk.FlowItemEscalationToFlowItemModel">
-				<value method="setId" node="flow-item@id" />
+		<object method="setNextTask" node="next-task"
+			class="net.officefloor.model.desk.TaskToNextTaskModel">
+			<value method="setNextTaskName" node="next-task@name" />
+		</object>
+		<object method="setNextExternalFlow" node="next-external-flow"
+			class="net.officefloor.model.desk.TaskToNextExternalFlowModel">
+			<value method="setExternalFlowName" node="next-external-flow@name" />
+		</object>
+		<object method="addTaskEscalation" node="task-escalation"
+			class="net.officefloor.model.desk.TaskEscalationModel">
+			<value method="setEscalationType" node="task-escalation@escalation-type" />
+			<object method="setTask" node="task"
+				class="net.officefloor.model.desk.TaskEscalationToTaskModel">
+				<value method="setTaskName" node="task@name" />
 			</object>
-			<object method="setExternalEscalation" node="external-escalation"
-				class="net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel">
-				<value method="setName" node="external-escalation@name" />
+			<object method="setExternalFlow" node="external-flow"
+				class="net.officefloor.model.desk.TaskEscalationToExternalFlowModel">
+				<value method="setExternalFlowName" node="external-flow@name" />
 			</object>
 		</object>
 	</object>

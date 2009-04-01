@@ -23,25 +23,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.LoaderContext;
-import net.officefloor.compile.desk.DeskLoader;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.mock.MockClass;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskObjectModel;
-import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.FlowItemEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputModel;
-import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
-import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
 import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
@@ -121,11 +118,11 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate work
 		assertList(new String[] { "getId", "getLoader", "getX", "getY" }, desk
-				.getWorks(), new DeskWorkModel("work", ClassWorkSource.class
+				.getWorks(), new WorkModel("work", ClassWorkSource.class
 				.getName(), null, null, null, 40, 41));
 
 		// Validate properties of work
-		DeskWorkModel work = desk.getWorks().get(0);
+		WorkModel work = desk.getWorks().get(0);
 		assertList(new String[] { "getName", "getValue" },
 				work.getProperties(), new PropertyModel(
 						ClassWorkSource.CLASS_NAME_PROPERTY_NAME,
@@ -133,43 +130,46 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 
 		// Validate initial flow item
 		assertEquals("Incorrect initial flow item id", "1", work
-				.getInitialFlowItem().getFlowItemId());
+				.getInitialTask().getInitialTaskName());
 
 		// ----------------------------------------
 		// Validate the Tasks
 		// ----------------------------------------
 
 		// Validate tasks
-		List<DeskTaskModel> tasks = new LinkedList<DeskTaskModel>();
-		tasks.add(new DeskTaskModel("taskMethod", null, null));
+		List<WorkTaskModel> tasks = new LinkedList<WorkTaskModel>();
+		tasks.add(new WorkTaskModel("taskMethod", null, null));
 		if (!isSynchronised) {
-			tasks.add(new DeskTaskModel("noLongerExists", null, null));
+			tasks.add(new WorkTaskModel("noLongerExists", null, null));
 		}
-		tasks.add(new DeskTaskModel("anotherMethod", null, null));
+		tasks.add(new WorkTaskModel("anotherMethod", null, null));
 		assertList(new String[] { "getName" }, desk.getWorks().get(0)
-				.getTasks(), tasks.toArray(new DeskTaskModel[0]));
+				.getWorkTasks(), tasks.toArray(new WorkTaskModel[0]));
 
 		// Validate task objects
 		assertList(new String[] { "getObjectType", "getIsParameter" }, desk
-				.getWorks().get(0).getTasks().get(0).getObjects(),
-				new DeskTaskObjectModel(String.class.getName(), false, null));
+				.getWorks().get(0).getWorkTasks().get(0).getTaskObjects(),
+				new WorkTaskObjectModel("key", "KEY", String.class.getName(),
+						false, null));
 		if (!isSynchronised) {
 			assertList(new String[] { "getObjectType", "getIsParameter" }, desk
-					.getWorks().get(0).getTasks().get(1).getObjects(),
-					new DeskTaskObjectModel(Integer.class.getName(), false,
-							null), new DeskTaskObjectModel(String.class
-							.getName(), true, null));
+					.getWorks().get(0).getWorkTasks().get(1).getTaskObjects(),
+					new WorkTaskObjectModel("key", "KEY", Integer.class
+							.getName(), false, null), new WorkTaskObjectModel(
+							"key", "KEY", String.class.getName(), true, null));
 		}
 
 		// Validate task object to external managed object connections
 		assertEquals("Incorrect external managed object name (for taskMethod)",
-				"mo", desk.getWorks().get(0).getTasks().get(0).getObjects()
-						.get(0).getManagedObject().getName());
+				"mo", desk.getWorks().get(0).getWorkTasks().get(0)
+						.getTaskObjects().get(0).getExternalManagedObject()
+						.getExternalManagedObjectName());
 		if (!isSynchronised) {
 			assertEquals(
 					"Incorrect external managed object name (for noLongerExists)",
-					"mo", desk.getWorks().get(0).getTasks().get(1).getObjects()
-							.get(0).getManagedObject().getName());
+					"mo", desk.getWorks().get(0).getWorkTasks().get(1)
+							.getTaskObjects().get(0).getExternalManagedObject()
+							.getExternalManagedObjectName());
 		}
 
 		// ----------------------------------------
@@ -177,125 +177,121 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 
 		// Validate flow items
-		List<FlowItemModel> flowItems = new LinkedList<FlowItemModel>();
-		flowItems.add(new FlowItemModel("1", true, "work", "taskMethod", null,
-				null, null, null, null, null, null, null, null, 100, 200));
-		flowItems.add(new FlowItemModel("2", false, "work", "anotherMethod",
+		List<TaskModel> flowItems = new LinkedList<TaskModel>();
+		flowItems
+				.add(new TaskModel("1", true, "work", "taskMethod", null, null,
+						null, null, null, null, null, null, null, null, 100,
+						200));
+		flowItems.add(new TaskModel("2", false, "work", "anotherMethod", null,
 				null, null, null, null, null, null, null, null, null, 50, 500));
 		if (!isSynchronised) {
-			flowItems.add(new FlowItemModel("3", false, "work",
-					"noLongerExists", null, null, null, null, null, null, null,
-					null, null, 10, 20));
+			flowItems.add(new TaskModel("3", false, "work", "noLongerExists",
+					null, null, null, null, null, null, null, null, null, null,
+					10, 20));
 		}
 		assertList(new String[] { "getId", "getWorkName", "getTaskName",
-				"getX", "getY" }, desk.getFlowItems(), flowItems
-				.toArray(new FlowItemModel[0]));
+				"getX", "getY" }, desk.getTasks(), flowItems
+				.toArray(new TaskModel[0]));
 
 		// Validate next external flow
-		FlowItemModel flowItem = desk.getFlowItems().get(0);
+		TaskModel flowItem = desk.getTasks().get(0);
 		assertEquals("Incorrect next external flow", "flow", flowItem
 				.getNextExternalFlow().getExternalFlowName());
 		assertEquals("Incorrect previous flow of external flow", flowItem
 				.getNextExternalFlow(), desk.getExternalFlows().get(0)
-				.getPreviousFlowItems().get(0));
+				.getPreviousTasks().get(0));
 
 		// Validate next flow
 		if (!isSynchronised) {
-			flowItem = desk.getFlowItems().get(2);
-			assertEquals("Incorrect next flow id", "1", flowItem
-					.getNextFlowItem().getId());
-			assertEquals("Incorrect previous flow", flowItem.getNextFlowItem(),
-					desk.getFlowItems().get(0).getPreviousFlowItems().get(0));
+			flowItem = desk.getTasks().get(2);
+			assertEquals("Incorrect next flow id", "1", flowItem.getNextTask()
+					.getNextTaskName());
+			assertEquals("Incorrect previous flow", flowItem.getNextTask(),
+					desk.getTasks().get(0).getPreviousTasks().get(0));
 		}
 
 		// Validate outputs of first flow item
-		FlowItemModel flowItemOne = desk.getFlowItems().get(0);
+		TaskModel flowItemOne = desk.getTasks().get(0);
 		assertList(new String[] { "getId", "getLabel" }, flowItemOne
-				.getOutputs(),
-				new FlowItemOutputModel("0", "First", null, null),
-				new FlowItemOutputModel("1", null, null, null),
-				new FlowItemOutputModel("2", "Third", null, null));
+				.getTaskFlows(), new TaskFlowModel("0", "First",
+				"java.lang.Object", null, null), new TaskFlowModel("1", null,
+				"java.lang.Object", null, null), new TaskFlowModel("2",
+				"Third", "java.lang.Object", null, null));
 
 		// Validate link types of the first flow item
 		assertEquals("Incorrect link type (sequential)",
-				DeskLoader.SEQUENTIAL_LINK_TYPE, flowItemOne.getOutputs()
+				DeskLoader.SEQUENTIAL_LINK_TYPE, flowItemOne.getTaskFlows()
 						.get(0).getExternalFlow().getLinkType());
 		assertEquals("Incorrect link type (parallel)",
-				DeskLoader.PARALLEL_LINK_TYPE, flowItemOne.getOutputs().get(1)
-						.getFlowItem().getLinkType());
+				DeskLoader.PARALLEL_LINK_TYPE, flowItemOne.getTaskFlows()
+						.get(1).getTask().getLinkType());
 		if (!isSynchronised) {
-			assertProperties(new FlowItemOutputToFlowItemModel("3", null, null,
+			assertProperties(new TaskFlowToTaskModel("3", null, null,
 					DeskLoader.ASYNCHRONOUS_LINK_TYPE), flowItemOne
-					.getOutputs().get(2).getFlowItem(), "getId", "getLinkType");
+					.getTaskFlows().get(2).getTask(), "getId", "getLinkType");
 		} else {
 			assertNull("Should lose link to non-existant task", flowItemOne
-					.getOutputs().get(2).getFlowItem());
+					.getTaskFlows().get(2).getTask());
 		}
 
 		// Validate escalations of first flow item
-		List<FlowItemEscalationModel> flowItemOneEscalations = new LinkedList<FlowItemEscalationModel>();
-		flowItemOneEscalations.add(new FlowItemEscalationModel(
-				IOException.class.getName(), null, null));
+		List<TaskEscalationModel> flowItemOneEscalations = new LinkedList<TaskEscalationModel>();
+		flowItemOneEscalations.add(new TaskEscalationModel(IOException.class
+				.getName(), null, null));
 		if (!isSynchronised) {
-			flowItemOneEscalations.add(new FlowItemEscalationModel(
+			flowItemOneEscalations.add(new TaskEscalationModel(
 					NullPointerException.class.getName(), null, null));
 		}
 		assertList(new String[] { "getEscalationType" }, flowItemOne
-				.getEscalations(), flowItemOneEscalations
-				.toArray(new FlowItemEscalationModel[0]));
+				.getTaskEscalations(), flowItemOneEscalations
+				.toArray(new TaskEscalationModel[0]));
 
 		// Validate handler on first flow escalation
-		assertNotNull("No handler for escalation", flowItemOne.getEscalations()
-				.get(0).getEscalationHandler());
+		assertNotNull("No handler for escalation", flowItemOne
+				.getTaskEscalations().get(0).getTask());
 
 		// Validate outputs of second flow item
-		FlowItemModel flowItemTwo = desk.getFlowItems().get(1);
+		TaskModel flowItemTwo = desk.getTasks().get(1);
 		assertEquals("Incorrect number of outputs on second flow", 0,
-				flowItemTwo.getOutputs().size());
+				flowItemTwo.getTaskFlows().size());
 
 		// Validate escalations of second flow item
-		List<FlowItemEscalationModel> flowItemTwoEscalations = new LinkedList<FlowItemEscalationModel>();
+		List<TaskEscalationModel> flowItemTwoEscalations = new LinkedList<TaskEscalationModel>();
 		if (isSynchronised) {
-			flowItemTwoEscalations.add(new FlowItemEscalationModel(
+			flowItemTwoEscalations.add(new TaskEscalationModel(
 					SQLException.class.getName(), null, null));
 		}
 		assertList(new String[] { "getEscalationType" }, flowItemTwo
-				.getEscalations(), flowItemTwoEscalations
-				.toArray(new FlowItemEscalationModel[0]));
+				.getTaskEscalations(), flowItemTwoEscalations
+				.toArray(new TaskEscalationModel[0]));
 
 		// Validate escalation handling of second flow item
 		assertEquals("Incorrect escalation being handled", flowItemOne
-				.getEscalations().get(0), flowItemTwo.getHandledEscalations()
-				.get(0).getEscalation());
+				.getTaskEscalations().get(0), flowItemTwo
+				.getTaskEscalationInputs().get(0).getEscalation());
 
 		if (!isSynchronised) {
 			// Validate outputs on third flow item
-			FlowItemModel flowItemThree = desk.getFlowItems().get(2);
+			TaskModel flowItemThree = desk.getTasks().get(2);
 			assertList(new String[] { "getId", "getLabel" }, flowItemThree
-					.getOutputs(), new FlowItemOutputModel("FIRST_FLOW", null,
-					null, null), new FlowItemOutputModel("SECOND_FLOW",
-					"Another", null, null));
+					.getTaskFlows(), new TaskFlowModel("FIRST_FLOW", null,
+					"java.lang.Object", null, null), new TaskFlowModel(
+					"SECOND_FLOW", "Another", "java.lang.Object", null, null));
 
 			// Validate link types of the second flow item
 			assertEquals("Incorrect link type (asynchronous)",
 					DeskLoader.ASYNCHRONOUS_LINK_TYPE, flowItemThree
-							.getOutputs().get(0).getExternalFlow()
+							.getTaskFlows().get(0).getExternalFlow()
 							.getLinkType());
 			assertEquals("Incorrect link type (parallel)",
-					DeskLoader.PARALLEL_LINK_TYPE, flowItemThree.getOutputs()
-							.get(1).getFlowItem().getLinkType());
+					DeskLoader.PARALLEL_LINK_TYPE, flowItemThree.getTaskFlows()
+							.get(1).getTask().getLinkType());
 
 			// Validate escalations of third flow item
 			assertList(new String[] { "getEscalationType" }, flowItemThree
-					.getEscalations(), new FlowItemEscalationModel(
+					.getTaskEscalations(), new TaskEscalationModel(
 					SQLException.class.getName(), null, null));
 
-			// Validate external escalation connection
-			assertProperties(new FlowItemEscalationToExternalEscalationModel(
-					"escalation", null, desk.getExternalEscalations().get(0)),
-					flowItemThree.getEscalations().get(0)
-							.getExternalEscalation(), "getName",
-					"getExternalEscalation");
 		}
 
 		// ----------------------------------------
@@ -309,16 +305,16 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 						10, 11));
 
 		// Validate external managed object connections to work tasks
-		List<DeskTaskObjectToExternalManagedObjectModel> taskObjects = new LinkedList<DeskTaskObjectToExternalManagedObjectModel>();
-		taskObjects.add(new DeskTaskObjectToExternalManagedObjectModel("mo",
+		List<WorkTaskObjectToExternalManagedObjectModel> taskObjects = new LinkedList<WorkTaskObjectToExternalManagedObjectModel>();
+		taskObjects.add(new WorkTaskObjectToExternalManagedObjectModel("mo",
 				null, null));
 		if (!isSynchronised) {
-			taskObjects.add(new DeskTaskObjectToExternalManagedObjectModel(
+			taskObjects.add(new WorkTaskObjectToExternalManagedObjectModel(
 					"mo", null, null));
 		}
 		assertList(new String[] { "getName" }, desk.getExternalManagedObjects()
 				.get(0).getTaskObjects(), taskObjects
-				.toArray(new DeskTaskObjectToExternalManagedObjectModel[0]));
+				.toArray(new WorkTaskObjectToExternalManagedObjectModel[0]));
 
 		// ----------------------------------------
 		// Validate the External Flows
@@ -327,41 +323,19 @@ public class DeskLoaderTest extends OfficeFrameTestCase {
 		// Validate external flows
 		assertList(new String[] { "getName", "getX", "getY" }, desk
 				.getExternalFlows(), new ExternalFlowModel("flow", null, null,
-				20, 21));
+				null, null, 20, 21));
 
 		// Validate external flow connections to flow items
-		List<FlowItemOutputToExternalFlowModel> externalFlowLinks = new LinkedList<FlowItemOutputToExternalFlowModel>();
-		externalFlowLinks.add(new FlowItemOutputToExternalFlowModel("flow",
-				null, null, "Sequential"));
+		List<TaskFlowToExternalFlowModel> externalFlowLinks = new LinkedList<TaskFlowToExternalFlowModel>();
+		externalFlowLinks.add(new TaskFlowToExternalFlowModel("flow", null,
+				null, "Sequential"));
 		if (!isSynchronised) {
-			externalFlowLinks.add(new FlowItemOutputToExternalFlowModel("flow",
-					null, null, "Asynchronous"));
+			externalFlowLinks.add(new TaskFlowToExternalFlowModel("flow", null,
+					null, "Asynchronous"));
 		}
 		assertList(new String[] { "getName", "getLinkType" }, desk
-				.getExternalFlows().get(0).getOutputs(), externalFlowLinks
-				.toArray(new FlowItemOutputToExternalFlowModel[0]));
-
-		// ----------------------------------------
-		// Validate the External Escalations
-		// ----------------------------------------
-
-		// Validate external escalations
-		assertList(new String[] { "getName", "getEscalationType", "getX",
-				"getY" }, desk.getExternalEscalations(),
-				new ExternalEscalationModel("escalation", SQLException.class
-						.getName(), null, 30, 31));
-
-		// Validate external escalation connection to flow item escalations
-		if (isSynchronised) {
-			assertEquals("Incorrect external escalation connection number", 0,
-					desk.getExternalEscalations().get(0)
-							.getHandledEscalations().size());
-		} else {
-			assertList(new String[] { "getName" }, desk
-					.getExternalEscalations().get(0).getHandledEscalations(),
-					new FlowItemEscalationToExternalEscalationModel(
-							"escalation", null, null));
-		}
+				.getExternalFlows().get(0).getTaskFlows(), externalFlowLinks
+				.toArray(new TaskFlowToExternalFlowModel[0]));
 	}
 
 	/**

@@ -22,27 +22,27 @@ import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputModel;
-import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
-import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel;
 
 /**
- * Contains the various items on the line from the {@link FlowItemOutputModel}
- * through to its {@link FlowItemModel}.
+ * Contains the various items on the line from the {@link TaskFlowModel}
+ * through to its {@link TaskModel}.
  * 
  * @author Daniel
  */
 public class FlowOutputLine {
 
 	/**
-	 * Source {@link FlowItemOutputModel}.
+	 * Source {@link TaskFlowModel}.
 	 */
-	public final FlowItemOutputModel sourceFlowItemOutput;
+	public final TaskFlowModel sourceFlowItemOutput;
 
 	/**
 	 * Source {@link ExternalFlowModel}. This will be <code>null</code> if
-	 * target {@link FlowItemModel} is on the same {@link DeskModel}.
+	 * target {@link TaskModel} is on the same {@link DeskModel}.
 	 */
 	public final ExternalFlowModel sourceExternalFlow;
 
@@ -82,21 +82,21 @@ public class FlowOutputLine {
 	public final TaskEntry<?> targetTaskEntry;
 
 	/**
-	 * Target {@link FlowItemModel}.
+	 * Target {@link TaskModel}.
 	 */
-	public final FlowItemModel targetFlowItem;
+	public final TaskModel targetFlowItem;
 
 	/**
-	 * Initiate the line from the {@link FlowItemOutputModel}.
+	 * Initiate the line from the {@link TaskFlowModel}.
 	 * 
 	 * @param flowItemOutput
-	 *            {@link FlowItemOutputModel}.
+	 *            {@link TaskFlowModel}.
 	 * @param taskEntry
-	 *            {@link TaskEntry} containing the {@link FlowItemOutputModel}.
+	 *            {@link TaskEntry} containing the {@link TaskFlowModel}.
 	 * @throws Exception
 	 *             If fails to create the line.
 	 */
-	public FlowOutputLine(FlowItemOutputModel flowItemOutput,
+	public FlowOutputLine(TaskFlowModel flowItemOutput,
 			TaskEntry<?> taskEntry) throws Exception {
 
 		// Store starting point
@@ -108,16 +108,16 @@ public class FlowOutputLine {
 		this.sourceDeskEntry = this.sourceWorkEntry.getDeskEntry();
 
 		// Determine the where linked
-		FlowItemOutputToFlowItemModel flowItemLink = this.sourceFlowItemOutput
-				.getFlowItem();
-		FlowItemOutputToExternalFlowModel externalFlowLink = this.sourceFlowItemOutput
+		TaskFlowToTaskModel flowItemLink = this.sourceFlowItemOutput
+				.getTask();
+		TaskFlowToExternalFlowModel externalFlowLink = this.sourceFlowItemOutput
 				.getExternalFlow();
 		LinkedFlow target;
 		String instigationType;
 		if (flowItemLink != null) {
 
 			// Linked to flow on same desk
-			FlowItemModel targetFlowItem = flowItemLink.getFlowItem();
+			TaskModel targetFlowItem = flowItemLink.getTask();
 			target = FlowLineUtil.getLinkedFlow(targetFlowItem,
 					this.sourceDeskEntry);
 			instigationType = flowItemLink.getLinkType();
@@ -136,7 +136,7 @@ public class FlowOutputLine {
 		} else {
 			// Flow output not linked
 			throw new Exception("Flow item output "
-					+ this.sourceFlowItemOutput.getId() + " on flow item "
+					+ this.sourceFlowItemOutput.getFlowName() + " on flow item "
 					+ this.sourceTaskEntry.getId() + " not linked to a flow");
 		}
 
@@ -152,10 +152,10 @@ public class FlowOutputLine {
 	}
 
 	/**
-	 * Indicates if the next {@link FlowItemModel} is on the same
+	 * Indicates if the next {@link TaskModel} is on the same
 	 * {@link WorkType}.
 	 * 
-	 * @return <code>true</code> if the next {@link FlowItemModel} is on the
+	 * @return <code>true</code> if the next {@link TaskModel} is on the
 	 *         same {@link WorkType}.
 	 */
 	public boolean isSameWork() {

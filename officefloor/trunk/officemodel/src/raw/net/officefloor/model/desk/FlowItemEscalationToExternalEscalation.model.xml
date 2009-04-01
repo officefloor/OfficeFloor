@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="String" name="name" />
-	<field type="FlowItemEscalationModel" name="escalation" end-field="external escalation" />
-	<field type="ExternalEscalationModel" name="external escalation" end-list="handled escalation" />
-</model>

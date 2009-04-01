@@ -53,16 +53,16 @@ public class DeskToOfficeDeskSynchroniser {
 		}
 
 		// Synchronise the flow items
-		for (net.officefloor.model.desk.FlowItemModel flowItem : desk
-				.getFlowItems()) {
-			String flowItemId = flowItem.getId();
+		for (net.officefloor.model.desk.TaskModel flowItem : desk
+				.getTasks()) {
+			String flowItemId = flowItem.getTaskName();
 			if (existingFlowItems.containsKey(flowItemId)) {
 				// Remove from existing (so not removed later)
 				existingFlowItems.remove(flowItemId);
 			} else {
 				// Add the flow item
 				FlowItemModel newFlowItem = new FlowItemModel(flowItemId,
-						flowItem.getWorkName(), flowItem.getTaskName(), null,
+						flowItem.getWorkName(), flowItem.getWorkTaskName(), null,
 						null, null, null);
 				officeDesk.addFlowItem(newFlowItem);
 			}

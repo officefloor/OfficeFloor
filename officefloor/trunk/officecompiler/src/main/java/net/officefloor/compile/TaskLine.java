@@ -22,8 +22,8 @@ import java.util.LinkedList;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeRoomModel;
@@ -33,7 +33,7 @@ import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.util.OFCU;
 
 /**
- * Contains the various items on the line from a {@link FlowItemModel} through
+ * Contains the various items on the line from a {@link TaskModel} through
  * to its {@link net.officefloor.model.office.FlowItemModel} and subsequent
  * {@link TeamModel} responsible for the {@link Task}.
  * 
@@ -42,19 +42,19 @@ import net.officefloor.util.OFCU;
 public class TaskLine<W extends Work> {
 
 	/**
-	 * Desk {@link FlowItemModel}.
+	 * Desk {@link TaskModel}.
 	 */
-	public final FlowItemModel deskFlowItem;
+	public final TaskModel deskFlowItem;
 
 	/**
-	 * {@link TaskEntry} of the {@link FlowItemModel}.
+	 * {@link TaskEntry} of the {@link TaskModel}.
 	 */
 	public final TaskEntry<W> taskEntry;
 
 	/**
-	 * {@link DeskTaskModel} for the {@link FlowItemModel}.
+	 * {@link WorkTaskModel} for the {@link TaskModel}.
 	 */
-	public final DeskTaskModel deskTask;
+	public final WorkTaskModel deskTask;
 
 	/**
 	 * {@link WorkEntry}.
@@ -107,16 +107,16 @@ public class TaskLine<W extends Work> {
 	public final TeamModel team;
 
 	/**
-	 * Initiate the line from the {@link FlowItemModel}.
+	 * Initiate the line from the {@link TaskModel}.
 	 * 
 	 * @param deskFlowItem
-	 *            {@link FlowItemModel}.
+	 *            {@link TaskModel}.
 	 * @param taskEntry
-	 *            {@link TaskEntry} for the {@link FlowItemModel}.
+	 *            {@link TaskEntry} for the {@link TaskModel}.
 	 * @throws Exception
 	 *             If fails to create the line.
 	 */
-	public TaskLine(FlowItemModel deskFlowItem, TaskEntry<W> taskEntry)
+	public TaskLine(TaskModel deskFlowItem, TaskEntry<W> taskEntry)
 			throws Exception {
 
 		// Store starting point
@@ -128,7 +128,7 @@ public class TaskLine<W extends Work> {
 		this.deskEntry = this.workEntry.getDeskEntry();
 
 		// Obtain the desk task
-		this.deskTask = this.deskFlowItem.getDeskTask().getTask();
+		this.deskTask = this.deskFlowItem.getTask().getWorkTask();
 
 		// Create the hierarchy of desk/room names
 		Deque<String> hierarchy = new LinkedList<String>();
@@ -199,13 +199,13 @@ public class TaskLine<W extends Work> {
 		net.officefloor.model.office.FlowItemModel officeFlowItem = null;
 		for (net.officefloor.model.office.FlowItemModel of : officeDesk
 				.getFlowItems()) {
-			if (this.deskFlowItem.getId().equals(of.getId())) {
+			if (this.deskFlowItem.getTaskName().equals(of.getId())) {
 				officeFlowItem = of;
 			}
 		}
 		if (officeFlowItem == null) {
 			throw new Exception("No corresponding flow item "
-					+ this.deskFlowItem.getId() + " on office desk "
+					+ this.deskFlowItem.getTaskName() + " on office desk "
 					+ officeDesk.getName() + " of office "
 					+ officeEntry.getId());
 		}

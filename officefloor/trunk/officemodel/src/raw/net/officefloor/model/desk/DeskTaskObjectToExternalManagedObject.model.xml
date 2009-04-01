@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="String" name="name"/>
-	<field type="DeskTaskObjectModel" name="task object" end-field="managed object"/>
-	<field type="ExternalManagedObjectModel" name="managed object" end-list="task object"/>
-</model>

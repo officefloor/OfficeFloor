@@ -29,12 +29,12 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskObjectModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.DeskWorkToFlowItemModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.TaskModel;
 
 /**
  * {@link net.officefloor.frame.api.execute.Work} entry for the
@@ -43,7 +43,7 @@ import net.officefloor.model.desk.FlowItemModel;
  * @author Daniel
  */
 public class WorkEntry<W extends Work> extends
-		AbstractEntry<WorkBuilder<W>, DeskWorkModel> {
+		AbstractEntry<WorkBuilder<W>, WorkModel> {
 
 	/**
 	 * Process scope for the {@link ManagedObject}.
@@ -65,7 +65,7 @@ public class WorkEntry<W extends Work> extends
 	 * Loads the {@link WorkEntry}.
 	 * 
 	 * @param deskWork
-	 *            {@link DeskWorkModel}.
+	 *            {@link WorkModel}.
 	 * @param deskEntry
 	 *            {@link DeskEntry} containing this {@link WorkEntry}.
 	 * @param context
@@ -76,7 +76,7 @@ public class WorkEntry<W extends Work> extends
 	 */
 	@SuppressWarnings("unchecked")
 	public static <W extends Work> WorkEntry<W> loadWork(
-			DeskWorkModel deskWork, DeskEntry deskEntry,
+			WorkModel deskWork, DeskEntry deskEntry,
 			OfficeFloorCompilerContext context) throws Exception {
 
 		// Obtain the work (and its details)
@@ -89,26 +89,26 @@ public class WorkEntry<W extends Work> extends
 
 		// Create the work builder
 		WorkBuilder<W> builder = deskEntry.getParentRoom().getOffice()
-				.getBuilder().addWork(deskWork.getId(), workFactory);
+				.getBuilder().addWork(deskWork.getWorkName(), workFactory);
 
 		// Create the work entry
-		WorkEntry<W> workEntry = new WorkEntry<W>(deskWork.getId(), deskWork,
+		WorkEntry<W> workEntry = new WorkEntry<W>(deskWork.getWorkName(), deskWork,
 				builder, deskEntry);
 
 		// Create the registry of Desk Task instances
-		Map<String, DeskTaskModel> tasks = new HashMap<String, DeskTaskModel>();
-		for (DeskTaskModel task : deskWork.getTasks()) {
-			tasks.put(task.getName(), task);
+		Map<String, WorkTaskModel> tasks = new HashMap<String, WorkTaskModel>();
+		for (WorkTaskModel task : deskWork.getWorkTasks()) {
+			tasks.put(task.getWorkTaskName(), task);
 		}
 
 		// Load flow items as tasks of work
-		String workId = deskWork.getId();
-		for (FlowItemModel flowItem : deskEntry.getModel().getFlowItems()) {
+		String workId = deskWork.getWorkName();
+		for (TaskModel flowItem : deskEntry.getModel().getTasks()) {
 			// Check if flow item of the work
 			if (workId.equals(flowItem.getWorkName())) {
 
 				// Obtain the task for the flow item
-				DeskTaskModel deskTask = tasks.get(flowItem.getTaskName());
+				WorkTaskModel deskTask = tasks.get(flowItem.getWorkTaskName());
 
 				// Load the task entry
 				TaskEntry taskEntry = TaskEntry.loadTask(flowItem, deskTask,
@@ -128,9 +128,9 @@ public class WorkEntry<W extends Work> extends
 	private final DeskEntry deskEntry;
 
 	/**
-	 * {@link FlowItemModel} to {@link TaskEntry} map.
+	 * {@link TaskModel} to {@link TaskEntry} map.
 	 */
-	protected final ModelEntryMap<FlowItemModel, TaskEntry<?>> taskMap = new ModelEntryMap<FlowItemModel, TaskEntry<?>>();
+	protected final ModelEntryMap<TaskModel, TaskEntry<?>> taskMap = new ModelEntryMap<TaskModel, TaskEntry<?>>();
 
 	/**
 	 * {@link TaskEntry} instances of this {@link WorkEntry}.
@@ -152,13 +152,13 @@ public class WorkEntry<W extends Work> extends
 	 * @param builder
 	 *            {@link WorkBuilder}.
 	 * @param deskWork
-	 *            {@link DeskWorkModel}.
+	 *            {@link WorkModel}.
 	 * @param deskEntry
 	 *            {@link DeskEntry}.
 	 * @param room
 	 *            {@link RoomEntry} containing this {@link WorkEntry}.
 	 */
-	public WorkEntry(String workId, DeskWorkModel workModel,
+	public WorkEntry(String workId, WorkModel workModel,
 			WorkBuilder<W> builder, DeskEntry deskEntry) {
 		super(workId, builder, workModel);
 		this.deskEntry = deskEntry;
@@ -215,19 +215,19 @@ public class WorkEntry<W extends Work> extends
 	}
 
 	/**
-	 * Obtains the {@link TaskEntry} for the {@link FlowItemModel}.
+	 * Obtains the {@link TaskEntry} for the {@link TaskModel}.
 	 * 
 	 * @param flowItemModel
-	 *            {@link FlowItemModel}.
+	 *            {@link TaskModel}.
 	 * @return {@link TaskEntry}.
 	 * @throws Exception
 	 *             If not found.
 	 */
-	public TaskEntry<?> getTaskEntry(FlowItemModel flowItemModel)
+	public TaskEntry<?> getTaskEntry(TaskModel flowItemModel)
 			throws Exception {
 		return this.getEntry(flowItemModel, this.taskMap, "No task '"
-				+ flowItemModel.getId() + "' on work "
-				+ this.getModel().getId() + " of desk "
+				+ flowItemModel.getTaskName() + "' on work "
+				+ this.getModel().getWorkName() + " of desk "
 				+ this.deskEntry.getId());
 	}
 
@@ -247,30 +247,30 @@ public class WorkEntry<W extends Work> extends
 		OfficeEntry officeEntry = this.getOfficeEntry();
 
 		// Obtain the work (and its details)
-		DeskWorkModel deskWork = this.getModel();
+		WorkModel deskWork = this.getModel();
 
 		// TODO use WorkLoader to obtain WorkType
 		WorkType work = null;
 		WorkFactory<W> workFactory = (WorkFactory<W>) work.getWorkFactory();
 
 		// Determine if an initial flow
-		FlowItemModel initialFlowItem = null;
-		DeskWorkToFlowItemModel initialFlowConnection = deskWork
-				.getInitialFlowItem();
+		TaskModel initialFlowItem = null;
+		WorkToInitialTaskModel initialFlowConnection = deskWork
+				.getInitialTask();
 		if (initialFlowConnection != null) {
-			initialFlowItem = initialFlowConnection.getInitialFlowItem();
+			initialFlowItem = initialFlowConnection.getInitialTask();
 		}
 
 		// Load details of work
 		if (initialFlowItem != null) {
-			this.getBuilder().setInitialTask(initialFlowItem.getId());
+			this.getBuilder().setInitialTask(initialFlowItem.getTaskName());
 		}
 
 		// Create the unique set of desk external managed objects of this work
 		Map<ExternalManagedObjectModel, ManagedObjectLine<W>> externalManagedObjects = new HashMap<ExternalManagedObjectModel, ManagedObjectLine<W>>();
 		for (TaskEntry task : this.tasks) {
-			for (DeskTaskObjectModel taskObject : task.getDeskTaskModel()
-					.getObjects()) {
+			for (WorkTaskObjectModel taskObject : task.getDeskTaskModel()
+					.getTaskObjects()) {
 
 				// Do not include parameters
 				if (taskObject.getIsParameter()) {
@@ -310,7 +310,7 @@ public class WorkEntry<W extends Work> extends
 	public void buildManagedObject(ManagedObjectLine<W> line) throws Exception {
 
 		// Obtain the name that tasks may use
-		String workMoName = line.deskExternalManagedObject.getName();
+		String workMoName = line.deskExternalManagedObject.getExternalManagedObjectName();
 
 		// Obtain the name known on the office
 		String officeMoName = line.officeExternalManagedObject.getName();
