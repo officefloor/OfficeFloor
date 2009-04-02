@@ -29,14 +29,14 @@ import net.officefloor.model.repository.ConfigurationItem;
 public class ClassLoaderConfigurationItem implements ConfigurationItem {
 
 	/**
-	 * Id.
+	 * Location.
 	 */
-	private final String id;
+	private final String location;
 
 	/**
-	 * {@link InputStream}.
+	 * {@link ClassLoader}.
 	 */
-	private final InputStream inputStream;
+	private final ClassLoader classLoader;
 
 	/**
 	 * {@link ConfigurationContext}.
@@ -44,20 +44,42 @@ public class ClassLoaderConfigurationItem implements ConfigurationItem {
 	private final ConfigurationContext context;
 
 	/**
+	 * {@link InputStream}.
+	 */
+	private InputStream inputStream;
+
+	/**
 	 * Initiate.
 	 * 
-	 * @param id
-	 *            Id.
-	 * @param inputStream
-	 *            {@link InputStream} of the resource.
+	 * @param location
+	 *            Location.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 */
+	public ClassLoaderConfigurationItem(String location, ClassLoader classLoader) {
+		this(location, classLoader, new ClassLoaderConfigurationContext(
+				classLoader), null);
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param location
+	 *            location.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
 	 * @param context
 	 *            {@link ConfigurationContext}.
+	 * @param inputStream
+	 *            {@link InputStream} of the resource.
 	 */
-	public ClassLoaderConfigurationItem(String id, InputStream inputStream,
-			ConfigurationContext context) {
-		this.id = id;
-		this.inputStream = inputStream;
+	public ClassLoaderConfigurationItem(String location,
+			ClassLoader classLoader, ConfigurationContext context,
+			InputStream inputStream) {
+		this.location = location;
+		this.classLoader = classLoader;
 		this.context = context;
+		this.inputStream = inputStream;
 	}
 
 	/*
@@ -66,12 +88,22 @@ public class ClassLoaderConfigurationItem implements ConfigurationItem {
 
 	@Override
 	public String getLocation() {
-		return this.id;
+		return this.location;
 	}
 
 	@Override
 	public InputStream getConfiguration() throws Exception {
-		return this.inputStream;
+
+		// Determine if first time asking for configuration
+		if (this.inputStream != null) {
+			// Return input stream and clear as used
+			InputStream stream = this.inputStream;
+			this.inputStream = null;
+			return stream;
+		}
+
+		// Obtain the input stream again and return
+		return this.classLoader.getResourceAsStream(this.location);
 	}
 
 	@Override

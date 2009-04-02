@@ -29,11 +29,6 @@ import net.officefloor.model.repository.ConfigurationItem;
 public class ClassLoaderConfigurationContext implements ConfigurationContext {
 
 	/**
-	 * Id.
-	 */
-	private final String id;
-
-	/**
 	 * {@link ClassLoader}.
 	 */
 	private final ClassLoader classLoader;
@@ -41,13 +36,10 @@ public class ClassLoaderConfigurationContext implements ConfigurationContext {
 	/**
 	 * Initiate.
 	 * 
-	 * @param id
-	 *            Id of this {@link ConfigurationContext}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 */
-	public ClassLoaderConfigurationContext(String id, ClassLoader classLoader) {
-		this.id = id;
+	public ClassLoaderConfigurationContext(ClassLoader classLoader) {
 		this.classLoader = classLoader;
 	}
 
@@ -57,7 +49,7 @@ public class ClassLoaderConfigurationContext implements ConfigurationContext {
 
 	@Override
 	public String getLocation() {
-		return this.id;
+		return "CLASS LOADER";
 	}
 
 	@Override
@@ -68,18 +60,19 @@ public class ClassLoaderConfigurationContext implements ConfigurationContext {
 	}
 
 	@Override
-	public ConfigurationItem getConfigurationItem(String id) throws Exception {
+	public ConfigurationItem getConfigurationItem(String location)
+			throws Exception {
 
 		// Obtain the resource on the class path
-		InputStream resource = this.classLoader.getResourceAsStream(id);
+		InputStream resource = this.classLoader.getResourceAsStream(location);
 		if (resource == null) {
 			// Not found
 			return null;
 		}
 
 		// Create the configuration item
-		ConfigurationItem item = new ClassLoaderConfigurationItem(id, resource,
-				this);
+		ConfigurationItem item = new ClassLoaderConfigurationItem(location,
+				this.classLoader, this, resource);
 
 		// Return the configuration item
 		return item;

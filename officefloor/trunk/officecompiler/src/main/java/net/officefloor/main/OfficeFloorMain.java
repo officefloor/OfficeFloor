@@ -126,7 +126,7 @@ public class OfficeFloorMain {
 
 		// Obtain the office floor configuration
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
-				OFFICE_FLOOR_MAIN, classLoader);
+				classLoader);
 		ConfigurationItem officeFloorConfigurationItem = configurationContext
 				.getConfigurationItem(officeFloorConfigFile);
 		if (officeFloorConfigurationItem == null) {

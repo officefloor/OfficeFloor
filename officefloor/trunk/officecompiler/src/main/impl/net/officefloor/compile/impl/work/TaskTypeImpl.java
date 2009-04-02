@@ -79,6 +79,11 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	private final List<TaskEscalationType> escalations = new LinkedList<TaskEscalationType>();
 
 	/**
+	 * Return type.
+	 */
+	private Class<?> returnType = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param taskName
@@ -104,6 +109,11 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	/*
 	 * ==================== TaskTypeBuilder ===================================
 	 */
+
+	@Override
+	public void setReturnType(Class<?> returnType) {
+		this.returnType = returnType;
+	}
 
 	@Override
 	public TaskObjectTypeBuilder<M> addObject(Class<?> objectType) {
@@ -182,6 +192,11 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	@Override
 	public TaskEscalationType[] getEscalationTypes() {
 		return this.escalations.toArray(new TaskEscalationType[0]);
+	}
+
+	@Override
+	public Class<?> getReturnType() {
+		return this.returnType;
 	}
 
 }

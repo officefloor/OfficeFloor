@@ -21,6 +21,7 @@ import net.officefloor.compile.desk.DeskOperations;
 import net.officefloor.compile.spi.work.TaskType;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskModel;
@@ -33,6 +34,21 @@ import net.officefloor.model.desk.WorkTaskModel;
  * @author Daniel
  */
 public class DeskOperationsImpl implements DeskOperations {
+
+	/**
+	 * {@link DeskModel}.
+	 */
+	private final DeskModel desk;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param desk
+	 *            {@link DeskModel}.
+	 */
+	public DeskOperationsImpl(DeskModel desk) {
+		this.desk = desk;
+	}
 
 	/*
 	 * ==================== DeskOperations =================================
