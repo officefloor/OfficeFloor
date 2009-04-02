@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0
 Bundle-Vendor: Daniel Sagenschneider
 Export-Package: 
  net.officefloor.compile,
- net.officefloor.compile.desk,
+ net.officefloor.compile.impl.desk,
  net.officefloor.compile.spi.work,
  net.officefloor.compile.spi.work.source,
  net.officefloor.compile.spi.work.source.impl,
@@ -15,8 +15,8 @@ Export-Package:
  net.officefloor.main,
  net.officefloor.mock,
  net.officefloor.model.impl.repository.classloader,
- net.officefloor.model.repository,
  net.officefloor.model.impl.repository.filesystem,
+ net.officefloor.model.repository,
  net.officefloor.office,
  net.officefloor.officefloor,
  net.officefloor.plugin.work.clazz,

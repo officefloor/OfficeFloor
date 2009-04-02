@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.work;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.work.TaskType;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
@@ -76,9 +77,8 @@ public class WorkTypeImpl<W extends Work> implements WorkType<W>,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public TaskType<W, ?, ?>[] getTaskTypes() {
-		return this.tasks.toArray(new TaskType[0]);
+		return CompileUtil.toArray(this.tasks, new TaskType[0]);
 	}
 
 }

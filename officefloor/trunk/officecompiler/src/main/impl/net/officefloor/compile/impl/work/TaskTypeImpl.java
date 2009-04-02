@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.work.TaskEscalationType;
 import net.officefloor.compile.spi.work.TaskFlowType;
 import net.officefloor.compile.spi.work.TaskObjectType;
@@ -148,10 +149,9 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public TaskObjectType<M>[] getObjectTypes() {
-		TaskObjectType<M>[] objectTypes = this.objects
-				.toArray(new TaskObjectType[0]);
+		TaskObjectType<M>[] objectTypes = CompileUtil.toArray(this.objects,
+				new TaskObjectType[0]);
 		Arrays.sort(objectTypes, new Comparator<TaskObjectType<M>>() {
 			@Override
 			public int compare(TaskObjectType<M> a, TaskObjectType<M> b) {
@@ -167,9 +167,9 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public TaskFlowType<F>[] getFlowTypes() {
-		TaskFlowType<F>[] flowTypes = this.flows.toArray(new TaskFlowType[0]);
+		TaskFlowType<F>[] flowTypes = CompileUtil.toArray(this.flows,
+				new TaskFlowType[0]);
 		Arrays.sort(flowTypes, new Comparator<TaskFlowType<F>>() {
 			@Override
 			public int compare(TaskFlowType<F> a, TaskFlowType<F> b) {

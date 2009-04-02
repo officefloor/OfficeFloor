@@ -16,30 +16,30 @@
  */
 package net.officefloor.model.impl.repository;
 
-import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.impl.desk.DeskLoaderImpl;
+import net.officefloor.compile.desk.DeskOperations;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.WorkTaskModel;
-import net.officefloor.model.desk.WorkTaskObjectModel;
-import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.TaskEscalationModel;
 import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
 import net.officefloor.model.desk.TaskEscalationToTaskModel;
-import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.TaskFlowModel;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.TaskToNextExternalFlowModel;
 import net.officefloor.model.desk.TaskToNextTaskModel;
-import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
+import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -175,13 +175,14 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the flow connections
 		TaskFlowModel taskOneFirst = taskOne.getTaskFlows().get(0);
 		assertProperties(new TaskFlowToExternalFlowModel("flow",
-				DeskLoaderImpl.SEQUENTIAL_LINK_TYPE), taskOneFirst
-				.getExternalFlow(), "getExternalFlowName", "getLinkType");
+				DeskOperations.SEQUENTIAL_LINK),
+				taskOneFirst.getExternalFlow(), "getExternalFlowName",
+				"getLinkType");
 		assertNull(taskOneFirst.getTask());
 		TaskFlowModel taskOneSecond = taskOne.getTaskFlows().get(1);
 		assertNull(taskOneSecond.getExternalFlow());
 		assertProperties(new TaskFlowToTaskModel("taskTwo",
-				DeskLoaderImpl.PARALLEL_LINK_TYPE), taskOneSecond.getTask(),
+				DeskOperations.PARALLEL_LINK), taskOneSecond.getTask(),
 				"getTaskName", "getLinkType");
 
 		// Validate next flows
@@ -243,14 +244,12 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		desk = repository.retrieve(desk, this.configurationItem);
 
 		// Store the Desk
-		File tmpFile = File.createTempFile("TestDesk.desk.xml", null);
-		FileSystemConfigurationItem tempFile = new FileSystemConfigurationItem(
-				tmpFile, null);
-		repository.store(desk, tempFile);
+		MemoryConfigurationItem contents = new MemoryConfigurationItem();
+		repository.store(desk, contents);
 
 		// Reload the Desk
 		DeskModel reloadedDesk = new DeskModel();
-		reloadedDesk = repository.retrieve(reloadedDesk, tempFile);
+		reloadedDesk = repository.retrieve(reloadedDesk, contents);
 
 		// Validate round trip
 		assertGraph(desk, reloadedDesk,

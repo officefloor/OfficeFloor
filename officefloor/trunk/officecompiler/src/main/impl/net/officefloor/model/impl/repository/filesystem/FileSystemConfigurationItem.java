@@ -19,6 +19,7 @@ package net.officefloor.model.impl.repository.filesystem;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import net.officefloor.model.repository.ConfigurationContext;
@@ -65,7 +66,19 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	/**
 	 * {@link ConfigurationContext}.
 	 */
-	private final ConfigurationContext configurationContext;
+	private ConfigurationContext configurationContext = null;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param file
+	 *            File containing the configuration.
+	 * @throws IOException
+	 *             If fails to initialise.
+	 */
+	public FileSystemConfigurationItem(File file) throws IOException {
+		this(file, null);
+	}
 
 	/**
 	 * Initiate.
@@ -74,11 +87,11 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	 *            File containing the configuration.
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
-	 * @throws Exception
+	 * @throws IOException
 	 *             If fails to initialise.
 	 */
 	public FileSystemConfigurationItem(File file,
-			ConfigurationContext configurationContext) throws Exception {
+			ConfigurationContext configurationContext) throws IOException {
 		this(file.getCanonicalPath(), file, configurationContext);
 	}
 
@@ -93,7 +106,7 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
 	 */
-	protected FileSystemConfigurationItem(String location, File file,
+	public FileSystemConfigurationItem(String location, File file,
 			ConfigurationContext configurationContext) {
 		this.location = location;
 		this.file = file;
@@ -119,6 +132,24 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	}
 
 	@Override
+	public ConfigurationContext getContext() {
+
+		// Default to parent directory if no context
+		if (this.configurationContext == null) {
+			try {
+				this.configurationContext = new FileSystemConfigurationContext(
+						this.file.getParentFile());
+			} catch (IOException ex) {
+				throw new IllegalStateException(
+						"Should always have a parent directory to file", ex);
+			}
+		}
+
+		// Return the configuration context
+		return this.configurationContext;
+	}
+
+	@Override
 	public InputStream getConfiguration() throws Exception {
 		return new FileInputStream(this.file);
 	}
@@ -126,11 +157,6 @@ public class FileSystemConfigurationItem implements ConfigurationItem {
 	@Override
 	public void setConfiguration(InputStream configuration) throws Exception {
 		writeConfiguration(this.file, configuration);
-	}
-
-	@Override
-	public ConfigurationContext getContext() {
-		return this.configurationContext;
 	}
 
 }

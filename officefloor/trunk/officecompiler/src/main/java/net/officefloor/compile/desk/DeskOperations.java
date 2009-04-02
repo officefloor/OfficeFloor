@@ -20,6 +20,8 @@ import net.officefloor.compile.change.Change;
 import net.officefloor.compile.spi.work.TaskType;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -33,6 +35,25 @@ import net.officefloor.model.desk.WorkTaskModel;
  * @author Daniel
  */
 public interface DeskOperations {
+
+	/**
+	 * Value for {@link FlowInstigationStrategyEnum#SEQUENTIAL} on the
+	 * {@link DeskModel} {@link ConnectionModel} instances.
+	 */
+	String SEQUENTIAL_LINK = FlowInstigationStrategyEnum.SEQUENTIAL.name();
+
+	/**
+	 * Value for {@link FlowInstigationStrategyEnum#PARALLEL} on the
+	 * {@link DeskModel} {@link ConnectionModel} instances.
+	 */
+	String PARALLEL_LINK = FlowInstigationStrategyEnum.PARALLEL.name();
+
+	/**
+	 * Value for {@link FlowInstigationStrategyEnum#ASYNCHRONOUS} on the
+	 * {@link DeskModel} {@link ConnectionModel} instances.
+	 */
+	final String ASYNCHRONOUS_LINK = FlowInstigationStrategyEnum.ASYNCHRONOUS
+			.name();
 
 	<W extends Work> Change<WorkModel> addWork(String workName,
 			WorkType<W> workType, String... taskNames);

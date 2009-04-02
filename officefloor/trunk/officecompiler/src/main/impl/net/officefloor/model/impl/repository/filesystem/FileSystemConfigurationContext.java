@@ -18,6 +18,7 @@ package net.officefloor.model.impl.repository.filesystem;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 import net.officefloor.model.repository.ConfigurationContext;
@@ -36,21 +37,21 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 	private final File rootDir;
 
 	/**
-	 * Id representing this file system repository.
+	 * Location representing this file system repository.
 	 */
-	private final String id;
+	private final String location;
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param rootDir
 	 *            Root directory for files containing the configuration.
-	 * @throws Exception
+	 * @throws IOException
 	 *             If fails to initiate.
 	 */
-	public FileSystemConfigurationContext(File rootDir) throws Exception {
+	public FileSystemConfigurationContext(File rootDir) throws IOException {
 		this.rootDir = rootDir;
-		this.id = this.rootDir.getCanonicalPath();
+		this.location = this.rootDir.getCanonicalPath();
 
 		// Ensure the directory exists
 		if (!this.rootDir.isDirectory()) {
@@ -62,32 +63,23 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 	/*
 	 * ================== ConfigurationContext ================================
 	 */
-	
+
 	@Override
 	public String getLocation() {
-		return this.id;
+		return this.location;
 	}
 
 	@Override
 	public String[] getClasspath() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
+		// Only single entry in class path being root directory
+		return new String[] { this.rootDir.getAbsolutePath() };
 	}
 
 	@Override
-	public ConfigurationItem getConfigurationItem(String id) throws Exception {
-		// Create the file
-		File file = new File(this.rootDir, id);
-
-		// Return the configuration item
-		return new FileSystemConfigurationItem(id, file, this);
-	}
-
-	@Override
-	public ConfigurationItem createConfigurationItem(String id,
+	public ConfigurationItem createConfigurationItem(String location,
 			InputStream configuration) throws Exception {
 		// Create the file
-		File file = new File(this.rootDir, id);
+		File file = new File(this.rootDir, location);
 
 		// Ensure the parent directory exists
 		file.getParentFile().mkdirs();
@@ -96,7 +88,17 @@ public class FileSystemConfigurationContext implements ConfigurationContext {
 		FileSystemConfigurationItem.writeConfiguration(file, configuration);
 
 		// Create the configuration item
-		return new FileSystemConfigurationItem(id, file, this);
+		return new FileSystemConfigurationItem(location, file, this);
+	}
+
+	@Override
+	public ConfigurationItem getConfigurationItem(String location)
+			throws Exception {
+		// Create the file
+		File file = new File(this.rootDir, location);
+
+		// Return the configuration item
+		return new FileSystemConfigurationItem(location, file, this);
 	}
 
 }
