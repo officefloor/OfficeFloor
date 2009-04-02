@@ -16,10 +16,12 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.compile.impl.desk.DeskLoaderImpl;
+import net.officefloor.compile.desk.DeskRepository;
+import net.officefloor.compile.impl.desk.DeskRepositoryImpl;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -52,9 +54,8 @@ public class DeskEntry extends AbstractEntry<Object, DeskModel> {
 			OfficeFloorCompilerContext context) throws Exception {
 
 		// Load the desk model
-		DeskModel deskModel = new DeskLoaderImpl(context.getLoaderContext(),
-				context.getModelRepository())
-				.loadDeskAndSynchronise(configurationItem);
+		DeskRepository deskRepository = new DeskRepositoryImpl(new ModelRepositoryImpl());
+		DeskModel deskModel = deskRepository.retrieveDesk(configurationItem);
 
 		// Create the desk entry
 		DeskEntry deskEntry = new DeskEntry(deskId, deskName, deskModel,

@@ -17,19 +17,18 @@
 package net.officefloor.compile;
 
 import net.officefloor.compile.FlowLineUtil.LinkedFlow;
-import net.officefloor.compile.impl.desk.DeskLoaderImpl;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
-import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.TaskFlowModel;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
+import net.officefloor.model.desk.TaskModel;
 
 /**
- * Contains the various items on the line from the {@link TaskFlowModel}
- * through to its {@link TaskModel}.
+ * Contains the various items on the line from the {@link TaskFlowModel} through
+ * to its {@link TaskModel}.
  * 
  * @author Daniel
  */
@@ -96,8 +95,8 @@ public class FlowOutputLine {
 	 * @throws Exception
 	 *             If fails to create the line.
 	 */
-	public FlowOutputLine(TaskFlowModel flowItemOutput,
-			TaskEntry<?> taskEntry) throws Exception {
+	public FlowOutputLine(TaskFlowModel flowItemOutput, TaskEntry<?> taskEntry)
+			throws Exception {
 
 		// Store starting point
 		this.sourceFlowItemOutput = flowItemOutput;
@@ -108,8 +107,7 @@ public class FlowOutputLine {
 		this.sourceDeskEntry = this.sourceWorkEntry.getDeskEntry();
 
 		// Determine the where linked
-		TaskFlowToTaskModel flowItemLink = this.sourceFlowItemOutput
-				.getTask();
+		TaskFlowToTaskModel flowItemLink = this.sourceFlowItemOutput.getTask();
 		TaskFlowToExternalFlowModel externalFlowLink = this.sourceFlowItemOutput
 				.getExternalFlow();
 		LinkedFlow target;
@@ -136,13 +134,14 @@ public class FlowOutputLine {
 		} else {
 			// Flow output not linked
 			throw new Exception("Flow item output "
-					+ this.sourceFlowItemOutput.getFlowName() + " on flow item "
-					+ this.sourceTaskEntry.getId() + " not linked to a flow");
+					+ this.sourceFlowItemOutput.getFlowName()
+					+ " on flow item " + this.sourceTaskEntry.getId()
+					+ " not linked to a flow");
 		}
 
 		// Indicate the instigation strategy
-		this.flowInstigationStrategy = DeskLoaderImpl
-				.getFlowInstigationStrategyEnum(instigationType);
+		this.flowInstigationStrategy = FlowInstigationStrategyEnum
+				.valueOf(instigationType);
 
 		// Specify the target details
 		this.targetDeskEntry = target.deskEntry;
@@ -152,11 +151,10 @@ public class FlowOutputLine {
 	}
 
 	/**
-	 * Indicates if the next {@link TaskModel} is on the same
-	 * {@link WorkType}.
+	 * Indicates if the next {@link TaskModel} is on the same {@link WorkType}.
 	 * 
-	 * @return <code>true</code> if the next {@link TaskModel} is on the
-	 *         same {@link WorkType}.
+	 * @return <code>true</code> if the next {@link TaskModel} is on the same
+	 *         {@link WorkType}.
 	 */
 	public boolean isSameWork() {
 		// No external flow so on same desk and work matches

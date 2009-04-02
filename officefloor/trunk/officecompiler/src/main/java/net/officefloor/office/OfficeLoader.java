@@ -19,7 +19,8 @@ package net.officefloor.office;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.impl.desk.DeskLoaderImpl;
+import net.officefloor.compile.desk.DeskRepository;
+import net.officefloor.compile.impl.desk.DeskRepositoryImpl;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministratorModel;
@@ -251,14 +252,16 @@ public class OfficeLoader {
 
 		// Create the loaders
 		RoomLoader roomLoader = new RoomLoader();
-		DeskLoaderImpl deskLoader = new DeskLoaderImpl(classLoader);
+		DeskRepository deskRepository = new DeskRepositoryImpl(
+				new ModelRepositoryImpl());
 
 		// Synchronise room
 		RoomToOfficeRoomSynchroniser.synchroniseRoomOntoOfficeRoom(rawRoomId,
 				rawRoomName, rawRoom, officeRoom);
 
 		// Recursively load the sub rooms/desks
-		this.recursiveLoadSubRooms(officeRoom, roomLoader, deskLoader, context);
+		this.recursiveLoadSubRooms(officeRoom, roomLoader, deskRepository,
+				context);
 
 		// Return the office room
 		return officeRoom;
@@ -282,10 +285,12 @@ public class OfficeLoader {
 
 		// Create the loaders
 		RoomLoader roomLoader = new RoomLoader();
-		DeskLoaderImpl deskLoader = new DeskLoaderImpl(classLoader);
+		DeskRepository deskRepository = new DeskRepositoryImpl(
+				new ModelRepositoryImpl());
 
 		// Recursively load the sub rooms/desks
-		this.recursiveLoadSubRooms(officeRoom, roomLoader, deskLoader, context);
+		this.recursiveLoadSubRooms(officeRoom, roomLoader, deskRepository,
+				context);
 	}
 
 	/**
@@ -303,7 +308,7 @@ public class OfficeLoader {
 	 *             If fails to load the sub rooms/desks.
 	 */
 	private void recursiveLoadSubRooms(OfficeRoomModel room,
-			RoomLoader roomLoader, DeskLoaderImpl deskLoader,
+			RoomLoader roomLoader, DeskRepository deskRepository,
 			ConfigurationContext context) throws Exception {
 
 		// Load the sub rooms
@@ -329,9 +334,8 @@ public class OfficeLoader {
 					subRoomId, subRoom.getName(), actualRoom, subRoom);
 
 			// Recursive load the further sub rooms
-			this
-					.recursiveLoadSubRooms(subRoom, roomLoader, deskLoader,
-							context);
+			this.recursiveLoadSubRooms(subRoom, roomLoader, deskRepository,
+					context);
 		}
 
 		// Load the desks
@@ -349,7 +353,7 @@ public class OfficeLoader {
 			}
 
 			// Load the desk model
-			DeskModel actualDesk = deskLoader.loadDesk(configItem);
+			DeskModel actualDesk = deskRepository.retrieveDesk(configItem);
 
 			// Synchronise desk
 			DeskToOfficeDeskSynchroniser.synchroniseDeskOntoOfficeDesk(deskId,
