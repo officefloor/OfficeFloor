@@ -45,6 +45,14 @@ public interface TaskType<W extends Work, M extends Enum<M>, F extends Enum<F>> 
 	TaskFactoryManufacturer<W, M, F> getTaskFactoryManufacturer();
 
 	/**
+	 * Obtains the type of {@link Object} returned from the {@link Task} that is
+	 * to be used as the argument to the next {@link Task}.
+	 * 
+	 * @return Return type of the {@link Task}.
+	 */
+	Class<?> getReturnType();
+
+	/**
 	 * Obtains the {@link Enum} providing the keys for the dependent
 	 * {@link Object} instances.
 	 * 

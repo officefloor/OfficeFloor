@@ -30,6 +30,15 @@ import net.officefloor.frame.internal.structure.Flow;
 public interface TaskTypeBuilder<M extends Enum<M>, F extends Enum<F>> {
 
 	/**
+	 * Specifies the type of {@link Object} returned from the {@link Task} that
+	 * is to be used as the argument to the next {@link Task}.
+	 * 
+	 * @param returnType
+	 *            Return type of the {@link Task}.
+	 */
+	void setReturnType(Class<?> returnType);
+
+	/**
 	 * <p>
 	 * Adds a {@link TaskObjectTypeBuilder} to the {@link TaskTypeBuilder}
 	 * definition.
