@@ -371,6 +371,46 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	@Override
+	public Change<WorkModel> renameWork(final WorkModel workModel,
+			final String newWorkName) {
+
+		// Ensure the work is on the desk
+		boolean isOnDesk = false;
+		for (WorkModel work : this.desk.getWorks()) {
+			if (work == workModel) {
+				isOnDesk = true;
+			}
+		}
+		if (!isOnDesk) {
+			// Not on desk so can not remove
+			return new NoChange<WorkModel>(workModel, "Rename work "
+					+ workModel.getWorkName() + " to " + newWorkName, "Work "
+					+ workModel.getWorkName() + " not on desk");
+		}
+
+		// Store the old name for reverting
+		final String oldWorkName = workModel.getWorkName();
+
+		// Return change to rename work
+		return new AbstractChange<WorkModel>(workModel, "Rename work "
+				+ workModel.getWorkName() + " to " + newWorkName) {
+			@Override
+			public void apply() {
+				// Rename and ensure work in sorted order
+				workModel.setWorkName(newWorkName);
+				DeskOperationsImpl.this.sortWorkModels();
+			}
+
+			@Override
+			public void revert() {
+				// Revert to old name, ensuring work sorted
+				workModel.setWorkName(oldWorkName);
+				DeskOperationsImpl.this.sortWorkModels();
+			}
+		};
+	}
+
+	@Override
 	public Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
 			String argumentType) {
 		// TODO Implement
@@ -455,13 +495,6 @@ public class DeskOperationsImpl implements DeskOperations {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement DeskOperations.renameTask");
-	}
-
-	@Override
-	public Change<WorkModel> renameWork(WorkModel workModel, String newWorkName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.renameWork");
 	}
 
 	@Override

@@ -19,6 +19,8 @@ package net.officefloor.compile.impl.desk;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+import junit.framework.TestCase;
+
 import net.officefloor.compile.change.Change;
 import net.officefloor.compile.change.Conflict;
 import net.officefloor.compile.desk.DeskOperations;
@@ -54,7 +56,7 @@ public abstract class AbstractDeskOperationsTestCase extends
 	/**
 	 * Flags if there is a specific setup file per test.
 	 */
-	private final boolean isSpecificSetupFilePerTest;
+	private boolean isSpecificSetupFilePerTest;
 
 	/**
 	 * {@link DeskModel} loaded for testing.
@@ -100,6 +102,27 @@ public abstract class AbstractDeskOperationsTestCase extends
 	}
 
 	/**
+	 * Allows particular tests of a {@link TestCase} to override using the
+	 * default setup {@link DeskModel} and use the specific test
+	 * {@link DeskModel}.
+	 */
+	protected void useTestSetupDesk() {
+		try {
+			// Flag to use test specific setup desk
+			this.isSpecificSetupFilePerTest = true;
+
+			// re-setup the test
+			this.setUp();
+
+		} catch (Exception ex) {
+			// Fail on failure (stops have to throw exception in tests)
+			StringWriter msg = new StringWriter();
+			ex.printStackTrace(new PrintWriter(msg));
+			fail("Failed to useTestSetupDesk");
+		}
+	}
+
+	/**
 	 * Obtains the test name for the setup {@link DeskModel}.
 	 * 
 	 * @return Test name for the setup {@link DeskModel}.
@@ -110,7 +133,7 @@ public abstract class AbstractDeskOperationsTestCase extends
 	}
 
 	/**
-	 * Asserts the {@link Change} details are correct.
+	 * Asserts the {@link Change} is correct.
 	 * 
 	 * @param change
 	 *            {@link Change} to verify.
@@ -119,14 +142,18 @@ public abstract class AbstractDeskOperationsTestCase extends
 	 * @param expectedChangeDescription
 	 *            Expected description of the {@link Change}.
 	 * @param expectCanApply
-	 *            Expected if can apply the {@link Change}.
+	 *            Expected if can apply the {@link Change}. Should it be able to
+	 *            be applied, both the {@link Change#apply()} and
+	 *            {@link Change#revert()} will be also tested.
 	 * @param expectedConflictDescriptions
 	 *            Expected descriptions for the {@link Conflict} instances on
 	 *            the {@link Change}.
 	 */
-	protected static <T> void assertChangeDetails(Change<T> change,
-			T expectedTarget, String expectedChangeDescription,
-			boolean expectCanApply, String... expectedConflictDescriptions) {
+	protected <T> void assertChange(Change<T> change, T expectedTarget,
+			String expectedChangeDescription, boolean expectCanApply,
+			String... expectedConflictDescriptions) {
+
+		// Ensure details of change correct
 		if (expectedTarget != null) {
 			assertEquals("Incorrect target", expectedTarget, change.getTarget());
 		}
@@ -139,6 +166,27 @@ public abstract class AbstractDeskOperationsTestCase extends
 			assertEquals("Incorrect descriptiong for conflict " + i,
 					expectedConflictDescriptions[i], change.getConflicts()[i]
 							.getConflictDescription());
+		}
+
+		// Validate changes if can apply change
+		if (expectCanApply) {
+			// Should be no change until change is applied
+			this.validateAsSetupDesk();
+
+			// Apply the change and validate results
+			change.apply();
+			this.validateDesk();
+
+			// Revert the change and validate reverted back to setup
+			change.revert();
+			this.validateAsSetupDesk();
+
+			// Apply again for 'redo' functionality
+			change.apply();
+			this.validateDesk();
+
+			// Revert change to have desk in setup state for any further testing
+			change.revert();
 		}
 	}
 
