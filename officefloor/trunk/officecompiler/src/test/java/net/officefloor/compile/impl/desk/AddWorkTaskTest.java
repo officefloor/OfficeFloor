@@ -18,7 +18,6 @@ package net.officefloor.compile.impl.desk;
 
 import net.officefloor.compile.change.Change;
 import net.officefloor.compile.spi.work.TaskType;
-import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
@@ -57,7 +56,7 @@ public class AddWorkTaskTest extends AbstractDeskOperationsTestCase {
 
 		// Create the task type
 		TaskType<?, ?, ?> task = this.constructTaskType("TASK",
-				new Constructor() {
+				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
 						task.addObject(Integer.class, null);
@@ -85,7 +84,7 @@ public class AddWorkTaskTest extends AbstractDeskOperationsTestCase {
 
 		// Create the task type
 		TaskType<?, ?, ?> task = this.constructTaskType("TASK",
-				new Constructor() {
+				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
 						task.addObject(Integer.class, TaskObjectKeys.ONE);
@@ -114,7 +113,7 @@ public class AddWorkTaskTest extends AbstractDeskOperationsTestCase {
 
 		// Create the task type
 		TaskType<?, ?, ?> task = this.constructTaskType("TASK",
-				new Constructor() {
+				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
 						task.addObject(Integer.class, null).setLabel(
@@ -176,49 +175,6 @@ public class AddWorkTaskTest extends AbstractDeskOperationsTestCase {
 				task);
 		this.assertChange(change, null, "Add work task TASK", false,
 				"Task TASK already added to work WORK");
-	}
-
-	/**
-	 * Constructor to construct the {@link TaskType}.
-	 */
-	private interface Constructor {
-
-		/**
-		 * Constructs the {@link TaskType}.
-		 * 
-		 * @param task
-		 *            {@link TaskType}.
-		 */
-		void construct(TaskTypeConstructor task);
-	}
-
-	/**
-	 * Constructs the {@link TaskType}.
-	 * 
-	 * @param taskName
-	 *            Name of the {@link TaskType}.
-	 * @param constructor
-	 *            {@link Constructor}.
-	 * @return {@link TaskType}.
-	 */
-	private TaskType<?, ?, ?> constructTaskType(final String taskName,
-			final Constructor constructor) {
-
-		// Construct the work
-		WorkType<?> workType = this
-				.constructWorkType(new WorkTypeConstructor() {
-					@Override
-					public void construct(WorkTypeContext context) {
-						// Construct the task
-						TaskTypeConstructor task = context.addTask(taskName);
-						if (constructor != null) {
-							constructor.construct(task);
-						}
-					}
-				});
-
-		// Return the task from the work
-		return workType.getTaskTypes()[0];
 	}
 
 }

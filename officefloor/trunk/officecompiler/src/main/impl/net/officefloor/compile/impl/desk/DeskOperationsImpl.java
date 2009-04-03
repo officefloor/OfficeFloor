@@ -560,6 +560,29 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	@Override
+	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<TaskModel> addTask(
+			String taskName, WorkTaskModel workTaskModel,
+			TaskType<W, D, F> taskType) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement DeskOperations.addTask");
+	}
+
+	@Override
+	public Change<TaskModel> removeTask(TaskModel taskModel) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement DeskOperations.removeTask");
+	}
+
+	@Override
+	public Change<TaskModel> renameTask(TaskModel taskModel, String newTaskName) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement DeskOperations.renameTask");
+	}
+
+	@Override
 	public Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
 			String argumentType) {
 		// TODO Implement
@@ -573,15 +596,6 @@ public class DeskOperationsImpl implements DeskOperations {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement DeskOperations.addExternalManagedObject");
-	}
-
-	@Override
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<TaskModel> addTask(
-			String taskName, WorkTaskModel workTaskModel,
-			TaskType<W, D, F> taskType) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.addTask");
 	}
 
 	@Override
@@ -617,22 +631,8 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	@Override
-	public Change<TaskModel> removeTask(TaskModel taskModel) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.removeTask");
-	}
-
-	@Override
-	public Change<TaskModel> renameTask(TaskModel taskModel, String newTaskName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.renameTask");
-	}
-
-	@Override
 	public Change<WorkTaskModel> setObjectAsParameter(boolean isParameter,
-			String objectName, WorkTaskModel workTaskModel) {
+			WorkTaskObjectModel taskObject) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement DeskOperations.setObjectAsParameter");

@@ -21,6 +21,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.TaskType;
 import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.ConnectionModel;
@@ -30,6 +31,7 @@ import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
 
 /**
  * Changes that can be made to a {@link DeskModel}.
@@ -103,7 +105,8 @@ public interface DeskOperations {
 			WorkType<W> workType);
 
 	/**
-	 * Adds the {@link TaskType} to the {@link WorkModel}.
+	 * Adds the {@link TaskType} as a {@link WorkTaskModel} to the
+	 * {@link WorkModel}.
 	 * 
 	 * @param workModel
 	 *            {@link WorkModel} to have the {@link TaskType} added.
@@ -128,19 +131,49 @@ public interface DeskOperations {
 	Change<WorkTaskModel> removeWorkTask(WorkModel workModel,
 			WorkTaskModel taskModel);
 
+	/**
+	 * Adds a {@link TaskType} as a {@link TaskModel} to the {@link DeskModel}.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param workTaskModel
+	 *            {@link WorkTaskModel} for the {@link TaskType}.
+	 * @param taskType
+	 *            {@link TaskType} for the {@link TaskModel}.
+	 * @return {@link Change} to add the {@link TaskType} to the
+	 *         {@link DeskModel}.
+	 */
 	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<TaskModel> addTask(
 			String taskName, WorkTaskModel workTaskModel,
 			TaskType<W, D, F> taskType);
 
+	/**
+	 * Removes the {@link TaskModel} from the {@link DeskModel}.
+	 * 
+	 * @param taskModel
+	 *            {@link TaskModel} to be removed.
+	 * @return {@link Change} to remove the {@link TaskModel} from the
+	 *         {@link DeskModel}.
+	 */
 	Change<TaskModel> removeTask(TaskModel taskModel);
 
+	/**
+	 * Renames the {@link TaskModel}.
+	 * 
+	 * @param taskModel
+	 *            {@link TaskModel} to be renamed.
+	 * @param newTaskName
+	 *            New name for the {@link TaskModel}.
+	 * @return {@link Change} to rename the {@link TaskModel}.
+	 */
 	Change<TaskModel> renameTask(TaskModel taskModel, String newTaskName);
 
 	Change<WorkTaskModel> setObjectAsParameter(boolean isParameter,
-			String objectName, WorkTaskModel workTaskModel);
+			WorkTaskObjectModel taskObjectModel);
 
 	Change<TaskModel> setTaskAsPublic(boolean isPublic, TaskModel taskModel);
 
+	// TODO determine how conformTask is to be implemented
 	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> conformTask(
 			WorkTaskModel taskModel, TaskType<W, D, F> taskType);
 
