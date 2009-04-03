@@ -61,13 +61,10 @@ public class AddWorkTest extends AbstractDeskOperationsTestCase {
 				.addWork("WORK", "net.example.ExampleWorkSource",
 						new PropertyListImpl("name.one", "value.one",
 								"name.two", "value.two"), work);
-		assertChangeDetails(change, null, "Add work WORK", true);
+		this.assertChange(change, null, "Add work WORK", true);
 		change.apply();
-		this.validateDesk();
 		assertEquals("Ensure correct target", this.desk.getWorks().get(0),
 				change.getTarget());
-		change.revert();
-		this.validateAsSetupDesk();
 	}
 
 	/**
@@ -99,10 +96,7 @@ public class AddWorkTest extends AbstractDeskOperationsTestCase {
 		Change<WorkModel> change = this.operations.addWork("WORK",
 				"net.example.ExampleWorkSource", new PropertyListImpl("name",
 						"value"), work);
-		change.apply();
-		this.validateDesk();
-		change.revert();
-		this.validateAsSetupDesk();
+		this.assertChange(change, null, "Add work WORK", true);
 	}
 
 	/**
@@ -133,10 +127,7 @@ public class AddWorkTest extends AbstractDeskOperationsTestCase {
 		Change<WorkModel> change = this.operations.addWork("WORK",
 				"net.example.ExampleWorkSource", new PropertyListImpl(), work,
 				"TASK_ONE", "TASK_THREE");
-		change.apply();
-		this.validateDesk();
-		change.revert();
-		this.validateAsSetupDesk();
+		this.assertChange(change, null, "Add work WORK", true);
 	}
 
 	/**
@@ -161,10 +152,7 @@ public class AddWorkTest extends AbstractDeskOperationsTestCase {
 		// Validate adding the work and reverting
 		Change<WorkModel> change = this.operations.addWork("WORK",
 				"net.example.ExampleWorkSource", new PropertyListImpl(), work);
-		change.apply();
-		this.validateDesk();
-		change.revert();
-		this.validateAsSetupDesk();
+		this.assertChange(change, null, "Add work WORK", true);
 	}
 
 	/**

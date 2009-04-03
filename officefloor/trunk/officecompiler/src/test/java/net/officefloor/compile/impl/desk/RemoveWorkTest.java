@@ -41,13 +41,10 @@ public class RemoveWorkTest extends AbstractDeskOperationsTestCase {
 	 * {@link DeskModel}.
 	 */
 	public void testRemoveWorkNotOnDesk() {
-
 		// Attempt to remove work not on the desk
 		WorkModel workNotOnDesk = new WorkModel("NOT ON DESK", null);
 		Change<WorkModel> change = this.operations.removeWork(workNotOnDesk);
-
-		// Verify change details
-		assertChangeDetails(change, workNotOnDesk, "Remove work NOT ON DESK",
+		this.assertChange(change, workNotOnDesk, "Remove work NOT ON DESK",
 				false, "Work NOT ON DESK not on desk");
 	}
 
@@ -55,34 +52,20 @@ public class RemoveWorkTest extends AbstractDeskOperationsTestCase {
 	 * Ensure can remove {@link WorkModel} without any connections.
 	 */
 	public void testRemoveWorkWithNoConnections() {
-
-		// Obtain the work to remove
+		// Obtain the work and remove it
 		WorkModel work = this.desk.getWorks().get(0);
-
-		// Remove the work
 		Change<WorkModel> change = this.operations.removeWork(work);
-		assertChangeDetails(change, work, "Remove work WORK", true);
-		change.apply();
-		this.validateDesk();
-		change.revert();
-		this.validateAsSetupDesk();
+		this.assertChange(change, work, "Remove work WORK", true);
 	}
 
 	/**
 	 * Ensure can remove {@link WorkModel} with a {@link TaskModel}.
 	 */
 	public void testRemoveWorkWithATask() {
-
-		// Obtain the work to remove
+		// Obtain the work and remove it
 		WorkModel work = this.desk.getWorks().get(0);
-
-		// Remove the work
 		Change<WorkModel> change = this.operations.removeWork(work);
-		assertChangeDetails(change, work, "Remove work WORK", true);
-		change.apply();
-		this.validateDesk();
-		change.revert();
-		this.validateAsSetupDesk();
+		this.assertChange(change, work, "Remove work WORK", true);
 	}
 
 	/**
@@ -90,17 +73,10 @@ public class RemoveWorkTest extends AbstractDeskOperationsTestCase {
 	 * are other {@link WorkModel} and {@link TaskModel} instances.
 	 */
 	public void testRemoveWorkWhenOtherWorkAndTasks() {
-
-		// Obtain the work to remove
+		// Obtain the work and remove it
 		WorkModel work = this.desk.getWorks().get(1);
-
-		// Remove the work
 		Change<WorkModel> change = this.operations.removeWork(work);
-		assertChangeDetails(change, work, "Remove work WORK_B", true);
-		change.apply();
-		this.validateDesk();
-		change.revert();
-		this.validateAsSetupDesk();
+		this.assertChange(change, work, "Remove work WORK_B", true);
 	}
 
 	/**
@@ -108,17 +84,10 @@ public class RemoveWorkTest extends AbstractDeskOperationsTestCase {
 	 * instances connected.
 	 */
 	public void testRemoveWorkWithConnections() {
-
-		// Obtain the work to remove
+		// Obtain the work and remove it
 		WorkModel work = this.desk.getWorks().get(0);
-
-		// Remove the work
 		Change<WorkModel> change = this.operations.removeWork(work);
-		assertChangeDetails(change, work, "Remove work WORK_A", true);
-		change.apply();
-		this.validateDesk();
-		change.revert();
-		this.validateAsSetupDesk();
+		this.assertChange(change, work, "Remove work WORK_A", true);
 	}
 
 }

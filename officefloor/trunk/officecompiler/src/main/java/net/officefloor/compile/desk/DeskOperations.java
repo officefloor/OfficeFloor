@@ -78,8 +78,24 @@ public interface DeskOperations {
 			String workSourceClassName, PropertyList properties,
 			WorkType<W> workType, String... taskNames);
 
+	/**
+	 * Removes a {@link WorkModel} from the {@link DeskModel}.
+	 * 
+	 * @param workModel
+	 *            {@link WorkModel} to be removed.
+	 * @return {@link Change} to remove the {@link WorkModel}.
+	 */
 	Change<WorkModel> removeWork(WorkModel workModel);
 
+	/**
+	 * Renames the {@link WorkModel}.
+	 * 
+	 * @param workModel
+	 *            {@link WorkModel} to rename.
+	 * @param newWorkName
+	 *            New name for the {@link WorkModel}.
+	 * @return {@link Change} to rename the {@link WorkModel}.
+	 */
 	Change<WorkModel> renameWork(WorkModel workModel, String newWorkName);
 
 	<W extends Work> Change<WorkModel> conformWork(WorkModel workModel,
