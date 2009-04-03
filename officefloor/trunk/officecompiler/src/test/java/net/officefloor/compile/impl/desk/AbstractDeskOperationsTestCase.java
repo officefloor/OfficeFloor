@@ -20,7 +20,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
-
 import net.officefloor.compile.change.Change;
 import net.officefloor.compile.change.Conflict;
 import net.officefloor.compile.desk.DeskOperations;
@@ -507,6 +506,49 @@ public abstract class AbstractDeskOperationsTestCase extends
 		public TaskTypeBuilder<?, ?> getBuilder() {
 			return this.taskTypeBuilder;
 		}
+	}
+
+	/**
+	 * Constructor to construct the {@link TaskType}.
+	 */
+	protected interface TaskConstructor {
+
+		/**
+		 * Constructs the {@link TaskType}.
+		 * 
+		 * @param task
+		 *            {@link TaskType}.
+		 */
+		void construct(TaskTypeConstructor task);
+	}
+
+	/**
+	 * Constructs the {@link TaskType}.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link TaskType}.
+	 * @param constructor
+	 *            {@link TaskConstructor}.
+	 * @return {@link TaskType}.
+	 */
+	protected TaskType<?, ?, ?> constructTaskType(final String taskName,
+			final TaskConstructor constructor) {
+
+		// Construct the work
+		WorkType<?> workType = this
+				.constructWorkType(new WorkTypeConstructor() {
+					@Override
+					public void construct(WorkTypeContext context) {
+						// Construct the task
+						TaskTypeConstructor task = context.addTask(taskName);
+						if (constructor != null) {
+							constructor.construct(task);
+						}
+					}
+				});
+
+		// Return the task from the work
+		return workType.getTaskTypes()[0];
 	}
 
 }
