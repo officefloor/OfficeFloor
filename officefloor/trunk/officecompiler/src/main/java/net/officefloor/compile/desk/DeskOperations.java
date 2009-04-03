@@ -17,8 +17,10 @@
 package net.officefloor.compile.desk;
 
 import net.officefloor.compile.change.Change;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.TaskType;
 import net.officefloor.compile.spi.work.WorkType;
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.ConnectionModel;
@@ -55,7 +57,25 @@ public interface DeskOperations {
 	final String ASYNCHRONOUS_LINK = FlowInstigationStrategyEnum.ASYNCHRONOUS
 			.name();
 
+	/**
+	 * Adds a {@link WorkModel} to the {@link DeskModel}.
+	 * 
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param workSourceClassName
+	 *            Fully qualified name of the {@link WorkSource}.
+	 * @param properties
+	 *            {@link PropertyList} to configure the {@link WorkSource}.
+	 * @param workType
+	 *            {@link WorkType} from the {@link WorkSource}.
+	 * @param taskNames
+	 *            Listing of {@link WorkTaskModel} names to be loaded. Empty
+	 *            list results in loading all {@link WorkTaskModel} instances
+	 *            for the {@link WorkType}.
+	 * @return {@link Change} to add the {@link WorkModel}.
+	 */
 	<W extends Work> Change<WorkModel> addWork(String workName,
+			String workSourceClassName, PropertyList properties,
 			WorkType<W> workType, String... taskNames);
 
 	Change<WorkModel> removeWork(WorkModel workModel);
