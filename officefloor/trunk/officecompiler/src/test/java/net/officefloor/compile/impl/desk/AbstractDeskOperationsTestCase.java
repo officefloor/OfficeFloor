@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import net.officefloor.compile.change.Change;
+import net.officefloor.compile.change.Conflict;
 import net.officefloor.compile.desk.DeskOperations;
 import net.officefloor.compile.impl.work.WorkTypeImpl;
 import net.officefloor.compile.spi.work.TaskEscalationType;
@@ -51,6 +52,11 @@ public abstract class AbstractDeskOperationsTestCase extends
 		OfficeFrameTestCase {
 
 	/**
+	 * Flags if there is a specific setup file per test.
+	 */
+	private final boolean isSpecificSetupFilePerTest;
+
+	/**
 	 * {@link DeskModel} loaded for testing.
 	 */
 	protected DeskModel desk;
@@ -59,6 +65,23 @@ public abstract class AbstractDeskOperationsTestCase extends
 	 * {@link DeskOperations} to be tested.
 	 */
 	protected DeskOperations operations;
+
+	/**
+	 * Initiate.
+	 */
+	public AbstractDeskOperationsTestCase() {
+		this.isSpecificSetupFilePerTest = false;
+	}
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param isSpecificSetupFilePerTest
+	 *            Flags if there is a specific setup file per test.
+	 */
+	public AbstractDeskOperationsTestCase(boolean isSpecificSetupFilePerTest) {
+		this.isSpecificSetupFilePerTest = isSpecificSetupFilePerTest;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -69,10 +92,54 @@ public abstract class AbstractDeskOperationsTestCase extends
 	protected void setUp() throws Exception {
 
 		// Retrieve the setup desk
-		this.desk = this.retrieveDesk("setup", null);
+		String setupTestName = this.getSetupTestName();
+		this.desk = this.retrieveDesk(setupTestName, null);
 
 		// Create the desk operations
 		this.operations = new DeskOperationsImpl(this.desk);
+	}
+
+	/**
+	 * Obtains the test name for the setup {@link DeskModel}.
+	 * 
+	 * @return Test name for the setup {@link DeskModel}.
+	 */
+	private String getSetupTestName() {
+		return (this.isSpecificSetupFilePerTest ? this.getName() + "_" : "")
+				+ "setup";
+	}
+
+	/**
+	 * Asserts the {@link Change} details are correct.
+	 * 
+	 * @param change
+	 *            {@link Change} to verify.
+	 * @param expectedTarget
+	 *            Expected target.
+	 * @param expectedChangeDescription
+	 *            Expected description of the {@link Change}.
+	 * @param expectCanApply
+	 *            Expected if can apply the {@link Change}.
+	 * @param expectedConflictDescriptions
+	 *            Expected descriptions for the {@link Conflict} instances on
+	 *            the {@link Change}.
+	 */
+	protected static <T> void assertChangeDetails(Change<T> change,
+			T expectedTarget, String expectedChangeDescription,
+			boolean expectCanApply, String... expectedConflictDescriptions) {
+		if (expectedTarget != null) {
+			assertEquals("Incorrect target", expectedTarget, change.getTarget());
+		}
+		assertEquals("Incorrect change description", expectedChangeDescription,
+				change.getChangeDescription());
+		assertEquals("Incorrect number of conflicts",
+				expectedConflictDescriptions.length,
+				change.getConflicts().length);
+		for (int i = 0; i < expectedConflictDescriptions.length; i++) {
+			assertEquals("Incorrect descriptiong for conflict " + i,
+					expectedConflictDescriptions[i], change.getConflicts()[i]
+							.getConflictDescription());
+		}
 	}
 
 	/**
@@ -102,7 +169,8 @@ public abstract class AbstractDeskOperationsTestCase extends
 	 * This is useful to test the revert functionality of a {@link Change}.
 	 */
 	protected void validateAsSetupDesk() {
-		this.validateDesk("setup", null);
+		String setupTestName = this.getSetupTestName();
+		this.validateDesk(setupTestName, null);
 	}
 
 	/**

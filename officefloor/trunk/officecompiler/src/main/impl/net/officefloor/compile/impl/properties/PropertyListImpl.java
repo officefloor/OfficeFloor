@@ -35,6 +35,20 @@ public class PropertyListImpl implements PropertyList {
 	 */
 	private final List<Property> properties = new LinkedList<Property>();
 
+	/**
+	 * Initiate.
+	 * 
+	 * @param nameValuePairs
+	 *            {@link Property} name/values to initially populate this list.
+	 */
+	public PropertyListImpl(String... nameValuePairs) {
+		for (int i = 0; i < nameValuePairs.length; i += 2) {
+			String name = nameValuePairs[i];
+			String value = nameValuePairs[i + 1];
+			this.addProperty(name).setValue(value);
+		}
+	}
+
 	/*
 	 * ================== PropertyList ======================================
 	 */
