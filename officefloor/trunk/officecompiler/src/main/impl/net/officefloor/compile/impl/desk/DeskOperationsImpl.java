@@ -144,6 +144,139 @@ public class DeskOperationsImpl implements DeskOperations {
 		sortTaskModels(this.desk.getTasks());
 	}
 
+	/**
+	 * Creates a {@link WorkTaskModel} for a {@link TaskType}.
+	 * 
+	 * @param taskType
+	 *            {@link TaskType}.
+	 * @return {@link WorkTaskModel} for the {@link TaskType}.
+	 */
+	private WorkTaskModel createWorkTaskModel(TaskType<?, ?, ?> taskType) {
+
+		// Create the work task model
+		WorkTaskModel workTask = new WorkTaskModel(taskType.getTaskName());
+
+		// Add the task object models
+		for (TaskObjectType<?> taskObjectType : taskType.getObjectTypes()) {
+			Enum<?> key = taskObjectType.getKey();
+			WorkTaskObjectModel taskObject = new WorkTaskObjectModel(
+					taskObjectType.getObjectName(), (key == null ? null : key
+							.name()), taskObjectType.getObjectType().getName(),
+					false);
+			workTask.addTaskObject(taskObject);
+		}
+
+		// Return the work task model
+		return workTask;
+	}
+
+	/**
+	 * Removes the connections to the {@link WorkTaskModel} and its associated
+	 * {@link TaskModel} instances.
+	 * 
+	 * @param workTask
+	 *            {@link WorkTaskModel}.
+	 * @param connectionList
+	 *            Listing to add the removed {@link ConnectionModel} instances.
+	 */
+	private void removeWorkTaskConnections(WorkTaskModel workTask,
+			List<ConnectionModel> connectionList) {
+
+		// Remove object connections
+		for (WorkTaskObjectModel taskObject : workTask.getTaskObjects()) {
+			WorkTaskObjectToExternalManagedObjectModel conn = taskObject
+					.getExternalManagedObject();
+			if (conn != null) {
+				conn.remove();
+				connectionList.add(conn);
+			}
+		}
+
+		// Remove task connections
+		for (WorkTaskToTaskModel taskConn : workTask.getTasks()) {
+			TaskModel task = taskConn.getTask();
+
+			// Remove input connections (copy to stop concurrent)
+			for (TaskToNextTaskModel conn : new ArrayList<TaskToNextTaskModel>(
+					task.getPreviousTasks())) {
+				conn.remove();
+				connectionList.add(conn);
+			}
+			for (TaskFlowToTaskModel conn : new ArrayList<TaskFlowToTaskModel>(
+					task.getTaskFlowInputs())) {
+				conn.remove();
+				connectionList.add(conn);
+			}
+			for (TaskEscalationToTaskModel conn : new ArrayList<TaskEscalationToTaskModel>(
+					task.getTaskEscalationInputs())) {
+				conn.remove();
+				connectionList.add(conn);
+			}
+
+			// Remove flow connections
+			for (TaskFlowModel flow : task.getTaskFlows()) {
+				TaskFlowToTaskModel connTask = flow.getTask();
+				if (connTask != null) {
+					connTask.remove();
+					connectionList.add(connTask);
+				}
+				TaskFlowToExternalFlowModel connExtFlow = flow
+						.getExternalFlow();
+				if (connExtFlow != null) {
+					connExtFlow.remove();
+					connectionList.add(connExtFlow);
+				}
+			}
+
+			// Remove next connections
+			TaskToNextTaskModel connNextTask = task.getNextTask();
+			if (connNextTask != null) {
+				connNextTask.remove();
+				connectionList.add(connNextTask);
+			}
+			TaskToNextExternalFlowModel connNextExtFlow = task
+					.getNextExternalFlow();
+			if (connNextExtFlow != null) {
+				connNextExtFlow.remove();
+				connectionList.add(connNextExtFlow);
+			}
+
+			// Remove escalation connections
+			for (TaskEscalationModel escalation : task.getTaskEscalations()) {
+				TaskEscalationToTaskModel connTask = escalation.getTask();
+				if (connTask != null) {
+					connTask.remove();
+					connectionList.add(connTask);
+				}
+				TaskEscalationToExternalFlowModel connExtFlow = escalation
+						.getExternalFlow();
+				if (connExtFlow != null) {
+					connExtFlow.remove();
+					connectionList.add(connExtFlow);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Removes the {@link TaskModel} instances associated to the
+	 * {@link WorkTaskModel}.
+	 * 
+	 * @param workTask
+	 *            {@link WorkTaskModel}.
+	 * @param taskList
+	 *            Listing to add the removed {@link TaskModel} instances.
+	 */
+	private void removeWorkTask(WorkTaskModel workTask, List<TaskModel> taskList) {
+		for (WorkTaskToTaskModel conn : workTask.getTasks()) {
+			TaskModel task = conn.getTask();
+
+			// Remove task and store for revert
+			DeskOperationsImpl.this.desk.removeTask(task);
+			taskList.add(task);
+		}
+	}
+
 	/*
 	 * ==================== DeskOperations =================================
 	 */
@@ -179,19 +312,10 @@ public class DeskOperationsImpl implements DeskOperations {
 				continue;
 			}
 
-			// Add the work task model
-			WorkTaskModel workTask = new WorkTaskModel(taskName);
+			// Create and add the work task model
+			WorkTaskModel workTask = DeskOperationsImpl.this
+					.createWorkTaskModel(taskType);
 			work.addWorkTask(workTask);
-
-			// Add the task object models
-			for (TaskObjectType<?> taskObjectType : taskType.getObjectTypes()) {
-				Enum<?> key = taskObjectType.getKey();
-				WorkTaskObjectModel taskObject = new WorkTaskObjectModel(
-						taskObjectType.getObjectName(), (key == null ? null
-								: key.name()), taskObjectType.getObjectType()
-								.getName(), false);
-				workTask.addTaskObject(taskObject);
-			}
 		}
 
 		// Ensure work task models in sorted order
@@ -251,84 +375,8 @@ public class DeskOperationsImpl implements DeskOperations {
 				// Remove connections to work and its tasks
 				List<ConnectionModel> connectionList = new LinkedList<ConnectionModel>();
 				for (WorkTaskModel workTask : workModel.getWorkTasks()) {
-
-					// Remove object connections
-					for (WorkTaskObjectModel taskObject : workTask
-							.getTaskObjects()) {
-						WorkTaskObjectToExternalManagedObjectModel conn = taskObject
-								.getExternalManagedObject();
-						if (conn != null) {
-							conn.remove();
-							connectionList.add(conn);
-						}
-					}
-
-					// Remove task connections
-					for (WorkTaskToTaskModel taskConn : workTask.getTasks()) {
-						TaskModel task = taskConn.getTask();
-
-						// Remove input connections (copy to stop concurrent)
-						for (TaskToNextTaskModel conn : new ArrayList<TaskToNextTaskModel>(
-								task.getPreviousTasks())) {
-							conn.remove();
-							connectionList.add(conn);
-						}
-						for (TaskFlowToTaskModel conn : new ArrayList<TaskFlowToTaskModel>(
-								task.getTaskFlowInputs())) {
-							conn.remove();
-							connectionList.add(conn);
-						}
-						for (TaskEscalationToTaskModel conn : new ArrayList<TaskEscalationToTaskModel>(
-								task.getTaskEscalationInputs())) {
-							conn.remove();
-							connectionList.add(conn);
-						}
-
-						// Remove flow connections
-						for (TaskFlowModel flow : task.getTaskFlows()) {
-							TaskFlowToTaskModel connTask = flow.getTask();
-							if (connTask != null) {
-								connTask.remove();
-								connectionList.add(connTask);
-							}
-							TaskFlowToExternalFlowModel connExtFlow = flow
-									.getExternalFlow();
-							if (connExtFlow != null) {
-								connExtFlow.remove();
-								connectionList.add(connExtFlow);
-							}
-						}
-
-						// Remove next connections
-						TaskToNextTaskModel connNextTask = task.getNextTask();
-						if (connNextTask != null) {
-							connNextTask.remove();
-							connectionList.add(connNextTask);
-						}
-						TaskToNextExternalFlowModel connNextExtFlow = task
-								.getNextExternalFlow();
-						if (connNextExtFlow != null) {
-							connNextExtFlow.remove();
-							connectionList.add(connNextExtFlow);
-						}
-
-						// Remove escalation connections
-						for (TaskEscalationModel escalation : task
-								.getTaskEscalations()) {
-							TaskEscalationToTaskModel connTask = escalation
-									.getTask();
-							if (connTask != null) {
-								connTask.remove();
-								connectionList.add(connTask);
-							}
-							TaskEscalationToExternalFlowModel connExtFlow = escalation
-									.getExternalFlow();
-							if (connExtFlow != null) {
-								connExtFlow.remove();
-								connectionList.add(connExtFlow);
-							}
-						}
-					}
+					DeskOperationsImpl.this.removeWorkTaskConnections(workTask,
+							connectionList);
 				}
 				this.connections = connectionList
 						.toArray(new ConnectionModel[0]);
@@ -336,13 +384,7 @@ public class DeskOperationsImpl implements DeskOperations {
 				// Remove the associated tasks (storing for revert)
 				List<TaskModel> taskList = new LinkedList<TaskModel>();
 				for (WorkTaskModel workTask : workModel.getWorkTasks()) {
-					for (WorkTaskToTaskModel conn : workTask.getTasks()) {
-						TaskModel task = conn.getTask();
-
-						// Remove task and store for revert
-						DeskOperationsImpl.this.desk.removeTask(task);
-						taskList.add(task);
-					}
+					DeskOperationsImpl.this.removeWorkTask(workTask, taskList);
 				}
 				this.tasks = taskList.toArray(new TaskModel[0]);
 
@@ -411,6 +453,113 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	@Override
+	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> addWorkTask(
+			final WorkModel workModel, TaskType<W, D, F> taskType) {
+
+		// Ensure the work task is not already added
+		String taskName = taskType.getTaskName();
+		for (WorkTaskModel workTask : workModel.getWorkTasks()) {
+			if (taskName.equals(taskName)) {
+				// Task already added
+				return new NoChange<WorkTaskModel>(workTask, "Add work task "
+						+ taskName, "Task " + taskName
+						+ " already added to work " + workModel.getWorkName());
+			}
+		}
+
+		// Create the work task model
+		final WorkTaskModel workTask = DeskOperationsImpl.this
+				.createWorkTaskModel(taskType);
+
+		// Return the add work task change
+		return new AbstractChange<WorkTaskModel>(workTask, "Add work task "
+				+ taskName) {
+			@Override
+			public void apply() {
+				// Add work task (ensuring work tasks sorted)
+				workModel.addWorkTask(workTask);
+				DeskOperationsImpl.sortWorkTaskModels(workModel.getWorkTasks());
+			}
+
+			@Override
+			public void revert() {
+				// Remove work task (should already be sorted)
+				workModel.removeWorkTask(workTask);
+			}
+		};
+	}
+
+	@Override
+	public Change<WorkTaskModel> removeWorkTask(final WorkModel work,
+			final WorkTaskModel workTask) {
+
+		// Ensure work task on work
+		boolean isOnWork = false;
+		for (WorkTaskModel workTaskModel : work.getWorkTasks()) {
+			if (workTaskModel == workTask) {
+				isOnWork = true;
+			}
+		}
+		if (!isOnWork) {
+			// Work task not on work
+			return new NoChange<WorkTaskModel>(workTask, "Remove work task "
+					+ workTask.getWorkTaskName(), "Work task "
+					+ workTask.getWorkTaskName() + " not on work "
+					+ work.getWorkName());
+		}
+
+		// Return the remove work task change
+		return new AbstractChange<WorkTaskModel>(workTask, "Remove work task "
+				+ workTask.getWorkTaskName()) {
+
+			/**
+			 * Removed {@link ConnectionModel} instances.
+			 */
+			private ConnectionModel[] connections;
+
+			/**
+			 * Removed {@link TaskModel} instances.
+			 */
+			private TaskModel[] tasks;
+
+			@Override
+			public void apply() {
+				// Remove the connections
+				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
+				DeskOperationsImpl.this.removeWorkTaskConnections(workTask,
+						connList);
+				this.connections = connList.toArray(new ConnectionModel[0]);
+
+				// Remove the tasks of the work task
+				List<TaskModel> taskList = new LinkedList<TaskModel>();
+				DeskOperationsImpl.this.removeWorkTask(workTask, taskList);
+				this.tasks = taskList.toArray(new TaskModel[0]);
+
+				// Remove the work task
+				work.removeWorkTask(workTask);
+			}
+
+			@Override
+			public void revert() {
+				// Add the work task (ensuring sorted)
+				work.addWorkTask(workTask);
+				DeskOperationsImpl.sortWorkTaskModels(work.getWorkTasks());
+
+				// Add the tasks (in reverse order, ensuring sorted)
+				for (int i = (this.tasks.length - 1); i >= 0; i--) {
+					DeskOperationsImpl.this.desk.addTask(this.tasks[i]);
+				}
+				DeskOperationsImpl.this.sortTaskModels();
+
+				// Reconnect connections
+				for (ConnectionModel connection : this.connections) {
+					connection.connect();
+				}
+			}
+		};
+	}
+
+	@Override
 	public Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
 			String argumentType) {
 		// TODO Implement
@@ -433,14 +582,6 @@ public class DeskOperationsImpl implements DeskOperations {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement DeskOperations.addTask");
-	}
-
-	@Override
-	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> addWorkTask(
-			WorkModel workModel, TaskType<W, D, F> taskType) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.addWorkTask");
 	}
 
 	@Override
@@ -480,14 +621,6 @@ public class DeskOperationsImpl implements DeskOperations {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement DeskOperations.removeTask");
-	}
-
-	@Override
-	public Change<WorkTaskModel> removeWorkTask(WorkModel workModel,
-			WorkTaskModel taskModel) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.removeWorkTask");
 	}
 
 	@Override

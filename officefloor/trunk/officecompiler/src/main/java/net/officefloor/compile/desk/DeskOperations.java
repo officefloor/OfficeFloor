@@ -98,17 +98,35 @@ public interface DeskOperations {
 	 */
 	Change<WorkModel> renameWork(WorkModel workModel, String newWorkName);
 
+	// TODO determine how conformWork is to be implemented
 	<W extends Work> Change<WorkModel> conformWork(WorkModel workModel,
 			WorkType<W> workType);
 
+	/**
+	 * Adds the {@link TaskType} to the {@link WorkModel}.
+	 * 
+	 * @param workModel
+	 *            {@link WorkModel} to have the {@link TaskType} added.
+	 * @param taskType
+	 *            {@link TaskType} to be added to the {@link WorkModel}.
+	 * @return {@link Change} to add the {@link TaskType} to the
+	 *         {@link WorkModel}.
+	 */
 	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> addWorkTask(
 			WorkModel workModel, TaskType<W, D, F> taskType);
 
+	/**
+	 * Removes the {@link WorkTaskModel} from the {@link WorkModel}.
+	 * 
+	 * @param workModel
+	 *            {@link WorkModel} to have the {@link WorkTaskModel} removed.
+	 * @param taskModel
+	 *            {@link WorkTaskModel} to be removed.
+	 * @return {@link Change} to remove the {@link WorkTaskModel} from the
+	 *         {@link WorkModel}.
+	 */
 	Change<WorkTaskModel> removeWorkTask(WorkModel workModel,
 			WorkTaskModel taskModel);
-
-	Change<WorkTaskModel> setObjectAsParameter(boolean isParameter,
-			String objectName, WorkTaskModel workTaskModel);
 
 	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<TaskModel> addTask(
 			String taskName, WorkTaskModel workTaskModel,
@@ -117,6 +135,9 @@ public interface DeskOperations {
 	Change<TaskModel> removeTask(TaskModel taskModel);
 
 	Change<TaskModel> renameTask(TaskModel taskModel, String newTaskName);
+
+	Change<WorkTaskModel> setObjectAsParameter(boolean isParameter,
+			String objectName, WorkTaskModel workTaskModel);
 
 	Change<TaskModel> setTaskAsPublic(boolean isPublic, TaskModel taskModel);
 
