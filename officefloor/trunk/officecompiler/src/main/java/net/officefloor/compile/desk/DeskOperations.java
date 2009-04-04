@@ -168,23 +168,80 @@ public interface DeskOperations {
 	 */
 	Change<TaskModel> renameTask(TaskModel taskModel, String newTaskName);
 
-	Change<WorkTaskModel> setObjectAsParameter(boolean isParameter,
+	/**
+	 * Specifies a {@link WorkTaskObjectModel} as a parameter or an object.
+	 * 
+	 * @param isParameter
+	 *            <code>true</code> for the {@link WorkTaskObjectModel} to be a
+	 *            parameter. <code>false</code> to be a dependency object.
+	 * @param taskObjectModel
+	 *            {@link WorkTaskObjectModel} to set as a parameter or object.
+	 * @return {@link Change} to set the {@link WorkTaskObjectModel} as a
+	 *         parameter or object.
+	 */
+	Change<WorkTaskObjectModel> setObjectAsParameter(boolean isParameter,
 			WorkTaskObjectModel taskObjectModel);
 
+	/**
+	 * Specifies a {@link TaskModel} as public/private.
+	 * 
+	 * @param isPublic
+	 *            <code>true</code> for the {@link TaskModel} to be public.
+	 *            <code>false</code> for the {@link TaskModel} to be private.
+	 * @param taskModel
+	 *            {@link TaskModel} to set public/private.
+	 * @return {@link Change} to set the {@link TaskModel} public/private.
+	 */
 	Change<TaskModel> setTaskAsPublic(boolean isPublic, TaskModel taskModel);
 
 	// TODO determine how conformTask is to be implemented
 	<W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> conformTask(
 			WorkTaskModel taskModel, TaskType<W, D, F> taskType);
 
+	/**
+	 * Adds an {@link ExternalFlowModel} to the {@link DeskModel}.
+	 * 
+	 * @param externalFlowName
+	 *            Name of the {@link ExternalFlowModel}.
+	 * @param argumentType
+	 *            Argument type for the {@link ExternalFlowModel}.
+	 * @return {@link Change} to add the {@link ExternalFlowModel}.
+	 */
 	Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
 			String argumentType);
 
+	/**
+	 * Removes an {@link ExternalFlowModel} from the {@link DeskModel}.
+	 * 
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel} for removal from the
+	 *            {@link DeskModel}.
+	 * @return {@link Change} to remove the {@link ExternalFlowModel} from the
+	 *         {@link DeskModel}.
+	 */
 	Change<ExternalFlowModel> removeExternalFlow(ExternalFlowModel externalFlow);
 
+	/**
+	 * Adds an {@link ExternalManagedObjectModel} to the {@link DeskModel}.
+	 * 
+	 * @param externalManagedObjectName
+	 *            Name of the {@link ExternalManagedObjectModel}.
+	 * @param objectType
+	 *            Object type for the {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to add the {@link ExternalManagedObjectModel}.
+	 */
 	Change<ExternalManagedObjectModel> addExternalManagedObject(
-			String externalManagedObjectName, String argumentType);
+			String externalManagedObjectName, String objectType);
 
+	/**
+	 * Removes an {@link ExternalManagedObjectModel} from the {@link DeskModel}.
+	 * 
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel} to remove from the
+	 *            {@link DeskModel}.
+	 * @return {@link Change} to remove the {@link ExternalManagedObjectModel}
+	 *         from the {@link DeskModel}.
+	 */
 	Change<ExternalManagedObjectModel> removeExternalManagedObject(
 			ExternalManagedObjectModel externalManagedObject);
 

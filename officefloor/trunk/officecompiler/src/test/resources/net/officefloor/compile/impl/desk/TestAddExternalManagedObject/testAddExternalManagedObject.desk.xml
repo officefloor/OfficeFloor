@@ -1,0 +1,6 @@
+<desk>
+	<external-managed-objects>
+		<external-managed-object name="OBJECT"
+			argument-type="java.lang.String" />
+	</external-managed-objects>
+</desk>

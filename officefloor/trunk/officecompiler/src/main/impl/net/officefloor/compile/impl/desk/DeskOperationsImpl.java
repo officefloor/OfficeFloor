@@ -631,7 +631,7 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	@Override
-	public Change<WorkTaskModel> setObjectAsParameter(boolean isParameter,
+	public Change<WorkTaskObjectModel> setObjectAsParameter(boolean isParameter,
 			WorkTaskObjectModel taskObject) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
