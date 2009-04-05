@@ -17,6 +17,7 @@
 package net.officefloor.compile.impl.desk;
 
 import net.officefloor.compile.change.Change;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.TaskModel;
 
 /**
@@ -49,6 +50,16 @@ public class SetTaskAsPublicTest extends AbstractDeskOperationsTestCase {
 		// Obtain the public and private tasks
 		this.publicTask = this.desk.getTasks().get(0);
 		this.privateTask = this.desk.getTasks().get(1);
+	}
+
+	/**
+	 * Ensure no change if the {@link TaskModel} not on the {@link DeskModel}.
+	 */
+	public void testTaskNotOnDesk() {
+		TaskModel task = new TaskModel("TASK", false, "WORK", "WORK_TASK", null);
+		Change<TaskModel> change = this.operations.setTaskAsPublic(true, task);
+		this.assertChange(change, task, "Set task TASK public", false,
+				"Task TASK not on desk");
 	}
 
 	/**

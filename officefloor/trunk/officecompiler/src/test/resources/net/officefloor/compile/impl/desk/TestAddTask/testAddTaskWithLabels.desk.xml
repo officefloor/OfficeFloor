@@ -6,8 +6,8 @@
 	</works>
 	<tasks>
 		<task name="TASK" work="WORK" task="WORK_TASK">
-			<task-flow name="FLOW_ONE" />
-			<task-flow name="FLOW_TWO" />
+			<task-flow name="FLOW_ONE" argument-type="java.lang.String" />
+			<task-flow name="FLOW_TWO" argument-type="java.lang.Integer" />
 			<task-escalation escalation-type="java.lang.Exception" />
 		</task>
 	</tasks>

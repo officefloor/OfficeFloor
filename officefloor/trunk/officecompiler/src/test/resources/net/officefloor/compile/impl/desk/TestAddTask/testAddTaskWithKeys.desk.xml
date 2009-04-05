@@ -5,11 +5,10 @@
         </work>
     </works>
     <tasks>
-        <task name="TASK" work="WORK" task="WORK_TASK" return-type="java.lang.Double">
-            <task-flow name="ONE" key="ONE" argument-type="java.lang.String" />
-            <task-flow name="TWO" key="TWO" argument-type="java.lang.Integer" />
-            <task-escalation escalation-type="java.sql.SQLException" />
-            <task-escalation escalation-type="java.io.IOException" />
+        <task name="TASK" work="WORK" task="WORK_TASK">
+            <task-flow name="ONE" key="ONE" />
+            <task-flow name="TWO" key="TWO" />
+            <task-escalation escalation-type="java.lang.Exception" />
         </task>
     </tasks>
 </desk>

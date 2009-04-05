@@ -218,7 +218,7 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("next -> task", task_next, nextToTask.getNextTask());
 
 		// Ensure the tasks are connected to their work tasks
-		assertEquals("task <- workTask", workTask, task.getTask().getWorkTask());
+		assertEquals("task <- workTask", workTask, task.getWorkTask().getWorkTask());
 		assertEquals("task -> workTask", task, workTask.getTasks().get(0)
 				.getTask());
 	}

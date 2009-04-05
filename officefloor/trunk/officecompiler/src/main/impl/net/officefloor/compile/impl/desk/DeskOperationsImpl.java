@@ -30,6 +30,8 @@ import net.officefloor.compile.impl.change.AbstractChange;
 import net.officefloor.compile.impl.change.NoChange;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.work.TaskEscalationType;
+import net.officefloor.compile.spi.work.TaskFlowType;
 import net.officefloor.compile.spi.work.TaskObjectType;
 import net.officefloor.compile.spi.work.TaskType;
 import net.officefloor.compile.spi.work.WorkType;
@@ -98,6 +100,25 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	/**
+	 * Sorts the {@link WorkTaskToTaskModel} connections.
+	 * 
+	 * @param workTaskToTaskConnections
+	 *            {@link WorkTaskToTaskModel} instances.
+	 */
+	public static void sortWorkTaskToTaskConnections(
+			List<WorkTaskToTaskModel> workTaskToTaskConnections) {
+		Collections.sort(workTaskToTaskConnections,
+				new Comparator<WorkTaskToTaskModel>() {
+					@Override
+					public int compare(WorkTaskToTaskModel a,
+							WorkTaskToTaskModel b) {
+						return a.getTask().getTaskName().compareTo(
+								b.getTask().getTaskName());
+					}
+				});
+	}
+
+	/**
 	 * <p>
 	 * Sorts the {@link TaskModel} instances.
 	 * <p>
@@ -113,6 +134,47 @@ public class DeskOperationsImpl implements DeskOperations {
 				return a.getTaskName().compareTo(b.getTaskName());
 			}
 		});
+	}
+
+	/**
+	 * <p>
+	 * Sorts the {@link ExternalFlowModel} instances.
+	 * <p>
+	 * This enables easier merging of configuration under SCM.
+	 * 
+	 * @param externalFlows
+	 *            {@link ExternalFlowModel} instances.
+	 */
+	public static void sortExternalFlows(List<ExternalFlowModel> externalFlows) {
+		Collections.sort(externalFlows, new Comparator<ExternalFlowModel>() {
+			@Override
+			public int compare(ExternalFlowModel a, ExternalFlowModel b) {
+				return a.getExternalFlowName().compareTo(
+						b.getExternalFlowName());
+			}
+		});
+	}
+
+	/**
+	 * <p>
+	 * Sorts the {@link ExternalManagedObjectModel} instances.
+	 * <p>
+	 * This enables easier merging of configuration under SCM.
+	 * 
+	 * @param externalManagedObjects
+	 *            {@link ExternalManagedObjectModel} instances.
+	 */
+	public static void sortExternalManagedObjects(
+			List<ExternalManagedObjectModel> externalManagedObjects) {
+		Collections.sort(externalManagedObjects,
+				new Comparator<ExternalManagedObjectModel>() {
+					@Override
+					public int compare(ExternalManagedObjectModel a,
+							ExternalManagedObjectModel b) {
+						return a.getExternalManagedObjectName().compareTo(
+								b.getExternalManagedObjectName());
+					}
+				});
 	}
 
 	/**
@@ -145,6 +207,20 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	/**
+	 * Sorts the {@link ExternalFlowModel} instances.
+	 */
+	protected void sortExternalFlows() {
+		sortExternalFlows(this.desk.getExternalFlows());
+	}
+
+	/**
+	 * Sorts the {@link ExternalManagedObjectModel} instances.
+	 */
+	protected void sortExternalManagedObjects() {
+		sortExternalManagedObjects(this.desk.getExternalManagedObjects());
+	}
+
+	/**
 	 * Creates a {@link WorkTaskModel} for a {@link TaskType}.
 	 * 
 	 * @param taskType
@@ -171,6 +247,78 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	/**
+	 * Removes the connections to the {@link TaskModel} (except to its
+	 * {@link WorkTaskModel}).
+	 * 
+	 * @param task
+	 *            {@link TaskModel}.
+	 * @param connectionList
+	 *            Listing to add removed {@link ConnectionModel} instances.
+	 */
+	private void removeTaskConnections(TaskModel task,
+			List<ConnectionModel> connectionList) {
+
+		// Remove input connections (copy to stop concurrent)
+		for (TaskToNextTaskModel conn : new ArrayList<TaskToNextTaskModel>(task
+				.getPreviousTasks())) {
+			conn.remove();
+			connectionList.add(conn);
+		}
+		for (TaskFlowToTaskModel conn : new ArrayList<TaskFlowToTaskModel>(task
+				.getTaskFlowInputs())) {
+			conn.remove();
+			connectionList.add(conn);
+		}
+		for (TaskEscalationToTaskModel conn : new ArrayList<TaskEscalationToTaskModel>(
+				task.getTaskEscalationInputs())) {
+			conn.remove();
+			connectionList.add(conn);
+		}
+
+		// Remove flow connections
+		for (TaskFlowModel flow : task.getTaskFlows()) {
+			TaskFlowToTaskModel connTask = flow.getTask();
+			if (connTask != null) {
+				connTask.remove();
+				connectionList.add(connTask);
+			}
+			TaskFlowToExternalFlowModel connExtFlow = flow.getExternalFlow();
+			if (connExtFlow != null) {
+				connExtFlow.remove();
+				connectionList.add(connExtFlow);
+			}
+		}
+
+		// Remove next connections
+		TaskToNextTaskModel connNextTask = task.getNextTask();
+		if (connNextTask != null) {
+			connNextTask.remove();
+			connectionList.add(connNextTask);
+		}
+		TaskToNextExternalFlowModel connNextExtFlow = task
+				.getNextExternalFlow();
+		if (connNextExtFlow != null) {
+			connNextExtFlow.remove();
+			connectionList.add(connNextExtFlow);
+		}
+
+		// Remove escalation connections
+		for (TaskEscalationModel escalation : task.getTaskEscalations()) {
+			TaskEscalationToTaskModel connTask = escalation.getTask();
+			if (connTask != null) {
+				connTask.remove();
+				connectionList.add(connTask);
+			}
+			TaskEscalationToExternalFlowModel connExtFlow = escalation
+					.getExternalFlow();
+			if (connExtFlow != null) {
+				connExtFlow.remove();
+				connectionList.add(connExtFlow);
+			}
+		}
+	}
+
+	/**
 	 * Removes the connections to the {@link WorkTaskModel} and its associated
 	 * {@link TaskModel} instances.
 	 * 
@@ -192,69 +340,11 @@ public class DeskOperationsImpl implements DeskOperations {
 			}
 		}
 
-		// Remove task connections
-		for (WorkTaskToTaskModel taskConn : workTask.getTasks()) {
+		// Remove task connections (copy to stop concurrent)
+		for (WorkTaskToTaskModel taskConn : new ArrayList<WorkTaskToTaskModel>(
+				workTask.getTasks())) {
 			TaskModel task = taskConn.getTask();
-
-			// Remove input connections (copy to stop concurrent)
-			for (TaskToNextTaskModel conn : new ArrayList<TaskToNextTaskModel>(
-					task.getPreviousTasks())) {
-				conn.remove();
-				connectionList.add(conn);
-			}
-			for (TaskFlowToTaskModel conn : new ArrayList<TaskFlowToTaskModel>(
-					task.getTaskFlowInputs())) {
-				conn.remove();
-				connectionList.add(conn);
-			}
-			for (TaskEscalationToTaskModel conn : new ArrayList<TaskEscalationToTaskModel>(
-					task.getTaskEscalationInputs())) {
-				conn.remove();
-				connectionList.add(conn);
-			}
-
-			// Remove flow connections
-			for (TaskFlowModel flow : task.getTaskFlows()) {
-				TaskFlowToTaskModel connTask = flow.getTask();
-				if (connTask != null) {
-					connTask.remove();
-					connectionList.add(connTask);
-				}
-				TaskFlowToExternalFlowModel connExtFlow = flow
-						.getExternalFlow();
-				if (connExtFlow != null) {
-					connExtFlow.remove();
-					connectionList.add(connExtFlow);
-				}
-			}
-
-			// Remove next connections
-			TaskToNextTaskModel connNextTask = task.getNextTask();
-			if (connNextTask != null) {
-				connNextTask.remove();
-				connectionList.add(connNextTask);
-			}
-			TaskToNextExternalFlowModel connNextExtFlow = task
-					.getNextExternalFlow();
-			if (connNextExtFlow != null) {
-				connNextExtFlow.remove();
-				connectionList.add(connNextExtFlow);
-			}
-
-			// Remove escalation connections
-			for (TaskEscalationModel escalation : task.getTaskEscalations()) {
-				TaskEscalationToTaskModel connTask = escalation.getTask();
-				if (connTask != null) {
-					connTask.remove();
-					connectionList.add(connTask);
-				}
-				TaskEscalationToExternalFlowModel connExtFlow = escalation
-						.getExternalFlow();
-				if (connExtFlow != null) {
-					connExtFlow.remove();
-					connectionList.add(connExtFlow);
-				}
-			}
+			this.removeTaskConnections(task, connectionList);
 		}
 	}
 
@@ -453,6 +543,14 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	@Override
+	public <W extends Work> Change<WorkModel> conformWork(WorkModel workModel,
+			WorkType<W> workType) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement DeskOperations.conformWork");
+	}
+
+	@Override
 	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<WorkTaskModel> addWorkTask(
 			final WorkModel workModel, TaskType<W, D, F> taskType) {
 
@@ -561,41 +659,298 @@ public class DeskOperationsImpl implements DeskOperations {
 
 	@Override
 	public <W extends Work, D extends Enum<D>, F extends Enum<F>> Change<TaskModel> addTask(
-			String taskName, WorkTaskModel workTaskModel,
+			String taskName, final WorkTaskModel workTask,
 			TaskType<W, D, F> taskType) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.addTask");
+
+		// Create the task model
+		Class<?> returnType = taskType.getReturnType();
+		final TaskModel task = new TaskModel(taskName, false, null, workTask
+				.getWorkTaskName(), (returnType != null ? returnType.getName()
+				: null));
+		for (TaskFlowType<?> flowType : taskType.getFlowTypes()) {
+			Enum<?> key = flowType.getKey();
+			Class<?> argumentType = flowType.getArgumentType();
+			TaskFlowModel taskFlow = new TaskFlowModel(flowType.getFlowName(),
+					(key != null ? key.name() : null),
+					(argumentType != null ? argumentType.getName() : null));
+			task.addTaskFlow(taskFlow);
+		}
+		for (TaskEscalationType escalationType : taskType.getEscalationTypes()) {
+			TaskEscalationModel taskEscalation = new TaskEscalationModel(
+					escalationType.getEscalationType().getName());
+			task.addTaskEscalation(taskEscalation);
+		}
+
+		// Ensure the work task is on the desk and obtain its work
+		WorkModel work = null;
+		for (WorkModel workModel : this.desk.getWorks()) {
+			for (WorkTaskModel workTaskModel : workModel.getWorkTasks()) {
+				if (workTaskModel == workTask) {
+					// On the desk
+					work = workModel;
+				}
+			}
+		}
+		if (work == null) {
+			// Work task not on desk so can not add task
+			return new NoChange<TaskModel>(task, "Add task " + taskName,
+					"Work task " + workTask.getWorkTaskName() + " not on desk");
+		}
+
+		// Specify the work name of the task (now that have work)
+		task.setWorkName(work.getWorkName());
+
+		// Ensure the work task for the task type
+		if (!workTask.getWorkTaskName().equals(taskType.getTaskName())) {
+			// Not correct task type for the work task
+			return new NoChange<TaskModel>(task, "Add task " + taskName,
+					"Task type " + taskType.getTaskName()
+							+ " does not match work task "
+							+ workTask.getWorkTaskName());
+		}
+
+		// Create the connection from work task to task
+		final WorkTaskToTaskModel conn = new WorkTaskToTaskModel(task, workTask);
+
+		// Return the change to add the task
+		return new AbstractChange<TaskModel>(task, "Add task " + taskName) {
+			@Override
+			public void apply() {
+				// Add the task ensuring ordering
+				DeskOperationsImpl.this.desk.addTask(task);
+				DeskOperationsImpl.this.sortTaskModels();
+
+				// Connect work task to the task (ensuring ordering)
+				conn.connect();
+				DeskOperationsImpl.sortWorkTaskToTaskConnections(workTask
+						.getTasks());
+			}
+
+			@Override
+			public void revert() {
+				// Disconnect work task from the task
+				conn.remove();
+
+				// Remove task (should maintain ordering)
+				DeskOperationsImpl.this.desk.removeTask(task);
+			}
+		};
 	}
 
 	@Override
-	public Change<TaskModel> removeTask(TaskModel taskModel) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.removeTask");
+	public Change<TaskModel> removeTask(final TaskModel task) {
+
+		// Ensure the task is on the desk
+		boolean isOnDesk = false;
+		for (TaskModel taskModel : this.desk.getTasks()) {
+			if (task == taskModel) {
+				isOnDesk = true; // task on desk
+			}
+		}
+		if (!isOnDesk) {
+			// Not on desk so can not remove it
+			return new NoChange<TaskModel>(task, "Remove task "
+					+ task.getTaskName(), "Task " + task.getTaskName()
+					+ " not on desk");
+		}
+
+		// Create change to remove the task
+		return new AbstractChange<TaskModel>(task, "Remove task "
+				+ task.getTaskName()) {
+
+			/**
+			 * {@link ConnectionModel} instances removed.
+			 */
+			private ConnectionModel[] connections;
+
+			@Override
+			public void apply() {
+				// Remove connections to the task
+				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
+				DeskOperationsImpl.this.removeTaskConnections(task, connList);
+
+				// Remove connection to work task
+				WorkTaskToTaskModel workTaskConn = task.getWorkTask();
+				workTaskConn.remove();
+				connList.add(workTaskConn);
+
+				// Store for revert
+				this.connections = connList.toArray(new ConnectionModel[0]);
+
+				// Remove the task (should maintain order)
+				DeskOperationsImpl.this.desk.removeTask(task);
+			}
+
+			@Override
+			public void revert() {
+				// Add task back in (ensuring order)
+				DeskOperationsImpl.this.desk.addTask(task);
+				DeskOperationsImpl.this.sortTaskModels();
+
+				// Reconnect connections
+				for (ConnectionModel conn : this.connections) {
+					conn.connect();
+				}
+
+				// Ensure work task connections sorted by task name
+				DeskOperationsImpl.sortWorkTaskToTaskConnections(task
+						.getWorkTask().getWorkTask().getTasks());
+			}
+		};
 	}
 
 	@Override
-	public Change<TaskModel> renameTask(TaskModel taskModel, String newTaskName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.renameTask");
+	public Change<TaskModel> renameTask(final TaskModel task,
+			final String newTaskName) {
+
+		// Ensure the task is on the desk
+		boolean isOnDesk = false;
+		for (TaskModel taskModel : DeskOperationsImpl.this.desk.getTasks()) {
+			if (task == taskModel) {
+				isOnDesk = true; // task on desk
+			}
+		}
+		if (!isOnDesk) {
+			// Can not remove task as not on desk
+			return new NoChange<TaskModel>(task, "Rename task "
+					+ task.getTaskName() + " to " + newTaskName, "Task "
+					+ task.getTaskName() + " not on desk");
+		}
+
+		// Maintain old task name for revert
+		final String oldTaskName = task.getTaskName();
+
+		// Return rename change
+		return new AbstractChange<TaskModel>(task, "Rename task " + oldTaskName
+				+ " to " + newTaskName) {
+			@Override
+			public void apply() {
+				// Rename task (ensuring ordering)
+				task.setTaskName(newTaskName);
+				DeskOperationsImpl.this.sortTaskModels();
+				DeskOperationsImpl.sortWorkTaskToTaskConnections(task
+						.getWorkTask().getWorkTask().getTasks());
+			}
+
+			@Override
+			public void revert() {
+				// Revert to old task name (ensuring ordering)
+				task.setTaskName(oldTaskName);
+				DeskOperationsImpl.this.sortTaskModels();
+				DeskOperationsImpl.sortWorkTaskToTaskConnections(task
+						.getWorkTask().getWorkTask().getTasks());
+			}
+		};
 	}
 
 	@Override
-	public Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
-			String argumentType) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.addExternalFlow");
+	public Change<WorkTaskObjectModel> setObjectAsParameter(
+			boolean isParameter, final WorkTaskObjectModel taskObject) {
+
+		// Ensure the task object on the desk
+		boolean isOnDesk = false;
+		for (WorkModel work : DeskOperationsImpl.this.desk.getWorks()) {
+			for (WorkTaskModel workTask : work.getWorkTasks()) {
+				for (WorkTaskObjectModel taskObjectModel : workTask
+						.getTaskObjects()) {
+					if (taskObject == taskObjectModel) {
+						isOnDesk = true; // on the desk
+					}
+				}
+			}
+		}
+		if (!isOnDesk) {
+			// Not on desk so can not set as parameter
+			return new NoChange<WorkTaskObjectModel>(taskObject,
+					"Set task object " + taskObject.getObjectName() + " as "
+							+ (isParameter ? "a parameter" : "an object"),
+					"Task object " + taskObject.getObjectName()
+							+ " not on desk");
+		}
+
+		// Return the appropriate change
+		if (isParameter) {
+			// Return change to set as parameter
+			final WorkTaskObjectToExternalManagedObjectModel conn = taskObject
+					.getExternalManagedObject();
+			return new AbstractChange<WorkTaskObjectModel>(taskObject,
+					"Set task object " + taskObject.getObjectName()
+							+ " as a parameter") {
+				@Override
+				public void apply() {
+					// Remove possible connection to external managed object
+					if (conn != null) {
+						conn.remove();
+					}
+
+					// Flag as parameter
+					taskObject.setIsParameter(true);
+				}
+
+				@Override
+				public void revert() {
+					// Flag as object
+					taskObject.setIsParameter(false);
+
+					// Reconnect to possible external managed object
+					if (conn != null) {
+						conn.connect();
+					}
+				}
+			};
+		} else {
+			// Return change to set as object
+			return new AbstractChange<WorkTaskObjectModel>(taskObject,
+					"Set task object " + taskObject.getObjectName()
+							+ " as an object") {
+				@Override
+				public void apply() {
+					// Flag as object (no connection as parameter)
+					taskObject.setIsParameter(false);
+				}
+
+				@Override
+				public void revert() {
+					// Flag back as parameter
+					taskObject.setIsParameter(true);
+				}
+			};
+		}
 	}
 
 	@Override
-	public Change<ExternalManagedObjectModel> addExternalManagedObject(
-			String externalManagedObjectName, String argumentType) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.addExternalManagedObject");
+	public Change<TaskModel> setTaskAsPublic(final boolean isPublic,
+			final TaskModel task) {
+
+		// Ensure task on desk
+		boolean isOnDesk = false;
+		for (TaskModel taskModel : DeskOperationsImpl.this.desk.getTasks()) {
+			if (task == taskModel) {
+				isOnDesk = true; // task on desk
+			}
+		}
+		if (!isOnDesk) {
+			// Task not on desk so can not make public
+			return new NoChange<TaskModel>(task, "Set task "
+					+ task.getTaskName() + (isPublic ? " public" : " private"),
+					"Task " + task.getTaskName() + " not on desk");
+		}
+
+		// Return the change
+		return new AbstractChange<TaskModel>(task, "Set task "
+				+ task.getTaskName() + (isPublic ? " public" : " private")) {
+			@Override
+			public void apply() {
+				// Specify public/private
+				task.setIsPublic(isPublic);
+			}
+
+			@Override
+			public void revert() {
+				// Revert public/private
+				task.setIsPublic(!isPublic);
+			}
+		};
 	}
 
 	@Override
@@ -607,43 +962,191 @@ public class DeskOperationsImpl implements DeskOperations {
 	}
 
 	@Override
-	public <W extends Work> Change<WorkModel> conformWork(WorkModel workModel,
-			WorkType<W> workType) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.conformWork");
+	public Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
+			String argumentType) {
+
+		// Create the external flow
+		final ExternalFlowModel externalFlow = new ExternalFlowModel(
+				externalFlowName, argumentType);
+
+		// Return change to add external flow
+		return new AbstractChange<ExternalFlowModel>(externalFlow,
+				"Add external flow " + externalFlowName) {
+			@Override
+			public void apply() {
+				// Add external flow (ensuring ordering)
+				DeskOperationsImpl.this.desk.addExternalFlow(externalFlow);
+				DeskOperationsImpl.this.sortExternalFlows();
+			}
+
+			@Override
+			public void revert() {
+				// Remove external flow (should maintain order)
+				DeskOperationsImpl.this.desk.removeExternalFlow(externalFlow);
+			}
+		};
 	}
 
 	@Override
 	public Change<ExternalFlowModel> removeExternalFlow(
-			ExternalFlowModel externalFlow) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.removeExternalFlow");
+			final ExternalFlowModel externalFlow) {
+
+		// Ensure external flow on desk
+		boolean isOnDesk = false;
+		for (ExternalFlowModel externalFlowModel : DeskOperationsImpl.this.desk
+				.getExternalFlows()) {
+			if (externalFlow == externalFlowModel) {
+				isOnDesk = true; // on the desk
+			}
+		}
+		if (!isOnDesk) {
+			// No change as external flow not on desk
+			return new NoChange<ExternalFlowModel>(externalFlow,
+					"Remove external flow "
+							+ externalFlow.getExternalFlowName(),
+					"External flow " + externalFlow.getExternalFlowName()
+							+ " not on desk");
+		}
+
+		// Return change to remove external flow
+		return new AbstractChange<ExternalFlowModel>(externalFlow,
+				"Remove external flow " + externalFlow.getExternalFlowName()) {
+
+			/**
+			 * {@link ConnectionModel} instances.
+			 */
+			private ConnectionModel[] connections;
+
+			@Override
+			public void apply() {
+				// Remove the connections to the external flows
+				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
+				for (TaskFlowToExternalFlowModel conn : new ArrayList<TaskFlowToExternalFlowModel>(
+						externalFlow.getTaskFlows())) {
+					conn.remove();
+					connList.add(conn);
+				}
+				for (TaskToNextExternalFlowModel conn : new ArrayList<TaskToNextExternalFlowModel>(
+						externalFlow.getPreviousTasks())) {
+					conn.remove();
+					connList.add(conn);
+				}
+				for (TaskEscalationToExternalFlowModel conn : new ArrayList<TaskEscalationToExternalFlowModel>(
+						externalFlow.getTaskEscalations())) {
+					conn.remove();
+					connList.add(conn);
+				}
+				this.connections = connList.toArray(new ConnectionModel[0]);
+
+				// Remove the external flow (should maintain order)
+				DeskOperationsImpl.this.desk.removeExternalFlow(externalFlow);
+			}
+
+			@Override
+			public void revert() {
+				// Add the external flow back (ensure ordering)
+				DeskOperationsImpl.this.desk.addExternalFlow(externalFlow);
+				DeskOperationsImpl.this.sortExternalFlows();
+
+				// Reconnect connections
+				for (ConnectionModel conn : this.connections) {
+					conn.connect();
+				}
+			}
+		};
+	}
+
+	@Override
+	public Change<ExternalManagedObjectModel> addExternalManagedObject(
+			String externalManagedObjectName, String objectType) {
+
+		// Create the external managed object
+		final ExternalManagedObjectModel externalMo = new ExternalManagedObjectModel(
+				externalManagedObjectName, objectType);
+
+		// Return the change to add external managed object
+		return new AbstractChange<ExternalManagedObjectModel>(externalMo,
+				"Add external managed object " + externalManagedObjectName) {
+			@Override
+			public void apply() {
+				// Add external managed object (ensure ordering)
+				DeskOperationsImpl.this.desk
+						.addExternalManagedObject(externalMo);
+				DeskOperationsImpl.this.sortExternalManagedObjects();
+			}
+
+			@Override
+			public void revert() {
+				// Remove external managed object (should maintain order)
+				DeskOperationsImpl.this.desk
+						.removeExternalManagedObject(externalMo);
+			}
+		};
 	}
 
 	@Override
 	public Change<ExternalManagedObjectModel> removeExternalManagedObject(
-			ExternalManagedObjectModel externalManagedObject) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.removeExternalManagedObject");
-	}
+			final ExternalManagedObjectModel externalManagedObject) {
 
-	@Override
-	public Change<WorkTaskObjectModel> setObjectAsParameter(boolean isParameter,
-			WorkTaskObjectModel taskObject) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.setObjectAsParameter");
-	}
+		// Ensure external managed object on desk
+		boolean isOnDesk = false;
+		for (ExternalManagedObjectModel externalManagedObjectModel : DeskOperationsImpl.this.desk
+				.getExternalManagedObjects()) {
+			if (externalManagedObject == externalManagedObjectModel) {
+				isOnDesk = true; // on the desk
+			}
+		}
+		if (!isOnDesk) {
+			// Not on desk so can not remove it
+			return new NoChange<ExternalManagedObjectModel>(
+					externalManagedObject, "Remove external managed object "
+							+ externalManagedObject
+									.getExternalManagedObjectName(),
+					"External managed object "
+							+ externalManagedObject
+									.getExternalManagedObjectName()
+							+ " not on desk");
+		}
 
-	@Override
-	public Change<TaskModel> setTaskAsPublic(boolean isPublic,
-			TaskModel taskModel) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DeskOperations.setTaskAsPublic");
+		// Return change to remove the external managed object
+		return new AbstractChange<ExternalManagedObjectModel>(
+				externalManagedObject, "Remove external managed object "
+						+ externalManagedObject.getExternalManagedObjectName()) {
+
+			/**
+			 * {@link ConnectionModel} instances.
+			 */
+			private ConnectionModel[] connections;
+
+			@Override
+			public void apply() {
+				// Remove the connections to the external managed object
+				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
+				for (WorkTaskObjectToExternalManagedObjectModel conn : new ArrayList<WorkTaskObjectToExternalManagedObjectModel>(
+						externalManagedObject.getTaskObjects())) {
+					conn.remove();
+					connList.add(conn);
+				}
+				this.connections = connList.toArray(new ConnectionModel[0]);
+
+				// Remove the external managed object (should maintain order)
+				DeskOperationsImpl.this.desk
+						.removeExternalManagedObject(externalManagedObject);
+			}
+
+			@Override
+			public void revert() {
+				// Add back the external managed object (ensure ordering)
+				DeskOperationsImpl.this.desk
+						.addExternalManagedObject(externalManagedObject);
+				DeskOperationsImpl.this.sortExternalManagedObjects();
+
+				// Reconnect connections
+				for (ConnectionModel conn : this.connections) {
+					conn.connect();
+				}
+			}
+		};
 	}
 
 }

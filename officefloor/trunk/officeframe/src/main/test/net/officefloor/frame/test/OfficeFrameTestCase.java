@@ -331,22 +331,28 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		try {
 
-			// Ensure checked only twice
-			// (allows checking bi-directional references)
-			if (checkedObjects.containsKey(expectedRoot)) {
-				// Ensure only check twice at most
-				int timesChecked = checkedObjects.get(expectedRoot).intValue();
-				timesChecked++; // another check
-				if (timesChecked > 2) {
-					// Already checked twice
-					return;
-				}
+			// Always check contents of a Collection or null value
+			// (stops two unrelated empty collections matching)
+			if ((expectedRoot != null)
+					&& (!(expectedRoot instanceof Collection))) {
+				// Ensure checked only twice
+				// (allows checking bi-directional references)
+				if (checkedObjects.containsKey(expectedRoot)) {
+					// Ensure only check twice at most
+					int timesChecked = checkedObjects.get(expectedRoot)
+							.intValue();
+					timesChecked++; // another check
+					if (timesChecked > 2) {
+						// Already checked twice
+						return;
+					}
 
-				// Specify another check of object
-				checkedObjects.put(expectedRoot, new Integer(timesChecked));
-			} else {
-				// First time accessed, therefore flag first time
-				checkedObjects.put(expectedRoot, new Integer(1));
+					// Specify another check of object
+					checkedObjects.put(expectedRoot, new Integer(timesChecked));
+				} else {
+					// First time accessed, therefore flag first time
+					checkedObjects.put(expectedRoot, new Integer(1));
+				}
 			}
 
 			// Ensure matches

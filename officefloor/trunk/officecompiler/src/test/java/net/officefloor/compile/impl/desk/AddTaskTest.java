@@ -21,8 +21,10 @@ import java.sql.SQLException;
 
 import net.officefloor.compile.change.Change;
 import net.officefloor.compile.spi.work.TaskType;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.TaskFlowModel;
 import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 
 /**
@@ -52,12 +54,51 @@ public class AddTaskTest extends AbstractDeskOperationsTestCase {
 	}
 
 	/**
+	 * Ensure can not apply change if {@link WorkTaskModel} is not on the
+	 * {@link DeskModel} (specifically a {@link WorkModel} of the
+	 * {@link DeskModel}).
+	 */
+	public void testWorkTaskNotOnDesk() {
+
+		// Create the work task not on the desk
+		WorkTaskModel workTask = new WorkTaskModel("NOT_ON_DESK");
+
+		// Validate not able to add task if work task not on desk
+		TaskType<?, ?, ?> taskType = this
+				.constructTaskType("NOT_ON_DESK", null);
+		Change<TaskModel> change = this.operations.addTask("TASK", workTask,
+				taskType);
+		this.assertChange(change, null, "Add task TASK", false,
+				"Work task NOT_ON_DESK not on desk");
+		assertNotNull("Must have target", change.getTarget());
+	}
+
+	/**
+	 * Ensures can not apply change if the {@link WorkTaskModel} name does not
+	 * match the {@link TaskType} name.
+	 */
+	public void testWorkTaskNameMismatch() {
+
+		// Create a task type with mismatched name
+		TaskType<?, ?, ?> taskType = this.constructTaskType(
+				"MISMATCH_TASK_NAME", null);
+
+		// Validate not able to add task if work task name mismatch
+		Change<TaskModel> change = this.operations.addTask("TASK",
+				this.workTask, taskType);
+		this
+				.assertChange(change, null, "Add task TASK", false,
+						"Task type MISMATCH_TASK_NAME does not match work task WORK_TASK");
+		assertNotNull("Must have target", change.getTarget());
+	}
+
+	/**
 	 * Ensure can add {@link TaskModel} that uses indexing.
 	 */
 	public void testAddTaskWithoutKeys() {
 
 		// Create the task type
-		TaskType<?, ?, ?> task = this.constructTaskType("TASK",
+		TaskType<?, ?, ?> task = this.constructTaskType("WORK_TASK",
 				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
@@ -86,7 +127,7 @@ public class AddTaskTest extends AbstractDeskOperationsTestCase {
 	public void testAddTaskWithKeys() {
 
 		// Create the task type
-		TaskType<?, ?, ?> task = this.constructTaskType("TASK",
+		TaskType<?, ?, ?> task = this.constructTaskType("WORK_TASK",
 				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
@@ -117,7 +158,7 @@ public class AddTaskTest extends AbstractDeskOperationsTestCase {
 	public void testAddTaskWithLabels() {
 
 		// Create the task type
-		TaskType<?, ?, ?> task = this.constructTaskType("TASK",
+		TaskType<?, ?, ?> task = this.constructTaskType("WORK_TASK",
 				new TaskConstructor() {
 					@Override
 					public void construct(TaskTypeConstructor task) {
@@ -141,17 +182,15 @@ public class AddTaskTest extends AbstractDeskOperationsTestCase {
 	public void testAddMultipleTasksEnsuringOrdering() {
 
 		// Create the task type
-		TaskType<?, ?, ?> taskB = this.constructTaskType("TASK_B", null);
-		TaskType<?, ?, ?> taskA = this.constructTaskType("TASK_A", null);
-		TaskType<?, ?, ?> taskC = this.constructTaskType("TASK_C", null);
+		TaskType<?, ?, ?> taskType = this.constructTaskType("WORK_TASK", null);
 
 		// Create the changes to add the tasks
 		Change<TaskModel> changeB = this.operations.addTask("TASK_B",
-				this.workTask, taskB);
+				this.workTask, taskType);
 		Change<TaskModel> changeA = this.operations.addTask("TASK_A",
-				this.workTask, taskA);
+				this.workTask, taskType);
 		Change<TaskModel> changeC = this.operations.addTask("TASK_C",
-				this.workTask, taskC);
+				this.workTask, taskType);
 
 		// Add the tasks and ensure ordering
 		changeB.apply();

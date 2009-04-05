@@ -17,6 +17,8 @@
 package net.officefloor.compile.impl.desk;
 
 import net.officefloor.compile.change.Change;
+import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
 
@@ -55,13 +57,27 @@ public class SetObjectAsParameterTest extends AbstractDeskOperationsTestCase {
 	}
 
 	/**
+	 * Ensures no change if {@link WorkTaskModel} is not on the
+	 * {@link DeskModel}.
+	 */
+	public void testWorkTaskNotOnDesk() {
+		WorkTaskObjectModel taskObject = new WorkTaskObjectModel("NOT_ON_DESK",
+				null, String.class.getName(), false);
+		Change<WorkTaskObjectModel> change = this.operations
+				.setObjectAsParameter(true, taskObject);
+		this.assertChange(change, taskObject,
+				"Set task object NOT_ON_DESK as a parameter", false,
+				"Task object NOT_ON_DESK not on desk");
+	}
+
+	/**
 	 * Ensures can set a {@link WorkTaskObjectModel} as a parameter.
 	 */
 	public void testSetToParameter() {
 		Change<WorkTaskObjectModel> change = this.operations
 				.setObjectAsParameter(true, this.object);
-		this.assertChange(change, this.object, "Set task object to parameter",
-				true);
+		this.assertChange(change, this.object,
+				"Set task object OBJECT as a parameter", true);
 	}
 
 	/**
@@ -71,7 +87,19 @@ public class SetObjectAsParameterTest extends AbstractDeskOperationsTestCase {
 		Change<WorkTaskObjectModel> change = this.operations
 				.setObjectAsParameter(false, this.parameter);
 		this.assertChange(change, this.parameter,
-				"Set task object to an object", true);
+				"Set task object PARAMETER as an object", true);
+	}
+
+	/**
+	 * Ensures can set a {@link WorkTaskObjectModel} as a parameter with
+	 * connected {@link ConnectionModel} instances.
+	 */
+	public void testSetToParameterWithConnections() {
+		this.useTestSetupDesk();
+		Change<WorkTaskObjectModel> change = this.operations
+				.setObjectAsParameter(true, this.object);
+		this.assertChange(change, this.object,
+				"Set task object OBJECT as a parameter", true);
 	}
 
 }
