@@ -16,20 +16,16 @@
  */
 package net.officefloor.room;
 
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.room.ExternalEscalationModel;
-import net.officefloor.model.room.ExternalFlowModel;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomEscalationModel;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
 
 /**
  * Tests the {@link net.officefloor.room.RoomToSubRoomSynchroniser}.
@@ -40,13 +36,13 @@ public class RoomToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensures correctly synchronises the
-	 * {@link net.officefloor.model.room.RoomModel} onto the
-	 * {@link net.officefloor.model.room.SubRoomModel}.
+	 * {@link net.officefloor.model.section.SectionModel} onto the
+	 * {@link net.officefloor.model.section.SubSectionModel}.
 	 */
 	public void testSynchroniseRoomOntoSubRoom() {
 
 		// Create the Room Model
-		RoomModel room = new RoomModel();
+		SectionModel room = new SectionModel();
 		room.addExternalManagedObject(new ExternalManagedObjectModel("MO-ONE",
 				"java.lang.String", null));
 		room.addExternalManagedObject(new ExternalManagedObjectModel("MO-TWO",
@@ -55,124 +51,98 @@ public class RoomToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 		room.addExternalFlow(new ExternalFlowModel("OF-TWO", null));
 
 		// Add sub rooms
-		SubRoomModel subRoomOne = new SubRoomModel("SR-ONE", "desk", null,
+		SubSectionModel subRoomOne = new SubSectionModel("SR-ONE", "desk",
 				null, null, null, null);
-		subRoomOne.addInputFlow(new SubRoomInputFlowModel("IF-ONE", true, null,
-				null));
-		room.addSubRoom(subRoomOne);
-		SubRoomModel subRoomTwo = new SubRoomModel("SR-TWO", "desk", null,
+		subRoomOne.addSubSectionInput(new SubSectionInputModel("IF-ONE",
+				Object.class.getName(), true, null));
+		room.addSubSection(subRoomOne);
+		SubSectionModel subRoomTwo = new SubSectionModel("SR-TWO", "desk",
 				null, null, null, null);
-		subRoomTwo.addInputFlow(new SubRoomInputFlowModel("IF-TWO", false,
-				null, null));
-		room.addSubRoom(subRoomTwo);
-		SubRoomModel subRoomThree = new SubRoomModel("SR-THREE", "desk", null,
+		subRoomTwo.addSubSectionInput(new SubSectionInputModel("IF-TWO",
+				Object.class.getName(), false, null));
+		room.addSubSection(subRoomTwo);
+		SubSectionModel subRoomThree = new SubSectionModel("SR-THREE", "desk",
 				null, null, null, null);
-		subRoomThree.addInputFlow(new SubRoomInputFlowModel("IF-THREE", true,
-				null, null));
-		room.addSubRoom(subRoomThree);
-
-		// Add escalations
-		room.addExternalEscalation(new ExternalEscalationModel("ES-ONE",
-				"java.sql.SQLException", null));
-		room.addExternalEscalation(new ExternalEscalationModel("ES-TWO",
-				"java.io.IOException", null));
+		subRoomThree.addSubSectionInput(new SubSectionInputModel("IF-THREE",
+				Object.class.getName(), true, null));
+		room.addSubSection(subRoomThree);
 
 		// Create the SubRoom
-		SubRoomModel subRoom = new SubRoomModel();
+		SubSectionModel subRoom = new SubSectionModel();
 
 		// Synchronise
 		RoomToSubRoomSynchroniser.synchroniseRoomOntoSubRoom(room, subRoom);
 
 		// Validate managed objects
 		assertList(new String[] { "getName", "getObjectType" }, subRoom
-				.getManagedObjects(), new SubRoomManagedObjectModel("MO-ONE",
-				String.class.getName(), null), new SubRoomManagedObjectModel(
+				.getSubSectionObjects(), new SubSectionObjectModel("MO-ONE",
+				String.class.getName(), null), new SubSectionObjectModel(
 				"MO-TWO", Connection.class.getName(), null));
 
 		// Validate input flow items
 		assertList(new String[] { "getName", "getIsPublic" }, subRoom
-				.getInputFlows(), new SubRoomInputFlowModel("SR-ONE-IF-ONE",
-				false, null, null), new SubRoomInputFlowModel(
-				"SR-THREE-IF-THREE", false, null, null));
+				.getSubSectionInputs(), new SubSectionInputModel(
+				"SR-ONE-IF-ONE", Object.class.getName(), false, null),
+				new SubSectionInputModel("SR-THREE-IF-THREE", Object.class
+						.getName(), false, null));
 
 		// Validate output flow items
-		assertList(new String[] { "getName" }, subRoom.getOutputFlows(),
-				new SubRoomOutputFlowModel("OF-ONE", null, null),
-				new SubRoomOutputFlowModel("OF-TWO", null, null));
-
-		// Validate the escalations
-		assertList(new String[] { "getName", "getEscalationType" }, subRoom
-				.getEscalations(), new SubRoomEscalationModel("ES-ONE",
-				SQLException.class.getName(), null, null),
-				new SubRoomEscalationModel("ES-TWO", IOException.class
-						.getName(), null, null));
+		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
+				new SubSectionOutputModel("OF-ONE", Object.class.getName()),
+				new SubSectionOutputModel("OF-TWO", Object.class.getName()));
 
 		// Remove one of each from room
 		room.removeExternalManagedObject(room.getExternalManagedObjects()
 				.get(1));
 		room.removeExternalFlow(room.getExternalFlows().get(1));
-		room.removeSubRoom(room.getSubRooms().get(2));
-		room.removeExternalEscalation(room.getExternalEscalations().get(1));
+		room.removeSubSection(room.getSubSections().get(2));
 
 		// Synchronise
 		RoomToSubRoomSynchroniser.synchroniseRoomOntoSubRoom(room, subRoom);
 
 		// Validate managed objects
 		assertList(new String[] { "getName", "getObjectType" }, subRoom
-				.getManagedObjects(), new SubRoomManagedObjectModel("MO-ONE",
+				.getSubSectionObjects(), new SubSectionObjectModel("MO-ONE",
 				String.class.getName(), null));
 
 		// Validate input flow items
 		assertList(new String[] { "getName", "getIsPublic" }, subRoom
-				.getInputFlows(), new SubRoomInputFlowModel("SR-ONE-IF-ONE",
-				false, null, null));
+				.getSubSectionInputs(), new SubSectionInputModel(
+				"SR-ONE-IF-ONE", Object.class.getName(), false, null));
 
 		// Validate output flow items
-		assertList(new String[] { "getName" }, subRoom.getOutputFlows(),
-				new SubRoomOutputFlowModel("OF-ONE", null, null));
-
-		// Validate the escalations
-		assertList(new String[] { "getName", "getEscalationType" }, subRoom
-				.getEscalations(), new SubRoomEscalationModel("ES-ONE",
-				SQLException.class.getName(), null, null));
+		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
+				new SubSectionOutputModel("OF-ONE", Object.class.getName()));
 
 		// Add one of each to room
 		room.addExternalManagedObject(new ExternalManagedObjectModel(
 				"MO-THREE", "java.lang.String", null));
 		room.addExternalFlow(new ExternalFlowModel("OF-THREE", null));
-		SubRoomModel subRoomFour = new SubRoomModel("SR-FOUR", "desk", null,
+		SubSectionModel subRoomFour = new SubSectionModel("SR-FOUR", "desk",
 				null, null, null, null);
-		subRoomFour.addInputFlow(new SubRoomInputFlowModel("IF-FOUR", true,
-				null, null));
-		room.addSubRoom(subRoomFour);
-		room.addExternalEscalation(new ExternalEscalationModel("ES-THREE",
-				"java.lang.NullPointerException", null));
+		subRoomFour.addSubSectionInput(new SubSectionInputModel("IF-FOUR",
+				Object.class.getName(), true, null));
+		room.addSubSection(subRoomFour);
 
 		// Synchronise
 		RoomToSubRoomSynchroniser.synchroniseRoomOntoSubRoom(room, subRoom);
 
 		// Validate managed objects
 		assertList(new String[] { "getName", "getObjectType" }, subRoom
-				.getManagedObjects(), new SubRoomManagedObjectModel("MO-ONE",
-				String.class.getName(), null), new SubRoomManagedObjectModel(
+				.getSubSectionObjects(), new SubSectionObjectModel("MO-ONE",
+				String.class.getName(), null), new SubSectionObjectModel(
 				"MO-THREE", String.class.getName(), null));
 
 		// Validate input flow items
 		assertList(new String[] { "getName", "getIsPublic" }, subRoom
-				.getInputFlows(), new SubRoomInputFlowModel("SR-ONE-IF-ONE",
-				false, null, null), new SubRoomInputFlowModel(
-				"SR-FOUR-IF-FOUR", false, null, null));
+				.getSubSectionInputs(), new SubSectionInputModel(
+				"SR-ONE-IF-ONE", Object.class.getName(), false, null),
+				new SubSectionInputModel("SR-FOUR-IF-FOUR", Object.class
+						.getName(), false, null));
 
 		// Validate output flow items
-		assertList(new String[] { "getName" }, subRoom.getOutputFlows(),
-				new SubRoomOutputFlowModel("OF-ONE", null, null),
-				new SubRoomOutputFlowModel("OF-THREE", null, null));
-
-		// Validate the escalations
-		assertList(new String[] { "getName", "getEscalationType" }, subRoom
-				.getEscalations(), new SubRoomEscalationModel("ES-ONE",
-				SQLException.class.getName(), null, null),
-				new SubRoomEscalationModel("ES-THREE",
-						NullPointerException.class.getName(), null, null));
+		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
+				new SubSectionOutputModel("OF-ONE", Object.class.getName()),
+				new SubSectionOutputModel("OF-THREE", Object.class.getName()));
 	}
 }

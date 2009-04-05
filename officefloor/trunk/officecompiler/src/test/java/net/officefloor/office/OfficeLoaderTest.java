@@ -38,7 +38,7 @@ import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.room.RoomLoader;
 
 /**
@@ -229,7 +229,7 @@ public class OfficeLoaderTest extends OfficeFrameTestCase {
 
 		// Load the raw room
 		RoomLoader roomLoader = new RoomLoader();
-		RoomModel rawRoom = roomLoader.loadRoom(roomConfigItem);
+		SectionModel rawRoom = roomLoader.loadRoom(roomConfigItem);
 
 		// Load the office room
 		OfficeRoomModel actualRoom = this.officeLoader.loadOfficeRoom(

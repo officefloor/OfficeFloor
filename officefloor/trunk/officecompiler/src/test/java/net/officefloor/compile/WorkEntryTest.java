@@ -26,7 +26,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.office.OfficeModel;
-import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.section.SectionModel;
 
 /**
  * Tests the {@link WorkEntry}.
@@ -69,7 +69,7 @@ public class WorkEntryTest extends OfficeFrameTestCase {
 				this.officeBuilder, office, null);
 
 		// Create the room entry
-		RoomModel room = new RoomModel();
+		SectionModel room = new SectionModel();
 		RoomEntry roomEntry = new RoomEntry("ROOM", room, officeEntry);
 
 		// Create the desk work

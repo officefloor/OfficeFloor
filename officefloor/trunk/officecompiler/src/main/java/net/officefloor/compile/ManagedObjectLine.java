@@ -24,8 +24,8 @@ import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 import net.officefloor.model.officefloor.OfficeManagedObjectModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.util.OFCU;
 
 /**
@@ -148,19 +148,19 @@ public class ManagedObjectLine<W extends Work> {
 		RoomEntry roomEntry = this.deskEntry.getParentRoom();
 
 		// Obtain the desk sub room
-		SubRoomModel subRoom = roomEntry.getSubRoom(this.deskEntry);
+		SubSectionModel subRoom = roomEntry.getSubRoom(this.deskEntry);
 
 		// Obtain the office external managed object
 		OfficeEntry officeEntry = null;
 		while (roomEntry != null) {
 
 			// Obtain the external managed object name on the desk sub room
-			SubRoomManagedObjectModel subRoomMo = roomEntry
+			SubSectionObjectModel subRoomMo = roomEntry
 					.getSubRoomManagedObject(subRoom, externalMoName);
 
 			// Obtain the external managed object name for the room
 			externalMoName = subRoomMo.getExternalManagedObject()
-					.getExternalManagedObject().getName();
+					.getExternalManagedObject().getExternalManagedObjectName();
 
 			// Obtain parent room of room or office
 			officeEntry = roomEntry.getOffice(); // before parent

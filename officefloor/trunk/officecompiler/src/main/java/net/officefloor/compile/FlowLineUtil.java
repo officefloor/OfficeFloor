@@ -20,11 +20,11 @@ import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.WorkModel;
-import net.officefloor.model.room.OutputFlowToExternalFlowModel;
-import net.officefloor.model.room.OutputFlowToInputFlowModel;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionOutputModel;
 
 /**
  * Utility class to obtain the {@link Flow} lines.
@@ -77,13 +77,13 @@ public class FlowLineUtil {
 		RoomEntry roomEntry = deskEntry.getParentRoom();
 
 		// Obtain the desk sub room
-		SubRoomModel subRoom = roomEntry.getSubRoom(deskEntry);
+		SubSectionModel subRoom = roomEntry.getSubRoom(deskEntry);
 
 		// Obtain the starting external flow name
 		String externalFlowName = externalFlow.getExternalFlowName();
 
 		// Loop until reached room which starts linking down
-		SubRoomOutputFlowModel outputFlow = null;
+		SubSectionOutputModel outputFlow = null;
 		while (externalFlowName != null) {
 
 			// Obtain the output flow within the room
@@ -91,11 +91,11 @@ public class FlowLineUtil {
 					externalFlowName);
 
 			// Follow flow
-			OutputFlowToExternalFlowModel extConn = outputFlow
+			SubSectionOutputToExternalFlowModel extConn = outputFlow
 					.getExternalFlow();
 			if (extConn != null) {
 				// External flow (set details to find)
-				externalFlowName = extConn.getExternalFlow().getName();
+				externalFlowName = extConn.getExternalFlow().getExternalFlowName();
 
 				// Obtain parent room to follow external flow
 				subRoom = roomEntry.getParentRoom().getSubRoom(roomEntry);
@@ -108,8 +108,8 @@ public class FlowLineUtil {
 		}
 
 		// Linking to another room
-		OutputFlowToInputFlowModel inConn = outputFlow.getInput();
-		SubRoomInputFlowModel inputFlow = inConn.getInput();
+		SubSectionOutputToSubSectionInputModel inConn = outputFlow.getSubSectionInput();
+		SubSectionInputModel inputFlow = inConn.getSubSectionInput();
 
 		// Return the linked flow
 		return getLinkedFlow(roomEntry, inputFlow);
@@ -122,21 +122,21 @@ public class FlowLineUtil {
 	 * @param roomEntry
 	 *            {@link RoomEntry}.
 	 * @param subRoomName
-	 *            Name of the {@link SubRoomModel}.
+	 *            Name of the {@link SubSectionModel}.
 	 * @param inputFlowName
-	 *            Name of the input flow on the {@link SubRoomModel}.
+	 *            Name of the input flow on the {@link SubSectionModel}.
 	 * @return {@link LinkedFlow}.
 	 * @throws Exception
 	 *             If fails to link.
 	 */
 	private static LinkedFlow getLinkedFlow(RoomEntry roomEntry,
-			SubRoomInputFlowModel subRoomInputFlow) throws Exception {
+			SubSectionInputModel subRoomInputFlow) throws Exception {
 
 		// Obtain the sub room for the input flow
-		SubRoomModel subRoom = null;
-		FOUND_SUB_ROOM: for (SubRoomModel r : roomEntry.getModel()
-				.getSubRooms()) {
-			for (SubRoomInputFlowModel i : r.getInputFlows()) {
+		SubSectionModel subRoom = null;
+		FOUND_SUB_ROOM: for (SubSectionModel r : roomEntry.getModel()
+				.getSubSections()) {
+			for (SubSectionInputModel i : r.getSubSectionInputs()) {
 				if (subRoomInputFlow == i) {
 					subRoom = r;
 					break FOUND_SUB_ROOM;
@@ -145,10 +145,10 @@ public class FlowLineUtil {
 		}
 
 		// Obtain the sub room name
-		String subRoomName = subRoom.getId();
+		String subRoomName = subRoom.getSubSectionName();
 
 		// Obtain the input flow name
-		String inputFlowName = subRoomInputFlow.getName();
+		String inputFlowName = subRoomInputFlow.getSubSectionInputName();
 
 		// Find the desk
 		DeskEntry deskEntry = null;
@@ -158,7 +158,7 @@ public class FlowLineUtil {
 			subRoom = roomEntry.getSubRoom(subRoomName);
 
 			// Obtain sub entry
-			String entryId = subRoom.getRoom();
+			String entryId = subRoom.getSectionLocation();
 			if (entryId != null) {
 				// Entry is a room
 
@@ -179,9 +179,9 @@ public class FlowLineUtil {
 				subRoom = roomEntry.getSubRoom(subRoomName);
 
 				// Obtain the input flow
-				SubRoomInputFlowModel inputFlow = null;
-				for (SubRoomInputFlowModel iF : subRoom.getInputFlows()) {
-					if (inputFlowName.equals(iF.getName())) {
+				SubSectionInputModel inputFlow = null;
+				for (SubSectionInputModel iF : subRoom.getSubSectionInputs()) {
+					if (inputFlowName.equals(iF.getSubSectionInputName())) {
 						inputFlow = iF;
 					}
 				}
@@ -192,13 +192,13 @@ public class FlowLineUtil {
 				}
 
 				// Obtain the input flow of the sub room
-				inputFlowName = inputFlow.getName();
+				inputFlowName = inputFlow.getSubSectionInputName();
 
 			} else {
 				// Entry is a desk
 				deskEntry = roomEntry.getDeskEntry(subRoom);
 				if (deskEntry == null) {
-					throw new Exception("No desk '" + subRoom.getId()
+					throw new Exception("No desk '" + subRoom.getSubSectionName()
 							+ "' on room " + roomEntry.getId());
 				}
 			}

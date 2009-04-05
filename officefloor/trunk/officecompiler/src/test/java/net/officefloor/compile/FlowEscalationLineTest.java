@@ -23,11 +23,8 @@ import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.TaskEscalationModel;
 import net.officefloor.model.desk.TaskEscalationToTaskModel;
 import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.room.EscalationToInputFlowModel;
-import net.officefloor.model.room.ExternalEscalationModel;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomEscalationModel;
-import net.officefloor.model.room.SubRoomInputFlowModel;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionInputModel;
 
 /**
  * Tests the {@link FlowEscalationLine}.
@@ -132,16 +129,11 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 				"WORK_HANDLING", Work.class, deskHandling);
 		TaskEntry<Work> taskHandling = EntryUtil.createTaskEntry(
 				"TASK_HANDLING", workHandling);
-		SubRoomInputFlowModel inputFlowHandling = EntryUtil
+		SubSectionInputModel inputFlowHandling = EntryUtil
 				.createSubRoomInputFlow(taskHandling.getModel(), deskHandling);
 
 		// TODO implement obtaining
-		SubRoomEscalationModel subRoomEscalation = null;
 		ExternalFlowModel externalEscalation = null; // become an external flow
-
-		// Link the escalation to handling task
-		new EscalationToInputFlowModel(null, null, subRoomEscalation,
-				inputFlowHandling).connect();
 
 		// Create the flow escalation line
 		FlowEscalationLine line = new FlowEscalationLine(escalation,
@@ -197,7 +189,7 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure handled by another {@link RoomModel}.
+	 * Ensure handled by another {@link SectionModel}.
 	 */
 	public void testHandledByAnotherRoom() throws Exception {
 
@@ -241,18 +233,13 @@ public class FlowEscalationLineTest extends OfficeFrameTestCase {
 				"WORK_HANDLING", Work.class, deskHandling);
 		TaskEntry<Work> taskHandling = EntryUtil.createTaskEntry(
 				"TASK_HANDLING", workHandling);
-		SubRoomInputFlowModel roomInputFlowHandling = EntryUtil
+		SubSectionInputModel roomInputFlowHandling = EntryUtil
 				.createSubRoomInputFlow(taskHandling.getModel(), deskHandling);
-		SubRoomInputFlowModel topLevelInputFlowHandling = EntryUtil
+		SubSectionInputModel topLevelInputFlowHandling = EntryUtil
 				.createSubRoomInputFlow(roomInputFlowHandling, deskHandling);
 
 		// TODO implement obtaining
-		SubRoomEscalationModel topLevelSubRoomEscalation = null;
 		ExternalFlowModel externalEscalation = null; // become an external flow
-
-		// Link for handling
-		new EscalationToInputFlowModel(null, null, topLevelSubRoomEscalation,
-				topLevelInputFlowHandling).connect();
 
 		// Create the flow escalation line
 		FlowEscalationLine line = new FlowEscalationLine(escalation,

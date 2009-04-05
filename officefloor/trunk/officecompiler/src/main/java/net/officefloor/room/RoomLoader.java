@@ -23,24 +23,20 @@ import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.room.EscalationToExternalEscalationModel;
-import net.officefloor.model.room.EscalationToInputFlowModel;
-import net.officefloor.model.room.ExternalEscalationModel;
-import net.officefloor.model.room.ExternalFlowModel;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel;
-import net.officefloor.model.room.OutputFlowToExternalFlowModel;
-import net.officefloor.model.room.OutputFlowToInputFlowModel;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomEscalationModel;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 import net.officefloor.util.DoubleKeyMap;
 
 /**
- * Loads the {@link net.officefloor.model.room.RoomModel}.
+ * Loads the {@link net.officefloor.model.section.SectionModel}.
  * 
  * @author Daniel
  */
@@ -52,7 +48,7 @@ public class RoomLoader {
 	private final ModelRepositoryImpl modelRepository;
 
 	/**
-	 * Flag indicating if the {@link SubRoomModel} models have been registered.
+	 * Flag indicating if the {@link SubSectionModel} models have been registered.
 	 */
 	private boolean isModelsRegistered = false;
 
@@ -74,58 +70,40 @@ public class RoomLoader {
 	}
 
 	/**
-	 * Loads the {@link RoomModel} from configuration.
+	 * Loads the {@link SectionModel} from configuration.
 	 * 
 	 * @param configuration
 	 *            {@link ConfigurationItem}.
-	 * @return Configured {@link RoomModel}.
+	 * @return Configured {@link SectionModel}.
 	 * @throws Exception
 	 *             If fails.
 	 */
-	public RoomModel loadRoom(ConfigurationItem configuration) throws Exception {
+	public SectionModel loadRoom(ConfigurationItem configuration) throws Exception {
 
 		// Load the Room from configuration
-		RoomModel room = this.modelRepository.retrieve(new RoomModel(),
+		SectionModel room = this.modelRepository.retrieve(new SectionModel(),
 				configuration);
 
 		// Create the registry of inputs
-		DoubleKeyMap<String, String, SubRoomInputFlowModel> inputs = new DoubleKeyMap<String, String, SubRoomInputFlowModel>();
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomInputFlowModel input : subRoom.getInputFlows()) {
-				inputs.put(subRoom.getId(), input.getName(), input);
+		DoubleKeyMap<String, String, SubSectionInputModel> inputs = new DoubleKeyMap<String, String, SubSectionInputModel>();
+		for (SubSectionModel subRoom : room.getSubSections()) {
+			for (SubSectionInputModel input : subRoom.getSubSectionInputs()) {
+				inputs.put(subRoom.getSubSectionName(), input.getSubSectionInputName(), input);
 			}
 		}
 
 		// Connect the outputs to inputs
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomOutputFlowModel output : subRoom.getOutputFlows()) {
-				OutputFlowToInputFlowModel conn = output.getInput();
+		for (SubSectionModel subRoom : room.getSubSections()) {
+			for (SubSectionOutputModel output : subRoom.getSubSectionOutputs()) {
+				SubSectionOutputToSubSectionInputModel conn = output.getSubSectionInput();
 				if (conn != null) {
 					// Obtain the input
-					SubRoomInputFlowModel input = inputs.get(conn
-							.getSubRoomName(), conn.getInputFlowName());
+					SubSectionInputModel input = inputs.get(conn
+							.getSubSectionName(), conn.getSubSectionInputName());
 					if (input != null) {
 						// Connect
-						conn.setOutput(output);
-						conn.setInput(input);
-						conn.connect();
-					}
-				}
-			}
-		}
-
-		// Connect the escalations to inputs
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
-				EscalationToInputFlowModel conn = escalation.getInputFlow();
-				if (conn != null) {
-					// Obtain the input
-					SubRoomInputFlowModel input = inputs.get(conn
-							.getSubRoomName(), conn.getInputFlowName());
-					if (input != null) {
-						// Connect
-						conn.setEscalation(escalation);
-						conn.setInputFlow(input);
+						conn.setSubSectionOutput(output);
+						conn.setSubSectionInput(input);
 						conn.connect();
 					}
 				}
@@ -135,20 +113,20 @@ public class RoomLoader {
 		// Create the registry of external flows
 		Map<String, ExternalFlowModel> externalFlows = new HashMap<String, ExternalFlowModel>();
 		for (ExternalFlowModel externalFlow : room.getExternalFlows()) {
-			externalFlows.put(externalFlow.getName(), externalFlow);
+			externalFlows.put(externalFlow.getExternalFlowName(), externalFlow);
 		}
 
 		// Connect the outputs to external flows
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomOutputFlowModel output : subRoom.getOutputFlows()) {
-				OutputFlowToExternalFlowModel conn = output.getExternalFlow();
+		for (SubSectionModel subRoom : room.getSubSections()) {
+			for (SubSectionOutputModel output : subRoom.getSubSectionOutputs()) {
+				SubSectionOutputToExternalFlowModel conn = output.getExternalFlow();
 				if (conn != null) {
 					// Obtain the external flow
 					ExternalFlowModel externalFlow = externalFlows.get(conn
 							.getExternalFlowName());
 					if (externalFlow != null) {
 						// Connect
-						conn.setOutput(output);
+						conn.setSubSectionOutput(output);
 						conn.setExternalFlow(externalFlow);
 						conn.connect();
 					}
@@ -160,49 +138,22 @@ public class RoomLoader {
 		Map<String, ExternalManagedObjectModel> externalMOs = new HashMap<String, ExternalManagedObjectModel>();
 		for (ExternalManagedObjectModel externalMo : room
 				.getExternalManagedObjects()) {
-			externalMOs.put(externalMo.getName(), externalMo);
+			externalMOs.put(externalMo.getExternalManagedObjectName(), externalMo);
 		}
 
 		// Connect the managed objects to external managed objects
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomManagedObjectModel mo : subRoom.getManagedObjects()) {
-				ManagedObjectToExternalManagedObjectModel conn = mo
+		for (SubSectionModel subRoom : room.getSubSections()) {
+			for (SubSectionObjectModel mo : subRoom.getSubSectionObjects()) {
+				SubSectionObjectToExternalManagedObjectModel conn = mo
 						.getExternalManagedObject();
 				if (conn != null) {
 					// Obtain the external managed object
 					ExternalManagedObjectModel extMo = externalMOs.get(conn
-							.getName());
+							.getExternalManagedObjectName());
 					if (extMo != null) {
 						// Connect
-						conn.setManagedObject(mo);
+						conn.setSubSectionObject(mo);
 						conn.setExternalManagedObject(extMo);
-						conn.connect();
-					}
-				}
-			}
-		}
-
-		// Create the registry of external escalations
-		Map<String, ExternalEscalationModel> externalEscalations = new HashMap<String, ExternalEscalationModel>();
-		for (ExternalEscalationModel externalEscalation : room
-				.getExternalEscalations()) {
-			externalEscalations.put(externalEscalation.getName(),
-					externalEscalation);
-		}
-
-		// Connect the escalations to external escalations
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
-				EscalationToExternalEscalationModel conn = escalation
-						.getExternalEscalation();
-				if (conn != null) {
-					// Obtain the external escalation
-					ExternalEscalationModel extEscalation = externalEscalations
-							.get(conn.getName());
-					if (extEscalation != null) {
-						// Connect
-						conn.setEscalation(escalation);
-						conn.setExternalEscalation(extEscalation);
 						conn.connect();
 					}
 				}
@@ -214,78 +165,55 @@ public class RoomLoader {
 	}
 
 	/**
-	 * Stores the {@link RoomModel}.
+	 * Stores the {@link SectionModel}.
 	 * 
 	 * @param room
-	 *            {@link RoomModel} to be stored.
+	 *            {@link SectionModel} to be stored.
 	 * @param configurationItem
 	 *            {@link ConfigurationItem} to contain the persisted state of
-	 *            the {@link RoomModel}.
+	 *            the {@link SectionModel}.
 	 * @throws Exception
-	 *             If fails to store the {@link RoomModel}.
+	 *             If fails to store the {@link SectionModel}.
 	 */
-	public void storeRoom(RoomModel room, ConfigurationItem configurationItem)
+	public void storeRoom(SectionModel room, ConfigurationItem configurationItem)
 			throws Exception {
 
 		// Ensure managed objects linked in (for new links)
 		for (ExternalManagedObjectModel extMo : room
 				.getExternalManagedObjects()) {
-			for (ManagedObjectToExternalManagedObjectModel link : extMo
-					.getSubRoomManagedObjects()) {
-				link.setName(extMo.getName());
+			for (SubSectionObjectToExternalManagedObjectModel link : extMo
+					.getSubSectionObjects()) {
+				link.setExternalManagedObjectName(extMo.getExternalManagedObjectName());
 			}
 		}
 
 		// Create the map of inputs to its sub room
-		Map<SubRoomInputFlowModel, SubRoomModel> inputToRoom = new HashMap<SubRoomInputFlowModel, SubRoomModel>();
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomInputFlowModel input : subRoom.getInputFlows()) {
+		Map<SubSectionInputModel, SubSectionModel> inputToRoom = new HashMap<SubSectionInputModel, SubSectionModel>();
+		for (SubSectionModel subRoom : room.getSubSections()) {
+			for (SubSectionInputModel input : subRoom.getSubSectionInputs()) {
 				inputToRoom.put(input, subRoom);
 			}
 		}
 
 		// Ensure output flow items linked to input flow items
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomOutputFlowModel output : subRoom.getOutputFlows()) {
-				OutputFlowToInputFlowModel conn = output.getInput();
+		for (SubSectionModel subRoom : room.getSubSections()) {
+			for (SubSectionOutputModel output : subRoom.getSubSectionOutputs()) {
+				SubSectionOutputToSubSectionInputModel conn = output.getSubSectionInput();
 				if (conn != null) {
-					SubRoomInputFlowModel input = conn.getInput();
-					conn.setSubRoomName(inputToRoom.get(input).getId());
-					conn.setInputFlowName(input.getName());
+					SubSectionInputModel input = conn.getSubSectionInput();
+					conn.setSubSectionName(inputToRoom.get(input).getSubSectionName());
+					conn.setSubSectionInputName(input.getSubSectionInputName());
 				}
 			}
 		}
 
 		// Ensure output flow items linked to external flows
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomOutputFlowModel output : subRoom.getOutputFlows()) {
-				OutputFlowToExternalFlowModel conn = output.getExternalFlow();
+		for (SubSectionModel subRoom : room.getSubSections()) {
+			for (SubSectionOutputModel output : subRoom.getSubSectionOutputs()) {
+				SubSectionOutputToExternalFlowModel conn = output.getExternalFlow();
 				if (conn != null) {
 					ExternalFlowModel externalFlow = conn.getExternalFlow();
-					conn.setExternalFlowName(externalFlow.getName());
-				}
-			}
-		}
-
-		// Ensure escalations linked to input flow items
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
-				EscalationToInputFlowModel conn = escalation.getInputFlow();
-				if (conn != null) {
-					SubRoomInputFlowModel input = conn.getInputFlow();
-					conn.setSubRoomName(inputToRoom.get(input).getId());
-					conn.setInputFlowName(input.getName());
-				}
-			}
-		}
-
-		// Ensure escalations linked to external escalations
-		for (SubRoomModel subRoom : room.getSubRooms()) {
-			for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
-				EscalationToExternalEscalationModel conn = escalation
-						.getExternalEscalation();
-				if (conn != null) {
-					conn.setName(conn.getExternalEscalation().getName());
+					conn.setExternalFlowName(externalFlow.getExternalFlowName());
 				}
 			}
 		}
@@ -295,41 +223,41 @@ public class RoomLoader {
 	}
 
 	/**
-	 * Loads the {@link SubRoomModel} from the input {@link ConfigurationItem}.
+	 * Loads the {@link SubSectionModel} from the input {@link ConfigurationItem}.
 	 * 
 	 * @param configurationItem
 	 *            {@link ConfigurationItem} containing the
 	 *            {@link net.officefloor.model.desk.DeskModel} or
-	 *            {@link RoomModel}.
-	 * @return {@link SubRoomModel}.
+	 *            {@link SectionModel}.
+	 * @return {@link SubSectionModel}.
 	 * @throws Exception
-	 *             If fails to load the {@link SubRoomModel}.
+	 *             If fails to load the {@link SubSectionModel}.
 	 */
-	public SubRoomModel loadSubRoom(ConfigurationItem configurationItem)
+	public SubSectionModel loadSubRoom(ConfigurationItem configurationItem)
 			throws Exception {
 		// Return the loaded sub room
-		return this.loadSubRoom(new SubRoomModel(), configurationItem);
+		return this.loadSubRoom(new SubSectionModel(), configurationItem);
 	}
 
 	/**
 	 * <p>
-	 * Loads the {@link SubRoomModel} from the {@link ConfigurationContext}.
+	 * Loads the {@link SubSectionModel} from the {@link ConfigurationContext}.
 	 * <p>
-	 * Utilises the location on the {@link SubRoomModel}.
+	 * Utilises the location on the {@link SubSectionModel}.
 	 * 
 	 * @param subRoom
-	 *            {@link SubRoomModel}.
+	 *            {@link SubSectionModel}.
 	 * @param context
 	 *            {@link ConfigurationContext}.
 	 * @throws Exception
-	 *             If fails to load the {@link SubRoomModel}.
+	 *             If fails to load the {@link SubSectionModel}.
 	 */
-	public void loadSubRoom(SubRoomModel subRoom, ConfigurationContext context)
+	public void loadSubRoom(SubSectionModel subRoom, ConfigurationContext context)
 			throws Exception {
 
 		// Obtain the configuration
-		String configurationLocation = (subRoom.getDesk() == null ? subRoom
-				.getRoom() : subRoom.getDesk());
+		String configurationLocation = (subRoom.getDeskLocation() == null ? subRoom
+				.getSectionLocation() : subRoom.getDeskLocation());
 		ConfigurationItem configurationItem = context
 				.getConfigurationItem(configurationLocation);
 
@@ -338,24 +266,24 @@ public class RoomLoader {
 	}
 
 	/**
-	 * Loads the {@link SubRoomModel}.
+	 * Loads the {@link SubSectionModel}.
 	 * 
 	 * @param subRoom
-	 *            {@link SubRoomModel}.
+	 *            {@link SubSectionModel}.
 	 * @param configurationItem
-	 *            {@link ConfigurationItem} for the {@link SubRoomModel}.
-	 * @return Loaded {@link SubRoomModel}.
+	 *            {@link ConfigurationItem} for the {@link SubSectionModel}.
+	 * @return Loaded {@link SubSectionModel}.
 	 * @throws Exception
-	 *             If fails to load the {@link SubRoomModel}.
+	 *             If fails to load the {@link SubSectionModel}.
 	 */
-	private SubRoomModel loadSubRoom(SubRoomModel subRoom,
+	private SubSectionModel loadSubRoom(SubSectionModel subRoom,
 			ConfigurationItem configurationItem) throws Exception {
 
 		// Ensure the sub room models registered
 		synchronized (this) {
 			if (!this.isModelsRegistered) {
 				this.modelRepository.registerModel(DeskModel.class);
-				this.modelRepository.registerModel(RoomModel.class);
+				this.modelRepository.registerModel(SectionModel.class);
 
 				// Models now registered
 				this.isModelsRegistered = true;
@@ -370,13 +298,13 @@ public class RoomLoader {
 			// Synchronise the desk onto the model
 			DeskModel desk = (DeskModel) model;
 			DeskToSubRoomSynchroniser.synchroniseDeskOntoSubRoom(desk, subRoom);
-			subRoom.setDesk(configurationItem.getLocation());
+			subRoom.setDeskLocation(configurationItem.getLocation());
 
-		} else if (model instanceof RoomModel) {
+		} else if (model instanceof SectionModel) {
 			// Synchronise the room onto the model
-			RoomModel room = (RoomModel) model;
+			SectionModel room = (SectionModel) model;
 			RoomToSubRoomSynchroniser.synchroniseRoomOntoSubRoom(room, subRoom);
-			subRoom.setRoom(configurationItem.getLocation());
+			subRoom.setSectionLocation(configurationItem.getLocation());
 
 		} else {
 			// Unknown model

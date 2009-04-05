@@ -40,7 +40,7 @@ import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.section.SectionModel;
 import net.officefloor.room.RoomLoader;
 import net.officefloor.util.DoubleKeyMap;
 
@@ -229,11 +229,11 @@ public class OfficeLoader {
 	 * Loads the {@link OfficeRoomModel}.
 	 * 
 	 * @param rawRoomId
-	 *            Id of the top level {@link RoomModel}.
+	 *            Id of the top level {@link SectionModel}.
 	 * @param rawRoomName
-	 *            Name of the top level {@link RoomModel}.
+	 *            Name of the top level {@link SectionModel}.
 	 * @param rawRoom
-	 *            Top level {@link RoomModel}.
+	 *            Top level {@link SectionModel}.
 	 * @param context
 	 *            {@link ConfigurationContext}.
 	 * @param classLoader
@@ -244,7 +244,7 @@ public class OfficeLoader {
 	 *             If fails to load the {@link OfficeRoomModel}.
 	 */
 	public OfficeRoomModel loadOfficeRoom(String rawRoomId, String rawRoomName,
-			RoomModel rawRoom, ConfigurationContext context,
+			SectionModel rawRoom, ConfigurationContext context,
 			ClassLoader classLoader) throws Exception {
 
 		// Create the office room
@@ -327,7 +327,7 @@ public class OfficeLoader {
 			}
 
 			// Load the room model
-			RoomModel actualRoom = roomLoader.loadRoom(configItem);
+			SectionModel actualRoom = roomLoader.loadRoom(configItem);
 
 			// Synchronise room
 			RoomToOfficeRoomSynchroniser.synchroniseRoomOntoOfficeRoom(
