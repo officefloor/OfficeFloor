@@ -8,6 +8,6 @@ Export-Package: net.officefloor.model,
  net.officefloor.model.desk,
  net.officefloor.model.office,
  net.officefloor.model.officefloor,
- net.officefloor.model.room
+ net.officefloor.model.section
 Require-Bundle: net.officefloor.frame
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
