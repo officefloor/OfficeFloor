@@ -57,13 +57,13 @@
 		<task name="taskOne" public="true" work="work" task="workTaskOne"
 			return-type="java.lang.Integer" x="100" y="101">
 			<task-flow name="First" key="ONE" argument-type="java.lang.Double">
-				<external-flow name="flow" link="Sequential" />
+				<external-flow name="flow" link="SEQUENTIAL" />
 			</task-flow>
 			<task-flow name="Second" key="TWO" argument-type="java.lang.Integer">
-				<task name="taskTwo" link="Parallel" />
+				<task name="taskTwo" link="PARALLEL" />
 			</task-flow>
 			<task-flow name="Third" key="THREE"> <!-- argument-type may be null -->
-				<task name="taskFour" link="Asynchronous" />
+				<task name="taskFour" link="ASYNCHRONOUS" />
 			</task-flow>
 			<next-task name="taskTwo" />
 			<task-escalation escalation-type="java.io.IOException">
@@ -81,10 +81,10 @@
 		<task name="taskThree" public="false" work="work" task="workTaskThree"
 			return-type="java.lang.Integer" x="300" y="301">
 			<task-flow name="0" argument-type="java.lang.Integer"> <!-- key may be null -->
-				<task name="taskTwo" link="Parallel" />
+				<task name="taskTwo" link="PARALLEL" />
 			</task-flow>
 			<task-flow name="1" argument-type="java.lang.Double">
-				<external-flow name="flow" link="Sequential" />
+				<external-flow name="flow" link="SEQUENTIAL" />
 			</task-flow>
 		</task>
 		<task name="taskFour" public="false" work="work" task="workTaskFour"
