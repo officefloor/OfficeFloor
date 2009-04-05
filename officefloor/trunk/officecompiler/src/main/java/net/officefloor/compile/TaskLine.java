@@ -128,7 +128,7 @@ public class TaskLine<W extends Work> {
 		this.deskEntry = this.workEntry.getDeskEntry();
 
 		// Obtain the desk task
-		this.deskTask = this.deskFlowItem.getTask().getWorkTask();
+		this.deskTask = this.deskFlowItem.getWorkTask().getWorkTask();
 
 		// Create the hierarchy of desk/room names
 		Deque<String> hierarchy = new LinkedList<String>();

@@ -78,7 +78,7 @@ public class ClassTaskFactory implements
 		Integer[] objectIndexes = objectIndexList.toArray(new Integer[0]);
 
 		// Ensure matching object configuration
-		List<WorkTaskObjectModel> objectList = task.getTask().getWorkTask()
+		List<WorkTaskObjectModel> objectList = task.getWorkTask().getWorkTask()
 				.getTaskObjects();
 		if (objectList.size() != objectIndexes.length) {
 			throw new Exception("Incorrect configuration as expect "
