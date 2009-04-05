@@ -16,20 +16,17 @@
  */
 package net.officefloor.room;
 
-import java.io.IOException;
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.room.SubRoomEscalationModel;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
 
 /**
  * Tests the {@link net.officefloor.room.DeskToSubRoomSynchroniser}.
@@ -41,7 +38,7 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 	/**
 	 * Ensures correctly synchronises the
 	 * {@link net.officefloor.model.desk.DeskModel} onto the
-	 * {@link net.officefloor.model.room.SubRoomModel}.
+	 * {@link net.officefloor.model.section.SubSectionModel}.
 	 */
 	public void testSynchroniseDeskOntoSubRoom() {
 
@@ -71,34 +68,27 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 				null)); // IOException.class.getName()
 
 		// Create the SubRoom
-		SubRoomModel subRoom = new SubRoomModel();
+		SubSectionModel subRoom = new SubSectionModel();
 
 		// Synchronise
 		DeskToSubRoomSynchroniser.synchroniseDeskOntoSubRoom(desk, subRoom);
 
 		// Validate managed objects
 		assertList(new String[] { "getName", "getObjectType" }, subRoom
-				.getManagedObjects(), new SubRoomManagedObjectModel("MO-ONE",
-				String.class.getName(), null), new SubRoomManagedObjectModel(
+				.getSubSectionObjects(), new SubSectionObjectModel("MO-ONE",
+				String.class.getName(), null), new SubSectionObjectModel(
 				"MO-TWO", Connection.class.getName(), null));
 
 		// Validate input flow items
 		assertList(new String[] { "getName", "getIsPublic" }, subRoom
-				.getInputFlows(), new SubRoomInputFlowModel("IF-ONE", false,
-				null, null), new SubRoomInputFlowModel("IF-THREE", false, null,
-				null));
+				.getSubSectionInputs(), new SubSectionInputModel("IF-ONE",
+				Object.class.getName(), false, null), new SubSectionInputModel(
+				"IF-THREE", Object.class.getName(), false, null));
 
 		// Validate output flow items
-		assertList(new String[] { "getName" }, subRoom.getOutputFlows(),
-				new SubRoomOutputFlowModel("OF-ONE", null, null),
-				new SubRoomOutputFlowModel("OF-TWO", null, null));
-
-		// Validate the escalations
-		assertList(new String[] { "getName", "getEscalationType" }, subRoom
-				.getEscalations(), new SubRoomEscalationModel("ES-ONE",
-				SQLException.class.getName(), null, null),
-				new SubRoomEscalationModel("ES-TWO", IOException.class
-						.getName(), null, null));
+		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
+				new SubSectionOutputModel("OF-ONE", Object.class.getName()),
+				new SubSectionOutputModel("OF-TWO", Object.class.getName()));
 
 		// Remove one of each from desk
 		desk.removeExternalManagedObject(desk.getExternalManagedObjects()
@@ -111,22 +101,18 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 
 		// Validate managed objects
 		assertList(new String[] { "getName", "getObjectType" }, subRoom
-				.getManagedObjects(), new SubRoomManagedObjectModel("MO-ONE",
+				.getSubSectionObjects(), new SubSectionObjectModel("MO-ONE",
 				String.class.getName(), null));
 
 		// Validate input flow items
 		assertList(new String[] { "getName", "getIsPublic" }, subRoom
-				.getInputFlows(), new SubRoomInputFlowModel("IF-ONE", false,
-				null, null));
+				.getSubSectionInputs(), new SubSectionInputModel("IF-ONE",
+				Object.class.getName(), false, null));
 
 		// Validate output flow items
-		assertList(new String[] { "getName" }, subRoom.getOutputFlows(),
-				new SubRoomOutputFlowModel("OF-ONE", null, null));
-
-		// Validate the escalations
-		assertList(new String[] { "getName", "getEscalationType" }, subRoom
-				.getEscalations(), new SubRoomEscalationModel("ES-ONE",
-				SQLException.class.getName(), null, null));
+		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
+				new SubSectionOutputModel("OF-ONE", Object.class.getName(),
+						null, null));
 
 		// Add one of each to desk
 		desk.addExternalManagedObject(new ExternalManagedObjectModel(
@@ -145,26 +131,19 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 
 		// Validate managed objects
 		assertList(new String[] { "getName", "getObjectType" }, subRoom
-				.getManagedObjects(), new SubRoomManagedObjectModel("MO-ONE",
-				String.class.getName(), null), new SubRoomManagedObjectModel(
+				.getSubSectionObjects(), new SubSectionObjectModel("MO-ONE",
+				String.class.getName(), null), new SubSectionObjectModel(
 				"MO-THREE", Integer.class.getName(), null));
 
 		// Validate input flow items
 		assertList(new String[] { "getName", "getIsPublic" }, subRoom
-				.getInputFlows(), new SubRoomInputFlowModel("IF-ONE", false,
-				null, null), new SubRoomInputFlowModel("IF-FIVE", false, null,
-				null));
+				.getSubSectionInputs(), new SubSectionInputModel("IF-ONE",
+				Object.class.getName(), false, null), new SubSectionInputModel(
+				"IF-FIVE", Object.class.getName(), false, null));
 
 		// Validate output flow items
-		assertList(new String[] { "getName" }, subRoom.getOutputFlows(),
-				new SubRoomOutputFlowModel("OF-ONE", null, null),
-				new SubRoomOutputFlowModel("OF-THREE", null, null));
-
-		// Validate the escalations
-		assertList(new String[] { "getName", "getEscalationType" }, subRoom
-				.getEscalations(), new SubRoomEscalationModel("ES-ONE",
-				SQLException.class.getName(), null, null),
-				new SubRoomEscalationModel("ES-THREE",
-						NullPointerException.class.getName(), null, null));
+		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
+				new SubSectionOutputModel("OF-ONE", Object.class.getName()),
+				new SubSectionOutputModel("OF-THREE", Object.class.getName()));
 	}
 }

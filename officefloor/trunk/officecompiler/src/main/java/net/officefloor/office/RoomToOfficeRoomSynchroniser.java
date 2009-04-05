@@ -24,30 +24,30 @@ import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRoomModel;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomModel;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionModel;
 
 /**
- * Synchronises the {@link RoomModel} onto the {@link OfficeRoomModel}.
+ * Synchronises the {@link SectionModel} onto the {@link OfficeRoomModel}.
  * 
  * @author Daniel
  */
 public class RoomToOfficeRoomSynchroniser {
 
 	/**
-	 * Synchronises the {@link RoomModel} onto the {@link OfficeRoomModel}.
+	 * Synchronises the {@link SectionModel} onto the {@link OfficeRoomModel}.
 	 * 
 	 * @param roomId
-	 *            Id of the {@link RoomModel}.
+	 *            Id of the {@link SectionModel}.
 	 * @param roomName
-	 *            Name of the {@link RoomModel}.
+	 *            Name of the {@link SectionModel}.
 	 * @param room
-	 *            {@link RoomModel}.
+	 *            {@link SectionModel}.
 	 * @param officeRoom
 	 *            {@link OfficeRoomModel}.
 	 */
 	public static void synchroniseRoomOntoOfficeRoom(String roomId,
-			String roomName, RoomModel room, OfficeRoomModel officeRoom) {
+			String roomName, SectionModel room, OfficeRoomModel officeRoom) {
 
 		// Specify the details of the room
 		officeRoom.setId(roomId);
@@ -66,13 +66,13 @@ public class RoomToOfficeRoomSynchroniser {
 		}
 
 		// Synchronise the sub rooms
-		for (SubRoomModel subRoom : room.getSubRooms()) {
+		for (SubSectionModel subRoom : room.getSubSections()) {
 
 			// Obtain the sub room name
-			String subRoomName = subRoom.getId();
+			String subRoomName = subRoom.getSubSectionName();
 
 			// Determine if a desk
-			String subDeskId = subRoom.getDesk();
+			String subDeskId = subRoom.getDeskLocation();
 			if (subDeskId != null) {
 				if (existingDesks.containsKey(subDeskId)) {
 					// Remove from existing (not to remove later)
@@ -85,7 +85,7 @@ public class RoomToOfficeRoomSynchroniser {
 				}
 			} else {
 				// Room
-				String subRoomId = subRoom.getRoom();
+				String subRoomId = subRoom.getSectionLocation();
 				if (subRoomId != null) {
 					if (existingRooms.containsKey(subRoomId)) {
 						// Remove from existing (not to remove later)
@@ -112,16 +112,16 @@ public class RoomToOfficeRoomSynchroniser {
 	}
 
 	/**
-	 * Synchronises the {@link RoomModel} onto the {@link OfficeModel}.
+	 * Synchronises the {@link SectionModel} onto the {@link OfficeModel}.
 	 * 
 	 * @param room
-	 *            {@link RoomModel}.
+	 *            {@link SectionModel}.
 	 * @param officeRoom
-	 *            {@link OfficeRoomModel} for the input {@link RoomModel}.
+	 *            {@link OfficeRoomModel} for the input {@link SectionModel}.
 	 * @param office
 	 *            {@link OfficeModel}.
 	 */
-	public static void synchroniseRoomOntoOffice(RoomModel room,
+	public static void synchroniseRoomOntoOffice(SectionModel room,
 			OfficeRoomModel officeRoom, OfficeModel office) {
 
 		// Set the room on the office
@@ -137,9 +137,9 @@ public class RoomToOfficeRoomSynchroniser {
 		// Synchronise the managed objects
 		int x = officeRoom.getX() + 200;
 		int y = officeRoom.getY();
-		for (net.officefloor.model.room.ExternalManagedObjectModel mo : room
+		for (net.officefloor.model.section.ExternalManagedObjectModel mo : room
 				.getExternalManagedObjects()) {
-			String moName = mo.getName();
+			String moName = mo.getExternalManagedObjectName();
 			if (existingMos.containsKey(moName)) {
 				// Remove managed object (so not removed later)
 				existingMos.remove(moName);

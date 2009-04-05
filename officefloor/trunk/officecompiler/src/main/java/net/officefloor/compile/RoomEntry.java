@@ -20,26 +20,25 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomEscalationModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.room.RoomLoader;
 
 /**
- * {@link net.officefloor.model.room.RoomModel} entry for the
+ * {@link net.officefloor.model.section.SectionModel} entry for the
  * {@link net.officefloor.frame.api.manage.Office}.
  * 
  * @author Daniel
  */
-public class RoomEntry extends AbstractEntry<Object, RoomModel> {
+public class RoomEntry extends AbstractEntry<Object, SectionModel> {
 
 	/**
 	 * Loads the {@link RoomEntry} parented by the {@link OfficeEntry}.
 	 * 
 	 * @param configurationItem
-	 *            {@link ConfigurationItem} containing the {@link RoomModel}.
+	 *            {@link ConfigurationItem} containing the {@link SectionModel}.
 	 * @param officeEntry
 	 *            Parent {@link OfficeEntry}.
 	 * @param context
@@ -59,9 +58,9 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	 * Loads the {@link RoomEntry} parented by another {@link RoomEntry}.
 	 * 
 	 * @param roomName
-	 *            Name of the {@link RoomModel}.
+	 *            Name of the {@link SectionModel}.
 	 * @param configurationItem
-	 *            {@link ConfigurationItem} containing the {@link RoomModel}.
+	 *            {@link ConfigurationItem} containing the {@link SectionModel}.
 	 * @param parentRoomEntry
 	 *            Parent {@link RoomEntry}.
 	 * @param parentOfficeEntry
@@ -78,25 +77,25 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 			throws Exception {
 
 		// Load the room
-		RoomModel roomModel = new RoomLoader(context.getModelRepository())
+		SectionModel roomModel = new RoomLoader(context.getModelRepository())
 				.loadRoom(configurationItem);
 
 		// Create the room entry
 		RoomEntry roomEntry;
 		if (parentOfficeEntry != null) {
-			roomEntry = new RoomEntry(configurationItem.getLocation(), roomModel,
-					parentOfficeEntry);
+			roomEntry = new RoomEntry(configurationItem.getLocation(),
+					roomModel, parentOfficeEntry);
 		} else {
-			roomEntry = new RoomEntry(configurationItem.getLocation(), roomName,
-					roomModel, parentRoomEntry);
+			roomEntry = new RoomEntry(configurationItem.getLocation(),
+					roomName, roomModel, parentRoomEntry);
 		}
 
 		// Register the sub rooms / desks
-		for (SubRoomModel subRoom : roomModel.getSubRooms()) {
+		for (SubSectionModel subRoom : roomModel.getSubSections()) {
 			// Check if sub room
-			String subRoomName = subRoom.getId();
-			String subRoomId = subRoom.getRoom();
-			String deskId = subRoom.getDesk();
+			String subRoomName = subRoom.getSubSectionName();
+			String subRoomId = subRoom.getSectionLocation();
+			String deskId = subRoom.getDeskLocation();
 			if (subRoomId != null) {
 				// Sub Room
 				RoomEntry subRoomEntry = RoomEntry.loadRoom(subRoomName,
@@ -123,7 +122,7 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	}
 
 	/**
-	 * Name of the {@link RoomModel}.
+	 * Name of the {@link SectionModel}.
 	 */
 	private final String roomName;
 
@@ -138,26 +137,26 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	private final OfficeEntry office;
 
 	/**
-	 * {@link SubRoomModel} room to {@link RoomEntry}.
+	 * {@link SubSectionModel} room to {@link RoomEntry}.
 	 */
-	protected final ModelEntryMap<SubRoomModel, RoomEntry> roomMap = new ModelEntryMap<SubRoomModel, RoomEntry>();
+	protected final ModelEntryMap<SubSectionModel, RoomEntry> roomMap = new ModelEntryMap<SubSectionModel, RoomEntry>();
 
 	/**
-	 * {@link SubRoomModel} desk to {@link DeskEntry}.
+	 * {@link SubSectionModel} desk to {@link DeskEntry}.
 	 */
-	protected final ModelEntryMap<SubRoomModel, DeskEntry> deskMap = new ModelEntryMap<SubRoomModel, DeskEntry>();
+	protected final ModelEntryMap<SubSectionModel, DeskEntry> deskMap = new ModelEntryMap<SubSectionModel, DeskEntry>();
 
 	/**
 	 * Initiate as the room of the office.
 	 * 
 	 * @param roomId
-	 *            Id of the {@link RoomModel}.
+	 *            Id of the {@link SectionModel}.
 	 * @param room
-	 *            {@link RoomModel}.
+	 *            {@link SectionModel}.
 	 * @param office
 	 *            {@link OfficeEntry}.
 	 */
-	public RoomEntry(String roomId, RoomModel room, OfficeEntry office) {
+	public RoomEntry(String roomId, SectionModel room, OfficeEntry office) {
 		super(roomId, null, room);
 		this.roomName = "OFFICE ROOM";
 		this.parentRoom = null;
@@ -168,15 +167,15 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	 * Initiate as a sub room of another room.
 	 * 
 	 * @param roomId
-	 *            Id of the {@link RoomModel}.
+	 *            Id of the {@link SectionModel}.
 	 * @param roomName
-	 *            Name of the {@link RoomModel}.
+	 *            Name of the {@link SectionModel}.
 	 * @param room
-	 *            {@link RoomModel}.
+	 *            {@link SectionModel}.
 	 * @param parentRoom
 	 *            Parent {@link RoomEntry}.
 	 */
-	public RoomEntry(String roomId, String roomName, RoomModel room,
+	public RoomEntry(String roomId, String roomName, SectionModel room,
 			RoomEntry parentRoom) {
 		super(roomId, null, room);
 		this.roomName = roomName;
@@ -185,9 +184,9 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	}
 
 	/**
-	 * Obtains the name of the {@link RoomModel}.
+	 * Obtains the name of the {@link SectionModel}.
 	 * 
-	 * @return Name of the {@link RoomModel}.
+	 * @return Name of the {@link SectionModel}.
 	 */
 	public String getRoomName() {
 		return this.roomName;
@@ -212,46 +211,46 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	}
 
 	/**
-	 * Obtains the {@link SubRoomModel} for the {@link RoomEntry}.
+	 * Obtains the {@link SubSectionModel} for the {@link RoomEntry}.
 	 * 
 	 * @param roomEntry
 	 *            {@link RoomEntry}.
-	 * @return {@link SubRoomModel}.
+	 * @return {@link SubSectionModel}.
 	 * @throws Exception
-	 *             If no {@link SubRoomModel}.
+	 *             If no {@link SubSectionModel}.
 	 */
-	public SubRoomModel getSubRoom(RoomEntry roomEntry) throws Exception {
+	public SubSectionModel getSubRoom(RoomEntry roomEntry) throws Exception {
 		return this.getModel(roomEntry, this.roomMap, "No sub room '"
 				+ roomEntry.getRoomName() + "' on room " + this.getId());
 	}
 
 	/**
-	 * Obtains the {@link SubRoomModel} for the {@link DeskEntry}.
+	 * Obtains the {@link SubSectionModel} for the {@link DeskEntry}.
 	 * 
 	 * @param deskEntry
 	 *            {@link DeskEntry}.
-	 * @return {@link SubRoomModel}.
+	 * @return {@link SubSectionModel}.
 	 * @throws Exception
-	 *             If no {@link SubRoomModel}.
+	 *             If no {@link SubSectionModel}.
 	 */
-	public SubRoomModel getSubRoom(DeskEntry deskEntry) throws Exception {
+	public SubSectionModel getSubRoom(DeskEntry deskEntry) throws Exception {
 		return this.getModel(deskEntry, this.deskMap, "No desk '"
 				+ deskEntry.getDeskName() + "' on room " + this.getId());
 	}
 
 	/**
-	 * Obtains the {@link SubRoomModel} by its name.
+	 * Obtains the {@link SubSectionModel} by its name.
 	 * 
 	 * @param subRoomName
-	 *            Name of the {@link SubRoomModel}.
-	 * @return {@link SubRoomModel}.
+	 *            Name of the {@link SubSectionModel}.
+	 * @return {@link SubSectionModel}.
 	 * @throws Exception
-	 *             If no {@link SubRoomModel}.
+	 *             If no {@link SubSectionModel}.
 	 */
-	public SubRoomModel getSubRoom(String subRoomName) throws Exception {
+	public SubSectionModel getSubRoom(String subRoomName) throws Exception {
 		// Obtains the sub room
-		for (SubRoomModel subRoom : this.getModel().getSubRooms()) {
-			if (subRoomName.equals(subRoom.getId())) {
+		for (SubSectionModel subRoom : this.getModel().getSubSections()) {
+			if (subRoomName.equals(subRoom.getSubSectionName())) {
 				return subRoom;
 			}
 		}
@@ -262,114 +261,87 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	}
 
 	/**
-	 * Obtains the {@link RoomEntry} for the {@link SubRoomModel} of this
+	 * Obtains the {@link RoomEntry} for the {@link SubSectionModel} of this
 	 * {@link RoomEntry}.
 	 * 
 	 * @param roomModel
-	 *            {@link SubRoomModel}.
-	 * @return {@link RoomEntry} for the {@link SubRoomModel}.
+	 *            {@link SubSectionModel}.
+	 * @return {@link RoomEntry} for the {@link SubSectionModel}.
 	 * @throws Exception
 	 *             If not found.
 	 */
-	public RoomEntry getRoomEntry(SubRoomModel roomModel) throws Exception {
+	public RoomEntry getRoomEntry(SubSectionModel roomModel) throws Exception {
 		return this.getEntry(roomModel, this.roomMap, "No room '"
-				+ roomModel.getId() + "' on room " + this.getId());
+				+ roomModel.getSubSectionName() + "' on room " + this.getId());
 	}
 
 	/**
-	 * Obtains the {@link DeskEntry} for the {@link SubRoomModel} of this
+	 * Obtains the {@link DeskEntry} for the {@link SubSectionModel} of this
 	 * {@link RoomEntry}.
 	 * 
 	 * @param deskModel
-	 *            {@link SubRoomModel}.
-	 * @return {@link DeskEntry} for the {@link SubRoomModel}.
+	 *            {@link SubSectionModel}.
+	 * @return {@link DeskEntry} for the {@link SubSectionModel}.
 	 * @throws Exception
 	 *             If not found.
 	 */
-	public DeskEntry getDeskEntry(SubRoomModel deskModel) throws Exception {
+	public DeskEntry getDeskEntry(SubSectionModel deskModel) throws Exception {
 		return this.getEntry(deskModel, this.deskMap, "No desk '"
-				+ deskModel.getId() + "' on room " + this.getId());
+				+ deskModel.getSubSectionName() + "' on room " + this.getId());
 	}
 
 	/**
-	 * Obtains the {@link SubRoomManagedObjectModel} on the {@link SubRoomModel}
+	 * Obtains the {@link SubSectionObjectModel} on the {@link SubSectionModel}
 	 * .
 	 * 
 	 * @param subRoom
-	 *            {@link SubRoomModel}.
+	 *            {@link SubSectionModel}.
 	 * @param managedObjectName
-	 *            Name of the {@link SubRoomManagedObjectModel}.
-	 * @return {@link SubRoomManagedObjectModel}.
+	 *            Name of the {@link SubSectionObjectModel}.
+	 * @return {@link SubSectionObjectModel}.
 	 * @throws Exception
-	 *             If no {@link SubRoomManagedObjectModel}.
+	 *             If no {@link SubSectionObjectModel}.
 	 */
-	public SubRoomManagedObjectModel getSubRoomManagedObject(
-			SubRoomModel subRoom, String managedObjectName) throws Exception {
+	public SubSectionObjectModel getSubRoomManagedObject(
+			SubSectionModel subRoom, String managedObjectName) throws Exception {
 
 		// Obtain the sub room managed object
-		for (SubRoomManagedObjectModel subRoomMo : subRoom.getManagedObjects()) {
-			if (managedObjectName.equals(subRoomMo.getName())) {
+		for (SubSectionObjectModel subRoomMo : subRoom.getSubSectionObjects()) {
+			if (managedObjectName.equals(subRoomMo.getSubSectionObjectName())) {
 				return subRoomMo;
 			}
 		}
 
 		// Not found if here
 		throw new Exception("Can not find managed object '" + managedObjectName
-				+ "' for sub room '" + subRoom.getId() + "'");
+				+ "' for sub room '" + subRoom.getSubSectionName() + "'");
 	}
 
 	/**
-	 * Obtains the {@link SubRoomOutputFlowModel} on the {@link SubRoomModel}.
+	 * Obtains the {@link SubSectionOutputModel} on the {@link SubSectionModel}.
 	 * 
 	 * @param subRoom
-	 *            {@link SubRoomModel}.
+	 *            {@link SubSectionModel}.
 	 * @param outputFlowName
 	 *            Output flow name on the sub room.
-	 * @return {@link SubRoomOutputFlowModel}.
+	 * @return {@link SubSectionOutputModel}.
 	 * @throws Exception
 	 *             If output flow does not exist.
 	 */
-	public SubRoomOutputFlowModel getSubRoomOutputFlow(SubRoomModel subRoom,
+	public SubSectionOutputModel getSubRoomOutputFlow(SubSectionModel subRoom,
 			String outputFlowName) throws Exception {
 
 		// Obtain the output flow
-		for (SubRoomOutputFlowModel outputFlow : subRoom.getOutputFlows()) {
-			if (outputFlowName.equals(outputFlow.getName())) {
+		for (SubSectionOutputModel outputFlow : subRoom.getSubSectionOutputs()) {
+			if (outputFlowName.equals(outputFlow.getSubSectionOutputName())) {
 				return outputFlow;
 			}
 		}
 
 		// Not found if here
 		throw new Exception("Unknown output flow '" + outputFlowName
-				+ "' on sub room '" + subRoom.getId() + "' of room '"
-				+ this.getId() + "'");
-	}
-
-	/**
-	 * Obtains the {@link SubRoomEscalationModel} on the {@link SubRoomModel}.
-	 * 
-	 * @param subRoom
-	 *            {@link SubRoomModel}.
-	 * @param escalationName
-	 *            Escalation name on the sub room.
-	 * @return {@link SubRoomEscalationModel}.
-	 * @throws Exception
-	 *             If escalation does not exist.
-	 */
-	public SubRoomEscalationModel getSubRoomEscalation(SubRoomModel subRoom,
-			String escalationName) throws Exception {
-
-		// Obtain the escalation
-		for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
-			if (escalationName.equals(escalation.getName())) {
-				return escalation;
-			}
-		}
-
-		// Not found if here
-		throw new Exception("Unknown escalation '" + escalationName
-				+ "' on sub room '" + subRoom.getId() + "' of room '"
-				+ this.getId() + "'");
+				+ "' on sub room '" + subRoom.getSubSectionName()
+				+ "' of room '" + this.getId() + "'");
 	}
 
 	/**
@@ -396,13 +368,14 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 	 *             If a {@link RoomEntry} or {@link DeskEntry} can not be found.
 	 */
 	private void loadDeskEntries(List<DeskEntry> desks) throws Exception {
-		for (SubRoomModel subRoom : this.getModel().getSubRooms()) {
-			if (subRoom.getRoom() != null) {
+		for (SubSectionModel subRoom : this.getModel().getSubSections()) {
+			if (subRoom.getSectionLocation() != null) {
 				// Recursively load rooms of the room
 				RoomEntry roomEntry = this.roomMap.getEntry(subRoom);
 				if (roomEntry == null) {
-					throw new Exception("Unknown room '" + subRoom.getId()
-							+ "' [" + subRoom.getRoom() + "] on room "
+					throw new Exception("Unknown room '"
+							+ subRoom.getSubSectionName() + "' ["
+							+ subRoom.getSectionLocation() + "] on room "
 							+ this.getId());
 				}
 				roomEntry.loadDeskEntries(desks);
@@ -410,8 +383,9 @@ public class RoomEntry extends AbstractEntry<Object, RoomModel> {
 				// Load the desk entry for return
 				DeskEntry deskEntry = this.deskMap.getEntry(subRoom);
 				if (deskEntry == null) {
-					throw new Exception("Unknown desk '" + subRoom.getId()
-							+ "' [" + subRoom.getDesk() + "] on room "
+					throw new Exception("Unknown desk '"
+							+ subRoom.getSubSectionName() + "' ["
+							+ subRoom.getDeskLocation() + "] on room "
 							+ this.getId());
 				}
 				desks.add(deskEntry);

@@ -19,10 +19,10 @@ package net.officefloor.room;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationItem;
 import net.officefloor.model.repository.ConfigurationItem;
-import net.officefloor.model.room.SubRoomModel;
+import net.officefloor.model.section.SubSectionModel;
 
 /**
- * Tests loading a {@link net.officefloor.model.room.SubRoomModel}.
+ * Tests loading a {@link net.officefloor.model.section.SubSectionModel}.
  * 
  * @author Daniel
  */
@@ -30,7 +30,7 @@ public class SubRoomLoaderTest extends OfficeFrameTestCase {
 
 	/**
 	 * Ensure able to load a {@link net.officefloor.model.desk.DeskModel}
-	 * {@link SubRoomModel}.
+	 * {@link SubSectionModel}.
 	 */
 	public void testLoadDeskSubRoom() throws Exception {
 
@@ -42,20 +42,20 @@ public class SubRoomLoaderTest extends OfficeFrameTestCase {
 				.findFile(this.getClass(), "TestSubRoom.desk.xml"), null);
 
 		// Load the Desk as a Sub Room
-		SubRoomModel subRoom = roomLoader.loadSubRoom(configItem);
+		SubSectionModel subRoom = roomLoader.loadSubRoom(configItem);
 
 		// Validate the Sub Room
-		assertNull("Room should not be specified", subRoom.getRoom());
-		assertNotNull("Desk must be specified", subRoom.getDesk());
+		assertNull("Room should not be specified", subRoom.getSectionLocation());
+		assertNotNull("Desk must be specified", subRoom.getDeskLocation());
 
 		// Validate synchronised
-		assertTrue("Must have managed objects", subRoom.getManagedObjects()
+		assertTrue("Must have managed objects", subRoom.getSubSectionObjects()
 				.size() > 0);
 	}
 
 	/**
-	 * Ensure able to load a {@link net.officefloor.model.room.RoomModel}
-	 * {@link SubRoomModel}.
+	 * Ensure able to load a {@link net.officefloor.model.section.SectionModel}
+	 * {@link SubSectionModel}.
 	 */
 	public void testLoadRoomSubRoom() throws Exception {
 
@@ -67,14 +67,14 @@ public class SubRoomLoaderTest extends OfficeFrameTestCase {
 				.findFile(this.getClass(), "TestRoom.room.xml"), null);
 
 		// Load the Room as a Sub Room
-		SubRoomModel subRoom = roomLoader.loadSubRoom(configItem);
+		SubSectionModel subRoom = roomLoader.loadSubRoom(configItem);
 
 		// Validate the Sub Room
-		assertNotNull("Room must be specified", subRoom.getRoom());
-		assertNull("Desk should not be specified", subRoom.getDesk());
+		assertNotNull("Room must be specified", subRoom.getSectionLocation());
+		assertNull("Desk should not be specified", subRoom.getDeskLocation());
 
 		// Validate synchronised
-		assertTrue("Must have managed objects", subRoom.getManagedObjects()
+		assertTrue("Must have managed objects", subRoom.getSubSectionObjects()
 				.size() > 0);
 	}
 

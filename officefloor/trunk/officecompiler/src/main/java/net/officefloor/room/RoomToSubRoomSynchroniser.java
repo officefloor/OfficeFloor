@@ -19,39 +19,37 @@ package net.officefloor.room;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.model.room.ExternalEscalationModel;
-import net.officefloor.model.room.ExternalFlowModel;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomEscalationModel;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
 
 /**
- * Synchronises the {@link net.officefloor.model.room.RoomModel} to the
- * {@link net.officefloor.model.room.SubRoomModel}.
+ * Synchronises the {@link net.officefloor.model.section.SectionModel} to the
+ * {@link net.officefloor.model.section.SubSectionModel}.
  * 
  * @author Daniel
  */
 public class RoomToSubRoomSynchroniser {
 
 	/**
-	 * Synchronises {@link RoomModel} onto the {@link SubRoomModel}.
+	 * Synchronises {@link SectionModel} onto the {@link SubSectionModel}.
 	 * 
 	 * @param room
-	 *            {@link RoomModel}.
+	 *            {@link SectionModel}.
 	 * @param subRoom
-	 *            {@link SubRoomModel}.
+	 *            {@link SubSectionModel}.
 	 */
-	public static void synchroniseRoomOntoSubRoom(RoomModel room,
-			SubRoomModel subRoom) {
+	public static void synchroniseRoomOntoSubRoom(SectionModel room,
+			SubSectionModel subRoom) {
 
 		// Create the map of existing managed objects to their names
-		Map<String, SubRoomManagedObjectModel> existingManagedObjects = new HashMap<String, SubRoomManagedObjectModel>();
-		for (SubRoomManagedObjectModel mo : subRoom.getManagedObjects()) {
-			existingManagedObjects.put(mo.getName(), mo);
+		Map<String, SubSectionObjectModel> existingManagedObjects = new HashMap<String, SubSectionObjectModel>();
+		for (SubSectionObjectModel mo : subRoom.getSubSectionObjects()) {
+			existingManagedObjects.put(mo.getSubSectionObjectName(), mo);
 		}
 
 		// Add managed objects as per desk
@@ -59,33 +57,35 @@ public class RoomToSubRoomSynchroniser {
 				.getExternalManagedObjects()) {
 
 			// Obtain the managed object
-			SubRoomManagedObjectModel mo = existingManagedObjects.get(roomMo
-					.getName());
+			SubSectionObjectModel mo = existingManagedObjects.get(roomMo
+					.getExternalManagedObjectName());
 			if (mo == null) {
 				// Not exist therefore create and add
-				mo = new SubRoomManagedObjectModel(roomMo.getName(), roomMo
-						.getObjectType(), null);
-				subRoom.addManagedObject(mo);
+				mo = new SubSectionObjectModel(roomMo
+						.getExternalManagedObjectName(),
+						roomMo.getObjectType(), null);
+				subRoom.addSubSectionObject(mo);
 			}
 
 			// Remove from existing list
-			existingManagedObjects.remove(roomMo.getName());
+			existingManagedObjects
+					.remove(roomMo.getExternalManagedObjectName());
 		}
 
 		// Remove no longer existing managed objects
-		for (SubRoomManagedObjectModel mo : existingManagedObjects.values()) {
-			subRoom.removeManagedObject(mo);
+		for (SubSectionObjectModel mo : existingManagedObjects.values()) {
+			subRoom.removeSubSectionObject(mo);
 		}
 
 		// Create the map of existing input flows to their names
-		Map<String, SubRoomInputFlowModel> existingInputFlows = new HashMap<String, SubRoomInputFlowModel>();
-		for (SubRoomInputFlowModel inFlow : subRoom.getInputFlows()) {
-			existingInputFlows.put(inFlow.getName(), inFlow);
+		Map<String, SubSectionInputModel> existingInputFlows = new HashMap<String, SubSectionInputModel>();
+		for (SubSectionInputModel inFlow : subRoom.getSubSectionInputs()) {
+			existingInputFlows.put(inFlow.getSubSectionInputName(), inFlow);
 		}
 
 		// Add input flows as per desk
-		for (SubRoomModel roomSubRoom : room.getSubRooms()) {
-			for (SubRoomInputFlowModel flow : roomSubRoom.getInputFlows()) {
+		for (SubSectionModel roomSubRoom : room.getSubSections()) {
+			for (SubSectionInputModel flow : roomSubRoom.getSubSectionInputs()) {
 
 				// Do not add non-public flow items
 				if (!flow.getIsPublic()) {
@@ -93,17 +93,17 @@ public class RoomToSubRoomSynchroniser {
 				}
 
 				// Obtain the name for the input flow
-				String inputFlowName = roomSubRoom.getId() + "-"
-						+ flow.getName();
+				String inputFlowName = roomSubRoom.getSubSectionName() + "-"
+						+ flow.getSubSectionInputName();
 
 				// Obtain the input flow
-				SubRoomInputFlowModel inFlow = existingInputFlows
+				SubSectionInputModel inFlow = existingInputFlows
 						.get(inputFlowName);
 				if (inFlow == null) {
 					// Not exist therefore create and add (defaultly not public)
-					inFlow = new SubRoomInputFlowModel(inputFlowName, false,
-							null, null);
-					subRoom.addInputFlow(inFlow);
+					inFlow = new SubSectionInputModel(inputFlowName,
+							Object.class.getName(), false, null);
+					subRoom.addSubSectionInput(inFlow);
 				}
 
 				// Remove from existing list
@@ -112,65 +112,36 @@ public class RoomToSubRoomSynchroniser {
 		}
 
 		// Remove no longer existing input flows
-		for (SubRoomInputFlowModel inFlow : existingInputFlows.values()) {
-			subRoom.removeInputFlow(inFlow);
+		for (SubSectionInputModel inFlow : existingInputFlows.values()) {
+			subRoom.removeSubSectionInput(inFlow);
 		}
 
 		// Create the map of existing output flows to their names
-		Map<String, SubRoomOutputFlowModel> existingOutputFlows = new HashMap<String, SubRoomOutputFlowModel>();
-		for (SubRoomOutputFlowModel outFlow : subRoom.getOutputFlows()) {
-			existingOutputFlows.put(outFlow.getName(), outFlow);
+		Map<String, SubSectionOutputModel> existingOutputFlows = new HashMap<String, SubSectionOutputModel>();
+		for (SubSectionOutputModel outFlow : subRoom.getSubSectionOutputs()) {
+			existingOutputFlows.put(outFlow.getSubSectionOutputName(), outFlow);
 		}
 
 		// Add output flows as per desk
 		for (ExternalFlowModel flow : room.getExternalFlows()) {
 
 			// Obtain the output flow
-			SubRoomOutputFlowModel outFlow = existingOutputFlows.get(flow
-					.getName());
+			SubSectionOutputModel outFlow = existingOutputFlows.get(flow
+					.getExternalFlowName());
 			if (outFlow == null) {
 				// Not exist therefore create and add
-				outFlow = new SubRoomOutputFlowModel(flow.getName(), null, null);
-				subRoom.addOutputFlow(outFlow);
+				outFlow = new SubSectionOutputModel(flow.getExternalFlowName(),
+						Object.class.getName());
+				subRoom.addSubSectionOutput(outFlow);
 			}
 
 			// Remove from existing list
-			existingOutputFlows.remove(outFlow.getName());
+			existingOutputFlows.remove(outFlow.getSubSectionOutputName());
 		}
 
 		// Remove no longer existing output flows
-		for (SubRoomOutputFlowModel outFlow : existingOutputFlows.values()) {
-			subRoom.removeOutputFlow(outFlow);
-		}
-
-		// Create the map of existing escalations to their names
-		Map<String, SubRoomEscalationModel> existingEscalations = new HashMap<String, SubRoomEscalationModel>();
-		for (SubRoomEscalationModel escalation : subRoom.getEscalations()) {
-			existingEscalations.put(escalation.getName(), escalation);
-		}
-
-		// Add escalations as per room
-		for (ExternalEscalationModel extEscalation : room
-				.getExternalEscalations()) {
-
-			// Obtain the escalation
-			SubRoomEscalationModel escalation = existingEscalations
-					.get(extEscalation.getName());
-			if (escalation == null) {
-				// Not exist therefore create and add
-				escalation = new SubRoomEscalationModel(
-						extEscalation.getName(), extEscalation
-								.getEscalationType(), null, null);
-				subRoom.addEscalation(escalation);
-			}
-
-			// Remove from existing list
-			existingEscalations.remove(extEscalation.getName());
-		}
-
-		// Remove no longer existing escalations
-		for (SubRoomEscalationModel escalation : existingEscalations.values()) {
-			subRoom.removeEscalation(escalation);
+		for (SubSectionOutputModel outFlow : existingOutputFlows.values()) {
+			subRoom.removeSubSectionOutput(outFlow);
 		}
 	}
 

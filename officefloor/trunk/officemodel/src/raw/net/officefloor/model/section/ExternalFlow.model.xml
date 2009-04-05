@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="String" name="name"/>
-	<list type="OutputFlowToExternalFlowModel" name="output"/>
+<model>
+	<field type="String" name="external flow name" />
+	<field type="String" name="argument type" />
+	<list type="SubSectionOutputToExternalFlowModel" name="sub section output" />
 </model>
