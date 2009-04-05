@@ -14,44 +14,46 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.compile.administrator;
+
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.spi.administration.Duty;
 
 /**
- * <p>
- * Indicates a property was not configured within the {@link WorkSourceContext}.
- * <p>
- * This is a serious error as the {@link WorkSource} is requiring this property
- * to initialise.
+ * <code>Type definition</code> of a {@link Flow} instigated by a {@link Duty}.
  * 
  * @author Daniel
  */
-public class WorkUnknownPropertyError extends Error {
+public interface DutyFlowType<F extends Enum<F>> {
 
 	/**
-	 * Name of the unknown property.
-	 */
-	private final String unknownPropertyName;
-
-	/**
-	 * Initiate.
+	 * Obtains the name of the {@link Flow}.
 	 * 
-	 * @param message
-	 *            Message.
-	 * @param unknownPropertyName
-	 *            Name of the unknown property.
+	 * @return Name of the {@link Flow}.
 	 */
-	public WorkUnknownPropertyError(String message, String unknownPropertyName) {
-		super(message);
-		this.unknownPropertyName = unknownPropertyName;
-	}
+	String getFlowName();
 
 	/**
-	 * Obtains the name of the unknown property.
+	 * Obtains the index identifying the {@link Flow}.
 	 * 
-	 * @return Name of the unknown property.
+	 * @return Index identifying the {@link Flow}.
 	 */
-	public String getUnknonwnPropertyName() {
-		return this.unknownPropertyName;
-	}
+	int getIndex();
+
+	/**
+	 * Obtains the type of the argument passed by the {@link Duty} to the
+	 * {@link Flow}.
+	 * 
+	 * @return Type of argument passed by the {@link Duty}. May be
+	 *         <code>null</code> to indicate no argument.
+	 */
+	Class<?> getArgumentType();
+
+	/**
+	 * Obtains the key identifying the {@link Flow}.
+	 * 
+	 * @return Key identifying the {@link Flow}.
+	 */
+	F getKey();
 
 }

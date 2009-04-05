@@ -17,7 +17,7 @@
 package net.officefloor.compile.impl.managedobject;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 
 /**
  * {@link ManagedObjectDependencyType} implementation.

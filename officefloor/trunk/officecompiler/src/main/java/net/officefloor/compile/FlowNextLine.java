@@ -17,7 +17,7 @@
 package net.officefloor.compile;
 
 import net.officefloor.compile.FlowLineUtil.LinkedFlow;
-import net.officefloor.compile.spi.work.WorkType;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.TaskModel;

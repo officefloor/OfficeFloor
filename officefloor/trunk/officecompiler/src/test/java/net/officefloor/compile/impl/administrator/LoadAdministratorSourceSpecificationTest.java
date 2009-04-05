@@ -18,11 +18,11 @@ package net.officefloor.compile.impl.administrator;
 
 import java.util.List;
 
+import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.administrator.AdministratorLoader;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.administration.Administrator;

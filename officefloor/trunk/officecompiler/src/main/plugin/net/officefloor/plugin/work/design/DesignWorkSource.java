@@ -17,12 +17,12 @@
 package net.officefloor.plugin.work.design;
 
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskModel;

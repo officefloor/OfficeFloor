@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.administrator;
+package net.officefloor.compile.administrator;
 
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.internal.structure.Flow;

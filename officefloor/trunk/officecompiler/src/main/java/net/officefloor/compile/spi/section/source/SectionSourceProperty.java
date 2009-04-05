@@ -14,45 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.managedobject;
-
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+package net.officefloor.compile.spi.section.source;
 
 /**
- * <code>Type definition</code> of a dependency required by the
- * {@link ManagedObject}.
+ * Property of the {@link SectionSourceSpecification}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectDependencyType<D extends Enum<D>> {
+public interface SectionSourceProperty {
 
 	/**
-	 * Obtains the name of the dependency.
+	 * Obtains the name of the property.
 	 * 
-	 * @return Name of the dependency.
+	 * @return Name of the property.
 	 */
-	String getDependencyName();
+	String getName();
 
 	/**
-	 * Obtains the index identifying the dependency.
+	 * Obtains the display name of the property. If this returns
+	 * <code>null</code> then the return value of {@link #getName()} is used.
 	 * 
-	 * @return Index identifying the dependency.
+	 * @return Display name of property.
 	 */
-	int getIndex();
-
-	/**
-	 * Obtains the {@link Class} that the dependent object must
-	 * extend/implement.
-	 * 
-	 * @return Type of the dependency.
-	 */
-	Class<?> getDependencyType();
-
-	/**
-	 * Obtains the key identifying the dependency.
-	 * 
-	 * @return Key identifying the dependency.
-	 */
-	D getKey();
+	String getLabel();
 
 }

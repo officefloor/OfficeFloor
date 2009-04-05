@@ -14,58 +14,58 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work;
+package net.officefloor.compile.team;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSourceProperty;
-import net.officefloor.compile.spi.work.source.WorkSource;
-import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.spi.team.source.TeamSourceProperty;
+import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
 
 /**
- * Loads the {@link WorkType} from the {@link WorkSource}.
+ * Loads the {@link TeamType} from the {@link TeamSource}.
  * 
  * @author Daniel
  */
-public interface WorkLoader {
+public interface TeamLoader {
 
 	/**
 	 * Loads and returns the {@link PropertyList} from the
-	 * {@link WorkSourceSpecification} for the {@link WorkSource}.
+	 * {@link TeamSourceSpecification} for the {@link TeamSource}.
 	 * 
-	 * @param workSourceClass
-	 *            Class of the {@link WorkSource}.
+	 * @param teamSourceClass
+	 *            Class of the {@link TeamSource}.
 	 * @param issues
 	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link WorkSourceSpecification} and obtaining the
+	 *            {@link TeamSourceSpecification} and obtaining the
 	 *            {@link PropertyList}.
-	 * @return {@link PropertyList} of the {@link WorkSourceProperty} instances
-	 *         of the {@link WorkSourceSpecification} or <code>null</code> if
-	 *         issue, which is reported to the {@link CompilerIssues}.
+	 * @return {@link PropertyList} of the {@link TeamSourceProperty} instances
+	 *         of the {@link TeamSourceSpecification} or <code>null</code> if
+	 *         issues, which are reported to the {@link CompilerIssues}.
 	 */
-	<W extends Work, WS extends WorkSource<W>> PropertyList loadSpecification(
-			Class<WS> workSourceClass, CompilerIssues issues);
+	<TS extends TeamSource> PropertyList loadSpecification(
+			Class<TS> teamSourceClass, CompilerIssues issues);
 
 	/**
-	 * Loads and returns the {@link WorkType} from the {@link WorkSource}.
+	 * Loads and returns the {@link TeamType} sourced from the
+	 * {@link TeamSource}.
 	 * 
-	 * @param workSourceClass
-	 *            Class of the {@link WorkSource}.
+	 * @param teamSourceClass
+	 *            Class of the {@link TeamSource}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
-	 *            {@link WorkType}.
+	 *            {@link TeamType}.
 	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link WorkSource} may use in
+	 *            {@link ClassLoader} that the {@link TeamSource} may use in
 	 *            obtaining necessary class path resources.
 	 * @param issues
 	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link WorkType}.
-	 * @return {@link WorkType} or <code>null</code> if issues, which is
+	 *            {@link TeamType}.
+	 * @return {@link TeamType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
-	<W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
-			Class<WS> workSourceClass, PropertyList propertyList,
-			ClassLoader classLoader, CompilerIssues issues);
+	<TS extends TeamSource> TeamType loadTeam(Class<TS> teamSourceClass,
+			PropertyList propertyList, ClassLoader classLoader,
+			CompilerIssues issues);
 
 }

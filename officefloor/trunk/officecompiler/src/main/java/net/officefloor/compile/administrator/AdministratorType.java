@@ -14,24 +14,32 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.managedobject;
+package net.officefloor.compile.administrator;
 
+import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.team.Team;
 
 /**
- * <code>Type definition</code> of a {@link Team} required by the
- * {@link ManagedObject}.
+ * <code>Type definition</code> of an {@link Administrator}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectTeamType {
+public interface AdministratorType<I, A extends Enum<A>> {
 
 	/**
-	 * Obtains the name to identify requirement of a {@link Team}.
+	 * Obtains the {@link Class} that the {@link ManagedObject} must provide as
+	 * an extension interface to be administered.
 	 * 
-	 * @return Name to identify requirement of a {@link Team}.
+	 * @return Extension interface for the {@link ManagedObject}.
 	 */
-	String getTeamName();
+	Class<I> getExtensionInterface();
+
+	/**
+	 * Obtains the {@link DutyType} definitions for this
+	 * {@link AdministratorType}.
+	 * 
+	 * @return {@link DutyType} definitions for this {@link AdministratorType}.
+	 */
+	DutyType<A, ?>[] getDutyTypes();
 
 }

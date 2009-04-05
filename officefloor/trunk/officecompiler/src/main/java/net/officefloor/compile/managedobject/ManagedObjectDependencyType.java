@@ -14,46 +14,45 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.administrator;
+package net.officefloor.compile.managedobject;
 
-import net.officefloor.frame.internal.structure.Flow;
-import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * <code>Type definition</code> of a {@link Flow} instigated by a {@link Duty}.
+ * <code>Type definition</code> of a dependency required by the
+ * {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface DutyFlowType<F extends Enum<F>> {
+public interface ManagedObjectDependencyType<D extends Enum<D>> {
 
 	/**
-	 * Obtains the name of the {@link Flow}.
+	 * Obtains the name of the dependency.
 	 * 
-	 * @return Name of the {@link Flow}.
+	 * @return Name of the dependency.
 	 */
-	String getFlowName();
+	String getDependencyName();
 
 	/**
-	 * Obtains the index identifying the {@link Flow}.
+	 * Obtains the index identifying the dependency.
 	 * 
-	 * @return Index identifying the {@link Flow}.
+	 * @return Index identifying the dependency.
 	 */
 	int getIndex();
 
 	/**
-	 * Obtains the type of the argument passed by the {@link Duty} to the
-	 * {@link Flow}.
+	 * Obtains the {@link Class} that the dependent object must
+	 * extend/implement.
 	 * 
-	 * @return Type of argument passed by the {@link Duty}. May be
-	 *         <code>null</code> to indicate no argument.
+	 * @return Type of the dependency.
 	 */
-	Class<?> getArgumentType();
+	Class<?> getDependencyType();
 
 	/**
-	 * Obtains the key identifying the {@link Flow}.
+	 * Obtains the key identifying the dependency.
 	 * 
-	 * @return Key identifying the {@link Flow}.
+	 * @return Key identifying the dependency.
 	 */
-	F getKey();
+	D getKey();
 
 }

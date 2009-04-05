@@ -14,26 +14,33 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.pool;
-
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+package net.officefloor.compile.section;
 
 /**
- * <p>
- * <code>Type definition</code> of a {@link ManagedObjectPool}.
- * <p>
- * All {@link ManagedObjectPool} instances implement the same interface. They
- * however differ in their characteristics which is internal to the
- * {@link ManagedObjectPool}.
- * <p>
- * TODO Need to consider if necessary to provide criteria on a
- * {@link ManagedObjectSource} to differentiate which {@link ManagedObjectPool}
- * may pool its {@link ManagedObject} instances.
+ * <code>Type definition</code> of an input for a {@link SectionType}.
  * 
  * @author Daniel
  */
-public interface ManagedObjectPoolType {
+public interface SectionInputType {
+
+	/**
+	 * Obtains the name of this {@link SectionInputType}.
+	 * 
+	 * @return Name of this {@link SectionInputType}.
+	 */
+	String getInputName();
+
+	/**
+	 * <p>
+	 * Obtains the fully qualified {@link Class} name of the parameter type for
+	 * this {@link SectionInputType}.
+	 * <p>
+	 * The name is returned rather than the actual {@link Class} to enable the
+	 * {@link SectionType} to be obtained should the {@link Class} not be
+	 * available to the {@link ClassLoader}.
+	 * 
+	 * @return Fully qualified {@link Class} name of the parameter type.
+	 */
+	String getParameterType();
 
 }

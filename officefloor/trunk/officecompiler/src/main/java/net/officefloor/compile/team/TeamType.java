@@ -14,31 +14,23 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work;
+package net.officefloor.compile.team;
 
-import net.officefloor.frame.api.execute.Task;
-import net.officefloor.frame.internal.structure.EscalationFlow;
+import net.officefloor.frame.spi.team.Job;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * <code>Type definition</code> of a possible {@link EscalationFlow} by the
- * {@link Task}.
+ * <p>
+ * <code>Type definition</code> of a {@link Team}.
+ * <p>
+ * All {@link Team} instances implement the same interface. They however differ
+ * in their characteristics which is internal to the {@link Team}.
+ * <p>
+ * TODO Need to consider if necessary to provide criteria on a {@link Job} to
+ * differentiate which {@link Team} may be responsible for the {@link Job}.
  * 
  * @author Daniel
  */
-public interface TaskEscalationType {
-
-	/**
-	 * Obtains the name for the {@link TaskEscalationType}.
-	 * 
-	 * @return Name for the {@link TaskEscalationType}.
-	 */
-	String getEscalationName();
-
-	/**
-	 * Obtains the type of {@link EscalationFlow} by the {@link Task}.
-	 * 
-	 * @return Type of {@link EscalationFlow} by the {@link Task}.
-	 */
-	<E extends Throwable> Class<E> getEscalationType();
+public interface TeamType {
 
 }

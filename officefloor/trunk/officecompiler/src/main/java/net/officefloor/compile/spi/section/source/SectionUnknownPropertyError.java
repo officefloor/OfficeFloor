@@ -14,18 +14,19 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.compile.spi.section.source;
 
 /**
  * <p>
- * Indicates a property was not configured within the {@link WorkSourceContext}.
+ * Indicates a property was not configured within the
+ * {@link SectionSourceContext}.
  * <p>
- * This is a serious error as the {@link WorkSource} is requiring this property
- * to initialise.
+ * This is a serious error as the {@link SectionSource} is requiring this
+ * property to initialise.
  * 
  * @author Daniel
  */
-public class WorkUnknownPropertyError extends Error {
+public class SectionUnknownPropertyError extends Error {
 
 	/**
 	 * Name of the unknown property.
@@ -40,7 +41,8 @@ public class WorkUnknownPropertyError extends Error {
 	 * @param unknownPropertyName
 	 *            Name of the unknown property.
 	 */
-	public WorkUnknownPropertyError(String message, String unknownPropertyName) {
+	public SectionUnknownPropertyError(String message,
+			String unknownPropertyName) {
 		super(message);
 		this.unknownPropertyName = unknownPropertyName;
 	}

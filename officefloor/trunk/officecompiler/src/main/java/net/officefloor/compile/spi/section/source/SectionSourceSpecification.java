@@ -14,20 +14,23 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.pool;
+package net.officefloor.compile.spi.section.source;
 
-import net.officefloor.compile.pool.ManagedObjectPoolType;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.compile.section.SectionType;
 
 /**
- * Tests loading the {@link ManagedObjectPoolType}.
+ * Provides the specification of the {@link SectionType} to be loaded by the
+ * particular {@link SectionSource}.
  * 
  * @author Daniel
  */
-public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
+public interface SectionSourceSpecification {
 
-	public void testImplement() {
-		fail("TODO implement testing for loading the ManagedObjectPoolType via the ManagedObjectPoolLoader");
-	}
+	/**
+	 * Obtains the specification of the properties for the {@link SectionType}.
+	 * 
+	 * @return Property specification.
+	 */
+	SectionSourceProperty[] getProperties();
 
 }

@@ -16,10 +16,10 @@
  */
 package net.officefloor.compile.impl.managedobject;
 
-import net.officefloor.compile.spi.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlowType;
-import net.officefloor.compile.spi.managedobject.ManagedObjectTeamType;
-import net.officefloor.compile.spi.managedobject.ManagedObjectType;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectTeamType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**

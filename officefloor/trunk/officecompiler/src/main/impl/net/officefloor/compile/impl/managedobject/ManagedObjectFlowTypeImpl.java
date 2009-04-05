@@ -17,7 +17,7 @@
 package net.officefloor.compile.impl.managedobject;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;

@@ -14,20 +14,15 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.pool;
+package net.officefloor.compile.spi.section;
 
-import net.officefloor.compile.pool.ManagedObjectPoolType;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.api.manage.Office;
 
 /**
- * Tests loading the {@link ManagedObjectPoolType}.
+ * Section within the {@link Office}.
  * 
  * @author Daniel
  */
-public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
-
-	public void testImplement() {
-		fail("TODO implement testing for loading the ManagedObjectPoolType via the ManagedObjectPoolLoader");
-	}
+public interface Section {
 
 }

@@ -14,20 +14,30 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.pool;
+package net.officefloor.compile.work;
 
-import net.officefloor.compile.pool.ManagedObjectPoolType;
-import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Work;
 
 /**
- * Tests loading the {@link ManagedObjectPoolType}.
+ * <code>Type definition</code> of a {@link Work}.
  * 
  * @author Daniel
  */
-public class LoadManagedObjectPoolTypeTest extends OfficeFrameTestCase {
+public interface WorkType<W extends Work> {
 
-	public void testImplement() {
-		fail("TODO implement testing for loading the ManagedObjectPoolType via the ManagedObjectPoolLoader");
-	}
+	/**
+	 * Obtains the {@link WorkFactory} to create the {@link Work} instances.
+	 * 
+	 * @return {@link WorkFactory}.
+	 */
+	WorkFactory<W> getWorkFactory();
+
+	/**
+	 * Obtains the {@link TaskType} definitions for the {@link Work}.
+	 * 
+	 * @return {@link TaskType} definitions for the {@link Work}.
+	 */
+	TaskType<W, ?, ?>[] getTaskTypes();
 
 }

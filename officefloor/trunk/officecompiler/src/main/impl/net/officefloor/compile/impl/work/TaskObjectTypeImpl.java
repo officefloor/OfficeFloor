@@ -17,8 +17,8 @@
 package net.officefloor.compile.impl.work;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.TaskObjectType;
 import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
+import net.officefloor.compile.work.TaskObjectType;
 
 /**
  * {@link TaskObjectType} implementation.
