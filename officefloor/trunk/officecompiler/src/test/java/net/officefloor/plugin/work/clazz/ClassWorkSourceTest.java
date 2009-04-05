@@ -19,11 +19,11 @@ package net.officefloor.plugin.work.clazz;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import net.officefloor.compile.spi.work.TaskFlowType;
-import net.officefloor.compile.spi.work.TaskObjectType;
-import net.officefloor.compile.spi.work.TaskType;
-import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.work.TaskFlowType;
+import net.officefloor.compile.work.TaskObjectType;
+import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.test.OfficeFrameTestCase;

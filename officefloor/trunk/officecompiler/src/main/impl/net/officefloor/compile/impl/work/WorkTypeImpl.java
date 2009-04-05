@@ -20,11 +20,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.TaskType;
-import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 

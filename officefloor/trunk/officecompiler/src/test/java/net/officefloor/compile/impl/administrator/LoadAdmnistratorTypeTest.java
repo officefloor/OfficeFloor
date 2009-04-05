@@ -16,7 +16,7 @@
  */
 package net.officefloor.compile.impl.administrator;
 
-import net.officefloor.compile.spi.administrator.AdministratorType;
+import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

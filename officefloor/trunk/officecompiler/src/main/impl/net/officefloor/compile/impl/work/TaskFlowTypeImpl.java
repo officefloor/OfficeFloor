@@ -17,8 +17,8 @@
 package net.officefloor.compile.impl.work;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.TaskFlowType;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
+import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.frame.internal.structure.Flow;
 
 /**

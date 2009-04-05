@@ -14,23 +14,26 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.team;
+package net.officefloor.compile.pool;
 
-import net.officefloor.frame.spi.team.Job;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * <p>
- * <code>Type definition</code> of a {@link Team}.
+ * <code>Type definition</code> of a {@link ManagedObjectPool}.
  * <p>
- * All {@link Team} instances implement the same interface. They however differ
- * in their characteristics which is internal to the {@link Team}.
+ * All {@link ManagedObjectPool} instances implement the same interface. They
+ * however differ in their characteristics which is internal to the
+ * {@link ManagedObjectPool}.
  * <p>
- * TODO Need to consider if necessary to provide criteria on a {@link Job} to
- * differentiate which {@link Team} may be responsible for the {@link Job}.
+ * TODO Need to consider if necessary to provide criteria on a
+ * {@link ManagedObjectSource} to differentiate which {@link ManagedObjectPool}
+ * may pool its {@link ManagedObject} instances.
  * 
  * @author Daniel
  */
-public interface TeamType {
+public interface ManagedObjectPoolType {
 
 }

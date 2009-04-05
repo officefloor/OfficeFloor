@@ -17,8 +17,8 @@
 package net.officefloor.compile.impl.work;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.TaskEscalationType;
 import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
+import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.internal.structure.EscalationFlow;
 
 /**

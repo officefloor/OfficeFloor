@@ -16,13 +16,13 @@
  */
 package net.officefloor.compile.impl.administrator;
 
+import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.administrator.AdministratorLoader;
-import net.officefloor.compile.spi.administrator.AdministratorType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;

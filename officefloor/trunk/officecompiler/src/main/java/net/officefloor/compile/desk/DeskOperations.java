@@ -18,9 +18,9 @@ package net.officefloor.compile.desk;
 
 import net.officefloor.compile.change.Change;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.TaskType;
-import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;

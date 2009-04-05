@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import net.officefloor.compile.change.Change;
-import net.officefloor.compile.spi.work.TaskType;
+import net.officefloor.compile.work.TaskType;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.TaskFlowModel;
 import net.officefloor.model.desk.TaskModel;

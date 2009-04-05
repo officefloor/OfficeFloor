@@ -7,7 +7,6 @@ Bundle-Vendor: Daniel Sagenschneider
 Export-Package: 
  net.officefloor.compile,
  net.officefloor.compile.impl.desk,
- net.officefloor.compile.spi.work,
  net.officefloor.compile.spi.work.source,
  net.officefloor.compile.spi.work.source.impl,
  net.officefloor.compile.test.work,

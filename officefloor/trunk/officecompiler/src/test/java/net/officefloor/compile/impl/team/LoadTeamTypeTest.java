@@ -16,7 +16,7 @@
  */
 package net.officefloor.compile.impl.team;
 
-import net.officefloor.compile.spi.team.TeamType;
+import net.officefloor.compile.team.TeamType;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**

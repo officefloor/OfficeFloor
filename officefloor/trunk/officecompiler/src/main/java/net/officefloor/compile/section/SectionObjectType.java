@@ -14,15 +14,34 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.desk;
-
-import net.officefloor.model.desk.DeskModel;
+package net.officefloor.compile.section;
 
 /**
- * {@link DeskModel} unit of compilation.
+ * <code>Type definition</code> of an {@link Object} dependency required by the
+ * {@link SectionType}.
  * 
  * @author Daniel
  */
-public interface DeskCompileUnit {
+public interface SectionObjectType {
+
+	/**
+	 * Obtains the name of this {@link SectionObjectType}.
+	 * 
+	 * @return Name of this {@link SectionObjectType}.
+	 */
+	String getObjectName();
+
+	/**
+	 * <p>
+	 * Obtains the fully qualified {@link Class} name of the {@link Object} type
+	 * for this {@link SectionObjectType}.
+	 * <p>
+	 * The name is returned rather than the actual {@link Class} to enable the
+	 * {@link SectionType} to be obtained should the {@link Class} not be
+	 * available to the {@link ClassLoader}.
+	 * 
+	 * @return Fully qualified {@link Class} name of the {@link Object} type.
+	 */
+	String getObjectType();
 
 }
