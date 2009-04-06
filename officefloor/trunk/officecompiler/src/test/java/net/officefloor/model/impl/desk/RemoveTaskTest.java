@@ -51,7 +51,7 @@ public class RemoveTaskTest extends AbstractDeskOperationsTestCase {
 	 * other {@link TaskModel} instances on the {@link DeskModel}.
 	 */
 	public void testRemoveTaskWhenOtherTasks() {
-		TaskModel task = this.desk.getTasks().get(1);
+		TaskModel task = this.model.getTasks().get(1);
 		Change<TaskModel> change = this.operations.removeTask(task);
 		this.assertChange(change, task, "Remove task TASK_B", true);
 	}
@@ -61,7 +61,7 @@ public class RemoveTaskTest extends AbstractDeskOperationsTestCase {
 	 * {@link DeskModel}.
 	 */
 	public void testRemoveTaskWithConnections() {
-		TaskModel task = this.desk.getTasks().get(0);
+		TaskModel task = this.model.getTasks().get(0);
 		Change<TaskModel> change = this.operations.removeTask(task);
 		this.assertChange(change, task, "Remove task TASK_A", true);
 	}

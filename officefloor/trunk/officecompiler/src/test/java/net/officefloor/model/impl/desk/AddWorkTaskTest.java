@@ -45,7 +45,7 @@ public class AddWorkTaskTest extends AbstractDeskOperationsTestCase {
 		super.setUp();
 
 		// Obtain the work model
-		this.work = this.desk.getWorks().get(0);
+		this.work = this.model.getWorks().get(0);
 	}
 
 	/**
@@ -152,13 +152,13 @@ public class AddWorkTaskTest extends AbstractDeskOperationsTestCase {
 		changeB.apply();
 		changeA.apply();
 		changeC.apply();
-		this.validateDesk();
+		this.validateModel();
 
 		// Revert
 		changeC.revert();
 		changeA.revert();
 		changeB.revert();
-		this.validateAsSetupDesk();
+		this.validateAsSetupModel();
 	}
 
 	/**

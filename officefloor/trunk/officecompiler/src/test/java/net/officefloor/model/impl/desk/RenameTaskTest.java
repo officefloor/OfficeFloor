@@ -42,7 +42,7 @@ public class RenameTaskTest extends AbstractDeskOperationsTestCase {
 	 * Ensure can rename the {@link TaskModel}.
 	 */
 	public void testRenameTask() {
-		TaskModel task = this.desk.getTasks().get(0);
+		TaskModel task = this.model.getTasks().get(0);
 		Change<TaskModel> change = this.operations.renameTask(task, "NEW_NAME");
 		this.assertChange(change, task, "Rename task OLD_NAME to NEW_NAME",
 				true);
@@ -52,8 +52,8 @@ public class RenameTaskTest extends AbstractDeskOperationsTestCase {
 	 * Ensures on renaming the {@link TaskModel} that order is maintained.
 	 */
 	public void testRenameTaskCausingTaskOrderChange() {
-		this.useTestSetupDesk();
-		TaskModel task = this.desk.getTasks().get(0);
+		this.useTestSetupModel();
+		TaskModel task = this.model.getTasks().get(0);
 		Change<TaskModel> change = this.operations.renameTask(task, "TASK_C");
 		this.assertChange(change, task, "Rename task TASK_A to TASK_C", true);
 	}

@@ -50,7 +50,7 @@ public class SetObjectAsParameterTest extends AbstractDeskOperationsTestCase {
 		super.setUp();
 
 		// Obtain the object parameter task object
-		WorkTaskModel workTask = this.desk.getWorks().get(0).getWorkTasks()
+		WorkTaskModel workTask = this.model.getWorks().get(0).getWorkTasks()
 				.get(0);
 		this.object = workTask.getTaskObjects().get(0);
 		this.parameter = workTask.getTaskObjects().get(1);
@@ -95,7 +95,7 @@ public class SetObjectAsParameterTest extends AbstractDeskOperationsTestCase {
 	 * connected {@link ConnectionModel} instances.
 	 */
 	public void testSetToParameterWithConnections() {
-		this.useTestSetupDesk();
+		this.useTestSetupModel();
 		Change<WorkTaskObjectModel> change = this.operations
 				.setObjectAsParameter(true, this.object);
 		this.assertChange(change, this.object,

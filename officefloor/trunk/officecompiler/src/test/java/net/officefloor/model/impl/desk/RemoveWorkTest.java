@@ -53,7 +53,7 @@ public class RemoveWorkTest extends AbstractDeskOperationsTestCase {
 	 */
 	public void testRemoveWorkWithNoConnections() {
 		// Obtain the work and remove it
-		WorkModel work = this.desk.getWorks().get(0);
+		WorkModel work = this.model.getWorks().get(0);
 		Change<WorkModel> change = this.operations.removeWork(work);
 		this.assertChange(change, work, "Remove work WORK", true);
 	}
@@ -63,7 +63,7 @@ public class RemoveWorkTest extends AbstractDeskOperationsTestCase {
 	 */
 	public void testRemoveWorkWithATask() {
 		// Obtain the work and remove it
-		WorkModel work = this.desk.getWorks().get(0);
+		WorkModel work = this.model.getWorks().get(0);
 		Change<WorkModel> change = this.operations.removeWork(work);
 		this.assertChange(change, work, "Remove work WORK", true);
 	}
@@ -74,7 +74,7 @@ public class RemoveWorkTest extends AbstractDeskOperationsTestCase {
 	 */
 	public void testRemoveWorkWhenOtherWorkAndTasks() {
 		// Obtain the work and remove it
-		WorkModel work = this.desk.getWorks().get(1);
+		WorkModel work = this.model.getWorks().get(1);
 		Change<WorkModel> change = this.operations.removeWork(work);
 		this.assertChange(change, work, "Remove work WORK_B", true);
 	}
@@ -85,7 +85,7 @@ public class RemoveWorkTest extends AbstractDeskOperationsTestCase {
 	 */
 	public void testRemoveWorkWithConnections() {
 		// Obtain the work and remove it
-		WorkModel work = this.desk.getWorks().get(0);
+		WorkModel work = this.model.getWorks().get(0);
 		Change<WorkModel> change = this.operations.removeWork(work);
 		this.assertChange(change, work, "Remove work WORK_A", true);
 	}

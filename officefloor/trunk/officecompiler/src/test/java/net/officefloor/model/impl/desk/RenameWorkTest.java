@@ -41,7 +41,7 @@ public class RenameWorkTest extends AbstractDeskOperationsTestCase {
 	 * Ensure can rename the {@link WorkModel}.
 	 */
 	public void testRenameWork() {
-		WorkModel work = this.desk.getWorks().get(0);
+		WorkModel work = this.model.getWorks().get(0);
 		Change<WorkModel> change = this.operations.renameWork(work, "NEW_NAME");
 		this.assertChange(change, work, "Rename work OLD_NAME to NEW_NAME",
 				true);
@@ -51,8 +51,8 @@ public class RenameWorkTest extends AbstractDeskOperationsTestCase {
 	 * Ensures on renaming the {@link WorkModel} that order is maintained.
 	 */
 	public void testRenameWorkCausingWorkOrderChange() {
-		this.useTestSetupDesk();
-		WorkModel work = this.desk.getWorks().get(0);
+		this.useTestSetupModel();
+		WorkModel work = this.model.getWorks().get(0);
 		Change<WorkModel> change = this.operations.renameWork(work, "WORK_C");
 		this.assertChange(change, work, "Rename work WORK_A to WORK_C", true);
 	}

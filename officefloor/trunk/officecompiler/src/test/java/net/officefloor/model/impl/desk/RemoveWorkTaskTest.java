@@ -51,7 +51,7 @@ public class RemoveWorkTaskTest extends AbstractDeskOperationsTestCase {
 		super.setUp();
 
 		// Obtain the work and work task model
-		this.work = this.desk.getWorks().get(0);
+		this.work = this.model.getWorks().get(0);
 	}
 
 	/**

@@ -55,7 +55,7 @@ public class RemoveExternalManagedObjectTest extends
 	 * on the {@link DeskModel}.
 	 */
 	public void testRemoveExternalManagedObjectWhenOtherExternalManagedObjects() {
-		ExternalManagedObjectModel extMo = this.desk
+		ExternalManagedObjectModel extMo = this.model
 				.getExternalManagedObjects().get(1);
 		Change<ExternalManagedObjectModel> change = this.operations
 				.removeExternalManagedObject(extMo);
@@ -68,7 +68,7 @@ public class RemoveExternalManagedObjectTest extends
 	 * the {@link DeskModel}.
 	 */
 	public void testRemoveExternalManagedObjectWithConnections() {
-		ExternalManagedObjectModel extMo = this.desk
+		ExternalManagedObjectModel extMo = this.model
 				.getExternalManagedObjects().get(0);
 		Change<ExternalManagedObjectModel> change = this.operations
 				.removeExternalManagedObject(extMo);

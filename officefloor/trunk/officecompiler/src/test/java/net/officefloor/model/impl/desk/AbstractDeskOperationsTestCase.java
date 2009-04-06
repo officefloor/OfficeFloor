@@ -16,10 +16,6 @@
  */
 package net.officefloor.model.impl.desk;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
-import junit.framework.TestCase;
 import net.officefloor.compile.impl.work.WorkTypeImpl;
 import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
@@ -34,16 +30,10 @@ import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.RemoveConnectionsAction;
-import net.officefloor.model.change.Change;
-import net.officefloor.model.change.Conflict;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskOperations;
-import net.officefloor.model.impl.desk.DeskOperationsImpl;
-import net.officefloor.model.impl.desk.DeskRepositoryImpl;
+import net.officefloor.model.impl.AbstractOperationsTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -52,28 +42,12 @@ import net.officefloor.model.repository.ConfigurationItem;
  * @author Daniel
  */
 public abstract class AbstractDeskOperationsTestCase extends
-		OfficeFrameTestCase {
-
-	/**
-	 * Flags if there is a specific setup file per test.
-	 */
-	private boolean isSpecificSetupFilePerTest;
-
-	/**
-	 * {@link DeskModel} loaded for testing.
-	 */
-	protected DeskModel desk;
-
-	/**
-	 * {@link DeskOperations} to be tested.
-	 */
-	protected DeskOperations operations;
+		AbstractOperationsTestCase<DeskModel, DeskOperations> {
 
 	/**
 	 * Initiate.
 	 */
 	public AbstractDeskOperationsTestCase() {
-		this.isSpecificSetupFilePerTest = false;
 	}
 
 	/**
@@ -83,215 +57,28 @@ public abstract class AbstractDeskOperationsTestCase extends
 	 *            Flags if there is a specific setup file per test.
 	 */
 	public AbstractDeskOperationsTestCase(boolean isSpecificSetupFilePerTest) {
-		this.isSpecificSetupFilePerTest = isSpecificSetupFilePerTest;
+		super(isSpecificSetupFilePerTest);
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see junit.framework.TestCase#setUp()
+	 * =================== AbstractOperationsTestCase ========================
 	 */
+
 	@Override
-	protected void setUp() throws Exception {
-
-		// Retrieve the setup desk
-		String setupTestName = this.getSetupTestName();
-		this.desk = this.retrieveDesk(setupTestName, null);
-
-		// Create the desk operations
-		this.operations = new DeskOperationsImpl(this.desk);
+	protected DeskModel retrieveModel(ConfigurationItem configurationItem)
+			throws Exception {
+		return new DeskRepositoryImpl(new ModelRepositoryImpl())
+				.retrieveDesk(configurationItem);
 	}
 
-	/**
-	 * Allows particular tests of a {@link TestCase} to override using the
-	 * default setup {@link DeskModel} and use the specific test
-	 * {@link DeskModel}.
-	 */
-	protected void useTestSetupDesk() {
-		try {
-			// Flag to use test specific setup desk
-			this.isSpecificSetupFilePerTest = true;
-
-			// re-setup the test
-			this.setUp();
-
-		} catch (Exception ex) {
-			// Fail on failure (stops have to throw exception in tests)
-			StringWriter msg = new StringWriter();
-			ex.printStackTrace(new PrintWriter(msg));
-			fail("Failed to useTestSetupDesk");
-		}
+	@Override
+	protected DeskOperations createModelOperations(DeskModel model) {
+		return new DeskOperationsImpl(model);
 	}
 
-	/**
-	 * Obtains the test name for the setup {@link DeskModel}.
-	 * 
-	 * @return Test name for the setup {@link DeskModel}.
-	 */
-	private String getSetupTestName() {
-		return (this.isSpecificSetupFilePerTest ? this.getName() + "_" : "")
-				+ "setup";
-	}
-
-	/**
-	 * Asserts the {@link Change} is correct.
-	 * 
-	 * @param change
-	 *            {@link Change} to verify.
-	 * @param expectedTarget
-	 *            Expected target.
-	 * @param expectedChangeDescription
-	 *            Expected description of the {@link Change}.
-	 * @param expectCanApply
-	 *            Expected if can apply the {@link Change}. Should it be able to
-	 *            be applied, both the {@link Change#apply()} and
-	 *            {@link Change#revert()} will be also tested.
-	 * @param expectedConflictDescriptions
-	 *            Expected descriptions for the {@link Conflict} instances on
-	 *            the {@link Change}.
-	 */
-	protected <T> void assertChange(Change<T> change, T expectedTarget,
-			String expectedChangeDescription, boolean expectCanApply,
-			String... expectedConflictDescriptions) {
-
-		// Ensure details of change correct
-		if (expectedTarget != null) {
-			assertEquals("Incorrect target", expectedTarget, change.getTarget());
-		}
-		assertEquals("Incorrect change description", expectedChangeDescription,
-				change.getChangeDescription());
-		assertEquals("Incorrect number of conflicts",
-				expectedConflictDescriptions.length,
-				change.getConflicts().length);
-		for (int i = 0; i < expectedConflictDescriptions.length; i++) {
-			assertEquals("Incorrect descriptiong for conflict " + i,
-					expectedConflictDescriptions[i], change.getConflicts()[i]
-							.getConflictDescription());
-		}
-
-		// Validate changes if can apply change
-		if (expectCanApply) {
-			// Should be no change until change is applied
-			this.validateAsSetupDesk();
-
-			// Apply the change and validate results
-			change.apply();
-			this.validateDesk();
-
-			// Revert the change and validate reverted back to setup
-			change.revert();
-			this.validateAsSetupDesk();
-
-			// Apply again for 'redo' functionality
-			change.apply();
-			this.validateDesk();
-
-			// Revert change to have desk in setup state for any further testing
-			change.revert();
-		}
-	}
-
-	/**
-	 * Validates the {@link DeskModel} against the default {@link DeskModel}
-	 * file for the test.
-	 */
-	protected void validateDesk() {
-		this.validateDesk(null);
-	}
-
-	/**
-	 * Validates the {@link DeskModel} against the specific {@link DeskModel}
-	 * file for the test.
-	 * 
-	 * @param specific
-	 *            Indicates the specific {@link DeskModel} file for the test.
-	 */
-	protected void validateDesk(String specific) {
-		this.validateDesk(this.getName(), specific);
-	}
-
-	/**
-	 * <p>
-	 * Validates the {@link DeskModel} against the {@link DeskModel} setup for
-	 * testing.
-	 * <p>
-	 * This is useful to test the revert functionality of a {@link Change}.
-	 */
-	protected void validateAsSetupDesk() {
-		String setupTestName = this.getSetupTestName();
-		this.validateDesk(setupTestName, null);
-	}
-
-	/**
-	 * Validates the {@link DeskModel}.
-	 * 
-	 * @param testName
-	 *            Name of the test.
-	 * @param specific
-	 *            Specific name for the test. May be <code>null</code> for the
-	 *            default {@link DeskModel} for the test.
-	 */
-	private void validateDesk(String testName, String specific) {
-
-		// Obtain the desk
-		DeskModel compareDesk = this.retrieveDesk(testName, specific);
-
-		try {
-			// Ensure the desks are the same
-			assertGraph(compareDesk, this.desk,
-					RemoveConnectionsAction.REMOVE_CONNECTIONS_METHOD_NAME);
-
-		} catch (Exception ex) {
-			// Fail on failure (stops have to throw exception in tests)
-			StringWriter msg = new StringWriter();
-			ex.printStackTrace(new PrintWriter(msg));
-			fail("Failed to validate graph");
-		}
-	}
-
-	/**
-	 * Retrieves the {@link DeskModel} for the test.
-	 * 
-	 * @param testName
-	 *            Name of the test.
-	 * @param specific
-	 *            Specific name for the test. May be <code>null</code> for the
-	 *            default {@link DeskModel} for the test.
-	 * @return {@link DeskModel}.
-	 */
-	private DeskModel retrieveDesk(String testName, String specific) {
-
-		// Move to 'Test' to start of test case name
-		String testCasePath = this.getClass().getSimpleName();
-		testCasePath = this.getClass().getPackage().getName().replace('.', '/')
-				+ "/Test"
-				+ testCasePath.substring(0, (testCasePath.length() - "Test"
-						.length()));
-
-		// Construct the path to the desk
-		String testPath = testCasePath.replace('.', '/') + "/" + testName;
-		String deskPath = testPath + (specific == null ? "" : "/" + specific)
-				+ ".desk.xml";
-
-		try {
-			// Obtain the configuration item to the desk
-			ConfigurationItem item = new ClassLoaderConfigurationContext(this
-					.getClass().getClassLoader())
-					.getConfigurationItem(deskPath);
-			assertNotNull("Can not find desk model configuration: " + deskPath,
-					item);
-
-			// Return the retrieved desk
-			return new DeskRepositoryImpl(new ModelRepositoryImpl())
-					.retrieveDesk(item);
-
-		} catch (Exception ex) {
-			// Fail on failure (stops have to throw exception in tests)
-			StringWriter msg = new StringWriter();
-			ex.printStackTrace(new PrintWriter(msg));
-			fail("Failed to retrieveDesk: " + deskPath + "\n" + msg.toString());
-			return null; // fail will throw
-		}
+	@Override
+	protected String getModelFileExtension() {
+		return ".desk.xml";
 	}
 
 	/**
