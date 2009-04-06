@@ -16,11 +16,11 @@
  */
 package net.officefloor.compile;
 
-import net.officefloor.compile.desk.DeskRepository;
-import net.officefloor.compile.impl.desk.DeskRepositoryImpl;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.DeskRepository;
 import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.impl.desk.DeskRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 

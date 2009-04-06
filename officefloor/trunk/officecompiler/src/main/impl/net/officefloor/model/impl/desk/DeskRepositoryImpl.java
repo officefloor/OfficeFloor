@@ -14,13 +14,13 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.desk;
+package net.officefloor.model.impl.desk;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.desk.DeskRepository;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.DeskRepository;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskEscalationModel;
