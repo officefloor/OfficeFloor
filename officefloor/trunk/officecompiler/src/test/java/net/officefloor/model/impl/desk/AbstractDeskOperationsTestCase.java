@@ -20,8 +20,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.change.Change;
-import net.officefloor.compile.change.Conflict;
 import net.officefloor.compile.impl.work.WorkTypeImpl;
 import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
@@ -38,6 +36,8 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.change.Conflict;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskOperations;
 import net.officefloor.model.impl.desk.DeskOperationsImpl;

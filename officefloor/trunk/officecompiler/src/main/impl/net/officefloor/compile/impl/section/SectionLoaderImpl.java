@@ -21,12 +21,17 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.section.Section;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
+import net.officefloor.compile.spi.section.source.SectionUnknownPropertyError;
 import net.officefloor.model.section.SectionModel;
 
 /**
@@ -162,9 +167,75 @@ public class SectionLoaderImpl implements SectionLoader {
 	public <S extends SectionSource> SectionType loadSectionType(
 			Class<S> sectionSourceClass, PropertyList propertyList,
 			ClassLoader classLoader, CompilerIssues issues) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionLoader.loadSectionType");
+
+		// Instantiate the section source
+		SectionSource sectionSource = CompileUtil.newInstance(
+				sectionSourceClass, SectionSource.class, LocationType.SECTION,
+				this.sectionLocation, null, null, issues);
+		if (sectionSource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Create the section source context
+		SectionSourceContext context = new SectionSourceContextImpl(
+				propertyList, classLoader);
+
+		// Create the section type builder
+		SectionTypeImpl sectionType = new SectionTypeImpl();
+
+		try {
+			// Source the section type
+			sectionSource.sourceSectionType(sectionType, context);
+
+		} catch (SectionUnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
+					+ "' for " + SectionSource.class.getSimpleName() + " "
+					+ sectionSourceClass.getName(), issues);
+			return null; // must have property
+
+		} catch (Throwable ex) {
+			this.addIssue("Failed to source "
+					+ SectionType.class.getSimpleName() + " definition from "
+					+ SectionSource.class.getSimpleName() + " "
+					+ sectionSourceClass.getName(), ex, issues);
+			return null; // must be successful
+		}
+
+		// Ensure all inputs have names
+		SectionInputType[] inputs = sectionType.getInputTypes();
+		for (int i = 0; i < inputs.length; i++) {
+			if (CompileUtil.isBlank(inputs[i].getInputName())) {
+				this.addIssue("Null name for input " + i, issues);
+				return null; // must have names for inputs
+			}
+		}
+
+		// Ensure all outputs have names
+		SectionOutputType[] outputs = sectionType.getOutputTypes();
+		for (int i = 0; i < outputs.length; i++) {
+			if (CompileUtil.isBlank(outputs[i].getOutputName())) {
+				this.addIssue("Null name for output " + i, issues);
+				return null; // must have names for outputs
+			}
+		}
+
+		// Ensure all objects have names and types
+		SectionObjectType[] objects = sectionType.getObjectTypes();
+		for (int i = 0; i < objects.length; i++) {
+			SectionObjectType object = objects[i];
+			if (CompileUtil.isBlank(object.getObjectName())) {
+				this.addIssue("Null name for object " + i, issues);
+				return null; // must have names for objects
+			}
+			if (CompileUtil.isBlank(object.getObjectType())) {
+				this.addIssue("Null type for object " + i + " (name="
+						+ object.getObjectName() + ")", issues);
+				return null; // must have types for objects
+			}
+		}
+
+		// Return the section type
+		return sectionType;
 	}
 
 	/**

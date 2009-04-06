@@ -16,7 +16,7 @@
  */
 package net.officefloor.model.impl.desk;
 
-import net.officefloor.compile.change.Change;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.ExternalFlowModel;
 
 /**

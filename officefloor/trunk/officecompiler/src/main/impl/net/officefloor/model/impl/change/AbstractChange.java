@@ -14,11 +14,11 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.change;
+package net.officefloor.model.impl.change;
 
-import net.officefloor.compile.change.Change;
-import net.officefloor.compile.change.Conflict;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.change.Conflict;
 
 /**
  * Abstract {@link Change}.

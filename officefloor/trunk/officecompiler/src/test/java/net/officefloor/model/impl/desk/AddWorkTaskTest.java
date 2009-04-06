@@ -16,8 +16,8 @@
  */
 package net.officefloor.model.impl.desk;
 
-import net.officefloor.compile.change.Change;
 import net.officefloor.compile.work.TaskType;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
