@@ -126,7 +126,7 @@ public class DeskToSubRoomSynchroniser {
 			if (outFlow == null) {
 				// Not exist therefore create and add
 				outFlow = new SubSectionOutputModel(flow.getExternalFlowName(),
-						Object.class.getName());
+						Object.class.getName(), false);
 				subRoom.addSubSectionOutput(outFlow);
 			}
 

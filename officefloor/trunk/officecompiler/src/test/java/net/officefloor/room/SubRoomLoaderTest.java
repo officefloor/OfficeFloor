@@ -46,7 +46,7 @@ public class SubRoomLoaderTest extends OfficeFrameTestCase {
 
 		// Validate the Sub Room
 		assertNull("Room should not be specified", subRoom.getSectionLocation());
-		assertNotNull("Desk must be specified", subRoom.getDeskLocation());
+		assertNotNull("Desk must be specified", subRoom.getSectionSourceClassName());
 
 		// Validate synchronised
 		assertTrue("Must have managed objects", subRoom.getSubSectionObjects()
@@ -71,7 +71,7 @@ public class SubRoomLoaderTest extends OfficeFrameTestCase {
 
 		// Validate the Sub Room
 		assertNotNull("Room must be specified", subRoom.getSectionLocation());
-		assertNull("Desk should not be specified", subRoom.getDeskLocation());
+		assertNull("Desk should not be specified", subRoom.getSectionSourceClassName());
 
 		// Validate synchronised
 		assertTrue("Must have managed objects", subRoom.getSubSectionObjects()

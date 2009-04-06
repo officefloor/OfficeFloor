@@ -87,8 +87,9 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 
 		// Validate output flow items
 		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
-				new SubSectionOutputModel("OF-ONE", Object.class.getName()),
-				new SubSectionOutputModel("OF-TWO", Object.class.getName()));
+				new SubSectionOutputModel("OF-ONE", Object.class.getName(),
+						false), new SubSectionOutputModel("OF-TWO",
+						Object.class.getName(), false));
 
 		// Remove one of each from desk
 		desk.removeExternalManagedObject(desk.getExternalManagedObjects()
@@ -112,7 +113,7 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 		// Validate output flow items
 		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
 				new SubSectionOutputModel("OF-ONE", Object.class.getName(),
-						null, null));
+						false, null, null));
 
 		// Add one of each to desk
 		desk.addExternalManagedObject(new ExternalManagedObjectModel(
@@ -143,7 +144,8 @@ public class DeskToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 
 		// Validate output flow items
 		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
-				new SubSectionOutputModel("OF-ONE", Object.class.getName()),
-				new SubSectionOutputModel("OF-THREE", Object.class.getName()));
+				new SubSectionOutputModel("OF-ONE", Object.class.getName(),
+						false), new SubSectionOutputModel("OF-THREE",
+						Object.class.getName(), false));
 	}
 }
