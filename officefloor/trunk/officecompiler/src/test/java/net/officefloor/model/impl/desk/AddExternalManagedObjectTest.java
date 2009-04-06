@@ -36,7 +36,7 @@ public class AddExternalManagedObjectTest extends
 		this.assertChange(change, null, "Add external managed object OBJECT",
 				true);
 		change.apply();
-		assertEquals("Incorrect target", this.desk.getExternalManagedObjects()
+		assertEquals("Incorrect target", this.model.getExternalManagedObjects()
 				.get(0), change.getTarget());
 	}
 
@@ -57,13 +57,13 @@ public class AddExternalManagedObjectTest extends
 		changeB.apply();
 		changeA.apply();
 		changeC.apply();
-		this.validateDesk();
+		this.validateModel();
 
 		// Revert
 		changeC.revert();
 		changeA.revert();
 		changeB.revert();
-		this.validateAsSetupDesk();
+		this.validateAsSetupModel();
 	}
 
 }

@@ -34,7 +34,7 @@ public class AddExternalFlowTest extends AbstractDeskOperationsTestCase {
 				"FLOW", String.class.getName());
 		this.assertChange(change, null, "Add external flow FLOW", true);
 		change.apply();
-		assertEquals("Incorrect target", this.desk.getExternalFlows().get(0),
+		assertEquals("Incorrect target", this.model.getExternalFlows().get(0),
 				change.getTarget());
 	}
 
@@ -55,13 +55,13 @@ public class AddExternalFlowTest extends AbstractDeskOperationsTestCase {
 		changeB.apply();
 		changeA.apply();
 		changeC.apply();
-		this.validateDesk();
+		this.validateModel();
 
 		// Revert
 		changeC.revert();
 		changeA.revert();
 		changeB.revert();
-		this.validateAsSetupDesk();
+		this.validateAsSetupModel();
 	}
 
 }

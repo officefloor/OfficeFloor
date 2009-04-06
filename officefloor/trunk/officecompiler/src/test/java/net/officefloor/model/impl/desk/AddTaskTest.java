@@ -50,7 +50,7 @@ public class AddTaskTest extends AbstractDeskOperationsTestCase {
 		super.setUp();
 
 		// Obtain the work task model
-		this.workTask = this.desk.getWorks().get(0).getWorkTasks().get(0);
+		this.workTask = this.model.getWorks().get(0).getWorkTasks().get(0);
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class AddTaskTest extends AbstractDeskOperationsTestCase {
 				this.workTask, task);
 		this.assertChange(change, null, "Add task TASK", true);
 		change.apply();
-		assertEquals("Ensure correct target", this.desk.getTasks().get(0),
+		assertEquals("Ensure correct target", this.model.getTasks().get(0),
 				change.getTarget());
 	}
 
@@ -196,12 +196,12 @@ public class AddTaskTest extends AbstractDeskOperationsTestCase {
 		changeB.apply();
 		changeA.apply();
 		changeC.apply();
-		this.validateDesk();
+		this.validateModel();
 
 		// Revert
 		changeC.revert();
 		changeA.revert();
 		changeB.revert();
-		this.validateAsSetupDesk();
+		this.validateAsSetupModel();
 	}
 }

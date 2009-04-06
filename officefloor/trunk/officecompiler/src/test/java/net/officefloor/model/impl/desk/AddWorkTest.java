@@ -63,7 +63,7 @@ public class AddWorkTest extends AbstractDeskOperationsTestCase {
 								"name.two", "value.two"), work);
 		this.assertChange(change, null, "Add work WORK", true);
 		change.apply();
-		assertEquals("Ensure correct target", this.desk.getWorks().get(0),
+		assertEquals("Ensure correct target", this.model.getWorks().get(0),
 				change.getTarget());
 	}
 
@@ -181,13 +181,13 @@ public class AddWorkTest extends AbstractDeskOperationsTestCase {
 		changeB.apply();
 		changeA.apply();
 		changeC.apply();
-		this.validateDesk();
+		this.validateModel();
 
 		// Ensure can revert changes (undo)
 		changeC.revert();
 		changeA.revert();
 		changeB.revert();
-		this.validateAsSetupDesk();
+		this.validateAsSetupModel();
 	}
 
 }

@@ -48,8 +48,8 @@ public class SetTaskAsPublicTest extends AbstractDeskOperationsTestCase {
 		super.setUp();
 
 		// Obtain the public and private tasks
-		this.publicTask = this.desk.getTasks().get(0);
-		this.privateTask = this.desk.getTasks().get(1);
+		this.publicTask = this.model.getTasks().get(0);
+		this.privateTask = this.model.getTasks().get(1);
 	}
 
 	/**

@@ -52,7 +52,7 @@ public class RemoveExternalFlowTest extends AbstractDeskOperationsTestCase {
 	 * {@link DeskModel}.
 	 */
 	public void testRemoveExternalFlowWhenOtherExternalFlows() {
-		ExternalFlowModel extFlow = this.desk.getExternalFlows().get(1);
+		ExternalFlowModel extFlow = this.model.getExternalFlows().get(1);
 		Change<ExternalFlowModel> change = this.operations
 				.removeExternalFlow(extFlow);
 		this.assertChange(change, extFlow, "Remove external flow FLOW_B", true);
@@ -63,7 +63,7 @@ public class RemoveExternalFlowTest extends AbstractDeskOperationsTestCase {
 	 * {@link DeskModel}.
 	 */
 	public void testRemoveExternalFlowWithConnections() {
-		ExternalFlowModel extFlow = this.desk.getExternalFlows().get(0);
+		ExternalFlowModel extFlow = this.model.getExternalFlows().get(0);
 		Change<ExternalFlowModel> change = this.operations
 				.removeExternalFlow(extFlow);
 		this.assertChange(change, extFlow, "Remove external flow FLOW", true);
