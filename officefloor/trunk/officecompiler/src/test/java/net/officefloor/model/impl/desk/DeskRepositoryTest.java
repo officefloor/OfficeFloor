@@ -14,17 +14,17 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.desk;
+package net.officefloor.model.impl.desk;
 
 import java.sql.Connection;
 
 import org.easymock.AbstractMatcher;
 
-import net.officefloor.compile.desk.DeskOperations;
-import net.officefloor.compile.desk.DeskRepository;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.DeskOperations;
+import net.officefloor.model.desk.DeskRepository;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskEscalationModel;
@@ -41,6 +41,7 @@ import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
+import net.officefloor.model.impl.desk.DeskRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 

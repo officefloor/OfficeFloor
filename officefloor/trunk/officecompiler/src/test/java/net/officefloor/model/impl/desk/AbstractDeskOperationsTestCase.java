@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.desk;
+package net.officefloor.model.impl.desk;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -22,7 +22,6 @@ import java.io.StringWriter;
 import junit.framework.TestCase;
 import net.officefloor.compile.change.Change;
 import net.officefloor.compile.change.Conflict;
-import net.officefloor.compile.desk.DeskOperations;
 import net.officefloor.compile.impl.work.WorkTypeImpl;
 import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
@@ -40,6 +39,9 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.DeskOperations;
+import net.officefloor.model.impl.desk.DeskOperationsImpl;
+import net.officefloor.model.impl.desk.DeskRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;

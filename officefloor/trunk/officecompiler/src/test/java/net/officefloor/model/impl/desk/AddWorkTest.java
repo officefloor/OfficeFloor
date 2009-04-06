@@ -14,16 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.desk;
+package net.officefloor.model.impl.desk;
 
 import java.sql.Connection;
 
 import net.officefloor.compile.change.Change;
-import net.officefloor.compile.desk.DeskOperations;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.model.desk.DeskOperations;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 

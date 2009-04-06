@@ -19,10 +19,10 @@ package net.officefloor.model.impl.repository;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.desk.DeskOperations;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.DeskOperations;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
