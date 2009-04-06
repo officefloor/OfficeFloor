@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.impl.section;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -33,6 +34,8 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.spi.section.source.SectionTypeBuilder;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Tests loading the {@link SectionType} from the {@link SectionSource}.
@@ -45,6 +48,13 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	 * Location of the {@link Section}.
 	 */
 	private final String SECTION_LOCATION = "SECTION";
+
+	/**
+	 * {@link ConfigurationContext}.
+	 */
+	private final ConfigurationContext configurationContext = this
+			.createMock(ConfigurationContext.class);
+
 	/**
 	 * {@link CompilerIssues}.
 	 */
@@ -76,6 +86,69 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to obtain specification
 		MockSectionSource.instantiateFailure = failure;
 		this.loadSectionType(false, null);
+	}
+
+	/**
+	 * Ensure obtain the correct {@link Section} location.
+	 */
+	public void testSectionLocation() {
+		this.loadSectionType(true, new Loader() {
+			@Override
+			public void sourceSection(SectionTypeBuilder section,
+					SectionSourceContext context) throws Exception {
+				assertEquals("Incorrect section location", SECTION_LOCATION,
+						context.getSectionLocation());
+			}
+		});
+	}
+
+	/**
+	 * Ensures issue if fails to obtain the {@link ConfigurationItem}.
+	 */
+	public void testFailGetConfigurationItem() throws Exception {
+
+		final String location = "LOCATION";
+		final IOException failure = new IOException(
+				"Configuration Item failure");
+
+		// Record failing to obtain the configuration item
+		this.control(this.configurationContext).expectAndThrow(
+				this.configurationContext.getConfigurationItem(location),
+				failure);
+		this.record_issue("Failure obtaining configuration 'LOCATION'",
+				failure);
+
+		// Attempt to obtain the configuration item
+		this.loadSectionType(false, new Loader() {
+			@Override
+			public void sourceSection(SectionTypeBuilder section,
+					SectionSourceContext context) throws Exception {
+				context.getConfiguration(location);
+			}
+		});
+	}
+
+	/**
+	 * Ensure able to obtain a {@link ConfigurationItem}.
+	 */
+	public void testGetConfigurationItem() throws Exception {
+
+		final String location = "LOCATION";
+		final ConfigurationItem item = this.createMock(ConfigurationItem.class);
+
+		// Record obtaining the configuration item
+		this.recordReturn(this.configurationContext, this.configurationContext
+				.getConfigurationItem(location), item);
+
+		// Obtain the configuration item
+		this.loadSectionType(true, new Loader() {
+			@Override
+			public void sourceSection(SectionTypeBuilder section,
+					SectionSourceContext context) throws Exception {
+				assertEquals("Incorrect configuation item", item, context
+						.getConfiguration(location));
+			}
+		});
 	}
 
 	/**
@@ -473,8 +546,9 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		SectionLoader sectionLoader = new SectionLoaderImpl(SECTION_LOCATION);
 		MockSectionSource.loader = loader;
 		SectionType sectionType = sectionLoader.loadSectionType(
-				MockSectionSource.class, propertyList,
-				LoadSectionTypeTest.class.getClassLoader(), this.issues);
+				MockSectionSource.class, this.configurationContext,
+				propertyList, LoadSectionTypeTest.class.getClassLoader(),
+				this.issues);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

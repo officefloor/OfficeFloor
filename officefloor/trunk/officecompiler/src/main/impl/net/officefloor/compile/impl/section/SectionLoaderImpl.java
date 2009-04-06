@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.spi.section.source.SectionUnknownPropertyError;
+import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.section.SectionModel;
 
 /**
@@ -165,8 +166,10 @@ public class SectionLoaderImpl implements SectionLoader {
 
 	@Override
 	public <S extends SectionSource> SectionType loadSectionType(
-			Class<S> sectionSourceClass, PropertyList propertyList,
-			ClassLoader classLoader, CompilerIssues issues) {
+			Class<S> sectionSourceClass,
+			ConfigurationContext configurationContext,
+			PropertyList propertyList, ClassLoader classLoader,
+			CompilerIssues issues) {
 
 		// Instantiate the section source
 		SectionSource sectionSource = CompileUtil.newInstance(
@@ -178,7 +181,8 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(
-				propertyList, classLoader);
+				this.sectionLocation, configurationContext, propertyList,
+				classLoader);
 
 		// Create the section type builder
 		SectionTypeImpl sectionType = new SectionTypeImpl();
@@ -192,6 +196,11 @@ public class SectionLoaderImpl implements SectionLoader {
 					+ "' for " + SectionSource.class.getSimpleName() + " "
 					+ sectionSourceClass.getName(), issues);
 			return null; // must have property
+
+		} catch (ConfigurationContextPropagateError ex) {
+			this.addIssue("Failure obtaining configuration '" + ex.getLocation()
+					+ "'", ex.getCause(), issues);
+			return null; // must not fail in getting configurations
 
 		} catch (Throwable ex) {
 			this.addIssue("Failed to source "

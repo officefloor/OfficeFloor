@@ -23,6 +23,11 @@ import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.spi.section.source.SectionTypeBuilder;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.ExternalFlowModel;
+import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link SectionSource} for a {@link DeskModel}.
@@ -42,7 +47,30 @@ public class DeskModelSectionSource implements SectionSource {
 	 */
 	public static void sourceSectionType(DeskModel desk,
 			SectionTypeBuilder sectionTypeBuilder) {
-		// TODO implement
+
+		// Add the public tasks as inputs
+		for (TaskModel task : desk.getTasks()) {
+			if (task.getIsPublic()) {
+				// TODO determine parameter type from work task
+				String parameterType = null;
+				sectionTypeBuilder.addInput(task.getTaskName(), parameterType);
+			}
+		}
+
+		// Add the external flows as outputs
+		for (ExternalFlowModel extFlow : desk.getExternalFlows()) {
+			// TODO determine if escalation only
+			boolean isEscalationOnly = false;
+			sectionTypeBuilder.addOutput(extFlow.getExternalFlowName(), extFlow
+					.getArgumentType(), isEscalationOnly);
+		}
+
+		// Add the external managed objects as objects
+		for (ExternalManagedObjectModel extMo : desk
+				.getExternalManagedObjects()) {
+			sectionTypeBuilder.addObject(extMo.getExternalManagedObjectName(),
+					extMo.getObjectType());
+		}
 	}
 
 	/*
@@ -59,9 +87,17 @@ public class DeskModelSectionSource implements SectionSource {
 	@Override
 	public void sourceSectionType(SectionTypeBuilder sectionTypeBuilder,
 			SectionSourceContext context) throws Exception {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionSource.sourceSectionType");
+
+		// Obtain the configuration to the desk
+		ConfigurationItem configuration = context.getConfiguration(context
+				.getSectionLocation());
+
+		// Retrieve the desk model
+		DeskModel desk = new DeskRepositoryImpl(new ModelRepositoryImpl())
+				.retrieveDesk(configuration);
+
+		// Source the section type for the desk
+		sourceSectionType(desk, sectionTypeBuilder);
 	}
 
 	@Override

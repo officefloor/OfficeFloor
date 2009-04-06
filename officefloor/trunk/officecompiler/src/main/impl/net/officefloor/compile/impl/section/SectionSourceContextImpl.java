@@ -23,6 +23,8 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionUnknownPropertyError;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link SectionSourceContext} implementation.
@@ -30,6 +32,16 @@ import net.officefloor.compile.spi.section.source.SectionUnknownPropertyError;
  * @author Daniel
  */
 public class SectionSourceContextImpl implements SectionSourceContext {
+
+	/**
+	 * Location of the {@link section}.
+	 */
+	private final String sectionLocation;
+
+	/**
+	 * {@link ConfigurationContext}.
+	 */
+	private final ConfigurationContext configurationContext;
 
 	/**
 	 * {@link PropertyList}.
@@ -44,20 +56,42 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 	/**
 	 * Initiate.
 	 * 
+	 * @param sectionLocation
+	 *            Location of the {@link section}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 */
-	public SectionSourceContextImpl(PropertyList propertyList,
-			ClassLoader classLoader) {
+	public SectionSourceContextImpl(String sectionLocation,
+			ConfigurationContext configurationContext,
+			PropertyList propertyList, ClassLoader classLoader) {
+		this.sectionLocation = sectionLocation;
+		this.configurationContext = configurationContext;
 		this.propertyList = propertyList;
 		this.classLoader = classLoader;
 	}
 
 	/*
-	 * ==================== SectionLoaderContext ================================
+	 * ================= SectionLoaderContext ================================
 	 */
+
+	@Override
+	public String getSectionLocation() {
+		return this.sectionLocation;
+	}
+
+	@Override
+	public ConfigurationItem getConfiguration(String location) {
+		try {
+			return this.configurationContext.getConfigurationItem(location);
+		} catch (Throwable ex) {
+			// Propagate failure to section loader
+			throw new ConfigurationContextPropagateError(location, ex);
+		}
+	}
 
 	@Override
 	public String[] getPropertyNames() {

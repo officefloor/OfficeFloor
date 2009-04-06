@@ -21,6 +21,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
+import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Loads the {@link SectionType} from the {@link SectionSource}.
@@ -52,6 +53,8 @@ public interface SectionLoader {
 	 * 
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link SectionType}.
@@ -65,7 +68,9 @@ public interface SectionLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<S extends SectionSource> SectionType loadSectionType(
-			Class<S> sectionSourceClass, PropertyList propertyList,
-			ClassLoader classLoader, CompilerIssues issues);
+			Class<S> sectionSourceClass,
+			ConfigurationContext configurationContext,
+			PropertyList propertyList, ClassLoader classLoader,
+			CompilerIssues issues);
 
 }
