@@ -52,17 +52,17 @@ public class RoomToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 
 		// Add sub rooms
 		SubSectionModel subRoomOne = new SubSectionModel("SR-ONE", "desk",
-				null, null, null, null);
+				null, null, null, null, null);
 		subRoomOne.addSubSectionInput(new SubSectionInputModel("IF-ONE",
-				Object.class.getName(), true, null));
+				Object.class.getName(), true, null, null));
 		room.addSubSection(subRoomOne);
 		SubSectionModel subRoomTwo = new SubSectionModel("SR-TWO", "desk",
-				null, null, null, null);
+				null, null, null, null, null);
 		subRoomTwo.addSubSectionInput(new SubSectionInputModel("IF-TWO",
 				Object.class.getName(), false, null));
 		room.addSubSection(subRoomTwo);
 		SubSectionModel subRoomThree = new SubSectionModel("SR-THREE", "desk",
-				null, null, null, null);
+				null, null, null, null, null);
 		subRoomThree.addSubSectionInput(new SubSectionInputModel("IF-THREE",
 				Object.class.getName(), true, null));
 		room.addSubSection(subRoomThree);
@@ -88,8 +88,9 @@ public class RoomToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 
 		// Validate output flow items
 		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
-				new SubSectionOutputModel("OF-ONE", Object.class.getName()),
-				new SubSectionOutputModel("OF-TWO", Object.class.getName()));
+				new SubSectionOutputModel("OF-ONE", Object.class.getName(),
+						false), new SubSectionOutputModel("OF-TWO",
+						Object.class.getName(), false));
 
 		// Remove one of each from room
 		room.removeExternalManagedObject(room.getExternalManagedObjects()
@@ -112,14 +113,15 @@ public class RoomToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 
 		// Validate output flow items
 		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
-				new SubSectionOutputModel("OF-ONE", Object.class.getName()));
+				new SubSectionOutputModel("OF-ONE", Object.class.getName(),
+						false));
 
 		// Add one of each to room
 		room.addExternalManagedObject(new ExternalManagedObjectModel(
 				"MO-THREE", "java.lang.String", null));
 		room.addExternalFlow(new ExternalFlowModel("OF-THREE", null));
 		SubSectionModel subRoomFour = new SubSectionModel("SR-FOUR", "desk",
-				null, null, null, null);
+				null, null, null, null, null);
 		subRoomFour.addSubSectionInput(new SubSectionInputModel("IF-FOUR",
 				Object.class.getName(), true, null));
 		room.addSubSection(subRoomFour);
@@ -142,7 +144,8 @@ public class RoomToSubRoomSynchroniserTest extends OfficeFrameTestCase {
 
 		// Validate output flow items
 		assertList(new String[] { "getName" }, subRoom.getSubSectionOutputs(),
-				new SubSectionOutputModel("OF-ONE", Object.class.getName()),
-				new SubSectionOutputModel("OF-THREE", Object.class.getName()));
+				new SubSectionOutputModel("OF-ONE", Object.class.getName(),
+						false), new SubSectionOutputModel("OF-THREE",
+						Object.class.getName(), false));
 	}
 }

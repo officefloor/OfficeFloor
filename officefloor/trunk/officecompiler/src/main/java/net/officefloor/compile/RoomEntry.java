@@ -95,7 +95,7 @@ public class RoomEntry extends AbstractEntry<Object, SectionModel> {
 			// Check if sub room
 			String subRoomName = subRoom.getSubSectionName();
 			String subRoomId = subRoom.getSectionLocation();
-			String deskId = subRoom.getDeskLocation();
+			String deskId = subRoom.getSectionSourceClassName();
 			if (subRoomId != null) {
 				// Sub Room
 				RoomEntry subRoomEntry = RoomEntry.loadRoom(subRoomName,
@@ -385,7 +385,7 @@ public class RoomEntry extends AbstractEntry<Object, SectionModel> {
 				if (deskEntry == null) {
 					throw new Exception("Unknown desk '"
 							+ subRoom.getSubSectionName() + "' ["
-							+ subRoom.getDeskLocation() + "] on room "
+							+ subRoom.getSectionSourceClassName() + "] on room "
 							+ this.getId());
 				}
 				desks.add(deskEntry);

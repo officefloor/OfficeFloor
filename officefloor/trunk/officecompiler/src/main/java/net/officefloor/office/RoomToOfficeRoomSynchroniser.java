@@ -72,7 +72,7 @@ public class RoomToOfficeRoomSynchroniser {
 			String subRoomName = subRoom.getSubSectionName();
 
 			// Determine if a desk
-			String subDeskId = subRoom.getDeskLocation();
+			String subDeskId = subRoom.getSectionSourceClassName();
 			if (subDeskId != null) {
 				if (existingDesks.containsKey(subDeskId)) {
 					// Remove from existing (not to remove later)

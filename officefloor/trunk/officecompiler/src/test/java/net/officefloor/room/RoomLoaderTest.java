@@ -81,9 +81,10 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		assertList(
 				new String[] { "getId", "getDesk", "getRoom", "getX", "getY" },
 				room.getSubSections(), new SubSectionModel("1",
-						"TestDesk.desk.xml", null, null, null, null, 100, 20),
+						"TestDesk.desk.xml", null, null, null, null, null, 100,
+						20),
 				new SubSectionModel("2", null, "TestSubRoom.room.xml", null,
-						null, null, 200, 30));
+						null, null, null, 200, 30));
 
 		// ===================================
 		// Validate the sub room one
@@ -99,7 +100,7 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		// Validate output flows
 		assertList(new String[] { "getName" }, subRoomOne
 				.getSubSectionOutputs(), new SubSectionOutputModel("output",
-				Object.class.getName()));
+				Object.class.getName(), false));
 		SubSectionOutputToSubSectionInputModel outputToInput = subRoomOne
 				.getSubSectionOutputs().get(0).getSubSectionInput();
 		assertProperties(new SubSectionOutputToSubSectionInputModel("2",
@@ -133,7 +134,7 @@ public class RoomLoaderTest extends OfficeFrameTestCase {
 		// Validate output flows
 		assertList(new String[] { "getName" }, subRoomTwo
 				.getSubSectionOutputs(), new SubSectionOutputModel("output",
-				Object.class.getName()));
+				Object.class.getName(), false));
 		SubSectionOutputToExternalFlowModel outputToExternalFlow = subRoomTwo
 				.getSubSectionOutputs().get(0).getExternalFlow();
 		assertProperties(new SubSectionOutputToExternalFlowModel("flow", null,

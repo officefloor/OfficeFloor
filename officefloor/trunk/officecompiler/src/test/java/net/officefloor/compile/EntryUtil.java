@@ -96,7 +96,7 @@ public class EntryUtil {
 			// Create the sub room for the desk
 			SubSectionModel subRoom = new SubSectionModel();
 			subRoom.setSubSectionName(deskName);
-			subRoom.setDeskLocation(deskId);
+			subRoom.setSectionSourceClassName(deskId);
 
 			// Link into parent room
 			parentRoomEntry.getModel().addSubSection(subRoom);

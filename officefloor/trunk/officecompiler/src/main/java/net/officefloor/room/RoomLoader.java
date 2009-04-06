@@ -256,8 +256,8 @@ public class RoomLoader {
 			throws Exception {
 
 		// Obtain the configuration
-		String configurationLocation = (subRoom.getDeskLocation() == null ? subRoom
-				.getSectionLocation() : subRoom.getDeskLocation());
+		String configurationLocation = (subRoom.getSectionSourceClassName() == null ? subRoom
+				.getSectionLocation() : subRoom.getSectionSourceClassName());
 		ConfigurationItem configurationItem = context
 				.getConfigurationItem(configurationLocation);
 
@@ -298,7 +298,7 @@ public class RoomLoader {
 			// Synchronise the desk onto the model
 			DeskModel desk = (DeskModel) model;
 			DeskToSubRoomSynchroniser.synchroniseDeskOntoSubRoom(desk, subRoom);
-			subRoom.setDeskLocation(configurationItem.getLocation());
+			subRoom.setSectionSourceClassName(configurationItem.getLocation());
 
 		} else if (model instanceof SectionModel) {
 			// Synchronise the room onto the model
