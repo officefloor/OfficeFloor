@@ -24,9 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.officefloor.compile.change.Change;
-import net.officefloor.compile.impl.change.AbstractChange;
-import net.officefloor.compile.impl.change.NoChange;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.work.TaskEscalationType;
@@ -36,6 +33,7 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskOperations;
 import net.officefloor.model.desk.ExternalFlowModel;
@@ -55,6 +53,8 @@ import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.impl.change.AbstractChange;
+import net.officefloor.model.impl.change.NoChange;
 
 /**
  * {@link DeskOperations} implementation.

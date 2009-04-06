@@ -14,20 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.change;
+package net.officefloor.model.impl.change;
+
+import net.officefloor.model.change.Conflict;
 
 /**
- * Obtains a {@link Conflict} preventing a {@link Change} from being applied.
+ * {@link Conflict} implementation.
  * 
  * @author Daniel
  */
-public interface Conflict {
+public class ConflictImpl implements Conflict {
 
 	/**
-	 * Obtains a description of the {@link Conflict}.
-	 * 
-	 * @return Description of the {@link Conflict}.
+	 * Description of the {@link Conflict}.
 	 */
-	String getConflictDescription();
+	private final String conflictDescription;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param conflictDescription
+	 *            Description of the {@link Conflict}.
+	 */
+	public ConflictImpl(String conflictDescription) {
+		this.conflictDescription = conflictDescription;
+	}
+
+	/*
+	 * ====================== Conflict ==================================
+	 */
+
+	@Override
+	public String getConflictDescription() {
+		return this.conflictDescription;
+	}
 
 }

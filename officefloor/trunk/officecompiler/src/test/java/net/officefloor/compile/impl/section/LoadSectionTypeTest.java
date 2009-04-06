@@ -175,7 +175,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullInputName() {
 
 		// Record null input name
-		this.record_issue("Null input name");
+		this.record_issue("Null name for input 0");
 
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
@@ -237,7 +237,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullOutputName() {
 
 		// Record null output name
-		this.record_issue("Null output name");
+		this.record_issue("Null name for output 0");
 
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
@@ -303,7 +303,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullObjectName() {
 
 		// Record null object name
-		this.record_issue("Null object name");
+		this.record_issue("Null name for object 0");
 
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
@@ -321,7 +321,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testNullObjectType() {
 
 		// Record null object type
-		this.record_issue("Null object type");
+		this.record_issue("Null type for object 0 (name=OBJECT)");
 
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
@@ -342,7 +342,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionTypeBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addInput("OBJECT", Double.class.getName());
+				section.addObject("OBJECT", Double.class.getName());
 			}
 		});
 

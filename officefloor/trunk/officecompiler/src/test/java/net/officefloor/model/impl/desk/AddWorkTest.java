@@ -18,11 +18,11 @@ package net.officefloor.model.impl.desk;
 
 import java.sql.Connection;
 
-import net.officefloor.compile.change.Change;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskOperations;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;

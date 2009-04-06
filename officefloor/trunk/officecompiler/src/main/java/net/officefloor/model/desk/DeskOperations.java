@@ -16,7 +16,6 @@
  */
 package net.officefloor.model.desk;
 
-import net.officefloor.compile.change.Change;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.TaskType;
@@ -25,6 +24,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -56,8 +56,7 @@ public interface DeskOperations {
 	 * Value for {@link FlowInstigationStrategyEnum#ASYNCHRONOUS} on the
 	 * {@link DeskModel} {@link ConnectionModel} instances.
 	 */
-	final String ASYNCHRONOUS_LINK = FlowInstigationStrategyEnum.ASYNCHRONOUS
-			.name();
+	String ASYNCHRONOUS_LINK = FlowInstigationStrategyEnum.ASYNCHRONOUS.name();
 
 	/**
 	 * Adds a {@link WorkModel} to the {@link DeskModel}.
