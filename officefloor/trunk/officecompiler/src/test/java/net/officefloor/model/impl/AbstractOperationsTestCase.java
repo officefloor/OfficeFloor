@@ -203,6 +203,27 @@ public abstract class AbstractOperationsTestCase<M extends Model, O> extends
 	}
 
 	/**
+	 * Assets all the {@link Change} instances result in a correct change.
+	 * 
+	 * @param changes
+	 *            {@link Change} instances to verify.
+	 */
+	protected void assertChanges(Change<?>... changes) {
+
+		// Apply the changes and verify the changes
+		for (int i = 0; i < changes.length; i++) {
+			changes[i].apply();
+		}
+		this.validateModel();
+
+		// Revert the changes and verify reverted
+		for (int i = (changes.length - 1); i >= 0; i--) {
+			changes[i].revert();
+		}
+		this.validateAsSetupModel();
+	}
+
+	/**
 	 * Validates the {@link Model} against the default {@link Model} file for
 	 * the test.
 	 */
