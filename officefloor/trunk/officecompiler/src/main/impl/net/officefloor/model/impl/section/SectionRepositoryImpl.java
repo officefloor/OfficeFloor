@@ -16,10 +16,23 @@
  */
 package net.officefloor.model.impl.section;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionRepository;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
  * {@link SectionRepository} implementation.
@@ -55,11 +68,83 @@ public class SectionRepositoryImpl implements SectionRepository {
 		SectionModel section = this.modelRepository.retrieve(
 				new SectionModel(), configuration);
 
-		// TODO connect output -> input
+		// Create the map of inputs
+		DoubleKeyMap<String, String, SubSectionInputModel> inputs = new DoubleKeyMap<String, String, SubSectionInputModel>();
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionInputModel input : subSection.getSubSectionInputs()) {
+				inputs.put(subSection.getSubSectionName(), input
+						.getSubSectionInputName(), input);
+			}
+		}
 
-		// TODO connect output -> external flow
+		// Connect the outputs to the inputs
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionOutputModel output : subSection
+					.getSubSectionOutputs()) {
+				SubSectionOutputToSubSectionInputModel conn = output
+						.getSubSectionInput();
+				if (conn != null) {
+					SubSectionInputModel input = inputs
+							.get(conn.getSubSectionName(), conn
+									.getSubSectionInputName());
+					if (input != null) {
+						conn.setSubSectionOutput(output);
+						conn.setSubSectionInput(input);
+						conn.connect();
+					}
+				}
+			}
+		}
 
-		// TODO connect object -> external managed object
+		// Create the map of external flows
+		Map<String, ExternalFlowModel> externalFlows = new HashMap<String, ExternalFlowModel>();
+		for (ExternalFlowModel externalFlow : section.getExternalFlows()) {
+			externalFlows.put(externalFlow.getExternalFlowName(), externalFlow);
+		}
+
+		// Connect the outputs to the inputs
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionOutputModel output : subSection
+					.getSubSectionOutputs()) {
+				SubSectionOutputToExternalFlowModel conn = output
+						.getExternalFlow();
+				if (conn != null) {
+					ExternalFlowModel externalFlow = externalFlows.get(conn
+							.getExternalFlowName());
+					if (externalFlow != null) {
+						conn.setSubSectionOutput(output);
+						conn.setExternalFlow(externalFlow);
+						conn.connect();
+					}
+				}
+			}
+		}
+
+		// Create the map of external managed objects
+		Map<String, ExternalManagedObjectModel> externalMos = new HashMap<String, ExternalManagedObjectModel>();
+		for (ExternalManagedObjectModel externalMo : section
+				.getExternalManagedObjects()) {
+			externalMos.put(externalMo.getExternalManagedObjectName(),
+					externalMo);
+		}
+
+		// Connect the objects to external managed objects
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionObjectModel object : subSection
+					.getSubSectionObjects()) {
+				SubSectionObjectToExternalManagedObjectModel conn = object
+						.getExternalManagedObject();
+				if (conn != null) {
+					ExternalManagedObjectModel externalMo = externalMos
+							.get(conn.getExternalManagedObjectName());
+					if (externalMo != null) {
+						conn.setSubSectionObject(object);
+						conn.setExternalManagedObject(externalMo);
+						conn.connect();
+					}
+				}
+			}
+		}
 
 		// Return the section
 		return section;
@@ -69,11 +154,34 @@ public class SectionRepositoryImpl implements SectionRepository {
 	public void storeSection(SectionModel section,
 			ConfigurationItem configuration) throws Exception {
 
-		// TODO store output -> input
+		// Specify output to input
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionInputModel input : subSection.getSubSectionInputs()) {
+				for (SubSectionOutputToSubSectionInputModel conn : input
+						.getSubSectionOutputs()) {
+					conn.setSubSectionName(subSection.getSubSectionName());
+					conn.setSubSectionInputName(input.getSubSectionInputName());
+				}
+			}
+		}
 
-		// TODO store output -> external flow
+		// Specify output to external flow
+		for (ExternalFlowModel extFlow : section.getExternalFlows()) {
+			for (SubSectionOutputToExternalFlowModel conn : extFlow
+					.getSubSectionOutputs()) {
+				conn.setExternalFlowName(extFlow.getExternalFlowName());
+			}
+		}
 
-		// TODO store object -> external managed object
+		// Specify object to external managed object
+		for (ExternalManagedObjectModel extMo : section
+				.getExternalManagedObjects()) {
+			for (SubSectionObjectToExternalManagedObjectModel conn : extMo
+					.getSubSectionObjects()) {
+				conn.setExternalManagedObjectName(extMo
+						.getExternalManagedObjectName());
+			}
+		}
 
 		// Store the section into the configuration
 		this.modelRepository.store(section, configuration);

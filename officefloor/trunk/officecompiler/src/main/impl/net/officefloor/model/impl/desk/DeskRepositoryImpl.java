@@ -19,6 +19,7 @@ package net.officefloor.model.impl.desk;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskRepository;
 import net.officefloor.model.desk.ExternalFlowModel;
@@ -40,7 +41,6 @@ import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
-import net.officefloor.util.DoubleKeyMap;
 
 /**
  * {@link DeskRepository} implementation.

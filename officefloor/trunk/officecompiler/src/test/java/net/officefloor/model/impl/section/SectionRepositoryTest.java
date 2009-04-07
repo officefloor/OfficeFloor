@@ -193,6 +193,7 @@ public class SectionRepositoryTest extends OfficeFrameTestCase {
 		SubSectionObjectToExternalManagedObjectModel objectToExtMo = new SubSectionObjectToExternalManagedObjectModel();
 		objectToExtMo.setSubSectionObject(object);
 		objectToExtMo.setExternalManagedObject(extMo);
+		objectToExtMo.connect();
 
 		// Record storing the section
 		this.modelRepository.store(section, this.configurationItem);

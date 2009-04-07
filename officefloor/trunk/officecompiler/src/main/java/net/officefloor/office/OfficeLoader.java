@@ -19,6 +19,7 @@ package net.officefloor.office;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.DeskRepository;
 import net.officefloor.model.impl.desk.DeskRepositoryImpl;
@@ -42,7 +43,6 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.room.RoomLoader;
-import net.officefloor.util.DoubleKeyMap;
 
 /**
  * Loads the {@link OfficeModel}.
