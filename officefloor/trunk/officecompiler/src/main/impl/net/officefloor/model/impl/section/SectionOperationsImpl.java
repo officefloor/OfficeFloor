@@ -16,15 +16,27 @@
  */
 package net.officefloor.model.impl.section;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.PropertyModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionOperations;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
 
 /**
  * {@link SectionOperations} implementation.
@@ -32,6 +44,21 @@ import net.officefloor.model.section.SubSectionModel;
  * @author Daniel
  */
 public class SectionOperationsImpl implements SectionOperations {
+
+	/**
+	 * Sorts the {@link SubSectionModel} instances.
+	 * 
+	 * @param subSections
+	 *            Listing of {@link SubSectionModel} instances to sort.
+	 */
+	public static void sortSubSections(List<SubSectionModel> subSections) {
+		Collections.sort(subSections, new Comparator<SubSectionModel>() {
+			@Override
+			public int compare(SubSectionModel a, SubSectionModel b) {
+				return a.getSubSectionName().compareTo(b.getSubSectionName());
+			}
+		});
+	}
 
 	/**
 	 * {@link SectionModel} to be operated on.
@@ -48,9 +75,97 @@ public class SectionOperationsImpl implements SectionOperations {
 		this.section = section;
 	}
 
+	/**
+	 * Sorts the {@link SubSectionModel} instances on the {@link SectionModel}.
+	 */
+	public void sortSubSections() {
+		sortSubSections(this.section.getSubSections());
+	}
+
 	/*
 	 * ====================== SectionOperations ============================
 	 */
+
+	@Override
+	public Change<SubSectionModel> addSubSection(String subSectionName,
+			String sectionSourceClassName, String sectionLocation,
+			PropertyList properties, SectionType sectionType) {
+
+		// Create the sub section model
+		final SubSectionModel subSection = new SubSectionModel(subSectionName,
+				sectionSourceClassName, sectionLocation);
+
+		// Add the properties in the order defined
+		for (Property property : properties.getPropertyList()) {
+			subSection.addProperty(new PropertyModel(property.getName(),
+					property.getValue()));
+		}
+
+		// Add the inputs ensuring ordering
+		for (SectionInputType inputType : sectionType.getInputTypes()) {
+			subSection
+					.addSubSectionInput(new SubSectionInputModel(inputType
+							.getInputName(), inputType.getParameterType(),
+							false, null));
+		}
+		Collections.sort(subSection.getSubSectionInputs(),
+				new Comparator<SubSectionInputModel>() {
+					@Override
+					public int compare(SubSectionInputModel a,
+							SubSectionInputModel b) {
+						return a.getSubSectionInputName().compareTo(
+								b.getSubSectionInputName());
+					}
+				});
+
+		// Add the outputs ensuring ordering
+		for (SectionOutputType outputType : sectionType.getOutputTypes()) {
+			subSection.addSubSectionOutput(new SubSectionOutputModel(outputType
+					.getOutputName(), outputType.getArgumentType(), outputType
+					.isEscalationOnly()));
+		}
+		Collections.sort(subSection.getSubSectionOutputs(),
+				new Comparator<SubSectionOutputModel>() {
+					@Override
+					public int compare(SubSectionOutputModel a,
+							SubSectionOutputModel b) {
+						return a.getSubSectionOutputName().compareTo(
+								b.getSubSectionOutputName());
+					}
+				});
+
+		// Add the objects ensuring ordering
+		for (SectionObjectType objectType : sectionType.getObjectTypes()) {
+			subSection.addSubSectionObject(new SubSectionObjectModel(objectType
+					.getObjectName(), objectType.getObjectType()));
+		}
+		Collections.sort(subSection.getSubSectionObjects(),
+				new Comparator<SubSectionObjectModel>() {
+					@Override
+					public int compare(SubSectionObjectModel a,
+							SubSectionObjectModel b) {
+						return a.getSubSectionObjectName().compareTo(
+								b.getSubSectionObjectName());
+					}
+				});
+
+		// Create the change to add the sub section
+		return new AbstractChange<SubSectionModel>(subSection,
+				"Add sub section " + subSectionName) {
+			@Override
+			public void apply() {
+				// Add the sub section (ensuring ordering)
+				SectionOperationsImpl.this.section.addSubSection(subSection);
+				SectionOperationsImpl.this.sortSubSections();
+			}
+
+			@Override
+			public void revert() {
+				// Remove the sub section (should maintain order)
+				SectionOperationsImpl.this.section.removeSubSection(subSection);
+			}
+		};
+	}
 
 	@Override
 	public Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
@@ -66,15 +181,6 @@ public class SectionOperationsImpl implements SectionOperations {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement SectionOperations.addExternalManagedObject");
-	}
-
-	@Override
-	public Change<SubSectionModel> addSubSection(String subSectionName,
-			String sectionSourceClassName, String sectionLocation,
-			PropertyList properties, SectionType sectionType) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionOperations.addSubSection");
 	}
 
 	@Override

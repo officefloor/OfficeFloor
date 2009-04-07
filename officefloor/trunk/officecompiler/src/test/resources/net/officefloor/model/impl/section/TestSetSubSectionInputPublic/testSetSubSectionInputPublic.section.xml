@@ -1,0 +1,12 @@
+<section>
+	<sub-sections>
+		<sub-section name="SUB_SECTION" source="net.example.ExampleSectionSource"
+			location="LOCATION">
+			<input name="PRIVATE" parameter-type="java.lang.String" public="true"
+				public-name="PUBLIC_NAME" />
+			<input name="PUBLIC" parameter-type="java.lang.Integer" public="true" />
+			<input name="PUBLIC_WITH_NAME" parameter-type="java.lang.Exception"
+				public="true" />
+		</sub-section>
+	</sub-sections>
+</section>

@@ -16,7 +16,16 @@
  */
 package net.officefloor.model.impl.section;
 
+import java.sql.Connection;
+
+import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.section.SectionTypeImpl;
+import net.officefloor.compile.section.SectionType;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
 
 /**
  * Tests adding a {@link SubSectionModel}.
@@ -25,8 +34,70 @@ import net.officefloor.model.section.SubSectionModel;
  */
 public class AddSubSectionTest extends AbstractSectionOperationsTestCase {
 
-	public void testTODO() {
-		// TODO add testing for adding sub section
+	/**
+	 * Ensure can add a {@link SubSectionModel} that only has properties.
+	 */
+	public void testAddSubSectionWithPropertiesOnly() {
+
+		// Create the sub section
+		SectionType sectionType = new SectionTypeImpl();
+
+		// Ensure can add
+		Change<SubSectionModel> change = this.operations.addSubSection(
+				"SUB_SECTION", "net.example.ExampleSectionSource",
+				"SECTION_LOCATION", new PropertyListImpl("name.one",
+						"value.one", "name.two", "value.two"), sectionType);
+		this.assertChange(change, null, "Add sub section SUB_SECTION", true);
+
+		// Ensure correct target
+		change.apply();
+		assertEquals("Incorrect target", this.model.getSubSections().get(0),
+				change.getTarget());
 	}
 
+	/**
+	 * Ensure can add a {@link SubSectionModel} with
+	 * {@link SubSectionInputModel}, {@link SubSectionOutputModel},
+	 * {@link SubSectionObjectModel} instances.
+	 */
+	public void testAddSubSectionWithInputsOutputsObjects() {
+
+		// Create the sub section with inputs, outputs, objects
+		SectionTypeImpl sectionType = new SectionTypeImpl();
+		sectionType.addInput("INPUT_B", Integer.class.getName());
+		sectionType.addInput("INPUT_A", Double.class.getName());
+		sectionType.addOutput("OUTPUT_B", String.class.getName(), false);
+		sectionType.addOutput("OUTPUT_A", Exception.class.getName(), true);
+		sectionType.addObject("OBJECT_B", Object.class.getName());
+		sectionType.addObject("OBJECT_A", Connection.class.getName());
+
+		// Ensure can add (ordering the inputs, outputs, objects for easier SCM)
+		Change<SubSectionModel> change = this.operations.addSubSection(
+				"SUB_SECTION", "net.example.ExampleSectionSource",
+				"SECTION_LOCATION", new PropertyListImpl(), sectionType);
+		this.assertChange(change, null, "Add sub section SUB_SECTION", true);
+	}
+
+	/**
+	 * Ensure can add multiple {@link SubSectionModel} instances.
+	 */
+	public void testAddMultipleSubSections() {
+
+		// Create the section type
+		SectionType sectionType = new SectionTypeImpl();
+
+		// Add multiple section types
+		Change<SubSectionModel> changeB = this.operations.addSubSection(
+				"SUB_SECTION_B", "net.example.ExampleSectionSource",
+				"LOCATION_B", new PropertyListImpl(), sectionType);
+		Change<SubSectionModel> changeA = this.operations.addSubSection(
+				"SUB_SECTION_A", "net.example.ExampleSectionSource",
+				"LOCATION_A", new PropertyListImpl(), sectionType);
+		Change<SubSectionModel> changeC = this.operations.addSubSection(
+				"SUB_SECTION_C", "net.example.ExampleSectionSource",
+				"LOCATION_C", new PropertyListImpl(), sectionType);
+
+		// Apply the changes, ensuring ordering of the sub sections
+		this.assertChanges(changeB, changeA, changeC);
+	}
 }
