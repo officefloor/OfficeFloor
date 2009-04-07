@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.FlowItemModel;
@@ -49,7 +50,6 @@ import net.officefloor.model.officefloor.TeamModel;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.office.OfficeLoader;
-import net.officefloor.util.DoubleKeyMap;
 
 /**
  * Loads the {@link OfficeFloorModel}.

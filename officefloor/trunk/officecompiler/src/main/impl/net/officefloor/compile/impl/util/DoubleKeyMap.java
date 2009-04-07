@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.util;
+package net.officefloor.compile.impl.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ import java.util.Map;
 public class DoubleKeyMap<A, B, E> {
 
 	/**
-	 * Internal registry.
+	 * Internal map.
 	 */
 	private final Map<A, Map<B, E>> registry = new HashMap<A, Map<B, E>>();
 
@@ -35,13 +35,11 @@ public class DoubleKeyMap<A, B, E> {
 	 * Registers the entry.
 	 * 
 	 * @param a
-	 *            First value to register.
+	 *            First key for registering.
 	 * @param b
-	 *            Second value to register.
+	 *            Second key for registering.
 	 * @param entry
 	 *            Entry to register.
-	 * @param registry
-	 *            Registry.
 	 */
 	public void put(A a, B b, E entry) {
 
@@ -60,12 +58,10 @@ public class DoubleKeyMap<A, B, E> {
 	 * Obtains the entry.
 	 * 
 	 * @param a
-	 *            First value to register.
+	 *            First key registered under.
 	 * @param b
-	 *            Second value to register.
-	 * @param registry
-	 *            Registry.
-	 * @return Entry from registry or <code>null</code> if not found.
+	 *            Second key registered under.
+	 * @return Entry or <code>null</code> if not found.
 	 */
 	public E get(A a, B b) {
 

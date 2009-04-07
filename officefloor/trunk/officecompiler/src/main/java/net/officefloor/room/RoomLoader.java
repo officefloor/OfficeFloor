@@ -19,6 +19,7 @@ package net.officefloor.room;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -33,7 +34,6 @@ import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectMode
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
-import net.officefloor.util.DoubleKeyMap;
 
 /**
  * Loads the {@link net.officefloor.model.section.SectionModel}.
