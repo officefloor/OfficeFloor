@@ -115,8 +115,9 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		this.control(this.configurationContext).expectAndThrow(
 				this.configurationContext.getConfigurationItem(location),
 				failure);
-		this.record_issue("Failure obtaining configuration 'LOCATION'",
-				failure);
+		this
+				.record_issue("Failure obtaining configuration 'LOCATION'",
+						failure);
 
 		// Attempt to obtain the configuration item
 		this.loadSectionType(false, new Loader() {
@@ -632,7 +633,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public Section sourceSection() {
+		public Section sourceSection(SectionSourceContext context) {
 			fail("Should not be invoked in obtaining section type");
 			return null;
 		}

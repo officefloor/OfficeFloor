@@ -16,22 +16,19 @@
  */
 package net.officefloor.compile.spi.section;
 
-import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.execute.Task;
 
 /**
- * Section within the {@link Office}.
+ * {@link Task} for a {@link SectionWork}.
  * 
  * @author Daniel
  */
-public interface Section {
+public interface SectionTask {
 
-	/**
-	 * Constructs the {@link Section}.
-	 * 
-	 * @param context
-	 *            {@link SectionContext}.
-	 * @throws Exception
-	 *             If fails to construct the {@link Section}.
-	 */
-	void constructSection(SectionContext context) throws Exception;
+	TaskFlow getTaskFlow(String taskFlowName);
+
+	TaskFlow getTaskEscalation(String taskEscalationName);
+
+	TaskObject getTaskObject(String taskObjectName);
+
 }
