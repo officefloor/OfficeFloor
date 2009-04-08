@@ -5,9 +5,9 @@
 	<sub-sections>
 		<sub-section name="SUB_SECTION" source="net.example.ExampleSectionSource"
 			location="LOCATION">
-			<input name="INPUT" argument-type="java.lang.String">
+			<output name="OUTPUT" argument-type="java.lang.String">
 				<external-flow name="FLOW" />
-			</input>
+			</output>
 		</sub-section>
 	</sub-sections>
 </section>

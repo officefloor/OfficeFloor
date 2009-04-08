@@ -18,6 +18,7 @@ package net.officefloor.model.section;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.model.change.Change;
 
 /**
@@ -27,26 +28,101 @@ import net.officefloor.model.change.Change;
  */
 public interface SectionOperations {
 
+	/**
+	 * Adds a {@link SubSectionModel} to the {@link SectionModel}.
+	 * 
+	 * @param subSectionName
+	 *            Name of the {@link SubSectionModel}.
+	 * @param sectionSourceClassName
+	 *            Name of the {@link SectionSource} class.
+	 * @param sectionLocation
+	 *            Location of the {@link SubSectionModel}.
+	 * @param properties
+	 *            {@link PropertyList} for the {@link SectionSource}.
+	 * @param sectionType
+	 *            {@link SectionType}.
+	 * @return {@link Change} to add the {@link SubSectionModel}.
+	 */
 	Change<SubSectionModel> addSubSection(String subSectionName,
 			String sectionSourceClassName, String sectionLocation,
 			PropertyList properties, SectionType sectionType);
 
+	/**
+	 * Removes the {@link SubSectionModel} from the {@link SectionModel}.
+	 * 
+	 * @param subSection
+	 *            {@link SubSectionModel} to remove.
+	 * @return {@link Change} to remove the {@link SubSectionModel}.
+	 */
 	Change<SubSectionModel> removeSubSection(SubSectionModel subSection);
 
+	/**
+	 * Renames the {@link SubSectionModel} to the new name.
+	 * 
+	 * @param subSection
+	 *            {@link SubSectionModel} to rename.
+	 * @param newSubSectionName
+	 *            New name for the {@link SubSectionModel}.
+	 * @return {@link Change} to rename the {@link SubSectionModel}.
+	 */
 	Change<SubSectionModel> renameSubSection(SubSectionModel subSection,
 			String newSubSectionName);
 
+	/**
+	 * Sets the {@link SubSectionInputModel} public/private.
+	 * 
+	 * @param isPublic
+	 *            Flag indicating if public/private.
+	 * @param publicName
+	 *            Public name if setting public. Ignored if setting private.
+	 * @param input
+	 *            {@link SubSectionInputModel} to set public/private.
+	 * @return {@link SubSectionInputModel} to set public/private.
+	 */
 	Change<SubSectionInputModel> setSubSectionInputPublic(boolean isPublic,
 			String publicName, SubSectionInputModel input);
 
+	/**
+	 * Adds an {@link ExternalFlowModel} to the {@link SectionModel}.
+	 * 
+	 * @param externalFlowName
+	 *            Name of the {@link ExternalFlowModel}.
+	 * @param argumentType
+	 *            Argument type for the {@link ExternalFlowModel}.
+	 * @return {@link Change} to add the {@link ExternalFlowModel}.
+	 */
 	Change<ExternalFlowModel> addExternalFlow(String externalFlowName,
 			String argumentType);
 
+	/**
+	 * Removes the {@link ExternalFlowModel} from the {@link SectionModel}.
+	 * 
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel} to remove.
+	 * @return {@link Change} to remove the {@link ExternalFlowModel}.
+	 */
 	Change<ExternalFlowModel> removeExternalFlow(ExternalFlowModel externalFlow);
 
+	/**
+	 * Adds the {@link ExternalManagedObjectModel} to the {@link SectionModel}.
+	 * 
+	 * @param externalManagedObjectName
+	 *            Name of the {@link ExternalManagedObjectModel}.
+	 * @param objectType
+	 *            Object type for the {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to add the {@link ExternalManagedObjectModel}.
+	 */
 	Change<ExternalManagedObjectModel> addExternalManagedObject(
 			String externalManagedObjectName, String objectType);
 
+	/**
+	 * Removes the {@link ExternalManagedObjectModel} from the
+	 * {@link SectionModel}.
+	 * 
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the {@link ExternalManagedObjectModel}.
+	 */
 	Change<ExternalManagedObjectModel> removeExternalManagedObject(
 			ExternalManagedObjectModel externalManagedObject);
 

@@ -174,7 +174,7 @@ public abstract class AbstractOperationsTestCase<M extends Model, O> extends
 				expectedConflictDescriptions.length,
 				change.getConflicts().length);
 		for (int i = 0; i < expectedConflictDescriptions.length; i++) {
-			assertEquals("Incorrect descriptiong for conflict " + i,
+			assertEquals("Incorrect description for conflict " + i,
 					expectedConflictDescriptions[i], change.getConflicts()[i]
 							.getConflictDescription());
 		}
