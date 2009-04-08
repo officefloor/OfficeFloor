@@ -58,8 +58,11 @@ public interface SectionSource {
 	/**
 	 * Sources the {@link Section}.
 	 * 
+	 * @param context
+	 *            {@link SectionSourceContext} to source details to create the
+	 *            {@link Section}.
 	 * @return {@link Section}.
 	 */
-	Section sourceSection();
+	Section sourceSection(SectionSourceContext context);
 
 }

@@ -16,22 +16,18 @@
  */
 package net.officefloor.compile.spi.section;
 
-import net.officefloor.frame.api.manage.Office;
-
 /**
- * Section within the {@link Office}.
+ * {@link SubSection} of a {@link Section}.
  * 
  * @author Daniel
  */
-public interface Section {
+public interface SubSection {
 
-	/**
-	 * Constructs the {@link Section}.
-	 * 
-	 * @param context
-	 *            {@link SectionContext}.
-	 * @throws Exception
-	 *             If fails to construct the {@link Section}.
-	 */
-	void constructSection(SectionContext context) throws Exception;
+	void addProperty(String name, String value);
+	
+	SubSectionInput getInput(String inputName);
+	
+	SubSectionOutput getOutput(String outputName);
+	
+	SubSectionObject getObject(String objectName);
 }

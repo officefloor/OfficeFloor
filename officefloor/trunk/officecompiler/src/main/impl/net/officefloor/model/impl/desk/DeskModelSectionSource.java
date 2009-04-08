@@ -101,7 +101,7 @@ public class DeskModelSectionSource implements SectionSource {
 	}
 
 	@Override
-	public Section sourceSection() {
+	public Section sourceSection(SectionSourceContext context) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement SectionSource.sourceSection");

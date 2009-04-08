@@ -409,7 +409,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public Section sourceSection() {
+		public Section sourceSection(SectionSourceContext context) {
 			fail("Should not be invoked for obtaining specification");
 			return null;
 		}
