@@ -71,7 +71,7 @@ public class SetSubSectionInputPublicTest extends
 				.setSubSectionInputPublic(true, null, input);
 		this.assertChange(change, input,
 				"Set sub section input NOT_IN_SECTION public", false,
-				"Sub section input NOT_IN_SECTION not not in section");
+				"Sub section input NOT_IN_SECTION not in section");
 	}
 
 	/**

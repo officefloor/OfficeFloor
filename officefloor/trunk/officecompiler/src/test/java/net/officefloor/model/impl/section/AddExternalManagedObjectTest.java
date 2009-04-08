@@ -47,9 +47,9 @@ public class AddExternalManagedObjectTest extends
 	 */
 	public void testAddMultipleExternalManagedObjectsEnsuringOrdering() {
 		Change<ExternalManagedObjectModel> changeB = this.operations
-				.addExternalManagedObject("OBJECT_B", String.class.getName());
+				.addExternalManagedObject("OBJECT_B", Integer.class.getName());
 		Change<ExternalManagedObjectModel> changeA = this.operations
-				.addExternalManagedObject("OBJECT_A", Integer.class.getName());
+				.addExternalManagedObject("OBJECT_A", String.class.getName());
 		Change<ExternalManagedObjectModel> changeC = this.operations
 				.addExternalManagedObject("OBJECT_C", Connection.class
 						.getName());

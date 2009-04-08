@@ -72,8 +72,8 @@ public class RemoveExternalManagedObjectTest extends
 				.getExternalManagedObjects().get(0);
 		Change<ExternalManagedObjectModel> change = this.operations
 				.removeExternalManagedObject(extMo);
-		this.assertChange(change, extMo,
-				"Remove external managed object OBJECT", true);
+		this.assertChange(change, extMo, "Remove external managed object MO",
+				true);
 	}
 
 }
