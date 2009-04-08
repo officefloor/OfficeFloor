@@ -33,11 +33,13 @@ public interface SectionContext {
 
 	SectionObject getSectionObject(String objectName);
 
-	// Work, SubSection
+	// Work
 
-	SectionWork addWork(String workName, String workSourceClassName);
+	SectionWork addWork(String workSourceClassName);
 
-	SectionWork addWork(String workname, WorkSource<?> workSource);
+	SectionWork addWork(WorkSource<?> workSource);
+
+	// SubSection
 
 	SubSection addSubSection(String subSectionName, String sectionSourceClass,
 			String location);
