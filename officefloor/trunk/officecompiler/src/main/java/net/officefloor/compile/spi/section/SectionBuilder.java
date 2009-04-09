@@ -19,21 +19,23 @@ package net.officefloor.compile.spi.section;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
-import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.TaskEscalationType;
 
 /**
- * Builder to construct the {@link Section}.
+ * Builder to construct the {@link OfficeSection}.
  * 
  * @author Daniel
  */
 public interface SectionBuilder {
 
 	/**
-	 * Adds a {@link SectionInputType} to the {@link SectionType}.
+	 * Adds a {@link SectionInput} to the {@link OfficeSection} being built.
 	 * 
 	 * @param inputName
-	 *            Name of the {@link SectionInputType}.
+	 *            Name of the {@link SectionInput}.
 	 * @param parameterType
 	 *            Parameter type for the {@link SectionInputType}.
 	 * @return {@link SectionInput} for linking.
@@ -41,10 +43,10 @@ public interface SectionBuilder {
 	SectionInput addInput(String inputName, String parameterType);
 
 	/**
-	 * Adds a {@link SectionOutputType} to the {@link SectionType}.
+	 * Adds a {@link SectionOutput} to the {@link OfficeSection} being built.
 	 * 
 	 * @param outputName
-	 *            Name of the {@link SectionOutputType}.
+	 *            Name of the {@link SectionOutput}.
 	 * @param argumentType
 	 *            Argument type for the {@link SectionOutputType}.
 	 * @param isEscalationOnly
@@ -56,14 +58,81 @@ public interface SectionBuilder {
 			boolean isEscalationOnly);
 
 	/**
-	 * Adds a {@link SectionObjectType} to the {@link SectionType}.
+	 * Adds a {@link SectionObject} to the {@link OfficeSection} being built.
 	 * 
 	 * @param objectName
-	 *            Name of the {@link SectionObjectType}.
+	 *            Name of the {@link SectionObject}.
 	 * @param objectType
 	 *            Type required for the {@link SectionObjectType}.
 	 * @return {@link SectionObject} for linking.
 	 */
 	SectionObject addObject(String objectName, String objectType);
+
+	/**
+	 * Adds a {@link SectionWork} to the {@link OfficeSection} being built.
+	 * 
+	 * @param workName
+	 *            Name of the {@link SectionWork}.
+	 * @param workSourceClassName
+	 *            Fully qualified class name of the {@link WorkSource}. This
+	 *            allows adding the {@link SectionWork} without having to worry
+	 *            if the {@link WorkSource} is available on the class path.
+	 *            <b>This should be used over attempting to find the
+	 *            {@link WorkSource}</b> - as should leave to compiler to find
+	 *            the {@link WorkSource}.
+	 * @return {@link SectionWork}.
+	 */
+	SectionWork addWork(String workName, String workSourceClassName);
+
+	/**
+	 * Adds a {@link SectionWork} to the {@link OfficeSection} being built.
+	 * 
+	 * @param workName
+	 *            Name of the {@link SectionWork}.
+	 * @param workSource
+	 *            {@link WorkSource} to enable providing direct instances. This
+	 *            should only be used should the {@link SectionSource} want to
+	 *            create a {@link SectionWork} instance by supplying its own
+	 *            instantiated {@link WorkSource} implementation.
+	 * @return {@link SectionWork}.
+	 */
+	SectionWork addWork(String workName, WorkSource<?> workSource);
+
+	/**
+	 * Adds a {@link SubSection} to the {@link OfficeSection} being built.
+	 * 
+	 * @param subSectionName
+	 *            Name of the {@link SubSection}.
+	 * @param sectionSourceClassName
+	 *            Fully qualified class name of the {@link SectionSource} for
+	 *            the {@link SubSection}. This allows adding the
+	 *            {@link SubSection} without having to worry if the
+	 *            {@link SectionSource} is available on the class path. <b>This
+	 *            should be used over attempting to find the
+	 *            {@link SectionSource}</b> - as should leave to the compiler to
+	 *            find the {@link SectionSource}.
+	 * @param location
+	 *            Location of the {@link SubSection}.
+	 * @return {@link SubSection}.
+	 */
+	SubSection addSubSection(String subSectionName,
+			String sectionSourceClassName, String location);
+
+	/**
+	 * Adds a {@link SubSection} to the {@link OfficeSection} being built.
+	 * 
+	 * @param subSectionName
+	 *            Name of the {@link SubSection}.
+	 * @param sectionSource
+	 *            {@link SectionSource} to enable providing direct instances.
+	 *            This should only be used should the {@link SectionSource} want
+	 *            to create a {@link SubSection} instance by supplying its own
+	 *            instantiated {@link SectionSource} implementation.
+	 * @param location
+	 *            Location of the {@link SubSection}.
+	 * @return {@link SubSection}.
+	 */
+	SubSection addSubSection(String subSectionName,
+			SectionSource sectionSource, String location);
 
 }

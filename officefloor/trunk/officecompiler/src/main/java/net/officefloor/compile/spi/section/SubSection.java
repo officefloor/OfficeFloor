@@ -23,11 +23,19 @@ package net.officefloor.compile.spi.section;
  */
 public interface SubSection {
 
+	/**
+	 * Obtains the name of this {@link SubSection}.
+	 * 
+	 * @return Name of this {@link SubSection}.
+	 */
+	String getSubSectionName();
+
 	void addProperty(String name, String value);
-	
+
 	SubSectionInput getInput(String inputName);
-	
+
 	SubSectionOutput getOutput(String outputName);
-	
+
 	SubSectionObject getObject(String objectName);
+
 }

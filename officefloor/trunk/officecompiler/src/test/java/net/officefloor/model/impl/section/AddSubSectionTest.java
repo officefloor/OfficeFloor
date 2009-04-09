@@ -19,7 +19,7 @@ package net.officefloor.model.impl.section;
 import java.sql.Connection;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.section.SectionBuilderImpl;
+import net.officefloor.compile.impl.section.SectionNode;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.section.SubSectionInputModel;
@@ -40,7 +40,7 @@ public class AddSubSectionTest extends AbstractSectionOperationsTestCase {
 	public void testAddSubSectionWithPropertiesOnly() {
 
 		// Create the sub section
-		SectionType sectionType = new SectionBuilderImpl();
+		SectionType sectionType = new SectionNode(null, null);
 
 		// Ensure can add
 		Change<SubSectionModel> change = this.operations.addSubSection(
@@ -63,7 +63,7 @@ public class AddSubSectionTest extends AbstractSectionOperationsTestCase {
 	public void testAddSubSectionWithInputsOutputsObjects() {
 
 		// Create the sub section with inputs, outputs, objects
-		SectionBuilderImpl sectionType = new SectionBuilderImpl();
+		SectionNode sectionType = new SectionNode(null, null);
 		sectionType.addInput("INPUT_B", Integer.class.getName());
 		sectionType.addInput("INPUT_A", Double.class.getName());
 		sectionType.addOutput("OUTPUT_B", String.class.getName(), false);
@@ -84,7 +84,7 @@ public class AddSubSectionTest extends AbstractSectionOperationsTestCase {
 	public void testAddMultipleSubSections() {
 
 		// Create the section type
-		SectionType sectionType = new SectionBuilderImpl();
+		SectionType sectionType = new SectionNode(null, null);
 
 		// Add multiple section types
 		Change<SubSectionModel> changeB = this.operations.addSubSection(

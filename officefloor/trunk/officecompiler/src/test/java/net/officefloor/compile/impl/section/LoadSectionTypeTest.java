@@ -373,7 +373,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link SectionObjectImpl} name.
+	 * Ensure issue if <code>null</code> {@link SectionObjectNode} name.
 	 */
 	public void testNullObjectName() {
 
@@ -391,7 +391,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link SectionObjectImpl} type.
+	 * Ensure issue if <code>null</code> {@link SectionObjectNode} type.
 	 */
 	public void testNullObjectType() {
 
@@ -478,19 +478,19 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Ensure section type correct
 		assertList(new String[] { "getSectionInputName", "getParameterType" },
-				type.getSectionInputTypes(), new SectionInputImpl("INPUT_A",
-						Integer.class.getName()), new SectionInputImpl(
+				type.getSectionInputTypes(), new SectionInputNode("INPUT_A",
+						Integer.class.getName()), new SectionInputNode(
 						"INPUT_B", String.class.getName()),
-				new SectionInputImpl("INPUT_C", null));
+				new SectionInputNode("INPUT_C", null));
 		assertList(new String[] { "getSectionOutputName", "getArgumentType",
 				"isEscalationOnly" }, type.getSectionOutputTypes(),
-				new SectionOutputImpl("OUTPUT_A", Exception.class.getName(),
-						true), new SectionOutputImpl("OUTPUT_B", Double.class
-						.getName(), false), new SectionOutputImpl("OUTPUT_C",
+				new SectionOutputNode("OUTPUT_A", Exception.class.getName(),
+						true), new SectionOutputNode("OUTPUT_B", Double.class
+						.getName(), false), new SectionOutputNode("OUTPUT_C",
 						null, false));
 		assertList(new String[] { "getSectionObjectName", "getObjectType" },
-				type.getSectionObjectTypes(), new SectionObjectImpl("OBJECT_A",
-						Object.class.getName()), new SectionObjectImpl(
+				type.getSectionObjectTypes(), new SectionObjectNode("OBJECT_A",
+						Object.class.getName()), new SectionObjectNode(
 						"OBJECT_B", Connection.class.getName()));
 	}
 

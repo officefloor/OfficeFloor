@@ -185,7 +185,8 @@ public class SectionLoaderImpl implements SectionLoader {
 				classLoader);
 
 		// Create the section builder
-		SectionBuilderImpl sectionType = new SectionBuilderImpl();
+		SectionNode sectionType = new SectionNode(
+				this.sectionLocation, issues);
 
 		try {
 			// Source the section type

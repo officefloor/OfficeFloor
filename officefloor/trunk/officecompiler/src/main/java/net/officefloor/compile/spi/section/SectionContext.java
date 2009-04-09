@@ -16,38 +16,17 @@
  */
 package net.officefloor.compile.spi.section;
 
-import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
- * Context for the {@link Section}.
+ * Context for the {@link OfficeSection}.
  * 
  * @author Daniel
  */
 // TODO transfer functionality to SectionBuilder
 @Deprecated
 public interface SectionContext {
-
-	SectionInput getSectionInput(String inputName);
-
-	SectionOutput getSectionOutput(String outputName);
-
-	SectionObject getSectionObject(String objectName);
-
-	// Work
-
-	SectionWork addWork(String workSourceClassName);
-
-	SectionWork addWork(WorkSource<?> workSource);
-
-	// SubSection
-
-	SubSection addSubSection(String subSectionName, String sectionSourceClass,
-			String location);
-
-	SubSection addSubSection(String subSectionName,
-			SectionSource sectionSource, String location);
 
 	// sectionInput -> task, subSectionInput, sectionOutput
 
