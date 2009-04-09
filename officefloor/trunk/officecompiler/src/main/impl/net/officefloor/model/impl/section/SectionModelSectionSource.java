@@ -16,11 +16,10 @@
  */
 package net.officefloor.model.impl.section;
 
-import net.officefloor.compile.spi.section.Section;
+import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
-import net.officefloor.compile.spi.section.source.SectionTypeBuilder;
 import net.officefloor.model.section.SectionModel;
 
 /**
@@ -42,14 +41,7 @@ public class SectionModelSectionSource implements SectionSource {
 	}
 
 	@Override
-	public Section sourceSection(SectionSourceContext context) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionSource.sourceSection");
-	}
-
-	@Override
-	public void sourceSectionType(SectionTypeBuilder sectionTypeBuilder,
+	public void sourceSection(SectionBuilder sectionBuilder,
 			SectionSourceContext context) throws Exception {
 		// TODO Implement
 		throw new UnsupportedOperationException(

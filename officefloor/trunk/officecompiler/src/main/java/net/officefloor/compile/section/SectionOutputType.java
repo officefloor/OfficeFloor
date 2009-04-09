@@ -32,7 +32,7 @@ public interface SectionOutputType {
 	 * 
 	 * @return Name of this {@link SectionOutputType}.
 	 */
-	String getOutputName();
+	String getSectionOutputName();
 
 	/**
 	 * <p>

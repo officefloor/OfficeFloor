@@ -17,7 +17,8 @@
 package net.officefloor.compile.spi.section.source;
 
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.section.Section;
+import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.section.SectionBuilder;
 
 /**
  * Sources the {@link SectionType}.
@@ -40,29 +41,19 @@ public interface SectionSource {
 	SectionSourceSpecification getSpecification();
 
 	/**
-	 * Sources the {@link SectionType} by populating it via the input
-	 * {@link SectionTypeBuilder}.
+	 * Sources the {@link OfficeSection} by constructing it via the input
+	 * {@link SectionBuilder}.
 	 * 
-	 * @param sectionTypeBuilder
-	 *            {@link SectionTypeBuilder} to be populated with the
-	 *            <code>type definition</code> of the {@link SectionType}.
+	 * @param sectionBuilder
+	 *            {@link SectionBuilder} to construct the structure of the
+	 *            {@link OfficeSection}.
 	 * @param context
-	 *            {@link SectionSourceContext} to source details to populate the
-	 *            {@link SectionType}.
+	 *            {@link SectionSourceContext} to source details to construct
+	 *            the {@link OfficeSection}.
 	 * @throws Exception
-	 *             If fails to populate the {@link SectionType}.
+	 *             If fails to construct the {@link OfficeSection}.
 	 */
-	void sourceSectionType(SectionTypeBuilder sectionTypeBuilder,
+	void sourceSection(SectionBuilder sectionBuilder,
 			SectionSourceContext context) throws Exception;
-
-	/**
-	 * Sources the {@link Section}.
-	 * 
-	 * @param context
-	 *            {@link SectionSourceContext} to source details to create the
-	 *            {@link Section}.
-	 * @return {@link Section}.
-	 */
-	Section sourceSection(SectionSourceContext context);
 
 }

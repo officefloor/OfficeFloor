@@ -19,7 +19,7 @@ package net.officefloor.compile.spi.section.source;
 import java.util.Properties;
 
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.section.Section;
+import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -31,13 +31,13 @@ public interface SectionSourceContext {
 
 	/**
 	 * <p>
-	 * Obtains the location of the {@link Section}.
+	 * Obtains the location of the {@link OfficeSection}.
 	 * <p>
 	 * How &quot;location&quot; is interpreted is for the {@link SectionSource},
 	 * however passing it to {@link #getConfiguration(String)} should return a
 	 * {@link ConfigurationItem}.
 	 * 
-	 * @return Location of the {@link Section}.
+	 * @return Location of the {@link OfficeSection}.
 	 */
 	String getSectionLocation();
 

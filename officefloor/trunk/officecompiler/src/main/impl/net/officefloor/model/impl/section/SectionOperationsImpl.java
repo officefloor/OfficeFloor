@@ -164,10 +164,10 @@ public class SectionOperationsImpl implements SectionOperations {
 		}
 
 		// Add the inputs ensuring ordering
-		for (SectionInputType inputType : sectionType.getInputTypes()) {
+		for (SectionInputType inputType : sectionType.getSectionInputTypes()) {
 			subSection
 					.addSubSectionInput(new SubSectionInputModel(inputType
-							.getInputName(), inputType.getParameterType(),
+							.getSectionInputName(), inputType.getParameterType(),
 							false, null));
 		}
 		Collections.sort(subSection.getSubSectionInputs(),
@@ -181,9 +181,9 @@ public class SectionOperationsImpl implements SectionOperations {
 				});
 
 		// Add the outputs ensuring ordering
-		for (SectionOutputType outputType : sectionType.getOutputTypes()) {
+		for (SectionOutputType outputType : sectionType.getSectionOutputTypes()) {
 			subSection.addSubSectionOutput(new SubSectionOutputModel(outputType
-					.getOutputName(), outputType.getArgumentType(), outputType
+					.getSectionOutputName(), outputType.getArgumentType(), outputType
 					.isEscalationOnly()));
 		}
 		Collections.sort(subSection.getSubSectionOutputs(),
@@ -197,9 +197,9 @@ public class SectionOperationsImpl implements SectionOperations {
 				});
 
 		// Add the objects ensuring ordering
-		for (SectionObjectType objectType : sectionType.getObjectTypes()) {
+		for (SectionObjectType objectType : sectionType.getSectionObjectTypes()) {
 			subSection.addSubSectionObject(new SubSectionObjectModel(objectType
-					.getObjectName(), objectType.getObjectType()));
+					.getSectionObjectName(), objectType.getObjectType()));
 		}
 		Collections.sort(subSection.getSubSectionObjects(),
 				new Comparator<SubSectionObjectModel>() {

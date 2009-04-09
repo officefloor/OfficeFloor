@@ -17,9 +17,17 @@
 package net.officefloor.compile.spi.section;
 
 /**
+ * Object required by the {@link Section}.
+ * 
  * @author Daniel
- *
  */
 public interface SectionObject {
+
+	/**
+	 * Obtains the name of this {@link SectionObject}.
+	 * 
+	 * @return Name of this {@link SectionObject}.
+	 */
+	String getSectionObjectName();
 
 }

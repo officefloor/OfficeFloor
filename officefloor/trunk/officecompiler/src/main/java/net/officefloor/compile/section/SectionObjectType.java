@@ -29,7 +29,7 @@ public interface SectionObjectType {
 	 * 
 	 * @return Name of this {@link SectionObjectType}.
 	 */
-	String getObjectName();
+	String getSectionObjectName();
 
 	/**
 	 * <p>

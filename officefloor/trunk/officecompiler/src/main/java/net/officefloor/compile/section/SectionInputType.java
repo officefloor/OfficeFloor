@@ -28,7 +28,7 @@ public interface SectionInputType {
 	 * 
 	 * @return Name of this {@link SectionInputType}.
 	 */
-	String getInputName();
+	String getSectionInputName();
 
 	/**
 	 * <p>
