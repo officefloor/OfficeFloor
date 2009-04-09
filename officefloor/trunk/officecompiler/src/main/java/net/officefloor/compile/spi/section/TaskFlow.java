@@ -16,10 +16,20 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.frame.internal.structure.Flow;
+
 /**
+ * {@link Flow} from the {@link SectionTask}.
+ * 
  * @author Daniel
- *
  */
 public interface TaskFlow {
+
+	/**
+	 * Obtains the name of this {@link TaskFlow}.
+	 * 
+	 * @return Name of this {@link TaskFlow}.
+	 */
+	String getTaskFlowName();
 
 }

@@ -28,6 +28,11 @@ import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.compile.spi.section.SubSectionObject;
+import net.officefloor.compile.spi.section.SubSectionOutput;
+import net.officefloor.compile.spi.section.TaskFlow;
+import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
@@ -59,8 +64,7 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link SectionBuilder} to be tested.
 	 */
-	private SectionBuilder builder = new SectionNode(SECTION_LOCATION,
-			this.issues);
+	private SectionNode node = new SectionNode(SECTION_LOCATION, this.issues);
 
 	/**
 	 * Tests adding a {@link SectionInput}.
@@ -68,13 +72,13 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	public void testAddSectionInput() {
 		// Add two different inputs verifying details
 		this.replayMockObjects();
-		SectionInput input = this.builder.addInput("INPUT", String.class
-				.getName());
+		SectionInput input = this.node
+				.addInput("INPUT", String.class.getName());
 		assertNotNull("Must have input", input);
 		assertEquals("Incorrect input name", "INPUT", input
 				.getSectionInputName());
-		assertNotSame("Should obtain another input", input, this.builder
-				.addInput("ANOTHER", Integer.class.getName()));
+		assertNotSame("Should obtain another input", input, this.node.addInput(
+				"ANOTHER", Integer.class.getName()));
 		this.verifyMockObjects();
 	}
 
@@ -88,9 +92,9 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Add the input twice
 		this.replayMockObjects();
-		SectionInput inputFirst = this.builder.addInput("INPUT", String.class
+		SectionInput inputFirst = this.node.addInput("INPUT", String.class
 				.getName());
-		SectionInput inputSecond = this.builder.addInput("INPUT", Integer.class
+		SectionInput inputSecond = this.node.addInput("INPUT", Integer.class
 				.getName());
 		this.verifyMockObjects();
 
@@ -105,12 +109,12 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	public void testSectionOutput() {
 		// Add two different outputs verifying details
 		this.replayMockObjects();
-		SectionOutput output = this.builder.addOutput("OUTPUT", Double.class
+		SectionOutput output = this.node.addOutput("OUTPUT", Double.class
 				.getName(), false);
 		assertNotNull("Must have output", output);
 		assertEquals("Incorrect output name", "OUTPUT", output
 				.getSectionOutputName());
-		assertNotSame("Should obtain another output", output, this.builder
+		assertNotSame("Should obtain another output", output, this.node
 				.addOutput("ANOTHER", Exception.class.getName(), true));
 		this.verifyMockObjects();
 	}
@@ -125,9 +129,9 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Add the output twice
 		this.replayMockObjects();
-		SectionOutput outputFirst = this.builder.addOutput("OUTPUT",
-				Object.class.getName(), false);
-		SectionOutput outputSecond = this.builder.addOutput("OUTPUT",
+		SectionOutput outputFirst = this.node.addOutput("OUTPUT", Object.class
+				.getName(), false);
+		SectionOutput outputSecond = this.node.addOutput("OUTPUT",
 				Exception.class.getName(), true);
 		this.verifyMockObjects();
 
@@ -142,12 +146,12 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	public void testSectionObject() {
 		// Add two different outputs verifying details
 		this.replayMockObjects();
-		SectionObject object = this.builder.addObject("OBJECT",
-				Connection.class.getName());
+		SectionObject object = this.node.addObject("OBJECT", Connection.class
+				.getName());
 		assertNotNull("Must have object", object);
 		assertEquals("Incorrect object name", "OBJECT", object
 				.getSectionObjectName());
-		assertNotSame("Should obtain another object", object, this.builder
+		assertNotSame("Should obtain another object", object, this.node
 				.addObject("ANOTHER", Object.class.getName()));
 		this.verifyMockObjects();
 	}
@@ -162,9 +166,9 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Add the object twice
 		this.replayMockObjects();
-		SectionObject objectFirst = this.builder.addObject("OBJECT",
+		SectionObject objectFirst = this.node.addObject("OBJECT",
 				Connection.class.getName());
-		SectionObject objectSecond = this.builder.addObject("OBJECT",
+		SectionObject objectSecond = this.node.addObject("OBJECT",
 				Exception.class.getName());
 		this.verifyMockObjects();
 
@@ -179,12 +183,12 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	public void testAddSectionWork() {
 		// Add two different section works verifying details
 		this.replayMockObjects();
-		SectionWork work = this.builder.addWork("WORK", NotUseWorkSource.class
+		SectionWork work = this.node.addWork("WORK", NotUseWorkSource.class
 				.getName());
 		assertNotNull("Must have section work", work);
 		assertEquals("Incorrect section work name", "WORK", work
 				.getSectionWorkName());
-		assertNotSame("Should obtain another section work", work, this.builder
+		assertNotSame("Should obtain another section work", work, this.node
 				.addWork("ANOTHER", NotUseWorkSource.class.getName()));
 		this.verifyMockObjects();
 	}
@@ -199,9 +203,9 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Add the section work twice
 		this.replayMockObjects();
-		SectionWork workFirst = this.builder.addWork("WORK",
+		SectionWork workFirst = this.node.addWork("WORK",
 				new NotUseWorkSource());
-		SectionWork workSecond = this.builder.addWork("WORK",
+		SectionWork workSecond = this.node.addWork("WORK",
 				new NotUseWorkSource());
 		this.verifyMockObjects();
 
@@ -216,7 +220,7 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	public void testAddSectionTask() {
 		// Add two different section tasks verifying details
 		this.replayMockObjects();
-		SectionWork work = this.builder.addWork("WORK", NotUseWorkSource.class
+		SectionWork work = this.node.addWork("WORK", NotUseWorkSource.class
 				.getName());
 		SectionTask task = work.addTask("TASK", "TYPE");
 		assertNotNull("Must have section task", task);
@@ -238,7 +242,7 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Add the section task twice by same work
 		this.replayMockObjects();
-		SectionWork work = this.builder.addWork("WORK", new NotUseWorkSource());
+		SectionWork work = this.node.addWork("WORK", new NotUseWorkSource());
 		SectionTask taskFirst = work.addTask("TASK", "TYPE");
 		SectionTask taskSecond = work.addTask("TASK", "ANOTHER_TYPE");
 		this.verifyMockObjects();
@@ -260,9 +264,9 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Add the section task twice by different work
 		this.replayMockObjects();
-		SectionTask taskFirst = this.builder.addWork("WORK_ONE",
+		SectionTask taskFirst = this.node.addWork("WORK_ONE",
 				new NotUseWorkSource()).addTask("TASK", "TYPE");
-		SectionTask taskSecond = this.builder.addWork("WORK_TWO",
+		SectionTask taskSecond = this.node.addWork("WORK_TWO",
 				new NotUseWorkSource()).addTask("TASK", "ANOTHER_TYPE");
 		this.verifyMockObjects();
 
@@ -272,18 +276,62 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure able to get {@link TaskFlow} and {@link TaskObject} instances from
+	 * the {@link SectionTask}.
+	 */
+	public void testSectionTaskGetFlowsAndObjects() {
+		// Ensure able to get flow/objects from section task
+		this.replayMockObjects();
+
+		// Obtain the section task
+		SectionTask task = this.node.addWork("WORK",
+				NotUseWorkSource.class.getName()).addTask("TASK", "TYPE");
+
+		// Ensure can get flow
+		TaskFlow flow = task.getTaskFlow("FLOW");
+		assertNotNull("Must have flow", flow);
+		assertEquals("Incorrect flow name", "FLOW", flow.getTaskFlowName());
+		assertEquals("Should get same task flow again", flow, task
+				.getTaskFlow("FLOW"));
+		assertNotSame("Should not be same flow for different name", flow, task
+				.getTaskFlow("ANOTHER"));
+
+		// Ensure can get object
+		TaskObject object = task.getTaskObject("OBJECT");
+		assertNotNull("Must have object", object);
+		assertEquals("Incorrect object name", "OBJECT", object
+				.getTaskObjectName());
+		assertEquals("Should get same task object again", object, task
+				.getTaskObject("OBJECT"));
+		assertNotSame("Should not be same object for different name", object,
+				task.getTaskObject("ANOTHER"));
+
+		// Ensure can get escalation
+		TaskFlow escalation = task.getTaskEscalation("ESCALATION");
+		assertNotNull("Must have escalation", escalation);
+		assertEquals("Incorrect escalation name", "ESCALATION", escalation
+				.getTaskFlowName());
+		assertEquals("Should get same task flow again", escalation, task
+				.getTaskEscalation("ESCALATION"));
+		assertNotSame("Should not be same escalation for different name",
+				escalation, task.getTaskEscalation("ANOTHER"));
+
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensure can add a {@link SubSection}.
 	 */
 	public void testAddSubSection() {
 		// Add two different sub sections verifying details
 		this.replayMockObjects();
-		SubSection subSection = this.builder.addSubSection("SUB_SECTION",
+		SubSection subSection = this.node.addSubSection("SUB_SECTION",
 				NotUseSectionSource.class.getName(), "SUB_SECTION_LOCATION");
 		assertNotNull("Must have sub section", subSection);
 		assertEquals("Incorrect sub section name", "SUB_SECTION", subSection
 				.getSubSectionName());
 		assertNotSame("Should obtain another sub section", subSection,
-				this.builder.addSubSection("ANOTHER", "not used", "not used"));
+				this.node.addSubSection("ANOTHER", "not used", "not used"));
 		this.verifyMockObjects();
 	}
 
@@ -297,15 +345,94 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Add the sub section twice
 		this.replayMockObjects();
-		SubSection subSectionFirst = this.builder.addSubSection("SUB_SECTION",
+		SubSection subSectionFirst = this.node.addSubSection("SUB_SECTION",
 				new NotUseSectionSource(), null);
-		SubSection subSectionSecond = this.builder.addSubSection("SUB_SECTION",
+		SubSection subSectionSecond = this.node.addSubSection("SUB_SECTION",
 				new NotUseSectionSource(), null);
 		this.verifyMockObjects();
 
 		// Should be the same sub section
 		assertEquals("Should be same sub section on adding twice",
 				subSectionFirst, subSectionSecond);
+	}
+
+	/**
+	 * Ensure able to get {@link SubSectionInput}, {@link SubSectionOutput} and
+	 * {@link SubSectionObject} instances from the {@link SubSection}.
+	 */
+	public void testSubSectionGetInputsOutputsAndObjects() {
+		// Ensure able to get inputs/outputs/objects from sub section
+		this.replayMockObjects();
+
+		// Obtain the sub section
+		SubSection subSection = this.node.addSubSection("SUB_SECTION",
+				NotUseSectionSource.class.getName(), "LOCATION");
+
+		// Ensure can get input
+		SubSectionInput input = subSection.getSubSectionInput("INPUT");
+		assertNotNull("Must have input", input);
+		assertEquals("Incorrect input name", "INPUT", input
+				.getSubSectionInputName());
+		assertEquals("Should get same input again", input, subSection
+				.getSubSectionInput("INPUT"));
+		assertNotSame("Should not be same input for different name", input,
+				subSection.getSubSectionInput("ANOTHER"));
+
+		// Ensure can get output
+		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
+		assertNotNull("Must have output", output);
+		assertEquals("Incorrect output name", "OUTPUT", output
+				.getSubSectionOutputName());
+		assertEquals("Should get same output again", output, subSection
+				.getSubSectionOutput("OUTPUT"));
+		assertNotSame("Should not be same output for different name", output,
+				subSection.getSubSectionOutput("ANOTHER"));
+
+		// Ensure can get object
+		SubSectionObject object = subSection.getSubSectionObject("OBJECT");
+		assertNotNull("Must have output", object);
+		assertEquals("Incorrect output name", "OBJECT", object
+				.getSubSectionObjectName());
+		assertEquals("Should get same object again", object, subSection
+				.getSubSectionObject("OBJECT"));
+		assertNotSame("Should not be same object for different name", object,
+				subSection.getSubSectionObject("ANOTHER"));
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures able to add a {@link SectionInput}, {@link SectionOutput} and
+	 * {@link SectionObject} after obtaining them as {@link SubSectionInput},
+	 * {@link SubSectionOutput} and {@link SubSectionObject} instances from the
+	 * node as a {@link SubSection}.
+	 */
+	public void testSectionAddInputOutputObjectAfterSubSectionGet() {
+		this.replayMockObjects();
+
+		// Ensure sub section input the same as section input added after
+		SubSectionInput subSectionInput = this.node.getSubSectionInput("INPUT");
+		SectionInput sectionInput = this.node.addInput("INPUT", String.class
+				.getName());
+		assertEquals("Inputs should be the same", subSectionInput, sectionInput);
+
+		// Ensure sub section output the same as section output added after
+		SubSectionOutput subSectionOutput = this.node
+				.getSubSectionOutput("OUTPUT");
+		SectionOutput sectionOutput = this.node.addOutput("OUTPUT",
+				Exception.class.getName(), true);
+		assertEquals("Outputs should be the same", subSectionOutput,
+				sectionOutput);
+
+		// Ensure sub section object the same as section object added after
+		SubSectionObject subSectionObject = this.node
+				.getSubSectionObject("OBJECT");
+		SectionObject sectionObject = this.node.addObject("OBJECT",
+				Connection.class.getName());
+		assertEquals("Objects should be the same", subSectionObject,
+				sectionObject);
+
+		this.verifyMockObjects();
 	}
 
 	/**

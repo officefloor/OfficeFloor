@@ -208,24 +208,39 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 	}
 
 	@Override
-	public SubSectionInput getInput(String inputName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SubSection.getInput");
+	public SubSectionInput getSubSectionInput(String inputName) {
+		// Obtain and return the section input for the name
+		SectionInputNode input = this.inputs.get(inputName);
+		if (input == null) {
+			// Add the input
+			input = new SectionInputNode(inputName);
+			this.inputs.put(inputName, input);
+		}
+		return input;
 	}
 
 	@Override
-	public SubSectionObject getObject(String objectName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SubSection.getObject");
+	public SubSectionOutput getSubSectionOutput(String outputName) {
+		// Obtain and return the section output for the name
+		SectionOutputNode output = this.outputs.get(outputName);
+		if (output == null) {
+			// Add the output
+			output = new SectionOutputNode(outputName);
+			this.outputs.put(outputName, output);
+		}
+		return output;
 	}
 
 	@Override
-	public SubSectionOutput getOutput(String outputName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SubSection.getOutput");
+	public SubSectionObject getSubSectionObject(String objectName) {
+		// Obtain and return the section object for the name
+		SectionObjectNode object = this.objects.get(objectName);
+		if (object == null) {
+			// Add the object
+			object = new SectionObjectNode(objectName);
+			this.objects.put(objectName, object);
+		}
+		return object;
 	}
 
 	/*
@@ -242,8 +257,14 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 			this.inputs.put(inputName, input);
 			this.inputTypes.add(input);
 		} else {
-			// Input already added
-			this.addIssue("Input " + inputName + " already added");
+			// Added but determine if requires initialising
+			if (!input.isInitialised()) {
+				// Initialise as not yet initialised
+				input.initialise(parameterType);
+			} else {
+				// Input already added and initialised
+				this.addIssue("Input " + inputName + " already added");
+			}
 		}
 		return input;
 	}
@@ -260,8 +281,14 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 			this.outputs.put(outputName, output);
 			this.outputTypes.add(output);
 		} else {
-			// Output already added
-			this.addIssue("Output " + outputName + " already added");
+			// Added but determine if requires initialising
+			if (!output.isInitialised()) {
+				// Initialise as not yet initialised
+				output.initialise(argumentType, isEscalationOnly);
+			} else {
+				// Output already added and initialised
+				this.addIssue("Output " + outputName + " already added");
+			}
 		}
 		return output;
 	}
@@ -276,8 +303,14 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 			this.objects.put(objectName, object);
 			this.objectTypes.add(object);
 		} else {
-			// Object already added
-			this.addIssue("Object " + objectName + " already added");
+			// Added but determine if requires initialising
+			if (!object.isInitialised()) {
+				// Initialise as not yet initialised
+				object.initialise(objectType);
+			} else {
+				// Object already added and initialised
+				this.addIssue("Object " + objectName + " already added");
+			}
 		}
 		return object;
 	}

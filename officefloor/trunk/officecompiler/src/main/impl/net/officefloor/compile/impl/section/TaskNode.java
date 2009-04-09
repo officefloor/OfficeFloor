@@ -16,10 +16,17 @@
  */
 package net.officefloor.compile.impl.section;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.work.TaskType;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 
 /**
  * {@link SectionTask} node.
@@ -39,16 +46,60 @@ public class TaskNode implements SectionTask {
 	private final String taskTypeName;
 
 	/**
+	 * Location of the {@link OfficeSection} containing this {@link TaskNode}.
+	 */
+	private final String sectionLocation;
+
+	/**
+	 * {@link CompilerIssues}.
+	 */
+	private final CompilerIssues issues;
+
+	/**
+	 * {@link TaskFlowNode} instances by their {@link TaskFlow} names.
+	 */
+	private final Map<String, TaskFlowNode> taskFlows = new HashMap<String, TaskFlowNode>();
+
+	/**
+	 * {@link TaskObjectNode} instances by their {@link TaskObject} names.
+	 */
+	private final Map<String, TaskObjectNode> taskObjects = new HashMap<String, TaskObjectNode>();
+
+	/**
+	 * {@link TaskFlowNode} instances by their {@link TaskFlow} names.
+	 */
+	private final Map<String, TaskFlowNode> taskEscalations = new HashMap<String, TaskFlowNode>();
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param taskName
 	 *            Name of this {@link SectionTask}.
 	 * @param taskTypeName
 	 *            Name of the {@link TaskType} for this {@link SectionTask}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link TaskNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
-	public TaskNode(String taskName, String taskTypeName) {
+	public TaskNode(String taskName, String taskTypeName,
+			String sectionLocation, CompilerIssues issues) {
 		this.taskName = taskName;
 		this.taskTypeName = taskTypeName;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
+	}
+
+	/**
+	 * Adds an issue regarding the {@link TaskNode} being built.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 */
+	private void addIssue(String issueDescription) {
+		this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
+				AssetType.TASK, this.taskName, issueDescription);
 	}
 
 	/*
@@ -61,24 +112,39 @@ public class TaskNode implements SectionTask {
 	}
 
 	@Override
-	public TaskFlow getTaskEscalation(String taskEscalationName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionTask.getTaskEscalation");
-	}
-
-	@Override
 	public TaskFlow getTaskFlow(String taskFlowName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionTask.getTaskFlow");
+		// Obtain and return the task flow for the name
+		TaskFlowNode flow = this.taskFlows.get(taskFlowName);
+		if (flow == null) {
+			// Add the task flow
+			flow = new TaskFlowNode(taskFlowName);
+			this.taskFlows.put(taskFlowName, flow);
+		}
+		return flow;
 	}
 
 	@Override
 	public TaskObject getTaskObject(String taskObjectName) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionTask.getTaskObject");
+		// Obtain and return the task object for the name
+		TaskObjectNode object = this.taskObjects.get(taskObjectName);
+		if (object == null) {
+			// Add the task object
+			object = new TaskObjectNode(taskObjectName);
+			this.taskObjects.put(taskObjectName, object);
+		}
+		return object;
+	}
+
+	@Override
+	public TaskFlow getTaskEscalation(String taskEscalationName) {
+		// Obtain and return the task escalation for the name
+		TaskFlowNode escalation = this.taskEscalations.get(taskEscalationName);
+		if (escalation == null) {
+			// Add the task escalation
+			escalation = new TaskFlowNode(taskEscalationName);
+			this.taskEscalations.put(taskEscalationName, escalation);
+		}
+		return escalation;
 	}
 
 }

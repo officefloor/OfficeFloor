@@ -14,20 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.section;
+package net.officefloor.compile.impl.section;
+
+import net.officefloor.compile.spi.section.TaskFlow;
 
 /**
- * Input into a {@link SubSection}.
+ * {@link TaskFlow} node.
  * 
  * @author Daniel
  */
-public interface SubSectionInput {
+public class TaskFlowNode implements TaskFlow {
 
 	/**
-	 * Obtains the name of this {@link SubSectionInput}.
-	 * 
-	 * @return Name of this {@link SubSectionInput}.
+	 * Name of this {@link TaskFlow}.
 	 */
-	String getSubSectionInputName();
+	private final String flowName;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param flowName
+	 *            Name of this {@link TaskFlow}.
+	 */
+	public TaskFlowNode(String flowName) {
+		this.flowName = flowName;
+	}
+
+	/*
+	 * ================== TaskFlow ======================================
+	 */
+
+	@Override
+	public String getTaskFlowName() {
+		return this.flowName;
+	}
 
 }

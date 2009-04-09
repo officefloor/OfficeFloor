@@ -127,7 +127,8 @@ public class WorkNode implements SectionWork {
 		TaskNode task = this.sectionTaskNodes.get(taskName);
 		if (task == null) {
 			// Add the section task
-			task = new TaskNode(taskName, taskTypeName);
+			task = new TaskNode(taskName, taskTypeName, this.sectionLocation,
+					this.issues);
 			this.sectionTaskNodes.put(taskName, task);
 		} else {
 			// Section task already added

@@ -17,9 +17,17 @@
 package net.officefloor.compile.spi.section;
 
 /**
+ * {@link Object} required by the {@link SectionTask}.
+ * 
  * @author Daniel
- *
  */
 public interface TaskObject {
+
+	/**
+	 * Obtains the name of this {@link TaskObject}.
+	 * 
+	 * @return Name of this {@link TaskObject}.
+	 */
+	String getTaskObjectName();
 
 }
