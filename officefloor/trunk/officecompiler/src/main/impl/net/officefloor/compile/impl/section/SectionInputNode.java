@@ -18,13 +18,15 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SubSectionInput;
 
 /**
  * {@link SectionInput} node.
  * 
  * @author Daniel
  */
-public class SectionInputNode implements SectionInputType, SectionInput {
+public class SectionInputNode implements SectionInputType, SectionInput,
+		SubSectionInput {
 
 	/**
 	 * Name of the {@link SectionInputType}.
@@ -32,12 +34,28 @@ public class SectionInputNode implements SectionInputType, SectionInput {
 	private final String inputName;
 
 	/**
-	 * Parameter type.
+	 * Indicates if this {@link SectionInputType} is initialised.
 	 */
-	private final String parameterType;
+	private boolean isInitialised = false;
 
 	/**
-	 * Initiate.
+	 * Parameter type.
+	 */
+	private String parameterType;
+
+	/**
+	 * Initiate not initialised.
+	 * 
+	 * @param inputName
+	 *            Name of the {@link SubSectionInput} (which is the name of the
+	 *            {@link SectionInputType}).
+	 */
+	public SectionInputNode(String inputName) {
+		this.inputName = inputName;
+	}
+
+	/**
+	 * Initiate initialised.
 	 * 
 	 * @param inputName
 	 *            Name of the {@link SectionInputType}.
@@ -46,7 +64,27 @@ public class SectionInputNode implements SectionInputType, SectionInput {
 	 */
 	public SectionInputNode(String inputName, String parameterType) {
 		this.inputName = inputName;
+		this.initialise(parameterType);
+	}
+
+	/**
+	 * Indicates if this {@link SectionInputType} has been initialised.
+	 * 
+	 * @return <code>true</code> if initialised.
+	 */
+	public boolean isInitialised() {
+		return this.isInitialised;
+	}
+
+	/**
+	 * Initialises this {@link SectionInputType}.
+	 * 
+	 * @param parameterType
+	 *            Parameter type.
+	 */
+	public void initialise(String parameterType) {
 		this.parameterType = parameterType;
+		this.isInitialised = true;
 	}
 
 	/*
@@ -61,6 +99,15 @@ public class SectionInputNode implements SectionInputType, SectionInput {
 	@Override
 	public String getParameterType() {
 		return this.parameterType;
+	}
+
+	/*
+	 * =================== SubSectionInput ========================
+	 */
+
+	@Override
+	public String getSubSectionInputName() {
+		return this.inputName;
 	}
 
 }

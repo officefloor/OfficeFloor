@@ -32,10 +32,31 @@ public interface SubSection {
 
 	void addProperty(String name, String value);
 
-	SubSectionInput getInput(String inputName);
+	/**
+	 * Obtains the {@link SubSectionInput}.
+	 * 
+	 * @param inputName
+	 *            Name of the {@link SubSectionInput} to obtain.
+	 * @return {@link SubSectionInput}.
+	 */
+	SubSectionInput getSubSectionInput(String inputName);
 
-	SubSectionOutput getOutput(String outputName);
+	/**
+	 * Obtains the {@link SubSectionOutput}.
+	 * 
+	 * @param outputName
+	 *            Name of the {@link SubSectionOutput} to obtain.
+	 * @return {@link SubSectionOutput}.
+	 */
+	SubSectionOutput getSubSectionOutput(String outputName);
 
-	SubSectionObject getObject(String objectName);
+	/**
+	 * Obtains the {@link SubSectionObject}.
+	 * 
+	 * @param objectName
+	 *            Name of the {@link SubSectionObject} to obtain.
+	 * @return {@link SubSectionObject}.
+	 */
+	SubSectionObject getSubSectionObject(String objectName);
 
 }

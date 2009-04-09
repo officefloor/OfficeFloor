@@ -14,20 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.section;
+package net.officefloor.compile.impl.section;
+
+import net.officefloor.compile.spi.section.TaskObject;
 
 /**
- * Input into a {@link SubSection}.
+ * {@link TaskObject} node.
  * 
  * @author Daniel
  */
-public interface SubSectionInput {
+public class TaskObjectNode implements TaskObject {
 
 	/**
-	 * Obtains the name of this {@link SubSectionInput}.
-	 * 
-	 * @return Name of this {@link SubSectionInput}.
+	 * Name of this {@link TaskObject}.
 	 */
-	String getSubSectionInputName();
+	private final String objectName;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param objectName
+	 *            Name of this {@link TaskObject}.
+	 */
+	public TaskObjectNode(String objectName) {
+		this.objectName = objectName;
+	}
+
+	/*
+	 * ===================== TaskObject ===============================
+	 */
+
+	@Override
+	public String getTaskObjectName() {
+		return this.objectName;
+	}
 
 }

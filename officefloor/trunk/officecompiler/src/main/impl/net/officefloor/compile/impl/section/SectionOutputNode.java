@@ -18,13 +18,15 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.section.SectionOutput;
+import net.officefloor.compile.spi.section.SubSectionOutput;
 
 /**
  * {@link SectionOutput} node.
  * 
  * @author Daniel
  */
-public class SectionOutputNode implements SectionOutputType, SectionOutput {
+public class SectionOutputNode implements SectionOutputType, SectionOutput,
+		SubSectionOutput {
 
 	/**
 	 * Name of the {@link SectionOutputType}.
@@ -32,17 +34,32 @@ public class SectionOutputNode implements SectionOutputType, SectionOutput {
 	private final String outputName;
 
 	/**
+	 * Indicates if this {@link SectionOutputType} is initialised.
+	 */
+	private boolean isInitialised = false;
+
+	/**
 	 * Argument type.
 	 */
-	private final String argumentType;
+	private String argumentType;
 
 	/**
 	 * Flag indicating if escalation only.
 	 */
-	private final boolean isEscalationOnly;
+	private boolean isEscalationOnly;
 
 	/**
-	 * Initiate.
+	 * Initiate not initialised.
+	 * 
+	 * @param outputName
+	 *            Name of the {@link SectionOutputType}.
+	 */
+	public SectionOutputNode(String outputName) {
+		this.outputName = outputName;
+	}
+
+	/**
+	 * Initiate initialised.
 	 * 
 	 * @param outputName
 	 *            Name of the {@link SectionOutputType}.
@@ -54,8 +71,30 @@ public class SectionOutputNode implements SectionOutputType, SectionOutput {
 	public SectionOutputNode(String outputName, String argumentType,
 			boolean isEscalationOnly) {
 		this.outputName = outputName;
+		this.initialise(argumentType, isEscalationOnly);
+	}
+
+	/**
+	 * Indicates if this {@link SectionOutputType} has been initialised.
+	 * 
+	 * @return <code>true</code> if initialised.
+	 */
+	public boolean isInitialised() {
+		return this.isInitialised;
+	}
+
+	/**
+	 * Initialises this {@link SectionOutputType}.
+	 * 
+	 * @param argumentType
+	 *            Argument type.
+	 * @param isEscalationOnly
+	 *            Flag indicating if escalation only.
+	 */
+	public void initialise(String argumentType, boolean isEscalationOnly) {
 		this.argumentType = argumentType;
 		this.isEscalationOnly = isEscalationOnly;
+		this.isInitialised = true;
 	}
 
 	/*
@@ -75,6 +114,15 @@ public class SectionOutputNode implements SectionOutputType, SectionOutput {
 	@Override
 	public boolean isEscalationOnly() {
 		return this.isEscalationOnly;
+	}
+
+	/*
+	 * ================ SubSectionOutput ===========================
+	 */
+
+	@Override
+	public String getSubSectionOutputName() {
+		return this.outputName;
 	}
 
 }

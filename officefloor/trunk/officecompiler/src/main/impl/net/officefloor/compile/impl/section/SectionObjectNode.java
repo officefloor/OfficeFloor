@@ -18,18 +18,25 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.section.SectionObject;
+import net.officefloor.compile.spi.section.SubSectionObject;
 
 /**
  * {@link SectionObject} node.
  * 
  * @author Daniel
  */
-public class SectionObjectNode implements SectionObjectType, SectionObject {
+public class SectionObjectNode implements SectionObjectType, SectionObject,
+		SubSectionObject {
 
 	/**
 	 * Name of the {@link SectionObjectType}.
 	 */
-	private String objectName;
+	private final String objectName;
+
+	/**
+	 * Indicates if this {@link SectionObjectType} is initialised.
+	 */
+	private boolean isInitialised = false;
 
 	/**
 	 * Object type.
@@ -37,7 +44,17 @@ public class SectionObjectNode implements SectionObjectType, SectionObject {
 	private String objectType;
 
 	/**
-	 * Initiate.
+	 * Initiate not initialised.
+	 * 
+	 * @param objectName
+	 *            Name of the {@link SectionObject}.
+	 */
+	public SectionObjectNode(String objectName) {
+		this.objectName = objectName;
+	}
+
+	/**
+	 * Initiate initialised.
 	 * 
 	 * @param objectName
 	 *            Name of the {@link SectionObjectType}.
@@ -46,7 +63,27 @@ public class SectionObjectNode implements SectionObjectType, SectionObject {
 	 */
 	public SectionObjectNode(String objectName, String objectType) {
 		this.objectName = objectName;
+		this.initialise(objectType);
+	}
+
+	/**
+	 * Indicates if this {@link SectionObjectType} has been initialised.
+	 * 
+	 * @return <code>true</code> if initialised.
+	 */
+	public boolean isInitialised() {
+		return this.isInitialised;
+	}
+
+	/**
+	 * Initialises this {@link SectionObjectType}.
+	 * 
+	 * @param objectType
+	 *            Object type.
+	 */
+	public void initialise(String objectType) {
 		this.objectType = objectType;
+		this.isInitialised = true;
 	}
 
 	/*
@@ -61,6 +98,15 @@ public class SectionObjectNode implements SectionObjectType, SectionObject {
 	@Override
 	public String getObjectType() {
 		return this.objectType;
+	}
+
+	/*
+	 * =============== SubSectionObject ============================
+	 */
+
+	@Override
+	public String getSubSectionObjectName() {
+		return this.objectName;
 	}
 
 }
