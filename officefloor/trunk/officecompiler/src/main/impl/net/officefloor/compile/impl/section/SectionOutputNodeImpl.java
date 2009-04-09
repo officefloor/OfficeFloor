@@ -16,17 +16,15 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.section.SectionOutputType;
-import net.officefloor.compile.spi.section.SectionOutput;
-import net.officefloor.compile.spi.section.SubSectionOutput;
 
 /**
- * {@link SectionOutput} node.
+ * {@link SectionOutputNode} implementation.
  * 
  * @author Daniel
  */
-public class SectionOutputNode implements SectionOutputType, SectionOutput,
-		SubSectionOutput {
+public class SectionOutputNodeImpl implements SectionOutputNode {
 
 	/**
 	 * Name of the {@link SectionOutputType}.
@@ -54,7 +52,7 @@ public class SectionOutputNode implements SectionOutputType, SectionOutput,
 	 * @param outputName
 	 *            Name of the {@link SectionOutputType}.
 	 */
-	public SectionOutputNode(String outputName) {
+	public SectionOutputNodeImpl(String outputName) {
 		this.outputName = outputName;
 	}
 
@@ -68,29 +66,22 @@ public class SectionOutputNode implements SectionOutputType, SectionOutput,
 	 * @param isEscalationOnly
 	 *            Flag indicating if escalation only.
 	 */
-	public SectionOutputNode(String outputName, String argumentType,
+	public SectionOutputNodeImpl(String outputName, String argumentType,
 			boolean isEscalationOnly) {
 		this.outputName = outputName;
 		this.initialise(argumentType, isEscalationOnly);
 	}
 
-	/**
-	 * Indicates if this {@link SectionOutputType} has been initialised.
-	 * 
-	 * @return <code>true</code> if initialised.
+	/*
+	 * ================== SectionOutputNode =======================
 	 */
+
+	@Override
 	public boolean isInitialised() {
 		return this.isInitialised;
 	}
 
-	/**
-	 * Initialises this {@link SectionOutputType}.
-	 * 
-	 * @param argumentType
-	 *            Argument type.
-	 * @param isEscalationOnly
-	 *            Flag indicating if escalation only.
-	 */
+	@Override
 	public void initialise(String argumentType, boolean isEscalationOnly) {
 		this.argumentType = argumentType;
 		this.isEscalationOnly = isEscalationOnly;

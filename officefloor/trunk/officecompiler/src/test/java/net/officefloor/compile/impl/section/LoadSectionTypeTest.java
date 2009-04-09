@@ -373,7 +373,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link SectionObjectNode} name.
+	 * Ensure issue if <code>null</code> {@link SectionObjectNodeImpl} name.
 	 */
 	public void testNullObjectName() {
 
@@ -391,7 +391,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link SectionObjectNode} type.
+	 * Ensure issue if <code>null</code> {@link SectionObjectNodeImpl} type.
 	 */
 	public void testNullObjectType() {
 
@@ -478,19 +478,19 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 		// Ensure section type correct
 		assertList(new String[] { "getSectionInputName", "getParameterType" },
-				type.getSectionInputTypes(), new SectionInputNode("INPUT_A",
-						Integer.class.getName()), new SectionInputNode(
+				type.getSectionInputTypes(), new SectionInputNodeImpl("INPUT_A",
+						Integer.class.getName()), new SectionInputNodeImpl(
 						"INPUT_B", String.class.getName()),
-				new SectionInputNode("INPUT_C", null));
+				new SectionInputNodeImpl("INPUT_C", null));
 		assertList(new String[] { "getSectionOutputName", "getArgumentType",
 				"isEscalationOnly" }, type.getSectionOutputTypes(),
-				new SectionOutputNode("OUTPUT_A", Exception.class.getName(),
-						true), new SectionOutputNode("OUTPUT_B", Double.class
-						.getName(), false), new SectionOutputNode("OUTPUT_C",
+				new SectionOutputNodeImpl("OUTPUT_A", Exception.class.getName(),
+						true), new SectionOutputNodeImpl("OUTPUT_B", Double.class
+						.getName(), false), new SectionOutputNodeImpl("OUTPUT_C",
 						null, false));
 		assertList(new String[] { "getSectionObjectName", "getObjectType" },
-				type.getSectionObjectTypes(), new SectionObjectNode("OBJECT_A",
-						Object.class.getName()), new SectionObjectNode(
+				type.getSectionObjectTypes(), new SectionObjectNodeImpl("OBJECT_A",
+						Object.class.getName()), new SectionObjectNodeImpl(
 						"OBJECT_B", Connection.class.getName()));
 	}
 

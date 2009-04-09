@@ -16,17 +16,16 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.section.SectionInputType;
-import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SubSectionInput;
 
 /**
- * {@link SectionInput} node.
+ * {@link SectionInputNode} node.
  * 
  * @author Daniel
  */
-public class SectionInputNode implements SectionInputType, SectionInput,
-		SubSectionInput {
+public class SectionInputNodeImpl implements SectionInputNode {
 
 	/**
 	 * Name of the {@link SectionInputType}.
@@ -50,7 +49,7 @@ public class SectionInputNode implements SectionInputType, SectionInput,
 	 *            Name of the {@link SubSectionInput} (which is the name of the
 	 *            {@link SectionInputType}).
 	 */
-	public SectionInputNode(String inputName) {
+	public SectionInputNodeImpl(String inputName) {
 		this.inputName = inputName;
 	}
 
@@ -62,26 +61,21 @@ public class SectionInputNode implements SectionInputType, SectionInput,
 	 * @param parameterType
 	 *            Parameter type.
 	 */
-	public SectionInputNode(String inputName, String parameterType) {
+	public SectionInputNodeImpl(String inputName, String parameterType) {
 		this.inputName = inputName;
 		this.initialise(parameterType);
 	}
 
-	/**
-	 * Indicates if this {@link SectionInputType} has been initialised.
-	 * 
-	 * @return <code>true</code> if initialised.
+	/*
+	 * ===================== SectionInputNode ===========================
 	 */
+
+	@Override
 	public boolean isInitialised() {
 		return this.isInitialised;
 	}
 
-	/**
-	 * Initialises this {@link SectionInputType}.
-	 * 
-	 * @param parameterType
-	 *            Parameter type.
-	 */
+	@Override
 	public void initialise(String parameterType) {
 		this.parameterType = parameterType;
 		this.isInitialised = true;
