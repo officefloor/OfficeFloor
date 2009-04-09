@@ -18,6 +18,8 @@ package net.officefloor.compile.impl.section;
 
 import java.util.Map;
 
+import net.officefloor.compile.internal.structure.TaskNode;
+import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.source.OfficeSection;
@@ -27,11 +29,11 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 
 /**
- * {@link SectionWork} node.
+ * {@link WorkNode} implementation.
  * 
  * @author Daniel
  */
-public class WorkNode implements SectionWork {
+public class WorkNodeImpl implements WorkNode {
 
 	/**
 	 * Name of this {@link SectionWork}.
@@ -83,7 +85,7 @@ public class WorkNode implements SectionWork {
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
-	public WorkNode(String workName, String workSourceClassName,
+	public WorkNodeImpl(String workName, String workSourceClassName,
 			WorkSource<?> workSource, String sectionLocation,
 			Map<String, TaskNode> sectionTaskNodes, CompilerIssues issues) {
 		this.workName = workName;
@@ -127,8 +129,8 @@ public class WorkNode implements SectionWork {
 		TaskNode task = this.sectionTaskNodes.get(taskName);
 		if (task == null) {
 			// Add the section task
-			task = new TaskNode(taskName, taskTypeName, this.sectionLocation,
-					this.issues);
+			task = new TaskNodeImpl(taskName, taskTypeName,
+					this.sectionLocation, this.issues);
 			this.sectionTaskNodes.put(taskName, task);
 		} else {
 			// Section task already added

@@ -16,17 +16,16 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.section.SectionObject;
-import net.officefloor.compile.spi.section.SubSectionObject;
 
 /**
- * {@link SectionObject} node.
+ * {@link SectionObjectNode} implementation.
  * 
  * @author Daniel
  */
-public class SectionObjectNode implements SectionObjectType, SectionObject,
-		SubSectionObject {
+public class SectionObjectNodeImpl implements SectionObjectNode {
 
 	/**
 	 * Name of the {@link SectionObjectType}.
@@ -49,7 +48,7 @@ public class SectionObjectNode implements SectionObjectType, SectionObject,
 	 * @param objectName
 	 *            Name of the {@link SectionObject}.
 	 */
-	public SectionObjectNode(String objectName) {
+	public SectionObjectNodeImpl(String objectName) {
 		this.objectName = objectName;
 	}
 
@@ -61,26 +60,21 @@ public class SectionObjectNode implements SectionObjectType, SectionObject,
 	 * @param objectType
 	 *            Object type.
 	 */
-	public SectionObjectNode(String objectName, String objectType) {
+	public SectionObjectNodeImpl(String objectName, String objectType) {
 		this.objectName = objectName;
 		this.initialise(objectType);
 	}
 
-	/**
-	 * Indicates if this {@link SectionObjectType} has been initialised.
-	 * 
-	 * @return <code>true</code> if initialised.
+	/*
+	 * ================== SectionObjectNode ========================
 	 */
+
+	@Override
 	public boolean isInitialised() {
 		return this.isInitialised;
 	}
 
-	/**
-	 * Initialises this {@link SectionObjectType}.
-	 * 
-	 * @param objectType
-	 *            Object type.
-	 */
+	@Override
 	public void initialise(String objectType) {
 		this.objectType = objectType;
 		this.isInitialised = true;

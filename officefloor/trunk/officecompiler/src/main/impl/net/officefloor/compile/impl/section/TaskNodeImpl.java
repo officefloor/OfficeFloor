@@ -19,6 +19,9 @@ package net.officefloor.compile.impl.section;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.internal.structure.TaskFlowNode;
+import net.officefloor.compile.internal.structure.TaskNode;
+import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.source.OfficeSection;
@@ -29,11 +32,11 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 
 /**
- * {@link SectionTask} node.
+ * {@link TaskNode} implementation.
  * 
  * @author Daniel
  */
-public class TaskNode implements SectionTask {
+public class TaskNodeImpl implements TaskNode {
 
 	/**
 	 * Name of this {@link SectionTask}.
@@ -83,7 +86,7 @@ public class TaskNode implements SectionTask {
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
-	public TaskNode(String taskName, String taskTypeName,
+	public TaskNodeImpl(String taskName, String taskTypeName,
 			String sectionLocation, CompilerIssues issues) {
 		this.taskName = taskName;
 		this.taskTypeName = taskTypeName;
@@ -117,7 +120,7 @@ public class TaskNode implements SectionTask {
 		TaskFlowNode flow = this.taskFlows.get(taskFlowName);
 		if (flow == null) {
 			// Add the task flow
-			flow = new TaskFlowNode(taskFlowName);
+			flow = new TaskFlowNodeImpl(taskFlowName);
 			this.taskFlows.put(taskFlowName, flow);
 		}
 		return flow;
@@ -129,7 +132,7 @@ public class TaskNode implements SectionTask {
 		TaskObjectNode object = this.taskObjects.get(taskObjectName);
 		if (object == null) {
 			// Add the task object
-			object = new TaskObjectNode(taskObjectName);
+			object = new TaskObjectNodeImpl(taskObjectName);
 			this.taskObjects.put(taskObjectName, object);
 		}
 		return object;
@@ -141,7 +144,7 @@ public class TaskNode implements SectionTask {
 		TaskFlowNode escalation = this.taskEscalations.get(taskEscalationName);
 		if (escalation == null) {
 			// Add the task escalation
-			escalation = new TaskFlowNode(taskEscalationName);
+			escalation = new TaskFlowNodeImpl(taskEscalationName);
 			this.taskEscalations.put(taskEscalationName, escalation);
 		}
 		return escalation;

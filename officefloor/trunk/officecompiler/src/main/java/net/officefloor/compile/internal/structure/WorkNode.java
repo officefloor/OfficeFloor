@@ -14,39 +14,14 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.section;
+package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.section.SectionWork;
 
 /**
- * {@link TaskObject} node.
+ * {@link SectionWork} node.
  * 
  * @author Daniel
  */
-public class TaskObjectNode implements TaskObject {
-
-	/**
-	 * Name of this {@link TaskObject}.
-	 */
-	private final String objectName;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param objectName
-	 *            Name of this {@link TaskObject}.
-	 */
-	public TaskObjectNode(String objectName) {
-		this.objectName = objectName;
-	}
-
-	/*
-	 * ===================== TaskObject ===============================
-	 */
-
-	@Override
-	public String getTaskObjectName() {
-		return this.objectName;
-	}
-
+public interface WorkNode extends SectionWork {
 }

@@ -16,14 +16,15 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.spi.section.TaskFlow;
 
 /**
- * {@link TaskFlow} node.
+ * {@link TaskFlowNode} implementation.
  * 
  * @author Daniel
  */
-public class TaskFlowNode implements TaskFlow {
+public class TaskFlowNodeImpl implements TaskFlowNode {
 
 	/**
 	 * Name of this {@link TaskFlow}.
@@ -36,7 +37,7 @@ public class TaskFlowNode implements TaskFlow {
 	 * @param flowName
 	 *            Name of this {@link TaskFlow}.
 	 */
-	public TaskFlowNode(String flowName) {
+	public TaskFlowNodeImpl(String flowName) {
 		this.flowName = flowName;
 	}
 

@@ -18,6 +18,7 @@ package net.officefloor.compile.impl.section;
 
 import java.sql.Connection;
 
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.source.OfficeSection;
@@ -64,7 +65,8 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link SectionBuilder} to be tested.
 	 */
-	private SectionNode node = new SectionNode(SECTION_LOCATION, this.issues);
+	private SectionNode node = new SectionNodeImpl(SECTION_LOCATION,
+			this.issues);
 
 	/**
 	 * Tests adding a {@link SectionInput}.

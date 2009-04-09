@@ -21,12 +21,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.internal.structure.SectionInputNode;
+import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.SectionObjectNode;
+import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.internal.structure.TaskNode;
+import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
-import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -42,11 +47,11 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 
 /**
- * Node within the hierarchy of {@link OfficeSection} instances.
+ * {@link SectionNode} implementation.
  * 
  * @author Daniel
  */
-public class SectionNode implements SectionBuilder, SectionType, SubSection {
+public class SectionNodeImpl implements SectionNode {
 
 	/**
 	 * Name of this {@link SubSection}.
@@ -132,7 +137,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 	 * @param issues
 	 *            {@link CompilerIssues} to report issues.
 	 */
-	public SectionNode(String sectionLocation, CompilerIssues issues) {
+	public SectionNodeImpl(String sectionLocation, CompilerIssues issues) {
 		this(null, null, null, sectionLocation, issues);
 	}
 
@@ -151,7 +156,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
-	private SectionNode(String sectionName, String sectionSourceClassName,
+	private SectionNodeImpl(String sectionName, String sectionSourceClassName,
 			SectionSource sectionSource, String sectionLocation,
 			CompilerIssues issues) {
 		this.sectionName = sectionName;
@@ -213,7 +218,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 		SectionInputNode input = this.inputs.get(inputName);
 		if (input == null) {
 			// Add the input
-			input = new SectionInputNode(inputName);
+			input = new SectionInputNodeImpl(inputName);
 			this.inputs.put(inputName, input);
 		}
 		return input;
@@ -225,7 +230,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 		SectionOutputNode output = this.outputs.get(outputName);
 		if (output == null) {
 			// Add the output
-			output = new SectionOutputNode(outputName);
+			output = new SectionOutputNodeImpl(outputName);
 			this.outputs.put(outputName, output);
 		}
 		return output;
@@ -237,7 +242,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 		SectionObjectNode object = this.objects.get(objectName);
 		if (object == null) {
 			// Add the object
-			object = new SectionObjectNode(objectName);
+			object = new SectionObjectNodeImpl(objectName);
 			this.objects.put(objectName, object);
 		}
 		return object;
@@ -253,7 +258,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 		SectionInputNode input = this.inputs.get(inputName);
 		if (input == null) {
 			// Add the input
-			input = new SectionInputNode(inputName, parameterType);
+			input = new SectionInputNodeImpl(inputName, parameterType);
 			this.inputs.put(inputName, input);
 			this.inputTypes.add(input);
 		} else {
@@ -276,7 +281,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 		SectionOutputNode output = this.outputs.get(outputName);
 		if (output == null) {
 			// Add the output
-			output = new SectionOutputNode(outputName, argumentType,
+			output = new SectionOutputNodeImpl(outputName, argumentType,
 					isEscalationOnly);
 			this.outputs.put(outputName, output);
 			this.outputTypes.add(output);
@@ -299,7 +304,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 		SectionObjectNode object = this.objects.get(objectName);
 		if (object == null) {
 			// Add the object
-			object = new SectionObjectNode(objectName, objectType);
+			object = new SectionObjectNodeImpl(objectName, objectType);
 			this.objects.put(objectName, object);
 			this.objectTypes.add(object);
 		} else {
@@ -343,7 +348,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 		WorkNode work = this.workNodes.get(workName);
 		if (work == null) {
 			// Add the section work
-			work = new WorkNode(workName, workSourceClassName, workSource,
+			work = new WorkNodeImpl(workName, workSourceClassName, workSource,
 					this.sectionLocation, this.taskNodes, this.issues);
 			this.workNodes.put(workName, work);
 		} else {
@@ -387,7 +392,7 @@ public class SectionNode implements SectionBuilder, SectionType, SubSection {
 		SectionNode subSection = this.subSections.get(subSectionName);
 		if (subSection == null) {
 			// Add the sub section
-			subSection = new SectionNode(subSectionName,
+			subSection = new SectionNodeImpl(subSectionName,
 					sectionSourceClassName, sectionSource, location,
 					this.issues);
 			this.subSections.put(subSectionName, subSection);
