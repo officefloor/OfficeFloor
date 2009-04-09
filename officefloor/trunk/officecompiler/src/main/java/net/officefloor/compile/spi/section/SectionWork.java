@@ -26,7 +26,15 @@ import net.officefloor.frame.api.manage.Office;
  */
 public interface SectionWork {
 
+	/**
+	 * Obtains the name of this {@link SectionWork}.
+	 * 
+	 * @return Name of this {@link SectionWork}.
+	 */
+	String getSectionWorkName();
+
 	void addProperty(String name, String value);
 
 	SectionTask addTask(String taskName, String taskTypeName);
+
 }

@@ -20,11 +20,11 @@ import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.section.SectionOutput;
 
 /**
- * {@link SectionOutputType} implementation.
+ * {@link SectionOutput} node.
  * 
  * @author Daniel
  */
-public class SectionOutputImpl implements SectionOutputType, SectionOutput {
+public class SectionOutputNode implements SectionOutputType, SectionOutput {
 
 	/**
 	 * Name of the {@link SectionOutputType}.
@@ -51,7 +51,7 @@ public class SectionOutputImpl implements SectionOutputType, SectionOutput {
 	 * @param isEscalationOnly
 	 *            Flag indicating if escalation only.
 	 */
-	public SectionOutputImpl(String outputName, String argumentType,
+	public SectionOutputNode(String outputName, String argumentType,
 			boolean isEscalationOnly) {
 		this.outputName = outputName;
 		this.argumentType = argumentType;

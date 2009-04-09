@@ -25,6 +25,13 @@ import net.officefloor.frame.api.execute.Task;
  */
 public interface SectionTask {
 
+	/**
+	 * Obtains the name of this {@link SectionTask}.
+	 * 
+	 * @return Name of this {@link SectionTask}.
+	 */
+	String getSectionTaskName();
+
 	TaskFlow getTaskFlow(String taskFlowName);
 
 	TaskFlow getTaskEscalation(String taskEscalationName);
