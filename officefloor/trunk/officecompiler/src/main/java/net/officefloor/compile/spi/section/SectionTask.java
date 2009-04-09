@@ -16,6 +16,9 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.compile.work.TaskEscalationType;
+import net.officefloor.compile.work.TaskFlowType;
+import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.frame.api.execute.Task;
 
 /**
@@ -32,10 +35,31 @@ public interface SectionTask {
 	 */
 	String getSectionTaskName();
 
+	/**
+	 * Obtains the {@link TaskFlow} for the {@link TaskFlowType}.
+	 * 
+	 * @param taskFlowName
+	 *            Name of the {@link TaskFlowType}.
+	 * @return {@link TaskFlow}.
+	 */
 	TaskFlow getTaskFlow(String taskFlowName);
 
-	TaskFlow getTaskEscalation(String taskEscalationName);
-
+	/**
+	 * Obtains the {@link TaskObject} for the {@link TaskObjectType}.
+	 * 
+	 * @param taskObjectName
+	 *            Name of the {@link TaskObjectType}.
+	 * @return {@link TaskObject}.
+	 */
 	TaskObject getTaskObject(String taskObjectName);
+
+	/**
+	 * Obtains the {@link TaskFlow} for the {@link TaskEscalationType}.
+	 * 
+	 * @param taskEscalationName
+	 *            Name of the {@link TaskEscalationType}.
+	 * @return {@link TaskFlow} for the {@link TaskEscalationType}.
+	 */
+	TaskFlow getTaskEscalation(String taskEscalationName);
 
 }

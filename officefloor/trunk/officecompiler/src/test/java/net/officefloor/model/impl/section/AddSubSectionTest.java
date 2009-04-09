@@ -64,12 +64,12 @@ public class AddSubSectionTest extends AbstractSectionOperationsTestCase {
 
 		// Create the sub section with inputs, outputs, objects
 		SectionNodeImpl sectionType = new SectionNodeImpl(null, null);
-		sectionType.addInput("INPUT_B", Integer.class.getName());
-		sectionType.addInput("INPUT_A", Double.class.getName());
-		sectionType.addOutput("OUTPUT_B", String.class.getName(), false);
-		sectionType.addOutput("OUTPUT_A", Exception.class.getName(), true);
-		sectionType.addObject("OBJECT_B", Object.class.getName());
-		sectionType.addObject("OBJECT_A", Connection.class.getName());
+		sectionType.addSectionInput("INPUT_B", Integer.class.getName());
+		sectionType.addSectionInput("INPUT_A", Double.class.getName());
+		sectionType.addSectionOutput("OUTPUT_B", String.class.getName(), false);
+		sectionType.addSectionOutput("OUTPUT_A", Exception.class.getName(), true);
+		sectionType.addSectionObject("OBJECT_B", Object.class.getName());
+		sectionType.addSectionObject("OBJECT_A", Connection.class.getName());
 
 		// Ensure can add (ordering the inputs, outputs, objects for easier SCM)
 		Change<SubSectionModel> change = this.operations.addSubSection(

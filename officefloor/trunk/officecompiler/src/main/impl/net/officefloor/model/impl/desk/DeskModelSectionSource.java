@@ -53,7 +53,7 @@ public class DeskModelSectionSource implements SectionSource {
 			if (task.getIsPublic()) {
 				// TODO determine parameter type from work task
 				String parameterType = null;
-				sectionBuilder.addInput(task.getTaskName(), parameterType);
+				sectionBuilder.addSectionInput(task.getTaskName(), parameterType);
 			}
 		}
 
@@ -61,14 +61,14 @@ public class DeskModelSectionSource implements SectionSource {
 		for (ExternalFlowModel extFlow : desk.getExternalFlows()) {
 			// TODO determine if escalation only
 			boolean isEscalationOnly = false;
-			sectionBuilder.addOutput(extFlow.getExternalFlowName(), extFlow
+			sectionBuilder.addSectionOutput(extFlow.getExternalFlowName(), extFlow
 					.getArgumentType(), isEscalationOnly);
 		}
 
 		// Add the external managed objects as objects
 		for (ExternalManagedObjectModel extMo : desk
 				.getExternalManagedObjects()) {
-			sectionBuilder.addObject(extMo.getExternalManagedObjectName(),
+			sectionBuilder.addSectionObject(extMo.getExternalManagedObjectName(),
 					extMo.getObjectType());
 		}
 	}

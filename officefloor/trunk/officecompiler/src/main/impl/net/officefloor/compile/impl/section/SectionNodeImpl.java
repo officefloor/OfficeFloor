@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
@@ -253,7 +254,7 @@ public class SectionNodeImpl implements SectionNode {
 	 */
 
 	@Override
-	public SectionInput addInput(String inputName, String parameterType) {
+	public SectionInput addSectionInput(String inputName, String parameterType) {
 		// Obtain and return the section input for the name
 		SectionInputNode input = this.inputs.get(inputName);
 		if (input == null) {
@@ -275,8 +276,8 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public SectionOutput addOutput(String outputName, String argumentType,
-			boolean isEscalationOnly) {
+	public SectionOutput addSectionOutput(String outputName,
+			String argumentType, boolean isEscalationOnly) {
 		// Obtain and return the section output for the name
 		SectionOutputNode output = this.outputs.get(outputName);
 		if (output == null) {
@@ -299,7 +300,7 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
-	public SectionObject addObject(String objectName, String objectType) {
+	public SectionObject addSectionObject(String objectName, String objectType) {
 		// Obtain and return the section object for the name
 		SectionObjectNode object = this.objects.get(objectName);
 		if (object == null) {
@@ -401,6 +402,56 @@ public class SectionNodeImpl implements SectionNode {
 			this.addIssue("Sub section " + subSectionName + " already added");
 		}
 		return subSection;
+	}
+
+	@Override
+	public void link(SectionInput sectionInput, SectionTask task) {
+		this.linkFlow(sectionInput, task);
+	}
+
+	@Override
+	public void link(SectionInput sectionInput, SubSectionInput subSectionInput) {
+		this.linkFlow(sectionInput, subSectionInput);
+	}
+
+	@Override
+	public void link(SectionInput sectionInput, SectionOutput sectionOutput) {
+		this.linkFlow(sectionInput, sectionOutput);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
+	 * 
+	 * @param linkSource
+	 *            Source {@link LinkFlowNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkFlowNode}.
+	 */
+	private void linkFlow(Object linkSource, Object linkTarget) {
+
+		// Ensure the link source is link flow node
+		if (!(linkSource instanceof LinkFlowNode)) {
+			this.addIssue("Invalid link source: "
+					+ linkSource
+					+ " ["
+					+ (linkSource == null ? null : linkSource.getClass()
+							.getName()) + "]");
+			return; // can not link
+		}
+
+		// Ensure the link target is link flow node
+		if (!(linkTarget instanceof LinkFlowNode)) {
+			this.addIssue("Invalid link target: "
+					+ linkTarget
+					+ " ["
+					+ (linkTarget == null ? null : linkTarget.getClass()
+							.getName()
+							+ "]"));
+			return; // can not link
+		}
+
+		// Link the nodes together
+		((LinkFlowNode) linkSource).linkFlowNode((LinkFlowNode) linkTarget);
 	}
 
 }
