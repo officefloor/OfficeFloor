@@ -30,12 +30,6 @@ public interface SectionContext {
 
 	// sectionInput -> task, subSectionInput, sectionOutput
 
-	void link(SectionInput sectionInput, SectionTask task);
-
-	void link(SectionInput sectionInput, SubSectionInput subSectionInput);
-
-	void link(SectionInput sectionInput, SectionOutput sectionOutput);
-
 	// taskFlow -> task, subSectionInput, sectionOutput
 
 	void link(TaskFlow taskFlow, SectionTask task,

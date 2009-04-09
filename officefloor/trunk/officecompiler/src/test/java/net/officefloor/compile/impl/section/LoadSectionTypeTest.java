@@ -257,7 +257,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addInput(null, String.class.getName());
+				section.addSectionInput(null, String.class.getName());
 			}
 		});
 	}
@@ -271,7 +271,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addInput("INPUT", String.class.getName());
+				section.addSectionInput("INPUT", String.class.getName());
 			}
 		});
 
@@ -293,7 +293,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addInput("INPUT", null);
+				section.addSectionInput("INPUT", null);
 			}
 		});
 
@@ -319,7 +319,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addOutput(null, String.class.getName(), false);
+				section.addSectionOutput(null, String.class.getName(), false);
 			}
 		});
 	}
@@ -333,7 +333,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addOutput("OUTPUT", Exception.class.getName(), true);
+				section.addSectionOutput("OUTPUT", Exception.class.getName(), true);
 			}
 		});
 
@@ -357,7 +357,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addOutput("OUTPUT", null, false);
+				section.addSectionOutput("OUTPUT", null, false);
 			}
 		});
 
@@ -385,7 +385,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addObject(null, Double.class.getName());
+				section.addSectionObject(null, Double.class.getName());
 			}
 		});
 	}
@@ -403,7 +403,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addObject("OBJECT", null);
+				section.addSectionObject("OBJECT", null);
 			}
 		});
 	}
@@ -417,7 +417,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addObject("OBJECT", Double.class.getName());
+				section.addSectionObject("OBJECT", Double.class.getName());
 			}
 		});
 
@@ -463,16 +463,16 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				// Inputs
-				section.addInput("INPUT_A", Integer.class.getName());
-				section.addInput("INPUT_B", String.class.getName());
-				section.addInput("INPUT_C", null);
+				section.addSectionInput("INPUT_A", Integer.class.getName());
+				section.addSectionInput("INPUT_B", String.class.getName());
+				section.addSectionInput("INPUT_C", null);
 				// Outputs
-				section.addOutput("OUTPUT_A", Exception.class.getName(), true);
-				section.addOutput("OUTPUT_B", Double.class.getName(), false);
-				section.addOutput("OUTPUT_C", null, false);
+				section.addSectionOutput("OUTPUT_A", Exception.class.getName(), true);
+				section.addSectionOutput("OUTPUT_B", Double.class.getName(), false);
+				section.addSectionOutput("OUTPUT_C", null, false);
 				// Objects
-				section.addObject("OBJECT_A", Object.class.getName());
-				section.addObject("OBJECT_B", Connection.class.getName());
+				section.addSectionObject("OBJECT_A", Object.class.getName());
+				section.addSectionObject("OBJECT_B", Connection.class.getName());
 			}
 		});
 

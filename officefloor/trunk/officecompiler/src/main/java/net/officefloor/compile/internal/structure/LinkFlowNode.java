@@ -14,38 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.section;
-
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
+package net.officefloor.compile.internal.structure;
 
 /**
- * {@link Work} within the {@link Section} of the {@link Office}.
+ * {@link LinkFlowNode} that can be linked to another {@link LinkFlowNode}.
  * 
  * @author Daniel
  */
-public interface SectionWork {
+public interface LinkFlowNode {
 
 	/**
-	 * Obtains the name of this {@link SectionWork}.
+	 * Links the input {@link LinkFlowNode} to this {@link LinkFlowNode}.
 	 * 
-	 * @return Name of this {@link SectionWork}.
+	 * @param node
+	 *            {@link LinkFlowNode} to link to this {@link LinkFlowNode}.
 	 */
-	String getSectionWorkName();
-
-	void addProperty(String name, String value);
+	void linkFlowNode(LinkFlowNode node);
 
 	/**
-	 * Adds a {@link SectionTask}.
+	 * Obtains the {@link LinkFlowNode} linked to this {@link LinkFlowNode}.
 	 * 
-	 * @param taskName
-	 *            Name of the {@link SectionTask}.
-	 * @param taskTypeName
-	 *            Name of the {@link TaskType} on the {@link WorkType}.
-	 * @return {@link SectionTask}.
+	 * @return {@link LinkFlowNode} linked to this {@link LinkFlowNode}.
 	 */
-	SectionTask addTask(String taskName, String taskTypeName);
+	LinkFlowNode getLinkedFlowNode();
 
 }

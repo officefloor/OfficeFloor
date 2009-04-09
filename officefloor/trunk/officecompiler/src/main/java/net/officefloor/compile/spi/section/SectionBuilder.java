@@ -40,7 +40,7 @@ public interface SectionBuilder {
 	 *            Parameter type for the {@link SectionInputType}.
 	 * @return {@link SectionInput} for linking.
 	 */
-	SectionInput addInput(String inputName, String parameterType);
+	SectionInput addSectionInput(String inputName, String parameterType);
 
 	/**
 	 * Adds a {@link SectionOutput} to the {@link OfficeSection} being built.
@@ -54,7 +54,7 @@ public interface SectionBuilder {
 	 *            are using the {@link SectionOutputType}.
 	 * @return {@link SectionOutput} for linking.
 	 */
-	SectionOutput addOutput(String outputName, String argumentType,
+	SectionOutput addSectionOutput(String outputName, String argumentType,
 			boolean isEscalationOnly);
 
 	/**
@@ -66,7 +66,7 @@ public interface SectionBuilder {
 	 *            Type required for the {@link SectionObjectType}.
 	 * @return {@link SectionObject} for linking.
 	 */
-	SectionObject addObject(String objectName, String objectType);
+	SectionObject addSectionObject(String objectName, String objectType);
 
 	/**
 	 * Adds a {@link SectionWork} to the {@link OfficeSection} being built.
@@ -134,5 +134,38 @@ public interface SectionBuilder {
 	 */
 	SubSection addSubSection(String subSectionName,
 			SectionSource sectionSource, String location);
+
+	/**
+	 * Links the {@link SectionInput} to be undertaken by the
+	 * {@link SectionTask}.
+	 * 
+	 * @param sectionInput
+	 *            {@link SectionInput}.
+	 * @param task
+	 *            {@link SectionTask}.
+	 */
+	void link(SectionInput sectionInput, SectionTask task);
+
+	/**
+	 * Links the {@link SectionInput} to be undertaken by the
+	 * {@link SubSectionInput}.
+	 * 
+	 * @param sectionInput
+	 *            {@link SectionInput}.
+	 * @param subSectionInput
+	 *            {@link SubSectionInput}.
+	 */
+	void link(SectionInput sectionInput, SubSectionInput subSectionInput);
+
+	/**
+	 * Links the {@link SubSectionInput} to be undertaken by the
+	 * {@link SectionOutput}.
+	 * 
+	 * @param sectionInput
+	 *            {@link SectionInput}.
+	 * @param sectionOutput
+	 *            {@link SectionOutput}.
+	 */
+	void link(SectionInput sectionInput, SectionOutput sectionOutput);
 
 }

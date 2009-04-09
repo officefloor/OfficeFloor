@@ -14,38 +14,21 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.section;
-
-import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.Office;
+package net.officefloor.compile.internal.structure;
 
 /**
- * {@link Work} within the {@link Section} of the {@link Office}.
+ * {@link LinkObjectNode} that can be linked to another {@link LinkObjectNode}.
  * 
  * @author Daniel
  */
-public interface SectionWork {
+public interface LinkObjectNode {
 
 	/**
-	 * Obtains the name of this {@link SectionWork}.
+	 * Links the input {@link LinkObjectNode} to this {@link LinkObjectNode}.
 	 * 
-	 * @return Name of this {@link SectionWork}.
+	 * @param node
+	 *            {@link LinkObjectNode} to link to this {@link LinkObjectNode}.
 	 */
-	String getSectionWorkName();
-
-	void addProperty(String name, String value);
-
-	/**
-	 * Adds a {@link SectionTask}.
-	 * 
-	 * @param taskName
-	 *            Name of the {@link SectionTask}.
-	 * @param taskTypeName
-	 *            Name of the {@link TaskType} on the {@link WorkType}.
-	 * @return {@link SectionTask}.
-	 */
-	SectionTask addTask(String taskName, String taskTypeName);
+	void linkObjectNode(LinkObjectNode node);
 
 }
