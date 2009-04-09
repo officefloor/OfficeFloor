@@ -23,12 +23,12 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
-import net.officefloor.compile.spi.section.Section;
+import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
-import net.officefloor.compile.spi.section.source.SectionTypeBuilder;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -39,7 +39,7 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link Section}.
+	 * Location of the {@link OfficeSection}.
 	 */
 	private final String SECTION_LOCATION = "SECTION";
 
@@ -403,15 +403,9 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceSectionType(SectionTypeBuilder sectionTypeBuilder,
+		public void sourceSection(SectionBuilder sectionBuilder,
 				SectionSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
-		}
-
-		@Override
-		public Section sourceSection(SectionSourceContext context) {
-			fail("Should not be invoked for obtaining specification");
-			return null;
 		}
 	}
 

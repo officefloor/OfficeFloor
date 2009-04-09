@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.section.source;
+package net.officefloor.compile.spi.section;
 
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
@@ -23,11 +23,11 @@ import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.work.TaskEscalationType;
 
 /**
- * Builder to construct the {@link SectionType}.
+ * Builder to construct the {@link Section}.
  * 
  * @author Daniel
  */
-public interface SectionTypeBuilder {
+public interface SectionBuilder {
 
 	/**
 	 * Adds a {@link SectionInputType} to the {@link SectionType}.
@@ -36,8 +36,9 @@ public interface SectionTypeBuilder {
 	 *            Name of the {@link SectionInputType}.
 	 * @param parameterType
 	 *            Parameter type for the {@link SectionInputType}.
+	 * @return {@link SectionInput} for linking.
 	 */
-	void addInput(String inputName, String parameterType);
+	SectionInput addInput(String inputName, String parameterType);
 
 	/**
 	 * Adds a {@link SectionOutputType} to the {@link SectionType}.
@@ -49,8 +50,9 @@ public interface SectionTypeBuilder {
 	 * @param isEscalationOnly
 	 *            <code>true</code> if only {@link TaskEscalationType} instances
 	 *            are using the {@link SectionOutputType}.
+	 * @return {@link SectionOutput} for linking.
 	 */
-	void addOutput(String outputName, String argumentType,
+	SectionOutput addOutput(String outputName, String argumentType,
 			boolean isEscalationOnly);
 
 	/**
@@ -60,7 +62,8 @@ public interface SectionTypeBuilder {
 	 *            Name of the {@link SectionObjectType}.
 	 * @param objectType
 	 *            Type required for the {@link SectionObjectType}.
+	 * @return {@link SectionObject} for linking.
 	 */
-	void addObject(String objectName, String objectType);
+	SectionObject addObject(String objectName, String objectType);
 
 }

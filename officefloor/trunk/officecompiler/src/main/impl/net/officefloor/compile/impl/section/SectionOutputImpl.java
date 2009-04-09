@@ -17,13 +17,14 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.spi.section.SectionOutput;
 
 /**
  * {@link SectionOutputType} implementation.
  * 
  * @author Daniel
  */
-public class SectionOutputTypeImpl implements SectionOutputType {
+public class SectionOutputImpl implements SectionOutputType, SectionOutput {
 
 	/**
 	 * Name of the {@link SectionOutputType}.
@@ -50,7 +51,7 @@ public class SectionOutputTypeImpl implements SectionOutputType {
 	 * @param isEscalationOnly
 	 *            Flag indicating if escalation only.
 	 */
-	public SectionOutputTypeImpl(String outputName, String argumentType,
+	public SectionOutputImpl(String outputName, String argumentType,
 			boolean isEscalationOnly) {
 		this.outputName = outputName;
 		this.argumentType = argumentType;
@@ -62,7 +63,7 @@ public class SectionOutputTypeImpl implements SectionOutputType {
 	 */
 
 	@Override
-	public String getOutputName() {
+	public String getSectionOutputName() {
 		return this.outputName;
 	}
 

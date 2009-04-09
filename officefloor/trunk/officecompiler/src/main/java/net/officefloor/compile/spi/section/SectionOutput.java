@@ -17,9 +17,17 @@
 package net.officefloor.compile.spi.section;
 
 /**
+ * Output of a {@link Section}.
+ * 
  * @author Daniel
- *
  */
 public interface SectionOutput {
+
+	/**
+	 * Obtains the name of this {@link SectionOutput}.
+	 * 
+	 * @return Name of this {@link SectionOutput}.
+	 */
+	String getSectionOutputName();
 
 }

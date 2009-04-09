@@ -18,6 +18,8 @@ package net.officefloor.compile.section;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
@@ -68,6 +70,35 @@ public interface SectionLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<S extends SectionSource> SectionType loadSectionType(
+			Class<S> sectionSourceClass,
+			ConfigurationContext configurationContext,
+			PropertyList propertyList, ClassLoader classLoader,
+			CompilerIssues issues);
+
+	/**
+	 * <p>
+	 * Loads and returns the {@link OfficeSection} from this
+	 * {@link SectionSource}.
+	 * <p>
+	 * Unlike loading the {@link SectionType} this will recursively load the
+	 * {@link SubSection} instances to fully construct the {@link OfficeSection}.
+	 * 
+	 * @param sectionSourceClass
+	 *            Class of the {@link SectionSource}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
+	 * @param propertyList
+	 *            {@link PropertyList} containing the properties to source the
+	 *            {@link OfficeSection}.
+	 * @param classLoader
+	 *            {@link ClassLoader} that the {@link SectionSource} may use in
+	 *            obtaining necessary class path resources.
+	 * @param issues
+	 *            {@link CompilerIssues} to report issues in loading the
+	 *            {@link OfficeSection}.
+	 * @return {@link OfficeSection}.
+	 */
+	<S extends SectionSource> OfficeSection loadOfficeSection(
 			Class<S> sectionSourceClass,
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader,

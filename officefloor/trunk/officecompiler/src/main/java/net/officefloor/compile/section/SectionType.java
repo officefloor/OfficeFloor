@@ -32,7 +32,7 @@ public interface SectionType {
 	 * @return {@link SectionInputType} definitions for the inputs into the
 	 *         {@link SectionType}.
 	 */
-	SectionInputType[] getInputTypes();
+	SectionInputType[] getSectionInputTypes();
 
 	/**
 	 * Obtains the {@link SectionOutputType} definitions for the outputs from
@@ -41,7 +41,7 @@ public interface SectionType {
 	 * @return {@link SectionOutputType} definitions for the outputs from the
 	 *         {@link SectionType}.
 	 */
-	SectionOutputType[] getOutputTypes();
+	SectionOutputType[] getSectionOutputTypes();
 
 	/**
 	 * Obtains the {@link SectionObjectType} definitions for the {@link Object}
@@ -50,6 +50,6 @@ public interface SectionType {
 	 * @return {@link SectionObjectType} definitions for the {@link Object}
 	 *         dependencies required by the {@link SectionType}.
 	 */
-	SectionObjectType[] getObjectTypes();
+	SectionObjectType[] getSectionObjectTypes();
 
 }

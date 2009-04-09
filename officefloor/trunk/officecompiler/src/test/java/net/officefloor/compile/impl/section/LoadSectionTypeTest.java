@@ -27,12 +27,13 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.section.Section;
+import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
-import net.officefloor.compile.spi.section.source.SectionTypeBuilder;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -45,7 +46,7 @@ import net.officefloor.model.repository.ConfigurationItem;
 public class LoadSectionTypeTest extends OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link Section}.
+	 * Location of the {@link OfficeSection}.
 	 */
 	private final String SECTION_LOCATION = "SECTION";
 
@@ -89,12 +90,12 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure obtain the correct {@link Section} location.
+	 * Ensure obtain the correct {@link OfficeSection} location.
 	 */
 	public void testSectionLocation() {
 		this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				assertEquals("Incorrect section location", SECTION_LOCATION,
 						context.getSectionLocation());
@@ -122,7 +123,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to obtain the configuration item
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				context.getConfiguration(location);
 			}
@@ -144,7 +145,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Obtain the configuration item
 		this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				assertEquals("Incorrect configuation item", item, context
 						.getConfiguration(location));
@@ -164,7 +165,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				context.getProperty("missing");
 			}
@@ -179,7 +180,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
@@ -211,7 +212,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				assertEquals("Incorrect class loader",
 						LoadSectionTypeTest.class.getClassLoader(), context
@@ -236,7 +237,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				throw failure;
 			}
@@ -254,7 +255,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				section.addInput(null, String.class.getName());
 			}
@@ -268,19 +269,19 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				section.addInput("INPUT", String.class.getName());
 			}
 		});
 
 		// Ensure correct input
-		assertEquals("Incorrect number of inputs", 1,
-				type.getInputTypes().length);
-		assertEquals("Incorrect input name", "INPUT", type.getInputTypes()[0]
-				.getInputName());
+		assertEquals("Incorrect number of inputs", 1, type
+				.getSectionInputTypes().length);
+		assertEquals("Incorrect input name", "INPUT", type
+				.getSectionInputTypes()[0].getSectionInputName());
 		assertEquals("Incorrect parameter type", String.class.getName(), type
-				.getInputTypes()[0].getParameterType());
+				.getSectionInputTypes()[0].getParameterType());
 	}
 
 	/**
@@ -290,18 +291,18 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				section.addInput("INPUT", null);
 			}
 		});
 
 		// Ensure correct input
-		assertEquals("Incorrect number of inputs", 1,
-				type.getInputTypes().length);
-		assertEquals("Incorrect input name", "INPUT", type.getInputTypes()[0]
-				.getInputName());
-		assertNull("Incorrect parameter type", type.getInputTypes()[0]
+		assertEquals("Incorrect number of inputs", 1, type
+				.getSectionInputTypes().length);
+		assertEquals("Incorrect input name", "INPUT", type
+				.getSectionInputTypes()[0].getSectionInputName());
+		assertNull("Incorrect parameter type", type.getSectionInputTypes()[0]
 				.getParameterType());
 	}
 
@@ -316,7 +317,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				section.addOutput(null, String.class.getName(), false);
 			}
@@ -330,21 +331,21 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				section.addOutput("OUTPUT", Exception.class.getName(), true);
 			}
 		});
 
 		// Ensure correct output
-		assertEquals("Incorrect number of outputs", 1,
-				type.getOutputTypes().length);
-		assertEquals("Incorrect output name", "OUTPUT",
-				type.getOutputTypes()[0].getOutputName());
+		assertEquals("Incorrect number of outputs", 1, type
+				.getSectionOutputTypes().length);
+		assertEquals("Incorrect output name", "OUTPUT", type
+				.getSectionOutputTypes()[0].getSectionOutputName());
 		assertEquals("Incorrect argument type", Exception.class.getName(), type
-				.getOutputTypes()[0].getArgumentType());
-		assertTrue("Incorrect is escalation only", type.getOutputTypes()[0]
-				.isEscalationOnly());
+				.getSectionOutputTypes()[0].getArgumentType());
+		assertTrue("Incorrect is escalation only",
+				type.getSectionOutputTypes()[0].isEscalationOnly());
 	}
 
 	/**
@@ -354,25 +355,25 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				section.addOutput("OUTPUT", null, false);
 			}
 		});
 
 		// Ensure correct output
-		assertEquals("Incorrect number of outputs", 1,
-				type.getOutputTypes().length);
-		assertEquals("Incorrect output name", "OUTPUT",
-				type.getOutputTypes()[0].getOutputName());
-		assertNull("Should be no argument type", type.getOutputTypes()[0]
-				.getArgumentType());
-		assertFalse("Incorrect is escalation only", type.getOutputTypes()[0]
-				.isEscalationOnly());
+		assertEquals("Incorrect number of outputs", 1, type
+				.getSectionOutputTypes().length);
+		assertEquals("Incorrect output name", "OUTPUT", type
+				.getSectionOutputTypes()[0].getSectionOutputName());
+		assertNull("Should be no argument type",
+				type.getSectionOutputTypes()[0].getArgumentType());
+		assertFalse("Incorrect is escalation only", type
+				.getSectionOutputTypes()[0].isEscalationOnly());
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link SectionObjectTypeImpl} name.
+	 * Ensure issue if <code>null</code> {@link SectionObjectImpl} name.
 	 */
 	public void testNullObjectName() {
 
@@ -382,7 +383,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				section.addObject(null, Double.class.getName());
 			}
@@ -390,7 +391,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensure issue if <code>null</code> {@link SectionObjectTypeImpl} type.
+	 * Ensure issue if <code>null</code> {@link SectionObjectImpl} type.
 	 */
 	public void testNullObjectType() {
 
@@ -400,7 +401,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				section.addObject("OBJECT", null);
 			}
@@ -414,19 +415,19 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				section.addObject("OBJECT", Double.class.getName());
 			}
 		});
 
 		// Ensure correct object
-		assertEquals("Incorrect number of objects", 1,
-				type.getObjectTypes().length);
-		assertEquals("Incorrect object name", "OBJECT",
-				type.getObjectTypes()[0].getObjectName());
+		assertEquals("Incorrect number of objects", 1, type
+				.getSectionObjectTypes().length);
+		assertEquals("Incorrect object name", "OBJECT", type
+				.getSectionObjectTypes()[0].getSectionObjectName());
 		assertEquals("Incorrect object type", Double.class.getName(), type
-				.getObjectTypes()[0].getObjectType());
+				.getSectionObjectTypes()[0].getObjectType());
 	}
 
 	/**
@@ -436,19 +437,19 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				// Load nothing
 			}
 		});
 
 		// Ensure empty section type
-		assertEquals("Incorrect number of inputs", 0,
-				type.getInputTypes().length);
-		assertEquals("Incorrect number of outputs", 0,
-				type.getOutputTypes().length);
-		assertEquals("Incorrect number of objects", 0,
-				type.getObjectTypes().length);
+		assertEquals("Incorrect number of inputs", 0, type
+				.getSectionInputTypes().length);
+		assertEquals("Incorrect number of outputs", 0, type
+				.getSectionOutputTypes().length);
+		assertEquals("Incorrect number of objects", 0, type
+				.getSectionObjectTypes().length);
 	}
 
 	/**
@@ -459,7 +460,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionTypeBuilder section,
+			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
 				// Inputs
 				section.addInput("INPUT_A", Integer.class.getName());
@@ -476,22 +477,21 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		});
 
 		// Ensure section type correct
-		assertList(new String[] { "getInputName", "getParameterType" }, type
-				.getInputTypes(), new SectionInputTypeImpl("INPUT_A",
-				Integer.class.getName()), new SectionInputTypeImpl("INPUT_B",
-				String.class.getName()), new SectionInputTypeImpl("INPUT_C",
-				null));
-		assertList(new String[] { "getOutputName", "getArgumentType",
-				"isEscalationOnly" }, type.getOutputTypes(),
-				new SectionOutputTypeImpl("OUTPUT_A",
-						Exception.class.getName(), true),
-				new SectionOutputTypeImpl("OUTPUT_B", Double.class.getName(),
-						false), new SectionOutputTypeImpl("OUTPUT_C", null,
-						false));
-		assertList(new String[] { "getObjectName", "getObjectType" }, type
-				.getObjectTypes(), new SectionObjectTypeImpl("OBJECT_A",
-				Object.class.getName()), new SectionObjectTypeImpl("OBJECT_B",
-				Connection.class.getName()));
+		assertList(new String[] { "getSectionInputName", "getParameterType" },
+				type.getSectionInputTypes(), new SectionInputImpl("INPUT_A",
+						Integer.class.getName()), new SectionInputImpl(
+						"INPUT_B", String.class.getName()),
+				new SectionInputImpl("INPUT_C", null));
+		assertList(new String[] { "getSectionOutputName", "getArgumentType",
+				"isEscalationOnly" }, type.getSectionOutputTypes(),
+				new SectionOutputImpl("OUTPUT_A", Exception.class.getName(),
+						true), new SectionOutputImpl("OUTPUT_B", Double.class
+						.getName(), false), new SectionOutputImpl("OUTPUT_C",
+						null, false));
+		assertList(new String[] { "getSectionObjectName", "getObjectType" },
+				type.getSectionObjectTypes(), new SectionObjectImpl("OBJECT_A",
+						Object.class.getName()), new SectionObjectImpl(
+						"OBJECT_B", Connection.class.getName()));
 	}
 
 	/**
@@ -574,14 +574,14 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		 * Implemented to load the {@link SectionType}.
 		 * 
 		 * @param section
-		 *            {@link SectionTypeBuilder}.
+		 *            {@link SectionBuilder}.
 		 * @param context
 		 *            {@link SectionSourceContext}.
 		 * @throws Exception
 		 *             If fails to source {@link SectionType}.
 		 */
-		void sourceSection(SectionTypeBuilder section,
-				SectionSourceContext context) throws Exception;
+		void sourceSection(SectionBuilder section, SectionSourceContext context)
+				throws Exception;
 	}
 
 	/**
@@ -627,15 +627,9 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceSectionType(SectionTypeBuilder sectionTypeBuilder,
+		public void sourceSection(SectionBuilder sectionBuilder,
 				SectionSourceContext context) throws Exception {
-			loader.sourceSection(sectionTypeBuilder, context);
-		}
-
-		@Override
-		public Section sourceSection(SectionSourceContext context) {
-			fail("Should not be invoked in obtaining section type");
-			return null;
+			loader.sourceSection(sectionBuilder, context);
 		}
 	}
 

@@ -16,20 +16,19 @@
  */
 package net.officefloor.compile.spi.office.source;
 
-import net.officefloor.compile.spi.section.Section;
 import net.officefloor.frame.api.manage.Office;
 
 /**
- * {@link Section} of the {@link Office}.
+ * {@link OfficeSection} of the {@link Office}.
  * 
  * @author Daniel
  */
 public interface OfficeSection {
 
 	/**
-	 * Obtains the name of this {@link Section}.
+	 * Obtains the name of this {@link OfficeSection}.
 	 * 
-	 * @return Name of this {@link Section}.
+	 * @return Name of this {@link OfficeSection}.
 	 */
 	String getSectionName();
 

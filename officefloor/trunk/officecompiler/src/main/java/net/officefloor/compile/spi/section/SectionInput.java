@@ -17,9 +17,16 @@
 package net.officefloor.compile.spi.section;
 
 /**
+ * Input to a {@link Section}.
+ * 
  * @author Daniel
- *
  */
 public interface SectionInput {
 
+	/**
+	 * Obtains the name of this {@link SectionInput}.
+	 * 
+	 * @return Name of this {@link SectionInput}.
+	 */
+	String getSectionInputName();
 }

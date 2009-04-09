@@ -25,6 +25,8 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
  * 
  * @author Daniel
  */
+// TODO transfer functionality to SectionBuilder
+@Deprecated
 public interface SectionContext {
 
 	SectionInput getSectionInput(String inputName);

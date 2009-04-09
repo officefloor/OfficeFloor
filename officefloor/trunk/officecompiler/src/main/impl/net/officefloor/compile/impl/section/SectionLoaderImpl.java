@@ -26,7 +26,7 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.section.Section;
+import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
@@ -43,7 +43,7 @@ import net.officefloor.model.section.SectionModel;
 public class SectionLoaderImpl implements SectionLoader {
 
 	/**
-	 * Location of the {@link Section}.
+	 * Location of the {@link SectionModel}.
 	 */
 	private final String sectionLocation;
 
@@ -184,12 +184,12 @@ public class SectionLoaderImpl implements SectionLoader {
 				this.sectionLocation, configurationContext, propertyList,
 				classLoader);
 
-		// Create the section type builder
-		SectionTypeImpl sectionType = new SectionTypeImpl();
+		// Create the section builder
+		SectionBuilderImpl sectionType = new SectionBuilderImpl();
 
 		try {
 			// Source the section type
-			sectionSource.sourceSectionType(sectionType, context);
+			sectionSource.sourceSection(sectionType, context);
 
 		} catch (SectionUnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
@@ -198,8 +198,8 @@ public class SectionLoaderImpl implements SectionLoader {
 			return null; // must have property
 
 		} catch (ConfigurationContextPropagateError ex) {
-			this.addIssue("Failure obtaining configuration '" + ex.getLocation()
-					+ "'", ex.getCause(), issues);
+			this.addIssue("Failure obtaining configuration '"
+					+ ex.getLocation() + "'", ex.getCause(), issues);
 			return null; // must not fail in getting configurations
 
 		} catch (Throwable ex) {
@@ -211,40 +211,51 @@ public class SectionLoaderImpl implements SectionLoader {
 		}
 
 		// Ensure all inputs have names
-		SectionInputType[] inputs = sectionType.getInputTypes();
+		SectionInputType[] inputs = sectionType.getSectionInputTypes();
 		for (int i = 0; i < inputs.length; i++) {
-			if (CompileUtil.isBlank(inputs[i].getInputName())) {
+			if (CompileUtil.isBlank(inputs[i].getSectionInputName())) {
 				this.addIssue("Null name for input " + i, issues);
 				return null; // must have names for inputs
 			}
 		}
 
 		// Ensure all outputs have names
-		SectionOutputType[] outputs = sectionType.getOutputTypes();
+		SectionOutputType[] outputs = sectionType.getSectionOutputTypes();
 		for (int i = 0; i < outputs.length; i++) {
-			if (CompileUtil.isBlank(outputs[i].getOutputName())) {
+			if (CompileUtil.isBlank(outputs[i].getSectionOutputName())) {
 				this.addIssue("Null name for output " + i, issues);
 				return null; // must have names for outputs
 			}
 		}
 
 		// Ensure all objects have names and types
-		SectionObjectType[] objects = sectionType.getObjectTypes();
+		SectionObjectType[] objects = sectionType.getSectionObjectTypes();
 		for (int i = 0; i < objects.length; i++) {
 			SectionObjectType object = objects[i];
-			if (CompileUtil.isBlank(object.getObjectName())) {
+			if (CompileUtil.isBlank(object.getSectionObjectName())) {
 				this.addIssue("Null name for object " + i, issues);
 				return null; // must have names for objects
 			}
 			if (CompileUtil.isBlank(object.getObjectType())) {
 				this.addIssue("Null type for object " + i + " (name="
-						+ object.getObjectName() + ")", issues);
+						+ object.getSectionObjectName() + ")", issues);
 				return null; // must have types for objects
 			}
 		}
 
 		// Return the section type
 		return sectionType;
+	}
+
+	@Override
+	public <S extends SectionSource> OfficeSection loadOfficeSection(
+			Class<S> sectionSourceClass,
+			ConfigurationContext configurationContext,
+			PropertyList propertyList, ClassLoader classLoader,
+			CompilerIssues issues) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement SectionLoader.loadOfficeSection");
 	}
 
 	/**

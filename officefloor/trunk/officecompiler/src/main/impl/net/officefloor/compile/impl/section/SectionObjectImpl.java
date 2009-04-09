@@ -16,50 +16,51 @@
  */
 package net.officefloor.compile.impl.section;
 
-import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.spi.section.SectionObject;
 
 /**
- * {@link SectionInputType} implementation.
+ * {@link SectionObjectType} implementation.
  * 
  * @author Daniel
  */
-public class SectionInputTypeImpl implements SectionInputType {
+public class SectionObjectImpl implements SectionObjectType, SectionObject {
 
 	/**
-	 * Name of the {@link SectionInputType}.
+	 * Name of the {@link SectionObjectType}.
 	 */
-	private final String inputName;
+	private String objectName;
 
 	/**
-	 * Parameter type.
+	 * Object type.
 	 */
-	private final String parameterType;
+	private String objectType;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param inputName
-	 *            Name of the {@link SectionInputType}.
-	 * @param parameterType
-	 *            Parameter type.
+	 * @param objectName
+	 *            Name of the {@link SectionObjectType}.
+	 * @param objectType
+	 *            Object type.
 	 */
-	public SectionInputTypeImpl(String inputName, String parameterType) {
-		this.inputName = inputName;
-		this.parameterType = parameterType;
+	public SectionObjectImpl(String objectName, String objectType) {
+		this.objectName = objectName;
+		this.objectType = objectType;
 	}
 
 	/*
-	 * ================= SectionInputType =========================
+	 * =============== SectionObjectType ===========================
 	 */
 
 	@Override
-	public String getInputName() {
-		return this.inputName;
+	public String getSectionObjectName() {
+		return this.objectName;
 	}
 
 	@Override
-	public String getParameterType() {
-		return this.parameterType;
+	public String getObjectType() {
+		return this.objectType;
 	}
 
 }
