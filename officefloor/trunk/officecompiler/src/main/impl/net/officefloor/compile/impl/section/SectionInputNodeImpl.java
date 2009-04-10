@@ -16,8 +16,12 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 
 /**
@@ -31,6 +35,17 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * Name of the {@link SectionInputType}.
 	 */
 	private final String inputName;
+
+	/**
+	 * Location of the {@link OfficeSection} containing this
+	 * {@link SectionInputNode}.
+	 */
+	private final String sectionLocation;
+
+	/**
+	 * {@link CompilerIssues}.
+	 */
+	private final CompilerIssues issues;
 
 	/**
 	 * Indicates if this {@link SectionInputType} is initialised.
@@ -48,9 +63,17 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * @param inputName
 	 *            Name of the {@link SubSectionInput} (which is the name of the
 	 *            {@link SectionInputType}).
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link SectionInputNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
-	public SectionInputNodeImpl(String inputName) {
+	public SectionInputNodeImpl(String inputName, String sectionLocation,
+			CompilerIssues issues) {
 		this.inputName = inputName;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
 	}
 
 	/**
@@ -60,9 +83,17 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 *            Name of the {@link SectionInputType}.
 	 * @param parameterType
 	 *            Parameter type.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link SectionInputNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
-	public SectionInputNodeImpl(String inputName, String parameterType) {
+	public SectionInputNodeImpl(String inputName, String parameterType,
+			String sectionLocation, CompilerIssues issues) {
 		this.inputName = inputName;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
 		this.initialise(parameterType);
 	}
 
@@ -102,6 +133,36 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	@Override
 	public String getSubSectionInputName() {
 		return this.inputName;
+	}
+
+	/*
+	 * =================== LinkFlowNode ============================
+	 */
+
+	/**
+	 * Linked {@link LinkFlowNode}.
+	 */
+	private LinkFlowNode linkedFlowNode = null;
+
+	@Override
+	public boolean linkFlowNode(LinkFlowNode node) {
+
+		// Ensure not already linked
+		if (this.linkedFlowNode != null) {
+			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
+					null, null, "Input " + this.inputName
+							+ " linked more than once");
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedFlowNode = node;
+		return true;
+	}
+
+	@Override
+	public LinkFlowNode getLinkedFlowNode() {
+		return this.linkedFlowNode;
 	}
 
 }

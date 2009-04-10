@@ -23,6 +23,7 @@ import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.TaskEscalationType;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * Builder to construct the {@link OfficeSection}.
@@ -167,5 +168,131 @@ public interface SectionBuilder {
 	 *            {@link SectionOutput}.
 	 */
 	void link(SectionInput sectionInput, SectionOutput sectionOutput);
+
+	/**
+	 * Links the {@link TaskFlow} to be undertaken by the {@link SectionTask}.
+	 * 
+	 * @param taskFlow
+	 *            {@link TaskFlow}.
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 */
+	void link(TaskFlow taskFlow, SectionTask task,
+			FlowInstigationStrategyEnum instigationStrategy);
+
+	/**
+	 * Links the {@link TaskFlow} to be undertaken by the
+	 * {@link SubSectionInput}.
+	 * 
+	 * @param taskFlow
+	 *            {@link TaskFlow}.
+	 * @param subSectionInput
+	 *            {@link SectionTask}.
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 */
+	void link(TaskFlow taskFlow, SubSectionInput subSectionInput,
+			FlowInstigationStrategyEnum instigationStrategy);
+
+	/**
+	 * Links the {@link TaskFlow} to be undertaken by the {@link SectionOutput}.
+	 * 
+	 * @param taskFlow
+	 *            {@link TaskFlow}.
+	 * @param sectionOutput
+	 *            {@link SectionOutput}.
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 */
+	void link(TaskFlow taskFlow, SectionOutput sectionOutput,
+			FlowInstigationStrategyEnum instigationStrategy);
+
+	/**
+	 * Links the {@link SectionTask} with the next {@link SectionTask} to be
+	 * undertaken.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param nextTask
+	 *            Next {@link SectionTask}.
+	 */
+	void link(SectionTask task, SectionTask nextTask);
+
+	/**
+	 * Links the {@link SectionTask} with the next {@link SubSectionInput} to be
+	 * undertaken.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param subSectionInput
+	 *            Next {@link SubSectionInput}.
+	 */
+	void link(SectionTask task, SubSectionInput subSectionInput);
+
+	/**
+	 * Links the {@link SectionTask} with the next {@link SectionOutput} to be
+	 * undertaken.
+	 * 
+	 * @param task
+	 *            {@link SectionTask}.
+	 * @param sectionOutput
+	 *            Next {@link SectionOutput}.
+	 */
+	void link(SectionTask task, SectionOutput sectionOutput);
+
+	/**
+	 * Links the {@link SubSectionOutput} to be undertaken by the
+	 * {@link SectionTask}.
+	 * 
+	 * @param subSectionOutput
+	 *            {@link SubSectionOutput}.
+	 * @param task
+	 *            {@link SectionTask}.
+	 */
+	void link(SubSectionOutput subSectionOutput, SectionTask task);
+
+	/**
+	 * Links the {@link SubSectionOutput} to be undertaken by the
+	 * {@link SubSectionInput}.
+	 * 
+	 * @param subSectionOutput
+	 *            {@link SubSectionOutput}.
+	 * @param subSectionInput
+	 *            {@link SubSectionInput}.
+	 */
+	void link(SubSectionOutput subSectionOutput, SubSectionInput subSectionInput);
+
+	/**
+	 * Links the {@link SubSectionOutput} to be undertaken by the
+	 * {@link SectionOutput}.
+	 * 
+	 * @param subSectionOutput
+	 *            {@link SubSectionOutput}.
+	 * @param sectionOutput
+	 *            {@link SectionOutput}.
+	 */
+	void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput);
+
+	/**
+	 * Links the {@link TaskObject} to be the {@link SectionObject}.
+	 * 
+	 * @param taskObject
+	 *            {@link TaskObject}.
+	 * @param sectionObject
+	 *            {@link SectionObject}.
+	 */
+	void link(TaskObject taskObject, SectionObject sectionObject);
+
+	/**
+	 * Links the {@link SubSectionObject} to be the {@link SectionObject}.
+	 * 
+	 * @param subSectionObject
+	 *            {@link SubSectionObject}.
+	 * @param sectionObject
+	 *            {@link SectionObject}.
+	 */
+	void link(SubSectionObject subSectionObject, SectionObject sectionObject);
 
 }

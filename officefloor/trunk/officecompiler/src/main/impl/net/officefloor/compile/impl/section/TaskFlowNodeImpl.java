@@ -16,8 +16,14 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.compile.spi.section.TaskFlow;
+import net.officefloor.compile.work.TaskEscalationType;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * {@link TaskFlowNode} implementation.
@@ -32,13 +38,43 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 	private final String flowName;
 
 	/**
+	 * Indicates if this {@link TaskFlow} is for a {@link TaskEscalationType}.
+	 */
+	private final boolean isEscalation;
+
+	/**
+	 * Location of the {@link OfficeSection} containing this {@link TaskFlow}.
+	 */
+	private final String sectionLocation;
+
+	/**
+	 * {@link CompilerIssues}.
+	 */
+	private final CompilerIssues issues;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param flowName
 	 *            Name of this {@link TaskFlow}.
+	 * @param isEscalation
+	 *            Indicates if this {@link TaskFlow} is for a
+	 *            {@link TaskEscalationType}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link TaskFlow}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
-	public TaskFlowNodeImpl(String flowName) {
+	public TaskFlowNodeImpl(String flowName, boolean isEscalation,
+			String sectionLocation, CompilerIssues issues) {
 		this.flowName = flowName;
+		this.isEscalation = isEscalation;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
+
+		// If escalation, then flow instigation strategy always sequential
+		this.instigationStrategy = FlowInstigationStrategyEnum.SEQUENTIAL;
 	}
 
 	/*
@@ -48,6 +84,59 @@ public class TaskFlowNodeImpl implements TaskFlowNode {
 	@Override
 	public String getTaskFlowName() {
 		return this.flowName;
+	}
+
+	/*
+	 * ================== TaskFlowNode ==================================
+	 */
+
+	/**
+	 * {@link FlowInstigationStrategyEnum} for this {@link TaskFlow}.
+	 */
+	private FlowInstigationStrategyEnum instigationStrategy;
+
+	@Override
+	public void setFlowInstigationStrategy(
+			FlowInstigationStrategyEnum instigationStrategy) {
+		// May only specify if not escalation
+		if (!this.isEscalation) {
+			this.instigationStrategy = instigationStrategy;
+		}
+	}
+
+	@Override
+	public FlowInstigationStrategyEnum getFlowInstigationStrategy() {
+		return this.instigationStrategy;
+	}
+
+	/*
+	 * =================== LinkFlowNode ==================================
+	 */
+
+	/**
+	 * Linked {@link LinkFlowNode}.
+	 */
+	private LinkFlowNode linkedFlowNode;
+
+	@Override
+	public boolean linkFlowNode(LinkFlowNode node) {
+
+		// Ensure not already linked
+		if (this.linkedFlowNode != null) {
+			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
+					null, null, "Task flow " + this.flowName
+							+ " linked more than once");
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedFlowNode = node;
+		return true;
+	}
+
+	@Override
+	public LinkFlowNode getLinkedFlowNode() {
+		return this.linkedFlowNode;
 	}
 
 }

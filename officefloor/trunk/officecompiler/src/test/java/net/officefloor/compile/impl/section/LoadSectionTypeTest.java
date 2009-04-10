@@ -333,7 +333,8 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 			@Override
 			public void sourceSection(SectionBuilder section,
 					SectionSourceContext context) throws Exception {
-				section.addSectionOutput("OUTPUT", Exception.class.getName(), true);
+				section.addSectionOutput("OUTPUT", Exception.class.getName(),
+						true);
 			}
 		});
 
@@ -467,31 +468,38 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 				section.addSectionInput("INPUT_B", String.class.getName());
 				section.addSectionInput("INPUT_C", null);
 				// Outputs
-				section.addSectionOutput("OUTPUT_A", Exception.class.getName(), true);
-				section.addSectionOutput("OUTPUT_B", Double.class.getName(), false);
+				section.addSectionOutput("OUTPUT_A", Exception.class.getName(),
+						true);
+				section.addSectionOutput("OUTPUT_B", Double.class.getName(),
+						false);
 				section.addSectionOutput("OUTPUT_C", null, false);
 				// Objects
 				section.addSectionObject("OBJECT_A", Object.class.getName());
-				section.addSectionObject("OBJECT_B", Connection.class.getName());
+				section
+						.addSectionObject("OBJECT_B", Connection.class
+								.getName());
 			}
 		});
 
 		// Ensure section type correct
 		assertList(new String[] { "getSectionInputName", "getParameterType" },
-				type.getSectionInputTypes(), new SectionInputNodeImpl("INPUT_A",
-						Integer.class.getName()), new SectionInputNodeImpl(
-						"INPUT_B", String.class.getName()),
-				new SectionInputNodeImpl("INPUT_C", null));
+				type.getSectionInputTypes(), new SectionInputNodeImpl(
+						"INPUT_A", Integer.class.getName(), null, null),
+				new SectionInputNodeImpl("INPUT_B", String.class.getName(),
+						null, null), new SectionInputNodeImpl("INPUT_C", null,
+						null, null));
 		assertList(new String[] { "getSectionOutputName", "getArgumentType",
 				"isEscalationOnly" }, type.getSectionOutputTypes(),
-				new SectionOutputNodeImpl("OUTPUT_A", Exception.class.getName(),
-						true), new SectionOutputNodeImpl("OUTPUT_B", Double.class
-						.getName(), false), new SectionOutputNodeImpl("OUTPUT_C",
-						null, false));
+				new SectionOutputNodeImpl("OUTPUT_A",
+						Exception.class.getName(), true, null, null),
+				new SectionOutputNodeImpl("OUTPUT_B", Double.class.getName(),
+						false, null, null), new SectionOutputNodeImpl(
+						"OUTPUT_C", null, false, null, null));
 		assertList(new String[] { "getSectionObjectName", "getObjectType" },
-				type.getSectionObjectTypes(), new SectionObjectNodeImpl("OBJECT_A",
-						Object.class.getName()), new SectionObjectNodeImpl(
-						"OBJECT_B", Connection.class.getName()));
+				type.getSectionObjectTypes(), new SectionObjectNodeImpl(
+						"OBJECT_A", Object.class.getName(), null, null),
+				new SectionObjectNodeImpl("OBJECT_B", Connection.class
+						.getName(), null, null));
 	}
 
 	/**

@@ -28,7 +28,14 @@ public interface LinkObjectNode {
 	 * 
 	 * @param node
 	 *            {@link LinkObjectNode} to link to this {@link LinkObjectNode}.
+	 * @return <code>true</code> if linked.
 	 */
-	void linkObjectNode(LinkObjectNode node);
+	boolean linkObjectNode(LinkObjectNode node);
 
+	/**
+	 * Obtains the {@link LinkObjectNode} linked to this {@link LinkObjectNode}.
+	 * 
+	 * @return {@link LinkObjectNode} linked to this {@link LinkObjectNode}.
+	 */
+	LinkObjectNode getLinkedObjectNode();
 }

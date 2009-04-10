@@ -26,7 +26,7 @@ import net.officefloor.compile.spi.section.SubSectionInput;
  * @author Daniel
  */
 public interface SectionInputNode extends SectionInputType, SectionInput,
-		SubSectionInput {
+		SubSectionInput, LinkFlowNode {
 
 	/**
 	 * Indicates if this {@link SectionInputType} has been initialised.

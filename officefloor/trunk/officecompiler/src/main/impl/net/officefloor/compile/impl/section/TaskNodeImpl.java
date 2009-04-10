@@ -19,6 +19,8 @@ package net.officefloor.compile.impl.section;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.FlowLineUtil.LinkedFlow;
+import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
@@ -120,7 +122,8 @@ public class TaskNodeImpl implements TaskNode {
 		TaskFlowNode flow = this.taskFlows.get(taskFlowName);
 		if (flow == null) {
 			// Add the task flow
-			flow = new TaskFlowNodeImpl(taskFlowName);
+			flow = new TaskFlowNodeImpl(taskFlowName, false,
+					this.sectionLocation, this.issues);
 			this.taskFlows.put(taskFlowName, flow);
 		}
 		return flow;
@@ -132,7 +135,8 @@ public class TaskNodeImpl implements TaskNode {
 		TaskObjectNode object = this.taskObjects.get(taskObjectName);
 		if (object == null) {
 			// Add the task object
-			object = new TaskObjectNodeImpl(taskObjectName);
+			object = new TaskObjectNodeImpl(taskObjectName,
+					this.sectionLocation, this.issues);
 			this.taskObjects.put(taskObjectName, object);
 		}
 		return object;
@@ -144,10 +148,41 @@ public class TaskNodeImpl implements TaskNode {
 		TaskFlowNode escalation = this.taskEscalations.get(taskEscalationName);
 		if (escalation == null) {
 			// Add the task escalation
-			escalation = new TaskFlowNodeImpl(taskEscalationName);
+			escalation = new TaskFlowNodeImpl(taskEscalationName, true,
+					this.sectionLocation, this.issues);
 			this.taskEscalations.put(taskEscalationName, escalation);
 		}
 		return escalation;
+	}
+
+	/*
+	 * ==================== LinkFlowNode ==================================
+	 */
+
+	/**
+	 * Linked {@link LinkFlowNode}.
+	 */
+	private LinkFlowNode linkedFlowNode;
+
+	@Override
+	public boolean linkFlowNode(LinkFlowNode node) {
+
+		// Ensure not already linked
+		if (this.linkedFlowNode != null) {
+			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
+					null, null, "Task " + this.taskName
+							+ " linked more than once");
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedFlowNode = node;
+		return true;
+	}
+
+	@Override
+	public LinkFlowNode getLinkedFlowNode() {
+		return this.linkedFlowNode;
 	}
 
 }
