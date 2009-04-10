@@ -28,8 +28,9 @@ public interface LinkFlowNode {
 	 * 
 	 * @param node
 	 *            {@link LinkFlowNode} to link to this {@link LinkFlowNode}.
+	 * @return <code>true</code> if linked.
 	 */
-	void linkFlowNode(LinkFlowNode node);
+	boolean linkFlowNode(LinkFlowNode node);
 
 	/**
 	 * Obtains the {@link LinkFlowNode} linked to this {@link LinkFlowNode}.

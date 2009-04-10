@@ -23,5 +23,5 @@ import net.officefloor.compile.spi.section.SectionTask;
  * 
  * @author Daniel
  */
-public interface TaskNode extends SectionTask {
+public interface TaskNode extends SectionTask, LinkFlowNode {
 }

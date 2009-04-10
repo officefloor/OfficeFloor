@@ -16,8 +16,13 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.section.SubSectionOutput;
 
 /**
  * {@link SectionOutputNode} implementation.
@@ -30,6 +35,17 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * Name of the {@link SectionOutputType}.
 	 */
 	private final String outputName;
+
+	/**
+	 * Location of the {@link OfficeSection} containing this
+	 * {@link SubSectionOutput}.
+	 */
+	private final String sectionLocation;
+
+	/**
+	 * {@link CompilerIssues}.
+	 */
+	private final CompilerIssues issues;
 
 	/**
 	 * Indicates if this {@link SectionOutputType} is initialised.
@@ -51,9 +67,17 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * 
 	 * @param outputName
 	 *            Name of the {@link SectionOutputType}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link SubSectionOutput}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
-	public SectionOutputNodeImpl(String outputName) {
+	public SectionOutputNodeImpl(String outputName, String sectionLocation,
+			CompilerIssues issues) {
 		this.outputName = outputName;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
 	}
 
 	/**
@@ -65,10 +89,18 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 *            Argument type.
 	 * @param isEscalationOnly
 	 *            Flag indicating if escalation only.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link SubSectionOutput}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
 	public SectionOutputNodeImpl(String outputName, String argumentType,
-			boolean isEscalationOnly) {
+			boolean isEscalationOnly, String sectionLocation,
+			CompilerIssues issues) {
 		this.outputName = outputName;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
 		this.initialise(argumentType, isEscalationOnly);
 	}
 
@@ -114,6 +146,36 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	@Override
 	public String getSubSectionOutputName() {
 		return this.outputName;
+	}
+
+	/*
+	 * ==================== LinkFlowNode ===========================
+	 */
+
+	/**
+	 * Linked {@link LinkFlowNode}.
+	 */
+	private LinkFlowNode linkedFlowNode;
+
+	@Override
+	public boolean linkFlowNode(LinkFlowNode node) {
+
+		// Ensure not already linked
+		if (this.linkedFlowNode != null) {
+			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
+					null, null, "Sub section output " + this.outputName
+							+ " linked more than once");
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedFlowNode = node;
+		return true;
+	}
+
+	@Override
+	public LinkFlowNode getLinkedFlowNode() {
+		return this.linkedFlowNode;
 	}
 
 }

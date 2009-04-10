@@ -16,9 +16,14 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.compile.spi.section.SectionObject;
+import net.officefloor.compile.spi.section.SubSectionObject;
 
 /**
  * {@link SectionObjectNode} implementation.
@@ -31,6 +36,17 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * Name of the {@link SectionObjectType}.
 	 */
 	private final String objectName;
+
+	/**
+	 * Location of the {@link OfficeSection} containing this
+	 * {@link SubSectionObject}.
+	 */
+	private final String sectionLocation;
+
+	/**
+	 * {@link CompilerIssues}.
+	 */
+	private final CompilerIssues issues;
 
 	/**
 	 * Indicates if this {@link SectionObjectType} is initialised.
@@ -47,9 +63,17 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * 
 	 * @param objectName
 	 *            Name of the {@link SectionObject}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link SubSectionObject}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
-	public SectionObjectNodeImpl(String objectName) {
+	public SectionObjectNodeImpl(String objectName, String sectionLocation,
+			CompilerIssues issues) {
 		this.objectName = objectName;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
 	}
 
 	/**
@@ -59,9 +83,17 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 *            Name of the {@link SectionObjectType}.
 	 * @param objectType
 	 *            Object type.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link SubSectionObject}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
-	public SectionObjectNodeImpl(String objectName, String objectType) {
+	public SectionObjectNodeImpl(String objectName, String objectType,
+			String sectionLocation, CompilerIssues issues) {
 		this.objectName = objectName;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
 		this.initialise(objectType);
 	}
 
@@ -101,6 +133,36 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	@Override
 	public String getSubSectionObjectName() {
 		return this.objectName;
+	}
+
+	/*
+	 * =============== LinkObjectNode ==============================
+	 */
+
+	/**
+	 * Linked {@link LinkObjectNode}.
+	 */
+	private LinkObjectNode linkedObjectNode;
+
+	@Override
+	public boolean linkObjectNode(LinkObjectNode node) {
+
+		// Ensure not already linked
+		if (this.linkedObjectNode != null) {
+			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
+					null, null, "Sub section object " + this.objectName
+							+ " linked more than once");
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedObjectNode = node;
+		return true;
+	}
+
+	@Override
+	public LinkObjectNode getLinkedObjectNode() {
+		return this.linkedObjectNode;
 	}
 
 }

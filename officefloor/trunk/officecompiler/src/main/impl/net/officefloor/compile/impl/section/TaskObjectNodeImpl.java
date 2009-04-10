@@ -16,7 +16,11 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.office.source.OfficeSection;
 import net.officefloor.compile.spi.section.TaskObject;
 
 /**
@@ -32,13 +36,31 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	private final String objectName;
 
 	/**
+	 * Location of the {@link OfficeSection} containing this {@link TaskObject}.
+	 */
+	private final String sectionLocation;
+
+	/**
+	 * {@link CompilerIssues}.
+	 */
+	private final CompilerIssues issues;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param objectName
 	 *            Name of this {@link TaskObject}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection} containing this
+	 *            {@link TaskObject}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
-	public TaskObjectNodeImpl(String objectName) {
+	public TaskObjectNodeImpl(String objectName, String sectionLocation,
+			CompilerIssues issues) {
 		this.objectName = objectName;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
 	}
 
 	/*
@@ -48,6 +70,36 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	@Override
 	public String getTaskObjectName() {
 		return this.objectName;
+	}
+
+	/*
+	 * ===================== LinkObjectNode ===========================
+	 */
+
+	/**
+	 * Linked {@link LinkObjectNode}.
+	 */
+	private LinkObjectNode linkedObjectNode;
+
+	@Override
+	public boolean linkObjectNode(LinkObjectNode node) {
+
+		// Ensure not already linked
+		if (this.linkedObjectNode != null) {
+			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
+					null, null, "Task object " + this.objectName
+							+ " linked more than once");
+			return false; // already linked
+		}
+
+		// Link
+		this.linkedObjectNode = node;
+		return true;
+	}
+
+	@Override
+	public LinkObjectNode getLinkedObjectNode() {
+		return this.linkedObjectNode;
 	}
 
 }

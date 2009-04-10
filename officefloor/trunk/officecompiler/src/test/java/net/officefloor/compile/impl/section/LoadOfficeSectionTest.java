@@ -14,33 +14,18 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.impl.section;
 
-import net.officefloor.compile.section.SectionObjectType;
-import net.officefloor.compile.spi.section.SectionObject;
-import net.officefloor.compile.spi.section.SubSectionObject;
+import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
- * {@link SectionObject} node.
+ * Tests loading the {@link OfficeSection}.
  * 
  * @author Daniel
  */
-public interface SectionObjectNode extends SectionObjectType, SectionObject,
-		SubSectionObject, LinkObjectNode {
+public class LoadOfficeSectionTest extends OfficeFrameTestCase {
 
-	/**
-	 * Indicates if this {@link SectionObjectType} has been initialised.
-	 * 
-	 * @return <code>true</code> if initialised.
-	 */
-	boolean isInitialised();
-
-	/**
-	 * Initialises this {@link SectionObjectType}.
-	 * 
-	 * @param objectType
-	 *            Object type.
-	 */
-	void initialise(String objectType);
+	// TODO implement
 
 }

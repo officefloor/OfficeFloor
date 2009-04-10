@@ -22,10 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
+import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -44,8 +46,11 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.SubSectionInput;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.compile.spi.section.SubSectionOutput;
+import net.officefloor.compile.spi.section.TaskFlow;
+import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * {@link SectionNode} implementation.
@@ -219,7 +224,8 @@ public class SectionNodeImpl implements SectionNode {
 		SectionInputNode input = this.inputs.get(inputName);
 		if (input == null) {
 			// Add the input
-			input = new SectionInputNodeImpl(inputName);
+			input = new SectionInputNodeImpl(inputName, this.sectionLocation,
+					this.issues);
 			this.inputs.put(inputName, input);
 		}
 		return input;
@@ -231,7 +237,8 @@ public class SectionNodeImpl implements SectionNode {
 		SectionOutputNode output = this.outputs.get(outputName);
 		if (output == null) {
 			// Add the output
-			output = new SectionOutputNodeImpl(outputName);
+			output = new SectionOutputNodeImpl(outputName,
+					this.sectionLocation, this.issues);
 			this.outputs.put(outputName, output);
 		}
 		return output;
@@ -243,7 +250,8 @@ public class SectionNodeImpl implements SectionNode {
 		SectionObjectNode object = this.objects.get(objectName);
 		if (object == null) {
 			// Add the object
-			object = new SectionObjectNodeImpl(objectName);
+			object = new SectionObjectNodeImpl(objectName,
+					this.sectionLocation, this.issues);
 			this.objects.put(objectName, object);
 		}
 		return object;
@@ -259,7 +267,8 @@ public class SectionNodeImpl implements SectionNode {
 		SectionInputNode input = this.inputs.get(inputName);
 		if (input == null) {
 			// Add the input
-			input = new SectionInputNodeImpl(inputName, parameterType);
+			input = new SectionInputNodeImpl(inputName, parameterType,
+					this.sectionLocation, this.issues);
 			this.inputs.put(inputName, input);
 			this.inputTypes.add(input);
 		} else {
@@ -283,7 +292,7 @@ public class SectionNodeImpl implements SectionNode {
 		if (output == null) {
 			// Add the output
 			output = new SectionOutputNodeImpl(outputName, argumentType,
-					isEscalationOnly);
+					isEscalationOnly, this.sectionLocation, this.issues);
 			this.outputs.put(outputName, output);
 			this.outputTypes.add(output);
 		} else {
@@ -305,7 +314,8 @@ public class SectionNodeImpl implements SectionNode {
 		SectionObjectNode object = this.objects.get(objectName);
 		if (object == null) {
 			// Add the object
-			object = new SectionObjectNodeImpl(objectName, objectType);
+			object = new SectionObjectNodeImpl(objectName, objectType,
+					this.sectionLocation, this.issues);
 			this.objects.put(objectName, object);
 			this.objectTypes.add(object);
 		} else {
@@ -419,6 +429,65 @@ public class SectionNodeImpl implements SectionNode {
 		this.linkFlow(sectionInput, sectionOutput);
 	}
 
+	@Override
+	public void link(TaskFlow taskFlow, SectionTask task,
+			FlowInstigationStrategyEnum instigationStrategy) {
+		if (this.linkFlow(taskFlow, task)) {
+			// Linked so specify instigation strategy
+			this.loadFlowInstigationStrategy(taskFlow, instigationStrategy);
+		}
+	}
+
+	@Override
+	public void link(TaskFlow taskFlow, SubSectionInput subSectionInput,
+			FlowInstigationStrategyEnum instigationStrategy) {
+		if (this.linkFlow(taskFlow, subSectionInput)) {
+			// Linked so specify instigation strategy
+			this.loadFlowInstigationStrategy(taskFlow, instigationStrategy);
+		}
+	}
+
+	@Override
+	public void link(TaskFlow taskFlow, SectionOutput sectionOutput,
+			FlowInstigationStrategyEnum instigationStrategy) {
+		if (this.linkFlow(taskFlow, sectionOutput)) {
+			// Linked so specify instigation strategy
+			this.loadFlowInstigationStrategy(taskFlow, instigationStrategy);
+		}
+	}
+
+	@Override
+	public void link(SectionTask task, SectionTask nextTask) {
+		this.linkFlow(task, nextTask);
+	}
+
+	@Override
+	public void link(SectionTask task, SubSectionInput subSectionInput) {
+		this.linkFlow(task, subSectionInput);
+	}
+
+	@Override
+	public void link(SectionTask task, SectionOutput sectionOutput) {
+		this.linkFlow(task, sectionOutput);
+	}
+
+	@Override
+	public void link(SubSectionOutput subSectionOutput, SectionTask task) {
+		this.linkFlow(subSectionOutput, task);
+	}
+
+	@Override
+	public void link(SubSectionOutput subSectionOutput,
+			SubSectionInput subSectionInput) {
+		this.linkFlow(subSectionOutput, subSectionInput);
+	}
+
+	@Override
+	public void link(SubSectionOutput subSectionOutput,
+			SectionOutput sectionOutput) {
+		this.linkFlow(subSectionOutput, sectionOutput);
+	}
+
 	/**
 	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
 	 * 
@@ -426,8 +495,9 @@ public class SectionNodeImpl implements SectionNode {
 	 *            Source {@link LinkFlowNode}.
 	 * @param linkTarget
 	 *            Target {@link LinkFlowNode}.
+	 * @return <code>true</code> if linked.
 	 */
-	private void linkFlow(Object linkSource, Object linkTarget) {
+	private boolean linkFlow(Object linkSource, Object linkTarget) {
 
 		// Ensure the link source is link flow node
 		if (!(linkSource instanceof LinkFlowNode)) {
@@ -436,7 +506,7 @@ public class SectionNodeImpl implements SectionNode {
 					+ " ["
 					+ (linkSource == null ? null : linkSource.getClass()
 							.getName()) + "]");
-			return; // can not link
+			return false; // can not link
 		}
 
 		// Ensure the link target is link flow node
@@ -447,11 +517,84 @@ public class SectionNodeImpl implements SectionNode {
 					+ (linkTarget == null ? null : linkTarget.getClass()
 							.getName()
 							+ "]"));
-			return; // can not link
+			return false; // can not link
 		}
 
 		// Link the nodes together
-		((LinkFlowNode) linkSource).linkFlowNode((LinkFlowNode) linkTarget);
+		return ((LinkFlowNode) linkSource)
+				.linkFlowNode((LinkFlowNode) linkTarget);
+	}
+
+	/**
+	 * Loads the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
+	 * 
+	 * @param taskFlow
+	 *            {@link TaskFlow}.
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 */
+	private void loadFlowInstigationStrategy(TaskFlow taskFlow,
+			FlowInstigationStrategyEnum instigationStrategy) {
+
+		// Ensure a task flow node
+		if (!(taskFlow instanceof TaskFlowNode)) {
+			this.addIssue("Invalid task flow: " + taskFlow + " ["
+					+ (taskFlow == null ? null : taskFlow.getClass().getName())
+					+ "]");
+			return; // can not load instigation strategy
+		}
+
+		// Load the instigation strategy
+		((TaskFlowNode) taskFlow)
+				.setFlowInstigationStrategy(instigationStrategy);
+	}
+
+	@Override
+	public void link(TaskObject taskObject, SectionObject sectionObject) {
+		this.linkObject(taskObject, sectionObject);
+	}
+
+	@Override
+	public void link(SubSectionObject subSectionObject,
+			SectionObject sectionObject) {
+		this.linkObject(subSectionObject, sectionObject);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkObjectNode} and if so links them.
+	 * 
+	 * @param linkSource
+	 *            Source {@link LinkObjectNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkObjectNode}.
+	 * @return <code>true</code> if linked.
+	 */
+	private boolean linkObject(Object linkSource, Object linkTarget) {
+
+		// Ensure the link source is link object node
+		if (!(linkSource instanceof LinkObjectNode)) {
+			this.addIssue("Invalid link source: "
+					+ linkSource
+					+ " ["
+					+ (linkSource == null ? null : linkSource.getClass()
+							.getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link object node
+		if (!(linkTarget instanceof LinkObjectNode)) {
+			this.addIssue("Invalid link target: "
+					+ linkTarget
+					+ " ["
+					+ (linkTarget == null ? null : linkTarget.getClass()
+							.getName()
+							+ "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkObjectNode) linkSource)
+				.linkObjectNode((LinkObjectNode) linkTarget);
 	}
 
 }

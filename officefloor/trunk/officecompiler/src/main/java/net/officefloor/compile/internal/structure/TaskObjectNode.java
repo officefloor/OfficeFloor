@@ -23,5 +23,5 @@ import net.officefloor.compile.spi.section.TaskObject;
  * 
  * @author Daniel
  */
-public interface TaskObjectNode extends TaskObject {
+public interface TaskObjectNode extends TaskObject, LinkObjectNode {
 }

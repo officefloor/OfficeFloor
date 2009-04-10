@@ -19,7 +19,9 @@ package net.officefloor.compile.impl.section;
 import java.sql.Connection;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.source.OfficeSection;
@@ -44,6 +46,7 @@ import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -442,27 +445,384 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	 * Ensure can link {@link SectionInput} to the {@link SectionTask}.
 	 */
 	public void testLinkSectionInputToSectionTask() {
-		fail("TODO implement");
+
+		// Record already being linked
+		this.record_issue("Input INPUT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionInput input = this.node.addSectionInput("INPUT", Object.class
+				.getName());
+		SectionWork work = this.node.addWork("WORK", NotUseWorkSource.class
+				.getName());
+		SectionTask task = work.addTask("TASK", "TYPE");
+		this.node.link(input, task);
+		assertFlowLink("input -> task", input, task);
+
+		// Ensure only can link once
+		this.node.link(input, work.addTask("ANOTHER", "TYPE"));
+		assertFlowLink("Can only link once", input, task);
+
+		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensure can link {@link SectionInput} to the {@link SubSectionInput}.
 	 */
 	public void testLinkSectionInputToSubSectionInput() {
-		fail("TODO implement");
+
+		// Record already being linked
+		this.record_issue("Input INPUT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionInput input = this.node.addSectionInput("INPUT", Object.class
+				.getName());
+		SubSection subSection = this.node.addSubSection("SUB_SECTION",
+				NotUseSectionSource.class.getName(), "LOCATION");
+		SubSectionInput subSectionInput = subSection
+				.getSubSectionInput("SUB_SECTION_INPUT");
+		this.node.link(input, subSectionInput);
+		assertFlowLink("input -> sub section input", input, subSectionInput);
+
+		// Ensure only can link once
+		this.node.link(input, subSection.getSubSectionInput("ANOTHER"));
+		assertFlowLink("Can only link once", input, subSectionInput);
+
+		this.verifyMockObjects();
 	}
 
 	/**
 	 * Ensures can link {@link SectionInput} to the {@link SectionOutput}.
 	 */
 	public void testLinkSectionInputToSectionOutput() {
+
+		// Record already being linked
+		this.record_issue("Input INPUT linked more than once");
+
 		this.replayMockObjects();
+
+		// Link
 		SectionInput input = this.node.addSectionInput("INPUT", Object.class
 				.getName());
 		SectionOutput output = this.node.addSectionOutput("OUTPUT",
 				Object.class.getName(), false);
 		this.node.link(input, output);
 		assertFlowLink("input -> output", input, output);
+
+		// Ensure only can link once
+		this.node.link(input, this.node.addSectionOutput("ANOTHER",
+				String.class.getName(), false));
+		assertFlowLink("Can only link once", input, output);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link TaskFlow} to the {@link SectionTask}.
+	 */
+	public void testLinkTaskFlowToSectionTask() {
+
+		// Record already being linked
+		this.record_issue("Task flow FLOW linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionTask task = this.node.addWork("WORK", new NotUseWorkSource())
+				.addTask("TASK", "TYPE");
+		TaskFlow flow = task.getTaskFlow("FLOW");
+		SectionTask targetTask = this.node.addWork("TARGET",
+				NotUseWorkSource.class.getName()).addTask("TARGET", "TYPE");
+		this.node
+				.link(flow, targetTask, FlowInstigationStrategyEnum.SEQUENTIAL);
+		assertFlowLink("task flow -> task", flow, targetTask);
+		assertFlowInstigationStrategy(flow,
+				FlowInstigationStrategyEnum.SEQUENTIAL);
+
+		// Ensure only can link once
+		this.node.link(flow, task, FlowInstigationStrategyEnum.PARALLEL);
+		assertFlowLink("Can only link once", flow, targetTask);
+		assertFlowInstigationStrategy(flow,
+				FlowInstigationStrategyEnum.SEQUENTIAL);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link TaskFlow} to the {@link SubSectionInput}.
+	 */
+	public void testLinkTaskFlowToSubSectionInput() {
+
+		// Record already being linked
+		this.record_issue("Task flow FLOW linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionTask task = this.node.addWork("WORK", new NotUseWorkSource())
+				.addTask("TASK", "TYPE");
+		TaskFlow flow = task.getTaskFlow("FLOW");
+		SubSection subSection = this.node.addSubSection("SUB_SECTION",
+				new NotUseSectionSource(), "LOCATION");
+		SubSectionInput input = subSection.getSubSectionInput("INPUT");
+		this.node.link(flow, input, FlowInstigationStrategyEnum.PARALLEL);
+		assertFlowLink("task flow -> sub section input", flow, input);
+		assertFlowInstigationStrategy(flow,
+				FlowInstigationStrategyEnum.PARALLEL);
+
+		// Ensure only can link once
+		this.node.link(flow, subSection.getSubSectionInput("ANOTHER"),
+				FlowInstigationStrategyEnum.SEQUENTIAL);
+		assertFlowLink("Can only link once", flow, input);
+		assertFlowInstigationStrategy(flow,
+				FlowInstigationStrategyEnum.PARALLEL);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link TaskFlow} to the {@link SectionOutput}.
+	 */
+	public void testLinkTaskFlowToSectionOutput() {
+
+		// Record already being linked
+		this.record_issue("Task flow FLOW linked more than once");
+
+		this.replayMockObjects();
+
+		// Link (escalation)
+		SectionTask task = this.node.addWork("WORK", new NotUseWorkSource())
+				.addTask("TASK", "TYPE");
+		TaskFlow flow = task.getTaskEscalation("FLOW");
+		SectionOutput output = this.node.addSectionOutput("OUTPUT",
+				Exception.class.getName(), true);
+		this.node.link(flow, output, FlowInstigationStrategyEnum.ASYNCHRONOUS);
+		assertFlowLink("task flow -> section output", flow, output);
+		// Task Escalation always sequential
+		assertFlowInstigationStrategy(flow,
+				FlowInstigationStrategyEnum.SEQUENTIAL);
+
+		// Ensure only can link once
+		this.node.link(flow, this.node.addSectionOutput("ANOTHER", Object.class
+				.getName(), false), FlowInstigationStrategyEnum.PARALLEL);
+		assertFlowLink("Can only link once", flow, output);
+		assertFlowInstigationStrategy(flow,
+				FlowInstigationStrategyEnum.SEQUENTIAL);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SectionTask} to its next {@link SectionTask}.
+	 */
+	public void testLinkSectionTaskToNextSectionTask() {
+
+		// Record already being linked
+		this.record_issue("Task TASK linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionWork work = this.node.addWork("WORK", NotUseWorkSource.class
+				.getName());
+		SectionTask task = work.addTask("TASK", "TYPE");
+		SectionTask nextTask = work.addTask("NEXT", "TYPE");
+		this.node.link(task, nextTask);
+		assertFlowLink("task -> next task", task, nextTask);
+
+		// Ensure only can link once
+		this.node.link(task, work.addTask("ANOTHER", "TYPE"));
+		assertFlowLink("Can only link once", task, nextTask);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SectionTask} to its next {@link SubSectionInput}.
+	 */
+	public void testLinkSectionTaskToNextSubSectionInput() {
+
+		// Record already being linked
+		this.record_issue("Task TASK linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionTask task = this.node.addWork("WORK",
+				NotUseWorkSource.class.getName()).addTask("TASK", "TYPE");
+		SubSection subSection = this.node.addSubSection("SUB_SECTION",
+				new NotUseSectionSource(), "LOCATION");
+		SubSectionInput input = subSection.getSubSectionInput("INPUT");
+		this.node.link(task, input);
+		assertFlowLink("task -> next input", task, input);
+
+		// Ensure only can link once
+		this.node.link(task, subSection.getSubSectionInput("ANOTHER"));
+		assertFlowLink("Can only link once", task, input);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SectionTask} to the {@link SectionOutput}.
+	 */
+	public void testLinkSectionTaskToNextSectionOutput() {
+
+		// Record already being linked
+		this.record_issue("Task TASK linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionTask task = this.node.addWork("WORK",
+				NotUseWorkSource.class.getName()).addTask("TASK", "TYPE");
+		SectionOutput output = this.node.addSectionOutput("OUTPUT",
+				Object.class.getName(), false);
+		this.node.link(task, output);
+		assertFlowLink("task -> next output", task, output);
+
+		// Ensure only can link once
+		this.node.link(task, this.node.addSectionOutput("ANOTHER", String.class
+				.getName(), false));
+		assertFlowLink("Can only link once", task, output);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SubSectionOutput} to the {@link SectionTask}.
+	 */
+	public void testLinkSubSectionOutputToSectionTask() {
+
+		// Record already being linked
+		this.record_issue("Sub section output OUTPUT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SubSection subSection = this.node.addSubSection("SUB_SECTION",
+				NotUseSectionSource.class.getName(), SECTION_LOCATION);
+		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
+		SectionWork work = this.node.addWork("WORK", NotUseWorkSource.class
+				.getName());
+		SectionTask task = work.addTask("TASK", "TYPE");
+		this.node.link(output, task);
+		assertFlowLink("sub section output -> task", output, task);
+
+		// Ensure only can link once
+		this.node.link(output, work.addTask("ANOTHER", "TYPE"));
+		assertFlowLink("Can only link once", output, task);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SubSectionOutput} to the {@link SubSectionInput}.
+	 */
+	public void testLinkSubSectionOutputToSubSectionInput() {
+
+		// Record already being linked
+		this.record_issue("Sub section output OUTPUT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SubSection subSection = this.node.addSubSection("SUB_SECTION",
+				NotUseSectionSource.class.getName(), SECTION_LOCATION);
+		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
+		SubSectionInput input = subSection.getSubSectionInput("INPUT");
+		this.node.link(output, input);
+		assertFlowLink("sub section output -> sub section input", output, input);
+
+		// Ensure only can link once
+		this.node.link(output, subSection.getSubSectionInput("ANOTHER"));
+		assertFlowLink("Can only link once", output, input);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SubSectionOutput} to the {@link SectionOutput}.
+	 */
+	public void testLinkSubSectionOutputToSectionOutput() {
+
+		// Record already being linked
+		this.record_issue("Sub section output OUTPUT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SubSection subSection = this.node.addSubSection("SUB_SECTION",
+				NotUseSectionSource.class.getName(), SECTION_LOCATION);
+		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
+		SectionOutput sectionOutput = this.node.addSectionOutput("OUTPUT",
+				Object.class.getName(), false);
+		this.node.link(output, sectionOutput);
+		assertFlowLink("sub section output -> section output", output,
+				sectionOutput);
+
+		// Ensure only can link once
+		this.node.link(output, this.node.addSectionOutput("ANOTHER",
+				String.class.getName(), false));
+		assertFlowLink("Can only link once", output, sectionOutput);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link TaskObject} to the {@link SectionObject}.
+	 */
+	public void testLinkTaskObjectToSectionObject() {
+
+		// Record already being linked
+		this.record_issue("Task object OBJECT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		TaskObject object = this.node.addWork("WORK", new NotUseWorkSource())
+				.addTask("TASK", "TYPE").getTaskObject("OBJECT");
+		SectionObject sectionObject = this.node.addSectionObject("OUTPUT",
+				Connection.class.getName());
+		this.node.link(object, sectionObject);
+		assertObjectLink("task object -> section object", object, sectionObject);
+
+		// Ensure only can link once
+		this.node.link(object, this.node.addSectionObject("ANOTHER",
+				String.class.getName()));
+		assertObjectLink("Can only link once", object, sectionObject);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SubSectionObject} to the {@link SectionObject}.
+	 */
+	public void testLinkSubSectionObjectToSectionObject() {
+
+		// Record already being linked
+		this.record_issue("Sub section object OBJECT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SubSectionObject object = this.node.addSubSection("SUB_SECTION",
+				new NotUseSectionSource(), SECTION_LOCATION)
+				.getSubSectionObject("OBJECT");
+		SectionObject sectionObject = this.node.addSectionObject("OUTPUT",
+				Connection.class.getName());
+		this.node.link(object, sectionObject);
+		assertObjectLink("sub section object -> section object", object,
+				sectionObject);
+
+		// Ensure only can link once
+		this.node.link(object, this.node.addSectionObject("ANOTHER",
+				String.class.getName()));
+		assertObjectLink("Can only link once", object, sectionObject);
+
 		this.verifyMockObjects();
 	}
 
@@ -483,6 +843,42 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 				+ LinkFlowNode.class.getSimpleName(),
 				linkSource instanceof LinkFlowNode);
 		assertEquals(msg, ((LinkFlowNode) linkSource).getLinkedFlowNode(),
+				linkTarget);
+	}
+
+	/**
+	 * Asserts the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
+	 * 
+	 * @param taskFlow
+	 *            {@link TaskFlow} to check.
+	 * @param instigationStrategy
+	 *            Expected {@link FlowInstigationStrategyEnum}.
+	 */
+	private static void assertFlowInstigationStrategy(TaskFlow taskFlow,
+			FlowInstigationStrategyEnum instigationStrategy) {
+		assertTrue("Task flow must be " + TaskFlowNode.class,
+				taskFlow instanceof TaskFlowNode);
+		assertEquals("Incorrect instigation strategy", instigationStrategy,
+				((TaskFlowNode) taskFlow).getFlowInstigationStrategy());
+	}
+
+	/**
+	 * Asserts the {@link LinkObjectNode} source is linked to the target
+	 * {@link LinkObjectNode}.
+	 * 
+	 * @param msg
+	 *            Message.
+	 * @param linkSource
+	 *            Source {@link LinkObjectNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkObjectNode}.
+	 */
+	private static void assertObjectLink(String msg, Object linkSource,
+			Object linkTarget) {
+		assertTrue(msg + ": source must be "
+				+ LinkObjectNode.class.getSimpleName(),
+				linkSource instanceof LinkObjectNode);
+		assertEquals(msg, ((LinkObjectNode) linkSource).getLinkedObjectNode(),
 				linkTarget);
 	}
 

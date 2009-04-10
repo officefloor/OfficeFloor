@@ -26,7 +26,7 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
  * @author Daniel
  */
 public interface SectionOutputNode extends SectionOutputType, SectionOutput,
-		SubSectionOutput {
+		SubSectionOutput, LinkFlowNode {
 
 	/**
 	 * Indicates if this {@link SectionOutputType} has been initialised.

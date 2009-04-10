@@ -17,11 +17,29 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.section.TaskFlow;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * {@link TaskFlow} node.
  * 
  * @author Daniel
  */
-public interface TaskFlowNode extends TaskFlow {
+public interface TaskFlowNode extends TaskFlow, LinkFlowNode {
+
+	/**
+	 * Obtains the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
+	 * 
+	 * @return {@link FlowInstigationStrategyEnum} for this {@link TaskFlow}.
+	 */
+	FlowInstigationStrategyEnum getFlowInstigationStrategy();
+
+	/**
+	 * Specifies the {@link FlowInstigationStrategyEnum} for this
+	 * {@link TaskFlow}.
+	 * 
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum} for this {@link TaskFlow}.
+	 */
+	void setFlowInstigationStrategy(
+			FlowInstigationStrategyEnum instigationStrategy);
 }
