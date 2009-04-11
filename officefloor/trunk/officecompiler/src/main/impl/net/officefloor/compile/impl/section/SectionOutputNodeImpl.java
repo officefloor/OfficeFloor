@@ -149,6 +149,15 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	}
 
 	/*
+	 * =================== OfficeSectionOutput ======================
+	 */
+
+	@Override
+	public String getOfficeSectionOutputName() {
+		return this.outputName;
+	}
+
+	/*
 	 * ==================== LinkFlowNode ===========================
 	 */
 

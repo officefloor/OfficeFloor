@@ -14,34 +14,27 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.internal.structure;
-
-import net.officefloor.compile.section.SectionInputType;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.compile.spi.section.SubSectionInput;
+package net.officefloor.compile.spi.office;
 
 /**
- * {@link SectionInput} node.
+ * Input into the {@link OfficeSection}.
  * 
  * @author Daniel
  */
-public interface SectionInputNode extends SectionInputType, SectionInput,
-		SubSectionInput, OfficeSectionInput, LinkFlowNode {
+public interface OfficeSectionInput {
 
 	/**
-	 * Indicates if this {@link SectionInputType} has been initialised.
+	 * Obtains the name of this {@link OfficeSectionInput}.
 	 * 
-	 * @return <code>true</code> if initialised.
+	 * @return Name of this {@link OfficeSectionInput}.
 	 */
-	boolean isInitialised();
+	String getOfficeSectionInputName();
 
 	/**
-	 * Initialises this {@link SectionInputType}.
+	 * Obtains the parameter type for this {@link OfficeSectionInput}.
 	 * 
-	 * @param parameterType
-	 *            Parameter type.
+	 * @return Parameter type for this {@link OfficeSectionInput}.
 	 */
-	void initialise(String parameterType);
+	String getParameterType();
 
 }

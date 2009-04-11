@@ -17,6 +17,9 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SubSection;
@@ -43,8 +46,8 @@ public class LoadOfficeSectionTest extends AbstractOfficeSectionTestCase {
 
 		// Ensure empty
 		assertEquals("Should be no sub section", 0,
-				section.getSubSections().length);
-		assertEquals("Should be no tasks", 0, section.getTasks().length);
+				section.getOfficeSubSections().length);
+		assertEquals("Should be no tasks", 0, section.getOfficeTasks().length);
 	}
 
 	/**
@@ -62,13 +65,13 @@ public class LoadOfficeSectionTest extends AbstractOfficeSectionTestCase {
 
 		// Validate results
 		assertEquals("Should have a sub section", 1,
-				section.getSubSections().length);
-		OfficeSection subSection = section.getSubSections()[0];
+				section.getOfficeSubSections().length);
+		OfficeSubSection subSection = section.getOfficeSubSections()[0];
 		assertEquals("Incorrect sub section", "SUB_SECTION", subSection
-				.getSectionName());
+				.getOfficeSectionName());
 		assertEquals("Should be no sub section tasks", 0,
-				subSection.getTasks().length);
-		assertEquals("Should be no tasks", 0, section.getTasks().length);
+				subSection.getOfficeTasks().length);
+		assertEquals("Should be no tasks", 0, section.getOfficeTasks().length);
 	}
 
 	/**
@@ -92,19 +95,19 @@ public class LoadOfficeSectionTest extends AbstractOfficeSectionTestCase {
 
 		// Validate the results
 		assertEquals("Should have a sub section", 1,
-				section.getSubSections().length);
+				section.getOfficeSubSections().length);
 		assertEquals("Should be no tasks on section", 0,
-				section.getTasks().length);
-		OfficeSection subSection = section.getSubSections()[0];
+				section.getOfficeTasks().length);
+		OfficeSubSection subSection = section.getOfficeSubSections()[0];
 		assertEquals("Should have a sub sub section", 1, subSection
-				.getSubSections().length);
+				.getOfficeSubSections().length);
 		assertEquals("Should be no tasks on sub section", 0, subSection
-				.getTasks().length);
-		OfficeSection subSubSection = subSection.getSubSections()[0];
+				.getOfficeTasks().length);
+		OfficeSubSection subSubSection = subSection.getOfficeSubSections()[0];
 		assertEquals("Incorrect sub sub section", "SUB_SUB_SECTION",
-				subSubSection.getSectionName());
+				subSubSection.getOfficeSectionName());
 		assertEquals("Should be no tasks on sub sub section", 0, subSubSection
-				.getTasks().length);
+				.getOfficeTasks().length);
 	}
 
 	/**
@@ -122,10 +125,64 @@ public class LoadOfficeSectionTest extends AbstractOfficeSectionTestCase {
 
 		// Validate results
 		assertEquals("Should be no sub sections", 0,
-				section.getSubSections().length);
-		assertEquals("Should have a single task", 1, section.getTasks().length);
-		OfficeTask task = section.getTasks()[0];
-		assertEquals("Incorrect task name", "TASK", task.getTaskName());
+				section.getOfficeSubSections().length);
+		assertEquals("Should have a single task", 1, section.getOfficeTasks().length);
+		OfficeTask task = section.getOfficeTasks()[0];
+		assertEquals("Incorrect task name", "TASK", task.getOfficeTaskName());
+	}
+
+	/**
+	 * Ensure can load a {@link OfficeSectionInput}.
+	 */
+	public void testLoadOfficeSectionInput() {
+
+		// Load the office section with an office section input
+		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
+			@Override
+			public void make(SectionMakerContext context) {
+				context.getBuilder().addSectionInput("INPUT",
+						String.class.getName());
+			}
+		});
+
+		// Validate results
+		assertEquals("Should have office section input", 1, section
+				.getOfficeSectionInputs().length);
+		OfficeSectionInput input = section.getOfficeSectionInputs()[0];
+		assertEquals("Incorrect office section input", "INPUT", input
+				.getOfficeSectionInputName());
+		assertEquals("Incorrect office section input parameter type",
+				String.class.getName(), input.getParameterType());
+		assertEquals("Should be no office section outputs", 0, section
+				.getOfficeSectionOutputs().length);
+	}
+
+	/**
+	 * Ensure can load a {@link OfficeSectionOutput}.
+	 */
+	public void testLoadOfficeSectionOutput() {
+
+		// Load the office section with an office section output
+		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
+			@Override
+			public void make(SectionMakerContext context) {
+				context.getBuilder().addSectionOutput("OUTPUT",
+						Exception.class.getName(), true);
+			}
+		});
+
+		// Validate results
+		assertEquals("Should be no office section inputs", 0, section
+				.getOfficeSectionInputs().length);
+		assertEquals("Should have office section output", 1, section
+				.getOfficeSectionOutputs().length);
+		OfficeSectionOutput output = section.getOfficeSectionOutputs()[0];
+		assertEquals("Incorrect office section output", "OUTPUT", output
+				.getOfficeSectionOutputName());
+		assertEquals("Incorrect office section output argument type",
+				Exception.class.getName(), output.getArgumentType());
+		assertTrue("Incorrect office section output escalation only flag",
+				output.isEscalationOnly());
 	}
 
 }

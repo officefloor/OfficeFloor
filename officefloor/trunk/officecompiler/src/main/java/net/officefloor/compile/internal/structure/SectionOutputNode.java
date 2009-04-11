@@ -17,6 +17,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSectionOutput;
 
@@ -26,7 +27,7 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
  * @author Daniel
  */
 public interface SectionOutputNode extends SectionOutputType, SectionOutput,
-		SubSectionOutput, LinkFlowNode {
+		SubSectionOutput, OfficeSectionOutput, LinkFlowNode {
 
 	/**
 	 * Indicates if this {@link SectionOutputType} has been initialised.

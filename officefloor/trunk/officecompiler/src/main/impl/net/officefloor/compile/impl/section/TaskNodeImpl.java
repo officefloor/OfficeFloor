@@ -192,7 +192,7 @@ public class TaskNodeImpl implements TaskNode {
 	 */
 
 	@Override
-	public String getTaskName() {
+	public String getOfficeTaskName() {
 		return this.taskName;
 	}
 
@@ -204,7 +204,7 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	public OfficeManagedObject[] getDependentManagedObjectNames() {
+	public OfficeManagedObject[] getDependentOfficeManagedObjects() {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement OfficeTask.getDependentManagedObjectNames");

@@ -136,6 +136,15 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	/*
+	 * ===================== OfficeSectionInput =====================
+	 */
+
+	@Override
+	public String getOfficeSectionInputName() {
+		return this.inputName;
+	}
+
+	/*
 	 * =================== LinkFlowNode ============================
 	 */
 
