@@ -16,21 +16,41 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.compile.spi.section.SubSection;
 
 /**
- * {@link ManagedObject} required by the {@link Office}.
+ * {@link SubSection} of an {@link OfficeSection}.
  * 
  * @author Daniel
  */
-public interface OfficeManagedObject {
+public interface OfficeSubSection {
 
 	/**
-	 * Obtains the name of the {@link ManagedObject}.
+	 * Obtains the name of this {@link OfficeSection}/{@link OfficeSubSection}.
 	 * 
-	 * @return Name of the {@link ManagedObject}.
+	 * @return Name of this {@link OfficeSection}/{@link OfficeSubSection}.
 	 */
-	String getOfficeManagedObjectName();
+	String getOfficeSectionName();
+
+	/**
+	 * Obtains the {@link OfficeSubSection} instances of this
+	 * {@link OfficeSection}.
+	 * 
+	 * @return {@link OfficeSubSection} instances.
+	 */
+	OfficeSubSection[] getOfficeSubSections();
+
+	/**
+	 * <p>
+	 * Obtains the {@link OfficeTask} instances for this particular
+	 * {@link OfficeSubSection}.
+	 * <p>
+	 * This does not include the {@link OfficeTask} instances of the sub
+	 * sections.
+	 * 
+	 * @return {@link OfficeTask} instances for this particular
+	 *         {@link OfficeSubSection}.
+	 */
+	OfficeTask[] getOfficeTasks();
 
 }

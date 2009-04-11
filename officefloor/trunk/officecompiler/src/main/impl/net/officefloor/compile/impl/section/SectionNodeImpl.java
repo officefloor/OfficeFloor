@@ -39,6 +39,9 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
+import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SectionInput;
@@ -701,17 +704,27 @@ public class SectionNodeImpl implements SectionNode {
 	 */
 
 	@Override
-	public String getSectionName() {
+	public String getOfficeSectionName() {
 		return this.sectionName;
 	}
 
 	@Override
-	public OfficeSection[] getSubSections() {
-		return this.subSections.values().toArray(new OfficeSection[0]);
+	public OfficeSubSection[] getOfficeSubSections() {
+		return this.subSections.values().toArray(new OfficeSubSection[0]);
 	}
 
 	@Override
-	public OfficeTask[] getTasks() {
+	public OfficeSectionInput[] getOfficeSectionInputs() {
+		return this.inputs.values().toArray(new OfficeSectionInput[0]);
+	}
+
+	@Override
+	public OfficeSectionOutput[] getOfficeSectionOutputs() {
+		return this.outputs.values().toArray(new OfficeSectionOutput[0]);
+	}
+
+	@Override
+	public OfficeTask[] getOfficeTasks() {
 		return this.taskNodes.values().toArray(new OfficeTask[0]);
 	}
 

@@ -17,12 +17,11 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.team.Team;
 
 /**
- * {@link Task} within the {@link Office}.
+ * {@link OfficeTask} within the {@link Office}.
  * 
  * @author Daniel
  */
@@ -30,35 +29,35 @@ public interface OfficeTask {
 
 	/**
 	 * <p>
-	 * Obtains the name of the {@link Task}.
+	 * Obtains the name of the {@link OfficeTask}.
 	 * <p>
 	 * This aids the {@link OfficeSource} in deciding the {@link Team}
-	 * responsible for this {@link Task}.
+	 * responsible for this {@link OfficeTask}.
 	 * 
-	 * @return Name of the {@link Task}.
+	 * @return Name of the {@link OfficeTask}.
 	 */
-	String getTaskName();
+	String getOfficeTaskName();
 
 	/**
 	 * <p>
-	 * Obtains the {@link OfficeManagedObject} instances that this {@link Task}
-	 * is dependent upon.
+	 * Obtains the {@link OfficeManagedObject} instances that this
+	 * {@link OfficeTask} is dependent upon.
 	 * <p>
 	 * This aids the {@link OfficeSource} in deciding the {@link Team}
-	 * responsible for this {@link Task}.
+	 * responsible for this {@link OfficeTask}.
 	 * 
-	 * @return {@link OfficeManagedObject} instances that this {@link Task} is
-	 *         dependent upon.
+	 * @return {@link OfficeManagedObject} instances that this
+	 *         {@link OfficeTask} is dependent upon.
 	 */
-	OfficeManagedObject[] getDependentManagedObjectNames();
+	OfficeManagedObject[] getDependentOfficeManagedObjects();
 
 	/**
 	 * Specifies the {@link Office} name of the {@link Team} responsible for
-	 * this {@link Task}.
+	 * this {@link OfficeTask}.
 	 * 
 	 * @param officeTeamName
 	 *            {@link Office} name of the {@link Team} responsible for this
-	 *            {@link Task}.
+	 *            {@link OfficeTask}.
 	 */
 	void setTeamResponsible(String officeTeamName);
 

@@ -14,34 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.section.SectionInputType;
-import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.section.SectionInput;
-import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.EscalationProcedure;
 
 /**
- * {@link SectionInput} node.
+ * Output from the {@link OfficeSection}.
  * 
  * @author Daniel
  */
-public interface SectionInputNode extends SectionInputType, SectionInput,
-		SubSectionInput, OfficeSectionInput, LinkFlowNode {
+public interface OfficeSectionOutput {
 
 	/**
-	 * Indicates if this {@link SectionInputType} has been initialised.
+	 * Obtains the name of this {@link OfficeSectionOutput}.
 	 * 
-	 * @return <code>true</code> if initialised.
+	 * @return Name of this {@link OfficeSectionOutput}.
 	 */
-	boolean isInitialised();
+	String getOfficeSectionOutputName();
 
 	/**
-	 * Initialises this {@link SectionInputType}.
+	 * Obtains the argument type from this {@link OfficeSectionOutput}.
 	 * 
-	 * @param parameterType
-	 *            Parameter type.
+	 * @return Argument type.
 	 */
-	void initialise(String parameterType);
+	String getArgumentType();
+
+	/**
+	 * Indicates if this {@link OfficeSectionOutput} is escalation only. In
+	 * other words it can be handled by an {@link Office}
+	 * {@link EscalationProcedure}.
+	 * 
+	 * @return <code>true</code> if escalation only.
+	 */
+	boolean isEscalationOnly();
 
 }
