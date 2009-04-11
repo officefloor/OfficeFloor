@@ -17,6 +17,9 @@
 package net.officefloor.compile.spi.office.source;
 
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 
 /**

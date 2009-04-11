@@ -21,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
@@ -32,10 +34,12 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
-import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -49,8 +53,10 @@ import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * {@link SectionNode} implementation.
@@ -68,6 +74,11 @@ public class SectionNodeImpl implements SectionNode {
 	 * Class name of the {@link SectionSource}.
 	 */
 	private final String sectionSourceClassName;
+
+	/**
+	 * {@link PropertyList} to source this {@link OfficeSection}.
+	 */
+	private final PropertyList propertyList;
 
 	/**
 	 * Location of the {@link OfficeSection} being built by this
@@ -148,6 +159,29 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	/**
+	 * Allows for the creation of the top level {@link OfficeSection}.
+	 * 
+	 * @param sectionSource
+	 *            {@link SectionSource}.
+	 * @param propertyList
+	 *            {@link PropertyList}.
+	 * @param sectionLocation
+	 *            Location of this {@link SectionNode}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	public SectionNodeImpl(SectionSource sectionSource,
+			PropertyList propertyList, String sectionLocation,
+			CompilerIssues issues) {
+		this.sectionName = null;
+		this.sectionSourceClassName = sectionSource.getClass().getName();
+		this.sectionSource = sectionSource;
+		this.propertyList = propertyList;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
+	}
+
+	/**
 	 * Allows for the creation of {@link SubSection} instances.
 	 * 
 	 * @param sectionName
@@ -168,6 +202,7 @@ public class SectionNodeImpl implements SectionNode {
 		this.sectionName = sectionName;
 		this.sectionSourceClassName = sectionSourceClassName;
 		this.sectionSource = sectionSource;
+		this.propertyList = new PropertyListImpl();
 		this.sectionLocation = sectionLocation;
 		this.issues = issues;
 	}
@@ -181,6 +216,70 @@ public class SectionNodeImpl implements SectionNode {
 	private void addIssue(String issueDescription) {
 		this.issues.addIssue(LocationType.SECTION, this.sectionLocation, null,
 				null, issueDescription);
+	}
+
+	/**
+	 * Adds an issue regarding the {@link OfficeSection} being built.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 * @param cause
+	 *            Cause of the issue.
+	 */
+	private void addIssue(String issueDescription, Throwable cause) {
+		this.issues.addIssue(LocationType.SECTION, this.sectionLocation, null,
+				null, issueDescription, cause);
+	}
+
+	/*
+	 * ======================= SectionNode =================================
+	 */
+
+	@Override
+	public void loadSection(ConfigurationContext configurationContext,
+			ClassLoader classLoader) {
+
+		// Ensure have instance of section source
+		if (this.sectionSource == null) {
+			// Obtain the section source class
+			Class<? extends SectionSource> sectionSourceClass = CompileUtil
+					.obtainClass(this.sectionSourceClassName,
+							SectionSource.class, classLoader,
+							LocationType.SECTION, this.sectionLocation, null,
+							null, this.issues);
+			if (sectionSourceClass == null) {
+				return; // must have section source class
+			}
+
+			// Instantiate an instance of the section source
+			this.sectionSource = CompileUtil.newInstance(sectionSourceClass,
+					SectionSource.class, LocationType.SECTION,
+					this.sectionLocation, null, null, issues);
+			if (this.sectionSource == null) {
+				return; // must instantiate section source
+			}
+		}
+
+		// Create the section source context
+		SectionSourceContext context = new SectionSourceContextImpl(
+				this.sectionLocation, configurationContext, this.propertyList,
+				classLoader);
+
+		try {
+			// Source the section
+			this.sectionSource.sourceSection(this, context);
+
+		} catch (Throwable ex) {
+			// Indicate failure to source section
+			this.addIssue("Faild to source "
+					+ OfficeSection.class.getSimpleName(), ex);
+			return; // can not load sub section as section load failure
+		}
+
+		// Load the sub sections
+		for (SectionNode subSection : this.subSections.values()) {
+			subSection.loadSection(configurationContext, classLoader);
+		}
 	}
 
 	/*
@@ -595,6 +694,25 @@ public class SectionNodeImpl implements SectionNode {
 		// Link the nodes together
 		return ((LinkObjectNode) linkSource)
 				.linkObjectNode((LinkObjectNode) linkTarget);
+	}
+
+	/*
+	 * ==================== OfficeSection =================================
+	 */
+
+	@Override
+	public String getSectionName() {
+		return this.sectionName;
+	}
+
+	@Override
+	public OfficeSection[] getSubSections() {
+		return this.subSections.values().toArray(new OfficeSection[0]);
+	}
+
+	@Override
+	public OfficeTask[] getTasks() {
+		return this.taskNodes.values().toArray(new OfficeTask[0]);
 	}
 
 }

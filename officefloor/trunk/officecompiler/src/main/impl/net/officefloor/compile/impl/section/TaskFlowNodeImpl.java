@@ -20,7 +20,7 @@ import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;

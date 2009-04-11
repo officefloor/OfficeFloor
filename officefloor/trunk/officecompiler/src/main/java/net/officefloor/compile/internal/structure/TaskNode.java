@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionTask;
 
 /**
@@ -23,5 +24,5 @@ import net.officefloor.compile.spi.section.SectionTask;
  * 
  * @author Daniel
  */
-public interface TaskNode extends SectionTask, LinkFlowNode {
+public interface TaskNode extends SectionTask, LinkFlowNode, OfficeTask {
 }

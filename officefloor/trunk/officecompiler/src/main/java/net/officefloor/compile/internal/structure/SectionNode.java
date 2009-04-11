@@ -17,14 +17,28 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Node within the hierarchy of {@link OfficeSection} instances.
  * 
  * @author Daniel
  */
-public interface SectionNode extends SectionBuilder, SectionType, SubSection {
+public interface SectionNode extends SectionBuilder, SectionType, SubSection,
+		OfficeSection {
+
+	/**
+	 * Loads the {@link OfficeSection} of this {@link SectionNode} and all its
+	 * {@link SubSection} {@link SectionNode} instances.
+	 * 
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 */
+	void loadSection(ConfigurationContext configurationContext,
+			ClassLoader classLoader);
 }

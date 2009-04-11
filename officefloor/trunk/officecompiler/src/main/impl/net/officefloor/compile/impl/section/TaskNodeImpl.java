@@ -26,7 +26,9 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
@@ -183,6 +185,43 @@ public class TaskNodeImpl implements TaskNode {
 	@Override
 	public LinkFlowNode getLinkedFlowNode() {
 		return this.linkedFlowNode;
+	}
+
+	/*
+	 * ========================== OfficeTask ===========================
+	 */
+
+	@Override
+	public String getTaskName() {
+		return this.taskName;
+	}
+
+	@Override
+	public void setTeamResponsible(String officeTeamName) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeTask.setTeamResponsible");
+	}
+
+	@Override
+	public OfficeManagedObject[] getDependentManagedObjectNames() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeTask.getDependentManagedObjectNames");
+	}
+
+	@Override
+	public void addPreTaskDuty(OfficeDuty duty) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeTask.addPreTaskDuty");
+	}
+
+	@Override
+	public void addPostTaskDuty(OfficeDuty duty) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeTask.addPostTaskDuty");
 	}
 
 }
