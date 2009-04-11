@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Builder to construct the {@link OfficeSection}.
@@ -98,6 +99,42 @@ public interface SectionBuilder {
 	 * @return {@link SectionWork}.
 	 */
 	SectionWork addWork(String workName, WorkSource<?> workSource);
+
+	/**
+	 * Adds a {@link SectionManagedObject} to the {@link OfficeSection} being
+	 * built.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link SectionManagedObject}.
+	 * @param workSourceClassName
+	 *            Fully qualified class name of the {@link ManagedObjectSource}.
+	 *            This allows adding the {@link SectionManagedObject} without
+	 *            having to worry if the {@link ManagedObjectSource} is
+	 *            available on the class path. <b>This should be used over
+	 *            attempting to find the {@link ManagedObjectSource}</b> - as
+	 *            should leave to compiler to find the
+	 *            {@link ManagedObjectSource}.
+	 * @return {@link SectionManagedObject}.
+	 */
+	SectionManagedObject addManagedObject(String managedObjectName,
+			String managedObjectSourceClassName);
+
+	/**
+	 * Adds a {@link SectionManagedObject} to the {@link OfficeSection} being
+	 * built.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link SectionManagedObject}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} to enable providing direct
+	 *            instances. This should only be used should the
+	 *            {@link SectionSource} want to create a
+	 *            {@link SectionManagedObject} instance by supplying its own
+	 *            instantiated {@link ManagedObjectSource} implementation.
+	 * @return {@link SectionManagedObject}.
+	 */
+	SectionManagedObject addManagedObject(String managedObjectName,
+			ManagedObjectSource<?, ?> managedObjectSource);
 
 	/**
 	 * Adds a {@link SubSection} to the {@link OfficeSection} being built.
@@ -276,6 +313,40 @@ public interface SectionBuilder {
 	void link(SubSectionOutput subSectionOutput, SectionOutput sectionOutput);
 
 	/**
+	 * Links the {@link ManagedObjectFlow} to be undertaken by the
+	 * {@link SectionTask}.
+	 * 
+	 * @param managedObjectFlow
+	 *            {@link ManagedObjectFlow}.
+	 * @param task
+	 *            {@link SectionTask}.
+	 */
+	void link(ManagedObjectFlow managedObjectFlow, SectionTask task);
+
+	/**
+	 * Links the {@link ManagedObjectFlow} to be undertaken by the
+	 * {@link SubSectionInput}.
+	 * 
+	 * @param managedObjectFlow
+	 *            {@link ManagedObjectFlow}.
+	 * @param subSectionInput
+	 *            {@link SubSectionInput}.
+	 */
+	void link(ManagedObjectFlow managedObjectFlow,
+			SubSectionInput subSectionInput);
+
+	/**
+	 * Links the {@link ManagedObjectFlow} to be undertaken by the
+	 * {@link SectionOutput}.
+	 * 
+	 * @param managedObjectFlow
+	 *            {@link ManagedObjectFlow}.
+	 * @param sectionOutput
+	 *            {@link SectionOutput}.
+	 */
+	void link(ManagedObjectFlow managedObjectFlow, SectionOutput sectionOutput);
+
+	/**
 	 * Links the {@link TaskObject} to be the {@link SectionObject}.
 	 * 
 	 * @param taskObject
@@ -286,6 +357,16 @@ public interface SectionBuilder {
 	void link(TaskObject taskObject, SectionObject sectionObject);
 
 	/**
+	 * Links the {@link TaskObject} to be the {@link SectionManagedObject}.
+	 * 
+	 * @param taskObject
+	 *            {@link TaskObject}.
+	 * @param sectionManagedObject
+	 *            {@link SectionManagedObject}.
+	 */
+	void link(TaskObject taskObject, SectionManagedObject sectionManagedObject);
+
+	/**
 	 * Links the {@link SubSectionObject} to be the {@link SectionObject}.
 	 * 
 	 * @param subSectionObject
@@ -294,5 +375,38 @@ public interface SectionBuilder {
 	 *            {@link SectionObject}.
 	 */
 	void link(SubSectionObject subSectionObject, SectionObject sectionObject);
+
+	/**
+	 * Links {@link SubSectionObject} to be the {@link SectionManagedObject}.
+	 * 
+	 * @param subSectionObject
+	 *            {@link SubSectionObject}.
+	 * @param sectionManagedObject
+	 *            {@link SectionManagedObject}.
+	 */
+	void link(SubSectionObject subSectionObject,
+			SectionManagedObject sectionManagedObject);
+
+	/**
+	 * Links {@link ManagedObjectDependency} to be the {@link SectionObject}.
+	 * 
+	 * @param dependency
+	 *            {@link ManagedObjectDependency}.
+	 * @param sectionObject
+	 *            {@link SectionObject}.
+	 */
+	void link(ManagedObjectDependency dependency, SectionObject sectionObject);
+
+	/**
+	 * Links the {@link ManagedObjectDependency} to be the
+	 * {@link SectionManagedObject}.
+	 * 
+	 * @param dependency
+	 *            {@link ManagedObjectDependency}.
+	 * @param sectionManagedObject
+	 *            {@link SectionManagedObject}.
+	 */
+	void link(ManagedObjectDependency dependency,
+			SectionManagedObject sectionManagedObject);
 
 }

@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
@@ -35,6 +36,14 @@ public interface SectionWork {
 	 */
 	String getSectionWorkName();
 
+	/**
+	 * Adds a {@link Property} to source this {@link SectionWork}.
+	 * 
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param value
+	 *            Value of the {@link Property}.
+	 */
 	void addProperty(String name, String value);
 
 	/**
