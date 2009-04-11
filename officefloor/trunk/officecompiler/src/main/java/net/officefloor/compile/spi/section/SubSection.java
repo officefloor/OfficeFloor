@@ -16,6 +16,8 @@
  */
 package net.officefloor.compile.spi.section;
 
+import net.officefloor.compile.properties.Property;
+
 /**
  * {@link SubSection} of a {@link Section}.
  * 
@@ -30,6 +32,14 @@ public interface SubSection {
 	 */
 	String getSubSectionName();
 
+	/**
+	 * Adds a {@link Property} to source this {@link SubSection}.
+	 * 
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param value
+	 *            Value of the {@link Property}.
+	 */
 	void addProperty(String name, String value);
 
 	/**

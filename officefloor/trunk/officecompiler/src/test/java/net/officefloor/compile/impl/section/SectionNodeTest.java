@@ -25,8 +25,11 @@ import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -44,9 +47,16 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -181,6 +191,81 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 		// Should be the same object
 		assertEquals("Should be same object on adding twice", objectFirst,
 				objectSecond);
+	}
+
+	/**
+	 * Ensure can add a {@link SectionManagedObject}.
+	 */
+	public void testAddSectionManagedObject() {
+		// Add two different managed objects verifying details
+		this.replayMockObjects();
+		SectionManagedObject mo = this.node.addManagedObject("MO",
+				NotUseManagedObjectSource.class.getName());
+		assertNotNull("Must have section managed object", mo);
+		assertEquals("Incorrect section managed object name", "MO", mo
+				.getSectionManagedObjectName());
+		assertNotSame("Should obtain another section managed object", mo,
+				this.node.addManagedObject("ANOTHER",
+						NotUseManagedObjectSource.class.getName()));
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure issue if add {@link SectionManagedObject} by same name twice.
+	 */
+	public void testAddSectionManagedObjectTwice() {
+
+		// Record issue in adding the section managed object twice
+		this.record_issue("Section managed object MO already added");
+
+		// Add the section managed object twice
+		this.replayMockObjects();
+		SectionManagedObject moFirst = this.node.addManagedObject("MO",
+				new NotUseManagedObjectSource());
+		SectionManagedObject moSecond = this.node.addManagedObject("MO",
+				new NotUseManagedObjectSource());
+		this.verifyMockObjects();
+
+		// Should be the same section managed object
+		assertEquals("Should be same section managed object on adding twice",
+				moFirst, moSecond);
+	}
+
+	/**
+	 * Ensure able to get {@link ManagedObjectFlow} and
+	 * {@link ManagedObjectDependency} instances from the
+	 * {@link SectionManagedObject}.
+	 */
+	public void testSectionManagedObjectGetDependenciesAndFlows() {
+		// Ensure able to get dependencies/flows from section managed object
+		this.replayMockObjects();
+
+		// Obtain the section managed object
+		SectionManagedObject mo = this.node.addManagedObject("MO",
+				NotUseManagedObjectSource.class.getName());
+
+		// Ensure can get dependency
+		ManagedObjectDependency dependency = mo
+				.getManagedObjectDependency("DEPENDENCY");
+		assertNotNull("Must have dependency", dependency);
+		assertEquals("Incorrect dependency name", "DEPENDENCY", dependency
+				.getManagedObjectDependencyName());
+		assertEquals("Should get same managed object dependency again",
+				dependency, mo.getManagedObjectDependency("DEPENDENCY"));
+		assertNotSame("Should not be same dependency for different name",
+				dependency, mo.getManagedObjectDependency("ANOTHER"));
+
+		// Ensure can get flow
+		ManagedObjectFlow flow = mo.getManagedObjectFlow("FLOW");
+		assertNotNull("Must have flow", flow);
+		assertEquals("Incorrect flow name", "FLOW", flow
+				.getManagedObjectFlowName());
+		assertEquals("Should get same task flow again", flow, mo
+				.getManagedObjectFlow("FLOW"));
+		assertNotSame("Should not be same flow for different name", flow, mo
+				.getManagedObjectFlow("ANOTHER"));
+
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -773,6 +858,88 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures can link {@link ManagedObjectFlow} to the {@link SectionTask}.
+	 */
+	public void testLinkManagedObjectFlowToSectionTask() {
+
+		// Record already being linked
+		this.record_issue("Managed object flow FLOW linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionManagedObject mo = this.node.addManagedObject("MO",
+				NotUseManagedObjectSource.class.getName());
+		ManagedObjectFlow flow = mo.getManagedObjectFlow("FLOW");
+		SectionWork work = this.node.addWork("WORK", NotUseWorkSource.class
+				.getName());
+		SectionTask task = work.addTask("TASK", "TYPE");
+		this.node.link(flow, task);
+		assertFlowLink("managed object flow -> section task", flow, task);
+
+		// Ensure only can link once
+		this.node.link(flow, work.addTask("ANOTHER", "TYPE"));
+		assertFlowLink("Can only link once", flow, task);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link ManagedObjectFlow} to the {@link SubSectionInput}
+	 * .
+	 */
+	public void testLinkManagedObjectFlowToSubSectionInput() {
+
+		// Record already being linked
+		this.record_issue("Managed object flow FLOW linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionManagedObject mo = this.node.addManagedObject("MO",
+				NotUseManagedObjectSource.class.getName());
+		ManagedObjectFlow flow = mo.getManagedObjectFlow("FLOW");
+		SubSection subSection = this.node.addSubSection("SUB_SECTION",
+				NotUseSectionSource.class.getName(), SECTION_LOCATION);
+		SubSectionInput input = subSection.getSubSectionInput("INPUT");
+		this.node.link(flow, input);
+		assertFlowLink("managed object flow -> sub section input", flow, input);
+
+		// Ensure only can link once
+		this.node.link(flow, subSection.getSubSectionInput("ANOTHER"));
+		assertFlowLink("Can only link once", flow, input);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link ManagedObjectFlow} to the {@link SectionOutput}.
+	 */
+	public void testLinkManagedObjectFlowToSectionOutput() {
+
+		// Record already being linked
+		this.record_issue("Managed object flow FLOW linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionManagedObject mo = this.node.addManagedObject("MO",
+				NotUseManagedObjectSource.class.getName());
+		ManagedObjectFlow flow = mo.getManagedObjectFlow("FLOW");
+		SectionOutput output = this.node.addSectionOutput("OUTPUT",
+				Object.class.getName(), false);
+		this.node.link(flow, output);
+		assertFlowLink("managed object flow -> section output", flow, output);
+
+		// Ensure only can link once
+		this.node.link(flow, this.node.addSectionOutput("ANOTHER", String.class
+				.getName(), false));
+		assertFlowLink("Can only link once", flow, output);
+
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensures can link {@link TaskObject} to the {@link SectionObject}.
 	 */
 	public void testLinkTaskObjectToSectionObject() {
@@ -794,6 +961,32 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 		this.node.link(object, this.node.addSectionObject("ANOTHER",
 				String.class.getName()));
 		assertObjectLink("Can only link once", object, sectionObject);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link TaskObject} to the {@link SectionManagedObject}.
+	 */
+	public void testLinkTaskObjectToSectionManagedObject() {
+
+		// Record already being linked
+		this.record_issue("Task object OBJECT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		TaskObject object = this.node.addWork("WORK", new NotUseWorkSource())
+				.addTask("TASK", "TYPE").getTaskObject("OBJECT");
+		SectionManagedObject mo = this.node.addManagedObject("MO",
+				NotUseManagedObjectSource.class.getName());
+		this.node.link(object, mo);
+		assertObjectLink("task object -> section managed object", object, mo);
+
+		// Ensure only can link once
+		this.node.link(object, this.node.addManagedObject("ANOTHER",
+				new NotUseManagedObjectSource()));
+		assertObjectLink("Can only link once", object, mo);
 
 		this.verifyMockObjects();
 	}
@@ -822,6 +1015,96 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 		this.node.link(object, this.node.addSectionObject("ANOTHER",
 				String.class.getName()));
 		assertObjectLink("Can only link once", object, sectionObject);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SubSectionObject} to the
+	 * {@link SectionManagedObject}.
+	 */
+	public void testLinkSubSectionObjectToSectionManagedObject() {
+
+		// Record already being linked
+		this.record_issue("Sub section object OBJECT linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SubSectionObject object = this.node.addSubSection("SUB_SECTION",
+				new NotUseSectionSource(), SECTION_LOCATION)
+				.getSubSectionObject("OBJECT");
+		SectionManagedObject mo = this.node.addManagedObject("MO",
+				NotUseManagedObjectSource.class.getName());
+		this.node.link(object, mo);
+		assertObjectLink("sub section object -> section managed object",
+				object, mo);
+
+		// Ensure only can link once
+		this.node.link(object, this.node.addManagedObject("ANOTHER",
+				NotUseManagedObjectSource.class.getName()));
+		assertObjectLink("Can only link once", object, mo);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SubSectionObject} to the {@link SectionObject}.
+	 */
+	public void testLinkManagedObjectDependencyToSectionObject() {
+
+		// Record already being linked
+		this
+				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionManagedObject mo = this.node.addManagedObject("MO",
+				new NotUseManagedObjectSource());
+		ManagedObjectDependency dependency = mo
+				.getManagedObjectDependency("DEPENDENCY");
+		SectionObject sectionObject = this.node.addSectionObject("OBJECT",
+				Connection.class.getName());
+		this.node.link(dependency, sectionObject);
+		assertObjectLink("managed object dependency -> section object",
+				dependency, sectionObject);
+
+		// Ensure only can link once
+		this.node.link(dependency, this.node.addSectionObject("ANOTHER",
+				Object.class.getName()));
+		assertObjectLink("Can only link once", dependency, sectionObject);
+
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can link {@link SubSectionObject} to the
+	 * {@link SectionManagedObject}.
+	 */
+	public void testLinkManagedObjectDependencyToSectionManagedObject() {
+
+		// Record already being linked
+		this
+				.record_issue("Managed object dependency DEPENDENCY linked more than once");
+
+		this.replayMockObjects();
+
+		// Link
+		SectionManagedObject mo = this.node.addManagedObject("MO",
+				new NotUseManagedObjectSource());
+		ManagedObjectDependency dependency = mo
+				.getManagedObjectDependency("DEPENDENCY");
+		SectionManagedObject moTarget = this.node.addManagedObject("MO_TARGET",
+				NotUseManagedObjectSource.class.getName());
+		this.node.link(dependency, moTarget);
+		assertObjectLink("managed object dependency -> section managed object",
+				dependency, moTarget);
+
+		// Ensure only can link once
+		this.node.link(dependency, this.node.addManagedObject("ANOTHER",
+				NotUseManagedObjectSource.class.getName()));
+		assertObjectLink("Can only link once", dependency, moTarget);
 
 		this.verifyMockObjects();
 	}
@@ -891,6 +1174,46 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	private void record_issue(String issueDescription) {
 		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION, null,
 				null, issueDescription);
+	}
+
+	/**
+	 * {@link ManagedObjectSource} that should not have its methods invoked.
+	 */
+	public static class NotUseManagedObjectSource implements
+			ManagedObjectSource<Indexed, Indexed> {
+
+		/*
+		 * ===================== ManagedObjectSource ======================
+		 */
+
+		@Override
+		public ManagedObjectSourceSpecification getSpecification() {
+			fail("Should not use ManagedObjectSource");
+			return null;
+		}
+
+		@Override
+		public void init(ManagedObjectSourceContext<Indexed> context)
+				throws Exception {
+			fail("Should not use ManagedObjectSource");
+		}
+
+		@Override
+		public ManagedObjectSourceMetaData<Indexed, Indexed> getMetaData() {
+			fail("Should not use ManagedObjectSource");
+			return null;
+		}
+
+		@Override
+		public void start(ManagedObjectExecuteContext<Indexed> context)
+				throws Exception {
+			fail("Should not use ManagedObjectSource");
+		}
+
+		@Override
+		public void sourceManagedObject(ManagedObjectUser user) {
+			fail("Should not use ManagedObjectSource");
+		}
 	}
 
 	/**

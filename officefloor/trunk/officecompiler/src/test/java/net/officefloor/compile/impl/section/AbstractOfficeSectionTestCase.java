@@ -22,6 +22,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionBuilder;
+import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
@@ -43,8 +44,13 @@ import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -152,6 +158,18 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		 * @return Added {@link SubSection}.
 		 */
 		SubSection addSubSection(String subSectionName, SectionMaker maker);
+
+		/**
+		 * Adds a {@link SectionManagedObject}.
+		 * 
+		 * @param managedObjectName
+		 *            Name of the {@link SectionManagedObject}.
+		 * @param maker
+		 *            {@link ManagedObjectMaker}.
+		 * @return Added {@link SectionManagedObject}.
+		 */
+		SectionManagedObject addManagedObject(String managedObjectName,
+				ManagedObjectMaker maker);
 
 		/**
 		 * Adds a {@link SectionWork}.
@@ -335,6 +353,18 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		}
 
 		@Override
+		public SectionManagedObject addManagedObject(String managedObjectName,
+				ManagedObjectMaker maker) {
+			// Create the managed object source
+			ManagedObjectSource<?, ?> managedObjectSource = new MakerManagedObjectSource(
+					maker);
+
+			// Return the created section managed object
+			return this.builder.addManagedObject(managedObjectName,
+					managedObjectSource);
+		}
+
+		@Override
 		public SectionWork addWork(String workName, WorkMaker maker) {
 			// Create the work source
 			WorkSource<?> workSource = new MakerWorkSource(maker);
@@ -413,6 +443,96 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 
 			// Return the task escalation
 			return task.getTaskEscalation(escalationName);
+		}
+	}
+
+	/**
+	 * Makes the {@link SectionManagedObject}.
+	 */
+	protected static interface ManagedObjectMaker {
+
+		/**
+		 * Makes the {@link SectionManagedObject}.
+		 * 
+		 * @param context
+		 *            {@link ManagedObjectMakerContext}.
+		 */
+		void make(ManagedObjectMakerContext context);
+	}
+
+	/**
+	 * Context for the {@link ManagedObjectMaker}.
+	 */
+	protected static interface ManagedObjectMakerContext {
+
+		/**
+		 * Obtains the {@link MetaDataContext}.
+		 * 
+		 * @return {@link MetaDataContext}.
+		 */
+		MetaDataContext<Indexed, Indexed> getContext();
+	}
+
+	/**
+	 * Maker {@link ManagedObjectSource}.
+	 */
+	private static class MakerManagedObjectSource extends
+			AbstractManagedObjectSource<Indexed, Indexed> implements
+			ManagedObjectMakerContext {
+
+		/**
+		 * {@link ManagedObjectMaker}.
+		 */
+		private final ManagedObjectMaker managedObjectMaker;
+
+		/**
+		 * {@link MetaDataContext}.
+		 */
+		private MetaDataContext<Indexed, Indexed> context;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param maker
+		 *            {@link ManagedObjectMaker}.
+		 */
+		public MakerManagedObjectSource(ManagedObjectMaker maker) {
+			this.managedObjectMaker = maker;
+		}
+
+		/*
+		 * ================= AbstractManagedObjectSource ======================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			fail("Should not require specification");
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<Indexed, Indexed> context)
+				throws Exception {
+
+			// Store details to load
+			this.context = context;
+
+			// Make the managed object
+			this.managedObjectMaker.make(this);
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			fail("Should not require to source managed object");
+			return null;
+		}
+
+		/*
+		 * ==================== ManagedObjectMakerContext ====================
+		 */
+
+		@Override
+		public MetaDataContext<Indexed, Indexed> getContext() {
+			return this.context;
 		}
 	}
 
