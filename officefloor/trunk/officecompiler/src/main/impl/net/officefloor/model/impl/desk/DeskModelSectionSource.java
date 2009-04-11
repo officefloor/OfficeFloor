@@ -17,7 +17,7 @@
 package net.officefloor.model.impl.desk;
 
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;

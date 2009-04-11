@@ -19,7 +19,7 @@ package net.officefloor.compile.spi.section.source;
 import java.util.Properties;
 
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**

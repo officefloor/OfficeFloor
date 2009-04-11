@@ -58,6 +58,55 @@ public class CompileUtil {
 	}
 
 	/**
+	 * Obtains the {@link Class}.
+	 * 
+	 * @param sectionSourceClassName
+	 *            Fully qualified name of the {@link Class} to obtain.
+	 * @param expectedType
+	 *            Expected type of the {@link Class} to return.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param assetType
+	 *            {@link AssetType}.
+	 * @param assetName
+	 *            Name of asset.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @return {@link Class}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> Class<? extends T> obtainClass(String sectionSourceClassName,
+			Class<T> expectedType, ClassLoader classLoader,
+			LocationType locationType, String location, AssetType assetType,
+			String assetName, CompilerIssues issues) {
+		try {
+			// Load the class
+			Class<?> clazz = classLoader.loadClass(sectionSourceClassName);
+
+			// Ensure class of expected type
+			if (!expectedType.isAssignableFrom(clazz)) {
+				issues.addIssue(locationType, location, assetType, assetName,
+						"Must implement " + expectedType.getSimpleName()
+								+ " (class=" + clazz.getName() + ")");
+				return null; // instance not of type
+			}
+			
+			// Return the obtained class
+			return (Class<? extends T>) clazz;
+
+		} catch (Throwable ex) {
+			// Indicate issue
+			issues.addIssue(locationType, location, assetType, assetName,
+					"Failed to obtain class " + sectionSourceClassName, ex);
+			return null; // no class
+		}
+	}
+
+	/**
 	 * Instantiates a new instance of the input {@link Class} by its default
 	 * constructor. If fails to instantiate, then reports issue via
 	 * {@link CompilerIssues}.

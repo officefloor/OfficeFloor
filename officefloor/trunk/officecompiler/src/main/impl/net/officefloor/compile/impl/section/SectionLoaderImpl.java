@@ -18,15 +18,17 @@ package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
@@ -185,8 +187,8 @@ public class SectionLoaderImpl implements SectionLoader {
 				classLoader);
 
 		// Create the section builder
-		SectionNodeImpl sectionType = new SectionNodeImpl(
-				this.sectionLocation, issues);
+		SectionNodeImpl sectionType = new SectionNodeImpl(this.sectionLocation,
+				issues);
 
 		try {
 			// Source the section type
@@ -254,9 +256,24 @@ public class SectionLoaderImpl implements SectionLoader {
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader,
 			CompilerIssues issues) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionLoader.loadOfficeSection");
+
+		// Instantiate an instance of the section source
+		S sectionSource = CompileUtil.newInstance(sectionSourceClass,
+				SectionSource.class, LocationType.SECTION,
+				this.sectionLocation, null, null, issues);
+		if (sectionSource == null) {
+			return null; // must instantiate section source
+		}
+
+		// Create the section node (loading in its properties)
+		SectionNode sectionNode = new SectionNodeImpl(sectionSource,
+				propertyList, this.sectionLocation, issues);
+
+		// Recursive load all the section nodes
+		sectionNode.loadSection(configurationContext, classLoader);
+
+		// Return the section node as the office section
+		return sectionNode;
 	}
 
 	/**

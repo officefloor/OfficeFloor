@@ -17,7 +17,7 @@
 package net.officefloor.compile.spi.section.source;
 
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.office.source.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionBuilder;
 
 /**
