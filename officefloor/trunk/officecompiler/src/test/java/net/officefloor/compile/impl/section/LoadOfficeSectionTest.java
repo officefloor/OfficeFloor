@@ -16,8 +16,11 @@
  */
 package net.officefloor.compile.impl.section;
 
+import javax.transaction.xa.XAResource;
+
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
@@ -45,8 +48,8 @@ public class LoadOfficeSectionTest extends AbstractOfficeSectionTestCase {
 		});
 
 		// Ensure empty
-		assertEquals("Should be no sub section", 0,
-				section.getOfficeSubSections().length);
+		assertEquals("Should be no sub section", 0, section
+				.getOfficeSubSections().length);
 		assertEquals("Should be no tasks", 0, section.getOfficeTasks().length);
 	}
 
@@ -64,13 +67,13 @@ public class LoadOfficeSectionTest extends AbstractOfficeSectionTestCase {
 		});
 
 		// Validate results
-		assertEquals("Should have a sub section", 1,
-				section.getOfficeSubSections().length);
+		assertEquals("Should have a sub section", 1, section
+				.getOfficeSubSections().length);
 		OfficeSubSection subSection = section.getOfficeSubSections()[0];
 		assertEquals("Incorrect sub section", "SUB_SECTION", subSection
 				.getOfficeSectionName());
-		assertEquals("Should be no sub section tasks", 0,
-				subSection.getOfficeTasks().length);
+		assertEquals("Should be no sub section tasks", 0, subSection
+				.getOfficeTasks().length);
 		assertEquals("Should be no tasks", 0, section.getOfficeTasks().length);
 	}
 
@@ -94,10 +97,10 @@ public class LoadOfficeSectionTest extends AbstractOfficeSectionTestCase {
 		});
 
 		// Validate the results
-		assertEquals("Should have a sub section", 1,
-				section.getOfficeSubSections().length);
-		assertEquals("Should be no tasks on section", 0,
-				section.getOfficeTasks().length);
+		assertEquals("Should have a sub section", 1, section
+				.getOfficeSubSections().length);
+		assertEquals("Should be no tasks on section", 0, section
+				.getOfficeTasks().length);
 		OfficeSubSection subSection = section.getOfficeSubSections()[0];
 		assertEquals("Should have a sub sub section", 1, subSection
 				.getOfficeSubSections().length);
@@ -108,6 +111,64 @@ public class LoadOfficeSectionTest extends AbstractOfficeSectionTestCase {
 				subSubSection.getOfficeSectionName());
 		assertEquals("Should be no tasks on sub sub section", 0, subSubSection
 				.getOfficeTasks().length);
+	}
+
+	/**
+	 * Ensure can load a {@link OfficeSectionManagedObject}.
+	 */
+	public void testLoadSectionManagedObject() {
+
+		// Load the office section with a sub sub section
+		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
+			@Override
+			public void make(SectionMakerContext context) {
+				context.addManagedObject("MO", null);
+			}
+		});
+
+		// Validate the results
+		assertEquals("Should have no sub section", 0, section
+				.getOfficeSubSections().length);
+		assertEquals("Should have no tasks", 0, section.getOfficeTasks().length);
+		assertEquals("Should have a section managed object", 1, section
+				.getOfficeSectionManagedObjects().length);
+		OfficeSectionManagedObject mo = section
+				.getOfficeSectionManagedObjects()[0];
+		assertEquals("Incorrect managed object name", "MO", mo
+				.getOfficeSectionManagedObjectName());
+	}
+
+	/**
+	 * Ensure can load a {@link OfficeSectionManagedObject} that supports an
+	 * extension interface.
+	 */
+	public void testLoadSectionManagedObjectSupportingAnExtensionInterface() {
+
+		// Load the office section with a sub sub section
+		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
+			@Override
+			public void make(SectionMakerContext context) {
+				context.addManagedObject("MO", new ManagedObjectMaker() {
+					@Override
+					public void make(ManagedObjectMakerContext context) {
+						context.addExtensionInterface(XAResource.class);
+					}
+				});
+			}
+		});
+
+		// Validate the results
+		assertEquals("Should have a section managed object", 1, section
+				.getOfficeSectionManagedObjects().length);
+		OfficeSectionManagedObject mo = section
+				.getOfficeSectionManagedObjects()[0];
+		assertEquals("Incorrect managed object name", "MO", mo
+				.getOfficeSectionManagedObjectName());
+		assertEquals("Should have a supported extension interface", 1, mo
+				.getSupportedExtensionInterfaces().length);
+		Class<?> supportedEi = mo.getSupportedExtensionInterfaces()[0];
+		assertEquals("Incorrect supported extension interface",
+				XAResource.class, supportedEi);
 	}
 
 	/**
@@ -124,9 +185,12 @@ public class LoadOfficeSectionTest extends AbstractOfficeSectionTestCase {
 		});
 
 		// Validate results
-		assertEquals("Should be no sub sections", 0,
-				section.getOfficeSubSections().length);
-		assertEquals("Should have a single task", 1, section.getOfficeTasks().length);
+		assertEquals("Should be no sub sections", 0, section
+				.getOfficeSubSections().length);
+		assertEquals("Should be no managed objects", 0, section
+				.getOfficeSectionManagedObjects().length);
+		assertEquals("Should have a single task", 1,
+				section.getOfficeTasks().length);
 		OfficeTask task = section.getOfficeTasks()[0];
 		assertEquals("Incorrect task name", "TASK", task.getOfficeTaskName());
 	}

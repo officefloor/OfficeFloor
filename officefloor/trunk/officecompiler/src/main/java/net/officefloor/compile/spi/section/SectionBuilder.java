@@ -120,23 +120,6 @@ public interface SectionBuilder {
 			String managedObjectSourceClassName);
 
 	/**
-	 * Adds a {@link SectionManagedObject} to the {@link OfficeSection} being
-	 * built.
-	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link SectionManagedObject}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} to enable providing direct
-	 *            instances. This should only be used should the
-	 *            {@link SectionSource} want to create a
-	 *            {@link SectionManagedObject} instance by supplying its own
-	 *            instantiated {@link ManagedObjectSource} implementation.
-	 * @return {@link SectionManagedObject}.
-	 */
-	SectionManagedObject addManagedObject(String managedObjectName,
-			ManagedObjectSource<?, ?> managedObjectSource);
-
-	/**
 	 * Adds a {@link SubSection} to the {@link OfficeSection} being built.
 	 * 
 	 * @param subSectionName

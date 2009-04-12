@@ -18,9 +18,13 @@ package net.officefloor.compile.spi.office.source;
 
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Context for the {@link OfficeSource}.
@@ -29,12 +33,10 @@ import net.officefloor.compile.spi.section.source.SectionSource;
  */
 public interface OfficeSourceContext {
 
-	OfficeManagedObject getOfficeFloorManagedObject(
+	OfficeFloorManagedObject addOfficeFloorManagedObject(
 			String officeManagedObjectName);
 
-	OfficeManagedObject addManagedObject(String managedObjectName,
-			String managedObjectSourceClassName, String sectionLocation,
-			PropertyList properties);
+	OfficeTeam addTeam(String officeTeamName);
 
 	OfficeSection addSection(String sectionName, String sectionSourceClassName,
 			String sectionLocation, PropertyList properties);
@@ -42,7 +44,18 @@ public interface OfficeSourceContext {
 	OfficeSection addSection(String sectionName, SectionSource sectionSource,
 			String sectionLocation, PropertyList properties);
 
+	OfficeManagedObject addManagedObject(String managedObjectName,
+			String managedObjectSourceClassName, PropertyList properties);
+
+	OfficeManagedObject addManagedObject(String managedObjectName,
+			ManagedObjectSource<?, ?> managedObjectSource,
+			PropertyList properties);
+
 	OfficeAdministrator addAdministrator(String administratorName,
 			String administratorSourceClassName, PropertyList properties);
+
+	OfficeAdministrator addAdministrator(String administratorName,
+			AdministratorSource<?, ?> administratorSource,
+			PropertyList properties);
 
 }

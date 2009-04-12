@@ -17,18 +17,20 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * {@link Administrator} within the {@link Office}.
+ * {@link Team} required by the {@link Office}.
  * 
  * @author Daniel
  */
-public interface OfficeAdministrator {
+public interface OfficeTeam {
 
-	OfficeDuty getDuty(String dutyName);
+	/**
+	 * Obtains the name of this {@link OfficeTeam}.
+	 * 
+	 * @return Name of this {@link OfficeTeam}.
+	 */
+	String getOfficeTeamName();
 
-	void administerManagedObject(OfficeManagedObject managedObject);
-
-	void administerManagedObject(OfficeFloorManagedObject managedObject);
 }

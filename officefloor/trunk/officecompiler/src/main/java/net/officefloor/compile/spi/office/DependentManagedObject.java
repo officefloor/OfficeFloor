@@ -16,19 +16,20 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link Administrator} within the {@link Office}.
+ * {@link ManagedObject} that a {@link OfficeTask} depends upon.
  * 
  * @author Daniel
  */
-public interface OfficeAdministrator {
+public interface DependentManagedObject {
 
-	OfficeDuty getDuty(String dutyName);
+	/**
+	 * Obtains the name of this {@link DependentManagedObject}.
+	 * 
+	 * @return Name of this {@link DependentManagedObject}.
+	 */
+	String getManagedObjectName();
 
-	void administerManagedObject(OfficeManagedObject managedObject);
-
-	void administerManagedObject(OfficeFloorManagedObject managedObject);
 }
