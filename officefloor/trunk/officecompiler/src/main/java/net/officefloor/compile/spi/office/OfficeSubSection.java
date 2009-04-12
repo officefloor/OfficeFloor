@@ -53,4 +53,17 @@ public interface OfficeSubSection {
 	 */
 	OfficeTask[] getOfficeTasks();
 
+	/**
+	 * <p>
+	 * Obtains the {@link OfficeSectionManagedObject} instances for this
+	 * particular {@link OfficeSubSection}.
+	 * <p>
+	 * This does not include the {@link OfficeSectionManagedObject} instances of
+	 * the sub sections.
+	 * 
+	 * @return {@link OfficeSectionManagedObject} instances for this particular
+	 *         {@link OfficeSubSection}.
+	 */
+	OfficeSectionManagedObject[] getOfficeSectionManagedObjects();
+
 }

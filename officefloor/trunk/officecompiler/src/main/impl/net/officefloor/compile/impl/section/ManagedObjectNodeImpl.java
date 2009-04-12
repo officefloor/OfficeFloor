@@ -19,16 +19,25 @@ package net.officefloor.compile.impl.section;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
+import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * {@link ManagedObjectNode} implementation.
@@ -46,6 +55,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * Class name of the {@link ManagedObjectSource}.
 	 */
 	private final String managedObjectSourceClassName;
+
+	/**
+	 * {@link PropertyList} to load the {@link ManagedObjectSource}.
+	 */
+	private final PropertyList propertyList = new PropertyListImpl();
 
 	/**
 	 * {@link ManagedObjectDependencyNode} instances by their
@@ -71,9 +85,9 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final CompilerIssues issues;
 
 	/**
-	 * {@link ManagedObjectSource}.
+	 * Loaded {@link ManagedObjectType}.
 	 */
-	private ManagedObjectSource<?, ?> managedObjectSource;
+	private ManagedObjectType<?> managedObjectType;
 
 	/**
 	 * Initiate.
@@ -82,8 +96,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 *            Name of this {@link SectionManagedObject}.
 	 * @param managedObjectSourceClassName
 	 *            Class name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource}.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SectionManagedObject}.
@@ -91,14 +103,43 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 *            {@link CompilerIssues}.
 	 */
 	public ManagedObjectNodeImpl(String managedObjectName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource,
-			String sectionLocation, CompilerIssues issues) {
+			String managedObjectSourceClassName, String sectionLocation,
+			CompilerIssues issues) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceClassName = managedObjectSourceClassName;
-		this.managedObjectSource = managedObjectSource;
 		this.sectionLocation = sectionLocation;
 		this.issues = issues;
+	}
+
+	/*
+	 * ===================== ManagedObjectNode ================================
+	 */
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void loadManagedObjectMetaData(
+			ConfigurationContext configurationContext, ClassLoader classLoader) {
+
+		// Obtain the managed object source class
+		Class<? extends ManagedObjectSource> managedObjectSourceClass = CompileUtil
+				.obtainClass(this.managedObjectSourceClassName,
+						ManagedObjectSource.class, classLoader,
+						LocationType.SECTION, this.sectionLocation,
+						AssetType.MANAGED_OBJECT, this.managedObjectName,
+						this.issues);
+		if (managedObjectSourceClass == null) {
+			return; // must have managed object source class
+		}
+
+		// Create the loader to obtain the managed object type
+		ManagedObjectLoader loader = new ManagedObjectLoaderImpl(
+				LocationType.SECTION, this.sectionLocation,
+				this.managedObjectName);
+
+		// Load the managed object type
+		this.managedObjectType = loader.loadManagedObject(
+				managedObjectSourceClass, this.propertyList, classLoader,
+				this.issues);
 	}
 
 	/*
@@ -112,9 +153,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public void addProperty(String name, String value) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionManagedObject.addProperty");
+		this.propertyList.addProperty(name).setValue(value);
 	}
 
 	@Override
@@ -144,6 +183,28 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			this.flows.put(managedObjectFlowName, flow);
 		}
 		return flow;
+	}
+
+	/*
+	 * ================ OfficeSectionManagedObject ============================
+	 */
+
+	@Override
+	public String getOfficeSectionManagedObjectName() {
+		return this.managedObjectName;
+	}
+
+	@Override
+	public Class<?>[] getSupportedExtensionInterfaces() {
+
+		// Ensure this not is initialised
+		if (this.managedObjectType == null) {
+			throw new IllegalStateException(
+					"Should not obtain supported extension interfaces before being initialised");
+		}
+
+		// Return the supported extension interfaces
+		return this.managedObjectType.getExtensionInterfaces();
 	}
 
 	/*

@@ -16,19 +16,24 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link Administrator} within the {@link Office}.
+ * {@link ManagedObject} that is to be provided by the {@link OfficeFloor}.
  * 
  * @author Daniel
  */
-public interface OfficeAdministrator {
+public interface OfficeFloorManagedObject {
 
-	OfficeDuty getDuty(String dutyName);
+	/**
+	 * Obtains the name that the {@link OfficeSource} refers to this
+	 * {@link ManagedObject}.
+	 * 
+	 * @return Name that the {@link OfficeSource} refers to this
+	 *         {@link ManagedObject}.
+	 */
+	String getOfficeManagedObjectName();
 
-	void administerManagedObject(OfficeManagedObject managedObject);
-
-	void administerManagedObject(OfficeFloorManagedObject managedObject);
 }

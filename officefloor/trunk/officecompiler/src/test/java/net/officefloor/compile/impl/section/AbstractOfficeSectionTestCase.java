@@ -16,6 +16,9 @@
  */
 package net.officefloor.compile.impl.section;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.officefloor.compile.LoaderContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
@@ -40,6 +43,7 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
+import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
@@ -48,6 +52,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
@@ -86,8 +91,16 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	protected final CompilerIssues issues = this
-			.createMock(CompilerIssues.class);
+	protected final CompilerIssues issues = new StderrCompilerIssuesWrapper(
+			this.createMock(CompilerIssues.class));
+
+	/**
+	 * Initiate for test.
+	 */
+	public AbstractOfficeSectionTestCase() {
+		MakerManagedObjectSource.reset();
+		MakerWorkSource.reset(this);
+	}
 
 	/**
 	 * Loads the {@link OfficeSection}.
@@ -100,7 +113,6 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 
 		// Reset for loading the office section
 		MakerSectionSource.reset(maker);
-		MakerWorkSource.reset(this);
 
 		// Load the section
 		this.replayMockObjects();
@@ -355,13 +367,9 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		@Override
 		public SectionManagedObject addManagedObject(String managedObjectName,
 				ManagedObjectMaker maker) {
-			// Create the managed object source
-			ManagedObjectSource<?, ?> managedObjectSource = new MakerManagedObjectSource(
-					maker);
-
-			// Return the created section managed object
-			return this.builder.addManagedObject(managedObjectName,
-					managedObjectSource);
+			// Register (and add) the managed object
+			return MakerManagedObjectSource.register(managedObjectName,
+					this.builder, maker);
 		}
 
 		@Override
@@ -471,34 +479,83 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		 * @return {@link MetaDataContext}.
 		 */
 		MetaDataContext<Indexed, Indexed> getContext();
+
+		/**
+		 * Adds an extension interface supported by the {@link ManagedObject}.
+		 * 
+		 * @param extensionInterface
+		 *            Extension interface supported.
+		 */
+		void addExtensionInterface(Class<?> extensionInterface);
 	}
 
 	/**
 	 * Maker {@link ManagedObjectSource}.
 	 */
-	private static class MakerManagedObjectSource extends
+	public static class MakerManagedObjectSource extends
 			AbstractManagedObjectSource<Indexed, Indexed> implements
 			ManagedObjectMakerContext {
 
 		/**
+		 * Name of property holding the identifier for the
 		 * {@link ManagedObjectMaker}.
 		 */
-		private final ManagedObjectMaker managedObjectMaker;
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "managed.object.maker";
+
+		/**
+		 * {@link ManagedObjectMaker} instances by their identifiers.
+		 */
+		private static Map<String, ManagedObjectMaker> managedObjectMakers;
+
+		/**
+		 * Clears the {@link ManagedObjectMaker} instances for the next test.
+		 */
+		public static void reset() {
+			managedObjectMakers = new HashMap<String, ManagedObjectMaker>();
+		}
+
+		/**
+		 * Registers a {@link ManagedObjectMaker}.
+		 * 
+		 * @param managedObjectName
+		 *            Name of the {@link ManagedObject}.
+		 * @param sectionBuilder
+		 *            {@link SectionBuilder}.
+		 * @param maker
+		 *            {@link ManagedObjectMaker}.
+		 * @return {@link SectionManagedObject}.
+		 */
+		public static SectionManagedObject register(String managedObjectName,
+				SectionBuilder sectionBuilder, ManagedObjectMaker maker) {
+
+			// Ensure have a maker
+			if (maker == null) {
+				maker = new ManagedObjectMaker() {
+					@Override
+					public void make(ManagedObjectMakerContext context) {
+						// Empty managed object
+					}
+				};
+			}
+
+			// Register the managed object maker
+			String identifier = String.valueOf(managedObjectMakers.size());
+			managedObjectMakers.put(identifier, maker);
+
+			// Create the section managed object
+			SectionManagedObject mo = sectionBuilder
+					.addManagedObject(managedObjectName,
+							MakerManagedObjectSource.class.getName());
+			mo.addProperty(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
+
+			// Return the section managed object
+			return mo;
+		}
 
 		/**
 		 * {@link MetaDataContext}.
 		 */
 		private MetaDataContext<Indexed, Indexed> context;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param maker
-		 *            {@link ManagedObjectMaker}.
-		 */
-		public MakerManagedObjectSource(ManagedObjectMaker maker) {
-			this.managedObjectMaker = maker;
-		}
 
 		/*
 		 * ================= AbstractManagedObjectSource ======================
@@ -513,11 +570,20 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		protected void loadMetaData(MetaDataContext<Indexed, Indexed> context)
 				throws Exception {
 
+			// Provide default object type
+			context.setObjectClass(Object.class);
+
 			// Store details to load
 			this.context = context;
 
+			// Obtain the managed object maker
+			String identifier = context.getManagedObjectSourceContext()
+					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			ManagedObjectMaker managedObjectMaker = managedObjectMakers
+					.get(identifier);
+
 			// Make the managed object
-			this.managedObjectMaker.make(this);
+			managedObjectMaker.make(this);
 		}
 
 		@Override
@@ -533,6 +599,21 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		@Override
 		public MetaDataContext<Indexed, Indexed> getContext() {
 			return this.context;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void addExtensionInterface(Class<?> extensionInterface) {
+			// Add the extension interface
+			this.context.addManagedObjectExtensionInterface(extensionInterface,
+					new ExtensionInterfaceFactory() {
+						@Override
+						public Object createExtensionInterface(
+								ManagedObject managedObject) {
+							fail("Should not require to create extension interface");
+							return null;
+						}
+					});
 		}
 	}
 

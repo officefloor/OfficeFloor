@@ -221,9 +221,9 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 		// Add the section managed object twice
 		this.replayMockObjects();
 		SectionManagedObject moFirst = this.node.addManagedObject("MO",
-				new NotUseManagedObjectSource());
+				NotUseManagedObjectSource.class.getName());
 		SectionManagedObject moSecond = this.node.addManagedObject("MO",
-				new NotUseManagedObjectSource());
+				NotUseManagedObjectSource.class.getName());
 		this.verifyMockObjects();
 
 		// Should be the same section managed object
@@ -985,7 +985,7 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Ensure only can link once
 		this.node.link(object, this.node.addManagedObject("ANOTHER",
-				new NotUseManagedObjectSource()));
+				NotUseManagedObjectSource.class.getName()));
 		assertObjectLink("Can only link once", object, mo);
 
 		this.verifyMockObjects();
@@ -1061,7 +1061,7 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Link
 		SectionManagedObject mo = this.node.addManagedObject("MO",
-				new NotUseManagedObjectSource());
+				NotUseManagedObjectSource.class.getName());
 		ManagedObjectDependency dependency = mo
 				.getManagedObjectDependency("DEPENDENCY");
 		SectionObject sectionObject = this.node.addSectionObject("OBJECT",
@@ -1092,7 +1092,7 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 
 		// Link
 		SectionManagedObject mo = this.node.addManagedObject("MO",
-				new NotUseManagedObjectSource());
+				NotUseManagedObjectSource.class.getName());
 		ManagedObjectDependency dependency = mo
 				.getManagedObjectDependency("DEPENDENCY");
 		SectionManagedObject moTarget = this.node.addManagedObject("MO_TARGET",

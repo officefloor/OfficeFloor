@@ -25,8 +25,8 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
-import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
@@ -41,6 +41,7 @@ import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
@@ -63,7 +64,6 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.repository.ConfigurationContext;
 
 /**
@@ -294,6 +294,12 @@ public class SectionNodeImpl implements SectionNode {
 		for (SectionNode subSection : this.subSections.values()) {
 			subSection.loadSection(configurationContext, classLoader);
 		}
+
+		// Load managed objects (require supported extension interfaces)
+		for (ManagedObjectNode managedObject : this.managedObjectNodes.values()) {
+			managedObject.loadManagedObjectMetaData(configurationContext,
+					classLoader);
+		}
 	}
 
 	/*
@@ -447,40 +453,14 @@ public class SectionNodeImpl implements SectionNode {
 	@Override
 	public SectionManagedObject addManagedObject(String managedObjectName,
 			String managedObjectSourceClassName) {
-		return this.addManagedObject(managedObjectName,
-				managedObjectSourceClassName, null);
-	}
-
-	@Override
-	public SectionManagedObject addManagedObject(String managedObjectName,
-			ManagedObjectSource<?, ?> managedObjectSource) {
-		return this.addManagedObject(managedObjectName, managedObjectSource
-				.getClass().getName(), managedObjectSource);
-	}
-
-	/**
-	 * Adds a {@link SectionManagedObject}.
-	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link SectionManagedObject}.
-	 * @param managedObjectSourceClassName
-	 *            Class name of the {@link ManagedObjectSource}.
-	 * @param managedObjectSource
-	 *            {@link ManagedObjectSource} instance if provided. May be
-	 *            <code>null</code>.
-	 * @return Added {@link SectionManagedObject}.
-	 */
-	private SectionManagedObject addManagedObject(String managedObjectName,
-			String managedObjectSourceClassName,
-			ManagedObjectSource<?, ?> managedObjectSource) {
 		// Obtain and return the section managed object for the name
 		ManagedObjectNode managedObject = this.managedObjectNodes
 				.get(managedObjectName);
 		if (managedObject == null) {
 			// Add the section managed object
 			managedObject = new ManagedObjectNodeImpl(managedObjectName,
-					managedObjectSourceClassName, managedObjectSource,
-					this.sectionLocation, this.issues);
+					managedObjectSourceClassName, this.sectionLocation,
+					this.issues);
 			this.managedObjectNodes.put(managedObjectName, managedObject);
 		} else {
 			// Section managed object already added
@@ -819,6 +799,12 @@ public class SectionNodeImpl implements SectionNode {
 	@Override
 	public OfficeSectionOutput[] getOfficeSectionOutputs() {
 		return this.outputs.values().toArray(new OfficeSectionOutput[0]);
+	}
+
+	@Override
+	public OfficeSectionManagedObject[] getOfficeSectionManagedObjects() {
+		return this.managedObjectNodes.values().toArray(
+				new OfficeSectionManagedObject[0]);
 	}
 
 	@Override

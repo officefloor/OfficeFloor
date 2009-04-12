@@ -40,26 +40,24 @@ public interface OfficeTask {
 
 	/**
 	 * <p>
-	 * Obtains the {@link OfficeManagedObject} instances that this
+	 * Obtains the {@link DependentManagedObject} instances that this
 	 * {@link OfficeTask} is dependent upon.
 	 * <p>
 	 * This aids the {@link OfficeSource} in deciding the {@link Team}
 	 * responsible for this {@link OfficeTask}.
 	 * 
-	 * @return {@link OfficeManagedObject} instances that this
+	 * @return {@link DependentManagedObject} instances that this
 	 *         {@link OfficeTask} is dependent upon.
 	 */
-	OfficeManagedObject[] getDependentOfficeManagedObjects();
+	DependentManagedObject[] getDependentManagedObjects();
 
 	/**
-	 * Specifies the {@link Office} name of the {@link Team} responsible for
-	 * this {@link OfficeTask}.
+	 * Specifies the {@link OfficeTeam} responsible for this {@link OfficeTask}.
 	 * 
-	 * @param officeTeamName
-	 *            {@link Office} name of the {@link Team} responsible for this
-	 *            {@link OfficeTask}.
+	 * @param team
+	 *            {@link OfficeTeam} responsible for this {@link OfficeTask}.
 	 */
-	void setTeamResponsible(String officeTeamName);
+	void setTeamResponsible(OfficeTeam team);
 
 	/**
 	 * <p>
