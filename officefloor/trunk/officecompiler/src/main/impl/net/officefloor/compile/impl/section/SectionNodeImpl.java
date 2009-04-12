@@ -26,6 +26,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
@@ -43,8 +44,11 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -59,6 +63,7 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.repository.ConfigurationContext;
 
 /**
@@ -126,6 +131,12 @@ public class SectionNodeImpl implements SectionNode {
 	 * were added.
 	 */
 	private final List<SectionObjectType> objectTypes = new LinkedList<SectionObjectType>();
+
+	/**
+	 * {@link ManagedObjectNode} instances by their {@link SectionManagedObject}
+	 * names.
+	 */
+	private final Map<String, ManagedObjectNode> managedObjectNodes = new HashMap<String, ManagedObjectNode>();
 
 	/**
 	 * {@link WorkNode} instances by their {@link SectionWork} names.
@@ -434,6 +445,52 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	@Override
+	public SectionManagedObject addManagedObject(String managedObjectName,
+			String managedObjectSourceClassName) {
+		return this.addManagedObject(managedObjectName,
+				managedObjectSourceClassName, null);
+	}
+
+	@Override
+	public SectionManagedObject addManagedObject(String managedObjectName,
+			ManagedObjectSource<?, ?> managedObjectSource) {
+		return this.addManagedObject(managedObjectName, managedObjectSource
+				.getClass().getName(), managedObjectSource);
+	}
+
+	/**
+	 * Adds a {@link SectionManagedObject}.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link SectionManagedObject}.
+	 * @param managedObjectSourceClassName
+	 *            Class name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSource
+	 *            {@link ManagedObjectSource} instance if provided. May be
+	 *            <code>null</code>.
+	 * @return Added {@link SectionManagedObject}.
+	 */
+	private SectionManagedObject addManagedObject(String managedObjectName,
+			String managedObjectSourceClassName,
+			ManagedObjectSource<?, ?> managedObjectSource) {
+		// Obtain and return the section managed object for the name
+		ManagedObjectNode managedObject = this.managedObjectNodes
+				.get(managedObjectName);
+		if (managedObject == null) {
+			// Add the section managed object
+			managedObject = new ManagedObjectNodeImpl(managedObjectName,
+					managedObjectSourceClassName, managedObjectSource,
+					this.sectionLocation, this.issues);
+			this.managedObjectNodes.put(managedObjectName, managedObject);
+		} else {
+			// Section managed object already added
+			this.addIssue("Section managed object " + managedObjectName
+					+ " already added");
+		}
+		return managedObject;
+	}
+
+	@Override
 	public SectionWork addWork(String workName, String workSourceClassName) {
 		return this.addWork(workName, workSourceClassName, null);
 	}
@@ -590,6 +647,23 @@ public class SectionNodeImpl implements SectionNode {
 		this.linkFlow(subSectionOutput, sectionOutput);
 	}
 
+	@Override
+	public void link(ManagedObjectFlow managedObjectFlow, SectionTask task) {
+		this.linkFlow(managedObjectFlow, task);
+	}
+
+	@Override
+	public void link(ManagedObjectFlow managedObjectFlow,
+			SubSectionInput subSectionInput) {
+		this.linkFlow(managedObjectFlow, subSectionInput);
+	}
+
+	@Override
+	public void link(ManagedObjectFlow managedObjectFlow,
+			SectionOutput sectionOutput) {
+		this.linkFlow(managedObjectFlow, sectionOutput);
+	}
+
 	/**
 	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
 	 * 
@@ -660,6 +734,30 @@ public class SectionNodeImpl implements SectionNode {
 	public void link(SubSectionObject subSectionObject,
 			SectionObject sectionObject) {
 		this.linkObject(subSectionObject, sectionObject);
+	}
+
+	@Override
+	public void link(TaskObject taskObject,
+			SectionManagedObject sectionManagedObject) {
+		this.linkObject(taskObject, sectionManagedObject);
+	}
+
+	@Override
+	public void link(SubSectionObject subSectionObject,
+			SectionManagedObject sectionManagedObject) {
+		this.linkObject(subSectionObject, sectionManagedObject);
+	}
+
+	@Override
+	public void link(ManagedObjectDependency dependency,
+			SectionObject sectionObject) {
+		this.linkObject(dependency, sectionObject);
+	}
+
+	@Override
+	public void link(ManagedObjectDependency dependency,
+			SectionManagedObject sectionManagedObject) {
+		this.linkObject(dependency, sectionManagedObject);
 	}
 
 	/**

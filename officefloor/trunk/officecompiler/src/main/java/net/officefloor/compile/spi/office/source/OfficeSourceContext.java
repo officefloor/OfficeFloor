@@ -29,8 +29,13 @@ import net.officefloor.compile.spi.section.source.SectionSource;
  */
 public interface OfficeSourceContext {
 
-	OfficeManagedObject getOfficeManagedObject(String managedObjectName);
-	
+	OfficeManagedObject getOfficeFloorManagedObject(
+			String officeManagedObjectName);
+
+	OfficeManagedObject addManagedObject(String managedObjectName,
+			String managedObjectSourceClassName, String sectionLocation,
+			PropertyList properties);
+
 	OfficeSection addSection(String sectionName, String sectionSourceClassName,
 			String sectionLocation, PropertyList properties);
 
