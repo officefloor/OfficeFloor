@@ -17,6 +17,7 @@
 package net.officefloor.compile.spi.office.source;
 
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 
 /**
  * Sources the {@link OfficeType}.
@@ -26,7 +27,7 @@ import net.officefloor.compile.office.OfficeType;
 public interface OfficeSource {
 
 	// TODO getSpecification()
-	
-	void sourceOffice(OfficeSourceContext context);
-	
+
+	void sourceOffice(OfficeArchitect architect, OfficeSourceContext context);
+
 }

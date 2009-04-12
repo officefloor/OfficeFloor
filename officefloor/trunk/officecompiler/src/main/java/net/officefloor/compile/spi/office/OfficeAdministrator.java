@@ -30,5 +30,7 @@ public interface OfficeAdministrator {
 
 	void administerManagedObject(OfficeManagedObject managedObject);
 
+	void administerManagedObject(OfficeSectionManagedObject managedObject);
+
 	void administerManagedObject(OfficeFloorManagedObject managedObject);
 }

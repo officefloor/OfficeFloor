@@ -14,14 +14,30 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.office.source;
+package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.frame.api.manage.Office;
 
 /**
- * Context for the {@link OfficeSource}.
+ * Architect to structure the {@link Office}.
  * 
  * @author Daniel
  */
-public interface OfficeSourceContext {
+public interface OfficeArchitect {
+
+	OfficeFloorManagedObject addOfficeFloorManagedObject(
+			String officeManagedObjectName);
+
+	OfficeTeam addTeam(String officeTeamName);
+
+	OfficeSection addSection(String sectionName, String sectionSourceClassName,
+			String sectionLocation, PropertyList properties);
+
+	OfficeManagedObject addManagedObject(String managedObjectName,
+			String managedObjectSourceClassName, PropertyList properties);
+
+	OfficeAdministrator addAdministrator(String administratorName,
+			String administratorSourceClassName, PropertyList properties);
 
 }
