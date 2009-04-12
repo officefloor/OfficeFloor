@@ -14,31 +14,31 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.section;
+package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
-import net.officefloor.compile.internal.structure.SectionInputNode;
+import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.section.SectionInputType;
+import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.compile.spi.section.SubSectionOutput;
 
 /**
- * {@link SectionInputNode} node.
+ * {@link SectionOutputNode} implementation.
  * 
  * @author Daniel
  */
-public class SectionInputNodeImpl implements SectionInputNode {
+public class SectionOutputNodeImpl implements SectionOutputNode {
 
 	/**
-	 * Name of the {@link SectionInputType}.
+	 * Name of the {@link SectionOutputType}.
 	 */
-	private final String inputName;
+	private final String outputName;
 
 	/**
 	 * Location of the {@link OfficeSection} containing this
-	 * {@link SectionInputNode}.
+	 * {@link SubSectionOutput}.
 	 */
 	private final String sectionLocation;
 
@@ -48,30 +48,34 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	private final CompilerIssues issues;
 
 	/**
-	 * Indicates if this {@link SectionInputType} is initialised.
+	 * Indicates if this {@link SectionOutputType} is initialised.
 	 */
 	private boolean isInitialised = false;
 
 	/**
-	 * Parameter type.
+	 * Argument type.
 	 */
-	private String parameterType;
+	private String argumentType;
+
+	/**
+	 * Flag indicating if escalation only.
+	 */
+	private boolean isEscalationOnly;
 
 	/**
 	 * Initiate not initialised.
 	 * 
-	 * @param inputName
-	 *            Name of the {@link SubSectionInput} (which is the name of the
-	 *            {@link SectionInputType}).
+	 * @param outputName
+	 *            Name of the {@link SectionOutputType}.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
-	 *            {@link SectionInputNode}.
+	 *            {@link SubSectionOutput}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
-	public SectionInputNodeImpl(String inputName, String sectionLocation,
+	public SectionOutputNodeImpl(String outputName, String sectionLocation,
 			CompilerIssues issues) {
-		this.inputName = inputName;
+		this.outputName = outputName;
 		this.sectionLocation = sectionLocation;
 		this.issues = issues;
 	}
@@ -79,26 +83,29 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	/**
 	 * Initiate initialised.
 	 * 
-	 * @param inputName
-	 *            Name of the {@link SectionInputType}.
-	 * @param parameterType
-	 *            Parameter type.
+	 * @param outputName
+	 *            Name of the {@link SectionOutputType}.
+	 * @param argumentType
+	 *            Argument type.
+	 * @param isEscalationOnly
+	 *            Flag indicating if escalation only.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
-	 *            {@link SectionInputNode}.
+	 *            {@link SubSectionOutput}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
-	public SectionInputNodeImpl(String inputName, String parameterType,
-			String sectionLocation, CompilerIssues issues) {
-		this.inputName = inputName;
+	public SectionOutputNodeImpl(String outputName, String argumentType,
+			boolean isEscalationOnly, String sectionLocation,
+			CompilerIssues issues) {
+		this.outputName = outputName;
 		this.sectionLocation = sectionLocation;
 		this.issues = issues;
-		this.initialise(parameterType);
+		this.initialise(argumentType, isEscalationOnly);
 	}
 
 	/*
-	 * ===================== SectionInputNode ===========================
+	 * ================== SectionOutputNode =======================
 	 */
 
 	@Override
@@ -107,51 +114,57 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	}
 
 	@Override
-	public void initialise(String parameterType) {
-		this.parameterType = parameterType;
+	public void initialise(String argumentType, boolean isEscalationOnly) {
+		this.argumentType = argumentType;
+		this.isEscalationOnly = isEscalationOnly;
 		this.isInitialised = true;
 	}
 
 	/*
-	 * ================= SectionInputType =========================
+	 * ================ SectionOutputType =========================
 	 */
 
 	@Override
-	public String getSectionInputName() {
-		return this.inputName;
+	public String getSectionOutputName() {
+		return this.outputName;
 	}
 
 	@Override
-	public String getParameterType() {
-		return this.parameterType;
+	public String getArgumentType() {
+		return this.argumentType;
+	}
+
+	@Override
+	public boolean isEscalationOnly() {
+		return this.isEscalationOnly;
 	}
 
 	/*
-	 * =================== SubSectionInput ========================
+	 * ================ SubSectionOutput ===========================
 	 */
 
 	@Override
-	public String getSubSectionInputName() {
-		return this.inputName;
+	public String getSubSectionOutputName() {
+		return this.outputName;
 	}
 
 	/*
-	 * ===================== OfficeSectionInput =====================
+	 * =================== OfficeSectionOutput ======================
 	 */
 
 	@Override
-	public String getOfficeSectionInputName() {
-		return this.inputName;
+	public String getOfficeSectionOutputName() {
+		return this.outputName;
 	}
 
 	/*
-	 * =================== LinkFlowNode ============================
+	 * ==================== LinkFlowNode ===========================
 	 */
 
 	/**
 	 * Linked {@link LinkFlowNode}.
 	 */
-	private LinkFlowNode linkedFlowNode = null;
+	private LinkFlowNode linkedFlowNode;
 
 	@Override
 	public boolean linkFlowNode(LinkFlowNode node) {
@@ -159,7 +172,7 @@ public class SectionInputNodeImpl implements SectionInputNode {
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
 			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-					null, null, "Input " + this.inputName
+					null, null, "Sub section output " + this.outputName
 							+ " linked more than once");
 			return false; // already linked
 		}

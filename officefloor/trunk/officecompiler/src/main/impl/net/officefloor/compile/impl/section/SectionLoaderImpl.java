@@ -17,6 +17,7 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues;

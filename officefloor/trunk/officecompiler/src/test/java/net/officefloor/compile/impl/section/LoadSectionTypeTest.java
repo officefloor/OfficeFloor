@@ -21,6 +21,9 @@ import java.sql.Connection;
 import java.util.Properties;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
+import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
+import net.officefloor.compile.impl.structure.SectionOutputNodeImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
