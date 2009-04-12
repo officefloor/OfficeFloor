@@ -16,12 +16,10 @@
  */
 package net.officefloor.compile.spi.office.source;
 
-
 /**
- * Context for the {@link OfficeSource}.
- * 
  * @author Daniel
+ *
  */
-public interface OfficeSourceContext {
+public interface OfficeSourceProperty {
 
 }
