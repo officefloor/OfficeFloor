@@ -19,7 +19,7 @@ package net.officefloor.model.impl.section;
 import java.sql.Connection;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.section.SectionNodeImpl;
+import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.section.SubSectionInputModel;
