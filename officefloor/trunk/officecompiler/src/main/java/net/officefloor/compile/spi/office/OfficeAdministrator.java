@@ -46,12 +46,37 @@ public interface OfficeAdministrator {
 	 */
 	void addProperty(String name, String value);
 
+	/**
+	 * Obtains the {@link OfficeDuty}.
+	 * 
+	 * @param dutyName
+	 *            Name of the {@link OfficeDuty}.
+	 * @return {@link OfficeDuty}.
+	 */
 	OfficeDuty getDuty(String dutyName);
 
-	void administerManagedObject(OfficeManagedObject managedObject);
-
+	/**
+	 * Administers the {@link OfficeSectionManagedObject}.
+	 * 
+	 * @param managedObject
+	 *            {@link OfficeSectionManagedObject} to be administered.
+	 */
 	void administerManagedObject(OfficeSectionManagedObject managedObject);
 
+	/**
+	 * Administers the {@link OfficeManagedObject}.
+	 * 
+	 * @param managedObject
+	 *            {@link OfficeManagedObject} to be administered.
+	 */
+	void administerManagedObject(OfficeManagedObject managedObject);
+
+	/**
+	 * Administers the {@link OfficeFloorManagedObject}.
+	 * 
+	 * @param managedObject
+	 *            {@link OfficeFloorManagedObject} to be administered.
+	 */
 	void administerManagedObject(OfficeFloorManagedObject managedObject);
 
 }

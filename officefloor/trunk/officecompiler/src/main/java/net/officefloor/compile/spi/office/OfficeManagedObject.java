@@ -16,7 +16,11 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -45,5 +49,26 @@ public interface OfficeManagedObject extends DependentManagedObject {
 	 *            Value of the {@link Property}.
 	 */
 	void addProperty(String name, String value);
+
+	/**
+	 * Obtains the {@link ManagedObjectDependency} for the
+	 * {@link ManagedObjectDependencyType}.
+	 * 
+	 * @param managedObjectDependencyName
+	 *            Name of the {@link ManagedObjectDependencyType}.
+	 * @return {@link ManagedObjectDependency}.
+	 */
+	ManagedObjectDependency getManagedObjectDependency(
+			String managedObjectDependencyName);
+
+	/**
+	 * Obtains the {@link ManagedObjectFlow} for he
+	 * {@link ManagedObjectFlowType}.
+	 * 
+	 * @param managedObjectFlowName
+	 *            Name of the {@link ManagedObjectFlowType}.
+	 * @return {@link ManagedObjectFlow}.
+	 */
+	ManagedObjectFlow getManagedObjectFlow(String managedObjectFlowName);
 
 }

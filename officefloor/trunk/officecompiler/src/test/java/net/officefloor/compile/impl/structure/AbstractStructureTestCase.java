@@ -22,6 +22,8 @@ import java.util.Map;
 import net.officefloor.compile.LoaderContext;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
+import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -105,6 +107,46 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		MakerManagedObjectSource.reset();
 		MakerWorkSource.reset(this);
 		MakerAdministratorSource.reset();
+	}
+
+	/**
+	 * Asserts the {@link LinkFlowNode} source is linked to the target
+	 * {@link LinkFlowNode}.
+	 * 
+	 * @param msg
+	 *            Message.
+	 * @param linkSource
+	 *            Source {@link LinkFlowNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkFlowNode}.
+	 */
+	protected static void assertFlowLink(String msg, Object linkSource,
+			Object linkTarget) {
+		assertTrue(msg + ": source must be "
+				+ LinkFlowNode.class.getSimpleName(),
+				linkSource instanceof LinkFlowNode);
+		assertEquals(msg, ((LinkFlowNode) linkSource).getLinkedFlowNode(),
+				linkTarget);
+	}
+
+	/**
+	 * Asserts the {@link LinkObjectNode} source is linked to the target
+	 * {@link LinkObjectNode}.
+	 * 
+	 * @param msg
+	 *            Message.
+	 * @param linkSource
+	 *            Source {@link LinkObjectNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkObjectNode}.
+	 */
+	protected static void assertObjectLink(String msg, Object linkSource,
+			Object linkTarget) {
+		assertTrue(msg + ": source must be "
+				+ LinkObjectNode.class.getSimpleName(),
+				linkSource instanceof LinkObjectNode);
+		assertEquals(msg, ((LinkObjectNode) linkSource).getLinkedObjectNode(),
+				linkTarget);
 	}
 
 	/**

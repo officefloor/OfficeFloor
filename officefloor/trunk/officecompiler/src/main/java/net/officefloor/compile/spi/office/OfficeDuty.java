@@ -16,10 +16,21 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.spi.administration.Duty;
+
 /**
+ * {@link Office} {@link Duty}.
+ * 
  * @author Daniel
- *
  */
 public interface OfficeDuty {
+
+	/**
+	 * Obtains the name of this {@link OfficeDuty}.
+	 * 
+	 * @return Name of this {@link OfficeDuty}.
+	 */
+	String getOfficeDutyName();
 
 }
