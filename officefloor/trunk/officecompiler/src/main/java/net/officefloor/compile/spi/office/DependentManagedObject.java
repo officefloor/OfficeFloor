@@ -30,6 +30,6 @@ public interface DependentManagedObject {
 	 * 
 	 * @return Name of this {@link DependentManagedObject}.
 	 */
-	String getManagedObjectName();
+	String getDependentManagedObjectName();
 
 }

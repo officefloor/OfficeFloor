@@ -19,16 +19,14 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.FlowLineUtil.LinkedFlow;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.spi.office.DependentManagedObject;
+import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
-import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -199,10 +197,10 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	public DependentManagedObject[] getDependentManagedObjects() {
+	public ObjectDependency[] getObjectDependencies() {
 		// TODO Implement
 		throw new UnsupportedOperationException(
-				"TODO implement OfficeTask.getDependentManagedObjects");
+				"TODO implement OfficeTask.getObjectDependencies");
 	}
 
 	@Override

@@ -16,24 +16,38 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link ManagedObject} that is to be provided by the {@link OfficeFloor}.
+ * Dependency of an {@link OfficeTask} on a {@link ManagedObject}.
  * 
  * @author Daniel
  */
-public interface OfficeFloorManagedObject extends DependentManagedObject {
+public interface ObjectDependency {
 
 	/**
-	 * Obtains the name that the {@link OfficeSource} refers to this
-	 * {@link ManagedObject}.
+	 * Obtains the name of this {@link ObjectDependency}. This is typically the
+	 * {@link TaskObjectType} name.
 	 * 
-	 * @return Name that the {@link OfficeSource} refers to this
-	 *         {@link ManagedObject}.
+	 * @return Name of this {@link ObjectDependency}.
 	 */
-	String getOfficeManagedObjectName();
+	String getObjectDependencyName();
 
+	/**
+	 * <p>
+	 * Obtains the {@link ManagedObject} that full fills the dependency.
+	 * <p>
+	 * Expected return types are:
+	 * <ol>
+	 * <li>{@link OfficeSectionManagedObject}</li>
+	 * <li>{@link OfficeManagedObject}</li>
+	 * <li>{@link OfficeFloorManagedObject}</li>
+	 * <li><code>null</code> if not yet linked (or issue in linking)</li>
+	 * </ol>
+	 * 
+	 * @return {@link DependentManagedObject} or <code>null</code> if not yet
+	 *         linked (or issue in linking).
+	 */
+	DependentManagedObject getDependentManagedObject();
 }

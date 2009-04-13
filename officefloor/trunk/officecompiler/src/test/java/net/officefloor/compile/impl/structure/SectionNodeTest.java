@@ -75,12 +75,12 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	private CompilerIssues issues = this.createMock(CompilerIssues.class);
+	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
 
 	/**
 	 * {@link SectionBuilder} to be tested.
 	 */
-	private SectionNode node = new SectionNodeImpl(SECTION_LOCATION,
+	private final SectionNode node = new SectionNodeImpl(SECTION_LOCATION,
 			this.issues);
 
 	/**

@@ -18,10 +18,12 @@ package net.officefloor.compile.impl.structure;
 
 import java.util.Map;
 
+import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
@@ -39,6 +41,11 @@ public class WorkNodeImpl implements WorkNode {
 	 * Name of this {@link SectionWork}.
 	 */
 	private final String workName;
+
+	/**
+	 * {@link PropertyList}.
+	 */
+	private final PropertyList propertyList = new PropertyListImpl();
 
 	/**
 	 * Location of the {@link OfficeSection} containing this {@link WorkNode}.
@@ -118,9 +125,7 @@ public class WorkNodeImpl implements WorkNode {
 
 	@Override
 	public void addProperty(String name, String value) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionWork.addProperty");
+		this.propertyList.addProperty(name).setValue(value);
 	}
 
 	@Override

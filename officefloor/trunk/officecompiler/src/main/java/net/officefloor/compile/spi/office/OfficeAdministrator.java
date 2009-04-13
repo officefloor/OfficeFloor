@@ -16,8 +16,10 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * {@link Administrator} within the {@link Office}.
@@ -26,6 +28,24 @@ import net.officefloor.frame.spi.administration.Administrator;
  */
 public interface OfficeAdministrator {
 
+	/**
+	 * Obtains the name of this {@link OfficeAdministrator}.
+	 * 
+	 * @return Name of this {@link OfficeAdministrator}.
+	 */
+	String getOfficeAdministratorName();
+
+	/**
+	 * Adds a {@link Property} to source the {@link Administrator} from the
+	 * {@link AdministratorSource}.
+	 * 
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param value
+	 *            Value of the {@link Property}.
+	 */
+	void addProperty(String name, String value);
+
 	OfficeDuty getDuty(String dutyName);
 
 	void administerManagedObject(OfficeManagedObject managedObject);
@@ -33,4 +53,5 @@ public interface OfficeAdministrator {
 	void administerManagedObject(OfficeSectionManagedObject managedObject);
 
 	void administerManagedObject(OfficeFloorManagedObject managedObject);
+
 }
