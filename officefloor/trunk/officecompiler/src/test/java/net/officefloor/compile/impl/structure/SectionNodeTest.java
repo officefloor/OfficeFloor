@@ -18,9 +18,6 @@ package net.officefloor.compile.impl.structure;
 
 import java.sql.Connection;
 
-import net.officefloor.compile.impl.structure.SectionNodeImpl;
-import net.officefloor.compile.internal.structure.LinkFlowNode;
-import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -58,14 +55,13 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
-import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
  * Tests the {@link SectionBuilder}.
  * 
  * @author Daniel
  */
-public class SectionNodeTest extends OfficeFrameTestCase {
+public class SectionNodeTest extends AbstractStructureTestCase {
 
 	/**
 	 * Location of the {@link OfficeSection} being built.
@@ -886,8 +882,7 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures can link {@link ManagedObjectFlow} to the {@link SubSectionInput}
-	 * .
+	 * Ensures can link {@link ManagedObjectFlow} to {@link SubSectionInput}.
 	 */
 	public void testLinkManagedObjectFlowToSubSectionInput() {
 
@@ -1111,26 +1106,6 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Asserts the {@link LinkFlowNode} source is linked to the target
-	 * {@link LinkFlowNode}.
-	 * 
-	 * @param msg
-	 *            Message.
-	 * @param linkSource
-	 *            Source {@link LinkFlowNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkFlowNode}.
-	 */
-	private static void assertFlowLink(String msg, Object linkSource,
-			Object linkTarget) {
-		assertTrue(msg + ": source must be "
-				+ LinkFlowNode.class.getSimpleName(),
-				linkSource instanceof LinkFlowNode);
-		assertEquals(msg, ((LinkFlowNode) linkSource).getLinkedFlowNode(),
-				linkTarget);
-	}
-
-	/**
 	 * Asserts the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
 	 * 
 	 * @param taskFlow
@@ -1144,26 +1119,6 @@ public class SectionNodeTest extends OfficeFrameTestCase {
 				taskFlow instanceof TaskFlowNode);
 		assertEquals("Incorrect instigation strategy", instigationStrategy,
 				((TaskFlowNode) taskFlow).getFlowInstigationStrategy());
-	}
-
-	/**
-	 * Asserts the {@link LinkObjectNode} source is linked to the target
-	 * {@link LinkObjectNode}.
-	 * 
-	 * @param msg
-	 *            Message.
-	 * @param linkSource
-	 *            Source {@link LinkObjectNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkObjectNode}.
-	 */
-	private static void assertObjectLink(String msg, Object linkSource,
-			Object linkTarget) {
-		assertTrue(msg + ": source must be "
-				+ LinkObjectNode.class.getSimpleName(),
-				linkSource instanceof LinkObjectNode);
-		assertEquals(msg, ((LinkObjectNode) linkSource).getLinkedObjectNode(),
-				linkTarget);
 	}
 
 	/**

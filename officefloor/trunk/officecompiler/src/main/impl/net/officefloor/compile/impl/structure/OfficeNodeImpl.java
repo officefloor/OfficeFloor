@@ -23,7 +23,12 @@ import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -61,7 +66,7 @@ public class OfficeNodeImpl implements OfficeNode {
 	 */
 
 	@Override
-	public OfficeFloorManagedObject addOfficeFloorManagedObject(
+	public OfficeFloorManagedObject getOfficeFloorManagedObject(
 			String officeManagedObjectName, String objectType) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
@@ -69,7 +74,7 @@ public class OfficeNodeImpl implements OfficeNode {
 	}
 
 	@Override
-	public OfficeTeam addTeam(String officeTeamName) {
+	public OfficeTeam getTeam(String officeTeamName) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement OfficeArchitect.addTeam");
@@ -98,6 +103,52 @@ public class OfficeNodeImpl implements OfficeNode {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement OfficeArchitect.addAdministrator");
+	}
+
+	@Override
+	public void link(OfficeSectionObject sectionObject,
+			OfficeManagedObject managedObject) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeArchitect.link");
+	}
+
+	@Override
+	public void link(OfficeSectionObject sectionObject,
+			OfficeFloorManagedObject managedObject) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeArchitect.link");
+	}
+
+	@Override
+	public void link(ManagedObjectDependency dependency,
+			OfficeManagedObject managedObject) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeArchitect.link");
+	}
+
+	@Override
+	public void link(ManagedObjectDependency dependency,
+			OfficeFloorManagedObject managedObject) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeArchitect.link");
+	}
+
+	@Override
+	public void link(ManagedObjectFlow flow, OfficeSectionInput input) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeArchitect.link");
+	}
+
+	@Override
+	public void link(OfficeSectionOutput output, OfficeSectionInput input) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeArchitect.link");
 	}
 
 }

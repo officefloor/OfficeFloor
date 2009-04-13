@@ -17,6 +17,8 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -30,7 +32,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface OfficeArchitect {
 
 	/**
-	 * Adds an {@link OfficeFloorManagedObject}.
+	 * Obtains an {@link OfficeFloorManagedObject}.
 	 * 
 	 * @param officeManagedObjectName
 	 *            Name of the {@link OfficeFloorManagedObject}.
@@ -38,17 +40,17 @@ public interface OfficeArchitect {
 	 *            Object type.
 	 * @return Added {@link OfficeFloorManagedObject}.
 	 */
-	OfficeFloorManagedObject addOfficeFloorManagedObject(
+	OfficeFloorManagedObject getOfficeFloorManagedObject(
 			String officeManagedObjectName, String objectType);
 
 	/**
-	 * Adds an {@link OfficeTeam}.
+	 * Obtains an {@link OfficeTeam}.
 	 * 
 	 * @param officeTeamName
 	 *            Name of the {@link OfficeTeam}.
 	 * @return Added {@link OfficeTeam}.
 	 */
-	OfficeTeam addTeam(String officeTeamName);
+	OfficeTeam getTeam(String officeTeamName);
 
 	/**
 	 * Adds an {@link OfficeSection}.
@@ -89,5 +91,75 @@ public interface OfficeArchitect {
 	 */
 	OfficeAdministrator addAdministrator(String administratorName,
 			String administratorSourceClassName);
+
+	/**
+	 * Links the {@link OfficeSectionObject} to be the
+	 * {@link OfficeManagedObject}.
+	 * 
+	 * @param sectionObject
+	 *            {@link OfficeSectionObject}.
+	 * @param managedObject
+	 *            {@link OfficeManagedObject}.
+	 */
+	void link(OfficeSectionObject sectionObject,
+			OfficeManagedObject managedObject);
+
+	/**
+	 * Links the {@link OfficeSectionObject} to be the
+	 * {@link OfficeFloorManagedObject}.
+	 * 
+	 * @param sectionObject
+	 *            {@link OfficeSectionObject}.
+	 * @param managedObject
+	 *            {@link OfficeFloorManagedObject}.
+	 */
+	void link(OfficeSectionObject sectionObject,
+			OfficeFloorManagedObject managedObject);
+
+	/**
+	 * Links the {@link ManagedObjectDependency} to be the
+	 * {@link OfficeManagedObject}.
+	 * 
+	 * @param dependency
+	 *            {@link ManagedObjectDependency}.
+	 * @param managedObject
+	 *            {@link OfficeManagedObject}.
+	 */
+	void link(ManagedObjectDependency dependency,
+			OfficeManagedObject managedObject);
+
+	/**
+	 * Links the {@link ManagedObjectDependency} to be the
+	 * {@link OfficeFloorManagedObject}.
+	 * 
+	 * @param dependency
+	 *            {@link ManagedObjectDependency}.
+	 * @param managedObject
+	 *            {@link OfficeFloorManagedObject}.
+	 */
+	void link(ManagedObjectDependency dependency,
+			OfficeFloorManagedObject managedObject);
+
+	/**
+	 * Links the {@link ManagedObjectFlow} to be undertaken by the
+	 * {@link OfficeSectionInput}.
+	 * 
+	 * @param flow
+	 *            {@link ManagedObjectFlow}.
+	 * @param input
+	 *            {@link OfficeSectionInput}.
+	 */
+	void link(ManagedObjectFlow flow, OfficeSectionInput input);
+
+	/**
+	 * Links the {@link OfficeSectionObject} to be undertaken by the
+	 * {@link OfficeSectionInput}.
+	 * 
+	 * @param output
+	 *            {@link OfficeSectionOutput}.
+	 * @param input
+	 *            {@link OfficeSectionInput}.
+	 */
+	void link(OfficeSectionOutput output, OfficeSectionInput input);
 
 }
