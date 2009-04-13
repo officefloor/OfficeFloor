@@ -16,21 +16,44 @@
  */
 package net.officefloor.compile.spi.office.source;
 
-import net.officefloor.compile.office.OfficeType;
-
 /**
- * Provides the specification of the {@link OfficeType} to be loaded by the
- * particular {@link OfficeSource}.
+ * <p>
+ * Indicates a property was not configured within the
+ * {@link OfficeSourceContext}.
+ * <p>
+ * This is a serious error as the {@link OfficeSource} is requiring this
+ * property to initialise.
  * 
  * @author Daniel
  */
-public interface OfficeSourceSpecification {
+public class OfficeUnknownPropertyError extends Error {
 
 	/**
-	 * Obtains the specification of the properties for the {@link OfficeType}.
-	 * 
-	 * @return Property specification.
+	 * Name of the unknown property.
 	 */
-	OfficeSourceProperty[] getProperties();
+	private final String unknownPropertyName;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param message
+	 *            Message.
+	 * @param unknownPropertyName
+	 *            Name of the unknown property.
+	 */
+	public OfficeUnknownPropertyError(String message,
+			String unknownPropertyName) {
+		super(message);
+		this.unknownPropertyName = unknownPropertyName;
+	}
+
+	/**
+	 * Obtains the name of the unknown property.
+	 * 
+	 * @return Name of the unknown property.
+	 */
+	public String getUnknonwnPropertyName() {
+		return this.unknownPropertyName;
+	}
 
 }

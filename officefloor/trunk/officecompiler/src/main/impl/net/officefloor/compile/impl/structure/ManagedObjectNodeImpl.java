@@ -208,6 +208,15 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	/*
+	 * =================== DependentManagedObject ==============================
+	 */
+
+	@Override
+	public String getDependentManagedObjectName() {
+		return this.managedObjectName;
+	}
+
+	/*
 	 * =================== LinkObjectNode ======================================
 	 */
 

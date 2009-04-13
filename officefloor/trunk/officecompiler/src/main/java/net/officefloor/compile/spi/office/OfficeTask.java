@@ -40,16 +40,16 @@ public interface OfficeTask {
 
 	/**
 	 * <p>
-	 * Obtains the {@link DependentManagedObject} instances that this
+	 * Obtains the {@link ObjectDependency} instances that this
 	 * {@link OfficeTask} is dependent upon.
 	 * <p>
 	 * This aids the {@link OfficeSource} in deciding the {@link Team}
 	 * responsible for this {@link OfficeTask}.
 	 * 
-	 * @return {@link DependentManagedObject} instances that this
-	 *         {@link OfficeTask} is dependent upon.
+	 * @return {@link ObjectDependency} instances that this {@link OfficeTask}
+	 *         is dependent upon.
 	 */
-	DependentManagedObject[] getDependentManagedObjects();
+	ObjectDependency[] getObjectDependencies();
 
 	/**
 	 * Specifies the {@link OfficeTeam} responsible for this {@link OfficeTask}.

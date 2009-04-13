@@ -43,4 +43,13 @@ public interface OfficeSection extends OfficeSubSection {
 	 */
 	OfficeSectionOutput[] getOfficeSectionOutputs();
 
+	/**
+	 * Obtains the {@link OfficeSectionObject} instances required by this
+	 * {@link OfficeSection}.
+	 * 
+	 * @return {@link OfficeSectionObject} instances required by this
+	 *         {@link OfficeSection}.
+	 */
+	OfficeSectionObject[] getOfficeSectionObjects();
+
 }

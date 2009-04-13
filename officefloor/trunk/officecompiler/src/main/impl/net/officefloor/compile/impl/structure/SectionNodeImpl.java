@@ -43,6 +43,7 @@ import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
@@ -333,9 +334,7 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public void addProperty(String name, String value) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SubSection.addProperty");
+		this.propertyList.addProperty(name).setValue(value);
 	}
 
 	@Override
@@ -800,6 +799,13 @@ public class SectionNodeImpl implements SectionNode {
 	@Override
 	public OfficeSectionOutput[] getOfficeSectionOutputs() {
 		return this.outputs.values().toArray(new OfficeSectionOutput[0]);
+	}
+
+	@Override
+	public OfficeSectionObject[] getOfficeSectionObjects() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeSection.getOfficeSectionObjects");
 	}
 
 	@Override

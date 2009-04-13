@@ -14,15 +14,21 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.section;
+package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.LoaderContext;
+import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.section.SectionLoaderImpl;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
+import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SectionManagedObject;
@@ -51,6 +57,9 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -64,7 +73,7 @@ import net.officefloor.model.repository.ConfigurationContext;
  * 
  * @author Daniel
  */
-public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase {
+public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 	/**
 	 * Location of the top level {@link OfficeSection}.
@@ -76,12 +85,6 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 	 */
 	protected final ConfigurationContext configurationContext = this
 			.createMock(ConfigurationContext.class);
-
-	/**
-	 * {@link PropertyList}.
-	 */
-	protected final PropertyList propertyList = this
-			.createMock(PropertyList.class);
 
 	/**
 	 * {@link ClassLoader}.
@@ -97,9 +100,11 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 	/**
 	 * Initiate for test.
 	 */
-	public AbstractOfficeSectionTestCase() {
+	public AbstractStructureTestCase() {
+		MakerSectionSource.reset();
 		MakerManagedObjectSource.reset();
 		MakerWorkSource.reset(this);
+		MakerAdministratorSource.reset();
 	}
 
 	/**
@@ -111,19 +116,95 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 	 */
 	protected OfficeSection loadOfficeSection(SectionMaker maker) {
 
-		// Reset for loading the office section
-		MakerSectionSource.reset(maker);
+		// Register the section maker
+		PropertyList propertyList = MakerSectionSource.register(maker);
 
 		// Load the section
 		this.replayMockObjects();
 		SectionLoader loader = new SectionLoaderImpl(SECTION_LOCATION);
 		OfficeSection section = loader.loadOfficeSection(
 				MakerSectionSource.class, this.configurationContext,
-				this.propertyList, this.classLoader, this.issues);
+				propertyList, this.classLoader, this.issues);
 		this.verifyMockObjects();
 
 		// Return the section
 		return section;
+	}
+
+	/**
+	 * Adds the {@link OfficeSection} to the {@link OfficeArchitect}.
+	 * 
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param maker
+	 *            {@link SectionMaker}.
+	 * @return Added {@link OfficeSection}.
+	 */
+	protected OfficeSection addSection(OfficeArchitect officeArchitect,
+			String sectionName, SectionMaker maker) {
+
+		// Register the section maker
+		PropertyList propertyList = MakerSectionSource.register(maker);
+
+		// Add and return the office section
+		return officeArchitect.addSection(sectionName, MakerSectionSource.class
+				.getName(), sectionName, propertyList);
+	}
+
+	/**
+	 * Adds an {@link OfficeManagedObject} to the {@link OfficeArchitect}.
+	 * 
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param managedObjectName
+	 *            Name of the {@link OfficeManagedObject}.
+	 * @param maker
+	 *            {@link ManagedObjectMaker}.
+	 * @return {@link OfficeManagedObject}.
+	 */
+	protected OfficeManagedObject addManagedObject(
+			OfficeArchitect officeArchitect, String managedObjectName,
+			ManagedObjectMaker maker) {
+
+		// Register the managed object maker
+		PropertyList propertyList = MakerManagedObjectSource.register(maker);
+
+		// Add and return the managed object
+		OfficeManagedObject mo = officeArchitect.addManagedObject(
+				managedObjectName, MakerManagedObjectSource.class.getName());
+		for (Property property : propertyList.getPropertyList()) {
+			mo.addProperty(property.getName(), property.getValue());
+		}
+		return mo;
+	}
+
+	/**
+	 * Adds an {@link OfficeAdministrator} to the {@link OfficeArchitect}.
+	 * 
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param administratorName
+	 *            Name of the {@link OfficeAdministrator}.
+	 * @param maker
+	 *            {@link AdministratorMaker}.
+	 * @return {@link OfficeAdministrator}.
+	 */
+	protected OfficeAdministrator addAdministrator(
+			OfficeArchitect officeArchitect, String administratorName,
+			AdministratorMaker maker) {
+
+		// Register the administrator maker
+		PropertyList propertyList = MakerAdministratorSource.register(maker);
+
+		// Add and return the administrator
+		OfficeAdministrator admin = officeArchitect.addAdministrator(
+				administratorName, MakerAdministratorSource.class.getName());
+		for (Property property : propertyList.getPropertyList()) {
+			admin.addProperty(property.getName(), property.getValue());
+		}
+		return admin;
 	}
 
 	/**
@@ -268,25 +349,51 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 			SectionMakerContext {
 
 		/**
-		 * Initial {@link SectionMaker}.
+		 * Property name to obtain the {@link SectionMaker} identifier.
 		 */
-		public static SectionMaker initialMaker = null;
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "section.maker";
 
 		/**
-		 * Reset for the next test.
-		 * 
-		 * @param initialMaker
-		 *            Initial {@link SectionMaker} for the top level
-		 *            {@link OfficeSection}.
+		 * {@link SectionMaker} instances by their identifier.
 		 */
-		public static void reset(SectionMaker initialMaker) {
-			MakerSectionSource.initialMaker = initialMaker;
+		private static Map<String, SectionMaker> sectionMakers;
+
+		/**
+		 * Resets for another test.
+		 */
+		public static void reset() {
+			sectionMakers = new HashMap<String, SectionMaker>();
 		}
 
 		/**
-		 * {@link SectionMaker}.
+		 * Registers a {@link SectionMaker}.
+		 * 
+		 * @param maker
+		 *            {@link SectionMaker}.
+		 * @return {@link PropertyList} to use to load the
+		 *         {@link MakerSectionSource}.
 		 */
-		private final SectionMaker maker;
+		public static PropertyList register(SectionMaker maker) {
+
+			// Ensure have a maker
+			if (maker == null) {
+				maker = new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						// Empty section
+					}
+				};
+			}
+
+			// Register the section maker
+			String identifier = String.valueOf(sectionMakers.size());
+			sectionMakers.put(identifier, maker);
+
+			// Create and return the properties to load
+			PropertyList propertyList = new PropertyListImpl(
+					MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
+			return propertyList;
+		}
 
 		/**
 		 * {@link SectionBuilder}.
@@ -297,23 +404,6 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		 * {@link SectionSourceContext}.
 		 */
 		private SectionSourceContext context;
-
-		/**
-		 * Default constructor for initial {@link OfficeSection}.
-		 */
-		public MakerSectionSource() {
-			this.maker = initialMaker;
-		}
-
-		/**
-		 * Initiate for {@link SubSection} instances.
-		 * 
-		 * @param maker
-		 *            {@link SectionMaker}.
-		 */
-		private MakerSectionSource(SectionMaker maker) {
-			this.maker = maker;
-		}
 
 		/*
 		 * ===================== SectionSource =============================
@@ -333,10 +423,13 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 			this.builder = sectionBuilder;
 			this.context = context;
 
-			// Make the section (if required)
-			if (this.maker != null) {
-				this.maker.make(this);
-			}
+			// Obtain the section maker
+			String identifier = context
+					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			SectionMaker maker = sectionMakers.get(identifier);
+
+			// Make the section
+			maker.make(this);
 		}
 
 		/*
@@ -356,29 +449,49 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		@Override
 		public SubSection addSubSection(String subSectionName,
 				SectionMaker maker) {
-			// Create the section source
-			SectionSource sectionSource = new MakerSectionSource(maker);
+
+			// Register the section source
+			PropertyList properties = MakerSectionSource.register(maker);
 
 			// Return the created sub section (using name as location)
-			return this.builder.addSubSection(subSectionName, sectionSource,
-					subSectionName);
+			SubSection subSection = this.builder.addSubSection(subSectionName,
+					MakerSectionSource.class.getName(), subSectionName);
+			for (Property property : properties.getPropertyList()) {
+				subSection.addProperty(property.getName(), property.getValue());
+			}
+			return subSection;
 		}
 
 		@Override
 		public SectionManagedObject addManagedObject(String managedObjectName,
 				ManagedObjectMaker maker) {
 			// Register (and add) the managed object
-			return MakerManagedObjectSource.register(managedObjectName,
-					this.builder, maker);
+			PropertyList propertyList = MakerManagedObjectSource
+					.register(maker);
+
+			// Create and return the section managed object
+			SectionManagedObject mo = this.builder
+					.addManagedObject(managedObjectName,
+							MakerManagedObjectSource.class.getName());
+			for (Property property : propertyList.getPropertyList()) {
+				mo.addProperty(property.getName(), property.getValue());
+			}
+			return mo;
 		}
 
 		@Override
 		public SectionWork addWork(String workName, WorkMaker maker) {
-			// Create the work source
-			WorkSource<?> workSource = new MakerWorkSource(maker);
+
+			// Register the work maker
+			PropertyList properties = MakerWorkSource.register(maker);
 
 			// Return the created work
-			return this.builder.addWork(workName, workSource);
+			SectionWork work = this.builder.addWork(workName,
+					MakerWorkSource.class.getName());
+			for (Property property : properties.getPropertyList()) {
+				work.addProperty(property.getName(), property.getValue());
+			}
+			return work;
 		}
 
 		@Override
@@ -517,16 +630,11 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		/**
 		 * Registers a {@link ManagedObjectMaker}.
 		 * 
-		 * @param managedObjectName
-		 *            Name of the {@link ManagedObject}.
-		 * @param sectionBuilder
-		 *            {@link SectionBuilder}.
 		 * @param maker
 		 *            {@link ManagedObjectMaker}.
-		 * @return {@link SectionManagedObject}.
+		 * @return {@link PropertyList}.
 		 */
-		public static SectionManagedObject register(String managedObjectName,
-				SectionBuilder sectionBuilder, ManagedObjectMaker maker) {
+		public static PropertyList register(ManagedObjectMaker maker) {
 
 			// Ensure have a maker
 			if (maker == null) {
@@ -542,14 +650,9 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 			String identifier = String.valueOf(managedObjectMakers.size());
 			managedObjectMakers.put(identifier, maker);
 
-			// Create the section managed object
-			SectionManagedObject mo = sectionBuilder
-					.addManagedObject(managedObjectName,
-							MakerManagedObjectSource.class.getName());
-			mo.addProperty(MAKER_IDENTIFIER_PROPERTY_NAME, identifier);
-
-			// Return the section managed object
-			return mo;
+			// Return the property list
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
+					identifier);
 		}
 
 		/**
@@ -729,24 +832,58 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 			WorkMakerContext {
 
 		/**
-		 * {@link AbstractOfficeSectionTestCase} currently running.
+		 * Property name for the {@link WorkMaker} identifier.
 		 */
-		private static AbstractOfficeSectionTestCase testCase;
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "work.maker";
+
+		/**
+		 * {@link AbstractStructureTestCase} currently running.
+		 */
+		private static AbstractStructureTestCase testCase;
+
+		/**
+		 * {@link WorkMaker} instances by their identifiers.
+		 */
+		private static Map<String, WorkMaker> workMakers;
 
 		/**
 		 * Resets for the next load.
 		 * 
 		 * @param testCase
-		 *            {@link AbstractOfficeSectionTestCase} currently running.
+		 *            {@link AbstractStructureTestCase} currently running.
 		 */
-		public static void reset(AbstractOfficeSectionTestCase testCase) {
+		public static void reset(AbstractStructureTestCase testCase) {
 			MakerWorkSource.testCase = testCase;
+			workMakers = new HashMap<String, WorkMaker>();
 		}
 
 		/**
-		 * {@link WorkMaker}.
+		 * Registers a {@link WorkMaker}.
+		 * 
+		 * @param maker
+		 *            {@link WorkMaker}.
+		 * @return {@link PropertyList}.
 		 */
-		private final WorkMaker workMaker;
+		public static PropertyList register(WorkMaker maker) {
+
+			// Ensure have a maker
+			if (maker == null) {
+				maker = new WorkMaker() {
+					@Override
+					public void make(WorkMakerContext context) {
+						// Empty work
+					}
+				};
+			}
+
+			// Register the work maker
+			String identifier = String.valueOf(workMakers.size());
+			workMakers.put(identifier, maker);
+
+			// Return the property list
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
+					identifier);
+		}
 
 		/**
 		 * {@link WorkFactory}.
@@ -762,16 +899,6 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 		 * {@link WorkSourceContext}.
 		 */
 		private WorkSourceContext context;
-
-		/**
-		 * Initiate.
-		 * 
-		 * @param maker
-		 *            {@link WorkMaker}.
-		 */
-		public MakerWorkSource(WorkMaker maker) {
-			this.workMaker = maker;
-		}
 
 		/*
 		 * ==================== WorkSource ==============================
@@ -796,8 +923,13 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 			this.builder = workTypeBuilder;
 			this.context = context;
 
+			// Obtain the work maker
+			String identifier = context
+					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			WorkMaker workMaker = workMakers.get(identifier);
+
 			// Make the work
-			this.workMaker.make(this);
+			workMaker.make(this);
 		}
 
 		/*
@@ -892,6 +1024,113 @@ public abstract class AbstractOfficeSectionTestCase extends OfficeFrameTestCase 
 				escalationBuilder.setLabel(escalationName);
 				return escalationBuilder;
 			}
+		}
+	}
+
+	/**
+	 * Maker of an {@link Administrator}.
+	 */
+	protected static interface AdministratorMaker {
+
+		/**
+		 * Makes the {@link Administrator}.
+		 * 
+		 * @param context
+		 *            {@link AdministratorMakerContext}.
+		 */
+		void make(AdministratorMakerContext context);
+	}
+
+	/**
+	 * Context for the {@link AdministratorMaker}.
+	 */
+	protected static interface AdministratorMakerContext {
+
+	}
+
+	/**
+	 * Maker {@link AdministratorSource}.
+	 */
+	public static class MakerAdministratorSource extends
+			AbstractAdministratorSource<Object, Indexed> implements
+			AdministratorMakerContext {
+
+		/**
+		 * Property name to obtain the {@link AdministratorMaker} identifier.
+		 */
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "administrator.maker";
+
+		/**
+		 * {@link AdministratorMaker} instances by their identifiers.
+		 */
+		private static Map<String, AdministratorMaker> adminMakers;
+
+		/**
+		 * Resets for the next test.
+		 */
+		public static void reset() {
+			adminMakers = new HashMap<String, AdministratorMaker>();
+		}
+
+		/**
+		 * Registers a {@link AdministratorMaker}.
+		 * 
+		 * @param maker
+		 *            {@link AdministratorMaker}.
+		 * @return {@link PropertyList}.
+		 */
+		public static PropertyList register(AdministratorMaker maker) {
+
+			// Ensure have a maker
+			if (maker == null) {
+				maker = new AdministratorMaker() {
+					@Override
+					public void make(AdministratorMakerContext context) {
+						// Empty administrator
+					}
+				};
+			}
+
+			// Register the administrator maker
+			String identifier = String.valueOf(adminMakers.size());
+			adminMakers.put(identifier, maker);
+
+			// Return the property list
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
+					identifier);
+		}
+
+		/*
+		 * ================ AbstractAdministratorSource ========================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			fail("Should not require specification");
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<Object, Indexed> context)
+				throws Exception {
+
+			// Store details to load
+			// TODO consider storing details
+
+			// Obtain the administrator maker
+			// TODO provide getProperty on AdministratorSourceContext
+			String identifier = context.getAdministratorSourceContext()
+					.getProperties()
+					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			AdministratorMaker adminMaker = adminMakers.get(identifier);
+
+			// Make the administrator
+			adminMaker.make(this);
+		}
+
+		@Override
+		public Administrator<Object, Indexed> createAdministrator() {
+			fail("Should not require creating an administrator");
+			return null;
 		}
 	}
 

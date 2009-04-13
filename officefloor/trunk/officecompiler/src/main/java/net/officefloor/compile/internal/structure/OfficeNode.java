@@ -14,26 +14,15 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.office;
+package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.frame.api.manage.Office;
 
 /**
- * {@link ManagedObject} that is to be provided by the {@link OfficeFloor}.
+ * {@link Office} node.
  * 
  * @author Daniel
  */
-public interface OfficeFloorManagedObject extends DependentManagedObject {
-
-	/**
-	 * Obtains the name that the {@link OfficeSource} refers to this
-	 * {@link ManagedObject}.
-	 * 
-	 * @return Name that the {@link OfficeSource} refers to this
-	 *         {@link ManagedObject}.
-	 */
-	String getOfficeManagedObjectName();
-
+public interface OfficeNode extends OfficeArchitect {
 }

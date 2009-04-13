@@ -16,15 +16,17 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObject} required by the {@link Office}.
  * 
  * @author Daniel
  */
-public interface OfficeManagedObject {
+public interface OfficeManagedObject extends DependentManagedObject {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject}.
@@ -32,5 +34,16 @@ public interface OfficeManagedObject {
 	 * @return Name of the {@link ManagedObject}.
 	 */
 	String getOfficeManagedObjectName();
+
+	/**
+	 * Adds a {@link Property} to source the {@link ManagedObject} from the
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param value
+	 *            Value of the {@link Property}.
+	 */
+	void addProperty(String name, String value);
 
 }

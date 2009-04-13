@@ -16,24 +16,25 @@
  */
 package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
-
 /**
- * {@link ManagedObject} that is to be provided by the {@link OfficeFloor}.
+ * Object required by the {@link OfficeSection}.
  * 
  * @author Daniel
  */
-public interface OfficeFloorManagedObject extends DependentManagedObject {
+public interface OfficeSectionObject {
 
 	/**
-	 * Obtains the name that the {@link OfficeSource} refers to this
-	 * {@link ManagedObject}.
+	 * Obtains the name of this {@link OfficeSectionObject}.
 	 * 
-	 * @return Name that the {@link OfficeSource} refers to this
-	 *         {@link ManagedObject}.
+	 * @return Name of this {@link OfficeSectionObject}.
 	 */
-	String getOfficeManagedObjectName();
+	String getOfficeSectionObjectName();
+
+	/**
+	 * Obtains the object type.
+	 * 
+	 * @return Object type.
+	 */
+	String getObjectType();
 
 }
