@@ -16,21 +16,31 @@
  */
 package net.officefloor.compile.office;
 
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
- * <code>Type definition</code> of a {@link Team} required by the
- * {@link OfficeType}.
+ * <code>Type definition</code> of an input into the {@link Office} that may be
+ * used for a {@link ManagedObjectFlow} added to the {@link OfficeFloor}.
  * 
  * @author Daniel
  */
-public interface OfficeTeamType {
+public interface OfficeInputType {
 
 	/**
-	 * Obtains the name of the required {@link Team}.
+	 * Obtains the name of this {@link OfficeInputType}.
 	 * 
-	 * @return Name of the required {@link Team}.
+	 * @return Name of this {@link OfficeInputType}.
 	 */
-	String getOfficeTeamName();
+	String getOfficeInputName();
+
+	/**
+	 * Obtains the fully qualified class name of the parameter type to this
+	 * {@link OfficeInputType}.
+	 * 
+	 * @return Parameter type to this {@link OfficeInputType}.
+	 */
+	String getParameterType();
 
 }
