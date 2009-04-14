@@ -66,7 +66,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	/**
 	 * Tests adding an {@link OfficeFloorManagedObject}.
 	 */
-	public void testAddOfficeFloorManagedObject() {
+	public void testGetOfficeFloorManagedObject() {
 		// Add two different managed objects verifying details
 		this.replayMockObjects();
 		OfficeFloorManagedObject mo = this.node.getOfficeFloorManagedObject(
@@ -82,7 +82,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	/**
 	 * Ensure issue if add the {@link OfficeFloorManagedObject} twice.
 	 */
-	public void testAddOfficeFloorManagedObjectTwice() {
+	public void testGetOfficeFloorManagedObjectTwice() {
 
 		// Record issue in adding the managed object twice
 		this.record_issue("Office floor managed object MO already added");
@@ -103,7 +103,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	/**
 	 * Tests adding an {@link OfficeTeam}.
 	 */
-	public void testAddOfficeTeam() {
+	public void testGetOfficeTeam() {
 		// Add two different teams verifying details
 		this.replayMockObjects();
 		OfficeTeam team = this.node.getTeam("TEAM");
@@ -117,7 +117,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	/**
 	 * Ensure issue if add the {@link OfficeTeam} twice.
 	 */
-	public void testAddOfficeTeamTwice() {
+	public void testGetOfficeTeamTwice() {
 
 		// Record issue in adding the teams twice
 		this.record_issue("Office team TEAM already added");
