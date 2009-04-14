@@ -16,7 +16,7 @@
  */
 package net.officefloor.compile.office;
 
-import net.officefloor.compile.spi.office.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -29,10 +29,10 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public interface OfficeManagedObjectType {
 
 	/**
-	 * Obtains the name of the {@link OfficeFloorManagedObject} required by the
+	 * Obtains the name of the {@link OfficeRequiredManagedObject} required by the
 	 * {@link Office}.
 	 * 
-	 * @return Name of the {@link OfficeFloorManagedObject} required by the
+	 * @return Name of the {@link OfficeRequiredManagedObject} required by the
 	 *         {@link Office}.
 	 */
 	String getOfficeManagedObjectName();

@@ -14,26 +14,20 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.office;
-
-import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+package net.officefloor.compile.spi.officefloor;
 
 /**
- * {@link ManagedObject} that is to be provided by the {@link OfficeFloor}.
+ * Input into a {@link DeployedOffice}.
  * 
  * @author Daniel
  */
-public interface OfficeFloorManagedObject extends DependentManagedObject {
+public interface DeployedOfficeInput {
 
 	/**
-	 * Obtains the name that the {@link OfficeSource} refers to this
-	 * {@link ManagedObject}.
+	 * Obtains the name of the {@link DeployedOfficeInput}.
 	 * 
-	 * @return Name that the {@link OfficeSource} refers to this
-	 *         {@link ManagedObject}.
+	 * @return Name of the {@link DeployedOfficeInput}.
 	 */
-	String getOfficeManagedObjectName();
+	String getDeployedOfficeInputName();
 
 }

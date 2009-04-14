@@ -14,21 +14,23 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.officefloor.source;
+package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.team.Team;
 
 /**
- * {@link ManagedObject} within the {@link OfficeFloor}.
+ * {@link Team} within the {@link OfficeFloor}.
  * 
  * @author Daniel
  */
-public interface OfficeFloorManagedObject {
+public interface OfficeFloorTeam {
 
-	void assignTeam(String managedObjectTeamName,
-			OfficeFloorTeam officeFloorTeam);
+	/**
+	 * Obtains the name of this {@link OfficeFloorTeam}.
+	 * 
+	 * @return Name of this {@link OfficeFloorTeam}.
+	 */
+	String getOfficeFloorTeamName();
 
-	void allocateDependency(String managedObjectDependencyName,
-			OfficeFloorManagedObject managedObject);
 }

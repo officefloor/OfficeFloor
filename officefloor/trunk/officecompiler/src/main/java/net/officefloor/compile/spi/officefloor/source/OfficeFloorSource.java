@@ -16,7 +16,11 @@
  */
 package net.officefloor.compile.spi.officefloor.source;
 
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Sources the {@link OfficeFloor}.
@@ -25,5 +29,69 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  */
 public interface OfficeFloorSource {
 
-	void sourceOfficeFloor(OfficeFloorSourceContext context);
+	/**
+	 * <p>
+	 * Obtains the {@link OfficeFloorSourceSpecification} for this
+	 * {@link OfficeFloorSource}.
+	 * <p>
+	 * This enables the {@link OfficeFloorSourceContext} to be populated with
+	 * the necessary details as per this {@link OfficeFloorSourceSpecification}
+	 * in deploying the {@link OfficeFloor}.
+	 * 
+	 * @return {@link OfficeFloorSourceSpecification}.
+	 */
+	OfficeFloorSourceSpecification getSpecification();
+
+	/**
+	 * <p>
+	 * Initialises this {@link OfficeFloorSource} to source the
+	 * {@link OfficeFloor}.
+	 * <p>
+	 * This method is a separate initial step from the
+	 * {@link #sourceOfficeFloor(OfficeFloorDeployer, OfficeFloorSourceContext)}
+	 * method to enable specifying any required {@link Property} instances once
+	 * the necessary {@link ConfigurationItem} instances have been interrogated.
+	 * <p>
+	 * Typically this allows environment specific properties to be defined
+	 * externally so that deployment configuration need not be repeated per
+	 * environment. In other words, one set of deployment configuration with
+	 * properties providing the differences between the environments.
+	 * <p>
+	 * This also enables sensitive properties, such as <code>passwords</code>,
+	 * to not be contained in deployment configuration but within a
+	 * &quot;secure&quot; location.
+	 * 
+	 * @param requiredProperties
+	 *            Populated by the {@link OfficeFloorSource} with any additional
+	 *            {@link Property} instances required to source the
+	 *            {@link OfficeFloor}.
+	 * @param context
+	 *            {@link OfficeFloorSourceContext} populated with
+	 *            {@link Property} instances as per the
+	 *            {@link OfficeFloorSourceSpecification}.
+	 * @throws Exception
+	 *             If fails to initialise the {@link OfficeFloorSource}.
+	 */
+	void init(PropertyList requiredProperties, OfficeFloorSourceContext context)
+			throws Exception;
+
+	/**
+	 * Sources the {@link OfficeFloor} by deploying it via the input
+	 * {@link OfficeFloorDeployer}.
+	 * 
+	 * @param deployer
+	 *            {@link OfficeFloorDeployer} to deploy the {@link OfficeFloor}.
+	 * @param context
+	 *            {@link OfficeFloorSourceContext} populated with the
+	 *            {@link Property} instances as per the
+	 *            {@link OfficeFloorSourceSpecification} and required by the
+	 *            {@link #init(PropertyList, OfficeFloorSourceContext)}. Should
+	 *            there be a name clash between the two, the <code>init</code>
+	 *            required {@link Property} will be used.
+	 * @throws Exception
+	 *             If fails to source the {@link OfficeFloor}.
+	 */
+	void sourceOfficeFloor(OfficeFloorDeployer deployer,
+			OfficeFloorSourceContext context) throws Exception;
+
 }

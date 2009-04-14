@@ -20,7 +20,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
-import net.officefloor.compile.spi.office.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -66,7 +66,7 @@ public class OfficeNodeImpl implements OfficeNode {
 	 */
 
 	@Override
-	public OfficeFloorManagedObject getOfficeFloorManagedObject(
+	public OfficeRequiredManagedObject getOfficeRequiredManagedObject(
 			String officeManagedObjectName, String objectType) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
@@ -115,7 +115,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 	@Override
 	public void link(OfficeSectionObject sectionObject,
-			OfficeFloorManagedObject managedObject) {
+			OfficeRequiredManagedObject managedObject) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement OfficeArchitect.link");
@@ -131,7 +131,7 @@ public class OfficeNodeImpl implements OfficeNode {
 
 	@Override
 	public void link(ManagedObjectDependency dependency,
-			OfficeFloorManagedObject managedObject) {
+			OfficeRequiredManagedObject managedObject) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement OfficeArchitect.link");

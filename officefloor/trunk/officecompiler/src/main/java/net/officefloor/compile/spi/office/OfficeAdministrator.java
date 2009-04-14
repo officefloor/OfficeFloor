@@ -72,11 +72,11 @@ public interface OfficeAdministrator {
 	void administerManagedObject(OfficeManagedObject managedObject);
 
 	/**
-	 * Administers the {@link OfficeFloorManagedObject}.
+	 * Administers the {@link OfficeRequiredManagedObject}.
 	 * 
 	 * @param managedObject
-	 *            {@link OfficeFloorManagedObject} to be administered.
+	 *            {@link OfficeRequiredManagedObject} to be administered.
 	 */
-	void administerManagedObject(OfficeFloorManagedObject managedObject);
+	void administerManagedObject(OfficeRequiredManagedObject managedObject);
 
 }

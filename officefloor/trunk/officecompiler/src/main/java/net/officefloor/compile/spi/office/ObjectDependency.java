@@ -42,7 +42,7 @@ public interface ObjectDependency {
 	 * <ol>
 	 * <li>{@link OfficeSectionManagedObject}</li>
 	 * <li>{@link OfficeManagedObject}</li>
-	 * <li>{@link OfficeFloorManagedObject}</li>
+	 * <li>{@link OfficeRequiredManagedObject}</li>
 	 * <li><code>null</code> if not yet linked (or issue in linking)</li>
 	 * </ol>
 	 * 
