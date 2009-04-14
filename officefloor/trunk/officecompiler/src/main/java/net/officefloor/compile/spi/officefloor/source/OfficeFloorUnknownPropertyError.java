@@ -16,14 +16,44 @@
  */
 package net.officefloor.compile.spi.officefloor.source;
 
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.team.Team;
-
 /**
- * {@link Team} within the {@link OfficeFloor}.
+ * <p>
+ * Indicates a property was not configured within the
+ * {@link OfficeFloorSourceContext}.
+ * <p>
+ * This is a serious error as the {@link OfficeFloorSource} is requiring this
+ * property to initialise.
  * 
  * @author Daniel
  */
-public interface OfficeFloorTeam {
+public class OfficeFloorUnknownPropertyError extends Error {
+
+	/**
+	 * Name of the unknown property.
+	 */
+	private final String unknownPropertyName;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param message
+	 *            Message.
+	 * @param unknownPropertyName
+	 *            Name of the unknown property.
+	 */
+	public OfficeFloorUnknownPropertyError(String message,
+			String unknownPropertyName) {
+		super(message);
+		this.unknownPropertyName = unknownPropertyName;
+	}
+
+	/**
+	 * Obtains the name of the unknown property.
+	 * 
+	 * @return Name of the unknown property.
+	 */
+	public String getUnknonwnPropertyName() {
+		return this.unknownPropertyName;
+	}
 
 }

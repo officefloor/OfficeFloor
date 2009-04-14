@@ -35,7 +35,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
@@ -261,7 +261,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.getOfficeFloorManagedObject(null, Connection.class
+				office.getOfficeRequiredManagedObject(null, Connection.class
 						.getName());
 			}
 		});
@@ -281,7 +281,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.getOfficeFloorManagedObject("MO", null);
+				office.getOfficeRequiredManagedObject("MO", null);
 			}
 		});
 	}
@@ -296,7 +296,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.getOfficeFloorManagedObject("MO", Connection.class
+				office.getOfficeRequiredManagedObject("MO", Connection.class
 						.getName());
 			}
 		});
@@ -324,8 +324,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				OfficeFloorManagedObject mo = office
-						.getOfficeFloorManagedObject("MO", Connection.class
+				OfficeRequiredManagedObject mo = office
+						.getOfficeRequiredManagedObject("MO", Connection.class
 								.getName());
 				OfficeAdministrator admin = LoadOfficeTypeTest.this
 						.addAdministrator(office, "ADMIN", null);

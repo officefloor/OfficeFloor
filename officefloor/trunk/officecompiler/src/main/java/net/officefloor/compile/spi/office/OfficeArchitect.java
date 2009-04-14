@@ -32,15 +32,15 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface OfficeArchitect {
 
 	/**
-	 * Obtains an {@link OfficeFloorManagedObject}.
+	 * Obtains an {@link OfficeRequiredManagedObject}.
 	 * 
 	 * @param officeManagedObjectName
-	 *            Name of the {@link OfficeFloorManagedObject}.
+	 *            Name of the {@link OfficeRequiredManagedObject}.
 	 * @param objectType
 	 *            Object type.
-	 * @return Added {@link OfficeFloorManagedObject}.
+	 * @return Added {@link OfficeRequiredManagedObject}.
 	 */
-	OfficeFloorManagedObject getOfficeFloorManagedObject(
+	OfficeRequiredManagedObject getOfficeRequiredManagedObject(
 			String officeManagedObjectName, String objectType);
 
 	/**
@@ -106,15 +106,15 @@ public interface OfficeArchitect {
 
 	/**
 	 * Links the {@link OfficeSectionObject} to be the
-	 * {@link OfficeFloorManagedObject}.
+	 * {@link OfficeRequiredManagedObject}.
 	 * 
 	 * @param sectionObject
 	 *            {@link OfficeSectionObject}.
 	 * @param managedObject
-	 *            {@link OfficeFloorManagedObject}.
+	 *            {@link OfficeRequiredManagedObject}.
 	 */
 	void link(OfficeSectionObject sectionObject,
-			OfficeFloorManagedObject managedObject);
+			OfficeRequiredManagedObject managedObject);
 
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the
@@ -130,15 +130,15 @@ public interface OfficeArchitect {
 
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the
-	 * {@link OfficeFloorManagedObject}.
+	 * {@link OfficeRequiredManagedObject}.
 	 * 
 	 * @param dependency
 	 *            {@link ManagedObjectDependency}.
 	 * @param managedObject
-	 *            {@link OfficeFloorManagedObject}.
+	 *            {@link OfficeRequiredManagedObject}.
 	 */
 	void link(ManagedObjectDependency dependency,
-			OfficeFloorManagedObject managedObject);
+			OfficeRequiredManagedObject managedObject);
 
 	/**
 	 * Links the {@link ManagedObjectFlow} to be undertaken by the
