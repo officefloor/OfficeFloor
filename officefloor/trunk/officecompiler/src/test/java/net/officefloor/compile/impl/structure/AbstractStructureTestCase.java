@@ -41,6 +41,10 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
+import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -69,6 +73,7 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
@@ -122,6 +127,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		MakerWorkSource.reset(this);
 		MakerAdministratorSource.reset();
 		MakerTeamSource.reset();
+		MakerOfficeSource.reset(this);
+		MakerOfficeFloorSource.reset(this);
 	}
 
 	/**
@@ -271,7 +278,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		// Add and return the managed object
 		OfficeManagedObject mo = officeArchitect.addManagedObject(
 				managedObjectName, MakerManagedObjectSource.class.getName());
-		for (Property property : propertyList.getPropertyList()) {
+		for (Property property : propertyList) {
 			mo.addProperty(property.getName(), property.getValue());
 		}
 		return mo;
@@ -298,7 +305,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		// Add and return the administrator
 		OfficeAdministrator admin = officeArchitect.addAdministrator(
 				administratorName, MakerAdministratorSource.class.getName());
-		for (Property property : propertyList.getPropertyList()) {
+		for (Property property : propertyList) {
 			admin.addProperty(property.getName(), property.getValue());
 		}
 		return admin;
@@ -324,7 +331,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		// Add and return the team
 		OfficeFloorTeam team = officeFloorDeployer.addTeam(teamName,
 				MakerTeamSource.class.getName());
-		for (Property property : propertyList.getPropertyList()) {
+		for (Property property : propertyList) {
 			team.addProperty(property.getName(), property.getValue());
 		}
 		return team;
@@ -352,7 +359,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		// Add and return the managed object
 		OfficeFloorManagedObject mo = officeFloorDeployer.addManagedObject(
 				managedObjectName, MakerManagedObjectSource.class.getName());
-		for (Property property : propertyList.getPropertyList()) {
+		for (Property property : propertyList) {
 			mo.addProperty(property.getName(), property.getValue());
 		}
 		return mo;
@@ -380,7 +387,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		// Add and return the deployed office
 		DeployedOffice office = officeFloorDeployer.deployOffice(officeName,
 				MakerOfficeSource.class.getName(), officeName);
-		for (Property property : propertyList.getPropertyList()) {
+		for (Property property : propertyList) {
 			office.addProperty(property.getName(), property.getValue());
 		}
 		return office;
@@ -635,7 +642,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			// Return the created sub section (using name as location)
 			SubSection subSection = this.builder.addSubSection(subSectionName,
 					MakerSectionSource.class.getName(), subSectionName);
-			for (Property property : properties.getPropertyList()) {
+			for (Property property : properties) {
 				subSection.addProperty(property.getName(), property.getValue());
 			}
 			return subSection;
@@ -652,7 +659,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			SectionManagedObject mo = this.builder
 					.addManagedObject(managedObjectName,
 							MakerManagedObjectSource.class.getName());
-			for (Property property : propertyList.getPropertyList()) {
+			for (Property property : propertyList) {
 				mo.addProperty(property.getName(), property.getValue());
 			}
 			return mo;
@@ -667,7 +674,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			// Return the created work
 			SectionWork work = this.builder.addWork(workName,
 					MakerWorkSource.class.getName());
-			for (Property property : properties.getPropertyList()) {
+			for (Property property : properties) {
 				work.addProperty(property.getName(), property.getValue());
 			}
 			return work;
@@ -1430,6 +1437,24 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 * Context for the {@link OfficeMaker}.
 	 */
 	protected static interface OfficeMakerContext {
+
+		/**
+		 * Obtains the {@link OfficeArchitect}.
+		 * 
+		 * @return {@link OfficeArchitect}.
+		 */
+		OfficeArchitect getArchitect();
+
+		/**
+		 * Adds a {@link OfficeSection} to the {@link Office}.
+		 * 
+		 * @param sectionName
+		 *            Name of the {@link OfficeSection}.
+		 * @param sectionMaker
+		 *            {@link SectionMaker}.
+		 * @return Added {@link OfficeSection}.
+		 */
+		OfficeSection addSection(String sectionName, SectionMaker sectionMaker);
 	}
 
 	/**
@@ -1449,10 +1474,19 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		private static Map<String, OfficeMaker> officeMakers;
 
 		/**
-		 * Resets for the next test.
+		 * {@link AbstractStructureTestCase}.
 		 */
-		public static void reset() {
+		private static AbstractStructureTestCase testCase;
+
+		/**
+		 * Resets for the next test.
+		 * 
+		 * @param testCase
+		 *            {@link AbstractStructureTestCase}.
+		 */
+		public static void reset(AbstractStructureTestCase testCase) {
 			officeMakers = new HashMap<String, OfficeMaker>();
+			MakerOfficeSource.testCase = testCase;
 		}
 
 		/**
@@ -1483,6 +1517,11 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 					identifier);
 		}
 
+		/**
+		 * {@link OfficeArchitect}.
+		 */
+		private OfficeArchitect architect;
+
 		/*
 		 * ===================== OfficeSource ================================
 		 */
@@ -1497,6 +1536,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		public void sourceOffice(OfficeArchitect officeArchitect,
 				OfficeSourceContext context) throws Exception {
 
+			// Store details to make available
+			this.architect = officeArchitect;
+
 			// Obtain the office maker
 			String identifier = context
 					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
@@ -1504,6 +1546,228 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 			// Make the office
 			officeMaker.make(this);
+		}
+
+		/*
+		 * ==================== OfficeMakerContext ==========================
+		 */
+
+		@Override
+		public OfficeArchitect getArchitect() {
+			return this.architect;
+		}
+
+		@Override
+		public OfficeSection addSection(String sectionName,
+				SectionMaker sectionMaker) {
+			return testCase.addSection(this.architect, sectionName,
+					sectionMaker);
+		}
+	}
+
+	/**
+	 * Makes the {@link OfficeFloor}.
+	 */
+	protected static interface OfficeFloorMaker {
+
+		/**
+		 * Makes the {@link OfficeFloor}.
+		 * 
+		 * @param context
+		 *            {@link OfficeFloor}.
+		 * @throws Exception
+		 *             If fails to make the {@link OfficeFloor}.
+		 */
+		void make(OfficeFloorMakerContext context) throws Exception;
+	}
+
+	/**
+	 * Context for the {@link OfficeFloorMaker}.
+	 */
+	protected static interface OfficeFloorMakerContext {
+
+		/**
+		 * Obtains the {@link OfficeFloorDeployer}.
+		 * 
+		 * @return {@link OfficeFloorDeployer}.
+		 */
+		OfficeFloorDeployer getDeployer();
+
+		/**
+		 * Obtains the {@link OfficeFloorSourceContext}.
+		 * 
+		 * @return {@link OfficeFloorSourceContext}.
+		 */
+		OfficeFloorSourceContext getContext();
+
+		/**
+		 * Adds an {@link Office}.
+		 * 
+		 * @param officeName
+		 *            Name of the {@link Office}.
+		 * @param officeMaker
+		 *            {@link OfficeMaker}.
+		 * @return Added {@link DeployedOffice}.
+		 */
+		DeployedOffice addOffice(String officeName, OfficeMaker officeMaker);
+
+		/**
+		 * Adds an {@link OfficeFloorTeam}.
+		 * 
+		 * @param teamName
+		 *            Name of the {@link OfficeFloorTeam}.
+		 * @param teamMaker
+		 *            {@link TeamMaker}.
+		 * @return Added {@link OfficeFloorTeam}.
+		 */
+		OfficeFloorTeam addTeam(String teamName, TeamMaker teamMaker);
+	}
+
+	/**
+	 * Maker {@link OfficeFloorSource}.
+	 */
+	public static class MakerOfficeFloorSource implements OfficeFloorSource,
+			OfficeFloorMakerContext {
+
+		/**
+		 * Property name to obtain the {@link OfficeFloorMaker} identifier.
+		 */
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "officefloor.maker";
+
+		/**
+		 * {@link OfficeFloorMaker} instances by their identifiers.
+		 */
+		private static Map<String, OfficeFloorMaker> officeFloorMakers;
+
+		/**
+		 * {@link AbstractStructureTestCase}.
+		 */
+		private static AbstractStructureTestCase testCase;
+
+		/**
+		 * Failure to instantiate this {@link MakerOfficeFloorSource}.
+		 */
+		public static RuntimeException instantiateFailure = null;
+
+		/**
+		 * Resets for the next test.
+		 * 
+		 * @param testCase
+		 *            Current {@link AbstractStructureTestCase} running.
+		 */
+		public static void reset(AbstractStructureTestCase testCase) {
+			officeFloorMakers = new HashMap<String, OfficeFloorMaker>();
+			MakerOfficeFloorSource.testCase = testCase;
+			instantiateFailure = null;
+		}
+
+		/**
+		 * Registers a {@link OfficeFloorMaker}.
+		 * 
+		 * @param maker
+		 *            {@link OfficeFloorMaker}.
+		 * @return {@link PropertyList}.
+		 */
+		public static PropertyList register(OfficeFloorMaker maker) {
+
+			// Ensure have a maker
+			if (maker == null) {
+				maker = new OfficeFloorMaker() {
+					@Override
+					public void make(OfficeFloorMakerContext context) {
+						// Empty office floor
+					}
+				};
+			}
+
+			// Register the office floor maker
+			String identifier = String.valueOf(officeFloorMakers.size());
+			officeFloorMakers.put(identifier, maker);
+
+			// Return the property list
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
+					identifier);
+		}
+
+		/**
+		 * {@link OfficeFloorDeployer}.
+		 */
+		private OfficeFloorDeployer deployer = null;
+
+		/**
+		 * {@link OfficeFloorSourceContext}.
+		 */
+		private OfficeFloorSourceContext context = null;
+
+		/**
+		 * Default constructor that may through instantiate failure if specified
+		 * to do so.
+		 */
+		public MakerOfficeFloorSource() {
+			if (instantiateFailure != null) {
+				throw instantiateFailure;
+			}
+		}
+
+		/*
+		 * ===================== OfficeFloorSource ============================
+		 */
+
+		@Override
+		public OfficeFloorSourceSpecification getSpecification() {
+			fail("Should not require specification");
+			return null;
+		}
+
+		@Override
+		public void specifyConfigurationProperties(
+				RequiredProperties requiredProperties,
+				OfficeFloorSourceContext context) throws Exception {
+			fail("Should not required to specify configuration properties");
+		}
+
+		@Override
+		public void sourceOfficeFloor(OfficeFloorDeployer deployer,
+				OfficeFloorSourceContext context) throws Exception {
+
+			// Store details to make available
+			this.deployer = deployer;
+			this.context = context;
+
+			// Obtain the office floor maker
+			String identifier = context
+					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			OfficeFloorMaker officeFloorMaker = officeFloorMakers
+					.get(identifier);
+
+			// Make the office floor
+			officeFloorMaker.make(this);
+		}
+
+		/*
+		 * =================== OfficeFloorMakerContext ========================
+		 */
+
+		@Override
+		public OfficeFloorDeployer getDeployer() {
+			return this.deployer;
+		}
+
+		@Override
+		public OfficeFloorSourceContext getContext() {
+			return this.context;
+		}
+
+		@Override
+		public DeployedOffice addOffice(String officeName,
+				OfficeMaker officeMaker) {
+			return testCase.addDeployedOffice(this.deployer, officeName,
+					officeMaker);
+		}
+
+		@Override
+		public OfficeFloorTeam addTeam(String teamName, TeamMaker teamMaker) {
+			return testCase.addTeam(this.deployer, teamName, teamMaker);
 		}
 	}
 

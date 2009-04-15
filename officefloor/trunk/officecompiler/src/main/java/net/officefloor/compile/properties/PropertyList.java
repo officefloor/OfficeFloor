@@ -16,7 +16,6 @@
  */
 package net.officefloor.compile.properties;
 
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -24,7 +23,7 @@ import java.util.Properties;
  * 
  * @author Daniel
  */
-public interface PropertyList {
+public interface PropertyList extends Iterable<Property> {
 
 	/**
 	 * Appends a {@link Property} to this {@link PropertyList}.
@@ -46,14 +45,6 @@ public interface PropertyList {
 	 * @return {@link Property} added.
 	 */
 	Property addProperty(String name);
-
-	/**
-	 * Obtains the internal list of {@link Property} instances. Changing the
-	 * return list changes the state of this {@link PropertyList}.
-	 * 
-	 * @return Internal {@link Property} instances.
-	 */
-	List<Property> getPropertyList();
 
 	/**
 	 * Obtains the names of the {@link Property} instances in the order they

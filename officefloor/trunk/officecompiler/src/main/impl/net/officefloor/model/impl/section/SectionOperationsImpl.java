@@ -158,17 +158,16 @@ public class SectionOperationsImpl implements SectionOperations {
 				sectionSourceClassName, sectionLocation);
 
 		// Add the properties in the order defined
-		for (Property property : properties.getPropertyList()) {
+		for (Property property : properties) {
 			subSection.addProperty(new PropertyModel(property.getName(),
 					property.getValue()));
 		}
 
 		// Add the inputs ensuring ordering
 		for (SectionInputType inputType : sectionType.getSectionInputTypes()) {
-			subSection
-					.addSubSectionInput(new SubSectionInputModel(inputType
-							.getSectionInputName(), inputType.getParameterType(),
-							false, null));
+			subSection.addSubSectionInput(new SubSectionInputModel(inputType
+					.getSectionInputName(), inputType.getParameterType(),
+					false, null));
 		}
 		Collections.sort(subSection.getSubSectionInputs(),
 				new Comparator<SubSectionInputModel>() {
@@ -183,8 +182,8 @@ public class SectionOperationsImpl implements SectionOperations {
 		// Add the outputs ensuring ordering
 		for (SectionOutputType outputType : sectionType.getSectionOutputTypes()) {
 			subSection.addSubSectionOutput(new SubSectionOutputModel(outputType
-					.getSectionOutputName(), outputType.getArgumentType(), outputType
-					.isEscalationOnly()));
+					.getSectionOutputName(), outputType.getArgumentType(),
+					outputType.isEscalationOnly()));
 		}
 		Collections.sort(subSection.getSubSectionOutputs(),
 				new Comparator<SubSectionOutputModel>() {

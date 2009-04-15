@@ -16,8 +16,6 @@
  */
 package net.officefloor.compile.test.work;
 
-import java.util.List;
-
 import junit.framework.TestCase;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.work.WorkLoaderImpl;
@@ -28,6 +26,7 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.issues.FailCompilerIssues;
+import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
@@ -66,18 +65,8 @@ public class WorkLoaderUtil {
 				workSourceClass, new FailCompilerIssues());
 
 		// Verify the properties
-		List<Property> properties = propertyList.getPropertyList();
-		TestCase.assertEquals("Incorrect number of properties",
-				propertyNameLabels.length / 2, properties.size());
-		for (int i = 0; i < propertyNameLabels.length; i += 2) {
-			Property property = properties.get(i / 2);
-			String name = propertyNameLabels[i];
-			String label = propertyNameLabels[i + 1];
-			TestCase.assertEquals("Incorrect name for property " + i, name,
-					property.getName());
-			TestCase.assertEquals("Incorrect label for property " + i, label,
-					property.getLabel());
-		}
+		PropertyListUtil.validatePropertyNameLabels(propertyList,
+				propertyNameLabels);
 
 		// Return the property list
 		return propertyList;
@@ -280,8 +269,8 @@ public class WorkLoaderUtil {
 		WorkLoader workLoader = new WorkLoaderImpl("TEST", "TEST");
 
 		// Return the loaded work
-		return workLoader.loadWorkType(workSourceClass, propertyList, classLoader,
-				new FailCompilerIssues());
+		return workLoader.loadWorkType(workSourceClass, propertyList,
+				classLoader, new FailCompilerIssues());
 	}
 
 	/**

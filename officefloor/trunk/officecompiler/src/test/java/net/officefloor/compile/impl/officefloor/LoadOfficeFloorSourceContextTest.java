@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.Properties;
 
 import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
@@ -46,11 +45,11 @@ public class LoadOfficeFloorSourceContextTest extends
 
 		// Record failure to instantiate
 		this.record_officefloor_issue("Failed to instantiate "
-				+ MockOfficeFloorSource.class.getName()
+				+ MakerOfficeFloorSource.class.getName()
 				+ " by default constructor", failure);
 
 		// Attempt to instantiate
-		MockOfficeFloorSource.instantiateFailure = failure;
+		MakerOfficeFloorSource.instantiateFailure = failure;
 		this.loadOfficeFloor(false, null);
 	}
 
@@ -58,12 +57,12 @@ public class LoadOfficeFloorSourceContextTest extends
 	 * Ensure obtain the correct {@link OfficeFloor} location.
 	 */
 	public void testOfficeFloorLocation() {
-		this.loadOfficeFloor(true, new Loader() {
+		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override
-			public void loadOfficeFloor(OfficeFloorDeployer deployer,
-					OfficeFloorSourceContext context) throws Exception {
+			public void make(OfficeFloorMakerContext context) {
 				assertEquals("Incorrect office location",
-						OFFICE_FLOOR_LOCATION, context.getOfficeFloorLocation());
+						OFFICE_FLOOR_LOCATION, context.getContext()
+								.getOfficeFloorLocation());
 			}
 		});
 	}
@@ -81,16 +80,14 @@ public class LoadOfficeFloorSourceContextTest extends
 		this.control(this.configurationContext).expectAndThrow(
 				this.configurationContext.getConfigurationItem(location),
 				failure);
-		this
-				.record_officefloor_issue("Failure obtaining configuration 'LOCATION'",
-						failure);
+		this.record_officefloor_issue(
+				"Failure obtaining configuration 'LOCATION'", failure);
 
 		// Attempt to obtain the configuration item
-		this.loadOfficeFloor(false, new Loader() {
+		this.loadOfficeFloor(false, new OfficeFloorMaker() {
 			@Override
-			public void loadOfficeFloor(OfficeFloorDeployer deployer,
-					OfficeFloorSourceContext context) throws Exception {
-				context.getConfiguration(location);
+			public void make(OfficeFloorMakerContext context) {
+				context.getContext().getConfiguration(location);
 			}
 		});
 	}
@@ -108,12 +105,11 @@ public class LoadOfficeFloorSourceContextTest extends
 				.getConfigurationItem(location), item);
 
 		// Obtain the configuration item
-		this.loadOfficeFloor(true, new Loader() {
+		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override
-			public void loadOfficeFloor(OfficeFloorDeployer deployer,
-					OfficeFloorSourceContext context) throws Exception {
+			public void make(OfficeFloorMakerContext context) {
 				assertEquals("Incorrect configuation item", item, context
-						.getConfiguration(location));
+						.getContext().getConfiguration(location));
 			}
 		});
 	}
@@ -124,15 +120,15 @@ public class LoadOfficeFloorSourceContextTest extends
 	public void testMissingProperty() {
 
 		// Record missing property
-		this.record_officefloor_issue("Missing property 'missing' for OfficeFloorSource "
-				+ MockOfficeFloorSource.class.getName());
+		this
+				.record_officefloor_issue("Missing property 'missing' for OfficeFloorSource "
+						+ MakerOfficeFloorSource.class.getName());
 
 		// Attempt to load office floor
-		this.loadOfficeFloor(false, new Loader() {
+		this.loadOfficeFloor(false, new OfficeFloorMaker() {
 			@Override
-			public void loadOfficeFloor(OfficeFloorDeployer deployer,
-					OfficeFloorSourceContext context) throws Exception {
-				context.getProperty("missing");
+			public void make(OfficeFloorMakerContext context) {
+				context.getContext().getProperty("missing");
 			}
 		});
 	}
@@ -143,11 +139,10 @@ public class LoadOfficeFloorSourceContextTest extends
 	public void testGetProperties() {
 
 		// Attempt to load office floor
-		this.loadOfficeFloor(true, new Loader() {
+		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override
-			public void loadOfficeFloor(
-					OfficeFloorDeployer deployer,
-					OfficeFloorSourceContext context) throws Exception {
+			public void make(OfficeFloorMakerContext makerContext) {
+				OfficeFloorSourceContext context = makerContext.getContext();
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
 				assertEquals("Ensure get property ONE", "1", context
@@ -176,13 +171,12 @@ public class LoadOfficeFloorSourceContextTest extends
 	public void testGetClassLoader() {
 
 		// Attempt to load office floor
-		this.loadOfficeFloor(true, new Loader() {
+		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override
-			public void loadOfficeFloor(OfficeFloorDeployer deployer,
-					OfficeFloorSourceContext context) throws Exception {
+			public void make(OfficeFloorMakerContext context) {
 				assertEquals("Incorrect class loader",
 						LoadRequiredPropertiesTest.class.getClassLoader(),
-						context.getClassLoader());
+						context.getContext().getClassLoader());
 			}
 		});
 	}
@@ -198,13 +192,12 @@ public class LoadOfficeFloorSourceContextTest extends
 		// Record failure to source the office floor
 		this.record_officefloor_issue(
 				"Failed to source required properties from OfficeFloorSource "
-						+ MockOfficeFloorSource.class.getName(), failure);
+						+ MakerOfficeFloorSource.class.getName(), failure);
 
 		// Attempt to load office floor
-		this.loadOfficeFloor(false, new Loader() {
+		this.loadOfficeFloor(false, new OfficeFloorMaker() {
 			@Override
-			public void loadOfficeFloor(OfficeFloorDeployer deployer,
-					OfficeFloorSourceContext context) throws Exception {
+			public void make(OfficeFloorMakerContext context) {
 				throw failure;
 			}
 		});

@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.impl.properties;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -50,6 +51,15 @@ public class PropertyListImpl implements PropertyList {
 	}
 
 	/*
+	 * ======================= Iterable ======================================
+	 */
+
+	@Override
+	public Iterator<Property> iterator() {
+		return this.properties.iterator();
+	}
+
+	/*
 	 * ================== PropertyList ======================================
 	 */
 
@@ -63,11 +73,6 @@ public class PropertyListImpl implements PropertyList {
 	@Override
 	public Property addProperty(String name) {
 		return this.addProperty(name, name);
-	}
-
-	@Override
-	public List<Property> getPropertyList() {
-		return this.properties;
 	}
 
 	@Override

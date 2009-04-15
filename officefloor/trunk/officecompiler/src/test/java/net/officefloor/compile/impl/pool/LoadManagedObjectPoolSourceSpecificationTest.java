@@ -16,8 +16,6 @@
  */
 package net.officefloor.compile.impl.pool;
 
-import java.util.List;
-
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.pool.ManagedObjectPoolLoader;
@@ -27,6 +25,7 @@ import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSource;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceContext;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceProperty;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceSpecification;
+import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -352,20 +351,8 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 			assertNotNull("Expected to load specification", propertyList);
 
 			// Ensure the properties are as expected
-			List<Property> properties = propertyList.getPropertyList();
-			assertEquals("Incorrect number of properties",
-					(propertyNameLabelPairs.length / 2), properties.size());
-			for (int i = 0; i < propertyNameLabelPairs.length; i += 2) {
-				String propertyName = propertyNameLabelPairs[i];
-				String propertyLabel = propertyNameLabelPairs[i + 1];
-				Property property = properties.get(i / 2);
-				assertEquals("Incorrect name for property " + (i / 2),
-						propertyName, property.getName());
-				assertEquals("Incorrect label for property " + (i / 2),
-						propertyLabel, property.getLabel());
-				assertEquals("Should be blank value for property " + (i / 2),
-						null, property.getValue());
-			}
+			PropertyListUtil.validatePropertyNameLabels(propertyList,
+					propertyNameLabelPairs);
 
 		} else {
 			assertNull("Should not load specification", propertyList);

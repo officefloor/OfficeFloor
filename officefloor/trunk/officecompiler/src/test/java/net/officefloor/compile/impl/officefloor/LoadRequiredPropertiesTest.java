@@ -17,7 +17,6 @@
 package net.officefloor.compile.impl.officefloor;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -32,6 +31,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
+import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -490,31 +490,8 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	 */
 	private static void assertRequiredProperties(
 			PropertyList requiredProperties, String... propertyNameLabelPairs) {
-
-		// Create the expected property list
-		PropertyList expectedList = new PropertyListImpl();
-		for (int i = 0; i < propertyNameLabelPairs.length; i += 2) {
-			String name = propertyNameLabelPairs[i];
-			String label = propertyNameLabelPairs[i + 1];
-			expectedList.addProperty(name, label);
-		}
-
-		// Validate properties are as expected
-		List<Property> expected = expectedList.getPropertyList();
-		List<Property> actual = requiredProperties.getPropertyList();
-		assertEquals("Incorrect number of properties", expected.size(), actual
-				.size());
-		for (int i = 0; i < expected.size(); i++) {
-			Property e = expected.get(i);
-			Property a = actual.get(i);
-
-			// Validate the property
-			assertEquals("Incorrect name for property " + i, e.getName(), a
-					.getName());
-			assertEquals("Incorrect label for property " + i, e.getLabel(), a
-					.getLabel());
-			assertNull("Should not have value for property " + i, a.getValue());
-		}
+		PropertyListUtil.validatePropertyNameLabels(requiredProperties,
+				propertyNameLabelPairs);
 	}
 
 	/**

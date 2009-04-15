@@ -23,11 +23,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
-import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -67,13 +63,6 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 */
 	protected final OfficeFloorBuilder officeFloorBuilder = this
 			.createMock(OfficeFloorBuilder.class);
-
-	/**
-	 * Initiate this test.
-	 */
-	public AbstractOfficeFloorTestCase() {
-		MockOfficeFloorSource.reset();
-	}
 
 	/**
 	 * Records an issue.
@@ -135,14 +124,14 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 * 
 	 * @param isExpectBuild
 	 *            If expected to build the {@link OfficeFloor}.
-	 * @param loader
-	 *            {@link Loader}.
+	 * @param maker
+	 *            {@link OfficeFloorMaker}.
 	 * @param propertyNameValuePairs
 	 *            Name/value pairs for the necessary {@link Property} instances
 	 *            to load the {@link OfficeFloor}.
 	 */
-	protected void loadOfficeFloor(boolean isExpectBuild, Loader loader,
-			String... propertyNameValuePairs) {
+	protected void loadOfficeFloor(boolean isExpectBuild,
+			OfficeFloorMaker maker, String... propertyNameValuePairs) {
 
 		// Office floor potentially built
 		OfficeFloor officeFloor = null;
@@ -178,12 +167,18 @@ public abstract class AbstractOfficeFloorTestCase extends
 			}
 		};
 
+		// Register the office floor maker and add to property list
+		PropertyList registerProperties = MakerOfficeFloorSource
+				.register(maker);
+		for (Property property : registerProperties) {
+			propertyList.addProperty(property.getName(), property.getLabel());
+		}
+
 		// Create the office loader and load the office floor
 		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl(
 				OFFICE_FLOOR_LOCATION);
-		MockOfficeFloorSource.loader = loader;
 		OfficeFloor loadedOfficeFloor = officeFloorLoader.loadOfficeFloor(
-				MockOfficeFloorSource.class, this.configurationContext,
+				MakerOfficeFloorSource.class, this.configurationContext,
 				propertyList,
 				LoadRequiredPropertiesTest.class.getClassLoader(), this.issues,
 				officeFrame);
@@ -197,82 +192,6 @@ public abstract class AbstractOfficeFloorTestCase extends
 					loadedOfficeFloor);
 		} else {
 			assertNull("Should not build the office floor", officeFloor);
-		}
-	}
-
-	/**
-	 * Implemented to load the {@link OfficeFloor}.
-	 */
-	protected interface Loader {
-
-		/**
-		 * Implemented to load the {@link OfficeFloor}.
-		 * 
-		 * @param deployer
-		 *            {@link OfficeFloorDeployer}.
-		 * @param context
-		 *            {@link OfficeFloorSourceContext}.
-		 * @throws Exception
-		 *             If fails to load the {@link OfficeFloor}.
-		 */
-		void loadOfficeFloor(OfficeFloorDeployer deployer,
-				OfficeFloorSourceContext context) throws Exception;
-	}
-
-	/**
-	 * Mock {@link OfficeFloorSource} for testing.
-	 */
-	public static class MockOfficeFloorSource implements OfficeFloorSource {
-
-		/**
-		 * {@link Loader} to load the {@link RequiredProperties}.
-		 */
-		public static Loader loader;
-
-		/**
-		 * Failure in instantiating an instance.
-		 */
-		public static RuntimeException instantiateFailure;
-
-		/**
-		 * Resets the state for the next test.
-		 */
-		public static void reset() {
-			loader = null;
-			instantiateFailure = null;
-		}
-
-		/**
-		 * Default constructor.
-		 */
-		public MockOfficeFloorSource() {
-			if (instantiateFailure != null) {
-				throw instantiateFailure;
-			}
-		}
-
-		/*
-		 * ================ OfficeFloorSource ==============================
-		 */
-
-		@Override
-		public OfficeFloorSourceSpecification getSpecification() {
-			fail("Should not required specification");
-			return null;
-		}
-
-		@Override
-		public void specifyConfigurationProperties(
-				RequiredProperties requiredProperties,
-				OfficeFloorSourceContext context) throws Exception {
-			fail("Should not require initialising");
-		}
-
-		@Override
-		public void sourceOfficeFloor(OfficeFloorDeployer deployer,
-				OfficeFloorSourceContext context) throws Exception {
-			// Load the office floor
-			loader.loadOfficeFloor(deployer, context);
 		}
 	}
 
