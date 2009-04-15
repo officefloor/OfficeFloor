@@ -17,7 +17,6 @@
 package net.officefloor.compile.spi.officefloor.source;
 
 import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -72,8 +71,8 @@ public interface OfficeFloorSource {
 	 * @throws Exception
 	 *             If fails to initialise the {@link OfficeFloorSource}.
 	 */
-	void init(PropertyList requiredProperties, OfficeFloorSourceContext context)
-			throws Exception;
+	void init(RequiredProperties requiredProperties,
+			OfficeFloorSourceContext context) throws Exception;
 
 	/**
 	 * Sources the {@link OfficeFloor} by deploying it via the input
@@ -84,10 +83,10 @@ public interface OfficeFloorSource {
 	 * @param context
 	 *            {@link OfficeFloorSourceContext} populated with the
 	 *            {@link Property} instances as per the
-	 *            {@link OfficeFloorSourceSpecification} and required by the
-	 *            {@link #init(PropertyList, OfficeFloorSourceContext)}. Should
-	 *            there be a name clash between the two, the <code>init</code>
-	 *            required {@link Property} will be used.
+	 *            {@link OfficeFloorSourceSpecification} and
+	 *            {@link RequiredProperties}. Should there be a name clash
+	 *            between the two, the {@link RequiredProperties}
+	 *            {@link Property} will be used.
 	 * @throws Exception
 	 *             If fails to source the {@link OfficeFloor}.
 	 */

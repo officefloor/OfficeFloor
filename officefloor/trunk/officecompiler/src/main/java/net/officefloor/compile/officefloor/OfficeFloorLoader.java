@@ -22,6 +22,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -92,6 +93,8 @@ public interface OfficeFloorLoader {
 	 * @param issues
 	 *            {@link CompilerIssues} to report issues in loading the
 	 *            {@link OfficeFloor}.
+	 * @param officeFrame
+	 *            {@link OfficeFrame} to use to build the {@link OfficeFloor}.
 	 * @return {@link OfficeFloor} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
@@ -99,6 +102,6 @@ public interface OfficeFloorLoader {
 			Class<OF> officeFloorSourceClass,
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader,
-			CompilerIssues issues);
+			CompilerIssues issues, OfficeFrame officeFrame);
 
 }

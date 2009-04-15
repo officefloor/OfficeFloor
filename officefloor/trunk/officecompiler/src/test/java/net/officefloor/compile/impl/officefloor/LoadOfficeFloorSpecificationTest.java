@@ -28,6 +28,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
+import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -411,7 +412,7 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(PropertyList requiredProperties,
+		public void init(RequiredProperties requiredProperties,
 				OfficeFloorSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}
