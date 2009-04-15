@@ -380,7 +380,7 @@ public class DeskOperationsImpl implements DeskOperations {
 		final WorkModel work = new WorkModel(workName, workSourceClassName);
 
 		// Add the properties to source the work again
-		for (Property property : properties.getPropertyList()) {
+		for (Property property : properties) {
 			work.addProperty(new PropertyModel(property.getName(), property
 					.getValue()));
 		}

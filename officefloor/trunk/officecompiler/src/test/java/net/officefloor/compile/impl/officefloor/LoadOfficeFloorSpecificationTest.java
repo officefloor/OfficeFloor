@@ -16,8 +16,6 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
-import java.util.List;
-
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -29,6 +27,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
+import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -333,20 +332,8 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 			assertNotNull("Expected to load specification", propertyList);
 
 			// Ensure the properties are as expected
-			List<Property> properties = propertyList.getPropertyList();
-			assertEquals("Incorrect number of properties",
-					(propertyNameLabelPairs.length / 2), properties.size());
-			for (int i = 0; i < propertyNameLabelPairs.length; i += 2) {
-				String propertyName = propertyNameLabelPairs[i];
-				String propertyLabel = propertyNameLabelPairs[i + 1];
-				Property property = properties.get(i / 2);
-				assertEquals("Incorrect name for property " + (i / 2),
-						propertyName, property.getName());
-				assertEquals("Incorrect label for property " + (i / 2),
-						propertyLabel, property.getLabel());
-				assertEquals("Should be blank value for property " + (i / 2),
-						null, property.getValue());
-			}
+			PropertyListUtil.validatePropertyNameLabels(propertyList,
+					propertyNameLabelPairs);
 
 		} else {
 			assertNull("Should not load specification", propertyList);
@@ -412,7 +399,8 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void specifyConfigurationProperties(RequiredProperties requiredProperties,
+		public void specifyConfigurationProperties(
+				RequiredProperties requiredProperties,
 				OfficeFloorSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}
