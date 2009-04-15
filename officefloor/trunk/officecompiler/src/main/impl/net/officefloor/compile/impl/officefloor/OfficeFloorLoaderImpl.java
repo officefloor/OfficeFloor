@@ -20,6 +20,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -73,7 +74,7 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			Class<OF> officeFloorSourceClass,
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader,
-			CompilerIssues issues) {
+			CompilerIssues issues, OfficeFrame officeFrame) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement OfficeFloorLoader.loadOfficeFloor");
