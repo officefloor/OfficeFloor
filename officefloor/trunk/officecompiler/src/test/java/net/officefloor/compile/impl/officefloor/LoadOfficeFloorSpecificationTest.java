@@ -412,7 +412,7 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void init(RequiredProperties requiredProperties,
+		public void specifyConfigurationProperties(RequiredProperties requiredProperties,
 				OfficeFloorSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}
