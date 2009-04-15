@@ -24,6 +24,8 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkOfficeNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -32,6 +34,13 @@ import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -59,6 +68,7 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
@@ -67,6 +77,10 @@ import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFacto
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.frame.spi.team.source.TeamSourceContext;
+import net.officefloor.frame.spi.team.source.TeamSourceSpecification;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -107,6 +121,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		MakerManagedObjectSource.reset();
 		MakerWorkSource.reset(this);
 		MakerAdministratorSource.reset();
+		MakerTeamSource.reset();
 	}
 
 	/**
@@ -146,6 +161,46 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				+ LinkObjectNode.class.getSimpleName(),
 				linkSource instanceof LinkObjectNode);
 		assertEquals(msg, ((LinkObjectNode) linkSource).getLinkedObjectNode(),
+				linkTarget);
+	}
+
+	/**
+	 * Asserts the {@link LinkTeamNode} source is linked to the target
+	 * {@link LinkTeamNode}.
+	 * 
+	 * @param msg
+	 *            Message.
+	 * @param linkSource
+	 *            Source {@link LinkTeamNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkTeamNode}.
+	 */
+	protected static void assertTeamLink(String msg, Object linkSource,
+			Object linkTarget) {
+		assertTrue(msg + ": source must be "
+				+ LinkTeamNode.class.getSimpleName(),
+				linkSource instanceof LinkTeamNode);
+		assertEquals(msg, ((LinkTeamNode) linkSource).getLinkedTeamNode(),
+				linkTarget);
+	}
+
+	/**
+	 * Asserts the {@link LinkOfficeNode} source is linked to the target
+	 * {@link LinkOfficeNode}.
+	 * 
+	 * @param msg
+	 *            Message.
+	 * @param linkSource
+	 *            Source {@link LinkOfficeNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkOfficeNode}.
+	 */
+	protected static void assertOfficeLink(String msg, Object linkSource,
+			Object linkTarget) {
+		assertTrue(msg + ": source must be "
+				+ LinkOfficeNode.class.getSimpleName(),
+				linkSource instanceof LinkOfficeNode);
+		assertEquals(msg, ((LinkOfficeNode) linkSource).getLinkedOfficeNode(),
 				linkTarget);
 	}
 
@@ -247,6 +302,88 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			admin.addProperty(property.getName(), property.getValue());
 		}
 		return admin;
+	}
+
+	/**
+	 * Adds an {@link OfficeFloorTeam} to the {@link OfficeFloorDeployer}.
+	 * 
+	 * @param officeFloorDeployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param teamName
+	 *            Name of the {@link OfficeFloorTeam}.
+	 * @param maker
+	 *            {@link TeamMaker}.
+	 * @return {@link OfficeFloorTeam}.
+	 */
+	protected OfficeFloorTeam addTeam(OfficeFloorDeployer officeFloorDeployer,
+			String teamName, TeamMaker maker) {
+
+		// Register the team maker
+		PropertyList propertyList = MakerTeamSource.register(maker);
+
+		// Add and return the team
+		OfficeFloorTeam team = officeFloorDeployer.addTeam(teamName,
+				MakerTeamSource.class.getName());
+		for (Property property : propertyList.getPropertyList()) {
+			team.addProperty(property.getName(), property.getValue());
+		}
+		return team;
+	}
+
+	/**
+	 * Adds an {@link OfficeFloorManagedObject} to the
+	 * {@link OfficeFloorDeployer}.
+	 * 
+	 * @param officeFloorDeployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param managedObjectName
+	 *            Name of the {@link OfficeFloorManagedObject}.
+	 * @param maker
+	 *            {@link ManagedObjectMaker}.
+	 * @return {@link OfficeFloorManagedObject}.
+	 */
+	protected OfficeFloorManagedObject addManagedObject(
+			OfficeFloorDeployer officeFloorDeployer, String managedObjectName,
+			ManagedObjectMaker maker) {
+
+		// Register the managed object maker
+		PropertyList propertyList = MakerManagedObjectSource.register(maker);
+
+		// Add and return the managed object
+		OfficeFloorManagedObject mo = officeFloorDeployer.addManagedObject(
+				managedObjectName, MakerManagedObjectSource.class.getName());
+		for (Property property : propertyList.getPropertyList()) {
+			mo.addProperty(property.getName(), property.getValue());
+		}
+		return mo;
+	}
+
+	/**
+	 * Adds a {@link DeployedOffice}.
+	 * 
+	 * @param officeFloorDeployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param officeName
+	 *            Name of the {@link DeployedOffice}. Also used as location of
+	 *            the {@link DeployedOffice}.
+	 * @param maker
+	 *            {@link OfficeMaker}.
+	 * @return {@link DeployedOffice}.
+	 */
+	protected DeployedOffice addDeployedOffice(
+			OfficeFloorDeployer officeFloorDeployer, String officeName,
+			OfficeMaker maker) {
+
+		// Register the office maker
+		PropertyList propertyList = MakerOfficeSource.register(maker);
+
+		// Add and return the deployed office
+		DeployedOffice office = officeFloorDeployer.deployOffice(officeName,
+				MakerOfficeSource.class.getName(), officeName);
+		for (Property property : propertyList.getPropertyList()) {
+			office.addProperty(property.getName(), property.getValue());
+		}
+		return office;
 	}
 
 	/**
@@ -1173,6 +1310,200 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		public Administrator<Object, Indexed> createAdministrator() {
 			fail("Should not require creating an administrator");
 			return null;
+		}
+	}
+
+	/**
+	 * Makes the {@link Team}.
+	 */
+	protected static interface TeamMaker {
+
+		/**
+		 * Makes the {@link Team}.
+		 * 
+		 * @param context
+		 *            {@link TeamMakerContext}.
+		 */
+		void make(TeamMakerContext context);
+	}
+
+	/**
+	 * Context for the {@link TeamMaker}.
+	 */
+	protected static interface TeamMakerContext {
+	}
+
+	/**
+	 * Maker {@link TeamSource}.
+	 */
+	public static class MakerTeamSource implements TeamSource, TeamMakerContext {
+
+		/**
+		 * Property name to obtain the {@link TeamMaker} identifier.
+		 */
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "team.maker";
+
+		/**
+		 * {@link TeamMaker} instances by their identifiers.
+		 */
+		private static Map<String, TeamMaker> teamMakers;
+
+		/**
+		 * Resets for the next test.
+		 */
+		public static void reset() {
+			teamMakers = new HashMap<String, TeamMaker>();
+		}
+
+		/**
+		 * Registers a {@link TeamMaker}.
+		 * 
+		 * @param maker
+		 *            {@link TeamMaker}.
+		 * @return {@link PropertyList}.
+		 */
+		public static PropertyList register(TeamMaker maker) {
+
+			// Ensure have a maker
+			if (maker == null) {
+				maker = new TeamMaker() {
+					@Override
+					public void make(TeamMakerContext context) {
+						// Empty team
+					}
+				};
+			}
+
+			// Register the team maker
+			String identifier = String.valueOf(teamMakers.size());
+			teamMakers.put(identifier, maker);
+
+			// Return the property list
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
+					identifier);
+		}
+
+		/*
+		 * ==================== TeamSource ================================
+		 */
+
+		@Override
+		public TeamSourceSpecification getSpecification() {
+			fail("Should not require specification");
+			return null;
+		}
+
+		@Override
+		public void init(TeamSourceContext context) throws Exception {
+
+			// Obtain the team maker
+			String identifier = context
+					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			TeamMaker teamMaker = teamMakers.get(identifier);
+
+			// Make the team
+			teamMaker.make(this);
+		}
+
+		@Override
+		public Team createTeam() {
+			fail("Should not require creating a team");
+			return null;
+		}
+	}
+
+	/**
+	 * Makes an {@link Office}.
+	 */
+	protected static interface OfficeMaker {
+
+		/**
+		 * Makes an {@link Office}.
+		 * 
+		 * @param context
+		 *            {@link OfficeMakerContext}.
+		 */
+		void make(OfficeMakerContext context);
+	}
+
+	/**
+	 * Context for the {@link OfficeMaker}.
+	 */
+	protected static interface OfficeMakerContext {
+	}
+
+	/**
+	 * Maker {@link OfficeSource}.
+	 */
+	public static class MakerOfficeSource implements OfficeSource,
+			OfficeMakerContext {
+
+		/**
+		 * Property name to obtain the {@link OfficeMaker} identifier.
+		 */
+		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "office.maker";
+
+		/**
+		 * {@link OfficeMaker} instances by their identifiers.
+		 */
+		private static Map<String, OfficeMaker> officeMakers;
+
+		/**
+		 * Resets for the next test.
+		 */
+		public static void reset() {
+			officeMakers = new HashMap<String, OfficeMaker>();
+		}
+
+		/**
+		 * Registers a {@link OfficeMaker}.
+		 * 
+		 * @param maker
+		 *            {@link OfficeMaker}.
+		 * @return {@link PropertyList}.
+		 */
+		public static PropertyList register(OfficeMaker maker) {
+
+			// Ensure have a maker
+			if (maker == null) {
+				maker = new OfficeMaker() {
+					@Override
+					public void make(OfficeMakerContext context) {
+						// Empty office
+					}
+				};
+			}
+
+			// Register the office maker
+			String identifier = String.valueOf(officeMakers.size());
+			officeMakers.put(identifier, maker);
+
+			// Return the property list
+			return new PropertyListImpl(MAKER_IDENTIFIER_PROPERTY_NAME,
+					identifier);
+		}
+
+		/*
+		 * ===================== OfficeSource ================================
+		 */
+
+		@Override
+		public OfficeSourceSpecification getSpecification() {
+			fail("Should not require specification");
+			return null;
+		}
+
+		@Override
+		public void sourceOffice(OfficeArchitect officeArchitect,
+				OfficeSourceContext context) throws Exception {
+
+			// Obtain the office maker
+			String identifier = context
+					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
+			OfficeMaker officeMaker = officeMakers.get(identifier);
+
+			// Make the office
+			officeMaker.make(this);
 		}
 	}
 

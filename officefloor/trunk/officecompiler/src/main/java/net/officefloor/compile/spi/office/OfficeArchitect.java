@@ -162,4 +162,24 @@ public interface OfficeArchitect {
 	 */
 	void link(OfficeSectionOutput output, OfficeSectionInput input);
 
+	/**
+	 * Links the {@link TaskTeam} to be the {@link OfficeTeam}.
+	 * 
+	 * @param team
+	 *            {@link TaskTeam}.
+	 * @param officeTeam
+	 *            {@link OfficeTeam}.
+	 */
+	void link(TaskTeam team, OfficeTeam officeTeam);
+
+	/**
+	 * Links the {@link ManagedObjectTeam} to be the {@link OfficeTeam}.
+	 * 
+	 * @param team
+	 *            {@link ManagedObjectTeam}.
+	 * @param officeTeam
+	 *            {@link OfficeTeam}.
+	 */
+	void link(ManagedObjectTeam team, OfficeTeam officeTeam);
+
 }

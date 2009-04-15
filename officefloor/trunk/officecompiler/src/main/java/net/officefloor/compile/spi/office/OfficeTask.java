@@ -52,12 +52,11 @@ public interface OfficeTask {
 	ObjectDependency[] getObjectDependencies();
 
 	/**
-	 * Specifies the {@link OfficeTeam} responsible for this {@link OfficeTask}.
+	 * Obtains the {@link TaskTeam} responsible for this {@link OfficeTask}.
 	 * 
-	 * @param team
-	 *            {@link OfficeTeam} responsible for this {@link OfficeTask}.
+	 * @return {@link TaskTeam} responsible for this {@link OfficeTask}.
 	 */
-	void setTeamResponsible(OfficeTeam team);
+	TaskTeam getTeamResponsible();
 
 	/**
 	 * <p>

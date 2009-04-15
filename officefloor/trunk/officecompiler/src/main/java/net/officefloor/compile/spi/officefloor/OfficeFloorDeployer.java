@@ -16,7 +16,12 @@
  */
 package net.officefloor.compile.spi.officefloor;
 
+import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
+import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -66,5 +71,71 @@ public interface OfficeFloorDeployer {
 	 */
 	DeployedOffice deployOffice(String officeName,
 			String officeSourceClassName, String officeLocation);
+
+	/**
+	 * Links the {@link ManagedObjectTeam} to be the {@link OfficeFloorTeam}.
+	 * 
+	 * @param team
+	 *            {@link ManagedObjectTeam}.
+	 * @param officeFloorTeam
+	 *            {@link OfficeFloorTeam}.
+	 */
+	void link(ManagedObjectTeam team, OfficeFloorTeam officeFloorTeam);
+
+	/**
+	 * Links the {@link ManagedObjectDependency} to be the
+	 * {@link OfficeFloorManagedObject}.
+	 * 
+	 * @param dependency
+	 *            {@link ManagedObjectDependency}.
+	 * @param managedObject
+	 *            {@link OfficeFloorManagedObject}.
+	 */
+	void link(ManagedObjectDependency dependency,
+			OfficeFloorManagedObject managedObject);
+
+	/**
+	 * Links the {@link ManagedObjectFlow} to be undertaken by the
+	 * {@link DeployedOfficeInput}.
+	 * 
+	 * @param flow
+	 *            {@link ManagedObjectFlow}.
+	 * @param input
+	 *            {@link DeployedOfficeInput}.
+	 */
+	void link(ManagedObjectFlow flow, DeployedOfficeInput input);
+
+	/**
+	 * Links the {@link ManagingOffice} to be managed by the
+	 * {@link DeployedOffice}.
+	 * 
+	 * @param managingOffice
+	 *            {@link ManagingOffice}.
+	 * @param office
+	 *            {@link DeployedOffice}.
+	 */
+	void link(ManagingOffice managingOffice, DeployedOffice office);
+
+	/**
+	 * Links the {@link OfficeTeam} to be the {@link OfficeFloorTeam}.
+	 * 
+	 * @param team
+	 *            {@link OfficeTeam}.
+	 * @param officeFloorTeam
+	 *            {@link OfficeFloorTeam}.
+	 */
+	void link(OfficeTeam team, OfficeFloorTeam officeFloorTeam);
+
+	/**
+	 * Links the {@link OfficeRequiredManagedObject} to be the
+	 * {@link OfficeFloorManagedObject}.
+	 * 
+	 * @param requiredManagedObject
+	 *            {@link OfficeRequiredManagedObject}.
+	 * @param officeFloorManagedObject
+	 *            {@link OfficeFloorManagedObject}.
+	 */
+	void link(OfficeRequiredManagedObject requiredManagedObject,
+			OfficeFloorManagedObject officeFloorManagedObject);
 
 }
