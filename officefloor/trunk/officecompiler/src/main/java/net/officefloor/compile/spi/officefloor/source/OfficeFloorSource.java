@@ -43,8 +43,9 @@ public interface OfficeFloorSource {
 
 	/**
 	 * <p>
-	 * Initialises this {@link OfficeFloorSource} to source the
-	 * {@link OfficeFloor}.
+	 * Obtains from the {@link OfficeFloorSource} any additional
+	 * {@link Property} instances required to source the {@link OfficeFloor}
+	 * after interrogating the configuration.
 	 * <p>
 	 * This method is a separate initial step from the
 	 * {@link #sourceOfficeFloor(OfficeFloorDeployer, OfficeFloorSourceContext)}
@@ -71,7 +72,7 @@ public interface OfficeFloorSource {
 	 * @throws Exception
 	 *             If fails to initialise the {@link OfficeFloorSource}.
 	 */
-	void init(RequiredProperties requiredProperties,
+	void specifyConfigurationProperties(RequiredProperties requiredProperties,
 			OfficeFloorSourceContext context) throws Exception;
 
 	/**
