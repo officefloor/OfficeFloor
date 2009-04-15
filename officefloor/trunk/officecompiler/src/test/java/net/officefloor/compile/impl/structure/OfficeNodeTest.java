@@ -40,6 +40,7 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
@@ -302,6 +303,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 */
 	public void testLinkTaskTeamToOfficeTeam() {
 
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactoryManufacturer<Work, ?, ?> manufacturer = this
+				.createMockTaskFactoryManufacturer();
+
 		// Record already being linked
 		this.record_issue("Office task TEAM already assigned team");
 
@@ -312,7 +317,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
-						context.addTask("WORK", "TASK", null);
+						context.addTask("WORK", workFactory, "TASK",
+								manufacturer, null);
 					}
 				});
 		assertEquals("Incorrect number of section tasks", 1, section
@@ -338,6 +344,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 */
 	public void testLinkPreOfficeDutyForOfficeTask() {
 
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactoryManufacturer<Work, ?, ?> manufacturer = this
+				.createMockTaskFactoryManufacturer();
+
 		this.replayMockObjects();
 
 		// Add section with task
@@ -345,7 +355,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
-						context.addTask("WORK", "TASK", null);
+						context.addTask("WORK", workFactory, "TASK",
+								manufacturer, null);
 					}
 				});
 		OfficeTask task = section.getOfficeTasks()[0];
@@ -371,6 +382,10 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 */
 	public void testLinkPostOfficeDutyForOfficeTask() {
 
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactoryManufacturer<Work, ?, ?> manufacturer = this
+				.createMockTaskFactoryManufacturer();
+
 		this.replayMockObjects();
 
 		// Add section with task
@@ -378,7 +393,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
-						context.addTask("WORK", "TASK", null);
+						context.addTask("WORK", workFactory, "TASK",
+								manufacturer, null);
 					}
 				});
 		OfficeTask task = section.getOfficeTasks()[0];
@@ -565,6 +581,11 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * {@link OfficeManagedObject}.
 	 */
 	public void testLinkObjectDependencyToOfficeManagedObject() {
+
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactoryManufacturer<Work, ?, ?> manufacturer = this
+				.createMockTaskFactoryManufacturer();
+
 		this.replayMockObjects();
 
 		// Add section with section object
@@ -574,7 +595,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 					public void make(SectionMakerContext context) {
 						// Add managed object and link to section output
 						TaskObject object = context.addTaskObject("WORK",
-								"TASK", "OBJECT", Connection.class);
+								workFactory, "TASK", manufacturer, "OBJECT",
+								Connection.class);
 						SectionObject sectionObject = context.getBuilder()
 								.addSectionObject("SECTION_OBJECT",
 										Connection.class.getName());
@@ -607,6 +629,11 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * {@link OfficeRequiredManagedObject}.
 	 */
 	public void testLinkObjectDependencyToOfficeFloorManagedObject() {
+
+		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+		final TaskFactoryManufacturer<Work, ?, ?> manufacturer = this
+				.createMockTaskFactoryManufacturer();
+
 		this.replayMockObjects();
 
 		// Add section with section object
@@ -616,7 +643,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 					public void make(SectionMakerContext context) {
 						// Add managed object and link to section output
 						TaskObject object = context.addTaskObject("WORK",
-								"TASK", "OBJECT", Connection.class);
+								workFactory, "TASK", manufacturer, "OBJECT",
+								Connection.class);
 						SectionObject sectionObject = context.getBuilder()
 								.addSectionObject("SECTION_OBJECT",
 										Connection.class.getName());

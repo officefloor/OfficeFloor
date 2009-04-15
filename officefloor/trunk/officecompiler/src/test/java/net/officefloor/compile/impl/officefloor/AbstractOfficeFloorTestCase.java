@@ -25,8 +25,13 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.match.TypeMatcher;
@@ -63,6 +68,45 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 */
 	protected final OfficeFloorBuilder officeFloorBuilder = this
 			.createMock(OfficeFloorBuilder.class);
+
+	/**
+	 * Creates a mock {@link TeamBuilder}.
+	 * 
+	 * @return Mock {@link TeamBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected TeamBuilder<MakerTeamSource> createMockTeamBuilder() {
+		return this.createMock(TeamBuilder.class);
+	}
+
+	/**
+	 * Creates a mock {@link OfficeBuilder}.
+	 * 
+	 * @return Mock {@link OfficeBuilder}.
+	 */
+	protected OfficeBuilder createMockOfficeBuilder() {
+		return this.createMock(OfficeBuilder.class);
+	}
+
+	/**
+	 * Creates a mock {@link WorkBuilder}.
+	 * 
+	 * @return Mock {@link WorkBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected WorkBuilder<Work> createMockWorkBuilder() {
+		return this.createMock(WorkBuilder.class);
+	}
+
+	/**
+	 * Creates the mock {@link TaskBuilder}.
+	 * 
+	 * @return Mock {@link TaskBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected TaskBuilder<Work, ?, ?> createMockTaskBuilder() {
+		return this.createMock(TaskBuilder.class);
+	}
 
 	/**
 	 * Records an issue.
