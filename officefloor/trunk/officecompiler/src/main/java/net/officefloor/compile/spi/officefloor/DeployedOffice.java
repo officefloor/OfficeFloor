@@ -19,6 +19,10 @@ package net.officefloor.compile.spi.officefloor;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
+import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -37,6 +41,17 @@ public interface DeployedOffice {
 	String getDeployedOfficeName();
 
 	/**
+	 * Adds a {@link Property} to source the {@link DeployedOffice} from the
+	 * {@link OfficeSource}.
+	 * 
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param value
+	 *            Value of the {@link Property}.
+	 */
+	void addProperty(String name, String value);
+
+	/**
 	 * Obtains the {@link DeployedOfficeInput} for the {@link OfficeInputType}.
 	 * 
 	 * @param inputName
@@ -46,26 +61,23 @@ public interface DeployedOffice {
 	DeployedOfficeInput getDeployedOfficeInput(String inputName);
 
 	/**
-	 * Assigns the {@link OfficeFloorTeam} assigned by the
-	 * {@link OfficeTeamType}.
+	 * Obtains the {@link OfficeTeam} for the {@link OfficeTeamType}.
 	 * 
 	 * @param officeTeamName
 	 *            Name of the {@link OfficeTeamType}.
-	 * @param officeFloorTeam
-	 *            {@link OfficeFloorTeam}.
+	 * @return {@link OfficeTeam}.
 	 */
-	void assignOfficeTeam(String officeTeamName, OfficeFloorTeam officeFloorTeam);
+	OfficeTeam getOfficeTeam(String officeTeamName);
 
 	/**
-	 * Allocates the {@link OfficeFloorManagedObject} required by the
+	 * Obtains the {@link OfficeRequiredManagedObject} for the
 	 * {@link OfficeManagedObjectType}.
 	 * 
 	 * @param officeManagedObjectName
 	 *            Name of the {@link OfficeManagedObjectType}.
-	 * @param officeFloorManagedObject
-	 *            {@link OfficeFloorManagedObject}.
+	 * @return {@link OfficeRequiredManagedObject}.
 	 */
-	void allocateManagedObject(String officeManagedObjectName,
-			OfficeFloorManagedObject officeFloorManagedObject);
+	OfficeRequiredManagedObject getOfficeRequiredManagedObject(
+			String officeManagedObjectName);
 
 }

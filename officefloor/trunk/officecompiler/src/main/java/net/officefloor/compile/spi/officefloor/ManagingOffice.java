@@ -16,32 +16,11 @@
  */
 package net.officefloor.compile.spi.officefloor;
 
-import net.officefloor.compile.properties.Property;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.team.Team;
 
 /**
- * {@link Team} within the {@link OfficeFloor}.
+ * Managing {@link Office} for the {@link OfficeFloorManagedObject}.
  * 
  * @author Daniel
  */
-public interface OfficeFloorTeam {
-
-	/**
-	 * Obtains the name of this {@link OfficeFloorTeam}.
-	 * 
-	 * @return Name of this {@link OfficeFloorTeam}.
-	 */
-	String getOfficeFloorTeamName();
-
-	/**
-	 * Adds a {@link Property} to source the {@link Team}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
-
+public interface ManagingOffice {
 }

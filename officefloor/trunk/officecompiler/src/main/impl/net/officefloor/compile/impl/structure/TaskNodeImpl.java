@@ -28,7 +28,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
@@ -204,10 +204,10 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
-	public void setTeamResponsible(OfficeTeam team) {
+	public TaskTeam getTeamResponsible() {
 		// TODO Implement
 		throw new UnsupportedOperationException(
-				"TODO implement OfficeTask.setTeamResponsible");
+				"TODO implement OfficeTask.getTeamResponsible");
 	}
 
 	@Override

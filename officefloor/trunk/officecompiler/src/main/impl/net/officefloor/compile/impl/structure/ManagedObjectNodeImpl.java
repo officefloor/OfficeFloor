@@ -31,6 +31,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -192,6 +193,13 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public String getOfficeSectionManagedObjectName() {
 		return this.managedObjectName;
+	}
+
+	@Override
+	public ManagedObjectTeam[] getOfficeSectionManagedObjectTeams() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeSectionManagedObject.getOfficeSectionManagedObjectTeams");
 	}
 
 	@Override

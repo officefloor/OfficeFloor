@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
@@ -27,6 +28,7 @@ import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
@@ -146,6 +148,20 @@ public class OfficeNodeImpl implements OfficeNode {
 
 	@Override
 	public void link(OfficeSectionOutput output, OfficeSectionInput input) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeArchitect.link");
+	}
+
+	@Override
+	public void link(TaskTeam team, OfficeTeam officeTeam) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement OfficeArchitect.link");
+	}
+
+	@Override
+	public void link(ManagedObjectTeam team, OfficeTeam officeTeam) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement OfficeArchitect.link");

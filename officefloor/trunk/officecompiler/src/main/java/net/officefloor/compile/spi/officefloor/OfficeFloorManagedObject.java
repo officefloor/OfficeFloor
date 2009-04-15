@@ -19,6 +19,9 @@ package net.officefloor.compile.spi.officefloor;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -38,48 +41,53 @@ public interface OfficeFloorManagedObject {
 	String getOfficeFloorManagedObjectName();
 
 	/**
-	 * Specifies the {@link DeployedOffice} that is responsible for managing
-	 * this {@link OfficeFloorManagedObject}.
+	 * Adds a {@link Property} to source the {@link ManagedObject}.
+	 * 
+	 * @param name
+	 *            Name of the {@link Property}.
+	 * @param value
+	 *            Value of the {@link Property}.
+	 */
+	void addProperty(String name, String value);
+
+	/**
+	 * Obtains the {@link ManagingOffice} for this
+	 * {@link OfficeFloorManagedObject}.
 	 * 
 	 * @param office
-	 *            Managing {@link DeployedOffice}.
+	 *            {@link ManagingOffice}.
 	 */
-	void setManagingOffice(DeployedOffice office);
+	ManagingOffice getManagingOffice();
 
 	/**
-	 * Links the {@link ManagedObjectFlow} to be undertaken by the
-	 * {@link DeployedOfficeInput}.
-	 * 
-	 * @param managedObjectFlowName
-	 *            Name of the {@link ManagedObjectFlowType}.
-	 * @param input
-	 *            {@link DeployedOfficeInput}.
-	 */
-	void linkManagedObjectFlow(String managedObjectFlowName,
-			DeployedOfficeInput input);
-
-	/**
-	 * Allocates the {@link OfficeFloorManagedObject} that full fills the
-	 * dependency.
-	 * 
-	 * @param managedObjectDependencyName
-	 *            Name of the {@link ManagedObjectDependencyType}.
-	 * @param managedObject
-	 *            {@link OfficeFloorManagedObject}.
-	 */
-	void allocateManagedObjectDependency(String managedObjectDependencyName,
-			OfficeFloorManagedObject managedObject);
-
-	/**
-	 * Assigns the {@link OfficeFloorTeam} required by the
-	 * {@link OfficeFloorManagedObject}.
+	 * Obtains the {@link ManagedObjectTeam} for the
+	 * {@link ManagedObjectTeamType}.
 	 * 
 	 * @param managedObjectTeamName
 	 *            Name of the {@link ManagedObjectTeamType}.
-	 * @param officeFloorTeam
-	 *            {@link OfficeFloorTeam}.
+	 * @return {@link ManagedObjectTeam}.
 	 */
-	void assignManagedObjectTeam(String managedObjectTeamName,
-			OfficeFloorTeam officeFloorTeam);
+	ManagedObjectTeam getManagedObjectTeam(String managedObjectTeamName);
+
+	/**
+	 * Obtains the {@link ManagedObjectDependency} for the
+	 * {@link ManagedObjectDependencyType}.
+	 * 
+	 * @param managedObjectDependencyName
+	 *            Name of the {@link ManagedObjectDependencyType}.
+	 * @return {@link ManagedObjectDependency}.
+	 */
+	ManagedObjectDependency getManagedObjectDependency(
+			String managedObjectDependencyName);
+
+	/**
+	 * Obtains the {@link ManagedObjectFlow} for he
+	 * {@link ManagedObjectFlowType}.
+	 * 
+	 * @param managedObjectFlowName
+	 *            Name of the {@link ManagedObjectFlowType}.
+	 * @return {@link ManagedObjectFlow}.
+	 */
+	ManagedObjectFlow getManagedObjectFlow(String managedObjectFlowName);
 
 }

@@ -18,6 +18,7 @@ package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
+import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -49,6 +50,16 @@ public interface OfficeManagedObject extends DependentManagedObject {
 	 *            Value of the {@link Property}.
 	 */
 	void addProperty(String name, String value);
+
+	/**
+	 * Obtains the {@link ManagedObjectTeam} for the
+	 * {@link ManagedObjectTeamType}.
+	 * 
+	 * @param managedObjectTeamName
+	 *            Name of the {@link ManagedObjectTeamType}.
+	 * @return {@link ManagedObjectTeam}.
+	 */
+	ManagedObjectTeam getManagedObjectTeam(String managedObjectTeamName);
 
 	/**
 	 * Obtains the {@link ManagedObjectDependency} for the

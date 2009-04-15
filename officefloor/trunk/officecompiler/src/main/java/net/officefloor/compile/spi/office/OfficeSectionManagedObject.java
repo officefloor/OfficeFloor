@@ -36,6 +36,20 @@ public interface OfficeSectionManagedObject extends DependentManagedObject {
 
 	/**
 	 * <p>
+	 * Obtains the {@link ManagedObjectTeam} instances required by this
+	 * {@link OfficeSectionManagedObject}.
+	 * <p>
+	 * Should there be an issue by the underlying {@link ManagedObjectSource}
+	 * providing the listing, an empty array will be returned with an issue
+	 * reported to the {@link CompilerIssues}.
+	 * 
+	 * @return {@link ManagedObjectTeam} instances required by this
+	 *         {@link OfficeSectionManagedObject}.
+	 */
+	ManagedObjectTeam[] getOfficeSectionManagedObjectTeams();
+
+	/**
+	 * <p>
 	 * Obtains the supported extension interfaces by this
 	 * {@link OfficeSectionManagedObject}.
 	 * <p>

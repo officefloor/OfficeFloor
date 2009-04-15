@@ -14,34 +14,28 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.officefloor;
-
-import net.officefloor.compile.properties.Property;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.team.Team;
+package net.officefloor.compile.internal.structure;
 
 /**
- * {@link Team} within the {@link OfficeFloor}.
+ * {@link LinkOfficeNode} that can be linked to another {@link LinkOfficeNode}.
  * 
  * @author Daniel
  */
-public interface OfficeFloorTeam {
+public interface LinkOfficeNode {
 
 	/**
-	 * Obtains the name of this {@link OfficeFloorTeam}.
+	 * Links the input {@link LinkOfficeNode} to this {@link LinkOfficeNode}.
 	 * 
-	 * @return Name of this {@link OfficeFloorTeam}.
+	 * @param node
+	 *            {@link LinkOfficeNode} to link to this {@link LinkOfficeNode}.
+	 * @return <code>true</code> if linked.
 	 */
-	String getOfficeFloorTeamName();
+	boolean linkOfficeNode(LinkOfficeNode node);
 
 	/**
-	 * Adds a {@link Property} to source the {@link Team}.
+	 * Obtains the {@link LinkOfficeNode} linked to this {@link LinkOfficeNode}.
 	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
+	 * @return {@link LinkOfficeNode} linked to this {@link LinkOfficeNode}.
 	 */
-	void addProperty(String name, String value);
-
+	LinkOfficeNode getLinkedOfficeNode();
 }
