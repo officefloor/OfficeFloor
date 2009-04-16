@@ -26,17 +26,21 @@ import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -75,6 +79,12 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final Map<String, ManagedObjectFlowNode> flows = new HashMap<String, ManagedObjectFlowNode>();
 
 	/**
+	 * {@link OfficeTeamNode} instances by their {@link ManagedObjectTeam}
+	 * names.
+	 */
+	private final Map<String, OfficeTeamNode> teams = new HashMap<String, OfficeTeamNode>();
+
+	/**
 	 * Location of the {@link OfficeSection} containing this
 	 * {@link SectionManagedObject}.
 	 */
@@ -86,9 +96,25 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final CompilerIssues issues;
 
 	/**
+	 * Flags whether the {@link ManagedObjectType} has been loaded.
+	 */
+	private boolean isManagedObjectTypeLoaded = false;
+
+	/**
 	 * Loaded {@link ManagedObjectType}.
 	 */
 	private ManagedObjectType<?> managedObjectType;
+
+	/**
+	 * Flags whether within the {@link Office} context.
+	 */
+	private boolean isInOfficeContext = false;
+
+	/**
+	 * Location of the {@link Office} containing this
+	 * {@link OfficeManagedObject}.
+	 */
+	private String officeLocation;
 
 	/**
 	 * Initiate.
@@ -117,6 +143,23 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 */
 
 	@Override
+	public void addOfficeContext(String officeLocation) {
+		this.officeLocation = officeLocation;
+
+		// Flag all existing dependencies within office context
+		for (ManagedObjectDependencyNode dependency : this.depedencies.values()) {
+			dependency.addOfficeContext(this.officeLocation);
+		}
+
+		// Flag all existing flows within office context
+		for (ManagedObjectFlowNode flow : this.flows.values()) {
+			flow.addOfficeContext(this.officeLocation);
+		}
+
+		this.isInOfficeContext = true;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public void loadManagedObjectMetaData(
 			ConfigurationContext configurationContext, ClassLoader classLoader) {
@@ -141,6 +184,18 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		this.managedObjectType = loader.loadManagedObject(
 				managedObjectSourceClass, this.propertyList, classLoader,
 				this.issues);
+
+		// Ensure all the teams are made available
+		if (this.managedObjectType != null) {
+			for (ManagedObjectTeamType teamType : this.managedObjectType
+					.getTeamTypes()) {
+				// Obtain team (ensures any missing teams are added)
+				this.getManagedObjectTeam(teamType.getTeamName());
+			}
+		}
+
+		// Managed object type loaded
+		this.isManagedObjectTypeLoaded = true;
 	}
 
 	/*
@@ -164,10 +219,16 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		ManagedObjectDependencyNode dependency = this.depedencies
 				.get(managedObjectDependencyName);
 		if (dependency == null) {
-			// Add the managed object dependency
+			// Create the managed object dependency
 			dependency = new ManagedObjectDependencyNodeImpl(
 					managedObjectDependencyName, this.sectionLocation,
 					this.issues);
+			if (this.isInOfficeContext) {
+				// Add office context as within office context
+				dependency.addOfficeContext(this.officeLocation);
+			}
+
+			// Add the managed object dependency
 			this.depedencies.put(managedObjectDependencyName, dependency);
 		}
 		return dependency;
@@ -178,9 +239,15 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		// Obtain and return the flow for the name
 		ManagedObjectFlowNode flow = this.flows.get(managedObjectFlowName);
 		if (flow == null) {
-			// Add the managed object flow
+			// Create the managed object flow
 			flow = new ManagedObjectFlowNodeImpl(managedObjectFlowName,
 					this.sectionLocation, this.issues);
+			if (this.isInOfficeContext) {
+				// Add office context as within office context
+				flow.addOfficeContext(this.officeLocation);
+			}
+
+			// Add the managed object flow
 			this.flows.put(managedObjectFlowName, flow);
 		}
 		return flow;
@@ -197,22 +264,63 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public ManagedObjectTeam[] getOfficeSectionManagedObjectTeams() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeSectionManagedObject.getOfficeSectionManagedObjectTeams");
+
+		// Ensure managed object type loaded
+		if (!this.isManagedObjectTypeLoaded) {
+			throw new IllegalStateException(
+					"Should not obtain managed object teams before being initialised");
+		}
+
+		// Return the managed object teams
+		return this.teams.values().toArray(new ManagedObjectTeam[0]);
 	}
 
 	@Override
 	public Class<?>[] getSupportedExtensionInterfaces() {
 
-		// Ensure this not is initialised
-		if (this.managedObjectType == null) {
+		// Ensure managed object type loaded
+		if (!this.isManagedObjectTypeLoaded) {
 			throw new IllegalStateException(
 					"Should not obtain supported extension interfaces before being initialised");
 		}
 
 		// Return the supported extension interfaces
-		return this.managedObjectType.getExtensionInterfaces();
+		if (this.managedObjectType == null) {
+			// Issue in loading type, no extension interfaces
+			return new Class[0];
+		} else {
+			// Return the extension interfaces supported by the managed object
+			return this.managedObjectType.getExtensionInterfaces();
+		}
+	}
+
+	/*
+	 * ======================= OfficeManagedObject ============================
+	 */
+
+	@Override
+	public String getOfficeManagedObjectName() {
+		return this.managedObjectName;
+	}
+
+	@Override
+	public ManagedObjectTeam getManagedObjectTeam(String managedObjectTeamName) {
+
+		// Must be in office context
+		if (!this.isInOfficeContext) {
+			throw new IllegalStateException(
+					"Must not obtain team unless in office context");
+		}
+
+		// Obtain and return the team for the name
+		OfficeTeamNode team = this.teams.get(managedObjectTeamName);
+		if (team == null) {
+			// Add the managed object team
+			team = new OfficeTeamNodeImpl(managedObjectTeamName,
+					this.officeLocation, this.issues);
+			this.teams.put(managedObjectTeamName, team);
+		}
+		return team;
 	}
 
 	/*
@@ -221,6 +329,15 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	public String getDependentManagedObjectName() {
+		return this.managedObjectName;
+	}
+
+	/*
+	 * =================== AdministerableManagedObject =========================
+	 */
+
+	@Override
+	public String getAdministerableManagedObjectName() {
 		return this.managedObjectName;
 	}
 

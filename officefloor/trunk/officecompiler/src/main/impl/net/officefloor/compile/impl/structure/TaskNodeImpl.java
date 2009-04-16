@@ -17,6 +17,8 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
@@ -28,12 +30,14 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.TaskTeam;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.work.TaskType;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link TaskNode} implementation.
@@ -53,7 +57,7 @@ public class TaskNodeImpl implements TaskNode {
 	private final String taskTypeName;
 
 	/**
-	 * Location of the {@link OfficeSection} containing this {@link TaskNode}.
+	 * Location of {@link OfficeSection} containing this {@link SectionTask}.
 	 */
 	private final String sectionLocation;
 
@@ -78,6 +82,34 @@ public class TaskNodeImpl implements TaskNode {
 	private final Map<String, TaskFlowNode> taskEscalations = new HashMap<String, TaskFlowNode>();
 
 	/**
+	 * Listing of {@link OfficeDuty} instances to do before this
+	 * {@link OfficeTask}.
+	 */
+	private final List<OfficeDuty> preTaskDuties = new LinkedList<OfficeDuty>();
+
+	/**
+	 * Listing of {@link OfficeDuty} instances to do after this
+	 * {@link OfficeDuty}.
+	 */
+	private final List<OfficeDuty> postTaskDuties = new LinkedList<OfficeDuty>();
+
+	/**
+	 * Flag indicating if the context of the {@link Office} for this
+	 * {@link OfficeTask} has been loaded.
+	 */
+	private boolean isOfficeContextLoaded = false;
+
+	/**
+	 * Location of {@link DeployedOffice} containing this {@link OfficeTask}.
+	 */
+	private String officeLocation;
+
+	/**
+	 * {@link TaskTeam} responsible for this {@link OfficeTask}.
+	 */
+	private TaskTeam teamResponsible = null;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param taskName
@@ -98,15 +130,18 @@ public class TaskNodeImpl implements TaskNode {
 		this.issues = issues;
 	}
 
-	/**
-	 * Adds an issue regarding the {@link TaskNode} being built.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	/*
+	 * ========================== TaskNode ===================================
 	 */
-	private void addIssue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-				AssetType.TASK, this.taskName, issueDescription);
+
+	@Override
+	public void addOfficeContext(String officeLocation) {
+		this.officeLocation = officeLocation;
+
+		// Create the team responsible
+		this.teamResponsible = new OfficeTeamNodeImpl("Team for task "
+				+ this.taskName, this.officeLocation, this.issues);
+		this.isOfficeContextLoaded = true;
 	}
 
 	/*
@@ -198,30 +233,29 @@ public class TaskNodeImpl implements TaskNode {
 
 	@Override
 	public ObjectDependency[] getObjectDependencies() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeTask.getObjectDependencies");
+		return this.taskObjects.values().toArray(new ObjectDependency[0]);
 	}
 
 	@Override
 	public TaskTeam getTeamResponsible() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeTask.getTeamResponsible");
+
+		// Ensure have office context
+		if (!this.isOfficeContextLoaded) {
+			throw new IllegalStateException("Office context has not been added");
+		}
+
+		// Return the team responsible
+		return this.teamResponsible;
 	}
 
 	@Override
 	public void addPreTaskDuty(OfficeDuty duty) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeTask.addPreTaskDuty");
+		this.preTaskDuties.add(duty);
 	}
 
 	@Override
 	public void addPostTaskDuty(OfficeDuty duty) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeTask.addPostTaskDuty");
+		this.postTaskDuties.add(duty);
 	}
 
 }

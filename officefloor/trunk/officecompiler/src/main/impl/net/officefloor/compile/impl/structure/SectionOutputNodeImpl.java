@@ -23,6 +23,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SubSectionOutput;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionOutputNode} implementation.
@@ -61,6 +62,16 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * Flag indicating if escalation only.
 	 */
 	private boolean isEscalationOnly;
+
+	/**
+	 * Flag indicating if within {@link Office} context.
+	 */
+	private boolean isInOfficeContext = false;
+
+	/**
+	 * Location of the {@link Office}.
+	 */
+	private String officeLocation;
 
 	/**
 	 * Initiate not initialised.
@@ -120,6 +131,12 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 		this.isInitialised = true;
 	}
 
+	@Override
+	public void addOfficeContext(String officeLocation) {
+		this.officeLocation = officeLocation;
+		this.isInOfficeContext = true;
+	}
+
 	/*
 	 * ================ SectionOutputType =========================
 	 */
@@ -171,9 +188,17 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-					null, null, "Sub section output " + this.outputName
-							+ " linked more than once");
+			if (this.isInOfficeContext) {
+				// Office section output
+				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
+						null, null, "Office section output " + this.outputName
+								+ " linked more than once");
+			} else {
+				// Sub section output
+				this.issues.addIssue(LocationType.SECTION,
+						this.sectionLocation, null, null, "Sub section output "
+								+ this.outputName + " linked more than once");
+			}
 			return false; // already linked
 		}
 

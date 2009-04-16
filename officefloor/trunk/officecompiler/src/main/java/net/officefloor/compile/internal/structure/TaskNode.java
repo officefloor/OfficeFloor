@@ -18,11 +18,20 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionTask;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionTask} node.
  * 
  * @author Daniel
  */
-public interface TaskNode extends SectionTask, LinkFlowNode, OfficeTask {
+public interface TaskNode extends SectionTask, OfficeTask, LinkFlowNode {
+
+	/**
+	 * Adds context of the {@link Office} containing this {@link OfficeTask}.
+	 * 
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 */
+	void addOfficeContext(String officeLocation);
 }

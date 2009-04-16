@@ -83,6 +83,8 @@ public interface SectionLoader {
 	 * Unlike loading the {@link SectionType} this will recursively load the
 	 * {@link SubSection} instances to fully construct the {@link OfficeSection}.
 	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource}.
 	 * @param configurationContext
@@ -99,7 +101,7 @@ public interface SectionLoader {
 	 * @return {@link OfficeSection}.
 	 */
 	<S extends SectionSource> OfficeSection loadOfficeSection(
-			Class<S> sectionSourceClass,
+			String sectionName, Class<S> sectionSourceClass,
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader,
 			CompilerIssues issues);

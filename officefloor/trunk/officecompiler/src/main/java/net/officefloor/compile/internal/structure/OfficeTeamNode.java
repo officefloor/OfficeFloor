@@ -16,14 +16,15 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.spi.office.ObjectDependency;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.office.ManagedObjectTeam;
+import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.office.TaskTeam;
 
 /**
- * {@link TaskObject} node.
+ * {@link OfficeTeam} node.
  * 
  * @author Daniel
  */
-public interface TaskObjectNode extends TaskObject, ObjectDependency,
-		LinkObjectNode {
+public interface OfficeTeamNode extends OfficeTeam, TaskTeam,
+		ManagedObjectTeam, LinkTeamNode {
 }

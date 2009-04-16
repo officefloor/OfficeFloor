@@ -14,16 +14,40 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.impl.structure;
 
-import net.officefloor.compile.spi.office.ObjectDependency;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.internal.structure.DutyNode;
+import net.officefloor.compile.spi.office.OfficeDuty;
 
 /**
- * {@link TaskObject} node.
+ * {@link DutyNode} implementation.
  * 
  * @author Daniel
  */
-public interface TaskObjectNode extends TaskObject, ObjectDependency,
-		LinkObjectNode {
+public class DutyNodeImpl implements DutyNode {
+
+	/**
+	 * Name of this {@link OfficeDuty}.
+	 */
+	private final String dutyName;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param dutyName
+	 *            Name of this {@link OfficeDuty}.
+	 */
+	public DutyNodeImpl(String dutyName) {
+		this.dutyName = dutyName;
+	}
+
+	/*
+	 * ======================= OfficeDuty ==============================
+	 */
+
+	@Override
+	public String getOfficeDutyName() {
+		return this.dutyName;
+	}
+
 }

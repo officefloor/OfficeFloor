@@ -22,6 +22,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link ManagedObjectDependencyNode} implementation.
@@ -46,6 +47,17 @@ public class ManagedObjectDependencyNodeImpl implements
 	 * {@link CompilerIssues}.
 	 */
 	private final CompilerIssues issues;
+
+	/**
+	 * Flag indicating if within {@link Office}.
+	 */
+	private boolean isInOfficeContext = false;
+
+	/**
+	 * Location of the {@link Office} containing this
+	 * {@link ManagedObjectDependency}.
+	 */
+	private String officeLocation;
 
 	/**
 	 * Initiate.
@@ -75,6 +87,16 @@ public class ManagedObjectDependencyNodeImpl implements
 	}
 
 	/*
+	 * ================= ManagedObjectDependencyNode ====================
+	 */
+
+	@Override
+	public void addOfficeContext(String officeLocation) {
+		this.officeLocation = officeLocation;
+		this.isInOfficeContext = true;
+	}
+
+	/*
 	 * ===================== LinkObjectNode ===========================
 	 */
 
@@ -88,9 +110,19 @@ public class ManagedObjectDependencyNodeImpl implements
 
 		// Ensure not already linked
 		if (this.linkedObjectNode != null) {
-			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-					null, null, "Managed object dependency "
-							+ this.dependencyName + " linked more than once");
+			if (this.isInOfficeContext) {
+				// Office dependency
+				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
+						null, null, "Managed object dependency "
+								+ this.dependencyName
+								+ " linked more than once");
+			} else {
+				// Section dependency
+				this.issues.addIssue(LocationType.SECTION,
+						this.sectionLocation, null, null,
+						"Managed object dependency " + this.dependencyName
+								+ " linked more than once");
+			}
 			return false; // already linked
 		}
 

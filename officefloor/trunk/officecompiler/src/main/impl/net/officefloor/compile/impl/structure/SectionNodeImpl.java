@@ -16,16 +16,14 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.internal.structure.LinkFlowNode;
-import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -65,6 +63,7 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -73,7 +72,7 @@ import net.officefloor.model.repository.ConfigurationContext;
  * 
  * @author Daniel
  */
-public class SectionNodeImpl implements SectionNode {
+public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Name of this {@link SubSection}.
@@ -107,32 +106,14 @@ public class SectionNodeImpl implements SectionNode {
 	private final Map<String, SectionInputNode> inputs = new HashMap<String, SectionInputNode>();
 
 	/**
-	 * Listing of {@link SectionInputType} instances maintaining the order they
-	 * were added.
-	 */
-	private final List<SectionInputType> inputTypes = new LinkedList<SectionInputType>();
-
-	/**
 	 * {@link SectionOutput} instances by their names.
 	 */
 	private final Map<String, SectionOutputNode> outputs = new HashMap<String, SectionOutputNode>();
 
 	/**
-	 * Listing of {@link SectionOutputType} instances maintaining the order they
-	 * were added.
-	 */
-	private final List<SectionOutputType> outputTypes = new LinkedList<SectionOutputType>();
-
-	/**
 	 * {@link SectionObject} instances by their names.
 	 */
 	private final Map<String, SectionObjectNode> objects = new HashMap<String, SectionObjectNode>();
-
-	/**
-	 * Listing of {@link SectionObjectType} instances maintaining the order they
-	 * were added.
-	 */
-	private final List<SectionObjectType> objectTypes = new LinkedList<SectionObjectType>();
 
 	/**
 	 * {@link ManagedObjectNode} instances by their {@link SectionManagedObject}
@@ -171,12 +152,18 @@ public class SectionNodeImpl implements SectionNode {
 	 *            {@link CompilerIssues} to report issues.
 	 */
 	public SectionNodeImpl(String sectionLocation, CompilerIssues issues) {
-		this(null, null, null, sectionLocation, issues);
+		this.sectionName = null;
+		this.sectionSourceClassName = null;
+		this.propertyList = new PropertyListImpl();
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
 	}
 
 	/**
-	 * Allows for the creation of the top level {@link OfficeSection}.
+	 * Allows for loading a {@link OfficeSection}.
 	 * 
+	 * @param sectionName
+	 *            Name of this {@link OfficeSection}.
 	 * @param sectionSource
 	 *            {@link SectionSource}.
 	 * @param propertyList
@@ -186,12 +173,37 @@ public class SectionNodeImpl implements SectionNode {
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
-	public SectionNodeImpl(SectionSource sectionSource,
+	public SectionNodeImpl(String sectionName, SectionSource sectionSource,
 			PropertyList propertyList, String sectionLocation,
 			CompilerIssues issues) {
-		this.sectionName = null;
+		this.sectionName = sectionName;
 		this.sectionSourceClassName = sectionSource.getClass().getName();
 		this.sectionSource = sectionSource;
+		this.propertyList = propertyList;
+		this.sectionLocation = sectionLocation;
+		this.issues = issues;
+	}
+
+	/**
+	 * Allows for adding an {@link OfficeSection} to an {@link Office}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param sectionSourceClassName
+	 *            Class name of the {@link SectionSource} for this
+	 *            {@link OfficeSection}.
+	 * @param propertyList
+	 *            {@link PropertyList}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	public SectionNodeImpl(String sectionName, String sectionSourceClassName,
+			PropertyList propertyList, String sectionLocation,
+			CompilerIssues issues) {
+		this.sectionName = sectionName;
+		this.sectionSourceClassName = sectionSourceClassName;
 		this.propertyList = propertyList;
 		this.sectionLocation = sectionLocation;
 		this.issues = issues;
@@ -204,11 +216,11 @@ public class SectionNodeImpl implements SectionNode {
 	 *            Name of this {@link SectionNode} as a {@link SubSection}.
 	 * @param sectionSourceClassName
 	 *            Class name of the {@link SectionSource} for this
-	 *            {@link SectionNode}.
+	 *            {@link SubSection}.
 	 * @param sectionSource
 	 *            {@link SectionSource} instance. May be <code>null</code>.
 	 * @param sectionLocation
-	 *            Location of this {@link SectionNode}.
+	 *            Location of this {@link SubSection}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
@@ -228,17 +240,6 @@ public class SectionNodeImpl implements SectionNode {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
-	 */
-	private void addIssue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, this.sectionLocation, null,
-				null, issueDescription);
-	}
-
-	/**
-	 * Adds an issue regarding the {@link OfficeSection} being built.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
 	 */
@@ -248,12 +249,22 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	/*
+	 * =================== AbstractNode ==================================
+	 */
+
+	@Override
+	protected void addIssue(String issueDescription) {
+		this.issues.addIssue(LocationType.SECTION, this.sectionLocation, null,
+				null, issueDescription);
+	}
+
+	/*
 	 * ======================= SectionNode =================================
 	 */
 
 	@Override
-	public void loadSection(ConfigurationContext configurationContext,
-			ClassLoader classLoader) {
+	public void loadSection(String officeLocation,
+			ConfigurationContext configurationContext, ClassLoader classLoader) {
 
 		// Ensure have instance of section source
 		if (this.sectionSource == null) {
@@ -294,13 +305,30 @@ public class SectionNodeImpl implements SectionNode {
 
 		// Load the sub sections
 		for (SectionNode subSection : this.subSections.values()) {
-			subSection.loadSection(configurationContext, classLoader);
+			subSection.loadSection(officeLocation, configurationContext,
+					classLoader);
 		}
 
 		// Load managed objects (require supported extension interfaces)
 		for (ManagedObjectNode managedObject : this.managedObjectNodes.values()) {
+			managedObject.addOfficeContext(officeLocation);
 			managedObject.loadManagedObjectMetaData(configurationContext,
 					classLoader);
+		}
+
+		// Add the office context for the tasks
+		for (TaskNode task : this.taskNodes.values()) {
+			task.addOfficeContext(officeLocation);
+		}
+
+		// Add the office context for the section outputs
+		for (SectionOutputNode output : this.outputs.values()) {
+			output.addOfficeContext(officeLocation);
+		}
+
+		// Add the office context for the section objects
+		for (SectionObjectNode object : this.objects.values()) {
+			object.addOfficeContext(officeLocation);
 		}
 	}
 
@@ -310,17 +338,47 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public SectionInputType[] getSectionInputTypes() {
-		return this.inputTypes.toArray(new SectionInputType[0]);
+		// Return the listing of input types sorted by name
+		SectionInputType[] inputTypes = this.inputs.values().toArray(
+				new SectionInputType[0]);
+		Arrays.sort(inputTypes, new Comparator<SectionInputType>() {
+			@Override
+			public int compare(SectionInputType a, SectionInputType b) {
+				return a.getSectionInputName().compareTo(
+						b.getSectionInputName());
+			}
+		});
+		return inputTypes;
 	}
 
 	@Override
 	public SectionOutputType[] getSectionOutputTypes() {
-		return this.outputTypes.toArray(new SectionOutputType[0]);
+		// Return the listing of output types sorted by name
+		SectionOutputType[] outputTypes = this.outputs.values().toArray(
+				new SectionOutputType[0]);
+		Arrays.sort(outputTypes, new Comparator<SectionOutputType>() {
+			@Override
+			public int compare(SectionOutputType a, SectionOutputType b) {
+				return a.getSectionOutputName().compareTo(
+						b.getSectionOutputName());
+			}
+		});
+		return outputTypes;
 	}
 
 	@Override
 	public SectionObjectType[] getSectionObjectTypes() {
-		return this.objectTypes.toArray(new SectionObjectType[0]);
+		// Return the listing of object types sorted by name
+		SectionObjectType[] objectTypes = this.objects.values().toArray(
+				new SectionObjectType[0]);
+		Arrays.sort(objectTypes, new Comparator<SectionObjectType>() {
+			@Override
+			public int compare(SectionObjectType a, SectionObjectType b) {
+				return a.getSectionObjectName().compareTo(
+						b.getSectionObjectName());
+			}
+		});
+		return objectTypes;
 	}
 
 	/*
@@ -389,7 +447,6 @@ public class SectionNodeImpl implements SectionNode {
 			input = new SectionInputNodeImpl(inputName, parameterType,
 					this.sectionLocation, this.issues);
 			this.inputs.put(inputName, input);
-			this.inputTypes.add(input);
 		} else {
 			// Added but determine if requires initialising
 			if (!input.isInitialised()) {
@@ -413,7 +470,6 @@ public class SectionNodeImpl implements SectionNode {
 			output = new SectionOutputNodeImpl(outputName, argumentType,
 					isEscalationOnly, this.sectionLocation, this.issues);
 			this.outputs.put(outputName, output);
-			this.outputTypes.add(output);
 		} else {
 			// Added but determine if requires initialising
 			if (!output.isInitialised()) {
@@ -436,7 +492,6 @@ public class SectionNodeImpl implements SectionNode {
 			object = new SectionObjectNodeImpl(objectName, objectType,
 					this.sectionLocation, this.issues);
 			this.objects.put(objectName, object);
-			this.objectTypes.add(object);
 		} else {
 			// Added but determine if requires initialising
 			if (!object.isInitialised()) {
@@ -645,43 +700,6 @@ public class SectionNodeImpl implements SectionNode {
 	}
 
 	/**
-	 * Ensures both inputs are a {@link LinkFlowNode} and if so links them.
-	 * 
-	 * @param linkSource
-	 *            Source {@link LinkFlowNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkFlowNode}.
-	 * @return <code>true</code> if linked.
-	 */
-	private boolean linkFlow(Object linkSource, Object linkTarget) {
-
-		// Ensure the link source is link flow node
-		if (!(linkSource instanceof LinkFlowNode)) {
-			this.addIssue("Invalid link source: "
-					+ linkSource
-					+ " ["
-					+ (linkSource == null ? null : linkSource.getClass()
-							.getName()) + "]");
-			return false; // can not link
-		}
-
-		// Ensure the link target is link flow node
-		if (!(linkTarget instanceof LinkFlowNode)) {
-			this.addIssue("Invalid link target: "
-					+ linkTarget
-					+ " ["
-					+ (linkTarget == null ? null : linkTarget.getClass()
-							.getName()
-							+ "]"));
-			return false; // can not link
-		}
-
-		// Link the nodes together
-		return ((LinkFlowNode) linkSource)
-				.linkFlowNode((LinkFlowNode) linkTarget);
-	}
-
-	/**
 	 * Loads the {@link FlowInstigationStrategyEnum} for the {@link TaskFlow}.
 	 * 
 	 * @param taskFlow
@@ -740,43 +758,6 @@ public class SectionNodeImpl implements SectionNode {
 		this.linkObject(dependency, sectionManagedObject);
 	}
 
-	/**
-	 * Ensures both inputs are a {@link LinkObjectNode} and if so links them.
-	 * 
-	 * @param linkSource
-	 *            Source {@link LinkObjectNode}.
-	 * @param linkTarget
-	 *            Target {@link LinkObjectNode}.
-	 * @return <code>true</code> if linked.
-	 */
-	private boolean linkObject(Object linkSource, Object linkTarget) {
-
-		// Ensure the link source is link object node
-		if (!(linkSource instanceof LinkObjectNode)) {
-			this.addIssue("Invalid link source: "
-					+ linkSource
-					+ " ["
-					+ (linkSource == null ? null : linkSource.getClass()
-							.getName()) + "]");
-			return false; // can not link
-		}
-
-		// Ensure the link target is link object node
-		if (!(linkTarget instanceof LinkObjectNode)) {
-			this.addIssue("Invalid link target: "
-					+ linkTarget
-					+ " ["
-					+ (linkTarget == null ? null : linkTarget.getClass()
-							.getName()
-							+ "]"));
-			return false; // can not link
-		}
-
-		// Link the nodes together
-		return ((LinkObjectNode) linkSource)
-				.linkObjectNode((LinkObjectNode) linkTarget);
-	}
-
 	/*
 	 * ==================== OfficeSection =================================
 	 */
@@ -788,35 +769,92 @@ public class SectionNodeImpl implements SectionNode {
 
 	@Override
 	public OfficeSubSection[] getOfficeSubSections() {
-		return this.subSections.values().toArray(new OfficeSubSection[0]);
+		// Return the sub sections sorted by name
+		OfficeSubSection[] subSections = this.subSections.values().toArray(
+				new OfficeSubSection[0]);
+		Arrays.sort(subSections, new Comparator<OfficeSubSection>() {
+			@Override
+			public int compare(OfficeSubSection a, OfficeSubSection b) {
+				return a.getOfficeSectionName().compareTo(
+						b.getOfficeSectionName());
+			}
+		});
+		return subSections;
 	}
 
 	@Override
 	public OfficeSectionInput[] getOfficeSectionInputs() {
-		return this.inputs.values().toArray(new OfficeSectionInput[0]);
+		// Return the section inputs sorted by name
+		OfficeSectionInput[] sectionInputs = this.inputs.values().toArray(
+				new OfficeSectionInput[0]);
+		Arrays.sort(sectionInputs, new Comparator<OfficeSectionInput>() {
+			@Override
+			public int compare(OfficeSectionInput a, OfficeSectionInput b) {
+				return a.getOfficeSectionInputName().compareTo(
+						b.getOfficeSectionInputName());
+			}
+		});
+		return sectionInputs;
 	}
 
 	@Override
 	public OfficeSectionOutput[] getOfficeSectionOutputs() {
-		return this.outputs.values().toArray(new OfficeSectionOutput[0]);
+		// Return the section outputs sorted by name
+		OfficeSectionOutput[] sectionOutputs = this.outputs.values().toArray(
+				new OfficeSectionOutput[0]);
+		Arrays.sort(sectionOutputs, new Comparator<OfficeSectionOutput>() {
+			@Override
+			public int compare(OfficeSectionOutput a, OfficeSectionOutput b) {
+				return a.getOfficeSectionOutputName().compareTo(
+						b.getOfficeSectionOutputName());
+			}
+		});
+		return sectionOutputs;
 	}
 
 	@Override
 	public OfficeSectionObject[] getOfficeSectionObjects() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeSection.getOfficeSectionObjects");
+		// Return the section objects sorted by name
+		OfficeSectionObject[] sectionObjects = this.objects.values().toArray(
+				new OfficeSectionObject[0]);
+		Arrays.sort(sectionObjects, new Comparator<OfficeSectionObject>() {
+			@Override
+			public int compare(OfficeSectionObject a, OfficeSectionObject b) {
+				return a.getOfficeSectionObjectName().compareTo(
+						b.getOfficeSectionObjectName());
+			}
+		});
+		return sectionObjects;
 	}
 
 	@Override
 	public OfficeSectionManagedObject[] getOfficeSectionManagedObjects() {
-		return this.managedObjectNodes.values().toArray(
-				new OfficeSectionManagedObject[0]);
+		// Return the section managed objects sorted by name
+		OfficeSectionManagedObject[] sectionMos = this.managedObjectNodes
+				.values().toArray(new OfficeSectionManagedObject[0]);
+		Arrays.sort(sectionMos, new Comparator<OfficeSectionManagedObject>() {
+			@Override
+			public int compare(OfficeSectionManagedObject a,
+					OfficeSectionManagedObject b) {
+				return a.getOfficeSectionManagedObjectName().compareTo(
+						b.getOfficeSectionManagedObjectName());
+			}
+		});
+		return sectionMos;
 	}
 
 	@Override
 	public OfficeTask[] getOfficeTasks() {
-		return this.taskNodes.values().toArray(new OfficeTask[0]);
+		// Return the office tasks sorted by name
+		OfficeTask[] officeTasks = this.taskNodes.values().toArray(
+				new OfficeTask[0]);
+		Arrays.sort(officeTasks, new Comparator<OfficeTask>() {
+			@Override
+			public int compare(OfficeTask a, OfficeTask b) {
+				return a.getOfficeTaskName().compareTo(b.getOfficeTaskName());
+			}
+		});
+		return officeTasks;
 	}
 
 }

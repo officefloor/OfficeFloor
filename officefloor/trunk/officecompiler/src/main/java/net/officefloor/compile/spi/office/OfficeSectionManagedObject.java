@@ -25,7 +25,8 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel
  */
-public interface OfficeSectionManagedObject extends DependentManagedObject {
+public interface OfficeSectionManagedObject extends DependentManagedObject,
+		AdministerableManagedObject {
 
 	/**
 	 * Obtains the name of this {@link OfficeSectionManagedObject}.

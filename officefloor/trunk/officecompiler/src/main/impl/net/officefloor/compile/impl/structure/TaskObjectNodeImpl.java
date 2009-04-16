@@ -20,6 +20,7 @@ import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.TaskObject;
 
@@ -70,6 +71,22 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	@Override
 	public String getTaskObjectName() {
 		return this.objectName;
+	}
+
+	/*
+	 * ======================= ObjectDependency ===========================
+	 */
+
+	@Override
+	public String getObjectDependencyName() {
+		return this.objectName;
+	}
+
+	@Override
+	public DependentManagedObject getDependentManagedObject() {
+		// TODO provide managed object linking
+		throw new UnsupportedOperationException(
+				"TODO implement ObjectDependency.getDependentManagedObject");
 	}
 
 	/*
