@@ -17,12 +17,24 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link Office} node.
  * 
  * @author Daniel
  */
-public interface OfficeNode extends OfficeArchitect {
+public interface OfficeNode extends OfficeArchitect, DeployedOffice,
+		LinkOfficeNode {
+
+	/**
+	 * Adds the context of the {@link OfficeFloor} containing this
+	 * {@link DeployedOffice}.
+	 * 
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
+	 */
+	void addOfficeFloorContext(String officeFloorLocation);
 }

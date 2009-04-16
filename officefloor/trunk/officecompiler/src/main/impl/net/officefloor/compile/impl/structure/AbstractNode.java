@@ -18,6 +18,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 
 /**
@@ -136,6 +137,43 @@ public abstract class AbstractNode {
 		// Link the nodes together
 		return ((LinkTeamNode) linkSource)
 				.linkTeamNode((LinkTeamNode) linkTarget);
+	}
+
+	/**
+	 * Ensures both inputs are a {@link LinkOfficeNode} and if so links them.
+	 * 
+	 * @param linkSource
+	 *            Source {@link LinkOfficeNode}.
+	 * @param linkTarget
+	 *            Target {@link LinkOfficeNode}.
+	 * @return <code>true</code> if linked.
+	 */
+	protected boolean linkOffice(Object linkSource, Object linkTarget) {
+
+		// Ensure the link source is link office node
+		if (!(linkSource instanceof LinkOfficeNode)) {
+			this.addIssue("Invalid link source: "
+					+ linkSource
+					+ " ["
+					+ (linkSource == null ? null : linkSource.getClass()
+							.getName()) + "]");
+			return false; // can not link
+		}
+
+		// Ensure the link target is link office node
+		if (!(linkTarget instanceof LinkOfficeNode)) {
+			this.addIssue("Invalid link target: "
+					+ linkTarget
+					+ " ["
+					+ (linkTarget == null ? null : linkTarget.getClass()
+							.getName()
+							+ "]"));
+			return false; // can not link
+		}
+
+		// Link the nodes together
+		return ((LinkOfficeNode) linkSource)
+				.linkOfficeNode((LinkOfficeNode) linkTarget);
 	}
 
 	/**

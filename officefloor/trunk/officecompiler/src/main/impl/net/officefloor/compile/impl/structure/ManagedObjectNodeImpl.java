@@ -36,11 +36,14 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.ManagingOffice;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -117,6 +120,22 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private String officeLocation;
 
 	/**
+	 * Flags whether within the {@link OfficeFloor} context.
+	 */
+	private boolean isInOfficeFloorContext = false;
+
+	/**
+	 * {@link ManagingOffice}.
+	 */
+	private ManagingOffice managingOffice;
+
+	/**
+	 * Location of the {@link OfficeFloor} containing this
+	 * {@link OfficeFloorManagedObject}.
+	 */
+	private String officeFloorLocation;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectName
@@ -156,7 +175,35 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			flow.addOfficeContext(this.officeLocation);
 		}
 
+		// Now in office context
 		this.isInOfficeContext = true;
+	}
+
+	@Override
+	public void addOfficeFloorContext(String officeFloorLocation) {
+		this.officeFloorLocation = officeFloorLocation;
+
+		// Load the managing office
+		this.managingOffice = new ManagingOfficeNodeImpl(
+				this.managedObjectName, this.officeFloorLocation, this.issues);
+
+		// Flag all existing dependencies within office floor context
+		for (ManagedObjectDependencyNode dependency : this.depedencies.values()) {
+			dependency.addOfficeFloorContext(this.officeFloorLocation);
+		}
+
+		// Flag all existing flows within office floor context
+		for (ManagedObjectFlowNode flow : this.flows.values()) {
+			flow.addOfficeFloorContext(this.officeFloorLocation);
+		}
+
+		// Flag all existing teams within office floor context
+		for (OfficeTeamNode team : this.teams.values()) {
+			team.addOfficeFloorContext(this.officeFloorLocation);
+		}
+
+		// Now in office floor context
+		this.isInOfficeFloorContext = true;
 	}
 
 	@Override
@@ -227,6 +274,10 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 				// Add office context as within office context
 				dependency.addOfficeContext(this.officeLocation);
 			}
+			if (this.isInOfficeFloorContext) {
+				// Add office floor context as within office floor context
+				dependency.addOfficeFloorContext(this.officeFloorLocation);
+			}
 
 			// Add the managed object dependency
 			this.depedencies.put(managedObjectDependencyName, dependency);
@@ -245,6 +296,10 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			if (this.isInOfficeContext) {
 				// Add office context as within office context
 				flow.addOfficeContext(this.officeLocation);
+			}
+			if (this.isInOfficeFloorContext) {
+				// Add office floor context as within office floor context
+				flow.addOfficeFloorContext(this.officeFloorLocation);
 			}
 
 			// Add the managed object flow
@@ -306,21 +361,49 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	@Override
 	public ManagedObjectTeam getManagedObjectTeam(String managedObjectTeamName) {
 
-		// Must be in office context
-		if (!this.isInOfficeContext) {
+		// Must be in office or office floor context
+		if ((!this.isInOfficeContext) && (!this.isInOfficeFloorContext)) {
 			throw new IllegalStateException(
-					"Must not obtain team unless in office context");
+					"Must not obtain team unless in office or office floor context");
 		}
 
 		// Obtain and return the team for the name
 		OfficeTeamNode team = this.teams.get(managedObjectTeamName);
 		if (team == null) {
-			// Add the managed object team
+			// Create the office team
 			team = new OfficeTeamNodeImpl(managedObjectTeamName,
 					this.officeLocation, this.issues);
+			if (this.isInOfficeFloorContext) {
+				// Add office floor context as within office floor context
+				team.addOfficeFloorContext(this.officeFloorLocation);
+			}
+
+			// Add the managed object team
 			this.teams.put(managedObjectTeamName, team);
 		}
 		return team;
+	}
+
+	/*
+	 * ==================== OfficeFloorManagedObject ===========================
+	 */
+
+	@Override
+	public String getOfficeFloorManagedObjectName() {
+		return this.managedObjectName;
+	}
+
+	@Override
+	public ManagingOffice getManagingOffice() {
+
+		// Must be in office context
+		if (!this.isInOfficeFloorContext) {
+			throw new IllegalStateException(
+					"Must not obtain managing office unless in office floor context");
+		}
+
+		// Return the managing office
+		return this.managingOffice;
 	}
 
 	/*

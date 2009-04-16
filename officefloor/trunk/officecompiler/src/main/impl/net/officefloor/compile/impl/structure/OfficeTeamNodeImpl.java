@@ -22,6 +22,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link OfficeTeamNode} implementation.
@@ -46,6 +47,16 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	private final CompilerIssues issues;
 
 	/**
+	 * Flag indicating if in {@link OfficeFloor} context.
+	 */
+	private boolean isInOfficeFloorContext = false;
+
+	/**
+	 * Location of the {@link OfficeFloor}.
+	 */
+	private String officeFloorLocation;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param teamName
@@ -60,6 +71,16 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 		this.teamName = teamName;
 		this.officeLocation = officeLocation;
 		this.issues = issues;
+	}
+
+	/*
+	 * ================== OfficeTeamNode ============================
+	 */
+
+	@Override
+	public void addOfficeFloorContext(String officeFloorLocation) {
+		this.officeFloorLocation = officeFloorLocation;
+		this.isInOfficeFloorContext = true;
 	}
 
 	/*
@@ -94,8 +115,16 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 
 		// Ensure not already linked
 		if (this.linkedTeamNode != null) {
-			this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
-					null, null, this.teamName + " already assigned");
+			if (this.isInOfficeFloorContext) {
+				// Deployed office team
+				this.issues.addIssue(LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation, null, null, this.teamName
+								+ " already assigned");
+			} else {
+				// Office required team
+				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
+						null, null, this.teamName + " already assigned");
+			}
 			return false; // already linked
 		}
 

@@ -38,6 +38,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
+import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
@@ -45,6 +46,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionBuilder;
@@ -143,7 +145,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private SectionSource sectionSource;
 
 	/**
-	 * Initiate.
+	 * Allows for loading the {@link SectionType}.
 	 * 
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} being built by this
@@ -207,6 +209,20 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		this.propertyList = propertyList;
 		this.sectionLocation = sectionLocation;
 		this.issues = issues;
+	}
+
+	/**
+	 * Allows for obtaining the {@link DeployedOfficeInput}.
+	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 */
+	public SectionNodeImpl(String sectionName) {
+		this.sectionName = sectionName;
+		this.sectionSourceClassName = null;
+		this.propertyList = new PropertyListImpl();
+		this.sectionLocation = null;
+		this.issues = null;
 	}
 
 	/**
@@ -330,6 +346,19 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		for (SectionObjectNode object : this.objects.values()) {
 			object.addOfficeContext(officeLocation);
 		}
+	}
+
+	@Override
+	public DeployedOfficeInput getDeployedOfficeInput(String inputName) {
+		// Obtain and return the section input
+		SectionInputNode input = this.inputs.get(inputName);
+		if (input == null) {
+			// Add the section input
+			input = new SectionInputNodeImpl(inputName, this.sectionLocation,
+					this.issues);
+			this.inputs.put(inputName, input);
+		}
+		return input;
 	}
 
 	/*

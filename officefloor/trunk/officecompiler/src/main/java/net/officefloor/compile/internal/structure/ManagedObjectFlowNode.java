@@ -18,6 +18,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link ManagedObjectFlow} node.
@@ -34,4 +35,14 @@ public interface ManagedObjectFlowNode extends ManagedObjectFlow, LinkFlowNode {
 	 *            Location of the {@link Office}.
 	 */
 	void addOfficeContext(String officeLocation);
+
+	/**
+	 * Adds the context of the {@link OfficeFloor} containing this
+	 * {@link ManagedObjectFlow}.
+	 * 
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
+	 */
+	void addOfficeFloorContext(String officeFloorLocation);
+
 }

@@ -16,33 +16,12 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 
 /**
- * {@link ManagedObjectDependency} node.
+ * {@link OfficeFloorTeam} node.
  * 
  * @author Daniel
  */
-public interface ManagedObjectDependencyNode extends ManagedObjectDependency,
-		LinkObjectNode {
-
-	/**
-	 * Adds the context of the {@link Office} containing this
-	 * {@link ManagedObjectDependency}.
-	 * 
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
-	 */
-	void addOfficeContext(String officeLocation);
-
-	/**
-	 * Adds the context of the {@link OfficeFloor} containing this
-	 * {@link ManagedObjectDependency}.
-	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 */
-	void addOfficeFloorContext(String officeFloorLocation);
+public interface TeamNode extends OfficeFloorTeam, LinkTeamNode {
 }

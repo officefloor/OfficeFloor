@@ -87,8 +87,8 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	 * {@link OfficeNode} to be tested.
 	 */
 	private final OfficeNode node = new OfficeNodeImpl(OFFICE_NAME,
-			this.configurationContext, this.classLoader, OFFICE_LOCATION,
-			this.issues);
+			MakerOfficeSource.class.getName(), this.configurationContext,
+			this.classLoader, OFFICE_LOCATION, this.issues);
 
 	/**
 	 * Tests adding an {@link OfficeRequiredManagedObject}.

@@ -16,6 +16,8 @@
  */
 package net.officefloor.compile.office;
 
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -29,11 +31,20 @@ import net.officefloor.frame.api.manage.OfficeFloor;
 public interface OfficeInputType {
 
 	/**
-	 * Obtains the name of this {@link OfficeInputType}.
+	 * Obtains the name of the {@link OfficeSection} containing the
+	 * {@link DeployedOfficeInput}.
 	 * 
-	 * @return Name of this {@link OfficeInputType}.
+	 * @return Name of the {@link OfficeSection}.
 	 */
-	String getOfficeInputName();
+	String getOfficeSectionName();
+
+	/**
+	 * Obtains the name of {@link DeployedOfficeInput} on the
+	 * {@link OfficeSection}.
+	 * 
+	 * @return Name of this {@link DeployedOfficeInput}.
+	 */
+	String getOfficeSectionInputName();
 
 	/**
 	 * Obtains the fully qualified class name of the parameter type to this

@@ -21,11 +21,13 @@ import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link SectionObjectNode} implementation.
@@ -70,6 +72,17 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * {@link OfficeSectionObject}.
 	 */
 	private String officeLocation;
+
+	/**
+	 * Flags whether within the {@link OfficeFloor} context
+	 */
+	private boolean isInOfficeFloorContext = false;
+
+	/**
+	 * Location of the {@link OfficeFloor} containing this
+	 * {@link OfficeRequiredManagedObject}.
+	 */
+	private String officeFloorLocation;
 
 	/**
 	 * Initiate not initialised.
@@ -129,6 +142,12 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	public void addOfficeContext(String officeLocation) {
 		this.officeLocation = officeLocation;
 		this.isInOfficeContext = true;
+	}
+
+	@Override
+	public void addOfficeFloorContext(String officeFloorLocation) {
+		this.officeFloorLocation = officeFloorLocation;
+		this.isInOfficeFloorContext = true;
 	}
 
 	/*
@@ -205,14 +224,18 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 		// Ensure not already linked
 		if (this.linkedObjectNode != null) {
-			// Provide issue based on whether in office context
-			if (this.isInOfficeContext) {
-				// Office section output already linked
+			if (this.isInOfficeFloorContext) {
+				// Office object already linked
+				this.issues.addIssue(LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation, null, null, "Office object "
+								+ this.objectName + " linked more than once");
+			} else if (this.isInOfficeContext) {
+				// Office section object already linked
 				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
 						null, null, "Office section object " + this.objectName
 								+ " linked more than once");
 			} else {
-				// Sub section output already linked
+				// Sub section object already linked
 				this.issues.addIssue(LocationType.SECTION,
 						this.sectionLocation, null, null, "Sub section object "
 								+ this.objectName + " linked more than once");

@@ -16,8 +16,10 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionBuilder;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.frame.api.manage.Office;
@@ -30,6 +32,17 @@ import net.officefloor.model.repository.ConfigurationContext;
  */
 public interface SectionNode extends SectionBuilder, SectionType, SubSection,
 		OfficeSection {
+
+	// TODO need to add initialise and isInitialised for getting input
+
+	/**
+	 * Obtains the {@link DeployedOfficeInput}.
+	 * 
+	 * @param inputName
+	 *            Input name as per the {@link OfficeInputType}.
+	 * @return {@link DeployedOfficeInput}.
+	 */
+	DeployedOfficeInput getDeployedOfficeInput(String inputName);
 
 	/**
 	 * Loads the {@link OfficeSection} of this {@link SectionNode} and all its
@@ -45,4 +58,5 @@ public interface SectionNode extends SectionBuilder, SectionType, SubSection,
 	 */
 	void loadSection(String officeLocation,
 			ConfigurationContext configurationContext, ClassLoader classLoader);
+
 }

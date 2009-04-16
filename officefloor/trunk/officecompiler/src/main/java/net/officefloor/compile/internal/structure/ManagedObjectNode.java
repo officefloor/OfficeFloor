@@ -18,8 +18,10 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -29,7 +31,8 @@ import net.officefloor.model.repository.ConfigurationContext;
  * @author Daniel
  */
 public interface ManagedObjectNode extends SectionManagedObject,
-		OfficeSectionManagedObject, OfficeManagedObject, LinkObjectNode {
+		OfficeSectionManagedObject, OfficeManagedObject,
+		OfficeFloorManagedObject, LinkObjectNode {
 
 	/**
 	 * Adds the context of the {@link Office} containing this
@@ -39,6 +42,15 @@ public interface ManagedObjectNode extends SectionManagedObject,
 	 *            Location of the {@link Office}.
 	 */
 	void addOfficeContext(String officeLocation);
+
+	/**
+	 * Adds the context of the {@link OfficeFloor} containing this
+	 * {@link OfficeFloorManagedObject}.
+	 * 
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
+	 */
+	void addOfficeFloorContext(String officeFloorLocation);
 
 	/**
 	 * Loads the {@link ManagedObjectMetaData} of this

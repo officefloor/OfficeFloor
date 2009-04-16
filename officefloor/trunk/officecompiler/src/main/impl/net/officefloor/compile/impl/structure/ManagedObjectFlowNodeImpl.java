@@ -23,6 +23,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link ManagedObjectFlowNode} implementation.
@@ -58,6 +59,16 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	private String officeLocation;
 
 	/**
+	 * Flags if within context of the {@link OfficeFloor}.
+	 */
+	private boolean isInOfficeFloorContext = false;
+
+	/**
+	 * Location of the {@link OfficeFloor}.
+	 */
+	private String officeFloorLocation;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectFlowName
@@ -85,6 +96,12 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 		this.isInOfficeContext = true;
 	}
 
+	@Override
+	public void addOfficeFloorContext(String officeFloorLocation) {
+		this.officeFloorLocation = officeFloorLocation;
+		this.isInOfficeFloorContext = true;
+	}
+
 	/*
 	 * =================== ManagedObjectFlow =============================
 	 */
@@ -108,7 +125,13 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			if (this.isInOfficeContext) {
+			if (this.isInOfficeFloorContext) {
+				// Office floor managed object flow
+				this.issues.addIssue(LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation, null, null,
+						"Managed object flow " + this.managedObjectFlowName
+								+ " linked more than once");
+			} else if (this.isInOfficeContext) {
 				// Office managed object flow
 				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
 						null, null, "Managed object flow "
