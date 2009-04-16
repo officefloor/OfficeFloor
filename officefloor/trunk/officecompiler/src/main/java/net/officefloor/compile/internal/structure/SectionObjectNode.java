@@ -22,6 +22,7 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link SectionObject} node.
@@ -55,4 +56,14 @@ public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
 	 *            Location of the {@link Office}.
 	 */
 	void addOfficeContext(String officeLocation);
+
+	/**
+	 * Adds the context of the {@link OfficeFloor} containing this
+	 * {@link OfficeRequiredManagedObject}.
+	 * 
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
+	 */
+	void addOfficeFloorContext(String officeFloorLocation);
+
 }

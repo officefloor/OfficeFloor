@@ -23,6 +23,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link ManagedObjectDependencyNode} implementation.
@@ -49,7 +50,7 @@ public class ManagedObjectDependencyNodeImpl implements
 	private final CompilerIssues issues;
 
 	/**
-	 * Flag indicating if within {@link Office}.
+	 * Flag indicating if within {@link Office} context.
 	 */
 	private boolean isInOfficeContext = false;
 
@@ -58,6 +59,17 @@ public class ManagedObjectDependencyNodeImpl implements
 	 * {@link ManagedObjectDependency}.
 	 */
 	private String officeLocation;
+
+	/**
+	 * Flag indicating if within {@link OfficeFloor} context.
+	 */
+	private boolean isInOfficeFloorContext = false;
+
+	/**
+	 * Location of the {@link OfficeFloor} containing this
+	 * {@link ManagedObjectDependency}.
+	 */
+	private String officeFloorLocation;
 
 	/**
 	 * Initiate.
@@ -96,6 +108,12 @@ public class ManagedObjectDependencyNodeImpl implements
 		this.isInOfficeContext = true;
 	}
 
+	@Override
+	public void addOfficeFloorContext(String officeFloorLocation) {
+		this.officeFloorLocation = officeFloorLocation;
+		this.isInOfficeFloorContext = true;
+	}
+
 	/*
 	 * ===================== LinkObjectNode ===========================
 	 */
@@ -110,7 +128,13 @@ public class ManagedObjectDependencyNodeImpl implements
 
 		// Ensure not already linked
 		if (this.linkedObjectNode != null) {
-			if (this.isInOfficeContext) {
+			if (this.isInOfficeFloorContext) {
+				// Office floor dependency
+				this.issues.addIssue(LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation, null, null,
+						"Managed object dependency " + this.dependencyName
+								+ " linked more than once");
+			} else if (this.isInOfficeContext) {
 				// Office dependency
 				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
 						null, null, "Managed object dependency "

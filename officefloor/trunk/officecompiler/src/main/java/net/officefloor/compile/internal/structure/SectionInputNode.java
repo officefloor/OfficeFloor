@@ -18,6 +18,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SubSectionInput;
 
@@ -27,7 +28,7 @@ import net.officefloor.compile.spi.section.SubSectionInput;
  * @author Daniel
  */
 public interface SectionInputNode extends SectionInputType, SectionInput,
-		SubSectionInput, OfficeSectionInput, LinkFlowNode {
+		SubSectionInput, OfficeSectionInput, DeployedOfficeInput, LinkFlowNode {
 
 	/**
 	 * Indicates if this {@link SectionInputType} has been initialised.

@@ -415,7 +415,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 				.getOfficeInputTypes().length);
 		OfficeInputType input = officeType.getOfficeInputTypes()[0];
 		assertEquals("Incorrect input name", "SECTION.INPUT", input
-				.getOfficeInputName());
+				.getOfficeSectionInputName());
 		assertEquals("Incorrect parameter type", String.class.getName(), input
 				.getParameterType());
 	}
