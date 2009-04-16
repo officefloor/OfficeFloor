@@ -22,8 +22,10 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSectionObject;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionObjectNode} implementation.
@@ -57,6 +59,17 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * Object type.
 	 */
 	private String objectType;
+
+	/**
+	 * Flags whether within the {@link Office} context.
+	 */
+	private boolean isInOfficeContext = false;
+
+	/**
+	 * Location of the {@link Office} containing this
+	 * {@link OfficeSectionObject}.
+	 */
+	private String officeLocation;
 
 	/**
 	 * Initiate not initialised.
@@ -112,6 +125,12 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 		this.isInitialised = true;
 	}
 
+	@Override
+	public void addOfficeContext(String officeLocation) {
+		this.officeLocation = officeLocation;
+		this.isInOfficeContext = true;
+	}
+
 	/*
 	 * =============== SectionObjectType ===========================
 	 */
@@ -136,6 +155,43 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	/*
+	 * ==================== OfficeSectionObject =========================
+	 */
+
+	@Override
+	public String getOfficeSectionObjectName() {
+		return this.objectName;
+	}
+
+	/*
+	 * ==================== OfficeRequiredManagedObject ========================
+	 */
+
+	@Override
+	public String getOfficeRequiredManagedObjectName() {
+		return this.objectName;
+	}
+
+	/*
+	 * =================== DependentManagedObject =============================
+	 */
+	@Override
+	public String getDependentManagedObjectName() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement DependentManagedObject.getDependentManagedObjectName");
+	}
+
+	/*
+	 * ================== AdministerableManagedObject =========================
+	 */
+
+	@Override
+	public String getAdministerableManagedObjectName() {
+		return this.objectName;
+	}
+
+	/*
 	 * =============== LinkObjectNode ==============================
 	 */
 
@@ -149,9 +205,18 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 		// Ensure not already linked
 		if (this.linkedObjectNode != null) {
-			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-					null, null, "Sub section object " + this.objectName
-							+ " linked more than once");
+			// Provide issue based on whether in office context
+			if (this.isInOfficeContext) {
+				// Office section output already linked
+				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
+						null, null, "Office section object " + this.objectName
+								+ " linked more than once");
+			} else {
+				// Sub section output already linked
+				this.issues.addIssue(LocationType.SECTION,
+						this.sectionLocation, null, null, "Sub section object "
+								+ this.objectName + " linked more than once");
+			}
 			return false; // already linked
 		}
 

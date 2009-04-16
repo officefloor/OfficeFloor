@@ -17,6 +17,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link ManagedObjectDependency} node.
@@ -25,4 +26,14 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
  */
 public interface ManagedObjectDependencyNode extends ManagedObjectDependency,
 		LinkObjectNode {
+
+	/**
+	 * Adds the context of the {@link Office} containing this
+	 * {@link ManagedObjectDependency}.
+	 * 
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 */
+	void addOfficeContext(String officeLocation);
+
 }

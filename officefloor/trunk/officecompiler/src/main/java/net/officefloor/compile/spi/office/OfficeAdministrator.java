@@ -56,27 +56,11 @@ public interface OfficeAdministrator {
 	OfficeDuty getDuty(String dutyName);
 
 	/**
-	 * Administers the {@link OfficeSectionManagedObject}.
+	 * Administers the {@link AdministerableManagedObject}.
 	 * 
 	 * @param managedObject
-	 *            {@link OfficeSectionManagedObject} to be administered.
+	 *            {@link AdministerableManagedObject} to be administered.
 	 */
-	void administerManagedObject(OfficeSectionManagedObject managedObject);
-
-	/**
-	 * Administers the {@link OfficeManagedObject}.
-	 * 
-	 * @param managedObject
-	 *            {@link OfficeManagedObject} to be administered.
-	 */
-	void administerManagedObject(OfficeManagedObject managedObject);
-
-	/**
-	 * Administers the {@link OfficeRequiredManagedObject}.
-	 * 
-	 * @param managedObject
-	 *            {@link OfficeRequiredManagedObject} to be administered.
-	 */
-	void administerManagedObject(OfficeRequiredManagedObject managedObject);
+	void administerManagedObject(AdministerableManagedObject managedObject);
 
 }

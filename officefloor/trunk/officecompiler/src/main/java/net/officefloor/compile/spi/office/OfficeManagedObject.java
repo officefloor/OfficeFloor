@@ -27,11 +27,12 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * {@link ManagedObject} required by the {@link Office}.
+ * {@link ManagedObject} for the {@link Office}.
  * 
  * @author Daniel
  */
-public interface OfficeManagedObject extends DependentManagedObject {
+public interface OfficeManagedObject extends DependentManagedObject,
+		AdministerableManagedObject {
 
 	/**
 	 * Obtains the name of the {@link ManagedObject}.

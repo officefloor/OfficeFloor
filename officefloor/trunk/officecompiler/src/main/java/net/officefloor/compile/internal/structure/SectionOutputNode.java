@@ -20,6 +20,7 @@ import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SubSectionOutput;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionOutput} node.
@@ -46,4 +47,12 @@ public interface SectionOutputNode extends SectionOutputType, SectionOutput,
 	 */
 	void initialise(String argumentType, boolean isEscalationOnly);
 
+	/**
+	 * Adds the context of the {@link Office} containing this
+	 * {@link OfficeSectionOutput}.
+	 * 
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 */
+	void addOfficeContext(String officeLocation);
 }

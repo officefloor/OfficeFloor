@@ -252,7 +252,7 @@ public class SectionLoaderImpl implements SectionLoader {
 
 	@Override
 	public <S extends SectionSource> OfficeSection loadOfficeSection(
-			Class<S> sectionSourceClass,
+			String sectionName, Class<S> sectionSourceClass,
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader,
 			CompilerIssues issues) {
@@ -266,11 +266,12 @@ public class SectionLoaderImpl implements SectionLoader {
 		}
 
 		// Create the section node (loading in its properties)
-		SectionNode sectionNode = new SectionNodeImpl(sectionSource,
-				propertyList, this.sectionLocation, issues);
+		SectionNode sectionNode = new SectionNodeImpl(sectionName,
+				sectionSource, propertyList, this.sectionLocation, issues);
 
 		// Recursive load all the section nodes
-		sectionNode.loadSection(configurationContext, classLoader);
+		sectionNode.loadSection(this.sectionLocation, configurationContext,
+				classLoader);
 
 		// Return the section node as the office section
 		return sectionNode;

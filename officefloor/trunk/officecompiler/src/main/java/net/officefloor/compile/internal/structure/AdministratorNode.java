@@ -16,14 +16,12 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.spi.office.ObjectDependency;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.spi.office.OfficeAdministrator;
 
 /**
- * {@link TaskObject} node.
+ * {@link OfficeAdministrator} node.
  * 
  * @author Daniel
  */
-public interface TaskObjectNode extends TaskObject, ObjectDependency,
-		LinkObjectNode {
+public interface AdministratorNode extends OfficeAdministrator {
 }

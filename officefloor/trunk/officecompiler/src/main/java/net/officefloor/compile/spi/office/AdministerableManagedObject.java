@@ -14,16 +14,22 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.internal.structure;
+package net.officefloor.compile.spi.office;
 
-import net.officefloor.compile.spi.office.ObjectDependency;
-import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link TaskObject} node.
+ * {@link ManagedObject} that may be administered by an
+ * {@link OfficeAdministrator}.
  * 
  * @author Daniel
  */
-public interface TaskObjectNode extends TaskObject, ObjectDependency,
-		LinkObjectNode {
+public interface AdministerableManagedObject {
+
+	/**
+	 * Obtains the name of this {@link AdministerableManagedObject}.
+	 * 
+	 * @return Name of this {@link AdministerableManagedObject}.
+	 */
+	String getAdministerableManagedObjectName();
 }

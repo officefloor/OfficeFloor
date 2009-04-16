@@ -53,14 +53,17 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadEmptySection() {
 
 		// Load the empty office section
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				// Leave empty
-			}
-		});
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						// Leave empty
+					}
+				});
 
 		// Ensure empty
+		assertEquals("Incorrect section name", "SECTION", section
+				.getOfficeSectionName());
 		assertEquals("Should be no sub section", 0, section
 				.getOfficeSubSections().length);
 		assertEquals("Should be no tasks", 0, section.getOfficeTasks().length);
@@ -72,12 +75,13 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadSubSection() {
 
 		// Load the office section with a sub section
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.addSubSection("SUB_SECTION", null);
-			}
-		});
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.addSubSection("SUB_SECTION", null);
+					}
+				});
 
 		// Validate results
 		assertEquals("Should have a sub section", 1, section
@@ -97,17 +101,20 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadSubSubSection() {
 
 		// Load the office section with a sub sub section
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.addSubSection("SUB_SECTION", new SectionMaker() {
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
-						context.addSubSection("SUB_SUB_SECTION", null);
+						context.addSubSection("SUB_SECTION",
+								new SectionMaker() {
+									@Override
+									public void make(SectionMakerContext context) {
+										context.addSubSection(
+												"SUB_SUB_SECTION", null);
+									}
+								});
 					}
 				});
-			}
-		});
 
 		// Validate the results
 		assertEquals("Should have a sub section", 1, section
@@ -136,14 +143,14 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactoryManufacturer();
 
 		// Load the office section with a section task
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context
-						.addTask("WORK", workFactory, "TASK", manufacturer,
-								null);
-			}
-		});
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.addTask("WORK", workFactory, "TASK",
+								manufacturer, null);
+					}
+				});
 
 		// Validate results
 		assertEquals("Should be no sub sections", 0, section
@@ -162,13 +169,14 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadOfficeSectionInput() {
 
 		// Load the office section with an office section input
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.getBuilder().addSectionInput("INPUT",
-						String.class.getName());
-			}
-		});
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.getBuilder().addSectionInput("INPUT",
+								String.class.getName());
+					}
+				});
 
 		// Validate results
 		assertEquals("Should have office section input", 1, section
@@ -190,13 +198,14 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadOfficeSectionOutput() {
 
 		// Load the office section with an office section output
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.getBuilder().addSectionOutput("OUTPUT",
-						Exception.class.getName(), true);
-			}
-		});
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.getBuilder().addSectionOutput("OUTPUT",
+								Exception.class.getName(), true);
+					}
+				});
 
 		// Validate results
 		assertEquals("Should be no office section inputs", 0, section
@@ -220,13 +229,14 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadOfficeSectionObject() {
 
 		// Load the office section with an office section object
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.getBuilder().addSectionObject("OBJECT",
-						Connection.class.getName());
-			}
-		});
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.getBuilder().addSectionObject("OBJECT",
+								Connection.class.getName());
+					}
+				});
 
 		// Validate results
 		assertEquals("Should be no office section inputs", 0, section
@@ -236,7 +246,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 		assertEquals("Should have office section object", 1, section
 				.getOfficeSectionObjects().length);
 		OfficeSectionObject object = section.getOfficeSectionObjects()[0];
-		assertEquals("Incorrect office section object", "OUTPUT", object
+		assertEquals("Incorrect office section object", "OBJECT", object
 				.getOfficeSectionObjectName());
 		assertEquals("Incorrect office section object, object type",
 				Connection.class.getName(), object.getObjectType());
@@ -248,12 +258,13 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadSectionManagedObject() {
 
 		// Load the section managed object
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.addManagedObject("MO", null);
-			}
-		});
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.addManagedObject("MO", null);
+					}
+				});
 
 		// Validate the results
 		assertEquals("Should have no sub section", 0, section
@@ -274,17 +285,21 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 	public void testLoadSectionManagedObjectSupportingAnExtensionInterface() {
 
 		// Load the section managed object supporting an extension interface
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.addManagedObject("MO", new ManagedObjectMaker() {
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
 					@Override
-					public void make(ManagedObjectMakerContext context) {
-						context.addExtensionInterface(XAResource.class);
+					public void make(SectionMakerContext context) {
+						context.addManagedObject("MO",
+								new ManagedObjectMaker() {
+									@Override
+									public void make(
+											ManagedObjectMakerContext context) {
+										context
+												.addExtensionInterface(XAResource.class);
+									}
+								});
 					}
 				});
-			}
-		});
 
 		// Validate the results
 		assertEquals("Should have a section managed object", 1, section
@@ -310,13 +325,14 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactoryManufacturer();
 
 		// Load the task object dependency not linked
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
-				context.addTaskObject("WORK", workFactory, "TASK",
-						manufacturer, "OBJECT", Connection.class);
-			}
-		});
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
+						context.addTaskObject("WORK", workFactory, "TASK",
+								manufacturer, "OBJECT", Connection.class);
+					}
+				});
 
 		// Validate not linked to dependent managed object
 		OfficeTask task = section.getOfficeTasks()[0];
@@ -340,20 +356,22 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactoryManufacturer();
 
 		// Load the task object dependent on managed object of same section
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
 
-				// Add the task object and managed object
-				TaskObject object = context.addTaskObject("WORK", workFactory,
-						"TASK", manufacturer, "OBJECT", Connection.class);
-				SectionManagedObject managedObject = context.addManagedObject(
-						"MO", null);
+						// Add the task object and managed object
+						TaskObject object = context.addTaskObject("WORK",
+								workFactory, "TASK", manufacturer, "OBJECT",
+								Connection.class);
+						SectionManagedObject managedObject = context
+								.addManagedObject("MO", null);
 
-				// Link task object to managed object
-				context.getBuilder().link(object, managedObject);
-			}
-		});
+						// Link task object to managed object
+						context.getBuilder().link(object, managedObject);
+					}
+				});
 
 		// Validate link to dependent managed object
 		OfficeTask task = section.getOfficeTasks()[0];
@@ -380,41 +398,45 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.createMockTaskFactoryManufacturer();
 
 		// Load the task object dependent on managed object of another section
-		OfficeSection section = this.loadOfficeSection(new SectionMaker() {
-			@Override
-			public void make(SectionMakerContext context) {
+		OfficeSection section = this.loadOfficeSection("SECTION",
+				new SectionMaker() {
+					@Override
+					public void make(SectionMakerContext context) {
 
-				// Add the section with task object
-				SubSection objectSection = context.addSubSection(
-						"OBJECT_SECTION", new SectionMaker() {
-							@Override
-							public void make(SectionMakerContext context) {
-								// Add the task object
-								TaskObject object = context.addTaskObject(
-										"WORK", workFactory, "TASK",
-										manufacturer, "OBJECT",
-										Connection.class);
+						// Add the section with task object
+						SubSection objectSection = context.addSubSection(
+								"OBJECT_SECTION", new SectionMaker() {
+									@Override
+									public void make(SectionMakerContext context) {
+										// Add the task object
+										TaskObject object = context
+												.addTaskObject("WORK",
+														workFactory, "TASK",
+														manufacturer, "OBJECT",
+														Connection.class);
 
-								// Link task object to section output
-								SectionObject sectionObject = context
-										.getBuilder().addSectionObject(
-												"SECTION_OBJECT",
-												Connection.class.getName());
-								context.getBuilder()
-										.link(object, sectionObject);
-							}
-						});
-				SubSectionObject subSectionObject = objectSection
-						.getSubSectionObject("SECTION_OBJECT");
+										// Link task object to section output
+										SectionObject sectionObject = context
+												.getBuilder().addSectionObject(
+														"SECTION_OBJECT",
+														Connection.class
+																.getName());
+										context.getBuilder().link(object,
+												sectionObject);
+									}
+								});
+						SubSectionObject subSectionObject = objectSection
+								.getSubSectionObject("SECTION_OBJECT");
 
-				// Add the managed object
-				SectionManagedObject managedObject = context.addManagedObject(
-						"MO", null);
+						// Add the managed object
+						SectionManagedObject managedObject = context
+								.addManagedObject("MO", null);
 
-				// Link task object to managed object
-				context.getBuilder().link(subSectionObject, managedObject);
-			}
-		});
+						// Link task object to managed object
+						context.getBuilder().link(subSectionObject,
+								managedObject);
+					}
+				});
 
 		// Validate link to dependent managed object
 		OfficeTask task = section.getOfficeSubSections()[0].getOfficeTasks()[0];

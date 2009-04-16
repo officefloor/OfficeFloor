@@ -22,6 +22,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link ManagedObjectFlowNode} implementation.
@@ -47,6 +48,16 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	private final CompilerIssues issues;
 
 	/**
+	 * Flags if within context of the {@link Office}.
+	 */
+	private boolean isInOfficeContext = false;
+
+	/**
+	 * Location of the {@link Office}.
+	 */
+	private String officeLocation;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param managedObjectFlowName
@@ -62,6 +73,16 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 		this.managedObjectFlowName = managedObjectFlowName;
 		this.sectionLocation = sectionLocation;
 		this.issues = issues;
+	}
+
+	/*
+	 * ================== ManagedObjectFlowNode ==============================
+	 */
+
+	@Override
+	public void addOfficeContext(String officeLocation) {
+		this.officeLocation = officeLocation;
+		this.isInOfficeContext = true;
 	}
 
 	/*
@@ -87,10 +108,19 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-					null, null, "Managed object flow "
-							+ this.managedObjectFlowName
-							+ " linked more than once");
+			if (this.isInOfficeContext) {
+				// Office managed object flow
+				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
+						null, null, "Managed object flow "
+								+ this.managedObjectFlowName
+								+ " linked more than once");
+			} else {
+				// Section managed object flow
+				this.issues.addIssue(LocationType.SECTION,
+						this.sectionLocation, null, null,
+						"Managed object flow " + this.managedObjectFlowName
+								+ " linked more than once");
+			}
 			return false; // already linked
 		}
 

@@ -17,16 +17,20 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSectionObject;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link SectionObject} node.
  * 
  * @author Daniel
  */
-public interface SectionObjectNode extends SectionObjectType, SectionObject,
-		SubSectionObject, LinkObjectNode {
+public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
+		SectionObject, OfficeSectionObject, OfficeRequiredManagedObject,
+		LinkObjectNode {
 
 	/**
 	 * Indicates if this {@link SectionObjectType} has been initialised.
@@ -43,4 +47,12 @@ public interface SectionObjectNode extends SectionObjectType, SectionObject,
 	 */
 	void initialise(String objectType);
 
+	/**
+	 * Adds the context of the {@link Office} containing this
+	 * {@link OfficeSectionObject}.
+	 * 
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 */
+	void addOfficeContext(String officeLocation);
 }

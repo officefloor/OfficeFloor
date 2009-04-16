@@ -245,11 +245,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Loads the {@link OfficeSection}.
 	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
 	 * @param maker
 	 *            {@link SectionMaker} to make the {@link OfficeSection}.
 	 * @return Loaded {@link OfficeSection}.
 	 */
-	protected OfficeSection loadOfficeSection(SectionMaker maker) {
+	protected OfficeSection loadOfficeSection(String sectionName,
+			SectionMaker maker) {
 
 		// Register the section maker
 		PropertyList propertyList = MakerSectionSource.register(maker);
@@ -257,7 +260,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		// Load the section
 		this.replayMockObjects();
 		SectionLoader loader = new SectionLoaderImpl(SECTION_LOCATION);
-		OfficeSection section = loader.loadOfficeSection(
+		OfficeSection section = loader.loadOfficeSection(sectionName,
 				MakerSectionSource.class, this.configurationContext,
 				propertyList, this.classLoader, this.issues);
 		this.verifyMockObjects();
