@@ -26,6 +26,30 @@ import java.util.Properties;
 public interface AdministratorSourceContext {
 
 	/**
+	 * Obtains a required property value.
+	 * 
+	 * @param name
+	 *            Name of the property.
+	 * @return Value of the property.
+	 * @throws AdministratorSourceUnknownPropertyError
+	 *             If property was not configured. Let this propagate as the
+	 *             framework will handle it.
+	 */
+	String getProperty(String name)
+			throws AdministratorSourceUnknownPropertyError;
+
+	/**
+	 * Obtains the property value or subsequently the default value.
+	 * 
+	 * @param name
+	 *            Name of the property.
+	 * @param defaultValue
+	 *            Default value if property not specified.
+	 * @return Value of the property or the the default value if not specified.
+	 */
+	String getProperty(String name, String defaultValue);
+
+	/**
 	 * Properties to configure the {@link AdministratorSource}.
 	 * 
 	 * @return Properties specific to the {@link AdministratorSource}.

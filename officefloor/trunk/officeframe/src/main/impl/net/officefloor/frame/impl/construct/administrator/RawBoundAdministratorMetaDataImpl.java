@@ -58,6 +58,7 @@ import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
+import net.officefloor.frame.spi.administration.source.AdministratorSourceUnknownPropertyError;
 import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExtensionInterfaceMetaData;
 import net.officefloor.frame.spi.team.Team;
@@ -243,12 +244,20 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 			return null; // no instance
 		}
 
-		// Initialise the administrator source
+		// Obtain context to initialise the administrator source
 		Properties properties = configuration.getProperties();
 		AdministratorSourceContext context = new AdministratorSourceContextImpl(
 				properties);
+
 		try {
+			// Initialise the administrator source
 			adminSource.init(context);
+
+		} catch (AdministratorSourceUnknownPropertyError ex) {
+			issues.addIssue(assetType, assetName, "Property '"
+					+ ex.getUnknownPropertyName() + "' must be specified");
+			return null; // must have property
+
 		} catch (Throwable ex) {
 			issues.addIssue(assetType, assetName,
 					"Failed to initialise Administrator " + adminName, ex);

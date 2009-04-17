@@ -261,6 +261,23 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures issue if missing required property.
+	 */
+	public void testMissingProperty() {
+
+		// Record fail instantiate due to missing property
+		this.record_init();
+		this.issues.addIssue(this.assetType, this.assetName,
+				"Property 'required.property' must be specified");
+
+		// Attempt to construct administrator
+		this.replayMockObjects();
+		MockAdministratorSource.requiredPropertyName = "required.property";
+		this.constructRawAdministrator(0, this.configuration);
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Ensures issue if no {@link AdministratorSourceMetaData}.
 	 */
 	public void testNoAdministratorSourceMetaData() {
@@ -813,9 +830,9 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 			AdministratorSource<Object, DutyKey> {
 
 		/**
-		 * Property name.
+		 * Property name that must be available.
 		 */
-		public static String propertyName = null;
+		public static String requiredPropertyName = null;
 
 		/**
 		 * Initialise {@link Exception}.
@@ -835,7 +852,7 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 		 */
 		public static void reset(
 				AdministratorSourceMetaData<Object, DutyKey> metaData) {
-			propertyName = null;
+			requiredPropertyName = null;
 			initFailure = null;
 			MockAdministratorSource.metaData = metaData;
 		}
@@ -852,6 +869,15 @@ public class RawBoundAdministratorMetaDataTest extends OfficeFrameTestCase {
 
 		@Override
 		public void init(AdministratorSourceContext context) throws Exception {
+
+			// Obtain the required property
+			if (requiredPropertyName != null) {
+				context.getProperty(requiredPropertyName);
+			}
+
+			// Ensure can obtain defaulted property
+			assertEquals("Must default property", "DEFAULT", context
+					.getProperty("property to default", "DEFAULT"));
 
 			// Throw initialise failure
 			if (initFailure != null) {
