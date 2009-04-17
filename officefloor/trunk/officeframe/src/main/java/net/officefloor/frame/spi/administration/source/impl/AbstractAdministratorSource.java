@@ -16,12 +16,11 @@
  */
 package net.officefloor.frame.spi.administration.source.impl;
 
-import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -171,35 +170,33 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		AdministratorSourceContext getAdministratorSourceContext();
 
 		/**
-		 * Specifies the {@link Enum} of the {@link Duty} keys.
-		 * 
-		 * @param dutyKeys
-		 *            {@link Enum} listing {@link Duty} keys.
-		 */
-		void setDutyKeys(Class<A> dutyKeys);
-
-		/**
-		 * <p>
-		 * Specifies the {@link Enum} of the flows for the {@link Duty}.
-		 * <p>
-		 * The default flow keys is {@link None} so this method need only be
-		 * called should the {@link Duty} require flows.
-		 * 
-		 * @param dutyKey
-		 *            {@link Duty} key {@link Enum}.
-		 * @param flowKeys
-		 *            {@link Enum} {@link Class} specifying the {@link Duty}
-		 *            flow keys.
-		 */
-		<F extends Enum<F>> void setDutyFlows(A dutyKey, Class<F> flowKeys);
-
-		/**
 		 * Specifies the extension interface.
 		 * 
 		 * @param extensionInterface
 		 *            Extension interface.
 		 */
 		void setExtensionInterface(Class<I> extensionInterface);
+
+		/**
+		 * Adds meta-data for a {@link Duty} that required no {@link Flow}
+		 * instances.
+		 * 
+		 * @param dutyKey
+		 *            Key identifying the {@link Duty}.
+		 */
+		void addDuty(A dutyKey);
+
+		/**
+		 * Adds meta-data for a {@link Duty} that requires {@link Flow}
+		 * instances.
+		 * 
+		 * @param dutyKey
+		 *            Key identifying the {@link Duty}.
+		 * @param flowKeys
+		 *            {@link Enum} {@link Class} specifying the {@link Duty}
+		 *            flow keys.
+		 */
+		<F extends Enum<F>> void addDuty(A dutyKey, Class<F> flowKeys);
 	}
 
 	/**
@@ -214,14 +211,9 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		private final AdministratorSourceContext context;
 
 		/**
-		 * {@link Enum} listing {@link Duty} keys.
-		 */
-		private Class<A> dutyKeys;
-
-		/**
 		 * {@link DutyMetaData} for the {@link Duty} key.
 		 */
-		private Map<A, DutyMetaData<?>> dutyMetaData;
+		private List<DutyMetaData<?>> dutyMetaData;
 
 		/**
 		 * Extension interface.
@@ -248,28 +240,18 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		}
 
 		@Override
-		public void setDutyKeys(Class<A> dutyKeys) {
-
-			// Specify the duty keys
-			this.dutyKeys = dutyKeys;
-
-			// Create the duty meta-data, with each having no flows
-			this.dutyMetaData = new EnumMap<A, DutyMetaData<?>>(this.dutyKeys);
-			for (A dutyKey : this.dutyKeys.getEnumConstants()) {
-				this.dutyMetaData.put(dutyKey, new DutyMetaData<None>(
-						None.class));
-			}
-		}
-
-		@Override
-		public <F extends Enum<F>> void setDutyFlows(A dutyKey,
-				Class<F> flowKeys) {
-			this.dutyMetaData.put(dutyKey, new DutyMetaData<F>(flowKeys));
-		}
-
-		@Override
 		public void setExtensionInterface(Class<I> extensionInterface) {
 			this.extensionInterface = extensionInterface;
+		}
+
+		@Override
+		public void addDuty(A dutyKey) {
+			this.dutyMetaData.add(new DutyMetaData<None>(dutyKey, None.class));
+		}
+
+		@Override
+		public <F extends Enum<F>> void addDuty(A dutyKey, Class<F> flowKeys) {
+			this.dutyMetaData.add(new DutyMetaData<F>(dutyKey, flowKeys));
 		}
 
 		/*
@@ -277,18 +259,14 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		 */
 
 		@Override
-		public Class<A> getAministratorDutyKeys() {
-			return this.dutyKeys;
-		}
-
-		@Override
-		public AdministratorDutyMetaData<?> getAdministratorDutyMetaData(A key) {
-			return this.dutyMetaData.get(key);
-		}
-
-		@Override
 		public Class<I> getExtensionInterface() {
 			return this.extensionInterface;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public AdministratorDutyMetaData<A, ?>[] getAdministratorDutyMetaData() {
+			return this.dutyMetaData.toArray(new AdministratorDutyMetaData[0]);
 		}
 	}
 
@@ -296,7 +274,12 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 	 * {@link AdministratorDutyMetaData} implementation.
 	 */
 	private class DutyMetaData<F extends Enum<F>> implements
-			AdministratorDutyMetaData<F> {
+			AdministratorDutyMetaData<A, F> {
+
+		/**
+		 * Key to the {@link Duty}.
+		 */
+		private final A dutyKey;
 
 		/**
 		 * Flow keys for the {@link Duty}.
@@ -306,17 +289,25 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		/**
 		 * Initiate.
 		 * 
+		 * @param dutyKey
+		 *            Key to the {@link Duty}.
 		 * @param flowKeys
 		 *            Flow keys for the {@link Duty}.
 		 */
-		public DutyMetaData(Class<F> flowKeys) {
+		public DutyMetaData(A dutyKey, Class<F> flowKeys) {
+			this.dutyKey = dutyKey;
 			this.flowKeys = flowKeys;
 		}
 
 		/*
 		 * ================= AdministratorDutyMetaData ======================
 		 */
-		
+
+		@Override
+		public A getKey() {
+			return this.dutyKey;
+		}
+
 		@Override
 		public Class<F> getFlowKeys() {
 			return this.flowKeys;

@@ -23,7 +23,14 @@ import net.officefloor.frame.spi.administration.Duty;
  * 
  * @author Daniel
  */
-public interface AdministratorDutyMetaData<F extends Enum<F>> {
+public interface AdministratorDutyMetaData<A extends Enum<A>, F extends Enum<F>> {
+
+	/**
+	 * Obtains the {@link Enum} key identifying this {@link Duty}.
+	 * 
+	 * @return {@link Enum} key identifying this {@link Duty}.
+	 */
+	A getKey();
 
 	/**
 	 * Obtains the {@link Enum} specifying the flow keys of the {@link Duty}.

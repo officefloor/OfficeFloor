@@ -36,22 +36,12 @@ public interface AdministratorSourceMetaData<I, A extends Enum<A>> {
 	Class<I> getExtensionInterface();
 
 	/**
-	 * Obtains the {@link Enum} specifying the duties that this
-	 * {@link Administrator} may undertake.
+	 * Obtains the {@link AdministratorDutyMetaData} of the {@link Duty}
+	 * instances for the {@link Administrator}.
 	 * 
-	 * @return {@link Enum} specifying the duties of this {@link Administrator}.
+	 * @return Listing {@link AdministratorDutyMetaData} of the {@link Duty}
+	 *         instances for the {@link Administrator}.
 	 */
-	Class<A> getAministratorDutyKeys();
-
-	/**
-	 * Obtains the {@link AdministratorDutyMetaData} for the particular
-	 * {@link Duty} key.
-	 * 
-	 * @param key
-	 *            Key identifying the particular {@link Duty}.
-	 * @return {@link AdministratorDutyMetaData} for the key.
-	 * @see #getAministratorDutyKeys()
-	 */
-	AdministratorDutyMetaData<?> getAdministratorDutyMetaData(A key);
+	AdministratorDutyMetaData<A, ?>[] getAdministratorDutyMetaData();
 
 }

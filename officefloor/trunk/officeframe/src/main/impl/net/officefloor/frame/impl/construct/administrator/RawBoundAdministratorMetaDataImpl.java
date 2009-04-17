@@ -55,6 +55,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectIndex;
 import net.officefloor.frame.internal.structure.TaskMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
+import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
@@ -370,17 +371,53 @@ public class RawBoundAdministratorMetaDataImpl<I, A extends Enum<A>> implements
 					extensionInterfaceFactory));
 		}
 
-		// Obtain the keys to the duties
-		Class<a> dutyKeyClass = metaData.getAministratorDutyKeys();
-		a[] dutyKeys = (dutyKeyClass == null ? null : dutyKeyClass
-				.getEnumConstants());
-		if ((dutyKeys == null) || (dutyKeys.length == 0)) {
+		// Obtain the duties meta-data
+		AdministratorDutyMetaData<a, ?>[] dutyMetaDatas = metaData
+				.getAdministratorDutyMetaData();
+		if ((dutyMetaDatas == null) || (dutyMetaDatas.length == 0)) {
 			issues.addIssue(assetType, assetName, "Administrator " + adminName
 					+ " does not provide duties");
 			return null; // must have duties
 		}
 
-		// Ensure the duty keys are in ordinal order
+		// Ensure all duty keys are of the correct type (report on all duties)
+		boolean isDutyKeyIssue = false;
+		Class<a> dutyKeyClass = null;
+		for (int i = 0; i < dutyMetaDatas.length; i++) {
+			AdministratorDutyMetaData<a, ?> dutyMetaData = dutyMetaDatas[i];
+
+			// Ensure have the duty key
+			a dutyKey = dutyMetaData.getKey();
+			if (dutyKey == null) {
+				issues.addIssue(assetType, assetName,
+						"No key provided for duty " + i);
+				isDutyKeyIssue = true;
+				continue; // can not process this duty
+			}
+
+			// Determine if first duty key which sets the type of duty keys
+			if (dutyKeyClass == null) {
+				// First duty key
+				dutyKeyClass = dutyKey.getDeclaringClass();
+
+			} else {
+				// Ensure subsequent duty keys of correct type
+				if (!dutyKeyClass.isInstance(dutyKey)) {
+					issues.addIssue(assetType, assetName, "Duty key " + dutyKey
+							+ " is of incorrect type [type="
+							+ dutyKey.getClass().getName() + ", required type="
+							+ dutyKeyClass.getName() + "]");
+					isDutyKeyIssue = true;
+				}
+			}
+		}
+		if (isDutyKeyIssue) {
+			return null; // should not be issue in obtaining duty keys
+		}
+
+		// Obtain the duty keys ensuring in ordinal order
+		a[] dutyKeys = (dutyKeyClass == null ? null : dutyKeyClass
+				.getEnumConstants());
 		Arrays.sort(dutyKeys, new Comparator<a>() {
 			@Override
 			public int compare(a objA, a objB) {
