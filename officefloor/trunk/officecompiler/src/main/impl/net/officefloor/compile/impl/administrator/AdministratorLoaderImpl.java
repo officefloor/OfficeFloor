@@ -16,18 +16,28 @@
  */
 package net.officefloor.compile.impl.administrator;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.impl.construct.administrator.AdministratorSourceContextImpl;
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorDutyMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
+import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaData;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
+import net.officefloor.frame.spi.administration.source.AdministratorSourceUnknownPropertyError;
 
 /**
  * {@link AdministratorLoader} implementation.
@@ -200,9 +210,131 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorType<I, A> loadAdministrator(
 			Class<AS> administratorSourceClass, PropertyList propertyList,
 			ClassLoader classLoader, CompilerIssues issues) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement AdministratorLoader.loadAdministrator");
+
+		// Create an instance of the administrator source
+		AS administratorSource = CompileUtil.newInstance(
+				administratorSourceClass, AdministratorSource.class,
+				LocationType.OFFICE, this.location, AssetType.ADMINISTRATOR,
+				this.administratorName, issues);
+		if (administratorSource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Create the administrator source context
+		Properties properties = propertyList.getProperties();
+		AdministratorSourceContext sourceContext = new AdministratorSourceContextImpl(
+				properties);
+
+		try {
+			// Initialise the administrator source
+			administratorSource.init(sourceContext);
+
+		} catch (AdministratorSourceUnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
+					+ "'", issues);
+			return null; // must have property
+
+		} catch (Throwable ex) {
+			this.addIssue("Failed to init", ex, issues);
+			return null; // must initialise
+		}
+
+		// Obtain the meta-data
+		AdministratorSourceMetaData<I, A> metaData;
+		try {
+			metaData = administratorSource.getMetaData();
+		} catch (Throwable ex) {
+			this.addIssue("Failed to get "
+					+ AdministratorSourceMetaData.class.getSimpleName(), ex,
+					issues);
+			return null; // must successfully get meta-data
+		}
+		if (metaData == null) {
+			this
+					.addIssue(
+							"Returned null "
+									+ AdministratorSourceMetaData.class
+											.getSimpleName(), issues);
+			return null; // must have meta-data
+		}
+
+		// Ensure handle any issue in interacting with meat-data
+		Class<I> extensionInterface;
+		List<DutyType<A, ?>> duties = new LinkedList<DutyType<A, ?>>();
+		try {
+
+			// Obtain the extension interface type
+			extensionInterface = metaData.getExtensionInterface();
+			if (extensionInterface == null) {
+				this.addIssue("No extension interface provided", issues);
+				return null; // must have extension interface
+			}
+
+			// Ensure have duties
+			AdministratorDutyMetaData<A, ?>[] dutyMetaDatas = metaData
+					.getAdministratorDutyMetaData();
+			if ((dutyMetaDatas == null) || (dutyMetaDatas.length == 0)) {
+				this.addIssue("Must have at least one duty", issues);
+				return null; // must have duties
+			}
+
+			// Load the duties
+			Class<A> dutyKeyClass = null;
+			boolean isDutyIssue = false;
+			for (int i = 0; i < dutyMetaDatas.length; i++) {
+
+				// Ensure have duty meta-data
+				AdministratorDutyMetaData<A, ?> dutyMetaData = dutyMetaDatas[i];
+				if (dutyMetaData == null) {
+					this.addIssue("Null meta data for duty " + i, issues);
+					isDutyIssue = true;
+					continue;
+				}
+
+				// Ensure have duty key
+				A dutyKey = dutyMetaData.getKey();
+				if (dutyKey == null) {
+					this.addIssue("Null key for duty " + i, issues);
+					isDutyIssue = true;
+					continue;
+				}
+
+				// Ensure valid key
+				if (dutyKeyClass == null) {
+					// First duty key
+					dutyKeyClass = dutyKey.getDeclaringClass();
+				} else {
+					// Ensure correct key type
+					if (!dutyKeyClass.isInstance(dutyKey)) {
+						this.addIssue("Key " + dutyKey + " for duty " + i
+								+ " is invalid (type="
+								+ dutyKey.getClass().getName()
+								+ ", required type=" + dutyKeyClass.getName()
+								+ ")", issues);
+						isDutyIssue = true;
+						continue;
+					}
+				}
+
+				// Create and add the duty meta-data
+				duties.add(new DutyTypeImpl<A>(dutyKey));
+			}
+			if (isDutyIssue) {
+				return null; // must not be issue with duties
+			}
+
+		} catch (Throwable ex) {
+			this.addIssue("Exception from "
+					+ administratorSourceClass.getName(), ex, issues);
+			return null; // must be successful with meta-data
+		}
+
+		// Create the listing of duty types
+		DutyType<A, ?>[] dutyTypes = CompileUtil.toArray(duties,
+				new DutyType[0]);
+
+		// Return the administrator type
+		return new AdministratorTypeImpl<I, A>(extensionInterface, dutyTypes);
 	}
 
 	/**

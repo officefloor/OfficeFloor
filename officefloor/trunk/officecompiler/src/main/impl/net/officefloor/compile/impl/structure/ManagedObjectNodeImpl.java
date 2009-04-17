@@ -228,7 +228,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 				this.managedObjectName);
 
 		// Load the managed object type
-		this.managedObjectType = loader.loadManagedObject(
+		this.managedObjectType = loader.loadManagedObjectType(
 				managedObjectSourceClass, this.propertyList, classLoader,
 				this.issues);
 

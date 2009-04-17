@@ -1598,7 +1598,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 				LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
 				MANAGED_OBJECT_NAME);
 		MockManagedObjectSource.init = init;
-		ManagedObjectType<?> moType = moLoader.loadManagedObject(
+		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
 				MockManagedObjectSource.class, propertyList,
 				LoadManagedObjectTypeTest.class.getClassLoader(), this.issues);
 
@@ -1692,6 +1692,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		 * 
 		 * @param metaData
 		 *            {@link ManagedObjectSourceMetaData}.
+		 * @param initUtil
+		 *            {@link InitUtil}.
 		 */
 		public static void reset(ManagedObjectSourceMetaData<?, ?> metaData,
 				InitUtil initUtil) {

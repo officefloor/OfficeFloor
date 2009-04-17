@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.AssertionFailedError;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -232,7 +231,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	}
 
 	@Override
-	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObject(
+	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
 			Class<MS> managedObjectSourceClass, PropertyList propertyList,
 			ClassLoader classLoader, CompilerIssues issues) {
 
@@ -337,10 +336,6 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			if (extensionInterfaces == null) {
 				return null; // issue in getting extension interfaces
 			}
-
-			// TODO remove
-		} catch (AssertionFailedError ex) {
-			throw ex;
 
 		} catch (Throwable ex) {
 			this.addIssue("Exception from "

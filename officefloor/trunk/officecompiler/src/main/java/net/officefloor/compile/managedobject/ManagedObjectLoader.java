@@ -64,7 +64,7 @@ public interface ManagedObjectLoader {
 	 * @return {@link ManagedObjectType} or <code>null</code> if issues, which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
-	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObject(
+	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
 			Class<MS> managedObjectSourceClass, PropertyList propertyList,
 			ClassLoader classLoader, CompilerIssues issues);
 
