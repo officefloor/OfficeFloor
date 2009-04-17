@@ -95,67 +95,36 @@ public class MockAdministratorSource<I, A extends Enum<A>> implements
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.taskadministration.source.TaskAdministratorSource
-	 * #getSpecification()
+	 * ====================== AdministratorSource ============================
 	 */
+
+	@Override
 	public AdministratorSourceSpecification getSpecification() {
 		throw new UnsupportedOperationException(
 				"Not supported by mock implementation");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.administration.source.AdministratorSource#init
-	 * (net
-	 * .officefloor.frame.spi.administration.source.AdministratorSourceContext)
-	 */
+	@Override
 	public void init(AdministratorSourceContext context) throws Exception {
-		// Obtain the name of the Task Administrator
-		String name = context.getProperties().getProperty(
-				TASK_ADMINISTRATOR_PROPERTY);
-
-		// Ensure have Task Administrator
-		if (name == null) {
-			throw new Exception("Property '" + TASK_ADMINISTRATOR_PROPERTY
-					+ "' must be specified - likely that not bound.");
-		}
-
 		// Obtain the Task Administrator Source State
+		String name = context.getProperty(TASK_ADMINISTRATOR_PROPERTY);
 		this.taskAdministratorSourceState = REGISTRY.get(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.frame.spi.taskadministration.source.TaskAdministratorSource
-	 * #getMetaData()
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public AdministratorSourceMetaData<I, A> getMetaData() {
 		return (AdministratorSourceMetaData<I, A>) this.taskAdministratorSourceState.taskAdministratorSourceMetaData;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.frame.spi.administration.source.AdministratorSource#
-	 * createAdministrator()
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public Administrator<I, A> createAdministrator() {
 		return (Administrator<I, A>) this.taskAdministratorSourceState.taskAdministrator;
 	}
 
 	/**
-	 * State of the
-	 * {@link net.officefloor.frame.spi.administration.source.AdministratorSource}
-	 * .
+	 * State of the {@link AdministratorSource} .
 	 */
 	private static class TaskAdministratorSourceState {
 

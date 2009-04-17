@@ -19,6 +19,7 @@ package net.officefloor.frame.impl.construct.administrator;
 import java.util.Properties;
 
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
+import net.officefloor.frame.spi.administration.source.AdministratorSourceUnknownPropertyError;
 
 /**
  * Implementation of the {@link AdministratorSourceContext}.
@@ -46,6 +47,36 @@ public class AdministratorSourceContextImpl implements
 	/*
 	 * ================== AdministratorSourceContext ===========================
 	 */
+
+	@Override
+	public String getProperty(String name)
+			throws AdministratorSourceUnknownPropertyError {
+		// Obtain the value
+		String value = this.getProperty(name, null);
+
+		// Ensure have a value
+		if (value == null) {
+			throw new AdministratorSourceUnknownPropertyError(
+					"Unknown property '" + name + "'", name);
+		}
+
+		// Return the value
+		return value;
+	}
+
+	@Override
+	public String getProperty(String name, String defaultValue) {
+		// Obtain the value
+		String value = this.properties.getProperty(name);
+
+		// Default value if not specified
+		if (value == null) {
+			value = defaultValue;
+		}
+
+		// Return the value
+		return value;
+	}
 
 	@Override
 	public Properties getProperties() {

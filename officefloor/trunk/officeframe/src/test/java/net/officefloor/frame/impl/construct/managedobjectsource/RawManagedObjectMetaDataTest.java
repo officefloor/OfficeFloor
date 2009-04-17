@@ -978,6 +978,10 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 				context.getProperty(requiredPropertyName);
 			}
 
+			// Ensure can obtain defaulted property
+			assertEquals("Must default property", "DEFAULT", context
+					.getProperty("property to default", "DEFAULT"));
+
 			// Register the recycle work
 			if (recycleWorkFactory != null) {
 				// Add work and task that should have name spaced names
