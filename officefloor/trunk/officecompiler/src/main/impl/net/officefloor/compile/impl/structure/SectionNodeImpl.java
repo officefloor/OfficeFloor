@@ -34,6 +34,7 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
@@ -349,13 +350,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
+	public OfficeInputType[] getOfficeInputTypes() {
+		return this.inputs.values().toArray(new OfficeInputType[0]);
+	}
+
+	@Override
 	public DeployedOfficeInput getDeployedOfficeInput(String inputName) {
 		// Obtain and return the section input
 		SectionInputNode input = this.inputs.get(inputName);
 		if (input == null) {
 			// Add the section input
-			input = new SectionInputNodeImpl(inputName, this.sectionLocation,
-					this.issues);
+			input = new SectionInputNodeImpl(inputName, this,
+					this.sectionLocation, this.issues);
 			this.inputs.put(inputName, input);
 		}
 		return input;
@@ -430,8 +436,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		SectionInputNode input = this.inputs.get(inputName);
 		if (input == null) {
 			// Add the input
-			input = new SectionInputNodeImpl(inputName, this.sectionLocation,
-					this.issues);
+			input = new SectionInputNodeImpl(inputName, this,
+					this.sectionLocation, this.issues);
 			this.inputs.put(inputName, input);
 		}
 		return input;
@@ -473,7 +479,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		SectionInputNode input = this.inputs.get(inputName);
 		if (input == null) {
 			// Add the input
-			input = new SectionInputNodeImpl(inputName, parameterType,
+			input = new SectionInputNodeImpl(inputName, this, parameterType,
 					this.sectionLocation, this.issues);
 			this.inputs.put(inputName, input);
 		} else {

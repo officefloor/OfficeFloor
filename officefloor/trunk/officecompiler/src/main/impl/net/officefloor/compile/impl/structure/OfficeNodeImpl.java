@@ -16,7 +16,10 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -29,6 +32,10 @@ import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.office.OfficeManagedObjectType;
+import net.officefloor.compile.office.OfficeTeamType;
+import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
@@ -47,7 +54,6 @@ import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.configuration.OfficeFloorConfiguration;
 import net.officefloor.model.repository.ConfigurationContext;
 
 /**
@@ -131,7 +137,30 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private String officeFloorLocation;
 
 	/**
-	 * Initiate.
+	 * Allows loading the {@link OfficeType}.
+	 * 
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	public OfficeNodeImpl(ConfigurationContext configurationContext,
+			ClassLoader classLoader, String officeLocation,
+			CompilerIssues issues) {
+		this.officeName = null;
+		this.officeSourceClassName = null;
+		this.configurationContext = configurationContext;
+		this.classLoader = classLoader;
+		this.officeLocation = officeLocation;
+		this.issues = issues;
+	}
+
+	/**
+	 * Allow loading the {@link DeployedOffice}.
 	 * 
 	 * @param officeName
 	 *            Name of this {@link DeployedOffice}.
@@ -165,6 +194,33 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	protected void addIssue(String issueDescription) {
 		this.issues.addIssue(LocationType.OFFICE, this.officeLocation, null,
 				null, issueDescription);
+	}
+
+	/*
+	 * ===================== OfficeType ================================
+	 */
+
+	@Override
+	public OfficeInputType[] getOfficeInputTypes() {
+
+		// Create the listing of office inputs
+		List<OfficeInputType> inputs = new LinkedList<OfficeInputType>();
+		for (SectionNode section : this.sections.values()) {
+			inputs.addAll(Arrays.asList(section.getOfficeInputTypes()));
+		}
+
+		// Return the listing of office inputs
+		return inputs.toArray(new OfficeInputType[0]);
+	}
+
+	@Override
+	public OfficeManagedObjectType[] getOfficeManagedObjectTypes() {
+		return this.objects.values().toArray(new OfficeManagedObjectType[0]);
+	}
+
+	@Override
+	public OfficeTeamType[] getOfficeTeamTypes() {
+		return this.teams.values().toArray(new OfficeTeamType[0]);
 	}
 
 	/*

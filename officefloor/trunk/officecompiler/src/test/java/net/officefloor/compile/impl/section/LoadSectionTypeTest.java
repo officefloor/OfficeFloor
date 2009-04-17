@@ -487,10 +487,10 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Ensure section type correct
 		assertList(new String[] { "getSectionInputName", "getParameterType" },
 				type.getSectionInputTypes(), new SectionInputNodeImpl(
-						"INPUT_A", Integer.class.getName(), null, null),
-				new SectionInputNodeImpl("INPUT_B", String.class.getName(),
-						null, null), new SectionInputNodeImpl("INPUT_C", null,
-						null, null));
+						"INPUT_A", null, Integer.class.getName(), null, null),
+				new SectionInputNodeImpl("INPUT_B", null, String.class
+						.getName(), null, null), new SectionInputNodeImpl(
+						"INPUT_C", null, null, null));
 		assertList(new String[] { "getSectionOutputName", "getArgumentType",
 				"isEscalationOnly" }, type.getSectionOutputTypes(),
 				new SectionOutputNodeImpl("OUTPUT_A",

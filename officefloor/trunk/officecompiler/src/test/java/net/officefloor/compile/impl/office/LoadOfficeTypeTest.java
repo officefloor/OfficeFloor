@@ -355,7 +355,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	public void testNullTeamName() {
 
 		// Record null required type
-		this.record_issue("Null type for managed object 0 (name=MO)");
+		this.record_issue("Null name for team 0");
 
 		// Attempt to load office type
 		this.loadOfficeType(false, new Loader() {
@@ -414,7 +414,9 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		assertEquals("Incorrect number of inputs", 1, officeType
 				.getOfficeInputTypes().length);
 		OfficeInputType input = officeType.getOfficeInputTypes()[0];
-		assertEquals("Incorrect input name", "SECTION.INPUT", input
+		assertEquals("Incorrect section name", "SECTION", input
+				.getOfficeSectionName());
+		assertEquals("Incorrect input name", "INPUT", input
 				.getOfficeSectionInputName());
 		assertEquals("Incorrect parameter type", String.class.getName(), input
 				.getParameterType());
