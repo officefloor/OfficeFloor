@@ -21,9 +21,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
+import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
@@ -37,7 +39,8 @@ import net.officefloor.frame.spi.administration.Administrator;
  * 
  * @author Daniel
  */
-public class AdministratorNodeImpl implements AdministratorNode {
+public class AdministratorNodeImpl<I, A extends Enum<A>> implements
+		AdministratorNode<I, A> {
 
 	/**
 	 * Name of this {@link OfficeAdministrator}.
@@ -117,7 +120,32 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	@Override
 	public void administerManagedObject(
 			AdministerableManagedObject managedObject) {
+
+		// Administer the managed object
 		this.administeredManagedObjects.add(managedObject);
+
+		// Make office required managed object aware of administration
+		if (managedObject instanceof SectionObjectNode) {
+			((SectionObjectNode) managedObject).addAdministratorType(this);
+		}
+	}
+
+	/*
+	 * ===================== AdministratorType ===============================
+	 */
+
+	@Override
+	public Class<I> getExtensionInterface() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement AdministratorType<I,A>.getExtensionInterface");
+	}
+
+	@Override
+	public DutyType<A, ?>[] getDutyTypes() {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement AdministratorType<I,A>.getDutyTypes");
 	}
 
 }

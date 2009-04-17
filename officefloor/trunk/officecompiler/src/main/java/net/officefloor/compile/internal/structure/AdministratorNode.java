@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 
 /**
@@ -23,5 +24,6 @@ import net.officefloor.compile.spi.office.OfficeAdministrator;
  * 
  * @author Daniel
  */
-public interface AdministratorNode extends OfficeAdministrator {
+public interface AdministratorNode<I, A extends Enum<A>> extends
+		OfficeAdministrator, AdministratorType<I, A> {
 }

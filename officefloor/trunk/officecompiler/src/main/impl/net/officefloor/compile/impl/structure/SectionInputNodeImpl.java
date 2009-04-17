@@ -18,6 +18,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionInputType;
@@ -35,6 +36,11 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * Name of the {@link SectionInputType}.
 	 */
 	private final String inputName;
+
+	/**
+	 * {@link SectionNode} containing this {@link SectionInputNode}.
+	 */
+	private final SectionNode section;
 
 	/**
 	 * Location of the {@link OfficeSection} containing this
@@ -63,15 +69,18 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * @param inputName
 	 *            Name of the {@link SubSectionInput} (which is the name of the
 	 *            {@link SectionInputType}).
+	 * @param section
+	 *            {@link SectionNode} containing this {@link SectionInputNode}.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SectionInputNode}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
-	public SectionInputNodeImpl(String inputName, String sectionLocation,
-			CompilerIssues issues) {
+	public SectionInputNodeImpl(String inputName, SectionNode section,
+			String sectionLocation, CompilerIssues issues) {
 		this.inputName = inputName;
+		this.section = section;
 		this.sectionLocation = sectionLocation;
 		this.issues = issues;
 	}
@@ -81,6 +90,8 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * 
 	 * @param inputName
 	 *            Name of the {@link SectionInputType}.
+	 * @param section
+	 *            {@link SectionNode} containing this {@link SectionInputNode}.
 	 * @param parameterType
 	 *            Parameter type.
 	 * @param sectionLocation
@@ -89,12 +100,22 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
-	public SectionInputNodeImpl(String inputName, String parameterType,
-			String sectionLocation, CompilerIssues issues) {
+	public SectionInputNodeImpl(String inputName, SectionNode section,
+			String parameterType, String sectionLocation, CompilerIssues issues) {
 		this.inputName = inputName;
+		this.section = section;
 		this.sectionLocation = sectionLocation;
 		this.issues = issues;
 		this.initialise(parameterType);
+	}
+
+	/*
+	 * =================== OfficeInputType ===========================
+	 */
+
+	@Override
+	public String getOfficeSectionName() {
+		return this.section.getOfficeSectionName();
 	}
 
 	/*

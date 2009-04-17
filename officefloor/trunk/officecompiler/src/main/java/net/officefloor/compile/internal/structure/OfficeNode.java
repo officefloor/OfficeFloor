@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.frame.api.manage.Office;
@@ -26,8 +27,8 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel
  */
-public interface OfficeNode extends OfficeArchitect, DeployedOffice,
-		LinkOfficeNode {
+public interface OfficeNode extends OfficeType, OfficeArchitect,
+		DeployedOffice, LinkOfficeNode {
 
 	/**
 	 * Adds the context of the {@link OfficeFloor} containing this

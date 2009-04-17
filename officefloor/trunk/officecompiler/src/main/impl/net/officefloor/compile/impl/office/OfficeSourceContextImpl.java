@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.impl.section;
+package net.officefloor.compile.impl.office;
 
 import java.util.Properties;
 
@@ -22,22 +22,23 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.spi.section.source.SectionUnknownPropertyError;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.office.source.OfficeUnknownPropertyError;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
- * {@link SectionSourceContext} implementation.
+ * {@link OfficeSourceContext} implementation.
  * 
  * @author Daniel
  */
-public class SectionSourceContextImpl implements SectionSourceContext {
+public class OfficeSourceContextImpl implements OfficeSourceContext {
 
 	/**
-	 * Location of the {@link section}.
+	 * Location of the {@link Office}.
 	 */
-	private final String sectionLocation;
+	private final String officeLocation;
 
 	/**
 	 * {@link ConfigurationContext}.
@@ -57,8 +58,8 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 	/**
 	 * Initiate.
 	 * 
-	 * @param sectionLocation
-	 *            Location of the {@link section}.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
 	 * @param propertyList
@@ -66,22 +67,22 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 */
-	public SectionSourceContextImpl(String sectionLocation,
+	public OfficeSourceContextImpl(String officeLocation,
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader) {
-		this.sectionLocation = sectionLocation;
+		this.officeLocation = officeLocation;
 		this.configurationContext = configurationContext;
 		this.propertyList = propertyList;
 		this.classLoader = classLoader;
 	}
 
 	/*
-	 * ================= SectionLoaderContext ================================
+	 * ================= OfficeLoaderContext ================================
 	 */
 
 	@Override
-	public String getSectionLocation() {
-		return this.sectionLocation;
+	public String getOfficeLocation() {
+		return this.officeLocation;
 	}
 
 	@Override
@@ -89,7 +90,7 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 		try {
 			return this.configurationContext.getConfigurationItem(location);
 		} catch (Throwable ex) {
-			// Propagate failure to section loader
+			// Propagate failure to office loader
 			throw new ConfigurationContextPropagateError(location, ex);
 		}
 	}
@@ -100,10 +101,10 @@ public class SectionSourceContextImpl implements SectionSourceContext {
 	}
 
 	@Override
-	public String getProperty(String name) throws SectionUnknownPropertyError {
+	public String getProperty(String name) throws OfficeUnknownPropertyError {
 		String value = this.getProperty(name, null);
 		if (value == null) {
-			throw new SectionUnknownPropertyError("Unknown property '" + name
+			throw new OfficeUnknownPropertyError("Unknown property '" + name
 					+ "'", name);
 		}
 		return value;

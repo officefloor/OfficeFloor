@@ -16,11 +16,20 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.section.SectionObjectType;
+import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
@@ -40,6 +49,13 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * Name of the {@link SectionObjectType}.
 	 */
 	private final String objectName;
+
+	/**
+	 * Listing of the {@link AdministratorType} instances of the
+	 * {@link OfficeAdministrator} instances administering this
+	 * {@link OfficeManagedObjectType}.
+	 */
+	private final List<AdministratorType<?, ?>> administratorTypes = new LinkedList<AdministratorType<?, ?>>();
 
 	/**
 	 * Location of the {@link OfficeSection} containing this
@@ -139,6 +155,11 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	@Override
+	public void addAdministratorType(AdministratorType<?, ?> administratorType) {
+		this.administratorTypes.add(administratorType);
+	}
+
+	@Override
 	public void addOfficeContext(String officeLocation) {
 		this.officeLocation = officeLocation;
 		this.isInOfficeContext = true;
@@ -180,6 +201,38 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	@Override
 	public String getOfficeSectionObjectName() {
 		return this.objectName;
+	}
+
+	/*
+	 * ===================== OfficeManagedObjectType ===========================
+	 */
+
+	@Override
+	public String getOfficeManagedObjectName() {
+		return this.objectName;
+	}
+
+	@Override
+	public String[] getExtensionInterfaces() {
+
+		// Obtain the set of extension interfaces to be supported
+		Set<String> extensionInterfaces = new HashSet<String>();
+		for (AdministratorType<?, ?> adminType : this.administratorTypes) {
+
+			// Ensure have extension interface (may be issue with administrator)
+			Class<?> extensionInterface = adminType.getExtensionInterface();
+			if (extensionInterface == null) {
+				continue; // problem loading administrator type
+			}
+
+			// Add the extension interface
+			extensionInterfaces.add(extensionInterface.getName());
+		}
+
+		// Create and return the listing of sorted extension interfaces
+		String[] listing = extensionInterfaces.toArray(new String[0]);
+		Arrays.sort(listing);
+		return listing;
 	}
 
 	/*

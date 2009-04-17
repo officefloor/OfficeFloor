@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
@@ -26,7 +27,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * 
  * @author Daniel
  */
-public interface OfficeTeamNode extends OfficeTeam, TaskTeam,
+public interface OfficeTeamNode extends OfficeTeam, OfficeTeamType, TaskTeam,
 		ManagedObjectTeam, LinkTeamNode {
 
 	/**

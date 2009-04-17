@@ -36,6 +36,14 @@ public interface SectionNode extends SectionBuilder, SectionType, SubSection,
 	// TODO need to add initialise and isInitialised for getting input
 
 	/**
+	 * Obtains the {@link OfficeInputType} instances for this
+	 * {@link OfficeSection}.
+	 * 
+	 * @return {@link OfficeInputType} instances for this {@link OfficeSection}.
+	 */
+	OfficeInputType[] getOfficeInputTypes();
+
+	/**
 	 * Obtains the {@link DeployedOfficeInput}.
 	 * 
 	 * @param inputName
