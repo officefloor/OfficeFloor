@@ -16,17 +16,21 @@
  */
 package net.officefloor.main;
 
-import java.io.IOException;
+import java.util.Properties;
 
-import net.officefloor.compile.LoaderContext;
-import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.impl.officefloor.OfficeFloorLoaderImpl;
+import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.officefloor.OfficeFloorLoader;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.api.manage.WorkManager;
 import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * Starting point to compile and run an {@link OfficeFloor}.
@@ -63,12 +67,12 @@ public class OfficeFloorMain {
 		}
 
 		// Obtain the command line arguments
-		String officeFloorConfigFile = args[0];
+		String officeFloorLocation = args[0];
 
 		// Create the office floor
-		System.out.println("Creating office floor '" + officeFloorConfigFile
+		System.out.println("Creating office floor '" + officeFloorLocation
 				+ "'");
-		OfficeFloor officeFloor = createOfficeFloor(officeFloorConfigFile);
+		OfficeFloor officeFloor = createOfficeFloor(officeFloorLocation);
 
 		// Open the office floor
 		System.out.println("Opening office floor");
@@ -103,47 +107,72 @@ public class OfficeFloorMain {
 	}
 
 	/**
-	 * Creates the {@link OfficeFloor} from the input configuration file.
+	 * Creates the {@link OfficeFloor}.
 	 * 
-	 * @param officeFloorConfigFile
-	 *            Class path location of the {@link OfficeFloor} configuration
-	 *            file.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
 	 * @return {@link OfficeFloor}.
 	 * @throws Exception
 	 *             If fails to create the {@link OfficeFloor}.
 	 */
-	public static OfficeFloor createOfficeFloor(String officeFloorConfigFile)
+	public static OfficeFloor createOfficeFloor(String officeFloorLocation)
 			throws Exception {
 
-		// Create the office floor compiler
-		OfficeFloorCompiler compiler = new OfficeFloorCompiler();
+		// TODO obtain the office floor source
+		Class<? extends OfficeFloorSource> officeFloorSourceClass = null;
 
-		// Obtain the class loader
+		// Use class path configuration context
 		ClassLoader classLoader = OfficeFloorMain.class.getClassLoader();
-
-		// Create the loader context
-		LoaderContext loaderContext = new LoaderContext(classLoader);
-
-		// Obtain the office floor configuration
 		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
 				classLoader);
-		ConfigurationItem officeFloorConfigurationItem = configurationContext
-				.getConfigurationItem(officeFloorConfigFile);
-		if (officeFloorConfigurationItem == null) {
-			throw new IOException(
-					"Can not find office floor configuration file '"
-							+ officeFloorConfigFile + "'");
+
+		// Use the system properties as the properties
+		PropertyList propertyList = new PropertyListImpl();
+		Properties systemProperties = System.getProperties();
+		for (String name : systemProperties.stringPropertyNames()) {
+			String value = systemProperties.getProperty(name);
+			propertyList.addProperty(name).setValue(value);
 		}
 
 		// Obtain the office frame
 		OfficeFrame officeFrame = OfficeFrame.getInstance();
 
-		// Compile the office floor
-		OfficeFloor officeFloor = compiler.compileOfficeFloor(
-				officeFloorConfigurationItem, officeFrame, loaderContext);
+		// Create the office floor loader and load the office floor
+		OfficeFloorLoader loader = new OfficeFloorLoaderImpl(
+				officeFloorLocation);
+		OfficeFloor officeFloor = loader.loadOfficeFloor(
+				officeFloorSourceClass, configurationContext, propertyList,
+				classLoader, new StderrCompilerIssues(), officeFrame);
 
 		// Return the office floor
 		return officeFloor;
+	}
+
+	/**
+	 * {@link CompilerIssues} to write issues to {@link System#err}.
+	 */
+	private static class StderrCompilerIssues implements CompilerIssues {
+
+		/*
+		 * ================= CompilerIssues ==================================
+		 */
+
+		@Override
+		public void addIssue(LocationType locationType, String location,
+				AssetType assetType, String assetName, String issueDescription) {
+			// TODO Implement
+			throw new UnsupportedOperationException(
+					"TODO implement CompilerIssues.addIssue");
+		}
+
+		@Override
+		public void addIssue(LocationType locationType, String location,
+				AssetType assetType, String assetName, String issueDescription,
+				Throwable cause) {
+			// TODO Implement
+			throw new UnsupportedOperationException(
+					"TODO implement CompilerIssues.addIssue");
+		}
 	}
 
 }

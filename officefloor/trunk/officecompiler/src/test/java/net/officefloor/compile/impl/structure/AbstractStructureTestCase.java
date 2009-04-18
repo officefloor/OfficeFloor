@@ -19,7 +19,6 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.LoaderContext;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionLoaderImpl;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
@@ -507,7 +506,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 * Test logic to make the {@link SubSection}.
 		 * 
 		 * @param context
-		 *            {@link LoaderContext}.
+		 *            {@link SectionMakerContext}.
 		 */
 		void make(SectionMakerContext context);
 	}

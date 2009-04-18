@@ -26,6 +26,8 @@ import net.officefloor.model.impl.desk.DeskModelSectionSource;
  */
 public class DeskModelSectionSourceTest extends OfficeFrameTestCase {
 
-	// TODO provide tests to source SectionType from DeskModel
+	public void test_TODO_Implement() {
+		// TODO provide tests to source SectionType from DeskModel
+	}
 
 }

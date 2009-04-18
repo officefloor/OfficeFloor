@@ -100,7 +100,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		final Error failure = new Error("specification failure");
 
 		// Record failure to instantiate
-		this.record_issue("Failed to obtain WorkSpecification from "
+		this.record_issue("Failed to obtain WorkSourceSpecification from "
 				+ MockWorkSource.class.getName(), failure);
 
 		// Attempt to obtain specification
@@ -116,7 +116,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	public void testNoWorkSpecification() {
 
 		// Record no specification returned
-		this.record_issue("No WorkSpecification returned from "
+		this.record_issue("No WorkSourceSpecification returned from "
 				+ MockWorkSource.class.getName());
 
 		// Attempt to obtain specification
@@ -138,9 +138,10 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		// Record null work properties
 		this.control(this.specification).expectAndThrow(
 				this.specification.getProperties(), failure);
-		this.record_issue(
-				"Failed to obtain WorkProperty instances from WorkSpecification for "
-						+ MockWorkSource.class.getName(), failure);
+		this
+				.record_issue(
+						"Failed to obtain WorkSourceProperty instances from WorkSourceSpecification for "
+								+ MockWorkSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -171,8 +172,9 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 		// Record null work properties
 		this.recordReturn(this.specification, this.specification
 				.getProperties(), new WorkSourceProperty[] { null });
-		this.record_issue("WorkProperty 0 is null from WorkSpecification for "
-				+ MockWorkSource.class.getName());
+		this
+				.record_issue("WorkSourceProperty 0 is null from WorkSourceSpecification for "
+						+ MockWorkSource.class.getName());
 
 		// Attempt to obtain specification
 		this.replayMockObjects();
@@ -193,7 +195,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 				.getProperties(), new WorkSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "");
 		this
-				.record_issue("WorkProperty 0 provided blank name from WorkSpecification for "
+				.record_issue("WorkSourceProperty 0 provided blank name from WorkSourceSpecification for "
 						+ MockWorkSource.class.getName());
 
 		// Attempt to obtain specification
@@ -217,7 +219,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 				.getProperties(), new WorkSourceProperty[] { property });
 		this.control(property).expectAndThrow(property.getName(), failure);
 		this.record_issue(
-				"Failed to get name for WorkProperty 0 from WorkSpecification for "
+				"Failed to get name for WorkSourceProperty 0 from WorkSourceSpecification for "
 						+ MockWorkSource.class.getName(), failure);
 
 		// Attempt to obtain specification
@@ -241,9 +243,10 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 				.getProperties(), new WorkSourceProperty[] { property });
 		this.recordReturn(property, property.getName(), "NAME");
 		this.control(property).expectAndThrow(property.getLabel(), failure);
-		this.record_issue(
-				"Failed to get label for WorkProperty 0 (NAME) from WorkSpecification for "
-						+ MockWorkSource.class.getName(), failure);
+		this
+				.record_issue(
+						"Failed to get label for WorkSourceProperty 0 (NAME) from WorkSourceSpecification for "
+								+ MockWorkSource.class.getName(), failure);
 
 		// Attempt to obtain specification
 		this.replayMockObjects();

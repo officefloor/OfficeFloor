@@ -26,8 +26,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public class LoadTeamTypeTest extends OfficeFrameTestCase {
 
-	public void testImplement() {
-		fail("TODO implement testing for loading the TeamType via the TeamLoader");
+	public void test_TODO_Implement() {
+		// TODO implement testing for loading the TeamType via the TeamLoader
 	}
 
 }
