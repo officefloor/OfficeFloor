@@ -73,6 +73,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 */
 	@Override
 	protected void setUp() throws Exception {
+		super.setUp();
 		MockOfficeSource.reset();
 	}
 

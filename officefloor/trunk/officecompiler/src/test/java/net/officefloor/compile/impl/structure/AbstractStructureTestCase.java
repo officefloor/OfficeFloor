@@ -120,10 +120,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	protected final CompilerIssues issues = new StderrCompilerIssuesWrapper(
 			this.createMock(CompilerIssues.class));
 
-	/**
-	 * Initiate for test.
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#setUp()
 	 */
-	public AbstractStructureTestCase() {
+	@Override
+	protected void setUp() throws Exception {
 		MakerSectionSource.reset();
 		MakerManagedObjectSource.reset();
 		MakerWorkSource.reset();
@@ -1799,7 +1802,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Property name to obtain the {@link OfficeFloorMaker} identifier.
 		 */
-		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "officefloor.maker";
+		public static final String MAKER_IDENTIFIER_PROPERTY_NAME = "officefloor.maker";
 
 		/**
 		 * {@link OfficeFloorMaker} instances by their identifiers.

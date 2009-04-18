@@ -35,6 +35,9 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -206,6 +209,47 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	public void link(OfficeRequiredManagedObject requiredManagedObject,
 			OfficeFloorManagedObject officeFloorManagedObject) {
 		this.linkObject(requiredManagedObject, officeFloorManagedObject);
+	}
+
+	/*
+	 * ===================== OfficeFloorNode ==================================
+	 */
+
+	@Override
+	public OfficeFloor deployOfficeFloor(OfficeFrame officeFrame) {
+
+		// Obtain the office floor builder
+		OfficeFloorBuilder builder = officeFrame
+				.createOfficeFloorBuilder(this.officeFloorLocation);
+
+		// Return the built office floor
+		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
+	}
+
+	/**
+	 * Compiler {@link OfficeFloorIssues}.
+	 */
+	private class CompilerOfficeFloorIssues implements OfficeFloorIssues {
+
+		/*
+		 * ================ OfficeFloorIssues ==============================
+		 */
+
+		@Override
+		public void addIssue(AssetType assetType, String assetName,
+				String issueDescription) {
+			OfficeFloorNodeImpl.this.issues.addIssue(LocationType.OFFICE_FLOOR,
+					OfficeFloorNodeImpl.this.officeFloorLocation, assetType,
+					assetName, issueDescription);
+		}
+
+		@Override
+		public void addIssue(AssetType assetType, String assetName,
+				String issueDescription, Throwable cause) {
+			OfficeFloorNodeImpl.this.issues.addIssue(LocationType.OFFICE_FLOOR,
+					OfficeFloorNodeImpl.this.officeFloorLocation, assetType,
+					assetName, issueDescription, cause);
+		}
 	}
 
 }

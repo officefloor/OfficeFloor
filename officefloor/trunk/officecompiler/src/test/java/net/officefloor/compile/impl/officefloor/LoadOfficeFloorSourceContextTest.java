@@ -150,17 +150,24 @@ public class LoadOfficeFloorSourceContextTest extends
 				assertEquals("Ensure get property TWO", "2", context
 						.getProperty("TWO"));
 				String[] names = context.getPropertyNames();
-				assertEquals("Incorrect number of property names", 2,
+				assertEquals("Incorrect number of property names", 3,
 						names.length);
 				assertEquals("Incorrect property name 0", "ONE", names[0]);
 				assertEquals("Incorrect property name 1", "TWO", names[1]);
+				assertEquals("Incorrect identifier",
+						MakerOfficeFloorSource.MAKER_IDENTIFIER_PROPERTY_NAME,
+						names[2]);
 				Properties properties = context.getProperties();
-				assertEquals("Incorrect number of properties", 2, properties
+				assertEquals("Incorrect number of properties", 3, properties
 						.size());
 				assertEquals("Incorrect property ONE", "1", properties
 						.get("ONE"));
 				assertEquals("Incorrect property TWO", "2", properties
 						.get("TWO"));
+				assertNotNull(
+						"Incorrect identifier",
+						properties
+								.get(MakerOfficeFloorSource.MAKER_IDENTIFIER_PROPERTY_NAME));
 			}
 		}, "ONE", "1", "TWO", "2");
 	}
@@ -184,15 +191,16 @@ public class LoadOfficeFloorSourceContextTest extends
 	/**
 	 * Ensure issue if fails to source the {@link RequiredProperties}.
 	 */
-	public void testFailSourceRequiredProperties() {
+	public void testFailSourceOfficeFloor() {
 
 		final NullPointerException failure = new NullPointerException(
-				"Fail source required properties");
+				"Fail source office floor");
 
 		// Record failure to source the office floor
 		this.record_officefloor_issue(
-				"Failed to source required properties from OfficeFloorSource "
-						+ MakerOfficeFloorSource.class.getName(), failure);
+				"Failed to source OfficeFloor from OfficeFloorSource (source="
+						+ MakerOfficeFloorSource.class.getName()
+						+ ", location=" + OFFICE_FLOOR_LOCATION + ")", failure);
 
 		// Attempt to load office floor
 		this.loadOfficeFloor(false, new OfficeFloorMaker() {

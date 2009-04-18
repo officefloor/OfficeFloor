@@ -191,9 +191,6 @@ public abstract class AbstractOfficeFloorTestCase extends
 					OfficeFloorIssues.class));
 		}
 
-		// Replay mock objects
-		this.replayMockObjects();
-
 		// Create the property list
 		PropertyList propertyList = new PropertyListImpl();
 		for (int i = 0; i < propertyNameValuePairs.length; i += 2) {
@@ -215,10 +212,12 @@ public abstract class AbstractOfficeFloorTestCase extends
 		PropertyList registerProperties = MakerOfficeFloorSource
 				.register(maker);
 		for (Property property : registerProperties) {
-			propertyList.addProperty(property.getName(), property.getLabel());
+			propertyList.addProperty(property.getName()).setValue(
+					property.getValue());
 		}
 
 		// Create the office loader and load the office floor
+		this.replayMockObjects();
 		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl(
 				OFFICE_FLOOR_LOCATION);
 		OfficeFloor loadedOfficeFloor = officeFloorLoader.loadOfficeFloor(
@@ -226,8 +225,6 @@ public abstract class AbstractOfficeFloorTestCase extends
 				propertyList,
 				LoadRequiredPropertiesTest.class.getClassLoader(), this.issues,
 				officeFrame);
-
-		// Verify the mock objects
 		this.verifyMockObjects();
 
 		// Ensure the correct loaded office floor

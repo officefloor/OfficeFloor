@@ -17,6 +17,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -25,4 +26,14 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * @author Daniel
  */
 public interface OfficeFloorNode extends OfficeFloorDeployer {
+
+	/**
+	 * Deploys the {@link OfficeFloor}.
+	 * 
+	 * @param officeFrame
+	 *            {@link OfficeFrame} to deploy the {@link OfficeFloor} within.
+	 * @return {@link OfficeFloor}.
+	 */
+	OfficeFloor deployOfficeFloor(OfficeFrame officeFrame);
+
 }
