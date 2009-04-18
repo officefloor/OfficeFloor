@@ -364,6 +364,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		if (administrator == null) {
 			// Add the administrator
 			administrator = new AdministratorNodeImpl(administratorName,
+					administratorSourceClassName, this.classLoader,
 					this.officeLocation, this.issues);
 			this.administrators.put(administratorName, administrator);
 		} else {

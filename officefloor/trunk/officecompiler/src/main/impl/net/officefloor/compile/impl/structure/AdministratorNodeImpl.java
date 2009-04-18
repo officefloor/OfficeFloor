@@ -21,26 +21,31 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.compile.administrator.DutyType;
+import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
 
 /**
  * {@link AdministratorNode} implementation.
  * 
  * @author Daniel
  */
-public class AdministratorNodeImpl<I, A extends Enum<A>> implements
-		AdministratorNode<I, A> {
+public class AdministratorNodeImpl implements AdministratorNode {
 
 	/**
 	 * Name of this {@link OfficeAdministrator}.
@@ -48,9 +53,19 @@ public class AdministratorNodeImpl<I, A extends Enum<A>> implements
 	private final String administratorName;
 
 	/**
+	 * Class name of the {@link AdministratorSource}.
+	 */
+	private final String administratorSourceClassName;
+
+	/**
 	 * {@link PropertyList} to source the {@link Administrator}.
 	 */
 	private final PropertyList properties = new PropertyListImpl();
+
+	/**
+	 * {@link ClassLoader}.
+	 */
+	private final ClassLoader classLoader;
 
 	/**
 	 * Location of the {@link Office} containing this
@@ -78,6 +93,10 @@ public class AdministratorNodeImpl<I, A extends Enum<A>> implements
 	 * 
 	 * @param administratorName
 	 *            Name of this {@link OfficeAdministrator}.
+	 * @param administratorSourceClassName
+	 *            Class name of the {@link AdministratorSource}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
 	 * @param officeLocation
 	 *            Location of the {@link Office} containing this
 	 *            {@link OfficeAdministrator}.
@@ -85,8 +104,11 @@ public class AdministratorNodeImpl<I, A extends Enum<A>> implements
 	 *            {@link CompilerIssues}.
 	 */
 	public AdministratorNodeImpl(String administratorName,
+			String administratorSourceClassName, ClassLoader classLoader,
 			String officeLocation, CompilerIssues issues) {
 		this.administratorName = administratorName;
+		this.administratorSourceClassName = administratorSourceClassName;
+		this.classLoader = classLoader;
 		this.officeLocation = officeLocation;
 		this.issues = issues;
 	}
@@ -126,26 +148,48 @@ public class AdministratorNodeImpl<I, A extends Enum<A>> implements
 
 		// Make office required managed object aware of administration
 		if (managedObject instanceof SectionObjectNode) {
-			((SectionObjectNode) managedObject).addAdministratorType(this);
+			((SectionObjectNode) managedObject).addAdministrator(this);
 		}
 	}
 
 	/*
-	 * ===================== AdministratorType ===============================
+	 * ===================== AdministratorNode ==============================
 	 */
 
-	@Override
-	public Class<I> getExtensionInterface() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement AdministratorType<I,A>.getExtensionInterface");
-	}
+	/**
+	 * Lazy loaded {@link AdministratorType}.
+	 */
+	private AdministratorType<?, ?> administratorType = null;
 
 	@Override
-	public DutyType<A, ?>[] getDutyTypes() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement AdministratorType<I,A>.getDutyTypes");
+	@SuppressWarnings("unchecked")
+	public AdministratorType<?, ?> getAdministratorType() {
+
+		// Lazy load the administrator type
+		if (this.administratorType == null) {
+
+			// Obtain the administrator source class
+			Class<? extends AdministratorSource> administratorSourceClass = CompileUtil
+					.obtainClass(this.administratorSourceClassName,
+							AdministratorSource.class, this.classLoader,
+							LocationType.OFFICE, this.officeLocation,
+							AssetType.ADMINISTRATOR, this.administratorName,
+							this.issues);
+			if (administratorSourceClass == null) {
+				return null; // must obtain source class
+			}
+
+			// Load the administrator type
+			AdministratorLoader loader = new AdministratorLoaderImpl(
+					LocationType.OFFICE, this.officeLocation,
+					this.administratorName);
+			this.administratorType = loader.loadAdministrator(
+					administratorSourceClass, this.properties,
+					this.classLoader, this.issues);
+		}
+
+		// Return administrator type
+		return this.administratorType;
 	}
 
 }
