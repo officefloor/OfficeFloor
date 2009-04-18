@@ -230,8 +230,9 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 
 		// Record failure to source the required properties
 		this.record_issue(
-				"Failed to source required properties from OfficeFloorSource "
-						+ MockOfficeFloorSource.class.getName(), failure);
+				"Failed to source required properties from OfficeFloorSource (source="
+						+ MockOfficeFloorSource.class.getName() + ", location="
+						+ OFFICE_FLOOR_LOCATION + ")", failure);
 
 		// Attempt to load required properties
 		this.loadRequiredProperties(false, new Loader() {
@@ -307,7 +308,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testAddRequiredPropertyByName() {
 
 		// Attempt to load required properties
-		PropertyList properties = this.loadRequiredProperties(false,
+		PropertyList properties = this.loadRequiredProperties(true,
 				new Loader() {
 					@Override
 					public void loadRequiredProperties(
@@ -327,7 +328,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testAddRequiredPropertyWithNullLabel() {
 
 		// Attempt to load required properties
-		PropertyList properties = this.loadRequiredProperties(false,
+		PropertyList properties = this.loadRequiredProperties(true,
 				new Loader() {
 					@Override
 					public void loadRequiredProperties(
@@ -347,7 +348,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testAddRequiredPropertyWithBlankLabel() {
 
 		// Attempt to load required properties
-		PropertyList properties = this.loadRequiredProperties(false,
+		PropertyList properties = this.loadRequiredProperties(true,
 				new Loader() {
 					@Override
 					public void loadRequiredProperties(
@@ -367,7 +368,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testAddRequiredPropertyWithLabel() {
 
 		// Attempt to load required properties
-		PropertyList properties = this.loadRequiredProperties(false,
+		PropertyList properties = this.loadRequiredProperties(true,
 				new Loader() {
 					@Override
 					public void loadRequiredProperties(
@@ -387,7 +388,7 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	public void testAddMultipleRequiredProperties() {
 
 		// Attempt to load required properties
-		PropertyList properties = this.loadRequiredProperties(false,
+		PropertyList properties = this.loadRequiredProperties(true,
 				new Loader() {
 					@Override
 					public void loadRequiredProperties(
@@ -459,10 +460,11 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl(
 				OFFICE_FLOOR_LOCATION);
 		MockOfficeFloorSource.loader = loader;
-		PropertyList requiredProperties = officeFloorLoader.init(
-				MockOfficeFloorSource.class, this.configurationContext,
-				propertyList,
-				LoadRequiredPropertiesTest.class.getClassLoader(), this.issues);
+		PropertyList requiredProperties = officeFloorLoader
+				.loadRequiredProperties(MockOfficeFloorSource.class,
+						this.configurationContext, propertyList,
+						LoadRequiredPropertiesTest.class.getClassLoader(),
+						this.issues);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

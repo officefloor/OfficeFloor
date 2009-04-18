@@ -52,16 +52,23 @@ public interface OfficeFloorLoader {
 			Class<OF> officeFloorSourceClass, CompilerIssues issues);
 
 	/**
-	 * Initialises the {@link OfficeFloorSource} and returns the required
-	 * {@link PropertyList}.
+	 * <p>
+	 * Loads the required {@link PropertyList} for the {@link OfficeFloorSource}
+	 * configuration.
+	 * <p>
+	 * These are additional {@link Property} instances over and above the
+	 * {@link OfficeFloorSourceSpecification} that are required by the
+	 * {@link OfficeFloorSource} to load the {@link OfficeFloor}. Typically
+	 * these will be {@link Property} instances required by the configuration of
+	 * the {@link OfficeFloor}.
 	 * 
 	 * @param officeFloorSourceClass
 	 *            Class of the {@link OfficeFloorSource}.
 	 * @param configurationContext
 	 *            {@link ConfigurationContext}.
 	 * @param propertyList
-	 *            {@link PropertyList} containing the properties to initialise
-	 *            the {@link OfficeFloorSource}.
+	 *            {@link PropertyList} containing the properties as per the
+	 *            {@link OfficeFloorSourceSpecification}.
 	 * @param classLoader
 	 *            {@link ClassLoader} that the {@link OfficeFloorSource} may use
 	 *            in obtaining necessary class path resources.
@@ -70,7 +77,7 @@ public interface OfficeFloorLoader {
 	 * @return Required {@link PropertyList} or <code>null</code> if issues,
 	 *         which are reported to the {@link CompilerIssues}.
 	 */
-	<OF extends OfficeFloorSource> PropertyList init(
+	<OF extends OfficeFloorSource> PropertyList loadRequiredProperties(
 			Class<OF> officeFloorSourceClass,
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader,

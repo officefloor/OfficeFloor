@@ -59,7 +59,7 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
 				.addTeam("TEAM", MakerTeamSource.class), teamBuilder);
 		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-				.addOffice("OFFICE"), this.officeFloorBuilder);
+				.addOffice("OFFICE"), officeBuilder);
 		officeBuilder.registerTeam("OFFICE_TEAM", "OFFICE_FLOOR_TEAM");
 		this.recordReturn(officeBuilder, officeBuilder.addWork("SECTION.WORK",
 				workFactory), workBuilder);

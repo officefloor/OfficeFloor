@@ -16,10 +16,21 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
+import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
+import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorUnknownPropertyError;
+import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -53,20 +64,210 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 	@Override
 	public <OF extends OfficeFloorSource> PropertyList loadSpecification(
 			Class<OF> officeFloorSourceClass, CompilerIssues issues) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorLoader.loadSpecification");
+
+		// Instantiate the office floor source
+		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(
+				officeFloorSourceClass, OfficeFloorSource.class,
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
+				null, issues);
+		if (officeFloorSource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Obtain the specification
+		OfficeFloorSourceSpecification specification;
+		try {
+			specification = officeFloorSource.getSpecification();
+		} catch (Throwable ex) {
+			this.addIssue("Failed to obtain "
+					+ OfficeFloorSourceSpecification.class.getSimpleName()
+					+ " from " + officeFloorSourceClass.getName(), ex, issues);
+			return null; // failed to obtain
+		}
+
+		// Ensure have specification
+		if (specification == null) {
+			this.addIssue("No "
+					+ OfficeFloorSourceSpecification.class.getSimpleName()
+					+ " returned from " + officeFloorSourceClass.getName(),
+					issues);
+			return null; // no specification obtained
+		}
+
+		// Obtain the properties
+		OfficeFloorSourceProperty[] officeFloorProperties;
+		try {
+			officeFloorProperties = specification.getProperties();
+		} catch (Throwable ex) {
+			this.addIssue("Failed to obtain "
+					+ OfficeFloorSourceProperty.class.getSimpleName()
+					+ " instances from "
+					+ OfficeFloorSourceSpecification.class.getSimpleName()
+					+ " for " + officeFloorSourceClass.getName(), ex, issues);
+			return null; // failed to obtain properties
+		}
+
+		// Load the office floor properties into a property list
+		PropertyList propertyList = new PropertyListImpl();
+		if (officeFloorProperties != null) {
+			for (int i = 0; i < officeFloorProperties.length; i++) {
+				OfficeFloorSourceProperty officeFloorProperty = officeFloorProperties[i];
+
+				// Ensure have the office floor property
+				if (officeFloorProperty == null) {
+					this.addIssue(OfficeFloorSourceProperty.class
+							.getSimpleName()
+							+ " "
+							+ i
+							+ " is null from "
+							+ OfficeFloorSourceSpecification.class
+									.getSimpleName()
+							+ " for "
+							+ officeFloorSourceClass.getName(), issues);
+					return null; // must have complete property details
+				}
+
+				// Obtain the property name
+				String name;
+				try {
+					name = officeFloorProperty.getName();
+				} catch (Throwable ex) {
+					this.addIssue("Failed to get name for "
+							+ OfficeFloorSourceProperty.class.getSimpleName()
+							+ " "
+							+ i
+							+ " from "
+							+ OfficeFloorSourceSpecification.class
+									.getSimpleName() + " for "
+							+ officeFloorSourceClass.getName(), ex, issues);
+					return null; // must have complete property details
+				}
+				if (CompileUtil.isBlank(name)) {
+					this.addIssue(OfficeFloorSourceProperty.class
+							.getSimpleName()
+							+ " "
+							+ i
+							+ " provided blank name from "
+							+ OfficeFloorSourceSpecification.class
+									.getSimpleName()
+							+ " for "
+							+ officeFloorSourceClass.getName(), issues);
+					return null; // must have complete property details
+				}
+
+				// Obtain the property label
+				String label;
+				try {
+					label = officeFloorProperty.getLabel();
+				} catch (Throwable ex) {
+					this.addIssue("Failed to get label for "
+							+ OfficeFloorSourceProperty.class.getSimpleName()
+							+ " "
+							+ i
+							+ " ("
+							+ name
+							+ ") from "
+							+ OfficeFloorSourceSpecification.class
+									.getSimpleName() + " for "
+							+ officeFloorSourceClass.getName(), ex, issues);
+					return null; // must have complete property details
+				}
+
+				// Add to the properties
+				propertyList.addProperty(name, label);
+			}
+		}
+
+		// Return the property list
+		return propertyList;
 	}
 
 	@Override
-	public <OF extends OfficeFloorSource> PropertyList init(
+	public <OF extends OfficeFloorSource> PropertyList loadRequiredProperties(
 			Class<OF> officeFloorSourceClass,
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader,
-			CompilerIssues issues) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorLoader.init");
+			final CompilerIssues issues) {
+
+		// Instantiate the office floor source
+		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(
+				officeFloorSourceClass, OfficeFloorSource.class,
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
+				null, issues);
+		if (officeFloorSource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Create the office floor source context
+		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
+				this.officeFloorLocation, configurationContext, propertyList,
+				classLoader);
+
+		// Create the required properties
+		final PropertyList requiredPropertyList = new PropertyListImpl();
+		final boolean[] isRequiredPropertyIssue = new boolean[1];
+		RequiredProperties requiredProperties = new RequiredProperties() {
+			@Override
+			public void addRequiredProperty(String name) {
+				this.addRequiredProperty(name, null);
+			}
+
+			@Override
+			public void addRequiredProperty(String name, String label) {
+
+				// Ensure have name
+				if (CompileUtil.isBlank(name)) {
+					OfficeFloorLoaderImpl.this.addIssue(
+							"Required property specified with null name (label="
+									+ label + ")", issues);
+					isRequiredPropertyIssue[0] = true;
+					return; // must have name
+				}
+
+				// Determine if already added the property
+				if (requiredPropertyList.getProperty(name) != null) {
+					OfficeFloorLoaderImpl.this.addIssue("Required property "
+							+ name + " already added", issues);
+					isRequiredPropertyIssue[0] = true;
+					return; // must only register required property once
+				}
+
+				// Add the required property
+				requiredPropertyList.addProperty(name, label);
+			}
+		};
+
+		try {
+			// Specify the configuration properties
+			officeFloorSource.specifyConfigurationProperties(
+					requiredProperties, sourceContext);
+
+		} catch (OfficeFloorUnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
+					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
+					+ officeFloorSourceClass.getName(), issues);
+			return null; // must have property
+
+		} catch (ConfigurationContextPropagateError ex) {
+			this.addIssue("Failure obtaining configuration '"
+					+ ex.getLocation() + "'", ex.getCause(), issues);
+			return null; // must not fail in getting configurations
+
+		} catch (Throwable ex) {
+			this.addIssue("Failed to source required properties from "
+					+ OfficeFloorSource.class.getSimpleName() + " (source="
+					+ officeFloorSourceClass.getName() + ", location="
+					+ this.officeFloorLocation + ")", ex, issues);
+			return null; // must be successful
+		}
+
+		// Do not return if issue with required properties
+		if (isRequiredPropertyIssue[0]) {
+			return null; // issue with required properties
+		}
+
+		// Return the listing of required properties
+		return requiredPropertyList;
 	}
 
 	@Override
@@ -75,9 +276,81 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 			ConfigurationContext configurationContext,
 			PropertyList propertyList, ClassLoader classLoader,
 			CompilerIssues issues, OfficeFrame officeFrame) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorLoader.loadOfficeFloor");
+
+		// Instantiate the office floor source
+		OfficeFloorSource officeFloorSource = CompileUtil.newInstance(
+				officeFloorSourceClass, OfficeFloorSource.class,
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation, null,
+				null, issues);
+		if (officeFloorSource == null) {
+			return null; // failed to instantiate
+		}
+
+		// Create the office floor source context
+		OfficeFloorSourceContext sourceContext = new OfficeFloorSourceContextImpl(
+				this.officeFloorLocation, configurationContext, propertyList,
+				classLoader);
+
+		// Create the office floor deployer
+		OfficeFloorNode deployer = new OfficeFloorNodeImpl(
+				configurationContext, classLoader, this.officeFloorLocation,
+				issues);
+
+		try {
+			// Source the office floor
+			officeFloorSource.sourceOfficeFloor(deployer, sourceContext);
+
+		} catch (OfficeFloorUnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
+					+ "' for " + OfficeFloorSource.class.getSimpleName() + " "
+					+ officeFloorSourceClass.getName(), issues);
+			return null; // must have property
+
+		} catch (ConfigurationContextPropagateError ex) {
+			this.addIssue("Failure obtaining configuration '"
+					+ ex.getLocation() + "'", ex.getCause(), issues);
+			return null; // must not fail in getting configurations
+
+		} catch (Throwable ex) {
+			this.addIssue("Failed to source "
+					+ OfficeFloor.class.getSimpleName() + " from "
+					+ OfficeFloorSource.class.getSimpleName() + " (source="
+					+ officeFloorSourceClass.getName() + ", location="
+					+ this.officeFloorLocation + ")", ex, issues);
+			return null; // must be successful
+		}
+
+		// Deploy and return the office floor
+		return deployer.deployOfficeFloor(officeFrame);
+	}
+
+	/**
+	 * Adds an issue.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	private void addIssue(String issueDescription, CompilerIssues issues) {
+		issues.addIssue(LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+				null, null, issueDescription);
+	}
+
+	/**
+	 * Adds an issue.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 * @param cause
+	 *            Cause of the issue.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 */
+	private void addIssue(String issueDescription, Throwable cause,
+			CompilerIssues issues) {
+		issues.addIssue(LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+				null, null, issueDescription, cause);
 	}
 
 }
