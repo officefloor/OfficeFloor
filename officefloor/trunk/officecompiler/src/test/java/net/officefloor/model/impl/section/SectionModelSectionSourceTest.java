@@ -25,6 +25,8 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public class SectionModelSectionSourceTest extends OfficeFrameTestCase {
 
-	// TODO provide tests to source SectionType from SectionModel
+	public void test_TODO_Implement() {
+		// TODO provide tests to source SectionType from SectionModel
+	}
 
 }
