@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -51,11 +52,11 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	private final String objectName;
 
 	/**
-	 * Listing of the {@link AdministratorType} instances of the
+	 * Listing of the {@link AdministratorNode} instances of the
 	 * {@link OfficeAdministrator} instances administering this
 	 * {@link OfficeManagedObjectType}.
 	 */
-	private final List<AdministratorType<?, ?>> administratorTypes = new LinkedList<AdministratorType<?, ?>>();
+	private final List<AdministratorNode> administrators = new LinkedList<AdministratorNode>();
 
 	/**
 	 * Location of the {@link OfficeSection} containing this
@@ -155,8 +156,8 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	@Override
-	public void addAdministratorType(AdministratorType<?, ?> administratorType) {
-		this.administratorTypes.add(administratorType);
+	public void addAdministrator(AdministratorNode administrator) {
+		this.administrators.add(administrator);
 	}
 
 	@Override
@@ -217,15 +218,16 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 		// Obtain the set of extension interfaces to be supported
 		Set<String> extensionInterfaces = new HashSet<String>();
-		for (AdministratorType<?, ?> adminType : this.administratorTypes) {
+		for (AdministratorNode admin : this.administrators) {
 
-			// Ensure have extension interface (may be issue with administrator)
-			Class<?> extensionInterface = adminType.getExtensionInterface();
-			if (extensionInterface == null) {
+			// Attempt to obtain the administrator type
+			AdministratorType<?, ?> adminType = admin.getAdministratorType();
+			if (adminType == null) {
 				continue; // problem loading administrator type
 			}
 
 			// Add the extension interface
+			Class<?> extensionInterface = adminType.getExtensionInterface();
 			extensionInterfaces.add(extensionInterface.getName());
 		}
 

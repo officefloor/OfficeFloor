@@ -16,7 +16,6 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
@@ -53,7 +52,7 @@ public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
 
 	/**
 	 * <p>
-	 * Adds an {@link AdministratorType} for this
+	 * Adds an {@link AdministratorNode} for this
 	 * {@link OfficeManagedObjectType}.
 	 * <p>
 	 * This allows the {@link OfficeManagedObjectType} to report the extension
@@ -61,10 +60,10 @@ public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
 	 * {@link OfficeFloorManagedObject} for the
 	 * {@link OfficeRequiredManagedObject}.
 	 * 
-	 * @param administratorType
-	 *            {@link AdministratorType}.
+	 * @param administrator
+	 *            {@link AdministratorNode}.
 	 */
-	void addAdministratorType(AdministratorType<?, ?> administratorType);
+	void addAdministrator(AdministratorNode administrator);
 
 	/**
 	 * Adds the context of the {@link Office} containing this

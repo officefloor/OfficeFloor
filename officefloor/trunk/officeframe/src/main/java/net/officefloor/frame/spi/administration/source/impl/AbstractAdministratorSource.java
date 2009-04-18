@@ -213,7 +213,7 @@ public abstract class AbstractAdministratorSource<I, A extends Enum<A>>
 		/**
 		 * {@link DutyMetaData} for the {@link Duty} key.
 		 */
-		private List<DutyMetaData<?>> dutyMetaData;
+		private final List<DutyMetaData<?>> dutyMetaData = new LinkedList<DutyMetaData<?>>();
 
 		/**
 		 * Extension interface.

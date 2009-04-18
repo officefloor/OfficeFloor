@@ -17,6 +17,7 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 
 /**
@@ -24,6 +25,16 @@ import net.officefloor.compile.spi.office.OfficeAdministrator;
  * 
  * @author Daniel
  */
-public interface AdministratorNode<I, A extends Enum<A>> extends
-		OfficeAdministrator, AdministratorType<I, A> {
+public interface AdministratorNode extends OfficeAdministrator {
+
+	/**
+	 * <p>
+	 * Obtains the {@link AdministratorType} for this {@link AdministratorNode}.
+	 * <p>
+	 * The {@link OfficeAdministrator} must be fully populated with the
+	 * necessary {@link Property} instances before calling this.
+	 * 
+	 * @return {@link AdministratorType} for this {@link AdministratorNode}.
+	 */
+	AdministratorType<?, ?> getAdministratorType();
 }

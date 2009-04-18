@@ -76,6 +76,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.Administrator;
+import net.officefloor.frame.spi.administration.Duty;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.impl.AbstractAdministratorSource;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -344,6 +345,50 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 		return admin;
 	}
+
+	/**
+	 * Adds a simple {@link OfficeAdministrator} to the
+	 * {@link OfficeAdministrator} with the supplied extension interface and a
+	 * single {@link Duty}.
+	 * 
+	 * @param officeArchitect
+	 *            {@link OfficeArchitect}.
+	 * @param administratorName
+	 *            Name of the {@link OfficeAdministrator}.
+	 * @param extensionInterface
+	 *            Extension interface.
+	 * @return {@link OfficeAdministrator}.
+	 */
+	protected OfficeAdministrator addAdministrator(
+			OfficeArchitect officeArchitect, String administratorName,
+			final Class<?> extensionInterface, final Enum<?> firstDutyKey,
+			final Enum<?>... remainingDutyKeys) {
+
+		// Create the simple administrator maker
+		AdministratorMaker maker = new AdministratorMaker() {
+			@Override
+			public void make(AdministratorMakerContext context) {
+				// Specify the extension interface
+				context.setExtensionInterface(extensionInterface);
+
+				// Specify the duties
+				context.addDuty(firstDutyKey); // must be at least one
+				for (Enum<?> dutyKey : remainingDutyKeys) {
+					context.addDuty(dutyKey);
+				}
+			}
+		};
+
+		// Add and return the administrator
+		return this.addAdministrator(officeArchitect, administratorName, maker);
+	}
+
+	/**
+	 * {@link Duty} key for a simple {@link OfficeAdministrator}.
+	 */
+	protected enum SimpleDutyKey {
+		DUTY
+	};
 
 	/**
 	 * Adds an {@link OfficeFloorTeam} to the {@link OfficeFloorDeployer}.
@@ -1318,6 +1363,22 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 */
 	protected static interface AdministratorMakerContext {
 
+		/**
+		 * Specifies the extension interface.
+		 * 
+		 * @param extensionInterface
+		 *            Extension interface.
+		 */
+		void setExtensionInterface(Class<?> extensionInterface);
+
+		/**
+		 * Adds a {@link Duty} for the {@link Administrator}.
+		 * 
+		 * @param dutyKey
+		 *            Key identifying the {@link Duty}.
+		 */
+		void addDuty(Enum<?> dutyKey);
+
 	}
 
 	/**
@@ -1372,6 +1433,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 					identifier);
 		}
 
+		/**
+		 * {@link MetaDataContext}.
+		 */
+		@SuppressWarnings("unchecked")
+		private MetaDataContext metaDataContext;
+
 		/*
 		 * ================ AbstractAdministratorSource ========================
 		 */
@@ -1386,12 +1453,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				throws Exception {
 
 			// Store details to load
-			// TODO consider storing details
+			this.metaDataContext = context;
 
 			// Obtain the administrator maker
-			// TODO provide getProperty on AdministratorSourceContext
 			String identifier = context.getAdministratorSourceContext()
-					.getProperties()
 					.getProperty(MAKER_IDENTIFIER_PROPERTY_NAME);
 			AdministratorMaker adminMaker = adminMakers.get(identifier);
 
@@ -1403,6 +1468,22 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		public Administrator<Object, Indexed> createAdministrator() {
 			fail("Should not require creating an administrator");
 			return null;
+		}
+
+		/*
+		 * ================= AdministratorMakerContext =========================
+		 */
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void setExtensionInterface(Class<?> extensionInterface) {
+			this.metaDataContext.setExtensionInterface(extensionInterface);
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void addDuty(Enum<?> dutyKey) {
+			this.metaDataContext.addDuty(dutyKey);
 		}
 	}
 

@@ -328,7 +328,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 						.getOfficeRequiredManagedObject("MO", Connection.class
 								.getName());
 				OfficeAdministrator admin = LoadOfficeTypeTest.this
-						.addAdministrator(office, "ADMIN", null);
+						.addAdministrator(office, "ADMIN", XAResource.class,
+								SimpleDutyKey.DUTY);
 				admin.administerManagedObject(mo);
 			}
 		});
