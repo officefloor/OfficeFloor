@@ -50,7 +50,7 @@ import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
-import net.officefloor.compile.spi.section.SectionBuilder;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionObject;
@@ -94,7 +94,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	/**
 	 * Location of the {@link OfficeSection} being built by this
-	 * {@link SectionBuilder}.
+	 * {@link SectionDesigner}.
 	 */
 	private final String sectionLocation;
 
@@ -150,7 +150,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 * 
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} being built by this
-	 *            {@link SectionBuilder}.
+	 *            {@link SectionDesigner}.
 	 * @param issues
 	 *            {@link CompilerIssues} to report issues.
 	 */
@@ -541,7 +541,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public SectionManagedObject addManagedObject(String managedObjectName,
+	public SectionManagedObject addSectionManagedObject(String managedObjectName,
 			String managedObjectSourceClassName) {
 		// Obtain and return the section managed object for the name
 		ManagedObjectNode managedObject = this.managedObjectNodes
@@ -561,12 +561,12 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public SectionWork addWork(String workName, String workSourceClassName) {
+	public SectionWork addSectionWork(String workName, String workSourceClassName) {
 		return this.addWork(workName, workSourceClassName, null);
 	}
 
 	@Override
-	public SectionWork addWork(String workName, WorkSource<?> workSource) {
+	public SectionWork addSectionWork(String workName, WorkSource<?> workSource) {
 		return this.addWork(workName, workSource.getClass().getName(),
 				workSource);
 	}

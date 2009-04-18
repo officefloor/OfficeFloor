@@ -17,7 +17,7 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -59,7 +59,7 @@ public interface OfficeFloorDeployer {
 			String managedObjectSourceClassName);
 
 	/**
-	 * Deploys an {@link Office} to the {@link OfficeFloor}.
+	 * Adds a {@link DeployedOffice} to the {@link OfficeFloor}.
 	 * 
 	 * @param officeName
 	 *            Name of the {@link Office}.
@@ -69,7 +69,7 @@ public interface OfficeFloorDeployer {
 	 *            Location of the {@link Office}.
 	 * @return Deployed {@link DeployedOffice}.
 	 */
-	DeployedOffice deployOffice(String officeName,
+	DeployedOffice addDeployedOffice(String officeName,
 			String officeSourceClassName, String officeLocation);
 
 	/**
@@ -127,15 +127,15 @@ public interface OfficeFloorDeployer {
 	void link(OfficeTeam team, OfficeFloorTeam officeFloorTeam);
 
 	/**
-	 * Links the {@link OfficeRequiredManagedObject} to be the
-	 * {@link OfficeFloorManagedObject}.
+	 * Links the {@link OfficeObject} to be the {@link OfficeFloorManagedObject}
+	 * .
 	 * 
 	 * @param requiredManagedObject
-	 *            {@link OfficeRequiredManagedObject}.
+	 *            {@link OfficeObject}.
 	 * @param officeFloorManagedObject
 	 *            {@link OfficeFloorManagedObject}.
 	 */
-	void link(OfficeRequiredManagedObject requiredManagedObject,
+	void link(OfficeObject requiredManagedObject,
 			OfficeFloorManagedObject officeFloorManagedObject);
 
 }

@@ -16,13 +16,16 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link TaskObjectNode} implementation.
@@ -47,6 +50,17 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	private final CompilerIssues issues;
 
 	/**
+	 * Flags whether within the {@link Office} context.
+	 */
+	private boolean isInOfficeContext = false;
+
+	/**
+	 * Location of the {@link Office} containing this
+	 * {@link OfficeSectionObject}.
+	 */
+	private String officeLocation;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param objectName
@@ -65,6 +79,16 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	}
 
 	/*
+	 * ==================== TaskObjectNode ============================
+	 */
+
+	@Override
+	public void addOfficeContext(String officeLocation) {
+		this.officeLocation = officeLocation;
+		this.isInOfficeContext = true;
+	}
+
+	/*
 	 * ===================== TaskObject ===============================
 	 */
 
@@ -79,14 +103,28 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 	@Override
 	public String getObjectDependencyName() {
+
+		// Ensure in office context
+		if (!this.isInOfficeContext) {
+			throw new IllegalStateException("Must be in office context");
+		}
+
+		// Return the object name
 		return this.objectName;
 	}
 
 	@Override
 	public DependentManagedObject getDependentManagedObject() {
-		// TODO provide managed object linking
-		throw new UnsupportedOperationException(
-				"TODO implement ObjectDependency.getDependentManagedObject");
+
+		// Ensure in office context
+		if (!this.isInOfficeContext) {
+			throw new IllegalStateException("Must be in office context");
+		}
+
+		// Return the retrieved dependent managed object
+		return LinkUtil.retrieveTarget(this, DependentManagedObject.class,
+				"TaskObject " + this.objectName, LocationType.OFFICE,
+				this.officeLocation, null, null, this.issues);
 	}
 
 	/*

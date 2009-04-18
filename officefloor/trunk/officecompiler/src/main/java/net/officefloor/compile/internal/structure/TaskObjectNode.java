@@ -18,6 +18,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.frame.api.manage.Office;
 
 /**
  * {@link TaskObject} node.
@@ -26,4 +27,14 @@ import net.officefloor.compile.spi.section.TaskObject;
  */
 public interface TaskObjectNode extends TaskObject, ObjectDependency,
 		LinkObjectNode {
+
+	/**
+	 * Adds the context of the {@link Office} containing this
+	 * {@link ObjectDependency}.
+	 * 
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 */
+	void addOfficeContext(String officeLocation);
+
 }

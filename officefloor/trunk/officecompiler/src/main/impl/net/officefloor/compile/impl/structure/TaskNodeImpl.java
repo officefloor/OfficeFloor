@@ -138,6 +138,11 @@ public class TaskNodeImpl implements TaskNode {
 	public void addOfficeContext(String officeLocation) {
 		this.officeLocation = officeLocation;
 
+		// Flag all task objects within office context
+		for (TaskObjectNode object : this.taskObjects.values()) {
+			object.addOfficeContext(officeLocation);
+		}
+
 		// Create the team responsible
 		this.teamResponsible = new OfficeTeamNodeImpl("Team for task "
 				+ this.taskName, this.officeLocation, this.issues);
@@ -171,9 +176,15 @@ public class TaskNodeImpl implements TaskNode {
 		// Obtain and return the task object for the name
 		TaskObjectNode object = this.taskObjects.get(taskObjectName);
 		if (object == null) {
-			// Add the task object
+			// Create the task object
 			object = new TaskObjectNodeImpl(taskObjectName,
 					this.sectionLocation, this.issues);
+			if (this.isOfficeContextLoaded) {
+				// Add the office context to the task
+				object.addOfficeContext(this.officeLocation);
+			}
+
+			// Add the task object
 			this.taskObjects.put(taskObjectName, object);
 		}
 		return object;

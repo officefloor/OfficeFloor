@@ -18,7 +18,7 @@ package net.officefloor.model.impl.desk;
 
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.section.SectionBuilder;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
@@ -42,11 +42,11 @@ public class DeskModelSectionSource implements SectionSource {
 	 * @param desk
 	 *            {@link DeskModel}.
 	 * @param sectionBuilder
-	 *            {@link SectionBuilder} to construct the {@link OfficeSection}
+	 *            {@link SectionDesigner} to construct the {@link OfficeSection}
 	 *            for the {@link DeskModel}.
 	 */
 	public static void sourceSectionType(DeskModel desk,
-			SectionBuilder sectionBuilder) {
+			SectionDesigner sectionBuilder) {
 
 		// Add the public tasks as inputs
 		for (TaskModel task : desk.getTasks()) {
@@ -85,7 +85,7 @@ public class DeskModelSectionSource implements SectionSource {
 	}
 
 	@Override
-	public void sourceSection(SectionBuilder sectionBuilder,
+	public void sourceSection(SectionDesigner sectionBuilder,
 			SectionSourceContext context) throws Exception {
 
 		// Obtain the configuration to the desk

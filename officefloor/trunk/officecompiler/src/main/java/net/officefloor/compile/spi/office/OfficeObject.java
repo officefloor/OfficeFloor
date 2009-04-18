@@ -17,24 +17,24 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 
 /**
- * {@link ManagedObject} that is to be provided by the {@link OfficeFloor}.
+ * {@link Object} required by the {@link Office} that is to be provided by the
+ * {@link OfficeFloor}.
  * 
  * @author Daniel
  */
-public interface OfficeRequiredManagedObject extends DependentManagedObject,
+public interface OfficeObject extends DependentManagedObject,
 		AdministerableManagedObject {
 
 	/**
 	 * Obtains the name that the {@link OfficeSource} refers to this
-	 * {@link ManagedObject}.
+	 * {@link Object}.
 	 * 
-	 * @return Name that the {@link OfficeSource} refers to this
-	 *         {@link ManagedObject}.
+	 * @return Name that the {@link OfficeSource} refers to this {@link Object}.
 	 */
-	String getOfficeRequiredManagedObjectName();
+	String getOfficeObjectName();
 
 }

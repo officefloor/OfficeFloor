@@ -32,25 +32,24 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public interface OfficeArchitect {
 
 	/**
-	 * Obtains an {@link OfficeRequiredManagedObject}.
+	 * Adds an {@link OfficeObject}.
 	 * 
-	 * @param officeManagedObjectName
-	 *            Name of the {@link OfficeRequiredManagedObject}.
+	 * @param officeObjectName
+	 *            Name of the {@link OfficeObject}.
 	 * @param objectType
 	 *            Object type.
-	 * @return Added {@link OfficeRequiredManagedObject}.
+	 * @return Added {@link OfficeObject}.
 	 */
-	OfficeRequiredManagedObject getOfficeRequiredManagedObject(
-			String officeManagedObjectName, String objectType);
+	OfficeObject addOfficeObject(String officeObjectName, String objectType);
 
 	/**
-	 * Obtains an {@link OfficeTeam}.
+	 * Adds an {@link OfficeTeam}.
 	 * 
 	 * @param officeTeamName
 	 *            Name of the {@link OfficeTeam}.
 	 * @return Added {@link OfficeTeam}.
 	 */
-	OfficeTeam getTeam(String officeTeamName);
+	OfficeTeam addOfficeTeam(String officeTeamName);
 
 	/**
 	 * Adds an {@link OfficeSection}.
@@ -65,7 +64,7 @@ public interface OfficeArchitect {
 	 *            {@link PropertyList} to load the {@link OfficeSection}.
 	 * @return Added {@link OfficeSection}.
 	 */
-	OfficeSection addSection(String sectionName, String sectionSourceClassName,
+	OfficeSection addOfficeSection(String sectionName, String sectionSourceClassName,
 			String sectionLocation, PropertyList properties);
 
 	/**
@@ -77,7 +76,7 @@ public interface OfficeArchitect {
 	 *            Fully qualified class name of the {@link ManagedObjectSource}.
 	 * @return Added {@link OfficeManagedObject}.
 	 */
-	OfficeManagedObject addManagedObject(String managedObjectName,
+	OfficeManagedObject addOfficeManagedObject(String managedObjectName,
 			String managedObjectSourceClassName);
 
 	/**
@@ -89,7 +88,7 @@ public interface OfficeArchitect {
 	 *            Fully qualified class name of the {@link AdministratorSource}.
 	 * @return Added {@link OfficeAdministrator}.
 	 */
-	OfficeAdministrator addAdministrator(String administratorName,
+	OfficeAdministrator addOfficeAdministrator(String administratorName,
 			String administratorSourceClassName);
 
 	/**
@@ -105,16 +104,14 @@ public interface OfficeArchitect {
 			OfficeManagedObject managedObject);
 
 	/**
-	 * Links the {@link OfficeSectionObject} to be the
-	 * {@link OfficeRequiredManagedObject}.
+	 * Links the {@link OfficeSectionObject} to be the {@link OfficeObject}.
 	 * 
 	 * @param sectionObject
 	 *            {@link OfficeSectionObject}.
 	 * @param managedObject
-	 *            {@link OfficeRequiredManagedObject}.
+	 *            {@link OfficeObject}.
 	 */
-	void link(OfficeSectionObject sectionObject,
-			OfficeRequiredManagedObject managedObject);
+	void link(OfficeSectionObject sectionObject, OfficeObject managedObject);
 
 	/**
 	 * Links the {@link ManagedObjectDependency} to be the
@@ -129,16 +126,14 @@ public interface OfficeArchitect {
 			OfficeManagedObject managedObject);
 
 	/**
-	 * Links the {@link ManagedObjectDependency} to be the
-	 * {@link OfficeRequiredManagedObject}.
+	 * Links the {@link ManagedObjectDependency} to be the {@link OfficeObject}.
 	 * 
 	 * @param dependency
 	 *            {@link ManagedObjectDependency}.
 	 * @param managedObject
-	 *            {@link OfficeRequiredManagedObject}.
+	 *            {@link OfficeObject}.
 	 */
-	void link(ManagedObjectDependency dependency,
-			OfficeRequiredManagedObject managedObject);
+	void link(ManagedObjectDependency dependency, OfficeObject managedObject);
 
 	/**
 	 * Links the {@link ManagedObjectFlow} to be undertaken by the

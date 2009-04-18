@@ -21,6 +21,7 @@ import java.sql.Connection;
 import javax.transaction.xa.XAResource;
 
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -324,8 +325,15 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 		final TaskFactoryManufacturer<Work, ?, ?> manufacturer = this
 				.createMockTaskFactoryManufacturer();
 
+		// Record not linked on first attempt to retrieve dependent
+		this.issues.addIssue(LocationType.OFFICE, SECTION_LOCATION, null, null,
+				"TaskObject OBJECT is not linked to a DependentManagedObject");
+
+		// Replay mocks
+		this.replayMockObjects();
+
 		// Load the task object dependency not linked
-		OfficeSection section = this.loadOfficeSection("SECTION",
+		OfficeSection section = this.loadOfficeSection(false, "SECTION",
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
@@ -343,6 +351,9 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				.getObjectDependencyName());
 		assertNull("Should not be linked to dependent managed object",
 				dependency.getDependentManagedObject());
+
+		// Verify the mocks
+		this.verifyMockObjects();
 	}
 
 	/**

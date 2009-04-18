@@ -28,7 +28,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
-import net.officefloor.compile.internal.structure.SectionObjectNode;
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
@@ -146,9 +146,9 @@ public class AdministratorNodeImpl implements AdministratorNode {
 		// Administer the managed object
 		this.administeredManagedObjects.add(managedObject);
 
-		// Make office required managed object aware of administration
-		if (managedObject instanceof SectionObjectNode) {
-			((SectionObjectNode) managedObject).addAdministrator(this);
+		// Make office object aware of administration
+		if (managedObject instanceof OfficeObjectNode) {
+			((OfficeObjectNode) managedObject).addAdministrator(this);
 		}
 	}
 

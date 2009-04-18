@@ -129,7 +129,7 @@ public class WorkNodeImpl implements WorkNode {
 	}
 
 	@Override
-	public SectionTask addTask(String taskName, String taskTypeName) {
+	public SectionTask addSectionTask(String taskName, String taskTypeName) {
 		// Obtain and return the section task for the name
 		TaskNode task = this.sectionTaskNodes.get(taskName);
 		if (task == null) {

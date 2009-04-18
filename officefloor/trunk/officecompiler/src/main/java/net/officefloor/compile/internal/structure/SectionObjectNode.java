@@ -16,15 +16,11 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.section.SectionObjectType;
-import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link SectionObject} node.
@@ -32,8 +28,7 @@ import net.officefloor.frame.api.manage.OfficeFloor;
  * @author Daniel
  */
 public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
-		SectionObject, OfficeSectionObject, OfficeManagedObjectType,
-		OfficeRequiredManagedObject, LinkObjectNode {
+		SectionObject, OfficeSectionObject, LinkObjectNode {
 
 	/**
 	 * Indicates if this {@link SectionObjectType} has been initialised.
@@ -51,21 +46,6 @@ public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
 	void initialise(String objectType);
 
 	/**
-	 * <p>
-	 * Adds an {@link AdministratorNode} for this
-	 * {@link OfficeManagedObjectType}.
-	 * <p>
-	 * This allows the {@link OfficeManagedObjectType} to report the extension
-	 * interfaces required to be supported by the
-	 * {@link OfficeFloorManagedObject} for the
-	 * {@link OfficeRequiredManagedObject}.
-	 * 
-	 * @param administrator
-	 *            {@link AdministratorNode}.
-	 */
-	void addAdministrator(AdministratorNode administrator);
-
-	/**
 	 * Adds the context of the {@link Office} containing this
 	 * {@link OfficeSectionObject}.
 	 * 
@@ -73,14 +53,5 @@ public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
 	 *            Location of the {@link Office}.
 	 */
 	void addOfficeContext(String officeLocation);
-
-	/**
-	 * Adds the context of the {@link OfficeFloor} containing this
-	 * {@link OfficeRequiredManagedObject}.
-	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 */
-	void addOfficeFloorContext(String officeFloorLocation);
 
 }
