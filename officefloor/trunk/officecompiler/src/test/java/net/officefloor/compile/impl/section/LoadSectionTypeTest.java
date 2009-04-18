@@ -33,7 +33,7 @@ import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.section.SectionBuilder;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
@@ -98,7 +98,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 	public void testSectionLocation() {
 		this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				assertEquals("Incorrect section location", SECTION_LOCATION,
 						context.getSectionLocation());
@@ -126,7 +126,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to obtain the configuration item
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				context.getConfiguration(location);
 			}
@@ -148,7 +148,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Obtain the configuration item
 		this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				assertEquals("Incorrect configuation item", item, context
 						.getConfiguration(location));
@@ -168,7 +168,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				context.getProperty("missing");
 			}
@@ -183,7 +183,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				assertEquals("Ensure get defaulted property", "DEFAULT",
 						context.getProperty("missing", "DEFAULT"));
@@ -215,7 +215,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				assertEquals("Incorrect class loader",
 						LoadSectionTypeTest.class.getClassLoader(), context
@@ -240,7 +240,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				throw failure;
 			}
@@ -258,7 +258,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				section.addSectionInput(null, String.class.getName());
 			}
@@ -272,7 +272,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				section.addSectionInput("INPUT", String.class.getName());
 			}
@@ -294,7 +294,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				section.addSectionInput("INPUT", null);
 			}
@@ -320,7 +320,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				section.addSectionOutput(null, String.class.getName(), false);
 			}
@@ -334,7 +334,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				section.addSectionOutput("OUTPUT", Exception.class.getName(),
 						true);
@@ -359,7 +359,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				section.addSectionOutput("OUTPUT", null, false);
 			}
@@ -387,7 +387,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				section.addSectionObject(null, Double.class.getName());
 			}
@@ -405,7 +405,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Attempt to load section type
 		this.loadSectionType(false, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				section.addSectionObject("OBJECT", null);
 			}
@@ -419,7 +419,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				section.addSectionObject("OBJECT", Double.class.getName());
 			}
@@ -441,7 +441,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				// Load nothing
 			}
@@ -464,7 +464,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		// Load section type
 		SectionType type = this.loadSectionType(true, new Loader() {
 			@Override
-			public void sourceSection(SectionBuilder section,
+			public void sourceSection(SectionDesigner section,
 					SectionSourceContext context) throws Exception {
 				// Inputs
 				section.addSectionInput("INPUT_A", Integer.class.getName());
@@ -585,13 +585,13 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		 * Implemented to load the {@link SectionType}.
 		 * 
 		 * @param section
-		 *            {@link SectionBuilder}.
+		 *            {@link SectionDesigner}.
 		 * @param context
 		 *            {@link SectionSourceContext}.
 		 * @throws Exception
 		 *             If fails to source {@link SectionType}.
 		 */
-		void sourceSection(SectionBuilder section, SectionSourceContext context)
+		void sourceSection(SectionDesigner section, SectionSourceContext context)
 				throws Exception;
 	}
 
@@ -638,7 +638,7 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceSection(SectionBuilder sectionBuilder,
+		public void sourceSection(SectionDesigner sectionBuilder,
 				SectionSourceContext context) throws Exception {
 			loader.sourceSection(sectionBuilder, context);
 		}

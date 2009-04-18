@@ -16,28 +16,16 @@
  */
 package net.officefloor.compile.impl.structure;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import net.officefloor.compile.administrator.AdministratorType;
-import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
-import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.section.SectionObjectType;
-import net.officefloor.compile.spi.office.OfficeAdministrator;
-import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SubSectionObject;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
  * {@link SectionObjectNode} implementation.
@@ -50,13 +38,6 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * Name of the {@link SectionObjectType}.
 	 */
 	private final String objectName;
-
-	/**
-	 * Listing of the {@link AdministratorNode} instances of the
-	 * {@link OfficeAdministrator} instances administering this
-	 * {@link OfficeManagedObjectType}.
-	 */
-	private final List<AdministratorNode> administrators = new LinkedList<AdministratorNode>();
 
 	/**
 	 * Location of the {@link OfficeSection} containing this
@@ -89,17 +70,6 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * {@link OfficeSectionObject}.
 	 */
 	private String officeLocation;
-
-	/**
-	 * Flags whether within the {@link OfficeFloor} context
-	 */
-	private boolean isInOfficeFloorContext = false;
-
-	/**
-	 * Location of the {@link OfficeFloor} containing this
-	 * {@link OfficeRequiredManagedObject}.
-	 */
-	private String officeFloorLocation;
 
 	/**
 	 * Initiate not initialised.
@@ -156,20 +126,9 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	@Override
-	public void addAdministrator(AdministratorNode administrator) {
-		this.administrators.add(administrator);
-	}
-
-	@Override
 	public void addOfficeContext(String officeLocation) {
 		this.officeLocation = officeLocation;
 		this.isInOfficeContext = true;
-	}
-
-	@Override
-	public void addOfficeFloorContext(String officeFloorLocation) {
-		this.officeFloorLocation = officeFloorLocation;
-		this.isInOfficeFloorContext = true;
 	}
 
 	/*
@@ -205,67 +164,6 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	}
 
 	/*
-	 * ===================== OfficeManagedObjectType ===========================
-	 */
-
-	@Override
-	public String getOfficeManagedObjectName() {
-		return this.objectName;
-	}
-
-	@Override
-	public String[] getExtensionInterfaces() {
-
-		// Obtain the set of extension interfaces to be supported
-		Set<String> extensionInterfaces = new HashSet<String>();
-		for (AdministratorNode admin : this.administrators) {
-
-			// Attempt to obtain the administrator type
-			AdministratorType<?, ?> adminType = admin.getAdministratorType();
-			if (adminType == null) {
-				continue; // problem loading administrator type
-			}
-
-			// Add the extension interface
-			Class<?> extensionInterface = adminType.getExtensionInterface();
-			extensionInterfaces.add(extensionInterface.getName());
-		}
-
-		// Create and return the listing of sorted extension interfaces
-		String[] listing = extensionInterfaces.toArray(new String[0]);
-		Arrays.sort(listing);
-		return listing;
-	}
-
-	/*
-	 * ==================== OfficeRequiredManagedObject ========================
-	 */
-
-	@Override
-	public String getOfficeRequiredManagedObjectName() {
-		return this.objectName;
-	}
-
-	/*
-	 * =================== DependentManagedObject =============================
-	 */
-	@Override
-	public String getDependentManagedObjectName() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement DependentManagedObject.getDependentManagedObjectName");
-	}
-
-	/*
-	 * ================== AdministerableManagedObject =========================
-	 */
-
-	@Override
-	public String getAdministerableManagedObjectName() {
-		return this.objectName;
-	}
-
-	/*
 	 * =============== LinkObjectNode ==============================
 	 */
 
@@ -279,12 +177,7 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 
 		// Ensure not already linked
 		if (this.linkedObjectNode != null) {
-			if (this.isInOfficeFloorContext) {
-				// Office object already linked
-				this.issues.addIssue(LocationType.OFFICE_FLOOR,
-						this.officeFloorLocation, null, null, "Office object "
-								+ this.objectName + " linked more than once");
-			} else if (this.isInOfficeContext) {
+			if (this.isInOfficeContext) {
 				// Office section object already linked
 				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
 						null, null, "Office section object " + this.objectName

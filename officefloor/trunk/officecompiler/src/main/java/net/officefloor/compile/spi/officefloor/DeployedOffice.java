@@ -20,7 +20,7 @@ import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
@@ -72,17 +72,17 @@ public interface DeployedOffice {
 	 *            Name of the {@link OfficeTeamType}.
 	 * @return {@link OfficeTeam}.
 	 */
-	OfficeTeam getOfficeTeam(String officeTeamName);
+	OfficeTeam getDeployedOfficeTeam(String officeTeamName);
 
 	/**
-	 * Obtains the {@link OfficeRequiredManagedObject} for the
+	 * Obtains the {@link OfficeObject} for the
 	 * {@link OfficeManagedObjectType}.
 	 * 
 	 * @param officeManagedObjectName
 	 *            Name of the {@link OfficeManagedObjectType}.
-	 * @return {@link OfficeRequiredManagedObject}.
+	 * @return {@link OfficeObject}.
 	 */
-	OfficeRequiredManagedObject getOfficeRequiredManagedObject(
+	OfficeObject getDeployedOfficeObject(
 			String officeManagedObjectName);
 
 }

@@ -18,7 +18,7 @@ package net.officefloor.compile.spi.section.source;
 
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.section.SectionBuilder;
+import net.officefloor.compile.spi.section.SectionDesigner;
 
 /**
  * Sources the {@link SectionType}.
@@ -42,10 +42,10 @@ public interface SectionSource {
 
 	/**
 	 * Sources the {@link OfficeSection} by constructing it via the input
-	 * {@link SectionBuilder}.
+	 * {@link SectionDesigner}.
 	 * 
 	 * @param sectionBuilder
-	 *            {@link SectionBuilder} to construct the structure of the
+	 *            {@link SectionDesigner} to construct the structure of the
 	 *            {@link OfficeSection}.
 	 * @param context
 	 *            {@link SectionSourceContext} to source details to construct
@@ -53,7 +53,7 @@ public interface SectionSource {
 	 * @throws Exception
 	 *             If fails to construct the {@link OfficeSection}.
 	 */
-	void sourceSection(SectionBuilder sectionBuilder,
+	void sourceSection(SectionDesigner sectionBuilder,
 			SectionSourceContext context) throws Exception;
 
 }

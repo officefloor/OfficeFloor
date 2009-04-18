@@ -45,7 +45,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
-import net.officefloor.compile.spi.section.SectionBuilder;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
@@ -64,7 +64,6 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
-import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
@@ -117,8 +116,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * {@link CompilerIssues}.
 	 */
-	protected final CompilerIssues issues = new StderrCompilerIssuesWrapper(
-			this.createMock(CompilerIssues.class));
+	protected final CompilerIssues issues = this
+			.createMock(CompilerIssues.class);
 
 	/*
 	 * (non-Javadoc)
@@ -257,17 +256,41 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 */
 	protected OfficeSection loadOfficeSection(String sectionName,
 			SectionMaker maker) {
+		return this.loadOfficeSection(true, sectionName, maker);
+	}
+
+	/**
+	 * Loads the {@link OfficeSection}.
+	 * 
+	 * @param isHandleMockState
+	 *            <code>true</code> for method to handle mock states.
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
+	 * @param maker
+	 *            {@link SectionMaker} to make the {@link OfficeSection}.
+	 * @return Loaded {@link OfficeSection}.
+	 */
+	protected OfficeSection loadOfficeSection(boolean isHandleMockState,
+			String sectionName, SectionMaker maker) {
 
 		// Register the section maker
 		PropertyList propertyList = MakerSectionSource.register(maker);
 
+		// Replay the mocks if handling mock state
+		if (isHandleMockState) {
+			this.replayMockObjects();
+		}
+
 		// Load the section
-		this.replayMockObjects();
 		SectionLoader loader = new SectionLoaderImpl(SECTION_LOCATION);
 		OfficeSection section = loader.loadOfficeSection(sectionName,
 				MakerSectionSource.class, this.configurationContext,
 				propertyList, this.classLoader, this.issues);
-		this.verifyMockObjects();
+
+		// Verify the mocks if handling mock state
+		if (isHandleMockState) {
+			this.verifyMockObjects();
+		}
 
 		// Return the section
 		return section;
@@ -291,7 +314,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		PropertyList propertyList = MakerSectionSource.register(maker);
 
 		// Add and return the office section
-		return officeArchitect.addSection(sectionName, MakerSectionSource.class
+		return officeArchitect.addOfficeSection(sectionName, MakerSectionSource.class
 				.getName(), sectionName, propertyList);
 	}
 
@@ -314,7 +337,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		PropertyList propertyList = MakerManagedObjectSource.register(maker);
 
 		// Add and return the managed object
-		OfficeManagedObject mo = officeArchitect.addManagedObject(
+		OfficeManagedObject mo = officeArchitect.addOfficeManagedObject(
 				managedObjectName, MakerManagedObjectSource.class.getName());
 		for (Property property : propertyList) {
 			mo.addProperty(property.getName(), property.getValue());
@@ -341,7 +364,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		PropertyList propertyList = MakerAdministratorSource.register(maker);
 
 		// Add and return the administrator
-		OfficeAdministrator admin = officeArchitect.addAdministrator(
+		OfficeAdministrator admin = officeArchitect.addOfficeAdministrator(
 				administratorName, MakerAdministratorSource.class.getName());
 		for (Property property : propertyList) {
 			admin.addProperty(property.getName(), property.getValue());
@@ -467,7 +490,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		PropertyList propertyList = MakerOfficeSource.register(maker);
 
 		// Add and return the deployed office
-		DeployedOffice office = officeFloorDeployer.deployOffice(officeName,
+		DeployedOffice office = officeFloorDeployer.addDeployedOffice(officeName,
 				MakerOfficeSource.class.getName(), officeName);
 		for (Property property : propertyList) {
 			office.addProperty(property.getName(), property.getValue());
@@ -495,11 +518,11 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	protected static interface SectionMakerContext {
 
 		/**
-		 * Obtains the {@link SectionBuilder}.
+		 * Obtains the {@link SectionDesigner}.
 		 * 
-		 * @return {@link SectionBuilder}.
+		 * @return {@link SectionDesigner}.
 		 */
-		SectionBuilder getBuilder();
+		SectionDesigner getBuilder();
 
 		/**
 		 * Obtains the {@link SectionSourceContext}.
@@ -691,9 +714,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		/**
-		 * {@link SectionBuilder}.
+		 * {@link SectionDesigner}.
 		 */
-		private SectionBuilder builder;
+		private SectionDesigner builder;
 
 		/**
 		 * {@link SectionSourceContext}.
@@ -711,7 +734,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceSection(SectionBuilder sectionBuilder,
+		public void sourceSection(SectionDesigner sectionBuilder,
 				SectionSourceContext context) throws Exception {
 
 			// Store details to load
@@ -732,7 +755,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 */
 
 		@Override
-		public SectionBuilder getBuilder() {
+		public SectionDesigner getBuilder() {
 			return this.builder;
 		}
 
@@ -766,7 +789,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 			// Create and return the section managed object
 			SectionManagedObject mo = this.builder
-					.addManagedObject(managedObjectName,
+					.addSectionManagedObject(managedObjectName,
 							MakerManagedObjectSource.class.getName());
 			for (Property property : propertyList) {
 				mo.addProperty(property.getName(), property.getValue());
@@ -783,7 +806,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 					workFactory);
 
 			// Return the created work
-			SectionWork work = this.builder.addWork(workName,
+			SectionWork work = this.builder.addSectionWork(workName,
 					MakerWorkSource.class.getName());
 			for (Property property : properties) {
 				work.addProperty(property.getName(), property.getValue());
@@ -811,7 +834,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			SectionWork work = this.addWork(workName, workFactory, workMaker);
 
 			// Return the section task
-			return work.addTask(taskName, taskName);
+			return work.addSectionTask(taskName, taskName);
 		}
 
 		@Override

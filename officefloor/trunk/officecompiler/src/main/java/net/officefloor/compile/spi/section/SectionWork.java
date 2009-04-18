@@ -55,6 +55,6 @@ public interface SectionWork {
 	 *            Name of the {@link TaskType} on the {@link WorkType}.
 	 * @return {@link SectionTask}.
 	 */
-	SectionTask addTask(String taskName, String taskTypeName);
+	SectionTask addSectionTask(String taskName, String taskTypeName);
 
 }

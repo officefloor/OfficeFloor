@@ -27,6 +27,7 @@ import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
+import net.officefloor.compile.internal.structure.OfficeObjectNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
@@ -40,7 +41,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
-import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
@@ -99,10 +100,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private final CompilerIssues issues;
 
 	/**
-	 * {@link SectionObjectNode} instances by their
-	 * {@link OfficeRequiredManagedObject} name.
+	 * {@link OfficeObjectNode} instances by their {@link OfficeObject} name.
 	 */
-	private final Map<String, SectionObjectNode> objects = new HashMap<String, SectionObjectNode>();
+	private final Map<String, OfficeObjectNode> objects = new HashMap<String, OfficeObjectNode>();
 
 	/**
 	 * {@link OfficeTeamNode} instances by their {@link OfficeTeam} name.
@@ -244,10 +244,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	 */
 
 	@Override
-	public OfficeRequiredManagedObject getOfficeRequiredManagedObject(
+	public OfficeObject addOfficeObject(
 			String officeManagedObjectName, String objectType) {
 		// Obtain and return the required object for the name
-		SectionObjectNode object = this.objects.get(officeManagedObjectName);
+		OfficeObjectNode object = this.objects.get(officeManagedObjectName);
 		if (object == null) {
 
 			// Ensure issue if already added as managed object
@@ -260,7 +260,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			}
 
 			// Add the object
-			object = new SectionObjectNodeImpl(officeManagedObjectName,
+			object = new OfficeObjectNodeImpl(officeManagedObjectName,
 					objectType, this.officeLocation, this.issues);
 			this.objects.put(officeManagedObjectName, object);
 
@@ -279,7 +279,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeTeam getTeam(String officeTeamName) {
+	public OfficeTeam addOfficeTeam(String officeTeamName) {
 		// Obtain and return the team for the name
 		OfficeTeamNode team = this.teams.get(officeTeamName);
 		if (team == null) {
@@ -301,7 +301,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeSection addSection(String sectionName,
+	public OfficeSection addOfficeSection(String sectionName,
 			String sectionSourceClassName, String sectionLocation,
 			PropertyList properties) {
 		// Obtain and return the section for the name
@@ -323,7 +323,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeManagedObject addManagedObject(String managedObjectName,
+	public OfficeManagedObject addOfficeManagedObject(String managedObjectName,
 			String managedObjectSourceClassName) {
 		// Obtain and return the section managed object for the name
 		ManagedObjectNode managedObject = this.managedObjects
@@ -331,7 +331,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		if (managedObject == null) {
 
 			// Ensure not already added as required object
-			SectionObjectNode object = this.objects.get(managedObjectName);
+			OfficeObjectNode object = this.objects.get(managedObjectName);
 			if (object != null) {
 				// Object already added
 				this.addIssue("Managed object " + managedObjectName
@@ -356,7 +356,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeAdministrator addAdministrator(String administratorName,
+	public OfficeAdministrator addOfficeAdministrator(String administratorName,
 			String administratorSourceClassName) {
 		// Obtain and return the administrator for the name
 		AdministratorNode administrator = this.administrators
@@ -383,7 +383,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public void link(OfficeSectionObject sectionObject,
-			OfficeRequiredManagedObject managedObject) {
+			OfficeObject managedObject) {
 		this.linkObject(sectionObject, managedObject);
 	}
 
@@ -395,7 +395,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public void link(ManagedObjectDependency dependency,
-			OfficeRequiredManagedObject managedObject) {
+			OfficeObject managedObject) {
 		this.linkObject(dependency, managedObject);
 	}
 
@@ -456,7 +456,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeRequiredManagedObject getOfficeRequiredManagedObject(
+	public OfficeObject getDeployedOfficeObject(
 			String officeManagedObjectName) {
 
 		// Ensure in office floor context
@@ -465,11 +465,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 					"Must be in office floor context to obtain required managed object");
 		}
 
-		// Obtain and return the required managed object
-		SectionObjectNode object = this.objects.get(officeManagedObjectName);
+		// Obtain and return the office object
+		OfficeObjectNode object = this.objects.get(officeManagedObjectName);
 		if (object == null) {
 			// Create the object within the office floor context
-			object = new SectionObjectNodeImpl(officeManagedObjectName,
+			object = new OfficeObjectNodeImpl(officeManagedObjectName,
 					this.officeLocation, this.issues);
 			object.addOfficeFloorContext(this.officeFloorLocation);
 
@@ -480,7 +480,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeTeam getOfficeTeam(String officeTeamName) {
+	public OfficeTeam getDeployedOfficeTeam(String officeTeamName) {
 
 		// Ensure in office floor context
 		if (!this.isInOfficeFloorContext) {

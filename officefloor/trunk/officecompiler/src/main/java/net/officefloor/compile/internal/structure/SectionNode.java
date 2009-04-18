@@ -20,7 +20,7 @@ import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.section.SectionBuilder;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -30,7 +30,7 @@ import net.officefloor.model.repository.ConfigurationContext;
  * 
  * @author Daniel
  */
-public interface SectionNode extends SectionBuilder, SectionType, SubSection,
+public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 		OfficeSection {
 
 	// TODO need to add initialise and isInitialised for getting input

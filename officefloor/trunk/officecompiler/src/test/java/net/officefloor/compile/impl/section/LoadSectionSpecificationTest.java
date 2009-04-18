@@ -22,7 +22,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.section.SectionBuilder;
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
@@ -390,7 +390,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public void sourceSection(SectionBuilder sectionBuilder,
+		public void sourceSection(SectionDesigner sectionBuilder,
 				SectionSourceContext context) throws Exception {
 			fail("Should not be invoked for obtaining specification");
 		}

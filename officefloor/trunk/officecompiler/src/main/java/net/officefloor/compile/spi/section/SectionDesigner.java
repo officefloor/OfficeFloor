@@ -27,11 +27,11 @@ import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * Builder to construct the {@link OfficeSection}.
+ * Designer to design the {@link OfficeSection}.
  * 
  * @author Daniel
  */
-public interface SectionBuilder {
+public interface SectionDesigner {
 
 	/**
 	 * Adds a {@link SectionInput} to the {@link OfficeSection} being built.
@@ -84,7 +84,7 @@ public interface SectionBuilder {
 	 *            the {@link WorkSource}.
 	 * @return {@link SectionWork}.
 	 */
-	SectionWork addWork(String workName, String workSourceClassName);
+	SectionWork addSectionWork(String workName, String workSourceClassName);
 
 	/**
 	 * Adds a {@link SectionWork} to the {@link OfficeSection} being built.
@@ -98,7 +98,7 @@ public interface SectionBuilder {
 	 *            instantiated {@link WorkSource} implementation.
 	 * @return {@link SectionWork}.
 	 */
-	SectionWork addWork(String workName, WorkSource<?> workSource);
+	SectionWork addSectionWork(String workName, WorkSource<?> workSource);
 
 	/**
 	 * Adds a {@link SectionManagedObject} to the {@link OfficeSection} being
@@ -116,7 +116,7 @@ public interface SectionBuilder {
 	 *            {@link ManagedObjectSource}.
 	 * @return {@link SectionManagedObject}.
 	 */
-	SectionManagedObject addManagedObject(String managedObjectName,
+	SectionManagedObject addSectionManagedObject(String managedObjectName,
 			String managedObjectSourceClassName);
 
 	/**

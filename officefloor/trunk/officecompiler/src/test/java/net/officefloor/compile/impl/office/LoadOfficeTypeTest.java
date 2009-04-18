@@ -35,7 +35,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
@@ -262,7 +262,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.getOfficeRequiredManagedObject(null, Connection.class
+				office.addOfficeObject(null, Connection.class
 						.getName());
 			}
 		});
@@ -282,7 +282,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.getOfficeRequiredManagedObject("MO", null);
+				office.addOfficeObject("MO", null);
 			}
 		});
 	}
@@ -297,7 +297,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.getOfficeRequiredManagedObject("MO", Connection.class
+				office.addOfficeObject("MO", Connection.class
 						.getName());
 			}
 		});
@@ -325,8 +325,8 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				OfficeRequiredManagedObject mo = office
-						.getOfficeRequiredManagedObject("MO", Connection.class
+				OfficeObject mo = office
+						.addOfficeObject("MO", Connection.class
 								.getName());
 				OfficeAdministrator admin = LoadOfficeTypeTest.this
 						.addAdministrator(office, "ADMIN", XAResource.class,
@@ -364,7 +364,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.getTeam(null);
+				office.addOfficeTeam(null);
 			}
 		});
 	}
@@ -379,7 +379,7 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 			@Override
 			public void sourceOffice(OfficeArchitect office,
 					OfficeSourceContext context) throws Exception {
-				office.getTeam("TEAM");
+				office.addOfficeTeam("TEAM");
 			}
 		});
 

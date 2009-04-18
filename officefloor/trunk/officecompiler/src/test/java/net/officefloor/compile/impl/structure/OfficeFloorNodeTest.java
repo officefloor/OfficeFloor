@@ -20,7 +20,7 @@ import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -307,7 +307,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Link
 		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE",
 				null);
-		OfficeTeam team = office.getOfficeTeam("TEAM");
+		OfficeTeam team = office.getDeployedOfficeTeam("TEAM");
 		OfficeFloorTeam officeFloorTeam = this.addTeam(this.node,
 				"OFFICE_FLOOR_TEAM", null);
 		this.node.link(team, officeFloorTeam);
@@ -322,7 +322,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	}
 
 	/**
-	 * Ensure can link {@link OfficeRequiredManagedObject} to the
+	 * Ensure can link {@link OfficeObject} to the
 	 * {@link OfficeFloorManagedObject}.
 	 */
 	public void testLinkOfficeRequiredManagedObjectToOfficeFloorManagedObject() {
@@ -335,8 +335,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Link
 		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE",
 				null);
-		OfficeRequiredManagedObject object = office
-				.getOfficeRequiredManagedObject("OBJECT");
+		OfficeObject object = office
+				.getDeployedOfficeObject("OBJECT");
 		OfficeFloorManagedObject mo = this.addManagedObject(this.node,
 				"MO_TARGET", null);
 		this.node.link(object, mo);

@@ -26,7 +26,7 @@ import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
-import net.officefloor.compile.spi.office.OfficeRequiredManagedObject;
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
@@ -159,7 +159,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public DeployedOffice deployOffice(String officeName,
+	public DeployedOffice addDeployedOffice(String officeName,
 			String officeSourceClassName, String officeLocation) {
 		// Obtain and return the office for the name
 		OfficeNode office = this.offices.get(officeName);
@@ -206,7 +206,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	}
 
 	@Override
-	public void link(OfficeRequiredManagedObject requiredManagedObject,
+	public void link(OfficeObject requiredManagedObject,
 			OfficeFloorManagedObject officeFloorManagedObject) {
 		this.linkObject(requiredManagedObject, officeFloorManagedObject);
 	}
