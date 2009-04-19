@@ -23,7 +23,6 @@ import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * {@link SectionManagedObject} node.
@@ -55,13 +54,7 @@ public interface ManagedObjectNode extends SectionManagedObject,
 	/**
 	 * Loads the {@link ManagedObjectMetaData} of this
 	 * {@link SectionManagedObject}.
-	 * 
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
 	 */
-	void loadManagedObjectMetaData(ConfigurationContext configurationContext,
-			ClassLoader classLoader);
+	void loadManagedObjectMetaData();
 
 }

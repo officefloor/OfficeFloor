@@ -45,7 +45,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * {@link ManagedObjectNode} implementation.
@@ -208,16 +207,16 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public void loadManagedObjectMetaData(
-			ConfigurationContext configurationContext, ClassLoader classLoader) {
+	public void loadManagedObjectMetaData() {
 
 		// Obtain the managed object source class
 		Class<? extends ManagedObjectSource> managedObjectSourceClass = CompileUtil
 				.obtainClass(this.managedObjectSourceClassName,
-						ManagedObjectSource.class, classLoader,
-						LocationType.SECTION, this.sectionLocation,
-						AssetType.MANAGED_OBJECT, this.managedObjectName,
-						this.context.getCompilerIssues());
+						ManagedObjectSource.class, this.context
+								.getClassLoader(), LocationType.SECTION,
+						this.sectionLocation, AssetType.MANAGED_OBJECT,
+						this.managedObjectName, this.context
+								.getCompilerIssues());
 		if (managedObjectSourceClass == null) {
 			return; // must have managed object source class
 		}
@@ -229,8 +228,8 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 		// Load the managed object type
 		this.managedObjectType = loader.loadManagedObjectType(
-				managedObjectSourceClass, this.propertyList, classLoader,
-				this.context.getCompilerIssues());
+				managedObjectSourceClass, this.propertyList, this.context
+						.getClassLoader(), this.context.getCompilerIssues());
 
 		// Ensure all the teams are made available
 		if (this.managedObjectType != null) {

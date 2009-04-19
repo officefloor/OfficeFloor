@@ -21,6 +21,7 @@ import java.util.Set;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -113,6 +114,44 @@ public class LinkUtil {
 	 * Retrieves the target link by the specified type.
 	 * 
 	 * @param link
+	 *            Starting {@link LinkTeamNode}.
+	 * @param targetType
+	 *            Target {@link LinkTeamNode} type to retrieve.
+	 * @param startingLinkName
+	 *            Name of the starting {@link LinkTeamNode}.
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param assetType
+	 *            {@link AssetType}.
+	 * @param assetName
+	 *            Name of the {@link Asset}.
+	 * @return Target {@link LinkTeamNode} or <code>null</code> if issue
+	 *         obtaining which is reported to the {@link CompilerIssues}.
+	 */
+	public static <T> T retrieveTarget(LinkTeamNode link, Class<T> targetType,
+			String startingLinkName, LocationType locationType,
+			String location, AssetType assetType, String assetName,
+			CompilerIssues issues) {
+
+		// Create the link team traverser
+		Traverser<LinkTeamNode> traverser = new Traverser<LinkTeamNode>() {
+			@Override
+			public LinkTeamNode getNextLinkNode(LinkTeamNode link) {
+				return link.getLinkedTeamNode();
+			}
+		};
+
+		// REturn the retrieved target
+		return retrieveTarget(link, traverser, targetType, startingLinkName,
+				locationType, location, assetType, assetName, issues);
+	}
+
+	/**
+	 * Retrieves the target link by the specified type.
+	 * 
+	 * @param link
 	 *            Starting link.
 	 * @param traverser
 	 *            {@link Traverser} to traverse the links.
@@ -136,6 +175,9 @@ public class LinkUtil {
 			Class<T> targetType, String startingLinkName,
 			LocationType locationType, String location, AssetType assetType,
 			String assetName, CompilerIssues issues) {
+
+		// Must traverse away from first link
+		link = traverser.getNextLinkNode(link);
 
 		// Traverse the links until find target type
 		Set<Object> traversedLinks = new HashSet<Object>();

@@ -21,8 +21,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
@@ -31,12 +33,19 @@ import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -107,7 +116,7 @@ public class TaskNodeImpl implements TaskNode {
 	/**
 	 * {@link TaskTeam} responsible for this {@link OfficeTask}.
 	 */
-	private TaskTeam teamResponsible = null;
+	private OfficeTeamNode teamResponsible = null;
 
 	/**
 	 * Initiate.
@@ -130,6 +139,18 @@ public class TaskNodeImpl implements TaskNode {
 		this.context = context;
 	}
 
+	/**
+	 * Adds an issue regarding the {@link OfficeSection} being built.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 */
+	private void addIssue(String issueDescription) {
+		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
+				this.sectionLocation, AssetType.TASK, this.taskName,
+				issueDescription);
+	}
+
 	/*
 	 * ========================== TaskNode ===================================
 	 */
@@ -147,6 +168,48 @@ public class TaskNodeImpl implements TaskNode {
 		this.teamResponsible = new OfficeTeamNodeImpl("Team for task "
 				+ this.taskName, this.officeLocation, this.context);
 		this.isOfficeContextLoaded = true;
+	}
+
+	@Override
+	public <W extends Work> void buildTask(WorkType<W> workType,
+			WorkBuilder<W> workBuilder) {
+
+		// Obtain the task factory for this task
+		TaskType<W, ?, ?> taskType = null;
+		for (TaskType<W, ?, ?> type : workType.getTaskTypes()) {
+			if (this.taskTypeName.equals(type.getTaskName())) {
+				// Found the type for this task
+				taskType = type;
+			}
+		}
+		if (taskType == null) {
+			this.addIssue("Can not find task type '" + this.taskTypeName + "'");
+			return; // must have task type
+		}
+
+		// Obtain the office team for the task
+		OfficeTeam officeTeam = LinkUtil.retrieveTarget(this.teamResponsible,
+				OfficeTeam.class, "Team for task  " + this.taskName,
+				LocationType.SECTION, this.sectionLocation, AssetType.TASK,
+				this.taskName, this.context.getCompilerIssues());
+		if (officeTeam == null) {
+			return; // must have team for the task
+		}
+
+		// Build the task
+		TaskFactory<W, ?, ?> taskFactory = taskType
+				.getTaskFactoryManufacturer().createTaskFactory();
+		TaskBuilder<W, ?, ?> taskBuilder = workBuilder.addTask(this.taskName,
+				taskFactory);
+		taskBuilder.setTeam(officeTeam.getOfficeTeamName());
+
+		// TODO build flows
+
+		// TODO build next flow
+
+		// TODO build objects
+
+		// TODO build escalations
 	}
 
 	/*

@@ -17,6 +17,8 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.execute.Work;
 
 /**
  * {@link SectionWork} node.
@@ -24,4 +26,13 @@ import net.officefloor.compile.spi.section.SectionWork;
  * @author Daniel
  */
 public interface WorkNode extends SectionWork {
+
+	/**
+	 * Builds the {@link Work} for this {@link SectionWork}.
+	 * 
+	 * @param builder
+	 *            {@link OfficeBuilder}.
+	 */
+	void buildWork(OfficeBuilder builder);
+
 }

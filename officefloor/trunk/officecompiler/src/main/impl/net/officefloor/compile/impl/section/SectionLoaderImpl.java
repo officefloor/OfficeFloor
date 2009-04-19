@@ -192,8 +192,8 @@ public class SectionLoaderImpl implements SectionLoader {
 		// Create the section designer
 		NodeContext nodeContext = new NodeContextImpl(configurationContext,
 				classLoader, issues);
-		SectionNode sectionType = new SectionNodeImpl(this.sectionLocation,
-				nodeContext);
+		SectionNode sectionType = new SectionNodeImpl(SectionType.class
+				.getSimpleName(), this.sectionLocation, nodeContext);
 
 		try {
 			// Source the section type
@@ -277,8 +277,7 @@ public class SectionLoaderImpl implements SectionLoader {
 				sectionSource, propertyList, this.sectionLocation, nodeContext);
 
 		// Recursive load all the section nodes
-		sectionNode.loadSection(this.sectionLocation, configurationContext,
-				classLoader);
+		sectionNode.loadOfficeSection(this.sectionLocation);
 
 		// Return the section node as the office section
 		return sectionNode;

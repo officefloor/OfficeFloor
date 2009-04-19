@@ -18,6 +18,10 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionTask;
+import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -34,4 +38,15 @@ public interface TaskNode extends SectionTask, OfficeTask, LinkFlowNode {
 	 *            Location of the {@link Office}.
 	 */
 	void addOfficeContext(String officeLocation);
+
+	/**
+	 * Builds the {@link Task} for this {@link TaskNode}.
+	 * 
+	 * @param workType
+	 *            {@link WorkType} for the {@link Work} of this {@link Task}.
+	 * @param workBuilder
+	 *            {@link WorkBuilder} for the {@link Work} of this {@link Task}.
+	 */
+	<W extends Work> void buildTask(WorkType<W> workType,
+			WorkBuilder<W> workBuilder);
 }

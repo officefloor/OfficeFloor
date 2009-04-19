@@ -18,8 +18,8 @@ package net.officefloor.compile.work;
 
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.frame.api.execute.Work;
 
@@ -48,11 +48,11 @@ public interface WorkLoader {
 			Class<WS> workSourceClass, CompilerIssues issues);
 
 	/**
-	 * Loads and returns the {@link WorkType} from the {@link WorkSource}.
+	 * Loads and returns the {@link WorkType} from the {@link WorkSource} class.
 	 * 
 	 * @param workSourceClass
 	 *            Class of the {@link WorkSource}.
-	 * @param propertyList
+	 * @param properties
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link WorkType}.
 	 * @param classLoader
@@ -65,7 +65,7 @@ public interface WorkLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
-			Class<WS> workSourceClass, PropertyList propertyList,
+			Class<WS> workSourceClass, PropertyList properties,
 			ClassLoader classLoader, CompilerIssues issues);
 
 }

@@ -17,8 +17,11 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
@@ -38,4 +41,19 @@ public interface OfficeNode extends OfficeType, OfficeArchitect,
 	 *            Location of the {@link OfficeFloor}.
 	 */
 	void addOfficeFloorContext(String officeFloorLocation);
+
+	/**
+	 * Loads this {@link Office} into this {@link OfficeNode}.
+	 * 
+	 * @return <code>true</code> if successfully loaded.
+	 */
+	boolean loadOffice(OfficeSource officeSource, PropertyList properties);
+
+	/**
+	 * Builds the {@link Office} for this {@link OfficeNode}.
+	 * 
+	 * @param builder
+	 *            {@link OfficeFloorBuilder}.
+	 */
+	void buildOffice(OfficeFloorBuilder builder);
 }

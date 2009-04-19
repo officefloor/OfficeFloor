@@ -79,26 +79,9 @@ public interface SectionDesigner {
 	 *            Fully qualified class name of the {@link WorkSource}. This
 	 *            allows adding the {@link SectionWork} without having to worry
 	 *            if the {@link WorkSource} is available on the class path.
-	 *            <b>This should be used over attempting to find the
-	 *            {@link WorkSource}</b> - as should leave to compiler to find
-	 *            the {@link WorkSource}.
 	 * @return {@link SectionWork}.
 	 */
 	SectionWork addSectionWork(String workName, String workSourceClassName);
-
-	/**
-	 * Adds a {@link SectionWork} to the {@link OfficeSection} being built.
-	 * 
-	 * @param workName
-	 *            Name of the {@link SectionWork}.
-	 * @param workSource
-	 *            {@link WorkSource} to enable providing direct instances. This
-	 *            should only be used should the {@link SectionSource} want to
-	 *            create a {@link SectionWork} instance by supplying its own
-	 *            instantiated {@link WorkSource} implementation.
-	 * @return {@link SectionWork}.
-	 */
-	SectionWork addSectionWork(String workName, WorkSource<?> workSource);
 
 	/**
 	 * Adds a {@link SectionManagedObject} to the {@link OfficeSection} being

@@ -18,6 +18,7 @@ package net.officefloor.compile.impl.util;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -57,7 +58,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
 
 	/**
-	 * Ensures can find the traverse {@link LinkFlowNode} instances.
+	 * Ensures can traverse {@link LinkFlowNode} instances.
 	 */
 	public void testTraverseLinkFlowNodes() {
 
@@ -72,7 +73,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures can find the traverse {@link LinkObjectNode} instances.
+	 * Ensures can traverse {@link LinkObjectNode} instances.
 	 */
 	public void testTraverseLinkObjectNodes() {
 
@@ -87,6 +88,21 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures can traverse {@link LinkTeamNode} instances.
+	 */
+	public void testTraverseLinkTeamNodes() {
+
+		// Create the links
+		TargetLinkNode target = new TargetLinkNode();
+		LinkNode link = new LinkNode(target);
+
+		// Obtain the target
+		TargetLinkNode retrieved = this.retrieveTeamTarget(link,
+				"Office team TEAM");
+		assertEquals("Incorrect target", target, retrieved);
+	}
+
+	/**
 	 * Ensures can find the link on many steps.
 	 */
 	public void testFindLinkOnManySteps() {
@@ -97,6 +113,21 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		for (int i = 0; i < 20; i++) {
 			link = new LinkNode(link);
 		}
+
+		// Obtain the target
+		TargetLinkNode retrieved = this.retrieveFlowTarget(link,
+				"TaskFlow FLOW");
+		assertEquals("Incorrect target", target, retrieved);
+	}
+
+	/**
+	 * Ensures that at least one link is traversed.
+	 */
+	public void testMustTraverseOneLink() {
+
+		// Create the targets
+		TargetLinkNode target = new TargetLinkNode();
+		TargetLinkNode link = new TargetLinkNode(target);
 
 		// Obtain the target
 		TargetLinkNode retrieved = this.retrieveFlowTarget(link,
@@ -191,6 +222,25 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Retrieves the {@link TargetLinkNode}.
+	 * 
+	 * @param link
+	 *            Starting {@link LinkTeamNode}.
+	 * @param startingLinkName
+	 *            Name of starting link.
+	 * @return {@link TargetLinkNode}.
+	 */
+	private TargetLinkNode retrieveTeamTarget(LinkTeamNode link,
+			String startingLinkName) {
+		this.replayMockObjects();
+		TargetLinkNode retrieved = LinkUtil.retrieveTarget(link,
+				TargetLinkNode.class, startingLinkName, LOCATION_TYPE,
+				LOCATION, ASSET_TYPE, ASSET_NAME, this.issues);
+		this.verifyMockObjects();
+		return retrieved;
+	}
+
+	/**
 	 * Records and issue.
 	 * 
 	 * @param issueDescription
@@ -204,7 +254,8 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	/**
 	 * Link node for testing.
 	 */
-	private class LinkNode implements LinkFlowNode, LinkObjectNode {
+	private class LinkNode implements LinkFlowNode, LinkObjectNode,
+			LinkTeamNode {
 
 		/**
 		 * Linked node.
@@ -279,6 +330,21 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 
 		@Override
 		public boolean linkObjectNode(LinkObjectNode node) {
+			fail("Should not be linking, only following links");
+			return false;
+		}
+
+		/*
+		 * =============== LinkTeamNode ==================================
+		 */
+
+		@Override
+		public LinkTeamNode getLinkedTeamNode() {
+			return this.getLinkedNode();
+		}
+
+		@Override
+		public boolean linkTeamNode(LinkTeamNode node) {
 			fail("Should not be linking, only following links");
 			return false;
 		}

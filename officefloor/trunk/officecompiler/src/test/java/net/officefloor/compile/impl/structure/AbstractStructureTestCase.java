@@ -1168,13 +1168,13 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * Maker {@link WorkSource}.
 	 */
-	private static class MakerWorkSource implements WorkSource<Work>,
+	public static class MakerWorkSource implements WorkSource<Work>,
 			WorkMakerContext {
 
 		/**
 		 * Property name for the {@link WorkMaker} identifier.
 		 */
-		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "work.maker";
+		public static final String MAKER_IDENTIFIER_PROPERTY_NAME = "work.maker";
 
 		/**
 		 * {@link WorkMaker} instances by their identifiers.
@@ -1547,7 +1547,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		/**
 		 * Property name to obtain the {@link TeamMaker} identifier.
 		 */
-		private static final String MAKER_IDENTIFIER_PROPERTY_NAME = "team.maker";
+		public static final String MAKER_IDENTIFIER_PROPERTY_NAME = "team.maker";
 
 		/**
 		 * {@link TeamMaker} instances by their identifiers.
