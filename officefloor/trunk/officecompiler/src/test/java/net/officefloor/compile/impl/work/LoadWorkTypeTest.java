@@ -44,7 +44,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.desk.DeskModel;
 
 /**
  * Tests loading the {@link WorkType} from the {@link WorkSource}.

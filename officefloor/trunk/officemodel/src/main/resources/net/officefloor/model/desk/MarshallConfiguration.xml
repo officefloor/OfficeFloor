@@ -81,6 +81,7 @@
 				<attribute method="getIsPublic" attribute="public" />
 				<attribute method="getWorkName" attribute="work" />
 				<attribute method="getWorkTaskName" attribute="task" />
+				<attribute method="getReturnType" attribute="return-type" />
 				<attribute method="getX" attribute="x" />
 				<attribute method="getY" attribute="y" />
 			</attributes>
