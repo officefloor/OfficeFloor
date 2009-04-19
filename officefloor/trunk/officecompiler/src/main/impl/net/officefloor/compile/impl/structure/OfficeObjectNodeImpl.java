@@ -25,8 +25,8 @@ import java.util.Set;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.section.SectionObjectType;
@@ -64,9 +64,9 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	private String officeLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private NodeContext context;
 
 	/**
 	 * Indicates if this {@link OfficeManagedObjectType} is initialised.
@@ -97,14 +97,14 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	 *            Type of the {@link OfficeObject}.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public OfficeObjectNodeImpl(String objectName, String objectType,
-			String officeLocation, CompilerIssues issues) {
+			String officeLocation, NodeContext context) {
 		this.objectName = objectName;
 		this.officeLocation = officeLocation;
-		this.issues = issues;
+		this.context = context;
 		this.initialise(objectType);
 	}
 
@@ -115,14 +115,14 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 	 *            Name of the {@link OfficeObject}.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public OfficeObjectNodeImpl(String objectName, String officeLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.objectName = objectName;
 		this.officeLocation = officeLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -235,13 +235,21 @@ public class OfficeObjectNodeImpl implements OfficeObjectNode {
 		if (this.linkedObjectNode != null) {
 			if (this.isInOfficeFloorContext) {
 				// Office object already linked
-				this.issues.addIssue(LocationType.OFFICE_FLOOR,
-						this.officeFloorLocation, null, null, "Office object "
-								+ this.objectName + " linked more than once");
+				this.context.getCompilerIssues().addIssue(
+						LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation,
+						null,
+						null,
+						"Office object " + this.objectName
+								+ " linked more than once");
 			} else {
 				// Office object already linked
-				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
-						null, null, "Office section object " + this.objectName
+				this.context.getCompilerIssues().addIssue(
+						LocationType.OFFICE,
+						this.officeLocation,
+						null,
+						null,
+						"Office section object " + this.objectName
 								+ " linked more than once");
 			}
 			return false; // already linked

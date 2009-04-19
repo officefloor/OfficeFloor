@@ -17,8 +17,8 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -44,9 +44,9 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Indicates if this {@link SectionOutputType} is initialised.
@@ -81,14 +81,14 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SubSectionOutput}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public SectionOutputNodeImpl(String outputName, String sectionLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.outputName = outputName;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/**
@@ -103,15 +103,15 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SubSectionOutput}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public SectionOutputNodeImpl(String outputName, String argumentType,
 			boolean isEscalationOnly, String sectionLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.outputName = outputName;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 		this.initialise(argumentType, isEscalationOnly);
 	}
 
@@ -190,14 +190,22 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 		if (this.linkedFlowNode != null) {
 			if (this.isInOfficeContext) {
 				// Office section output
-				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
-						null, null, "Office section output " + this.outputName
+				this.context.getCompilerIssues().addIssue(
+						LocationType.OFFICE,
+						this.officeLocation,
+						null,
+						null,
+						"Office section output " + this.outputName
 								+ " linked more than once");
 			} else {
 				// Sub section output
-				this.issues.addIssue(LocationType.SECTION,
-						this.sectionLocation, null, null, "Sub section output "
-								+ this.outputName + " linked more than once");
+				this.context.getCompilerIssues().addIssue(
+						LocationType.SECTION,
+						this.sectionLocation,
+						null,
+						null,
+						"Sub section output " + this.outputName
+								+ " linked more than once");
 			}
 			return false; // already linked
 		}

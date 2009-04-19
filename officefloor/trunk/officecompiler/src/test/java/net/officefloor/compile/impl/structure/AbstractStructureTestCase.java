@@ -25,6 +25,7 @@ import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -117,6 +118,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	 */
 	protected final CompilerIssues issues = this
 			.createMock(CompilerIssues.class);
+
+	/**
+	 * {@link NodeContext}.
+	 */
+	protected final NodeContext nodeContext = new NodeContextImpl(
+			this.configurationContext, this.classLoader, this.issues);
 
 	/*
 	 * (non-Javadoc)
@@ -313,8 +320,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		PropertyList propertyList = MakerSectionSource.register(maker);
 
 		// Add and return the office section
-		return officeArchitect.addOfficeSection(sectionName, MakerSectionSource.class
-				.getName(), sectionName, propertyList);
+		return officeArchitect.addOfficeSection(sectionName,
+				MakerSectionSource.class.getName(), sectionName, propertyList);
 	}
 
 	/**
@@ -489,8 +496,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		PropertyList propertyList = MakerOfficeSource.register(maker);
 
 		// Add and return the deployed office
-		DeployedOffice office = officeFloorDeployer.addDeployedOffice(officeName,
-				MakerOfficeSource.class.getName(), officeName);
+		DeployedOffice office = officeFloorDeployer.addDeployedOffice(
+				officeName, MakerOfficeSource.class.getName(), officeName);
 		for (Property property : propertyList) {
 			office.addProperty(property.getName(), property.getValue());
 		}

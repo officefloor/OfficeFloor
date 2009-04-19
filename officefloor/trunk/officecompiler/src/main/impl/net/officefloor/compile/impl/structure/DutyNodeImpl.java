@@ -30,7 +30,7 @@ public class DutyNodeImpl implements DutyNode {
 	 * Name of this {@link OfficeDuty}.
 	 */
 	private final String dutyName;
-
+	
 	/**
 	 * Initiate.
 	 * 

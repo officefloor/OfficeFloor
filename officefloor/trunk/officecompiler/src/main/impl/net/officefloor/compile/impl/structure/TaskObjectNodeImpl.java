@@ -18,8 +18,8 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -45,9 +45,9 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Flags whether within the {@link Office} context.
@@ -68,14 +68,14 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link TaskObject}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public TaskObjectNodeImpl(String objectName, String sectionLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.objectName = objectName;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -124,7 +124,8 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 		// Return the retrieved dependent managed object
 		return LinkUtil.retrieveTarget(this, DependentManagedObject.class,
 				"TaskObject " + this.objectName, LocationType.OFFICE,
-				this.officeLocation, null, null, this.issues);
+				this.officeLocation, null, null, this.context
+						.getCompilerIssues());
 	}
 
 	/*
@@ -141,9 +142,14 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 		// Ensure not already linked
 		if (this.linkedObjectNode != null) {
-			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-					null, null, "Task object " + this.objectName
-							+ " linked more than once");
+			this.context.getCompilerIssues()
+					.addIssue(
+							LocationType.SECTION,
+							this.sectionLocation,
+							null,
+							null,
+							"Task object " + this.objectName
+									+ " linked more than once");
 			return false; // already linked
 		}
 

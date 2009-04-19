@@ -19,9 +19,9 @@ package net.officefloor.compile.impl.structure;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -53,9 +53,9 @@ public class WorkNodeImpl implements WorkNode {
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues} to report issues.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Map of {@link TaskNode} instances for the {@link OfficeSection}
@@ -89,18 +89,18 @@ public class WorkNodeImpl implements WorkNode {
 	 *            Map of {@link TaskNode} instances for the
 	 *            {@link OfficeSection} containing this {@link SectionWork} by
 	 *            their {@link SectionTask} names.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public WorkNodeImpl(String workName, String workSourceClassName,
 			WorkSource<?> workSource, String sectionLocation,
-			Map<String, TaskNode> sectionTaskNodes, CompilerIssues issues) {
+			Map<String, TaskNode> sectionTaskNodes, NodeContext context) {
 		this.workName = workName;
 		this.workSourceClassName = workSourceClassName;
 		this.workSource = workSource;
 		this.sectionLocation = sectionLocation;
 		this.sectionTaskNodes = sectionTaskNodes;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/**
@@ -110,8 +110,9 @@ public class WorkNodeImpl implements WorkNode {
 	 *            Description of the issue.
 	 */
 	private void addIssue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-				AssetType.WORK, this.workName, issueDescription);
+		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
+				this.sectionLocation, AssetType.WORK, this.workName,
+				issueDescription);
 	}
 
 	/*
@@ -135,7 +136,7 @@ public class WorkNodeImpl implements WorkNode {
 		if (task == null) {
 			// Add the section task
 			task = new TaskNodeImpl(taskName, taskTypeName,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			this.sectionTaskNodes.put(taskName, task);
 		} else {
 			// Section task already added

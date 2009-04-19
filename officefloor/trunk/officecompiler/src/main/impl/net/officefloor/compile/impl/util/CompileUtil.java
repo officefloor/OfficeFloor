@@ -60,7 +60,7 @@ public class CompileUtil {
 	/**
 	 * Obtains the {@link Class}.
 	 * 
-	 * @param sectionSourceClassName
+	 * @param className
 	 *            Fully qualified name of the {@link Class} to obtain.
 	 * @param expectedType
 	 *            Expected type of the {@link Class} to return.
@@ -79,13 +79,13 @@ public class CompileUtil {
 	 * @return {@link Class}.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> Class<? extends T> obtainClass(String sectionSourceClassName,
+	public static <T> Class<? extends T> obtainClass(String className,
 			Class<T> expectedType, ClassLoader classLoader,
 			LocationType locationType, String location, AssetType assetType,
 			String assetName, CompilerIssues issues) {
 		try {
 			// Load the class
-			Class<?> clazz = classLoader.loadClass(sectionSourceClassName);
+			Class<?> clazz = classLoader.loadClass(className);
 
 			// Ensure class of expected type
 			if (!expectedType.isAssignableFrom(clazz)) {
@@ -94,14 +94,14 @@ public class CompileUtil {
 								+ " (class=" + clazz.getName() + ")");
 				return null; // instance not of type
 			}
-			
+
 			// Return the obtained class
 			return (Class<? extends T>) clazz;
 
 		} catch (Throwable ex) {
 			// Indicate issue
 			issues.addIssue(locationType, location, assetType, assetName,
-					"Failed to obtain class " + sectionSourceClassName, ex);
+					"Failed to obtain class " + className, ex);
 			return null; // no class
 		}
 	}

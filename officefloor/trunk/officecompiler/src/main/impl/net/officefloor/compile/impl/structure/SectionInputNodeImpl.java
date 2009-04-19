@@ -17,9 +17,9 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -49,9 +49,9 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Indicates if this {@link SectionInputType} is initialised.
@@ -74,15 +74,15 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SectionInputNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public SectionInputNodeImpl(String inputName, SectionNode section,
-			String sectionLocation, CompilerIssues issues) {
+			String sectionLocation, NodeContext context) {
 		this.inputName = inputName;
 		this.section = section;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/**
@@ -97,15 +97,15 @@ public class SectionInputNodeImpl implements SectionInputNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SectionInputNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public SectionInputNodeImpl(String inputName, SectionNode section,
-			String parameterType, String sectionLocation, CompilerIssues issues) {
+			String parameterType, String sectionLocation, NodeContext context) {
 		this.inputName = inputName;
 		this.section = section;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 		this.initialise(parameterType);
 	}
 
@@ -188,9 +188,9 @@ public class SectionInputNodeImpl implements SectionInputNode {
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-					null, null, "Input " + this.inputName
-							+ " linked more than once");
+			this.context.getCompilerIssues().addIssue(LocationType.SECTION,
+					this.sectionLocation, null, null,
+					"Input " + this.inputName + " linked more than once");
 			return false; // already linked
 		}
 

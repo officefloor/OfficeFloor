@@ -18,7 +18,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -44,9 +44,9 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Flags if within context of the {@link Office}.
@@ -76,14 +76,14 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link ManagedObjectFlowNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectFlowNodeImpl(String managedObjectFlowName,
-			String sectionLocation, CompilerIssues issues) {
+			String sectionLocation, NodeContext context) {
 		this.managedObjectFlowName = managedObjectFlowName;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -127,20 +127,29 @@ public class ManagedObjectFlowNodeImpl implements ManagedObjectFlowNode {
 		if (this.linkedFlowNode != null) {
 			if (this.isInOfficeFloorContext) {
 				// Office floor managed object flow
-				this.issues.addIssue(LocationType.OFFICE_FLOOR,
-						this.officeFloorLocation, null, null,
+				this.context.getCompilerIssues().addIssue(
+						LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation,
+						null,
+						null,
 						"Managed object flow " + this.managedObjectFlowName
 								+ " linked more than once");
 			} else if (this.isInOfficeContext) {
 				// Office managed object flow
-				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
-						null, null, "Managed object flow "
-								+ this.managedObjectFlowName
+				this.context.getCompilerIssues().addIssue(
+						LocationType.OFFICE,
+						this.officeLocation,
+						null,
+						null,
+						"Managed object flow " + this.managedObjectFlowName
 								+ " linked more than once");
 			} else {
 				// Section managed object flow
-				this.issues.addIssue(LocationType.SECTION,
-						this.sectionLocation, null, null,
+				this.context.getCompilerIssues().addIssue(
+						LocationType.SECTION,
+						this.sectionLocation,
+						null,
+						null,
 						"Managed object flow " + this.managedObjectFlowName
 								+ " linked more than once");
 			}

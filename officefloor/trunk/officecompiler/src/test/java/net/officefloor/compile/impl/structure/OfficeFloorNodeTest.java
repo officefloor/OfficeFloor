@@ -64,8 +64,8 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	 * {@link OfficeFloorNode} implementation.
 	 */
 	private final OfficeFloorNode node = new OfficeFloorNodeImpl(
-			this.configurationContext, this.classLoader, OFFICE_FLOOR_LOCATION,
-			this.issues);
+			OFFICE_FLOOR_LOCATION, new NodeContextImpl(
+					this.configurationContext, this.classLoader, this.issues));
 
 	/**
 	 * Tests adding an {@link OfficeFloorTeam}.
@@ -335,8 +335,7 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 		// Link
 		DeployedOffice office = this.addDeployedOffice(this.node, "OFFICE",
 				null);
-		OfficeObject object = office
-				.getDeployedOfficeObject("OBJECT");
+		OfficeObject object = office.getDeployedOfficeObject("OBJECT");
 		OfficeFloorManagedObject mo = this.addManagedObject(this.node,
 				"MO_TARGET", null);
 		this.node.link(object, mo);

@@ -17,8 +17,8 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.frame.api.manage.Office;
@@ -42,9 +42,9 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	private final String officeLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Flag indicating if in {@link OfficeFloor} context.
@@ -63,14 +63,14 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 	 *            Name of this {@link OfficeTeam}.
 	 * @param officeLocation
 	 *            Location of the {@link Office}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public OfficeTeamNodeImpl(String teamName, String officeLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.teamName = teamName;
 		this.officeLocation = officeLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -117,13 +117,14 @@ public class OfficeTeamNodeImpl implements OfficeTeamNode {
 		if (this.linkedTeamNode != null) {
 			if (this.isInOfficeFloorContext) {
 				// Deployed office team
-				this.issues.addIssue(LocationType.OFFICE_FLOOR,
-						this.officeFloorLocation, null, null, this.teamName
-								+ " already assigned");
+				this.context.getCompilerIssues().addIssue(
+						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+						null, null, this.teamName + " already assigned");
 			} else {
 				// Office required team
-				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
-						null, null, this.teamName + " already assigned");
+				this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
+						this.officeLocation, null, null,
+						this.teamName + " already assigned");
 			}
 			return false; // already linked
 		}

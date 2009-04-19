@@ -17,11 +17,17 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -54,9 +60,9 @@ public class TeamNodeImpl implements TeamNode {
 	private final String officeFloorLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Initiate.
@@ -67,15 +73,40 @@ public class TeamNodeImpl implements TeamNode {
 	 *            Class name of the {@link TeamSource}.
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public TeamNodeImpl(String teamName, String teamSourceClassName,
-			String officeFloorLocation, CompilerIssues issues) {
+			String officeFloorLocation, NodeContext context) {
 		this.teamName = teamName;
 		this.teamSourceClassName = teamSourceClassName;
 		this.officeFloorLocation = officeFloorLocation;
-		this.issues = issues;
+		this.context = context;
+	}
+
+	/*
+	 * =============== TeamNode ======================================
+	 */
+
+	@Override
+	public void buildTeam(OfficeFloorBuilder builder) {
+
+		// Obtain the team source class
+		Class<? extends TeamSource> teamSourceClass = CompileUtil.obtainClass(
+				this.teamSourceClassName, TeamSource.class, this.context
+						.getClassLoader(), LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, AssetType.TEAM, this.teamName,
+				this.context.getCompilerIssues());
+		if (teamSourceClass == null) {
+			return; // must obtain team source class
+		}
+
+		// Build the team
+		TeamBuilder<?> teamBuilder = builder.addTeam(this.teamName,
+				teamSourceClass);
+		for (Property property : this.propertyList) {
+			teamBuilder.addProperty(property.getName(), property.getValue());
+		}
 	}
 
 	/*

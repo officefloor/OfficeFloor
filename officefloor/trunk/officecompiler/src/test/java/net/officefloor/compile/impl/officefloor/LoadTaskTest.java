@@ -57,7 +57,8 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 
 		// Record loading the task
 		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-				.addTeam("TEAM", MakerTeamSource.class), teamBuilder);
+				.addTeam("OFFICE_FLOOR_TEAM", MakerTeamSource.class),
+				teamBuilder);
 		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
 				.addOffice("OFFICE"), officeBuilder);
 		officeBuilder.registerTeam("OFFICE_TEAM", "OFFICE_FLOOR_TEAM");
@@ -105,7 +106,8 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 				// Specify team responsible for task
 				OfficeFloorTeam team = context.addTeam("OFFICE_FLOOR_TEAM",
 						null);
-				deployer.link(office.getDeployedOfficeTeam("OFFICE_TEAM"), team);
+				deployer
+						.link(office.getDeployedOfficeTeam("OFFICE_TEAM"), team);
 			}
 		});
 	}

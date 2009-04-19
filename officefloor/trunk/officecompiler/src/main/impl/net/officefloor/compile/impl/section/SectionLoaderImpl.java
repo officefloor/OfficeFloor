@@ -17,9 +17,11 @@
 package net.officefloor.compile.impl.section;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.NodeContextImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -187,9 +189,11 @@ public class SectionLoaderImpl implements SectionLoader {
 				this.sectionLocation, configurationContext, propertyList,
 				classLoader);
 
-		// Create the section builder
+		// Create the section designer
+		NodeContext nodeContext = new NodeContextImpl(configurationContext,
+				classLoader, issues);
 		SectionNode sectionType = new SectionNodeImpl(this.sectionLocation,
-				issues);
+				nodeContext);
 
 		try {
 			// Source the section type
@@ -267,8 +271,10 @@ public class SectionLoaderImpl implements SectionLoader {
 		}
 
 		// Create the section node (loading in its properties)
+		NodeContext nodeContext = new NodeContextImpl(configurationContext,
+				classLoader, issues);
 		SectionNode sectionNode = new SectionNodeImpl(sectionName,
-				sectionSource, propertyList, this.sectionLocation, issues);
+				sectionSource, propertyList, this.sectionLocation, nodeContext);
 
 		// Recursive load all the section nodes
 		sectionNode.loadSection(this.sectionLocation, configurationContext,

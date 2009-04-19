@@ -16,22 +16,34 @@
  */
 package net.officefloor.compile.internal.structure;
 
-import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
-import net.officefloor.frame.spi.team.Team;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.model.repository.ConfigurationContext;
 
 /**
- * {@link OfficeFloorTeam} node.
+ * Context for a node.
  * 
  * @author Daniel
  */
-public interface TeamNode extends OfficeFloorTeam, LinkTeamNode {
+public interface NodeContext {
 
 	/**
-	 * Builds the {@link Team} for this {@link TeamNode}.
+	 * Obtains the {@link ConfigurationContext}.
 	 * 
-	 * @param builder
-	 *            {@link OfficeFloorBuilder}.
+	 * @return {@link ConfigurationContext}.
 	 */
-	void buildTeam(OfficeFloorBuilder builder);
+	ConfigurationContext getConfigurationContext();
+
+	/**
+	 * Obtains the {@link ClassLoader}.
+	 * 
+	 * @return {@link ClassLoader}.
+	 */
+	ClassLoader getClassLoader();
+
+	/**
+	 * Obtains the {@link CompilerIssues}.
+	 * 
+	 * @return {@link CompilerIssues}.
+	 */
+	CompilerIssues getCompilerIssues();
 }

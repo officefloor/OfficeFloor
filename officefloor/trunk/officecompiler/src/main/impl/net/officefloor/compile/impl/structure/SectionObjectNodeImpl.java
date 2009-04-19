@@ -17,8 +17,8 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -46,9 +46,9 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Indicates if this {@link SectionObjectType} is initialised.
@@ -79,14 +79,14 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SubSectionObject}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public SectionObjectNodeImpl(String objectName, String sectionLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.objectName = objectName;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/**
@@ -99,14 +99,14 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SubSectionObject}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public SectionObjectNodeImpl(String objectName, String objectType,
-			String sectionLocation, CompilerIssues issues) {
+			String sectionLocation, NodeContext context) {
 		this.objectName = objectName;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 		this.initialise(objectType);
 	}
 
@@ -179,14 +179,22 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 		if (this.linkedObjectNode != null) {
 			if (this.isInOfficeContext) {
 				// Office section object already linked
-				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
-						null, null, "Office section object " + this.objectName
+				this.context.getCompilerIssues().addIssue(
+						LocationType.OFFICE,
+						this.officeLocation,
+						null,
+						null,
+						"Office section object " + this.objectName
 								+ " linked more than once");
 			} else {
 				// Sub section object already linked
-				this.issues.addIssue(LocationType.SECTION,
-						this.sectionLocation, null, null, "Sub section object "
-								+ this.objectName + " linked more than once");
+				this.context.getCompilerIssues().addIssue(
+						LocationType.SECTION,
+						this.sectionLocation,
+						null,
+						null,
+						"Sub section object " + this.objectName
+								+ " linked more than once");
 			}
 			return false; // already linked
 		}
