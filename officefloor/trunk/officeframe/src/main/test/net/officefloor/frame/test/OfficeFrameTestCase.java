@@ -295,8 +295,9 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	public synchronized static <O> void assertGraph(O expectedRoot,
 			O actualRoot, String... ignoreMethodNames) throws Exception {
-		assertGraph(expectedRoot, actualRoot, new HashMap<Object, Integer>(),
-				"<root>", ignoreMethodNames);
+		assertGraph(expectedRoot, actualRoot,
+				new HashMap<CheckedObject, Integer>(), "<root>",
+				ignoreMethodNames);
 	}
 
 	/**
@@ -304,6 +305,51 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * been logged.
 	 */
 	private static boolean isAssetGraphExceptionLogged = false;
+
+	/**
+	 * Wrapper around {@link Object} being checked to ensure
+	 * {@link Object#equals(Object)} does not equate {@link Object} instances to
+	 * be the same and not fully check the object graph.
+	 */
+	private static class CheckedObject {
+
+		/**
+		 * Object being checked.
+		 */
+		private final Object object;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param object
+		 *            Object being checked.
+		 */
+		public CheckedObject(Object object) {
+			this.object = object;
+		}
+
+		/*
+		 * ================== Object ================================
+		 */
+
+		@Override
+		public boolean equals(Object obj) {
+
+			// Object must be checked object
+			assertTrue("Must be CheckedObject " + obj,
+					(obj instanceof CheckedObject));
+			CheckedObject that = (CheckedObject) obj;
+
+			// Ensure same instance (rather than equals)
+			return (this.object == that.object);
+		}
+
+		@Override
+		public int hashCode() {
+			// Use the object's hash to ensuring able to find itself
+			return this.object.hashCode();
+		}
+	}
 
 	/**
 	 * Assets that the input graph is as expected.
@@ -323,7 +369,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <O> void assertGraph(O expectedRoot, O actualRoot,
-			Map<Object, Integer> checkedObjects, String path,
+			Map<CheckedObject, Integer> checkedObjects, String path,
 			String[] ignoreMethodNames) throws Exception {
 
 		// Reset
@@ -331,27 +377,31 @@ public abstract class OfficeFrameTestCase extends TestCase {
 
 		try {
 
-			// Always check contents of a Collection or null value
-			// (stops two unrelated empty collections matching)
+			// Always check contents of:
+			// - null
+			// - Collection
+			// - primitive types
+			// (stops equals instances from matching)
 			if ((expectedRoot != null)
-					&& (!(expectedRoot instanceof Collection))) {
+					&& (!(expectedRoot instanceof Collection))
+					&& (!(expectedRoot.getClass().isPrimitive()))) {
 				// Ensure checked only twice
 				// (allows checking bi-directional references)
-				if (checkedObjects.containsKey(expectedRoot)) {
+				CheckedObject checkedObject = new CheckedObject(expectedRoot);
+				Integer timesChecked = checkedObjects.get(checkedObject);
+				if (timesChecked != null) {
 					// Ensure only check twice at most
-					int timesChecked = checkedObjects.get(expectedRoot)
-							.intValue();
-					timesChecked++; // another check
-					if (timesChecked > 2) {
+					int times = timesChecked.intValue() + 1;
+					if (times > 2) {
 						// Already checked twice
 						return;
 					}
 
 					// Specify another check of object
-					checkedObjects.put(expectedRoot, new Integer(timesChecked));
+					checkedObjects.put(checkedObject, new Integer(times));
 				} else {
 					// First time accessed, therefore flag first time
-					checkedObjects.put(expectedRoot, new Integer(1));
+					checkedObjects.put(checkedObject, new Integer(1));
 				}
 			}
 
@@ -360,7 +410,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				// Match as both null
 				return;
 			} else if ((expectedRoot != null) && (actualRoot != null)) {
-				// Both not null therefore check
+				// Both not null therefore ensure of same type
 				assertEquals("Path " + path + " type mismatch", expectedRoot
 						.getClass(), actualRoot.getClass());
 
@@ -393,13 +443,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 						// Obtain the method name
 						String methodName = method.getName();
 
-						// Ignore hashCode
-						if ("hashCode".equals(methodName)) {
-							continue;
-						}
-
-						// Ignore toString
-						if ("toString".equals(methodName)) {
+						// Ignore Object methods
+						if (Object.class.equals(method.getDeclaringClass())) {
 							continue;
 						}
 
@@ -471,7 +516,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <O> void assertGraphCollection(Collection<O> expected,
-			Collection<O> actual, Map<Object, Integer> checkedObjects,
+			Collection<O> actual, Map<CheckedObject, Integer> checkedObjects,
 			String path, String[] ignoreMethodNames) throws Exception {
 
 		// Validate the size

@@ -63,6 +63,7 @@
 					<attributes>
 						<attribute method="getSubSectionOutputName" attribute="name" />
 						<attribute method="getArgumentType" attribute="argument-type" />
+						<attribute method="getEscalationOnly" attribute="escalation-only" />
 					</attributes>
 					<object method="getSubSectionInput" element="input">
 						<attributes>
