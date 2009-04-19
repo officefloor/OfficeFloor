@@ -26,6 +26,8 @@ import net.officefloor.model.desk.TaskModel;
  * 
  * @author Daniel
  */
+// TODO remove CompilerAwareTaskFactory
+@Deprecated
 public interface CompilerAwareTaskFactory<W extends Work, M extends Enum<M>, F extends Enum<F>>
 		extends TaskFactory<W, M, F> {
 

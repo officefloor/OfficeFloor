@@ -207,6 +207,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			team.buildTeam(builder);
 		}
 
+		// Build the offices
+		for (OfficeNode office : this.offices.values()) {
+			office.buildOffice(builder);
+		}
+
 		// Return the built office floor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
 	}

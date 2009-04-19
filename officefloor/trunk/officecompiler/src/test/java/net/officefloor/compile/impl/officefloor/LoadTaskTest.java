@@ -16,17 +16,15 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
+import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.build.TeamBuilder;
-import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -38,39 +36,39 @@ import net.officefloor.frame.api.execute.Work;
  */
 public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 
+	// TODO remove once tests are working
+	@Override
+	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
+		return new StderrCompilerIssuesWrapper(issues);
+	}
+
+	/**
+	 * {@link WorkFactory}.
+	 */
+	private final WorkFactory<Work> workFactory = this.createMockWorkFactory();
+
+	/**
+	 * {@link TaskFactoryManufacturer}.
+	 */
+	private final TaskFactoryManufacturer<Work, ?, ?> manufacturer = this
+			.createMockTaskFactoryManufacturer();
+
 	/**
 	 * Ensure can load a simple {@link Task}.
 	 */
 	public void testLoadSimpleTask() {
 
-		final TeamBuilder<MakerTeamSource> teamBuilder = this
-				.createMockTeamBuilder();
-		final OfficeBuilder officeBuilder = this.createMockOfficeBuilder();
-		final WorkBuilder<Work> workBuilder = this.createMockWorkBuilder();
-		final WorkFactory<Work> workFactory = this.createMockWorkFactory();
-		final TaskBuilder<Work, ?, ?> taskBuilder = this
-				.createMockTaskBuilder();
-		final TaskFactoryManufacturer<Work, ?, ?> manufacturer = this
-				.createMockTaskFactoryManufacturer();
-		final TaskFactory<Work, ?, ?> taskFactory = this
-				.createMockTaskFactory();
-
 		// Record loading the task
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-				.addTeam("OFFICE_FLOOR_TEAM", MakerTeamSource.class),
-				teamBuilder);
-		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
-				.addOffice("OFFICE"), officeBuilder);
+		this.record_officefloor_addTeam("OFFICE_FLOOR_TEAM");
+		OfficeBuilder officeBuilder = this
+				.record_officefloor_addOffice("OFFICE");
 		officeBuilder.registerTeam("OFFICE_TEAM", "OFFICE_FLOOR_TEAM");
-		this.recordReturn(officeBuilder, officeBuilder.addWork("SECTION.WORK",
-				workFactory), workBuilder);
-		this.recordReturn(manufacturer, manufacturer.createTaskFactory(),
-				taskFactory);
-		this.recordReturn(workBuilder,
-				workBuilder.addTask("TASK", taskFactory), taskBuilder);
+		this.record_office_addWork("SECTION.WORK", this.workFactory);
+		TaskBuilder<?, ?, ?> taskBuilder = this.record_work_addTask("TASK",
+				this.manufacturer);
 		taskBuilder.setTeam("OFFICE_TEAM");
 
-		// Loads the office floor with a single task
+		// Loads the office floor with a simple task
 		this.loadOfficeFloor(true, new OfficeFloorMaker() {
 			@Override
 			public void make(OfficeFloorMakerContext context) throws Exception {
@@ -104,11 +102,11 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 						});
 
 				// Specify team responsible for task
-				OfficeFloorTeam team = context.addTeam("OFFICE_FLOOR_TEAM",
-						null);
-				deployer
-						.link(office.getDeployedOfficeTeam("OFFICE_TEAM"), team);
+				deployer.link(office.getDeployedOfficeTeam("OFFICE_TEAM"),
+						context.addTeam("OFFICE_FLOOR_TEAM", null));
 			}
 		});
 	}
+	
+	
 }

@@ -18,6 +18,7 @@ package net.officefloor.compile.impl.util;
 
 import java.util.List;
 
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -153,6 +154,81 @@ public class CompileUtil {
 							+ " by default constructor", ex);
 			return null; // no instance
 		}
+	}
+
+	/**
+	 * Convenience method to instantiate and instance of a {@link Class} from
+	 * its fully qualified name.
+	 * 
+	 * @param className
+	 *            Fully qualified name of the {@link Class}.
+	 * @param expectedType
+	 *            Expected type that {@link Class} instance must be assignable.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param assetType
+	 *            {@link AssetType}.
+	 * @param assetName
+	 *            Name of asset.
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @return New instance or <code>null</code> if not able to instantiate.
+	 */
+	public static <T> T newInstance(String className, Class<T> expectedType,
+			ClassLoader classLoader, LocationType locationType,
+			String location, AssetType assetType, String assetName,
+			CompilerIssues issues) {
+
+		// Obtain the class
+		Class<? extends T> clazz = obtainClass(className, expectedType,
+				classLoader, locationType, location, assetType, assetName,
+				issues);
+		if (clazz == null) {
+			return null; // must have class
+		}
+
+		// Create an instance of the class
+		T instance = newInstance(clazz, expectedType, locationType, location,
+				assetType, assetName, issues);
+		if (instance == null) {
+			return null; // must have instance
+		}
+
+		// Return the instance
+		return instance;
+	}
+
+	/**
+	 * Convenience method to instantiate and instance of a {@link Class} from
+	 * its fully qualified name utilising a {@link NodeContext}.
+	 * 
+	 * @param className
+	 *            Fully qualified name of the {@link Class}.
+	 * @param expectedType
+	 *            Expected type that {@link Class} instance must be assignable.
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param assetType
+	 *            {@link AssetType}.
+	 * @param assetName
+	 *            Name of asset.
+	 * @param context
+	 *            {@link NodeContext}.
+	 * @return New instance or <code>null</code> if not able to instantiate.
+	 */
+	public static <T> T newInstance(String className, Class<T> expectedType,
+			LocationType locationType, String location, AssetType assetType,
+			String assetName, NodeContext context) {
+		// Return new instance
+		return newInstance(className, expectedType, context.getClassLoader(),
+				locationType, location, assetType, assetName, context
+						.getCompilerIssues());
 	}
 
 	/**

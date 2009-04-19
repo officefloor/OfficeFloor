@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
+import junit.framework.TestCase;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -24,16 +25,22 @@ import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
+import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
+import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.build.WorkFactory;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -62,6 +69,27 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 */
 	protected final CompilerIssues issues = this
 			.createMock(CompilerIssues.class);
+
+	/**
+	 * Enhances {@link CompilerIssues}.
+	 */
+	private final CompilerIssues enhancedIssues = this
+			.enhanceIssues(this.issues);
+
+	/**
+	 * <p>
+	 * Allow enhancing the {@link CompilerIssues}. For example allows wrapping
+	 * with a {@link StderrCompilerIssuesWrapper}.
+	 * <p>
+	 * This is available for {@link TestCase} instances to override.
+	 * 
+	 * @param issues
+	 *            {@link CompilerIssues}.
+	 * @return By default returns input {@link CompilerIssues}.
+	 */
+	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
+		return this.issues;
+	}
 
 	/**
 	 * {@link OfficeFloorBuilder}.
@@ -106,6 +134,102 @@ public abstract class AbstractOfficeFloorTestCase extends
 	@SuppressWarnings("unchecked")
 	protected TaskBuilder<Work, ?, ?> createMockTaskBuilder() {
 		return this.createMock(TaskBuilder.class);
+	}
+
+	/**
+	 * {@link MakerTeamSource} identifier.
+	 */
+	private int makerTeamSourceIdentifier = 0;
+
+	/**
+	 * Records adding a {@link Team}.
+	 * 
+	 * @param Name
+	 *            of the {@link Team}.
+	 * @return {@link TeamBuilder}.
+	 */
+	protected TeamBuilder<?> record_officefloor_addTeam(String teamName) {
+		TeamBuilder<?> teamBuilder = this.createMockTeamBuilder();
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
+				.addTeam(teamName, MakerTeamSource.class), teamBuilder);
+		teamBuilder.addProperty(MakerTeamSource.MAKER_IDENTIFIER_PROPERTY_NAME,
+				String.valueOf(this.makerTeamSourceIdentifier++));
+		return teamBuilder;
+	}
+
+	/**
+	 * Current {@link OfficeBuilder}.
+	 */
+	private OfficeBuilder officeBuilder = null;
+
+	/**
+	 * Records adding an {@link Office}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @return {@link OfficeBuilder}.
+	 */
+	protected OfficeBuilder record_officefloor_addOffice(String officeName) {
+		this.officeBuilder = this.createMockOfficeBuilder();
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
+				.addOffice(officeName), this.officeBuilder);
+		return this.officeBuilder;
+	}
+
+	/**
+	 * Current {@link WorkBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	private WorkBuilder workBuilder = null;
+
+	/**
+	 * Records adding a {@link Work}.
+	 * 
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @param workFactory
+	 *            {@link WorkFactory}.
+	 * @return {@link WorkBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <W extends Work> WorkBuilder<W> record_office_addWork(
+			String workName, WorkFactory<W> workFactory) {
+		this.workBuilder = this.createMockWorkBuilder();
+		this.recordReturn(this.officeBuilder, this.officeBuilder.addWork(
+				workName, workFactory), this.workBuilder);
+		return this.workBuilder;
+	}
+
+	/**
+	 * Current {@link TaskBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	private TaskBuilder taskBuilder = null;
+
+	/**
+	 * Records adding a {@link Task}.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param manufacturer
+	 *            {@link TaskFactoryManufacturer}.
+	 * @return {@link TaskBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <W extends Work> TaskBuilder<W, ?, ?> record_work_addTask(
+			String taskName, TaskFactoryManufacturer<W, ?, ?> manufacturer) {
+
+		// Ensure manufacturer is a mock
+		assertNotNull("Manufacturer must be a mock", this.control(manufacturer));
+
+		// Record adding the task
+		TaskFactory<?, ?, ?> taskFactory = this.createMockTaskFactory();
+		this.recordReturn(manufacturer, manufacturer.createTaskFactory(),
+				taskFactory);
+		this.taskBuilder = this.createMockTaskBuilder();
+		this.recordReturn(this.workBuilder, this.workBuilder.addTask("TASK",
+				taskFactory), this.taskBuilder);
+		return this.taskBuilder;
 	}
 
 	/**
@@ -223,8 +347,8 @@ public abstract class AbstractOfficeFloorTestCase extends
 		OfficeFloor loadedOfficeFloor = officeFloorLoader.loadOfficeFloor(
 				MakerOfficeFloorSource.class, this.configurationContext,
 				propertyList,
-				LoadRequiredPropertiesTest.class.getClassLoader(), this.issues,
-				officeFrame);
+				LoadRequiredPropertiesTest.class.getClassLoader(),
+				this.enhancedIssues, officeFrame);
 		this.verifyMockObjects();
 
 		// Ensure the correct loaded office floor

@@ -16,10 +16,15 @@
  */
 package net.officefloor.compile.impl.structure;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.work.WorkLoaderImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -28,6 +33,10 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.work.WorkLoader;
+import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 
 /**
@@ -53,6 +62,11 @@ public class WorkNodeImpl implements WorkNode {
 	private final String sectionLocation;
 
 	/**
+	 * {@link OfficeSection} containing this {@link WorkNode}.
+	 */
+	private final SectionNode section;
+
+	/**
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
@@ -64,14 +78,14 @@ public class WorkNodeImpl implements WorkNode {
 	private final Map<String, TaskNode> sectionTaskNodes;
 
 	/**
+	 * Listing of {@link TaskNode} instances for this {@link SectionWork}.
+	 */
+	private final List<TaskNode> workTaskNodes = new LinkedList<TaskNode>();
+
+	/**
 	 * Class name of the {@link WorkSource}.
 	 */
 	private final String workSourceClassName;
-
-	/**
-	 * {@link WorkSource} instance.
-	 */
-	private WorkSource<?> workSource;
 
 	/**
 	 * Initiate.
@@ -80,8 +94,6 @@ public class WorkNodeImpl implements WorkNode {
 	 *            Name of this {@link SectionWork}.
 	 * @param workSourceClassName
 	 *            Class name of the {@link WorkSource}.
-	 * @param workSource
-	 *            {@link WorkSource} instance. May be <code>null</code>.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link WorkNode}.
@@ -89,17 +101,19 @@ public class WorkNodeImpl implements WorkNode {
 	 *            Map of {@link TaskNode} instances for the
 	 *            {@link OfficeSection} containing this {@link SectionWork} by
 	 *            their {@link SectionTask} names.
+	 * @param section
+	 *            {@link OfficeSection} containing this {@link WorkNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public WorkNodeImpl(String workName, String workSourceClassName,
-			WorkSource<?> workSource, String sectionLocation,
-			Map<String, TaskNode> sectionTaskNodes, NodeContext context) {
+			String sectionLocation, Map<String, TaskNode> sectionTaskNodes,
+			SectionNode section, NodeContext context) {
 		this.workName = workName;
 		this.workSourceClassName = workSourceClassName;
-		this.workSource = workSource;
 		this.sectionLocation = sectionLocation;
 		this.sectionTaskNodes = sectionTaskNodes;
+		this.section = section;
 		this.context = context;
 	}
 
@@ -138,11 +152,53 @@ public class WorkNodeImpl implements WorkNode {
 			task = new TaskNodeImpl(taskName, taskTypeName,
 					this.sectionLocation, this.context);
 			this.sectionTaskNodes.put(taskName, task);
+			this.workTaskNodes.add(task);
 		} else {
 			// Section task already added
 			this.addIssue("Section task " + taskName + " already added");
 		}
 		return task;
+	}
+
+	/*
+	 * ===================== WorkNode ===================================
+	 */
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public void buildWork(OfficeBuilder builder) {
+
+		// Obtain the work source class
+		Class<? extends WorkSource> workSourceClass = CompileUtil.obtainClass(
+				this.workSourceClassName, WorkSource.class, this.context
+						.getClassLoader(), LocationType.SECTION,
+				this.sectionLocation, AssetType.WORK, this.workName,
+				this.context.getCompilerIssues());
+		if (workSourceClass == null) {
+			return; // must obtain work source class
+		}
+
+		// Load the work type
+		WorkLoader workLoader = new WorkLoaderImpl(this.sectionLocation,
+				this.workName);
+		WorkType workType = workLoader.loadWorkType(workSourceClass,
+				this.propertyList, this.context.getClassLoader(), this.context
+						.getCompilerIssues());
+
+		// Obtain the fully qualified work name
+		String fullyQualifiedWorkName = this.section
+				.getSectionQualifiedName(this.workName);
+
+		// Build the work
+		WorkBuilder workBuilder = builder.addWork(fullyQualifiedWorkName,
+				workType.getWorkFactory());
+
+		// Build the tasks
+		for (TaskNode task : this.workTaskNodes) {
+			task.buildTask(workType, workBuilder);
+		}
+
+		// TODO specify initial task for work
 	}
 
 }

@@ -24,6 +24,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
@@ -53,9 +54,9 @@ import net.officefloor.model.desk.DeskModel;
 public class LoadWorkTypeTest extends OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link DeskModel}.
+	 * Location of the {@link OfficeSection} containing the {@link Work}.
 	 */
-	private final String DESK_LOCATION = "DESK";
+	private final String SECTION_LOCATION = "SECTION";
 
 	/**
 	 * Name of the {@link Work}.
@@ -843,8 +844,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.DESK, DESK_LOCATION, AssetType.WORK,
-				WORK_NAME, issueDescription);
+		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
+				AssetType.WORK, WORK_NAME, issueDescription);
 	}
 
 	/**
@@ -856,8 +857,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.DESK, DESK_LOCATION, AssetType.WORK,
-				WORK_NAME, issueDescription, cause);
+		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
+				AssetType.WORK, WORK_NAME, issueDescription, cause);
 	}
 
 	/**
@@ -886,7 +887,7 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the work loader and load the work
-		WorkLoader workLoader = new WorkLoaderImpl(DESK_LOCATION, WORK_NAME);
+		WorkLoader workLoader = new WorkLoaderImpl(SECTION_LOCATION, WORK_NAME);
 		MockWorkSource.loader = loader;
 		WorkType<Work> workType = workLoader.loadWorkType(MockWorkSource.class,
 				propertyList, LoadWorkTypeTest.class.getClassLoader(),

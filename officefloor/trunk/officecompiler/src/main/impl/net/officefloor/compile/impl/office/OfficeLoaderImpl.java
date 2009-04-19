@@ -20,21 +20,16 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.NodeContextImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeLoader;
-import net.officefloor.compile.office.OfficeManagedObjectType;
-import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
-import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceProperty;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
-import net.officefloor.compile.spi.office.source.OfficeUnknownPropertyError;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.model.repository.ConfigurationContext;
 
@@ -192,69 +187,16 @@ public class OfficeLoaderImpl implements OfficeLoader {
 			return null; // failed to instantiate
 		}
 
-		// Create the office source context
-		OfficeSourceContext context = new OfficeSourceContextImpl(
-				this.officeLocation, configurationContext, propertyList,
-				classLoader);
-
-		// Create the office builder
+		// Create the office type
 		NodeContext nodeContext = new NodeContextImpl(configurationContext,
 				classLoader, issues);
 		OfficeNode officeType = new OfficeNodeImpl(this.officeLocation,
 				nodeContext);
 
-		try {
-			// Source the office type
-			officeSource.sourceOffice(officeType, context);
-
-		} catch (OfficeUnknownPropertyError ex) {
-			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
-					+ "' for " + OfficeSource.class.getSimpleName() + " "
-					+ officeSourceClass.getName(), issues);
-			return null; // must have property
-
-		} catch (ConfigurationContextPropagateError ex) {
-			this.addIssue("Failure obtaining configuration '"
-					+ ex.getLocation() + "'", ex.getCause(), issues);
-			return null; // must not fail in getting configurations
-
-		} catch (Throwable ex) {
-			this.addIssue("Failed to source "
-					+ OfficeType.class.getSimpleName() + " definition from "
-					+ OfficeSource.class.getSimpleName() + " "
-					+ officeSourceClass.getName(), ex, issues);
-			return null; // must be successful
-		}
-
-		// Ensure all objects have names and types
-		OfficeManagedObjectType[] moTypes = officeType
-				.getOfficeManagedObjectTypes();
-		for (int i = 0; i < moTypes.length; i++) {
-			OfficeManagedObjectType moType = moTypes[i];
-
-			// Ensure have name
-			String moName = moType.getOfficeManagedObjectName();
-			if (CompileUtil.isBlank(moName)) {
-				this.addIssue("Null name for managed object " + i, issues);
-				return null; // must have name
-			}
-
-			// Ensure have type
-			if (CompileUtil.isBlank(moType.getObjectType())) {
-				this.addIssue("Null type for managed object " + i + " (name="
-						+ moName + ")", issues);
-				return null; // must have type
-			}
-		}
-
-		// Ensure all teams have names
-		OfficeTeamType[] teamTypes = officeType.getOfficeTeamTypes();
-		for (int i = 0; i < teamTypes.length; i++) {
-			OfficeTeamType teamType = teamTypes[i];
-			if (CompileUtil.isBlank(teamType.getOfficeTeamName())) {
-				this.addIssue("Null name for team " + i, issues);
-				return null; // must have name
-			}
+		// Load the office which in turn provides the detail for the office type
+		boolean isLoaded = officeType.loadOffice(officeSource, propertyList);
+		if (!isLoaded) {
+			return null; // must load office
 		}
 
 		// Return the office type

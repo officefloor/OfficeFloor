@@ -22,8 +22,8 @@ import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Node within the hierarchy of {@link OfficeSection} instances.
@@ -59,12 +59,25 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	 * @param officeLocation
 	 *            Location of the {@link Office} containing this
 	 *            {@link OfficeSection}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
 	 */
-	void loadSection(String officeLocation,
-			ConfigurationContext configurationContext, ClassLoader classLoader);
+	void loadOfficeSection(String officeLocation);
+
+	/**
+	 * Builds this {@link OfficeSection} for this {@link SectionNode}.
+	 * 
+	 * @param builder
+	 *            {@link OfficeBuilder}.
+	 */
+	void buildSection(OfficeBuilder builder);
+
+	/**
+	 * Obtain the {@link OfficeSection} qualified name.
+	 * 
+	 * @param simpleName
+	 *            Simple name to qualify with the {@link OfficeSection} name
+	 *            space.
+	 * @return {@link OfficeSection} qualified name.
+	 */
+	String getSectionQualifiedName(String simpleName);
 
 }

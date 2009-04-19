@@ -20,6 +20,7 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSourceProperty;
@@ -30,7 +31,6 @@ import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.desk.DeskModel;
 
 /**
  * Tests the {@link WorkLoader}.
@@ -40,10 +40,9 @@ import net.officefloor.model.desk.DeskModel;
 public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link DeskModel} as {@link Work} is always done on a
-	 * desk.
+	 * Location of the {@link OfficeSection} containing the {@link Work}.
 	 */
-	private final String DESK_LOCATION = "DESK";
+	private final String SECTION_LOCATION = "SECTION";
 
 	/**
 	 * Name of the {@link Work}.
@@ -290,8 +289,8 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.DESK, DESK_LOCATION, AssetType.WORK,
-				WORK_NAME, issueDescription);
+		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
+				AssetType.WORK, WORK_NAME, issueDescription);
 	}
 
 	/**
@@ -303,8 +302,8 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.DESK, DESK_LOCATION, AssetType.WORK,
-				WORK_NAME, issueDescription, cause);
+		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
+				AssetType.WORK, WORK_NAME, issueDescription, cause);
 	}
 
 	/**
@@ -320,7 +319,7 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 			String... propertyNameLabelPairs) {
 
 		// Load the work specification
-		WorkLoader workLoader = new WorkLoaderImpl(DESK_LOCATION, WORK_NAME);
+		WorkLoader workLoader = new WorkLoaderImpl(SECTION_LOCATION, WORK_NAME);
 		PropertyList propertyList = workLoader.loadSpecification(
 				MockWorkSource.class, this.issues);
 

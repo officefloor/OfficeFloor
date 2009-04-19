@@ -31,7 +31,7 @@ public interface CompilerIssues {
 	 * Type of location where issues may arise.
 	 */
 	public static enum LocationType {
-		DESK, SECTION, OFFICE, OFFICE_FLOOR
+		SECTION, OFFICE, OFFICE_FLOOR
 	}
 
 	/**

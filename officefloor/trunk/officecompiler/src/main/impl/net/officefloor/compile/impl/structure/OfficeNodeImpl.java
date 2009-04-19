@@ -22,7 +22,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -40,6 +44,7 @@ import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
+import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -49,10 +54,16 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.office.source.OfficeSourceContext;
+import net.officefloor.compile.spi.office.source.OfficeUnknownPropertyError;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -97,7 +108,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	/**
 	 * {@link OfficeTeamNode} instances by their {@link OfficeTeam} name.
 	 */
-	private final Map<String, OfficeTeamNode> teams = new HashMap<String, OfficeTeamNode>();
+	private final Map<String, TeamStruct> teams = new HashMap<String, TeamStruct>();
 
 	/**
 	 * {@link SectionNode} instances by their {@link OfficeSection} name.
@@ -165,6 +176,19 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		this.context = context;
 	}
 
+	/**
+	 * Adds an issue.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 * @param cause
+	 *            Cause of the issue.
+	 */
+	protected void addIssue(String issueDescription, Throwable cause) {
+		this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
+				this.officeLocation, null, null, issueDescription, cause);
+	}
+
 	/*
 	 * =================== AbstractNode ================================
 	 */
@@ -199,7 +223,15 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public OfficeTeamType[] getOfficeTeamTypes() {
-		return this.teams.values().toArray(new OfficeTeamType[0]);
+		// Copy team types into an array
+		TeamStruct[] structs = this.teams.values().toArray(new TeamStruct[0]);
+		OfficeTeamType[] teamTypes = new OfficeTeamType[structs.length];
+		for (int i = 0; i < teamTypes.length; i++) {
+			teamTypes[i] = structs[i].team;
+		}
+
+		// Return the team types
+		return teamTypes;
 	}
 
 	/*
@@ -211,11 +243,125 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		this.officeFloorLocation = officeFloorLocation;
 
 		// Flag all the teams within office floor context
-		for (OfficeTeamNode team : this.teams.values()) {
-			team.addOfficeFloorContext(this.officeFloorLocation);
+		for (TeamStruct struct : this.teams.values()) {
+			struct.team.addOfficeFloorContext(this.officeFloorLocation);
 		}
 
 		this.isInOfficeFloorContext = true;
+	}
+
+	@Override
+	public boolean loadOffice(OfficeSource officeSource, PropertyList properties) {
+
+		// Create the office source context
+		OfficeSourceContext context = new OfficeSourceContextImpl(
+				this.officeLocation, this.context.getConfigurationContext(),
+				properties, this.context.getClassLoader());
+
+		try {
+			// Source the office
+			officeSource.sourceOffice(this, context);
+
+		} catch (OfficeUnknownPropertyError ex) {
+			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
+					+ "' for " + OfficeSource.class.getSimpleName() + " "
+					+ officeSource.getClass().getName());
+			return false; // must have property
+
+		} catch (ConfigurationContextPropagateError ex) {
+			this.addIssue("Failure obtaining configuration '"
+					+ ex.getLocation() + "'", ex.getCause());
+			return false; // must not fail in getting configurations
+
+		} catch (Throwable ex) {
+			this.addIssue("Failed to source "
+					+ OfficeType.class.getSimpleName() + " definition from "
+					+ OfficeSource.class.getSimpleName() + " "
+					+ officeSource.getClass().getName(), ex);
+			return false; // must be successful
+		}
+
+		// Ensure all objects have names and types
+		OfficeManagedObjectType[] moTypes = this.getOfficeManagedObjectTypes();
+		for (int i = 0; i < moTypes.length; i++) {
+			OfficeManagedObjectType moType = moTypes[i];
+
+			// Ensure have name
+			String moName = moType.getOfficeManagedObjectName();
+			if (CompileUtil.isBlank(moName)) {
+				this.addIssue("Null name for managed object " + i);
+				return false; // must have name
+			}
+
+			// Ensure have type
+			if (CompileUtil.isBlank(moType.getObjectType())) {
+				this.addIssue("Null type for managed object " + i + " (name="
+						+ moName + ")");
+				return false; // must have type
+			}
+		}
+
+		// Ensure all teams have names
+		OfficeTeamType[] teamTypes = this.getOfficeTeamTypes();
+		for (int i = 0; i < teamTypes.length; i++) {
+			OfficeTeamType teamType = teamTypes[i];
+			if (CompileUtil.isBlank(teamType.getOfficeTeamName())) {
+				this.addIssue("Null name for team " + i);
+				return false; // must have name
+			}
+		}
+
+		// As here, successfully loaded the office
+		return true;
+	}
+
+	@Override
+	public void buildOffice(OfficeFloorBuilder builder) {
+
+		// Obtain the office source
+		OfficeSource officeSource = CompileUtil.newInstance(
+				this.officeSourceClassName, OfficeSource.class,
+				LocationType.OFFICE, this.officeLocation, null, null,
+				this.context);
+		if (officeSource == null) {
+			return; // must have office source
+		}
+
+		// Load this office (will also recursively load the office sections)
+		boolean isLoaded = this.loadOffice(officeSource, this.properties);
+		if (!isLoaded) {
+			return; // must load the office
+		}
+
+		// Build this office
+		OfficeBuilder officeBuilder = builder.addOffice(this.officeName);
+
+		// Register the teams for the office
+		for (TeamStruct struct : this.teams.values()) {
+
+			// Obtain the office team name
+			String officeTeamName = struct.team.getOfficeTeamName();
+
+			// Obtain the office floor team name
+			OfficeFloorTeam officeFloorTeam = LinkUtil.retrieveTarget(
+					struct.team, OfficeFloorTeam.class, "Office team "
+							+ officeTeamName, LocationType.OFFICE,
+					this.officeLocation, AssetType.TEAM, officeTeamName,
+					this.context.getCompilerIssues());
+			if (officeFloorTeam == null) {
+				continue; // office floor team not linked
+			}
+			String officeFloorTeamName = officeFloorTeam
+					.getOfficeFloorTeamName();
+
+			// Register the team to the office
+			officeBuilder.registerTeam(officeTeamName, officeFloorTeamName);
+		}
+
+		// Build the sections of the office
+		for (SectionNode section : this.sections.values()) {
+			section.buildSection(officeBuilder);
+		}
 	}
 
 	/*
@@ -260,23 +406,30 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public OfficeTeam addOfficeTeam(String officeTeamName) {
 		// Obtain and return the team for the name
-		OfficeTeamNode team = this.teams.get(officeTeamName);
-		if (team == null) {
+		TeamStruct struct = this.teams.get(officeTeamName);
+		if (struct == null) {
 			// Create the team
-			team = new OfficeTeamNodeImpl(officeTeamName, this.officeLocation,
-					this.context);
+			OfficeTeamNode team = new OfficeTeamNodeImpl(officeTeamName,
+					this.officeLocation, this.context);
+			struct = new TeamStruct(team, true); // added by architect
 			if (this.isInOfficeFloorContext) {
 				// Add office floor context as within office floor context
-				team.addOfficeFloorContext(this.officeFloorLocation);
+				struct.team.addOfficeFloorContext(this.officeFloorLocation);
 			}
 
 			// Add the team
-			this.teams.put(officeTeamName, team);
+			this.teams.put(officeTeamName, struct);
 		} else {
-			// Team already added and initialised
-			this.addIssue("Team " + officeTeamName + " already added");
+			// Determine if added by architect
+			if (!struct.isAdded) {
+				// Now added by architect
+				struct.isAdded = true;
+			} else {
+				// Team already added by architect
+				this.addIssue("Team " + officeTeamName + " already added");
+			}
 		}
-		return team;
+		return struct.team;
 	}
 
 	@Override
@@ -289,8 +442,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			// Create the section and have it loaded
 			section = new SectionNodeImpl(sectionName, sectionSourceClassName,
 					properties, sectionLocation, this.context);
-			section.loadSection(this.officeLocation, this.context
-					.getConfigurationContext(), this.context.getClassLoader());
+			section.loadOfficeSection(this.officeLocation);
 
 			// Add the section
 			this.sections.put(sectionName, section);
@@ -426,7 +578,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		SectionNode section = this.sections.get(sectionName);
 		if (section == null) {
 			// Add the section
-			section = new SectionNodeImpl(sectionName, this.context);
+			section = new SectionNodeImpl(sectionName, null, this.context);
 			this.sections.put(sectionName, section);
 		}
 
@@ -467,17 +619,18 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Obtain and return the office team
-		OfficeTeamNode team = this.teams.get(officeTeamName);
-		if (team == null) {
+		TeamStruct struct = this.teams.get(officeTeamName);
+		if (struct == null) {
 			// Create the team within the office floor context
-			team = new OfficeTeamNodeImpl(officeTeamName, this.officeLocation,
-					this.context);
+			OfficeTeamNode team = new OfficeTeamNodeImpl(officeTeamName,
+					this.officeLocation, this.context);
+			struct = new TeamStruct(team, false); // not added by architect
 			team.addOfficeFloorContext(this.officeFloorLocation);
 
 			// Add the office team
-			this.teams.put(officeTeamName, team);
+			this.teams.put(officeTeamName, struct);
 		}
-		return team;
+		return struct.team;
 	}
 
 	/*
@@ -500,6 +653,36 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public LinkOfficeNode getLinkedOfficeNode() {
 		return this.linkedOfficeNode;
+	}
+
+	/**
+	 * Structure containing details of an {@link OfficeTeamNode}.
+	 */
+	private class TeamStruct {
+
+		/**
+		 * {@link OfficeTeamNode}.
+		 */
+		public final OfficeTeamNode team;
+
+		/**
+		 * Flag indicating if has been added by {@link OfficeArchitect}.
+		 */
+		public boolean isAdded = false;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param team
+		 *            {@link OfficeTeamNode}.
+		 * @param isAdded
+		 *            <code>true</code> if has been added by
+		 *            {@link OfficeArchitect}.
+		 */
+		public TeamStruct(OfficeTeamNode team, boolean isAdded) {
+			this.team = team;
+			this.isAdded = isAdded;
+		}
 	}
 
 }

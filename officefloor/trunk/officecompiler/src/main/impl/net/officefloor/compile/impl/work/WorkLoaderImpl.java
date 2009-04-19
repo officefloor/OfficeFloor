@@ -24,6 +24,7 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -51,9 +52,9 @@ import net.officefloor.model.desk.DeskModel;
 public class WorkLoaderImpl implements WorkLoader {
 
 	/**
-	 * Location of the {@link DeskModel}.
+	 * Location of the {@link OfficeSection}.
 	 */
-	private final String deskLocation;
+	private final String sectionLocation;
 
 	/**
 	 * Name of the {@link Work}.
@@ -63,13 +64,13 @@ public class WorkLoaderImpl implements WorkLoader {
 	/**
 	 * Initiate.
 	 * 
-	 * @param deskLocation
+	 * @param sectionLocation
 	 *            Location of the {@link DeskModel}.
 	 * @param workName
 	 *            Name of the {@link Work}.
 	 */
-	public WorkLoaderImpl(String deskLocation, String workName) {
-		this.deskLocation = deskLocation;
+	public WorkLoaderImpl(String sectionLocation, String workName) {
+		this.sectionLocation = sectionLocation;
 		this.workName = workName;
 	}
 
@@ -83,7 +84,7 @@ public class WorkLoaderImpl implements WorkLoader {
 
 		// Instantiate the work source
 		WorkSource<W> workSource = CompileUtil.newInstance(workSourceClass,
-				WorkSource.class, LocationType.DESK, this.deskLocation,
+				WorkSource.class, LocationType.SECTION, this.sectionLocation,
 				AssetType.WORK, this.workName, issues);
 		if (workSource == null) {
 			return null; // failed to instantiate
@@ -184,7 +185,7 @@ public class WorkLoaderImpl implements WorkLoader {
 
 		// Instantiate the work source
 		WorkSource<W> workSource = CompileUtil.newInstance(workSourceClass,
-				WorkSource.class, LocationType.DESK, this.deskLocation,
+				WorkSource.class, LocationType.SECTION, this.sectionLocation,
 				AssetType.WORK, this.workName, issues);
 		if (workSource == null) {
 			return null; // failed to instantiate
@@ -651,8 +652,8 @@ public class WorkLoaderImpl implements WorkLoader {
 	 */
 	private void addTaskIssue(String issueDescription, CompilerIssues issues,
 			int taskIndex, String taskName, Class<?> workSourceClass) {
-		issues.addIssue(LocationType.DESK, this.deskLocation, AssetType.WORK,
-				this.workName, issueDescription + " "
+		issues.addIssue(LocationType.SECTION, this.sectionLocation,
+				AssetType.WORK, this.workName, issueDescription + " "
 						+ TaskType.class.getSimpleName() + " definition "
 						+ taskIndex
 						+ (taskName == null ? "" : " (" + taskName + ")")
@@ -669,8 +670,8 @@ public class WorkLoaderImpl implements WorkLoader {
 	 *            {@link CompilerIssues}.
 	 */
 	private void addIssue(String issueDescription, CompilerIssues issues) {
-		issues.addIssue(LocationType.DESK, this.deskLocation, AssetType.WORK,
-				this.workName, issueDescription);
+		issues.addIssue(LocationType.SECTION, this.sectionLocation,
+				AssetType.WORK, this.workName, issueDescription);
 	}
 
 	/**
@@ -685,8 +686,8 @@ public class WorkLoaderImpl implements WorkLoader {
 	 */
 	private void addIssue(String issueDescription, Throwable cause,
 			CompilerIssues issues) {
-		issues.addIssue(LocationType.DESK, this.deskLocation, AssetType.WORK,
-				this.workName, issueDescription, cause);
+		issues.addIssue(LocationType.SECTION, this.sectionLocation,
+				AssetType.WORK, this.workName, issueDescription, cause);
 	}
 
 }
