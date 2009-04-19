@@ -20,7 +20,6 @@ import java.sql.Connection;
 
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -69,15 +68,10 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	private static final String SECTION_LOCATION = "SECTION_LOCATION";
 
 	/**
-	 * {@link CompilerIssues}.
-	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
-
-	/**
 	 * {@link SectionDesigner} to be tested.
 	 */
 	private final SectionNode node = new SectionNodeImpl(SECTION_LOCATION,
-			this.issues);
+			this.nodeContext);
 
 	/**
 	 * Tests adding a {@link SectionInput}.
@@ -271,8 +265,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionWork() {
 		// Add two different section works verifying details
 		this.replayMockObjects();
-		SectionWork work = this.node.addSectionWork("WORK", NotUseWorkSource.class
-				.getName());
+		SectionWork work = this.node.addSectionWork("WORK",
+				NotUseWorkSource.class.getName());
 		assertNotNull("Must have section work", work);
 		assertEquals("Incorrect section work name", "WORK", work
 				.getSectionWorkName());
@@ -308,14 +302,14 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 	public void testAddSectionTask() {
 		// Add two different section tasks verifying details
 		this.replayMockObjects();
-		SectionWork work = this.node.addSectionWork("WORK", NotUseWorkSource.class
-				.getName());
+		SectionWork work = this.node.addSectionWork("WORK",
+				NotUseWorkSource.class.getName());
 		SectionTask task = work.addSectionTask("TASK", "TYPE");
 		assertNotNull("Must have section task", task);
 		assertEquals("Incorrect section task name", "TASK", task
 				.getSectionTaskName());
-		assertNotSame("Should obtain another section task", task, work.addSectionTask(
-				"ANOTHER", "TYPE"));
+		assertNotSame("Should obtain another section task", task, work
+				.addSectionTask("ANOTHER", "TYPE"));
 		this.verifyMockObjects();
 	}
 
@@ -330,7 +324,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Add the section task twice by same work
 		this.replayMockObjects();
-		SectionWork work = this.node.addSectionWork("WORK", new NotUseWorkSource());
+		SectionWork work = this.node.addSectionWork("WORK",
+				new NotUseWorkSource());
 		SectionTask taskFirst = work.addSectionTask("TASK", "TYPE");
 		SectionTask taskSecond = work.addSectionTask("TASK", "ANOTHER_TYPE");
 		this.verifyMockObjects();
@@ -373,7 +368,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Obtain the section task
 		SectionTask task = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName()).addSectionTask("TASK", "TYPE");
+				NotUseWorkSource.class.getName())
+				.addSectionTask("TASK", "TYPE");
 
 		// Ensure can get flow
 		TaskFlow flow = task.getTaskFlow("FLOW");
@@ -536,8 +532,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		// Link
 		SectionInput input = this.node.addSectionInput("INPUT", Object.class
 				.getName());
-		SectionWork work = this.node.addSectionWork("WORK", NotUseWorkSource.class
-				.getName());
+		SectionWork work = this.node.addSectionWork("WORK",
+				NotUseWorkSource.class.getName());
 		SectionTask task = work.addSectionTask("TASK", "TYPE");
 		this.node.link(input, task);
 		assertFlowLink("input -> task", input, task);
@@ -613,11 +609,12 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		SectionTask task = this.node.addSectionWork("WORK", new NotUseWorkSource())
-				.addSectionTask("TASK", "TYPE");
+		SectionTask task = this.node.addSectionWork("WORK",
+				new NotUseWorkSource()).addSectionTask("TASK", "TYPE");
 		TaskFlow flow = task.getTaskFlow("FLOW");
 		SectionTask targetTask = this.node.addSectionWork("TARGET",
-				NotUseWorkSource.class.getName()).addSectionTask("TARGET", "TYPE");
+				NotUseWorkSource.class.getName()).addSectionTask("TARGET",
+				"TYPE");
 		this.node
 				.link(flow, targetTask, FlowInstigationStrategyEnum.SEQUENTIAL);
 		assertFlowLink("task flow -> task", flow, targetTask);
@@ -644,8 +641,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		SectionTask task = this.node.addSectionWork("WORK", new NotUseWorkSource())
-				.addSectionTask("TASK", "TYPE");
+		SectionTask task = this.node.addSectionWork("WORK",
+				new NotUseWorkSource()).addSectionTask("TASK", "TYPE");
 		TaskFlow flow = task.getTaskFlow("FLOW");
 		SubSection subSection = this.node.addSubSection("SUB_SECTION",
 				new NotUseSectionSource(), "LOCATION");
@@ -676,8 +673,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link (escalation)
-		SectionTask task = this.node.addSectionWork("WORK", new NotUseWorkSource())
-				.addSectionTask("TASK", "TYPE");
+		SectionTask task = this.node.addSectionWork("WORK",
+				new NotUseWorkSource()).addSectionTask("TASK", "TYPE");
 		TaskFlow flow = task.getTaskEscalation("FLOW");
 		SectionOutput output = this.node.addSectionOutput("OUTPUT",
 				Exception.class.getName(), true);
@@ -708,8 +705,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		SectionWork work = this.node.addSectionWork("WORK", NotUseWorkSource.class
-				.getName());
+		SectionWork work = this.node.addSectionWork("WORK",
+				NotUseWorkSource.class.getName());
 		SectionTask task = work.addSectionTask("TASK", "TYPE");
 		SectionTask nextTask = work.addSectionTask("NEXT", "TYPE");
 		this.node.link(task, nextTask);
@@ -734,7 +731,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		SectionTask task = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName()).addSectionTask("TASK", "TYPE");
+				NotUseWorkSource.class.getName())
+				.addSectionTask("TASK", "TYPE");
 		SubSection subSection = this.node.addSubSection("SUB_SECTION",
 				new NotUseSectionSource(), "LOCATION");
 		SubSectionInput input = subSection.getSubSectionInput("INPUT");
@@ -760,7 +758,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 
 		// Link
 		SectionTask task = this.node.addSectionWork("WORK",
-				NotUseWorkSource.class.getName()).addSectionTask("TASK", "TYPE");
+				NotUseWorkSource.class.getName())
+				.addSectionTask("TASK", "TYPE");
 		SectionOutput output = this.node.addSectionOutput("OUTPUT",
 				Object.class.getName(), false);
 		this.node.link(task, output);
@@ -788,8 +787,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SubSection subSection = this.node.addSubSection("SUB_SECTION",
 				NotUseSectionSource.class.getName(), SECTION_LOCATION);
 		SubSectionOutput output = subSection.getSubSectionOutput("OUTPUT");
-		SectionWork work = this.node.addSectionWork("WORK", NotUseWorkSource.class
-				.getName());
+		SectionWork work = this.node.addSectionWork("WORK",
+				NotUseWorkSource.class.getName());
 		SectionTask task = work.addSectionTask("TASK", "TYPE");
 		this.node.link(output, task);
 		assertFlowLink("sub section output -> task", output, task);
@@ -868,8 +867,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		SectionManagedObject mo = this.node.addSectionManagedObject("MO",
 				NotUseManagedObjectSource.class.getName());
 		ManagedObjectFlow flow = mo.getManagedObjectFlow("FLOW");
-		SectionWork work = this.node.addSectionWork("WORK", NotUseWorkSource.class
-				.getName());
+		SectionWork work = this.node.addSectionWork("WORK",
+				NotUseWorkSource.class.getName());
 		SectionTask task = work.addSectionTask("TASK", "TYPE");
 		this.node.link(flow, task);
 		assertFlowLink("managed object flow -> section task", flow, task);
@@ -946,8 +945,9 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		TaskObject object = this.node.addSectionWork("WORK", new NotUseWorkSource())
-				.addSectionTask("TASK", "TYPE").getTaskObject("OBJECT");
+		TaskObject object = this.node.addSectionWork("WORK",
+				new NotUseWorkSource()).addSectionTask("TASK", "TYPE")
+				.getTaskObject("OBJECT");
 		SectionObject sectionObject = this.node.addSectionObject("OUTPUT",
 				Connection.class.getName());
 		this.node.link(object, sectionObject);
@@ -972,8 +972,9 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 		this.replayMockObjects();
 
 		// Link
-		TaskObject object = this.node.addSectionWork("WORK", new NotUseWorkSource())
-				.addSectionTask("TASK", "TYPE").getTaskObject("OBJECT");
+		TaskObject object = this.node.addSectionWork("WORK",
+				new NotUseWorkSource()).addSectionTask("TASK", "TYPE")
+				.getTaskObject("OBJECT");
 		SectionManagedObject mo = this.node.addSectionManagedObject("MO",
 				NotUseManagedObjectSource.class.getName());
 		this.node.link(object, mo);
@@ -1091,8 +1092,8 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 				NotUseManagedObjectSource.class.getName());
 		ManagedObjectDependency dependency = mo
 				.getManagedObjectDependency("DEPENDENCY");
-		SectionManagedObject moTarget = this.node.addSectionManagedObject("MO_TARGET",
-				NotUseManagedObjectSource.class.getName());
+		SectionManagedObject moTarget = this.node.addSectionManagedObject(
+				"MO_TARGET", NotUseManagedObjectSource.class.getName());
 		this.node.link(dependency, moTarget);
 		assertObjectLink("managed object dependency -> section managed object",
 				dependency, moTarget);

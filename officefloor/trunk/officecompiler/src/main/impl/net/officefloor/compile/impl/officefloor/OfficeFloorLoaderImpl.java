@@ -17,9 +17,11 @@
 package net.officefloor.compile.impl.officefloor;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.structure.NodeContextImpl;
 import net.officefloor.compile.impl.structure.OfficeFloorNodeImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -292,9 +294,10 @@ public class OfficeFloorLoaderImpl implements OfficeFloorLoader {
 				classLoader);
 
 		// Create the office floor deployer
+		NodeContext nodeContext = new NodeContextImpl(configurationContext,
+				classLoader, issues);
 		OfficeFloorNode deployer = new OfficeFloorNodeImpl(
-				configurationContext, classLoader, this.officeFloorLocation,
-				issues);
+				this.officeFloorLocation, nodeContext);
 
 		try {
 			// Source the office floor

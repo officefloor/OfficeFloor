@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -39,7 +39,6 @@ import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * {@link OfficeFloorNode} implementation.
@@ -50,24 +49,14 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeFloorNode {
 
 	/**
-	 * {@link ConfigurationContext}.
-	 */
-	private final ConfigurationContext configurationContext;
-
-	/**
-	 * {@link ClassLoader}.
-	 */
-	private final ClassLoader classLoader;
-
-	/**
 	 * Location of the {@link OfficeFloor}.
 	 */
 	private final String officeFloorLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * {@link ManagedObjectNode} instances by their
@@ -88,22 +77,14 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	/**
 	 * Initiate.
 	 * 
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
-	public OfficeFloorNodeImpl(ConfigurationContext configurationContext,
-			ClassLoader classLoader, String officeFloorLocation,
-			CompilerIssues issues) {
-		this.configurationContext = configurationContext;
-		this.classLoader = classLoader;
+	public OfficeFloorNodeImpl(String officeFloorLocation, NodeContext context) {
 		this.officeFloorLocation = officeFloorLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -112,7 +93,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 
 	@Override
 	protected void addIssue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR,
+		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
 				this.officeFloorLocation, null, null, issueDescription);
 	}
 
@@ -129,7 +110,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			// Create the managed object and have in office floor context
 			mo = new ManagedObjectNodeImpl(managedObjectName,
 					managedObjectSourceClassName, this.officeFloorLocation,
-					this.issues);
+					this.context);
 			mo.addOfficeFloorContext(this.officeFloorLocation);
 
 			// Add the managed object
@@ -149,7 +130,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		if (team == null) {
 			// Add the team
 			team = new TeamNodeImpl(teamName, teamSourceClassName,
-					this.officeFloorLocation, this.issues);
+					this.officeFloorLocation, this.context);
 			this.teams.put(teamName, team);
 		} else {
 			// Team already added
@@ -166,8 +147,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		if (office == null) {
 			// Create the office within the office floor context
 			office = new OfficeNodeImpl(officeName, officeSourceClassName,
-					this.configurationContext, this.classLoader,
-					officeLocation, this.issues);
+					officeLocation, this.context);
 			office.addOfficeFloorContext(this.officeFloorLocation);
 
 			// Add the office
@@ -222,6 +202,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeFloorBuilder builder = officeFrame
 				.createOfficeFloorBuilder(this.officeFloorLocation);
 
+		// Build the teams
+		for (TeamNode team : this.teams.values()) {
+			team.buildTeam(builder);
+		}
+
 		// Return the built office floor
 		return builder.buildOfficeFloor(new CompilerOfficeFloorIssues());
 	}
@@ -238,7 +223,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		@Override
 		public void addIssue(AssetType assetType, String assetName,
 				String issueDescription) {
-			OfficeFloorNodeImpl.this.issues.addIssue(LocationType.OFFICE_FLOOR,
+			OfficeFloorNodeImpl.this.context.getCompilerIssues().addIssue(
+					LocationType.OFFICE_FLOOR,
 					OfficeFloorNodeImpl.this.officeFloorLocation, assetType,
 					assetName, issueDescription);
 		}
@@ -246,7 +232,8 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		@Override
 		public void addIssue(AssetType assetType, String assetName,
 				String issueDescription, Throwable cause) {
-			OfficeFloorNodeImpl.this.issues.addIssue(LocationType.OFFICE_FLOOR,
+			OfficeFloorNodeImpl.this.context.getCompilerIssues().addIssue(
+					LocationType.OFFICE_FLOOR,
 					OfficeFloorNodeImpl.this.officeFloorLocation, assetType,
 					assetName, issueDescription, cause);
 		}

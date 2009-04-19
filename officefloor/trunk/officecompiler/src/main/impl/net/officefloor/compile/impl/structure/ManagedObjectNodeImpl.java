@@ -26,8 +26,8 @@ import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
@@ -94,9 +94,9 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Flags whether the {@link ManagedObjectType} has been loaded.
@@ -145,16 +145,16 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SectionManagedObject}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectNodeImpl(String managedObjectName,
 			String managedObjectSourceClassName, String sectionLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.managedObjectName = managedObjectName;
 		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -185,7 +185,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 		// Load the managing office
 		this.managingOffice = new ManagingOfficeNodeImpl(
-				this.managedObjectName, this.officeFloorLocation, this.issues);
+				this.managedObjectName, this.officeFloorLocation, this.context);
 
 		// Flag all existing dependencies within office floor context
 		for (ManagedObjectDependencyNode dependency : this.depedencies.values()) {
@@ -217,7 +217,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 						ManagedObjectSource.class, classLoader,
 						LocationType.SECTION, this.sectionLocation,
 						AssetType.MANAGED_OBJECT, this.managedObjectName,
-						this.issues);
+						this.context.getCompilerIssues());
 		if (managedObjectSourceClass == null) {
 			return; // must have managed object source class
 		}
@@ -230,7 +230,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		// Load the managed object type
 		this.managedObjectType = loader.loadManagedObjectType(
 				managedObjectSourceClass, this.propertyList, classLoader,
-				this.issues);
+				this.context.getCompilerIssues());
 
 		// Ensure all the teams are made available
 		if (this.managedObjectType != null) {
@@ -269,7 +269,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 			// Create the managed object dependency
 			dependency = new ManagedObjectDependencyNodeImpl(
 					managedObjectDependencyName, this.sectionLocation,
-					this.issues);
+					this.context);
 			if (this.isInOfficeContext) {
 				// Add office context as within office context
 				dependency.addOfficeContext(this.officeLocation);
@@ -292,7 +292,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		if (flow == null) {
 			// Create the managed object flow
 			flow = new ManagedObjectFlowNodeImpl(managedObjectFlowName,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			if (this.isInOfficeContext) {
 				// Add office context as within office context
 				flow.addOfficeContext(this.officeLocation);
@@ -372,7 +372,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		if (team == null) {
 			// Create the office team
 			team = new OfficeTeamNodeImpl(managedObjectTeamName,
-					this.officeLocation, this.issues);
+					this.officeLocation, this.context);
 			if (this.isInOfficeFloorContext) {
 				// Add office floor context as within office floor context
 				team.addOfficeFloorContext(this.officeFloorLocation);

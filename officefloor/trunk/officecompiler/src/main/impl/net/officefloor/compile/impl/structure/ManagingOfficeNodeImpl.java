@@ -18,7 +18,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -43,9 +43,9 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	private final String officeFloorLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Initiate.
@@ -55,14 +55,14 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	 *            {@link ManagingOffice}.
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public ManagingOfficeNodeImpl(String managedObjectName,
-			String officeFloorLocation, CompilerIssues issues) {
+			String officeFloorLocation, NodeContext context) {
 		this.managedObjectName = managedObjectName;
 		this.officeFloorLocation = officeFloorLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -79,9 +79,12 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 		// Ensure not already linked
 		if (this.linkedOfficeNode != null) {
-			this.issues
-					.addIssue(LocationType.OFFICE_FLOOR,
-							this.officeFloorLocation, null, null,
+			this.context.getCompilerIssues()
+					.addIssue(
+							LocationType.OFFICE_FLOOR,
+							this.officeFloorLocation,
+							null,
+							null,
 							"Managing office for managed object "
 									+ this.managedObjectName
 									+ " linked more than once");

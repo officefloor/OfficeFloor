@@ -25,6 +25,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
@@ -32,7 +33,6 @@ import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.properties.PropertyList;
@@ -99,9 +99,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues} to report issues.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * {@link SectionInput} instances by their names.
@@ -146,20 +146,21 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private SectionSource sectionSource;
 
 	/**
-	 * Allows for loading the {@link SectionType}.
+	 * Allows for loading the {@link SectionType} and obtaining the
+	 * {@link DeployedOfficeInput}.
 	 * 
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} being built by this
 	 *            {@link SectionDesigner}.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
-	public SectionNodeImpl(String sectionLocation, CompilerIssues issues) {
+	public SectionNodeImpl(String sectionLocation, NodeContext context) {
 		this.sectionName = null;
 		this.sectionSourceClassName = null;
 		this.propertyList = new PropertyListImpl();
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/**
@@ -173,18 +174,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            {@link PropertyList}.
 	 * @param sectionLocation
 	 *            Location of this {@link SectionNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public SectionNodeImpl(String sectionName, SectionSource sectionSource,
 			PropertyList propertyList, String sectionLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.sectionName = sectionName;
 		this.sectionSourceClassName = sectionSource.getClass().getName();
 		this.sectionSource = sectionSource;
 		this.propertyList = propertyList;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/**
@@ -199,31 +200,17 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            {@link PropertyList}.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public SectionNodeImpl(String sectionName, String sectionSourceClassName,
 			PropertyList propertyList, String sectionLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.sectionName = sectionName;
 		this.sectionSourceClassName = sectionSourceClassName;
 		this.propertyList = propertyList;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
-	}
-
-	/**
-	 * Allows for obtaining the {@link DeployedOfficeInput}.
-	 * 
-	 * @param sectionName
-	 *            Name of the {@link OfficeSection}.
-	 */
-	public SectionNodeImpl(String sectionName) {
-		this.sectionName = sectionName;
-		this.sectionSourceClassName = null;
-		this.propertyList = new PropertyListImpl();
-		this.sectionLocation = null;
-		this.issues = null;
+		this.context = context;
 	}
 
 	/**
@@ -238,18 +225,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            {@link SectionSource} instance. May be <code>null</code>.
 	 * @param sectionLocation
 	 *            Location of this {@link SubSection}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	private SectionNodeImpl(String sectionName, String sectionSourceClassName,
 			SectionSource sectionSource, String sectionLocation,
-			CompilerIssues issues) {
+			NodeContext context) {
 		this.sectionName = sectionName;
 		this.sectionSourceClassName = sectionSourceClassName;
 		this.sectionSource = sectionSource;
 		this.propertyList = new PropertyListImpl();
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/**
@@ -261,8 +248,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            Cause of the issue.
 	 */
 	private void addIssue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.SECTION, this.sectionLocation, null,
-				null, issueDescription, cause);
+		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
+				this.sectionLocation, null, null, issueDescription, cause);
 	}
 
 	/*
@@ -271,8 +258,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 	@Override
 	protected void addIssue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, this.sectionLocation, null,
-				null, issueDescription);
+		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
+				this.sectionLocation, null, null, issueDescription);
 	}
 
 	/*
@@ -290,7 +277,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 					.obtainClass(this.sectionSourceClassName,
 							SectionSource.class, classLoader,
 							LocationType.SECTION, this.sectionLocation, null,
-							null, this.issues);
+							null, this.context.getCompilerIssues());
 			if (sectionSourceClass == null) {
 				return; // must have section source class
 			}
@@ -298,7 +285,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Instantiate an instance of the section source
 			this.sectionSource = CompileUtil.newInstance(sectionSourceClass,
 					SectionSource.class, LocationType.SECTION,
-					this.sectionLocation, null, null, issues);
+					this.sectionLocation, null, null, this.context
+							.getCompilerIssues());
 			if (this.sectionSource == null) {
 				return; // must instantiate section source
 			}
@@ -361,7 +349,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (input == null) {
 			// Add the section input
 			input = new SectionInputNodeImpl(inputName, this,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			this.inputs.put(inputName, input);
 		}
 		return input;
@@ -437,7 +425,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (input == null) {
 			// Add the input
 			input = new SectionInputNodeImpl(inputName, this,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			this.inputs.put(inputName, input);
 		}
 		return input;
@@ -450,7 +438,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (output == null) {
 			// Add the output
 			output = new SectionOutputNodeImpl(outputName,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			this.outputs.put(outputName, output);
 		}
 		return output;
@@ -463,7 +451,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (object == null) {
 			// Add the object
 			object = new SectionObjectNodeImpl(objectName,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			this.objects.put(objectName, object);
 		}
 		return object;
@@ -480,7 +468,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (input == null) {
 			// Add the input
 			input = new SectionInputNodeImpl(inputName, this, parameterType,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			this.inputs.put(inputName, input);
 		} else {
 			// Added but determine if requires initialising
@@ -503,7 +491,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (output == null) {
 			// Add the output
 			output = new SectionOutputNodeImpl(outputName, argumentType,
-					isEscalationOnly, this.sectionLocation, this.issues);
+					isEscalationOnly, this.sectionLocation, this.context);
 			this.outputs.put(outputName, output);
 		} else {
 			// Added but determine if requires initialising
@@ -525,7 +513,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (object == null) {
 			// Add the object
 			object = new SectionObjectNodeImpl(objectName, objectType,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			this.objects.put(objectName, object);
 		} else {
 			// Added but determine if requires initialising
@@ -541,8 +529,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public SectionManagedObject addSectionManagedObject(String managedObjectName,
-			String managedObjectSourceClassName) {
+	public SectionManagedObject addSectionManagedObject(
+			String managedObjectName, String managedObjectSourceClassName) {
 		// Obtain and return the section managed object for the name
 		ManagedObjectNode managedObject = this.managedObjectNodes
 				.get(managedObjectName);
@@ -550,7 +538,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Add the section managed object
 			managedObject = new ManagedObjectNodeImpl(managedObjectName,
 					managedObjectSourceClassName, this.sectionLocation,
-					this.issues);
+					this.context);
 			this.managedObjectNodes.put(managedObjectName, managedObject);
 		} else {
 			// Section managed object already added
@@ -561,7 +549,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public SectionWork addSectionWork(String workName, String workSourceClassName) {
+	public SectionWork addSectionWork(String workName,
+			String workSourceClassName) {
 		return this.addWork(workName, workSourceClassName, null);
 	}
 
@@ -589,7 +578,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (work == null) {
 			// Add the section work
 			work = new WorkNodeImpl(workName, workSourceClassName, workSource,
-					this.sectionLocation, this.taskNodes, this.issues);
+					this.sectionLocation, this.taskNodes, this.context);
 			this.workNodes.put(workName, work);
 		} else {
 			// Section work already added
@@ -634,7 +623,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Add the sub section
 			subSection = new SectionNodeImpl(subSectionName,
 					sectionSourceClassName, sectionSource, location,
-					this.issues);
+					this.context);
 			this.subSections.put(subSectionName, subSection);
 		} else {
 			// Sub section already added

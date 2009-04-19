@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
@@ -62,9 +62,9 @@ public class TaskNodeImpl implements TaskNode {
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * {@link TaskFlowNode} instances by their {@link TaskFlow} names.
@@ -119,15 +119,15 @@ public class TaskNodeImpl implements TaskNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link TaskNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public TaskNodeImpl(String taskName, String taskTypeName,
-			String sectionLocation, CompilerIssues issues) {
+			String sectionLocation, NodeContext context) {
 		this.taskName = taskName;
 		this.taskTypeName = taskTypeName;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -145,7 +145,7 @@ public class TaskNodeImpl implements TaskNode {
 
 		// Create the team responsible
 		this.teamResponsible = new OfficeTeamNodeImpl("Team for task "
-				+ this.taskName, this.officeLocation, this.issues);
+				+ this.taskName, this.officeLocation, this.context);
 		this.isOfficeContextLoaded = true;
 	}
 
@@ -165,7 +165,7 @@ public class TaskNodeImpl implements TaskNode {
 		if (flow == null) {
 			// Add the task flow
 			flow = new TaskFlowNodeImpl(taskFlowName, false,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			this.taskFlows.put(taskFlowName, flow);
 		}
 		return flow;
@@ -178,7 +178,7 @@ public class TaskNodeImpl implements TaskNode {
 		if (object == null) {
 			// Create the task object
 			object = new TaskObjectNodeImpl(taskObjectName,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			if (this.isOfficeContextLoaded) {
 				// Add the office context to the task
 				object.addOfficeContext(this.officeLocation);
@@ -197,7 +197,7 @@ public class TaskNodeImpl implements TaskNode {
 		if (escalation == null) {
 			// Add the task escalation
 			escalation = new TaskFlowNodeImpl(taskEscalationName, true,
-					this.sectionLocation, this.issues);
+					this.sectionLocation, this.context);
 			this.taskEscalations.put(taskEscalationName, escalation);
 		}
 		return escalation;
@@ -217,9 +217,9 @@ public class TaskNodeImpl implements TaskNode {
 
 		// Ensure not already linked
 		if (this.linkedFlowNode != null) {
-			this.issues.addIssue(LocationType.SECTION, this.sectionLocation,
-					null, null, "Task " + this.taskName
-							+ " linked more than once");
+			this.context.getCompilerIssues().addIssue(LocationType.SECTION,
+					this.sectionLocation, null, null,
+					"Task " + this.taskName + " linked more than once");
 			return false; // already linked
 		}
 

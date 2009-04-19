@@ -18,7 +18,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -45,9 +45,9 @@ public class ManagedObjectDependencyNodeImpl implements
 	private final String sectionLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * Flag indicating if within {@link Office} context.
@@ -79,14 +79,14 @@ public class ManagedObjectDependencyNodeImpl implements
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link ManagedObjectDependencyNode}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectDependencyNodeImpl(String dependencyName,
-			String sectionLocation, CompilerIssues issues) {
+			String sectionLocation, NodeContext context) {
 		this.dependencyName = dependencyName;
 		this.sectionLocation = sectionLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -130,20 +130,29 @@ public class ManagedObjectDependencyNodeImpl implements
 		if (this.linkedObjectNode != null) {
 			if (this.isInOfficeFloorContext) {
 				// Office floor dependency
-				this.issues.addIssue(LocationType.OFFICE_FLOOR,
-						this.officeFloorLocation, null, null,
+				this.context.getCompilerIssues().addIssue(
+						LocationType.OFFICE_FLOOR,
+						this.officeFloorLocation,
+						null,
+						null,
 						"Managed object dependency " + this.dependencyName
 								+ " linked more than once");
 			} else if (this.isInOfficeContext) {
 				// Office dependency
-				this.issues.addIssue(LocationType.OFFICE, this.officeLocation,
-						null, null, "Managed object dependency "
-								+ this.dependencyName
+				this.context.getCompilerIssues().addIssue(
+						LocationType.OFFICE,
+						this.officeLocation,
+						null,
+						null,
+						"Managed object dependency " + this.dependencyName
 								+ " linked more than once");
 			} else {
 				// Section dependency
-				this.issues.addIssue(LocationType.SECTION,
-						this.sectionLocation, null, null,
+				this.context.getCompilerIssues().addIssue(
+						LocationType.SECTION,
+						this.sectionLocation,
+						null,
+						null,
 						"Managed object dependency " + this.dependencyName
 								+ " linked more than once");
 			}

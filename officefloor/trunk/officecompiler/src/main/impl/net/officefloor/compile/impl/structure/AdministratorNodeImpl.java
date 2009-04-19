@@ -28,8 +28,8 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
@@ -63,20 +63,15 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	private final PropertyList properties = new PropertyListImpl();
 
 	/**
-	 * {@link ClassLoader}.
-	 */
-	private final ClassLoader classLoader;
-
-	/**
 	 * Location of the {@link Office} containing this
 	 * {@link OfficeAdministrator}.
 	 */
 	private final String officeLocation;
 
 	/**
-	 * {@link CompilerIssues}.
+	 * {@link NodeContext}.
 	 */
-	private final CompilerIssues issues;
+	private final NodeContext context;
 
 	/**
 	 * {@link DutyNode} instances by their {@link OfficeDuty} name.
@@ -95,22 +90,19 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	 *            Name of this {@link OfficeAdministrator}.
 	 * @param administratorSourceClassName
 	 *            Class name of the {@link AdministratorSource}.
-	 * @param classLoader
-	 *            {@link ClassLoader}.
 	 * @param officeLocation
 	 *            Location of the {@link Office} containing this
 	 *            {@link OfficeAdministrator}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
+	 * @param context
+	 *            {@link NodeContext}.
 	 */
 	public AdministratorNodeImpl(String administratorName,
-			String administratorSourceClassName, ClassLoader classLoader,
-			String officeLocation, CompilerIssues issues) {
+			String administratorSourceClassName, String officeLocation,
+			NodeContext context) {
 		this.administratorName = administratorName;
 		this.administratorSourceClassName = administratorSourceClassName;
-		this.classLoader = classLoader;
 		this.officeLocation = officeLocation;
-		this.issues = issues;
+		this.context = context;
 	}
 
 	/*
@@ -171,10 +163,11 @@ public class AdministratorNodeImpl implements AdministratorNode {
 			// Obtain the administrator source class
 			Class<? extends AdministratorSource> administratorSourceClass = CompileUtil
 					.obtainClass(this.administratorSourceClassName,
-							AdministratorSource.class, this.classLoader,
-							LocationType.OFFICE, this.officeLocation,
-							AssetType.ADMINISTRATOR, this.administratorName,
-							this.issues);
+							AdministratorSource.class, this.context
+									.getClassLoader(), LocationType.OFFICE,
+							this.officeLocation, AssetType.ADMINISTRATOR,
+							this.administratorName, this.context
+									.getCompilerIssues());
 			if (administratorSourceClass == null) {
 				return null; // must obtain source class
 			}
@@ -183,9 +176,10 @@ public class AdministratorNodeImpl implements AdministratorNode {
 			AdministratorLoader loader = new AdministratorLoaderImpl(
 					LocationType.OFFICE, this.officeLocation,
 					this.administratorName);
-			this.administratorType = loader.loadAdministrator(
-					administratorSourceClass, this.properties,
-					this.classLoader, this.issues);
+			this.administratorType = loader
+					.loadAdministrator(administratorSourceClass,
+							this.properties, this.context.getClassLoader(),
+							this.context.getCompilerIssues());
 		}
 
 		// Return administrator type
