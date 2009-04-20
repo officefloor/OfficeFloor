@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="String" name="team name" />
-	<field type="AdministratorModel" name="administrator"
-		end-field="team" />
-	<field type="ExternalTeamModel" name="team"
-		end-list="administrator" />
-</model>

@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="OfficeRoomModel" name="room"/>
-	<list type="ExternalTeamModel" name="external team"/>
-	<list type="ExternalManagedObjectModel" name="external managed object"/>
-	<list type="AdministratorModel" name="administrator"/>
+<model>
+    <list type="OfficeSectionModel" name="section" />	
 </model>
