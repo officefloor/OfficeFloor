@@ -555,12 +555,12 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the section loader and load the section
-		SectionLoader sectionLoader = new SectionLoaderImpl(SECTION_LOCATION);
+		SectionLoader sectionLoader = new SectionLoaderImpl();
 		MockSectionSource.loader = loader;
 		SectionType sectionType = sectionLoader.loadSectionType(
-				MockSectionSource.class, this.configurationContext,
-				propertyList, LoadSectionTypeTest.class.getClassLoader(),
-				this.issues);
+				MockSectionSource.class, SECTION_LOCATION, propertyList,
+				this.configurationContext, LoadSectionTypeTest.class
+						.getClassLoader(), this.issues);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

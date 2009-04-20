@@ -16,6 +16,7 @@
  */
 package net.officefloor.model.impl.desk;
 
+import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.impl.desk.DeskModelSectionSource;
 
@@ -26,8 +27,10 @@ import net.officefloor.model.impl.desk.DeskModelSectionSource;
  */
 public class DeskModelSectionSourceTest extends OfficeFrameTestCase {
 
-	public void test_TODO_Implement() {
-		// TODO provide tests to source SectionType from DeskModel
+	/**
+	 * No specification properties required.
+	 */
+	public void testNoSpecification() {
+		SectionLoaderUtil.validateSpecification(DeskModelSectionSource.class);
 	}
-
 }

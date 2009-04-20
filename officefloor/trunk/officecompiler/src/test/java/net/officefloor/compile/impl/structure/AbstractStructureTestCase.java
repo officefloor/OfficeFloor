@@ -288,10 +288,10 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		// Load the section
-		SectionLoader loader = new SectionLoaderImpl(SECTION_LOCATION);
+		SectionLoader loader = new SectionLoaderImpl();
 		OfficeSection section = loader.loadOfficeSection(sectionName,
-				MakerSectionSource.class, this.configurationContext,
-				propertyList, this.classLoader, this.issues);
+				MakerSectionSource.class, SECTION_LOCATION, propertyList,
+				this.configurationContext, this.classLoader, this.issues);
 
 		// Verify the mocks if handling mock state
 		if (isHandleMockState) {

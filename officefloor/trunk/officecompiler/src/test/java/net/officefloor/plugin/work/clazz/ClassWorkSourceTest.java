@@ -54,7 +54,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	public void testWorkLoader() throws Exception {
 
 		// Load the work type
-		WorkType<ClassWork> workType = WorkLoaderUtil.loadWork(
+		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
 				ClassWorkSource.class,
 				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, MockClass.class
 						.getName());

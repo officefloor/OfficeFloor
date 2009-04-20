@@ -16,12 +16,10 @@
  */
 package net.officefloor.model.impl.desk;
 
-import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -34,54 +32,15 @@ import net.officefloor.model.repository.ConfigurationItem;
  * 
  * @author Daniel
  */
-public class DeskModelSectionSource implements SectionSource {
-
-	/**
-	 * Sources the {@link SectionType} from the {@link DeskModel}.
-	 * 
-	 * @param desk
-	 *            {@link DeskModel}.
-	 * @param sectionBuilder
-	 *            {@link SectionDesigner} to construct the {@link OfficeSection}
-	 *            for the {@link DeskModel}.
-	 */
-	public static void sourceSectionType(DeskModel desk,
-			SectionDesigner sectionBuilder) {
-
-		// Add the public tasks as inputs
-		for (TaskModel task : desk.getTasks()) {
-			if (task.getIsPublic()) {
-				// TODO determine parameter type from work task
-				String parameterType = null;
-				sectionBuilder.addSectionInput(task.getTaskName(), parameterType);
-			}
-		}
-
-		// Add the external flows as outputs
-		for (ExternalFlowModel extFlow : desk.getExternalFlows()) {
-			// TODO determine if escalation only
-			boolean isEscalationOnly = false;
-			sectionBuilder.addSectionOutput(extFlow.getExternalFlowName(), extFlow
-					.getArgumentType(), isEscalationOnly);
-		}
-
-		// Add the external managed objects as objects
-		for (ExternalManagedObjectModel extMo : desk
-				.getExternalManagedObjects()) {
-			sectionBuilder.addSectionObject(extMo.getExternalManagedObjectName(),
-					extMo.getObjectType());
-		}
-	}
+public class DeskModelSectionSource extends AbstractSectionSource {
 
 	/*
 	 * ================= SectionSource ===========================
 	 */
 
 	@Override
-	public SectionSourceSpecification getSpecification() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionSource.getSpecification");
+	protected void loadSpecification(SpecificationContext context) {
+		// No specification required
 	}
 
 	@Override
@@ -96,8 +55,30 @@ public class DeskModelSectionSource implements SectionSource {
 		DeskModel desk = new DeskRepositoryImpl(new ModelRepositoryImpl())
 				.retrieveDesk(configuration);
 
-		// Source the section type for the desk
-		sourceSectionType(desk, sectionBuilder);
+		// Add the public tasks as inputs
+		for (TaskModel task : desk.getTasks()) {
+			if (task.getIsPublic()) {
+				// TODO determine parameter type from work task
+				String parameterType = null;
+				sectionBuilder.addSectionInput(task.getTaskName(),
+						parameterType);
+			}
+		}
+
+		// Add the external flows as outputs
+		for (ExternalFlowModel extFlow : desk.getExternalFlows()) {
+			// TODO determine if escalation only
+			boolean isEscalationOnly = false;
+			sectionBuilder.addSectionOutput(extFlow.getExternalFlowName(),
+					extFlow.getArgumentType(), isEscalationOnly);
+		}
+
+		// Add the external managed objects as objects
+		for (ExternalManagedObjectModel extMo : desk
+				.getExternalManagedObjects()) {
+			sectionBuilder.addSectionObject(extMo
+					.getExternalManagedObjectName(), extMo.getObjectType());
+		}
 	}
 
 }

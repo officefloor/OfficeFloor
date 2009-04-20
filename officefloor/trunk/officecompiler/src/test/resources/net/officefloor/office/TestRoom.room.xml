@@ -1,8 +1,0 @@
-<room>
-	<external-managed-objects/>
-	<external-flows/>
-	<sub-rooms>
-		<sub-room id="1" desk="TestDesk.desk.xml"/>
-		<sub-room id="2" room="TestSubRoom.room.xml"/>
-	</sub-rooms>
-</room>
