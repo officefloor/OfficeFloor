@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="String" name="administrator id"/>
-	<field type="String" name="duty key"/>
-	<field type="FlowItemModel" name="flow item" end-list="pre admin duty"/>
-	<field type="DutyModel" name="duty" end-list="pre admin flow item"/>
-</model>
