@@ -38,7 +38,6 @@ import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.spi.section.source.SectionUnknownPropertyError;
 import net.officefloor.model.repository.ConfigurationContext;
-import net.officefloor.model.section.SectionModel;
 
 /**
  * {@link SectionLoader} implementation.
@@ -46,21 +45,6 @@ import net.officefloor.model.section.SectionModel;
  * @author Daniel
  */
 public class SectionLoaderImpl implements SectionLoader {
-
-	/**
-	 * Location of the {@link SectionModel}.
-	 */
-	private final String sectionLocation;
-
-	/**
-	 * Initiate.
-	 * 
-	 * @param sectionLocation
-	 *            Location of the {@link SectionModel}.
-	 */
-	public SectionLoaderImpl(String sectionLocation) {
-		this.sectionLocation = sectionLocation;
-	}
 
 	/*
 	 * ====================== SectionLoader ====================================
@@ -73,7 +57,7 @@ public class SectionLoaderImpl implements SectionLoader {
 		// Instantiate the section source
 		SectionSource sectionSource = CompileUtil.newInstance(
 				sectionSourceClass, SectionSource.class, LocationType.SECTION,
-				this.sectionLocation, null, null, issues);
+				null, null, null, issues);
 		if (sectionSource == null) {
 			return null; // failed to instantiate
 		}
@@ -83,9 +67,11 @@ public class SectionLoaderImpl implements SectionLoader {
 		try {
 			specification = sectionSource.getSpecification();
 		} catch (Throwable ex) {
-			this.addIssue("Failed to obtain "
-					+ SectionSourceSpecification.class.getSimpleName()
-					+ " from " + sectionSourceClass.getName(), ex, issues);
+			this
+					.addIssue("Failed to obtain "
+							+ SectionSourceSpecification.class.getSimpleName()
+							+ " from " + sectionSourceClass.getName(), ex,
+							null, issues);
 			return null; // failed to obtain
 		}
 
@@ -93,7 +79,8 @@ public class SectionLoaderImpl implements SectionLoader {
 		if (specification == null) {
 			this.addIssue("No "
 					+ SectionSourceSpecification.class.getSimpleName()
-					+ " returned from " + sectionSourceClass.getName(), issues);
+					+ " returned from " + sectionSourceClass.getName(), null,
+					issues);
 			return null; // no specification obtained
 		}
 
@@ -106,7 +93,7 @@ public class SectionLoaderImpl implements SectionLoader {
 					+ SectionSourceProperty.class.getSimpleName()
 					+ " instances from "
 					+ SectionSourceSpecification.class.getSimpleName()
-					+ " for " + sectionSourceClass.getName(), ex, issues);
+					+ " for " + sectionSourceClass.getName(), ex, null, issues);
 			return null; // failed to obtain properties
 		}
 
@@ -121,7 +108,8 @@ public class SectionLoaderImpl implements SectionLoader {
 					this.addIssue(SectionSourceProperty.class.getSimpleName()
 							+ " " + i + " is null from "
 							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), issues);
+							+ " for " + sectionSourceClass.getName(), null,
+							issues);
 					return null; // must have complete property details
 				}
 
@@ -134,7 +122,7 @@ public class SectionLoaderImpl implements SectionLoader {
 							+ SectionSourceProperty.class.getSimpleName() + " "
 							+ i + " from "
 							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), ex,
+							+ " for " + sectionSourceClass.getName(), ex, null,
 							issues);
 					return null; // must have complete property details
 				}
@@ -142,7 +130,8 @@ public class SectionLoaderImpl implements SectionLoader {
 					this.addIssue(SectionSourceProperty.class.getSimpleName()
 							+ " " + i + " provided blank name from "
 							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), issues);
+							+ " for " + sectionSourceClass.getName(), null,
+							issues);
 					return null; // must have complete property details
 				}
 
@@ -155,7 +144,7 @@ public class SectionLoaderImpl implements SectionLoader {
 							+ SectionSourceProperty.class.getSimpleName() + " "
 							+ i + " (" + name + ") from "
 							+ SectionSourceSpecification.class.getSimpleName()
-							+ " for " + sectionSourceClass.getName(), ex,
+							+ " for " + sectionSourceClass.getName(), ex, null,
 							issues);
 					return null; // must have complete property details
 				}
@@ -171,29 +160,29 @@ public class SectionLoaderImpl implements SectionLoader {
 
 	@Override
 	public <S extends SectionSource> SectionType loadSectionType(
-			Class<S> sectionSourceClass,
-			ConfigurationContext configurationContext,
-			PropertyList propertyList, ClassLoader classLoader,
+			Class<S> sectionSourceClass, String sectionLocation,
+			PropertyList propertyList,
+			ConfigurationContext configurationContext, ClassLoader classLoader,
 			CompilerIssues issues) {
 
 		// Instantiate the section source
 		SectionSource sectionSource = CompileUtil.newInstance(
 				sectionSourceClass, SectionSource.class, LocationType.SECTION,
-				this.sectionLocation, null, null, issues);
+				sectionLocation, null, null, issues);
 		if (sectionSource == null) {
 			return null; // failed to instantiate
 		}
 
 		// Create the section source context
 		SectionSourceContext context = new SectionSourceContextImpl(
-				this.sectionLocation, configurationContext, propertyList,
+				sectionLocation, configurationContext, propertyList,
 				classLoader);
 
 		// Create the section designer
 		NodeContext nodeContext = new NodeContextImpl(configurationContext,
 				classLoader, issues);
 		SectionNode sectionType = new SectionNodeImpl(SectionType.class
-				.getSimpleName(), this.sectionLocation, nodeContext);
+				.getSimpleName(), sectionLocation, nodeContext);
 
 		try {
 			// Source the section type
@@ -202,19 +191,23 @@ public class SectionLoaderImpl implements SectionLoader {
 		} catch (SectionUnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknonwnPropertyName()
 					+ "' for " + SectionSource.class.getSimpleName() + " "
-					+ sectionSourceClass.getName(), issues);
+					+ sectionSourceClass.getName(), sectionLocation, issues);
 			return null; // must have property
 
 		} catch (ConfigurationContextPropagateError ex) {
 			this.addIssue("Failure obtaining configuration '"
-					+ ex.getLocation() + "'", ex.getCause(), issues);
+					+ ex.getLocation() + "'", ex.getCause(), sectionLocation,
+					issues);
 			return null; // must not fail in getting configurations
 
 		} catch (Throwable ex) {
-			this.addIssue("Failed to source "
-					+ SectionType.class.getSimpleName() + " definition from "
-					+ SectionSource.class.getSimpleName() + " "
-					+ sectionSourceClass.getName(), ex, issues);
+			this
+					.addIssue("Failed to source "
+							+ SectionType.class.getSimpleName()
+							+ " definition from "
+							+ SectionSource.class.getSimpleName() + " "
+							+ sectionSourceClass.getName(), ex,
+							sectionLocation, issues);
 			return null; // must be successful
 		}
 
@@ -222,7 +215,8 @@ public class SectionLoaderImpl implements SectionLoader {
 		SectionInputType[] inputs = sectionType.getSectionInputTypes();
 		for (int i = 0; i < inputs.length; i++) {
 			if (CompileUtil.isBlank(inputs[i].getSectionInputName())) {
-				this.addIssue("Null name for input " + i, issues);
+				this.addIssue("Null name for input " + i, sectionLocation,
+						issues);
 				return null; // must have names for inputs
 			}
 		}
@@ -231,7 +225,8 @@ public class SectionLoaderImpl implements SectionLoader {
 		SectionOutputType[] outputs = sectionType.getSectionOutputTypes();
 		for (int i = 0; i < outputs.length; i++) {
 			if (CompileUtil.isBlank(outputs[i].getSectionOutputName())) {
-				this.addIssue("Null name for output " + i, issues);
+				this.addIssue("Null name for output " + i, sectionLocation,
+						issues);
 				return null; // must have names for outputs
 			}
 		}
@@ -241,12 +236,14 @@ public class SectionLoaderImpl implements SectionLoader {
 		for (int i = 0; i < objects.length; i++) {
 			SectionObjectType object = objects[i];
 			if (CompileUtil.isBlank(object.getSectionObjectName())) {
-				this.addIssue("Null name for object " + i, issues);
+				this.addIssue("Null name for object " + i, sectionLocation,
+						issues);
 				return null; // must have names for objects
 			}
 			if (CompileUtil.isBlank(object.getObjectType())) {
 				this.addIssue("Null type for object " + i + " (name="
-						+ object.getSectionObjectName() + ")", issues);
+						+ object.getSectionObjectName() + ")", sectionLocation,
+						issues);
 				return null; // must have types for objects
 			}
 		}
@@ -258,14 +255,14 @@ public class SectionLoaderImpl implements SectionLoader {
 	@Override
 	public <S extends SectionSource> OfficeSection loadOfficeSection(
 			String sectionName, Class<S> sectionSourceClass,
-			ConfigurationContext configurationContext,
-			PropertyList propertyList, ClassLoader classLoader,
+			String sectionLocation, PropertyList propertyList,
+			ConfigurationContext configurationContext, ClassLoader classLoader,
 			CompilerIssues issues) {
 
 		// Instantiate an instance of the section source
 		S sectionSource = CompileUtil.newInstance(sectionSourceClass,
-				SectionSource.class, LocationType.SECTION,
-				this.sectionLocation, null, null, issues);
+				SectionSource.class, LocationType.SECTION, sectionLocation,
+				null, null, issues);
 		if (sectionSource == null) {
 			return null; // must instantiate section source
 		}
@@ -274,10 +271,10 @@ public class SectionLoaderImpl implements SectionLoader {
 		NodeContext nodeContext = new NodeContextImpl(configurationContext,
 				classLoader, issues);
 		SectionNode sectionNode = new SectionNodeImpl(sectionName,
-				sectionSource, propertyList, this.sectionLocation, nodeContext);
+				sectionSource, propertyList, sectionLocation, nodeContext);
 
 		// Recursive load all the section nodes
-		sectionNode.loadOfficeSection(this.sectionLocation);
+		sectionNode.loadOfficeSection(sectionLocation);
 
 		// Return the section node as the office section
 		return sectionNode;
@@ -288,11 +285,14 @@ public class SectionLoaderImpl implements SectionLoader {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
-	private void addIssue(String issueDescription, CompilerIssues issues) {
-		issues.addIssue(LocationType.SECTION, this.sectionLocation, null, null,
+	private void addIssue(String issueDescription, String sectionLocation,
+			CompilerIssues issues) {
+		issues.addIssue(LocationType.SECTION, sectionLocation, null, null,
 				issueDescription);
 	}
 
@@ -303,12 +303,14 @@ public class SectionLoaderImpl implements SectionLoader {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
 	 * @param issues
 	 *            {@link CompilerIssues}.
 	 */
 	private void addIssue(String issueDescription, Throwable cause,
-			CompilerIssues issues) {
-		issues.addIssue(LocationType.SECTION, this.sectionLocation, null, null,
+			String sectionLocation, CompilerIssues issues) {
+		issues.addIssue(LocationType.SECTION, sectionLocation, null, null,
 				issueDescription, cause);
 	}
 

@@ -21,7 +21,6 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
@@ -36,11 +35,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
-
-	/**
-	 * Location of the {@link OfficeSection}.
-	 */
-	private final String SECTION_LOCATION = "SECTION";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -284,8 +278,8 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION, null,
-				null, issueDescription);
+		this.issues.addIssue(LocationType.SECTION, null, null, null,
+				issueDescription);
 	}
 
 	/**
@@ -297,8 +291,8 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION, null,
-				null, issueDescription, cause);
+		this.issues.addIssue(LocationType.SECTION, null, null, null,
+				issueDescription, cause);
 	}
 
 	/**
@@ -314,7 +308,7 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 			String... propertyNameLabelPairs) {
 
 		// Load the section specification
-		SectionLoader sectionLoader = new SectionLoaderImpl(SECTION_LOCATION);
+		SectionLoader sectionLoader = new SectionLoaderImpl();
 		PropertyList propertyList = sectionLoader.loadSpecification(
 				MockSectionSource.class, this.issues);
 

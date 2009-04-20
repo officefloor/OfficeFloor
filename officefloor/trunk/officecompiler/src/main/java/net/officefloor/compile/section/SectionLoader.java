@@ -55,11 +55,13 @@ public interface SectionLoader {
 	 * 
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link SectionType}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
 	 * @param classLoader
 	 *            {@link ClassLoader} that the {@link SectionSource} may use in
 	 *            obtaining necessary class path resources.
@@ -70,9 +72,9 @@ public interface SectionLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<S extends SectionSource> SectionType loadSectionType(
-			Class<S> sectionSourceClass,
-			ConfigurationContext configurationContext,
-			PropertyList propertyList, ClassLoader classLoader,
+			Class<S> sectionSourceClass, String sectionLocation,
+			PropertyList propertyList,
+			ConfigurationContext configurationContext, ClassLoader classLoader,
 			CompilerIssues issues);
 
 	/**
@@ -87,11 +89,13 @@ public interface SectionLoader {
 	 *            Name of the {@link OfficeSection}.
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link OfficeSection}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
 	 * @param classLoader
 	 *            {@link ClassLoader} that the {@link SectionSource} may use in
 	 *            obtaining necessary class path resources.
@@ -102,8 +106,8 @@ public interface SectionLoader {
 	 */
 	<S extends SectionSource> OfficeSection loadOfficeSection(
 			String sectionName, Class<S> sectionSourceClass,
-			ConfigurationContext configurationContext,
-			PropertyList propertyList, ClassLoader classLoader,
+			String sectionLocation, PropertyList propertyList,
+			ConfigurationContext configurationContext, ClassLoader classLoader,
 			CompilerIssues issues);
 
 }

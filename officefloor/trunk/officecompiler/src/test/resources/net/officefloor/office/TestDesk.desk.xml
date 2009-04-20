@@ -1,9 +1,0 @@
-<desk>
-	<external-managed-objects/>
-	<external-flows/>
-	<works/>
-	<flow-items>
-		<flow-item id="1" work="workA" task="taskMethod"/>
-		<flow-item id="2" work="workB" task="noLongerExists"/>
-	</flow-items>
-</desk>

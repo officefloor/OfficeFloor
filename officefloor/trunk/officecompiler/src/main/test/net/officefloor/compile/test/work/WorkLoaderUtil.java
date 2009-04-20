@@ -114,7 +114,7 @@ public class WorkLoaderUtil {
 		WorkType<W> expectedWork = (WorkType<W>) expectedWorkType;
 
 		// Load the actual work type
-		WorkType<W> actualWork = loadWork(workSourceClass, propertyNameValues);
+		WorkType<W> actualWork = loadWorkType(workSourceClass, propertyNameValues);
 
 		// Verify the work type
 		TestCase.assertEquals("Incorrect work factory", expectedWork
@@ -231,14 +231,14 @@ public class WorkLoaderUtil {
 	 *            the {@link WorkSource}.
 	 * @return Loaded {@link WorkType}.
 	 */
-	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWork(
+	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
 			Class<WS> workSourceClass, String... propertyNameValues) {
 
 		// Obtain the class loader
 		ClassLoader classLoader = workSourceClass.getClassLoader();
 
 		// Return the loaded work
-		return loadWork(workSourceClass, classLoader, propertyNameValues);
+		return loadWorkType(workSourceClass, classLoader, propertyNameValues);
 	}
 
 	/**
@@ -253,7 +253,7 @@ public class WorkLoaderUtil {
 	 *            the {@link WorkSource}.
 	 * @return Loaded {@link WorkType}.
 	 */
-	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWork(
+	public static <W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
 			Class<WS> workSourceClass, ClassLoader classLoader,
 			String... propertyNameValues) {
 
