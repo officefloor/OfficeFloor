@@ -16,6 +16,8 @@
  */
 package net.officefloor.model.impl.desk;
 
+import java.io.FileNotFoundException;
+
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
@@ -24,6 +26,8 @@ import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 
@@ -50,6 +54,11 @@ public class DeskModelSectionSource extends AbstractSectionSource {
 		// Obtain the configuration to the desk
 		ConfigurationItem configuration = context.getConfiguration(context
 				.getSectionLocation());
+		if (configuration == null) {
+			// Must have configuration
+			throw new FileNotFoundException("Can not find desk '"
+					+ context.getSectionLocation() + "'");
+		}
 
 		// Retrieve the desk model
 		DeskModel desk = new DeskRepositoryImpl(new ModelRepositoryImpl())
@@ -58,8 +67,20 @@ public class DeskModelSectionSource extends AbstractSectionSource {
 		// Add the public tasks as inputs
 		for (TaskModel task : desk.getTasks()) {
 			if (task.getIsPublic()) {
-				// TODO determine parameter type from work task
+
+				// Obtain the work task
+				WorkTaskModel workTask = task.getWorkTask().getWorkTask();
+
+				// Determine the parameter type from the work task
 				String parameterType = null;
+				for (WorkTaskObjectModel taskObject : workTask.getTaskObjects()) {
+					if (taskObject.getIsParameter()) {
+						// TODO handle two parameters to work for a desk
+						parameterType = taskObject.getObjectType();
+					}
+				}
+
+				// Add the section input
 				sectionBuilder.addSectionInput(task.getTaskName(),
 						parameterType);
 			}
@@ -67,8 +88,13 @@ public class DeskModelSectionSource extends AbstractSectionSource {
 
 		// Add the external flows as outputs
 		for (ExternalFlowModel extFlow : desk.getExternalFlows()) {
-			// TODO determine if escalation only
-			boolean isEscalationOnly = false;
+
+			// Determine if escalation only (only has task escalation connected)
+			boolean isEscalationOnly = ((extFlow.getPreviousTasks().size() == 0)
+					&& (extFlow.getTaskFlows().size() == 0) && (extFlow
+					.getTaskEscalations().size() > 0));
+
+			// Add the section output
 			sectionBuilder.addSectionOutput(extFlow.getExternalFlowName(),
 					extFlow.getArgumentType(), isEscalationOnly);
 		}

@@ -190,18 +190,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 				// Obtain the method name
 				String methodName = method.getName();
 
-				// Ignore hashCode
-				if ("hashCode".equals(methodName)) {
-					continue;
-				}
-
-				// Ignore toString
-				if ("toString".equals(methodName)) {
-					continue;
-				}
-
-				// Ignore getClass
-				if ("getClass".equals(methodName)) {
+				// Ignore Object methods
+				if (Object.class.equals(method.getDeclaringClass())) {
 					continue;
 				}
 
@@ -1185,10 +1175,8 @@ public abstract class OfficeFrameTestCase extends TestCase {
 	 * <p>
 	 * Obtains the input stream to the file by the input file name located in
 	 * the package of the input class.
-	 * </p>
 	 * <p>
 	 * Note: this also searches the class path for the file.
-	 * </p>
 	 * 
 	 * @param packageClass
 	 *            Class to obtain the relative path from for its package.
@@ -1228,7 +1216,7 @@ public abstract class OfficeFrameTestCase extends TestCase {
 		String packageName = packageClass.getPackage().getName();
 
 		// Return package name as relative path
-		return packageName.replaceAll("\\.", "/");
+		return packageName.replace('.', '/');
 	}
 
 	/**

@@ -35,7 +35,6 @@ import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.WorkModel;
 
 /**
  * Utility class for testing a {@link WorkSource}.
@@ -89,7 +88,8 @@ public class WorkLoaderUtil {
 
 	/**
 	 * Convenience method that validates the {@link WorkType} loaded from the
-	 * input {@link WorkSource} against the {@link WorkModel}.
+	 * input {@link WorkSource} against the expected {@link WorkType} from the
+	 * {@link WorkTypeBuilder}.
 	 * 
 	 * @param expectedWorkType
 	 *            {@link WorkTypeBuilder} that has had the expected
@@ -114,7 +114,8 @@ public class WorkLoaderUtil {
 		WorkType<W> expectedWork = (WorkType<W>) expectedWorkType;
 
 		// Load the actual work type
-		WorkType<W> actualWork = loadWorkType(workSourceClass, propertyNameValues);
+		WorkType<W> actualWork = loadWorkType(workSourceClass,
+				propertyNameValues);
 
 		// Verify the work type
 		TestCase.assertEquals("Incorrect work factory", expectedWork

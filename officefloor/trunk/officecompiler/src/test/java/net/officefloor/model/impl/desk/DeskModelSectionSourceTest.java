@@ -16,8 +16,12 @@
  */
 package net.officefloor.model.impl.desk;
 
+import java.sql.Connection;
+
+import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.impl.desk.DeskModelSectionSource;
 
 /**
@@ -33,4 +37,25 @@ public class DeskModelSectionSourceTest extends OfficeFrameTestCase {
 	public void testNoSpecification() {
 		SectionLoaderUtil.validateSpecification(DeskModelSectionSource.class);
 	}
+
+	/**
+	 * Ensure can source a {@link DeskModel}.
+	 */
+	public void testDesk() {
+
+		// Create the expected section
+		SectionDesigner designer = SectionLoaderUtil
+				.createSectionDesigner(DeskModelSectionSource.class);
+		designer.addSectionInput("INPUT", Integer.class.getName());
+		designer.addSectionOutput("OUTPUT", Float.class.getName(), false);
+		designer
+				.addSectionOutput("ESCALATION", Exception.class.getName(), true);
+		designer.addSectionObject("OBJECT", Connection.class.getName());
+
+		// Validates the section is as expected
+		SectionLoaderUtil.validateSection(designer,
+				DeskModelSectionSource.class, this,
+				"DeskModelSectionSourceTest.desk.xml");
+	}
+
 }

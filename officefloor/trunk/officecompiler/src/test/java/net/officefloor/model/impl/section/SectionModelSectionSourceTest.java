@@ -16,7 +16,12 @@
  */
 package net.officefloor.model.impl.section;
 
+import java.sql.Connection;
+
+import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
+import net.officefloor.model.section.SectionModel;
 
 /**
  * Tests the {@link SectionModelSectionSource}.
@@ -25,8 +30,32 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public class SectionModelSectionSourceTest extends OfficeFrameTestCase {
 
-	public void test_TODO_Implement() {
-		// TODO provide tests to source SectionType from SectionModel
+	/**
+	 * No specification properties required.
+	 */
+	public void testNoSpecification() {
+		SectionLoaderUtil
+				.validateSpecification(SectionModelSectionSource.class);
+	}
+
+	/**
+	 * Ensure can source a {@link SectionModel}.
+	 */
+	public void testDesk() {
+
+		// Create the expected section
+		SectionDesigner designer = SectionLoaderUtil
+				.createSectionDesigner(SectionModelSectionSource.class);
+		designer.addSectionInput("INPUT", Integer.class.getName());
+		designer.addSectionOutput("OUTPUT", Float.class.getName(), false);
+		designer
+				.addSectionOutput("ESCALATION", Exception.class.getName(), true);
+		designer.addSectionObject("OBJECT", Connection.class.getName());
+
+		// Validates the section is as expected
+		SectionLoaderUtil.validateSection(designer,
+				SectionModelSectionSource.class, this,
+				"SectionModelSectionSourceTest.section.xml");
 	}
 
 }
