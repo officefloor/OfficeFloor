@@ -16,36 +16,95 @@
  */
 package net.officefloor.model.impl.section;
 
+import java.io.FileNotFoundException;
+
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
-import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
+import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 
 /**
  * {@link SectionSource} for a {@link SectionModel}.
  * 
  * @author Daniel
  */
-public class SectionModelSectionSource implements SectionSource {
+public class SectionModelSectionSource extends AbstractSectionSource {
 
 	/*
 	 * ================== SectionSource ===========================
 	 */
 
 	@Override
-	public SectionSourceSpecification getSpecification() {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionSource.getSpecification");
+	protected void loadSpecification(SpecificationContext context) {
+		// No specification
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner sectionBuilder,
+	public void sourceSection(SectionDesigner sectionDesigner,
 			SectionSourceContext context) throws Exception {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement SectionSource.sourceSectionType");
+
+		// Obtain the configuration to the section
+		ConfigurationItem configuration = context.getConfiguration(context
+				.getSectionLocation());
+		if (configuration == null) {
+			// Must have configuration
+			throw new FileNotFoundException("Can not find section '"
+					+ context.getSectionLocation() + "'");
+		}
+
+		// Retrieve the section model
+		SectionModel section = new SectionRepositoryImpl(
+				new ModelRepositoryImpl()).retrieveSection(configuration);
+
+		// Add the public section inputs as inputs to section
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionInputModel input : subSection.getSubSectionInputs()) {
+				if (input.getIsPublic()) {
+					// Obtain the public name for the input
+					String inputName = input.getPublicInputName();
+					inputName = (CompileUtil.isBlank(inputName) ? input
+							.getSubSectionInputName() : inputName);
+
+					// Add the input
+					sectionDesigner.addSectionInput(inputName, input
+							.getParameterType());
+				}
+			}
+		}
+
+		// Add the external flows as outputs from the section
+		for (ExternalFlowModel extFlow : section.getExternalFlows()) {
+
+			// Determine if all connected sub section outputs are escalation
+			boolean isEscalationOnly = true;
+			for (SubSectionOutputToExternalFlowModel conn : extFlow
+					.getSubSectionOutputs()) {
+				if (!conn.getSubSectionOutput().getEscalationOnly()) {
+					// Connected to output which is not escalation only
+					isEscalationOnly = false;
+				}
+			}
+
+			// Add the output
+			sectionDesigner.addSectionOutput(extFlow.getExternalFlowName(),
+					extFlow.getArgumentType(), isEscalationOnly);
+		}
+
+		// Add the external managed objects as objects required by section
+		for (ExternalManagedObjectModel extMo : section
+				.getExternalManagedObjects()) {
+			sectionDesigner.addSectionObject(extMo
+					.getExternalManagedObjectName(), extMo.getObjectType());
+		}
 	}
 
 }
