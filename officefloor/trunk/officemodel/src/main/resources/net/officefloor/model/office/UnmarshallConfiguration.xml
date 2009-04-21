@@ -1,93 +1,104 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<unmarshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="../../../../../../../plugin/xml/src/schema/TreeXmlUnmarshaller.xsd"
-	node="office" class="net.officefloor.model.office.OfficeModel">
-	<!-- TEAMS -->
-	<object method="addExternalTeam" node="team"
-		class="net.officefloor.model.office.ExternalTeamModel">
-		<value method="setName" node="team@name" />
-		<value method="setX" node="team@x" />
-		<value method="setY" node="team@y" />
-	</object>
-	<!-- MANAGED OBEJCTS -->
-	<object method="addExternalManagedObject" node="managed-object"
-		class="net.officefloor.model.office.ExternalManagedObjectModel">
-		<value method="setName" node="managed-object@name" />
-		<value method="setObjectType" node="managed-object@object-type" />
-		<value method="setScope" node="managed-object@scope" />
-		<value method="setX" node="managed-object@x" />
-		<value method="setY" node="managed-object@y" />
-	</object>
-	<!-- ROOM -->
-	<object method="setRoom" node="room"
-		class="net.officefloor.model.office.OfficeRoomModel" id="ROOM">
-		<value method="setId" node="room@id" />
-		<value method="setName" node="room@name" />
-		<value method="setX" node="room@x" />
-		<value method="setY" node="room@y" />
-		<reference id="ROOM" method="addSubRoom" />
-		<!-- DESK -->
-		<object method="addDesk" node="desk"
-			class="net.officefloor.model.office.OfficeDeskModel">
-			<value method="setId" node="desk@id" />
-			<value method="setName" node="desk@name" />
-			<object method="addFlowItem" node="flow-item"
-				class="net.officefloor.model.office.FlowItemModel">
-				<value method="setId" node="flow-item@id" />
-				<value method="setWorkName" node="flow-item@work" />
-				<value method="setTaskName" node="flow-item@task" />
-				<object method="setTeam" node="team"
-					class="net.officefloor.model.office.FlowItemToTeamModel">
-					<value method="setTeamName" node="team@name" />
-				</object>
-				<object method="addPreAdminDuty" node="pre-admin"
-					class="net.officefloor.model.office.FlowItemToPreAdministratorDutyModel">
-					<value method="setAdministratorId"
-						node="pre-admin@administrator" />
-					<value method="setDutyKey" node="pre-admin@duty" />
-				</object>
-				<object method="addPostAdminDuty" node="post-admin"
-					class="net.officefloor.model.office.FlowItemToPostAdministratorDutyModel">
-					<value method="setAdministratorId"
-						node="post-admin@administrator" />
-					<value method="setDutyKey" node="post-admin@duty" />
-				</object>
-			</object>
-		</object>
-	</object>
-	<!-- ADMINISTRATORS -->
-	<object method="addAdministrator" node="administrator"
-		class="net.officefloor.model.office.AdministratorModel">
-		<value method="setId" node="administrator@id" />
-		<value method="setSource" node="administrator@source" />
-		<value method="setDutyKeyClass" node="administrator@duty-keys" />
-		<value method="setX" node="administrator@x" />
-		<value method="setY" node="administrator@y" />
-		<object method="setTeam" node="team"
-			class="net.officefloor.model.office.AdministratorToTeamModel">
-			<value method="setTeamName" node="team@name" />
-		</object>
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.office.PropertyModel">
-			<value method="setName" node="property@name" />
-			<value method="setValue" node="property@value" />
-		</object>
-		<object method="addManagedObject" node="managed-object"
-			class="net.officefloor.model.office.AdministratorToManagedObjectModel">
-			<value method="setName" node="managed-object@name" />
-		</object>
-		<object method="addDuty" node="duty"
-			class="net.officefloor.model.office.DutyModel">
-			<value method="setKey" node="duty@key" />
-			<value method="setFlowKeys" node="duty@flow-keys" />
-			<object method="addFlow" node="flow"
-				class="net.officefloor.model.office.DutyFlowModel">
-				<value method="setKey" node="flow@key" />
-				<object method="setFlowItem" node="flow-item"
-					class="net.officefloor.model.office.DutyFlowToFlowItemModel">
-					<value method="setFlowItemId" node="flow-item@id" />
-				</object>
-			</object>
-		</object>
-	</object>
+<unmarshall node="office" class="net.officefloor.model.office.OfficeModel">
+    <!-- EXTERNAL MANAGED OBJECTS -->
+    <object method="addExternalManagedObject" node="external-managed-object"
+        class="net.officefloor.model.office.ExternalManagedObjectModel">
+        <value method="setExternalManagedObjectName" node="external-managed-object@name" />
+        <value method="setObjectType" node="external-managed-object@object-type" />
+        <value method="setX" node="external-managed-object@x" />
+        <value method="setY" node="external-managed-object@y" />
+    </object>
+    <!-- OFFICE TEAMS -->
+    <object method="addOfficeTeam" node="team"
+        class="net.officefloor.model.office.OfficeTeamModel">
+        <value method="setOfficeTeamName" node="team@name" />
+        <value method="setX" node="team@x" />
+        <value method="setY" node="team@y" />
+    </object>
+    <!-- OFFICE ESCALATIONS -->
+    <object method="addOfficeEscalation" node="escalation"
+        class="net.officefloor.model.office.OfficeEscalationModel">
+        <value method="setEscalationType" node="escalation@escalation-type" />
+        <value method="setX" node="escalation@x" />
+        <value method="setY" node="escalation@y" />
+    </object>
+    <!-- OFFICE ADMINISTRATORS -->
+    <object method="addOfficeAdministrator" node="administrator"
+        class="net.officefloor.model.office.AdministratorModel">
+        <value method="setAdministratorName" node="administrator@name" />
+        <value method="setAdministratorSourceClassName" node="administrator@source" />
+        <value method="setX" node="administrator@x" />
+        <value method="setY" node="administrator@y" />
+        <object method="addProperty" node="property"
+            class="net.officefloor.model.office.PropertyModel">
+            <value method="setName" node="property@name" />
+            <value method="setValue" node="property@value" />
+        </object>
+        <object method="addDuty" node="duty"
+            class="net.officefloor.model.office.DutyModel">
+            <value method="setDutyName" node="duty@name" />
+        </object>
+    </object>
+    <!-- OFFICE SECTIONS -->
+    <object method="addOfficeSection" node="section"
+        class="net.officefloor.model.office.OfficeSectionModel">
+        <value method="setOfficeSectionName" node="section@name" />
+        <value method="setSectionSourceClassName" node="section@source" />
+        <value method="setSectionLocation" node="section@location" />
+        <value method="setX" node="section@x" />
+        <value method="setY" node="section@y" />
+        <object method="addProperty" node="property"
+            class="net.officefloor.model.office.PropertyModel">
+            <value method="setName" node="property@name" />
+            <value method="setValue" node="property@value" />
+        </object>
+        <object method="addOfficeSectionInput" node="input"
+            class="net.officefloor.model.office.OfficeSectionInputModel">
+            <value method="setOfficeSectionInputName" node="input@name" />
+            <value method="setParameterType" node="input@parameter-type" />
+        </object>
+        <object method="addOfficeSectionOutput" node="output"
+            class="net.officefloor.model.office.OfficeSectionOutputModel">
+            <value method="setOfficeSectionOutputName" node="output@name" />
+            <value method="setArgumentType" node="output@argument-type" />
+            <value method="setEscalationOnly" node="output@escalation-only" />
+        </object>
+        <object method="addOfficeSectionObject" node="object"
+            class="net.officefloor.model.office.OfficeSectionObjectModel">
+            <value method="setOfficeSectionObjectName" node="object@name" />
+            <value method="setObjectType" node="object@object-type" />
+        </object>
+        <object method="addOfficeSectionResponsibility" node="responsibility"
+            class="net.officefloor.model.office.OfficeSectionResponsibilityModel">
+            <value method="setOfficeSectionResponsibilityName"
+                node="responsibility@name" />
+            <object method="addOfficeSectionResponsibilityObject"
+                node="object"
+                class="net.officefloor.model.office.OfficeSectionResponsibilityObjectModel">
+                <value method="setOfficeSectionResponsibilityObjectName"
+                    node="object@name" />
+            </object>
+        </object>
+        <object method="setOfficeSubSection" node="sub-section"
+            class="net.officefloor.model.office.OfficeSubSectionModel"
+            id="SUB_SECTION">
+            <value method="setOfficeSubSectionName" node="sub-section@name" />
+            <object method="addOfficeSectionManagedObject" node="section-managed-object"
+                class="net.officefloor.model.office.OfficeSectionManagedObjectModel">
+                <value method="setOfficeSectionManagedObjectName"
+                    node="section-managed-object@name" />
+                <object method="addOfficeSectionManagedObjectTeam"
+                    node="team"
+                    class="net.officefloor.model.office.OfficeSectionManagedObjectTeamModel">
+                    <value method="setOfficeSectionManagedObjectTeamName"
+                        node="team@name" />
+                </object>
+            </object>
+            <object method="addOfficeTask" node="task"
+                class="net.officefloor.model.office.OfficeTaskModel">
+                <value method="setOfficeTaskName" node="task@name" />
+            </object>
+            <reference id="SUB_SECTION" method="addOfficeSubSection" />
+        </object>
+    </object>
 </unmarshall>
