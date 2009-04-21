@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model>
+    <field type="String" name="administrator name" />
+    <field type="String" name="administrator source class name" />
+    <list type="PropertyModel" name="property" plural="properties" />
+    <list type="DutyModel" name="duty" plural="duties" />
+</model>

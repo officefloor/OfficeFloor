@@ -1,0 +1,53 @@
+<office>
+    <external-managed-objects>
+        <external-managed-object name="EXTERNAL_MANAGED_OBJECT"
+            object-type="java.sql.Connection" x="10" y="11" />
+    </external-managed-objects>
+    <teams>
+        <team name="TEAM" x="20" y="21" />
+    </teams>
+    <escalations>
+        <escalation escalation-type="java.lang.Exception" x="30"
+            y="31" />
+    </escalations>
+    <administrators>
+        <administrator name="ADMINISTRATOR"
+            source="net.example.ExampleAdministratorSource" x="40" y="41">
+            <properties>
+                <property name="ADMIN_ONE" value="VALUE_ONE" />
+                <property name="ADMIN_TWO" value="VALUE_TWO" />
+            </properties>
+            <duty name="DUTY_ONE" />
+            <duty name="DUTY_TWO" />
+        </administrator>
+    </administrators>
+    <sections>
+        <section name="SECTION" source="net.example.ExampleSectionSource"
+            location="SECTION_LOCATION" x="50" y="51">
+            <properties>
+                <property name="PROP_ONE" value="VALUE_ONE" />
+                <property name="PROP_TWO" value="VALUE_TWO" />
+            </properties>
+            <input name="INPUT" parameter-type="java.lang.Integer" />
+            <output name="OUTPUT_ONE" argument-type="java.lang.Float"
+                escalation-only="false" />
+            <output name="OUTPUT_TWO" argument-type="java.lang.Exception"
+                escalation-only="true" />
+            <object name="OBJECT" object-type="java.sql.Connection" />
+            <responsibility name="RESPONSIBILITY">
+                <object name="RESPONSIBILITY_OBJECT" />
+            </responsibility>
+            <sub-section>
+                <section-managed-object name="SECTION_MANAGED_OBJECT">
+                    <team name="MO_TEAM" />
+                </section-managed-object>
+                <task name="TASK" />
+                <sub-section name="SUB_SECTION">
+                    <section-managed-object name="SUB_SECTION_MANAGED_OBJECT" />
+                    <task name="SUB_SECTION_TASK" />
+                    <sub-section name="SUB_SUB_SECTION" />
+                </sub-section>
+            </sub-section>
+        </section>
+    </sections>
+</office>
