@@ -14,16 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.section.source.impl;
+package net.officefloor.compile.spi.office.source.impl;
 
-import net.officefloor.compile.spi.section.source.SectionSourceProperty;
+import net.officefloor.compile.spi.office.source.OfficeSourceProperty;
 
 /**
- * {@link SectionSourceProperty} implementation.
+ * {@link OfficeSourceProperty} implementation.
  * 
  * @author Daniel
  */
-public class SectionSourcePropertyImpl implements SectionSourceProperty {
+public class OfficeSourcePropertyImpl implements OfficeSourceProperty {
 
 	/**
 	 * Name.
@@ -43,14 +43,14 @@ public class SectionSourcePropertyImpl implements SectionSourceProperty {
 	 * @param label
 	 *            Label. Defaults to <code>name</code> if <code>null</code>.
 	 */
-	public SectionSourcePropertyImpl(String name, String label) {
+	public OfficeSourcePropertyImpl(String name, String label) {
 		this.name = name;
 		this.label = ((label == null) || (label.trim().length() == 0)) ? name
 				: label;
 	}
 
 	/*
-	 * ==================== SectionSourceProperty ===========================
+	 * ====================== OfficeSourceProperty ==========================
 	 */
 
 	@Override
