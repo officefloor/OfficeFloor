@@ -16,8 +16,15 @@
  */
 package net.officefloor.plugin.work.clazz;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.Map;
+
+import net.officefloor.frame.api.execute.FlowFuture;
 import net.officefloor.frame.api.execute.TaskContext;
-import net.officefloor.work.clazz.Flow;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * {@link ParameterFactory} to obtain the {@link Flow}.
@@ -27,18 +34,35 @@ import net.officefloor.work.clazz.Flow;
 public class FlowParameterFactory implements ParameterFactory {
 
 	/**
-	 * Index of the {@link Flow}.
+	 * {@link Constructor} for the {@link Proxy} instance.
 	 */
-	private final int flowIndex;
+	private final Constructor<?> proxyConstructor;
+
+	/**
+	 * {@link FlowMethodMetaData} instances by its {@link Method} name.
+	 */
+	private final Map<String, FlowMethodMetaData> methodMetaDatas;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param flowIndex
-	 *            Index of the {@link Flow}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param flowInterface
+	 *            {@link FlowInterface} class.
+	 * @param methodMetaDatas
+	 *            {@link FlowMethodMetaData} instances by its {@link Method}
+	 *            name.
 	 */
-	public FlowParameterFactory(int flowIndex) {
-		this.flowIndex = flowIndex;
+	public FlowParameterFactory(ClassLoader classLoader,
+			Class<?> flowInterface,
+			Map<String, FlowMethodMetaData> methodMetaDatas) throws Exception {
+		this.methodMetaDatas = methodMetaDatas;
+
+		// Create the proxy class and obtain the constructor to use
+		Class<?> proxyClass = Proxy.getProxyClass(classLoader, flowInterface);
+		this.proxyConstructor = proxyClass
+				.getConstructor(InvocationHandler.class);
 	}
 
 	/*
@@ -46,38 +70,55 @@ public class FlowParameterFactory implements ParameterFactory {
 	 */
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Object createParameter(TaskContext<?, ?, ?> context) {
-		return new FlowImpl(context);
+	public Object createParameter(TaskContext<?, ?, ?> context)
+			throws Exception {
+		// Return a new instance of the proxy to invoke the flows
+		return this.proxyConstructor
+				.newInstance(new Object[] { new FlowInvocationHandler(context) });
 	}
 
 	/**
-	 * {@link Flow} implementation.
+	 * {@link Flow} {@link InvocationHandler}.
 	 */
-	private class FlowImpl<P> implements Flow<P> {
+	private class FlowInvocationHandler implements InvocationHandler {
 
 		/**
 		 * {@link TaskContext}.
 		 */
-		private final TaskContext<?, ?, ?> context;
+		private final TaskContext<?, ?, ?> taskContext;
 
 		/**
 		 * Initiate.
 		 * 
-		 * @param context
+		 * @param taskContext
 		 *            {@link TaskContext}.
 		 */
-		public FlowImpl(TaskContext<?, ?, ?> context) {
-			this.context = context;
+		public FlowInvocationHandler(TaskContext<?, ?, ?> taskContext) {
+			this.taskContext = taskContext;
 		}
 
 		/*
-		 * ====================== Flow ====================================
+		 * ================ InvocationHandler ========================
 		 */
 
 		@Override
-		public void invoke(P parameter) {
-			this.context.doFlow(FlowParameterFactory.this.flowIndex, parameter);
+		public Object invoke(Object proxy, Method method, Object[] args)
+				throws Throwable {
+
+			// Obtain the method meta-data
+			String methodName = method.getName();
+			FlowMethodMetaData metaData = FlowParameterFactory.this.methodMetaDatas
+					.get(methodName);
+
+			// Obtain the parameter
+			Object parameter = (metaData.isParameter() ? args[0] : null);
+
+			// Invoke the flow
+			FlowFuture flowFuture = this.taskContext.doFlow(metaData
+					.getFlowIndex(), parameter);
+
+			// Return the flow future if required
+			return (metaData.isReturnFlowFuture() ? flowFuture : null);
 		}
 	}
 

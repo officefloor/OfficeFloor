@@ -17,12 +17,12 @@
 package net.officefloor.plugin.work.design;
 
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskModel;
@@ -46,8 +46,8 @@ public class DesignWorkSource extends AbstractWorkSource<Work> {
 	 * {@link DesignWorkSource} can use to source the {@link WorkType} again.
 	 * <p>
 	 * The {@link WorkType} however has had the {@link WorkFactory} and
-	 * {@link TaskFactoryManufacturer} substituted so the {@link WorkType} can
-	 * not actually be used.
+	 * {@link TaskFactory} substituted so the {@link WorkType} can not actually
+	 * be used.
 	 * 
 	 * @param workType
 	 *            {@link WorkType}.

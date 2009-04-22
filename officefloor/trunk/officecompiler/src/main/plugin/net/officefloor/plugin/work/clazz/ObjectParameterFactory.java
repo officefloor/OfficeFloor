@@ -14,23 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile.spi.work.source;
+package net.officefloor.plugin.work.clazz;
 
-import net.officefloor.frame.api.build.TaskFactory;
-import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.execute.TaskContext;
 
 /**
- * Creates a {@link TaskFactory}.
+ * {@link ParameterFactory} for an {@link Object}.
  * 
  * @author Daniel
  */
-public interface TaskFactoryManufacturer<W extends Work, M extends Enum<M>, F extends Enum<F>> {
+public class ObjectParameterFactory implements ParameterFactory {
 
 	/**
-	 * Creates the {@link TaskFactory}.
-	 * 
-	 * @return {@link TaskFactory}.
+	 * Index of the {@link Object}.
 	 */
-	TaskFactory<W, M, F> createTaskFactory();
+	private final int objectIndex;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param objectIndex
+	 *            Index of the {@link Object}.
+	 */
+	public ObjectParameterFactory(int objectIndex) {
+		this.objectIndex = objectIndex;
+	}
+
+	/*
+	 * ================== ParameterFactory ====================================
+	 */
+
+	@Override
+	public Object createParameter(TaskContext<?, ?, ?> context) {
+		return context.getObject(this.objectIndex);
+	}
 
 }

@@ -56,7 +56,6 @@ import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
 import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
@@ -239,16 +238,6 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	protected TaskFactory<Work, ?, ?> createMockTaskFactory() {
 		return this.createMock(TaskFactory.class);
-	}
-
-	/**
-	 * Creates a mock {@link TaskFactoryManufacturer}.
-	 * 
-	 * @return Mock {@link TaskFactoryManufacturer}.
-	 */
-	@SuppressWarnings("unchecked")
-	protected TaskFactoryManufacturer<Work, ?, ?> createMockTaskFactoryManufacturer() {
-		return this.createMock(TaskFactoryManufacturer.class);
 	}
 
 	/**
@@ -585,16 +574,15 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            {@link WorkFactory}.
 		 * @param taskName
 		 *            Name of the {@link SectionTask}.
-		 * @param manufacturer
-		 *            {@link TaskFactoryManufacturer}.
+		 * @param taskFactory
+		 *            {@link TaskFactory}.
 		 * @param taskMaker
 		 *            {@link TaskMaker} for the {@link SectionTask}.
 		 * @return {@link SectionTask}.
 		 */
 		<W extends Work> SectionTask addTask(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactoryManufacturer<W, ?, ?> manufacturer,
-				TaskMaker taskMaker);
+				TaskFactory<W, ?, ?> taskFactory, TaskMaker taskMaker);
 
 		/**
 		 * Adds a {@link TaskFlow}.
@@ -606,8 +594,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            {@link WorkFactory}.
 		 * @param taskName
 		 *            Name of the {@link SectionTask}.
-		 * @param manufacturer
-		 *            {@link TaskFactoryManufacturer}.
+		 * @param taskFactory
+		 *            {@link TaskFactory}.
 		 * @param flowName
 		 *            Name of the {@link TaskFlowType}.
 		 * @param argumentType
@@ -616,7 +604,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 */
 		<W extends Work> TaskFlow addTaskFlow(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactoryManufacturer<W, ?, ?> manufacturer, String flowName,
+				TaskFactory<W, ?, ?> taskFactory, String flowName,
 				Class<?> argumentType);
 
 		/**
@@ -629,8 +617,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            {@link WorkFactory}.
 		 * @param taskName
 		 *            Name of the {@link SectionTask}.
-		 * @param manufacturer
-		 *            {@link TaskFactoryManufacturer}.
+		 * @param taskFactory
+		 *            {@link TaskFactory}.
 		 * @param objectName
 		 *            Name of the {@link TaskObjectType}.
 		 * @param objectType
@@ -639,8 +627,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 */
 		<W extends Work> TaskObject addTaskObject(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactoryManufacturer<W, ?, ?> manufacturer,
-				String objectName, Class<?> objectType);
+				TaskFactory<W, ?, ?> taskFactory, String objectName,
+				Class<?> objectType);
 
 		/**
 		 * Adds a {@link TaskFlow} for a {@link TaskEscalationType}.
@@ -652,8 +640,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 *            {@link WorkFactory}.
 		 * @param taskName
 		 *            Name of the {@link SectionTask}.
-		 * @param manufacturer
-		 *            {@link TaskFactoryManufacturer}.
+		 * @param taskFactory
+		 *            {@link TaskFactory}.
 		 * @param escalationName
 		 *            Name of the {@link TaskEscalationType}.
 		 * @param escalationType
@@ -662,8 +650,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 */
 		<E extends Throwable, W extends Work> TaskFlow addTaskEscalation(
 				String workName, WorkFactory<W> workFactory, String taskName,
-				TaskFactoryManufacturer<W, ?, ?> manufacturer,
-				String escalationName, Class<E> escalationType);
+				TaskFactory<W, ?, ?> taskFactory, String escalationName,
+				Class<E> escalationType);
 	}
 
 	/**
@@ -823,15 +811,15 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		public <W extends Work> SectionTask addTask(String workName,
 				WorkFactory<W> workFactory, final String taskName,
-				final TaskFactoryManufacturer<W, ?, ?> manufacturer,
+				final TaskFactory<W, ?, ?> taskFactory,
 				final TaskMaker taskMaker) {
 			// Create the section work containing the single task type
 			WorkMaker workMaker = new WorkMaker() {
 				@Override
 				public void make(WorkMakerContext context) {
 					// Create the task type and make if required
-					TaskTypeMaker maker = context.addTask(taskName,
-							manufacturer);
+					TaskTypeMaker maker = context
+							.addTask(taskName, taskFactory);
 					if (taskMaker != null) {
 						taskMaker.make(maker);
 					}
@@ -846,8 +834,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		public <W extends Work> TaskFlow addTaskFlow(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactoryManufacturer<W, ?, ?> manufacturer,
-				final String flowName, final Class<?> argumentType) {
+				TaskFactory<W, ?, ?> taskFactory, final String flowName,
+				final Class<?> argumentType) {
 			// Create the section task containing of a single flow
 			TaskMaker taskMaker = new TaskMaker() {
 				@Override
@@ -857,7 +845,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				}
 			};
 			SectionTask task = this.addTask(workName, workFactory, taskName,
-					manufacturer, taskMaker);
+					taskFactory, taskMaker);
 
 			// Return the task flow
 			return task.getTaskFlow(flowName);
@@ -866,8 +854,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		public <W extends Work> TaskObject addTaskObject(String workName,
 				WorkFactory<W> workFactory, String taskName,
-				TaskFactoryManufacturer<W, ?, ?> manufacturer,
-				final String objectName, final Class<?> objectType) {
+				TaskFactory<W, ?, ?> taskFactory, final String objectName,
+				final Class<?> objectType) {
 			// Create the section task containing of a single object
 			TaskMaker taskMaker = new TaskMaker() {
 				@Override
@@ -877,7 +865,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				}
 			};
 			SectionTask task = this.addTask(workName, workFactory, taskName,
-					manufacturer, taskMaker);
+					taskFactory, taskMaker);
 
 			// Return the task object
 			return task.getTaskObject(objectName);
@@ -886,8 +874,8 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		@Override
 		public <E extends Throwable, W extends Work> TaskFlow addTaskEscalation(
 				String workName, WorkFactory<W> workFactory, String taskName,
-				TaskFactoryManufacturer<W, ?, ?> manufacturer,
-				final String escalationName, final Class<E> escalationType) {
+				TaskFactory<W, ?, ?> taskFactory, final String escalationName,
+				final Class<E> escalationType) {
 			// Create the section task containing of a single escalation
 			TaskMaker taskMaker = new TaskMaker() {
 				@Override
@@ -897,7 +885,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 				}
 			};
 			SectionTask task = this.addTask(workName, workFactory, taskName,
-					manufacturer, taskMaker);
+					taskFactory, taskMaker);
 
 			// Return the task escalation
 			return task.getTaskEscalation(escalationName);
@@ -1102,12 +1090,12 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		 * 
 		 * @param taskTypeName
 		 *            Name of the {@link TaskType}.
-		 * @param manufacturer
-		 *            {@link TaskFactoryManufacturer}.
+		 * @param taskFactory
+		 *            {@link TaskFactory}.
 		 * @return {@link TaskTypeMaker} to make the {@link TaskType}.
 		 */
 		<W extends Work> TaskTypeMaker addTask(String taskTypeName,
-				TaskFactoryManufacturer<W, ?, ?> manufacturer);
+				TaskFactory<W, ?, ?> taskFactory);
 	}
 
 	/**
@@ -1298,10 +1286,9 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public TaskTypeMaker addTask(String taskName,
-				TaskFactoryManufacturer manufacturer) {
+		public TaskTypeMaker addTask(String taskName, TaskFactory taskFactory) {
 			// Create and return the task type maker
-			return new TaskTypeMakerImpl(taskName, manufacturer, this.builder);
+			return new TaskTypeMakerImpl(taskName, taskFactory, this.builder);
 		}
 
 		/**
@@ -1312,7 +1299,7 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			/**
 			 * {@link TaskFactoryManufacturer}.
 			 */
-			private final TaskFactoryManufacturer<Work, ?, ?> manufacturer;
+			private final TaskFactory<Work, ?, ?> taskFactory;
 
 			/**
 			 * {@link TaskTypeBuilder}.
@@ -1324,19 +1311,19 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 			 * 
 			 * @param taskName
 			 *            Name of the {@link SectionTask}.
-			 * @param manufacturer
-			 *            {@link TaskFactoryManufacturer}.
+			 * @param taskFactory
+			 *            {@link TaskFactory}.
 			 * @param workTypeBuilder
 			 *            {@link WorkTypeBuilder}.
 			 */
 			public TaskTypeMakerImpl(String taskName,
-					TaskFactoryManufacturer<Work, ?, ?> manufacturer,
+					TaskFactory<Work, ?, ?> taskFactory,
 					WorkTypeBuilder<Work> workTypeBuilder) {
-				this.manufacturer = manufacturer;
+				this.taskFactory = taskFactory;
 
 				// Create the task type builder
 				this.taskTypeBuilder = workTypeBuilder.addTaskType(taskName,
-						this.manufacturer, null, null);
+						this.taskFactory, null, null);
 			}
 
 			/*

@@ -16,8 +16,8 @@
  */
 package net.officefloor.compile.work;
 
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.EscalationFlow;
@@ -38,11 +38,11 @@ public interface TaskType<W extends Work, M extends Enum<M>, F extends Enum<F>> 
 	String getTaskName();
 
 	/**
-	 * Obtains the {@link TaskFactoryManufacturer}.
+	 * Obtains the {@link TaskFactory}.
 	 * 
-	 * @return {@link TaskFactoryManufacturer}.
+	 * @return {@link TaskFactory}.
 	 */
-	TaskFactoryManufacturer<W, M, F> getTaskFactoryManufacturer();
+	TaskFactory<W, M, F> getTaskFactory();
 
 	/**
 	 * Obtains the type of {@link Object} returned from the {@link Task} that is

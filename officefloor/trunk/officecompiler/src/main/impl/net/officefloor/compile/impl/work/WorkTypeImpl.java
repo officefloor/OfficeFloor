@@ -16,15 +16,17 @@
  */
 package net.officefloor.compile.impl.work;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
 
@@ -58,11 +60,10 @@ public class WorkTypeImpl<W extends Work> implements WorkType<W>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public <M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<M, F> addTaskType(
-			String taskName,
-			TaskFactoryManufacturer<? super W, M, F> taskFactoryManufacturer,
+			String taskName, TaskFactory<? super W, M, F> taskFactory,
 			Class<M> objectKeysClass, Class<F> flowKeysClass) {
-		TaskTypeImpl taskType = new TaskTypeImpl(taskName,
-				taskFactoryManufacturer, objectKeysClass, flowKeysClass);
+		TaskTypeImpl taskType = new TaskTypeImpl(taskName, taskFactory,
+				objectKeysClass, flowKeysClass);
 		this.tasks.add(taskType);
 		return taskType;
 	}
@@ -78,7 +79,16 @@ public class WorkTypeImpl<W extends Work> implements WorkType<W>,
 
 	@Override
 	public TaskType<W, ?, ?>[] getTaskTypes() {
-		return CompileUtil.toArray(this.tasks, new TaskType[0]);
+		// Create and return the sorted listing of task types
+		TaskType<W, ?, ?>[] taskTypes = CompileUtil.toArray(this.tasks,
+				new TaskType[0]);
+		Arrays.sort(taskTypes, new Comparator<TaskType<W, ?, ?>>() {
+			@Override
+			public int compare(TaskType<W, ?, ?> a, TaskType<W, ?, ?> b) {
+				return a.getTaskName().compareTo(b.getTaskName());
+			}
+		});
+		return taskTypes;
 	}
 
 }

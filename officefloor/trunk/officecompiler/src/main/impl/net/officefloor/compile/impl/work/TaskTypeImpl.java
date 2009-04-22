@@ -23,7 +23,6 @@ import java.util.List;
 
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.spi.work.source.TaskEscalationTypeBuilder;
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
@@ -31,6 +30,7 @@ import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.internal.structure.Flow;
@@ -49,9 +49,9 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	private final String taskName;
 
 	/**
-	 * {@link TaskFactoryManufacturer}.
+	 * {@link TaskFactory}.
 	 */
-	private final TaskFactoryManufacturer<W, M, F> taskFactoryManufacturer;
+	private final TaskFactory<W, M, F> taskFactory;
 
 	/**
 	 * {@link Enum} providing keys for dependent {@link Object} instances.
@@ -88,8 +88,8 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 * 
 	 * @param taskName
 	 *            Name of the {@link Task}.
-	 * @param taskFactoryManufacturer
-	 *            {@link TaskFactoryManufacturer}.
+	 * @param taskFactory
+	 *            {@link TaskFactory}.
 	 * @param objectKeyClass
 	 *            {@link Enum} providing keys for dependent {@link Object}
 	 *            instances.
@@ -97,11 +97,10 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	 *            {@link Enum} providing keys for instigated {@link Flow}
 	 *            instances.
 	 */
-	public TaskTypeImpl(String taskName,
-			TaskFactoryManufacturer<W, M, F> taskFactoryManufacturer,
+	public TaskTypeImpl(String taskName, TaskFactory<W, M, F> taskFactory,
 			Class<M> objectKeyClass, Class<F> flowKeyClass) {
 		this.taskName = taskName;
-		this.taskFactoryManufacturer = taskFactoryManufacturer;
+		this.taskFactory = taskFactory;
 		this.objectKeyClass = objectKeyClass;
 		this.flowKeyClass = flowKeyClass;
 	}
@@ -149,8 +148,8 @@ public class TaskTypeImpl<W extends Work, M extends Enum<M>, F extends Enum<F>>
 	}
 
 	@Override
-	public TaskFactoryManufacturer<W, M, F> getTaskFactoryManufacturer() {
-		return this.taskFactoryManufacturer;
+	public TaskFactory<W, M, F> getTaskFactory() {
+		return this.taskFactory;
 	}
 
 	@Override

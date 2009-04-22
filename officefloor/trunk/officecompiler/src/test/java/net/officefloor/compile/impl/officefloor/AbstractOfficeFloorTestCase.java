@@ -25,7 +25,6 @@ import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -211,24 +210,21 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 * 
 	 * @param taskName
 	 *            Name of the {@link Task}.
-	 * @param manufacturer
-	 *            {@link TaskFactoryManufacturer}.
+	 * @param factory
+	 *            {@link TaskFactory}.
 	 * @return {@link TaskBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
 	protected <W extends Work> TaskBuilder<W, ?, ?> record_work_addTask(
-			String taskName, TaskFactoryManufacturer<W, ?, ?> manufacturer) {
+			String taskName, TaskFactory<W, ?, ?> factory) {
 
 		// Ensure manufacturer is a mock
-		assertNotNull("Manufacturer must be a mock", this.control(manufacturer));
+		assertNotNull("Manufacturer must be a mock", this.control(factory));
 
 		// Record adding the task
-		TaskFactory<?, ?, ?> taskFactory = this.createMockTaskFactory();
-		this.recordReturn(manufacturer, manufacturer.createTaskFactory(),
-				taskFactory);
 		this.taskBuilder = this.createMockTaskBuilder();
 		this.recordReturn(this.workBuilder, this.workBuilder.addTask("TASK",
-				taskFactory), this.taskBuilder);
+				factory), this.taskBuilder);
 		return this.taskBuilder;
 	}
 

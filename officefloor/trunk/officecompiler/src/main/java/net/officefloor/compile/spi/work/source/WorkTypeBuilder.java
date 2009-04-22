@@ -45,9 +45,8 @@ public interface WorkTypeBuilder<W extends Work> {
 	 * 
 	 * @param taskName
 	 *            Name of the {@link Task}.
-	 * @param taskFactoryManufacturer
-	 *            {@link TaskFactoryManufacturer} to create the
-	 *            {@link TaskFactory}.
+	 * @param taskFactory
+	 *            {@link TaskFactory} to create the {@link Task}.
 	 * @param objectKeysClass
 	 *            {@link Enum} providing the keys of the dependent
 	 *            {@link Object} instances required by the
@@ -63,8 +62,7 @@ public interface WorkTypeBuilder<W extends Work> {
 	 *         of the added {@link Task}.
 	 */
 	<M extends Enum<M>, F extends Enum<F>> TaskTypeBuilder<M, F> addTaskType(
-			String taskName,
-			TaskFactoryManufacturer<? super W, M, F> taskFactoryManufacturer,
+			String taskName, TaskFactory<? super W, M, F> taskFactory,
 			Class<M> objectKeysClass, Class<F> flowKeysClass);
 
 }
