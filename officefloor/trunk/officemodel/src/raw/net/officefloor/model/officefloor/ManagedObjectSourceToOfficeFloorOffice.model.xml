@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="String" name="managing office name"/>
-	<field type="ManagedObjectSourceModel" name="managed object source" end-field="managing office"/>
-	<field type="OfficeFloorOfficeModel" name="managing office" end-list="responsible managed object"/>
-</model>

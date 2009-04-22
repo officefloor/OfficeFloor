@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<field type="String" name="managed object source id"/>
-	<field type="OfficeManagedObjectModel" name="office managed object" end-field="managed object source"/>
-	<field type="ManagedObjectSourceModel" name="managed object source" end-list="office managed object"/>
-</model>

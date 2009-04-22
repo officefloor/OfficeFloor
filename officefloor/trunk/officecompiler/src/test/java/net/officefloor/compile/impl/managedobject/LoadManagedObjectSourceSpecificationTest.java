@@ -24,6 +24,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -33,7 +34,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourcePropert
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.officefloor.OfficeFloorModel;
 
 /**
  * Tests the {@link ManagedObjectLoader}.
@@ -44,8 +44,8 @@ public class LoadManagedObjectSourceSpecificationTest extends
 		OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link OfficeFloorModel} as {@link ManagedObjectSource}
-	 * typically used in an {@link OfficeFloorModel}.
+	 * Location of the {@link OfficeFloor} as {@link ManagedObjectSource}
+	 * typically used in an {@link OfficeFloor}.
 	 */
 	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
 

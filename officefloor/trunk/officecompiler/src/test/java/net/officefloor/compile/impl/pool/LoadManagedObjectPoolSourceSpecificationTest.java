@@ -27,9 +27,9 @@ import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceProperty;
 import net.officefloor.compile.spi.pool.source.ManagedObjectPoolSourceSpecification;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.pool.ManagedObjectPool;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.officefloor.OfficeFloorModel;
 
 /**
  * Tests the {@link ManagedObjectPoolLoader}.
@@ -40,9 +40,9 @@ public class LoadManagedObjectPoolSourceSpecificationTest extends
 		OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link OfficeFloorModel} as
+	 * Location of the {@link OfficeFloor} as
 	 * {@link ManagedObjectPoolSource} typically used in an
-	 * {@link OfficeFloorModel}.
+	 * {@link OfficeFloor}.
 	 */
 	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
 
