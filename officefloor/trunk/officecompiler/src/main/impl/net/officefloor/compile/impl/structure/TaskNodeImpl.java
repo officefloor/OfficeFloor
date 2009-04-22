@@ -197,8 +197,7 @@ public class TaskNodeImpl implements TaskNode {
 		}
 
 		// Build the task
-		TaskFactory<W, ?, ?> taskFactory = taskType
-				.getTaskFactoryManufacturer().createTaskFactory();
+		TaskFactory<W, ?, ?> taskFactory = taskType.getTaskFactory();
 		TaskBuilder<W, ?, ?> taskBuilder = workBuilder.addTask(this.taskName,
 				taskFactory);
 		taskBuilder.setTeam(officeTeam.getOfficeTeamName());

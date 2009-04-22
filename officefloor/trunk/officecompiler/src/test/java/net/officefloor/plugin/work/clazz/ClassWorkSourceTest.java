@@ -17,20 +17,19 @@
 package net.officefloor.plugin.work.clazz;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 
+import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
+import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
+import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
-import net.officefloor.compile.work.TaskFlowType;
-import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
-import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.execute.FlowFuture;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.plugin.work.clazz.ClassTask;
-import net.officefloor.plugin.work.clazz.ClassWork;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
-import net.officefloor.work.clazz.Flow;
 
 /**
  * Test the {@link ClassWorkSource}.
@@ -38,6 +37,22 @@ import net.officefloor.work.clazz.Flow;
  * @author Daniel
  */
 public class ClassWorkSourceTest extends OfficeFrameTestCase {
+
+	/**
+	 * {@link TaskContext}.
+	 */
+	@SuppressWarnings("unchecked")
+	private final TaskContext taskContext = this.createMock(TaskContext.class);
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see junit.framework.TestCase#setUp()
+	 */
+	@Override
+	protected void setUp() throws Exception {
+		MockClass.reset(this.taskContext);
+	}
 
 	/**
 	 * Ensures specification correct.
@@ -50,75 +65,158 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to load {@link WorkType} for the {@link ClassWorkSource}.
 	 */
-	@SuppressWarnings("unchecked")
-	public void testWorkLoader() throws Exception {
+	public void testWorkType() throws Exception {
 
-		// Load the work type
+		// Create the work type builder
+		WorkTypeBuilder<ClassWork> work = WorkLoaderUtil
+				.createWorkTypeBuilder(new ClassWorkFactory(MockClass.class));
+
+		// taskInstanceMethod
+		TaskTypeBuilder<?, ?> taskMethod = work.addTaskType(
+				"taskInstanceMethod", new ClassTaskFactory(null, false, null),
+				null, null);
+		taskMethod.addObject(String.class).setLabel(
+				String.class.getSimpleName());
+		taskMethod.addFlow().setLabel("sequential");
+		TaskFlowTypeBuilder<?> parallel = taskMethod.addFlow();
+		parallel.setLabel("parallel");
+		parallel.setArgumentType(Integer.class);
+		TaskFlowTypeBuilder<?> asynchronous = taskMethod.addFlow();
+		asynchronous.setLabel("asynchronous");
+		asynchronous.setArgumentType(String.class);
+		taskMethod.addEscalation(IOException.class);
+
+		// taskFailMethod
+		TaskTypeBuilder<?, ?> anotherMethod = work.addTaskType(
+				"taskFailMethod", new ClassTaskFactory(null, false, null),
+				null, null);
+		anotherMethod.addEscalation(SQLException.class);
+
+		// taskStaticMethod
+		work.addTaskType("taskStaticMethod", new ClassTaskFactory(null, false,
+				null), null, null);
+
+		// Validate the work type
+		WorkLoaderUtil.validateWorkType(work, ClassWorkSource.class,
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, MockClass.class
+						.getName());
+	}
+
+	/**
+	 * Ensure can invoke the the instance {@link Method}.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testInvokeInstanceMethod() throws Throwable {
+
+		final FlowFuture ignoreFlowFuture = this.createMock(FlowFuture.class);
+		final FlowFuture flowFuture = this.createMock(FlowFuture.class);
+		final String PARAMETER_VALUE = "PARAMETER";
+		final Object RETURN_VALUE = new Object();
+
+		// Create the task
 		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
 				ClassWorkSource.class,
 				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, MockClass.class
 						.getName());
+		ClassWork work = workType.getWorkFactory().createWork();
+		TaskType<ClassWork, ?, ?> taskType = workType.getTaskTypes()[1];
+		Task<ClassWork, ?, ?> task = taskType.getTaskFactory().createTask(work);
+		assertEquals("Incorrect task", "taskInstanceMethod", taskType
+				.getTaskName());
 
-		// Verify the work model
-		ClassWork classWork = (ClassWork) workType.getWorkFactory()
-				.createWork();
-		assertTrue("Must create work ",
-				classWork.getObject() instanceof MockClass);
-		assertEquals("Incorrect number of tasks", 2,
-				workType.getTaskTypes().length);
+		// Record invoking method
+		MockClass.expectedParameter = PARAMETER_VALUE;
+		MockClass.returnValue = RETURN_VALUE;
+		this.recordReturn(this.taskContext, this.taskContext.getWork(), work);
+		this.recordReturn(this.taskContext, this.taskContext.getObject(0),
+				PARAMETER_VALUE);
+		this.recordReturn(this.taskContext, this.taskContext.doFlow(0, null),
+				ignoreFlowFuture);
+		this.recordReturn(this.taskContext, this.taskContext.doFlow(1,
+				new Integer(1)), ignoreFlowFuture);
+		this.recordReturn(this.taskContext, this.taskContext.doFlow(2,
+				PARAMETER_VALUE), flowFuture);
+		this.taskContext.join(flowFuture, 1000, "TOKEN");
 
-		// Obtain the tasks
-		TaskType<ClassWork, Indexed, Indexed> taskOne = null;
-		TaskType<ClassWork, Indexed, Indexed> taskTwo = null;
-		for (TaskType task : workType.getTaskTypes()) {
-			if ("anotherMethod".equals(task.getTaskName())) {
-				taskOne = task;
-			} else if ("taskMethod".equals(task.getTaskName())) {
-				taskTwo = task;
-			}
+		// Replay the mock objects
+		this.replayMockObjects();
+
+		// Invoke the task ensuring the correct return value
+		Object returnValue = task.doTask(this.taskContext);
+		assertEquals("Incorrect return value", RETURN_VALUE, returnValue);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure can throw an {@link Exception} from the {@link Method}.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testThrowException() throws Throwable {
+
+		final SQLException exception = new SQLException("Method failure");
+
+		// Create the task
+		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
+				ClassWorkSource.class,
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, MockClass.class
+						.getName());
+		ClassWork work = workType.getWorkFactory().createWork();
+		TaskType<ClassWork, ?, ?> taskType = workType.getTaskTypes()[0];
+		Task<ClassWork, ?, ?> task = taskType.getTaskFactory().createTask(work);
+		assertEquals("Incorrect task", "taskFailMethod", taskType.getTaskName());
+
+		// Record invoking method
+		MockClass.sqlException = exception;
+		this.recordReturn(this.taskContext, this.taskContext.getWork(), work);
+
+		// Replay the mock objects
+		this.replayMockObjects();
+
+		// Invoke the task ensuring it throws exception
+		try {
+			task.doTask(this.taskContext);
+			fail("Should not return succesfully");
+		} catch (SQLException ex) {
+			assertEquals("Incorrect failure", exception, ex);
 		}
 
-		// Verify the first task
-		assertEquals("Incorrect task name", "anotherMethod", taskOne
-				.getTaskName());
-		TaskFactory<ClassWork, Indexed, Indexed> taskFactoryOne = taskOne
-				.getTaskFactoryManufacturer().createTaskFactory();
-		ClassTask classTaskOne = (ClassTask) taskFactoryOne
-				.createTask(classWork);
-		assertEquals("Incorrect task method", "anotherMethod", classTaskOne
-				.getMethod().getName());
-		assertEquals("Incorrect number of objects", 0,
-				taskOne.getObjectTypes().length);
-		assertEquals("Incorrect number of flows", 0,
-				taskOne.getFlowTypes().length);
-		assertEquals("Incorrect number of escalations", 1, taskOne
-				.getEscalationTypes().length);
-		assertEquals("Incorrect escalation", SQLException.class, taskOne
-				.getEscalationTypes()[0].getEscalationType());
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
 
-		// Verify the second task
-		assertEquals("Incorrect task name", "taskMethod", taskTwo.getTaskName());
-		TaskFactory<ClassWork, Indexed, Indexed> taskFactoryTwo = taskTwo
-				.getTaskFactoryManufacturer().createTaskFactory();
-		ClassTask classTaskTwo = (ClassTask) taskFactoryTwo
-				.createTask(classWork);
-		assertEquals("Incorrect task method", "taskMethod", classTaskTwo
-				.getMethod().getName());
-		assertEquals("Incorrect number of objects", 1,
-				taskTwo.getObjectTypes().length);
-		TaskObjectType<?> objectType = taskTwo.getObjectTypes()[0];
-		assertNull("Incorrect object managed object key", objectType.getKey());
-		assertEquals("Incorrect object type", String.class, objectType
-				.getObjectType());
-		assertEquals("Incorrect number of flows", 3,
-				taskTwo.getFlowTypes().length);
-		TaskFlowType<?> flowType = taskTwo.getFlowTypes()[0];
-		assertNull("Incorrect flow key", flowType.getKey());
-		assertEquals("Incorrect flow index", 0, flowType.getIndex());
-		assertEquals("Incorrect number of escalations", 1, taskTwo
-				.getEscalationTypes().length);
-		assertEquals("Incorrect escalation", IOException.class, taskTwo
-				.getEscalationTypes()[0].getEscalationType());
+	/**
+	 * Ensure can invoke static {@link Method}.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testStaticException() throws Throwable {
+
+		final Object RETURN_VALUE = new Object();
+
+		// Create the task
+		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
+				ClassWorkSource.class,
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME, MockClass.class
+						.getName());
+		ClassWork work = workType.getWorkFactory().createWork();
+		TaskType<ClassWork, ?, ?> taskType = workType.getTaskTypes()[2];
+		Task<ClassWork, ?, ?> task = taskType.getTaskFactory().createTask(work);
+		assertEquals("Incorrect task", "taskStaticMethod", taskType
+				.getTaskName());
+
+		// Record invoking method
+		MockClass.returnValue = RETURN_VALUE;
+
+		// Replay the mock objects
+		this.replayMockObjects();
+
+		// Invoke the task ensuring the correct return value
+		Object returnValue = task.doTask(this.taskContext);
+		assertEquals("Incorrect return value", RETURN_VALUE, returnValue);
+
+		// Verify mock objects
+		this.verifyMockObjects();
 	}
 
 	/**
@@ -126,18 +224,112 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public static class MockClass {
 
-		public Object taskMethod(String parameter, Flow<?> flowSequential,
-				Flow<Object> flowParallel, Flow<String> flowAsynchronous)
-				throws IOException {
-			return null;
+		/**
+		 * Expected parameter.
+		 */
+		public static String expectedParameter;
+
+		/**
+		 * Expected {@link TaskContext}.
+		 */
+		public static TaskContext<?, ?, ?> expectedContext;
+
+		/**
+		 * Value to be returned from the {@link Method}.
+		 */
+		public static Object returnValue;
+
+		/**
+		 * {@link SQLException}.
+		 */
+		public static SQLException sqlException;
+
+		/**
+		 * Resets for the next test.
+		 * 
+		 * @param expectedContext
+		 *            Expected {@link TaskContext}.
+		 */
+		static void reset(TaskContext<?, ?, ?> expectedContext) {
+			expectedParameter = null;
+			MockClass.expectedContext = expectedContext;
+			returnValue = null;
+			sqlException = null;
 		}
 
-		public void anotherMethod() throws SQLException {
+		/**
+		 * {@link Task} taskMethod.
+		 */
+		public Object taskInstanceMethod(String parameter, MockFlows flows,
+				TaskContext<?, ?, ?> context) throws IOException {
+
+			// Ensure correct inputs
+			assertEquals("Incorrect parameter", expectedParameter, parameter);
+			assertNotNull("Must have flows", flows);
+			assertEquals("Incorrect task context", expectedContext, context);
+
+			// Invoke the flows
+			flows.sequential();
+			flows.parallel(new Integer(1));
+			FlowFuture flowFuture = flows.asynchronous(parameter);
+
+			// Ensure can join on the flow future
+			assertNotNull("Must obtain flow future", flowFuture);
+			context.join(flowFuture, 1000, "TOKEN");
+
+			// Return the value
+			return returnValue;
 		}
 
+		/**
+		 * {@link Task} anotherMethod.
+		 */
+		public void taskFailMethod() throws SQLException {
+			throw sqlException;
+		}
+
+		/**
+		 * {@link Task} staticMethod.
+		 */
+		public static Object taskStaticMethod() {
+			return returnValue;
+		}
+
+		/**
+		 * Private method to the class.
+		 */
 		Object nonTaskMethod(Object parameter) {
 			return null;
 		}
+	}
+
+	/**
+	 * Mock interface for flows from the {@link MockClass}.
+	 */
+	@FlowInterface
+	public static interface MockFlows {
+
+		/**
+		 * Sequential invocation. Does not have a parameter.
+		 */
+		void sequential();
+
+		/**
+		 * Parallel invocation.
+		 * 
+		 * @param parameter
+		 *            Parameter.
+		 */
+		void parallel(Integer parameter);
+
+		/**
+		 * Asynchronous invocation.
+		 * 
+		 * @param parameter
+		 *            Parameter.
+		 * @return {@link FlowFuture}.
+		 */
+		FlowFuture asynchronous(String parameter);
 	}
 
 }

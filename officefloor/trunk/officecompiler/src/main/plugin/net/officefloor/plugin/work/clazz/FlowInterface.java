@@ -14,31 +14,25 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.mock;
+package net.officefloor.plugin.work.clazz;
 
-import java.net.Socket;
-import java.sql.Connection;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import net.officefloor.work.clazz.Flow;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
- * Mock work class providing many task methods for unit testing.
+ * Annotates an interface to have each of its methods be a {@link Flow} that may
+ * be invoked by the {@link Task} class method.
  * 
  * @author Daniel
  */
-public class MockWork {
-
-	public Object taskMethodOne(Object parameter, Flow<?> flow,
-			Connection connection) {
-		return null;
-	}
-
-	public Object taskMethodTwo(Object parameter, Socket socket) {
-		return null;
-	}
-
-	public Object taskMethodThree(Flow<?> flowOne, Flow<?> flowTwo) {
-		return null;
-	}
-
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface FlowInterface {
 }

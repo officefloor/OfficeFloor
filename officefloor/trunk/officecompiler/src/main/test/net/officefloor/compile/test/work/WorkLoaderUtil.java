@@ -130,27 +130,27 @@ public class WorkLoaderUtil {
 			// Verify the task type
 			TestCase.assertEquals("Incorrect task name (task=" + i + ")",
 					expectedTask.getTaskName(), actualTask.getTaskName());
-			TestCase.assertEquals("Incorrect dependency keys (task=" + i + ")",
-					expectedTask.getObjectKeyClass(), actualTask
-							.getObjectKeyClass());
-			TestCase.assertEquals("Incorrect flow keys (task=" + i + ")",
-					expectedTask.getFlowKeyClass(), actualTask
-							.getFlowKeyClass());
+			TestCase.assertEquals("Incorrect dependency keys (task="
+					+ expectedTask.getTaskName() + ")", expectedTask
+					.getObjectKeyClass(), actualTask.getObjectKeyClass());
+			TestCase.assertEquals("Incorrect flow keys (task="
+					+ expectedTask.getTaskName() + ")", expectedTask
+					.getFlowKeyClass(), actualTask.getFlowKeyClass());
 
 			// If work factory and task factory match then should be so
-			if (expectedWork.getWorkFactory() == expectedTask
-					.getTaskFactoryManufacturer()) {
+			if (expectedWork.getWorkFactory() == expectedTask.getTaskFactory()) {
 				TestCase
 						.assertTrue(
 								"WorkFactory and TaskFactoryManufacturer should be the same",
 								(actualWork.getWorkFactory() == actualTask
-										.getTaskFactoryManufacturer()));
+										.getTaskFactory()));
 			}
 
 			// Verify the dependencies
-			TestCase.assertEquals("Incorrect number of dependences (task=" + i
-					+ ")", expectedTask.getObjectTypes().length, actualTask
-					.getObjectTypes().length);
+			TestCase.assertEquals("Incorrect number of dependences (task="
+					+ expectedTask.getTaskName() + ")", expectedTask
+					.getObjectTypes().length,
+					actualTask.getObjectTypes().length);
 			for (int d = 0; d < expectedTask.getObjectTypes().length; d++) {
 				TaskObjectType<?> expectedDependency = expectedTask
 						.getObjectTypes()[d];
@@ -158,41 +158,46 @@ public class WorkLoaderUtil {
 						.getObjectTypes()[d];
 
 				// Verify the dependency
-				TestCase.assertEquals("Incorrect dependency key (task=" + i
-						+ ", dependency=" + d + ")", expectedDependency
-						.getKey(), actualDependency.getKey());
-				TestCase.assertEquals("Incorrect dependency type (task=" + i
-						+ ", dependency=" + d + ")", expectedDependency
-						.getObjectType(), actualDependency.getObjectType());
-				TestCase.assertEquals("Incorrect dependency index (task=" + i
-						+ ", dependency=" + d + ")", expectedDependency
-						.getIndex(), actualDependency.getIndex());
-				TestCase.assertEquals("Incorrect dependency name (task=" + i
-						+ ", dependency=" + d + ")", expectedDependency
-						.getObjectName(), actualDependency.getObjectName());
+				TestCase.assertEquals("Incorrect dependency key (task="
+						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ ")", expectedDependency.getKey(), actualDependency
+						.getKey());
+				TestCase.assertEquals("Incorrect dependency type (task="
+						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ ")", expectedDependency.getObjectType(),
+						actualDependency.getObjectType());
+				TestCase.assertEquals("Incorrect dependency index (task="
+						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ ")", expectedDependency.getIndex(), actualDependency
+						.getIndex());
+				TestCase.assertEquals("Incorrect dependency name (task="
+						+ expectedTask.getTaskName() + ", dependency=" + d
+						+ ")", expectedDependency.getObjectName(),
+						actualDependency.getObjectName());
 			}
 
 			// Verify the flows
-			TestCase.assertEquals("Incorrect number of flows (task=" + i + ")",
-					expectedTask.getFlowTypes().length, actualTask
-							.getFlowTypes().length);
+			TestCase.assertEquals("Incorrect number of flows (task="
+					+ expectedTask.getTaskName() + ")", expectedTask
+					.getFlowTypes().length, actualTask.getFlowTypes().length);
 			for (int f = 0; f < expectedTask.getFlowTypes().length; f++) {
 				TaskFlowType<?> expectedFlow = expectedTask.getFlowTypes()[f];
 				TaskFlowType<?> actualFlow = actualTask.getFlowTypes()[f];
 
 				// Verify the flow
-				TestCase.assertEquals("Incorrect flow key (task=" + i
-						+ ", flow=" + f + ")", expectedFlow.getKey(),
-						actualFlow.getKey());
-				TestCase.assertEquals("Incorrect flow argument type (task=" + i
-						+ ", flow=" + f + ")", expectedFlow.getArgumentType(),
-						actualFlow.getArgumentType());
-				TestCase.assertEquals("Incorrect flow index (task=" + i
-						+ ", flow=" + f + ")", expectedFlow.getIndex(),
-						actualFlow.getIndex());
-				TestCase.assertEquals("Incorrect flow name (task=" + i
-						+ ", flow=" + f + ")", expectedFlow.getFlowName(),
-						actualFlow.getFlowName());
+				TestCase.assertEquals("Incorrect flow key (task="
+						+ expectedTask.getTaskName() + ", flow=" + f + ")",
+						expectedFlow.getKey(), actualFlow.getKey());
+				TestCase.assertEquals("Incorrect flow argument type (task="
+						+ expectedTask.getTaskName() + ", flow=" + f + ")",
+						expectedFlow.getArgumentType(), actualFlow
+								.getArgumentType());
+				TestCase.assertEquals("Incorrect flow index (task="
+						+ expectedTask.getTaskName() + ", flow=" + f + ")",
+						expectedFlow.getIndex(), actualFlow.getIndex());
+				TestCase.assertEquals("Incorrect flow name (task="
+						+ expectedTask.getTaskName() + ", flow=" + f + ")",
+						expectedFlow.getFlowName(), actualFlow.getFlowName());
 			}
 
 			// Verify the escalations
@@ -206,14 +211,14 @@ public class WorkLoaderUtil {
 						.getEscalationTypes()[e];
 
 				// Verify the flow
-				TestCase.assertEquals("Incorrect escalation type (task=" + i
-						+ ", escalation=" + e + ")", expectedEscalation
-						.getEscalationType(), actualEscalation
-						.getEscalationType());
-				TestCase.assertEquals("Incorrect escalation name (task=" + i
-						+ ", escalation=" + e + ")", expectedEscalation
-						.getEscalationName(), actualEscalation
-						.getEscalationName());
+				TestCase.assertEquals("Incorrect escalation type (task="
+						+ expectedTask.getTaskName() + ", escalation=" + e
+						+ ")", expectedEscalation.getEscalationType(),
+						actualEscalation.getEscalationType());
+				TestCase.assertEquals("Incorrect escalation name (task="
+						+ expectedTask.getTaskName() + ", escalation=" + e
+						+ ")", expectedEscalation.getEscalationName(),
+						actualEscalation.getEscalationName());
 			}
 		}
 

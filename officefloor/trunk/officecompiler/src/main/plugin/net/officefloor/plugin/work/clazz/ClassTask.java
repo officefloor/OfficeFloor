@@ -29,12 +29,7 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel
  */
-class ClassTask implements Task<ClassWork, Indexed, Indexed> {
-
-	/**
-	 * {@link Work}.
-	 */
-	private final ClassWork work;
+public class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 
 	/**
 	 * Method to invoke for this {@link Task}.
@@ -42,23 +37,30 @@ class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 	private final Method method;
 
 	/**
-	 * Parameters.
+	 * Indicates if the {@link Method} is <code>static</code>.
 	 */
-	private final ParameterFactory[] parameters;
+	private final boolean isStaticMethod;
+
+	/**
+	 * {@link ParameterFactory} instances.
+	 */
+	private final ParameterFactory[] parameterFactories;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param work
-	 *            {@link ClassWork}.
 	 * @param method
 	 *            Method to invoke for this {@link Task}.
+	 * @param isStaticMethod
+	 *            Indicates if the {@link Method} is <code>static</code>.
+	 * @param parameterFactories
+	 *            {@link ParameterFactory} instances.
 	 */
-	public ClassTask(ClassWork work, Method method,
-			ParameterFactory[] parameters) {
-		this.work = work;
+	public ClassTask(Method method, boolean isStaticMethod,
+			ParameterFactory[] parameterFactories) {
 		this.method = method;
-		this.parameters = parameters;
+		this.isStaticMethod = isStaticMethod;
+		this.parameterFactories = parameterFactories;
 	}
 
 	/**
@@ -75,19 +77,22 @@ class ClassTask implements Task<ClassWork, Indexed, Indexed> {
 	 */
 
 	@Override
-	public Object doTask(
-			TaskContext<ClassWork, Indexed, Indexed> context)
+	public Object doTask(TaskContext<ClassWork, Indexed, Indexed> context)
 			throws Throwable {
 
+		// Obtain the instance to invoke the method on
+		Object instance = (this.isStaticMethod ? null : context.getWork()
+				.getObject());
+
 		// Create the listing of parameters
-		Object[] params = new Object[this.parameters.length];
+		Object[] params = new Object[this.parameterFactories.length];
 		for (int i = 0; i < params.length; i++) {
-			params[i] = this.parameters[i].createParameter(context);
+			params[i] = this.parameterFactories[i].createParameter(context);
 		}
 
 		// Invoke the task
 		try {
-			return this.method.invoke(this.work.getObject(), params);
+			return this.method.invoke(instance, params);
 		} catch (InvocationTargetException ex) {
 			// Propagate failure of task
 			throw ex.getCause();

@@ -25,10 +25,9 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
-import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
+import net.officefloor.compile.spi.work.source.WorkSourceProperty;
 import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
 import net.officefloor.compile.spi.work.source.WorkUnknownPropertyError;
 import net.officefloor.compile.work.TaskEscalationType;
@@ -38,10 +37,12 @@ import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.model.desk.DeskModel;
 
 /**
@@ -269,10 +270,9 @@ public class WorkLoaderImpl implements WorkLoader {
 			return false; // must have complete type
 		}
 
-		// Ensure has task factory manufacturer
-		if (taskType.getTaskFactoryManufacturer() == null) {
-			this.addTaskIssue("No "
-					+ TaskFactoryManufacturer.class.getSimpleName()
+		// Ensure has task factory
+		if (taskType.getTaskFactory() == null) {
+			this.addTaskIssue("No " + TaskFactory.class.getSimpleName()
 					+ " provided for", issues, taskIndex, taskName,
 					workSourceClass);
 			return false; // must have complete type

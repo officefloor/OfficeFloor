@@ -21,10 +21,10 @@ import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.spi.work.source.TaskFactoryManufacturer;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
@@ -48,10 +48,10 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 	private final WorkFactory<Work> workFactory = this.createMockWorkFactory();
 
 	/**
-	 * {@link TaskFactoryManufacturer}.
+	 * {@link TaskFactory}.
 	 */
-	private final TaskFactoryManufacturer<Work, ?, ?> manufacturer = this
-			.createMockTaskFactoryManufacturer();
+	private final TaskFactory<Work, ?, ?> taskFactory = this
+			.createMockTaskFactory();
 
 	/**
 	 * Ensure can load a simple {@link Task}.
@@ -65,7 +65,7 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 		officeBuilder.registerTeam("OFFICE_TEAM", "OFFICE_FLOOR_TEAM");
 		this.record_office_addWork("SECTION.WORK", this.workFactory);
 		TaskBuilder<?, ?, ?> taskBuilder = this.record_work_addTask("TASK",
-				this.manufacturer);
+				this.taskFactory);
 		taskBuilder.setTeam("OFFICE_TEAM");
 
 		// Loads the office floor with a simple task
@@ -90,7 +90,7 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 													SectionMakerContext context) {
 												context.addTask("WORK",
 														workFactory, "TASK",
-														manufacturer, null);
+														taskFactory, null);
 											}
 										});
 
@@ -107,6 +107,5 @@ public class LoadTaskTest extends AbstractOfficeFloorTestCase {
 			}
 		});
 	}
-	
-	
+
 }

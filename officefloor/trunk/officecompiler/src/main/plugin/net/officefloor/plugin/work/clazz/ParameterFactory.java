@@ -31,7 +31,9 @@ public interface ParameterFactory {
 	 * @param context
 	 *            {@link TaskContext}.
 	 * @return Parameter.
+	 * @throws Exception
+	 *             If fails to create the parameter.
 	 */
-	Object createParameter(TaskContext<?, ?, ?> context);
+	Object createParameter(TaskContext<?, ?, ?> context) throws Exception;
 
 }

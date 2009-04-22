@@ -17,16 +17,10 @@
 package net.officefloor.plugin.work.clazz;
 
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
 
-import net.officefloor.compile.spi.work.source.CompilerAwareTaskFactory;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.WorkTaskObjectModel;
-import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.desk.TaskFlowModel;
 
 /**
  * {@link TaskFactory} for the {@link ClassTask}.
@@ -34,12 +28,17 @@ import net.officefloor.model.desk.TaskFlowModel;
  * @author Daniel
  */
 public class ClassTaskFactory implements
-		CompilerAwareTaskFactory<ClassWork, Indexed, Indexed> {
+		TaskFactory<ClassWork, Indexed, Indexed> {
 
 	/**
 	 * Method to invoke for this task.
 	 */
 	private final Method method;
+
+	/**
+	 * Indicates if the {@link Method} is <code>static</code>.
+	 */
+	private final boolean isStaticMethod;
 
 	/**
 	 * Parameters.
@@ -51,81 +50,16 @@ public class ClassTaskFactory implements
 	 * 
 	 * @param method
 	 *            {@link Method} to invoke on the {@link Work} class.
-	 * @param parameters
-	 *            Parameters.
+	 * @param isStaticMethod
+	 *            Indicates if the {@link Method} is <code>static</code>.
+	 * @param parameterFactories
+	 *            {@link ParameterFactory} instances.
 	 */
-	public ClassTaskFactory(Method method, ParameterFactory[] parameters) {
+	public ClassTaskFactory(Method method, boolean isStaticMethod,
+			ParameterFactory[] parameters) {
 		this.method = method;
+		this.isStaticMethod = isStaticMethod;
 		this.parameters = parameters;
-	}
-
-	/*
-	 * =================== CompilerAwareTaskFactory ===========================
-	 */
-
-	@Override
-	public void initialiseTaskFactory(TaskModel task) throws Exception {
-
-		// Create the indexes of objects
-		List<Integer> objectIndexList = new LinkedList<Integer>();
-		for (int i = 0; i < this.parameters.length; i++) {
-			if (this.parameters[i] == null) {
-				// Object as not specified.
-				// Configuration indicates if parameter or managed object.
-				objectIndexList.add(new Integer(i));
-			}
-		}
-		Integer[] objectIndexes = objectIndexList.toArray(new Integer[0]);
-
-		// Ensure matching object configuration
-		List<WorkTaskObjectModel> objectList = task.getWorkTask().getWorkTask()
-				.getTaskObjects();
-		if (objectList.size() != objectIndexes.length) {
-			throw new Exception("Incorrect configuration as expect "
-					+ objectIndexes.length
-					+ " objects but provided configuration for "
-					+ objectList.size() + " objects");
-		}
-		WorkTaskObjectModel[] objects = objectList
-				.toArray(new WorkTaskObjectModel[0]);
-
-		// Ensure matching flow configuration (parameters after objects)
-		List<TaskFlowModel> flowList = task.getTaskFlows();
-		int flowOutputCount = this.parameters.length - objectIndexes.length;
-		if (flowList.size() != flowOutputCount) {
-			throw new Exception("Incorrect configuration as expect "
-					+ flowOutputCount
-					+ " flow outputs but provided configuration for "
-					+ flowList.size() + " flow outputs");
-		}
-
-		// Load the parameter factories
-		int moIndex = 0;
-		for (int i = 0; i < objectIndexes.length; i++) {
-
-			// Obtain the task object
-			WorkTaskObjectModel object = objects[i];
-
-			// Obtain the parameter index
-			int paramIndex = objectIndexes[i].intValue();
-
-			// Create the appropriate parameter factory
-			ParameterFactory parameterFactory;
-			if (object.getIsParameter()) {
-				parameterFactory = new ParameterParameterFactory();
-			} else {
-				parameterFactory = new ManagedObjectParameterFactory(moIndex++);
-			}
-
-			// Ensure parameter is not already specified
-			if (this.parameters[paramIndex] != null) {
-				throw new IllegalStateException("Object parameter "
-						+ paramIndex + " should not be specified");
-			}
-
-			// Specify the parameter factory
-			this.parameters[paramIndex] = parameterFactory;
-		}
 	}
 
 	/*
@@ -134,7 +68,7 @@ public class ClassTaskFactory implements
 
 	@Override
 	public ClassTask createTask(ClassWork work) {
-		return new ClassTask(work, this.method, this.parameters);
+		return new ClassTask(this.method, this.isStaticMethod, this.parameters);
 	}
 
 }
