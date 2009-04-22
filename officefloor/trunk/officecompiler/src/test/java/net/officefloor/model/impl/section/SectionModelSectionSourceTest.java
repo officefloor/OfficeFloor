@@ -41,7 +41,7 @@ public class SectionModelSectionSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure can source a {@link SectionModel}.
 	 */
-	public void testDesk() {
+	public void testSection() {
 
 		// Create the expected section
 		SectionDesigner designer = SectionLoaderUtil
@@ -52,7 +52,7 @@ public class SectionModelSectionSourceTest extends OfficeFrameTestCase {
 				.addSectionOutput("ESCALATION", Exception.class.getName(), true);
 		designer.addSectionObject("OBJECT", Connection.class.getName());
 
-		// Validates the section is as expected
+		// Validate the section is as expected
 		SectionLoaderUtil.validateSection(designer,
 				SectionModelSectionSource.class, this,
 				"SectionModelSectionSourceTest.section.xml");

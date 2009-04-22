@@ -21,6 +21,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceProperty;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.model.repository.ConfigurationContext;
 
 /**
@@ -53,11 +54,13 @@ public interface OfficeLoader {
 	 * 
 	 * @param officeSourceClass
 	 *            Class of the {@link OfficeSource}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link OfficeType}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
 	 * @param classLoader
 	 *            {@link ClassLoader} that the {@link OfficeSource} may use in
 	 *            obtaining necessary class path resources.
@@ -68,9 +71,9 @@ public interface OfficeLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<O extends OfficeSource> OfficeType loadOfficeType(
-			Class<O> officeSourceClass,
-			ConfigurationContext configurationContext,
-			PropertyList propertyList, ClassLoader classLoader,
+			Class<O> officeSourceClass, String officeLocation,
+			PropertyList propertyList,
+			ConfigurationContext configurationContext, ClassLoader classLoader,
 			CompilerIssues issues);
 
 }

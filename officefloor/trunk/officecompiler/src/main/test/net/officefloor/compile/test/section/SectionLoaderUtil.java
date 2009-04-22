@@ -51,7 +51,7 @@ import net.officefloor.model.impl.repository.classloader.ClassLoaderConfiguratio
 import net.officefloor.model.repository.ConfigurationContext;
 
 /**
- * Utility class for testing a {@link SectionLoader}.
+ * Utility class for testing a {@link SectionSource}.
  * 
  * @author Daniel
  */

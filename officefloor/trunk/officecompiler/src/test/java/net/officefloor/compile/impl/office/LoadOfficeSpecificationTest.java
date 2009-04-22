@@ -37,11 +37,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link OfficeOffice}.
-	 */
-	private final String OFFICE_LOCATION = "OFFICE";
-
-	/**
 	 * {@link CompilerIssues}.
 	 */
 	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
@@ -283,7 +278,7 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION, null, null,
+		this.issues.addIssue(LocationType.OFFICE, null, null, null,
 				issueDescription);
 	}
 
@@ -296,7 +291,7 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION, null, null,
+		this.issues.addIssue(LocationType.OFFICE, null, null, null,
 				issueDescription, cause);
 	}
 
@@ -313,7 +308,7 @@ public class LoadOfficeSpecificationTest extends OfficeFrameTestCase {
 			String... propertyNameLabelPairs) {
 
 		// Load the office specification
-		OfficeLoader officeLoader = new OfficeLoaderImpl(OFFICE_LOCATION);
+		OfficeLoader officeLoader = new OfficeLoaderImpl();
 		PropertyList propertyList = officeLoader.loadSpecification(
 				MockOfficeSource.class, this.issues);
 
