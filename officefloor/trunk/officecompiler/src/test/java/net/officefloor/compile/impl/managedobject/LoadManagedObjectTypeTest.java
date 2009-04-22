@@ -40,6 +40,7 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -58,7 +59,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
 import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.officefloor.OfficeFloorModel;
 
 /**
  * Tests loading the {@link ManagedObjectType}.
@@ -68,7 +68,7 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link OfficeFloorModel}.
+	 * Location of the {@link OfficeFloor}.
 	 */
 	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
 

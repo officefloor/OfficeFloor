@@ -24,6 +24,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
@@ -31,7 +32,6 @@ import net.officefloor.frame.spi.administration.source.AdministratorSourceMetaDa
 import net.officefloor.frame.spi.administration.source.AdministratorSourceProperty;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceSpecification;
 import net.officefloor.frame.test.OfficeFrameTestCase;
-import net.officefloor.model.officefloor.OfficeFloorModel;
 
 /**
  * Tests the {@link AdministratorLoader}.
@@ -42,8 +42,8 @@ public class LoadAdministratorSourceSpecificationTest extends
 		OfficeFrameTestCase {
 
 	/**
-	 * Location of the {@link OfficeFloorModel} as {@link AdministratorSource}
-	 * typically used in an {@link OfficeFloorModel}.
+	 * Location of the {@link OfficeFloor} as {@link AdministratorSource}
+	 * typically used in an {@link OfficeFloor}.
 	 */
 	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
 

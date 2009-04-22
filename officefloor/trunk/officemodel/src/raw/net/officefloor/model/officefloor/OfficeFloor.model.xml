@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\src\schema\Model.xsd">
-	<list type="ManagedObjectSourceModel" name="managed object source"/>
-	<list type="TeamModel" name="team"/>
-	<list type="OfficeFloorOfficeModel" name="office"/>
+<model>
+    <list type="OfficeFloorManagedObjectModel" name="office floor managed object" />
+    <list type="OfficeFloorTeamModel" name="office floor team" />
+    <list type="DeployedOfficeModel" name="deployed office" />
 </model>
