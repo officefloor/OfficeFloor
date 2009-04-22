@@ -1,129 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<unmarshall xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:noNamespaceSchemaLocation="../../../../../../../plugin/xml/src/schema/TreeXmlUnmarshaller.xsd"
-	node="office-floor"
-	class="net.officefloor.model.officefloor.OfficeFloorModel">
-	<!-- MANAGED OBJECTS -->
-	<object method="addManagedObjectSource" node="managed-object-source"
-		class="net.officefloor.model.officefloor.ManagedObjectSourceModel">
-		<value method="setId" node="managed-object-source@id" />
-		<value method="setSource" node="managed-object-source@source" />
-		<value method="setDefaultTimeout"
-			node="managed-object-source@timeout" />
-		<value method="setX" node="managed-object-source@x" />
-		<value method="setY" node="managed-object-source@y" />
-		<object method="setManagingOffice" node="managing-office"
-			class="net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel">
-			<value method="setManagingOfficeName"
-				node="managing-office@name" />
-		</object>
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.officefloor.PropertyModel">
-			<value method="setName" node="property@name" />
-			<value method="setValue" node="property@value" />
-		</object>
-		<object method="addDependency" node="dependency"
-			class="net.officefloor.model.officefloor.ManagedObjectDependencyModel">
-			<value method="setDependencyKey" node="dependency@key" />
-			<value method="setDependencyType" node="dependency@type" />
-		</object>
-		<object method="addHandler" node="handler"
-			class="net.officefloor.model.officefloor.ManagedObjectHandlerModel">
-			<value method="setHandlerKey" node="handler@key" />
-			<value method="setHandlerKeyClass" node="handler@key-class" />
-			<value method="setHandlerType" node="handler@type" />
-			<object method="setHandlerInstance" node="handler-instance"
-				class="net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel">
-				<value method="setLoader"
-					node="handler-instance@loader" />
-				<value method="setConfiguration"
-					node="handler-instance@configuration" />
-				<object method="addLinkProcess" node="link-process"
-					class="net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel">
-					<value method="setLinkProcessId"
-						node="link-process@id" />
-					<value method="setWorkName"
-						node="link-process@work" />
-					<value method="setTaskName"
-						node="link-process@task" />
-					<object method="setOfficeTask" node="task"
-						class="net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel">
-						<value method="setWorkName" node="task@work" />
-						<value method="setTaskName" node="task@task" />
-					</object>
-				</object>
-			</object>
-		</object>
-		<object method="addTask" node="task"
-			class="net.officefloor.model.officefloor.ManagedObjectTaskModel">
-			<value method="setWorkName" node="task@work" />
-			<value method="setTaskName" node="task@task" />
-			<value method="setTeamName" node="task@team" />
-			<object method="addFlow" node="flow"
-				class="net.officefloor.model.officefloor.ManagedObjectTaskFlowModel">
-				<value method="setFlowId" node="flow@id" />
-				<value method="setInitialWorkName" node="flow@work" />
-				<value method="setInitialTaskName" node="flow@task" />
-				<object method="setOfficeTask" node="task"
-					class="net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel">
-					<value method="setWorkName" node="task@work" />
-					<value method="setTaskName" node="task@task" />
-				</object>
-			</object>
-		</object>
-		<object method="addTeam" node="team"
-			class="net.officefloor.model.officefloor.ManagedObjectTeamModel">
-			<value method="setTeamName" node="team@name" />
-			<object method="setTeam" node="team-instance"
-				class="net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel">
-				<value method="setTeamId" node="team-instance@name" />
-			</object>
-		</object>
-	</object>
-	<!-- TEAMS -->
-	<object method="addTeam" node="team-instance"
-		class="net.officefloor.model.officefloor.TeamModel">
-		<value method="setId" node="team-instance@id" />
-		<value method="setTeamFactory"
-			node="team-instance@team-factory" />
-		<value method="setX" node="team-instance@x" />
-		<value method="setY" node="team-instance@y" />
-		<object method="addProperty" node="property"
-			class="net.officefloor.model.officefloor.PropertyModel">
-			<value method="setName" node="property@name" />
-			<value method="setValue" node="property@value" />
-		</object>
-	</object>
-	<!-- OFFICES -->
-	<object method="addOffice" node="office"
-		class="net.officefloor.model.officefloor.OfficeFloorOfficeModel">
-		<value method="setId" node="office@id" />
-		<value method="setName" node="office@name" />
-		<value method="setX" node="office@x" />
-		<value method="setY" node="office@y" />
-		<object method="addManagedObject" node="managed-object"
-			class="net.officefloor.model.officefloor.OfficeManagedObjectModel">
-			<value method="setManagedObjectName"
-				node="managed-object@name" />
-			<object method="setManagedObjectSource"
-				node="managed-object-source"
-				class="net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourceModel">
-				<value method="setManagedObjectSourceId"
-					node="managed-object-source@id" />
-			</object>
-		</object>
-		<object method="addTeam" node="team"
-			class="net.officefloor.model.officefloor.OfficeTeamModel">
-			<value method="setTeamName" node="team@name" />
-			<object method="setTeam" node="team-instance"
-				class="net.officefloor.model.officefloor.OfficeTeamToTeamModel">
-				<value method="setTeamId" node="team-instance@id" />
-			</object>
-		</object>
-		<object method="addTask" node="task"
-			class="net.officefloor.model.officefloor.OfficeTaskModel">
-			<value method="setWorkName" node="task@work" />
-			<value method="setTaskName" node="task@task" />
-		</object>
-	</object>
+<unmarshall node="office-floor"
+    class="net.officefloor.model.officefloor.OfficeFloorModel">
+    <!-- MANAGED OBJECTS -->
+    <object method="addOfficeFloorManagedObject" node="managed-object"
+        class="net.officefloor.model.officefloor.OfficeFloorManagedObjectModel">
+        <value method="setOfficeFloorManagedObjectName" node="managed-object@name" />
+        <value method="setManagedObjectSourceClassName" node="managed-object@source" />
+        <value method="setObjectType" node="managed-object@object-type" />
+        <value method="setX" node="managed-object@x" />
+        <value method="setY" node="managed-object@y" />
+        <object method="addProperty" node="property"
+            class="net.officefloor.model.officefloor.PropertyModel">
+            <value method="setName" node="property@name" />
+            <value method="setValue" node="property@value" />
+        </object>
+        <object method="addOfficeFloorManagedObjectDependency"
+            node="dependency"
+            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel">
+            <value method="setOfficeFloorManagedObjectDependencyName"
+                node="dependency@name" />
+            <value method="setDependencyType" node="dependency@object-type" />
+        </object>
+        <object method="addOfficeFloorManagedObjectFlow" node="flow"
+            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectFlowModel">
+            <value method="setOfficeFloorManagedObjectFlowName"
+                node="flow@name" />
+            <value method="setArgumentType" node="flow@argument-type" />
+        </object>
+        <object method="addOfficeFloorManagedObjectTeam" node="team"
+            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectTeamModel">
+            <value method="setOfficeFloorManagedObjectTeamName"
+                node="team@name" />
+        </object>
+    </object>
+    <!-- TEAMS -->
+    <object method="addOfficeFloorTeam" node="team"
+        class="net.officefloor.model.officefloor.OfficeFloorTeamModel">
+        <value method="setOfficeFloorTeamName" node="team@name" />
+        <value method="setTeamSourceClassName" node="team@source" />
+        <value method="setX" node="team@x" />
+        <value method="setY" node="team@y" />
+        <object method="addProperty" node="property"
+            class="net.officefloor.model.officefloor.PropertyModel">
+            <value method="setName" node="property@name" />
+            <value method="setValue" node="property@value" />
+        </object>
+    </object>
+    <!-- OFFICES -->
+    <object method="addDeployedOffice" node="office"
+        class="net.officefloor.model.officefloor.DeployedOfficeModel">
+        <value method="setDeployedOfficeName" node="office@name" />
+        <value method="setOfficeSourceClassName" node="office@source" />
+        <value method="setOfficeLocation" node="office@location" />
+        <value method="setX" node="office@x" />
+        <value method="setY" node="office@y" />
+        <object method="addProperty" node="property"
+            class="net.officefloor.model.officefloor.PropertyModel">
+            <value method="setName" node="property@name" />
+            <value method="setValue" node="property@value" />
+        </object>
+        <object method="addDeployedOfficeObject" node="object"
+            class="net.officefloor.model.officefloor.DeployedOfficeObjectModel">
+            <value method="setDeployedOfficeObjectName" node="object@name" />
+            <value method="setObjectType" node="object@object-type" />
+        </object>
+        <object method="addDeployedOfficeInput" node="input"
+            class="net.officefloor.model.officefloor.DeployedOfficeInputModel">
+            <value method="setDeployedOfficeInputName" node="input@name" />
+            <value method="setParameterType" node="input@parameter-type" />
+        </object>
+        <object method="addDeployedOfficeTeam" node="team"
+            class="net.officefloor.model.officefloor.DeployedOfficeTeamModel">
+            <value method="setDeployedOfficeTeamName" node="team@name" />
+        </object>
+    </object>
 </unmarshall>

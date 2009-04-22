@@ -182,7 +182,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 	/**
 	 * Ensure able to round trip storing and retrieving the {@link OfficeModel}.
 	 */
-	public void testRoundTripStoreRetrieveDesk() throws Exception {
+	public void testRoundTripStoreRetrieveOffice() throws Exception {
 
 		// Load the Office
 		ModelRepository repository = new ModelRepositoryImpl();
