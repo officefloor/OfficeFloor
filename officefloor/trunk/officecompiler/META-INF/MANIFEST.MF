@@ -15,7 +15,7 @@ Export-Package:
  net.officefloor.model.impl.repository.filesystem,
  net.officefloor.model.repository,
  net.officefloor.plugin.work.clazz
-Require-Bundle: net.officefloor.api,
+Require-Bundle: 
  net.officefloor.frame,
  net.officefloor.xml,
  net.officefloor.model,
