@@ -54,7 +54,7 @@ public class ClassManagedObjectSource extends
 				.getManagedObjectSourceContext();
 
 		// Obtain the class name
-		String className = mosContext.getProperty("class");
+		mosContext.getProperty("class");
 
 		// TODO load class and reflective determine the meta-data
 	}

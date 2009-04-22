@@ -18,11 +18,11 @@ package net.officefloor.plugin.work.http;
 
 import java.io.IOException;
 
-import net.officefloor.compile.util.AbstractSingleTaskWork;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
 
@@ -33,7 +33,7 @@ import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
  */
 public class HttpResponseSendTask
 		extends
-		AbstractSingleTaskWork<Work, HttpResponseSendTask.HttpResponseSendTaskDependencies, None> {
+		AbstractSingleTask<Work, HttpResponseSendTask.HttpResponseSendTaskDependencies, None> {
 
 	/**
 	 * Dependencies for the {@link HttpResponseSendTask}.

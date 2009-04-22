@@ -8,6 +8,7 @@ Export-Package:
  net.officefloor.compile.spi.work.source,
  net.officefloor.compile.spi.work.source.impl,
  net.officefloor.compile.test.work,
+ net.officefloor.compile.work,
  net.officefloor.main,
  net.officefloor.model.impl.desk,
  net.officefloor.model.impl.repository.classloader,

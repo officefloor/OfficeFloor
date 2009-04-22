@@ -89,8 +89,8 @@ public class HibernateManagedObjectSource
 
 		// Create the Session Factory
 		this.sessionFactory = new Configuration().configure(
-				context.getManagedObjectSourceContext().getResourceLocator()
-						.locateURL(configFilePath)).buildSessionFactory();
+				context.getManagedObjectSourceContext().getClassLoader()
+						.getResource(configFilePath)).buildSessionFactory();
 	}
 
 	@Override

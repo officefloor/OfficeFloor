@@ -311,8 +311,8 @@ public class TreeXmlMarshallerManagedObjectSource extends
 				.getProperty(CONFIGURATION_PROPERTY_NAME);
 
 		// Ensure obtain configuration
-		InputStream configuration = mosContext.getResourceLocator()
-				.locateInputStream(configurationName);
+		InputStream configuration = mosContext.getClassLoader()
+				.getResourceAsStream(configurationName);
 		if (configuration == null) {
 			throw new Exception("Could not find configuration by location '"
 					+ configurationName + "'");

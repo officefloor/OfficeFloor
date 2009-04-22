@@ -17,7 +17,7 @@
 package net.officefloor.compile.work;
 
 import net.officefloor.frame.api.execute.Task;
-import net.officefloor.work.clazz.Flow;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * <code>Type definition</code> of a {@link Flow} possibly instigated by a

@@ -56,7 +56,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecifi
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectUser;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
-import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
@@ -197,8 +196,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 					InitUtil util) {
 				assertEquals("Incorrect resource locator",
 						LoadWorkTypeTest.class.getClassLoader().getResource(
-								objectPath), context.getResourceLocator()
-								.locateURL(objectPath));
+								objectPath), context.getClassLoader()
+								.getResource(objectPath));
 			}
 		});
 	}

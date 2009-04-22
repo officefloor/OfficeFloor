@@ -26,9 +26,9 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.util.AbstractSingleTaskWork;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpStatus;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
@@ -42,7 +42,7 @@ import net.officefloor.plugin.work.http.HttpException;
  */
 public class HttpHtmlFormToBeanTask
 		extends
-		AbstractSingleTaskWork<HttpHtmlFormToBeanTask, HttpHtmlFormToBeanTask.HttpHtmlFormToBeanTaskDependencies, None> {
+		AbstractSingleTask<HttpHtmlFormToBeanTask, HttpHtmlFormToBeanTask.HttpHtmlFormToBeanTaskDependencies, None> {
 
 	/**
 	 * Dependencies for the {@link HttpHtmlFormToBeanTask}.

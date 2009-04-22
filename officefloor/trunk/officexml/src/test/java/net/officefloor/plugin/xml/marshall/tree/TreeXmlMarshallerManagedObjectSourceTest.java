@@ -16,9 +16,6 @@
  */
 package net.officefloor.plugin.xml.marshall.tree;
 
-import java.io.InputStream;
-
-import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 
@@ -77,17 +74,11 @@ public class TreeXmlMarshallerManagedObjectSourceTest extends
 	protected TreeXmlMarshaller createMarshaller(String configurationFileName)
 			throws Throwable {
 
-		// Create the mock objects
-		final ResourceLocator resourceLocator = this
-				.createMock(ResourceLocator.class);
-
-		// Obtain the input stream to the file
-		InputStream configuration = this.findInputStream(this.getClass(),
-				configurationFileName);
-
-		// Record mock
-		resourceLocator.locateInputStream(configurationFileName);
-		this.control(resourceLocator).setReturnValue(configuration);
+		// Ensure the file is available
+		this.findFile(this.getClass(), configurationFileName);
+		String configurationFilePath = this.getPackageRelativePath(this
+				.getClass())
+				+ "/" + configurationFileName;
 
 		// Play
 		this.replayMockObjects();
@@ -97,8 +88,7 @@ public class TreeXmlMarshallerManagedObjectSourceTest extends
 		loader
 				.addProperty(
 						TreeXmlMarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME,
-						configurationFileName);
-		loader.setResourceLocator(resourceLocator);
+						configurationFilePath);
 		TreeXmlMarshallerManagedObjectSource source = loader
 				.loadManagedObjectSource(TreeXmlMarshallerManagedObjectSource.class);
 

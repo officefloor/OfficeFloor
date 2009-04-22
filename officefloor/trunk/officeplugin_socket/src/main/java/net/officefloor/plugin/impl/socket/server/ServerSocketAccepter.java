@@ -28,12 +28,12 @@ import java.util.Iterator;
 
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.impl.socket.server.messagesegment.DirectBufferMessageSegmentPool;
 import net.officefloor.plugin.socket.server.spi.Message;
 import net.officefloor.plugin.socket.server.spi.MessageSegment;
 import net.officefloor.plugin.socket.server.spi.ServerSocketHandler;
-import net.officefloor.work.clazz.Flow;
 
 /**
  * Accepts connections.

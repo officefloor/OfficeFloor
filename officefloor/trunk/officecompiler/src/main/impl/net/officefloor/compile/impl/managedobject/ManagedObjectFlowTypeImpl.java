@@ -20,8 +20,8 @@ import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.work.clazz.Flow;
 
 /**
  * {@link ManagedObjectFlowType} implementation.

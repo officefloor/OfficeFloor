@@ -18,10 +18,11 @@ package net.officefloor.plugin.work.http.html.template;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
@@ -32,9 +33,6 @@ import net.officefloor.plugin.work.http.HttpException;
 import net.officefloor.plugin.work.http.HttpResponseSendTask;
 import net.officefloor.plugin.work.http.MockHttpResponse;
 import net.officefloor.plugin.work.http.HttpResponseSendTask.HttpResponseSendTaskDependencies;
-import net.officefloor.plugin.work.http.html.template.HttpHtmlTemplateTask;
-import net.officefloor.plugin.work.http.html.template.HttpHtmlTemplateWork;
-import net.officefloor.plugin.work.http.html.template.HttpHtmlTemplateWorkSource;
 import net.officefloor.plugin.work.http.html.template.HttpHtmlTemplateTask.HttpHtmlTemplateTaskDependencies;
 
 /**
@@ -186,7 +184,7 @@ public class HttpHtmlTemplateWorkSourceTest extends OfficeFrameTestCase {
 				httpResponse);
 
 		// Load the work type
-		WorkType<HttpHtmlTemplateWork> workType = WorkLoaderUtil.loadWork(
+		WorkType<HttpHtmlTemplateWork> workType = WorkLoaderUtil.loadWorkType(
 				HttpHtmlTemplateWorkSource.class, this.properties);
 
 		// Replay mocks
@@ -196,17 +194,17 @@ public class HttpHtmlTemplateWorkSourceTest extends OfficeFrameTestCase {
 		HttpHtmlTemplateWork work = workType.getWorkFactory().createWork();
 
 		// Execute the 'template' task
-		this.doTask(0, work, workType, taskContext);
+		this.doTask("template", work, workType, taskContext);
 
 		// Execute the 'List' task (for table and its child)
-		this.doTask(1, work, workType, taskContext); // table row bean
-		this.doTask(1, work, workType, taskContext); // child row bean
+		this.doTask("List", work, workType, taskContext); // table row bean
+		this.doTask("List", work, workType, taskContext); // child row bean
 
 		// Execute the 'Tail' task
-		this.doTask(2, work, workType, taskContext);
+		this.doTask("Tail", work, workType, taskContext);
 
 		// Send the HTTP response
-		this.doTask(3, work, workType, taskContext);
+		this.doTask("SendHttpResponse", work, workType, taskContext);
 
 		// Verify mocks
 		this.verifyMockObjects();
@@ -231,8 +229,8 @@ public class HttpHtmlTemplateWorkSourceTest extends OfficeFrameTestCase {
 	/**
 	 * Does the {@link Task} on the {@link WorkType}.
 	 * 
-	 * @param taskIndex
-	 *            Index of {@link Task} on {@link WorkType} to execute.
+	 * @param taskName
+	 *            Name of {@link Task} on {@link WorkType} to execute.
 	 * @param work
 	 *            {@link HttpHtmlTemplateWork}.
 	 * @param workType
@@ -243,15 +241,26 @@ public class HttpHtmlTemplateWorkSourceTest extends OfficeFrameTestCase {
 	 *             If fails.
 	 */
 	@SuppressWarnings("unchecked")
-	private void doTask(int taskIndex, HttpHtmlTemplateWork work,
+	private void doTask(String taskName, HttpHtmlTemplateWork work,
 			WorkType<HttpHtmlTemplateWork> workType,
 			TaskContext<HttpHtmlTemplateWork, ?, ?> taskContext)
 			throws Throwable {
 
+		// Obtain the index of the task
+		int taskIndex = -1;
+		TaskType<?, ?, ?>[] taskTypes = workType.getTaskTypes();
+		for (int i = 0; i < taskTypes.length; i++) {
+			if (taskName.equals(taskTypes[i].getTaskName())) {
+				taskIndex = i;
+			}
+		}
+		if (taskIndex == -1) {
+			fail("Could not find task '" + taskName + "'");
+		}
+
 		// Create the task
-		Task task = workType.getTaskTypes()[taskIndex]
-				.getTaskFactoryManufacturer().createTaskFactory().createTask(
-						work);
+		Task task = workType.getTaskTypes()[taskIndex].getTaskFactory()
+				.createTask(work);
 
 		// Execute the task
 		task.doTask(taskContext);

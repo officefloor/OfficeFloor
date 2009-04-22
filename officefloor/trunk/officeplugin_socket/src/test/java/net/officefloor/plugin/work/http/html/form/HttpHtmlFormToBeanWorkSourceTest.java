@@ -18,19 +18,16 @@ package net.officefloor.plugin.work.http.html.form;
 
 import java.io.ByteArrayInputStream;
 
-import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
 import net.officefloor.plugin.work.http.HttpException;
-import net.officefloor.plugin.work.http.html.form.BeanMapException;
-import net.officefloor.plugin.work.http.html.form.HttpHtmlFormToBeanTask;
-import net.officefloor.plugin.work.http.html.form.HttpHtmlFormToBeanWorkSource;
 import net.officefloor.plugin.work.http.html.form.HttpHtmlFormToBeanTask.HttpHtmlFormToBeanTaskDependencies;
 
 /**
@@ -87,7 +84,7 @@ public class HttpHtmlFormToBeanWorkSourceTest extends OfficeFrameTestCase {
 		final String VALUE = "VALUE";
 
 		// Load the work
-		WorkType<HttpHtmlFormToBeanTask> work = WorkLoaderUtil.loadWork(
+		WorkType<HttpHtmlFormToBeanTask> work = WorkLoaderUtil.loadWorkType(
 				HttpHtmlFormToBeanWorkSource.class,
 				HttpHtmlFormToBeanWorkSource.BEAN_CLASS_PROPERTY,
 				HtmlFormBean.class.getName(),
