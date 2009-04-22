@@ -21,7 +21,7 @@ import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.work.clazz.Flow;
+import net.officefloor.frame.internal.structure.Flow;
 
 /**
  * Provides means for the {@link WorkSource} to provide a

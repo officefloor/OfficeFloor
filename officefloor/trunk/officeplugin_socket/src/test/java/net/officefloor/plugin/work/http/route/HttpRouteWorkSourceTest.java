@@ -18,15 +18,13 @@ package net.officefloor.plugin.work.http.route;
 
 import java.util.regex.Pattern;
 
-import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
-import net.officefloor.plugin.work.http.route.HttpRouteTask;
-import net.officefloor.plugin.work.http.route.HttpRouteWorkSource;
 import net.officefloor.plugin.work.http.route.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
@@ -49,7 +47,7 @@ public class HttpRouteWorkSourceTest extends OfficeFrameTestCase {
 	 */
 	public void testNoRoutes() throws Exception {
 		try {
-			WorkLoaderUtil.loadWork(HttpRouteWorkSource.class);
+			WorkLoaderUtil.loadWorkType(HttpRouteWorkSource.class);
 			fail("Should not be able to load without routings");
 		} catch (Throwable ex) {
 		}

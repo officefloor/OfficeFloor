@@ -16,9 +16,6 @@
  */
 package net.officefloor.plugin.xml.unmarshall.tree;
 
-import java.io.InputStream;
-
-import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
 
@@ -58,17 +55,11 @@ public class TreeXmlUnmarshallerManagedObjectSourceTest extends
 	private TreeXmlUnmarshaller createUnmarshaller(String configurationFileName)
 			throws Throwable {
 
-		// Create the mock objects
-		final ResourceLocator resourceLocator = this
-				.createMock(ResourceLocator.class);
-
-		// Obtain the input stream to the file
-		InputStream configuration = this.findInputStream(this.getClass(),
-				configurationFileName);
-
-		// Record mock
-		resourceLocator.locateInputStream(configurationFileName);
-		this.control(resourceLocator).setReturnValue(configuration);
+		// Ensure the file is available
+		this.findFile(this.getClass(), configurationFileName);
+		String configurationFilePath = this.getPackageRelativePath(this
+				.getClass())
+				+ "/" + configurationFileName;
 
 		// Play
 		this.replayMockObjects();
@@ -78,8 +69,7 @@ public class TreeXmlUnmarshallerManagedObjectSourceTest extends
 		loader
 				.addProperty(
 						TreeXmlUnmarshallerManagedObjectSource.CONFIGURATION_PROPERTY_NAME,
-						configurationFileName);
-		loader.setResourceLocator(resourceLocator);
+						configurationFilePath);
 		TreeXmlUnmarshallerManagedObjectSource source = loader
 				.loadManagedObjectSource(TreeXmlUnmarshallerManagedObjectSource.class);
 

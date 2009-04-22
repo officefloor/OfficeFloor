@@ -40,7 +40,6 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.impl.construct.managedobjectsource.ClassLoaderResourceLocator;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSourceContextImpl;
 import net.officefloor.frame.impl.construct.managedobjectsource.ManagingOfficeBuilderImpl;
 import net.officefloor.frame.impl.construct.office.OfficeBuilderImpl;
@@ -61,7 +60,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaDat
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
-import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 
 /**
  * {@link ManagedObjectLoader} implementation.
@@ -246,14 +244,12 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 		// Create the managed object source context to initialise
 		String officeName = null;
-		ResourceLocator resourceLocator = new ClassLoaderResourceLocator(
-				classLoader);
 		ManagingOfficeConfiguration<F> managingOffice = new ManagingOfficeBuilderImpl<F>(
 				officeName);
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
 		ManagedObjectSourceContext<F> sourceContext = new ManagedObjectSourceContextImpl<F>(
-				namespaceName, propertyList.getProperties(), resourceLocator,
+				namespaceName, propertyList.getProperties(), classLoader,
 				managingOffice.getBuilder(), office.getBuilder());
 
 		try {

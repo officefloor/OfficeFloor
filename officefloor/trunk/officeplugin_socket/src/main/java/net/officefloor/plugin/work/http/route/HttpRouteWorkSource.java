@@ -20,8 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import net.officefloor.compile.spi.work.WorkLoader;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
@@ -30,7 +30,7 @@ import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
 import net.officefloor.plugin.work.http.route.HttpRouteTask.HttpRouteTaskDependencies;
 
 /**
- * {@link WorkLoader} to provide routing of HTTP requests.
+ * {@link WorkSource} to provide routing of HTTP requests.
  * 
  * @author Daniel
  */

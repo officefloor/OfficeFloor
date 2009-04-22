@@ -19,8 +19,8 @@ package net.officefloor.plugin.work.http.html.form;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.spi.work.WorkLoader;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
@@ -30,7 +30,7 @@ import net.officefloor.plugin.work.http.HttpException;
 import net.officefloor.plugin.work.http.html.form.HttpHtmlFormToBeanTask.HttpHtmlFormToBeanTaskDependencies;
 
 /**
- * {@link WorkLoader} for the {@link HttpHtmlFormToBeanTask}.
+ * {@link WorkSource} for the {@link HttpHtmlFormToBeanTask}.
  * 
  * @author Daniel
  */

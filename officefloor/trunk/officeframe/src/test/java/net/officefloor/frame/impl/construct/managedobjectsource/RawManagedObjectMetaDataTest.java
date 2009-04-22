@@ -969,8 +969,8 @@ public class RawManagedObjectMetaDataTest extends OfficeFrameTestCase {
 			// Ensure able to obtain resources
 			String objectPath = Object.class.getName().replace('.', '/')
 					+ ".class";
-			InputStream inputStream = context.getResourceLocator()
-					.locateInputStream(objectPath);
+			InputStream inputStream = context.getClassLoader()
+					.getResourceAsStream(objectPath);
 			assertNotNull("Must be able to obtain resources", inputStream);
 
 			// Obtain the required property

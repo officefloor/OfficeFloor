@@ -16,13 +16,6 @@
  */
 package net.officefloor.frame.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 
 import net.officefloor.frame.api.OfficeFrame;
@@ -35,7 +28,6 @@ import net.officefloor.frame.impl.construct.managedobjectsource.ManagedObjectSou
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 
 /**
  * Loads {@link ManagedObjectSource} for stand-alone use.
@@ -61,80 +53,6 @@ public class ManagedObjectSourceStandAlone {
 	private final Properties properties = new Properties();
 
 	/**
-	 * {@link ResourceLocator}. Defaults to use the system class loader to find
-	 * resources and if not on class path goes looking as a {@link File}.
-	 */
-	private ResourceLocator resourceLocator = new ResourceLocator() {
-
-		@Override
-		public InputStream locateInputStream(String name) {
-
-			// Find first by system class loader
-			InputStream inputStream = ClassLoader
-					.getSystemResourceAsStream(name);
-			if (inputStream != null) {
-				return inputStream;
-			}
-
-			// Find by file paths
-			File file = this.getFile(name);
-			if (file != null) {
-				try {
-					return new FileInputStream(file);
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
-			}
-
-			// File not found
-			return null;
-		}
-
-		@Override
-		public URL locateURL(String name) {
-			// Only find by class path
-			return ClassLoader.getSystemResource(name);
-		}
-
-		/**
-		 * Obtains the {@link File} for the name.
-		 * 
-		 * @param name
-		 *            Name of the file.
-		 * @return {@link File} or <code>null</code> if not found.
-		 */
-		private File getFile(String name) {
-
-			// Obtain the current directory
-			File currentDirectory = new File(".");
-
-			// Create the listing of paths to find the file
-			List<File> paths = new LinkedList<File>();
-
-			// Absolute and relative
-			paths.add(new File(name));
-			paths.add(new File(currentDirectory, name));
-
-			// Maven locations to be searched
-			paths.add(new File(
-					new File(currentDirectory, "target/test-classes"), name));
-			paths.add(new File(new File(currentDirectory, "target/classes"),
-					name));
-			paths.add(new File(new File(currentDirectory, "target"), name));
-
-			// Obtain the file
-			for (File path : paths) {
-				if (path.exists()) {
-					return path;
-				}
-			}
-
-			// File not found if here
-			return null;
-		}
-	};
-
-	/**
 	 * Adds a property for the {@link ManagedObjectSource}.
 	 * 
 	 * @param name
@@ -144,16 +62,6 @@ public class ManagedObjectSourceStandAlone {
 	 */
 	public void addProperty(String name, String value) {
 		this.properties.setProperty(name, value);
-	}
-
-	/**
-	 * Specifies the {@link ResourceLocator}.
-	 * 
-	 * @param resourceLocator
-	 *            {@link ResourceLocator}.
-	 */
-	public void setResourceLocator(ResourceLocator resourceLocator) {
-		this.resourceLocator = resourceLocator;
 	}
 
 	/**
@@ -185,7 +93,8 @@ public class ManagedObjectSourceStandAlone {
 		// Initialise the managed object source
 		ManagedObjectSourceContextImpl sourceContext = new ManagedObjectSourceContextImpl(
 				STAND_ALONE_MANAGED_OBJECT_SOURCE_NAME, this.properties,
-				this.resourceLocator, managingOfficeBuilder, officeBuilder);
+				managedObjectSourceClass.getClassLoader(),
+				managingOfficeBuilder, officeBuilder);
 		moSource.init(sourceContext);
 
 		// Return the initialised managed object source

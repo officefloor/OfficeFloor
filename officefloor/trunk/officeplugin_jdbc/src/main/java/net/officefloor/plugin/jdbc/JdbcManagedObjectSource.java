@@ -192,8 +192,8 @@ public class JdbcManagedObjectSource extends
 				DATA_SOURCE_INITIALISE_SCRIPT, null);
 		if (initialiseScript != null) {
 			// Obtain access to the initialise script contents
-			this.initialiseScriptInputStream = mosContext.getResourceLocator()
-					.locateInputStream(initialiseScript);
+			this.initialiseScriptInputStream = mosContext.getClassLoader()
+					.getResourceAsStream(initialiseScript);
 			if (this.initialiseScriptInputStream == null) {
 				throw new Exception("Can not find initialise script '"
 						+ initialiseScript + "'");

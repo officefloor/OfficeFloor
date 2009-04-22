@@ -18,16 +18,14 @@ package net.officefloor.plugin.work.http.file;
 
 import java.io.IOException;
 
-import net.officefloor.compile.spi.work.WorkType;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.test.work.WorkLoaderUtil;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
 import net.officefloor.plugin.work.http.HttpException;
-import net.officefloor.plugin.work.http.file.HttpFileTask;
-import net.officefloor.plugin.work.http.file.HttpFileWorkSource;
 import net.officefloor.plugin.work.http.file.HttpFileTask.HttpFileTaskDependencies;
 
 /**

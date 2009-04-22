@@ -18,6 +18,7 @@ package net.officefloor.frame.impl.construct.managedobjectsource;
 
 import java.util.Properties;
 
+import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -46,7 +47,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectFlowMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
-import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 
 /**
  * Raw {@link ManagedObjectMetaData}.
@@ -203,8 +203,8 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 			return null; // can not carry on
 		}
 
-		// Create the resource locator
-		ResourceLocator resourceLocator = new ClassLoaderResourceLocator();
+		// Obtain the class loader
+		ClassLoader classLoader = OfficeFrame.class.getClassLoader();
 
 		// Obtain the properties to initialise the managed object source
 		Properties properties = configuration.getProperties();
@@ -242,7 +242,7 @@ public class RawManagedObjectMetaDataImpl<D extends Enum<D>, F extends Enum<F>>
 
 		// Create the context for the managed object source
 		ManagedObjectSourceContextImpl<h> context = new ManagedObjectSourceContextImpl<h>(
-				managedObjectSourceName, properties, resourceLocator,
+				managedObjectSourceName, properties, classLoader,
 				managingOfficeBuilder, officeBuilder);
 
 		try {

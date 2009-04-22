@@ -34,7 +34,6 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceUnknownPropertyError;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
-import net.officefloor.frame.spi.managedobject.source.ResourceLocator;
 
 /**
  * Implementation of the {@link ManagedObjectSourceContext}.
@@ -60,9 +59,9 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 	private final Properties properties;
 
 	/**
-	 * Resource locator.
+	 * {@link ClassLoader}.
 	 */
-	private final ResourceLocator resourceLocator;
+	private final ClassLoader classLoader;
 
 	/**
 	 * {@link ManagingOfficeBuilder}.
@@ -87,8 +86,8 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 	 *            Name of the {@link ManagedObject}.
 	 * @param properties
 	 *            Properties.
-	 * @param resourceLocator
-	 *            {@link ResourceLocator}.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
 	 * @param managingOfficeBuilder
 	 *            {@link ManagingOfficeBuilder}.
 	 * @param officeBuilder
@@ -96,12 +95,12 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 	 *            {@link ManagedObjectSource}.
 	 */
 	public ManagedObjectSourceContextImpl(String managedObjectName,
-			Properties properties, ResourceLocator resourceLocator,
+			Properties properties, ClassLoader classLoader,
 			ManagingOfficeBuilder<F> managingOfficeBuilder,
 			OfficeBuilder officeBuilder) {
 		this.managedObjectName = managedObjectName;
 		this.properties = properties;
-		this.resourceLocator = resourceLocator;
+		this.classLoader = classLoader;
 		this.managingOfficeBuilder = managingOfficeBuilder;
 		this.officeBuilder = officeBuilder;
 	}
@@ -168,8 +167,8 @@ public class ManagedObjectSourceContextImpl<F extends Enum<F>> implements
 	}
 
 	@Override
-	public ResourceLocator getResourceLocator() {
-		return this.resourceLocator;
+	public ClassLoader getClassLoader() {
+		return this.classLoader;
 	}
 
 	@Override

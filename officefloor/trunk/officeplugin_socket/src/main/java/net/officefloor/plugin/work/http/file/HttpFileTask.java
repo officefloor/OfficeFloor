@@ -22,11 +22,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-import net.officefloor.compile.util.AbstractSingleTaskWork;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.HttpStatus;
 import net.officefloor.plugin.socket.server.http.api.HttpRequest;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
@@ -40,7 +40,7 @@ import net.officefloor.plugin.work.http.HttpException;
  */
 public class HttpFileTask
 		extends
-		AbstractSingleTaskWork<HttpFileTask, HttpFileTask.HttpFileTaskDependencies, None> {
+		AbstractSingleTask<HttpFileTask, HttpFileTask.HttpFileTaskDependencies, None> {
 
 	/**
 	 * Dependencies for the {@link HttpFileTask}.

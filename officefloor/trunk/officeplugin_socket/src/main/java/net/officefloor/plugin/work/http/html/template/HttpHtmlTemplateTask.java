@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
-import net.officefloor.compile.util.AbstractSingleTaskWork;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.TaskContext;
+import net.officefloor.frame.util.AbstractSingleTask;
 import net.officefloor.plugin.socket.server.http.api.HttpResponse;
 import net.officefloor.plugin.socket.server.http.api.ServerHttpConnection;
 import net.officefloor.plugin.work.http.HttpException;
@@ -35,7 +35,7 @@ import net.officefloor.plugin.work.http.HttpException;
  */
 public class HttpHtmlTemplateTask
 		extends
-		AbstractSingleTaskWork<HttpHtmlTemplateWork, HttpHtmlTemplateTask.HttpHtmlTemplateTaskDependencies, None> {
+		AbstractSingleTask<HttpHtmlTemplateWork, HttpHtmlTemplateTask.HttpHtmlTemplateTaskDependencies, None> {
 
 	/**
 	 * Dependencies for the {@link HttpHtmlTemplateTask}.

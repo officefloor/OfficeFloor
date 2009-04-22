@@ -46,7 +46,9 @@ public class TransactionAdministratorSource extends
 	protected void loadMetaData(
 			MetaDataContext<Transaction, TransactionDutiesEnum> context)
 			throws Exception {
-		context.setDutyKeys(TransactionDutiesEnum.class);
+		context.addDuty(TransactionDutiesEnum.BEGIN);
+		context.addDuty(TransactionDutiesEnum.ROLLBACK);
+		context.addDuty(TransactionDutiesEnum.COMMIT);
 		context.setExtensionInterface(Transaction.class);
 	}
 

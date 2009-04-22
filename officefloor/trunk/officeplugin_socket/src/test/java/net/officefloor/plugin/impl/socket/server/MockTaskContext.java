@@ -97,7 +97,7 @@ public class MockTaskContext implements
 	}
 
 	@Override
-	public void join(FlowFuture flowFuture) {
+	public void join(FlowFuture flowFuture, long timeout, Object token) {
 		TestCase.fail("Should not be invoked");
 	}
 

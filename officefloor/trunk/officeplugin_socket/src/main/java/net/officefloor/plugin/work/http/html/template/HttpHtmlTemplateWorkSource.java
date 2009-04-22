@@ -24,8 +24,8 @@ import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.compile.spi.work.WorkLoader;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkTypeBuilder;
 import net.officefloor.compile.spi.work.source.impl.AbstractWorkSource;
@@ -42,7 +42,7 @@ import net.officefloor.plugin.work.http.html.template.parse.TemplateSection;
 import net.officefloor.plugin.work.http.html.template.parse.TemplateSectionContent;
 
 /**
- * {@link WorkLoader} that loads a HTTP HTML template.
+ * {@link WorkSource} that loads a HTTP HTML template.
  * 
  * @author Daniel
  */
