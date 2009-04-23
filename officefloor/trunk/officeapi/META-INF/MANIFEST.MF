@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: API for the Office Floor
-Bundle-SymbolicName: net.officefloor.api;singleton:=true
-Bundle-Version: 1.0.0
-Bundle-Vendor: Daniel Sagenschneider
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
