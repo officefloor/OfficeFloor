@@ -18,8 +18,8 @@ package net.officefloor.plugin.filingcabinet;
 
 import java.io.File;
 
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationContext;
+import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Tests the {@link TableGenerator}.
