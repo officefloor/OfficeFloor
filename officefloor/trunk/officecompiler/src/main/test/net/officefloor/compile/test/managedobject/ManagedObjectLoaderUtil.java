@@ -16,9 +16,22 @@
  */
 package net.officefloor.compile.test.managedobject;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import junit.framework.TestCase;
+import net.officefloor.compile.impl.managedobject.ManagedObjectDependencyTypeImpl;
+import net.officefloor.compile.impl.managedobject.ManagedObjectFlowTypeImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
+import net.officefloor.compile.impl.managedobject.ManagedObjectTeamTypeImpl;
+import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.managedobject.ManagedObjectTeamType;
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailCompilerIssues;
@@ -64,9 +77,254 @@ public class ManagedObjectLoaderUtil {
 	}
 
 	/**
+	 * Creates the {@link ManagedObjectTypeBuilder} to create the expected
+	 * {@link ManagedObjectType}.
+	 * 
+	 * @return {@link ManagedObjectTypeBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static ManagedObjectTypeBuilder createManagedObjectTypeBuilder() {
+		return new ManagedObjectTypeBuilderImpl();
+	}
+
+	/**
+	 * Validates the {@link ManagedObjectType} contained in the
+	 * {@link ManagedObjectTypeBuilder} against the {@link ManagedObjectType}
+	 * loaded from the {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link ManagedObjectType} loaded from the
+	 *         {@link ManagedObjectSource}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectType<D> validateManagedObjectType(
+			ManagedObjectTypeBuilder expectedManagedObjectType,
+			Class<S> managedObjectSourceClass, String... propertyNameValues) {
+
+		// Cast to obtain expected managed object type
+		if (!(expectedManagedObjectType instanceof OfficeType)) {
+			TestCase
+					.fail("builder must be created from createManagedObjectTypeBuilder");
+		}
+		ManagedObjectType<D> eType = (ManagedObjectType<D>) expectedManagedObjectType;
+
+		// Load the managed object type
+		ManagedObjectType<D> aType = loadManagedObjectType(
+				managedObjectSourceClass, propertyNameValues);
+
+		// Verify the types match
+		TestCase.assertEquals("Incorrect object type", eType.getObjectClass(),
+				aType.getObjectClass());
+
+		// Verify the dependencies
+		ManagedObjectDependencyType<D>[] eDependencies = eType
+				.getDependencyTypes();
+		ManagedObjectDependencyType<D>[] aDependencies = aType
+				.getDependencyTypes();
+		TestCase.assertEquals("Incorrect number of dependencies",
+				eDependencies.length, aDependencies.length);
+		for (int i = 0; i < eDependencies.length; i++) {
+			ManagedObjectDependencyType<D> eDependency = eDependencies[i];
+			ManagedObjectDependencyType<D> aDependency = aDependencies[i];
+			TestCase.assertEquals("Incorrect name for dependency " + i,
+					eDependency.getDependencyName(), aDependency
+							.getDependencyName());
+			TestCase.assertEquals("Incorrect type for dependency " + i,
+					eDependency.getDependencyType(), aDependency
+							.getDependencyType());
+			TestCase.assertEquals("Incorrect index for dependency " + i,
+					eDependency.getIndex(), aDependency.getIndex());
+			TestCase.assertEquals("Incorrect key for dependency " + i,
+					eDependency.getKey(), aDependency.getKey());
+		}
+
+		// Verify the flows
+		ManagedObjectFlowType<?>[] eFlows = eType.getFlowTypes();
+		ManagedObjectFlowType<?>[] aFlows = aType.getFlowTypes();
+		TestCase.assertEquals("Incorrect number of flows", eFlows.length,
+				aFlows.length);
+		for (int i = 0; i < eFlows.length; i++) {
+			ManagedObjectFlowType<?> eFlow = eFlows[i];
+			ManagedObjectFlowType<?> aFlow = aFlows[i];
+			TestCase.assertEquals("Incorrect name for flow " + i, eFlow
+					.getFlowName(), aFlow.getFlowName());
+			TestCase.assertEquals("Incorrect argument type for flow " + i,
+					eFlow.getArgumentType(), aFlow.getArgumentType());
+			TestCase.assertEquals("Incorrect work for flow " + i, eFlow
+					.getWorkName(), aFlow.getWorkName());
+			TestCase.assertEquals("Incorrect task for flow " + i, eFlow
+					.getTaskName(), aFlow.getTaskName());
+			TestCase.assertEquals("Incorrect index for flow " + i, eFlow
+					.getIndex(), aFlow.getIndex());
+			TestCase.assertEquals("Incorrect key for flow " + i,
+					eFlow.getKey(), aFlow.getKey());
+		}
+
+		// Verify the teams
+		ManagedObjectTeamType[] eTeams = eType.getTeamTypes();
+		ManagedObjectTeamType[] aTeams = aType.getTeamTypes();
+		TestCase.assertEquals("Incorrect number of teams", eTeams.length,
+				aTeams.length);
+		for (int i = 0; i < eFlows.length; i++) {
+			ManagedObjectTeamType eTeam = eTeams[i];
+			ManagedObjectTeamType aTeam = aTeams[i];
+			TestCase.assertEquals("Incorrect name for team " + i, eTeam
+					.getTeamName(), aTeam.getTeamName());
+		}
+
+		// Return the loaded managed object type
+		return aType;
+	}
+
+	/**
+	 * Convenience method to load the {@link ManagedObjectType} from the
+	 * {@link ManagedObjectSource} utilising the {@link ClassLoader} from the
+	 * input {@link ManagedObjectSource} class.
+	 * 
+	 * @param managedObjectSourceClass
+	 *            {@link ManagedObjectSource} class.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value listing.
+	 * @return {@link ManagedObjectType}.
+	 */
+	public static <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
+			Class<S> managedObjectSourceClass, String... propertyNameValues) {
+
+		// Obtain the class loader
+		ClassLoader classLoader = managedObjectSourceClass.getClassLoader();
+
+		// Return the loaded managed object type
+		return loadManagedObjectType(managedObjectSourceClass, classLoader,
+				propertyNameValues);
+	}
+
+	/**
+	 * Loads the {@link ManagedObjectType} from the {@link ManagedObjectSource}.
+	 * 
+	 * @param managedObjectSourceClass
+	 *            {@link ManagedObjectSource} class.
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value listing.
+	 * @return {@link ManagedObjectType}.
+	 */
+	public static <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
+			Class<S> managedObjectSourceClass, ClassLoader classLoader,
+			String... propertyNameValues) {
+
+		// Create the managed object loader
+		ManagedObjectLoader managedObjectLoader = new ManagedObjectLoaderImpl(
+				LocationType.OFFICE_FLOOR, null, "TEST");
+
+		// Load and return the managed object type
+		return managedObjectLoader.loadManagedObjectType(
+				managedObjectSourceClass, new PropertyListImpl(
+						propertyNameValues), classLoader,
+				new FailCompilerIssues());
+	}
+
+	/**
 	 * All access is via static methods.
 	 */
 	private ManagedObjectLoaderUtil() {
+	}
+
+	/**
+	 * {@link ManagedObjectTypeBuilder} implementation.
+	 */
+	private static class ManagedObjectTypeBuilderImpl<D extends Enum<D>>
+			implements ManagedObjectTypeBuilder, ManagedObjectType<D> {
+
+		/**
+		 * Object class.
+		 */
+		private Class<?> objectClass;
+
+		/**
+		 * {@link ManagedObjectDependencyType} instances.
+		 */
+		private final List<ManagedObjectDependencyType<?>> dependencies = new LinkedList<ManagedObjectDependencyType<?>>();
+
+		/**
+		 * {@link ManagedObjectFlowType} instances.
+		 */
+		private final List<ManagedObjectFlowType<?>> flows = new LinkedList<ManagedObjectFlowType<?>>();
+
+		/**
+		 * {@link ManagedObjectTeamType} instances.
+		 */
+		private final List<ManagedObjectTeamType> teams = new LinkedList<ManagedObjectTeamType>();
+
+		/**
+		 * Extension interfaces.
+		 */
+		private final List<Class<?>> extensionInterfaces = new LinkedList<Class<?>>();
+
+		/*
+		 * ====================== ManagedObjectType ==========================
+		 */
+
+		@Override
+		public Class<?> getObjectClass() {
+			return this.objectClass;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public ManagedObjectDependencyType<D>[] getDependencyTypes() {
+			return (ManagedObjectDependencyType<D>[]) this.dependencies
+					.toArray(new ManagedObjectDependencyType[0]);
+		}
+
+		@Override
+		public ManagedObjectFlowType<?>[] getFlowTypes() {
+			return this.flows.toArray(new ManagedObjectFlowType[0]);
+		}
+
+		@Override
+		public ManagedObjectTeamType[] getTeamTypes() {
+			return this.teams.toArray(new ManagedObjectTeamType[0]);
+		}
+
+		@Override
+		public Class<?>[] getExtensionInterfaces() {
+			return this.extensionInterfaces.toArray(new Class[0]);
+		}
+
+		/*
+		 * ================= ManagedObjectTypeBuilder =========================
+		 */
+
+		@Override
+		public void setObjectClass(Class<?> objectClass) {
+			this.objectClass = objectClass;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void addDependency(String name, Class<?> type, int index,
+				Enum<?> key) {
+			this.dependencies.add(new ManagedObjectDependencyTypeImpl(index,
+					type, key, name));
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public void addFlow(String name, Class<?> argumentType, int index,
+				Enum<?> key, String workName, String taskName) {
+			this.flows.add(new ManagedObjectFlowTypeImpl(workName, taskName,
+					index, argumentType, key, name));
+		}
+
+		@Override
+		public void addTeam(String teamName) {
+			this.teams.add(new ManagedObjectTeamTypeImpl(teamName));
+		}
+
+		@Override
+		public void addExtensionInterface(Class<?> extensionInterface) {
+			this.extensionInterfaces.add(extensionInterface);
+		}
 	}
 
 }
