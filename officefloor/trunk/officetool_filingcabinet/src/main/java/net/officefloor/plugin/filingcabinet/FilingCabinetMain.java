@@ -21,8 +21,8 @@ import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationContext;
+import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Main for invoking the {@link FilingCabinetGenerator}.

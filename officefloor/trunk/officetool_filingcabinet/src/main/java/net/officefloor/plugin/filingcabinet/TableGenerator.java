@@ -19,7 +19,7 @@ package net.officefloor.plugin.filingcabinet;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import net.officefloor.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Generates the class for the table.
