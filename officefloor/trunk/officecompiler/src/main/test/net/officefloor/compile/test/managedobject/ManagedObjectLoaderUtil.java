@@ -31,7 +31,6 @@ import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.office.OfficeType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.issues.FailCompilerIssues;
@@ -101,7 +100,7 @@ public class ManagedObjectLoaderUtil {
 			Class<S> managedObjectSourceClass, String... propertyNameValues) {
 
 		// Cast to obtain expected managed object type
-		if (!(expectedManagedObjectType instanceof OfficeType)) {
+		if (!(expectedManagedObjectType instanceof ManagedObjectType)) {
 			TestCase
 					.fail("builder must be created from createManagedObjectTypeBuilder");
 		}
@@ -169,6 +168,16 @@ public class ManagedObjectLoaderUtil {
 			ManagedObjectTeamType aTeam = aTeams[i];
 			TestCase.assertEquals("Incorrect name for team " + i, eTeam
 					.getTeamName(), aTeam.getTeamName());
+		}
+
+		// Verify the extension interfaces
+		Class<?>[] eEis = eType.getExtensionInterfaces();
+		Class<?>[] aEis = aType.getExtensionInterfaces();
+		TestCase.assertEquals("Incorrect number of extension interfaces",
+				eEis.length, aEis.length);
+		for (int i = 0; i < eEis.length; i++) {
+			TestCase.assertEquals("Incorrect extension interface " + i,
+					eEis[i], aEis[i]);
 		}
 
 		// Return the loaded managed object type
