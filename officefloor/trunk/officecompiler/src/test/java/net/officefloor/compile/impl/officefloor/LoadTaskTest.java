@@ -16,12 +16,10 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
@@ -35,12 +33,6 @@ import net.officefloor.frame.api.execute.Work;
  * @author Daniel
  */
 public class LoadTaskTest extends AbstractOfficeFloorTestCase {
-
-	// TODO remove once tests are working
-	@Override
-	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
-		return new StderrCompilerIssuesWrapper(issues);
-	}
 
 	/**
 	 * {@link WorkFactory}.

@@ -16,34 +16,24 @@
  */
 package net.officefloor.main;
 
-import java.util.Properties;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-import net.officefloor.compile.impl.officefloor.OfficeFloorLoaderImpl;
-import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.officefloor.OfficeFloorLoader;
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
-import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.api.manage.UnknownWorkException;
 import net.officefloor.frame.api.manage.WorkManager;
-import net.officefloor.model.impl.repository.classloader.ClassLoaderConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
- * Starting point to compile and run an {@link OfficeFloor}.
+ * Main class to compile and run an {@link OfficeFloor}.
  * 
  * @author Daniel
  */
 public class OfficeFloorMain {
-
-	/**
-	 * Main class name.
-	 */
-	private static final String OFFICE_FLOOR_MAIN = OfficeFloorMain.class
-			.getName();
 
 	/**
 	 * <p>
@@ -57,26 +47,45 @@ public class OfficeFloorMain {
 	 * @param args
 	 *            Command line arguments.
 	 */
-	public static void main(String... args) throws Exception {
+	public static void main(String... args) {
 
 		// Ensure have command line arguments
 		if (args.length == 0) {
-			System.err.println("USAGE: java ... " + OFFICE_FLOOR_MAIN
-					+ " <office floor configuration file> [<office> <work>]");
+			System.err.println("USAGE: java ... "
+					+ OfficeFloorMain.class.getName()
+					+ " <office floor location> [<office> <work>]");
 			return;
 		}
 
-		// Obtain the command line arguments
+		// Obtain the location of the office floor
 		String officeFloorLocation = args[0];
 
-		// Create the office floor
-		System.out.println("Creating office floor '" + officeFloorLocation
-				+ "'");
-		OfficeFloor officeFloor = createOfficeFloor(officeFloorLocation);
+		// Create the compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.addSystemProperties();
+
+		// Compile the office floor
+		System.out.println("Compiling office floor " + officeFloorLocation
+				+ " ...");
+		OfficeFloor officeFloor = compiler.compile(officeFloorLocation,
+				new StderrCompilerIssues());
+		if (officeFloor == null) {
+			System.err.println("ERROR: Failed to compile office floor.");
+			System.exit(1);
+		}
 
 		// Open the office floor
-		System.out.println("Opening office floor");
-		officeFloor.openOfficeFloor();
+		System.out.println("Opening office floor ...");
+		try {
+			officeFloor.openOfficeFloor();
+		} catch (Throwable ex) {
+			StringWriter stackTrace = new StringWriter();
+			ex.printStackTrace(new PrintWriter(stackTrace));
+			System.err.println("ERROR: Failed to open office floor.\n"
+					+ stackTrace.toString());
+			System.exit(1);
+		}
 
 		// Determine if invoke work
 		if (args.length >= 3) {
@@ -89,63 +98,32 @@ public class OfficeFloorMain {
 			// Obtain the Office
 			Office office = officeFloor.getOffice(officeName);
 			if (office == null) {
-				System.err.println("No office by name '" + officeName + "'");
-				return;
+				System.err.println("ERROR: No office by name '" + officeName
+						+ "'");
+				System.exit(1);
 			}
 
 			// Obtain the Work
-			WorkManager workManager = office.getWorkManager(workName);
-			if (workManager == null) {
-				System.err.println("No work by name '" + workName
+			WorkManager workManager;
+			try {
+				workManager = office.getWorkManager(workName);
+			} catch (UnknownWorkException ex) {
+				System.err.println("ERROR: No work by name '" + workName
 						+ "' on office " + officeName);
+				System.exit(1);
+				return; // required for compiling
 			}
 
 			// Invoke the Work
 			String parameter = (args.length > 4 ? args[3] : null);
-			workManager.invokeWork(parameter);
+			try {
+				workManager.invokeWork(parameter);
+			} catch (NoInitialTaskException ex) {
+				System.err.println("ERROR: No initial task on work " + workName
+						+ " of office " + officeName);
+				System.exit(1);
+			}
 		}
-	}
-
-	/**
-	 * Creates the {@link OfficeFloor}.
-	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
-	 * @return {@link OfficeFloor}.
-	 * @throws Exception
-	 *             If fails to create the {@link OfficeFloor}.
-	 */
-	public static OfficeFloor createOfficeFloor(String officeFloorLocation)
-			throws Exception {
-
-		// TODO obtain the office floor source
-		Class<? extends OfficeFloorSource> officeFloorSourceClass = null;
-
-		// Use class path configuration context
-		ClassLoader classLoader = OfficeFloorMain.class.getClassLoader();
-		ConfigurationContext configurationContext = new ClassLoaderConfigurationContext(
-				classLoader);
-
-		// Use the system properties as the properties
-		PropertyList propertyList = new PropertyListImpl();
-		Properties systemProperties = System.getProperties();
-		for (String name : systemProperties.stringPropertyNames()) {
-			String value = systemProperties.getProperty(name);
-			propertyList.addProperty(name).setValue(value);
-		}
-
-		// Obtain the office frame
-		OfficeFrame officeFrame = OfficeFrame.getInstance();
-
-		// Create the office floor loader and load the office floor
-		OfficeFloorLoader loader = new OfficeFloorLoaderImpl(
-				officeFloorLocation);
-		OfficeFloor officeFloor = loader.loadOfficeFloor(
-				officeFloorSourceClass, configurationContext, propertyList,
-				classLoader, new StderrCompilerIssues(), officeFrame);
-
-		// Return the office floor
-		return officeFloor;
 	}
 
 	/**
@@ -160,18 +138,33 @@ public class OfficeFloorMain {
 		@Override
 		public void addIssue(LocationType locationType, String location,
 				AssetType assetType, String assetName, String issueDescription) {
-			// TODO Implement
-			throw new UnsupportedOperationException(
-					"TODO implement CompilerIssues.addIssue");
+			this.addIssue(locationType, location, assetType, assetName,
+					issueDescription, null);
 		}
 
 		@Override
 		public void addIssue(LocationType locationType, String location,
 				AssetType assetType, String assetName, String issueDescription,
 				Throwable cause) {
-			// TODO Implement
-			throw new UnsupportedOperationException(
-					"TODO implement CompilerIssues.addIssue");
+
+			// Obtain the stack trace
+			String stackTrace = "";
+			if (cause != null) {
+				StringWriter buffer = new StringWriter();
+				cause.printStackTrace(new PrintWriter(buffer));
+				stackTrace = "\n" + buffer.toString();
+			}
+
+			// Obtain the asset details
+			String assetDetails = "";
+			if (assetType != null) {
+				assetDetails = ", " + assetType + "=" + assetName;
+			}
+
+			// Output details of issue
+			System.err.println("ERROR: " + issueDescription + " ["
+					+ locationType + "=" + location + assetDetails + "]"
+					+ stackTrace);
 		}
 	}
 
