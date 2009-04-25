@@ -64,11 +64,13 @@ public interface OfficeFloorLoader {
 	 * 
 	 * @param officeFloorSourceClass
 	 *            Class of the {@link OfficeFloorSource}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties as per the
 	 *            {@link OfficeFloorSourceSpecification}.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
 	 * @param classLoader
 	 *            {@link ClassLoader} that the {@link OfficeFloorSource} may use
 	 *            in obtaining necessary class path resources.
@@ -78,9 +80,9 @@ public interface OfficeFloorLoader {
 	 *         which are reported to the {@link CompilerIssues}.
 	 */
 	<OF extends OfficeFloorSource> PropertyList loadRequiredProperties(
-			Class<OF> officeFloorSourceClass,
-			ConfigurationContext configurationContext,
-			PropertyList propertyList, ClassLoader classLoader,
+			Class<OF> officeFloorSourceClass, String officeFloorLocation,
+			PropertyList propertyList,
+			ConfigurationContext configurationContext, ClassLoader classLoader,
 			CompilerIssues issues);
 
 	/**
@@ -88,12 +90,14 @@ public interface OfficeFloorLoader {
 	 * 
 	 * @param officeFloorSourceClass
 	 *            Class of the {@link OfficeFloorSource}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
+	 * @param officeFloorLocation
+	 *            Location of the {@link OfficeFloor}.
 	 * @param propertyList
 	 *            {@link PropertyList} containing both the
 	 *            {@link OfficeFloorSourceProperty} and the required
 	 *            {@link Property} instances.
+	 * @param configurationContext
+	 *            {@link ConfigurationContext}.
 	 * @param classLoader
 	 *            {@link ClassLoader} that the {@link OfficeFloorSource} may use
 	 *            in obtaining necessary class path resources.
@@ -106,9 +110,9 @@ public interface OfficeFloorLoader {
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<OF extends OfficeFloorSource> OfficeFloor loadOfficeFloor(
-			Class<OF> officeFloorSourceClass,
-			ConfigurationContext configurationContext,
-			PropertyList propertyList, ClassLoader classLoader,
+			Class<OF> officeFloorSourceClass, String officeFloorLocation,
+			PropertyList propertyList,
+			ConfigurationContext configurationContext, ClassLoader classLoader,
 			CompilerIssues issues, OfficeFrame officeFrame);
 
 }

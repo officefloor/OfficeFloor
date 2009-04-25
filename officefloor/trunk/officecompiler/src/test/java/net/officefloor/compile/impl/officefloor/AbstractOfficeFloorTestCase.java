@@ -338,11 +338,10 @@ public abstract class AbstractOfficeFloorTestCase extends
 
 		// Create the office loader and load the office floor
 		this.replayMockObjects();
-		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl(
-				OFFICE_FLOOR_LOCATION);
+		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl();
 		OfficeFloor loadedOfficeFloor = officeFloorLoader.loadOfficeFloor(
-				MakerOfficeFloorSource.class, this.configurationContext,
-				propertyList,
+				MakerOfficeFloorSource.class, OFFICE_FLOOR_LOCATION,
+				propertyList, this.configurationContext,
 				LoadRequiredPropertiesTest.class.getClassLoader(),
 				this.enhancedIssues, officeFrame);
 		this.verifyMockObjects();

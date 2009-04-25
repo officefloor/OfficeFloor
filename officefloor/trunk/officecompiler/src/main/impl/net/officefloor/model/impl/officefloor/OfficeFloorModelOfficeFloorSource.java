@@ -16,12 +16,19 @@
  */
 package net.officefloor.model.impl.officefloor;
 
+import java.io.FileNotFoundException;
+
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.OfficeFloorModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
+import net.officefloor.model.officefloor.PropertyModel;
+import net.officefloor.model.repository.ConfigurationItem;
 
 /**
  * {@link OfficeFloorModel} {@link OfficeFloorSource}.
@@ -52,9 +59,33 @@ public class OfficeFloorModelOfficeFloorSource extends
 	@Override
 	public void sourceOfficeFloor(OfficeFloorDeployer deployer,
 			OfficeFloorSourceContext context) throws Exception {
-		// TODO Implement
+
+		// Obtain the configuration to the section
+		ConfigurationItem configuration = context.getConfiguration(context
+				.getOfficeFloorLocation());
+		if (configuration == null) {
+			// Must have configuration
+			throw new FileNotFoundException("Can not find office floor '"
+					+ context.getOfficeFloorLocation() + "'");
+		}
+
+		// Retrieve the office floor model
+		OfficeFloorModel officeFloor = new OfficeFloorRepositoryImpl(
+				new ModelRepositoryImpl()).retrieveOfficeFloor(configuration);
+
+		// Load the office floor teams
+		for (OfficeFloorTeamModel teamModel : officeFloor.getOfficeFloorTeams()) {
+			OfficeFloorTeam team = deployer.addTeam(teamModel
+					.getOfficeFloorTeamName(), teamModel
+					.getTeamSourceClassName());
+			for (PropertyModel property : teamModel.getProperties()) {
+				team.addProperty(property.getName(), property.getValue());
+			}
+		}
+
+		// TODO continue implementing
 		throw new UnsupportedOperationException(
-				"TODO implement OfficeFloorSource.sourceOfficeFloor");
+				"Continue implementing OfficeFloorModelOfficeFloorSource");
 	}
 
 }

@@ -28,7 +28,6 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.test.properties.PropertyListUtil;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 
 /**
@@ -37,11 +36,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
-
-	/**
-	 * Location of the {@link OfficeFloor}.
-	 */
-	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -292,8 +286,8 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				null, null, issueDescription);
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
+				issueDescription);
 	}
 
 	/**
@@ -305,8 +299,8 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				null, null, issueDescription, cause);
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, null, null,
+				issueDescription, cause);
 	}
 
 	/**
@@ -322,8 +316,7 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 			String... propertyNameLabelPairs) {
 
 		// Load the office floor specification
-		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl(
-				OFFICE_FLOOR_LOCATION);
+		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl();
 		PropertyList propertyList = officeFloorLoader.loadSpecification(
 				MockOfficeFloorSource.class, this.issues);
 

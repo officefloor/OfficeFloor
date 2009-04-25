@@ -457,12 +457,12 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 		}
 
 		// Create the office loader and load the required properties
-		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl(
-				OFFICE_FLOOR_LOCATION);
+		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl();
 		MockOfficeFloorSource.loader = loader;
 		PropertyList requiredProperties = officeFloorLoader
 				.loadRequiredProperties(MockOfficeFloorSource.class,
-						this.configurationContext, propertyList,
+						OFFICE_FLOOR_LOCATION, propertyList,
+						this.configurationContext,
 						LoadRequiredPropertiesTest.class.getClassLoader(),
 						this.issues);
 
