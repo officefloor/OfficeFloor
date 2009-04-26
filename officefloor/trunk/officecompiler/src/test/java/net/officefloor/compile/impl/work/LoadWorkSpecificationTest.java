@@ -16,11 +16,11 @@
  */
 package net.officefloor.compile.impl.work;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.spi.work.source.WorkSourceContext;
 import net.officefloor.compile.spi.work.source.WorkSourceProperty;
@@ -38,16 +38,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
-
-	/**
-	 * Location of the {@link OfficeSection} containing the {@link Work}.
-	 */
-	private final String SECTION_LOCATION = "SECTION";
-
-	/**
-	 * Name of the {@link Work}.
-	 */
-	private final String WORK_NAME = "WORK";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -289,8 +279,8 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
-				AssetType.WORK, WORK_NAME, issueDescription);
+		this.issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
+				issueDescription);
 	}
 
 	/**
@@ -302,8 +292,8 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
-				AssetType.WORK, WORK_NAME, issueDescription, cause);
+		this.issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
+				issueDescription, cause);
 	}
 
 	/**
@@ -319,9 +309,12 @@ public class LoadWorkSpecificationTest extends OfficeFrameTestCase {
 			String... propertyNameLabelPairs) {
 
 		// Load the work specification
-		WorkLoader workLoader = new WorkLoaderImpl(SECTION_LOCATION, WORK_NAME);
-		PropertyList propertyList = workLoader.loadSpecification(
-				MockWorkSource.class, this.issues);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		WorkLoader workLoader = compiler.getWorkLoader();
+		PropertyList propertyList = workLoader
+				.loadSpecification(MockWorkSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {

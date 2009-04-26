@@ -16,15 +16,14 @@
  */
 package net.officefloor.compile.impl.administrator;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.frame.spi.administration.source.AdministratorSourceContext;
@@ -40,17 +39,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public class LoadAdministratorSourceSpecificationTest extends
 		OfficeFrameTestCase {
-
-	/**
-	 * Location of the {@link OfficeFloor} as {@link AdministratorSource}
-	 * typically used in an {@link OfficeFloor}.
-	 */
-	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
-
-	/**
-	 * Name of the {@link Administrator}.
-	 */
-	private final String ADMINISTRATOR_NAME = "ADMINISTRATOR";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -305,8 +293,8 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				AssetType.ADMINISTRATOR, ADMINISTRATOR_NAME, issueDescription);
+		this.issues.addIssue(null, null, AssetType.ADMINISTRATOR, null,
+				issueDescription);
 	}
 
 	/**
@@ -318,9 +306,8 @@ public class LoadAdministratorSourceSpecificationTest extends
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				AssetType.ADMINISTRATOR, ADMINISTRATOR_NAME, issueDescription,
-				cause);
+		this.issues.addIssue(null, null, AssetType.ADMINISTRATOR, null,
+				issueDescription, cause);
 	}
 
 	/**
@@ -336,11 +323,13 @@ public class LoadAdministratorSourceSpecificationTest extends
 			String... propertyNameLabelPairs) {
 
 		// Load the managed object specification specification
-		AdministratorLoader administratorLoader = new AdministratorLoaderImpl(
-				LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				ADMINISTRATOR_NAME);
-		PropertyList propertyList = administratorLoader.loadSpecification(
-				MockAdministratorSource.class, this.issues);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		AdministratorLoader administratorLoader = compiler
+				.getAdministratorLoader();
+		PropertyList propertyList = administratorLoader
+				.loadSpecification(MockAdministratorSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {

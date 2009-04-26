@@ -318,11 +318,19 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public void buildOffice(OfficeFloorBuilder builder) {
 
+		// Obtain the office source class
+		Class<? extends OfficeSource> officeSourceClass = this.context
+				.getOfficeSourceClass(this.officeSourceClassName,
+						this.officeLocation, this.officeName);
+		if (officeSourceClass == null) {
+			return; // must have office source class
+		}
+
 		// Obtain the office source
-		OfficeSource officeSource = CompileUtil.newInstance(
-				this.officeSourceClassName, OfficeSource.class,
-				LocationType.OFFICE, this.officeLocation, null, null,
-				this.context);
+		OfficeSource officeSource = CompileUtil.newInstance(officeSourceClass,
+				OfficeSource.class, LocationType.OFFICE, this.officeLocation,
+				AssetType.OFFICE, this.officeName, this.context
+						.getCompilerIssues());
 		if (officeSource == null) {
 			return; // must have office source
 		}

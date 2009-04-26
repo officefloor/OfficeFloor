@@ -20,16 +20,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.administrator.AdministratorLoader;
+import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
+import net.officefloor.compile.impl.issues.StderrCompilerIssues;
+import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
+import net.officefloor.compile.impl.office.OfficeLoaderImpl;
 import net.officefloor.compile.impl.officefloor.OfficeFloorLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.section.SectionLoaderImpl;
+import net.officefloor.compile.impl.team.TeamLoaderImpl;
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.work.WorkLoaderImpl;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.team.TeamLoader;
+import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -48,17 +65,18 @@ import net.officefloor.model.repository.ConfigurationContext;
  * 
  * @author Daniel
  */
-public class OfficeFloorCompilerImpl extends OfficeFloorCompiler {
-
-	/**
-	 * {@link ClassLoader}.
-	 */
-	private ClassLoader classLoader = null;
+public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
+		NodeContext {
 
 	/**
 	 * {@link ConfigurationContext}.
 	 */
 	private ConfigurationContext configurationContext = null;
+
+	/**
+	 * {@link CompilerIssues}.
+	 */
+	private CompilerIssues issues = new StderrCompilerIssues();
 
 	/**
 	 * {@link OfficeFrame}.
@@ -78,32 +96,86 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler {
 	/**
 	 * {@link OfficeSource} {@link Class} instances by their alias name.
 	 */
-	private final Map<String, Class<? extends OfficeSource>> officeSourceAliases = new HashMap<String, Class<? extends OfficeSource>>();
+	private final Map<String, Class<?>> officeSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link SectionSource} {@link Class} instances by their alias name.
 	 */
-	private final Map<String, Class<? extends SectionSource>> sectionSourceAliases = new HashMap<String, Class<? extends SectionSource>>();
+	private final Map<String, Class<?>> sectionSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link WorkSource} {@link Class} instances by their alias name.
 	 */
-	private final Map<String, Class<? extends WorkSource<?>>> workSourceAliases = new HashMap<String, Class<? extends WorkSource<?>>>();
+	private final Map<String, Class<?>> workSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link ManagedObjectSource} {@link Class} instances by their alias name.
 	 */
-	private final Map<String, Class<? extends ManagedObjectSource<?, ?>>> managedObjectSourceAliases = new HashMap<String, Class<? extends ManagedObjectSource<?, ?>>>();
+	private final Map<String, Class<?>> managedObjectSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link AdministratorSource} {@link Class} instances by their alias name.
 	 */
-	private final Map<String, Class<? extends AdministratorSource<?, ?>>> administratorSourceAliases = new HashMap<String, Class<? extends AdministratorSource<?, ?>>>();
+	private final Map<String, Class<?>> administratorSourceAliases = new HashMap<String, Class<?>>();
 
 	/**
 	 * {@link TeamSource} {@link Class} instances by their alias name.
 	 */
-	private final Map<String, Class<? extends TeamSource>> teamSourceAliases = new HashMap<String, Class<? extends TeamSource>>();
+	private final Map<String, Class<?>> teamSourceAliases = new HashMap<String, Class<?>>();
+
+	/**
+	 * Flag indicating if the source aliases have been added.
+	 */
+	private boolean isSourceAliasesAdded = false;
+
+	/**
+	 * Ensures that the source aliases have been added.
+	 */
+	private void ensureSourceAliasesAdded() {
+		if (!this.isSourceAliasesAdded) {
+			// Not added, so add and flag now added
+			this.addSourceAliases();
+			this.isSourceAliasesAdded = true;
+		}
+	}
+
+	/**
+	 * <p>
+	 * Registers the alias ensuring only the first alias is used.
+	 * <p>
+	 * This follows class loading behaviour of loading the first class found on
+	 * the class path.
+	 * 
+	 * @param alias
+	 *            Alias.
+	 * @param aliasSourceClass
+	 *            Alias source class.
+	 * @param aliasMap
+	 *            Map of aliases to the alias source class.
+	 * @param aliasType
+	 *            Type of alias for providing a warning of duplicate aliases.
+	 */
+	private <C> void registerAlias(String alias, C aliasSourceClass,
+			Map<String, C> aliasMap, String aliasType) {
+
+		// Ensure the alias is not already registered
+		C sourceClass = aliasMap.get(alias);
+		if (sourceClass != null) {
+
+			// Ignore if same class
+			if (sourceClass.equals(aliasSourceClass)) {
+				return; // same class, therefore ignore
+			}
+
+			// Issue as alias with different source classes
+			this.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR, null,
+					null, null, "Duplicate " + aliasType + " alias " + alias);
+			return; // do not register the duplicate
+		}
+
+		// Register the alias
+		aliasMap.put(alias, aliasSourceClass);
+	}
 
 	/*
 	 * ==================== OfficeFloorCompiler ==============================
@@ -116,8 +188,8 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler {
 	}
 
 	@Override
-	public void setClassLoader(ClassLoader classLoader) {
-		this.classLoader = classLoader;
+	public void setCompilerIssues(CompilerIssues issues) {
+		this.issues = issues;
 	}
 
 	@Override
@@ -179,62 +251,150 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler {
 	}
 
 	@Override
-	public OfficeFloor compile(String officeFloorLocation, CompilerIssues issues) {
+	public OfficeFloorLoader getOfficeFloorLoader() {
+		return new OfficeFloorLoaderImpl(this);
+	}
 
-		// Obtain the class loader
-		ClassLoader classLoader = (this.classLoader != null ? this.classLoader
-				: OfficeFloorCompiler.class.getClassLoader());
+	@Override
+	public OfficeLoader getOfficeLoader() {
+		return new OfficeLoaderImpl(this);
+	}
 
-		// Obtain the configuration context
-		ConfigurationContext configurationContext = (this.configurationContext != null ? this.configurationContext
-				: new ClassLoaderConfigurationContext(classLoader));
+	@Override
+	public SectionLoader getSectionLoader() {
+		return new SectionLoaderImpl(this);
+	}
+
+	@Override
+	public WorkLoader getWorkLoader() {
+		return new WorkLoaderImpl(this);
+	}
+
+	@Override
+	public ManagedObjectLoader getManagedObjectLoader() {
+		return new ManagedObjectLoaderImpl(this);
+	}
+
+	@Override
+	public AdministratorLoader getAdministratorLoader() {
+		return new AdministratorLoaderImpl(this);
+	}
+
+	@Override
+	public TeamLoader getTeamLoader() {
+		return new TeamLoaderImpl(this);
+	}
+
+	@Override
+	public OfficeFloor compile(String officeFloorLocation) {
+
+		// Ensure aliases are added
+		this.ensureSourceAliasesAdded();
 
 		// Obtain the office floor source
 		Class<? extends OfficeFloorSource> officeFloorSourceClass = (this.officeFloorSourceClass != null ? this.officeFloorSourceClass
 				: OfficeFloorModelOfficeFloorSource.class);
 
-		// Obtain the office frame
-		OfficeFrame officeFrame = (this.officeFrame != null ? this.officeFrame
-				: OfficeFrame.getInstance());
-
 		// Create the office floor loader
-		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl();
+		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl(this);
 
 		// Compile, build and return the office floor
 		return officeFloorLoader.loadOfficeFloor(officeFloorSourceClass,
-				officeFloorLocation, this.properties, configurationContext,
-				classLoader, issues, officeFrame);
+				officeFloorLocation, this.properties);
 	}
 
-	/**
-	 * <p>
-	 * Registers the alias ensuring only the first alias is used.
-	 * <p>
-	 * This follows class loading behaviour of loading the first class found on
-	 * the class path.
-	 * 
-	 * @param alias
-	 *            Alias.
-	 * @param aliasSourceClass
-	 *            Alias source class.
-	 * @param aliasMap
-	 *            Map of aliases to the alias source class.
-	 * @param aliasType
-	 *            Type of alias for providing a warning of duplicate aliases.
+	/*
+	 * ===================== NodeContext =====================================
 	 */
-	private <C> void registerAlias(String alias, C aliasSourceClass,
-			Map<String, C> aliasMap, String aliasType) {
 
-		// Ensure the alias is not already registered
-		if (aliasMap.containsKey(alias)) {
-			// Provide warning and ignore duplicates
-			System.err.println("WARNING: duplicate " + aliasType + " alias "
-					+ alias);
-			return; // do not register the duplicate
+	@Override
+	public ConfigurationContext getConfigurationContext() {
+		// Provide default configuration context if none specified
+		return (this.configurationContext != null ? this.configurationContext
+				: new ClassLoaderConfigurationContext(this.getClassLoader()));
+	}
+
+	@Override
+	public CompilerIssues getCompilerIssues() {
+		// Ensure have compiler issues
+		if (this.issues == null) {
+			this.issues = new StderrCompilerIssues();
 		}
 
-		// Register the alias
-		aliasMap.put(alias, aliasSourceClass);
+		// Return the issues
+		return this.issues;
+	}
+
+	@Override
+	public OfficeFrame getOfficeFrame() {
+		// Provide default office frame if none specified
+		return (this.officeFrame != null ? this.officeFrame : OfficeFrame
+				.getInstance());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends OfficeSource> Class<S> getOfficeSourceClass(
+			String officeSourceName, String officeLocation, String officeName) {
+		return (Class<S>) CompileUtil.obtainClass(officeSourceName,
+				OfficeSource.class, this.officeSourceAliases, this
+						.getClassLoader(), LocationType.OFFICE, officeLocation,
+				AssetType.OFFICE, officeName, this.getCompilerIssues());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends SectionSource> Class<S> getSectionSourceClass(
+			String sectionSourceName, String sectionLocation, String sectionName) {
+		return (Class<S>) CompileUtil.obtainClass(sectionSourceName,
+				SectionSource.class, this.sectionSourceAliases, this
+						.getClassLoader(), LocationType.SECTION,
+				sectionLocation, null, null, this.getCompilerIssues());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends WorkSource<?>> Class<S> getWorkSourceClass(
+			String workSourceName, String sectionLocation, String workName) {
+		return (Class<S>) CompileUtil.obtainClass(workSourceName,
+				WorkSource.class, this.workSourceAliases,
+				this.getClassLoader(), LocationType.SECTION, sectionLocation,
+				AssetType.WORK, workName, this.getCompilerIssues());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends ManagedObjectSource<?, ?>> Class<S> getManagedObjectSourceClass(
+			String managedObjectSourceName, LocationType locationType,
+			String location, String managedObjectName) {
+		return (Class<S>) CompileUtil.obtainClass(managedObjectSourceName,
+				ManagedObjectSource.class, this.managedObjectSourceAliases,
+				this.getClassLoader(), locationType, location,
+				AssetType.MANAGED_OBJECT, managedObjectName, this
+						.getCompilerIssues());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends AdministratorSource<?, ?>> Class<S> getAdministratorSourceClass(
+			String administratorSourceName, String officeLocation,
+			String administratorName) {
+		return (Class<S>) CompileUtil.obtainClass(administratorSourceName,
+				AdministratorSource.class, this.administratorSourceAliases,
+				this.getClassLoader(), LocationType.OFFICE, officeLocation,
+				AssetType.ADMINISTRATOR, administratorName, this
+						.getCompilerIssues());
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <S extends TeamSource> Class<S> getTeamSourceClass(
+			String teamSourceName, String officeFloorLocation, String teamName) {
+		return (Class<S>) CompileUtil.obtainClass(teamSourceName,
+				TeamSource.class, this.teamSourceAliases,
+				this.getClassLoader(), LocationType.OFFICE_FLOOR,
+				officeFloorLocation, AssetType.TEAM, teamName, this
+						.getCompilerIssues());
 	}
 
 }

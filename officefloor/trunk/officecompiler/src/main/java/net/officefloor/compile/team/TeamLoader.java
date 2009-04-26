@@ -35,16 +35,12 @@ public interface TeamLoader {
 	 * 
 	 * @param teamSourceClass
 	 *            Class of the {@link TeamSource}.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link TeamSourceSpecification} and obtaining the
-	 *            {@link PropertyList}.
 	 * @return {@link PropertyList} of the {@link TeamSourceProperty} instances
 	 *         of the {@link TeamSourceSpecification} or <code>null</code> if
 	 *         issues, which are reported to the {@link CompilerIssues}.
 	 */
 	<TS extends TeamSource> PropertyList loadSpecification(
-			Class<TS> teamSourceClass, CompilerIssues issues);
+			Class<TS> teamSourceClass);
 
 	/**
 	 * Loads and returns the {@link TeamType} sourced from the
@@ -55,17 +51,10 @@ public interface TeamLoader {
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link TeamType}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link TeamSource} may use in
-	 *            obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link TeamType}.
 	 * @return {@link TeamType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<TS extends TeamSource> TeamType loadTeam(Class<TS> teamSourceClass,
-			PropertyList propertyList, ClassLoader classLoader,
-			CompilerIssues issues);
+			PropertyList propertyList);
 
 }

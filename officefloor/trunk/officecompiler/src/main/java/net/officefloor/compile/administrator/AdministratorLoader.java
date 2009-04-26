@@ -36,15 +36,13 @@ public interface AdministratorLoader {
 	 * 
 	 * @param administratorSourceClass
 	 *            {@link AdministratorSource} class.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 * @return {@link PropertyList} of the {@link AdministratorSourceProperty}
 	 *         instances of the {@link AdministratorSourceSpecification} or
 	 *         <code>null</code> if issues, which are reported to the
 	 *         {@link CompilerIssues}.
 	 */
 	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> PropertyList loadSpecification(
-			Class<AS> administratorSourceClass, CompilerIssues issues);
+			Class<AS> administratorSourceClass);
 
 	/**
 	 * Loads and returns the {@link AdministratorType} sourced from the
@@ -55,17 +53,10 @@ public interface AdministratorLoader {
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link AdministratorType}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link AdministratorSource} may
-	 *            use in obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link AdministratorType}.
 	 * @return {@link AdministratorType} or <code>null</code> if issues, which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
 	<I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorType<I, A> loadAdministrator(
-			Class<AS> administratorSourceClass, PropertyList propertyList,
-			ClassLoader classLoader, CompilerIssues issues);
+			Class<AS> administratorSourceClass, PropertyList propertyList);
 
 }

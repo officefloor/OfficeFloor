@@ -16,9 +16,10 @@
  */
 package net.officefloor.compile.impl.team;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
@@ -47,16 +48,35 @@ public class TeamLoaderImpl implements TeamLoader {
 	private final String teamName;
 
 	/**
-	 * Initiate.
+	 * {@link NodeContext}.
+	 */
+	private final NodeContext nodeContext;
+
+	/**
+	 * Initiate for building.
 	 * 
 	 * @param officeFloorLocation
 	 *            Location.
 	 * @param teamName
 	 *            Name of the {@link Team}.
+	 * @param nodeContext
+	 *            {@link NodeContext}.
 	 */
-	public TeamLoaderImpl(String officeFloorLocation, String teamName) {
+	public TeamLoaderImpl(String officeFloorLocation, String teamName,
+			NodeContext nodeContext) {
 		this.officeFloorLocation = officeFloorLocation;
 		this.teamName = teamName;
+		this.nodeContext = nodeContext;
+	}
+
+	/**
+	 * Initiate from {@link OfficeFloorCompiler}.
+	 * 
+	 * @param nodeContext
+	 *            {@link NodeContext}.
+	 */
+	public TeamLoaderImpl(NodeContext nodeContext) {
+		this(null, null, nodeContext);
 	}
 
 	/*
@@ -65,13 +85,13 @@ public class TeamLoaderImpl implements TeamLoader {
 
 	@Override
 	public <TS extends TeamSource> PropertyList loadSpecification(
-			Class<TS> teamSourceClass, CompilerIssues issues) {
+			Class<TS> teamSourceClass) {
 
 		// Instantiate the team source
-		TeamSource teamSource = CompileUtil
-				.newInstance(teamSourceClass, TeamSource.class,
-						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-						AssetType.TEAM, this.teamName, issues);
+		TeamSource teamSource = CompileUtil.newInstance(teamSourceClass,
+				TeamSource.class, LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, AssetType.TEAM, this.teamName,
+				this.nodeContext.getCompilerIssues());
 		if (teamSource == null) {
 			return null; // failed to instantiate
 		}
@@ -83,14 +103,14 @@ public class TeamLoaderImpl implements TeamLoader {
 		} catch (Throwable ex) {
 			this.addIssue("Failed to obtain "
 					+ TeamSourceSpecification.class.getSimpleName() + " from "
-					+ teamSourceClass.getName(), ex, issues);
+					+ teamSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
 		// Ensure have specification
 		if (specification == null) {
 			this.addIssue("No " + TeamSourceSpecification.class.getSimpleName()
-					+ " returned from " + teamSourceClass.getName(), issues);
+					+ " returned from " + teamSourceClass.getName());
 			return null; // no specification obtained
 		}
 
@@ -103,7 +123,7 @@ public class TeamLoaderImpl implements TeamLoader {
 					+ TeamSourceProperty.class.getSimpleName()
 					+ " instances from "
 					+ TeamSourceSpecification.class.getSimpleName() + " for "
-					+ teamSourceClass.getName(), ex, issues);
+					+ teamSourceClass.getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -118,7 +138,7 @@ public class TeamLoaderImpl implements TeamLoader {
 					this.addIssue(TeamSourceProperty.class.getSimpleName()
 							+ " " + i + " is null from "
 							+ TeamSourceSpecification.class.getSimpleName()
-							+ " for " + teamSourceClass.getName(), issues);
+							+ " for " + teamSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -131,14 +151,14 @@ public class TeamLoaderImpl implements TeamLoader {
 							+ TeamSourceProperty.class.getSimpleName() + " "
 							+ i + " from "
 							+ TeamSourceSpecification.class.getSimpleName()
-							+ " for " + teamSourceClass.getName(), ex, issues);
+							+ " for " + teamSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
 					this.addIssue(TeamSourceProperty.class.getSimpleName()
 							+ " " + i + " provided blank name from "
 							+ TeamSourceSpecification.class.getSimpleName()
-							+ " for " + teamSourceClass.getName(), issues);
+							+ " for " + teamSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -151,7 +171,7 @@ public class TeamLoaderImpl implements TeamLoader {
 							+ TeamSourceProperty.class.getSimpleName() + " "
 							+ i + " (" + name + ") from "
 							+ TeamSourceSpecification.class.getSimpleName()
-							+ " for " + teamSourceClass.getName(), ex, issues);
+							+ " for " + teamSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -166,8 +186,7 @@ public class TeamLoaderImpl implements TeamLoader {
 
 	@Override
 	public <TS extends TeamSource> TeamType loadTeam(Class<TS> teamSourceClass,
-			PropertyList propertyList, ClassLoader classLoader,
-			CompilerIssues issues) {
+			PropertyList propertyList) {
 		// TODO Implement
 		throw new UnsupportedOperationException(
 				"TODO implement TeamLoader.loadTeam");
@@ -178,11 +197,10 @@ public class TeamLoaderImpl implements TeamLoader {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 */
-	private void addIssue(String issueDescription, CompilerIssues issues) {
-		issues.addIssue(LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+	private void addIssue(String issueDescription) {
+		this.nodeContext.getCompilerIssues().addIssue(
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
 				AssetType.TEAM, this.teamName, issueDescription);
 	}
 
@@ -193,12 +211,10 @@ public class TeamLoaderImpl implements TeamLoader {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 */
-	private void addIssue(String issueDescription, Throwable cause,
-			CompilerIssues issues) {
-		issues.addIssue(LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+	private void addIssue(String issueDescription, Throwable cause) {
+		this.nodeContext.getCompilerIssues().addIssue(
+				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
 				AssetType.TEAM, this.teamName, issueDescription, cause);
 	}
 

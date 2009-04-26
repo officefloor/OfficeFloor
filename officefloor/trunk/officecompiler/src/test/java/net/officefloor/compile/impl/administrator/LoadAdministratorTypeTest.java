@@ -20,17 +20,16 @@ import java.util.Properties;
 
 import javax.transaction.xa.XAResource;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.AdministratorMetaData;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.Duty;
@@ -47,16 +46,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
-
-	/**
-	 * Location of the {@link Office}.
-	 */
-	private final String OFFICE_LOCATION = "OFFICE_LOCATION";
-
-	/**
-	 * Name of the {@link Administrator}.
-	 */
-	private final String ADMINISTRATOR_NAME = "ADMIN";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -365,8 +354,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
-				AssetType.ADMINISTRATOR, ADMINISTRATOR_NAME, issueDescription);
+		this.issues.addIssue(null, null, AssetType.ADMINISTRATOR, null,
+				issueDescription);
 	}
 
 	/**
@@ -378,9 +367,8 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
-				AssetType.ADMINISTRATOR, ADMINISTRATOR_NAME, issueDescription,
-				cause);
+		this.issues.addIssue(null, null, AssetType.ADMINISTRATOR, null,
+				issueDescription, cause);
 	}
 
 	/**
@@ -410,12 +398,13 @@ public class LoadAdministratorTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the administrator loader and load the administrator type
-		AdministratorLoader adminLoader = new AdministratorLoaderImpl(
-				LocationType.OFFICE, OFFICE_LOCATION, ADMINISTRATOR_NAME);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		AdministratorLoader adminLoader = compiler.getAdministratorLoader();
 		MockAdministratorSource.init = init;
 		AdministratorType<?, ?> adminType = adminLoader.loadAdministrator(
-				MockAdministratorSource.class, propertyList,
-				LoadAdministratorTypeTest.class.getClassLoader(), this.issues);
+				MockAdministratorSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

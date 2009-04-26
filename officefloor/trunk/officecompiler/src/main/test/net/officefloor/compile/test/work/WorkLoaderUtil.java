@@ -17,8 +17,8 @@
 package net.officefloor.compile.test.work;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.work.WorkLoaderImpl;
 import net.officefloor.compile.impl.work.WorkTypeImpl;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -31,7 +31,6 @@ import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
-import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
@@ -56,12 +55,9 @@ public class WorkLoaderUtil {
 	public static <W extends Work, WS extends WorkSource<W>> PropertyList validateSpecification(
 			Class<WS> workSourceClass, String... propertyNameLabels) {
 
-		// Create the work loader
-		WorkLoader workLoader = new WorkLoaderImpl("TEST", "TEST");
-
 		// Load the specification
-		PropertyList propertyList = workLoader.loadSpecification(
-				workSourceClass, new FailCompilerIssues());
+		PropertyList propertyList = getOfficeFloorCompiler().getWorkLoader()
+				.loadSpecification(workSourceClass);
 
 		// Verify the properties
 		PropertyListUtil.validatePropertyNameLabels(propertyList,
@@ -271,12 +267,22 @@ public class WorkLoaderUtil {
 			propertyList.addProperty(name).setValue(value);
 		}
 
-		// Create the work loader
-		WorkLoader workLoader = new WorkLoaderImpl("TEST", "TEST");
-
 		// Return the loaded work
-		return workLoader.loadWorkType(workSourceClass, propertyList,
-				classLoader, new FailCompilerIssues());
+		return getOfficeFloorCompiler().getWorkLoader().loadWorkType(
+				workSourceClass, propertyList);
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorCompiler} setup for use.
+	 * 
+	 * @return {@link OfficeFloorCompiler}.
+	 */
+	private static OfficeFloorCompiler getOfficeFloorCompiler() {
+		// Create the office floor compiler that fails on first issue
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(new FailCompilerIssues());
+		return compiler;
 	}
 
 	/**

@@ -20,8 +20,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import net.officefloor.compile.OfficeFloorCompiler;
-import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.NoInitialTaskException;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -68,8 +66,7 @@ public class OfficeFloorMain {
 		// Compile the office floor
 		System.out.println("Compiling office floor " + officeFloorLocation
 				+ " ...");
-		OfficeFloor officeFloor = compiler.compile(officeFloorLocation,
-				new StderrCompilerIssues());
+		OfficeFloor officeFloor = compiler.compile(officeFloorLocation);
 		if (officeFloor == null) {
 			System.err.println("ERROR: Failed to compile office floor.");
 			System.exit(1);
@@ -123,48 +120,6 @@ public class OfficeFloorMain {
 						+ " of office " + officeName);
 				System.exit(1);
 			}
-		}
-	}
-
-	/**
-	 * {@link CompilerIssues} to write issues to {@link System#err}.
-	 */
-	private static class StderrCompilerIssues implements CompilerIssues {
-
-		/*
-		 * ================= CompilerIssues ==================================
-		 */
-
-		@Override
-		public void addIssue(LocationType locationType, String location,
-				AssetType assetType, String assetName, String issueDescription) {
-			this.addIssue(locationType, location, assetType, assetName,
-					issueDescription, null);
-		}
-
-		@Override
-		public void addIssue(LocationType locationType, String location,
-				AssetType assetType, String assetName, String issueDescription,
-				Throwable cause) {
-
-			// Obtain the stack trace
-			String stackTrace = "";
-			if (cause != null) {
-				StringWriter buffer = new StringWriter();
-				cause.printStackTrace(new PrintWriter(buffer));
-				stackTrace = "\n" + buffer.toString();
-			}
-
-			// Obtain the asset details
-			String assetDetails = "";
-			if (assetType != null) {
-				assetDetails = ", " + assetType + "=" + assetName;
-			}
-
-			// Output details of issue
-			System.err.println("ERROR: " + issueDescription + " ["
-					+ locationType + "=" + location + assetDetails + "]"
-					+ stackTrace);
 		}
 	}
 

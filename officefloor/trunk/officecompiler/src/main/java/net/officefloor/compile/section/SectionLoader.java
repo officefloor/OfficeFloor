@@ -23,7 +23,6 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceProperty;
 import net.officefloor.compile.spi.section.source.SectionSourceSpecification;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Loads the {@link SectionType} from the {@link SectionSource}.
@@ -38,17 +37,13 @@ public interface SectionLoader {
 	 * 
 	 * @param sectionSourceClass
 	 *            Class of the {@link SectionSource}.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link SectionSourceSpecification} and obtaining the
-	 *            {@link PropertyList}.
 	 * @return {@link PropertyList} of the {@link SectionSourceProperty}
 	 *         instances of the {@link SectionSourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
 	<S extends SectionSource> PropertyList loadSpecification(
-			Class<S> sectionSourceClass, CompilerIssues issues);
+			Class<S> sectionSourceClass);
 
 	/**
 	 * Loads and returns the {@link SectionType} from the {@link SectionSource}.
@@ -60,22 +55,12 @@ public interface SectionLoader {
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link SectionType}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link SectionSource} may use in
-	 *            obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link SectionType}.
 	 * @return {@link SectionType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<S extends SectionSource> SectionType loadSectionType(
 			Class<S> sectionSourceClass, String sectionLocation,
-			PropertyList propertyList,
-			ConfigurationContext configurationContext, ClassLoader classLoader,
-			CompilerIssues issues);
+			PropertyList propertyList);
 
 	/**
 	 * <p>
@@ -94,20 +79,10 @@ public interface SectionLoader {
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link OfficeSection}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link SectionSource} may use in
-	 *            obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link OfficeSection}.
 	 * @return {@link OfficeSection}.
 	 */
 	<S extends SectionSource> OfficeSection loadOfficeSection(
 			String sectionName, Class<S> sectionSourceClass,
-			String sectionLocation, PropertyList propertyList,
-			ConfigurationContext configurationContext, ClassLoader classLoader,
-			CompilerIssues issues);
+			String sectionLocation, PropertyList propertyList);
 
 }

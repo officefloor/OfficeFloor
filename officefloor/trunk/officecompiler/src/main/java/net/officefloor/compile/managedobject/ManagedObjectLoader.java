@@ -36,15 +36,13 @@ public interface ManagedObjectLoader {
 	 * 
 	 * @param managedObjectSourceClass
 	 *            {@link ManagedObjectSource} class.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 * @return {@link PropertyList} of the {@link ManagedObjectSourceProperty}
 	 *         instances of the {@link ManagedObjectSourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> PropertyList loadSpecification(
-			Class<MS> managedObjectSourceClass, CompilerIssues issues);
+			Class<MS> managedObjectSourceClass);
 
 	/**
 	 * Loads and returns the {@link ManagedObjectType} for the
@@ -55,17 +53,10 @@ public interface ManagedObjectLoader {
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link ManagedObjectType}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link ManagedObjectSource} may
-	 *            use in obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link ManagedObjectType}.
 	 * @return {@link ManagedObjectType} or <code>null</code> if issues, which
 	 *         are reported to the {@link CompilerIssues}.
 	 */
 	<D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
-			Class<MS> managedObjectSourceClass, PropertyList propertyList,
-			ClassLoader classLoader, CompilerIssues issues);
+			Class<MS> managedObjectSourceClass, PropertyList propertyList);
 
 }

@@ -27,7 +27,10 @@ import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.team.Team;
+import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
@@ -72,6 +75,32 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 */
 	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
 		return this.issues;
+	}
+
+	/**
+	 * Records adding a {@link Team} to the {@link OfficeFloorBuilder}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link Team}.
+	 * @param teamSourceClass
+	 *            {@link TeamSource} class.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value listing.
+	 * @return {@link TeamBuilder} for the added {@link Team}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <S extends TeamSource> TeamBuilder<S> record_officefloor_addTeam(
+			String teamName, Class<S> teamSourceClass,
+			String... propertyNameValues) {
+		TeamBuilder<S> builder = this.createMock(TeamBuilder.class);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
+				.addTeam(teamName, teamSourceClass), builder);
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			String name = propertyNameValues[i];
+			String value = propertyNameValues[i + 1];
+			builder.addProperty(name, value);
+		}
+		return builder;
 	}
 
 	/**
@@ -140,6 +169,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		// Create the compiler (overriding values to allow testing)
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.enhancedIssues);
 		compiler.setOfficeFrame(officeFrame);
 		compiler.setConfigurationContext(configurationContext);
 
@@ -151,8 +181,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		}
 
 		// Compile the office floor
-		OfficeFloor loadedOfficeFloor = compiler.compile("office-floor",
-				this.enhancedIssues);
+		OfficeFloor loadedOfficeFloor = compiler.compile("office-floor");
 
 		// Verify the mocks
 		this.verifyMockObjects();

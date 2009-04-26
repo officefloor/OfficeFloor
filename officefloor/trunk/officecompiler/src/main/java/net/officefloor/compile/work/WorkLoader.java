@@ -36,16 +36,12 @@ public interface WorkLoader {
 	 * 
 	 * @param workSourceClass
 	 *            Class of the {@link WorkSource}.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link WorkSourceSpecification} and obtaining the
-	 *            {@link PropertyList}.
 	 * @return {@link PropertyList} of the {@link WorkSourceProperty} instances
 	 *         of the {@link WorkSourceSpecification} or <code>null</code> if
 	 *         issue, which is reported to the {@link CompilerIssues}.
 	 */
 	<W extends Work, WS extends WorkSource<W>> PropertyList loadSpecification(
-			Class<WS> workSourceClass, CompilerIssues issues);
+			Class<WS> workSourceClass);
 
 	/**
 	 * Loads and returns the {@link WorkType} from the {@link WorkSource} class.
@@ -55,17 +51,10 @@ public interface WorkLoader {
 	 * @param properties
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link WorkType}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link WorkSource} may use in
-	 *            obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link WorkType}.
 	 * @return {@link WorkType} or <code>null</code> if issues, which is
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<W extends Work, WS extends WorkSource<W>> WorkType<W> loadWorkType(
-			Class<WS> workSourceClass, PropertyList properties,
-			ClassLoader classLoader, CompilerIssues issues);
+			Class<WS> workSourceClass, PropertyList properties);
 
 }

@@ -19,8 +19,8 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.section.SectionLoaderImpl;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
@@ -121,8 +121,19 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	/**
 	 * {@link NodeContext}.
 	 */
-	protected final NodeContext nodeContext = new NodeContextImpl(
-			this.configurationContext, this.classLoader, this.issues);
+	protected final NodeContext nodeContext;
+
+	/**
+	 * Initiate.
+	 */
+	public AbstractStructureTestCase() {
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		compiler.setClassLoader(this.classLoader);
+		compiler.setConfigurationContext(this.configurationContext);
+		this.nodeContext = (NodeContext) compiler;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -277,10 +288,14 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		// Load the section
-		SectionLoader loader = new SectionLoaderImpl();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		compiler.setClassLoader(this.classLoader);
+		compiler.setConfigurationContext(this.configurationContext);
+		SectionLoader loader = compiler.getSectionLoader();
 		OfficeSection section = loader.loadOfficeSection(sectionName,
-				MakerSectionSource.class, SECTION_LOCATION, propertyList,
-				this.configurationContext, this.classLoader, this.issues);
+				MakerSectionSource.class, SECTION_LOCATION, propertyList);
 
 		// Verify the mocks if handling mock state
 		if (isHandleMockState) {

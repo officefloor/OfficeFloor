@@ -25,7 +25,6 @@ import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.impl.administrator.AdministratorLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.DutyNode;
 import net.officefloor.compile.internal.structure.NodeContext;
@@ -35,7 +34,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.AdministerableManagedObject;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeDuty;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.administration.Administrator;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
@@ -154,20 +152,16 @@ public class AdministratorNodeImpl implements AdministratorNode {
 	private AdministratorType<?, ?> administratorType = null;
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public AdministratorType<?, ?> getAdministratorType() {
 
 		// Lazy load the administrator type
 		if (this.administratorType == null) {
 
 			// Obtain the administrator source class
-			Class<? extends AdministratorSource> administratorSourceClass = CompileUtil
-					.obtainClass(this.administratorSourceClassName,
-							AdministratorSource.class, this.context
-									.getClassLoader(), LocationType.OFFICE,
-							this.officeLocation, AssetType.ADMINISTRATOR,
-							this.administratorName, this.context
-									.getCompilerIssues());
+			Class<? extends AdministratorSource<?, ?>> administratorSourceClass = this.context
+					.getAdministratorSourceClass(
+							this.administratorSourceClassName,
+							this.officeLocation, this.administratorName);
 			if (administratorSourceClass == null) {
 				return null; // must obtain source class
 			}
@@ -175,11 +169,9 @@ public class AdministratorNodeImpl implements AdministratorNode {
 			// Load the administrator type
 			AdministratorLoader loader = new AdministratorLoaderImpl(
 					LocationType.OFFICE, this.officeLocation,
-					this.administratorName);
-			this.administratorType = loader
-					.loadAdministrator(administratorSourceClass,
-							this.properties, this.context.getClassLoader(),
-							this.context.getCompilerIssues());
+					this.administratorName, this.context);
+			this.administratorType = loader.loadAdministrator(
+					administratorSourceClass, this.properties);
 		}
 
 		// Return administrator type

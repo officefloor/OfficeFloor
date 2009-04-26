@@ -24,9 +24,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
@@ -84,7 +85,12 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	private final String managedObjectName;
 
 	/**
-	 * Initiate.
+	 * {@link NodeContext}.
+	 */
+	private final NodeContext nodeContext;
+
+	/**
+	 * Initiate for building.
 	 * 
 	 * @param locationType
 	 *            {@link LocationType}.
@@ -92,12 +98,25 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 *            Location.
 	 * @param managedObjectName
 	 *            Name of the {@link ManagedObject}.
+	 * @param nodeContext
+	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectLoaderImpl(LocationType locationType, String location,
-			String managedObjectName) {
+			String managedObjectName, NodeContext nodeContext) {
 		this.locationType = locationType;
 		this.location = location;
 		this.managedObjectName = managedObjectName;
+		this.nodeContext = nodeContext;
+	}
+
+	/**
+	 * Initiate from {@link OfficeFloorCompiler}.
+	 * 
+	 * @param nodeContext
+	 *            {@link NodeContext}.
+	 */
+	public ManagedObjectLoaderImpl(NodeContext nodeContext) {
+		this(null, null, null, nodeContext);
 	}
 
 	/*
@@ -106,14 +125,15 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 	@Override
 	public <D extends Enum<D>, H extends Enum<H>, MS extends ManagedObjectSource<D, H>> PropertyList loadSpecification(
-			Class<MS> managedObjectSourceClass, CompilerIssues issues) {
+			Class<MS> managedObjectSourceClass) {
 
 		// Instantiate the managed object source
 		ManagedObjectSource<D, H> managedObjectSource = CompileUtil
 				.newInstance(managedObjectSourceClass,
 						ManagedObjectSource.class, this.locationType,
 						this.location, AssetType.MANAGED_OBJECT,
-						this.managedObjectName, issues);
+						this.managedObjectName, this.nodeContext
+								.getCompilerIssues());
 		if (managedObjectSource == null) {
 			return null; // failed to instantiate
 		}
@@ -123,11 +143,9 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		try {
 			specification = managedObjectSource.getSpecification();
 		} catch (Throwable ex) {
-			this
-					.addIssue("Failed to obtain "
-							+ ManagedObjectSourceSpecification.class
-									.getSimpleName() + " from "
-							+ managedObjectSourceClass.getName(), ex, issues);
+			this.addIssue("Failed to obtain "
+					+ ManagedObjectSourceSpecification.class.getSimpleName()
+					+ " from " + managedObjectSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
@@ -135,8 +153,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		if (specification == null) {
 			this.addIssue("No "
 					+ ManagedObjectSourceSpecification.class.getSimpleName()
-					+ " returned from " + managedObjectSourceClass.getName(),
-					issues);
+					+ " returned from " + managedObjectSourceClass.getName());
 			return null; // no specification obtained
 		}
 
@@ -149,7 +166,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 					+ ManagedObjectSourceProperty.class.getSimpleName()
 					+ " instances from "
 					+ ManagedObjectSourceSpecification.class.getSimpleName()
-					+ " for " + managedObjectSourceClass.getName(), ex, issues);
+					+ " for " + managedObjectSourceClass.getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -169,7 +186,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 							+ ManagedObjectSourceSpecification.class
 									.getSimpleName()
 							+ " for "
-							+ managedObjectSourceClass.getName(), issues);
+							+ managedObjectSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -185,7 +202,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 							+ " from "
 							+ ManagedObjectSourceSpecification.class
 									.getSimpleName() + " for "
-							+ managedObjectSourceClass.getName(), ex, issues);
+							+ managedObjectSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
@@ -197,7 +214,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 							+ ManagedObjectSourceSpecification.class
 									.getSimpleName()
 							+ " for "
-							+ managedObjectSourceClass.getName(), issues);
+							+ managedObjectSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -215,7 +232,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 							+ ") from "
 							+ ManagedObjectSourceSpecification.class
 									.getSimpleName() + " for "
-							+ managedObjectSourceClass.getName(), ex, issues);
+							+ managedObjectSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -230,14 +247,13 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 	@Override
 	public <D extends Enum<D>, F extends Enum<F>, MS extends ManagedObjectSource<D, F>> ManagedObjectType<D> loadManagedObjectType(
-			Class<MS> managedObjectSourceClass, PropertyList propertyList,
-			ClassLoader classLoader, CompilerIssues issues) {
+			Class<MS> managedObjectSourceClass, PropertyList propertyList) {
 
 		// Create an instance of the managed object source
 		MS managedObjectSource = CompileUtil.newInstance(
 				managedObjectSourceClass, ManagedObjectSource.class,
 				this.locationType, this.location, AssetType.MANAGED_OBJECT,
-				this.managedObjectName, issues);
+				this.managedObjectName, this.nodeContext.getCompilerIssues());
 		if (managedObjectSource == null) {
 			return null; // failed to instantiate
 		}
@@ -249,8 +265,9 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 		OfficeConfiguration office = new OfficeBuilderImpl(officeName);
 		String namespaceName = null; // stops the name spacing
 		ManagedObjectSourceContext<F> sourceContext = new ManagedObjectSourceContextImpl<F>(
-				namespaceName, propertyList.getProperties(), classLoader,
-				managingOffice.getBuilder(), office.getBuilder());
+				namespaceName, propertyList.getProperties(), this.nodeContext
+						.getClassLoader(), managingOffice.getBuilder(), office
+						.getBuilder());
 
 		try {
 			// Initialise the managed object source
@@ -258,11 +275,11 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 		} catch (ManagedObjectSourceUnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
-					+ "'", issues);
+					+ "'");
 			return null; // must have property
 
 		} catch (Throwable ex) {
-			this.addIssue("Failed to init", ex, issues);
+			this.addIssue("Failed to init", ex);
 			return null; // must initialise
 		}
 
@@ -272,16 +289,12 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			metaData = managedObjectSource.getMetaData();
 		} catch (Throwable ex) {
 			this.addIssue("Failed to get "
-					+ ManagedObjectSourceMetaData.class.getSimpleName(), ex,
-					issues);
+					+ ManagedObjectSourceMetaData.class.getSimpleName(), ex);
 			return null; // must have meta-data
 		}
 		if (metaData == null) {
-			this
-					.addIssue(
-							"Returned null "
-									+ ManagedObjectSourceMetaData.class
-											.getSimpleName(), issues);
+			this.addIssue("Returned null "
+					+ ManagedObjectSourceMetaData.class.getSimpleName());
 			return null; // must have meta-data
 		}
 
@@ -295,7 +308,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			// Obtain the object class
 			objectType = metaData.getObjectClass();
 			if (objectType == null) {
-				this.addIssue("No Object type provided", issues);
+				this.addIssue("No Object type provided");
 				return null; // must have object type
 			}
 
@@ -303,60 +316,57 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			Class<?> managedObjectType = metaData.getManagedObjectClass();
 			if (managedObjectType == null) {
 				this.addIssue("No " + ManagedObject.class.getSimpleName()
-						+ " type provided", issues);
+						+ " type provided");
 				return null; // must have managed object type
 			}
 			if (!ManagedObject.class.isAssignableFrom(managedObjectType)) {
 				this.addIssue(ManagedObject.class.getSimpleName()
 						+ " class must implement "
 						+ ManagedObject.class.getName() + " (class="
-						+ managedObjectType.getName() + ")", issues);
+						+ managedObjectType.getName() + ")");
 				return null; // must have valid type
 			}
 
 			// Obtain the dependency types
-			dependencyTypes = this.getManagedObjectDependencyTypes(metaData,
-					issues);
+			dependencyTypes = this.getManagedObjectDependencyTypes(metaData);
 			if (dependencyTypes == null) {
 				return null; // issue in getting dependency types
 			}
 
 			// Obtain the flow types
-			flowTypes = this.getManagedObjectFlowTypes(metaData, issues);
+			flowTypes = this.getManagedObjectFlowTypes(metaData);
 			if (flowTypes == null) {
 				return null; // issue in getting flow types
 			}
 
 			// Obtain the supported extension interfaces
-			extensionInterfaces = this.getExtensionInterfaces(metaData, issues);
+			extensionInterfaces = this.getExtensionInterfaces(metaData);
 			if (extensionInterfaces == null) {
 				return null; // issue in getting extension interfaces
 			}
 
 		} catch (Throwable ex) {
 			this.addIssue("Exception from "
-					+ managedObjectSourceClass.getName(), ex, issues);
+					+ managedObjectSourceClass.getName(), ex);
 			return null; // must be successful with meta-data
 		}
 
 		// Obtain the team types (ensuring work and tasks have names)
 		ManagedObjectTeamType[] teamTypes = this
-				.getTeamsEnsuringHaveWorkAndTaskNames(office, issues);
+				.getTeamsEnsuringHaveWorkAndTaskNames(office);
 		if (teamTypes == null) {
 			return null; // issue getting team types
 		}
 
 		// Filter out linked processes already linked to tasks
 		ManagedObjectFlowType<F>[] unlinkedFlowTypes = this
-				.filterLinkedProcesses(flowTypes, managingOffice, office,
-						issues);
+				.filterLinkedProcesses(flowTypes, managingOffice, office);
 		if (unlinkedFlowTypes == null) {
 			return null; // issue in filter meta-data flow types
 		}
 
 		// Obtain the flows instigated by the tasks
-		ManagedObjectFlowType<?>[] taskFlows = this
-				.getTaskFlows(office, issues);
+		ManagedObjectFlowType<?>[] taskFlows = this.getTaskFlows(office);
 		if (taskFlows == null) {
 			return null; // issue getting task flow types
 		}
@@ -384,14 +394,12 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 *            {@link ManagingOfficeConfiguration}.
 	 * @param office
 	 *            {@link OfficeConfiguration}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 * @return Filtered {@link ManagedObjectFlowType}.
 	 */
 	private <F extends Enum<F>> ManagedObjectFlowType<F>[] filterLinkedProcesses(
 			ManagedObjectFlowType<F>[] metaDataFlows,
 			ManagingOfficeConfiguration<F> managingOffice,
-			OfficeConfiguration office, CompilerIssues issues) {
+			OfficeConfiguration office) {
 
 		// Determine if required to do filtering
 		if (metaDataFlows.length == 0) {
@@ -416,7 +424,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			if (linkedFlow == null) {
 				this.addIssue("Null "
 						+ ManagedObjectFlowConfiguration.class.getSimpleName()
-						+ " for flow index " + i, issues);
+						+ " for flow index " + i);
 				return null; // must have configuration
 			}
 
@@ -428,12 +436,9 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			if (key == null) {
 				// Ensure should be indexed
 				if (keyClass != null) {
-					this
-							.addIssue(
-									ManagedObjectFlowMetaData.class
-											.getSimpleName()
-											+ " requires linking by keys (not indexes)",
-									issues);
+					this.addIssue(ManagedObjectFlowMetaData.class
+							.getSimpleName()
+							+ " requires linking by keys (not indexes)");
 					return null; // linked by index but keyed
 				}
 
@@ -441,20 +446,16 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				if ((index < 0) || (index >= metaDataFlows.length)) {
 					this.addIssue(ManagedObjectFlowMetaData.class
 							.getSimpleName()
-							+ " does not define index (index=" + index + ")",
-							issues);
+							+ " does not define index (index=" + index + ")");
 					return null;
 				}
 
 			} else {
 				// Ensure should be keyed
 				if (keyClass == null) {
-					this
-							.addIssue(
-									ManagedObjectFlowMetaData.class
-											.getSimpleName()
-											+ " requires linking by indexes (not keys)",
-									issues);
+					this.addIssue(ManagedObjectFlowMetaData.class
+							.getSimpleName()
+							+ " requires linking by indexes (not keys)");
 					return null; // linked by key but indexed
 				}
 
@@ -464,7 +465,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 							+ ManagedObjectFlowMetaData.class.getSimpleName()
 							+ " (meta-data key type=" + keyClass.getName()
 							+ ", link key type=" + key.getClass().getName()
-							+ ", link key=" + key + ")", issues);
+							+ ", link key=" + key + ")");
 					return null; // invalid key
 				}
 			}
@@ -478,23 +479,20 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 			// Ensure have work name
 			if (CompileUtil.isBlank(linkWorkName)) {
-				this.addIssue("Must provide work name for " + linkLabel + ")",
-						issues);
+				this.addIssue("Must provide work name for " + linkLabel + ")");
 				return null;
 			}
 
 			// Ensure have task name
 			if (CompileUtil.isBlank(linkTaskName)) {
-				this.addIssue("Must provide task name for " + linkLabel + ")",
-						issues);
+				this.addIssue("Must provide task name for " + linkLabel + ")");
 				return null;
 			}
 
 			// Ensure the linked task was added
 			if (!this.isTaskAdded(linkWorkName, linkTaskName, office)) {
 				this.addIssue("Unknown task for " + linkLabel + ", link work="
-						+ linkWorkName + ", link task=" + linkTaskName + ")",
-						issues);
+						+ linkWorkName + ", link task=" + linkTaskName + ")");
 				return null;
 			}
 
@@ -522,13 +520,10 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 * 
 	 * @param office
 	 *            {@link OfficeConfiguration}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 * @return {@link ManagedObjectFlowType} instances.
 	 */
 	@SuppressWarnings("unchecked")
-	private ManagedObjectFlowType<?>[] getTaskFlows(OfficeConfiguration office,
-			CompilerIssues issues) {
+	private ManagedObjectFlowType<?>[] getTaskFlows(OfficeConfiguration office) {
 
 		// Obtain the flows instigated by the tasks
 		List<ManagedObjectFlowType<?>> taskFlows = new LinkedList<ManagedObjectFlowType<?>>();
@@ -548,7 +543,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 					// Ensure the flow has instigation strategy
 					if (flow.getInstigationStrategy() == null) {
 						this.addIssue("No instigation strategy for flow ("
-								+ flowLabel + ")", issues);
+								+ flowLabel + ")");
 						return null; // must have instigation strategy
 					}
 
@@ -566,8 +561,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 						// Ensure no work as required flow
 						if (!CompileUtil.isBlank(linkWorkName)) {
 							this.addIssue("No task name for flow (" + flowLabel
-									+ ", link work=" + linkWorkName + ")",
-									issues);
+									+ ", link work=" + linkWorkName + ")");
 							return null; // no task name then no work name
 						}
 
@@ -587,8 +581,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 								office)) {
 							this.addIssue("Unknown task being linked ("
 									+ flowLabel + ", link work=" + linkWorkName
-									+ ", link task=" + linkTaskName + ")",
-									issues);
+									+ ", link task=" + linkTaskName + ")");
 							return null; // must link to added task
 						}
 					}
@@ -606,12 +599,10 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 * 
 	 * @param office
 	 *            {@link OfficeConfiguration}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 * @return {@link ManagedObjectTeamType} instances.
 	 */
 	private ManagedObjectTeamType[] getTeamsEnsuringHaveWorkAndTaskNames(
-			OfficeConfiguration office, CompilerIssues issues) {
+			OfficeConfiguration office) {
 
 		// Ensure all added tasks are valid (and collect the set of team names)
 		Set<String> teamNames = new HashSet<String>();
@@ -620,16 +611,16 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			// Ensure have work name
 			String workName = work.getWorkName();
 			if (CompileUtil.isBlank(workName)) {
-				this.addIssue("Work added without a name", issues);
+				this.addIssue("Work added without a name");
 				return null; // must have work name
 			}
 
 			// Ensure have tasks for the work
 			TaskConfiguration<?, ?, ?>[] tasks = work.getTaskConfiguration();
 			if (tasks.length == 0) {
-				this.addIssue(
-						"No tasks added for work (work=" + workName + ")",
-						issues);
+				this
+						.addIssue("No tasks added for work (work=" + workName
+								+ ")");
 				return null; // must have at least one task
 			}
 
@@ -640,7 +631,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				String taskName = task.getTaskName();
 				if (CompileUtil.isBlank(taskName)) {
 					this.addIssue("Task added without a name (work=" + workName
-							+ ")", issues);
+							+ ")");
 					return null; // must have task name
 				}
 
@@ -648,7 +639,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				String teamName = task.getOfficeTeamName();
 				if (CompileUtil.isBlank(teamName)) {
 					this.addIssue("Must specify team for task (work="
-							+ workName + ", task=" + taskName + ")", issues);
+							+ workName + ", task=" + taskName + ")");
 					return null; // must have team name
 				}
 
@@ -706,13 +697,11 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 * 
 	 * @param metaData
 	 *            {@link ManagedObjectSourceMetaData}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 * @return {@link ManagedObjectDependencyType} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	private <D extends Enum<D>> ManagedObjectDependencyType<D>[] getManagedObjectDependencyTypes(
-			ManagedObjectSourceMetaData<D, ?> metaData, CompilerIssues issues) {
+			ManagedObjectSourceMetaData<D, ?> metaData) {
 
 		// Obtain the dependency meta-data
 		ManagedObjectDependencyType<D>[] dependencyTypes;
@@ -733,8 +722,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				if (dependencyMetaData == null) {
 					this.addIssue("Null "
 							+ ManagedObjectDependencyMetaData.class
-									.getSimpleName() + " for dependency " + i,
-							issues);
+									.getSimpleName() + " for dependency " + i);
 					return null; // missing met-data
 				}
 
@@ -764,19 +752,18 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 						if (!isIndexKeyMix) {
 							// Ensure the key is valid
 							if (!dependencyKeys.isInstance(key)) {
-								this.addIssue(
-										"Dependencies identified by different key types ("
+								this
+										.addIssue("Dependencies identified by different key types ("
 												+ dependencyKeys.getName()
 												+ ", "
 												+ key.getClass().getName()
-												+ ")", issues);
+												+ ")");
 								return null; // mismatched keys
 							}
 						}
 					}
 					if (isIndexKeyMix) {
-						this.addIssue("Dependencies mixing keys and indexes",
-								issues);
+						this.addIssue("Dependencies mixing keys and indexes");
 						return null; // can not mix indexing/keying
 					}
 				}
@@ -784,7 +771,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				// Obtain the type required for the dependency
 				Class<?> type = dependencyMetaData.getType();
 				if (type == null) {
-					this.addIssue("No type for " + dependencyLabel, issues);
+					this.addIssue("No type for " + dependencyLabel);
 					return null; // must have type
 				}
 
@@ -809,9 +796,9 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 			for (ManagedObjectDependencyType<D> dependencyType : dependencyTypes) {
 				D key = dependencyType.getKey();
 				if (!keys.contains(key)) {
-					this.addIssue(
-							"Must have exactly one dependency per key (key="
-									+ key + ")", issues);
+					this
+							.addIssue("Must have exactly one dependency per key (key="
+									+ key + ")");
 					return null; // must be one dependency per key
 				}
 				keys.remove(key);
@@ -827,7 +814,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 					msg.append(key.toString());
 				}
 				this.addIssue("Missing dependency meta-data (keys="
-						+ msg.toString() + ")", issues);
+						+ msg.toString() + ")");
 				return null; // must have meta-data for each key
 			}
 		}
@@ -852,13 +839,11 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 * 
 	 * @param metaData
 	 *            {@link ManagedObjectSourceMetaData}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 * @return {@link ManagedObjectFlowType} instances.
 	 */
 	@SuppressWarnings("unchecked")
 	private <F extends Enum<F>> ManagedObjectFlowType<F>[] getManagedObjectFlowTypes(
-			ManagedObjectSourceMetaData<?, F> metaData, CompilerIssues issues) {
+			ManagedObjectSourceMetaData<?, F> metaData) {
 
 		// Obtain the flow meta-data
 		ManagedObjectFlowType<F>[] flowTypes;
@@ -879,7 +864,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				if (flowMetaData == null) {
 					this.addIssue("Null "
 							+ ManagedObjectFlowMetaData.class.getSimpleName()
-							+ " for flow " + i, issues);
+							+ " for flow " + i);
 					return null; // missing met-data
 				}
 
@@ -904,19 +889,19 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 						if (!isIndexKeyMix) {
 							// Ensure the key is valid
 							if (!flowKeys.isInstance(key)) {
-								this.addIssue(
-										"Meta-data flows identified by different key types ("
-												+ flowKeys.getName() + ", "
+								this
+										.addIssue("Meta-data flows identified by different key types ("
+												+ flowKeys.getName()
+												+ ", "
 												+ key.getClass().getName()
-												+ ")", issues);
+												+ ")");
 								return null; // mismatched keys
 							}
 						}
 					}
 					if (isIndexKeyMix) {
-						this.addIssue(
-								"Meta-data flows mixing keys and indexes",
-								issues);
+						this
+								.addIssue("Meta-data flows mixing keys and indexes");
 						return null; // can not mix indexing/keying
 					}
 				}
@@ -946,7 +931,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 				F key = flowType.getKey();
 				if (!keys.contains(key)) {
 					this.addIssue("Must have exactly one flow per key (key="
-							+ key + ")", issues);
+							+ key + ")");
 					return null; // must be one flow per key
 				}
 				keys.remove(key);
@@ -962,7 +947,7 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 					msg.append(key.toString());
 				}
 				this.addIssue("Missing flow meta-data (keys=" + msg.toString()
-						+ ")", issues);
+						+ ")");
 				return null; // must have meta-data for each key
 			}
 		}
@@ -985,12 +970,10 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 * 
 	 * @param metaData
 	 *            {@link ManagedObjectSourceMetaData}.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 * @return Extension interfaces.
 	 */
 	private Class<?>[] getExtensionInterfaces(
-			ManagedObjectSourceMetaData<?, ?> metaData, CompilerIssues issues) {
+			ManagedObjectSourceMetaData<?, ?> metaData) {
 
 		// Obtain the extension interface meta-data
 		Class<?>[] extensionInterfaces;
@@ -1008,21 +991,21 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 
 				// Ensure have the interface meta-data
 				if (eiMetaData == null) {
-					this.addIssue("Null extension interface meta-data", issues);
+					this.addIssue("Null extension interface meta-data");
 					return null; // must have meta-data
 				}
 
 				// Obtain the extension interface type
 				Class<?> eiType = eiMetaData.getExtensionInterfaceType();
 				if (eiType == null) {
-					this.addIssue("Null extension interface type", issues);
+					this.addIssue("Null extension interface type");
 					return null; // must have type
 				}
 
 				// Ensure an extension factory
 				if (eiMetaData.getExtensionInterfaceFactory() == null) {
 					this.addIssue("No extension interface factory (type="
-							+ eiType.getName() + ")", issues);
+							+ eiType.getName() + ")");
 					return null; // must have factory
 				}
 
@@ -1041,13 +1024,11 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 */
-	private void addIssue(String issueDescription, CompilerIssues issues) {
-		issues.addIssue(this.locationType, this.location,
-				AssetType.MANAGED_OBJECT, this.managedObjectName,
-				issueDescription);
+	private void addIssue(String issueDescription) {
+		this.nodeContext.getCompilerIssues().addIssue(this.locationType,
+				this.location, AssetType.MANAGED_OBJECT,
+				this.managedObjectName, issueDescription);
 	}
 
 	/**
@@ -1057,14 +1038,11 @@ public class ManagedObjectLoaderImpl implements ManagedObjectLoader {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 */
-	private void addIssue(String issueDescription, Throwable cause,
-			CompilerIssues issues) {
-		issues.addIssue(this.locationType, this.location,
-				AssetType.MANAGED_OBJECT, this.managedObjectName,
-				issueDescription, cause);
+	private void addIssue(String issueDescription, Throwable cause) {
+		this.nodeContext.getCompilerIssues().addIssue(this.locationType,
+				this.location, AssetType.MANAGED_OBJECT,
+				this.managedObjectName, issueDescription, cause);
 	}
 
 }

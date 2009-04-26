@@ -20,12 +20,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
-import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -62,7 +63,12 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	private final String administratorName;
 
 	/**
-	 * Initiate.
+	 * {@link NodeContext}.
+	 */
+	private final NodeContext nodeContext;
+
+	/**
+	 * Initiate for building.
 	 * 
 	 * @param locationType
 	 *            {@link LocationType}.
@@ -70,12 +76,25 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	 *            Location.
 	 * @param administratorName
 	 *            Name of the {@link Administrator}.
+	 * @param nodeContext
+	 *            {@link NodeContext}.
 	 */
 	public AdministratorLoaderImpl(LocationType locationType, String location,
-			String administratorName) {
+			String administratorName, NodeContext nodeContext) {
 		this.locationType = locationType;
 		this.location = location;
 		this.administratorName = administratorName;
+		this.nodeContext = nodeContext;
+	}
+
+	/**
+	 * Initiate from {@link OfficeFloorCompiler}.
+	 * 
+	 * @param nodeContext
+	 *            {@link NodeContext}.
+	 */
+	public AdministratorLoaderImpl(NodeContext nodeContext) {
+		this(null, null, null, nodeContext);
 	}
 
 	/*
@@ -84,14 +103,15 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 
 	@Override
 	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> PropertyList loadSpecification(
-			Class<AS> administratorSourceClass, CompilerIssues issues) {
+			Class<AS> administratorSourceClass) {
 
 		// Instantiate the administrator source
 		AdministratorSource<I, A> administratorSource = CompileUtil
 				.newInstance(administratorSourceClass,
 						AdministratorSource.class, this.locationType,
 						this.location, AssetType.ADMINISTRATOR,
-						this.administratorName, issues);
+						this.administratorName, this.nodeContext
+								.getCompilerIssues());
 		if (administratorSource == null) {
 			return null; // failed to instantiate
 		}
@@ -101,11 +121,9 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 		try {
 			specification = administratorSource.getSpecification();
 		} catch (Throwable ex) {
-			this
-					.addIssue("Failed to obtain "
-							+ AdministratorSourceSpecification.class
-									.getSimpleName() + " from "
-							+ administratorSourceClass.getName(), ex, issues);
+			this.addIssue("Failed to obtain "
+					+ AdministratorSourceSpecification.class.getSimpleName()
+					+ " from " + administratorSourceClass.getName(), ex);
 			return null; // failed to obtain
 		}
 
@@ -113,8 +131,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 		if (specification == null) {
 			this.addIssue("No "
 					+ AdministratorSourceSpecification.class.getSimpleName()
-					+ " returned from " + administratorSourceClass.getName(),
-					issues);
+					+ " returned from " + administratorSourceClass.getName());
 			return null; // no specification obtained
 		}
 
@@ -127,7 +144,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 					+ AdministratorSourceProperty.class.getSimpleName()
 					+ " instances from "
 					+ AdministratorSourceSpecification.class.getSimpleName()
-					+ " for " + administratorSourceClass.getName(), ex, issues);
+					+ " for " + administratorSourceClass.getName(), ex);
 			return null; // failed to obtain properties
 		}
 
@@ -147,7 +164,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 							+ AdministratorSourceSpecification.class
 									.getSimpleName()
 							+ " for "
-							+ administratorSourceClass.getName(), issues);
+							+ administratorSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -163,7 +180,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 							+ " from "
 							+ AdministratorSourceSpecification.class
 									.getSimpleName() + " for "
-							+ administratorSourceClass.getName(), ex, issues);
+							+ administratorSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 				if (CompileUtil.isBlank(name)) {
@@ -175,7 +192,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 							+ AdministratorSourceSpecification.class
 									.getSimpleName()
 							+ " for "
-							+ administratorSourceClass.getName(), issues);
+							+ administratorSourceClass.getName());
 					return null; // must have complete property details
 				}
 
@@ -193,7 +210,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 							+ ") from "
 							+ AdministratorSourceSpecification.class
 									.getSimpleName() + " for "
-							+ administratorSourceClass.getName(), ex, issues);
+							+ administratorSourceClass.getName(), ex);
 					return null; // must have complete property details
 				}
 
@@ -208,14 +225,13 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 
 	@Override
 	public <I, A extends Enum<A>, AS extends AdministratorSource<I, A>> AdministratorType<I, A> loadAdministrator(
-			Class<AS> administratorSourceClass, PropertyList propertyList,
-			ClassLoader classLoader, CompilerIssues issues) {
+			Class<AS> administratorSourceClass, PropertyList propertyList) {
 
 		// Create an instance of the administrator source
 		AS administratorSource = CompileUtil.newInstance(
 				administratorSourceClass, AdministratorSource.class,
-				LocationType.OFFICE, this.location, AssetType.ADMINISTRATOR,
-				this.administratorName, issues);
+				this.locationType, this.location, AssetType.ADMINISTRATOR,
+				this.administratorName, this.nodeContext.getCompilerIssues());
 		if (administratorSource == null) {
 			return null; // failed to instantiate
 		}
@@ -231,11 +247,11 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 
 		} catch (AdministratorSourceUnknownPropertyError ex) {
 			this.addIssue("Missing property '" + ex.getUnknownPropertyName()
-					+ "'", issues);
+					+ "'");
 			return null; // must have property
 
 		} catch (Throwable ex) {
-			this.addIssue("Failed to init", ex, issues);
+			this.addIssue("Failed to init", ex);
 			return null; // must initialise
 		}
 
@@ -245,16 +261,12 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 			metaData = administratorSource.getMetaData();
 		} catch (Throwable ex) {
 			this.addIssue("Failed to get "
-					+ AdministratorSourceMetaData.class.getSimpleName(), ex,
-					issues);
+					+ AdministratorSourceMetaData.class.getSimpleName(), ex);
 			return null; // must successfully get meta-data
 		}
 		if (metaData == null) {
-			this
-					.addIssue(
-							"Returned null "
-									+ AdministratorSourceMetaData.class
-											.getSimpleName(), issues);
+			this.addIssue("Returned null "
+					+ AdministratorSourceMetaData.class.getSimpleName());
 			return null; // must have meta-data
 		}
 
@@ -266,7 +278,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 			// Obtain the extension interface type
 			extensionInterface = metaData.getExtensionInterface();
 			if (extensionInterface == null) {
-				this.addIssue("No extension interface provided", issues);
+				this.addIssue("No extension interface provided");
 				return null; // must have extension interface
 			}
 
@@ -274,7 +286,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 			AdministratorDutyMetaData<A, ?>[] dutyMetaDatas = metaData
 					.getAdministratorDutyMetaData();
 			if ((dutyMetaDatas == null) || (dutyMetaDatas.length == 0)) {
-				this.addIssue("Must have at least one duty", issues);
+				this.addIssue("Must have at least one duty");
 				return null; // must have duties
 			}
 
@@ -286,7 +298,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 				// Ensure have duty meta-data
 				AdministratorDutyMetaData<A, ?> dutyMetaData = dutyMetaDatas[i];
 				if (dutyMetaData == null) {
-					this.addIssue("Null meta data for duty " + i, issues);
+					this.addIssue("Null meta data for duty " + i);
 					isDutyIssue = true;
 					continue;
 				}
@@ -294,7 +306,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 				// Ensure have duty key
 				A dutyKey = dutyMetaData.getKey();
 				if (dutyKey == null) {
-					this.addIssue("Null key for duty " + i, issues);
+					this.addIssue("Null key for duty " + i);
 					isDutyIssue = true;
 					continue;
 				}
@@ -310,7 +322,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 								+ " is invalid (type="
 								+ dutyKey.getClass().getName()
 								+ ", required type=" + dutyKeyClass.getName()
-								+ ")", issues);
+								+ ")");
 						isDutyIssue = true;
 						continue;
 					}
@@ -325,7 +337,7 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 
 		} catch (Throwable ex) {
 			this.addIssue("Exception from "
-					+ administratorSourceClass.getName(), ex, issues);
+					+ administratorSourceClass.getName(), ex);
 			return null; // must be successful with meta-data
 		}
 
@@ -342,12 +354,10 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	 * 
 	 * @param issueDescription
 	 *            Description of the issue.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 */
-	private void addIssue(String issueDescription, CompilerIssues issues) {
-		issues.addIssue(this.locationType, this.location,
-				AssetType.ADMINISTRATOR, this.administratorName,
+	private void addIssue(String issueDescription) {
+		this.nodeContext.getCompilerIssues().addIssue(this.locationType,
+				this.location, AssetType.ADMINISTRATOR, this.administratorName,
 				issueDescription);
 	}
 
@@ -358,13 +368,10 @@ public class AdministratorLoaderImpl implements AdministratorLoader {
 	 *            Description of the issue.
 	 * @param cause
 	 *            Cause of the issue.
-	 * @param issues
-	 *            {@link CompilerIssues}.
 	 */
-	private void addIssue(String issueDescription, Throwable cause,
-			CompilerIssues issues) {
-		issues.addIssue(this.locationType, this.location,
-				AssetType.ADMINISTRATOR, this.administratorName,
+	private void addIssue(String issueDescription, Throwable cause) {
+		this.nodeContext.getCompilerIssues().addIssue(this.locationType,
+				this.location, AssetType.ADMINISTRATOR, this.administratorName,
 				issueDescription, cause);
 	}
 
