@@ -19,7 +19,6 @@ package net.officefloor.compile.impl.structure;
 import java.sql.Connection;
 
 import net.officefloor.compile.internal.structure.OfficeNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
@@ -48,7 +47,6 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectTaskBuilder;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectWorkBuilder;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Tests the {@link OfficeArchitect}.
@@ -68,28 +66,11 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	private static final String OFFICE_LOCATION = "OFFICE_LOCATION";
 
 	/**
-	 * {@link ConfigurationContext}.
-	 */
-	private final ConfigurationContext configurationContext = this
-			.createMock(ConfigurationContext.class);
-
-	/**
-	 * {@link ClassLoader}.
-	 */
-	private final ClassLoader classLoader = this.getClass().getClassLoader();
-
-	/**
-	 * {@link CompilerIssues}.
-	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
-
-	/**
 	 * {@link OfficeNode} to be tested.
 	 */
 	private final OfficeNode node = new OfficeNodeImpl(OFFICE_NAME,
 			MakerOfficeSource.class.getName(), OFFICE_LOCATION,
-			new NodeContextImpl(this.configurationContext, this.classLoader,
-					this.issues));
+			this.nodeContext);
 
 	/**
 	 * Tests adding an {@link OfficeObject}.

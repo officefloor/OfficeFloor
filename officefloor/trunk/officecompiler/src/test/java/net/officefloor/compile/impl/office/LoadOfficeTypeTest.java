@@ -22,9 +22,9 @@ import java.util.Properties;
 
 import javax.transaction.xa.XAResource;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeInputType;
 import net.officefloor.compile.office.OfficeLoader;
@@ -40,7 +40,6 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -54,17 +53,6 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 	 * Location of the {@link Office}.
 	 */
 	private final String OFFICE_LOCATION = "OFFICE_LOCATION";
-
-	/**
-	 * {@link ConfigurationContext}.
-	 */
-	private final ConfigurationContext configurationContext = this
-			.createMock(ConfigurationContext.class);
-
-	/**
-	 * {@link CompilerIssues}.
-	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
 
 	/*
 	 * (non-Javadoc)
@@ -471,12 +459,14 @@ public class LoadOfficeTypeTest extends AbstractStructureTestCase {
 		}
 
 		// Create the office loader and load the office
-		OfficeLoader officeLoader = new OfficeLoaderImpl();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		compiler.setConfigurationContext(this.configurationContext);
+		OfficeLoader officeLoader = compiler.getOfficeLoader();
 		MockOfficeSource.loader = loader;
 		OfficeType officeType = officeLoader.loadOfficeType(
-				MockOfficeSource.class, OFFICE_LOCATION, propertyList,
-				this.configurationContext, LoadOfficeTypeTest.class
-						.getClassLoader(), this.issues);
+				MockOfficeSource.class, OFFICE_LOCATION, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

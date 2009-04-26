@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.impl.team;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
@@ -23,7 +24,6 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.team.TeamLoader;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.spi.team.source.TeamSourceContext;
@@ -37,17 +37,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
-
-	/**
-	 * Location of the {@link OfficeFloor} as {@link TeamSource} typically
-	 * used in an {@link OfficeFloor}.
-	 */
-	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
-
-	/**
-	 * Name of the {@link Team}.
-	 */
-	private final String TEAM_NAME = "TEAM";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -289,8 +278,8 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				AssetType.TEAM, TEAM_NAME, issueDescription);
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, AssetType.TEAM,
+				null, issueDescription);
 	}
 
 	/**
@@ -302,8 +291,8 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				AssetType.TEAM, TEAM_NAME, issueDescription, cause);
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, null, AssetType.TEAM,
+				null, issueDescription, cause);
 	}
 
 	/**
@@ -319,10 +308,12 @@ public class LoadTeamSourceSpecificationTest extends OfficeFrameTestCase {
 			String... propertyNameLabelPairs) {
 
 		// Load the managed object specification specification
-		TeamLoader teamLoader = new TeamLoaderImpl(OFFICE_FLOOR_LOCATION,
-				TEAM_NAME);
-		PropertyList propertyList = teamLoader.loadSpecification(
-				MockTeamSource.class, this.issues);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		TeamLoader teamLoader = compiler.getTeamLoader();
+		PropertyList propertyList = teamLoader
+				.loadSpecification(MockTeamSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {

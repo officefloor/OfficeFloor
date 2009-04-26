@@ -17,6 +17,7 @@
 package net.officefloor.compile.impl.util;
 
 import java.util.List;
+import java.util.Map;
 
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -65,6 +66,8 @@ public class CompileUtil {
 	 *            Fully qualified name of the {@link Class} to obtain.
 	 * @param expectedType
 	 *            Expected type of the {@link Class} to return.
+	 * @param aliases
+	 *            Map of alias name to {@link Class}. May be <code>null</code>.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param locationType
@@ -81,12 +84,18 @@ public class CompileUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> Class<? extends T> obtainClass(String className,
-			Class<T> expectedType, ClassLoader classLoader,
-			LocationType locationType, String location, AssetType assetType,
-			String assetName, CompilerIssues issues) {
+			Class<T> expectedType, Map<String, Class<?>> aliases,
+			ClassLoader classLoader, LocationType locationType,
+			String location, AssetType assetType, String assetName,
+			CompilerIssues issues) {
 		try {
-			// Load the class
-			Class<?> clazz = classLoader.loadClass(className);
+
+			// Obtain the class (first checking for an alias)
+			Class<?> clazz = (aliases != null ? aliases.get(className) : null);
+			if (clazz == null) {
+				// Not alias, so load the class
+				clazz = classLoader.loadClass(className);
+			}
 
 			// Ensure class of expected type
 			if (!expectedType.isAssignableFrom(clazz)) {
@@ -164,6 +173,8 @@ public class CompileUtil {
 	 *            Fully qualified name of the {@link Class}.
 	 * @param expectedType
 	 *            Expected type that {@link Class} instance must be assignable.
+	 * @param aliases
+	 *            Map of alias name to {@link Class}. May be <code>null</code>.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param locationType
@@ -179,14 +190,14 @@ public class CompileUtil {
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T> T newInstance(String className, Class<T> expectedType,
-			ClassLoader classLoader, LocationType locationType,
-			String location, AssetType assetType, String assetName,
-			CompilerIssues issues) {
+			Map<String, Class<?>> aliases, ClassLoader classLoader,
+			LocationType locationType, String location, AssetType assetType,
+			String assetName, CompilerIssues issues) {
 
 		// Obtain the class
 		Class<? extends T> clazz = obtainClass(className, expectedType,
-				classLoader, locationType, location, assetType, assetName,
-				issues);
+				aliases, classLoader, locationType, location, assetType,
+				assetName, issues);
 		if (clazz == null) {
 			return null; // must have class
 		}
@@ -210,6 +221,8 @@ public class CompileUtil {
 	 *            Fully qualified name of the {@link Class}.
 	 * @param expectedType
 	 *            Expected type that {@link Class} instance must be assignable.
+	 * @param aliases
+	 *            Map of alias name to {@link Class}. May be <code>null</code>.
 	 * @param locationType
 	 *            {@link LocationType}.
 	 * @param location
@@ -223,12 +236,13 @@ public class CompileUtil {
 	 * @return New instance or <code>null</code> if not able to instantiate.
 	 */
 	public static <T> T newInstance(String className, Class<T> expectedType,
-			LocationType locationType, String location, AssetType assetType,
-			String assetName, NodeContext context) {
+			Map<String, Class<?>> aliases, LocationType locationType,
+			String location, AssetType assetType, String assetName,
+			NodeContext context) {
 		// Return new instance
-		return newInstance(className, expectedType, context.getClassLoader(),
-				locationType, location, assetType, assetName, context
-						.getCompilerIssues());
+		return newInstance(className, expectedType, aliases, context
+				.getClassLoader(), locationType, location, assetType,
+				assetName, context.getCompilerIssues());
 	}
 
 	/**

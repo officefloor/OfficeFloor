@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.work.WorkLoaderImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -169,21 +168,18 @@ public class WorkNodeImpl implements WorkNode {
 	public void buildWork(OfficeBuilder builder) {
 
 		// Obtain the work source class
-		Class<? extends WorkSource> workSourceClass = CompileUtil.obtainClass(
-				this.workSourceClassName, WorkSource.class, this.context
-						.getClassLoader(), LocationType.SECTION,
-				this.sectionLocation, AssetType.WORK, this.workName,
-				this.context.getCompilerIssues());
+		Class<? extends WorkSource> workSourceClass = this.context
+				.getWorkSourceClass(this.workSourceClassName,
+						this.sectionLocation, this.workName);
 		if (workSourceClass == null) {
 			return; // must obtain work source class
 		}
 
 		// Load the work type
 		WorkLoader workLoader = new WorkLoaderImpl(this.sectionLocation,
-				this.workName);
+				this.workName, this.context);
 		WorkType workType = workLoader.loadWorkType(workSourceClass,
-				this.propertyList, this.context.getClassLoader(), this.context
-						.getCompilerIssues());
+				this.propertyList);
 
 		// Obtain the fully qualified work name
 		String fullyQualifiedWorkName = this.section

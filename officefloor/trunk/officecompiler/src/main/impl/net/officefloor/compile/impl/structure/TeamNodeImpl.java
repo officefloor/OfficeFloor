@@ -17,17 +17,14 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.TeamNode;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.TeamBuilder;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -92,11 +89,9 @@ public class TeamNodeImpl implements TeamNode {
 	public void buildTeam(OfficeFloorBuilder builder) {
 
 		// Obtain the team source class
-		Class<? extends TeamSource> teamSourceClass = CompileUtil.obtainClass(
-				this.teamSourceClassName, TeamSource.class, this.context
-						.getClassLoader(), LocationType.OFFICE_FLOOR,
-				this.officeFloorLocation, AssetType.TEAM, this.teamName,
-				this.context.getCompilerIssues());
+		Class<? extends TeamSource> teamSourceClass = this.context
+				.getTeamSourceClass(this.teamSourceClassName,
+						this.officeFloorLocation, this.teamName);
 		if (teamSourceClass == null) {
 			return; // must obtain team source class
 		}

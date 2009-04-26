@@ -20,15 +20,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.managedobject.ManagedObjectDependencyTypeImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectFlowTypeImpl;
-import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.managedobject.ManagedObjectTeamTypeImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
-import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.Property;
@@ -59,13 +57,10 @@ public class ManagedObjectLoaderUtil {
 	public static <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> PropertyList validateSpecification(
 			Class<S> managedObjectSourceClass, String... propertyNameLabels) {
 
-		// Create the managed object loader
-		ManagedObjectLoader managedObjectLoader = new ManagedObjectLoaderImpl(
-				LocationType.OFFICE_FLOOR, null, "TEST");
-
 		// Load the specification
-		PropertyList propertyList = managedObjectLoader.loadSpecification(
-				managedObjectSourceClass, new FailCompilerIssues());
+		PropertyList propertyList = getOfficeFloorCompiler()
+				.getManagedObjectLoader().loadSpecification(
+						managedObjectSourceClass);
 
 		// Verify the properties
 		PropertyListUtil.validatePropertyNameLabels(propertyList,
@@ -221,15 +216,23 @@ public class ManagedObjectLoaderUtil {
 			Class<S> managedObjectSourceClass, ClassLoader classLoader,
 			String... propertyNameValues) {
 
-		// Create the managed object loader
-		ManagedObjectLoader managedObjectLoader = new ManagedObjectLoaderImpl(
-				LocationType.OFFICE_FLOOR, null, "TEST");
-
 		// Load and return the managed object type
-		return managedObjectLoader.loadManagedObjectType(
-				managedObjectSourceClass, new PropertyListImpl(
-						propertyNameValues), classLoader,
-				new FailCompilerIssues());
+		return getOfficeFloorCompiler().getManagedObjectLoader()
+				.loadManagedObjectType(managedObjectSourceClass,
+						new PropertyListImpl(propertyNameValues));
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorCompiler} setup for use.
+	 * 
+	 * @return {@link OfficeFloorCompiler}.
+	 */
+	private static OfficeFloorCompiler getOfficeFloorCompiler() {
+		// Create the office floor compiler that fails on first issue
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(new FailCompilerIssues());
+		return compiler;
 	}
 
 	/**

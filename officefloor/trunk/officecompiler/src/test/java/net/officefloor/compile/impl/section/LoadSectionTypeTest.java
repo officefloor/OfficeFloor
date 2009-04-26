@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.Properties;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.SectionInputNodeImpl;
 import net.officefloor.compile.impl.structure.SectionObjectNodeImpl;
@@ -555,12 +556,14 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the section loader and load the section
-		SectionLoader sectionLoader = new SectionLoaderImpl();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		compiler.setConfigurationContext(this.configurationContext);
+		SectionLoader sectionLoader = compiler.getSectionLoader();
 		MockSectionSource.loader = loader;
 		SectionType sectionType = sectionLoader.loadSectionType(
-				MockSectionSource.class, SECTION_LOCATION, propertyList,
-				this.configurationContext, LoadSectionTypeTest.class
-						.getClassLoader(), this.issues);
+				MockSectionSource.class, SECTION_LOCATION, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

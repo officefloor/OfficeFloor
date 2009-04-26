@@ -17,7 +17,6 @@
 package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
@@ -30,7 +29,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Tests the {@link OfficeFloorNode}.
@@ -45,27 +43,10 @@ public class OfficeFloorNodeTest extends AbstractStructureTestCase {
 	private static final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
 
 	/**
-	 * {@link ConfigurationContext}.
-	 */
-	private final ConfigurationContext configurationContext = this
-			.createMock(ConfigurationContext.class);
-
-	/**
-	 * {@link ClassLoader}.
-	 */
-	private final ClassLoader classLoader = this.getClass().getClassLoader();
-
-	/**
-	 * {@link CompilerIssues}.
-	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
-
-	/**
 	 * {@link OfficeFloorNode} implementation.
 	 */
 	private final OfficeFloorNode node = new OfficeFloorNodeImpl(
-			OFFICE_FLOOR_LOCATION, new NodeContextImpl(
-					this.configurationContext, this.classLoader, this.issues));
+			OFFICE_FLOOR_LOCATION, this.nodeContext);
 
 	/**
 	 * Tests adding an {@link OfficeFloorTeam}.

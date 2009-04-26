@@ -20,14 +20,21 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
 
+import net.officefloor.compile.administrator.AdministratorLoader;
 import net.officefloor.compile.impl.OfficeFloorCompilerImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.managedobject.ManagedObjectLoader;
+import net.officefloor.compile.office.OfficeLoader;
+import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.team.TeamLoader;
+import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -143,52 +150,41 @@ public abstract class OfficeFloorCompiler {
 			compiler = new OfficeFloorCompilerImpl();
 		}
 
-		// Add the office source aliases from the class path
-		for (OfficeSourceService service : ServiceLoader
-				.load(OfficeSourceService.class)) {
-			compiler.addOfficeSourceAlias(service.getOfficeSourceAlias(),
-					service.getOfficeSourceClass());
-		}
-
-		// Add the section source aliases from the class path
-		for (SectionSourceService service : ServiceLoader
-				.load(SectionSourceService.class)) {
-			compiler.addSectionSourceAlias(service.getSectionSourceAlias(),
-					service.getSectionSourceClass());
-		}
-
-		// Add the work source aliases from the class path
-		for (WorkSourceService service : ServiceLoader
-				.load(WorkSourceService.class)) {
-			compiler.addWorkSourceAlias(service.getWorkSourceAlias(), service
-					.getWorkSourceClass());
-		}
-
-		// Add the managed object source aliases from the class path
-		for (ManagedObjectSourceService service : ServiceLoader
-				.load(ManagedObjectSourceService.class)) {
-			compiler.addManagedObjectSourceAlias(service
-					.getManagedObjectSourceAlias(), service
-					.getManagedObjectSourceClass());
-		}
-
-		// Add the administrator source aliases from the class path
-		for (AdministratorSourceService service : ServiceLoader
-				.load(AdministratorSourceService.class)) {
-			compiler.addAdministratorSourceAlias(service
-					.getAdministratorSourceAlias(), service
-					.getAdministratorSourceClass());
-		}
-
-		// Add the team source aliases from the class path
-		for (TeamSourceService service : ServiceLoader
-				.load(TeamSourceService.class)) {
-			compiler.addTeamSourceAlias(service.getTeamSourceAlias(), service
-					.getTeamSourceClass());
-		}
-
 		// Return the office floor compiler
 		return compiler;
+	}
+
+	/**
+	 * {@link ClassLoader} initialised to be the {@link Thread} instance's
+	 * {@link ClassLoader}.
+	 */
+	private ClassLoader classLoader = null;
+
+	/**
+	 * Obtains the {@link ClassLoader} for this {@link OfficeFloorCompiler}.
+	 * 
+	 * @return {@link ClassLoader} for this {@link OfficeFloorCompiler}.
+	 */
+	public ClassLoader getClassLoader() {
+
+		// Ensure have a class loader
+		if (this.classLoader == null) {
+			this.classLoader = Thread.currentThread().getContextClassLoader();
+		}
+
+		// Return the class loader
+		return this.classLoader;
+	}
+
+	/**
+	 * Overrides the default {@link ClassLoader} to use in compiling the
+	 * {@link OfficeFloor}.
+	 * 
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 */
+	public void setClassLoader(ClassLoader classLoader) {
+		this.classLoader = classLoader;
 	}
 
 	/**
@@ -223,6 +219,56 @@ public abstract class OfficeFloorCompiler {
 		}
 	}
 
+	/**
+	 * Adds the aliases for the source classes.
+	 */
+	public void addSourceAliases() {
+
+		// Add the office source aliases from the class path
+		for (OfficeSourceService service : ServiceLoader.load(
+				OfficeSourceService.class, this.getClassLoader())) {
+			this.addOfficeSourceAlias(service.getOfficeSourceAlias(), service
+					.getOfficeSourceClass());
+		}
+
+		// Add the section source aliases from the class path
+		for (SectionSourceService service : ServiceLoader.load(
+				SectionSourceService.class, this.getClassLoader())) {
+			this.addSectionSourceAlias(service.getSectionSourceAlias(), service
+					.getSectionSourceClass());
+		}
+
+		// Add the work source aliases from the class path
+		for (WorkSourceService service : ServiceLoader.load(
+				WorkSourceService.class, this.getClassLoader())) {
+			this.addWorkSourceAlias(service.getWorkSourceAlias(), service
+					.getWorkSourceClass());
+		}
+
+		// Add the managed object source aliases from the class path
+		for (ManagedObjectSourceService service : ServiceLoader.load(
+				ManagedObjectSourceService.class, this.getClassLoader())) {
+			this.addManagedObjectSourceAlias(service
+					.getManagedObjectSourceAlias(), service
+					.getManagedObjectSourceClass());
+		}
+
+		// Add the administrator source aliases from the class path
+		for (AdministratorSourceService service : ServiceLoader.load(
+				AdministratorSourceService.class, this.getClassLoader())) {
+			this.addAdministratorSourceAlias(service
+					.getAdministratorSourceAlias(), service
+					.getAdministratorSourceClass());
+		}
+
+		// Add the team source aliases from the class path
+		for (TeamSourceService service : ServiceLoader.load(
+				TeamSourceService.class, this.getClassLoader())) {
+			this.addTeamSourceAlias(service.getTeamSourceAlias(), service
+					.getTeamSourceClass());
+		}
+	}
+
 	/*
 	 * ======= Methods to be implemented by the OfficeFloorCompiler ===========
 	 */
@@ -243,17 +289,17 @@ public abstract class OfficeFloorCompiler {
 
 	/**
 	 * <p>
-	 * Overrides the default {@link ClassLoader} to use in compiling the
+	 * Overrides the default {@link CompilerIssues} to use in compiling the
 	 * {@link OfficeFloor}.
 	 * <p>
 	 * Implementations of {@link OfficeFloorCompiler} must provide a default
-	 * {@link ClassLoader} (typically this will be {@link ClassLoader} from the
-	 * {@link OfficeFloorCompiler} {@link Class}).
+	 * {@link CompilerIssues}. Typically this will be an implementation that
+	 * writes issues to {@link System#err}.
 	 * 
-	 * @param classLoader
-	 *            {@link ClassLoader}.
+	 * @param issues
+	 *            {@link CompilerIssues}.
 	 */
-	public abstract void setClassLoader(ClassLoader classLoader);
+	public abstract void setCompilerIssues(CompilerIssues issues);
 
 	/**
 	 * <p>
@@ -431,17 +477,65 @@ public abstract class OfficeFloorCompiler {
 			String alias, Class<S> teamSourceClass);
 
 	/**
+	 * Obtains the {@link OfficeFloorLoader}.
+	 * 
+	 * @return {@link OfficeFloorLoader}.
+	 */
+	public abstract OfficeFloorLoader getOfficeFloorLoader();
+
+	/**
+	 * Obtains the {@link OfficeLoader}.
+	 * 
+	 * @return {@link OfficeLoader}.
+	 */
+	public abstract OfficeLoader getOfficeLoader();
+
+	/**
+	 * Obtains the {@link SectionLoader}.
+	 * 
+	 * @return {@link SectionLoader}.
+	 */
+	public abstract SectionLoader getSectionLoader();
+
+	/**
+	 * Obtains the {@link WorkLoader}.
+	 * 
+	 * @return {@link WorkLoader}.
+	 */
+	public abstract WorkLoader getWorkLoader();
+
+	/**
+	 * Obtains the {@link ManagedObjectLoader}.
+	 * 
+	 * @return {@link ManagedObjectLoader}.
+	 */
+	public abstract ManagedObjectLoader getManagedObjectLoader();
+
+	/**
+	 * Obtains the {@link AdministratorLoader}.
+	 * 
+	 * @return {@link AdministratorLoader}.
+	 */
+	public abstract AdministratorLoader getAdministratorLoader();
+
+	/**
+	 * Obtains the {@link TeamLoader}.
+	 * 
+	 * @return {@link TeamLoader}.
+	 */
+	public abstract TeamLoader getTeamLoader();
+
+	/**
+	 * <p>
 	 * Compiles and builds the {@link OfficeFloor}.
+	 * <p>
+	 * Use this method in preference to {@link OfficeFloorLoader}.
 	 * 
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in compiling and
-	 *            building the {@link OfficeFloor}.
 	 * @return {@link OfficeFloor} or <code>null</code> if issues in compiling
 	 *         which are reported to the {@link CompilerIssues}.
 	 */
-	public abstract OfficeFloor compile(String officeFloorLocation,
-			CompilerIssues issues);
+	public abstract OfficeFloor compile(String officeFloorLocation);
 
 }

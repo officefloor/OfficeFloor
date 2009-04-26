@@ -82,10 +82,6 @@ public class OfficeFloorModelOfficeFloorSource extends
 				team.addProperty(property.getName(), property.getValue());
 			}
 		}
-
-		// TODO continue implementing
-		throw new UnsupportedOperationException(
-				"Continue implementing OfficeFloorModelOfficeFloorSource");
 	}
 
 }

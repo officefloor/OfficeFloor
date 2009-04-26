@@ -19,9 +19,9 @@ package net.officefloor.compile.impl.officefloor;
 import java.io.IOException;
 import java.util.Properties;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.Property;
@@ -53,11 +53,6 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 	 */
 	private final ConfigurationContext configurationContext = this
 			.createMock(ConfigurationContext.class);
-
-	/**
-	 * {@link CompilerIssues}.
-	 */
-	private final CompilerIssues issues = this.createMock(CompilerIssues.class);
 
 	/*
 	 * (non-Javadoc)
@@ -457,14 +452,15 @@ public class LoadRequiredPropertiesTest extends AbstractStructureTestCase {
 		}
 
 		// Create the office loader and load the required properties
-		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		compiler.setConfigurationContext(this.configurationContext);
+		OfficeFloorLoader officeFloorLoader = compiler.getOfficeFloorLoader();
 		MockOfficeFloorSource.loader = loader;
 		PropertyList requiredProperties = officeFloorLoader
 				.loadRequiredProperties(MockOfficeFloorSource.class,
-						OFFICE_FLOOR_LOCATION, propertyList,
-						this.configurationContext,
-						LoadRequiredPropertiesTest.class.getClassLoader(),
-						this.issues);
+						OFFICE_FLOOR_LOCATION, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

@@ -22,9 +22,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceProperty;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecification;
-import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Loads the {@link OfficeFloor} from the {@link OfficeFloorSource}.
@@ -39,17 +37,13 @@ public interface OfficeFloorLoader {
 	 * 
 	 * @param officeFloorSourceClass
 	 *            Class of the {@link OfficeFloorSource}.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link OfficeFloorSourceSpecification} and obtaining the
-	 *            {@link PropertyList}.
 	 * @return {@link PropertyList} of the {@link OfficeFloorSourceProperty}
 	 *         instances of the {@link OfficeFloorSourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
 	<OF extends OfficeFloorSource> PropertyList loadSpecification(
-			Class<OF> officeFloorSourceClass, CompilerIssues issues);
+			Class<OF> officeFloorSourceClass);
 
 	/**
 	 * <p>
@@ -69,21 +63,12 @@ public interface OfficeFloorLoader {
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties as per the
 	 *            {@link OfficeFloorSourceSpecification}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link OfficeFloorSource} may use
-	 *            in obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in initialising.
 	 * @return Required {@link PropertyList} or <code>null</code> if issues,
 	 *         which are reported to the {@link CompilerIssues}.
 	 */
 	<OF extends OfficeFloorSource> PropertyList loadRequiredProperties(
 			Class<OF> officeFloorSourceClass, String officeFloorLocation,
-			PropertyList propertyList,
-			ConfigurationContext configurationContext, ClassLoader classLoader,
-			CompilerIssues issues);
+			PropertyList propertyList);
 
 	/**
 	 * Loads the {@link OfficeFloor}.
@@ -96,23 +81,11 @@ public interface OfficeFloorLoader {
 	 *            {@link PropertyList} containing both the
 	 *            {@link OfficeFloorSourceProperty} and the required
 	 *            {@link Property} instances.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link OfficeFloorSource} may use
-	 *            in obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link OfficeFloor}.
-	 * @param officeFrame
-	 *            {@link OfficeFrame} to use to build the {@link OfficeFloor}.
 	 * @return {@link OfficeFloor} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<OF extends OfficeFloorSource> OfficeFloor loadOfficeFloor(
 			Class<OF> officeFloorSourceClass, String officeFloorLocation,
-			PropertyList propertyList,
-			ConfigurationContext configurationContext, ClassLoader classLoader,
-			CompilerIssues issues, OfficeFrame officeFrame);
+			PropertyList propertyList);
 
 }

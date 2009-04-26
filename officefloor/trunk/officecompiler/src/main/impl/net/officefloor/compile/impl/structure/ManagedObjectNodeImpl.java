@@ -21,7 +21,6 @@ import java.util.Map;
 
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
@@ -41,7 +40,6 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
-import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -210,13 +208,10 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	public void loadManagedObjectMetaData() {
 
 		// Obtain the managed object source class
-		Class<? extends ManagedObjectSource> managedObjectSourceClass = CompileUtil
-				.obtainClass(this.managedObjectSourceClassName,
-						ManagedObjectSource.class, this.context
-								.getClassLoader(), LocationType.SECTION,
-						this.sectionLocation, AssetType.MANAGED_OBJECT,
-						this.managedObjectName, this.context
-								.getCompilerIssues());
+		Class<? extends ManagedObjectSource> managedObjectSourceClass = this.context
+				.getManagedObjectSourceClass(this.managedObjectSourceClassName,
+						LocationType.SECTION, this.sectionLocation,
+						this.managedObjectName);
 		if (managedObjectSourceClass == null) {
 			return; // must have managed object source class
 		}
@@ -224,12 +219,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		// Create the loader to obtain the managed object type
 		ManagedObjectLoader loader = new ManagedObjectLoaderImpl(
 				LocationType.SECTION, this.sectionLocation,
-				this.managedObjectName);
+				this.managedObjectName, this.context);
 
 		// Load the managed object type
 		this.managedObjectType = loader.loadManagedObjectType(
-				managedObjectSourceClass, this.propertyList, this.context
-						.getClassLoader(), this.context.getCompilerIssues());
+				managedObjectSourceClass, this.propertyList);
 
 		// Ensure all the teams are made available
 		if (this.managedObjectType != null) {

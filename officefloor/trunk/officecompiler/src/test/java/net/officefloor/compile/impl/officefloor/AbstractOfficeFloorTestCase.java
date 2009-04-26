@@ -17,6 +17,7 @@
 package net.officefloor.compile.impl.officefloor;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.structure.AbstractStructureTestCase;
 import net.officefloor.compile.issues.CompilerIssues;
@@ -41,7 +42,6 @@ import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.test.match.TypeMatcher;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Tests loading the {@link OfficeFloor} via the {@link OfficeFloorLoader} from
@@ -56,18 +56,6 @@ public abstract class AbstractOfficeFloorTestCase extends
 	 * Location of the {@link OfficeFloor}.
 	 */
 	protected final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
-
-	/**
-	 * {@link ConfigurationContext}.
-	 */
-	protected final ConfigurationContext configurationContext = this
-			.createMock(ConfigurationContext.class);
-
-	/**
-	 * {@link CompilerIssues}.
-	 */
-	protected final CompilerIssues issues = this
-			.createMock(CompilerIssues.class);
 
 	/**
 	 * Enhances {@link CompilerIssues}.
@@ -338,12 +326,15 @@ public abstract class AbstractOfficeFloorTestCase extends
 
 		// Create the office loader and load the office floor
 		this.replayMockObjects();
-		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl();
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.enhancedIssues);
+		compiler.setConfigurationContext(this.configurationContext);
+		compiler.setOfficeFrame(officeFrame);
+		OfficeFloorLoader officeFloorLoader = compiler.getOfficeFloorLoader();
 		OfficeFloor loadedOfficeFloor = officeFloorLoader.loadOfficeFloor(
 				MakerOfficeFloorSource.class, OFFICE_FLOOR_LOCATION,
-				propertyList, this.configurationContext,
-				LoadRequiredPropertiesTest.class.getClassLoader(),
-				this.enhancedIssues, officeFrame);
+				propertyList);
 		this.verifyMockObjects();
 
 		// Ensure the correct loaded office floor

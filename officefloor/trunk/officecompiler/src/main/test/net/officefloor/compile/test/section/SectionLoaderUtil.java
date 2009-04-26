@@ -20,15 +20,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import junit.framework.TestCase;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.section.SectionLoaderImpl;
-import net.officefloor.compile.impl.structure.NodeContextImpl;
 import net.officefloor.compile.impl.structure.SectionNodeImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
-import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
@@ -76,12 +74,9 @@ public class SectionLoaderUtil {
 	public static <S extends SectionSource> PropertyList validateSpecification(
 			Class<S> sectionSourceClass, String... propertyNameLabels) {
 
-		// Create the section loader
-		SectionLoader sectionLoader = new SectionLoaderImpl();
-
 		// Load the specification
-		PropertyList propertyList = sectionLoader.loadSpecification(
-				sectionSourceClass, new FailCompilerIssues());
+		PropertyList propertyList = getOfficeFloorCompiler().getSectionLoader()
+				.loadSpecification(sectionSourceClass);
 
 		// Verify the properties
 		PropertyListUtil.validatePropertyNameLabels(propertyList,
@@ -123,8 +118,8 @@ public class SectionLoaderUtil {
 	 */
 	public static <S extends SectionSource> SectionDesigner createSectionDesigner(
 			Class<S> sectionSourceClass) {
-		NodeContext context = new NodeContextImpl(sectionSourceClass
-				.getClassLoader(), new FailCompilerIssues());
+		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
+		NodeContext context = (NodeContext) compiler;
 		return new SectionNodeImpl(SECTION_NAME, "TEST_LOCATION", context);
 	}
 
@@ -518,13 +513,10 @@ public class SectionLoaderUtil {
 			ConfigurationContext configurationContext, ClassLoader classLoader,
 			String... propertyNameValuePairs) throws Exception {
 
-		// Create the section loader
-		SectionLoader sectionLoader = new SectionLoaderImpl();
-
 		// Load and return the section type
-		return sectionLoader.loadSectionType(sectionSourceClass,
-				sectionLocation, new PropertyListImpl(propertyNameValuePairs),
-				configurationContext, classLoader, new FailCompilerIssues());
+		return getOfficeFloorCompiler().getSectionLoader().loadSectionType(
+				sectionSourceClass, sectionLocation,
+				new PropertyListImpl(propertyNameValuePairs));
 	}
 
 	/**
@@ -579,13 +571,23 @@ public class SectionLoaderUtil {
 			String sectionLocation, ConfigurationContext configurationContext,
 			ClassLoader classLoader, String... propertyNameValuePairs) {
 
-		// Create the section loader
-		SectionLoader sectionLoader = new SectionLoaderImpl();
-
 		// Load and return the office section
-		return sectionLoader.loadOfficeSection(sectionName, sectionSourceClass,
-				sectionLocation, new PropertyListImpl(propertyNameValuePairs),
-				configurationContext, classLoader, new FailCompilerIssues());
+		return getOfficeFloorCompiler().getSectionLoader().loadOfficeSection(
+				sectionName, sectionSourceClass, sectionLocation,
+				new PropertyListImpl(propertyNameValuePairs));
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorCompiler} setup for use.
+	 * 
+	 * @return {@link OfficeFloorCompiler}.
+	 */
+	private static OfficeFloorCompiler getOfficeFloorCompiler() {
+		// Create the office floor compiler that fails on first issue
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(new FailCompilerIssues());
+		return compiler;
 	}
 
 	/**

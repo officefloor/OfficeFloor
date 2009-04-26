@@ -19,12 +19,12 @@ package net.officefloor.compile.impl.work;
 import java.sql.Connection;
 import java.util.Properties;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
 import net.officefloor.compile.spi.work.source.WorkSource;
@@ -51,16 +51,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class LoadWorkTypeTest extends OfficeFrameTestCase {
-
-	/**
-	 * Location of the {@link OfficeSection} containing the {@link Work}.
-	 */
-	private final String SECTION_LOCATION = "SECTION";
-
-	/**
-	 * Name of the {@link Work}.
-	 */
-	private final String WORK_NAME = "WORK";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -841,8 +831,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
-				AssetType.WORK, WORK_NAME, issueDescription);
+		this.issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
+				issueDescription);
 	}
 
 	/**
@@ -854,8 +844,8 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
-				AssetType.WORK, WORK_NAME, issueDescription, cause);
+		this.issues.addIssue(LocationType.SECTION, null, AssetType.WORK, null,
+				issueDescription, cause);
 	}
 
 	/**
@@ -884,11 +874,13 @@ public class LoadWorkTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the work loader and load the work
-		WorkLoader workLoader = new WorkLoaderImpl(SECTION_LOCATION, WORK_NAME);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		WorkLoader workLoader = compiler.getWorkLoader();
 		MockWorkSource.loader = loader;
 		WorkType<Work> workType = workLoader.loadWorkType(MockWorkSource.class,
-				propertyList, LoadWorkTypeTest.class.getClassLoader(),
-				this.issues);
+				propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

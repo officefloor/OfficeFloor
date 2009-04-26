@@ -21,10 +21,10 @@ import java.util.Properties;
 
 import javax.transaction.xa.XAResource;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.work.LoadWorkTypeTest;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
@@ -40,7 +40,6 @@ import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
@@ -65,16 +64,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  * @author Daniel
  */
 public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
-
-	/**
-	 * Location of the {@link OfficeFloor}.
-	 */
-	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
-
-	/**
-	 * Name of the {@link ManagedObjectSource}.
-	 */
-	private final String MANAGED_OBJECT_NAME = "MO";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -1546,10 +1535,8 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues
-				.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-						AssetType.MANAGED_OBJECT, MANAGED_OBJECT_NAME,
-						issueDescription);
+		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+				issueDescription);
 	}
 
 	/**
@@ -1561,8 +1548,7 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				AssetType.MANAGED_OBJECT, MANAGED_OBJECT_NAME,
+		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
 				issueDescription, cause);
 	}
 
@@ -1593,13 +1579,13 @@ public class LoadManagedObjectTypeTest extends OfficeFrameTestCase {
 		}
 
 		// Create the managed object loader and load the managed object type
-		ManagedObjectLoader moLoader = new ManagedObjectLoaderImpl(
-				LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				MANAGED_OBJECT_NAME);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		ManagedObjectLoader moLoader = compiler.getManagedObjectLoader();
 		MockManagedObjectSource.init = init;
 		ManagedObjectType<?> moType = moLoader.loadManagedObjectType(
-				MockManagedObjectSource.class, propertyList,
-				LoadManagedObjectTypeTest.class.getClassLoader(), this.issues);
+				MockManagedObjectSource.class, propertyList);
 
 		// Verify the mock objects
 		this.verifyMockObjects();

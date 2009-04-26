@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.impl.officefloor;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
@@ -316,9 +317,12 @@ public class LoadOfficeFloorSpecificationTest extends OfficeFrameTestCase {
 			String... propertyNameLabelPairs) {
 
 		// Load the office floor specification
-		OfficeFloorLoader officeFloorLoader = new OfficeFloorLoaderImpl();
-		PropertyList propertyList = officeFloorLoader.loadSpecification(
-				MockOfficeFloorSource.class, this.issues);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		OfficeFloorLoader officeFloorLoader = compiler.getOfficeFloorLoader();
+		PropertyList propertyList = officeFloorLoader
+				.loadSpecification(MockOfficeFloorSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {

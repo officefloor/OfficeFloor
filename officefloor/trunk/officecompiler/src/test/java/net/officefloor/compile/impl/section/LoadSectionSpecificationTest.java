@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.impl.section;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.properties.Property;
@@ -308,9 +309,12 @@ public class LoadSectionSpecificationTest extends OfficeFrameTestCase {
 			String... propertyNameLabelPairs) {
 
 		// Load the section specification
-		SectionLoader sectionLoader = new SectionLoaderImpl();
-		PropertyList propertyList = sectionLoader.loadSpecification(
-				MockSectionSource.class, this.issues);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		SectionLoader sectionLoader = compiler.getSectionLoader();
+		PropertyList propertyList = sectionLoader
+				.loadSpecification(MockSectionSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {

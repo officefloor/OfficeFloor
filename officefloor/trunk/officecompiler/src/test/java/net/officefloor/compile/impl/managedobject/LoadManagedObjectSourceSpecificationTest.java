@@ -16,16 +16,14 @@
  */
 package net.officefloor.compile.impl.managedobject;
 
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
-import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.test.properties.PropertyListUtil;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
@@ -42,17 +40,6 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
  */
 public class LoadManagedObjectSourceSpecificationTest extends
 		OfficeFrameTestCase {
-
-	/**
-	 * Location of the {@link OfficeFloor} as {@link ManagedObjectSource}
-	 * typically used in an {@link OfficeFloor}.
-	 */
-	private final String OFFICE_FLOOR_LOCATION = "OFFICE_FLOOR";
-
-	/**
-	 * Name of the {@link ManagedObject}.
-	 */
-	private final String MANAGED_OBJECT_NAME = "MANAGED_OBJECT";
 
 	/**
 	 * {@link CompilerIssues}.
@@ -307,10 +294,8 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 *            Description of the issue.
 	 */
 	private void record_issue(String issueDescription) {
-		this.issues
-				.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-						AssetType.MANAGED_OBJECT, MANAGED_OBJECT_NAME,
-						issueDescription);
+		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
+				issueDescription);
 	}
 
 	/**
@@ -322,8 +307,7 @@ public class LoadManagedObjectSourceSpecificationTest extends
 	 *            Cause of the issue.
 	 */
 	private void record_issue(String issueDescription, Throwable cause) {
-		this.issues.addIssue(LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				AssetType.MANAGED_OBJECT, MANAGED_OBJECT_NAME,
+		this.issues.addIssue(null, null, AssetType.MANAGED_OBJECT, null,
 				issueDescription, cause);
 	}
 
@@ -340,11 +324,13 @@ public class LoadManagedObjectSourceSpecificationTest extends
 			String... propertyNameLabelPairs) {
 
 		// Load the managed object specification specification
-		ManagedObjectLoader managedObjectLoader = new ManagedObjectLoaderImpl(
-				LocationType.OFFICE_FLOOR, OFFICE_FLOOR_LOCATION,
-				MANAGED_OBJECT_NAME);
-		PropertyList propertyList = managedObjectLoader.loadSpecification(
-				MockManagedObjectSource.class, this.issues);
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(this.issues);
+		ManagedObjectLoader managedObjectLoader = compiler
+				.getManagedObjectLoader();
+		PropertyList propertyList = managedObjectLoader
+				.loadSpecification(MockManagedObjectSource.class);
 
 		// Determine if expected to load
 		if (isExpectToLoad) {

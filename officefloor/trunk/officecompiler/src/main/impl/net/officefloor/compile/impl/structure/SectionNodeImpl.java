@@ -286,11 +286,20 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		// Ensure have instance of section source
 		if (this.sectionSource == null) {
+
+			// Obtain the section source class
+			Class<? extends SectionSource> sectionSourceClass = this.context
+					.getSectionSourceClass(this.sectionSourceClassName,
+							this.sectionLocation, this.sectionName);
+			if (sectionSourceClass == null) {
+				return; // must have section source class
+			}
+
 			// Instantiate an instance of the section source
-			this.sectionSource = CompileUtil.newInstance(
-					this.sectionSourceClassName, SectionSource.class,
-					LocationType.SECTION, this.sectionLocation, null, null,
-					this.context);
+			this.sectionSource = CompileUtil.newInstance(sectionSourceClass,
+					SectionSource.class, LocationType.SECTION,
+					this.sectionLocation, null, null, this.context
+							.getCompilerIssues());
 			if (this.sectionSource == null) {
 				return; // must instantiate section source
 			}
@@ -348,7 +357,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		}
 
 		// TODO build the section managed objects
-		
+
 		// TODO build the sub sections
 	}
 

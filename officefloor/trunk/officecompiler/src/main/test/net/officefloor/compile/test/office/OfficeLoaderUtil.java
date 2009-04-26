@@ -17,13 +17,11 @@
 package net.officefloor.compile.test.office;
 
 import junit.framework.TestCase;
-import net.officefloor.compile.impl.office.OfficeLoaderImpl;
+import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
-import net.officefloor.compile.impl.structure.NodeContextImpl;
 import net.officefloor.compile.impl.structure.OfficeNodeImpl;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.office.OfficeInputType;
-import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.office.OfficeManagedObjectType;
 import net.officefloor.compile.office.OfficeTeamType;
 import net.officefloor.compile.office.OfficeType;
@@ -60,12 +58,9 @@ public class OfficeLoaderUtil {
 	public static <O extends OfficeSource> PropertyList validateSpecification(
 			Class<O> officeSourceClass, String... propertyNameLabels) {
 
-		// Create the office loader
-		OfficeLoader officeLoader = new OfficeLoaderImpl();
-
 		// Load the specification
-		PropertyList properties = officeLoader.loadSpecification(
-				officeSourceClass, new FailCompilerIssues());
+		PropertyList properties = getOfficeFloorCompiler().getOfficeLoader()
+				.loadSpecification(officeSourceClass);
 
 		// Validate the properties of the specification
 		PropertyListUtil.validatePropertyNameLabels(properties,
@@ -101,8 +96,8 @@ public class OfficeLoaderUtil {
 	 */
 	public static <O extends OfficeSource> OfficeArchitect createOfficeArchitect(
 			Class<O> officeSourceClass) {
-		NodeContext context = new NodeContextImpl(officeSourceClass
-				.getClassLoader(), new FailCompilerIssues());
+		OfficeFloorCompiler compiler = getOfficeFloorCompiler();
+		NodeContext context = (NodeContext) compiler;
 		return new OfficeNodeImpl("TEST_LOCATION", context);
 	}
 
@@ -276,13 +271,23 @@ public class OfficeLoaderUtil {
 			ConfigurationContext configurationContext, ClassLoader classLoader,
 			String... propertyNameValuePairs) {
 
-		// Create the office loader
-		OfficeLoader officeLoader = new OfficeLoaderImpl();
-
 		// Return the loaded office type
-		return officeLoader.loadOfficeType(officeSourceClass, officeLocation,
-				new PropertyListImpl(propertyNameValuePairs),
-				configurationContext, classLoader, new FailCompilerIssues());
+		return getOfficeFloorCompiler().getOfficeLoader().loadOfficeType(
+				officeSourceClass, officeLocation,
+				new PropertyListImpl(propertyNameValuePairs));
+	}
+
+	/**
+	 * Obtains the {@link OfficeFloorCompiler} setup for use.
+	 * 
+	 * @return {@link OfficeFloorCompiler}.
+	 */
+	private static OfficeFloorCompiler getOfficeFloorCompiler() {
+		// Create the office floor compiler that fails on first issue
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+		compiler.setCompilerIssues(new FailCompilerIssues());
+		return compiler;
 	}
 
 	/**

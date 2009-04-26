@@ -22,7 +22,6 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceProperty;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.model.repository.ConfigurationContext;
 
 /**
  * Loads the {@link OfficeType} from the {@link OfficeSource}.
@@ -37,17 +36,13 @@ public interface OfficeLoader {
 	 * 
 	 * @param officeSourceClass
 	 *            Class of the {@link OfficeSource}.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link OfficeSourceSpecification} and obtaining the
-	 *            {@link PropertyList}.
 	 * @return {@link PropertyList} of the {@link OfficeSourceProperty}
 	 *         instances of the {@link OfficeSourceSpecification} or
 	 *         <code>null</code> if issue, which is reported to the
 	 *         {@link CompilerIssues}.
 	 */
 	<O extends OfficeSource> PropertyList loadSpecification(
-			Class<O> officeSourceClass, CompilerIssues issues);
+			Class<O> officeSourceClass);
 
 	/**
 	 * Loads and returns the {@link OfficeType} from the {@link OfficeSource}.
@@ -59,21 +54,11 @@ public interface OfficeLoader {
 	 * @param propertyList
 	 *            {@link PropertyList} containing the properties to source the
 	 *            {@link OfficeType}.
-	 * @param configurationContext
-	 *            {@link ConfigurationContext}.
-	 * @param classLoader
-	 *            {@link ClassLoader} that the {@link OfficeSource} may use in
-	 *            obtaining necessary class path resources.
-	 * @param issues
-	 *            {@link CompilerIssues} to report issues in loading the
-	 *            {@link OfficeType}.
 	 * @return {@link OfficeType} or <code>null</code> if issues, which are
 	 *         reported to the {@link CompilerIssues}.
 	 */
 	<O extends OfficeSource> OfficeType loadOfficeType(
 			Class<O> officeSourceClass, String officeLocation,
-			PropertyList propertyList,
-			ConfigurationContext configurationContext, ClassLoader classLoader,
-			CompilerIssues issues);
+			PropertyList propertyList);
 
 }
