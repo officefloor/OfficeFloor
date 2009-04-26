@@ -20,6 +20,10 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
+import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionResponsibilityModel;
+import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -58,6 +62,19 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the raw office to be connected
 		OfficeModel office = new OfficeModel();
+		OfficeTeamModel team = new OfficeTeamModel("TEAM");
+		office.addOfficeTeam(team);
+		OfficeSectionModel section = new OfficeSectionModel("SECTION",
+				"net.example.ExampleSectionSource", "SECTION_LOCATION");
+		office.addOfficeSection(section);
+		OfficeSectionResponsibilityModel responsibility = new OfficeSectionResponsibilityModel(
+				"RESPONSIBILITY");
+		section.addOfficeSectionResponsibility(responsibility);
+
+		// responsibility -> team
+		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel(
+				"TEAM");
+		responsibility.setOfficeTeam(respToTeam);
 
 		// Record retrieving the office
 		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(
@@ -79,7 +96,10 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 		assertEquals("Incorrect office", office, retrievedOffice);
 
-		// TODO ensure connections are linked
+		// Ensure the responsibility team connected
+		assertEquals("responsibility <- team", responsibility, respToTeam
+				.getOfficeSectionResponsibility());
+		assertEquals("responsibility -> team", team, respToTeam.getOfficeTeam());
 	}
 
 	/**
@@ -90,6 +110,20 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the office (without connections)
 		OfficeModel office = new OfficeModel();
+		OfficeTeamModel team = new OfficeTeamModel("TEAM");
+		office.addOfficeTeam(team);
+		OfficeSectionModel section = new OfficeSectionModel("SECTION",
+				"net.example.ExampleSectionSource", "SECTION_LOCATION");
+		office.addOfficeSection(section);
+		OfficeSectionResponsibilityModel responsibility = new OfficeSectionResponsibilityModel(
+				"RESPONSIBILITY");
+		section.addOfficeSectionResponsibility(responsibility);
+
+		// responsibility -> team
+		OfficeSectionResponsibilityToOfficeTeamModel respToTeam = new OfficeSectionResponsibilityToOfficeTeamModel();
+		respToTeam.setOfficeSectionResponsibility(responsibility);
+		respToTeam.setOfficeTeam(team);
+		respToTeam.connect();
 
 		// Record storing the office
 		this.modelRepository.store(office, this.configurationItem);
@@ -100,6 +134,7 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving
-		// TODO verify connections are linked
+		assertEquals("responsibility - team", "TEAM", respToTeam
+				.getOfficeTeamName());
 	}
 }

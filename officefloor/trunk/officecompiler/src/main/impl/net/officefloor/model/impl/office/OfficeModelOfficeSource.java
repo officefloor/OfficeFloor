@@ -17,15 +17,30 @@
 package net.officefloor.model.impl.office;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
+import net.officefloor.compile.OfficeSourceService;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSubSection;
+import net.officefloor.compile.spi.office.OfficeTask;
+import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionResponsibilityModel;
+import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeTeamModel;
+import net.officefloor.model.office.PropertyModel;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
@@ -33,7 +48,22 @@ import net.officefloor.model.repository.ConfigurationItem;
  * 
  * @author Daniel
  */
-public class OfficeModelOfficeSource extends AbstractOfficeSource {
+public class OfficeModelOfficeSource extends AbstractOfficeSource implements
+		OfficeSourceService {
+
+	/*
+	 * ====================== OfficeSourceService ==============================
+	 */
+
+	@Override
+	public String getOfficeSourceAlias() {
+		return "OFFICE";
+	}
+
+	@Override
+	public Class<? extends OfficeSource> getOfficeSourceClass() {
+		return this.getClass();
+	}
 
 	/*
 	 * ================= AbstractOfficeSource ================================
@@ -68,9 +98,134 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource {
 					.getExternalManagedObjectName(), object.getObjectType());
 		}
 
-		// Add the teams
-		for (OfficeTeamModel team : office.getOfficeTeams()) {
-			officeArchitect.addOfficeTeam(team.getOfficeTeamName());
+		// Add the teams, keeping registry of the teams
+		Map<String, OfficeTeam> teams = new HashMap<String, OfficeTeam>();
+		for (OfficeTeamModel teamModel : office.getOfficeTeams()) {
+			String teamName = teamModel.getOfficeTeamName();
+			OfficeTeam team = officeArchitect.addOfficeTeam(teamName);
+			teams.put(teamName, team);
+		}
+
+		// Add the sections
+		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
+
+			// Create the property list to add the section
+			PropertyList propertyList = officeArchitect.createPropertyList();
+			for (PropertyModel property : sectionModel.getProperties()) {
+				propertyList.addProperty(property.getName()).setValue(
+						property.getValue());
+			}
+
+			// Add the section
+			OfficeSection section = officeArchitect.addOfficeSection(
+					sectionModel.getOfficeSectionName(), sectionModel
+							.getSectionSourceClassName(), sectionModel
+							.getSectionLocation(), propertyList);
+
+			// Create the listing of responsibilities
+			List<Responsibility> responsibilities = new LinkedList<Responsibility>();
+			for (OfficeSectionResponsibilityModel responsibilityModel : sectionModel
+					.getOfficeSectionResponsibilities()) {
+
+				// Obtain the office team responsible
+				OfficeTeam officeTeam = null;
+				OfficeSectionResponsibilityToOfficeTeamModel conn = responsibilityModel
+						.getOfficeTeam();
+				if (conn != null) {
+					OfficeTeamModel teamModel = conn.getOfficeTeam();
+					if (teamModel != null) {
+						String teamName = teamModel.getOfficeTeamName();
+						officeTeam = teams.get(teamName);
+					}
+				}
+				if (officeTeam == null) {
+					continue; // must have team responsible
+				}
+
+				// Add the responsibility
+				responsibilities.add(new Responsibility(officeTeam));
+			}
+
+			// Create the listing of all tasks
+			List<OfficeTask> tasks = new LinkedList<OfficeTask>();
+			this.loadOfficeTasks(section, tasks);
+
+			// Assign teams their responsibilities
+			for (Responsibility responsibility : responsibilities) {
+				for (OfficeTask task : new ArrayList<OfficeTask>(tasks)) {
+					if (responsibility.isResponsible(task)) {
+						// Assign the team responsible for task
+						officeArchitect.link(task.getTeamResponsible(),
+								responsibility.officeTeam);
+
+						// Remove task from listing as assigned its team
+						tasks.remove(task);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Loads the {@link OfficeTask} instances for the {@link OfficeSubSection}
+	 * and its {@link OfficeSubSection} instances.
+	 * 
+	 * @param section
+	 *            {@link OfficeSubSection}.
+	 * @param tasks
+	 *            Listing to be populated with the {@link OfficeSubSection}
+	 *            {@link OfficeTask} instances.
+	 */
+	private void loadOfficeTasks(OfficeSubSection section,
+			List<OfficeTask> tasks) {
+
+		// Ensure have section
+		if (section == null) {
+			return;
+		}
+
+		// Add the section office tasks
+		for (OfficeTask task : section.getOfficeTasks()) {
+			tasks.add(task);
+		}
+
+		// Recursively add the sub section office tasks
+		for (OfficeSubSection subSection : section.getOfficeSubSections()) {
+			this.loadOfficeTasks(subSection, tasks);
+		}
+	}
+
+	/**
+	 * Responsibility.
+	 */
+	private static class Responsibility {
+
+		/**
+		 * {@link OfficeTeam} responsible for this responsibility.
+		 */
+		public final OfficeTeam officeTeam;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param officeTeam
+		 *            {@link OfficeTeam} responsible for this responsibility.
+		 */
+		public Responsibility(OfficeTeam officeTeam) {
+			this.officeTeam = officeTeam;
+		}
+
+		/**
+		 * Indicates if {@link OfficeTask} is within this responsibility.
+		 * 
+		 * @param task
+		 *            {@link OfficeTask}.
+		 * @return <code>true</code> if {@link OfficeTask} is within this
+		 *         responsibility.
+		 */
+		public boolean isResponsible(OfficeTask task) {
+			// TODO handle managed object matching for responsibility
+			return true; // TODO for now always responsible
 		}
 	}
 

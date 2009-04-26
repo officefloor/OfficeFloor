@@ -72,6 +72,10 @@
         <object method="addDeployedOfficeTeam" node="team"
             class="net.officefloor.model.officefloor.DeployedOfficeTeamModel">
             <value method="setDeployedOfficeTeamName" node="team@name" />
+            <object method="setOfficeFloorTeam" node="office-floor-team"
+                class="net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel">
+                <value method="setOfficeFloorTeamName" node="office-floor-team@name" />
+            </object>
         </object>
     </object>
 </unmarshall>

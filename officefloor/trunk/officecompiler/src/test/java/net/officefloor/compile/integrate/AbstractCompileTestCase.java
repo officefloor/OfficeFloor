@@ -25,16 +25,25 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
+import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
-import net.officefloor.model.repository.ConfigurationContext;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Provides abstract functionality for testing integration of the
@@ -89,7 +98,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * @return {@link TeamBuilder} for the added {@link Team}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected <S extends TeamSource> TeamBuilder<S> record_officefloor_addTeam(
+	protected <S extends TeamSource> TeamBuilder<S> record_officeFloorBuilder_addTeam(
 			String teamName, Class<S> teamSourceClass,
 			String... propertyNameValues) {
 		TeamBuilder<S> builder = this.createMock(TeamBuilder.class);
@@ -101,6 +110,83 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			builder.addProperty(name, value);
 		}
 		return builder;
+	}
+
+	/**
+	 * Current {@link OfficeBuilder}.
+	 */
+	private OfficeBuilder officeBuilder = null;
+
+	/**
+	 * Records adding a {@link OfficeBuilder}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @return Added {@link OfficeBuilder}.
+	 */
+	protected OfficeBuilder record_officeFloorBuilder_addOffice(
+			String officeName) {
+		this.officeBuilder = this.createMock(OfficeBuilder.class);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
+				.addOffice(officeName), this.officeBuilder);
+		return this.officeBuilder;
+	}
+
+	/**
+	 * Current {@link WorkBuilder}.
+	 */
+	private WorkBuilder<Work> workBuilder = null;
+
+	/**
+	 * Records adding a {@link WorkBuilder}.
+	 * 
+	 * @param workName
+	 *            Name of the {@link Work}.
+	 * @return Added {@link WorkBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected WorkBuilder<Work> record_officeBuilder_addWork(
+			final String workName) {
+		this.workBuilder = this.createMock(WorkBuilder.class);
+		this.recordReturn(this.officeBuilder, this.officeBuilder.addWork(
+				workName, null), this.workBuilder, new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect work name", workName, actual[0]);
+				assertNotNull("Must have work factory", actual[1]);
+				return true;
+			}
+		});
+		return this.workBuilder;
+	}
+
+	/**
+	 * Current {@link TaskBuilder}.
+	 */
+	private TaskBuilder<Work, ?, ?> taskBuilder;
+
+	/**
+	 * Records adding a {@link TaskBuilder}.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @return Added {@link TaskBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected TaskBuilder<Work, ?, ?> record_workBuilder_addTask(
+			final String taskName) {
+		this.taskBuilder = this.createMock(TaskBuilder.class);
+		TaskFactory<Work, Indexed, Indexed> taskFactory = null;
+		this.recordReturn(this.workBuilder, this.workBuilder.addTask(taskName,
+				taskFactory), this.taskBuilder, new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				assertEquals("Incorrect task name", taskName, actual[0]);
+				assertNotNull("Must have task factory", actual[1]);
+				return true;
+			}
+		});
+		return this.taskBuilder;
 	}
 
 	/**
@@ -144,10 +230,14 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 		// Create the configuration context
 		String configFileName = testCaseName + "/" + testName + ".xml";
-		ConfigurationContext configurationContext;
+		XmlConfigurationContext configurationContext;
 		try {
 			configurationContext = new XmlConfigurationContext(this,
 					configFileName);
+
+			// Add the tag replacements
+			configurationContext.addTag("testcase", this.getClass().getName());
+
 		} catch (Exception ex) {
 			// Wrap failure to not require tests to have to handle
 			StringWriter stackTrace = new StringWriter();

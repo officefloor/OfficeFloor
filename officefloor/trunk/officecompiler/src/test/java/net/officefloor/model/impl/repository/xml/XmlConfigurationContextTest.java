@@ -77,6 +77,23 @@ public class XmlConfigurationContextTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure that can do tag replacement before parsing the XML.
+	 */
+	public void testXmlConfigurationTagReplace() throws Exception {
+
+		// Create the XML configuration context
+		XmlConfigurationContext context = new XmlConfigurationContext(this,
+				"XmlConfigurationContextTagReplace.xml");
+
+		// Do tag replacement
+		context.addTag("TAG", "VALUE");
+
+		// Validate the tag replacement
+		ConfigurationItem item = context.getConfigurationItem("tag");
+		this.validateConfigurationItem(item, "tag", "<tag>VALUE</tag>");
+	}
+
+	/**
 	 * Validates the {@link ConfigurationItem}.
 	 * 
 	 * @param configurationItem

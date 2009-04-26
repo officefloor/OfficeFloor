@@ -27,6 +27,7 @@ import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
@@ -106,7 +107,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeFloorTeamName",
 				"getTeamSourceClassName", "getX", "getY" }, officeFloor
 				.getOfficeFloorTeams(), new OfficeFloorTeamModel("TEAM",
-				"net.example.ExampleTeamSource", null, 20, 21));
+				"net.example.ExampleTeamSource", null, null, 20, 21));
 		OfficeFloorTeamModel team = officeFloor.getOfficeFloorTeams().get(0);
 		assertList(new String[] { "getName", "getValue" },
 				team.getProperties(),
@@ -133,9 +134,16 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getDeployedOfficeInputName",
 				"getParameterType" }, office.getDeployedOfficeInputs(),
 				new DeployedOfficeInputModel("INPUT", Integer.class.getName()));
+
+		// Deployed office team
 		assertList(new String[] { "getDeployedOfficeTeamName" }, office
 				.getDeployedOfficeTeams(), new DeployedOfficeTeamModel(
 				"OFFICE_TEAM"));
+		DeployedOfficeTeamModel officeTeam = office.getDeployedOfficeTeams()
+				.get(0);
+		assertProperties(officeTeam.getOfficeFloorTeam(),
+				new DeployedOfficeTeamToOfficeFloorTeamModel("TEAM"),
+				"getOfficeFloorTeamName");
 	}
 
 	/**

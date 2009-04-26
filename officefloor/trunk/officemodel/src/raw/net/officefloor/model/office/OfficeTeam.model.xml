@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
-	<field type="String" name="office team name" />
+    <field type="String" name="office team name" />
+    <list type="OfficeSectionResponsibilityToOfficeTeamModel" name="office section responsibility"
+        plural="office section responsibilities" />
 </model>

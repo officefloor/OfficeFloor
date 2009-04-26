@@ -441,6 +441,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
+	public PropertyList createPropertyList() {
+		return new PropertyListImpl();
+	}
+
+	@Override
 	public OfficeSection addOfficeSection(String sectionName,
 			String sectionSourceClassName, String sectionLocation,
 			PropertyList properties) {

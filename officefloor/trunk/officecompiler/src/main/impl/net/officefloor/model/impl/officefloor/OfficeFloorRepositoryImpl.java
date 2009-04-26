@@ -16,8 +16,15 @@
  */
 package net.officefloor.model.impl.officefloor;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -55,7 +62,29 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 		OfficeFloorModel officeFloor = this.modelRepository.retrieve(
 				new OfficeFloorModel(), configuration);
 
-		// TODO link the connections
+		// Create the set of office floor teams
+		Map<String, OfficeFloorTeamModel> teams = new HashMap<String, OfficeFloorTeamModel>();
+		for (OfficeFloorTeamModel team : officeFloor.getOfficeFloorTeams()) {
+			teams.put(team.getOfficeFloorTeamName(), team);
+		}
+
+		// Connect the office teams to the office floor teams
+		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
+			for (DeployedOfficeTeamModel officeTeam : office
+					.getDeployedOfficeTeams()) {
+				DeployedOfficeTeamToOfficeFloorTeamModel conn = officeTeam
+						.getOfficeFloorTeam();
+				if (conn != null) {
+					OfficeFloorTeamModel officeFloorTeam = teams.get(conn
+							.getOfficeFloorTeamName());
+					if (officeFloorTeam != null) {
+						conn.setDeployedOfficeTeam(officeTeam);
+						conn.setOfficeFloorTeam(officeFloorTeam);
+						conn.connect();
+					}
+				}
+			}
+		}
 
 		// Return the office floor
 		return officeFloor;
@@ -65,7 +94,15 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 	public void storeOfficeFloor(OfficeFloorModel officeFloor,
 			ConfigurationItem configuration) throws Exception {
 
-		// TODO specify the links
+		// Specify office teams to office floor teams
+		for (OfficeFloorTeamModel officeFloorTeam : officeFloor
+				.getOfficeFloorTeams()) {
+			for (DeployedOfficeTeamToOfficeFloorTeamModel conn : officeFloorTeam
+					.getDeployedOfficeTeams()) {
+				conn.setOfficeFloorTeamName(officeFloorTeam
+						.getOfficeFloorTeamName());
+			}
+		}
 
 		// Store the office floor
 		this.modelRepository.store(officeFloor, configuration);
