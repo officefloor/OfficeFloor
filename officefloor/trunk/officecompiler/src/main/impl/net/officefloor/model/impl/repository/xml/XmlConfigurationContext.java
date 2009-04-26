@@ -18,6 +18,10 @@ package net.officefloor.model.impl.repository.xml;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,6 +36,7 @@ import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -58,6 +63,11 @@ public class XmlConfigurationContext implements ConfigurationContext {
 	private final Map<String, ConfigurationItem> items = new HashMap<String, ConfigurationItem>();
 
 	/**
+	 * XML raw text before parsing into the {@link ConfigurationItem} instances.
+	 */
+	private String xmlText;
+
+	/**
 	 * Obtains the {@link ConfigurationContext} contained in the XML file found
 	 * in the package of the offset object.
 	 * 
@@ -75,17 +85,68 @@ public class XmlConfigurationContext implements ConfigurationContext {
 				'.', '/')
 				+ "/" + singleXmlFileName;
 
-		// Obtain the contents of the XML file
+		// Obtain the raw XML text from the resource
 		InputStream inputStream = offsetObject.getClass().getClassLoader()
 				.getResourceAsStream(this.location);
 		if (inputStream == null) {
-			throw new FileNotFoundException("Can not find XML file: "
+			throw new FileNotFoundException("Can not find XML resource: "
 					+ this.location);
 		}
+		StringWriter writer = new StringWriter();
+		Reader reader = new InputStreamReader(inputStream);
+		for (int value = reader.read(); value != -1; value = reader.read()) {
+			writer.write(value);
+		}
+		this.xmlText = writer.toString();
+	}
+
+	/**
+	 * Adds tag replacement of the raw XML text before it is parsed and divided
+	 * into {@link ConfigurationItem} instances.
+	 * 
+	 * @param tagName
+	 *            Name of the tag. This will replace <code>${tagName}</code>
+	 *            text with the tag replace value.
+	 * @param tagReplaceValue
+	 *            Value to replace the tag with.
+	 */
+	public void addTag(String tagName, String tagReplaceValue) {
+
+		// Ensure not attempted to obtain configuration item
+		if (this.xmlText == null) {
+			throw new IllegalStateException(
+					"Can not replace tags after using context methods");
+		}
+
+		// Do the tag replacement
+		this.xmlText = this.xmlText.replace("${" + tagName + "}",
+				tagReplaceValue);
+	}
+
+	/**
+	 * Ensures the XML text has been parsed into {@link ConfigurationItem}
+	 * instances.
+	 * 
+	 * @throws Exception
+	 *             If fails to parse.
+	 */
+	private void ensureParsedIntoConfigurationItems() throws Exception {
+
+		// Determine if parsed
+		if (this.xmlText == null) {
+			return; // already parsed into configuration items
+		}
+
+		// Create the input source for the XML text
+		InputSource inputSource = new InputSource(
+				new StringReader(this.xmlText));
 
 		// Parse the contents
 		SAXParser saxParser = SAXParserFactory.newInstance().newSAXParser();
-		saxParser.parse(inputStream, new XmlConfigurationHandler());
+		saxParser.parse(inputSource, new XmlConfigurationHandler());
+
+		// Flag that now parsed
+		this.xmlText = null;
 	}
 
 	/*
@@ -115,6 +176,7 @@ public class XmlConfigurationContext implements ConfigurationContext {
 	@Override
 	public ConfigurationItem getConfigurationItem(String relativeLocation)
 			throws Exception {
+		this.ensureParsedIntoConfigurationItems();
 		return this.items.get(relativeLocation);
 	}
 

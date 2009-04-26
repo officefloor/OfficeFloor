@@ -141,6 +141,12 @@
                         <attribute method="getOfficeSectionResponsibilityName"
                             attribute="name" />
                     </attributes>
+                    <object method="getOfficeTeam" element="team">
+                        <attributes>
+                            <attribute method="getOfficeTeamName"
+                                attribute="name" />
+                        </attributes>
+                    </object>
                     <collection method="getOfficeSectionResponsibilityObjects">
                         <item
                             type="net.officefloor.model.office.OfficeSectionResponsibilityObjectModel"

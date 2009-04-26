@@ -18,16 +18,22 @@ package net.officefloor.model.impl.desk;
 
 import java.io.FileNotFoundException;
 
+import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionTask;
+import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 
@@ -36,7 +42,22 @@ import net.officefloor.model.repository.ConfigurationItem;
  * 
  * @author Daniel
  */
-public class DeskModelSectionSource extends AbstractSectionSource {
+public class DeskModelSectionSource extends AbstractSectionSource implements
+		SectionSourceService {
+
+	/*
+	 * =================== SectionSourceService ===============================
+	 */
+
+	@Override
+	public String getSectionSourceAlias() {
+		return "DESK";
+	}
+
+	@Override
+	public Class<? extends SectionSource> getSectionSourceClass() {
+		return this.getClass();
+	}
 
 	/*
 	 * ================= SectionSource ===========================
@@ -105,6 +126,27 @@ public class DeskModelSectionSource extends AbstractSectionSource {
 			sectionBuilder.addSectionObject(extMo
 					.getExternalManagedObjectName(), extMo.getObjectType());
 		}
-	}
 
+		// Add the works
+		for (WorkModel workModel : desk.getWorks()) {
+
+			// Add the work
+			SectionWork work = sectionBuilder.addSectionWork(workModel
+					.getWorkName(), workModel.getWorkSourceClassName());
+			for (PropertyModel property : workModel.getProperties()) {
+				work.addProperty(property.getName(), property.getValue());
+			}
+
+			// Add the tasks for the work
+			for (WorkTaskModel workTaskModel : workModel.getWorkTasks()) {
+				for (WorkTaskToTaskModel conn : workTaskModel.getTasks()) {
+					TaskModel taskModel = conn.getTask();
+
+					// Add the task for the work
+					SectionTask task = work.addSectionTask(taskModel
+							.getTaskName(), taskModel.getWorkTaskName());
+				}
+			}
+		}
+	}
 }

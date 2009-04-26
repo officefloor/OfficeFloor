@@ -17,7 +17,11 @@
 package net.officefloor.model.impl.officefloor;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
+import net.officefloor.compile.spi.office.OfficeTeam;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -25,6 +29,9 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
@@ -73,13 +80,61 @@ public class OfficeFloorModelOfficeFloorSource extends
 		OfficeFloorModel officeFloor = new OfficeFloorRepositoryImpl(
 				new ModelRepositoryImpl()).retrieveOfficeFloor(configuration);
 
-		// Load the office floor teams
+		// Add the office floor teams, keeping registry of teams
+		Map<String, OfficeFloorTeam> officeFloorTeams = new HashMap<String, OfficeFloorTeam>();
 		for (OfficeFloorTeamModel teamModel : officeFloor.getOfficeFloorTeams()) {
-			OfficeFloorTeam team = deployer.addTeam(teamModel
-					.getOfficeFloorTeamName(), teamModel
+
+			// Add the office floor team
+			String teamName = teamModel.getOfficeFloorTeamName();
+			OfficeFloorTeam team = deployer.addTeam(teamName, teamModel
 					.getTeamSourceClassName());
 			for (PropertyModel property : teamModel.getProperties()) {
 				team.addProperty(property.getName(), property.getValue());
+			}
+
+			// Register the team
+			officeFloorTeams.put(teamName, team);
+		}
+
+		// Add the offices
+		for (DeployedOfficeModel officeModel : officeFloor.getDeployedOffices()) {
+
+			// Add the office
+			DeployedOffice office = deployer.addDeployedOffice(officeModel
+					.getDeployedOfficeName(), officeModel
+					.getOfficeSourceClassName(), officeModel
+					.getOfficeLocation());
+			for (PropertyModel property : officeModel.getProperties()) {
+				office.addProperty(property.getName(), property.getValue());
+			}
+
+			// Add the office teams
+			for (DeployedOfficeTeamModel teamModel : officeModel
+					.getDeployedOfficeTeams()) {
+
+				// Add the office team
+				OfficeTeam officeTeam = office.getDeployedOfficeTeam(teamModel
+						.getDeployedOfficeTeamName());
+
+				// Obtain the office floor team
+				OfficeFloorTeam officeFloorTeam = null;
+				DeployedOfficeTeamToOfficeFloorTeamModel conn = teamModel
+						.getOfficeFloorTeam();
+				if (conn != null) {
+					OfficeFloorTeamModel officeFloorTeamModel = conn
+							.getOfficeFloorTeam();
+					if (officeFloorTeamModel != null) {
+						officeFloorTeam = officeFloorTeams
+								.get(officeFloorTeamModel
+										.getOfficeFloorTeamName());
+					}
+				}
+				if (officeFloorTeam == null) {
+					continue; // must have undertaking office floor team
+				}
+
+				// Have the office team be the office floor team
+				deployer.link(officeTeam, officeFloorTeam);
 			}
 		}
 	}

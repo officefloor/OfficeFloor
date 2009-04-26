@@ -18,8 +18,12 @@ package net.officefloor.model.impl.officefloor;
 
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.repository.ModelRepository;
 
@@ -58,6 +62,20 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the raw office floor to be connected
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel(
+				"OFFICE_FLOOR_TEAM", "net.example.ExampleTeamSource");
+		officeFloor.addOfficeFloorTeam(officeFloorTeam);
+		DeployedOfficeModel office = new DeployedOfficeModel("OFFICE",
+				"net.example.ExampleOfficeSource", "OFFICE_LOCATION");
+		officeFloor.addDeployedOffice(office);
+		DeployedOfficeTeamModel officeTeam = new DeployedOfficeTeamModel(
+				"OFFICE_TEAM");
+		office.addDeployedOfficeTeam(officeTeam);
+
+		// office team -> office floor team
+		DeployedOfficeTeamToOfficeFloorTeamModel officeTeamToFloorTeam = new DeployedOfficeTeamToOfficeFloorTeamModel(
+				"OFFICE_FLOOR_TEAM");
+		officeTeam.setOfficeFloorTeam(officeTeamToFloorTeam);
 
 		// Record retrieving the office
 		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(
@@ -82,7 +100,11 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 		assertEquals("Incorrect office", officeFloor, retrievedOfficeFloor);
 
-		// TODO ensure connections are linked
+		// Ensure office team connected
+		assertEquals("office team <- office floor team", officeTeam,
+				officeTeamToFloorTeam.getDeployedOfficeTeam());
+		assertEquals("office team -> office floor team", officeFloorTeam,
+				officeTeamToFloorTeam.getOfficeFloorTeam());
 	}
 
 	/**
@@ -93,6 +115,21 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the office floor (without connections)
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel(
+				"OFFICE_FLOOR_TEAM", "net.example.ExampleTeamSource");
+		officeFloor.addOfficeFloorTeam(officeFloorTeam);
+		DeployedOfficeModel office = new DeployedOfficeModel("OFFICE",
+				"net.example.ExampleOfficeSource", "OFFICE_LOCATION");
+		officeFloor.addDeployedOffice(office);
+		DeployedOfficeTeamModel officeTeam = new DeployedOfficeTeamModel(
+				"OFFICE_TEAM");
+		office.addDeployedOfficeTeam(officeTeam);
+
+		// office team -> office floor team
+		DeployedOfficeTeamToOfficeFloorTeamModel officeTeamToFloorTeam = new DeployedOfficeTeamToOfficeFloorTeamModel();
+		officeTeamToFloorTeam.setDeployedOfficeTeam(officeTeam);
+		officeTeamToFloorTeam.setOfficeFloorTeam(officeFloorTeam);
+		officeTeamToFloorTeam.connect();
 
 		// Record storing the office floor
 		this.modelRepository.store(officeFloor, this.configurationItem);
@@ -104,7 +141,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving
-		// TODO verify connections are linked
+		assertEquals("office team - office floor team", "OFFICE_FLOOR_TEAM",
+				officeTeamToFloorTeam.getOfficeFloorTeamName());
 	}
 
 }

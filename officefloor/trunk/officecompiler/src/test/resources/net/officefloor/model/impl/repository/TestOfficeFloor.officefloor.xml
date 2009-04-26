@@ -30,7 +30,9 @@
             </properties>
             <object name="OBJECT" object-type="net.orm.Session" />
             <input name="INPUT" parameter-type="java.lang.Integer" />
-            <team name="OFFICE_TEAM" />
+            <team name="OFFICE_TEAM">
+                <office-floor-team name="TEAM" />
+            </team>
         </office>
     </offices>
 </office-floor>

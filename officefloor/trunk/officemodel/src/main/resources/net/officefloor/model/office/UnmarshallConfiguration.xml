@@ -72,6 +72,10 @@
             class="net.officefloor.model.office.OfficeSectionResponsibilityModel">
             <value method="setOfficeSectionResponsibilityName"
                 node="responsibility@name" />
+            <object method="setOfficeTeam" node="team"
+                class="net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel">
+                <value method="setOfficeTeamName" node="team@name" />
+            </object>
             <object method="addOfficeSectionResponsibilityObject"
                 node="object"
                 class="net.officefloor.model.office.OfficeSectionResponsibilityObjectModel">

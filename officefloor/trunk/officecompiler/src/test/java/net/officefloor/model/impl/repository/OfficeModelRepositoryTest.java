@@ -36,6 +36,7 @@ import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityObjectModel;
+import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeSubSectionModel;
 import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.office.OfficeTeamModel;
@@ -91,7 +92,7 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the teams
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeTeamName", "getX", "getY" }, office
-				.getOfficeTeams(), new OfficeTeamModel("TEAM", 20, 21));
+				.getOfficeTeams(), new OfficeTeamModel("TEAM", null, 20, 21));
 
 		// ----------------------------------------
 		// Validate the escalations
@@ -141,15 +142,21 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				section.getOfficeSectionObjects(),
 				new OfficeSectionObjectModel("OBJECT", Connection.class
 						.getName()));
+
+		// Responsibilities of section
 		assertList(new String[] { "getOfficeSectionResponsibilityName" },
 				section.getOfficeSectionResponsibilities(),
 				new OfficeSectionResponsibilityModel("RESPONSIBILITY"));
 		OfficeSectionResponsibilityModel responsibility = section
 				.getOfficeSectionResponsibilities().get(0);
+		assertProperties(new OfficeSectionResponsibilityToOfficeTeamModel(
+				"TEAM"), responsibility.getOfficeTeam(), "getOfficeTeamName");
 		assertList(new String[] { "getOfficeSectionResponsibilityObjectName" },
 				responsibility.getOfficeSectionResponsibilityObjects(),
 				new OfficeSectionResponsibilityObjectModel(
 						"RESPONSIBILITY_OBJECT"));
+
+		// Sub sections
 		assertNotNull("Must have sub section of office section", section
 				.getOfficeSubSection());
 		OfficeSubSectionModel officeSection = section.getOfficeSubSection();

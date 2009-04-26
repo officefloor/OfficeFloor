@@ -21,6 +21,7 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.WorkSourceService;
 import net.officefloor.compile.spi.work.source.TaskFlowTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskObjectTypeBuilder;
 import net.officefloor.compile.spi.work.source.TaskTypeBuilder;
@@ -40,12 +41,27 @@ import net.officefloor.frame.api.execute.Work;
  * 
  * @author Daniel
  */
-public class ClassWorkSource extends AbstractWorkSource<ClassWork> {
+public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
+		WorkSourceService {
 
 	/**
 	 * Property name providing the {@link Class} name.
 	 */
 	public static final String CLASS_NAME_PROPERTY_NAME = "class.name";
+
+	/*
+	 * =================== WorkSourceService ================================
+	 */
+
+	@Override
+	public String getWorkSourceAlias() {
+		return "CLASS";
+	}
+
+	@Override
+	public Class<? extends WorkSource<?>> getWorkSourceClass() {
+		return this.getClass();
+	}
 
 	/*
 	 * =================== AbstractWorkLoader ==============================
@@ -220,4 +236,5 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> {
 			}
 		}
 	}
+
 }

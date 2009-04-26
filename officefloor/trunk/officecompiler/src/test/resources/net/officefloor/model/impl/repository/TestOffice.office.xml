@@ -35,6 +35,7 @@
                 escalation-only="true" />
             <object name="OBJECT" object-type="java.sql.Connection" />
             <responsibility name="RESPONSIBILITY">
+                <team name="TEAM" />
                 <object name="RESPONSIBILITY_OBJECT" />
             </responsibility>
             <sub-section>

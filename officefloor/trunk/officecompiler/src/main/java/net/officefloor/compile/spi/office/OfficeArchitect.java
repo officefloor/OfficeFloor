@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.spi.office;
 
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -52,6 +53,14 @@ public interface OfficeArchitect {
 	OfficeTeam addOfficeTeam(String officeTeamName);
 
 	/**
+	 * Creates a {@link PropertyList} to be populated with {@link Property}
+	 * instances and passed to add an {@link OfficeSection}.
+	 * 
+	 * @return {@link PropertyList}.
+	 */
+	PropertyList createPropertyList();
+
+	/**
 	 * Adds an {@link OfficeSection}.
 	 * 
 	 * @param sectionName
@@ -64,8 +73,9 @@ public interface OfficeArchitect {
 	 *            {@link PropertyList} to load the {@link OfficeSection}.
 	 * @return Added {@link OfficeSection}.
 	 */
-	OfficeSection addOfficeSection(String sectionName, String sectionSourceClassName,
-			String sectionLocation, PropertyList properties);
+	OfficeSection addOfficeSection(String sectionName,
+			String sectionSourceClassName, String sectionLocation,
+			PropertyList properties);
 
 	/**
 	 * Adds an {@link OfficeManagedObject}.
