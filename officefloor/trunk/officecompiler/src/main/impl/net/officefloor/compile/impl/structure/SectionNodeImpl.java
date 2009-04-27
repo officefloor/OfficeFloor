@@ -383,7 +383,18 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 
 		// TODO build the section managed objects
 
-		// TODO build the sub sections
+		// Build the sub sections (in deterministic order)
+		SectionNode[] subSections = CompileUtil.toSortedArray(this.subSections
+				.values(), new SectionNode[0],
+				new StringExtractor<SectionNode>() {
+					@Override
+					public String toString(SectionNode subSection) {
+						return subSection.getSubSectionName();
+					}
+				});
+		for (SectionNode subSection : subSections) {
+			subSection.buildSection(builder);
+		}
 	}
 
 	@Override

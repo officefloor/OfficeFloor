@@ -22,6 +22,8 @@ import java.util.Map;
 
 import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.TaskFlow;
@@ -37,6 +39,7 @@ import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
 import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.WorkModel;
@@ -94,28 +97,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 		DeskModel desk = new DeskRepositoryImpl(new ModelRepositoryImpl())
 				.retrieveDesk(configuration);
 
-		// Add the public tasks as inputs
-		for (TaskModel task : desk.getTasks()) {
-			if (task.getIsPublic()) {
-
-				// Obtain the work task
-				WorkTaskModel workTask = task.getWorkTask().getWorkTask();
-
-				// Determine the parameter type from the work task
-				String parameterType = null;
-				for (WorkTaskObjectModel taskObject : workTask.getTaskObjects()) {
-					if (taskObject.getIsParameter()) {
-						// TODO handle two parameters to work for a desk
-						parameterType = taskObject.getObjectType();
-					}
-				}
-
-				// Add the section input
-				designer.addSectionInput(task.getTaskName(), parameterType);
-			}
-		}
-
-		// Add the external flows as outputs
+		// Add the external flows as outputs, keeping registry of the outputs
+		Map<String, SectionOutput> sectionOutputs = new HashMap<String, SectionOutput>();
 		for (ExternalFlowModel extFlow : desk.getExternalFlows()) {
 
 			// Determine if escalation only (only has task escalation connected)
@@ -123,9 +106,12 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					&& (extFlow.getTaskFlows().size() == 0) && (extFlow
 					.getTaskEscalations().size() > 0));
 
-			// Add the section output
-			designer.addSectionOutput(extFlow.getExternalFlowName(), extFlow
-					.getArgumentType(), isEscalationOnly);
+			// Add the section output and register
+			String sectionOutputName = extFlow.getExternalFlowName();
+			SectionOutput sectionOutput = designer.addSectionOutput(
+					sectionOutputName, extFlow.getArgumentType(),
+					isEscalationOnly);
+			sectionOutputs.put(sectionOutputName, sectionOutput);
 		}
 
 		// Add the external managed objects as objects
@@ -199,8 +185,68 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					// Link the flow to its task
 					designer.link(taskFlow, linkedTask, instigationStrategy);
 				}
+
+				// Determine if link to external flow
+				SectionOutput linkedSectionOutput = null;
+				TaskFlowToExternalFlowModel flowToExtFlow = taskFlowModel
+						.getExternalFlow();
+				if (flowToExtFlow != null) {
+					ExternalFlowModel linkedExtFlow = flowToExtFlow
+							.getExternalFlow();
+					if (linkedExtFlow != null) {
+						// Obtain the linked flow and instigation strategy
+						linkedSectionOutput = sectionOutputs.get(linkedExtFlow
+								.getExternalFlowName());
+						instigationStrategy = this
+								.getFlowInstatigationStrategy(flowToExtFlow
+										.getLinkType(), designer, taskName,
+										flowName);
+					}
+				}
+				if (linkedSectionOutput != null) {
+					// Link the flow to section output
+					designer.link(taskFlow, linkedSectionOutput,
+							instigationStrategy);
+				}
 			}
 		}
+
+		// Add the public tasks as inputs and link to tasks
+		for (TaskModel task : desk.getTasks()) {
+			if (task.getIsPublic()) {
+
+				// Obtain the work task
+				WorkTaskModel workTask = null;
+				WorkTaskToTaskModel conn = task.getWorkTask();
+				if (conn != null) {
+					workTask = conn.getWorkTask();
+				}
+				if (workTask == null) {
+					designer.addIssue("Task not linked to a work task",
+							AssetType.TASK, task.getTaskName());
+					continue; // must have work task
+				}
+
+				// Determine the parameter type from the work task
+				String parameterType = null;
+				for (WorkTaskObjectModel taskObject : workTask.getTaskObjects()) {
+					if (taskObject.getIsParameter()) {
+						// TODO handle two parameters to work for a desk
+						parameterType = taskObject.getObjectType();
+					}
+				}
+
+				// Add the section input and register
+				String taskName = task.getTaskName();
+				SectionInput sectionInput = designer.addSectionInput(taskName,
+						parameterType);
+
+				// Obtain the section task and link input to task
+				SectionTask sectionTask = tasks.get(taskName);
+				designer.link(sectionInput, sectionTask);
+			}
+		}
+
 	}
 
 	/**

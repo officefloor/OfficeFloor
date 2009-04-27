@@ -147,6 +147,26 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Convenience method to both add the {@link Office} and register a
+	 * {@link Team} to it.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link Office}.
+	 * @param officeTeamName
+	 *            {@link Office} {@link Team} name.
+	 * @param officeFloorTeamName
+	 *            {@link OfficeFloor} {@link Team} name.
+	 * @return Added {@link OfficeBuilder}.
+	 */
+	protected OfficeBuilder record_officeFloorBuilder_addOffice(
+			String officeName, String officeTeamName, String officeFloorTeamName) {
+		this.record_officeFloorBuilder_addOffice(officeName);
+		this.record_officeBuilder_registerTeam(officeTeamName,
+				officeFloorTeamName);
+		return this.officeBuilder;
+	}
+
+	/**
 	 * Current {@link WorkBuilder}.
 	 */
 	private WorkBuilder<Work> workBuilder = null;
@@ -165,7 +185,7 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 */
 	@SuppressWarnings("unchecked")
 	protected WorkBuilder<Work> record_officeBuilder_addWork(String workName) {
-		
+
 		// Record adding the work
 		this.workBuilder = this.createMock(WorkBuilder.class);
 		WorkFactory<Work> workFactory = null;
@@ -182,10 +202,10 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 			});
 			this.isMatcherSet_officeBuilder_addWork = true;
 		}
-		
+
 		// Reset add task matcher as new mock work builder
 		this.isMatcherSet_workBuilder_addTask = false;
-		
+
 		// Return the work builder
 		return this.workBuilder;
 	}

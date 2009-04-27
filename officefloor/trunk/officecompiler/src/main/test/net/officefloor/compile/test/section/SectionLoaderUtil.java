@@ -340,54 +340,66 @@ public class SectionLoaderUtil {
 		}
 
 		// Validate remaining of the office section
-		validateOfficeSubSection(eSection, aSection);
+		validateOfficeSubSection(null, eSection, aSection);
 	}
 
 	/**
 	 * Validates the {@link OfficeSubSection}.
 	 * 
+	 * @param subSectionName
+	 *            Name of the {@link OfficeSubSection} being validated.
 	 * @param eSection
 	 *            Expected {@link OfficeSubSection}.
 	 * @param aSection
 	 *            Actual {@link OfficeSubSection}.
 	 */
-	private static void validateOfficeSubSection(OfficeSubSection eSection,
-			OfficeSubSection aSection) {
+	private static void validateOfficeSubSection(String subSectionName,
+			OfficeSubSection eSection, OfficeSubSection aSection) {
 
 		// Validate the office sub section
-		TestCase.assertEquals("Incorrect section name", eSection
-				.getOfficeSectionName(), aSection.getOfficeSectionName());
+		TestCase.assertEquals("Incorrect section name (parent section="
+				+ subSectionName + ")", eSection.getOfficeSectionName(),
+				aSection.getOfficeSectionName());
+
+		// Determine this sub section name
+		subSectionName = (subSectionName == null ? "" : subSectionName + ".")
+				+ eSection.getOfficeSectionName();
 
 		// Validate the tasks
 		OfficeTask[] eTasks = eSection.getOfficeTasks();
 		OfficeTask[] aTasks = aSection.getOfficeTasks();
-		TestCase.assertEquals("Incorrect number of tasks", eTasks.length,
-				aTasks.length);
+		TestCase.assertEquals("Incorrect number of tasks (section="
+				+ subSectionName + ")", eTasks.length, aTasks.length);
 		for (int i = 0; i < eTasks.length; i++) {
 			OfficeTask eTask = eTasks[i];
 			OfficeTask aTask = aTasks[i];
-			TestCase.assertEquals("Incorrect name for task " + i, eTask
+			TestCase.assertEquals("Incorrect name for task " + i
+					+ " (sub section=" + subSectionName + ")", eTask
 					.getOfficeTaskName(), aTask.getOfficeTaskName());
-			TestCase.assertNotNull("Must have team responsible for task " + i,
-					aTask.getTeamResponsible());
+			TestCase.assertNotNull("Must have team responsible for task " + i
+					+ " (sub section=" + subSectionName + ")", aTask
+					.getTeamResponsible());
 
 			// Validate the dependencies
 			ObjectDependency[] eDependencies = eTask.getObjectDependencies();
 			ObjectDependency[] aDependencies = aTask.getObjectDependencies();
 			TestCase.assertEquals("Incorrect number of dependencies for task "
-					+ i, eDependencies.length, aDependencies.length);
+					+ i + " (sub section=" + subSectionName + ")",
+					eDependencies.length, aDependencies.length);
 			for (int j = 0; j < eDependencies.length; j++) {
 				ObjectDependency eDependency = eDependencies[j];
 				ObjectDependency aDependency = aDependencies[j];
-				TestCase.assertEquals("Incorrect name for dependency " + j,
-						eDependency.getObjectDependencyName(), aDependency
-								.getObjectDependencyName());
+				TestCase.assertEquals("Incorrect name for dependency " + j
+						+ " (sub section=" + subSectionName + ")", eDependency
+						.getObjectDependencyName(), aDependency
+						.getObjectDependencyName());
 				DependentManagedObject eMo = eDependency
 						.getDependentManagedObject();
 				DependentManagedObject aMo = aDependency
 						.getDependentManagedObject();
 				TestCase.assertEquals(
-						"Incorrect dependent name for dependency " + j, eMo
+						"Incorrect dependent name for dependency " + j
+								+ " (sub section=" + subSectionName + ")", eMo
 								.getDependentManagedObjectName(), aMo
 								.getDependentManagedObjectName());
 
@@ -399,21 +411,25 @@ public class SectionLoaderUtil {
 				.getOfficeSectionManagedObjects();
 		OfficeSectionManagedObject[] aMos = aSection
 				.getOfficeSectionManagedObjects();
-		TestCase.assertEquals("Incorrect number of managed objects",
-				eMos.length, aMos.length);
+		TestCase.assertEquals(
+				"Incorrect number of managed objects (sub section="
+						+ subSectionName + ")", eMos.length, aMos.length);
 		for (int i = 0; i < eMos.length; i++) {
 			OfficeSectionManagedObject eMo = eMos[i];
 			OfficeSectionManagedObject aMo = aMos[i];
-			TestCase.assertEquals("Incorrect name for managed obect " + i, eMo
+			TestCase.assertEquals("Incorrect name for managed obect " + i
+					+ " (sub section=" + subSectionName + ")", eMo
 					.getOfficeSectionManagedObjectName(), aMo
 					.getOfficeSectionManagedObjectName());
 			TestCase.assertEquals(
-					"Incorrect dependent name for managed object " + i, eMo
+					"Incorrect dependent name for managed object " + i
+							+ " (sub section=" + subSectionName + ")", eMo
 							.getDependentManagedObjectName(), aMo
 							.getDependentManagedObjectName());
 			TestCase.assertEquals(
-					"Incorrect administerable name for managed object " + i,
-					eMo.getAdministerableManagedObjectName(), aMo
+					"Incorrect administerable name for managed object " + i
+							+ " (sub section=" + subSectionName + ")", eMo
+							.getAdministerableManagedObjectName(), aMo
 							.getAdministerableManagedObjectName());
 
 			// Validate the managed object teams
@@ -422,12 +438,14 @@ public class SectionLoaderUtil {
 			ManagedObjectTeam[] aTeams = aMo
 					.getOfficeSectionManagedObjectTeams();
 			TestCase.assertEquals(
-					"Incorrect number of teams for managed object " + i,
+					"Incorrect number of teams for managed object " + i
+							+ " (sub section=" + subSectionName + ")",
 					eTeams.length, aTeams.length);
 			for (int j = 0; j < eTeams.length; j++) {
 				ManagedObjectTeam eTeam = eTeams[j];
 				ManagedObjectTeam aTeam = aTeams[j];
-				TestCase.assertEquals("Incorrect name for team " + j, eTeam
+				TestCase.assertEquals("Incorrect name for team " + j
+						+ " (sub section=" + subSectionName + ")", eTeam
 						.getManagedObjectTeamName(), aTeam
 						.getManagedObjectTeamName());
 			}
@@ -435,12 +453,15 @@ public class SectionLoaderUtil {
 			// Validate the managed object supported extension interfaces
 			Class<?>[] eEis = eMo.getSupportedExtensionInterfaces();
 			Class<?>[] aEis = aMo.getSupportedExtensionInterfaces();
-			TestCase.assertEquals(
-					"Incorrect number of supported extension interfaces for managed object "
-							+ i, eEis.length, aEis.length);
+			TestCase
+					.assertEquals(
+							"Incorrect number of supported extension interfaces for managed object (sub section="
+									+ subSectionName + ")" + i, eEis.length,
+							aEis.length);
 			for (int j = 0; j < eEis.length; j++) {
 				TestCase.assertEquals(
-						"Incorrect class for extension interface " + j,
+						"Incorrect class for extension interface " + j
+								+ " (sub section=" + subSectionName + ")",
 						eEis[j], aEis[j]);
 			}
 		}
@@ -448,10 +469,17 @@ public class SectionLoaderUtil {
 		// Validate the sub sections
 		OfficeSubSection[] eSubSections = eSection.getOfficeSubSections();
 		OfficeSubSection[] aSubSections = aSection.getOfficeSubSections();
-		TestCase.assertEquals("Incorect number of sub sections",
-				eSubSections.length, aSubSections.length);
+		TestCase.assertEquals("Incorect number of sub sections (sub section="
+				+ subSectionName + ")", eSubSections.length,
+				aSubSections.length);
 		for (int i = 0; i < eSubSections.length; i++) {
-			validateOfficeSubSection(eSubSections[i], aSubSections[i]);
+			OfficeSubSection eSubSection = eSubSections[i];
+			OfficeSubSection aSubSection = aSubSections[i];
+			TestCase
+					.assertEquals("Incorrect name for sub section " + i
+							+ " (sub section=" + subSectionName + ")",
+							eSubSection.getOfficeSectionName(), aSubSection
+									.getOfficeSectionName());
 		}
 	}
 

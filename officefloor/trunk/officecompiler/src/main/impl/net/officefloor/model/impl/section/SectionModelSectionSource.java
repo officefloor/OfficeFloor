@@ -17,9 +17,16 @@
 package net.officefloor.model.impl.section;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
+import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.section.SubSectionInput;
+import net.officefloor.compile.spi.section.SubSectionOutput;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
@@ -27,17 +34,35 @@ import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.PropertyModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
  * {@link SectionSource} for a {@link SectionModel}.
  * 
  * @author Daniel
  */
-public class SectionModelSectionSource extends AbstractSectionSource {
+public class SectionModelSectionSource extends AbstractSectionSource implements
+		SectionSourceService {
+
+	/*
+	 * ==================== SectionSourceService ============================
+	 */
+
+	@Override
+	public String getSectionSourceAlias() {
+		return "SECTION";
+	}
+
+	@Override
+	public Class<? extends SectionSource> getSectionSourceClass() {
+		return this.getClass();
+	}
 
 	/*
 	 * ================== SectionSource ===========================
@@ -49,7 +74,7 @@ public class SectionModelSectionSource extends AbstractSectionSource {
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner sectionDesigner,
+	public void sourceSection(SectionDesigner designer,
 			SectionSourceContext context) throws Exception {
 
 		// Obtain the configuration to the section
@@ -75,7 +100,7 @@ public class SectionModelSectionSource extends AbstractSectionSource {
 							.getSubSectionInputName() : inputName);
 
 					// Add the input
-					sectionDesigner.addSectionInput(inputName, input
+					designer.addSectionInput(inputName, input
 							.getParameterType());
 				}
 			}
@@ -95,16 +120,107 @@ public class SectionModelSectionSource extends AbstractSectionSource {
 			}
 
 			// Add the output
-			sectionDesigner.addSectionOutput(extFlow.getExternalFlowName(),
-					extFlow.getArgumentType(), isEscalationOnly);
+			designer.addSectionOutput(extFlow.getExternalFlowName(), extFlow
+					.getArgumentType(), isEscalationOnly);
 		}
 
 		// Add the external managed objects as objects required by section
 		for (ExternalManagedObjectModel extMo : section
 				.getExternalManagedObjects()) {
-			sectionDesigner.addSectionObject(extMo
-					.getExternalManagedObjectName(), extMo.getObjectType());
+			designer.addSectionObject(extMo.getExternalManagedObjectName(),
+					extMo.getObjectType());
 		}
+
+		// Add the sub sections, keeping registry of sub sections/inputs
+		Map<String, SubSection> subSections = new HashMap<String, SubSection>();
+		DoubleKeyMap<String, String, SubSectionInput> subSectionInputs = new DoubleKeyMap<String, String, SubSectionInput>();
+		for (SubSectionModel subSectionModel : section.getSubSections()) {
+
+			// Add the sub section and register
+			String subSectionName = subSectionModel.getSubSectionName();
+			SubSection subSection = designer.addSubSection(subSectionName,
+					subSectionModel.getSectionSourceClassName(),
+					subSectionModel.getSectionLocation());
+			subSections.put(subSectionName, subSection);
+			for (PropertyModel property : subSectionModel.getProperties()) {
+				subSection.addProperty(property.getName(), property.getValue());
+			}
+
+			// Add the sub section inputs and register
+			for (SubSectionInputModel inputModel : subSectionModel
+					.getSubSectionInputs()) {
+				String inputName = inputModel.getSubSectionInputName();
+				SubSectionInput input = subSection
+						.getSubSectionInput(inputName);
+				subSectionInputs.put(subSectionName, inputName, input);
+			}
+		}
+
+		// Add the sub section outputs now that all inputs available
+		for (SubSectionModel subSectionModel : section.getSubSections()) {
+
+			// Obtain the sub section
+			String subSectionName = subSectionModel.getSubSectionName();
+			SubSection subSection = subSections.get(subSectionName);
+
+			// Add the sub section outputs
+			for (SubSectionOutputModel outputModel : subSectionModel
+					.getSubSectionOutputs()) {
+
+				// Add the sub section output
+				String outputName = outputModel.getSubSectionOutputName();
+				SubSectionOutput output = subSection
+						.getSubSectionOutput(outputName);
+
+				// Determine if link to a sub section input
+				SubSectionInput linkedInput = null;
+				SubSectionOutputToSubSectionInputModel outputToInput = outputModel
+						.getSubSectionInput();
+				if (outputToInput != null) {
+					SubSectionInputModel inputModel = outputToInput
+							.getSubSectionInput();
+					if (inputModel != null) {
+						SubSectionModel linkedSubSection = this
+								.getSubSectionForInput(section, inputModel);
+						linkedInput = subSectionInputs.get(linkedSubSection
+								.getSubSectionName(), inputModel
+								.getSubSectionInputName());
+					}
+				}
+				if (linkedInput != null) {
+					// Link the output to the input
+					designer.link(output, linkedInput);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Obtains the {@link SubSectionModel} containing the input
+	 * {@link SubSectionInputModel}.
+	 * 
+	 * @param section
+	 *            {@link SectionModel}.
+	 * @param input
+	 *            {@link SubSectionInputModel}.
+	 * @return {@link SubSectionModel}.
+	 */
+	private SubSectionModel getSubSectionForInput(SectionModel section,
+			SubSectionInputModel input) {
+
+		// Search the for input (which is contained in the target sub section)
+		for (SubSectionModel subSection : section.getSubSections()) {
+			for (SubSectionInputModel check : subSection.getSubSectionInputs()) {
+				if (check == input) {
+					// Found the input and subsequently the containing sub
+					// section
+					return subSection;
+				}
+			}
+		}
+
+		// No sub section if at this point
+		return null;
 	}
 
 }
