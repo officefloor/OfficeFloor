@@ -30,11 +30,11 @@
                     <property name="class.name"
                         value="${testcase}$CompileTaskWork" />
                 </properties>
-                <work-task name="simpleTask" />
+                <work-task name="flowTask" />
             </work>
         </works>
         <tasks>
-            <task name="TASK" work="WORK" task="simpleTask" />
+            <task name="TASK" work="WORK" task="flowTask" />
         </tasks>
     </desk>
 </context>

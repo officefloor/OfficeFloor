@@ -16,6 +16,7 @@
  */
 package net.officefloor.compile.internal.structure;
 
+import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.execute.Work;
@@ -26,6 +27,21 @@ import net.officefloor.frame.api.execute.Work;
  * @author Daniel
  */
 public interface WorkNode extends SectionWork {
+
+	/**
+	 * Obtains the {@link SectionNode} containing this {@link WorkNode}.
+	 * 
+	 * @return {@link SectionNode} containing this {@link WorkNode}.
+	 */
+	SectionNode getSectionNode();
+
+	/**
+	 * Obtains the name of this {@link Work} qualified with the
+	 * {@link OfficeSection} hierarchy containing this {@link Work}.
+	 * 
+	 * @return Qualified name of this {@link Work}.
+	 */
+	String getQualifiedWorkName();
 
 	/**
 	 * Builds the {@link Work} for this {@link SectionWork}.

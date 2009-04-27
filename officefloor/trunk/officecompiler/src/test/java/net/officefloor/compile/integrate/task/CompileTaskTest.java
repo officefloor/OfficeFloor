@@ -18,12 +18,19 @@ package net.officefloor.compile.integrate.task;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
-import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
+import net.officefloor.plugin.work.clazz.FlowInterface;
 
 /**
  * Tests compiling a {@link Task}.
@@ -40,20 +47,114 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	/**
 	 * Tests compiling a simple {@link Task}.
 	 */
-	public void testSimpleTask() throws Exception {
+	public void testSimpleTask() {
 
 		// Record building the office floor
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
-		OfficeBuilder office = this
-				.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK");
-		task.setTeam("OFFICE_TEAM");
+		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 
 		// Compile the office floor
 		this.compile(true);
+	}
+
+	/**
+	 * Ensures issue if {@link TaskFlow} not linked.
+	 */
+	public void testTaskFlowNotLinked() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
+		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
+				"TASK", "Flow flow is not linked to a TaskNode");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensures issue if unknown {@link FlowInstigationStrategyEnum}.
+	 */
+	public void testUnknownFlowInstigationStrategy() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		this.record_workBuilder_addTask("TASK_A", "OFFICE_TEAM");
+		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
+		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
+				"TASK_A",
+				"Unknown flow instigation strategy 'unknown' for flow flow");
+		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
+				"TASK_A", "No instigation strategy provided for flow flow");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link Task} linking a {@link Flow} to another
+	 * {@link Task} on the same {@link Work}.
+	 */
+	public void testLinkFlowToTaskOnSameWork() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<?, ?, ?> taskOne = this.record_workBuilder_addTask(
+				"TASK_A", "OFFICE_TEAM");
+		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
+		taskOne.linkFlow(0, "TASK_B", FlowInstigationStrategyEnum.PARALLEL,
+				String.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link Task} linking a {@link Flow} to different
+	 * {@link Work} in the same {@link OfficeSection}.
+	 */
+	public void testLinkFlowToTaskOnDifferentWorkInSameSection() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK_A");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
+				"OFFICE_TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK_B");
+		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
+		task.linkFlow(0, "SECTION.WORK_B", "TASK_B",
+				FlowInstigationStrategyEnum.SEQUENTIAL, String.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * {@link FlowInterface} for {@link CompileTaskWork}.
+	 */
+	@FlowInterface
+	public static interface Flows {
+
+		void flow(String parameter);
 	}
 
 	/**
@@ -61,7 +162,10 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	 */
 	public static class CompileTaskWork {
 
-		public void task() {
+		public void simpleTask() {
+		}
+
+		public void flowTask(Flows flows) {
 		}
 	}
 

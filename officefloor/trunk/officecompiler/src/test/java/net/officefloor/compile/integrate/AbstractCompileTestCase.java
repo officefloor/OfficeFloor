@@ -33,6 +33,7 @@ import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.TeamBuilder;
 import net.officefloor.frame.api.build.WorkBuilder;
+import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
@@ -133,9 +134,27 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records registering the {@link Team}.
+	 * 
+	 * @param officeTeamName
+	 *            {@link Office} {@link Team} name.
+	 * @param officeFloorTeamName
+	 *            {@link OfficeFloor} {@link Team} name.
+	 */
+	protected void record_officeBuilder_registerTeam(String officeTeamName,
+			String officeFloorTeamName) {
+		this.officeBuilder.registerTeam(officeTeamName, officeFloorTeamName);
+	}
+
+	/**
 	 * Current {@link WorkBuilder}.
 	 */
 	private WorkBuilder<Work> workBuilder = null;
+
+	/**
+	 * Flags if the matcher has been specified to add a {@link Work}.
+	 */
+	private boolean isMatcherSet_officeBuilder_addWork = false;
 
 	/**
 	 * Records adding a {@link WorkBuilder}.
@@ -145,18 +164,29 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 * @return Added {@link WorkBuilder}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected WorkBuilder<Work> record_officeBuilder_addWork(
-			final String workName) {
+	protected WorkBuilder<Work> record_officeBuilder_addWork(String workName) {
+		
+		// Record adding the work
 		this.workBuilder = this.createMock(WorkBuilder.class);
+		WorkFactory<Work> workFactory = null;
 		this.recordReturn(this.officeBuilder, this.officeBuilder.addWork(
-				workName, null), this.workBuilder, new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertEquals("Incorrect work name", workName, actual[0]);
-				assertNotNull("Must have work factory", actual[1]);
-				return true;
-			}
-		});
+				workName, workFactory), this.workBuilder);
+		if (!this.isMatcherSet_officeBuilder_addWork) {
+			this.control(this.officeBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					assertNotNull("Must have work factory", actual[1]);
+					// Match based on work name
+					return expected[0].equals(actual[0]);
+				}
+			});
+			this.isMatcherSet_officeBuilder_addWork = true;
+		}
+		
+		// Reset add task matcher as new mock work builder
+		this.isMatcherSet_workBuilder_addTask = false;
+		
+		// Return the work builder
 		return this.workBuilder;
 	}
 
@@ -172,21 +202,63 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 *            Name of the {@link Task}.
 	 * @return Added {@link TaskBuilder}.
 	 */
+	protected TaskBuilder<Work, ?, ?> record_workBuilder_addTask(String taskName) {
+		return this.record_workBuilder_addTask(taskName, null);
+	}
+
+	/**
+	 * Flags if the matcher has been specified to add a {@link Task}.
+	 */
+	private boolean isMatcherSet_workBuilder_addTask = false;
+
+	/**
+	 * Convenience method for recording adding a {@link TaskBuilder} and
+	 * specifying the {@link Team} for the {@link Task}.
+	 * 
+	 * @param taskName
+	 *            Name of the {@link Task}.
+	 * @param officeTeamName
+	 *            {@link Office} {@link Team} name.
+	 * @return Added {@link TaskBuilder}.
+	 */
 	@SuppressWarnings("unchecked")
 	protected TaskBuilder<Work, ?, ?> record_workBuilder_addTask(
-			final String taskName) {
+			String taskName, String officeTeamName) {
+
+		// Record adding the task
 		this.taskBuilder = this.createMock(TaskBuilder.class);
 		TaskFactory<Work, Indexed, Indexed> taskFactory = null;
 		this.recordReturn(this.workBuilder, this.workBuilder.addTask(taskName,
-				taskFactory), this.taskBuilder, new AbstractMatcher() {
-			@Override
-			public boolean matches(Object[] expected, Object[] actual) {
-				assertEquals("Incorrect task name", taskName, actual[0]);
-				assertNotNull("Must have task factory", actual[1]);
-				return true;
-			}
-		});
+				taskFactory), this.taskBuilder);
+		if (!this.isMatcherSet_workBuilder_addTask) {
+			this.control(this.workBuilder).setMatcher(new AbstractMatcher() {
+				@Override
+				public boolean matches(Object[] expected, Object[] actual) {
+					assertNotNull("Must have task factory", actual[1]);
+					// Match based on task name
+					return expected[0].equals(actual[0]);
+				}
+			});
+			this.isMatcherSet_workBuilder_addTask = true;
+		}
+
+		// Determine if record specifying the team responsible for task
+		if (officeTeamName != null) {
+			this.taskBuilder.setTeam(officeTeamName);
+		}
+
+		// Return the task builder
 		return this.taskBuilder;
+	}
+
+	/**
+	 * Specifies the {@link Team} for the {@link Task}.
+	 * 
+	 * @param officeTeamName
+	 *            {@link Office} {@link Team} name.
+	 */
+	protected void record_taskBuilder_setTeam(String officeTeamName) {
+		this.taskBuilder.setTeam(officeTeamName);
 	}
 
 	/**

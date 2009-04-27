@@ -25,7 +25,14 @@
     </office>
     <desk>
         <works>
-            <work name="WORK" source="CLASS">
+            <work name="WORK_A" source="CLASS">
+                <properties>
+                    <property name="class.name"
+                        value="${testcase}$CompileTaskWork" />
+                </properties>
+                <work-task name="flowTask" />
+            </work>
+            <work name="WORK_B" source="CLASS">
                 <properties>
                     <property name="class.name"
                         value="${testcase}$CompileTaskWork" />
@@ -34,7 +41,12 @@
             </work>
         </works>
         <tasks>
-            <task name="TASK" work="WORK" task="simpleTask" />
+            <task name="TASK_A" work="WORK_A" task="flowTask">
+                <task-flow name="flow">
+                    <task name="TASK_B" link="SEQUENTIAL" />
+                </task-flow>
+            </task>
+            <task name="TASK_B" work="WORK_B" task="simpleTask" />
         </tasks>
     </desk>
 </context>

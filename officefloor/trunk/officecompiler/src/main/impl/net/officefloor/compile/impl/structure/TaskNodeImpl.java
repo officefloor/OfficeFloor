@@ -28,6 +28,7 @@ import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
+import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
@@ -39,6 +40,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -47,6 +49,7 @@ import net.officefloor.frame.api.build.WorkBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 /**
  * {@link TaskNode} implementation.
@@ -69,6 +72,11 @@ public class TaskNodeImpl implements TaskNode {
 	 * Location of {@link OfficeSection} containing this {@link SectionTask}.
 	 */
 	private final String sectionLocation;
+
+	/**
+	 * {@link WorkNode} containing this {@link TaskNode}.
+	 */
+	private final WorkNode workNode;
 
 	/**
 	 * {@link NodeContext}.
@@ -128,14 +136,17 @@ public class TaskNodeImpl implements TaskNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link TaskNode}.
+	 * @param workNode
+	 *            {@link WorkNode} containing this {@link TaskNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public TaskNodeImpl(String taskName, String taskTypeName,
-			String sectionLocation, NodeContext context) {
+			String sectionLocation, WorkNode workNode, NodeContext context) {
 		this.taskName = taskName;
 		this.taskTypeName = taskTypeName;
 		this.sectionLocation = sectionLocation;
+		this.workNode = workNode;
 		this.context = context;
 	}
 
@@ -171,6 +182,12 @@ public class TaskNodeImpl implements TaskNode {
 	}
 
 	@Override
+	public WorkNode getWorkNode() {
+		return this.workNode;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public <W extends Work> void buildTask(WorkType<W> workType,
 			WorkBuilder<W> workBuilder) {
 
@@ -198,11 +215,63 @@ public class TaskNodeImpl implements TaskNode {
 
 		// Build the task
 		TaskFactory<W, ?, ?> taskFactory = taskType.getTaskFactory();
-		TaskBuilder<W, ?, ?> taskBuilder = workBuilder.addTask(this.taskName,
+		TaskBuilder taskBuilder = workBuilder.addTask(this.taskName,
 				taskFactory);
 		taskBuilder.setTeam(officeTeam.getOfficeTeamName());
 
-		// TODO build flows
+		// Build the flows
+		TaskFlowType<?>[] flowTypes = taskType.getFlowTypes();
+		for (int flowIndex = 0; flowIndex < flowTypes.length; flowIndex++) {
+			TaskFlowType<?> flowType = flowTypes[flowIndex];
+
+			// Obtain type details for linking
+			String flowName = flowType.getFlowName();
+			Enum<?> flowKey = flowType.getKey();
+			Class<?> argumentType = flowType.getArgumentType();
+
+			// Obtain the linked task for the flow
+			TaskFlowNode flowNode = this.taskFlows.get(flowName);
+			TaskNode linkedTask = LinkUtil.retrieveTarget(flowNode,
+					TaskNode.class, "Flow " + flowName, LocationType.SECTION,
+					this.sectionLocation, AssetType.TASK, this.taskName,
+					this.context.getCompilerIssues());
+			if (linkedTask == null) {
+				continue; // must have linked task
+			}
+
+			// Obtain configured details for linking
+			String linkedTaskName = linkedTask.getOfficeTaskName();
+			FlowInstigationStrategyEnum instigationStrategy = flowNode
+					.getFlowInstigationStrategy();
+			if (instigationStrategy == null) {
+				this.addIssue("No instigation strategy provided for flow "
+						+ flowName);
+				continue; // must have instigation strategy
+			}
+
+			// Determine if same work
+			WorkNode linkedWork = linkedTask.getWorkNode();
+			if (this.workNode == linkedWork) {
+				// Link to task on same work
+				if (flowKey != null) {
+					taskBuilder.linkFlow(flowKey, linkedTaskName,
+							instigationStrategy, argumentType);
+				} else {
+					taskBuilder.linkFlow(flowIndex, linkedTaskName,
+							instigationStrategy, argumentType);
+				}
+			} else {
+				// Link to task on different work
+				String linkedWorkName = linkedWork.getQualifiedWorkName();
+				if (flowKey != null) {
+					taskBuilder.linkFlow(flowKey, linkedWorkName,
+							linkedTaskName, instigationStrategy, argumentType);
+				} else {
+					taskBuilder.linkFlow(flowIndex, linkedWorkName,
+							linkedTaskName, instigationStrategy, argumentType);
+				}
+			}
+		}
 
 		// TODO build next flow
 

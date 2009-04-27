@@ -17,18 +17,27 @@
 package net.officefloor.model.impl.desk;
 
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
 import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
+import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.DeskOperations;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel;
 import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
@@ -69,7 +78,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 	}
 
 	@Override
-	public void sourceSection(SectionDesigner sectionBuilder,
+	public void sourceSection(SectionDesigner designer,
 			SectionSourceContext context) throws Exception {
 
 		// Obtain the configuration to the desk
@@ -102,8 +111,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 				}
 
 				// Add the section input
-				sectionBuilder.addSectionInput(task.getTaskName(),
-						parameterType);
+				designer.addSectionInput(task.getTaskName(), parameterType);
 			}
 		}
 
@@ -116,23 +124,24 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					.getTaskEscalations().size() > 0));
 
 			// Add the section output
-			sectionBuilder.addSectionOutput(extFlow.getExternalFlowName(),
-					extFlow.getArgumentType(), isEscalationOnly);
+			designer.addSectionOutput(extFlow.getExternalFlowName(), extFlow
+					.getArgumentType(), isEscalationOnly);
 		}
 
 		// Add the external managed objects as objects
 		for (ExternalManagedObjectModel extMo : desk
 				.getExternalManagedObjects()) {
-			sectionBuilder.addSectionObject(extMo
-					.getExternalManagedObjectName(), extMo.getObjectType());
+			designer.addSectionObject(extMo.getExternalManagedObjectName(),
+					extMo.getObjectType());
 		}
 
-		// Add the works
+		// Add the works, keeping registry of the tasks
+		Map<String, SectionTask> tasks = new HashMap<String, SectionTask>();
 		for (WorkModel workModel : desk.getWorks()) {
 
 			// Add the work
-			SectionWork work = sectionBuilder.addSectionWork(workModel
-					.getWorkName(), workModel.getWorkSourceClassName());
+			SectionWork work = designer.addSectionWork(workModel.getWorkName(),
+					workModel.getWorkSourceClassName());
 			for (PropertyModel property : workModel.getProperties()) {
 				work.addProperty(property.getName(), property.getValue());
 			}
@@ -141,12 +150,90 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			for (WorkTaskModel workTaskModel : workModel.getWorkTasks()) {
 				for (WorkTaskToTaskModel conn : workTaskModel.getTasks()) {
 					TaskModel taskModel = conn.getTask();
-
-					// Add the task for the work
-					SectionTask task = work.addSectionTask(taskModel
-							.getTaskName(), taskModel.getWorkTaskName());
+					if (taskModel != null) {
+						// Add the task for the work and register
+						String taskName = taskModel.getTaskName();
+						SectionTask task = work.addSectionTask(taskName,
+								taskModel.getWorkTaskName());
+						tasks.put(taskName, task);
+					}
 				}
 			}
 		}
+
+		// Link the flows for the task (now that all tasks registered)
+		for (TaskModel taskModel : desk.getTasks()) {
+
+			// Obtain the task for the task model
+			String taskName = taskModel.getTaskName();
+			SectionTask task = tasks.get(taskName);
+			if (task == null) {
+				continue; // task not linked to work
+			}
+
+			// Link in the flows for the task
+			for (TaskFlowModel taskFlowModel : taskModel.getTaskFlows()) {
+
+				// Obtain the task flow
+				String flowName = taskFlowModel.getFlowName();
+				TaskFlow taskFlow = task.getTaskFlow(flowName);
+
+				// Determine the instigation strategy
+				FlowInstigationStrategyEnum instigationStrategy = null;
+
+				// Determine if link to another task
+				SectionTask linkedTask = null;
+				TaskFlowToTaskModel flowToTask = taskFlowModel.getTask();
+				if (flowToTask != null) {
+					TaskModel linkedTaskModel = flowToTask.getTask();
+					if (linkedTaskModel != null) {
+						// Obtain the linked task and instigation strategy
+						linkedTask = tasks.get(linkedTaskModel.getTaskName());
+						instigationStrategy = this
+								.getFlowInstatigationStrategy(flowToTask
+										.getLinkType(), designer, taskName,
+										flowName);
+					}
+				}
+				if (linkedTask != null) {
+					// Link the flow to its task
+					designer.link(taskFlow, linkedTask, instigationStrategy);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Obtains the {@link FlowInstigationStrategyEnum}.
+	 * 
+	 * @param instigationStrategyName
+	 *            Name identifying the {@link FlowInstigationStrategyEnum}.
+	 * @param designer
+	 *            {@link SectionDesigner}.
+	 * @param taskName
+	 *            Name of the {@link Task} for reporting issues.
+	 * @param flowName
+	 *            Name of the {@link TaskFlow} for reporting issues.
+	 * @return {@link FlowInstigationStrategyEnum}.
+	 */
+	private FlowInstigationStrategyEnum getFlowInstatigationStrategy(
+			String instigationStrategyName, SectionDesigner designer,
+			String taskName, String flowName) {
+
+		// Obtain the flow instigation strategy
+		if (DeskOperations.SEQUENTIAL_LINK.equals(instigationStrategyName)) {
+			return FlowInstigationStrategyEnum.SEQUENTIAL;
+		} else if (DeskOperations.PARALLEL_LINK.equals(instigationStrategyName)) {
+			return FlowInstigationStrategyEnum.PARALLEL;
+		} else if (DeskOperations.ASYNCHRONOUS_LINK
+				.equals(instigationStrategyName)) {
+			return FlowInstigationStrategyEnum.ASYNCHRONOUS;
+		}
+
+		// Unknown flow instigation strategy if at this point
+		designer.addIssue("Unknown flow instigation strategy '"
+				+ instigationStrategyName + "' for flow " + flowName,
+				AssetType.TASK, taskName);
+		return null;
 	}
 }
