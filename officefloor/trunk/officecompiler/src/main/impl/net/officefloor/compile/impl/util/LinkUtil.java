@@ -176,35 +176,39 @@ public class LinkUtil {
 			LocationType locationType, String location, AssetType assetType,
 			String assetName, CompilerIssues issues) {
 
-		// Must traverse away from first link
-		link = traverser.getNextLinkNode(link);
+		// Ensure have starting link
+		if (link != null) {
 
-		// Traverse the links until find target type
-		Set<Object> traversedLinks = new HashSet<Object>();
-		while (link != null) {
-
-			// Determine if a cycle
-			if (traversedLinks.contains(link)) {
-				// In a cycle
-				issues.addIssue(locationType, location, assetType, assetName,
-						startingLinkName
-								+ " results in a cycle on linking to a "
-								+ targetType.getSimpleName());
-				return null;
-			}
-
-			// Determine if link of correct target type
-			if (targetType.isInstance(link)) {
-				// Found the target
-				return (T) link;
-			}
-
-			// Traverse to the next link to check
-			traversedLinks.add(link);
+			// Must traverse away from first link
 			link = traverser.getNextLinkNode(link);
+
+			// Traverse the links until find target type
+			Set<Object> traversedLinks = new HashSet<Object>();
+			while (link != null) {
+
+				// Determine if a cycle
+				if (traversedLinks.contains(link)) {
+					// In a cycle
+					issues.addIssue(locationType, location, assetType,
+							assetName, startingLinkName
+									+ " results in a cycle on linking to a "
+									+ targetType.getSimpleName());
+					return null;
+				}
+
+				// Determine if link of correct target type
+				if (targetType.isInstance(link)) {
+					// Found the target
+					return (T) link;
+				}
+
+				// Traverse to the next link to check
+				traversedLinks.add(link);
+				link = traverser.getNextLinkNode(link);
+			}
 		}
 
-		// Run out of links, so could not find target
+		// Run out of links (or no starting link), so could not find target
 		issues.addIssue(locationType, location, assetType, assetName,
 				startingLinkName + " is not linked to a "
 						+ targetType.getSimpleName());

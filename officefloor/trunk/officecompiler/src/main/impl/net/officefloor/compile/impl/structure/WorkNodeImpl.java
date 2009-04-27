@@ -149,7 +149,7 @@ public class WorkNodeImpl implements WorkNode {
 		if (task == null) {
 			// Add the section task
 			task = new TaskNodeImpl(taskName, taskTypeName,
-					this.sectionLocation, this.context);
+					this.sectionLocation, this, this.context);
 			this.sectionTaskNodes.put(taskName, task);
 			this.workTaskNodes.add(task);
 		} else {
@@ -162,6 +162,16 @@ public class WorkNodeImpl implements WorkNode {
 	/*
 	 * ===================== WorkNode ===================================
 	 */
+
+	@Override
+	public SectionNode getSectionNode() {
+		return this.section;
+	}
+
+	@Override
+	public String getQualifiedWorkName() {
+		return this.section.getSectionQualifiedName(this.workName);
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")

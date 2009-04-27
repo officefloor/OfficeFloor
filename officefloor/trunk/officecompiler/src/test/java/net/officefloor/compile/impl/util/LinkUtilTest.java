@@ -103,6 +103,21 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensure can handle <code>null</code> starting link.
+	 */
+	public void testNullStartingLink() {
+
+		// Record not finding target
+		this.record_issue("TaskFlow FLOW is not linked to a "
+				+ TargetLinkNode.class.getSimpleName());
+
+		// Attempt to obtain the target (from null)
+		TargetLinkNode retrieved = this.retrieveFlowTarget(null,
+				"TaskFlow FLOW");
+		assertNull("Should not find target", retrieved);
+	}
+
+	/**
 	 * Ensures can find the link on many steps.
 	 */
 	public void testFindLinkOnManySteps() {

@@ -63,14 +63,6 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	void loadOfficeSection(String officeLocation);
 
 	/**
-	 * Builds this {@link OfficeSection} for this {@link SectionNode}.
-	 * 
-	 * @param builder
-	 *            {@link OfficeBuilder}.
-	 */
-	void buildSection(OfficeBuilder builder);
-
-	/**
 	 * Obtain the {@link OfficeSection} qualified name.
 	 * 
 	 * @param simpleName
@@ -79,5 +71,13 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	 * @return {@link OfficeSection} qualified name.
 	 */
 	String getSectionQualifiedName(String simpleName);
+
+	/**
+	 * Builds this {@link OfficeSection} for this {@link SectionNode}.
+	 * 
+	 * @param builder
+	 *            {@link OfficeBuilder}.
+	 */
+	void buildSection(OfficeBuilder builder);
 
 }

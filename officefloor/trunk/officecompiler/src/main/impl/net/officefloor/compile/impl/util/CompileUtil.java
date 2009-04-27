@@ -16,6 +16,9 @@
  */
 package net.officefloor.compile.impl.util;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -54,9 +57,45 @@ public class CompileUtil {
 	 * @return List as an array.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T[] toArray(List<T> list, Object[] type) {
+	public static <T> T[] toArray(Collection<T> list, Object[] type) {
 		Object[] array = list.toArray(type);
 		return (T[]) array;
+	}
+
+	/**
+	 * Convenience method to create a sorted array from a {@link Collection}
+	 * that passes compiler warnings for generic typed array along with handling
+	 * <code>null</code> <code>compareTo</code> values.
+	 * 
+	 * @param collection
+	 *            Collection to transform into a sorted array.
+	 * @param type
+	 *            Type of the array.
+	 * @param extractor
+	 *            {@link StringExtractor} to obtain compare key to sort.
+	 * @return Collection as a sorted array.
+	 */
+	public static <T> T[] toSortedArray(Collection<T> collection,
+			Object[] type, final StringExtractor<T> extractor) {
+
+		// Create the array
+		T[] array = toArray(collection, type);
+
+		// Sort the array
+		Arrays.sort(array, new Comparator<T>() {
+			@Override
+			public int compare(T a, T b) {
+				// Obtain the string keys for comparing
+				String aKey = extractor.toString(a);
+				String bKey = extractor.toString(b);
+
+				// Return the comparison (handling possible null key)
+				return (aKey == null ? "" : aKey).compareTo(bKey);
+			}
+		});
+
+		// Return the sorted array
+		return array;
 	}
 
 	/**

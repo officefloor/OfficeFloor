@@ -40,6 +40,13 @@ public interface TaskNode extends SectionTask, OfficeTask, LinkFlowNode {
 	void addOfficeContext(String officeLocation);
 
 	/**
+	 * Obtains the {@link WorkNode} containing this {@link TaskNode}.
+	 * 
+	 * @return {@link WorkNode} containing this {@link TaskNode}.
+	 */
+	WorkNode getWorkNode();
+
+	/**
 	 * Builds the {@link Task} for this {@link TaskNode}.
 	 * 
 	 * @param workType

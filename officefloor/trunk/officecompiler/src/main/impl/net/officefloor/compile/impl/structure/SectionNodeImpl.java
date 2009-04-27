@@ -24,6 +24,7 @@ import java.util.Map;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
@@ -66,6 +67,7 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
@@ -349,19 +351,6 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public void buildSection(OfficeBuilder builder) {
-
-		// Build the work of this section
-		for (WorkNode work : this.workNodes.values()) {
-			work.buildWork(builder);
-		}
-
-		// TODO build the section managed objects
-
-		// TODO build the sub sections
-	}
-
-	@Override
 	public String getSectionQualifiedName(String simpleName) {
 
 		// Obtain the qualified name for this section
@@ -375,6 +364,26 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Further parent sections
 			return this.parentSection.getSectionQualifiedName(qualifiedName);
 		}
+	}
+
+	@Override
+	public void buildSection(OfficeBuilder builder) {
+
+		// Build the work of this section (in deterministic order)
+		WorkNode[] works = CompileUtil.toSortedArray(this.workNodes.values(),
+				new WorkNode[0], new StringExtractor<WorkNode>() {
+					@Override
+					public String toString(WorkNode work) {
+						return work.getSectionWorkName();
+					}
+				});
+		for (WorkNode work : works) {
+			work.buildWork(builder);
+		}
+
+		// TODO build the section managed objects
+
+		// TODO build the sub sections
 	}
 
 	@Override
@@ -798,6 +807,21 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	public void link(ManagedObjectDependency dependency,
 			SectionManagedObject sectionManagedObject) {
 		this.linkObject(dependency, sectionManagedObject);
+	}
+
+	@Override
+	public void addIssue(String issueDescription, AssetType assetType,
+			String assetName) {
+		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
+				this.sectionLocation, assetType, assetName, issueDescription);
+	}
+
+	@Override
+	public void addIssue(String issueDescription, Throwable cause,
+			AssetType assetType, String assetName) {
+		this.context.getCompilerIssues().addIssue(LocationType.SECTION,
+				this.sectionLocation, assetType, assetName, issueDescription,
+				cause);
 	}
 
 	/*

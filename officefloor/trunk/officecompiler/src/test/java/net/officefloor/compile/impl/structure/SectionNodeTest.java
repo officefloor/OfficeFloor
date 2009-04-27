@@ -79,6 +79,40 @@ public class SectionNodeTest extends AbstractStructureTestCase {
 			SECTION_LOCATION, this.nodeContext);
 
 	/**
+	 * Ensure allow {@link SectionSource} to report issues via the
+	 * {@link SectionDesigner}.
+	 */
+	public void testAddIssue() {
+
+		// Record adding the issue
+		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
+				AssetType.TASK, "SOME TASK", "TEST_ISSUE");
+
+		// Add the issue
+		this.replayMockObjects();
+		this.node.addIssue("TEST_ISSUE", AssetType.TASK, "SOME TASK");
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure allow {@link SectionSource} to report issues via the
+	 * {@link SectionDesigner}.
+	 */
+	public void testAddIssueWithCause() {
+
+		final Exception failure = new Exception("cause");
+
+		// Record adding the issue
+		this.issues.addIssue(LocationType.SECTION, SECTION_LOCATION,
+				AssetType.TASK, "SOME TASK", "TEST_ISSUE", failure);
+
+		// Add the issue
+		this.replayMockObjects();
+		this.node.addIssue("TEST_ISSUE", failure, AssetType.TASK, "SOME TASK");
+		this.verifyMockObjects();
+	}
+
+	/**
 	 * Tests adding a {@link SectionInput}.
 	 */
 	public void testAddSectionInput() {
