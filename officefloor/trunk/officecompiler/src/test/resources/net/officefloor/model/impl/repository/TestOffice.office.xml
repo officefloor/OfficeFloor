@@ -30,7 +30,9 @@
             </properties>
             <input name="INPUT" parameter-type="java.lang.Integer" />
             <output name="OUTPUT_ONE" argument-type="java.lang.Float"
-                escalation-only="false" />
+                escalation-only="false">
+                <section-input section="SECTION_TARGET" input="INPUT" />
+            </output>
             <output name="OUTPUT_TWO" argument-type="java.lang.Exception"
                 escalation-only="true" />
             <object name="OBJECT" object-type="java.sql.Connection" />
@@ -49,6 +51,10 @@
                     <sub-section name="SUB_SUB_SECTION" />
                 </sub-section>
             </sub-section>
+        </section>
+        <section name="SECTION_TARGET" source="net.example.ExampleSectionSource"
+            location="SECTION_LOCATION" x="60" y="61">
+            <input name="INPUT" parameter-type="java.lang.Float" />
         </section>
     </sections>
 </office>

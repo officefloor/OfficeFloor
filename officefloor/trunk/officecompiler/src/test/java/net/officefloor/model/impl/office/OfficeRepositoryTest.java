@@ -20,7 +20,10 @@ import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
+import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionOutputModel;
+import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeTeamModel;
@@ -76,6 +79,21 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				"TEAM");
 		responsibility.setOfficeTeam(respToTeam);
 
+		// section output -> section input
+		OfficeSectionOutputModel output = new OfficeSectionOutputModel(
+				"OUTPUT", String.class.getName(), false);
+		section.addOfficeSectionOutput(output);
+		OfficeSectionModel targetSection = new OfficeSectionModel(
+				"SECTION_TARGET", "net.example.ExcampleSectionSource",
+				"SECTION_LOCATION");
+		office.addOfficeSection(targetSection);
+		OfficeSectionInputModel targetInput = new OfficeSectionInputModel(
+				"INPUT", String.class.getName());
+		targetSection.addOfficeSectionInput(targetInput);
+		OfficeSectionOutputToOfficeSectionInputModel outputToInput = new OfficeSectionOutputToOfficeSectionInputModel(
+				"SECTION_TARGET", "INPUT");
+		output.setOfficeSectionInput(outputToInput);
+
 		// Record retrieving the office
 		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(
 				null, this.configurationItem), office, new AbstractMatcher() {
@@ -100,6 +118,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("responsibility <- team", responsibility, respToTeam
 				.getOfficeSectionResponsibility());
 		assertEquals("responsibility -> team", team, respToTeam.getOfficeTeam());
+
+		// Ensure the outputs connected to inputs
+		assertEquals("output <- input", output, outputToInput
+				.getOfficeSectionOutput());
+		assertEquals("output -> input", targetInput, outputToInput
+				.getOfficeSectionInput());
 	}
 
 	/**
@@ -125,6 +149,22 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		respToTeam.setOfficeTeam(team);
 		respToTeam.connect();
 
+		// section output -> section input
+		OfficeSectionOutputModel output = new OfficeSectionOutputModel(
+				"OUTPUT", String.class.getName(), false);
+		section.addOfficeSectionOutput(output);
+		OfficeSectionModel targetSection = new OfficeSectionModel(
+				"SECTION_TARGET", "net.example.ExcampleSectionSource",
+				"SECTION_LOCATION");
+		office.addOfficeSection(targetSection);
+		OfficeSectionInputModel targetInput = new OfficeSectionInputModel(
+				"INPUT", String.class.getName());
+		targetSection.addOfficeSectionInput(targetInput);
+		OfficeSectionOutputToOfficeSectionInputModel outputToInput = new OfficeSectionOutputToOfficeSectionInputModel();
+		outputToInput.setOfficeSectionOutput(output);
+		outputToInput.setOfficeSectionInput(targetInput);
+		outputToInput.connect();
+
 		// Record storing the office
 		this.modelRepository.store(office, this.configurationItem);
 
@@ -136,5 +176,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		// Ensure the connections have links to enable retrieving
 		assertEquals("responsibility - team", "TEAM", respToTeam
 				.getOfficeTeamName());
+		assertEquals("output - input (section name)", "SECTION_TARGET",
+				outputToInput.getOfficeSectionName());
+		assertEquals("output - input (input name)", "INPUT", outputToInput
+				.getOfficeSectionInputName());
 	}
 }

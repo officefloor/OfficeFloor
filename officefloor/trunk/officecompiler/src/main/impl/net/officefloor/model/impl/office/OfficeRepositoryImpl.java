@@ -19,9 +19,13 @@ package net.officefloor.model.impl.office;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
+import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionOutputModel;
+import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeTeamModel;
@@ -85,6 +89,35 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Create the set of office section inputs
+		DoubleKeyMap<String, String, OfficeSectionInputModel> inputs = new DoubleKeyMap<String, String, OfficeSectionInputModel>();
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			for (OfficeSectionInputModel input : section
+					.getOfficeSectionInputs()) {
+				inputs.put(section.getOfficeSectionName(), input
+						.getOfficeSectionInputName(), input);
+			}
+		}
+
+		// Connect the outputs to the inputs
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			for (OfficeSectionOutputModel output : section
+					.getOfficeSectionOutputs()) {
+				OfficeSectionOutputToOfficeSectionInputModel conn = output
+						.getOfficeSectionInput();
+				if (conn != null) {
+					OfficeSectionInputModel input = inputs.get(conn
+							.getOfficeSectionName(), conn
+							.getOfficeSectionInputName());
+					if (input != null) {
+						conn.setOfficeSectionOutput(output);
+						conn.setOfficeSectionInput(input);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Return the office
 		return office;
 	}
@@ -98,6 +131,19 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			for (OfficeSectionResponsibilityToOfficeTeamModel conn : team
 					.getOfficeSectionResponsibilities()) {
 				conn.setOfficeTeamName(team.getOfficeTeamName());
+			}
+		}
+
+		// Specify outputs to inputs
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			for (OfficeSectionInputModel input : section
+					.getOfficeSectionInputs()) {
+				for (OfficeSectionOutputToOfficeSectionInputModel conn : input
+						.getOfficeSectionOutputs()) {
+					conn.setOfficeSectionName(section.getOfficeSectionName());
+					conn.setOfficeSectionInputName(input
+							.getOfficeSectionInputName());
+				}
 			}
 		}
 

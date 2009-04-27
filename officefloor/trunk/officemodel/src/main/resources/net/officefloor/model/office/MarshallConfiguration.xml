@@ -119,6 +119,15 @@
                         <attribute method="getEscalationOnly"
                             attribute="escalation-only" />
                     </attributes>
+                    <object method="getOfficeSectionInput"
+                        element="section-input">
+                        <attributes>
+                            <attribute method="getOfficeSectionName"
+                                attribute="section" />
+                            <attribute method="getOfficeSectionInputName"
+                                attribute="input" />
+                        </attributes>
+                    </object>
                 </item>
             </collection>
             <collection method="getOfficeSectionObjects">
