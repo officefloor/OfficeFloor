@@ -34,6 +34,7 @@ import net.officefloor.model.office.OfficeSectionManagedObjectTeamModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
+import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityObjectModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
@@ -121,22 +122,37 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		assertList(new String[] { "getOfficeSectionName",
 				"getSectionSourceClassName", "getSectionLocation", "getX",
-				"getY" }, office.getOfficeSections(), new OfficeSectionModel(
-				"SECTION", "net.example.ExampleSectionSource",
-				"SECTION_LOCATION", null, null, null, null, null, null, 50, 51));
+				"getY" }, office.getOfficeSections(),
+				new OfficeSectionModel("SECTION",
+						"net.example.ExampleSectionSource", "SECTION_LOCATION",
+						null, null, null, null, null, null, 50, 51),
+				new OfficeSectionModel("SECTION_TARGET",
+						"net.example.ExampleSectionSource", "SECTION_LOCATION",
+						null, null, null, null, null, null, 60, 61));
 		OfficeSectionModel section = office.getOfficeSections().get(0);
 		assertList(new String[] { "getName", "getValue" }, section
 				.getProperties(), new PropertyModel("PROP_ONE", "VALUE_ONE"),
 				new PropertyModel("PROP_TWO", "VALUE_TWO"));
+
+		// Inputs of section
 		assertList(new String[] { "getOfficeSectionInputName",
 				"getParameterType" }, section.getOfficeSectionInputs(),
 				new OfficeSectionInputModel("INPUT", Integer.class.getName()));
+
+		// Outputs of section
 		assertList(new String[] { "getOfficeSectionOutputName",
 				"getArgumentType", "getEscalationOnly" }, section
 				.getOfficeSectionOutputs(), new OfficeSectionOutputModel(
 				"OUTPUT_ONE", Float.class.getName(), false),
 				new OfficeSectionOutputModel("OUTPUT_TWO", Exception.class
 						.getName(), true));
+		OfficeSectionOutputModel output = section.getOfficeSectionOutputs()
+				.get(0);
+		assertProperties(new OfficeSectionOutputToOfficeSectionInputModel(
+				"SECTION_TARGET", "INPUT"), output.getOfficeSectionInput(),
+				"getOfficeSectionName", "getOfficeSectionInputName");
+
+		// Objects of section
 		assertList(
 				new String[] { "getOfficeSectionObjectName", "getObjectType" },
 				section.getOfficeSectionObjects(),

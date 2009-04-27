@@ -24,9 +24,12 @@ import java.util.List;
 import java.util.Map;
 
 import net.officefloor.compile.OfficeSourceService;
+import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -36,7 +39,10 @@ import net.officefloor.compile.spi.office.source.impl.AbstractOfficeSource;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionOutputModel;
+import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeTeamModel;
@@ -75,7 +81,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	}
 
 	@Override
-	public void sourceOffice(OfficeArchitect officeArchitect,
+	public void sourceOffice(OfficeArchitect architect,
 			OfficeSourceContext context) throws Exception {
 
 		// Obtain the configuration to the section
@@ -94,33 +100,47 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		// Add the external managed objects
 		for (ExternalManagedObjectModel object : office
 				.getExternalManagedObjects()) {
-			officeArchitect.addOfficeObject(object
-					.getExternalManagedObjectName(), object.getObjectType());
+			architect.addOfficeObject(object.getExternalManagedObjectName(),
+					object.getObjectType());
 		}
 
 		// Add the teams, keeping registry of the teams
 		Map<String, OfficeTeam> teams = new HashMap<String, OfficeTeam>();
 		for (OfficeTeamModel teamModel : office.getOfficeTeams()) {
 			String teamName = teamModel.getOfficeTeamName();
-			OfficeTeam team = officeArchitect.addOfficeTeam(teamName);
+			OfficeTeam team = architect.addOfficeTeam(teamName);
 			teams.put(teamName, team);
 		}
 
-		// Add the sections
+		// Add the sections, keeping registry of inputs/outputs
+		DoubleKeyMap<String, String, OfficeSectionInput> inputs = new DoubleKeyMap<String, String, OfficeSectionInput>();
+		DoubleKeyMap<String, String, OfficeSectionOutput> outputs = new DoubleKeyMap<String, String, OfficeSectionOutput>();
 		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
 
 			// Create the property list to add the section
-			PropertyList propertyList = officeArchitect.createPropertyList();
+			PropertyList propertyList = architect.createPropertyList();
 			for (PropertyModel property : sectionModel.getProperties()) {
 				propertyList.addProperty(property.getName()).setValue(
 						property.getValue());
 			}
 
 			// Add the section
-			OfficeSection section = officeArchitect.addOfficeSection(
-					sectionModel.getOfficeSectionName(), sectionModel
-							.getSectionSourceClassName(), sectionModel
+			String sectionName = sectionModel.getOfficeSectionName();
+			OfficeSection section = architect.addOfficeSection(sectionName,
+					sectionModel.getSectionSourceClassName(), sectionModel
 							.getSectionLocation(), propertyList);
+
+			// Register the section inputs
+			for (OfficeSectionInput input : section.getOfficeSectionInputs()) {
+				inputs.put(sectionName, input.getOfficeSectionInputName(),
+						input);
+			}
+
+			// Register the section outputs
+			for (OfficeSectionOutput output : section.getOfficeSectionOutputs()) {
+				outputs.put(sectionName, output.getOfficeSectionOutputName(),
+						output);
+			}
 
 			// Create the listing of responsibilities
 			List<Responsibility> responsibilities = new LinkedList<Responsibility>();
@@ -155,7 +175,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				for (OfficeTask task : new ArrayList<OfficeTask>(tasks)) {
 					if (responsibility.isResponsible(task)) {
 						// Assign the team responsible for task
-						officeArchitect.link(task.getTeamResponsible(),
+						architect.link(task.getTeamResponsible(),
 								responsibility.officeTeam);
 
 						// Remove task from listing as assigned its team
@@ -164,6 +184,74 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 				}
 			}
 		}
+
+		// Link the outputs to the inputs
+		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
+			for (OfficeSectionOutputModel outputModel : sectionModel
+					.getOfficeSectionOutputs()) {
+
+				// Obtain the output
+				OfficeSectionOutput output = outputs.get(sectionModel
+						.getOfficeSectionName(), outputModel
+						.getOfficeSectionOutputName());
+				if (output == null) {
+					continue; // must have the output
+				}
+
+				// Obtain the input
+				OfficeSectionInput input = null;
+				OfficeSectionOutputToOfficeSectionInputModel conn = outputModel
+						.getOfficeSectionInput();
+				if (conn != null) {
+					OfficeSectionInputModel inputModel = conn
+							.getOfficeSectionInput();
+					if (inputModel != null) {
+						OfficeSectionModel inputSection = this
+								.getOfficeSectionForInput(office, inputModel);
+						if (inputSection != null) {
+							input = inputs.get(inputSection
+									.getOfficeSectionName(), inputModel
+									.getOfficeSectionInputName());
+						}
+					}
+				}
+				if (input == null) {
+					continue; // must have the input
+				}
+
+				// Link output to the input
+				architect.link(output, input);
+			}
+		}
+	}
+
+	/**
+	 * Obtains the {@link OfficeSectionModel} containing the
+	 * {@link OfficeSectionInputModel}.
+	 * 
+	 * @param office
+	 *            {@link OfficeModel}.
+	 * @param input
+	 *            {@link OfficeSectionInput}.
+	 * @return {@link OfficeSectionModel} containing the
+	 *         {@link OfficeSectionInput}.
+	 */
+	private OfficeSectionModel getOfficeSectionForInput(OfficeModel office,
+			OfficeSectionInputModel input) {
+
+		// Find and return the office section for the input
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			for (OfficeSectionInputModel check : section
+					.getOfficeSectionInputs()) {
+				if (check == input) {
+					// Found the input so subsequently return section
+					return section;
+				}
+			}
+		}
+
+		// As here did not find the section
+		return null;
 	}
 
 	/**

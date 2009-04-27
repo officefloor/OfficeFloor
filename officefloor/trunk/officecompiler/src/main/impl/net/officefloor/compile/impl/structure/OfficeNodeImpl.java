@@ -27,6 +27,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.ConfigurationContextPropagateError;
 import net.officefloor.compile.impl.util.LinkUtil;
+import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -366,8 +367,16 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			officeBuilder.registerTeam(officeTeamName, officeFloorTeamName);
 		}
 
-		// Build the sections of the office
-		for (SectionNode section : this.sections.values()) {
+		// Build the sections of the office (in deterministic order)
+		SectionNode[] sections = CompileUtil.toSortedArray(this.sections
+				.values(), new SectionNode[0],
+				new StringExtractor<SectionNode>() {
+					@Override
+					public String toString(SectionNode section) {
+						return section.getOfficeSectionName();
+					}
+				});
+		for (SectionNode section : sections) {
 			section.buildSection(officeBuilder);
 		}
 	}

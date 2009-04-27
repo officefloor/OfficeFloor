@@ -76,7 +76,7 @@ public class CompileUtil {
 	 * @return Collection as a sorted array.
 	 */
 	public static <T> T[] toSortedArray(Collection<T> collection,
-			Object[] type, final StringExtractor<T> extractor) {
+			Object[] type, final StringExtractor<? super T> extractor) {
 
 		// Create the array
 		T[] array = toArray(collection, type);

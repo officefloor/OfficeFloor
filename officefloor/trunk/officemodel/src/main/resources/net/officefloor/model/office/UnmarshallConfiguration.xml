@@ -62,6 +62,11 @@
             <value method="setOfficeSectionOutputName" node="output@name" />
             <value method="setArgumentType" node="output@argument-type" />
             <value method="setEscalationOnly" node="output@escalation-only" />
+            <object method="setOfficeSectionInput" node="section-input"
+                class="net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel">
+                <value method="setOfficeSectionName" node="section-input@section" />
+                <value method="setOfficeSectionInputName" node="section-input@input" />
+            </object>
         </object>
         <object method="addOfficeSectionObject" node="object"
             class="net.officefloor.model.office.OfficeSectionObjectModel">

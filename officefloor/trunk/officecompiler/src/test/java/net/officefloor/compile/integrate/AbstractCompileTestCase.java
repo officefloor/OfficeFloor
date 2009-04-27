@@ -127,9 +127,16 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	 */
 	protected OfficeBuilder record_officeFloorBuilder_addOffice(
 			String officeName) {
+
+		// Record adding the office
 		this.officeBuilder = this.createMock(OfficeBuilder.class);
 		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
 				.addOffice(officeName), this.officeBuilder);
+
+		// Reset add work matcher as new mock office builder
+		this.isMatcherSet_officeBuilder_addWork = false;
+
+		// Return the office builder
 		return this.officeBuilder;
 	}
 
