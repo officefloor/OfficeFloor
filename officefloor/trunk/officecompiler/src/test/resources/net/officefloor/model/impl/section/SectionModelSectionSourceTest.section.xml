@@ -10,7 +10,7 @@
 	<sub-sections>
 		<sub-section name="SUB_SECTION"
 			source="net.officefloor.model.impl.desk.DeskModelSectionSource"
-			location="net/officefloor/model/impl/desk/DeskModelSectionSource.desk.xml">
+			location="net/officefloor/model/impl/desk/DeskModelSectionSourceTest.desk.xml">
 			<input name="INPUT" parameter-type="java.lang.Integer" public="true" />
 			<output name="SECTION_OUTPUT" argument-type="java.lang.Float"
 				escalation-only="false">

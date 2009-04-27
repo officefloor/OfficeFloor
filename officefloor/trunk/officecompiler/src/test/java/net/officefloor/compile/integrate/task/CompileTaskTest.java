@@ -20,6 +20,7 @@ import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -52,8 +53,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		// Record building the office floor
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 
@@ -69,8 +70,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		// Record building the office floor
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
@@ -88,8 +89,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		// Record building the office floor
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK_A", "OFFICE_TEAM");
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
@@ -112,8 +113,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		// Record building the office floor
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		TaskBuilder<?, ?, ?> taskOne = this.record_workBuilder_addTask(
 				"TASK_A", "OFFICE_TEAM");
@@ -134,8 +135,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		// Record building the office floor
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE");
-		this.record_officeBuilder_registerTeam("OFFICE_TEAM", "TEAM");
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK_A");
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
 				"OFFICE_TEAM");
@@ -143,6 +144,29 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
 		task.linkFlow(0, "SECTION.WORK_B", "TASK_B",
 				FlowInstigationStrategyEnum.SEQUENTIAL, String.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link Task} linking a {@link Flow} to a {@link Task}
+	 * in a different {@link SubSection}.
+	 */
+	public void testLinkFlowToTaskInDifferentSubSection() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.SUB_SECTION_A.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		this.record_officeBuilder_addWork("SECTION.SUB_SECTION_B.WORK");
+		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
+		task.linkFlow(0, "SECTION.SUB_SECTION_B.WORK", "INPUT",
+				FlowInstigationStrategyEnum.ASYNCHRONOUS, String.class);
 
 		// Compile the office floor
 		this.compile(true);

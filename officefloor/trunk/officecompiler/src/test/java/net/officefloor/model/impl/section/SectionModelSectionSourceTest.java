@@ -51,6 +51,7 @@ public class SectionModelSectionSourceTest extends OfficeFrameTestCase {
 		designer
 				.addSectionOutput("ESCALATION", Exception.class.getName(), true);
 		designer.addSectionObject("OBJECT", Connection.class.getName());
+		designer.addSubSection("SUB_SECTION", "TODO SOURCE", "TODO LOCATION");
 
 		// Validate the section is as expected
 		SectionLoaderUtil.validateSection(designer,
