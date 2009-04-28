@@ -17,14 +17,12 @@
 package net.officefloor.compile.integrate.task;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
-import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
-import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -46,11 +44,6 @@ import net.officefloor.plugin.work.clazz.FlowInterface;
  * @author Daniel
  */
 public class CompileTaskTest extends AbstractCompileTestCase {
-
-	@Override
-	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
-		return new StderrCompilerIssuesWrapper(issues);
-	}
 
 	/**
 	 * Tests compiling a simple {@link Task}.
