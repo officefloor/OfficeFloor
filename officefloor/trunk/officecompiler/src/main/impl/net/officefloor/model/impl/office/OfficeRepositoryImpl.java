@@ -20,10 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.DoubleKeyMap;
+import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
@@ -118,6 +121,31 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 			}
 		}
 
+		// Create the set of external managed objects
+		Map<String, ExternalManagedObjectModel> extMos = new HashMap<String, ExternalManagedObjectModel>();
+		for (ExternalManagedObjectModel extMo : office
+				.getExternalManagedObjects()) {
+			extMos.put(extMo.getExternalManagedObjectName(), extMo);
+		}
+
+		// Connect the objects to the external managed objects
+		for (OfficeSectionModel section : office.getOfficeSections()) {
+			for (OfficeSectionObjectModel object : section
+					.getOfficeSectionObjects()) {
+				OfficeSectionObjectToExternalManagedObjectModel conn = object
+						.getExternalManagedObject();
+				if (conn != null) {
+					ExternalManagedObjectModel extMo = extMos.get(conn
+							.getExternalManagedObjectName());
+					if (extMo != null) {
+						conn.setOfficeSectionObject(object);
+						conn.setExternalManagedObject(extMo);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Return the office
 		return office;
 	}
@@ -144,6 +172,16 @@ public class OfficeRepositoryImpl implements OfficeRepository {
 					conn.setOfficeSectionInputName(input
 							.getOfficeSectionInputName());
 				}
+			}
+		}
+
+		// Specify objects to external managed objects
+		for (ExternalManagedObjectModel extMo : office
+				.getExternalManagedObjects()) {
+			for (OfficeSectionObjectToExternalManagedObjectModel conn : extMo
+					.getOfficeSectionObjects()) {
+				conn.setExternalManagedObjectName(extMo
+						.getExternalManagedObjectName());
 			}
 		}
 

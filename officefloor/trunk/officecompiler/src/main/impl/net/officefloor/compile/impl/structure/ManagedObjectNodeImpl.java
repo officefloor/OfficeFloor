@@ -31,6 +31,7 @@ import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
@@ -40,6 +41,8 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -236,6 +239,26 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 		// Managed object type loaded
 		this.isManagedObjectTypeLoaded = true;
+	}
+
+	@Override
+	public void buildManagedObject(OfficeFloorBuilder builder) {
+
+		// Obtain the managed object source class
+		Class<? extends ManagedObjectSource<?, ?>> managedObjectSourceClass = this.context
+				.getManagedObjectSourceClass(this.managedObjectSourceClassName,
+						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
+						this.managedObjectName);
+		if (managedObjectSourceClass == null) {
+			return; // must have managed object source class
+		}
+
+		// Build the managed object source
+		ManagedObjectBuilder<?> moBuilder = builder.addManagedObject(
+				this.managedObjectName, managedObjectSourceClass);
+		for (Property property : this.propertyList) {
+			moBuilder.addProperty(property.getName(), property.getValue());
+		}
 	}
 
 	/*

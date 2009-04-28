@@ -23,10 +23,12 @@ import java.util.Map;
 import net.officefloor.compile.SectionSourceService;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
+import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.TaskFlow;
+import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.compile.spi.section.source.SectionSourceContext;
 import net.officefloor.compile.spi.section.source.impl.AbstractSectionSource;
@@ -47,6 +49,7 @@ import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -116,11 +119,14 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			sectionOutputs.put(sectionOutputName, sectionOutput);
 		}
 
-		// Add the external managed objects as objects
+		// Add the external managed objects as objects, keeping registry of them
+		Map<String, SectionObject> sectionObjects = new HashMap<String, SectionObject>();
 		for (ExternalManagedObjectModel extMo : desk
 				.getExternalManagedObjects()) {
-			designer.addSectionObject(extMo.getExternalManagedObjectName(),
-					extMo.getObjectType());
+			String sectionObjectName = extMo.getExternalManagedObjectName();
+			SectionObject sectionObject = designer.addSectionObject(
+					sectionObjectName, extMo.getObjectType());
+			sectionObjects.put(sectionObjectName, sectionObject);
 		}
 
 		// Add the works, keeping registry of the tasks
@@ -149,7 +155,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			}
 		}
 
-		// Link the flows for the task (as all tasks/external flows registered)
+		// Link the flows/objects for the task (as all links registered)
 		for (TaskModel taskModel : desk.getTasks()) {
 
 			// Obtain the task for the task model
@@ -157,6 +163,42 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			SectionTask task = tasks.get(taskName);
 			if (task == null) {
 				continue; // task not linked to work
+			}
+
+			// Obtain the work task for the task
+			WorkTaskModel workTaskModel = null;
+			WorkTaskToTaskModel workTaskToTask = taskModel.getWorkTask();
+			if (workTaskToTask != null) {
+				workTaskModel = workTaskToTask.getWorkTask();
+			}
+			if (workTaskModel != null) {
+				// Link in the objects for the task
+				for (WorkTaskObjectModel taskObjectModel : workTaskModel
+						.getTaskObjects()) {
+
+					// Obtain the task object
+					String objectName = taskObjectModel.getObjectName();
+					TaskObject taskObject = task.getTaskObject(objectName);
+
+					// Determine if link object to external managed object
+					SectionObject linkedSectionObject = null;
+					WorkTaskObjectToExternalManagedObjectModel objectToExtMo = taskObjectModel
+							.getExternalManagedObject();
+					if (objectToExtMo != null) {
+						ExternalManagedObjectModel linkedExtMo = objectToExtMo
+								.getExternalManagedObject();
+						if (linkedExtMo != null) {
+							// Obtain the linked section object
+							linkedSectionObject = sectionObjects
+									.get(linkedExtMo
+											.getExternalManagedObjectName());
+						}
+					}
+					if (linkedSectionObject != null) {
+						// Link the object to its section object
+						designer.link(taskObject, linkedSectionObject);
+					}
+				}
 			}
 
 			// Link in the flows for the task

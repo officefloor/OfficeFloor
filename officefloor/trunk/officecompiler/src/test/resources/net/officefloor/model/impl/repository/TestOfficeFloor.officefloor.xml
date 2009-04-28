@@ -28,7 +28,9 @@
                 <property name="OFFICE_ONE" value="VALUE_ONE" />
                 <property name="OFFICE_TWO" value="VALUE_TWO" />
             </properties>
-            <object name="OBJECT" object-type="net.orm.Session" />
+            <object name="OBJECT" object-type="net.orm.Session">
+                <managed-object name="MANAGED_OBJECT" />
+            </object>
             <input name="INPUT" parameter-type="java.lang.Integer" />
             <team name="OFFICE_TEAM">
                 <office-floor-team name="TEAM" />

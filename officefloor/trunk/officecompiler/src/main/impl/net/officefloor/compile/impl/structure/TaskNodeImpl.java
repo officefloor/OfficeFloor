@@ -32,6 +32,7 @@ import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -41,6 +42,7 @@ import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.work.TaskFlowType;
+import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.build.TaskBuilder;
@@ -300,7 +302,37 @@ public class TaskNodeImpl implements TaskNode {
 			}
 		}
 
-		// TODO build objects
+		// Build the objects
+		TaskObjectType<?>[] objectTypes = taskType.getObjectTypes();
+		for (int objectIndex = 0; objectIndex < objectTypes.length; objectIndex++) {
+			TaskObjectType<?> objectType = objectTypes[objectIndex];
+
+			// Obtain the type details for linking
+			String objectName = objectType.getObjectName();
+			Enum<?> objectKey = objectType.getKey();
+			Class<?> objectClass = objectType.getObjectType();
+
+			// Obtain the linked office object for the object
+			TaskObjectNode objectNode = this.taskObjects.get(objectName);
+			OfficeObject linkedOfficeObject = LinkUtil.retrieveTarget(
+					objectNode, OfficeObject.class, "Object " + objectName,
+					LocationType.SECTION, this.sectionLocation, AssetType.TASK,
+					this.taskName, this.context.getCompilerIssues());
+			if (linkedOfficeObject == null) {
+				continue; // must have linked office object
+			}
+
+			// Link task object to office object
+			String linkedOfficeObjectName = linkedOfficeObject
+					.getOfficeObjectName();
+			if (objectKey != null) {
+				taskBuilder.linkManagedObject(objectKey,
+						linkedOfficeObjectName, objectClass);
+			} else {
+				taskBuilder.linkManagedObject(objectIndex,
+						linkedOfficeObjectName, objectClass);
+			}
+		}
 
 		// TODO build escalations
 	}

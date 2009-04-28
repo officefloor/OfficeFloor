@@ -19,6 +19,7 @@ package net.officefloor.model.impl.desk;
 import java.sql.Connection;
 
 import net.officefloor.compile.spi.section.SectionDesigner;
+import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.test.section.SectionLoaderUtil;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -54,7 +55,8 @@ public class DeskModelSectionSourceTest extends OfficeFrameTestCase {
 		designer.addSectionObject("OBJECT", Connection.class.getName());
 		SectionWork work = designer.addSectionWork("WORK",
 				"net.example.ExampleWorkSource");
-		work.addSectionTask("INPUT", "WORK_TASK");
+		SectionTask task = work.addSectionTask("INPUT", "WORK_TASK");
+		task.getTaskObject("PARAMETER"); // TODO handle parameters
 
 		// Validates the section is as expected
 		SectionLoaderUtil.validateSection(designer,

@@ -63,6 +63,11 @@
             class="net.officefloor.model.officefloor.DeployedOfficeObjectModel">
             <value method="setDeployedOfficeObjectName" node="object@name" />
             <value method="setObjectType" node="object@object-type" />
+            <object method="setOfficeFloorManagedObject" node="managed-object"
+                class="net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel">
+                <value method="setOfficeFloorManagedObjectName"
+                    node="managed-object@name" />
+            </object>
         </object>
         <object method="addDeployedOfficeInput" node="input"
             class="net.officefloor.model.officefloor.DeployedOfficeInputModel">

@@ -27,8 +27,10 @@ import net.officefloor.compile.OfficeSourceService;
 import net.officefloor.compile.impl.util.DoubleKeyMap;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
+import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
@@ -41,6 +43,8 @@ import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
@@ -97,11 +101,14 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 		OfficeModel office = new OfficeRepositoryImpl(new ModelRepositoryImpl())
 				.retrieveOffice(configuration);
 
-		// Add the external managed objects
+		// Add the external managed objects, keeping registry of them
+		Map<String, OfficeObject> officeObjects = new HashMap<String, OfficeObject>();
 		for (ExternalManagedObjectModel object : office
 				.getExternalManagedObjects()) {
-			architect.addOfficeObject(object.getExternalManagedObjectName(),
-					object.getObjectType());
+			String officeObjectName = object.getExternalManagedObjectName();
+			OfficeObject officeObject = architect.addOfficeObject(
+					officeObjectName, object.getObjectType());
+			officeObjects.put(officeObjectName, officeObject);
 		}
 
 		// Add the teams, keeping registry of the teams
@@ -112,9 +119,10 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			teams.put(teamName, team);
 		}
 
-		// Add the sections, keeping registry of inputs/outputs
+		// Add the sections, keeping registry of inputs/outputs/objects
 		DoubleKeyMap<String, String, OfficeSectionInput> inputs = new DoubleKeyMap<String, String, OfficeSectionInput>();
 		DoubleKeyMap<String, String, OfficeSectionOutput> outputs = new DoubleKeyMap<String, String, OfficeSectionOutput>();
+		DoubleKeyMap<String, String, OfficeSectionObject> objects = new DoubleKeyMap<String, String, OfficeSectionObject>();
 		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
 
 			// Create the property list to add the section
@@ -140,6 +148,12 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			for (OfficeSectionOutput output : section.getOfficeSectionOutputs()) {
 				outputs.put(sectionName, output.getOfficeSectionOutputName(),
 						output);
+			}
+
+			// Register the section objects
+			for (OfficeSectionObject object : section.getOfficeSectionObjects()) {
+				objects.put(sectionName, object.getOfficeSectionObjectName(),
+						object);
 			}
 
 			// Create the listing of responsibilities
@@ -185,15 +199,49 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			}
 		}
 
-		// Link the outputs to the inputs
+		// Link the sections to other sections and external office
 		for (OfficeSectionModel sectionModel : office.getOfficeSections()) {
+
+			// Obtain the section name
+			String sectionName = sectionModel.getOfficeSectionName();
+
+			// Link the objects to office objects
+			for (OfficeSectionObjectModel objectModel : sectionModel
+					.getOfficeSectionObjects()) {
+
+				// Obtain the object
+				OfficeSectionObject object = objects.get(sectionName,
+						objectModel.getOfficeSectionObjectName());
+				if (object == null) {
+					continue; // must have the object
+				}
+
+				// Determine if link object to office object
+				OfficeObject officeObject = null;
+				OfficeSectionObjectToExternalManagedObjectModel conn = objectModel
+						.getExternalManagedObject();
+				if (conn != null) {
+					ExternalManagedObjectModel extMo = conn
+							.getExternalManagedObject();
+					if (extMo != null) {
+						officeObject = officeObjects.get(extMo
+								.getExternalManagedObjectName());
+					}
+				}
+				if (officeObject != null) {
+					// Link object to office object
+					architect.link(object, officeObject);
+				}
+
+			}
+
+			// Link the outputs to the inputs
 			for (OfficeSectionOutputModel outputModel : sectionModel
 					.getOfficeSectionOutputs()) {
 
 				// Obtain the output
-				OfficeSectionOutput output = outputs.get(sectionModel
-						.getOfficeSectionName(), outputModel
-						.getOfficeSectionOutputName());
+				OfficeSectionOutput output = outputs.get(sectionName,
+						outputModel.getOfficeSectionOutputName());
 				if (output == null) {
 					continue; // must have the output
 				}

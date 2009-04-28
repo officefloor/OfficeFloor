@@ -202,6 +202,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeFloorBuilder builder = officeFrame
 				.createOfficeFloorBuilder(this.officeFloorLocation);
 
+		// Build the managed objects
+		for (ManagedObjectNode managedObject : this.managedObjects.values()) {
+			managedObject.buildManagedObject(builder);
+		}
+
 		// Build the teams
 		for (TeamNode team : this.teams.values()) {
 			team.buildTeam(builder);

@@ -121,6 +121,13 @@
                         <attribute method="getObjectType"
                             attribute="object-type" />
                     </attributes>
+                    <object method="getOfficeFloorManagedObject"
+                        element="managed-object">
+                        <attributes>
+                            <attribute method="getOfficeFloorManagedObjectName"
+                                attribute="name" />
+                        </attributes>
+                    </object>
                 </item>
             </collection>
             <collection method="getDeployedOfficeInputs">
