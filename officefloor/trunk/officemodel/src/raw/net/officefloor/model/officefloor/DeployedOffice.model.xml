@@ -7,4 +7,6 @@
     <list type="DeployedOfficeObjectModel" name="deployed office object" />
     <list type="DeployedOfficeInputModel" name="deployed office input" />
     <list type="DeployedOfficeTeamModel" name="deployed office team" />
+    <list type="OfficeFloorManagedObjectToDeployedOfficeModel"
+        name="office floor managed object" />
 </model>

@@ -18,6 +18,7 @@ package net.officefloor.compile.impl.util;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -103,6 +104,21 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures can traverse {@link LinkOfficeNode} instances.
+	 */
+	public void testTraverseLinkOfficeNodes() {
+
+		// Create the links
+		TargetLinkNode target = new TargetLinkNode();
+		LinkNode link = new LinkNode(target);
+
+		// Obtain the target
+		TargetLinkNode retrieved = this.retrieveOfficeTarget(link,
+				"Office OFFICE");
+		assertEquals("Incorrect target", target, retrieved);
+	}
+
+	/**
 	 * Ensures no issue is raised if no target is found and <code>null</code>
 	 * returned.
 	 */
@@ -153,7 +169,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 			link = ((i % 2 == 0) ? new LinkNode(link)
 					: new TargetLinkNode(link));
 		}
-		
+
 		// Find the target
 		this.replayMockObjects();
 		TargetLinkNode found = LinkUtil.findFurtherestTarget(link,
@@ -336,6 +352,25 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Retrieves the {@link TargetLinkNode}.
+	 * 
+	 * @param link
+	 *            Starting {@link LinkOfficeNode}.
+	 * @param startingLinkName
+	 *            Name of starting link.
+	 * @return {@link TargetLinkNode}.
+	 */
+	private TargetLinkNode retrieveOfficeTarget(LinkOfficeNode link,
+			String startingLinkName) {
+		this.replayMockObjects();
+		TargetLinkNode retrieved = LinkUtil.retrieveTarget(link,
+				TargetLinkNode.class, startingLinkName, LOCATION_TYPE,
+				LOCATION, ASSET_TYPE, ASSET_NAME, this.issues);
+		this.verifyMockObjects();
+		return retrieved;
+	}
+
+	/**
 	 * Records and issue.
 	 * 
 	 * @param issueDescription
@@ -350,7 +385,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	 * Link node for testing.
 	 */
 	private class LinkNode implements LinkFlowNode, LinkObjectNode,
-			LinkTeamNode {
+			LinkTeamNode, LinkOfficeNode {
 
 		/**
 		 * Linked node.
@@ -440,6 +475,21 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 
 		@Override
 		public boolean linkTeamNode(LinkTeamNode node) {
+			fail("Should not be linking, only following links");
+			return false;
+		}
+
+		/*
+		 * ================ LinkOfficeNode ===============================
+		 */
+
+		@Override
+		public LinkOfficeNode getLinkedOfficeNode() {
+			return this.getLinkedNode();
+		}
+
+		@Override
+		public boolean linkOfficeNode(LinkOfficeNode node) {
 			fail("Should not be linking, only following links");
 			return false;
 		}

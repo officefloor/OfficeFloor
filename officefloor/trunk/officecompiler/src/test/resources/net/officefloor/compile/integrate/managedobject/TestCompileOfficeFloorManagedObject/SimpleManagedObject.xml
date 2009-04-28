@@ -1,0 +1,17 @@
+<context>
+    <office-floor>
+        <managed-objects>
+            <managed-object name="MANAGED_OBJECT" source="CLASS">
+                <properties>
+                    <property name="class.name"
+                        value="${testcase}$SimpleManagedObject" />
+                </properties>
+                <managing-office name="OFFICE" />
+            </managed-object>
+        </managed-objects>
+        <offices>
+            <office name="OFFICE" source="OFFICE" location="office" />
+        </offices>
+    </office-floor>
+    <office />
+</context>

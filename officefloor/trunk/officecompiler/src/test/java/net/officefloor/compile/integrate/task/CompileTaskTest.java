@@ -24,6 +24,7 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.work.TaskEscalationType;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -265,9 +266,13 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	public void testLinkTaskObjectToOfficeFloorManagedObject() {
 
 		// Record building the office floor
-		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
-				"class.name", CompileManagedObject.class.getName());
+		ManagedObjectBuilder<?> moBuilder = this
+				.record_officeFloorBuilder_addManagedObject(
+						"MANAGED_OBJECT_SOURCE",
+						ClassManagedObjectSource.class, "class.name",
+						CompileManagedObject.class.getName());
+		this.recordReturn(moBuilder, moBuilder.setManagingOffice("OFFICE"),
+				null);
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(

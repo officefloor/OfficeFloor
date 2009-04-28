@@ -21,10 +21,12 @@ import java.util.Map;
 
 import net.officefloor.compile.impl.managedobject.ManagedObjectLoaderImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectFlowNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagingOfficeNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -36,6 +38,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
+import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
@@ -43,6 +46,7 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -127,7 +131,7 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	/**
 	 * {@link ManagingOffice}.
 	 */
-	private ManagingOffice managingOffice;
+	private ManagingOfficeNode managingOffice;
 
 	/**
 	 * Location of the {@link OfficeFloor} containing this
@@ -258,6 +262,17 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 				this.managedObjectName, managedObjectSourceClass);
 		for (Property property : this.propertyList) {
 			moBuilder.addProperty(property.getName(), property.getValue());
+		}
+
+		// Obtain the managing office
+		DeployedOffice managingOffice = LinkUtil.retrieveTarget(
+				this.managingOffice, DeployedOffice.class, "Managed Object "
+						+ this.managedObjectName, LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, AssetType.MANAGED_OBJECT,
+				this.managedObjectName, this.context.getCompilerIssues());
+		if (managingOffice != null) {
+			// Specify the managing office
+			moBuilder.setManagingOffice(managingOffice.getDeployedOfficeName());
 		}
 	}
 

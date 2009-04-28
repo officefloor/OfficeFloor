@@ -14,6 +14,11 @@
             <value method="setName" node="property@name" />
             <value method="setValue" node="property@value" />
         </object>
+        <object method="setManagingOffice" node="managing-office"
+            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectToDeployedOfficeModel">
+            <value method="setManagingOfficeName" node="managing-office@name" />
+            <value method="setProcessBoundManagedObjectName" node="managing-office@process-bound-name" />
+        </object>
         <object method="addOfficeFloorManagedObjectDependency"
             node="dependency"
             class="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel">

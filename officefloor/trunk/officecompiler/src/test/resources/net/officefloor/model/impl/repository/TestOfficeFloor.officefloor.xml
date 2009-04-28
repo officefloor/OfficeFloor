@@ -7,6 +7,7 @@
                 <property name="MO_ONE" value="VALUE_ONE" />
                 <property name="MO_TWO" value="VALUE_TWO" />
             </properties>
+            <managing-office name="OFFICE" process-bound-name="PROCESS_MO" />
             <dependency name="DEPENDENCY" object-type="java.sql.Connection" />
             <flow name="FLOW" argument-type="java.lang.Integer" />
             <team name="MO_TEAM" />

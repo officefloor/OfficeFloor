@@ -3,6 +3,8 @@
     <field type="String" name="office floor managed object name" />
     <field type="String" name="managed object source class name" />
     <field type="String" name="object type" />
+    <field type="OfficeFloorManagedObjectToDeployedOfficeModel"
+        name="managing office" />
     <list type="PropertyModel" name="property" plural="properties" />
     <list type="OfficeFloorManagedObjectDependencyModel" name="office floor managed object dependency"
         plural="office floor managed object dependencies" />
