@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.officefloor.compile.ManagedObjectSourceService;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
@@ -40,7 +41,8 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  * @author Daniel
  */
 public class ClassManagedObjectSource extends
-		AbstractManagedObjectSource<Indexed, None> {
+		AbstractManagedObjectSource<Indexed, None> implements
+		ManagedObjectSourceService {
 
 	/**
 	 * Convenience method to aid in unit testing.
@@ -134,6 +136,20 @@ public class ClassManagedObjectSource extends
 	 * {@link DependencyMetaData} instances.
 	 */
 	private DependencyMetaData[] dependencyMetaData;
+
+	/*
+	 * =================== ManagedObjectSourceService ==========================
+	 */
+
+	@Override
+	public String getManagedObjectSourceAlias() {
+		return "CLASS";
+	}
+
+	@Override
+	public Class<? extends ManagedObjectSource<?, ?>> getManagedObjectSourceClass() {
+		return this.getClass();
+	}
 
 	/*
 	 * ==================== AbstractManagedObjectSource ========================

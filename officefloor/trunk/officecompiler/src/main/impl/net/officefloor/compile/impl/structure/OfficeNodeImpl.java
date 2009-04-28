@@ -59,6 +59,7 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeUnknownPropertyError;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -365,6 +366,30 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 			// Register the team to the office
 			officeBuilder.registerTeam(officeTeamName, officeFloorTeamName);
+		}
+
+		// Register the office floor managed objects for the office
+		for (OfficeObjectNode objectNode : this.objects.values()) {
+
+			// Obtain the office object name
+			String officeObjectName = objectNode.getOfficeObjectName();
+
+			// Obtain the office floor managed object name
+			OfficeFloorManagedObject officeFloorManagedObject = LinkUtil
+					.retrieveTarget(objectNode, OfficeFloorManagedObject.class,
+							"Office object " + officeObjectName,
+							LocationType.OFFICE, this.officeLocation,
+							AssetType.MANAGED_OBJECT, officeObjectName,
+							this.context.getCompilerIssues());
+			if (officeFloorManagedObject == null) {
+				continue; // office floor managed object not linked
+			}
+			String officeFloorManagedObjectName = officeFloorManagedObject
+					.getOfficeFloorManagedObjectName();
+
+			// Register the managed object to the office
+			officeBuilder.registerManagedObjectSource(officeObjectName,
+					officeFloorManagedObjectName);
 		}
 
 		// Build the sections of the office (in deterministic order)

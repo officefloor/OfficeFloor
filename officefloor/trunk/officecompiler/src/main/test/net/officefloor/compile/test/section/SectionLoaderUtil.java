@@ -30,7 +30,6 @@ import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
 import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
-import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -393,16 +392,7 @@ public class SectionLoaderUtil {
 						+ " (sub section=" + subSectionName + ")", eDependency
 						.getObjectDependencyName(), aDependency
 						.getObjectDependencyName());
-				DependentManagedObject eMo = eDependency
-						.getDependentManagedObject();
-				DependentManagedObject aMo = aDependency
-						.getDependentManagedObject();
-				TestCase.assertEquals(
-						"Incorrect dependent name for dependency " + j
-								+ " (sub section=" + subSectionName + ")", eMo
-								.getDependentManagedObjectName(), aMo
-								.getDependentManagedObjectName());
-
+				// Do not check dependent as requires linking
 			}
 		}
 

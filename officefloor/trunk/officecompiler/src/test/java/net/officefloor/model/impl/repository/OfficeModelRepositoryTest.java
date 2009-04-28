@@ -33,6 +33,7 @@ import net.officefloor.model.office.OfficeSectionManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionManagedObjectTeamModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
@@ -87,7 +88,8 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getExternalManagedObjectName",
 				"getObjectType", "getX", "getY" }, office
 				.getExternalManagedObjects(), new ExternalManagedObjectModel(
-				"EXTERNAL_MANAGED_OBJECT", Connection.class.getName(), 10, 11));
+				"EXTERNAL_MANAGED_OBJECT", Connection.class.getName(), null,
+				10, 11));
 
 		// ----------------------------------------
 		// Validate the teams
@@ -158,6 +160,11 @@ public class OfficeModelRepositoryTest extends OfficeFrameTestCase {
 				section.getOfficeSectionObjects(),
 				new OfficeSectionObjectModel("OBJECT", Connection.class
 						.getName()));
+		OfficeSectionObjectModel object = section.getOfficeSectionObjects()
+				.get(0);
+		assertProperties(new OfficeSectionObjectToExternalManagedObjectModel(
+				"EXTERNAL_MANAGED_OBJECT"), object.getExternalManagedObject(),
+				"getExternalManagedObjectName");
 
 		// Responsibilities of section
 		assertList(new String[] { "getOfficeSectionResponsibilityName" },

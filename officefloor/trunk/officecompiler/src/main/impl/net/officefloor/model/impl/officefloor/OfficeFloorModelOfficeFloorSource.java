@@ -20,9 +20,11 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -30,8 +32,11 @@ import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
@@ -80,6 +85,26 @@ public class OfficeFloorModelOfficeFloorSource extends
 		OfficeFloorModel officeFloor = new OfficeFloorRepositoryImpl(
 				new ModelRepositoryImpl()).retrieveOfficeFloor(configuration);
 
+		// Add the office floor managed objects, keeping registry of them
+		Map<String, OfficeFloorManagedObject> officeFloorManagedObjects = new HashMap<String, OfficeFloorManagedObject>();
+		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor
+				.getOfficeFloorManagedObjects()) {
+
+			// Add the office floor managed object
+			String managedObjectName = managedObjectModel
+					.getOfficeFloorManagedObjectName();
+			OfficeFloorManagedObject managedObject = deployer.addManagedObject(
+					managedObjectName, managedObjectModel
+							.getManagedObjectSourceClassName());
+			for (PropertyModel property : managedObjectModel.getProperties()) {
+				managedObject.addProperty(property.getName(), property
+						.getValue());
+			}
+
+			// Register the managed object
+			officeFloorManagedObjects.put(managedObjectName, managedObject);
+		}
+
 		// Add the office floor teams, keeping registry of teams
 		Map<String, OfficeFloorTeam> officeFloorTeams = new HashMap<String, OfficeFloorTeam>();
 		for (OfficeFloorTeamModel teamModel : officeFloor.getOfficeFloorTeams()) {
@@ -106,6 +131,36 @@ public class OfficeFloorModelOfficeFloorSource extends
 					.getOfficeLocation());
 			for (PropertyModel property : officeModel.getProperties()) {
 				office.addProperty(property.getName(), property.getValue());
+			}
+
+			// Add the office objects
+			for (DeployedOfficeObjectModel objectModel : officeModel
+					.getDeployedOfficeObjects()) {
+
+				// Add the office object
+				OfficeObject officeObject = office
+						.getDeployedOfficeObject(objectModel
+								.getDeployedOfficeObjectName());
+
+				// Obtain the office floor managed object
+				OfficeFloorManagedObject managedObject = null;
+				DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = objectModel
+						.getOfficeFloorManagedObject();
+				if (conn != null) {
+					OfficeFloorManagedObjectModel managedObjectModel = conn
+							.getOfficeFloorManagedObject();
+					if (managedObjectModel != null) {
+						managedObject = officeFloorManagedObjects
+								.get(managedObjectModel
+										.getOfficeFloorManagedObjectName());
+					}
+				}
+				if (managedObject == null) {
+					continue; // must have managed object for office object
+				}
+
+				// Have the office object be the managed object
+				deployer.link(officeObject, managedObject);
 			}
 
 			// Add the office teams

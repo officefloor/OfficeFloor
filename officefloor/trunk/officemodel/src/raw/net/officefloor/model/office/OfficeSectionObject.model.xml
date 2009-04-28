@@ -2,4 +2,6 @@
 <model>
     <field type="String" name="office section object name" />
     <field type="String" name="object type" />
+    <field type="OfficeSectionObjectToExternalManagedObjectModel"
+        name="external managed object" />
 </model>

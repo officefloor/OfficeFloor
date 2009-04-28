@@ -140,6 +140,13 @@
                         <attribute method="getObjectType"
                             attribute="object-type" />
                     </attributes>
+                    <object method="getExternalManagedObject"
+                        element="external-managed-object">
+                        <attributes>
+                            <attribute method="getExternalManagedObjectName"
+                                attribute="name" />
+                        </attributes>
+                    </object>
                 </item>
             </collection>
             <collection method="getOfficeSectionResponsibilities">

@@ -20,9 +20,11 @@ import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link SectionManagedObject} node.
@@ -56,5 +58,13 @@ public interface ManagedObjectNode extends SectionManagedObject,
 	 * {@link SectionManagedObject}.
 	 */
 	void loadManagedObjectMetaData();
+
+	/**
+	 * Builds {@link ManagedObjectSource} for this {@link ManagedObjectNode}.
+	 * 
+	 * @param builder
+	 *            {@link OfficeFloorBuilder}.
+	 */
+	void buildManagedObject(OfficeFloorBuilder builder);
 
 }

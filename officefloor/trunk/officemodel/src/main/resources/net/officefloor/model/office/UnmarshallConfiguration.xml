@@ -72,6 +72,10 @@
             class="net.officefloor.model.office.OfficeSectionObjectModel">
             <value method="setOfficeSectionObjectName" node="object@name" />
             <value method="setObjectType" node="object@object-type" />
+            <object method="setExternalManagedObject" node="external-managed-object"
+                class="net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel">
+                <value method="setExternalManagedObjectName" node="external-managed-object@name" />
+            </object>
         </object>
         <object method="addOfficeSectionResponsibility" node="responsibility"
             class="net.officefloor.model.office.OfficeSectionResponsibilityModel">

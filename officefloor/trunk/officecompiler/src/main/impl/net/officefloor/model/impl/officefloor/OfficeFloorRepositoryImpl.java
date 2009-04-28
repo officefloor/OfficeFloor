@@ -20,8 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -62,6 +65,32 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 		OfficeFloorModel officeFloor = this.modelRepository.retrieve(
 				new OfficeFloorModel(), configuration);
 
+		// Create the set of office floor managed objects
+		Map<String, OfficeFloorManagedObjectModel> managedObjects = new HashMap<String, OfficeFloorManagedObjectModel>();
+		for (OfficeFloorManagedObjectModel managedObject : officeFloor
+				.getOfficeFloorManagedObjects()) {
+			managedObjects.put(managedObject.getOfficeFloorManagedObjectName(),
+					managedObject);
+		}
+
+		// Connect the office objects to the office floor managed objects
+		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
+			for (DeployedOfficeObjectModel officeObject : office
+					.getDeployedOfficeObjects()) {
+				DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = officeObject
+						.getOfficeFloorManagedObject();
+				if (conn != null) {
+					OfficeFloorManagedObjectModel managedObject = managedObjects
+							.get(conn.getOfficeFloorManagedObjectName());
+					if (managedObject != null) {
+						conn.setDeployedOfficeObject(officeObject);
+						conn.setOfficeFloorManagedObject(managedObject);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Create the set of office floor teams
 		Map<String, OfficeFloorTeamModel> teams = new HashMap<String, OfficeFloorTeamModel>();
 		for (OfficeFloorTeamModel team : officeFloor.getOfficeFloorTeams()) {
@@ -93,6 +122,16 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 	@Override
 	public void storeOfficeFloor(OfficeFloorModel officeFloor,
 			ConfigurationItem configuration) throws Exception {
+
+		// Specify office objects to office floor managed objects
+		for (OfficeFloorManagedObjectModel managedObject : officeFloor
+				.getOfficeFloorManagedObjects()) {
+			for (DeployedOfficeObjectToOfficeFloorManagedObjectModel conn : managedObject
+					.getDeployedOfficeObjects()) {
+				conn.setOfficeFloorManagedObjectName(managedObject
+						.getOfficeFloorManagedObjectName());
+			}
+		}
 
 		// Specify office teams to office floor teams
 		for (OfficeFloorTeamModel officeFloorTeam : officeFloor

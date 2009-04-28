@@ -26,6 +26,7 @@ import net.officefloor.model.impl.repository.memory.MemoryConfigurationItem;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
@@ -77,12 +78,14 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the office floor managed objects
 		// ----------------------------------------
-		assertList(new String[] { "getOfficeFloorManagedObjectName",
-				"getManagedObjectSourceClassName", "getObjectType", "getX",
-				"getY" }, officeFloor.getOfficeFloorManagedObjects(),
+		assertList(
+				new String[] { "getOfficeFloorManagedObjectName",
+						"getManagedObjectSourceClassName", "getObjectType",
+						"getX", "getY" },
+				officeFloor.getOfficeFloorManagedObjects(),
 				new OfficeFloorManagedObjectModel("MANAGED_OBJECT",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", null, null, null, null, 10, 11));
+						"net.orm.Session", null, null, null, null, null, 10, 11));
 		OfficeFloorManagedObjectModel mo = officeFloor
 				.getOfficeFloorManagedObjects().get(0);
 		assertList(new String[] { "getName", "getValue" }, mo.getProperties(),
@@ -128,9 +131,20 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getName", "getValue" }, office
 				.getProperties(), new PropertyModel("OFFICE_ONE", "VALUE_ONE"),
 				new PropertyModel("OFFICE_TWO", "VALUE_TWO"));
+
+		// Deployed office objects
 		assertList(new String[] { "getDeployedOfficeObjectName",
 				"getObjectType" }, office.getDeployedOfficeObjects(),
 				new DeployedOfficeObjectModel("OBJECT", "net.orm.Session"));
+		DeployedOfficeObjectModel officeObject = office
+				.getDeployedOfficeObjects().get(0);
+		assertProperties(
+				new DeployedOfficeObjectToOfficeFloorManagedObjectModel(
+						"MANAGED_OBJECT"), officeObject
+						.getOfficeFloorManagedObject(),
+				"getOfficeFloorManagedObjectName");
+
+		// Deployed office inputs
 		assertList(new String[] { "getDeployedOfficeInputName",
 				"getParameterType" }, office.getDeployedOfficeInputs(),
 				new DeployedOfficeInputModel("INPUT", Integer.class.getName()));

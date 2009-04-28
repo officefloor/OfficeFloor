@@ -103,12 +103,6 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 
 	@Override
 	public String getObjectDependencyName() {
-
-		// Ensure in office context
-		if (!this.isInOfficeContext) {
-			throw new IllegalStateException("Must be in office context");
-		}
-
 		// Return the object name
 		return this.objectName;
 	}

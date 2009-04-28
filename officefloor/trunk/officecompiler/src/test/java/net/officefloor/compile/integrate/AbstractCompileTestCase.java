@@ -26,6 +26,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -38,6 +39,7 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
@@ -105,6 +107,36 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		TeamBuilder<S> builder = this.createMock(TeamBuilder.class);
 		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
 				.addTeam(teamName, teamSourceClass), builder);
+		for (int i = 0; i < propertyNameValues.length; i += 2) {
+			String name = propertyNameValues[i];
+			String value = propertyNameValues[i + 1];
+			builder.addProperty(name, value);
+		}
+		return builder;
+	}
+
+	/**
+	 * Records adding a {@link ManagedObjectSource} to the
+	 * {@link OfficeFloorBuilder}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource}.
+	 * @param managedObjectSourceClass
+	 *            {@link ManagedObjectSource} class.
+	 * @param propertyNameValues
+	 *            {@link Property} name/value listing.
+	 * @param {@link ManagedObjectBuilder} for the added
+	 *        {@link ManagedObjectSource}.
+	 */
+	@SuppressWarnings("unchecked")
+	protected <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> record_officeFloorBuilder_addManagedObject(
+			String managedObjectSourceName, Class<S> managedObjectSourceClass,
+			String... propertyNameValues) {
+		ManagedObjectBuilder<F> builder = this
+				.createMock(ManagedObjectBuilder.class);
+		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
+				.addManagedObject(managedObjectSourceName,
+						managedObjectSourceClass), builder);
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];

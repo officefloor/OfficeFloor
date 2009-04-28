@@ -31,11 +31,14 @@
             <input name="INPUT" parameter-type="java.lang.Integer" />
             <output name="OUTPUT_ONE" argument-type="java.lang.Float"
                 escalation-only="false">
-                <section-input section="SECTION_TARGET" input="INPUT" />
+                <section-input section="SECTION_TARGET"
+                    input="INPUT" />
             </output>
             <output name="OUTPUT_TWO" argument-type="java.lang.Exception"
                 escalation-only="true" />
-            <object name="OBJECT" object-type="java.sql.Connection" />
+            <object name="OBJECT" object-type="java.sql.Connection">
+                <external-managed-object name="EXTERNAL_MANAGED_OBJECT" />
+            </object>
             <responsibility name="RESPONSIBILITY">
                 <team name="TEAM" />
                 <object name="RESPONSIBILITY_OBJECT" />

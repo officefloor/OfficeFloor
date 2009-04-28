@@ -16,11 +16,16 @@
  */
 package net.officefloor.model.impl.officefloor;
 
+import java.sql.Connection;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -62,15 +67,27 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the raw office floor to be connected
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		OfficeFloorManagedObjectModel officeFloorManagedObject = new OfficeFloorManagedObjectModel(
+				"MANAGED_OBJECT", "net.example.ExampleManagedObjectSource",
+				Connection.class.getName());
+		officeFloor.addOfficeFloorManagedObject(officeFloorManagedObject);
 		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel(
 				"OFFICE_FLOOR_TEAM", "net.example.ExampleTeamSource");
 		officeFloor.addOfficeFloorTeam(officeFloorTeam);
 		DeployedOfficeModel office = new DeployedOfficeModel("OFFICE",
 				"net.example.ExampleOfficeSource", "OFFICE_LOCATION");
 		officeFloor.addDeployedOffice(office);
+		DeployedOfficeObjectModel officeObject = new DeployedOfficeObjectModel(
+				"OBJECT", Connection.class.getName());
+		office.addDeployedOfficeObject(officeObject);
 		DeployedOfficeTeamModel officeTeam = new DeployedOfficeTeamModel(
 				"OFFICE_TEAM");
 		office.addDeployedOfficeTeam(officeTeam);
+
+		// office object -> office floor managed object
+		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel(
+				"MANAGED_OBJECT");
+		officeObject.setOfficeFloorManagedObject(officeObjectToManagedObject);
 
 		// office team -> office floor team
 		DeployedOfficeTeamToOfficeFloorTeamModel officeTeamToFloorTeam = new DeployedOfficeTeamToOfficeFloorTeamModel(
@@ -101,6 +118,12 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect office", officeFloor, retrievedOfficeFloor);
 
 		// Ensure office team connected
+		assertEquals("office object <- office floor managed object",
+				officeObject, officeObjectToManagedObject
+						.getDeployedOfficeObject());
+		assertEquals("office object -> office floor managed object",
+				officeFloorManagedObject, officeObjectToManagedObject
+						.getOfficeFloorManagedObject());
 		assertEquals("office team <- office floor team", officeTeam,
 				officeTeamToFloorTeam.getDeployedOfficeTeam());
 		assertEquals("office team -> office floor team", officeFloorTeam,
@@ -115,15 +138,29 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the office floor (without connections)
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		OfficeFloorManagedObjectModel officeFloorManagedObject = new OfficeFloorManagedObjectModel(
+				"MANAGED_OBJECT", "net.example.ExampleManagedObjectSource",
+				Connection.class.getName());
+		officeFloor.addOfficeFloorManagedObject(officeFloorManagedObject);
 		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel(
 				"OFFICE_FLOOR_TEAM", "net.example.ExampleTeamSource");
 		officeFloor.addOfficeFloorTeam(officeFloorTeam);
 		DeployedOfficeModel office = new DeployedOfficeModel("OFFICE",
 				"net.example.ExampleOfficeSource", "OFFICE_LOCATION");
 		officeFloor.addDeployedOffice(office);
+		DeployedOfficeObjectModel officeObject = new DeployedOfficeObjectModel(
+				"OBJECT", Connection.class.getName());
+		office.addDeployedOfficeObject(officeObject);
 		DeployedOfficeTeamModel officeTeam = new DeployedOfficeTeamModel(
 				"OFFICE_TEAM");
 		office.addDeployedOfficeTeam(officeTeam);
+
+		// office object -> office floor managed object
+		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel();
+		officeObjectToManagedObject.setDeployedOfficeObject(officeObject);
+		officeObjectToManagedObject
+				.setOfficeFloorManagedObject(officeFloorManagedObject);
+		officeObjectToManagedObject.connect();
 
 		// office team -> office floor team
 		DeployedOfficeTeamToOfficeFloorTeamModel officeTeamToFloorTeam = new DeployedOfficeTeamToOfficeFloorTeamModel();
@@ -141,6 +178,9 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving
+		assertEquals("office object - office floor managed object",
+				"MANAGED_OBJECT", officeObjectToManagedObject
+						.getOfficeFloorManagedObjectName());
 		assertEquals("office team - office floor team", "OFFICE_FLOOR_TEAM",
 				officeTeamToFloorTeam.getOfficeFloorTeamName());
 	}

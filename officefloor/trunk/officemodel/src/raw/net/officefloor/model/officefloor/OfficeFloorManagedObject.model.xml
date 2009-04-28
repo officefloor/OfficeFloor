@@ -8,4 +8,6 @@
         plural="office floor managed object dependencies" />
     <list type="OfficeFloorManagedObjectFlowModel" name="office floor managed object flow" />
     <list type="OfficeFloorManagedObjectTeamModel" name="office floor managed object team" />
+    <list type="DeployedOfficeObjectToOfficeFloorManagedObjectModel"
+        name="deployed office object" />
 </model>

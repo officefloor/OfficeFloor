@@ -16,12 +16,17 @@
  */
 package net.officefloor.model.impl.office;
 
+import java.sql.Connection;
+
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeRepository;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityModel;
@@ -65,6 +70,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the raw office to be connected
 		OfficeModel office = new OfficeModel();
+		ExternalManagedObjectModel extMo = new ExternalManagedObjectModel(
+				"EXTERNAL_MANAGED_OBJECT", Connection.class.getName());
+		office.addExternalManagedObject(extMo);
 		OfficeTeamModel team = new OfficeTeamModel("TEAM");
 		office.addOfficeTeam(team);
 		OfficeSectionModel section = new OfficeSectionModel("SECTION",
@@ -93,6 +101,14 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		OfficeSectionOutputToOfficeSectionInputModel outputToInput = new OfficeSectionOutputToOfficeSectionInputModel(
 				"SECTION_TARGET", "INPUT");
 		output.setOfficeSectionInput(outputToInput);
+
+		// section object -> external managed object
+		OfficeSectionObjectModel object = new OfficeSectionObjectModel(
+				"OBJECT", Connection.class.getName());
+		section.addOfficeSectionObject(object);
+		OfficeSectionObjectToExternalManagedObjectModel objectToExtMo = new OfficeSectionObjectToExternalManagedObjectModel(
+				"EXTERNAL_MANAGED_OBJECT");
+		object.setExternalManagedObject(objectToExtMo);
 
 		// Record retrieving the office
 		this.recordReturn(this.modelRepository, this.modelRepository.retrieve(
@@ -124,6 +140,12 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				.getOfficeSectionOutput());
 		assertEquals("output -> input", targetInput, outputToInput
 				.getOfficeSectionInput());
+
+		// Ensure the objects connected to external managed object
+		assertEquals("object <- external managed object", object, objectToExtMo
+				.getOfficeSectionObject());
+		assertEquals("object -> external managed object", extMo, objectToExtMo
+				.getExternalManagedObject());
 	}
 
 	/**
@@ -134,6 +156,9 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the office (without connections)
 		OfficeModel office = new OfficeModel();
+		ExternalManagedObjectModel extMo = new ExternalManagedObjectModel(
+				"EXTERNAL_MANAGED_OBJECT", Connection.class.getName());
+		office.addExternalManagedObject(extMo);
 		OfficeTeamModel team = new OfficeTeamModel("TEAM");
 		office.addOfficeTeam(team);
 		OfficeSectionModel section = new OfficeSectionModel("SECTION",
@@ -165,6 +190,15 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 		outputToInput.setOfficeSectionInput(targetInput);
 		outputToInput.connect();
 
+		// section object -> external managed object
+		OfficeSectionObjectModel object = new OfficeSectionObjectModel(
+				"OBJECT", Connection.class.getName());
+		section.addOfficeSectionObject(object);
+		OfficeSectionObjectToExternalManagedObjectModel objectToExtMo = new OfficeSectionObjectToExternalManagedObjectModel();
+		objectToExtMo.setOfficeSectionObject(object);
+		objectToExtMo.setExternalManagedObject(extMo);
+		objectToExtMo.connect();
+
 		// Record storing the office
 		this.modelRepository.store(office, this.configurationItem);
 
@@ -180,5 +214,8 @@ public class OfficeRepositoryTest extends OfficeFrameTestCase {
 				outputToInput.getOfficeSectionName());
 		assertEquals("output - input (input name)", "INPUT", outputToInput
 				.getOfficeSectionInputName());
+		assertEquals("object - external managed object",
+				"EXTERNAL_MANAGED_OBJECT", objectToExtMo
+						.getExternalManagedObjectName());
 	}
 }
