@@ -126,6 +126,8 @@ public class WorkLoaderUtil {
 			// Verify the task type
 			TestCase.assertEquals("Incorrect task name (task=" + i + ")",
 					expectedTask.getTaskName(), actualTask.getTaskName());
+			TestCase.assertEquals("Incorrect return type (task=" + i + ")",
+					expectedTask.getReturnType(), actualTask.getReturnType());
 			TestCase.assertEquals("Incorrect dependency keys (task="
 					+ expectedTask.getTaskName() + ")", expectedTask
 					.getObjectKeyClass(), actualTask.getObjectKeyClass());

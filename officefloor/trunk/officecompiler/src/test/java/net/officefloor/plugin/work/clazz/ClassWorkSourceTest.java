@@ -72,29 +72,32 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 				.createWorkTypeBuilder(new ClassWorkFactory(MockClass.class));
 
 		// taskInstanceMethod
-		TaskTypeBuilder<?, ?> taskMethod = work.addTaskType(
+		TaskTypeBuilder<?, ?> instanceMethod = work.addTaskType(
 				"taskInstanceMethod", new ClassTaskFactory(null, false, null),
 				null, null);
-		taskMethod.addObject(String.class).setLabel(
+		instanceMethod.setReturnType(String.class);
+		instanceMethod.addObject(String.class).setLabel(
 				String.class.getSimpleName());
-		taskMethod.addFlow().setLabel("sequential");
-		TaskFlowTypeBuilder<?> parallel = taskMethod.addFlow();
+		instanceMethod.addFlow().setLabel("sequential");
+		TaskFlowTypeBuilder<?> parallel = instanceMethod.addFlow();
 		parallel.setLabel("parallel");
 		parallel.setArgumentType(Integer.class);
-		TaskFlowTypeBuilder<?> asynchronous = taskMethod.addFlow();
+		TaskFlowTypeBuilder<?> asynchronous = instanceMethod.addFlow();
 		asynchronous.setLabel("asynchronous");
 		asynchronous.setArgumentType(String.class);
-		taskMethod.addEscalation(IOException.class);
+		instanceMethod.addEscalation(IOException.class);
 
 		// taskFailMethod
-		TaskTypeBuilder<?, ?> anotherMethod = work.addTaskType(
+		TaskTypeBuilder<?, ?> failMethod = work.addTaskType(
 				"taskFailMethod", new ClassTaskFactory(null, false, null),
 				null, null);
-		anotherMethod.addEscalation(SQLException.class);
+		failMethod.addEscalation(SQLException.class);
 
 		// taskStaticMethod
-		work.addTaskType("taskStaticMethod", new ClassTaskFactory(null, false,
-				null), null, null);
+		TaskTypeBuilder<?, ?> staticMethod = work.addTaskType(
+				"taskStaticMethod", new ClassTaskFactory(null, false, null),
+				null, null);
+		staticMethod.setReturnType(Object.class);
 
 		// Validate the work type
 		WorkLoaderUtil.validateWorkType(work, ClassWorkSource.class,
@@ -111,7 +114,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		final FlowFuture ignoreFlowFuture = this.createMock(FlowFuture.class);
 		final FlowFuture flowFuture = this.createMock(FlowFuture.class);
 		final String PARAMETER_VALUE = "PARAMETER";
-		final Object RETURN_VALUE = new Object();
+		final String RETURN_VALUE = "INSTANCE RETURN VALUE";
 
 		// Create the task
 		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
@@ -192,7 +195,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 	@SuppressWarnings("unchecked")
 	public void testStaticException() throws Throwable {
 
-		final Object RETURN_VALUE = new Object();
+		final String RETURN_VALUE = "STATIC RETURN VALUE";
 
 		// Create the task
 		WorkType<ClassWork> workType = WorkLoaderUtil.loadWorkType(
@@ -237,7 +240,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		/**
 		 * Value to be returned from the {@link Method}.
 		 */
-		public static Object returnValue;
+		public static String returnValue;
 
 		/**
 		 * {@link SQLException}.
@@ -260,7 +263,7 @@ public class ClassWorkSourceTest extends OfficeFrameTestCase {
 		/**
 		 * {@link Task} taskMethod.
 		 */
-		public Object taskInstanceMethod(String parameter, MockFlows flows,
+		public String taskInstanceMethod(String parameter, MockFlows flows,
 				TaskContext<?, ?, ?> context) throws IOException {
 
 			// Ensure correct inputs
