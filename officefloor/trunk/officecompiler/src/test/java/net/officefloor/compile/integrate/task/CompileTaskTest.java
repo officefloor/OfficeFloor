@@ -32,6 +32,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.Flow;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
@@ -290,26 +291,6 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
-	 * Ensures issue if {@link TaskEscalationType} not linked.
-	 */
-	public void testTaskEscalationNotLinked() {
-
-		// Record building the office floor
-		this.record_officeFloorBuilder_addTeam("TEAM",
-				OnePersonTeamSource.class);
-		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
-				"TEAM");
-		this.record_officeBuilder_addWork("SECTION.WORK");
-		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
-				"TASK",
-				"Escalation java.lang.Exception is not linked to a TaskNode");
-
-		// Compile the office floor
-		this.compile(true);
-	}
-
-	/**
 	 * Tests compiling a {@link Task} linking a {@link Escalation} to another
 	 * {@link Task} on the same {@link Work}.
 	 */
@@ -347,6 +328,50 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		this.record_officeBuilder_addWork("SECTION_B.WORK");
 		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
 		task.addEscalation(Exception.class, "SECTION_B.WORK", "INPUT");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensures issue if {@link TaskEscalationType} not linked.
+	 */
+	public void testEscalationNotPropagatedToOffice() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
+		this.issues
+				.addIssue(
+						LocationType.SECTION,
+						"desk",
+						AssetType.TASK,
+						"TASK",
+						"Escalation "
+								+ Exception.class.getName()
+								+ " not handled by a Task nor propagated to the Office");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link Task} that propagates the {@link Escalation} to
+	 * the {@link Office}.
+	 */
+	public void testEscalationPropagatedToOffice() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
 
 		// Compile the office floor
 		this.compile(true);

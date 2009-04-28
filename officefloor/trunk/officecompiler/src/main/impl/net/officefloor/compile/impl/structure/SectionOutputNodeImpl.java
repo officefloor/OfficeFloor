@@ -18,6 +18,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionOutputType;
@@ -42,6 +43,11 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * {@link SubSectionOutput}.
 	 */
 	private final String sectionLocation;
+
+	/**
+	 * {@link SectionNode} containing this {@link SectionOutputNode}.
+	 */
+	private final SectionNode section;
 
 	/**
 	 * {@link NodeContext}.
@@ -81,13 +87,16 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SubSectionOutput}.
+	 * @param section
+	 *            {@link SectionNode} containing this {@link SectionOutputNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionOutputNodeImpl(String outputName, String sectionLocation,
-			NodeContext context) {
+			SectionNode section, NodeContext context) {
 		this.outputName = outputName;
 		this.sectionLocation = sectionLocation;
+		this.section = section;
 		this.context = context;
 	}
 
@@ -103,14 +112,17 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SubSectionOutput}.
+	 * @param section
+	 *            {@link SectionNode} containing this {@link SectionOutputNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionOutputNodeImpl(String outputName, String argumentType,
 			boolean isEscalationOnly, String sectionLocation,
-			NodeContext context) {
+			SectionNode section, NodeContext context) {
 		this.outputName = outputName;
 		this.sectionLocation = sectionLocation;
+		this.section = section;
 		this.context = context;
 		this.initialise(argumentType, isEscalationOnly);
 	}
@@ -135,6 +147,11 @@ public class SectionOutputNodeImpl implements SectionOutputNode {
 	public void addOfficeContext(String officeLocation) {
 		this.officeLocation = officeLocation;
 		this.isInOfficeContext = true;
+	}
+
+	@Override
+	public SectionNode getSectionNode() {
+		return this.section;
 	}
 
 	/*

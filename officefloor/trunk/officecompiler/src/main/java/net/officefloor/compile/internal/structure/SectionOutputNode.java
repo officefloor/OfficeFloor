@@ -55,4 +55,12 @@ public interface SectionOutputNode extends SectionOutputType, SectionOutput,
 	 *            Location of the {@link Office}.
 	 */
 	void addOfficeContext(String officeLocation);
+
+	/**
+	 * Obtains {@link SectionNode} containing this {@link SectionOutputNode}.
+	 * 
+	 * @return {@link SectionNode} containing this {@link SectionOutputNode}.
+	 */
+	SectionNode getSectionNode();
+
 }

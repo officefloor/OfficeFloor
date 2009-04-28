@@ -398,6 +398,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
+	public Object getParentSectionNode() {
+		return this.parentSection;
+	}
+
+	@Override
 	public OfficeInputType[] getOfficeInputTypes() {
 		return this.inputs.values().toArray(new OfficeInputType[0]);
 	}
@@ -498,7 +503,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (output == null) {
 			// Add the output
 			output = new SectionOutputNodeImpl(outputName,
-					this.sectionLocation, this.context);
+					this.sectionLocation, this, this.context);
 			this.outputs.put(outputName, output);
 		}
 		return output;
@@ -511,7 +516,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (object == null) {
 			// Add the object
 			object = new SectionObjectNodeImpl(objectName,
-					this.sectionLocation, this.context);
+					this.sectionLocation, this, this.context);
 			this.objects.put(objectName, object);
 		}
 		return object;
@@ -551,7 +556,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (output == null) {
 			// Add the output
 			output = new SectionOutputNodeImpl(outputName, argumentType,
-					isEscalationOnly, this.sectionLocation, this.context);
+					isEscalationOnly, this.sectionLocation, this, this.context);
 			this.outputs.put(outputName, output);
 		} else {
 			// Added but determine if requires initialising
@@ -573,7 +578,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 		if (object == null) {
 			// Add the object
 			object = new SectionObjectNodeImpl(objectName, objectType,
-					this.sectionLocation, this.context);
+					this.sectionLocation, this, this.context);
 			this.objects.put(objectName, object);
 		} else {
 			// Added but determine if requires initialising

@@ -103,24 +103,85 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Ensures no issue is raised if no target is found and <code>null</code>
+	 * returned.
+	 */
+	public void testFindNoTarget() {
+
+		// Create the links
+		LinkNode link = new LinkNode(null);
+		for (int i = 0; i < 10; i++) {
+			link = new LinkNode(link);
+		}
+
+		// Find the target
+		TargetLinkNode found = this.findFlowTarget(link, "TaskFlow FLOW");
+		assertNull("Should not find target", found);
+	}
+
+	/**
+	 * Ensures able to find the target.
+	 */
+	public void testFindTarget() {
+
+		// Create the links
+		TargetLinkNode target = new TargetLinkNode();
+		LinkNode link = new LinkNode(target);
+		for (int i = 0; i < 10; i++) {
+			link = new LinkNode(link);
+		}
+
+		// Find the target
+		TargetLinkNode found = this.findFlowTarget(link, "TaskFlow FLOW");
+		assertEquals("Incorrect target", target, found);
+	}
+
+	/**
+	 * Ensures able to find the furtherest target.
+	 */
+	public void testFindFurtherestTarget() {
+
+		// Create extra links without target
+		LinkNode link = new LinkNode(null);
+		for (int i = 0; i < 10; i++) {
+			link = new LinkNode(link);
+		}
+		TargetLinkNode target = new TargetLinkNode(link);
+		link = new LinkNode(target);
+		// Provide various possible links to the furtherest target
+		for (int i = 0; i < 20; i++) {
+			link = ((i % 2 == 0) ? new LinkNode(link)
+					: new TargetLinkNode(link));
+		}
+		
+		// Find the target
+		this.replayMockObjects();
+		TargetLinkNode found = LinkUtil.findFurtherestTarget(link,
+				TargetLinkNode.class, "TaskFlow FLOW", LOCATION_TYPE, LOCATION,
+				ASSET_TYPE, ASSET_NAME, this.issues);
+		this.verifyMockObjects();
+		assertEquals("Incorrect target", target, found);
+	}
+
+	/**
 	 * Ensure can handle <code>null</code> starting link.
 	 */
 	public void testNullStartingLink() {
 
-		// Record not finding target
+		// Record not retrieving target
 		this.record_issue("TaskFlow FLOW is not linked to a "
 				+ TargetLinkNode.class.getSimpleName());
 
 		// Attempt to obtain the target (from null)
 		TargetLinkNode retrieved = this.retrieveFlowTarget(null,
 				"TaskFlow FLOW");
-		assertNull("Should not find target", retrieved);
+		assertNull("Should not retrieve target", retrieved);
 	}
 
 	/**
-	 * Ensures can find the link on many steps.
+	 * Ensures can retrieve the link on many steps.
 	 */
-	public void testFindLinkOnManySteps() {
+	public void testRetrieveLinkOnManySteps() {
 
 		// Create the links
 		TargetLinkNode target = new TargetLinkNode();
@@ -161,14 +222,14 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 			link = new LinkNode(link);
 		}
 
-		// Record not finding target
+		// Record not retrieving target
 		this.record_issue("TaskFlow FLOW is not linked to a "
 				+ TargetLinkNode.class.getSimpleName());
 
 		// Attempt to obtain the target
 		TargetLinkNode retrieved = this.retrieveFlowTarget(link,
 				"TaskFlow FLOW");
-		assertNull("Should not find target", retrieved);
+		assertNull("Should not retrieve target", retrieved);
 	}
 
 	/**
@@ -195,7 +256,7 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 		// Attempt to obtain the target
 		TargetLinkNode retrieved = this.retrieveFlowTarget(link,
 				"TaskFlow FLOW");
-		assertNull("Should not find target", retrieved);
+		assertNull("Should not retrieve target", retrieved);
 	}
 
 	/**
@@ -215,6 +276,25 @@ public class LinkUtilTest extends OfficeFrameTestCase {
 				LOCATION, ASSET_TYPE, ASSET_NAME, this.issues);
 		this.verifyMockObjects();
 		return retrieved;
+	}
+
+	/**
+	 * Finds the {@link TargetLinkNode}.
+	 * 
+	 * @param link
+	 *            Starting {@link LinkFlowNode}.
+	 * @param startingLinkName
+	 *            Name of starting link.
+	 * @return {@link TargetLinkNode} or <code>null</code> if not found.
+	 */
+	private TargetLinkNode findFlowTarget(LinkFlowNode link,
+			String startingLinkName) {
+		this.replayMockObjects();
+		TargetLinkNode found = LinkUtil.findTarget(link, TargetLinkNode.class,
+				startingLinkName, LOCATION_TYPE, LOCATION, ASSET_TYPE,
+				ASSET_NAME, this.issues);
+		this.verifyMockObjects();
+		return found;
 	}
 
 	/**

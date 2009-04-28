@@ -35,6 +35,90 @@ import net.officefloor.frame.internal.structure.Asset;
 public class LinkUtil {
 
 	/**
+	 * Finds the furtherest target link by the specified type.
+	 * 
+	 * @param link
+	 *            Starting {@link LinkFlowNode}.
+	 * @param targetType
+	 *            Target {@link LinkFlowNode} type to find.
+	 * @param startingLinkName
+	 *            Name of the starting {@link LinkFlowNode}.
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param assetType
+	 *            {@link AssetType}.
+	 * @param assetName
+	 *            Name of the {@link Asset}.
+	 * @return Furtherest target {@link LinkFlowNode} or <code>null</code> if no
+	 *         targets found.
+	 */
+	public static <T> T findFurtherestTarget(LinkFlowNode link,
+			Class<T> targetType, String startingLinkName,
+			LocationType locationType, String location, AssetType assetType,
+			String assetName, CompilerIssues issues) {
+
+		// Find the first target
+		T target = findTarget(link, targetType, startingLinkName, locationType,
+				location, assetType, assetName, issues);
+
+		// Loop to find the furtherest target
+		T furtherestTarget = target;
+		while (target != null) {
+			// Keep reference to found target (will become the furtherest)
+			furtherestTarget = target;
+
+			// Attempt to obtain the next target (all targets are link flows)
+			link = (LinkFlowNode) target;
+			target = findTarget(link, targetType, startingLinkName,
+					locationType, location, assetType, assetName, issues);
+		}
+
+		// Return the furtherest target
+		return furtherestTarget;
+	}
+
+	/**
+	 * Finds the target link by the specified type.
+	 * 
+	 * @param link
+	 *            Starting {@link LinkFlowNode}.
+	 * @param targetType
+	 *            Target {@link LinkFlowNode} type to find.
+	 * @param startingLinkName
+	 *            Name of the starting {@link LinkFlowNode}.
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param assetType
+	 *            {@link AssetType}.
+	 * @param assetName
+	 *            Name of the {@link Asset}.
+	 * @return Target {@link LinkFlowNode} or <code>null</code> if target not
+	 *         found.
+	 */
+	public static <T> T findTarget(LinkFlowNode link, Class<T> targetType,
+			String startingLinkName, LocationType locationType,
+			String location, AssetType assetType, String assetName,
+			CompilerIssues issues) {
+
+		// Create the link flow node traverser
+		Traverser<LinkFlowNode> traverser = new Traverser<LinkFlowNode>() {
+			@Override
+			public LinkFlowNode getNextLinkNode(LinkFlowNode link) {
+				return link.getLinkedFlowNode();
+			}
+		};
+
+		// Return the retrieved target
+		return retrieveTarget(link, traverser, targetType, false,
+				startingLinkName, locationType, location, assetType, assetName,
+				issues);
+	}
+
+	/**
 	 * Retrieves the target link by the specified type.
 	 * 
 	 * @param link
@@ -68,8 +152,9 @@ public class LinkUtil {
 		};
 
 		// Return the retrieved target
-		return retrieveTarget(link, traverser, targetType, startingLinkName,
-				locationType, location, assetType, assetName, issues);
+		return retrieveTarget(link, traverser, targetType, true,
+				startingLinkName, locationType, location, assetType, assetName,
+				issues);
 	}
 
 	/**
@@ -106,8 +191,9 @@ public class LinkUtil {
 		};
 
 		// Return the retrieved target
-		return retrieveTarget(link, traverser, targetType, startingLinkName,
-				locationType, location, assetType, assetName, issues);
+		return retrieveTarget(link, traverser, targetType, true,
+				startingLinkName, locationType, location, assetType, assetName,
+				issues);
 	}
 
 	/**
@@ -144,8 +230,9 @@ public class LinkUtil {
 		};
 
 		// REturn the retrieved target
-		return retrieveTarget(link, traverser, targetType, startingLinkName,
-				locationType, location, assetType, assetName, issues);
+		return retrieveTarget(link, traverser, targetType, true,
+				startingLinkName, locationType, location, assetType, assetName,
+				issues);
 	}
 
 	/**
@@ -157,6 +244,8 @@ public class LinkUtil {
 	 *            {@link Traverser} to traverse the links.
 	 * @param targetType
 	 *            Target type to retrieve.
+	 * @param isIssueOnNoTarget
+	 *            Indicates if issue should be made if target not found.
 	 * @param startingLinkName
 	 *            Name of the starting link.
 	 * @param locationType
@@ -172,9 +261,10 @@ public class LinkUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <T, L> T retrieveTarget(L link, Traverser<L> traverser,
-			Class<T> targetType, String startingLinkName,
-			LocationType locationType, String location, AssetType assetType,
-			String assetName, CompilerIssues issues) {
+			Class<T> targetType, boolean isIssueOnNoTarget,
+			String startingLinkName, LocationType locationType,
+			String location, AssetType assetType, String assetName,
+			CompilerIssues issues) {
 
 		// Ensure have starting link
 		if (link != null) {
@@ -209,9 +299,11 @@ public class LinkUtil {
 		}
 
 		// Run out of links (or no starting link), so could not find target
-		issues.addIssue(locationType, location, assetType, assetName,
-				startingLinkName + " is not linked to a "
-						+ targetType.getSimpleName());
+		if (isIssueOnNoTarget) {
+			issues.addIssue(locationType, location, assetType, assetName,
+					startingLinkName + " is not linked to a "
+							+ targetType.getSimpleName());
+		}
 		return null; // target not found
 	}
 

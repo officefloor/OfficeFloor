@@ -54,4 +54,11 @@ public interface SectionObjectNode extends SectionObjectType, SubSectionObject,
 	 */
 	void addOfficeContext(String officeLocation);
 
+	/**
+	 * Obtains {@link SectionNode} containing this {@link SectionObjectNode}.
+	 * 
+	 * @return {@link SectionNode} containing this {@link SectionObjectNode}.
+	 */
+	SectionNode getSectionNode();
+
 }

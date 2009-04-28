@@ -18,6 +18,7 @@ package net.officefloor.compile.impl.structure;
 
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.section.SectionObjectType;
@@ -44,6 +45,11 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * {@link SubSectionObject}.
 	 */
 	private final String sectionLocation;
+
+	/**
+	 * {@link SectionNode} containing this {@link SectionObjectNode}.
+	 */
+	private final SectionNode section;
 
 	/**
 	 * {@link NodeContext}.
@@ -79,13 +85,16 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SubSectionObject}.
+	 * @param section
+	 *            {@link SectionNode} containing this {@link SectionObjectNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionObjectNodeImpl(String objectName, String sectionLocation,
-			NodeContext context) {
+			SectionNode section, NodeContext context) {
 		this.objectName = objectName;
 		this.sectionLocation = sectionLocation;
+		this.section = section;
 		this.context = context;
 	}
 
@@ -99,13 +108,16 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection} containing this
 	 *            {@link SubSectionObject}.
+	 * @param section
+	 *            {@link SectionNode} containing this {@link SectionObjectNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionObjectNodeImpl(String objectName, String objectType,
-			String sectionLocation, NodeContext context) {
+			String sectionLocation, SectionNode section, NodeContext context) {
 		this.objectName = objectName;
 		this.sectionLocation = sectionLocation;
+		this.section = section;
 		this.context = context;
 		this.initialise(objectType);
 	}
@@ -129,6 +141,11 @@ public class SectionObjectNodeImpl implements SectionObjectNode {
 	public void addOfficeContext(String officeLocation) {
 		this.officeLocation = officeLocation;
 		this.isInOfficeContext = true;
+	}
+
+	@Override
+	public SectionNode getSectionNode() {
+		return this.section;
 	}
 
 	/*
