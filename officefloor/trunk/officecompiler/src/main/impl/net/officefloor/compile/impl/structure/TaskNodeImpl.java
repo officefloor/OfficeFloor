@@ -41,6 +41,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
@@ -334,7 +335,42 @@ public class TaskNodeImpl implements TaskNode {
 			}
 		}
 
-		// TODO build escalations
+		// Build the escalations
+		TaskEscalationType[] escalationTypes = taskType.getEscalationTypes();
+		for (int i = 0; i < escalationTypes.length; i++) {
+			TaskEscalationType escalationType = escalationTypes[i];
+
+			// Obtain the type details for linking
+			Class<? extends Throwable> escalationClass = escalationType
+					.getEscalationType();
+			String escalationName = escalationClass.getName();
+
+			// Obtain the linked task for the escalation
+			TaskFlowNode escalationNode = this.taskEscalations
+					.get(escalationName);
+			TaskNode linkedTask = LinkUtil.retrieveTarget(escalationNode,
+					TaskNode.class, "Escalation " + escalationName,
+					LocationType.SECTION, this.sectionLocation, AssetType.TASK,
+					this.taskName, this.context.getCompilerIssues());
+			if (linkedTask == null) {
+				continue; // must have linked task
+			}
+
+			// Obtain the configuration details for linking
+			String linkedTaskName = linkedTask.getOfficeTaskName();
+
+			// Determine if same work
+			WorkNode linkedWork = linkedTask.getWorkNode();
+			if (this.workNode == linkedWork) {
+				// Link to task on same work
+				taskBuilder.addEscalation(escalationClass, linkedTaskName);
+			} else {
+				// Link to task on different work
+				String linkedWorkName = linkedWork.getQualifiedWorkName();
+				taskBuilder.addEscalation(escalationClass, linkedWorkName,
+						linkedTaskName);
+			}
+		}
 	}
 
 	/*

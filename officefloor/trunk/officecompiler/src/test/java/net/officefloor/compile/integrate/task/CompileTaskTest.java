@@ -25,9 +25,11 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
+import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
@@ -288,6 +290,69 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Ensures issue if {@link TaskEscalationType} not linked.
+	 */
+	public void testTaskEscalationNotLinked() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
+		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
+				"TASK",
+				"Escalation java.lang.Exception is not linked to a TaskNode");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link Task} linking a {@link Escalation} to another
+	 * {@link Task} on the same {@link Work}.
+	 */
+	public void testLinkEscalationToTaskOnSameWork() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
+				"OFFICE_TEAM");
+		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
+		task.addEscalation(Exception.class, "TASK_B");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link Task} linking a {@link Escalation} to a
+	 * {@link Task} in a different {@link OfficeSection}.
+	 */
+	public void testLinkEscalationToTaskInDifferentOfficeSection() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION_A.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		this.record_officeBuilder_addWork("SECTION_B.WORK");
+		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
+		task.addEscalation(Exception.class, "SECTION_B.WORK", "INPUT");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * {@link FlowInterface} for {@link CompileTaskWork}.
 	 */
 	@FlowInterface
@@ -315,6 +380,10 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		}
 
 		public void objectTask(CompileManagedObject object) {
+			fail("Should not be invoked in compiling");
+		}
+
+		public void escalationTask() throws Exception {
 			fail("Should not be invoked in compiling");
 		}
 	}
