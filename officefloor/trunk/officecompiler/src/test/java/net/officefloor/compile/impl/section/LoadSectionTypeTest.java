@@ -495,15 +495,15 @@ public class LoadSectionTypeTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getSectionOutputName", "getArgumentType",
 				"isEscalationOnly" }, type.getSectionOutputTypes(),
 				new SectionOutputNodeImpl("OUTPUT_A",
-						Exception.class.getName(), true, null, null),
+						Exception.class.getName(), true, null, null, null),
 				new SectionOutputNodeImpl("OUTPUT_B", Double.class.getName(),
-						false, null, null), new SectionOutputNodeImpl(
-						"OUTPUT_C", null, false, null, null));
+						false, null, null, null), new SectionOutputNodeImpl(
+						"OUTPUT_C", null, false, null, null, null));
 		assertList(new String[] { "getSectionObjectName", "getObjectType" },
 				type.getSectionObjectTypes(), new SectionObjectNodeImpl(
-						"OBJECT_A", Object.class.getName(), null, null),
+						"OBJECT_A", Object.class.getName(), null, null, null),
 				new SectionObjectNodeImpl("OBJECT_B", Connection.class
-						.getName(), null, null));
+						.getName(), null, null, null));
 	}
 
 	/**

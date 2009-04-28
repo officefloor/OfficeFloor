@@ -25,6 +25,8 @@ import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.SectionNode;
+import net.officefloor.compile.internal.structure.SectionOutputNode;
 import net.officefloor.compile.internal.structure.TaskFlowNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.TaskObjectNode;
@@ -348,27 +350,53 @@ public class TaskNodeImpl implements TaskNode {
 			// Obtain the linked task for the escalation
 			TaskFlowNode escalationNode = this.taskEscalations
 					.get(escalationName);
-			TaskNode linkedTask = LinkUtil.retrieveTarget(escalationNode,
+			TaskNode linkedTask = LinkUtil.findTarget(escalationNode,
 					TaskNode.class, "Escalation " + escalationName,
 					LocationType.SECTION, this.sectionLocation, AssetType.TASK,
 					this.taskName, this.context.getCompilerIssues());
-			if (linkedTask == null) {
-				continue; // must have linked task
-			}
+			if (linkedTask != null) {
+				// Obtain the configuration details for linking
+				String linkedTaskName = linkedTask.getOfficeTaskName();
 
-			// Obtain the configuration details for linking
-			String linkedTaskName = linkedTask.getOfficeTaskName();
-
-			// Determine if same work
-			WorkNode linkedWork = linkedTask.getWorkNode();
-			if (this.workNode == linkedWork) {
-				// Link to task on same work
-				taskBuilder.addEscalation(escalationClass, linkedTaskName);
+				// Determine if same work
+				WorkNode linkedWork = linkedTask.getWorkNode();
+				if (this.workNode == linkedWork) {
+					// Link to task on same work
+					taskBuilder.addEscalation(escalationClass, linkedTaskName);
+				} else {
+					// Link to task on different work
+					String linkedWorkName = linkedWork.getQualifiedWorkName();
+					taskBuilder.addEscalation(escalationClass, linkedWorkName,
+							linkedTaskName);
+				}
 			} else {
-				// Link to task on different work
-				String linkedWorkName = linkedWork.getQualifiedWorkName();
-				taskBuilder.addEscalation(escalationClass, linkedWorkName,
-						linkedTaskName);
+				// Ensure the escalation is propagated to the office
+				boolean isEscalatedToOffice = false;
+				SectionOutputNode sectionOutputNode = LinkUtil
+						.findFurtherestTarget(escalationNode,
+								SectionOutputNode.class, "Escalation "
+										+ escalationName, LocationType.SECTION,
+								this.sectionLocation, AssetType.TASK,
+								this.taskName, this.context.getCompilerIssues());
+				if (sectionOutputNode != null) {
+					// Determine if object of top level section (the office)
+					SectionNode sectionNode = sectionOutputNode
+							.getSectionNode();
+					isEscalatedToOffice = (sectionNode.getParentSectionNode() == null);
+				}
+				if (!isEscalatedToOffice) {
+					// Escalation must be propagated to the office
+					this.context
+							.getCompilerIssues()
+							.addIssue(
+									LocationType.SECTION,
+									this.sectionLocation,
+									AssetType.TASK,
+									this.taskName,
+									"Escalation "
+											+ escalationClass.getName()
+											+ " not handled by a Task nor propagated to the Office");
+				}
 			}
 		}
 	}
