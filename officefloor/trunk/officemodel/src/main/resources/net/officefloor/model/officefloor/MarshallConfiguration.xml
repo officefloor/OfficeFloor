@@ -26,6 +26,14 @@
                     </attributes>
                 </item>
             </collection>
+            <object method="getManagingOffice" element="managing-office">
+                <attributes>
+                    <attribute method="getManagingOfficeName"
+                        attribute="name" />
+                    <attribute method="getProcessBoundManagedObjectName"
+                        attribute="process-bound-name" />
+                </attributes>
+            </object>
             <collection method="getOfficeFloorManagedObjectDependencies">
                 <item
                     type="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel"

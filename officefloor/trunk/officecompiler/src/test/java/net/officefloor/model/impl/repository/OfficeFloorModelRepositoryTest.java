@@ -33,6 +33,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
@@ -78,28 +79,38 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		// ----------------------------------------
 		// Validate the office floor managed objects
 		// ----------------------------------------
-		assertList(
-				new String[] { "getOfficeFloorManagedObjectName",
-						"getManagedObjectSourceClassName", "getObjectType",
-						"getX", "getY" },
-				officeFloor.getOfficeFloorManagedObjects(),
+		assertList(new String[] { "getOfficeFloorManagedObjectName",
+				"getManagedObjectSourceClassName", "getObjectType", "getX",
+				"getY" }, officeFloor.getOfficeFloorManagedObjects(),
 				new OfficeFloorManagedObjectModel("MANAGED_OBJECT",
 						"net.example.ExampleManagedObjectSource",
-						"net.orm.Session", null, null, null, null, null, 10, 11));
+						"net.orm.Session", null, null, null, null, null, null,
+						10, 11));
 		OfficeFloorManagedObjectModel mo = officeFloor
 				.getOfficeFloorManagedObjects().get(0);
 		assertList(new String[] { "getName", "getValue" }, mo.getProperties(),
 				new PropertyModel("MO_ONE", "VALUE_ONE"), new PropertyModel(
 						"MO_TWO", "VALUE_TWO"));
+
+		// Managing office
+		assertProperties(new OfficeFloorManagedObjectToDeployedOfficeModel(
+				"OFFICE", "PROCESS_MO"), mo.getManagingOffice(),
+				"getManagingOfficeName", "getProcessBoundManagedObjectName");
+
+		// Dependencies
 		assertList(new String[] { "getOfficeFloorManagedObjectDependencyName",
 				"getDependencyType" }, mo
 				.getOfficeFloorManagedObjectDependencies(),
 				new OfficeFloorManagedObjectDependencyModel("DEPENDENCY",
 						Connection.class.getName()));
+
+		// Flows
 		assertList(new String[] { "getOfficeFloorManagedObjectFlowName",
 				"getArgumentType" }, mo.getOfficeFloorManagedObjectFlows(),
 				new OfficeFloorManagedObjectFlowModel("FLOW", Integer.class
 						.getName()));
+
+		// Teams
 		assertList(new String[] { "getOfficeFloorManagedObjectTeamName" }, mo
 				.getOfficeFloorManagedObjectTeams(),
 				new OfficeFloorManagedObjectTeamModel("MO_TEAM"));
@@ -126,7 +137,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 						"getX", "getY" }, officeFloor.getDeployedOffices(),
 				new DeployedOfficeModel("OFFICE",
 						"net.example.ExampleOfficeSource", "OFFICE_LOCATION",
-						null, null, null, null, 30, 31));
+						null, null, null, null, null, 30, 31));
 		DeployedOfficeModel office = officeFloor.getDeployedOffices().get(0);
 		assertList(new String[] { "getName", "getValue" }, office
 				.getProperties(), new PropertyModel("OFFICE_ONE", "VALUE_ONE"),

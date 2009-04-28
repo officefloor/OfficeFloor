@@ -25,6 +25,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -64,6 +65,28 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 		// Load the office floor from configuration
 		OfficeFloorModel officeFloor = this.modelRepository.retrieve(
 				new OfficeFloorModel(), configuration);
+
+		// Create the set of offices
+		Map<String, DeployedOfficeModel> offices = new HashMap<String, DeployedOfficeModel>();
+		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
+			offices.put(office.getDeployedOfficeName(), office);
+		}
+
+		// Connect the office floor managed object to its managing office
+		for (OfficeFloorManagedObjectModel mo : officeFloor
+				.getOfficeFloorManagedObjects()) {
+			OfficeFloorManagedObjectToDeployedOfficeModel conn = mo
+					.getManagingOffice();
+			if (conn != null) {
+				DeployedOfficeModel office = offices.get(conn
+						.getManagingOfficeName());
+				if (office != null) {
+					conn.setOfficeFloorManagedObject(mo);
+					conn.setManagingOffice(office);
+					conn.connect();
+				}
+			}
+		}
 
 		// Create the set of office floor managed objects
 		Map<String, OfficeFloorManagedObjectModel> managedObjects = new HashMap<String, OfficeFloorManagedObjectModel>();
@@ -122,6 +145,14 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 	@Override
 	public void storeOfficeFloor(OfficeFloorModel officeFloor,
 			ConfigurationItem configuration) throws Exception {
+
+		// Specify managing offices for the office floor managed objects
+		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
+			for (OfficeFloorManagedObjectToDeployedOfficeModel conn : office
+					.getOfficeFloorManagedObjects()) {
+				conn.setManagingOfficeName(office.getDeployedOfficeName());
+			}
+		}
 
 		// Specify office objects to office floor managed objects
 		for (OfficeFloorManagedObjectModel managedObject : officeFloor

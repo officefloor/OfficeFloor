@@ -21,6 +21,7 @@ import java.util.Set;
 
 import net.officefloor.compile.internal.structure.LinkFlowNode;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
+import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.LinkTeamNode;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -226,6 +227,45 @@ public class LinkUtil {
 			@Override
 			public LinkTeamNode getNextLinkNode(LinkTeamNode link) {
 				return link.getLinkedTeamNode();
+			}
+		};
+
+		// REturn the retrieved target
+		return retrieveTarget(link, traverser, targetType, true,
+				startingLinkName, locationType, location, assetType, assetName,
+				issues);
+	}
+
+	/**
+	 * Retrieves the target link by the specified type.
+	 * 
+	 * @param link
+	 *            Starting {@link LinkOfficeNode}.
+	 * @param targetType
+	 *            Target {@link LinkOfficeNode} type to retrieve.
+	 * @param startingLinkName
+	 *            Name of the starting {@link LinkOfficeNode}.
+	 * @param locationType
+	 *            {@link LocationType}.
+	 * @param location
+	 *            Location.
+	 * @param assetType
+	 *            {@link AssetType}.
+	 * @param assetName
+	 *            Name of the {@link Asset}.
+	 * @return Target {@link LinkOfficeNode} or <code>null</code> if issue
+	 *         obtaining which is reported to the {@link CompilerIssues}.
+	 */
+	public static <T> T retrieveTarget(LinkOfficeNode link,
+			Class<T> targetType, String startingLinkName,
+			LocationType locationType, String location, AssetType assetType,
+			String assetName, CompilerIssues issues) {
+
+		// Create the link office traverser
+		Traverser<LinkOfficeNode> traverser = new Traverser<LinkOfficeNode>() {
+			@Override
+			public LinkOfficeNode getNextLinkNode(LinkOfficeNode link) {
+				return link.getLinkedOfficeNode();
 			}
 		};
 

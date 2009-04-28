@@ -37,6 +37,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
@@ -121,14 +122,16 @@ public class OfficeFloorModelOfficeFloorSource extends
 			officeFloorTeams.put(teamName, team);
 		}
 
-		// Add the offices
+		// Add the offices, keeping registry of them
+		Map<String, DeployedOffice> offices = new HashMap<String, DeployedOffice>();
 		for (DeployedOfficeModel officeModel : officeFloor.getDeployedOffices()) {
 
 			// Add the office
-			DeployedOffice office = deployer.addDeployedOffice(officeModel
-					.getDeployedOfficeName(), officeModel
-					.getOfficeSourceClassName(), officeModel
-					.getOfficeLocation());
+			String officeName = officeModel.getDeployedOfficeName();
+			DeployedOffice office = deployer.addDeployedOffice(officeName,
+					officeModel.getOfficeSourceClassName(), officeModel
+							.getOfficeLocation());
+			offices.put(officeName, office);
 			for (PropertyModel property : officeModel.getProperties()) {
 				office.addProperty(property.getName(), property.getValue());
 			}
@@ -191,6 +194,37 @@ public class OfficeFloorModelOfficeFloorSource extends
 				// Have the office team be the office floor team
 				deployer.link(officeTeam, officeFloorTeam);
 			}
+		}
+
+		// Manage the office floor managed objects
+		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor
+				.getOfficeFloorManagedObjects()) {
+
+			// Obtain the managed object
+			OfficeFloorManagedObject managedObject = officeFloorManagedObjects
+					.get(managedObjectModel.getOfficeFloorManagedObjectName());
+			if (managedObject == null) {
+				continue; // must have managed object
+			}
+
+			// Obtain the managing office
+			DeployedOffice managingOffice = null;
+			OfficeFloorManagedObjectToDeployedOfficeModel moToOffice = managedObjectModel
+					.getManagingOffice();
+			if (moToOffice != null) {
+				DeployedOfficeModel officeModel = moToOffice
+						.getManagingOffice();
+				if (officeModel != null) {
+					managingOffice = offices.get(officeModel
+							.getDeployedOfficeName());
+				}
+			}
+			if (managingOffice != null) {
+				// Have the office manage the managed object
+				deployer
+						.link(managedObject.getManagingOffice(), managingOffice);
+			}
+
 		}
 	}
 

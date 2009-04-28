@@ -26,6 +26,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -84,6 +85,11 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"OFFICE_TEAM");
 		office.addDeployedOfficeTeam(officeTeam);
 
+		// office floor managed object -> office
+		OfficeFloorManagedObjectToDeployedOfficeModel moToOffice = new OfficeFloorManagedObjectToDeployedOfficeModel(
+				"OFFICE", null);
+		officeFloorManagedObject.setManagingOffice(moToOffice);
+
 		// office object -> office floor managed object
 		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel(
 				"MANAGED_OBJECT");
@@ -118,6 +124,11 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertEquals("Incorrect office", officeFloor, retrievedOfficeFloor);
 
 		// Ensure office team connected
+		assertEquals("office floor managed object <- office",
+				officeFloorManagedObject, moToOffice
+						.getOfficeFloorManagedObject());
+		assertEquals("office floor managed object -> office", office,
+				moToOffice.getManagingOffice());
 		assertEquals("office object <- office floor managed object",
 				officeObject, officeObjectToManagedObject
 						.getDeployedOfficeObject());
@@ -155,6 +166,12 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"OFFICE_TEAM");
 		office.addDeployedOfficeTeam(officeTeam);
 
+		// office floor managed object -> office
+		OfficeFloorManagedObjectToDeployedOfficeModel moToOffice = new OfficeFloorManagedObjectToDeployedOfficeModel();
+		moToOffice.setOfficeFloorManagedObject(officeFloorManagedObject);
+		moToOffice.setManagingOffice(office);
+		moToOffice.connect();
+
 		// office object -> office floor managed object
 		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel();
 		officeObjectToManagedObject.setDeployedOfficeObject(officeObject);
@@ -178,6 +195,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving
+		assertEquals("office floor managed object - office", "OFFICE",
+				moToOffice.getManagingOfficeName());
 		assertEquals("office object - office floor managed object",
 				"MANAGED_OBJECT", officeObjectToManagedObject
 						.getOfficeFloorManagedObjectName());
