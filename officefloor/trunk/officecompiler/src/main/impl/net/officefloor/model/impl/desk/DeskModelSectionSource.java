@@ -42,6 +42,8 @@ import net.officefloor.model.desk.TaskFlowModel;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
 import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskToNextExternalFlowModel;
+import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
@@ -147,7 +149,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			}
 		}
 
-		// Link the flows for the task (now that all tasks registered)
+		// Link the flows for the task (as all tasks/external flows registered)
 		for (TaskModel taskModel : desk.getTasks()) {
 
 			// Obtain the task for the task model
@@ -167,7 +169,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 				// Determine the instigation strategy
 				FlowInstigationStrategyEnum instigationStrategy = null;
 
-				// Determine if link to another task
+				// Determine if link flow to another task
 				SectionTask linkedTask = null;
 				TaskFlowToTaskModel flowToTask = taskFlowModel.getTask();
 				if (flowToTask != null) {
@@ -186,7 +188,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					designer.link(taskFlow, linkedTask, instigationStrategy);
 				}
 
-				// Determine if link to external flow
+				// Determine if link flow to external flow
 				SectionOutput linkedSectionOutput = null;
 				TaskFlowToExternalFlowModel flowToExtFlow = taskFlowModel
 						.getExternalFlow();
@@ -208,6 +210,37 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					designer.link(taskFlow, linkedSectionOutput,
 							instigationStrategy);
 				}
+			}
+
+			// Determine if link task to next task
+			SectionTask nextTask = null;
+			TaskToNextTaskModel taskToNextTask = taskModel.getNextTask();
+			if (taskToNextTask != null) {
+				TaskModel nextTaskModel = taskToNextTask.getNextTask();
+				if (nextTaskModel != null) {
+					nextTask = tasks.get(nextTaskModel.getTaskName());
+				}
+			}
+			if (nextTask != null) {
+				// Link the task to its next task
+				designer.link(task, nextTask);
+			}
+
+			// Determine if link task to next external flow
+			SectionOutput nextSectionOutput = null;
+			TaskToNextExternalFlowModel taskToNextExtFlow = taskModel
+					.getNextExternalFlow();
+			if (taskToNextExtFlow != null) {
+				ExternalFlowModel nextExtFlow = taskToNextExtFlow
+						.getNextExternalFlow();
+				if (nextExtFlow != null) {
+					nextSectionOutput = sectionOutputs.get(nextExtFlow
+							.getExternalFlowName());
+				}
+			}
+			if (nextSectionOutput != null) {
+				// Link the task to its next section output
+				designer.link(task, nextSectionOutput);
 			}
 		}
 

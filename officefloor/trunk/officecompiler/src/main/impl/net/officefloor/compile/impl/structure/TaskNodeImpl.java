@@ -273,7 +273,32 @@ public class TaskNodeImpl implements TaskNode {
 			}
 		}
 
-		// TODO build next flow
+		// Build the next task
+		if (this.linkedFlowNode != null) {
+			// Have next task so link to it
+			TaskNode nextTask = LinkUtil.retrieveTarget(this, TaskNode.class,
+					"Next task ", LocationType.SECTION, this.sectionLocation,
+					AssetType.TASK, this.taskName, this.context
+							.getCompilerIssues());
+			if (nextTask != null) {
+
+				// Obtain next details for linking
+				String nextTaskName = nextTask.getOfficeTaskName();
+				Class<?> argumentType = taskType.getReturnType();
+
+				// Determine if linked task is on the same work
+				WorkNode nextWork = nextTask.getWorkNode();
+				if (this.workNode == nextWork) {
+					// Link to next task on same work
+					taskBuilder.setNextTaskInFlow(nextTaskName, argumentType);
+				} else {
+					// Link to next task on different work
+					String nextWorkName = nextWork.getQualifiedWorkName();
+					taskBuilder.setNextTaskInFlow(nextWorkName, nextTaskName,
+							argumentType);
+				}
+			}
+		}
 
 		// TODO build objects
 

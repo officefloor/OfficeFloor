@@ -196,6 +196,49 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Ensures compiling a {@link Task} linking to next {@link Task} on the same
+	 * {@link Work}.
+	 */
+	public void testLinkTaskNextToTaskOnSameWork() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK_A",
+				"OFFICE_TEAM");
+		this.record_workBuilder_addTask("TASK_B", "OFFICE_TEAM");
+		task.setNextTaskInFlow("TASK_B", Integer.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensures compiling a {@link Task} linking to next {@link Task} in a
+	 * different {@link OfficeSection}.
+	 */
+	public void testLinkTaskNextToTaskInDifferentOfficeSection() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION_A.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		this.record_officeBuilder_addWork("SECTION_B.WORK");
+		this.record_workBuilder_addTask("INPUT", "OFFICE_TEAM");
+		task.setNextTaskInFlow("SECTION_B.WORK", "INPUT", Integer.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * {@link FlowInterface} for {@link CompileTaskWork}.
 	 */
 	@FlowInterface
@@ -210,9 +253,16 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	public static class CompileTaskWork {
 
 		public void simpleTask() {
+			fail("Should not be invoked in compiling");
 		}
 
 		public void flowTask(Flows flows) {
+			fail("Should not be invoked in compiling");
+		}
+
+		public Integer nextTask() {
+			fail("Should not be invoked in compiling");
+			return null;
 		}
 	}
 

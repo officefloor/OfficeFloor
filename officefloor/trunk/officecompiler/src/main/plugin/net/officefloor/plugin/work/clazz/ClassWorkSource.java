@@ -114,6 +114,12 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 					.addTaskType(methodName, new ClassTaskFactory(method,
 							isStatic, parameters), null, null);
 
+			// Define the return type (it not void)
+			Class<?> returnType = method.getReturnType();
+			if ((returnType != null) && (!Void.TYPE.equals(returnType))) {
+				taskTypeBuilder.setReturnType(returnType);
+			}
+
 			// Define the listing of task objects and flows
 			int objectIndex = 0;
 			int flowIndex = 0;
@@ -182,12 +188,12 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 
 						// Ensure correct return type
 						boolean isReturnFlowFuture;
-						Class<?> returnType = flowMethod.getReturnType();
-						if (FlowFuture.class.equals(returnType)) {
+						Class<?> flowReturnType = flowMethod.getReturnType();
+						if (FlowFuture.class.equals(flowReturnType)) {
 							// Returns a flow future
 							isReturnFlowFuture = true;
-						} else if (Void.TYPE.equals(returnType)
-								|| (returnType == null)) {
+						} else if (Void.TYPE.equals(flowReturnType)
+								|| (flowReturnType == null)) {
 							// Does not return value
 							isReturnFlowFuture = false;
 						} else {
@@ -196,7 +202,7 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 									+ paramType.getSimpleName() + "."
 									+ methodName
 									+ " return type is invalid (return type="
-									+ returnType.getName() + ", task="
+									+ flowReturnType.getName() + ", task="
 									+ methodName + ")");
 						}
 
