@@ -19,6 +19,7 @@ package net.officefloor.compile.spi.section;
 import net.officefloor.compile.work.TaskEscalationType;
 import net.officefloor.compile.work.TaskFlowType;
 import net.officefloor.compile.work.TaskObjectType;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.api.execute.Task;
 
 /**
@@ -56,10 +57,13 @@ public interface SectionTask {
 	/**
 	 * Obtains the {@link TaskFlow} for the {@link TaskEscalationType}.
 	 * 
-	 * @param taskEscalationName
-	 *            Name of the {@link TaskEscalationType}.
+	 * @param escalationType
+	 *            Fully qualified class name of the {@link Throwable}
+	 *            identifying the {@link TaskEscalationType}. The
+	 *            {@link Escalation} type is used rather than the name as
+	 *            handling is done by the {@link Escalation} type.
 	 * @return {@link TaskFlow} for the {@link TaskEscalationType}.
 	 */
-	TaskFlow getTaskEscalation(String taskEscalationName);
+	TaskFlow getTaskEscalation(String escalationType);
 
 }

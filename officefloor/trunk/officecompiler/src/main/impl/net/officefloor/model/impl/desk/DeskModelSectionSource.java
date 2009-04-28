@@ -40,6 +40,9 @@ import net.officefloor.model.desk.DeskOperations;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationToTaskModel;
 import net.officefloor.model.desk.TaskFlowModel;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
@@ -155,7 +158,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			}
 		}
 
-		// Link the flows/objects for the task (as all links registered)
+		// Link the flows/objects/escalations for the task (as all links
+		// registered)
 		for (TaskModel taskModel : desk.getTasks()) {
 
 			// Obtain the task for the task model
@@ -283,6 +287,51 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			if (nextSectionOutput != null) {
 				// Link the task to its next section output
 				designer.link(task, nextSectionOutput);
+			}
+
+			// Link in the escalations for the task
+			for (TaskEscalationModel taskEscalationModel : taskModel
+					.getTaskEscalations()) {
+
+				// Obtain the task escalation
+				String escalationTypeName = taskEscalationModel
+						.getEscalationType();
+				TaskFlow taskEscalation = task
+						.getTaskEscalation(escalationTypeName);
+
+				// Determine if link escalation to another task
+				SectionTask linkedTask = null;
+				TaskEscalationToTaskModel escalationToTask = taskEscalationModel
+						.getTask();
+				if (escalationToTask != null) {
+					TaskModel linkedTaskModel = escalationToTask.getTask();
+					if (linkedTaskModel != null) {
+						linkedTask = tasks.get(linkedTaskModel.getTaskName());
+					}
+				}
+				if (linkedTask != null) {
+					// Link the escalation to its task
+					designer.link(taskEscalation, linkedTask,
+							FlowInstigationStrategyEnum.PARALLEL);
+				}
+
+				// Determine if link escalation to section output
+				SectionOutput linkedSectionOutput = null;
+				TaskEscalationToExternalFlowModel escalationToExtFlow = taskEscalationModel
+						.getExternalFlow();
+				if (escalationToExtFlow != null) {
+					ExternalFlowModel linkedExtFlow = escalationToExtFlow
+							.getExternalFlow();
+					if (linkedExtFlow != null) {
+						linkedSectionOutput = sectionOutputs.get(linkedExtFlow
+								.getExternalFlowName());
+					}
+				}
+				if (linkedSectionOutput != null) {
+					// Link the escalation to its section output
+					designer.link(taskEscalation, linkedSectionOutput,
+							FlowInstigationStrategyEnum.PARALLEL);
+				}
 			}
 		}
 
