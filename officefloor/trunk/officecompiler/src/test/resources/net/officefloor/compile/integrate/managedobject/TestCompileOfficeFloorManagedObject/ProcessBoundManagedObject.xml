@@ -1,7 +1,8 @@
 <context>
     <office-floor>
         <managed-objects>
-            <managed-object name="MANAGED_OBJECT_SOURCE" source="CLASS">
+            <managed-object name="MANAGED_OBJECT_SOURCE"
+                source="CLASS">
                 <properties>
                     <property name="class.name"
                         value="${testcase}$SimpleManagedObject" />
@@ -10,7 +11,11 @@
             </managed-object>
         </managed-objects>
         <offices>
-            <office name="OFFICE" source="OFFICE" location="office" />
+            <office name="OFFICE" source="OFFICE" location="office">
+                <object name="MANAGED_OBJECT">
+                    <managed-object name="MANAGED_OBJECT_SOURCE" />
+                </object>
+            </office>
         </offices>
     </office-floor>
     <office />
