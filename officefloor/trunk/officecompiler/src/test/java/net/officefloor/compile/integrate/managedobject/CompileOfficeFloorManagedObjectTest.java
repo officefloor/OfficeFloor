@@ -17,7 +17,9 @@
 package net.officefloor.compile.integrate.managedobject;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
@@ -35,11 +37,32 @@ public class CompileOfficeFloorManagedObjectTest extends
 	public void testSimpleManagedObject() {
 
 		// Record building the office floor
-		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT",
-				ClassManagedObjectSource.class, "class.name",
-				SimpleManagedObject.class.getName());
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Tests compiling a {@link ManagedObject} bound to {@link ProcessState}.
+	 */
+	public void testProcessBoundManagedObject() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		OfficeBuilder office = this
+				.record_officeFloorBuilder_addOffice("OFFICE");
+		office.registerManagedObjectSource("MANAGED_OBJECT",
+				"MANAGED_OBJECT_SOURCE");
+		this.recordReturn(office, office.addProcessManagedObject("PROCESS_MO",
+				"MANAGED_OBJECT"), null);
 
 		// Compile the office floor
 		this.compile(true);

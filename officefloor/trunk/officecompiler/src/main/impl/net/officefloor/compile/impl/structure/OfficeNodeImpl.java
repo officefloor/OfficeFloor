@@ -105,7 +105,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	/**
 	 * {@link OfficeObjectNode} instances by their {@link OfficeObject} name.
 	 */
-	private final Map<String, OfficeObjectNode> objects = new HashMap<String, OfficeObjectNode>();
+	private final Map<String, OfficeObjectStruct> objects = new HashMap<String, OfficeObjectStruct>();
 
 	/**
 	 * {@link OfficeTeamNode} instances by their {@link OfficeTeam} name.
@@ -220,20 +220,33 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 
 	@Override
 	public OfficeManagedObjectType[] getOfficeManagedObjectTypes() {
-		return this.objects.values().toArray(new OfficeManagedObjectType[0]);
+		// Copy architect added object types into an array
+		OfficeObjectStruct[] structs = this.objects.values().toArray(
+				new OfficeObjectStruct[0]);
+		List<OfficeManagedObjectType> managedObjectTypes = new LinkedList<OfficeManagedObjectType>();
+		for (int i = 0; i < structs.length; i++) {
+			if (structs[i].isAdded) {
+				managedObjectTypes.add(structs[i].officeObject);
+			}
+		}
+
+		// Return the managed object types
+		return managedObjectTypes.toArray(new OfficeManagedObjectType[0]);
 	}
 
 	@Override
 	public OfficeTeamType[] getOfficeTeamTypes() {
-		// Copy team types into an array
+		// Copy architect added team types into an array
 		TeamStruct[] structs = this.teams.values().toArray(new TeamStruct[0]);
-		OfficeTeamType[] teamTypes = new OfficeTeamType[structs.length];
-		for (int i = 0; i < teamTypes.length; i++) {
-			teamTypes[i] = structs[i].team;
+		List<OfficeTeamType> teamTypes = new LinkedList<OfficeTeamType>();
+		for (int i = 0; i < structs.length; i++) {
+			if (structs[i].isAdded) {
+				teamTypes.add(structs[i].team);
+			}
 		}
 
 		// Return the team types
-		return teamTypes;
+		return teamTypes.toArray(new OfficeTeamType[0]);
 	}
 
 	/*
@@ -369,9 +382,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Register the office floor managed objects for the office
-		for (OfficeObjectNode objectNode : this.objects.values()) {
+		for (OfficeObjectStruct struct : this.objects.values()) {
 
 			// Obtain the office object name
+			OfficeObjectNode objectNode = struct.officeObject;
 			String officeObjectName = objectNode.getOfficeObjectName();
 
 			// Obtain the office floor managed object name
@@ -414,8 +428,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	public OfficeObject addOfficeObject(String officeManagedObjectName,
 			String objectType) {
 		// Obtain and return the required object for the name
-		OfficeObjectNode object = this.objects.get(officeManagedObjectName);
-		if (object == null) {
+		OfficeObjectStruct struct = this.objects.get(officeManagedObjectName);
+		if (struct == null) {
 
 			// Ensure issue if already added as managed object
 			ManagedObjectNode managedObject = this.managedObjects
@@ -427,22 +441,28 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			}
 
 			// Add the object
-			object = new OfficeObjectNodeImpl(officeManagedObjectName,
-					objectType, this.officeLocation, this.context);
-			this.objects.put(officeManagedObjectName, object);
+			OfficeObjectNode object = new OfficeObjectNodeImpl(
+					officeManagedObjectName, objectType, this.officeLocation,
+					this.context);
+			struct = new OfficeObjectStruct(object, true);
+			this.objects.put(officeManagedObjectName, struct);
 
 		} else {
+
+			// Flag the office object added by office architect
+			struct.isAdded = true;
+
 			// Added but determine if requires initialising
-			if (!object.isInitialised()) {
+			if (!struct.officeObject.isInitialised()) {
 				// Initialise as not yet initialised
-				object.initialise(objectType);
+				struct.officeObject.initialise(objectType);
 			} else {
 				// Object already added and initialised
 				this.addIssue("Object " + officeManagedObjectName
 						+ " already added");
 			}
 		}
-		return object;
+		return struct.officeObject;
 	}
 
 	@Override
@@ -509,8 +529,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		if (managedObject == null) {
 
 			// Ensure not already added as required object
-			OfficeObjectNode object = this.objects.get(managedObjectName);
-			if (object != null) {
+			OfficeObjectStruct struct = this.objects.get(managedObjectName);
+			if (struct != null) {
 				// Object already added
 				this.addIssue("Managed object " + managedObjectName
 						+ " already added as Object");
@@ -643,17 +663,18 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Obtain and return the office object
-		OfficeObjectNode object = this.objects.get(officeManagedObjectName);
-		if (object == null) {
+		OfficeObjectStruct struct = this.objects.get(officeManagedObjectName);
+		if (struct == null) {
 			// Create the object within the office floor context
-			object = new OfficeObjectNodeImpl(officeManagedObjectName,
-					this.officeLocation, this.context);
+			OfficeObjectNode object = new OfficeObjectNodeImpl(
+					officeManagedObjectName, this.officeLocation, this.context);
 			object.addOfficeFloorContext(this.officeFloorLocation);
 
 			// Add the object
-			this.objects.put(officeManagedObjectName, object);
+			struct = new OfficeObjectStruct(object, false);
+			this.objects.put(officeManagedObjectName, struct);
 		}
-		return object;
+		return struct.officeObject;
 	}
 
 	@Override
@@ -700,6 +721,36 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public LinkOfficeNode getLinkedOfficeNode() {
 		return this.linkedOfficeNode;
+	}
+
+	/**
+	 * Structure containing details of an {@link OfficeObjectNode}.
+	 */
+	private class OfficeObjectStruct {
+
+		/**
+		 * {@link OfficeObjectNode}.
+		 */
+		public final OfficeObjectNode officeObject;
+
+		/**
+		 * Flag indicating if has been added by {@link OfficeArchitect}.
+		 */
+		public boolean isAdded = false;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param officeObject
+		 *            {@link OfficeObjectNode}.
+		 * @param isAdded
+		 *            <code>true</code> if has been added by
+		 *            {@link OfficeArchitect}.
+		 */
+		public OfficeObjectStruct(OfficeObjectNode officeObject, boolean isAdded) {
+			this.officeObject = officeObject;
+			this.isAdded = isAdded;
+		}
 	}
 
 	/**
