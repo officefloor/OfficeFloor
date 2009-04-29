@@ -158,8 +158,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			}
 		}
 
-		// Link the flows/objects/escalations for the task (as all links
-		// registered)
+		// Link the flows/objects/escalations (as all links registered)
 		for (TaskModel taskModel : desk.getTasks()) {
 
 			// Obtain the task for the task model
@@ -183,6 +182,12 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					// Obtain the task object
 					String objectName = taskObjectModel.getObjectName();
 					TaskObject taskObject = task.getTaskObject(objectName);
+					
+					// Determine if object is a parameter
+					if (taskObjectModel.getIsParameter()) {
+						taskObject.flagAsParameter();
+						continue; // flagged as parameter
+					}
 
 					// Determine if link object to external managed object
 					SectionObject linkedSectionObject = null;

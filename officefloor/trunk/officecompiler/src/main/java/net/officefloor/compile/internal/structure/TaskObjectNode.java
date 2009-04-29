@@ -18,6 +18,7 @@ package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -36,5 +37,13 @@ public interface TaskObjectNode extends TaskObject, ObjectDependency,
 	 *            Location of the {@link Office}.
 	 */
 	void addOfficeContext(String officeLocation);
+
+	/**
+	 * Indicates if this {@link TaskObject} is a parameter to the {@link Task}.
+	 * 
+	 * @return <code>true</code> if this {@link TaskObject} is a parameter to
+	 *         the {@link Task}.
+	 */
+	boolean isParameter();
 
 }

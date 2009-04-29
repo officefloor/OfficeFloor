@@ -24,7 +24,6 @@ import net.officefloor.compile.spi.section.SubSection;
 import net.officefloor.compile.spi.section.TaskFlow;
 import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.compile.work.TaskEscalationType;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -260,19 +259,36 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	}
 
 	/**
+	 * Ensure compiling a {@link Task} link the {@link TaskObject} as a
+	 * parameter.
+	 */
+	public void testLinkTaskObjectAsParameter() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		task.linkParameter(0, CompileManagedObject.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * Ensure compiling a {@link Task} linking the {@link TaskObject} to a
 	 * {@link OfficeFloorManagedObject}.
 	 */
 	public void testLinkTaskObjectToOfficeFloorManagedObject() {
 
 		// Record building the office floor
-		ManagedObjectBuilder<?> moBuilder = this
-				.record_officeFloorBuilder_addManagedObject(
-						"MANAGED_OBJECT_SOURCE",
-						ClassManagedObjectSource.class, "class.name",
-						CompileManagedObject.class.getName());
-		this.recordReturn(moBuilder, moBuilder.setManagingOffice("OFFICE"),
-				null);
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(

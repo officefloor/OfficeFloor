@@ -315,8 +315,21 @@ public class TaskNodeImpl implements TaskNode {
 			Enum<?> objectKey = objectType.getKey();
 			Class<?> objectClass = objectType.getObjectType();
 
-			// Obtain the linked office object for the object
+			// Obtain the object node for the task object
 			TaskObjectNode objectNode = this.taskObjects.get(objectName);
+
+			// Determine if the object is a parameter
+			if ((objectNode != null) && (objectNode.isParameter())) {
+				// Link as parameter
+				if (objectKey != null) {
+					taskBuilder.linkParameter(objectKey, objectClass);
+				} else {
+					taskBuilder.linkParameter(objectIndex, objectClass);
+				}
+				continue; // linked as a parameter
+			}
+
+			// Obtain the linked office object for the object
 			OfficeObject linkedOfficeObject = LinkUtil.retrieveTarget(
 					objectNode, OfficeObject.class, "Object " + objectName,
 					LocationType.SECTION, this.sectionLocation, AssetType.TASK,
