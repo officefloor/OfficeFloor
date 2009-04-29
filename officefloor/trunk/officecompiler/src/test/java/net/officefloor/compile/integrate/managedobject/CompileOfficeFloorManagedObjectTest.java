@@ -17,7 +17,6 @@
 package net.officefloor.compile.integrate.managedobject;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
-import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
@@ -36,12 +35,10 @@ public class CompileOfficeFloorManagedObjectTest extends
 	public void testSimpleManagedObject() {
 
 		// Record building the office floor
-		ManagedObjectBuilder<?> moBuilder = this
-				.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT",
-						ClassManagedObjectSource.class, "class.name",
-						SimpleManagedObject.class.getName());
-		this.recordReturn(moBuilder, moBuilder.setManagingOffice("OFFICE"),
-				null);
+		this.record_officeFloorBuilder_addManagedObject("MANAGED_OBJECT",
+				ClassManagedObjectSource.class, "class.name",
+				SimpleManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeFloorBuilder_addOffice("OFFICE");
 
 		// Compile the office floor

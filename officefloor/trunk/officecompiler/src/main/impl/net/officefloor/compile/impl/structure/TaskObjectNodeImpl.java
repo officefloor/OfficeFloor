@@ -25,6 +25,7 @@ import net.officefloor.compile.spi.office.DependentManagedObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.section.TaskObject;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 
 /**
@@ -48,6 +49,12 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	 * {@link NodeContext}.
 	 */
 	private final NodeContext context;
+
+	/**
+	 * Flag indicating if this {@link TaskObject} is a parameter to the
+	 * {@link Task}.
+	 */
+	private boolean isParameter = false;
 
 	/**
 	 * Flags whether within the {@link Office} context.
@@ -88,6 +95,11 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 		this.isInOfficeContext = true;
 	}
 
+	@Override
+	public boolean isParameter() {
+		return this.isParameter;
+	}
+
 	/*
 	 * ===================== TaskObject ===============================
 	 */
@@ -95,6 +107,11 @@ public class TaskObjectNodeImpl implements TaskObjectNode {
 	@Override
 	public String getTaskObjectName() {
 		return this.objectName;
+	}
+
+	@Override
+	public void flagAsParameter() {
+		this.isParameter = true;
 	}
 
 	/*

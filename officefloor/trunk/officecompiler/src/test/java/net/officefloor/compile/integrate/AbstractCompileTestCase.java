@@ -23,10 +23,12 @@ import junit.framework.TestCase;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
@@ -116,6 +118,12 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Current {@link ManagedObjectBuilder}.
+	 */
+	@SuppressWarnings("unchecked")
+	private ManagedObjectBuilder managedObjectBuilder = null;
+
+	/**
 	 * Records adding a {@link ManagedObjectSource} to the
 	 * {@link OfficeFloorBuilder}.
 	 * 
@@ -132,16 +140,31 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	protected <D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> ManagedObjectBuilder<F> record_officeFloorBuilder_addManagedObject(
 			String managedObjectSourceName, Class<S> managedObjectSourceClass,
 			String... propertyNameValues) {
-		ManagedObjectBuilder<F> builder = this
-				.createMock(ManagedObjectBuilder.class);
+		this.managedObjectBuilder = this.createMock(ManagedObjectBuilder.class);
 		this.recordReturn(this.officeFloorBuilder, this.officeFloorBuilder
 				.addManagedObject(managedObjectSourceName,
-						managedObjectSourceClass), builder);
+						managedObjectSourceClass), this.managedObjectBuilder);
 		for (int i = 0; i < propertyNameValues.length; i += 2) {
 			String name = propertyNameValues[i];
 			String value = propertyNameValues[i + 1];
-			builder.addProperty(name, value);
+			this.managedObjectBuilder.addProperty(name, value);
 		}
+		return this.managedObjectBuilder;
+	}
+
+	/**
+	 * Records specifying the {@link ManagingOffice}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link ManagingOffice}.
+	 * @return {@link ManagingOfficeBuilder}.
+	 */
+	protected ManagingOfficeBuilder<?> record_managedObjectBuilder_setManagingOffice(
+			String officeName) {
+		ManagingOfficeBuilder<?> builder = this
+				.createMock(ManagingOfficeBuilder.class);
+		this.recordReturn(this.managedObjectBuilder, this.managedObjectBuilder
+				.setManagingOffice(officeName), builder);
 		return builder;
 	}
 
