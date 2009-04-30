@@ -200,6 +200,25 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Records adding a {@link ProcessState} {@link ManagedObject} to the
+	 * {@link Office}.
+	 * 
+	 * @param processManagedObjectName
+	 *            {@link ThreadState} bound name.
+	 * @param officeManagedObjectName
+	 *            {@link Office} registered {@link ManagedObject} name.
+	 */
+	protected DependencyMappingBuilder record_officeBuilder_addProcessManagedObject(
+			String processManagedObjectName, String officeManagedObjectName) {
+		DependencyMappingBuilder builder = this
+				.createMock(DependencyMappingBuilder.class);
+		this.recordReturn(this.officeBuilder, this.officeBuilder
+				.addProcessManagedObject(processManagedObjectName,
+						officeManagedObjectName), builder);
+		return builder;
+	}
+
+	/**
 	 * Records adding a {@link ThreadState} {@link ManagedObject} to the
 	 * {@link Office}.
 	 * 
