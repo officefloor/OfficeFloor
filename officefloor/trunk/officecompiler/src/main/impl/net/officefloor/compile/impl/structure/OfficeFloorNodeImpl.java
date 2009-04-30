@@ -19,7 +19,7 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
 import net.officefloor.compile.internal.structure.OfficeNode;
@@ -32,6 +32,7 @@ import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -59,10 +60,10 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	private final NodeContext context;
 
 	/**
-	 * {@link ManagedObjectNode} instances by their
-	 * {@link OfficeFloorManagedObject} name.
+	 * {@link ManagedObjectSourceNode} instances by their
+	 * {@link OfficeFloorManagedObjectSource} name.
 	 */
-	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
+	private final Map<String, ManagedObjectSourceNode> managedObjectSources = new HashMap<String, ManagedObjectSourceNode>();
 
 	/**
 	 * {@link TeamNode} instances by their {@link OfficeFloorTeam} name.
@@ -102,23 +103,24 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 */
 
 	@Override
-	public OfficeFloorManagedObject addManagedObject(String managedObjectName,
-			String managedObjectSourceClassName) {
-		// Obtain and return the managed object for the name
-		ManagedObjectNode mo = this.managedObjects.get(managedObjectName);
+	public OfficeFloorManagedObjectSource addManagedObjectSource(
+			String managedObjectSourceName, String managedObjectSourceClassName) {
+		// Obtain and return the managed object source for the name
+		ManagedObjectSourceNode mo = this.managedObjectSources
+				.get(managedObjectSourceName);
 		if (mo == null) {
-			// Create the managed object and have in office floor context
-			mo = new ManagedObjectNodeImpl(managedObjectName,
-					managedObjectSourceClassName, this.officeFloorLocation,
-					this.context);
+			// Create the managed object source and have in office floor context
+			mo = new ManagedObjectSourceNodeImpl(managedObjectSourceName,
+					managedObjectSourceClassName, LocationType.OFFICE_FLOOR,
+					this.officeFloorLocation, this.context);
 			mo.addOfficeFloorContext(this.officeFloorLocation);
 
-			// Add the managed object
-			this.managedObjects.put(managedObjectName, mo);
+			// Add the managed object source
+			this.managedObjectSources.put(managedObjectSourceName, mo);
 		} else {
-			// Managed object already added
-			this.addIssue("Office floor managed object " + managedObjectName
-					+ " already added");
+			// Managed object source already added
+			this.addIssue("Office floor managed object source "
+					+ managedObjectSourceName + " already added");
 		}
 		return mo;
 	}
@@ -202,9 +204,10 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeFloorBuilder builder = officeFrame
 				.createOfficeFloorBuilder(this.officeFloorLocation);
 
-		// Build the managed objects
-		for (ManagedObjectNode managedObject : this.managedObjects.values()) {
-			managedObject.buildManagedObject(builder);
+		// Build the managed object sources
+		for (ManagedObjectSourceNode managedObjectSource : this.managedObjectSources
+				.values()) {
+			managedObjectSource.buildManagedObject(builder);
 		}
 
 		// Build the teams

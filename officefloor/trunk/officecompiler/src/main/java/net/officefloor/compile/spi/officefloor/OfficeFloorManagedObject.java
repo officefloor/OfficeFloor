@@ -17,12 +17,7 @@
 package net.officefloor.compile.spi.officefloor;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.managedobject.ManagedObjectFlowType;
-import net.officefloor.compile.managedobject.ManagedObjectTeamType;
-import net.officefloor.compile.properties.Property;
-import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -41,35 +36,6 @@ public interface OfficeFloorManagedObject {
 	String getOfficeFloorManagedObjectName();
 
 	/**
-	 * Adds a {@link Property} to source the {@link ManagedObject}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
-
-	/**
-	 * Obtains the {@link ManagingOffice} for this
-	 * {@link OfficeFloorManagedObject}.
-	 * 
-	 * @param office
-	 *            {@link ManagingOffice}.
-	 */
-	ManagingOffice getManagingOffice();
-
-	/**
-	 * Obtains the {@link ManagedObjectTeam} for the
-	 * {@link ManagedObjectTeamType}.
-	 * 
-	 * @param managedObjectTeamName
-	 *            Name of the {@link ManagedObjectTeamType}.
-	 * @return {@link ManagedObjectTeam}.
-	 */
-	ManagedObjectTeam getManagedObjectTeam(String managedObjectTeamName);
-
-	/**
 	 * Obtains the {@link ManagedObjectDependency} for the
 	 * {@link ManagedObjectDependencyType}.
 	 * 
@@ -79,15 +45,5 @@ public interface OfficeFloorManagedObject {
 	 */
 	ManagedObjectDependency getManagedObjectDependency(
 			String managedObjectDependencyName);
-
-	/**
-	 * Obtains the {@link ManagedObjectFlow} for he
-	 * {@link ManagedObjectFlowType}.
-	 * 
-	 * @param managedObjectFlowName
-	 *            Name of the {@link ManagedObjectFlowType}.
-	 * @return {@link ManagedObjectFlow}.
-	 */
-	ManagedObjectFlow getManagedObjectFlow(String managedObjectFlowName);
 
 }

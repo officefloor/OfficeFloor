@@ -32,14 +32,14 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
-import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeSourceSpecification;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -47,6 +47,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceSpecifica
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SectionWork;
 import net.officefloor.compile.spi.section.SubSection;
@@ -329,30 +330,31 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Adds an {@link OfficeManagedObject} to the {@link OfficeArchitect}.
+	 * Adds an {@link OfficeManagedObjectSource} to the {@link OfficeArchitect}.
 	 * 
 	 * @param officeArchitect
 	 *            {@link OfficeArchitect}.
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeManagedObject}.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeManagedObjectSource}.
 	 * @param maker
 	 *            {@link ManagedObjectMaker}.
-	 * @return {@link OfficeManagedObject}.
+	 * @return {@link OfficeManagedObjectSource}.
 	 */
-	protected OfficeManagedObject addManagedObject(
-			OfficeArchitect officeArchitect, String managedObjectName,
+	protected OfficeManagedObjectSource addManagedObjectSource(
+			OfficeArchitect officeArchitect, String managedObjectSourceName,
 			ManagedObjectMaker maker) {
 
 		// Register the managed object maker
 		PropertyList propertyList = MakerManagedObjectSource.register(maker);
 
-		// Add and return the managed object
-		OfficeManagedObject mo = officeArchitect.addOfficeManagedObject(
-				managedObjectName, MakerManagedObjectSource.class.getName());
+		// Add and return the managed object source
+		OfficeManagedObjectSource moSource = officeArchitect
+				.addOfficeManagedObjectSource(managedObjectSourceName,
+						MakerManagedObjectSource.class.getName());
 		for (Property property : propertyList) {
-			mo.addProperty(property.getName(), property.getValue());
+			moSource.addProperty(property.getName(), property.getValue());
 		}
-		return mo;
+		return moSource;
 	}
 
 	/**
@@ -453,31 +455,32 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Adds an {@link OfficeFloorManagedObject} to the
+	 * Adds an {@link OfficeFloorManagedObjectSource} to the
 	 * {@link OfficeFloorDeployer}.
 	 * 
 	 * @param officeFloorDeployer
 	 *            {@link OfficeFloorDeployer}.
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeFloorManagedObject}.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeFloorManagedObjectSource}.
 	 * @param maker
 	 *            {@link ManagedObjectMaker}.
-	 * @return {@link OfficeFloorManagedObject}.
+	 * @return {@link OfficeFloorManagedObjectSource}.
 	 */
-	protected OfficeFloorManagedObject addManagedObject(
-			OfficeFloorDeployer officeFloorDeployer, String managedObjectName,
-			ManagedObjectMaker maker) {
+	protected OfficeFloorManagedObjectSource addManagedObjectSource(
+			OfficeFloorDeployer officeFloorDeployer,
+			String managedObjectSourceName, ManagedObjectMaker maker) {
 
 		// Register the managed object maker
 		PropertyList propertyList = MakerManagedObjectSource.register(maker);
 
-		// Add and return the managed object
-		OfficeFloorManagedObject mo = officeFloorDeployer.addManagedObject(
-				managedObjectName, MakerManagedObjectSource.class.getName());
+		// Add and return the managed object source
+		OfficeFloorManagedObjectSource moSource = officeFloorDeployer
+				.addManagedObjectSource(managedObjectSourceName,
+						MakerManagedObjectSource.class.getName());
 		for (Property property : propertyList) {
-			mo.addProperty(property.getName(), property.getValue());
+			moSource.addProperty(property.getName(), property.getValue());
 		}
-		return mo;
+		return moSource;
 	}
 
 	/**
@@ -554,16 +557,16 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		SubSection addSubSection(String subSectionName, SectionMaker maker);
 
 		/**
-		 * Adds a {@link SectionManagedObject}.
+		 * Adds a {@link SectionManagedObjectSource}.
 		 * 
-		 * @param managedObjectName
-		 *            Name of the {@link SectionManagedObject}.
+		 * @param managedObjectSourceName
+		 *            Name of the {@link SectionManagedObjectSource}.
 		 * @param maker
 		 *            {@link ManagedObjectMaker}.
-		 * @return Added {@link SectionManagedObject}.
+		 * @return Added {@link SectionManagedObjectSource}.
 		 */
-		SectionManagedObject addManagedObject(String managedObjectName,
-				ManagedObjectMaker maker);
+		SectionManagedObjectSource addManagedObjectSource(
+				String managedObjectSourceName, ManagedObjectMaker maker);
 
 		/**
 		 * Adds a {@link SectionWork}.
@@ -790,20 +793,21 @@ public abstract class AbstractStructureTestCase extends OfficeFrameTestCase {
 		}
 
 		@Override
-		public SectionManagedObject addManagedObject(String managedObjectName,
-				ManagedObjectMaker maker) {
-			// Register (and add) the managed object
+		public SectionManagedObjectSource addManagedObjectSource(
+				String managedObjectSourceName, ManagedObjectMaker maker) {
+
+			// Register the managed object source
 			PropertyList propertyList = MakerManagedObjectSource
 					.register(maker);
 
 			// Create and return the section managed object
-			SectionManagedObject mo = this.builder
-					.addSectionManagedObject(managedObjectName,
+			SectionManagedObjectSource moSource = this.builder
+					.addSectionManagedObjectSource(managedObjectSourceName,
 							MakerManagedObjectSource.class.getName());
 			for (Property property : propertyList) {
-				mo.addProperty(property.getName(), property.getValue());
+				moSource.addProperty(property.getName(), property.getValue());
 			}
-			return mo;
+			return moSource;
 		}
 
 		@Override

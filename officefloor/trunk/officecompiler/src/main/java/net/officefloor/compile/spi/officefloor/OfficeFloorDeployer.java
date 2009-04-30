@@ -47,16 +47,16 @@ public interface OfficeFloorDeployer {
 	OfficeFloorTeam addTeam(String teamName, String teamSourceClassName);
 
 	/**
-	 * Adds an {@link OfficeFloorManagedObject}.
+	 * Adds a {@link OfficeFloorManagedObjectSource}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeFloorManagedObject}.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeFloorManagedObjectSource}.
 	 * @param managedObjectSourceClassName
 	 *            Fully qualified class name of the {@link ManagedObjectSource}.
-	 * @return Added {@link OfficeFloorManagedObject}.
+	 * @return Added {@link OfficeFloorManagedObjectSource}.
 	 */
-	OfficeFloorManagedObject addManagedObject(String managedObjectName,
-			String managedObjectSourceClassName);
+	OfficeFloorManagedObjectSource addManagedObjectSource(
+			String managedObjectSourceName, String managedObjectSourceClassName);
 
 	/**
 	 * Adds a {@link DeployedOffice} to the {@link OfficeFloor}.
@@ -127,15 +127,14 @@ public interface OfficeFloorDeployer {
 	void link(OfficeTeam team, OfficeFloorTeam officeFloorTeam);
 
 	/**
-	 * Links the {@link OfficeObject} to be the {@link OfficeFloorManagedObject}
-	 * .
+	 * Links {@link OfficeObject} to be the {@link OfficeFloorManagedObject}.
 	 * 
-	 * @param requiredManagedObject
+	 * @param officeObject
 	 *            {@link OfficeObject}.
 	 * @param officeFloorManagedObject
 	 *            {@link OfficeFloorManagedObject}.
 	 */
-	void link(OfficeObject requiredManagedObject,
+	void link(OfficeObject officeObject,
 			OfficeFloorManagedObject officeFloorManagedObject);
 
 }

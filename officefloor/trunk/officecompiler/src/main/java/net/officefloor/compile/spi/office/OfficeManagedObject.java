@@ -17,14 +17,9 @@
 package net.officefloor.compile.spi.office;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.managedobject.ManagedObjectFlowType;
-import net.officefloor.compile.managedobject.ManagedObjectTeamType;
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagedObject} for the {@link Office}.
@@ -42,27 +37,6 @@ public interface OfficeManagedObject extends DependentManagedObject,
 	String getOfficeManagedObjectName();
 
 	/**
-	 * Adds a {@link Property} to source the {@link ManagedObject} from the
-	 * {@link ManagedObjectSource}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
-
-	/**
-	 * Obtains the {@link ManagedObjectTeam} for the
-	 * {@link ManagedObjectTeamType}.
-	 * 
-	 * @param managedObjectTeamName
-	 *            Name of the {@link ManagedObjectTeamType}.
-	 * @return {@link ManagedObjectTeam}.
-	 */
-	ManagedObjectTeam getManagedObjectTeam(String managedObjectTeamName);
-
-	/**
 	 * Obtains the {@link ManagedObjectDependency} for the
 	 * {@link ManagedObjectDependencyType}.
 	 * 
@@ -72,15 +46,5 @@ public interface OfficeManagedObject extends DependentManagedObject,
 	 */
 	ManagedObjectDependency getManagedObjectDependency(
 			String managedObjectDependencyName);
-
-	/**
-	 * Obtains the {@link ManagedObjectFlow} for he
-	 * {@link ManagedObjectFlowType}.
-	 * 
-	 * @param managedObjectFlowName
-	 *            Name of the {@link ManagedObjectFlowType}.
-	 * @return {@link ManagedObjectFlow}.
-	 */
-	ManagedObjectFlow getManagedObjectFlow(String managedObjectFlowName);
 
 }

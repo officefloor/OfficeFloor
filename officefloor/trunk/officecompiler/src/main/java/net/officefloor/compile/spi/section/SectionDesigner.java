@@ -86,23 +86,20 @@ public interface SectionDesigner {
 	SectionWork addSectionWork(String workName, String workSourceClassName);
 
 	/**
-	 * Adds a {@link SectionManagedObject} to the {@link OfficeSection} being
-	 * built.
+	 * Adds a {@link SectionManagedObjectSource} to the {@link OfficeSection}
+	 * being built.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link SectionManagedObject}.
-	 * @param workSourceClassName
+	 * @param managedObjectSourceName
+	 *            Name of the {@link SectionManagedObjectSource}.
+	 * @param managedObjectSourceClassName
 	 *            Fully qualified class name of the {@link ManagedObjectSource}.
 	 *            This allows adding the {@link SectionManagedObject} without
 	 *            having to worry if the {@link ManagedObjectSource} is
-	 *            available on the class path. <b>This should be used over
-	 *            attempting to find the {@link ManagedObjectSource}</b> - as
-	 *            should leave to compiler to find the
-	 *            {@link ManagedObjectSource}.
+	 *            available on the class path.
 	 * @return {@link SectionManagedObject}.
 	 */
-	SectionManagedObject addSectionManagedObject(String managedObjectName,
-			String managedObjectSourceClassName);
+	SectionManagedObjectSource addSectionManagedObjectSource(
+			String managedObjectSourceName, String managedObjectSourceClassName);
 
 	/**
 	 * Adds a {@link SubSection} to the {@link OfficeSection} being built.
@@ -416,7 +413,7 @@ public interface SectionDesigner {
 	 *            Name of the {@link Asset}. May be <code>null</code> if
 	 *            {@link OfficeSection} in general.
 	 */
-	void addIssue(String issueDescription, Throwable cause, AssetType assetType,
-			String assetName);
+	void addIssue(String issueDescription, Throwable cause,
+			AssetType assetType, String assetName);
 
 }

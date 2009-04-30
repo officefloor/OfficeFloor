@@ -78,16 +78,16 @@ public interface OfficeArchitect {
 			PropertyList properties);
 
 	/**
-	 * Adds an {@link OfficeManagedObject}.
+	 * Adds a {@link OfficeManagedObjectSource}.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link OfficeManagedObject}.
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeManagedObjectSource}.
 	 * @param managedObjectSourceClassName
 	 *            Fully qualified class name of the {@link ManagedObjectSource}.
-	 * @return Added {@link OfficeManagedObject}.
+	 * @return Added {@link OfficeManagedObjectSource}.
 	 */
-	OfficeManagedObject addOfficeManagedObject(String managedObjectName,
-			String managedObjectSourceClassName);
+	OfficeManagedObjectSource addOfficeManagedObjectSource(
+			String managedObjectSourceName, String managedObjectSourceClassName);
 
 	/**
 	 * Adds an {@link OfficeAdministrator}.

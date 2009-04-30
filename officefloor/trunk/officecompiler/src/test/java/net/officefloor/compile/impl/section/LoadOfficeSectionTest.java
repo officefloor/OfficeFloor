@@ -27,11 +27,13 @@ import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionTask;
 import net.officefloor.compile.spi.section.SubSection;
@@ -40,6 +42,7 @@ import net.officefloor.compile.spi.section.TaskObject;
 import net.officefloor.frame.api.build.TaskFactory;
 import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
  * Tests loading the {@link OfficeSection}.
@@ -156,8 +159,8 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 		// Validate results
 		assertEquals("Should be no sub sections", 0, section
 				.getOfficeSubSections().length);
-		assertEquals("Should be no managed objects", 0, section
-				.getOfficeSectionManagedObjects().length);
+		assertEquals("Should be no managed object sources", 0, section
+				.getOfficeSectionManagedObjectSources().length);
 		assertEquals("Should have a single task", 1,
 				section.getOfficeTasks().length);
 		OfficeTask task = section.getOfficeTasks()[0];
@@ -263,7 +266,10 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
-						context.addManagedObject("MO", null);
+						SectionManagedObjectSource source = context
+								.addManagedObjectSource("MO_SOURCE", null);
+						source.getSectionManagedObject("MO",
+								ManagedObjectScope.PROCESS);
 					}
 				});
 
@@ -271,9 +277,15 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 		assertEquals("Should have no sub section", 0, section
 				.getOfficeSubSections().length);
 		assertEquals("Should have no tasks", 0, section.getOfficeTasks().length);
-		assertEquals("Should have a section managed object", 1, section
+		assertEquals("Should have a section managed object source", 1, section
+				.getOfficeSectionManagedObjectSources().length);
+		OfficeSectionManagedObjectSource moSource = section
+				.getOfficeSectionManagedObjectSources()[0];
+		assertEquals("Incorrect managed object source name", "MO_SOURCE",
+				moSource.getOfficeSectionManagedObjectSourceName());
+		assertEquals("Should have a section managed object", 1, moSource
 				.getOfficeSectionManagedObjects().length);
-		OfficeSectionManagedObject mo = section
+		OfficeSectionManagedObject mo = moSource
 				.getOfficeSectionManagedObjects()[0];
 		assertEquals("Incorrect managed object name", "MO", mo
 				.getOfficeSectionManagedObjectName());
@@ -290,25 +302,32 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 				new SectionMaker() {
 					@Override
 					public void make(SectionMakerContext context) {
-						context.addManagedObject("MO",
-								new ManagedObjectMaker() {
-									@Override
-									public void make(
-											ManagedObjectMakerContext context) {
-										context
-												.addExtensionInterface(XAResource.class);
-									}
-								});
+						SectionManagedObjectSource source = context
+								.addManagedObjectSource("MO_SOURCE",
+										new ManagedObjectMaker() {
+											@Override
+											public void make(
+													ManagedObjectMakerContext context) {
+												context
+														.addExtensionInterface(XAResource.class);
+											}
+										});
+						source.getSectionManagedObject("MO",
+								ManagedObjectScope.WORK);
 					}
 				});
 
 		// Validate the results
-		assertEquals("Should have a section managed object", 1, section
+		assertEquals("Should have a section managed object source", 1, section
+				.getOfficeSectionManagedObjectSources().length);
+		OfficeSectionManagedObjectSource moSource = section
+				.getOfficeSectionManagedObjectSources()[0];
+		assertEquals("Incorrect managed object source name", "MO_SOURCE",
+				moSource.getOfficeSectionManagedObjectSourceName());
+		assertEquals("Should have a section managed object", 1, moSource
 				.getOfficeSectionManagedObjects().length);
-		OfficeSectionManagedObject mo = section
+		OfficeSectionManagedObject mo = moSource
 				.getOfficeSectionManagedObjects()[0];
-		assertEquals("Incorrect managed object name", "MO", mo
-				.getOfficeSectionManagedObjectName());
 		assertEquals("Should have a supported extension interface", 1, mo
 				.getSupportedExtensionInterfaces().length);
 		Class<?> supportedEi = mo.getSupportedExtensionInterfaces()[0];
@@ -376,8 +395,11 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 						TaskObject object = context.addTaskObject("WORK",
 								workFactory, "TASK", taskFactory, "OBJECT",
 								Connection.class);
-						SectionManagedObject managedObject = context
-								.addManagedObject("MO", null);
+						SectionManagedObjectSource moSource = context
+								.addManagedObjectSource("MO_SOURCE", null);
+						SectionManagedObject managedObject = moSource
+								.getSectionManagedObject("MO",
+										ManagedObjectScope.THREAD);
 
 						// Link task object to managed object
 						context.getBuilder().link(object, managedObject);
@@ -440,8 +462,11 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 								.getSubSectionObject("SECTION_OBJECT");
 
 						// Add the managed object
-						SectionManagedObject managedObject = context
-								.addManagedObject("MO", null);
+						SectionManagedObjectSource moSource = context
+								.addManagedObjectSource("MO_SOURCE", null);
+						SectionManagedObject managedObject = moSource
+								.getSectionManagedObject("MO",
+										ManagedObjectScope.PROCESS);
 
 						// Link task object to managed object
 						context.getBuilder().link(subSectionObject,

@@ -25,6 +25,7 @@ import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
@@ -86,24 +87,26 @@ public class OfficeFloorModelOfficeFloorSource extends
 		OfficeFloorModel officeFloor = new OfficeFloorRepositoryImpl(
 				new ModelRepositoryImpl()).retrieveOfficeFloor(configuration);
 
-		// Add the office floor managed objects, keeping registry of them
-		Map<String, OfficeFloorManagedObject> officeFloorManagedObjects = new HashMap<String, OfficeFloorManagedObject>();
+		// Add the office floor managed object sources, keeping registry of them
+		Map<String, OfficeFloorManagedObjectSource> officeFloorManagedObjectSources = new HashMap<String, OfficeFloorManagedObjectSource>();
 		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor
 				.getOfficeFloorManagedObjects()) {
 
 			// Add the office floor managed object
 			String managedObjectName = managedObjectModel
 					.getOfficeFloorManagedObjectName();
-			OfficeFloorManagedObject managedObject = deployer.addManagedObject(
-					managedObjectName, managedObjectModel
-							.getManagedObjectSourceClassName());
+			OfficeFloorManagedObjectSource managedObjectSource = deployer
+					.addManagedObjectSource(managedObjectName,
+							managedObjectModel
+									.getManagedObjectSourceClassName());
 			for (PropertyModel property : managedObjectModel.getProperties()) {
-				managedObject.addProperty(property.getName(), property
+				managedObjectSource.addProperty(property.getName(), property
 						.getValue());
 			}
 
 			// Register the managed object
-			officeFloorManagedObjects.put(managedObjectName, managedObject);
+			officeFloorManagedObjectSources.put(managedObjectName,
+					managedObjectSource);
 		}
 
 		// Add the office floor teams, keeping registry of teams
@@ -145,22 +148,25 @@ public class OfficeFloorModelOfficeFloorSource extends
 						.getDeployedOfficeObject(objectModel
 								.getDeployedOfficeObjectName());
 
-				// Obtain the office floor managed object
-				OfficeFloorManagedObject managedObject = null;
+				// Obtain the office floor managed object source
+				OfficeFloorManagedObjectSource managedObjectSource = null;
 				DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = objectModel
 						.getOfficeFloorManagedObject();
 				if (conn != null) {
 					OfficeFloorManagedObjectModel managedObjectModel = conn
 							.getOfficeFloorManagedObject();
 					if (managedObjectModel != null) {
-						managedObject = officeFloorManagedObjects
+						managedObjectSource = officeFloorManagedObjectSources
 								.get(managedObjectModel
 										.getOfficeFloorManagedObjectName());
 					}
 				}
-				if (managedObject == null) {
+				if (managedObjectSource == null) {
 					continue; // must have managed object for office object
 				}
+
+				// TODO obtain the office floor managed object
+				OfficeFloorManagedObject managedObject = null;
 
 				// Have the office object be the managed object
 				deployer.link(officeObject, managedObject);
@@ -201,9 +207,9 @@ public class OfficeFloorModelOfficeFloorSource extends
 				.getOfficeFloorManagedObjects()) {
 
 			// Obtain the managed object
-			OfficeFloorManagedObject managedObject = officeFloorManagedObjects
+			OfficeFloorManagedObjectSource managedObjectSource = officeFloorManagedObjectSources
 					.get(managedObjectModel.getOfficeFloorManagedObjectName());
-			if (managedObject == null) {
+			if (managedObjectSource == null) {
 				continue; // must have managed object
 			}
 
@@ -221,8 +227,8 @@ public class OfficeFloorModelOfficeFloorSource extends
 			}
 			if (managingOffice != null) {
 				// Have the office manage the managed object
-				deployer
-						.link(managedObject.getManagingOffice(), managingOffice);
+				deployer.link(managedObjectSource.getManagingOffice(),
+						managingOffice);
 			}
 
 		}

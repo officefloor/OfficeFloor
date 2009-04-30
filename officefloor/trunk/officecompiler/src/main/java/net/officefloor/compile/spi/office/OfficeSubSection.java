@@ -55,15 +55,15 @@ public interface OfficeSubSection {
 
 	/**
 	 * <p>
-	 * Obtains the {@link OfficeSectionManagedObject} instances for this
+	 * Obtains the {@link OfficeSectionManagedObjectSource} instances for this
 	 * particular {@link OfficeSubSection}.
 	 * <p>
-	 * This does not include the {@link OfficeSectionManagedObject} instances of
-	 * the sub sections.
+	 * This does not include the {@link OfficeSectionManagedObjectSource}
+	 * instances of the sub sections.
 	 * 
-	 * @return {@link OfficeSectionManagedObject} instances for this particular
-	 *         {@link OfficeSubSection}.
+	 * @return {@link OfficeSectionManagedObjectSource} instances for this
+	 *         particular {@link OfficeSubSection}.
 	 */
-	OfficeSectionManagedObject[] getOfficeSectionManagedObjects();
+	OfficeSectionManagedObjectSource[] getOfficeSectionManagedObjectSources();
 
 }

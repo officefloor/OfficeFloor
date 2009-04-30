@@ -18,9 +18,11 @@ package net.officefloor.compile.impl.structure;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.impl.office.OfficeSourceContextImpl;
 import net.officefloor.compile.impl.properties.PropertyListImpl;
@@ -31,6 +33,7 @@ import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.AdministratorNode;
 import net.officefloor.compile.internal.structure.LinkOfficeNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeObjectNode;
@@ -47,6 +50,7 @@ import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeAdministrator;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
@@ -59,7 +63,6 @@ import net.officefloor.compile.spi.office.source.OfficeSourceContext;
 import net.officefloor.compile.spi.office.source.OfficeUnknownPropertyError;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
-import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
@@ -118,10 +121,10 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private final Map<String, SectionNode> sections = new HashMap<String, SectionNode>();
 
 	/**
-	 * {@link ManagedObjectNode} instances by their {@link OfficeManagedObject}
-	 * name.
+	 * {@link ManagedObjectSourceNode} instances by their
+	 * {@link OfficeManagedObjectSource} name.
 	 */
-	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
+	private final Map<String, ManagedObjectSourceNode> managedObjectSources = new HashMap<String, ManagedObjectSourceNode>();
 
 	/**
 	 * {@link AdministratorNode} instances by their {@link OfficeAdministrator}
@@ -382,28 +385,36 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Register the office floor managed objects for the office
+		Set<ManagedObjectNode> managedObjectNodes = new HashSet<ManagedObjectNode>();
 		for (OfficeObjectStruct struct : this.objects.values()) {
 
 			// Obtain the office object name
 			OfficeObjectNode objectNode = struct.officeObject;
 			String officeObjectName = objectNode.getOfficeObjectName();
 
-			// Obtain the office floor managed object name
-			OfficeFloorManagedObject officeFloorManagedObject = LinkUtil
-					.retrieveTarget(objectNode, OfficeFloorManagedObject.class,
-							"Office object " + officeObjectName,
-							LocationType.OFFICE, this.officeLocation,
-							AssetType.MANAGED_OBJECT, officeObjectName,
-							this.context.getCompilerIssues());
-			if (officeFloorManagedObject == null) {
+			// Obtain the office floor managed object node
+			ManagedObjectNode managedObjectNode = LinkUtil.retrieveTarget(
+					objectNode, ManagedObjectNode.class, "Office object "
+							+ officeObjectName, LocationType.OFFICE,
+					this.officeLocation, AssetType.MANAGED_OBJECT,
+					officeObjectName, this.context.getCompilerIssues());
+			if (managedObjectNode == null) {
 				continue; // office floor managed object not linked
 			}
-			String officeFloorManagedObjectName = officeFloorManagedObject
-					.getOfficeFloorManagedObjectName();
 
 			// Register the managed object to the office
 			officeBuilder.registerManagedObjectSource(officeObjectName,
-					officeFloorManagedObjectName);
+					managedObjectNode.getOfficeFloorManagedObjectName());
+
+			// Have the managed object register itself to this office
+			managedObjectNode.registerToOffice(this, objectNode, officeBuilder);
+			managedObjectNodes.add(managedObjectNode);
+		}
+
+		// Now that all office floor managed objects registered have them built
+		for (ManagedObjectNode managedObjectNode : managedObjectNodes) {
+			// Have the managed object build itself into this office
+			managedObjectNode.buildOfficeManagedObject(this, officeBuilder);
 		}
 
 		// Build the sections of the office (in deterministic order)
@@ -430,15 +441,6 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		// Obtain and return the required object for the name
 		OfficeObjectStruct struct = this.objects.get(officeManagedObjectName);
 		if (struct == null) {
-
-			// Ensure issue if already added as managed object
-			ManagedObjectNode managedObject = this.managedObjects
-					.get(officeManagedObjectName);
-			if (managedObject != null) {
-				// Managed object already added
-				this.addIssue("Object " + officeManagedObjectName
-						+ " already added as Managed Object");
-			}
 
 			// Add the object
 			OfficeObjectNode object = new OfficeObjectNodeImpl(
@@ -521,36 +523,29 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public OfficeManagedObject addOfficeManagedObject(String managedObjectName,
-			String managedObjectSourceClassName) {
-		// Obtain and return the section managed object for the name
-		ManagedObjectNode managedObject = this.managedObjects
-				.get(managedObjectName);
-		if (managedObject == null) {
+	public OfficeManagedObjectSource addOfficeManagedObjectSource(
+			String managedObjectSourceName, String managedObjectSourceClassName) {
+		// Obtain and return the section managed object source for the name
+		ManagedObjectSourceNode managedObjectSource = this.managedObjectSources
+				.get(managedObjectSourceName);
+		if (managedObjectSource == null) {
 
-			// Ensure not already added as required object
-			OfficeObjectStruct struct = this.objects.get(managedObjectName);
-			if (struct != null) {
-				// Object already added
-				this.addIssue("Managed object " + managedObjectName
-						+ " already added as Object");
-			}
+			// Create the office managed object source (within office context)
+			managedObjectSource = new ManagedObjectSourceNodeImpl(
+					managedObjectSourceName, managedObjectSourceClassName,
+					LocationType.OFFICE, this.officeLocation, this.context);
+			managedObjectSource.addOfficeContext(this.officeLocation);
 
-			// Create the office managed object (within office context)
-			managedObject = new ManagedObjectNodeImpl(managedObjectName,
-					managedObjectSourceClassName, this.officeLocation,
-					this.context);
-			managedObject.addOfficeContext(this.officeLocation);
-
-			// Add the office managed object
-			this.managedObjects.put(managedObjectName, managedObject);
+			// Add the office managed object source
+			this.managedObjectSources.put(managedObjectSourceName,
+					managedObjectSource);
 
 		} else {
-			// Managed object already added
-			this.addIssue("Managed object " + managedObjectName
+			// Managed object source already added
+			this.addIssue("Managed object source " + managedObjectSourceName
 					+ " already added");
 		}
-		return managedObject;
+		return managedObjectSource;
 	}
 
 	@Override
