@@ -42,7 +42,7 @@ import net.officefloor.frame.api.execute.Work;
  * @author Daniel
  */
 public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
-		WorkSourceService {
+		WorkSourceService<ClassWork, ClassWorkSource> {
 
 	/**
 	 * Property name providing the {@link Class} name.
@@ -59,8 +59,8 @@ public class ClassWorkSource extends AbstractWorkSource<ClassWork> implements
 	}
 
 	@Override
-	public Class<? extends WorkSource<?>> getWorkSourceClass() {
-		return this.getClass();
+	public Class<ClassWorkSource> getWorkSourceClass() {
+		return ClassWorkSource.class;
 	}
 
 	/*

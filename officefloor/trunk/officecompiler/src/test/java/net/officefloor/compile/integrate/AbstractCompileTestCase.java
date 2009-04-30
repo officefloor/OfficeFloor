@@ -26,6 +26,7 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
@@ -41,6 +42,8 @@ import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.ThreadState;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -194,6 +197,25 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 
 		// Return the office builder
 		return this.officeBuilder;
+	}
+
+	/**
+	 * Records adding a {@link ThreadState} {@link ManagedObject} to the
+	 * {@link Office}.
+	 * 
+	 * @param threadManagedObjectName
+	 *            {@link ThreadState} bound name.
+	 * @param officeManagedObjectName
+	 *            {@link Office} registered {@link ManagedObject} name.
+	 */
+	protected DependencyMappingBuilder record_officeBuilder_addThreadManagedObject(
+			String threadManagedObjectName, String officeManagedObjectName) {
+		DependencyMappingBuilder builder = this
+				.createMock(DependencyMappingBuilder.class);
+		this.recordReturn(this.officeBuilder, this.officeBuilder
+				.addThreadManagedObject(threadManagedObjectName,
+						officeManagedObjectName), builder);
+		return builder;
 	}
 
 	/**

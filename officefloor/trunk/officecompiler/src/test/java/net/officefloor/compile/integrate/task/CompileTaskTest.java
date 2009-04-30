@@ -295,6 +295,8 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"OFFICE", "OFFICE_TEAM", "TEAM");
 		office.registerManagedObjectSource("MANAGED_OBJECT",
 				"MANAGED_OBJECT_SOURCE");
+		this.record_officeBuilder_addThreadManagedObject("MANAGED_OBJECT",
+				"MANAGED_OBJECT");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");

@@ -52,6 +52,11 @@
             <value method="setOfficeFloorManagedObjectDependencyName"
                 node="dependency@name" />
             <value method="setDependencyType" node="dependency@object-type" />
+            <object method="setOfficeFloorManagedObject" node="managed-object"
+                class="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel">
+                <value method="setOfficeFloorManagedObjectName"
+                    node="managed-object@name" />
+            </object>
         </object>
     </object>
     <!-- TEAMS -->

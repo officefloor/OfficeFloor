@@ -185,17 +185,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	/**
-	 * Adds an issue regarding the {@link ManagedObjectSource} being built.
+	 * Adds a {@link ManagedObjectNode}.
 	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
+	 * @param managedObjectName
+	 *            Name of the {@link ManagedObjectNode}.
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} for the {@link ManagedObject}.
+	 * @return Added {@link ManagedObjectNode}.
 	 */
-	private void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(this.locationType,
-				this.location, AssetType.MANAGED_OBJECT,
-				this.managedObjectSourceName, issueDescription);
-	}
-
 	public ManagedObjectNode addManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope) {
 		// Obtain and return the managed object for the name
@@ -246,7 +243,10 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	@SuppressWarnings("unchecked")
 	public void loadManagedObjectType() {
 
-		// Flag that loaded the managed object type (whether successful or not)
+		// Only load the managed object type once (whether successful or not)
+		if (this.isManagedObjectTypeLoaded) {
+			return;
+		}
 		this.isManagedObjectTypeLoaded = true;
 
 		// Obtain the managed object source class
@@ -279,6 +279,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 
 	@Override
 	public ManagedObjectType<?> getManagedObjectType() {
+
+		// Ensure the managed object type is loaded
+		if (!this.isManagedObjectTypeLoaded) {
+			throw new IllegalStateException(
+					"Managed object type must be loaded");
+		}
+
+		// Return the loaded managed object type
 		return this.managedObjectType;
 	}
 

@@ -42,7 +42,7 @@ import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObject
  */
 public class ClassManagedObjectSource extends
 		AbstractManagedObjectSource<Indexed, None> implements
-		ManagedObjectSourceService {
+		ManagedObjectSourceService<Indexed, None, ClassManagedObjectSource> {
 
 	/**
 	 * Convenience method to aid in unit testing.
@@ -147,8 +147,8 @@ public class ClassManagedObjectSource extends
 	}
 
 	@Override
-	public Class<? extends ManagedObjectSource<?, ?>> getManagedObjectSourceClass() {
-		return this.getClass();
+	public Class<ClassManagedObjectSource> getManagedObjectSourceClass() {
+		return ClassManagedObjectSource.class;
 	}
 
 	/*

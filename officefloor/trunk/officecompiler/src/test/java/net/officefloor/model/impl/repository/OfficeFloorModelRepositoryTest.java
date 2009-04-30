@@ -30,6 +30,7 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
@@ -120,8 +121,10 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeFloorManagedObjectName",
 				"getManagedObjectScope", "getX", "getY" }, officeFloor
 				.getOfficeFloorManagedObjects(),
-				new OfficeFloorManagedObjectModel("MANAGED_OBJECT", "THREAD",
-						null, null, null, 200, 201));
+				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_ONE",
+						"THREAD", null, null, null, null, 200, 201),
+				new OfficeFloorManagedObjectModel("MANAGED_OBJECT_TWO",
+						"PROCESS", null, null, null, null, 210, 211));
 		OfficeFloorManagedObjectModel mo = officeFloor
 				.getOfficeFloorManagedObjects().get(0);
 
@@ -138,6 +141,13 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				.getOfficeFloorManagedObjectDependencies(),
 				new OfficeFloorManagedObjectDependencyModel("DEPENDENCY",
 						Connection.class.getName()));
+		OfficeFloorManagedObjectDependencyModel dependency = mo
+				.getOfficeFloorManagedObjectDependencies().get(0);
+		assertProperties(
+				new OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel(
+						"MANAGED_OBJECT_TWO"), dependency
+						.getOfficeFloorManagedObject(),
+				"getOfficeFloorManagedObjectName");
 
 		// ----------------------------------------
 		// Validate the office floor teams

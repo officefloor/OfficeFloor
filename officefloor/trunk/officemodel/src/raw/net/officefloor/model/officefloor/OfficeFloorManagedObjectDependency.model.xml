@@ -2,4 +2,7 @@
 <model>
     <field type="String" name="office floor managed object dependency name" />
     <field type="String" name="dependency type" />
+    <field
+        type="OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel"
+        name="office floor managed object" />
 </model>

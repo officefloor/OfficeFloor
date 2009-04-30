@@ -25,6 +25,8 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -92,10 +94,22 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"OFFICE_TEAM");
 		office.addDeployedOfficeTeam(officeTeam);
 
-		// office floor managed object -> office floor managed object
+		// office floor managed object -> office floor managed object source
 		OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel moToSource = new OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel(
 				"MANAGED_OBJECT_SOURCE");
 		officeFloorManagedObject.setOfficeFloorManagedObjectSource(moToSource);
+
+		// office floor managed object dependency -> office floor managed object
+		OfficeFloorManagedObjectDependencyModel dependency = new OfficeFloorManagedObjectDependencyModel(
+				"DEPENDENCY", Connection.class.getName());
+		officeFloorManagedObject
+				.addOfficeFloorManagedObjectDependency(dependency);
+		OfficeFloorManagedObjectModel mo_dependency = new OfficeFloorManagedObjectModel(
+				"MO_DEPENDENCY", "THREAD");
+		officeFloor.addOfficeFloorManagedObject(mo_dependency);
+		OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel dependencyToMo = new OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel(
+				"MO_DEPENDENCY");
+		dependency.setOfficeFloorManagedObject(dependencyToMo);
 
 		// office floor managed object source -> office
 		OfficeFloorManagedObjectSourceToDeployedOfficeModel moSourceToOffice = new OfficeFloorManagedObjectSourceToDeployedOfficeModel(
@@ -135,26 +149,38 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 		assertEquals("Incorrect office", officeFloor, retrievedOfficeFloor);
 
-		// Ensure office floor connected
+		// Ensure office floor managed object connected to its source
 		assertEquals(
-				"office floor managed object <- office floor managed object",
+				"office floor managed object <- office floor managed object source",
 				officeFloorManagedObject, moToSource
 						.getOfficeFloorManagedObject());
 		assertEquals(
-				"office floor managed object -> office floor managed object",
+				"office floor managed object -> office floor managed object source",
 				officeFloorManagedObjectSource, moToSource
 						.getOfficeFloorManagedObjectSource());
+
+		// Ensure managed object dependency to managed object
+		assertEquals("dependency <- managed object", dependency, dependencyToMo
+				.getOfficeFloorManagedObjectDependency());
+		assertEquals("dependency -> managed object", mo_dependency,
+				dependencyToMo.getOfficeFloorManagedObject());
+
+		// Ensure managed object source connected to managing office
 		assertEquals("office floor managed object source <- office",
 				officeFloorManagedObjectSource, moSourceToOffice
 						.getOfficeFloorManagedObjectSource());
 		assertEquals("office floor managed object source -> office", office,
 				moSourceToOffice.getManagingOffice());
+
+		// Ensure office object connected to office floor managed object
 		assertEquals("office object <- office floor managed object",
 				officeObject, officeObjectToManagedObject
 						.getDeployedOfficeObject());
 		assertEquals("office object -> office floor managed object",
 				officeFloorManagedObject, officeObjectToManagedObject
 						.getOfficeFloorManagedObject());
+
+		// Ensure office team connected to office floor team
 		assertEquals("office team <- office floor team", officeTeam,
 				officeTeamToFloorTeam.getDeployedOfficeTeam());
 		assertEquals("office team -> office floor team", officeFloorTeam,
@@ -198,6 +224,19 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				.setOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
 		moToSource.connect();
 
+		// office floor managed object dependency -> office floor managed object
+		OfficeFloorManagedObjectDependencyModel dependency = new OfficeFloorManagedObjectDependencyModel(
+				"DEPENDENCY", Connection.class.getName());
+		officeFloorManagedObject
+				.addOfficeFloorManagedObjectDependency(dependency);
+		OfficeFloorManagedObjectModel mo_dependency = new OfficeFloorManagedObjectModel(
+				"MO_DEPENDENCY", "THREAD");
+		officeFloor.addOfficeFloorManagedObject(mo_dependency);
+		OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel dependencyToMo = new OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel();
+		dependencyToMo.setOfficeFloorManagedObjectDependency(dependency);
+		dependencyToMo.setOfficeFloorManagedObject(mo_dependency);
+		dependencyToMo.connect();
+
 		// office floor managed object source -> office
 		OfficeFloorManagedObjectSourceToDeployedOfficeModel moSourceToOffice = new OfficeFloorManagedObjectSourceToDeployedOfficeModel();
 		moSourceToOffice
@@ -232,6 +271,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"office floor managed object - office floor managed object source",
 				"MANAGED_OBJECT_SOURCE", moToSource
 						.getOfficeFloorManagedObjectSourceName());
+		assertEquals("dependency - managed object", "MO_DEPENDENCY",
+				dependencyToMo.getOfficeFloorManagedObjectName());
 		assertEquals("office floor managed object source - office", "OFFICE",
 				moSourceToOffice.getManagingOfficeName());
 		assertEquals("office object - office floor managed object",
