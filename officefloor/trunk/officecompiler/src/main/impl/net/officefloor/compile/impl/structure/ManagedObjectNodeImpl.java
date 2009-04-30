@@ -19,6 +19,7 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectDependencyNode;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
@@ -26,10 +27,12 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
@@ -110,6 +113,18 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		this.context = context;
 	}
 
+	/**
+	 * Adds an issue.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 */
+	private void addIssue(String issueDescription) {
+		this.context.getCompilerIssues().addIssue(this.locationType,
+				this.location, AssetType.MANAGED_OBJECT,
+				this.managedObjectName, issueDescription);
+	}
+
 	/*
 	 * ===================== ManagedObjectNode ================================
 	 */
@@ -120,8 +135,16 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void buildOfficeManagedObject(OfficeNode office,
 			OfficeBuilder officeBuilder) {
+
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
+				.getManagedObjectType();
+		if (managedObjectType == null) {
+			return; // must have managed object type
+		}
 
 		// Register to the office
 		officeBuilder.registerManagedObjectSource(this.getManagedObjectName(),
@@ -149,9 +172,40 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 					+ this.managedObjectScope);
 		}
 
-		// TODO provide the dependencies for the managed object
-		// mapper.mapDependency(0, "SIMPLE");
+		// Load the dependencies for the managed object
+		for (ManagedObjectDependencyType<?> dependencyType : managedObjectType
+				.getDependencyTypes()) {
 
+			// Obtain the dependency type details
+			String dependencyName = dependencyType.getDependencyName();
+			Enum dependencyKey = dependencyType.getKey();
+			int dependencyIndex = dependencyType.getIndex();
+
+			// Obtain the dependency
+			ManagedObjectDependencyNode dependencyNode = this.depedencies
+					.get(dependencyName);
+			ManagedObjectNode dependency = LinkUtil.retrieveTarget(
+					dependencyNode, ManagedObjectNode.class, "Dependency "
+							+ dependencyName, this.locationType, this.location,
+					AssetType.MANAGED_OBJECT, this.managedObjectName,
+					this.context.getCompilerIssues());
+			if (dependency == null) {
+				continue; // must have dependency
+			}
+
+			// Ensure the dependent managed object is built into the office
+			dependency.buildOfficeManagedObject(office, officeBuilder);
+
+			// Link the dependency
+			String dependentManagedObjectName = dependency
+					.getManagedObjectName();
+			if (dependencyKey != null) {
+				mapper.mapDependency(dependencyKey, dependentManagedObjectName);
+			} else {
+				mapper.mapDependency(dependencyIndex,
+						dependentManagedObjectName);
+			}
+		}
 	}
 
 	/*

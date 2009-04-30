@@ -92,6 +92,13 @@
                         <attribute method="getDependencyType"
                             attribute="object-type" />
                     </attributes>
+                    <object method="getOfficeFloorManagedObject"
+                        element="managed-object">
+                        <attributes>
+                            <attribute method="getOfficeFloorManagedObjectName"
+                                attribute="name" />
+                        </attributes>
+                    </object>
                 </item>
             </collection>
         </item>

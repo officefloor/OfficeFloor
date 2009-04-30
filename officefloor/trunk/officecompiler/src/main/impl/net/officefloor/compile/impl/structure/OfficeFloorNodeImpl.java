@@ -243,6 +243,11 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 							}
 						});
 		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
+
+			// Ensure load managed object type for managed object source
+			managedObjectSource.loadManagedObjectType();
+
+			// Build the managed object source
 			managedObjectSource.buildManagedObject(builder);
 		}
 

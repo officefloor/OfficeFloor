@@ -31,6 +31,7 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
+import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -39,6 +40,8 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -149,6 +152,46 @@ public class OfficeFloorModelOfficeFloorSource extends
 					.addOfficeFloorManagedObject(managedObjectName,
 							managedObjectScope);
 			officeFloorManagedObjects.put(managedObjectName, managedObject);
+		}
+
+		// Link the dependencies for the managed objects
+		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor
+				.getOfficeFloorManagedObjects()) {
+
+			// Obtain the managed object
+			OfficeFloorManagedObject managedObject = officeFloorManagedObjects
+					.get(managedObjectModel.getOfficeFloorManagedObjectName());
+
+			// Link each dependency for the managed object
+			for (OfficeFloorManagedObjectDependencyModel dependencyModel : managedObjectModel
+					.getOfficeFloorManagedObjectDependencies()) {
+
+				// Add the dependency
+				String dependencyName = dependencyModel
+						.getOfficeFloorManagedObjectDependencyName();
+				ManagedObjectDependency dependency = managedObject
+						.getManagedObjectDependency(dependencyName);
+
+				// Obtain the dependent managed object
+				OfficeFloorManagedObject dependentManagedObject = null;
+				OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel dependencyToMo = dependencyModel
+						.getOfficeFloorManagedObject();
+				if (dependencyToMo != null) {
+					OfficeFloorManagedObjectModel dependentMoModel = dependencyToMo
+							.getOfficeFloorManagedObject();
+					if (dependentMoModel != null) {
+						dependentManagedObject = officeFloorManagedObjects
+								.get(dependentMoModel
+										.getOfficeFloorManagedObjectName());
+					}
+				}
+				if (dependentManagedObject == null) {
+					continue; // must have dependent managed object
+				}
+
+				// Link the dependency to the managed object
+				deployer.link(dependency, dependentManagedObject);
+			}
 		}
 
 		// Add the office floor teams, keeping registry of teams

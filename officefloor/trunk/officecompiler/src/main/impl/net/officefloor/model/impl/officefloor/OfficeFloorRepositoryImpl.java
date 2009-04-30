@@ -24,6 +24,8 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -141,6 +143,26 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			}
 		}
 
+		// Connect the dependencies to the office floor managed objects
+		for (OfficeFloorManagedObjectModel managedObject : officeFloor
+				.getOfficeFloorManagedObjects()) {
+			for (OfficeFloorManagedObjectDependencyModel dependency : managedObject
+					.getOfficeFloorManagedObjectDependencies()) {
+				OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel conn = dependency
+						.getOfficeFloorManagedObject();
+				if (conn != null) {
+					OfficeFloorManagedObjectModel dependentManagedObject = managedObjects
+							.get(conn.getOfficeFloorManagedObjectName());
+					if (dependentManagedObject != null) {
+						conn.setOfficeFloorManagedObjectDependency(dependency);
+						conn
+								.setOfficeFloorManagedObject(dependentManagedObject);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Create the set of office floor teams
 		Map<String, OfficeFloorTeamModel> teams = new HashMap<String, OfficeFloorTeamModel>();
 		for (OfficeFloorTeamModel team : officeFloor.getOfficeFloorTeams()) {
@@ -196,6 +218,16 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				.getOfficeFloorManagedObjects()) {
 			for (DeployedOfficeObjectToOfficeFloorManagedObjectModel conn : managedObject
 					.getDeployedOfficeObjects()) {
+				conn.setOfficeFloorManagedObjectName(managedObject
+						.getOfficeFloorManagedObjectName());
+			}
+		}
+
+		// Specify dependencies to office floor managed objects
+		for (OfficeFloorManagedObjectModel managedObject : officeFloor
+				.getOfficeFloorManagedObjects()) {
+			for (OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel conn : managedObject
+					.getDependentOfficeFloorManagedObjects()) {
 				conn.setOfficeFloorManagedObjectName(managedObject
 						.getOfficeFloorManagedObjectName());
 			}

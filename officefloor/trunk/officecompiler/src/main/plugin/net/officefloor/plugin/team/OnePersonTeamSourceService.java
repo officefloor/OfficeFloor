@@ -18,14 +18,14 @@ package net.officefloor.plugin.team;
 
 import net.officefloor.compile.TeamSourceService;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
-import net.officefloor.frame.spi.team.source.TeamSource;
 
 /**
  * {@link TeamSourceService} for a {@link OnePersonTeamSource}.
  * 
  * @author Daniel
  */
-public class OnePersonTeamSourceService implements TeamSourceService {
+public class OnePersonTeamSourceService implements
+		TeamSourceService<OnePersonTeamSource> {
 
 	/*
 	 * ================== TeamSourceService ==================================
@@ -37,7 +37,7 @@ public class OnePersonTeamSourceService implements TeamSourceService {
 	}
 
 	@Override
-	public Class<? extends TeamSource> getTeamSourceClass() {
+	public Class<OnePersonTeamSource> getTeamSourceClass() {
 		return OnePersonTeamSource.class;
 	}
 
