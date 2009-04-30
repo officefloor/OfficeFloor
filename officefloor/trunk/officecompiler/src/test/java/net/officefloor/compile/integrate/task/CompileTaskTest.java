@@ -241,7 +241,7 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	/**
 	 * Ensures issue if {@link TaskObject} not linked.
 	 */
-	public void testTaskObjectNotLinked() {
+	public void testTaskObjectNotLinked() throws Exception {
 
 		// Record building the office floor
 		this.record_officeFloorBuilder_addTeam("TEAM",
@@ -250,9 +250,9 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		this.record_workBuilder_addTask("TASK", "OFFICE_TEAM");
-		this.issues.addIssue(LocationType.SECTION, "desk", AssetType.TASK,
-				"TASK",
-				"Object CompileManagedObject is not linked to a OfficeObject");
+		this.issues
+				.addIssue(LocationType.SECTION, "desk", AssetType.TASK, "TASK",
+						"Object CompileManagedObject is not linked to a ManagedObjectNode");
 
 		// Compile the office floor
 		this.compile(true);

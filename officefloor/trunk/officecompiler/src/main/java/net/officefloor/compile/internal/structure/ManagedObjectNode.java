@@ -17,17 +17,12 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeManagedObject;
-import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.build.OfficeBuilder;
-import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
-import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * Node representing an instance use of a {@link ManagedObject}..
@@ -39,27 +34,13 @@ public interface ManagedObjectNode extends SectionManagedObject,
 		OfficeFloorManagedObject, LinkObjectNode {
 
 	/**
-	 * <p>
-	 * Registers this {@link ManagedObject} to the {@link Office}.
-	 * <p>
-	 * This may be called more than once for an {@link Office} due to dependency
-	 * management. Only the first invocation should register this
-	 * {@link ManagedObject} and all further invocations are to be ignored.
+	 * Obtains the name under which this {@link ManagedObject} is made available
+	 * to the {@link Office}.
 	 * 
-	 * @param office
-	 *            {@link OfficeNode} of the {@link Office} that this
-	 *            {@link ManagedObject} is to register.
-	 * @param objectNode
-	 *            {@link OfficeObject} that represents this
-	 *            {@link ManagedObject} within the {@link Office}. May be
-	 *            <code>null</code> if is a dependency of a
-	 *            {@link ManagedObject} that is not directly linked to the
-	 *            {@link Office}.
-	 * @param officeBuilder
-	 *            {@link OfficeBuilder} of the {@link Office}.
+	 * @return Name under which this {@link ManagedObject} is made available to
+	 *         the {@link Office}.
 	 */
-	void registerToOffice(OfficeNode office, OfficeObject object,
-			OfficeBuilder officeBuilder);
+	String getManagedObjectName();
 
 	/**
 	 * <p>

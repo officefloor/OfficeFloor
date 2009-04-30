@@ -225,28 +225,28 @@ public abstract class OfficeFloorCompiler {
 	public void addSourceAliases() {
 
 		// Add the office source aliases from the class path
-		for (OfficeSourceService service : ServiceLoader.load(
+		for (OfficeSourceService<?> service : ServiceLoader.load(
 				OfficeSourceService.class, this.getClassLoader())) {
 			this.addOfficeSourceAlias(service.getOfficeSourceAlias(), service
 					.getOfficeSourceClass());
 		}
 
 		// Add the section source aliases from the class path
-		for (SectionSourceService service : ServiceLoader.load(
+		for (SectionSourceService<?> service : ServiceLoader.load(
 				SectionSourceService.class, this.getClassLoader())) {
 			this.addSectionSourceAlias(service.getSectionSourceAlias(), service
 					.getSectionSourceClass());
 		}
 
 		// Add the work source aliases from the class path
-		for (WorkSourceService service : ServiceLoader.load(
+		for (WorkSourceService<?, ?> service : ServiceLoader.load(
 				WorkSourceService.class, this.getClassLoader())) {
 			this.addWorkSourceAlias(service.getWorkSourceAlias(), service
 					.getWorkSourceClass());
 		}
 
 		// Add the managed object source aliases from the class path
-		for (ManagedObjectSourceService service : ServiceLoader.load(
+		for (ManagedObjectSourceService<?, ?, ?> service : ServiceLoader.load(
 				ManagedObjectSourceService.class, this.getClassLoader())) {
 			this.addManagedObjectSourceAlias(service
 					.getManagedObjectSourceAlias(), service
@@ -254,7 +254,7 @@ public abstract class OfficeFloorCompiler {
 		}
 
 		// Add the administrator source aliases from the class path
-		for (AdministratorSourceService service : ServiceLoader.load(
+		for (AdministratorSourceService<?, ?, ?> service : ServiceLoader.load(
 				AdministratorSourceService.class, this.getClassLoader())) {
 			this.addAdministratorSourceAlias(service
 					.getAdministratorSourceAlias(), service
@@ -262,7 +262,7 @@ public abstract class OfficeFloorCompiler {
 		}
 
 		// Add the team source aliases from the class path
-		for (TeamSourceService service : ServiceLoader.load(
+		for (TeamSourceService<?> service : ServiceLoader.load(
 				TeamSourceService.class, this.getClassLoader())) {
 			this.addTeamSourceAlias(service.getTeamSourceAlias(), service
 					.getTeamSourceClass());

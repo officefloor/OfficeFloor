@@ -80,11 +80,11 @@ public class CompileOfficeFloorManagedObjectTest extends
 		// Record building the office floor
 
 		// Add managed objects to office floor
-		this.record_officeFloorBuilder_addManagedObject("DEPENDENT",
+		this.record_officeFloorBuilder_addManagedObject("DEPENDENT_SOURCE",
 				ClassManagedObjectSource.class, "class.name",
 				DependencyManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		this.record_officeFloorBuilder_addManagedObject("SIMPLE",
+		this.record_officeFloorBuilder_addManagedObject("SIMPLE_SOURCE",
 				ClassManagedObjectSource.class, "class.name",
 				SimpleManagedObject.class.getName());
 		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
@@ -92,19 +92,19 @@ public class CompileOfficeFloorManagedObjectTest extends
 		// Register the office linked managed objects with the office
 		OfficeBuilder office = this
 				.record_officeFloorBuilder_addOffice("OFFICE");
-		office.registerManagedObjectSource("MANAGED_OBJECT", "DEPENDENT");
+		office.registerManagedObjectSource("DEPENDENT", "DEPENDENT_SOURCE");
 
 		// Bind the managed object to the process of the office
 		DependencyMappingBuilder mapper = this
 				.createMock(DependencyMappingBuilder.class);
-		this.recordReturn(office, office.addProcessManagedObject(
-				"MANAGED_OBJECT", "MANAGED_OBJECT"), mapper);
+		this.recordReturn(office, office.addProcessManagedObject("DEPENDENT",
+				"DEPENDENT"), mapper);
 
 		// Map in the managed object dependency not registered to office
-		office.registerManagedObjectSource("#MANAGED_OBJECT.1#", "SIMPLE");
-		this.recordReturn(office, office.addProcessManagedObject(
-				"#MANAGED_OBJECT.1#", "#MANAGED_OBJECT.1#"), null);
-		mapper.mapDependency(0, "#MANAGED_OBJECT.1#");
+		office.registerManagedObjectSource("SIMPLE", "SIMPLE_SOURCE");
+		this.recordReturn(office, office.addProcessManagedObject("SIMPLE",
+				"SIMPLE"), null);
+		mapper.mapDependency(0, "SIMPLE");
 
 		// Compile the office floor
 		this.compile(true);

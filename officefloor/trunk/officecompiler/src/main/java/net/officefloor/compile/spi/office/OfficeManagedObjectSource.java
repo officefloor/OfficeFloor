@@ -83,8 +83,7 @@ public interface OfficeManagedObjectSource {
 	 *            within the {@link Office}.
 	 * @return {@link OfficeManagedObject}.
 	 */
-	// TODO change method name to addOfficeManagedObject
-	OfficeManagedObject getOfficeManagedObject(String managedObjectName,
+	OfficeManagedObject addOfficeManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope);
 
 }

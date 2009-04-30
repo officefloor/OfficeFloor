@@ -31,7 +31,7 @@ import net.officefloor.compile.spi.office.source.OfficeSource;
  * 
  * @author Daniel
  */
-public interface OfficeSourceService {
+public interface OfficeSourceService<S extends OfficeSource> {
 
 	/**
 	 * Obtains the alias for the {@link OfficeSource} {@link Class}.
@@ -45,6 +45,6 @@ public interface OfficeSourceService {
 	 * 
 	 * @return {@link OfficeSource} {@link Class}.
 	 */
-	Class<? extends OfficeSource> getOfficeSourceClass();
+	Class<S> getOfficeSourceClass();
 
 }

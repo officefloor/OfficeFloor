@@ -31,7 +31,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
  * 
  * @author Daniel
  */
-public interface ManagedObjectSourceService {
+public interface ManagedObjectSourceService<D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> {
 
 	/**
 	 * Obtains the alias for the {@link ManagedObjectSource} {@link Class}.
@@ -45,6 +45,6 @@ public interface ManagedObjectSourceService {
 	 * 
 	 * @return {@link ManagedObjectSource} {@link Class}.
 	 */
-	Class<? extends ManagedObjectSource<?, ?>> getManagedObjectSourceClass();
+	Class<S> getManagedObjectSourceClass();
 
 }

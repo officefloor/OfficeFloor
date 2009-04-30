@@ -127,6 +127,12 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	private final Map<String, ManagedObjectSourceNode> managedObjectSources = new HashMap<String, ManagedObjectSourceNode>();
 
 	/**
+	 * {@link ManagedObjectNode} instances by their {@link OfficeManagedObject}
+	 * name.
+	 */
+	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
+
+	/**
 	 * {@link AdministratorNode} instances by their {@link OfficeAdministrator}
 	 * name.
 	 */
@@ -384,8 +390,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			officeBuilder.registerTeam(officeTeamName, officeFloorTeamName);
 		}
 
-		// Register the office floor managed objects for the office
-		Set<ManagedObjectNode> managedObjectNodes = new HashSet<ManagedObjectNode>();
+		// Build the office floor managed objects for the office.
+		// Ensure the managed objects are only built into the office once.
+		Set<ManagedObjectNode> builtManagedObjects = new HashSet<ManagedObjectNode>();
 		for (OfficeObjectStruct struct : this.objects.values()) {
 
 			// Obtain the office object name
@@ -402,19 +409,14 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 				continue; // office floor managed object not linked
 			}
 
-			// Register the managed object to the office
-			officeBuilder.registerManagedObjectSource(officeObjectName,
-					managedObjectNode.getOfficeFloorManagedObjectName());
+			// Determine if already built the managed object
+			if (builtManagedObjects.contains(managedObjectNode)) {
+				continue; // already built into office (reusing)
+			}
 
-			// Have the managed object register itself to this office
-			managedObjectNode.registerToOffice(this, objectNode, officeBuilder);
-			managedObjectNodes.add(managedObjectNode);
-		}
-
-		// Now that all office floor managed objects registered have them built
-		for (ManagedObjectNode managedObjectNode : managedObjectNodes) {
 			// Have the managed object build itself into this office
 			managedObjectNode.buildOfficeManagedObject(this, officeBuilder);
+			builtManagedObjects.add(managedObjectNode);
 		}
 
 		// Build the sections of the office (in deterministic order)
@@ -533,7 +535,8 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 			// Create the office managed object source (within office context)
 			managedObjectSource = new ManagedObjectSourceNodeImpl(
 					managedObjectSourceName, managedObjectSourceClassName,
-					LocationType.OFFICE, this.officeLocation, this.context);
+					LocationType.OFFICE, this.officeLocation,
+					this.managedObjects, this.context);
 			managedObjectSource.addOfficeContext(this.officeLocation);
 
 			// Add the office managed object source
@@ -610,6 +613,21 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	@Override
 	public void link(ManagedObjectTeam team, OfficeTeam officeTeam) {
 		this.linkTeam(team, officeTeam);
+	}
+
+	@Override
+	public void addIssue(String issueDescription, AssetType assetType,
+			String assetName) {
+		this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
+				this.officeLocation, assetType, assetName, issueDescription);
+	}
+
+	@Override
+	public void addIssue(String issueDescription, Throwable cause,
+			AssetType assetType, String assetName) {
+		this.context.getCompilerIssues().addIssue(LocationType.OFFICE,
+				this.officeLocation, assetType, assetName, issueDescription,
+				cause);
 	}
 
 	/*

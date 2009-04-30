@@ -23,15 +23,15 @@ import net.officefloor.frame.spi.administration.source.AdministratorSource;
 /**
  * <p>
  * {@link ServiceLoader} service to plug-in an {@link AdministratorSource}
- * {@link Class} alias by including the extension {@link AdministratorSource} jar on
- * the class path.
+ * {@link Class} alias by including the extension {@link AdministratorSource}
+ * jar on the class path.
  * <p>
- * {@link OfficeFloorCompiler#addAdministratorSourceAlias(String, Class)} will be
- * invoked for each found {@link AdministratorSourceService}.
+ * {@link OfficeFloorCompiler#addAdministratorSourceAlias(String, Class)} will
+ * be invoked for each found {@link AdministratorSourceService}.
  * 
  * @author Daniel
  */
-public interface AdministratorSourceService {
+public interface AdministratorSourceService<I, A extends Enum<A>, S extends AdministratorSource<I, A>> {
 
 	/**
 	 * Obtains the alias for the {@link AdministratorSource} {@link Class}.
@@ -45,6 +45,6 @@ public interface AdministratorSourceService {
 	 * 
 	 * @return {@link AdministratorSource} {@link Class}.
 	 */
-	Class<? extends AdministratorSource<?, ?>> getAdministratorSourceClass();
+	Class<S> getAdministratorSourceClass();
 
 }

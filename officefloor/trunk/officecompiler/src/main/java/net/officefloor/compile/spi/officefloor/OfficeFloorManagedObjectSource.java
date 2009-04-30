@@ -93,8 +93,7 @@ public interface OfficeFloorManagedObjectSource {
 	 *            {@link OfficeFloorManagedObject} within the {@link Office}.
 	 * @return {@link OfficeFloorManagedObject}.
 	 */
-	// TODO change name to addOfficeFloorManagedObject
-	OfficeFloorManagedObject getOfficeFloorManagedObject(
+	OfficeFloorManagedObject addOfficeFloorManagedObject(
 			String managedObjectName, ManagedObjectScope managedObjectScope);
 
 }
