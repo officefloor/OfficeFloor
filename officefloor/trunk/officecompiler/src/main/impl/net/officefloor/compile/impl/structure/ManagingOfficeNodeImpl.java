@@ -22,7 +22,7 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.frame.api.manage.OfficeFloor;
-import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
  * {@link ManagingOfficeNode} implementation.
@@ -32,10 +32,10 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 
 	/**
-	 * Name of the {@link ManagedObject} for which this is the
+	 * Name of the {@link ManagedObjectSource} for which this is the
 	 * {@link ManagingOffice}.
 	 */
-	private final String managedObjectName;
+	private final String managedObjectSourceName;
 
 	/**
 	 * Location of the {@link OfficeFloor}.
@@ -50,17 +50,17 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 	/**
 	 * Initiate.
 	 * 
-	 * @param managedObjectName
-	 *            Name of the {@link ManagedObject} for which this is the
+	 * @param managedObjectSourceName
+	 *            Name of the {@link ManagedObjectSource} for which this is the
 	 *            {@link ManagingOffice}.
 	 * @param officeFloorLocation
 	 *            Location of the {@link OfficeFloor}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public ManagingOfficeNodeImpl(String managedObjectName,
+	public ManagingOfficeNodeImpl(String managedObjectSourceName,
 			String officeFloorLocation, NodeContext context) {
-		this.managedObjectName = managedObjectName;
+		this.managedObjectSourceName = managedObjectSourceName;
 		this.officeFloorLocation = officeFloorLocation;
 		this.context = context;
 	}
@@ -85,8 +85,8 @@ public class ManagingOfficeNodeImpl implements ManagingOfficeNode {
 							this.officeFloorLocation,
 							null,
 							null,
-							"Managing office for managed object "
-									+ this.managedObjectName
+							"Managing office for managed object source "
+									+ this.managedObjectSourceName
 									+ " linked more than once");
 			return false; // already linked
 		}

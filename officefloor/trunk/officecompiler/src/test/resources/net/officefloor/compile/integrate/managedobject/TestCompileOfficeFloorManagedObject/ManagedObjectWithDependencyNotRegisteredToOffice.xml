@@ -1,0 +1,29 @@
+<context>
+    <office-floor>
+        <managed-objects>
+            <managed-object name="DEPENDENT" source="CLASS">
+                <properties>
+                    <property name="class.name"
+                        value="${testcase}$DependencyManagedObject" />
+                </properties>
+                <managing-office name="OFFICE" />
+                <dependency name="dependency" />
+            </managed-object>
+            <managed-object name="SIMPLE" source="CLASS">
+                <properties>
+                    <property name="class.name"
+                        value="${testcase}$SimpleManagedObject" />
+                </properties>
+                <managing-office name="OFFICE" />
+            </managed-object>
+        </managed-objects>
+        <offices>
+            <office name="OFFICE" source="OFFICE" location="office">
+                <object name="MANAGED_OBJECT">
+                    <managed-object name="DEPENDENT" />
+                </object>
+            </office>
+        </offices>
+    </office-floor>
+    <office />
+</context>

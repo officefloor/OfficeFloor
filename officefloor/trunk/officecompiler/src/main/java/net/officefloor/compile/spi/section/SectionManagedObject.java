@@ -17,8 +17,6 @@
 package net.officefloor.compile.spi.section;
 
 import net.officefloor.compile.managedobject.ManagedObjectDependencyType;
-import net.officefloor.compile.managedobject.ManagedObjectFlowType;
-import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 
@@ -37,16 +35,6 @@ public interface SectionManagedObject {
 	String getSectionManagedObjectName();
 
 	/**
-	 * Adds a {@link Property} to source the {@link ManagedObject}.
-	 * 
-	 * @param name
-	 *            Name of the {@link Property}.
-	 * @param value
-	 *            Value of the {@link Property}.
-	 */
-	void addProperty(String name, String value);
-
-	/**
 	 * Obtains the {@link ManagedObjectDependency} for the
 	 * {@link ManagedObjectDependencyType}.
 	 * 
@@ -56,15 +44,5 @@ public interface SectionManagedObject {
 	 */
 	ManagedObjectDependency getManagedObjectDependency(
 			String managedObjectDependencyName);
-
-	/**
-	 * Obtains the {@link ManagedObjectFlow} for he
-	 * {@link ManagedObjectFlowType}.
-	 * 
-	 * @param managedObjectFlowName
-	 *            Name of the {@link ManagedObjectFlowType}.
-	 * @return {@link ManagedObjectFlow}.
-	 */
-	ManagedObjectFlow getManagedObjectFlow(String managedObjectFlowName);
 
 }

@@ -25,7 +25,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
-import net.officefloor.compile.internal.structure.ManagedObjectNode;
+import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -43,7 +43,7 @@ import net.officefloor.compile.section.SectionOutputType;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeSectionInput;
-import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
+import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
@@ -54,6 +54,7 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SectionInput;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.compile.spi.section.SectionManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionObject;
 import net.officefloor.compile.spi.section.SectionOutput;
 import net.officefloor.compile.spi.section.SectionTask;
@@ -125,10 +126,10 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final Map<String, SectionObjectNode> objects = new HashMap<String, SectionObjectNode>();
 
 	/**
-	 * {@link ManagedObjectNode} instances by their {@link SectionManagedObject}
-	 * names.
+	 * {@link ManagedObjectSourceNode} instances by their
+	 * {@link SectionManagedObjectSource} names.
 	 */
-	private final Map<String, ManagedObjectNode> managedObjectNodes = new HashMap<String, ManagedObjectNode>();
+	private final Map<String, ManagedObjectSourceNode> managedObjectSourceNodes = new HashMap<String, ManagedObjectSourceNode>();
 
 	/**
 	 * {@link WorkNode} instances by their {@link SectionWork} names.
@@ -328,10 +329,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			subSection.loadOfficeSection(officeLocation);
 		}
 
-		// Load managed objects (require supported extension interfaces)
-		for (ManagedObjectNode managedObject : this.managedObjectNodes.values()) {
-			managedObject.addOfficeContext(officeLocation);
-			managedObject.loadManagedObjectMetaData();
+		// Load managed object sources (require supported extension interfaces)
+		for (ManagedObjectSourceNode managedObjectSource : this.managedObjectSourceNodes
+				.values()) {
+			managedObjectSource.addOfficeContext(officeLocation);
+			managedObjectSource.loadManagedObjectType();
 		}
 
 		// Add the office context for the tasks
@@ -594,23 +596,24 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public SectionManagedObject addSectionManagedObject(
-			String managedObjectName, String managedObjectSourceClassName) {
-		// Obtain and return the section managed object for the name
-		ManagedObjectNode managedObject = this.managedObjectNodes
-				.get(managedObjectName);
-		if (managedObject == null) {
-			// Add the section managed object
-			managedObject = new ManagedObjectNodeImpl(managedObjectName,
-					managedObjectSourceClassName, this.sectionLocation,
-					this.context);
-			this.managedObjectNodes.put(managedObjectName, managedObject);
+	public SectionManagedObjectSource addSectionManagedObjectSource(
+			String managedObjectSourceName, String managedObjectSourceClassName) {
+		// Obtain and return the section managed object source for the name
+		ManagedObjectSourceNode managedObjectSource = this.managedObjectSourceNodes
+				.get(managedObjectSourceName);
+		if (managedObjectSource == null) {
+			// Add the section managed object source
+			managedObjectSource = new ManagedObjectSourceNodeImpl(
+					managedObjectSourceName, managedObjectSourceClassName,
+					LocationType.SECTION, this.sectionLocation, this.context);
+			this.managedObjectSourceNodes.put(managedObjectSourceName,
+					managedObjectSource);
 		} else {
-			// Section managed object already added
-			this.addIssue("Section managed object " + managedObjectName
-					+ " already added");
+			// Section managed object source already added
+			this.addIssue("Section managed object source "
+					+ managedObjectSourceName + " already added");
 		}
-		return managedObject;
+		return managedObjectSource;
 	}
 
 	@Override
@@ -910,18 +913,22 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public OfficeSectionManagedObject[] getOfficeSectionManagedObjects() {
-		// Return the section managed objects sorted by name
-		OfficeSectionManagedObject[] sectionMos = this.managedObjectNodes
-				.values().toArray(new OfficeSectionManagedObject[0]);
-		Arrays.sort(sectionMos, new Comparator<OfficeSectionManagedObject>() {
-			@Override
-			public int compare(OfficeSectionManagedObject a,
-					OfficeSectionManagedObject b) {
-				return a.getOfficeSectionManagedObjectName().compareTo(
-						b.getOfficeSectionManagedObjectName());
-			}
-		});
+	public OfficeSectionManagedObjectSource[] getOfficeSectionManagedObjectSources() {
+		// Return the section managed object sources sorted by name
+		OfficeSectionManagedObjectSource[] sectionMos = this.managedObjectSourceNodes
+				.values().toArray(new OfficeSectionManagedObjectSource[0]);
+		Arrays.sort(sectionMos,
+				new Comparator<OfficeSectionManagedObjectSource>() {
+					@Override
+					public int compare(OfficeSectionManagedObjectSource a,
+							OfficeSectionManagedObjectSource b) {
+						return a
+								.getOfficeSectionManagedObjectSourceName()
+								.compareTo(
+										b
+												.getOfficeSectionManagedObjectSourceName());
+					}
+				});
 		return sectionMos;
 	}
 

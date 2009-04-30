@@ -21,32 +21,40 @@ import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * {@link ManagedObject} contained within an {@link OfficeSubSection}.
+ * {@link ManagedObjectSource} contained within a {@link OfficeSection}.
  * 
  * @author Daniel
  */
-public interface OfficeSectionManagedObject extends DependentManagedObject,
-		AdministerableManagedObject {
+public interface OfficeSectionManagedObjectSource {
 
 	/**
-	 * Obtains the name of this {@link OfficeSectionManagedObject}.
+	 * Obtains the name of this {@link OfficeSectionManagedObjectSource}.
 	 * 
-	 * @return Name of this {@link OfficeSectionManagedObject}.
+	 * @return Name of this {@link OfficeSectionManagedObjectSource}.
 	 */
-	String getOfficeSectionManagedObjectName();
+	String getOfficeSectionManagedObjectSourceName();
 
 	/**
 	 * <p>
-	 * Obtains the supported extension interfaces by this
-	 * {@link OfficeSectionManagedObject}.
+	 * Obtains the {@link ManagedObjectTeam} instances required by this
+	 * {@link OfficeSectionManagedObjectSource}.
 	 * <p>
 	 * Should there be an issue by the underlying {@link ManagedObjectSource}
 	 * providing the listing, an empty array will be returned with an issue
 	 * reported to the {@link CompilerIssues}.
 	 * 
-	 * @return Supported extension interfaces by this
-	 *         {@link OfficeSectionManagedObject}.
+	 * @return {@link ManagedObjectTeam} instances required by this
+	 *         {@link OfficeSectionManagedObjectSource}.
 	 */
-	Class<?>[] getSupportedExtensionInterfaces();
+	ManagedObjectTeam[] getOfficeSectionManagedObjectTeams();
+
+	/**
+	 * Obtains the {@link OfficeSectionManagedObject} instance uses of
+	 * {@link ManagedObject} from the {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link OfficeSectionManagedObject} instance uses of
+	 *         {@link ManagedObject} from the {@link ManagedObjectSource}.
+	 */
+	OfficeSectionManagedObject[] getOfficeSectionManagedObjects();
 
 }

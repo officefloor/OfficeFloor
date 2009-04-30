@@ -17,17 +17,20 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.spi.office.OfficeManagedObject;
+import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.internal.structure.ManagedObjectMetaData;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 /**
- * {@link SectionManagedObject} node.
+ * Node representing an instance use of a {@link ManagedObject}..
  * 
  * @author Daniel
  */
@@ -36,35 +39,43 @@ public interface ManagedObjectNode extends SectionManagedObject,
 		OfficeFloorManagedObject, LinkObjectNode {
 
 	/**
-	 * Adds the context of the {@link Office} containing this
-	 * {@link SectionManagedObject}.
+	 * <p>
+	 * Registers this {@link ManagedObject} to the {@link Office}.
+	 * <p>
+	 * This may be called more than once for an {@link Office} due to dependency
+	 * management. Only the first invocation should register this
+	 * {@link ManagedObject} and all further invocations are to be ignored.
 	 * 
-	 * @param officeLocation
-	 *            Location of the {@link Office}.
+	 * @param office
+	 *            {@link OfficeNode} of the {@link Office} that this
+	 *            {@link ManagedObject} is to register.
+	 * @param objectNode
+	 *            {@link OfficeObject} that represents this
+	 *            {@link ManagedObject} within the {@link Office}. May be
+	 *            <code>null</code> if is a dependency of a
+	 *            {@link ManagedObject} that is not directly linked to the
+	 *            {@link Office}.
+	 * @param officeBuilder
+	 *            {@link OfficeBuilder} of the {@link Office}.
 	 */
-	void addOfficeContext(String officeLocation);
+	void registerToOffice(OfficeNode office, OfficeObject object,
+			OfficeBuilder officeBuilder);
 
 	/**
-	 * Adds the context of the {@link OfficeFloor} containing this
-	 * {@link OfficeFloorManagedObject}.
+	 * <p>
+	 * Builds the {@link ManagedObject} into the {@link Office}.
+	 * <p>
+	 * This may be called more than once for an {@link Office} due to dependency
+	 * management. Only the first invocation should build this
+	 * {@link ManagedObject} into the {@link Office} and all further invocations
+	 * are to be ignored.
 	 * 
-	 * @param officeFloorLocation
-	 *            Location of the {@link OfficeFloor}.
+	 * @param office
+	 *            {@link OfficeNode} of the {@link Office} that this
+	 *            {@link ManagedObject} is to build itself into.
+	 * @param officeBuilder
+	 *            {@link OfficeBuilder} for the {@link Office}.
 	 */
-	void addOfficeFloorContext(String officeFloorLocation);
-
-	/**
-	 * Loads the {@link ManagedObjectMetaData} of this
-	 * {@link SectionManagedObject}.
-	 */
-	void loadManagedObjectMetaData();
-
-	/**
-	 * Builds {@link ManagedObjectSource} for this {@link ManagedObjectNode}.
-	 * 
-	 * @param builder
-	 *            {@link OfficeFloorBuilder}.
-	 */
-	void buildManagedObject(OfficeFloorBuilder builder);
+	void buildOfficeManagedObject(OfficeNode office, OfficeBuilder officeBuilder);
 
 }
