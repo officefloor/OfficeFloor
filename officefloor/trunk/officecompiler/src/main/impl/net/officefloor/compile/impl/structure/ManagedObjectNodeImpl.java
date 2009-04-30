@@ -17,7 +17,9 @@
 package net.officefloor.compile.impl.structure;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkObjectNode;
@@ -113,18 +115,6 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		this.context = context;
 	}
 
-	/**
-	 * Adds an issue.
-	 * 
-	 * @param issueDescription
-	 *            Description of the issue.
-	 */
-	private void addIssue(String issueDescription) {
-		this.context.getCompilerIssues().addIssue(this.locationType,
-				this.location, AssetType.MANAGED_OBJECT,
-				this.managedObjectName, issueDescription);
-	}
-
 	/*
 	 * ===================== ManagedObjectNode ================================
 	 */
@@ -134,10 +124,22 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 		return this.managedObjectName;
 	}
 
+	/**
+	 * {@link OfficeNode} instances that this {@link ManagedObject} has already
+	 * been built into.
+	 */
+	private final Set<OfficeNode> builtOffices = new HashSet<OfficeNode>();
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public void buildOfficeManagedObject(OfficeNode office,
 			OfficeBuilder officeBuilder) {
+
+		// Ensure not already built into the office
+		if (this.builtOffices.contains(office)) {
+			return; // already built into the office
+		}
+		this.builtOffices.add(office);
 
 		// Obtain the managed object type
 		ManagedObjectType<?> managedObjectType = this.managedObjectSourceNode
