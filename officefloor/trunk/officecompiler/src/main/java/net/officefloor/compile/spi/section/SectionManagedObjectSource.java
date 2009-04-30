@@ -71,7 +71,7 @@ public interface SectionManagedObjectSource {
 	 *            within the {@link Office}.
 	 * @return {@link SectionManagedObject}.
 	 */
-	SectionManagedObject getSectionManagedObject(String managedObjectName,
+	SectionManagedObject addSectionManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope);
 
 }

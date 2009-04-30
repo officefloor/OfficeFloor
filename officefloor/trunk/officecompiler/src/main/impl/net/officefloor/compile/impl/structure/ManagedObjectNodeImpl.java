@@ -27,10 +27,10 @@ import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
-import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
-import net.officefloor.compile.spi.section.SectionManagedObject;
+import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
@@ -42,9 +42,14 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 public class ManagedObjectNodeImpl implements ManagedObjectNode {
 
 	/**
-	 * Name of this {@link SectionManagedObject}.
+	 * Name of this {@link ManagedObject}.
 	 */
 	private final String managedObjectName;
+
+	/**
+	 * {@link ManagedObjectScope} of this {@link ManagedObject}.
+	 */
+	private final ManagedObjectScope managedObjectScope;
 
 	/**
 	 * {@link ManagedObjectDependencyNode} instances by their
@@ -78,7 +83,9 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 * Initiate.
 	 * 
 	 * @param managedObjectName
-	 *            Name of this {@link SectionManagedObject}.
+	 *            Name of this {@link ManagedObject}.
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} of the {@link ManagedObjectNode}.
 	 * @param locationType
 	 *            {@link LocationType} of the location containing this
 	 *            {@link ManagedObject}.
@@ -92,9 +99,11 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectNodeImpl(String managedObjectName,
-			LocationType locationType, String location,
-			ManagedObjectSourceNode managedObjectSourcNode, NodeContext context) {
+			ManagedObjectScope managedObjectScope, LocationType locationType,
+			String location, ManagedObjectSourceNode managedObjectSourcNode,
+			NodeContext context) {
 		this.managedObjectName = managedObjectName;
+		this.managedObjectScope = managedObjectScope;
 		this.locationType = locationType;
 		this.location = location;
 		this.managedObjectSourceNode = managedObjectSourcNode;
@@ -106,24 +115,43 @@ public class ManagedObjectNodeImpl implements ManagedObjectNode {
 	 */
 
 	@Override
-	public void registerToOffice(OfficeNode office, OfficeObject object,
-			OfficeBuilder officeBuilder) {
-
-		// Register to the office
-		officeBuilder.registerManagedObjectSource(object.getOfficeObjectName(),
-				this.managedObjectName);
+	public String getManagedObjectName() {
+		return this.managedObjectName;
 	}
 
 	@Override
 	public void buildOfficeManagedObject(OfficeNode office,
 			OfficeBuilder officeBuilder) {
 
+		// Register to the office
+		officeBuilder.registerManagedObjectSource(this.getManagedObjectName(),
+				this.managedObjectSourceNode.getManagedObjectSourceName());
+
+		// Obtain the managed object name
+		String managedObjectName = this.getManagedObjectName();
+
 		// Add the managed object to the office
-		// DependencyMappingBuilder mapper = officeBuilder
-		// .addProcessManagedObject(officeManagedObjectName,
-		// officeManagedObjectName);
+		DependencyMappingBuilder mapper;
+		switch (this.managedObjectScope) {
+		case PROCESS:
+			mapper = officeBuilder.addProcessManagedObject(managedObjectName,
+					managedObjectName);
+			break;
+		case THREAD:
+			mapper = officeBuilder.addThreadManagedObject(managedObjectName,
+					managedObjectName);
+			break;
+		case WORK:
+			// work not built here
+			return;
+		default:
+			throw new IllegalStateException("Unknown managed object scope "
+					+ this.managedObjectScope);
+		}
 
 		// TODO provide the dependencies for the managed object
+		// mapper.mapDependency(0, "SIMPLE");
+
 	}
 
 	/*

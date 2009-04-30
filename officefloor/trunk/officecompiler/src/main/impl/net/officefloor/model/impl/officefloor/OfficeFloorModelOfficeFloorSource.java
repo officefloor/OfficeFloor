@@ -31,6 +31,8 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
@@ -40,7 +42,9 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamMode
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
+import net.officefloor.model.officefloor.OfficeFloorOperations;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -111,6 +115,42 @@ public class OfficeFloorModelOfficeFloorSource extends
 					managedObjectSource);
 		}
 
+		// Add the office floor managed objects, keeping registry of them
+		Map<String, OfficeFloorManagedObject> officeFloorManagedObjects = new HashMap<String, OfficeFloorManagedObject>();
+		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor
+				.getOfficeFloorManagedObjects()) {
+
+			// Obtain the managed object details
+			String managedObjectName = managedObjectModel
+					.getOfficeFloorManagedObjectName();
+			ManagedObjectScope managedObjectScope = this.getManagedObjectScope(
+					managedObjectModel.getManagedObjectScope(), deployer,
+					managedObjectName);
+
+			// Obtain the managed object source for the managed object
+			OfficeFloorManagedObjectSource moSource = null;
+			OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel moToSource = managedObjectModel
+					.getOfficeFloorManagedObjectSource();
+			if (moToSource != null) {
+				OfficeFloorManagedObjectSourceModel moSourceModel = moToSource
+						.getOfficeFloorManagedObjectSource();
+				if (moSourceModel != null) {
+					moSource = officeFloorManagedObjectSources
+							.get(moSourceModel
+									.getOfficeFloorManagedObjectSourceName());
+				}
+			}
+			if (moSource == null) {
+				continue; // must have managed object source
+			}
+
+			// Add the managed object and also register it
+			OfficeFloorManagedObject managedObject = moSource
+					.addOfficeFloorManagedObject(managedObjectName,
+							managedObjectScope);
+			officeFloorManagedObjects.put(managedObjectName, managedObject);
+		}
+
 		// Add the office floor teams, keeping registry of teams
 		Map<String, OfficeFloorTeam> officeFloorTeams = new HashMap<String, OfficeFloorTeam>();
 		for (OfficeFloorTeamModel teamModel : officeFloor.getOfficeFloorTeams()) {
@@ -150,25 +190,22 @@ public class OfficeFloorModelOfficeFloorSource extends
 						.getDeployedOfficeObject(objectModel
 								.getDeployedOfficeObjectName());
 
-				// Obtain the office floor managed object source
-				OfficeFloorManagedObjectSource managedObjectSource = null;
+				// Obtain the office floor managed object
+				OfficeFloorManagedObject managedObject = null;
 				DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = objectModel
 						.getOfficeFloorManagedObject();
 				if (conn != null) {
 					OfficeFloorManagedObjectModel managedObjectModel = conn
 							.getOfficeFloorManagedObject();
 					if (managedObjectModel != null) {
-						managedObjectSource = officeFloorManagedObjectSources
+						managedObject = officeFloorManagedObjects
 								.get(managedObjectModel
 										.getOfficeFloorManagedObjectName());
 					}
 				}
-				if (managedObjectSource == null) {
+				if (managedObject == null) {
 					continue; // must have managed object for office object
 				}
-
-				// TODO obtain the office floor managed object
-				OfficeFloorManagedObject managedObject = null;
 
 				// Have the office object be the managed object
 				deployer.link(officeObject, managedObject);
@@ -237,4 +274,37 @@ public class OfficeFloorModelOfficeFloorSource extends
 		}
 	}
 
+	/**
+	 * Obtains the {@link ManagedObjectScope} from the managed object scope
+	 * name.
+	 * 
+	 * @param managedObjectScope
+	 *            Name of the {@link ManagedObjectScope}.
+	 * @param deployer
+	 *            {@link OfficeFloorDeployer}.
+	 * @param managedObjectName
+	 *            Name of the {@link OfficeFloorManagedObjectModel}.
+	 * @return {@link ManagedObjectScope} or <code>null</code> with issue
+	 *         reported to the {@link OfficeFloorDeployer}.
+	 */
+	private ManagedObjectScope getManagedObjectScope(String managedObjectScope,
+			OfficeFloorDeployer deployer, String managedObjectName) {
+
+		// Obtain the managed object scope
+		if (OfficeFloorOperations.PROCESS_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.PROCESS;
+		} else if (OfficeFloorOperations.THREAD_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.THREAD;
+		} else if (OfficeFloorOperations.WORK_MANAGED_OBJECT_SCOPE
+				.equals(managedObjectScope)) {
+			return ManagedObjectScope.WORK;
+		}
+
+		// Unknown scope if at this point
+		deployer.addIssue("Unknown managed object scope " + managedObjectScope,
+				AssetType.MANAGED_OBJECT, managedObjectName);
+		return null;
+	}
 }

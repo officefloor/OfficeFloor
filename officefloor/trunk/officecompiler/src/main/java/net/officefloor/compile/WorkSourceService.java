@@ -19,6 +19,7 @@ package net.officefloor.compile;
 import java.util.ServiceLoader;
 
 import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.frame.api.execute.Work;
 
 /**
  * <p>
@@ -30,7 +31,7 @@ import net.officefloor.compile.spi.work.source.WorkSource;
  * 
  * @author Daniel
  */
-public interface WorkSourceService {
+public interface WorkSourceService<W extends Work, S extends WorkSource<W>> {
 
 	/**
 	 * Obtains the alias for the {@link WorkSource} {@link Class}.
@@ -44,6 +45,6 @@ public interface WorkSourceService {
 	 * 
 	 * @return {@link WorkSource} {@link Class}.
 	 */
-	Class<? extends WorkSource<?>> getWorkSourceClass();
+	Class<S> getWorkSourceClass();
 
 }

@@ -19,6 +19,9 @@ package net.officefloor.compile.impl.structure;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.CompileUtil;
+import net.officefloor.compile.impl.util.StringExtractor;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeFloorNode;
@@ -39,6 +42,7 @@ import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.OfficeFrame;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.OfficeFloor;
 
 /**
@@ -64,6 +68,12 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 	 * {@link OfficeFloorManagedObjectSource} name.
 	 */
 	private final Map<String, ManagedObjectSourceNode> managedObjectSources = new HashMap<String, ManagedObjectSourceNode>();
+
+	/**
+	 * {@link ManagedObjectNode} instances by their
+	 * {@link OfficeFloorManagedObject} name.
+	 */
+	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
 
 	/**
 	 * {@link TeamNode} instances by their {@link OfficeFloorTeam} name.
@@ -112,7 +122,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			// Create the managed object source and have in office floor context
 			mo = new ManagedObjectSourceNodeImpl(managedObjectSourceName,
 					managedObjectSourceClassName, LocationType.OFFICE_FLOOR,
-					this.officeFloorLocation, this.context);
+					this.officeFloorLocation, this.managedObjects, this.context);
 			mo.addOfficeFloorContext(this.officeFloorLocation);
 
 			// Add the managed object source
@@ -193,6 +203,22 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		this.linkObject(requiredManagedObject, officeFloorManagedObject);
 	}
 
+	@Override
+	public void addIssue(String issueDescription, AssetType assetType,
+			String assetName) {
+		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, assetType, assetName,
+				issueDescription);
+	}
+
+	@Override
+	public void addIssue(String issueDescription, Throwable cause,
+			AssetType assetType, String assetName) {
+		this.context.getCompilerIssues().addIssue(LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, assetType, assetName,
+				issueDescription, cause);
+	}
+
 	/*
 	 * ===================== OfficeFloorNode ==================================
 	 */
@@ -204,19 +230,43 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeFloorBuilder builder = officeFrame
 				.createOfficeFloorBuilder(this.officeFloorLocation);
 
-		// Build the managed object sources
-		for (ManagedObjectSourceNode managedObjectSource : this.managedObjectSources
-				.values()) {
+		// Build the managed object sources (in deterministic order)
+		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
+				.toSortedArray(this.managedObjectSources.values(),
+						new ManagedObjectSourceNode[0],
+						new StringExtractor<ManagedObjectSourceNode>() {
+							@Override
+							public String toString(
+									ManagedObjectSourceNode object) {
+								return object
+										.getOfficeFloorManagedObjectSourceName();
+							}
+						});
+		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
 			managedObjectSource.buildManagedObject(builder);
 		}
 
-		// Build the teams
-		for (TeamNode team : this.teams.values()) {
+		// Build the teams (in deterministic order)
+		TeamNode[] teams = CompileUtil.toSortedArray(this.teams.values(),
+				new TeamNode[0], new StringExtractor<TeamNode>() {
+					@Override
+					public String toString(TeamNode object) {
+						return object.getOfficeFloorTeamName();
+					}
+				});
+		for (TeamNode team : teams) {
 			team.buildTeam(builder);
 		}
 
-		// Build the offices
-		for (OfficeNode office : this.offices.values()) {
+		// Build the offices (in deterministic order)
+		OfficeNode[] offices = CompileUtil.toSortedArray(this.offices.values(),
+				new OfficeNode[0], new StringExtractor<OfficeNode>() {
+					@Override
+					public String toString(OfficeNode object) {
+						return object.getDeployedOfficeName();
+					}
+				});
+		for (OfficeNode office : offices) {
 			office.buildOffice(builder);
 		}
 

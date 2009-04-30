@@ -14,37 +14,33 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.compile;
+package net.officefloor.model.officefloor;
 
-import java.util.ServiceLoader;
-
-import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.internal.structure.ManagedObjectScope;
 
 /**
- * <p>
- * {@link ServiceLoader} service to plug-in an {@link SectionSource}
- * {@link Class} alias by including the extension {@link SectionSource} jar on
- * the class path.
- * <p>
- * {@link OfficeFloorCompiler#addSectionSourceAlias(String, Class)} will be
- * invoked for each found {@link SectionSourceService}.
+ * Changes that can be made to an {@link OfficeFloorModel}.
  * 
  * @author Daniel
  */
-public interface SectionSourceService<S extends SectionSource> {
+public interface OfficeFloorOperations {
 
 	/**
-	 * Obtains the alias for the {@link SectionSource} {@link Class}.
-	 * 
-	 * @return Alias for the {@link SectionSource} {@link Class}.
+	 * Value for {@link ManagedObjectScope#PROCESS} on
+	 * {@link OfficeFloorManagedObjectModel} instances.
 	 */
-	String getSectionSourceAlias();
+	String PROCESS_MANAGED_OBJECT_SCOPE = ManagedObjectScope.PROCESS.name();
 
 	/**
-	 * Obtains the {@link SectionSource} {@link Class}.
-	 * 
-	 * @return {@link SectionSource} {@link Class}.
+	 * Value for {@link ManagedObjectScope#THREAD} on
+	 * {@link OfficeFloorManagedObjectModel} instances.
 	 */
-	Class<S> getSectionSourceClass();
+	String THREAD_MANAGED_OBJECT_SCOPE = ManagedObjectScope.THREAD.name();
+
+	/**
+	 * Value for {@link ManagedObjectScope#WORK} on
+	 * {@link OfficeFloorManagedObjectModel} instances.
+	 */
+	String WORK_MANAGED_OBJECT_SCOPE = ManagedObjectScope.WORK.name();
 
 }

@@ -70,6 +70,15 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	void addOfficeFloorContext(String officeFloorLocation);
 
 	/**
+	 * Obtains the name that this {@link ManagedObjectSource} was added to the
+	 * {@link OfficeFloor}.
+	 * 
+	 * @return Name that this {@link ManagedObjectSource} was added to the
+	 *         {@link OfficeFloor}.
+	 */
+	String getManagedObjectSourceName();
+
+	/**
 	 * Builds {@link ManagedObjectSource} for this {@link ManagedObjectNode}.
 	 * 
 	 * @param builder

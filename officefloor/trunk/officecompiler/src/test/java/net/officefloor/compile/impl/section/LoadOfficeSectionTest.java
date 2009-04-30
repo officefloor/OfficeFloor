@@ -268,7 +268,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 					public void make(SectionMakerContext context) {
 						SectionManagedObjectSource source = context
 								.addManagedObjectSource("MO_SOURCE", null);
-						source.getSectionManagedObject("MO",
+						source.addSectionManagedObject("MO",
 								ManagedObjectScope.PROCESS);
 					}
 				});
@@ -312,7 +312,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 														.addExtensionInterface(XAResource.class);
 											}
 										});
-						source.getSectionManagedObject("MO",
+						source.addSectionManagedObject("MO",
 								ManagedObjectScope.WORK);
 					}
 				});
@@ -398,7 +398,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 						SectionManagedObjectSource moSource = context
 								.addManagedObjectSource("MO_SOURCE", null);
 						SectionManagedObject managedObject = moSource
-								.getSectionManagedObject("MO",
+								.addSectionManagedObject("MO",
 										ManagedObjectScope.THREAD);
 
 						// Link task object to managed object
@@ -465,7 +465,7 @@ public class LoadOfficeSectionTest extends AbstractStructureTestCase {
 						SectionManagedObjectSource moSource = context
 								.addManagedObjectSource("MO_SOURCE", null);
 						SectionManagedObject managedObject = moSource
-								.getSectionManagedObject("MO",
+								.addSectionManagedObject("MO",
 										ManagedObjectScope.PROCESS);
 
 						// Link task object to managed object

@@ -25,6 +25,7 @@ import net.officefloor.compile.impl.properties.PropertyListImpl;
 import net.officefloor.compile.impl.section.SectionSourceContextImpl;
 import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.impl.util.StringExtractor;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.SectionInputNode;
@@ -130,6 +131,12 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 * {@link SectionManagedObjectSource} names.
 	 */
 	private final Map<String, ManagedObjectSourceNode> managedObjectSourceNodes = new HashMap<String, ManagedObjectSourceNode>();
+
+	/**
+	 * {@link ManagedObjectNode} instances by their {@link SectionManagedObject}
+	 * name.
+	 */
+	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
 
 	/**
 	 * {@link WorkNode} instances by their {@link SectionWork} names.
@@ -605,7 +612,8 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Add the section managed object source
 			managedObjectSource = new ManagedObjectSourceNodeImpl(
 					managedObjectSourceName, managedObjectSourceClassName,
-					LocationType.SECTION, this.sectionLocation, this.context);
+					LocationType.SECTION, this.sectionLocation,
+					this.managedObjects, this.context);
 			this.managedObjectSourceNodes.put(managedObjectSourceName,
 					managedObjectSource);
 		} else {

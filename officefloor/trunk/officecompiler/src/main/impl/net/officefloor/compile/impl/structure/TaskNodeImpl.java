@@ -23,6 +23,7 @@ import java.util.Map;
 
 import net.officefloor.compile.impl.util.LinkUtil;
 import net.officefloor.compile.internal.structure.LinkFlowNode;
+import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
@@ -34,7 +35,6 @@ import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.spi.office.ObjectDependency;
 import net.officefloor.compile.spi.office.OfficeDuty;
-import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
@@ -329,24 +329,25 @@ public class TaskNodeImpl implements TaskNode {
 				continue; // linked as a parameter
 			}
 
-			// Obtain the linked office object for the object
-			OfficeObject linkedOfficeObject = LinkUtil.retrieveTarget(
-					objectNode, OfficeObject.class, "Object " + objectName,
-					LocationType.SECTION, this.sectionLocation, AssetType.TASK,
-					this.taskName, this.context.getCompilerIssues());
-			if (linkedOfficeObject == null) {
-				continue; // must have linked office object
+			// Obtain the managed object for the object
+			ManagedObjectNode linkedManagedObject = LinkUtil.retrieveTarget(
+					objectNode, ManagedObjectNode.class,
+					"Object " + objectName, LocationType.SECTION,
+					this.sectionLocation, AssetType.TASK, this.taskName,
+					this.context.getCompilerIssues());
+			if (linkedManagedObject == null) {
+				continue; // must have linked managed object
 			}
 
-			// Link task object to office object
-			String linkedOfficeObjectName = linkedOfficeObject
-					.getOfficeObjectName();
+			// Link task object to managed object
+			String linkedManagedObjectName = linkedManagedObject
+					.getManagedObjectName();
 			if (objectKey != null) {
 				taskBuilder.linkManagedObject(objectKey,
-						linkedOfficeObjectName, objectClass);
+						linkedManagedObjectName, objectClass);
 			} else {
 				taskBuilder.linkManagedObject(objectIndex,
-						linkedOfficeObjectName, objectClass);
+						linkedManagedObjectName, objectClass);
 			}
 		}
 

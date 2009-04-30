@@ -47,6 +47,7 @@ import net.officefloor.frame.spi.team.source.TeamSource;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.test.match.TypeMatcher;
 import net.officefloor.model.impl.repository.xml.XmlConfigurationContext;
+import net.officefloor.model.repository.ConfigurationContext;
 
 import org.easymock.AbstractMatcher;
 
@@ -344,6 +345,46 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 	}
 
 	/**
+	 * Obtains the {@link ConfigurationContext} for test being run.
+	 * 
+	 * @return {@link ConfigurationContext} for test being run.
+	 */
+	protected ConfigurationContext getConfigurationContext() {
+
+		// Move the 'Test' to start of test case name
+		String testCaseName = this.getClass().getSimpleName();
+		testCaseName = "Test"
+				+ testCaseName.substring(0, (testCaseName.length() - "Test"
+						.length()));
+
+		// Remove the 'test' from the start of the test name
+		String testName = this.getName();
+		testName = testName.substring("test".length());
+
+		// Create the configuration context
+		String configFileName = testCaseName + "/" + testName + ".xml";
+		XmlConfigurationContext configurationContext;
+		try {
+			configurationContext = new XmlConfigurationContext(this,
+					configFileName);
+
+			// Add the tag replacements
+			configurationContext.addTag("testcase", this.getClass().getName());
+
+		} catch (Exception ex) {
+			// Wrap failure to not require tests to have to handle
+			StringWriter stackTrace = new StringWriter();
+			ex.printStackTrace(new PrintWriter(stackTrace));
+			fail("Failed to obtain configuration: " + configFileName + "\n"
+					+ stackTrace.toString());
+			return null; // fail should propagate exception
+		}
+
+		// Return the configuration context
+		return configurationContext;
+	}
+
+	/**
 	 * Compiles the {@link OfficeFloor} verifying correctly built into the
 	 * {@link OfficeFloorBuilder}.
 	 * 
@@ -372,35 +413,6 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 		// Replay the mocks
 		this.replayMockObjects();
 
-		// Move the 'Test' to start of test case name
-		String testCaseName = this.getClass().getSimpleName();
-		testCaseName = "Test"
-				+ testCaseName.substring(0, (testCaseName.length() - "Test"
-						.length()));
-
-		// Remove the 'test' from the start of the test name
-		String testName = this.getName();
-		testName = testName.substring("test".length());
-
-		// Create the configuration context
-		String configFileName = testCaseName + "/" + testName + ".xml";
-		XmlConfigurationContext configurationContext;
-		try {
-			configurationContext = new XmlConfigurationContext(this,
-					configFileName);
-
-			// Add the tag replacements
-			configurationContext.addTag("testcase", this.getClass().getName());
-
-		} catch (Exception ex) {
-			// Wrap failure to not require tests to have to handle
-			StringWriter stackTrace = new StringWriter();
-			ex.printStackTrace(new PrintWriter(stackTrace));
-			fail("Failed to obtain configuration: " + configFileName + "\n"
-					+ stackTrace.toString());
-			return; // fail should propagate exception
-		}
-
 		// Create the office frame to return the mock office floor builder
 		OfficeFrame officeFrame = new OfficeFrame() {
 			@Override
@@ -409,6 +421,10 @@ public abstract class AbstractCompileTestCase extends OfficeFrameTestCase {
 				return AbstractCompileTestCase.this.officeFloorBuilder;
 			}
 		};
+
+		// Obtain the configuration context
+		ConfigurationContext configurationContext = this
+				.getConfigurationContext();
 
 		// Create the compiler (overriding values to allow testing)
 		OfficeFloorCompiler compiler = OfficeFloorCompiler

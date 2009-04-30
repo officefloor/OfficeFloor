@@ -38,6 +38,9 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.TaskTeam;
+import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
@@ -76,6 +79,43 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 	private final OfficeNode node = new OfficeNodeImpl(OFFICE_NAME,
 			MakerOfficeSource.class.getName(), OFFICE_LOCATION,
 			this.nodeContext);
+
+	/**
+	 * Ensure allow {@link OfficeSource} to report issues via the
+	 * {@link OfficeArchitect}.
+	 */
+	public void testAddIssue() {
+
+		// Record adding the issue
+		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
+				AssetType.ADMINISTRATOR, "SOME ADMINISTRATOR", "TEST_ISSUE");
+
+		// Add the issue
+		this.replayMockObjects();
+		this.node.addIssue("TEST_ISSUE", AssetType.ADMINISTRATOR,
+				"SOME ADMINISTRATOR");
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensure allow {@link OfficeFloorSource} to report issues via the
+	 * {@link OfficeFloorDeployer}.
+	 */
+	public void testAddIssueWithCause() {
+
+		final Exception failure = new Exception("cause");
+
+		// Record adding the issue
+		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
+				AssetType.ADMINISTRATOR, "SOME ADMINISTRATOR", "TEST_ISSUE",
+				failure);
+
+		// Add the issue
+		this.replayMockObjects();
+		this.node.addIssue("TEST_ISSUE", failure, AssetType.ADMINISTRATOR,
+				"SOME ADMINISTRATOR");
+		this.verifyMockObjects();
+	}
 
 	/**
 	 * Tests adding an {@link OfficeObject}.
@@ -230,13 +270,13 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add two different managed objects verifying details
 		this.replayMockObjects();
-		OfficeManagedObject mo = moSource.getOfficeManagedObject("MO",
+		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
 				ManagedObjectScope.PROCESS);
 		assertNotNull("Must have managed object", mo);
 		assertEquals("Incorrect managed object name", "MO", mo
 				.getOfficeManagedObjectName());
 		assertNotSame("Should obtain another managed object", mo, moSource
-				.getOfficeManagedObject("ANOTHER", ManagedObjectScope.PROCESS));
+				.addOfficeManagedObject("ANOTHER", ManagedObjectScope.PROCESS));
 		this.verifyMockObjects();
 	}
 
@@ -247,7 +287,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Record issue in adding the managed objects twice
 		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
-				AssetType.MANAGED_OBJECT, "MO_SOURCE",
+				AssetType.MANAGED_OBJECT, "MO",
 				"Office managed object MO already added");
 
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
@@ -255,9 +295,38 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 
 		// Add the managed object twice
 		this.replayMockObjects();
-		OfficeManagedObject moFirst = moSource.getOfficeManagedObject("MO",
+		OfficeManagedObject moFirst = moSource.addOfficeManagedObject("MO",
 				ManagedObjectScope.THREAD);
-		OfficeManagedObject moSecond = moSource.getOfficeManagedObject("MO",
+		OfficeManagedObject moSecond = moSource.addOfficeManagedObject("MO",
+				ManagedObjectScope.THREAD);
+		this.verifyMockObjects();
+
+		// Should be the same managed object
+		assertEquals("Should be same managed object on adding twice", moFirst,
+				moSecond);
+	}
+
+	/**
+	 * Ensure issue if add the {@link OfficeManagedObject} twice by different
+	 * {@link OfficeManagedObjectSource} instances.
+	 */
+	public void testAddOfficeManagedObjectTwiceByDifferentSources() {
+
+		// Record issue in adding the managed objects twice
+		this.issues.addIssue(LocationType.OFFICE, OFFICE_LOCATION,
+				AssetType.MANAGED_OBJECT, "MO",
+				"Office managed object MO already added");
+
+		OfficeManagedObjectSource moSourceOne = this.addManagedObjectSource(
+				this.node, "MO_SOURCE_ONE", null);
+		OfficeManagedObjectSource moSourceTwo = this.addManagedObjectSource(
+				this.node, "MO_SOURCE_TWO", null);
+
+		// Add the managed object twice by different sources
+		this.replayMockObjects();
+		OfficeManagedObject moFirst = moSourceOne.addOfficeManagedObject("MO",
+				ManagedObjectScope.THREAD);
+		OfficeManagedObject moSecond = moSourceTwo.addOfficeManagedObject("MO",
 				ManagedObjectScope.THREAD);
 		this.verifyMockObjects();
 
@@ -430,7 +499,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 					public void make(SectionMakerContext context) {
 						SectionManagedObjectSource moSource = context
 								.addManagedObjectSource("MO_SOURCE", null);
-						moSource.getSectionManagedObject("MO",
+						moSource.addSectionManagedObject("MO",
 								ManagedObjectScope.WORK);
 					}
 				});
@@ -461,7 +530,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 				"ADMINISTRATOR", null);
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
 				this.node, "MO_SOURCE", null);
-		OfficeManagedObject mo = moSource.getOfficeManagedObject("MO",
+		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
 				ManagedObjectScope.THREAD);
 		administrator.administerManagedObject(mo);
 		// TODO test that administering the section managed object
@@ -522,14 +591,14 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
 				this.node, "MO_SOURCE", null);
-		OfficeManagedObject mo = moSource.getOfficeManagedObject("MO",
+		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
 				ManagedObjectScope.PROCESS);
 		this.node.link(sectionObject, mo);
 		assertObjectLink("section object -> office managed object",
 				sectionObject, mo);
 
 		// Ensure only can link once
-		this.node.link(sectionObject, moSource.getOfficeManagedObject(
+		this.node.link(sectionObject, moSource.addOfficeManagedObject(
 				"ANOTHER", ManagedObjectScope.PROCESS));
 		assertObjectLink("Can only link once", sectionObject, mo);
 
@@ -618,7 +687,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Link section object to an office managed object
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
 				this.node, "MO_SOURCE", null);
-		OfficeManagedObject mo = moSource.getOfficeManagedObject("MO",
+		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
 				ManagedObjectScope.WORK);
 		this.node.link(sectionObject, mo);
 
@@ -697,20 +766,20 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
 				this.node, "MO_SOURCE", null);
-		OfficeManagedObject mo = moSource.getOfficeManagedObject("MO",
+		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
 				ManagedObjectScope.THREAD);
 		ManagedObjectDependency dependency = mo
 				.getManagedObjectDependency("DEPENDENCY");
 		OfficeManagedObjectSource moSourceTarget = this.addManagedObjectSource(
 				this.node, "MO_SOURCE_TARGET", null);
-		OfficeManagedObject moTarget = moSourceTarget.getOfficeManagedObject(
+		OfficeManagedObject moTarget = moSourceTarget.addOfficeManagedObject(
 				"MO_TARGET", ManagedObjectScope.THREAD);
 		this.node.link(dependency, moTarget);
 		assertObjectLink("managed object dependency -> office managed object",
 				dependency, moTarget);
 
 		// Ensure only can link once
-		this.node.link(dependency, moSourceTarget.getOfficeManagedObject(
+		this.node.link(dependency, moSourceTarget.addOfficeManagedObject(
 				"ANOTHER", ManagedObjectScope.THREAD));
 		assertObjectLink("Can only link once", dependency, moTarget);
 
@@ -821,7 +890,7 @@ public class OfficeNodeTest extends AbstractStructureTestCase {
 		// Link
 		OfficeManagedObjectSource moSource = this.addManagedObjectSource(
 				this.node, "MO_SOURCE", null);
-		OfficeManagedObject mo = moSource.getOfficeManagedObject("MO",
+		OfficeManagedObject mo = moSource.addOfficeManagedObject("MO",
 				ManagedObjectScope.WORK);
 		ManagedObjectDependency dependency = mo
 				.getManagedObjectDependency("DEPENDENCY");

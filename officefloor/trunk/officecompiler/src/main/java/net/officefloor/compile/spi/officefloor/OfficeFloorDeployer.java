@@ -20,10 +20,13 @@ import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.internal.structure.Asset;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.team.Team;
 import net.officefloor.frame.spi.team.source.TeamSource;
@@ -136,5 +139,46 @@ public interface OfficeFloorDeployer {
 	 */
 	void link(OfficeObject officeObject,
 			OfficeFloorManagedObject officeFloorManagedObject);
+
+	/**
+	 * <p>
+	 * Allows the {@link OfficeFloorSource} to add an issue in attempting to
+	 * deploy the {@link OfficeFloor}.
+	 * <p>
+	 * This is available to report invalid configuration but continue to deploy
+	 * the rest of the {@link OfficeFloor}.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 * @param assetType
+	 *            {@link AssetType}. May be <code>null</code> if
+	 *            {@link OfficeFloor} in general.
+	 * @param assetName
+	 *            Name of the {@link Asset}. May be <code>null</code> if
+	 *            {@link OfficeFloor} in general.
+	 */
+	void addIssue(String issueDescription, AssetType assetType, String assetName);
+
+	/**
+	 * <p>
+	 * Allows the {@link OfficeFloorSource} to add an issue along with its cause
+	 * in attempting to deploy the {@link OfficeFloor}.
+	 * <p>
+	 * This is available to report invalid configuration but continue to deploy
+	 * the rest of the {@link OfficeFloor}.
+	 * 
+	 * @param issueDescription
+	 *            Description of the issue.
+	 * @param cause
+	 *            Cause of the issue.
+	 * @param assetType
+	 *            {@link AssetType}. May be <code>null</code> if
+	 *            {@link OfficeFloor} in general.
+	 * @param assetName
+	 *            Name of the {@link Asset}. May be <code>null</code> if
+	 *            {@link OfficeFloor} in general.
+	 */
+	void addIssue(String issueDescription, Throwable cause,
+			AssetType assetType, String assetName);
 
 }

@@ -87,6 +87,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	private final Map<String, OfficeTeamNode> teams = new HashMap<String, OfficeTeamNode>();
 
 	/**
+	 * Registry of all {@link ManagedObjectNode} instances within a location.
+	 * This allows to check that no other {@link ManagedObjectNode} instances
+	 * are added by other {@link ManagedObjectSourceNode} with the same name.
+	 */
+	private final Map<String, ManagedObjectNode> locationManagedObjects;
+
+	/**
 	 * {@link ManagedObjectNode} instances by their {@link ManagedObject} name.
 	 */
 	private final Map<String, ManagedObjectNode> managedObjects = new HashMap<String, ManagedObjectNode>();
@@ -156,16 +163,24 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 *            {@link ManagedObjectSource}.
 	 * @param location
 	 *            Location containing this {@link ManagedObjectSource}.
+	 * @param locationManagedObjects
+	 *            Registry of all {@link ManagedObjectNode} instances within a
+	 *            location. This allows to check that no other
+	 *            {@link ManagedObjectNode} instances are added by other
+	 *            {@link ManagedObjectSourceNode} with the same name.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public ManagedObjectSourceNodeImpl(String managedObjectSourceName,
 			String managedObjectSourceClassName, LocationType locationType,
-			String location, NodeContext context) {
+			String location,
+			Map<String, ManagedObjectNode> locationManagedObjects,
+			NodeContext context) {
 		this.managedObjectSourceName = managedObjectSourceName;
 		this.managedObjectSourceClassName = managedObjectSourceClassName;
 		this.locationType = locationType;
 		this.location = location;
+		this.locationManagedObjects = locationManagedObjects;
 		this.context = context;
 	}
 
@@ -184,12 +199,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	public ManagedObjectNode addManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope) {
 		// Obtain and return the managed object for the name
-		ManagedObjectNode managedObject = this.managedObjects
+		ManagedObjectNode managedObject = this.locationManagedObjects
 				.get(managedObjectName);
 		if (managedObject == null) {
-			// Add the managed object
+			// Add the managed object and register it
 			managedObject = new ManagedObjectNodeImpl(managedObjectName,
-					this.locationType, this.location, this, this.context);
+					managedObjectScope, this.locationType, this.location, this,
+					this.context);
+			this.locationManagedObjects.put(managedObjectName, managedObject);
 			this.managedObjects.put(managedObjectName, managedObject);
 		} else {
 			// Obtain managed object location type description
@@ -210,8 +227,13 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			}
 
 			// Managed object already added
-			this.addIssue(locationTypeDesc + " managed object "
-					+ managedObjectName + " already added");
+			this.context.getCompilerIssues().addIssue(
+					this.locationType,
+					this.location,
+					AssetType.MANAGED_OBJECT,
+					managedObjectName,
+					locationTypeDesc + " managed object " + managedObjectName
+							+ " already added");
 		}
 		return managedObject;
 	}
@@ -221,13 +243,14 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	 */
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void loadManagedObjectType() {
 
 		// Flag that loaded the managed object type (whether successful or not)
 		this.isManagedObjectTypeLoaded = true;
 
 		// Obtain the managed object source class
-		Class<? extends ManagedObjectSource<?, ?>> managedObjectSourceClass = this.context
+		Class<? extends ManagedObjectSource> managedObjectSourceClass = this.context
 				.getManagedObjectSourceClass(this.managedObjectSourceClassName,
 						this.locationType, this.location,
 						this.managedObjectSourceName);
@@ -284,28 +307,37 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
+	public String getManagedObjectSourceName() {
+		return this.managedObjectSourceName;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public void buildManagedObject(OfficeFloorBuilder builder) {
 
+		// Obtain the name to add this managed object source
+		String managedObjectSourceName = this.getManagedObjectSourceName();
+
 		// Obtain the managed object source class
-		Class<? extends ManagedObjectSource<?, ?>> managedObjectSourceClass = this.context
+		Class<? extends ManagedObjectSource> managedObjectSourceClass = this.context
 				.getManagedObjectSourceClass(this.managedObjectSourceClassName,
 						LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-						this.managedObjectSourceName);
+						managedObjectSourceName);
 		if (managedObjectSourceClass == null) {
 			return; // must have managed object source class
 		}
 
 		// Build the managed object source
-		ManagedObjectBuilder<?> moBuilder = builder.addManagedObject(
-				this.managedObjectSourceName, managedObjectSourceClass);
+		ManagedObjectBuilder<?> moBuilder = builder.addManagedObject(this
+				.getManagedObjectSourceName(), managedObjectSourceClass);
 		for (Property property : this.propertyList) {
 			moBuilder.addProperty(property.getName(), property.getValue());
 		}
 
 		// Obtain the managing office
 		DeployedOffice managingOffice = LinkUtil.retrieveTarget(
-				this.managingOffice, DeployedOffice.class, "Managed Object "
-						+ this.managedObjectSourceName,
+				this.managingOffice, DeployedOffice.class,
+				"Managed Object Source " + managedObjectSourceName,
 				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
 				AssetType.MANAGED_OBJECT, this.managedObjectSourceName,
 				this.context.getCompilerIssues());
@@ -380,7 +412,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public SectionManagedObject getSectionManagedObject(
+	public SectionManagedObject addSectionManagedObject(
 			String managedObjectName, ManagedObjectScope managedObjectScope) {
 		return this.addManagedObject(managedObjectName, managedObjectScope);
 	}
@@ -423,7 +455,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public OfficeManagedObject getOfficeManagedObject(String managedObjectName,
+	public OfficeManagedObject addOfficeManagedObject(String managedObjectName,
 			ManagedObjectScope managedObjectScope) {
 		return this.addManagedObject(managedObjectName, managedObjectScope);
 	}
@@ -451,7 +483,7 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
-	public OfficeFloorManagedObject getOfficeFloorManagedObject(
+	public OfficeFloorManagedObject addOfficeFloorManagedObject(
 			String managedObjectName, ManagedObjectScope managedObjectScope) {
 		return this.addManagedObject(managedObjectName, managedObjectScope);
 	}
