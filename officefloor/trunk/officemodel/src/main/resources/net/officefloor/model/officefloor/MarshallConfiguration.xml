@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <marshall type="net.officefloor.model.officefloor.OfficeFloorModel"
     element="office-floor">
-    <!-- MANAGED OBJECTS -->
-    <collection method="getOfficeFloorManagedObjects"
-        element="managed-objects">
+    <!-- MANAGED OBJECT SOURCES -->
+    <collection method="getOfficeFloorManagedObjectSources"
+        element="managed-object-sources">
         <item
-            type="net.officefloor.model.officefloor.OfficeFloorManagedObjectModel"
-            element="managed-object">
+            type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel"
+            element="managed-object-source">
             <attributes>
-                <attribute method="getOfficeFloorManagedObjectName"
+                <attribute method="getOfficeFloorManagedObjectSourceName"
                     attribute="name" />
                 <attribute method="getManagedObjectSourceClassName"
                     attribute="source" />
@@ -34,6 +34,53 @@
                         attribute="process-bound-name" />
                 </attributes>
             </object>
+            <collection method="getOfficeFloorManagedObjectSourceFlows">
+                <item
+                    type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel"
+                    element="flow">
+                    <attributes>
+                        <attribute
+                            method="getOfficeFloorManagedObjectSourceFlowName"
+                            attribute="name" />
+                        <attribute method="getArgumentType"
+                            attribute="argument-type" />
+                    </attributes>
+                </item>
+            </collection>
+            <collection method="getOfficeFloorManagedObjectSourceTeams">
+                <item
+                    type="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel"
+                    element="team">
+                    <attributes>
+                        <attribute
+                            method="getOfficeFloorManagedObjectSourceTeamName"
+                            attribute="name" />
+                    </attributes>
+                </item>
+            </collection>
+        </item>
+    </collection>
+    <!-- MANAGED OBJECTS -->
+    <collection method="getOfficeFloorManagedObjects"
+        element="managed-objects">
+        <item
+            type="net.officefloor.model.officefloor.OfficeFloorManagedObjectModel"
+            element="managed-object">
+            <attributes>
+                <attribute method="getOfficeFloorManagedObjectName"
+                    attribute="name" />
+                <attribute method="getManagedObjectScope"
+                    attribute="scope" />
+                <attribute method="getX" attribute="x" />
+                <attribute method="getY" attribute="y" />
+            </attributes>
+            <object method="getOfficeFloorManagedObjectSource"
+                element="managed-object-source">
+                <attributes>
+                    <attribute method="getOfficeFloorManagedObjectSourceName"
+                        attribute="name" />
+                </attributes>
+            </object>
             <collection method="getOfficeFloorManagedObjectDependencies">
                 <item
                     type="net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel"
@@ -44,28 +91,6 @@
                             attribute="name" />
                         <attribute method="getDependencyType"
                             attribute="object-type" />
-                    </attributes>
-                </item>
-            </collection>
-            <collection method="getOfficeFloorManagedObjectFlows">
-                <item
-                    type="net.officefloor.model.officefloor.OfficeFloorManagedObjectFlowModel"
-                    element="flow">
-                    <attributes>
-                        <attribute method="getOfficeFloorManagedObjectFlowName"
-                            attribute="name" />
-                        <attribute method="getArgumentType"
-                            attribute="argument-type" />
-                    </attributes>
-                </item>
-            </collection>
-            <collection method="getOfficeFloorManagedObjectTeams">
-                <item
-                    type="net.officefloor.model.officefloor.OfficeFloorManagedObjectTeamModel"
-                    element="team">
-                    <attributes>
-                        <attribute method="getOfficeFloorManagedObjectTeamName"
-                            attribute="name" />
                     </attributes>
                 </item>
             </collection>

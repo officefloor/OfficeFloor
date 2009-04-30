@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <model>
     <field type="String" name="office floor managed object name" />
-    <field type="String" name="managed object source class name" />
-    <field type="String" name="object type" />
-    <field type="OfficeFloorManagedObjectToDeployedOfficeModel"
-        name="managing office" />
-    <list type="PropertyModel" name="property" plural="properties" />
+    <field type="String" name="managed object scope" />
+    <field
+        type="OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel"
+        name="office floor managed object source" />
     <list type="OfficeFloorManagedObjectDependencyModel" name="office floor managed object dependency"
         plural="office floor managed object dependencies" />
-    <list type="OfficeFloorManagedObjectFlowModel" name="office floor managed object flow" />
-    <list type="OfficeFloorManagedObjectTeamModel" name="office floor managed object team" />
     <list type="DeployedOfficeObjectToOfficeFloorManagedObjectModel"
         name="deployed office object" />
 </model>

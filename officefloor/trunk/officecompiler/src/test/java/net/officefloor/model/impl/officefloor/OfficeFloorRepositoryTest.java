@@ -26,7 +26,9 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -68,9 +70,14 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the raw office floor to be connected
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource = new OfficeFloorManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE",
+				"net.example.ExampleManagedObjectSource", Connection.class
+						.getName());
+		officeFloor
+				.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
 		OfficeFloorManagedObjectModel officeFloorManagedObject = new OfficeFloorManagedObjectModel(
-				"MANAGED_OBJECT", "net.example.ExampleManagedObjectSource",
-				Connection.class.getName());
+				"MANAGED_OBJECT", "THREAD");
 		officeFloor.addOfficeFloorManagedObject(officeFloorManagedObject);
 		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel(
 				"OFFICE_FLOOR_TEAM", "net.example.ExampleTeamSource");
@@ -85,10 +92,15 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"OFFICE_TEAM");
 		office.addDeployedOfficeTeam(officeTeam);
 
-		// office floor managed object -> office
-		OfficeFloorManagedObjectToDeployedOfficeModel moToOffice = new OfficeFloorManagedObjectToDeployedOfficeModel(
+		// office floor managed object -> office floor managed object
+		OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel moToSource = new OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE");
+		officeFloorManagedObject.setOfficeFloorManagedObjectSource(moToSource);
+
+		// office floor managed object source -> office
+		OfficeFloorManagedObjectSourceToDeployedOfficeModel moSourceToOffice = new OfficeFloorManagedObjectSourceToDeployedOfficeModel(
 				"OFFICE", null);
-		officeFloorManagedObject.setManagingOffice(moToOffice);
+		officeFloorManagedObjectSource.setManagingOffice(moSourceToOffice);
 
 		// office object -> office floor managed object
 		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel(
@@ -123,12 +135,20 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 		assertEquals("Incorrect office", officeFloor, retrievedOfficeFloor);
 
-		// Ensure office team connected
-		assertEquals("office floor managed object <- office",
-				officeFloorManagedObject, moToOffice
+		// Ensure office floor connected
+		assertEquals(
+				"office floor managed object <- office floor managed object",
+				officeFloorManagedObject, moToSource
 						.getOfficeFloorManagedObject());
-		assertEquals("office floor managed object -> office", office,
-				moToOffice.getManagingOffice());
+		assertEquals(
+				"office floor managed object -> office floor managed object",
+				officeFloorManagedObjectSource, moToSource
+						.getOfficeFloorManagedObjectSource());
+		assertEquals("office floor managed object source <- office",
+				officeFloorManagedObjectSource, moSourceToOffice
+						.getOfficeFloorManagedObjectSource());
+		assertEquals("office floor managed object source -> office", office,
+				moSourceToOffice.getManagingOffice());
 		assertEquals("office object <- office floor managed object",
 				officeObject, officeObjectToManagedObject
 						.getDeployedOfficeObject());
@@ -149,9 +169,14 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 
 		// Create the office floor (without connections)
 		OfficeFloorModel officeFloor = new OfficeFloorModel();
+		OfficeFloorManagedObjectSourceModel officeFloorManagedObjectSource = new OfficeFloorManagedObjectSourceModel(
+				"MANAGED_OBJECT_SOURCE",
+				"net.example.ExampleManagedObjectSource", Connection.class
+						.getName());
+		officeFloor
+				.addOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
 		OfficeFloorManagedObjectModel officeFloorManagedObject = new OfficeFloorManagedObjectModel(
-				"MANAGED_OBJECT", "net.example.ExampleManagedObjectSource",
-				Connection.class.getName());
+				"MANAGED_OBJECT", "THREAD");
 		officeFloor.addOfficeFloorManagedObject(officeFloorManagedObject);
 		OfficeFloorTeamModel officeFloorTeam = new OfficeFloorTeamModel(
 				"OFFICE_FLOOR_TEAM", "net.example.ExampleTeamSource");
@@ -166,11 +191,19 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"OFFICE_TEAM");
 		office.addDeployedOfficeTeam(officeTeam);
 
-		// office floor managed object -> office
-		OfficeFloorManagedObjectToDeployedOfficeModel moToOffice = new OfficeFloorManagedObjectToDeployedOfficeModel();
-		moToOffice.setOfficeFloorManagedObject(officeFloorManagedObject);
-		moToOffice.setManagingOffice(office);
-		moToOffice.connect();
+		// office floor managed object -> office floor managed object source
+		OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel moToSource = new OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel();
+		moToSource.setOfficeFloorManagedObject(officeFloorManagedObject);
+		moToSource
+				.setOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
+		moToSource.connect();
+
+		// office floor managed object source -> office
+		OfficeFloorManagedObjectSourceToDeployedOfficeModel moSourceToOffice = new OfficeFloorManagedObjectSourceToDeployedOfficeModel();
+		moSourceToOffice
+				.setOfficeFloorManagedObjectSource(officeFloorManagedObjectSource);
+		moSourceToOffice.setManagingOffice(office);
+		moSourceToOffice.connect();
 
 		// office object -> office floor managed object
 		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel();
@@ -195,8 +228,12 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		this.verifyMockObjects();
 
 		// Ensure the connections have links to enable retrieving
-		assertEquals("office floor managed object - office", "OFFICE",
-				moToOffice.getManagingOfficeName());
+		assertEquals(
+				"office floor managed object - office floor managed object source",
+				"MANAGED_OBJECT_SOURCE", moToSource
+						.getOfficeFloorManagedObjectSourceName());
+		assertEquals("office floor managed object source - office", "OFFICE",
+				moSourceToOffice.getManagingOfficeName());
 		assertEquals("office object - office floor managed object",
 				"MANAGED_OBJECT", officeObjectToManagedObject
 						.getOfficeFloorManagedObjectName());

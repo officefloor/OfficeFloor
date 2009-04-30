@@ -38,7 +38,8 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
@@ -89,23 +90,24 @@ public class OfficeFloorModelOfficeFloorSource extends
 
 		// Add the office floor managed object sources, keeping registry of them
 		Map<String, OfficeFloorManagedObjectSource> officeFloorManagedObjectSources = new HashMap<String, OfficeFloorManagedObjectSource>();
-		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor
-				.getOfficeFloorManagedObjects()) {
+		for (OfficeFloorManagedObjectSourceModel managedObjectSourceModel : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
 
-			// Add the office floor managed object
-			String managedObjectName = managedObjectModel
-					.getOfficeFloorManagedObjectName();
+			// Add the office floor managed object source
+			String managedObjectSourceName = managedObjectSourceModel
+					.getOfficeFloorManagedObjectSourceName();
 			OfficeFloorManagedObjectSource managedObjectSource = deployer
-					.addManagedObjectSource(managedObjectName,
-							managedObjectModel
+					.addManagedObjectSource(managedObjectSourceName,
+							managedObjectSourceModel
 									.getManagedObjectSourceClassName());
-			for (PropertyModel property : managedObjectModel.getProperties()) {
+			for (PropertyModel property : managedObjectSourceModel
+					.getProperties()) {
 				managedObjectSource.addProperty(property.getName(), property
 						.getValue());
 			}
 
-			// Register the managed object
-			officeFloorManagedObjectSources.put(managedObjectName,
+			// Register the managed object source
+			officeFloorManagedObjectSources.put(managedObjectSourceName,
 					managedObjectSource);
 		}
 
@@ -202,20 +204,21 @@ public class OfficeFloorModelOfficeFloorSource extends
 			}
 		}
 
-		// Manage the office floor managed objects
-		for (OfficeFloorManagedObjectModel managedObjectModel : officeFloor
-				.getOfficeFloorManagedObjects()) {
+		// Manage the office floor managed object sources
+		for (OfficeFloorManagedObjectSourceModel managedObjectSourceModel : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
 
 			// Obtain the managed object
 			OfficeFloorManagedObjectSource managedObjectSource = officeFloorManagedObjectSources
-					.get(managedObjectModel.getOfficeFloorManagedObjectName());
+					.get(managedObjectSourceModel
+							.getOfficeFloorManagedObjectSourceName());
 			if (managedObjectSource == null) {
-				continue; // must have managed object
+				continue; // must have managed object source
 			}
 
 			// Obtain the managing office
 			DeployedOffice managingOffice = null;
-			OfficeFloorManagedObjectToDeployedOfficeModel moToOffice = managedObjectModel
+			OfficeFloorManagedObjectSourceToDeployedOfficeModel moToOffice = managedObjectSourceModel
 					.getManagingOffice();
 			if (moToOffice != null) {
 				DeployedOfficeModel officeModel = moToOffice

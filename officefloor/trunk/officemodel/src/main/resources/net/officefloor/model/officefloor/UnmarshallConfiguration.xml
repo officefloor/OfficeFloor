@@ -1,23 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <unmarshall node="office-floor"
     class="net.officefloor.model.officefloor.OfficeFloorModel">
-    <!-- MANAGED OBJECTS -->
-    <object method="addOfficeFloorManagedObject" node="managed-object"
-        class="net.officefloor.model.officefloor.OfficeFloorManagedObjectModel">
-        <value method="setOfficeFloorManagedObjectName" node="managed-object@name" />
-        <value method="setManagedObjectSourceClassName" node="managed-object@source" />
-        <value method="setObjectType" node="managed-object@object-type" />
-        <value method="setX" node="managed-object@x" />
-        <value method="setY" node="managed-object@y" />
+    <!-- MANAGED OBJECT SOURCES -->
+    <object method="addOfficeFloorManagedObjectSource" node="managed-object-source"
+        class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel">
+        <value method="setOfficeFloorManagedObjectSourceName"
+            node="managed-object-source@name" />
+        <value method="setManagedObjectSourceClassName" node="managed-object-source@source" />
+        <value method="setObjectType" node="managed-object-source@object-type" />
+        <value method="setX" node="managed-object-source@x" />
+        <value method="setY" node="managed-object-source@y" />
         <object method="addProperty" node="property"
             class="net.officefloor.model.officefloor.PropertyModel">
             <value method="setName" node="property@name" />
             <value method="setValue" node="property@value" />
         </object>
         <object method="setManagingOffice" node="managing-office"
-            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectToDeployedOfficeModel">
+            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel">
             <value method="setManagingOfficeName" node="managing-office@name" />
             <value method="setProcessBoundManagedObjectName" node="managing-office@process-bound-name" />
+        </object>
+        <object method="addOfficeFloorManagedObjectSourceFlow"
+            node="flow"
+            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel">
+            <value method="setOfficeFloorManagedObjectSourceFlowName"
+                node="flow@name" />
+            <value method="setArgumentType" node="flow@argument-type" />
+        </object>
+        <object method="addOfficeFloorManagedObjectSourceTeam"
+            node="team"
+            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel">
+            <value method="setOfficeFloorManagedObjectSourceTeamName"
+                node="team@name" />
+        </object>
+    </object>
+    <!-- MANAGED OBJECTS -->
+    <object method="addOfficeFloorManagedObject" node="managed-object"
+        class="net.officefloor.model.officefloor.OfficeFloorManagedObjectModel">
+        <value method="setOfficeFloorManagedObjectName" node="managed-object@name" />
+        <value method="setManagedObjectScope" node="managed-object@scope" />
+        <value method="setX" node="managed-object@x" />
+        <value method="setY" node="managed-object@y" />
+        <object method="setOfficeFloorManagedObjectSource" node="managed-object-source"
+            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel">
+            <value method="setOfficeFloorManagedObjectSourceName"
+                node="managed-object-source@name" />
         </object>
         <object method="addOfficeFloorManagedObjectDependency"
             node="dependency"
@@ -25,17 +52,6 @@
             <value method="setOfficeFloorManagedObjectDependencyName"
                 node="dependency@name" />
             <value method="setDependencyType" node="dependency@object-type" />
-        </object>
-        <object method="addOfficeFloorManagedObjectFlow" node="flow"
-            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectFlowModel">
-            <value method="setOfficeFloorManagedObjectFlowName"
-                node="flow@name" />
-            <value method="setArgumentType" node="flow@argument-type" />
-        </object>
-        <object method="addOfficeFloorManagedObjectTeam" node="team"
-            class="net.officefloor.model.officefloor.OfficeFloorManagedObjectTeamModel">
-            <value method="setOfficeFloorManagedObjectTeamName"
-                node="team@name" />
         </object>
     </object>
     <!-- TEAMS -->
