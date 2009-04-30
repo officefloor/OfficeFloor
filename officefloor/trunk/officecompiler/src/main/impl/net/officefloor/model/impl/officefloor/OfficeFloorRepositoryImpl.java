@@ -25,7 +25,9 @@ import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManage
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorRepository;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
@@ -66,22 +68,47 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 		OfficeFloorModel officeFloor = this.modelRepository.retrieve(
 				new OfficeFloorModel(), configuration);
 
+		// Create the set of office floor managed object sources
+		Map<String, OfficeFloorManagedObjectSourceModel> managedObjectSources = new HashMap<String, OfficeFloorManagedObjectSourceModel>();
+		for (OfficeFloorManagedObjectSourceModel managedObjectSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			managedObjectSources.put(managedObjectSource
+					.getOfficeFloorManagedObjectSourceName(),
+					managedObjectSource);
+		}
+
+		// Connect the managed objects to their managed object sources
+		for (OfficeFloorManagedObjectModel managedObject : officeFloor
+				.getOfficeFloorManagedObjects()) {
+			OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel conn = managedObject
+					.getOfficeFloorManagedObjectSource();
+			if (conn != null) {
+				OfficeFloorManagedObjectSourceModel moSource = managedObjectSources
+						.get(conn.getOfficeFloorManagedObjectSourceName());
+				if (moSource != null) {
+					conn.setOfficeFloorManagedObject(managedObject);
+					conn.setOfficeFloorManagedObjectSource(moSource);
+					conn.connect();
+				}
+			}
+		}
+
 		// Create the set of offices
 		Map<String, DeployedOfficeModel> offices = new HashMap<String, DeployedOfficeModel>();
 		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
 			offices.put(office.getDeployedOfficeName(), office);
 		}
 
-		// Connect the office floor managed object to its managing office
-		for (OfficeFloorManagedObjectModel mo : officeFloor
-				.getOfficeFloorManagedObjects()) {
-			OfficeFloorManagedObjectToDeployedOfficeModel conn = mo
+		// Connect the office floor managed object source to its managing office
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			OfficeFloorManagedObjectSourceToDeployedOfficeModel conn = moSource
 					.getManagingOffice();
 			if (conn != null) {
 				DeployedOfficeModel office = offices.get(conn
 						.getManagingOfficeName());
 				if (office != null) {
-					conn.setOfficeFloorManagedObject(mo);
+					conn.setOfficeFloorManagedObjectSource(moSource);
 					conn.setManagingOffice(office);
 					conn.connect();
 				}
@@ -146,10 +173,20 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 	public void storeOfficeFloor(OfficeFloorModel officeFloor,
 			ConfigurationItem configuration) throws Exception {
 
+		// Specify managed object sources for the managed objects
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel conn : moSource
+					.getOfficeFloorManagedObjects()) {
+				conn.setOfficeFloorManagedObjectSourceName(moSource
+						.getOfficeFloorManagedObjectSourceName());
+			}
+		}
+
 		// Specify managing offices for the office floor managed objects
 		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
-			for (OfficeFloorManagedObjectToDeployedOfficeModel conn : office
-					.getOfficeFloorManagedObjects()) {
+			for (OfficeFloorManagedObjectSourceToDeployedOfficeModel conn : office
+					.getOfficeFloorManagedObjectSources()) {
 				conn.setManagingOfficeName(office.getDeployedOfficeName());
 			}
 		}
