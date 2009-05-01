@@ -158,7 +158,7 @@ public class ManagedObjectLoaderUtil {
 		ManagedObjectTeamType[] aTeams = aType.getTeamTypes();
 		TestCase.assertEquals("Incorrect number of teams", eTeams.length,
 				aTeams.length);
-		for (int i = 0; i < eFlows.length; i++) {
+		for (int i = 0; i < eTeams.length; i++) {
 			ManagedObjectTeamType eTeam = eTeams[i];
 			ManagedObjectTeamType aTeam = aTeams[i];
 			TestCase.assertEquals("Incorrect name for team " + i, eTeam
