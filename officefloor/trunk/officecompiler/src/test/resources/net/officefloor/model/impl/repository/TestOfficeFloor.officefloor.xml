@@ -9,7 +9,9 @@
             </properties>
             <managing-office name="OFFICE"
                 process-bound-name="PROCESS_MO" />
-            <flow name="FLOW" argument-type="java.lang.Integer" />
+            <flow name="FLOW" argument-type="java.lang.Integer" >
+                <office-input office="OFFICE" input="INPUT" />
+            </flow>
             <team name="MO_TEAM" />
         </managed-object-source>
     </managed-object-sources>

@@ -19,14 +19,21 @@ package net.officefloor.compile.integrate.managedobject;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
+import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
+import net.officefloor.frame.api.build.TaskBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
+import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.managedobject.clazz.ProcessInterface;
+import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 /**
  * Tests compiling a {@link OfficeFloor} {@link ManagedObject}.
@@ -171,17 +178,69 @@ public class CompileOfficeFloorManagedObjectTest extends
 	}
 
 	/**
+	 * Tests linking the {@link ManagedObjectSource} invoked
+	 * {@link ProcessState} with a {@link Task}.
+	 */
+	public void testManagedObjectSourceWithFlow() {
+
+		// Record building the office floor
+
+		// Add the managed object source to office floor
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", ProcessManagedObject.class.getName());
+		ManagingOfficeBuilder<?> managingOffice = this
+				.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		managingOffice.linkProcess(0, "SECTION.WORK", "TASK");
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
+				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+				"OFFICE_TEAM");
+		task.linkParameter(0, Integer.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * Simple class for {@link ClassManagedObjectSource}.
 	 */
 	public static class SimpleManagedObject {
 	}
 
 	/**
-	 * Class for {@link ClassManagedObjectSource} containing a dependency.
+	 * Class for {@link ClassManagedObjectSource} containing a
+	 * {@link Dependency}.
 	 */
 	public static class DependencyManagedObject {
 
 		@Dependency
 		SimpleManagedObject dependency;
+	}
+
+	/**
+	 * Class for {@link ClassWorkSource}.
+	 */
+	public static class ProcessWork {
+
+		public void process(Integer parameter) {
+		}
+	}
+
+	/**
+	 * Class for {@link ClassManagedObjectSource} containing a
+	 * {@link ProcessInterface}.
+	 */
+	public static class ProcessManagedObject {
+
+		public static interface Processes {
+			void doProcess(Integer parameter);
+		}
+
+		@ProcessInterface
+		Processes processes;
 	}
 }
