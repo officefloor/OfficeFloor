@@ -28,6 +28,7 @@ import net.officefloor.compile.impl.util.StringExtractor;
 import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.SectionInputNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.SectionObjectNode;
@@ -96,6 +97,11 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 * Parent {@link OfficeSection} containing this {@link OfficeSection}.
 	 */
 	private final SectionNode parentSection;
+
+	/**
+	 * {@link OfficeNode} containing this {@link SectionNode}.
+	 */
+	private final OfficeNode office;
 
 	/**
 	 * {@link NodeContext}.
@@ -167,8 +173,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private SectionSource sectionSource;
 
 	/**
-	 * Allows for loading the {@link SectionType} and obtaining the
-	 * {@link DeployedOfficeInput}.
+	 * Allows for loading the {@link SectionType}.
 	 * 
 	 * @param sectionName
 	 *            Name of the {@link OfficeSection}.
@@ -182,6 +187,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			NodeContext context) {
 		this.sectionName = sectionName;
 		this.parentSection = null;
+		this.office = null;
 		this.context = context;
 		this.sectionLocation = sectionLocation;
 	}
@@ -192,12 +198,16 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 * 
 	 * @param sectionName
 	 *            Name of this {@link OfficeSection}.
+	 * @param office
+	 *            {@link OfficeNode} containing this {@link SectionNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
-	public SectionNodeImpl(String sectionName, NodeContext context) {
+	public SectionNodeImpl(String sectionName, OfficeNode office,
+			NodeContext context) {
 		this.sectionName = sectionName;
 		this.parentSection = null;
+		this.office = office;
 		this.context = context;
 	}
 
@@ -212,14 +222,17 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            Location of this {@link SectionNode}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
+	 * @param office
+	 *            {@link OfficeNode} containing this {@link SectionNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionNodeImpl(String sectionName, SectionSource sectionSource,
 			String sectionLocation, PropertyList propertyList,
-			NodeContext context) {
+			OfficeNode office, NodeContext context) {
 		this.sectionName = sectionName;
 		this.parentSection = null;
+		this.office = office;
 		this.context = context;
 
 		// Initialise this section
@@ -240,14 +253,17 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 *            Location of the {@link OfficeSection}.
 	 * @param propertyList
 	 *            {@link PropertyList}.
+	 * @param office
+	 *            {@link OfficeNode} containing this {@link SectionNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionNodeImpl(String sectionName, String sectionSourceClassName,
 			String sectionLocation, PropertyList propertyList,
-			NodeContext context) {
+			OfficeNode office, NodeContext context) {
 		this.sectionName = sectionName;
 		this.parentSection = null;
+		this.office = office;
 		this.context = context;
 
 		// Initialise the section
@@ -269,14 +285,17 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 * @param parentSection
 	 *            Parent {@link OfficeSection} containing this
 	 *            {@link SubSection}.
+	 * @param office
+	 *            {@link OfficeNode} containing this {@link SectionNode}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	private SectionNodeImpl(String sectionName, String sectionSourceClassName,
 			SectionSource sectionSource, String sectionLocation,
-			SectionNode parentSection, NodeContext context) {
+			SectionNode parentSection, OfficeNode office, NodeContext context) {
 		this.sectionName = sectionName;
 		this.parentSection = parentSection;
+		this.office = office;
 		this.context = context;
 
 		// Initialise the section
@@ -449,7 +468,12 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	}
 
 	@Override
-	public Object getParentSectionNode() {
+	public OfficeNode getOfficeNode() {
+		return this.office;
+	}
+
+	@Override
+	public SectionNode getParentSectionNode() {
 		return this.parentSection;
 	}
 
@@ -719,7 +743,7 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			// Add the sub section
 			subSection = new SectionNodeImpl(subSectionName,
 					sectionSourceClassName, sectionSource, location, this,
-					this.context);
+					this.office, this.context);
 			this.subSections.put(subSectionName, subSection);
 		} else {
 			// Sub section already added

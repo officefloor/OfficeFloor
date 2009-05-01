@@ -19,6 +19,7 @@ package net.officefloor.compile.integrate.managedobject;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
@@ -194,8 +195,6 @@ public class CompileOfficeFloorManagedObjectTest extends
 	public void testManagedObjectSourceFlowNotLinked() {
 
 		// Record building the office floor
-
-		// Add the managed object source to office floor
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				"class.name", ProcessManagedObject.class.getName());
@@ -213,11 +212,9 @@ public class CompileOfficeFloorManagedObjectTest extends
 	 * Tests linking the {@link ManagedObjectSource} invoked
 	 * {@link ProcessState} with a {@link Task}.
 	 */
-	public void testManagedObjectSourceWithFlow() {
+	public void testManagedObjectSourceFlowLinkedToTask() {
 
 		// Record building the office floor
-
-		// Add the managed object source to office floor
 		this.record_officeFloorBuilder_addManagedObject(
 				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
 				"class.name", ProcessManagedObject.class.getName());
@@ -228,6 +225,39 @@ public class CompileOfficeFloorManagedObjectTest extends
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
+		this.record_officeBuilder_addWork("SECTION.WORK");
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
+				"OFFICE_TEAM");
+		task.linkParameter(0, Integer.class);
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure issue if linking {@link ManagedObjectFlow} to {@link Task} that is
+	 * not in the {@link ManagingOffice} for the {@link ManagedObjectSource}.
+	 */
+	public void testManagedObjectSourceFlowLinkedToTaskNotInManagingOffice() {
+
+		// Record building the office floor
+
+		// Add the managed object source (flow linked to invalid office)
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", ProcessManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("MANAGING_OFFICE");
+		this.issues
+				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
+						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+						"Flow doProcess linked task must be within the managing office");
+
+		// Add the team and offices along with the task
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("MANAGING_OFFICE");
+		this.record_officeFloorBuilder_addOffice("OFFICE_WITH_TASK",
+				"OFFICE_TEAM", "TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");

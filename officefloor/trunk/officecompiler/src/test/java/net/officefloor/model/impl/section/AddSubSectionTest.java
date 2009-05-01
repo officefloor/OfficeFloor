@@ -40,7 +40,7 @@ public class AddSubSectionTest extends AbstractSectionOperationsTestCase {
 	public void testAddSubSectionWithPropertiesOnly() {
 
 		// Create the sub section
-		SectionType sectionType = new SectionNodeImpl(null, null, null);
+		SectionType sectionType = new SectionNodeImpl(null, (String) null, null);
 
 		// Ensure can add
 		Change<SubSectionModel> change = this.operations.addSubSection(
@@ -63,7 +63,8 @@ public class AddSubSectionTest extends AbstractSectionOperationsTestCase {
 	public void testAddSubSectionWithInputsOutputsObjects() {
 
 		// Create the sub section with inputs, outputs, objects
-		SectionNodeImpl sectionType = new SectionNodeImpl(null, null, null);
+		SectionNodeImpl sectionType = new SectionNodeImpl(null, (String) null,
+				null);
 		sectionType.addSectionInput("INPUT_B", Integer.class.getName());
 		sectionType.addSectionInput("INPUT_A", Double.class.getName());
 		sectionType.addSectionOutput("OUTPUT_B", String.class.getName(), false);
@@ -85,7 +86,7 @@ public class AddSubSectionTest extends AbstractSectionOperationsTestCase {
 	public void testAddMultipleSubSections() {
 
 		// Create the section type
-		SectionType sectionType = new SectionNodeImpl(null, null, null);
+		SectionType sectionType = new SectionNodeImpl(null, (String) null, null);
 
 		// Add multiple section types
 		Change<SubSectionModel> changeB = this.operations.addSubSection(

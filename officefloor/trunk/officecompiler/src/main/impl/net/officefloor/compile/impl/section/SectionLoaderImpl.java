@@ -261,7 +261,8 @@ public class SectionLoaderImpl implements SectionLoader {
 
 		// Create the section node (loading in its properties)
 		SectionNode sectionNode = new SectionNodeImpl(sectionName,
-				sectionSource, sectionLocation, propertyList, this.nodeContext);
+				sectionSource, sectionLocation, propertyList, null,
+				this.nodeContext);
 
 		// Recursive load all the section nodes
 		sectionNode.loadOfficeSection(sectionLocation);
