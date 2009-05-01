@@ -26,6 +26,12 @@
             <value method="setOfficeFloorManagedObjectSourceFlowName"
                 node="flow@name" />
             <value method="setArgumentType" node="flow@argument-type" />
+            <object method="setDeployedOfficeInput" node="office-input"
+                class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel">
+                <value method="setDeployedOfficeName" node="office-input@office" />
+                <value method="setSectionName" node="office-input@section" />
+                <value method="setSectionInputName" node="office-input@input" />
+            </object>
         </object>
         <object method="addOfficeFloorManagedObjectSourceTeam"
             node="team"
@@ -97,7 +103,8 @@
         </object>
         <object method="addDeployedOfficeInput" node="input"
             class="net.officefloor.model.officefloor.DeployedOfficeInputModel">
-            <value method="setDeployedOfficeInputName" node="input@name" />
+            <value method="setSectionName" node="input@section" />
+            <value method="setSectionInputName" node="input@input" />
             <value method="setParameterType" node="input@parameter-type" />
         </object>
         <object method="addDeployedOfficeTeam" node="team"

@@ -230,6 +230,18 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		OfficeFloorBuilder builder = officeFrame
 				.createOfficeFloorBuilder(this.officeFloorLocation);
 
+		// Load the offices (in deterministic order)
+		OfficeNode[] offices = CompileUtil.toSortedArray(this.offices.values(),
+				new OfficeNode[0], new StringExtractor<OfficeNode>() {
+					@Override
+					public String toString(OfficeNode object) {
+						return object.getDeployedOfficeName();
+					}
+				});
+		for (OfficeNode office : offices) {
+			office.loadOffice();
+		}
+
 		// Build the managed object sources (in deterministic order)
 		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
 				.toSortedArray(this.managedObjectSources.values(),
@@ -264,13 +276,6 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		}
 
 		// Build the offices (in deterministic order)
-		OfficeNode[] offices = CompileUtil.toSortedArray(this.offices.values(),
-				new OfficeNode[0], new StringExtractor<OfficeNode>() {
-					@Override
-					public String toString(OfficeNode object) {
-						return object.getDeployedOfficeName();
-					}
-				});
 		for (OfficeNode office : offices) {
 			office.buildOffice(builder);
 		}

@@ -20,9 +20,11 @@ import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.TripleKeyMap;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
@@ -32,9 +34,11 @@ import net.officefloor.compile.spi.officefloor.source.OfficeFloorSourceContext;
 import net.officefloor.compile.spi.officefloor.source.RequiredProperties;
 import net.officefloor.compile.spi.officefloor.source.impl.AbstractOfficeFloorSource;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
@@ -43,6 +47,8 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamMode
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
@@ -210,11 +216,12 @@ public class OfficeFloorModelOfficeFloorSource extends
 			officeFloorTeams.put(teamName, team);
 		}
 
-		// Add the offices, keeping registry of them
+		// Add the offices, keeping registry of the offices and their inputs
 		Map<String, DeployedOffice> offices = new HashMap<String, DeployedOffice>();
+		TripleKeyMap<String, String, String, DeployedOfficeInput> officeInputs = new TripleKeyMap<String, String, String, DeployedOfficeInput>();
 		for (DeployedOfficeModel officeModel : officeFloor.getDeployedOffices()) {
 
-			// Add the office
+			// Add the office, registering them
 			String officeName = officeModel.getDeployedOfficeName();
 			DeployedOffice office = deployer.addDeployedOffice(officeName,
 					officeModel.getOfficeSourceClassName(), officeModel
@@ -222,6 +229,17 @@ public class OfficeFloorModelOfficeFloorSource extends
 			offices.put(officeName, office);
 			for (PropertyModel property : officeModel.getProperties()) {
 				office.addProperty(property.getName(), property.getValue());
+			}
+
+			// Add the office inputs, registering them
+			for (DeployedOfficeInputModel inputModel : officeModel
+					.getDeployedOfficeInputs()) {
+				String sectionName = inputModel.getSectionName();
+				String sectionInputName = inputModel.getSectionInputName();
+				DeployedOfficeInput officeInput = office
+						.getDeployedOfficeInput(sectionName, sectionInputName);
+				officeInputs.put(officeName, sectionName, sectionInputName,
+						officeInput);
 			}
 
 			// Add the office objects
@@ -284,11 +302,11 @@ public class OfficeFloorModelOfficeFloorSource extends
 			}
 		}
 
-		// Manage the office floor managed object sources
+		// Link details for the managed object sources
 		for (OfficeFloorManagedObjectSourceModel managedObjectSourceModel : officeFloor
 				.getOfficeFloorManagedObjectSources()) {
 
-			// Obtain the managed object
+			// Obtain the managed object source
 			OfficeFloorManagedObjectSource managedObjectSource = officeFloorManagedObjectSources
 					.get(managedObjectSourceModel
 							.getOfficeFloorManagedObjectSourceName());
@@ -314,7 +332,68 @@ public class OfficeFloorModelOfficeFloorSource extends
 						managingOffice);
 			}
 
+			// Add the office managed object source flows
+			for (OfficeFloorManagedObjectSourceFlowModel flowModel : managedObjectSourceModel
+					.getOfficeFloorManagedObjectSourceFlows()) {
+
+				// Add the office floor managed object source flow
+				String flowName = flowModel
+						.getOfficeFloorManagedObjectSourceFlowName();
+				ManagedObjectFlow flow = managedObjectSource
+						.getManagedObjectFlow(flowName);
+
+				// Obtain the office input
+				DeployedOfficeInput officeInput = null;
+				OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel flowToInput = flowModel
+						.getDeployedOfficeInput();
+				if (flowToInput != null) {
+					DeployedOfficeInputModel officeInputModel = flowToInput
+							.getDeployedOfficeInput();
+					if (officeInputModel != null) {
+						DeployedOfficeModel officeModel = this
+								.getOfficeForInput(officeInputModel,
+										officeFloor);
+						officeInput = officeInputs.get(officeModel
+								.getDeployedOfficeName(), officeInputModel
+								.getSectionName(), officeInputModel
+								.getSectionInputName());
+					}
+				}
+				if (officeInput != null) {
+					// Have the office input for the flow
+					deployer.link(flow, officeInput);
+				}
+			}
 		}
+	}
+
+	/**
+	 * Obtains {@link DeployedOfficeModel} for the
+	 * {@link DeployedOfficeInputModel}.
+	 * 
+	 * @param officeInputModel
+	 *            {@link DeployedOfficeInputModel}.
+	 * @param officeFloor
+	 *            {@link OfficeFloorModel}.
+	 * @return {@link DeployedOfficeModel}.
+	 */
+	private DeployedOfficeModel getOfficeForInput(
+			DeployedOfficeInputModel officeInputModel,
+			OfficeFloorModel officeFloor) {
+
+		// Find the office for the input
+		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
+			for (DeployedOfficeInputModel input : office
+					.getDeployedOfficeInputs()) {
+				if (input == officeInputModel) {
+					// Found input, return containing office
+					return office;
+				}
+			}
+		}
+
+		// No office if at this point
+		return null;
 	}
 
 	/**

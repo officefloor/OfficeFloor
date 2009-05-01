@@ -340,7 +340,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public void buildOffice(OfficeFloorBuilder builder) {
+	public void loadOffice() {
 
 		// Obtain the office source class
 		Class<? extends OfficeSource> officeSourceClass = this.context
@@ -360,10 +360,11 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		}
 
 		// Load this office (will also recursively load the office sections)
-		boolean isLoaded = this.loadOffice(officeSource, this.properties);
-		if (!isLoaded) {
-			return; // must load the office
-		}
+		this.loadOffice(officeSource, this.properties);
+	}
+
+	@Override
+	public void buildOffice(OfficeFloorBuilder builder) {
 
 		// Build this office
 		OfficeBuilder officeBuilder = builder.addOffice(this.officeName);
@@ -512,14 +513,22 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		if (section == null) {
 			// Create the section and have it loaded
 			section = new SectionNodeImpl(sectionName, sectionSourceClassName,
-					properties, sectionLocation, this.context);
+					sectionLocation, properties, this.context);
 			section.loadOfficeSection(this.officeLocation);
 
 			// Add the section
 			this.sections.put(sectionName, section);
 		} else {
-			// Section already added
-			this.addIssue("Section " + sectionName + " already added");
+			// Added but determine if initialised
+			if (!section.isInitialised()) {
+				// Initialise as not yet initialised
+				section.initialise(sectionSourceClassName, sectionLocation,
+						properties);
+				section.loadOfficeSection(this.officeLocation);
+			} else {
+				// Section already added and initialised
+				this.addIssue("Section " + sectionName + " already added");
+			}
 		}
 		return section;
 	}
@@ -658,7 +667,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		SectionNode section = this.sections.get(sectionName);
 		if (section == null) {
 			// Add the section
-			section = new SectionNodeImpl(sectionName, null, this.context);
+			section = new SectionNodeImpl(sectionName, this.context);
 			this.sections.put(sectionName, section);
 		}
 

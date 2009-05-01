@@ -59,7 +59,7 @@ import net.officefloor.model.repository.ConfigurationItem;
  * @author Daniel
  */
 public class OfficeModelOfficeSource extends AbstractOfficeSource implements
-		OfficeSourceService {
+		OfficeSourceService<OfficeModelOfficeSource> {
 
 	/*
 	 * ====================== OfficeSourceService ==============================
@@ -71,8 +71,8 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 	}
 
 	@Override
-	public Class<? extends OfficeSource> getOfficeSourceClass() {
-		return this.getClass();
+	public Class<OfficeModelOfficeSource> getOfficeSourceClass() {
+		return OfficeModelOfficeSource.class;
 	}
 
 	/*
@@ -118,7 +118,7 @@ public class OfficeModelOfficeSource extends AbstractOfficeSource implements
 			OfficeTeam team = architect.addOfficeTeam(teamName);
 			teams.put(teamName, team);
 		}
-
+		
 		// Add the sections, keeping registry of inputs/outputs/objects
 		DoubleKeyMap<String, String, OfficeSectionInput> inputs = new DoubleKeyMap<String, String, OfficeSectionInput>();
 		DoubleKeyMap<String, String, OfficeSectionOutput> outputs = new DoubleKeyMap<String, String, OfficeSectionOutput>();

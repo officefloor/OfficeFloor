@@ -37,6 +37,7 @@ import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionInputType;
 import net.officefloor.compile.section.SectionObjectType;
@@ -50,6 +51,7 @@ import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.compile.spi.office.OfficeSubSection;
 import net.officefloor.compile.spi.office.OfficeTask;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
+import net.officefloor.compile.spi.officefloor.OfficeFloorDeployer;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionDesigner;
@@ -86,20 +88,9 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final String sectionName;
 
 	/**
-	 * Class name of the {@link SectionSource}.
-	 */
-	private final String sectionSourceClassName;
-
-	/**
 	 * {@link PropertyList} to source this {@link OfficeSection}.
 	 */
-	private final PropertyList propertyList;
-
-	/**
-	 * Location of the {@link OfficeSection} being built by this
-	 * {@link SectionDesigner}.
-	 */
-	private final String sectionLocation;
+	private final PropertyList propertyList = new PropertyListImpl();
 
 	/**
 	 * Parent {@link OfficeSection} containing this {@link OfficeSection}.
@@ -155,6 +146,22 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	private final Map<String, SectionNode> subSections = new HashMap<String, SectionNode>();
 
 	/**
+	 * Indicates if this {@link SectionNode} is initialised.
+	 */
+	private boolean isInitialised = false;
+
+	/**
+	 * Class name of the {@link SectionSource}.
+	 */
+	private String sectionSourceClassName;
+
+	/**
+	 * Location of the {@link OfficeSection} being built by this
+	 * {@link SectionDesigner}.
+	 */
+	private String sectionLocation;
+
+	/**
 	 * {@link SectionSource} for this {@link SectionNode}.
 	 */
 	private SectionSource sectionSource;
@@ -174,38 +181,51 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	public SectionNodeImpl(String sectionName, String sectionLocation,
 			NodeContext context) {
 		this.sectionName = sectionName;
-		this.sectionSourceClassName = null;
-		this.propertyList = new PropertyListImpl();
+		this.parentSection = null;
+		this.context = context;
 		this.sectionLocation = sectionLocation;
+	}
+
+	/**
+	 * Allows for obtaining {@link DeployedOfficeInput} from the
+	 * {@link OfficeFloorDeployer}.
+	 * 
+	 * @param sectionName
+	 *            Name of this {@link OfficeSection}.
+	 * @param context
+	 *            {@link NodeContext}.
+	 */
+	public SectionNodeImpl(String sectionName, NodeContext context) {
+		this.sectionName = sectionName;
 		this.parentSection = null;
 		this.context = context;
 	}
 
 	/**
-	 * Allows for loading a top level {@link OfficeSection} to an {@link Office}
-	 * .
+	 * Allows for loading top level {@link OfficeSection} to an {@link Office}.
 	 * 
 	 * @param sectionName
 	 *            Name of this {@link OfficeSection}.
 	 * @param sectionSource
 	 *            {@link SectionSource}.
-	 * @param propertyList
-	 *            {@link PropertyList}.
 	 * @param sectionLocation
 	 *            Location of this {@link SectionNode}.
+	 * @param propertyList
+	 *            {@link PropertyList}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionNodeImpl(String sectionName, SectionSource sectionSource,
-			PropertyList propertyList, String sectionLocation,
+			String sectionLocation, PropertyList propertyList,
 			NodeContext context) {
 		this.sectionName = sectionName;
-		this.sectionSourceClassName = sectionSource.getClass().getName();
-		this.sectionSource = sectionSource;
-		this.propertyList = propertyList;
-		this.sectionLocation = sectionLocation;
 		this.parentSection = null;
 		this.context = context;
+
+		// Initialise this section
+		this.sectionSource = sectionSource;
+		this.initialise(sectionSource.getClass().getName(), sectionLocation,
+				propertyList);
 	}
 
 	/**
@@ -216,22 +236,22 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	 * @param sectionSourceClassName
 	 *            Class name of the {@link SectionSource} for this
 	 *            {@link OfficeSection}.
-	 * @param propertyList
-	 *            {@link PropertyList}.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
+	 * @param propertyList
+	 *            {@link PropertyList}.
 	 * @param context
 	 *            {@link NodeContext}.
 	 */
 	public SectionNodeImpl(String sectionName, String sectionSourceClassName,
-			PropertyList propertyList, String sectionLocation,
+			String sectionLocation, PropertyList propertyList,
 			NodeContext context) {
 		this.sectionName = sectionName;
-		this.sectionSourceClassName = sectionSourceClassName;
-		this.propertyList = propertyList;
-		this.sectionLocation = sectionLocation;
 		this.parentSection = null;
 		this.context = context;
+
+		// Initialise the section
+		this.initialise(sectionSourceClassName, sectionLocation, propertyList);
 	}
 
 	/**
@@ -256,12 +276,13 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 			SectionSource sectionSource, String sectionLocation,
 			SectionNode parentSection, NodeContext context) {
 		this.sectionName = sectionName;
-		this.sectionSourceClassName = sectionSourceClassName;
-		this.sectionSource = sectionSource;
-		this.propertyList = new PropertyListImpl();
-		this.sectionLocation = sectionLocation;
 		this.parentSection = parentSection;
 		this.context = context;
+
+		// Initialise the section
+		this.sectionSource = sectionSource;
+		this.initialise(sectionSourceClassName, sectionLocation,
+				new PropertyListImpl());
 	}
 
 	/**
@@ -290,6 +311,27 @@ public class SectionNodeImpl extends AbstractNode implements SectionNode {
 	/*
 	 * ======================= SectionNode =================================
 	 */
+
+	@Override
+	public boolean isInitialised() {
+		return this.isInitialised;
+	}
+
+	@Override
+	public void initialise(String sectionSourceClassName,
+			String sectionLocation, PropertyList properties) {
+
+		// Initialise this section node
+		this.sectionSourceClassName = sectionSourceClassName;
+		this.sectionLocation = sectionLocation;
+		for (Property property : properties) {
+			this.propertyList.addProperty(property.getName()).setValue(
+					property.getValue());
+		}
+
+		// Flag that initialised
+		this.isInitialised = true;
+	}
 
 	@Override
 	public void loadOfficeSection(String officeLocation) {

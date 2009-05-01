@@ -45,6 +45,17 @@
                         <attribute method="getArgumentType"
                             attribute="argument-type" />
                     </attributes>
+                    <object method="getDeployedOfficeInput"
+                        element="office-input">
+                        <attributes>
+                            <attribute method="getDeployedOfficeName"
+                                attribute="office" />
+                            <attribute method="getSectionName"
+                                attribute="section" />
+                            <attribute method="getSectionInputName"
+                                attribute="input" />
+                        </attributes>
+                    </object>
                 </item>
             </collection>
             <collection method="getOfficeFloorManagedObjectSourceTeams">
@@ -175,8 +186,10 @@
                     type="net.officefloor.model.officefloor.DeployedOfficeInputModel"
                     element="input">
                     <attributes>
-                        <attribute method="getDeployedOfficeInputName"
-                            attribute="name" />
+                        <attribute method="getSectionName"
+                            attribute="section" />
+                        <attribute method="getSectionInputName"
+                            attribute="input" />
                         <attribute method="getParameterType"
                             attribute="parameter-type" />
                     </attributes>

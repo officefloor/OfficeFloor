@@ -50,10 +50,16 @@ public interface OfficeNode extends OfficeType, OfficeArchitect,
 	boolean loadOffice(OfficeSource officeSource, PropertyList properties);
 
 	/**
+	 * Loads this {@link Office} ready for it to be built.
+	 */
+	void loadOffice();
+
+	/**
 	 * Builds the {@link Office} for this {@link OfficeNode}.
 	 * 
 	 * @param builder
 	 *            {@link OfficeFloorBuilder}.
 	 */
 	void buildOffice(OfficeFloorBuilder builder);
+
 }

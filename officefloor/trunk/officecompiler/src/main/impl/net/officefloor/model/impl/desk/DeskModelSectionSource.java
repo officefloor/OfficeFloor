@@ -63,7 +63,7 @@ import net.officefloor.model.repository.ConfigurationItem;
  * @author Daniel
  */
 public class DeskModelSectionSource extends AbstractSectionSource implements
-		SectionSourceService {
+		SectionSourceService<DeskModelSectionSource> {
 
 	/*
 	 * =================== SectionSourceService ===============================
@@ -75,8 +75,8 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 	}
 
 	@Override
-	public Class<? extends SectionSource> getSectionSourceClass() {
-		return this.getClass();
+	public Class<DeskModelSectionSource> getSectionSourceClass() {
+		return DeskModelSectionSource.class;
 	}
 
 	/*
@@ -182,7 +182,7 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 					// Obtain the task object
 					String objectName = taskObjectModel.getObjectName();
 					TaskObject taskObject = task.getTaskObject(objectName);
-					
+
 					// Determine if object is a parameter
 					if (taskObjectModel.getIsParameter()) {
 						taskObject.flagAsParameter();

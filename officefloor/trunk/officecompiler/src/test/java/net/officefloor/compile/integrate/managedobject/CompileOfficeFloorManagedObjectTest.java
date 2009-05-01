@@ -17,7 +17,11 @@
 package net.officefloor.compile.integrate.managedobject;
 
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
+import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
+import net.officefloor.compile.spi.section.ManagedObjectFlow;
+import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
 import net.officefloor.frame.api.build.OfficeBuilder;
@@ -42,6 +46,12 @@ import net.officefloor.plugin.work.clazz.ClassWorkSource;
  */
 public class CompileOfficeFloorManagedObjectTest extends
 		AbstractCompileTestCase {
+
+	// TODO remove once tests working
+	@Override
+	protected CompilerIssues enhanceIssues(CompilerIssues issues) {
+		return new StderrCompilerIssuesWrapper(issues);
+	}
 
 	/**
 	 * Tests compiling a simple {@link ManagedObject}.
@@ -178,6 +188,28 @@ public class CompileOfficeFloorManagedObjectTest extends
 	}
 
 	/**
+	 * Ensure issue if {@link ManagedObjectFlow} of
+	 * {@link OfficeFloorManagedObjectSource} is not linked.
+	 */
+	public void testManagedObjectSourceFlowNotLinked() {
+
+		// Record building the office floor
+
+		// Add the managed object source to office floor
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", ProcessManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.issues.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
+				AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+				"Managed object flow doProcess is not linked to a TaskNode");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * Tests linking the {@link ManagedObjectSource} invoked
 	 * {@link ProcessState} with a {@link Task}.
 	 */
@@ -191,13 +223,13 @@ public class CompileOfficeFloorManagedObjectTest extends
 				"class.name", ProcessManagedObject.class.getName());
 		ManagingOfficeBuilder<?> managingOffice = this
 				.record_managedObjectBuilder_setManagingOffice("OFFICE");
-		managingOffice.linkProcess(0, "SECTION.WORK", "TASK");
+		managingOffice.linkProcess(0, "SECTION.WORK", "INPUT");
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		this.record_officeFloorBuilder_addOffice("OFFICE", "OFFICE_TEAM",
 				"TEAM");
 		this.record_officeBuilder_addWork("SECTION.WORK");
-		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
+		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("INPUT",
 				"OFFICE_TEAM");
 		task.linkParameter(0, Integer.class);
 

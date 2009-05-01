@@ -28,7 +28,10 @@ import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
 import net.officefloor.compile.internal.structure.NodeContext;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.TaskNode;
+import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.managedobject.ManagedObjectFlowType;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectTeamType;
 import net.officefloor.compile.managedobject.ManagedObjectType;
@@ -326,6 +329,9 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 		// Obtain the name to add this managed object source
 		String managedObjectSourceName = this.getManagedObjectSourceName();
 
+		// Obtain the managed object type
+		ManagedObjectType<?> managedObjectType = this.getManagedObjectType();
+
 		// Obtain the managed object source class
 		Class<? extends ManagedObjectSource> managedObjectSourceClass = this.context
 				.getManagedObjectSourceClass(this.managedObjectSourceClassName,
@@ -351,9 +357,41 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				this.context.getCompilerIssues());
 		if (managingOffice != null) {
 			// Specify the managing office
-			ManagingOfficeBuilder<?> managingOfficeBuilder = moBuilder
+			ManagingOfficeBuilder managingOfficeBuilder = moBuilder
 					.setManagingOffice(managingOffice.getDeployedOfficeName());
-			// TODO configure in managing details of office
+
+			// Link in the flows for the managed object source
+			for (ManagedObjectFlowType<?> flowType : managedObjectType
+					.getFlowTypes()) {
+
+				// Obtain the flow type details
+				String flowName = flowType.getFlowName();
+				Enum<?> flowKey = flowType.getKey();
+				int flowIndex = flowType.getIndex();
+
+				// Obtain the task for the flow
+				ManagedObjectFlowNode flowNode = this.flows.get(flowName);
+				TaskNode taskNode = LinkUtil.retrieveTarget(flowNode,
+						TaskNode.class, "Managed object flow " + flowName,
+						this.locationType, this.location,
+						AssetType.MANAGED_OBJECT, this.managedObjectSourceName,
+						this.context.getCompilerIssues());
+				if (taskNode == null) {
+					continue; // must have task node
+				}
+
+				// Link the flow to the task
+				WorkNode workNode = taskNode.getWorkNode();
+				String workName = workNode.getQualifiedWorkName();
+				String taskName = taskNode.getOfficeTaskName();
+				if (flowKey != null) {
+					managingOfficeBuilder.linkProcess(flowKey, workName,
+							taskName);
+				} else {
+					managingOfficeBuilder.linkProcess(flowIndex, workName,
+							taskName);
+				}
+			}
 		}
 	}
 
