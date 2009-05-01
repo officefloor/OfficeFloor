@@ -33,6 +33,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
@@ -108,6 +109,12 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				.getOfficeFloorManagedObjectSourceFlows(),
 				new OfficeFloorManagedObjectSourceFlowModel("FLOW",
 						Integer.class.getName()));
+		OfficeFloorManagedObjectSourceFlowModel flow = moSource
+				.getOfficeFloorManagedObjectSourceFlows().get(0);
+		assertProperties(
+				new OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel(
+						"OFFICE", "INPUT"), flow.getDeployedOfficeInput(),
+				"getDeployedOfficeName", "getDeployedOfficeInputName");
 
 		// Teams
 		assertList(

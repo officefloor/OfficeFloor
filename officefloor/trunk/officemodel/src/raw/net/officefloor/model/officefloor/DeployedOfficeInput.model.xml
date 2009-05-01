@@ -2,4 +2,6 @@
 <model>
     <field type="String" name="deployed office input name" />
     <field type="String" name="parameter type" />
+    <list type="OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel"
+        name="office floor managed object source flow" />
 </model>
