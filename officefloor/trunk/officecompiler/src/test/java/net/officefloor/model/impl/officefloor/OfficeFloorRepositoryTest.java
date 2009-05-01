@@ -91,7 +91,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"net.example.ExampleOfficeSource", "OFFICE_LOCATION");
 		officeFloor.addDeployedOffice(office);
 		DeployedOfficeInputModel officeInput = new DeployedOfficeInputModel(
-				"INPUT", Integer.class.getName());
+				"SECTION", "INPUT", Integer.class.getName());
 		office.addDeployedOfficeInput(officeInput);
 		DeployedOfficeObjectModel officeObject = new DeployedOfficeObjectModel(
 				"OBJECT", Connection.class.getName());
@@ -128,7 +128,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		officeFloorManagedObjectSource
 				.addOfficeFloorManagedObjectSourceFlow(flow);
 		OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel flowToInput = new OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel(
-				"OFFICE", "INPUT");
+				"OFFICE", "SECTION", "INPUT");
 		flow.setDeployedOfficeInput(flowToInput);
 
 		// office object -> office floor managed object
@@ -232,7 +232,7 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"net.example.ExampleOfficeSource", "OFFICE_LOCATION");
 		officeFloor.addDeployedOffice(office);
 		DeployedOfficeInputModel officeInput = new DeployedOfficeInputModel(
-				"INPUT", Integer.class.getName());
+				"SECTION", "INPUT", Integer.class.getName());
 		office.addDeployedOfficeInput(officeInput);
 		DeployedOfficeObjectModel officeObject = new DeployedOfficeObjectModel(
 				"OBJECT", Connection.class.getName());
@@ -313,8 +313,11 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"office floor managed object source flow - office input (office)",
 				"OFFICE", flowToInput.getDeployedOfficeName());
 		assertEquals(
+				"office floor managed object source flow - office input (section)",
+				"SECTION", flowToInput.getSectionName());
+		assertEquals(
 				"office floor managed object source flow - office input (input)",
-				"INPUT", flowToInput.getDeployedOfficeInputName());
+				"INPUT", flowToInput.getSectionInputName());
 		assertEquals("office object - office floor managed object",
 				"MANAGED_OBJECT", officeObjectToManagedObject
 						.getOfficeFloorManagedObjectName());

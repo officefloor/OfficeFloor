@@ -48,7 +48,7 @@ import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
  * @author Daniel
  */
 public class SectionModelSectionSource extends AbstractSectionSource implements
-		SectionSourceService {
+		SectionSourceService<SectionModelSectionSource> {
 
 	/*
 	 * ==================== SectionSourceService ============================
@@ -60,8 +60,8 @@ public class SectionModelSectionSource extends AbstractSectionSource implements
 	}
 
 	@Override
-	public Class<? extends SectionSource> getSectionSourceClass() {
-		return this.getClass();
+	public Class<SectionModelSectionSource> getSectionSourceClass() {
+		return SectionModelSectionSource.class;
 	}
 
 	/*

@@ -113,8 +113,9 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				.getOfficeFloorManagedObjectSourceFlows().get(0);
 		assertProperties(
 				new OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel(
-						"OFFICE", "INPUT"), flow.getDeployedOfficeInput(),
-				"getDeployedOfficeName", "getDeployedOfficeInputName");
+						"OFFICE", "SECTION", "INPUT"), flow
+						.getDeployedOfficeInput(), "getDeployedOfficeName",
+				"getSectionName", "getSectionInputName");
 
 		// Teams
 		assertList(
@@ -197,9 +198,10 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				"getOfficeFloorManagedObjectName");
 
 		// Deployed office inputs
-		assertList(new String[] { "getDeployedOfficeInputName",
+		assertList(new String[] { "getSectionName", "getSectionInputName",
 				"getParameterType" }, office.getDeployedOfficeInputs(),
-				new DeployedOfficeInputModel("INPUT", Integer.class.getName()));
+				new DeployedOfficeInputModel("SECTION", "INPUT", Integer.class
+						.getName()));
 
 		// Deployed office team
 		assertList(new String[] { "getDeployedOfficeTeamName" }, office

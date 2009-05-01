@@ -9,7 +9,8 @@
                 </properties>
                 <managing-office name="OFFICE" />
                 <flow name="doProcess">
-                    <!-- TODO link to office input -->
+                    <office-input office="OFFICE" section="SECTION"
+                        input="INPUT" />
                 </flow>
             </managed-object-source>
         </managed-object-sources>
@@ -18,7 +19,7 @@
         </teams>
         <offices>
             <office name="OFFICE" source="OFFICE" location="office">
-                <input name="OFFICE_INPUT" />
+                <input section="SECTION" input="INPUT" />
                 <team name="OFFICE_TEAM">
                     <office-floor-team name="TEAM" />
                 </team>
@@ -31,7 +32,7 @@
         </teams>
         <sections>
             <section name="SECTION" source="DESK" location="desk">
-                <input name="OFFICE_INPUT" />
+                <input name="INPUT" />
                 <responsibility name="RESPONSIBILITY">
                     <team name="OFFICE_TEAM" />
                 </responsibility>
@@ -50,7 +51,7 @@
             </work>
         </works>
         <tasks>
-            <task name="TASK" work="WORK" task="process" public="true" />
+            <task name="INPUT" work="WORK" task="process" public="true" />
         </tasks>
     </desk>
 </context>

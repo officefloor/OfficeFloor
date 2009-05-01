@@ -19,6 +19,8 @@ package net.officefloor.model.impl.officefloor;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.officefloor.compile.impl.util.TripleKeyMap;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
@@ -27,6 +29,8 @@ import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamMode
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
@@ -113,6 +117,37 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 					conn.setOfficeFloorManagedObjectSource(moSource);
 					conn.setManagingOffice(office);
 					conn.connect();
+				}
+			}
+		}
+
+		// Create the set of office inputs
+		TripleKeyMap<String, String, String, DeployedOfficeInputModel> officeInputs = new TripleKeyMap<String, String, String, DeployedOfficeInputModel>();
+		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
+			for (DeployedOfficeInputModel officeInput : office
+					.getDeployedOfficeInputs()) {
+				officeInputs.put(office.getDeployedOfficeName(), officeInput
+						.getSectionName(), officeInput.getSectionInputName(),
+						officeInput);
+			}
+		}
+
+		// Connect the managed object source flows to their office inputs
+		for (OfficeFloorManagedObjectSourceModel moSource : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceFlowModel flow : moSource
+					.getOfficeFloorManagedObjectSourceFlows()) {
+				OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel conn = flow
+						.getDeployedOfficeInput();
+				if (conn != null) {
+					DeployedOfficeInputModel officeInput = officeInputs.get(
+							conn.getDeployedOfficeName(),
+							conn.getSectionName(), conn.getSectionInputName());
+					if (officeInput != null) {
+						conn.setOfficeFloorManagedObjectSoruceFlow(flow);
+						conn.setDeployedOfficeInput(officeInput);
+						conn.connect();
+					}
 				}
 			}
 		}
@@ -210,6 +245,19 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			for (OfficeFloorManagedObjectSourceToDeployedOfficeModel conn : office
 					.getOfficeFloorManagedObjectSources()) {
 				conn.setManagingOfficeName(office.getDeployedOfficeName());
+			}
+		}
+
+		// Specify office input for office floor managed object source flows
+		for (DeployedOfficeModel office : officeFloor.getDeployedOffices()) {
+			for (DeployedOfficeInputModel officeInput : office
+					.getDeployedOfficeInputs()) {
+				for (OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel conn : officeInput
+						.getOfficeFloorManagedObjectSourceFlows()) {
+					conn.setDeployedOfficeName(office.getDeployedOfficeName());
+					conn.setSectionName(officeInput.getSectionName());
+					conn.setSectionInputName(officeInput.getSectionInputName());
+				}
 			}
 		}
 

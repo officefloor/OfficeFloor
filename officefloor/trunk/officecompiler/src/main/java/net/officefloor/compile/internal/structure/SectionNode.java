@@ -17,11 +17,13 @@
 package net.officefloor.compile.internal.structure;
 
 import net.officefloor.compile.office.OfficeInputType;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.officefloor.DeployedOfficeInput;
 import net.officefloor.compile.spi.section.SectionDesigner;
 import net.officefloor.compile.spi.section.SubSection;
+import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.manage.Office;
 
@@ -33,7 +35,25 @@ import net.officefloor.frame.api.manage.Office;
 public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 		OfficeSection {
 
-	// TODO need to add initialise and isInitialised for getting input
+	/**
+	 * Indicates if this {@link OfficeSection} has been initialised.
+	 * 
+	 * @return <code>true</code> if initialised.
+	 */
+	boolean isInitialised();
+
+	/**
+	 * Initialises this {@link OfficeSection}.
+	 * 
+	 * @param sectionSourceClassName
+	 *            Class name of the {@link SectionSource}.
+	 * @param sectionLocation
+	 *            Location of the {@link OfficeSection}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 */
+	void initialise(String sectionSourceClassName, String sectionLocation,
+			PropertyList properties);
 
 	/**
 	 * Obtains the {@link OfficeInputType} instances for this
