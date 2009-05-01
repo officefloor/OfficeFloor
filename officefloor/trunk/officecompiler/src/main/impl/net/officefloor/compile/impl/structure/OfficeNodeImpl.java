@@ -513,7 +513,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		if (section == null) {
 			// Create the section and have it loaded
 			section = new SectionNodeImpl(sectionName, sectionSourceClassName,
-					sectionLocation, properties, this.context);
+					sectionLocation, properties, this, this.context);
 			section.loadOfficeSection(this.officeLocation);
 
 			// Add the section
@@ -667,7 +667,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		SectionNode section = this.sections.get(sectionName);
 		if (section == null) {
 			// Add the section
-			section = new SectionNodeImpl(sectionName, this.context);
+			section = new SectionNodeImpl(sectionName, this, this.context);
 			this.sections.put(sectionName, section);
 		}
 

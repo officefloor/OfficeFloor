@@ -27,7 +27,9 @@ import net.officefloor.compile.internal.structure.ManagedObjectNode;
 import net.officefloor.compile.internal.structure.ManagedObjectSourceNode;
 import net.officefloor.compile.internal.structure.ManagingOfficeNode;
 import net.officefloor.compile.internal.structure.NodeContext;
+import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
+import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
@@ -380,8 +382,25 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 					continue; // must have task node
 				}
 
-				// Link the flow to the task
+				// Ensure the task is contained in the managing office
 				WorkNode workNode = taskNode.getWorkNode();
+				SectionNode section = workNode.getSectionNode();
+				OfficeNode taskOffice = section.getOfficeNode();
+				if (taskOffice != managingOffice) {
+					this.context
+							.getCompilerIssues()
+							.addIssue(
+									this.locationType,
+									this.location,
+									AssetType.MANAGED_OBJECT,
+									this.managedObjectSourceName,
+									"Flow "
+											+ flowName
+											+ " linked task must be within the managing office");
+					continue; // task must be within managing office
+				}
+
+				// Link the flow to the task
 				String workName = workNode.getQualifiedWorkName();
 				String taskName = taskNode.getOfficeTaskName();
 				if (flowKey != null) {

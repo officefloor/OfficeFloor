@@ -83,6 +83,13 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	void loadOfficeSection(String officeLocation);
 
 	/**
+	 * Obtains the {@link OfficeNode} containing this {@link SectionNode}.
+	 * 
+	 * @return {@link OfficeNode} containing this {@link SectionNode}.
+	 */
+	OfficeNode getOfficeNode();
+
+	/**
 	 * Obtains the parent {@link SectionNode} containing this
 	 * {@link SectionNode}.
 	 * 
@@ -90,7 +97,7 @@ public interface SectionNode extends SectionDesigner, SectionType, SubSection,
 	 *         {@link SectionNode} is the top level {@link SectionNode} (in
 	 *         other words a {@link OfficeSection}).
 	 */
-	Object getParentSectionNode();
+	SectionNode getParentSectionNode();
 
 	/**
 	 * Obtain the {@link OfficeSection} qualified name.
