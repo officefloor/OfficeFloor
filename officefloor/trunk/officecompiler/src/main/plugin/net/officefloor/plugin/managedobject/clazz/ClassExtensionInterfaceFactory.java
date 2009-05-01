@@ -1,0 +1,66 @@
+/*
+ *  Office Floor, Application Server
+ *  Copyright (C) 2006 Daniel Sagenschneider
+ *
+ *  This program is free software; you can redistribute it and/or modify it under the terms 
+ *  of the GNU General Public License as published by the Free Software Foundation; either 
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ *  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+ *  See the GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License along with this program; 
+ *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
+ *  MA 02111-1307 USA
+ */
+package net.officefloor.plugin.managedobject.clazz;
+
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.frame.spi.managedobject.ManagedObject;
+import net.officefloor.frame.spi.managedobject.extension.ExtensionInterfaceFactory;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractAsyncManagedObjectSource.MetaDataContext;
+
+/**
+ * <p>
+ * {@link ExtensionInterfaceFactory} that return the object of the
+ * {@link ClassManagedObject}.
+ * <p>
+ * This allows any implemented interfaces of the class to be an extension
+ * interface for the {@link ManagedObject} with implementation delegated to the
+ * object instantiated from the class.
+ * 
+ * @author Daniel
+ */
+@SuppressWarnings("unchecked")
+public class ClassExtensionInterfaceFactory implements
+		ExtensionInterfaceFactory {
+
+	/**
+	 * Registers the extension interface.
+	 * 
+	 * @param context
+	 *            {@link MetaDataContext} to add the extension interface.
+	 * @param objectClass
+	 *            Object class which is the extension interface.
+	 */
+	public static void registerExtensionInterface(
+			MetaDataContext<Indexed, Indexed> context, Class<?> objectClass) {
+		context.addManagedObjectExtensionInterface(objectClass,
+				new ClassExtensionInterfaceFactory());
+	}
+
+	/*
+	 * ================ ExtensionInterfaceFactory =======================
+	 */
+
+	@Override
+	public Object createExtensionInterface(ManagedObject managedObject) {
+
+		// Downcast to the class managed object
+		ClassManagedObject classManagedObject = (ClassManagedObject) managedObject;
+
+		// Return the object as the extension interface
+		return classManagedObject.getObject();
+	}
+}

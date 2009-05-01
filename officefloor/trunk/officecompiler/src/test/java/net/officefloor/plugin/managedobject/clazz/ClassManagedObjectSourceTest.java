@@ -23,14 +23,16 @@ import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.test.managedobject.ManagedObjectLoaderUtil;
 import net.officefloor.compile.test.managedobject.ManagedObjectTypeBuilder;
 import net.officefloor.frame.api.build.Indexed;
-import net.officefloor.frame.api.build.None;
+import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.CoordinatingManagedObject;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.ObjectRegistry;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectExecuteContext;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.frame.util.ManagedObjectSourceStandAlone;
 import net.officefloor.frame.util.ManagedObjectUserStandAlone;
+
+import org.easymock.AbstractMatcher;
 
 /**
  * Tests the {@link ClassManagedObjectSource}.
@@ -65,6 +67,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		expected.addDependency("connection", Connection.class, 0, null);
 		expected.addDependency("sqlQuery", String.class, 1, null);
 
+		// Processes
+		expected.addFlow("doProcess", null, 0, null, null, null);
+		expected.addFlow("parameterisedProcess", Integer.class, 1, null, null,
+				null);
+
 		// Class should be the extension interface to allow administration
 		// (Allows implemented interfaces to also be extension interfaces)
 		expected.addExtensionInterface(MockClass.class);
@@ -95,6 +102,18 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		expected.addDependency("ParentMockClass.connection", Connection.class,
 				1, null);
 
+		// Processes
+		expected.addFlow(OverrideMockClass.class.getName()
+				+ ".processes.doProcess", null, 0, null, null, null);
+		expected.addFlow(OverrideMockClass.class.getName()
+				+ ".processes.parameterisedProcess", Integer.class, 1, null,
+				null, null);
+		expected.addFlow(ParentMockClass.class.getName()
+				+ ".processes.doProcess", null, 2, null, null, null);
+		expected.addFlow(ParentMockClass.class.getName()
+				+ ".processes.parameterisedProcess", Integer.class, 3, null,
+				null, null);
+
 		// Verify extension interface
 		expected.addExtensionInterface(OverrideMockClass.class);
 
@@ -106,7 +125,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	}
 
 	/**
-	 * Ensures can inject dependencies into the object.
+	 * Ensures can inject {@link Dependency} instances into the object.
 	 */
 	@SuppressWarnings("unchecked")
 	public void testInjectDependencies() throws Throwable {
@@ -130,7 +149,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		standAlone.addProperty(
 				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
 				MockClass.class.getName());
-		ManagedObjectSource<Indexed, None> source = standAlone
+		ClassManagedObjectSource source = standAlone
 				.loadManagedObjectSource(ClassManagedObjectSource.class);
 
 		// Source the managed object
@@ -149,7 +168,89 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		MockClass mockClass = (MockClass) object;
 
 		// Verify the dependencies injected
-		mockClass.verify(SQL_QUERY, connection);
+		mockClass.verifyDependencyInjection(SQL_QUERY, connection);
+
+		// Verify functionality
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Ensures can inject the {@link ProcessInterface} instances into the
+	 * object.
+	 */
+	@SuppressWarnings("unchecked")
+	public void testInjectProcessInterfaces() throws Throwable {
+
+		final String SQL_QUERY = "SELECT * FROM TABLE";
+		final Connection connection = this.createMock(Connection.class);
+		final ObjectRegistry<Indexed> objectRegistry = this
+				.createMock(ObjectRegistry.class);
+		final ManagedObjectExecuteContext<Indexed> executeContext = this
+				.createMock(ManagedObjectExecuteContext.class);
+		final Integer PROCESS_PARAMETER = new Integer(100);
+
+		// Record obtaining the dependencies
+		this.recordReturn(objectRegistry, objectRegistry.getObject(0),
+				connection);
+		this.recordReturn(objectRegistry, objectRegistry.getObject(1),
+				SQL_QUERY);
+
+		// Record invoking the processes
+		executeContext.invokeProcess(0, null, null);
+		this.control(executeContext).setMatcher(new AbstractMatcher() {
+			@Override
+			public boolean matches(Object[] expected, Object[] actual) {
+				boolean isMatch = true;
+				// Ensure process indexes match
+				isMatch &= (expected[0].equals(actual[0]));
+
+				// Ensure parameters match
+				isMatch &= ((expected[1] == null ? "null" : expected[1])
+						.equals((actual[1] == null ? "null" : actual[1])));
+
+				// Ensure have a managed object
+				assertNotNull("Must have managed object", actual[2]);
+				assertTrue("Incorrect managed object type",
+						actual[2] instanceof ClassManagedObject);
+
+				// Return whether matched
+				return isMatch;
+			}
+		});
+		executeContext.invokeProcess(1, PROCESS_PARAMETER, null);
+
+		// Replay mocks
+		this.replayMockObjects();
+
+		// Load the class managed object source
+		ManagedObjectSourceStandAlone standAlone = new ManagedObjectSourceStandAlone();
+		standAlone.addProperty(
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME,
+				MockClass.class.getName());
+		ClassManagedObjectSource source = standAlone
+				.initManagedObjectSource(ClassManagedObjectSource.class);
+		source.start(executeContext);
+
+		// Source the managed object
+		ManagedObject managedObject = ManagedObjectUserStandAlone
+				.sourceManagedObject(source);
+		assertTrue("Managed object must be coordinating",
+				managedObject instanceof CoordinatingManagedObject);
+		CoordinatingManagedObject<Indexed> coordinatingManagedObject = (CoordinatingManagedObject<Indexed>) managedObject;
+
+		// Coordinate the managed object
+		coordinatingManagedObject.loadObjects(objectRegistry);
+
+		// Obtain the object and validate correct type
+		Object object = managedObject.getObject();
+		assertTrue("Incorrect object type", object instanceof MockClass);
+		MockClass mockClass = (MockClass) object;
+
+		// Verify the dependencies injected
+		mockClass.verifyDependencyInjection(SQL_QUERY, connection);
+
+		// Verify the processes injected
+		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
 
 		// Verify functionality
 		this.verifyMockObjects();
@@ -162,14 +263,49 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 
 		final Connection connection = this.createMock(Connection.class);
 		final String SQL_QUERY = "SELECT * FROM TABLE";
+		final MockProcessInterface processInterface = this
+				.createMock(MockProcessInterface.class);
+		final Integer PROCESS_PARAMETER = new Integer(200);
+
+		// Record invoking processes
+		processInterface.doProcess();
+		processInterface.parameterisedProcess(PROCESS_PARAMETER);
+
+		// Replay mock objects
+		this.replayMockObjects();
 
 		// Create the instance
 		MockClass mockClass = ClassManagedObjectSource.newInstance(
 				MockClass.class, "sqlQuery", SQL_QUERY, "connection",
-				connection);
+				connection, "processes", processInterface);
 
 		// Verify the dependencies injected
-		mockClass.verify(SQL_QUERY, connection);
+		mockClass.verifyDependencyInjection(SQL_QUERY, connection);
+
+		// Verify the process interfaces injected
+		mockClass.verifyProcessInjection(PROCESS_PARAMETER);
+
+		// Verify mock objects
+		this.verifyMockObjects();
+	}
+
+	/**
+	 * Mock {@link ProcessInterface}.
+	 */
+	public static interface MockProcessInterface {
+
+		/**
+		 * Method to invoke a {@link ProcessState} without a parameter.
+		 */
+		void doProcess();
+
+		/**
+		 * Method to invoke a {@link ProcessState} with a parameter.
+		 * 
+		 * @param parameter
+		 *            Parameter to the {@link ProcessState}.
+		 */
+		void parameterisedProcess(Integer parameter);
 	}
 
 	/**
@@ -178,7 +314,7 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 	public static class MockClass extends ParentMockClass {
 
 		/**
-		 * Ensure can inject parent dependencies.
+		 * Ensure can inject dependencies.
 		 */
 		@Dependency
 		private String sqlQuery;
@@ -191,10 +327,15 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		 * @param connection
 		 *            Expected {@link Connection}.
 		 */
-		public void verify(String sqlQuery, Connection connection) {
+		public void verifyDependencyInjection(String sqlQuery,
+				Connection connection) {
+
+			// Verify dependency injection
 			TestCase.assertEquals("Incorrect sql query", sqlQuery,
 					this.sqlQuery);
-			this.verify(connection);
+
+			// Verify parent dependencies
+			super.verifyDependencyInjection(connection);
 		}
 	}
 
@@ -210,19 +351,38 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		private Connection connection;
 
 		/**
+		 * Ensure can invoke {@link ProcessState}.
+		 */
+		@ProcessInterface
+		private MockProcessInterface processes;
+
+		/**
 		 * Field not a dependency.
 		 */
 		protected String notDependency;
 
 		/**
-		 * Verifies the dependencies.
+		 * Verifies the dependencies injected.
 		 * 
 		 * @param connection
 		 *            Expected {@link Connection}.
 		 */
-		public void verify(Connection connection) {
+		public void verifyDependencyInjection(Connection connection) {
+			// Verify dependency injection
 			TestCase.assertEquals("Incorrect connection", connection,
 					this.connection);
+		}
+
+		/**
+		 * Verifies the processes injected.
+		 * 
+		 * @param processParameter
+		 *            Parameter for the invoked processes.
+		 */
+		public void verifyProcessInjection(Integer processParameter) {
+			// Verify can invoke processes
+			this.processes.doProcess();
+			this.processes.parameterisedProcess(processParameter);
 		}
 	}
 
@@ -236,5 +396,11 @@ public class ClassManagedObjectSourceTest extends OfficeFrameTestCase {
 		 */
 		@Dependency
 		protected Integer connection;
+
+		/**
+		 * Overriding process field.
+		 */
+		@ProcessInterface
+		protected MockProcessInterface processes;
 	}
 }

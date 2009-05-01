@@ -23,12 +23,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates a field to be an injected dependency.
+ * <p>
+ * Annotates a field to be process interface to invoke processes.
+ * <p>
+ * The type of the field must adhere to the rules of being a
+ * {@link ProcessInterface}:
+ * <ol>
+ * <li>TODO provide the rules of a ProcessInterface</li>
+ * </ol>
  * 
  * @author Daniel
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Dependency {
+public @interface ProcessInterface {
 }

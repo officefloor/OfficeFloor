@@ -16,19 +16,38 @@
  */
 package net.officefloor.plugin.managedobject.clazz;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+
+import net.officefloor.frame.spi.managedobject.ObjectRegistry;
 
 /**
- * Annotates a field to be an injected dependency.
+ * Meta-data for a {@link Dependency}.
  * 
  * @author Daniel
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface Dependency {
+public class DependencyMetaData {
+
+	/**
+	 * Index of the dependency within the {@link ObjectRegistry}.
+	 */
+	public final int index;
+
+	/**
+	 * {@link Field} to receive the injected dependency.
+	 */
+	public final Field field;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param index
+	 *            Index of the dependency within the {@link ObjectRegistry}.
+	 * @param field
+	 *            {@link Field} to receive the injected dependency.
+	 */
+	public DependencyMetaData(int index, Field field) {
+		this.index = index;
+		this.field = field;
+	}
+
 }
