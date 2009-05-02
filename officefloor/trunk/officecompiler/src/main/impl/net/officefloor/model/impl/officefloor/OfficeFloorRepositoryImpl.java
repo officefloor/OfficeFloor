@@ -32,6 +32,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -222,6 +224,25 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 			}
 		}
 
+		// Connect the office floor managed object teams to office floor teams
+		for (OfficeFloorManagedObjectSourceModel mos : officeFloor
+				.getOfficeFloorManagedObjectSources()) {
+			for (OfficeFloorManagedObjectSourceTeamModel mosTeam : mos
+					.getOfficeFloorManagedObjectSourceTeams()) {
+				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel conn = mosTeam
+						.getOfficeFloorTeam();
+				if (conn != null) {
+					OfficeFloorTeamModel team = teams.get(conn
+							.getOfficeFloorTeamName());
+					if (team != null) {
+						conn.setOfficeFloorManagedObjectSourceTeam(mosTeam);
+						conn.setOfficeFloorTeam(team);
+						conn.connect();
+					}
+				}
+			}
+		}
+
 		// Return the office floor
 		return officeFloor;
 	}
@@ -286,6 +307,16 @@ public class OfficeFloorRepositoryImpl implements OfficeFloorRepository {
 				.getOfficeFloorTeams()) {
 			for (DeployedOfficeTeamToOfficeFloorTeamModel conn : officeFloorTeam
 					.getDeployedOfficeTeams()) {
+				conn.setOfficeFloorTeamName(officeFloorTeam
+						.getOfficeFloorTeamName());
+			}
+		}
+
+		// Specify managed object source teams to office floor teams
+		for (OfficeFloorTeamModel officeFloorTeam : officeFloor
+				.getOfficeFloorTeams()) {
+			for (OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel conn : officeFloorTeam
+					.getOfficeFloorManagedObjectSourceTeams()) {
 				conn.setOfficeFloorTeamName(officeFloorTeam
 						.getOfficeFloorTeamName());
 			}

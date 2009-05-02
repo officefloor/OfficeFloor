@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.officefloor.compile.impl.util.TripleKeyMap;
+import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeObject;
 import net.officefloor.compile.spi.office.OfficeTeam;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
@@ -50,6 +51,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -332,7 +335,7 @@ public class OfficeFloorModelOfficeFloorSource extends
 						managingOffice);
 			}
 
-			// Add the office managed object source flows
+			// Add the office floor managed object source flows
 			for (OfficeFloorManagedObjectSourceFlowModel flowModel : managedObjectSourceModel
 					.getOfficeFloorManagedObjectSourceFlows()) {
 
@@ -362,6 +365,34 @@ public class OfficeFloorModelOfficeFloorSource extends
 				if (officeInput != null) {
 					// Have the office input for the flow
 					deployer.link(flow, officeInput);
+				}
+			}
+
+			// Add the office floor managed object source teams
+			for (OfficeFloorManagedObjectSourceTeamModel mosTeamModel : managedObjectSourceModel
+					.getOfficeFloorManagedObjectSourceTeams()) {
+
+				// Add the office floor managed object source team
+				String mosTeamName = mosTeamModel
+						.getOfficeFloorManagedObjectSourceTeamName();
+				ManagedObjectTeam mosTeam = managedObjectSource
+						.getManagedObjectTeam(mosTeamName);
+
+				// Obtain the office floor team
+				OfficeFloorTeam team = null;
+				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = mosTeamModel
+						.getOfficeFloorTeam();
+				if (mosTeamToTeam != null) {
+					OfficeFloorTeamModel teamModel = mosTeamToTeam
+							.getOfficeFloorTeam();
+					if (teamModel != null) {
+						team = officeFloorTeams.get(teamModel
+								.getOfficeFloorTeamName());
+					}
+				}
+				if (team != null) {
+					// Have the team for the managed object source team
+					deployer.link(mosTeam, team);
 				}
 			}
 		}

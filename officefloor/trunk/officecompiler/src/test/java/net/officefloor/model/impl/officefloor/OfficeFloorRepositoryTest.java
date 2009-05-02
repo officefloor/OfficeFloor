@@ -32,6 +32,8 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -131,6 +133,15 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				"OFFICE", "SECTION", "INPUT");
 		flow.setDeployedOfficeInput(flowToInput);
 
+		// office floor managed object source team -> office floor team
+		OfficeFloorManagedObjectSourceTeamModel mosTeam = new OfficeFloorManagedObjectSourceTeamModel(
+				"MO_TEAM");
+		officeFloorManagedObjectSource
+				.addOfficeFloorManagedObjectSourceTeam(mosTeam);
+		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel(
+				"OFFICE_FLOOR_TEAM");
+		mosTeam.setOfficeFloorTeam(mosTeamToTeam);
+
 		// office object -> office floor managed object
 		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel(
 				"MANAGED_OBJECT");
@@ -192,6 +203,14 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 				flow, flowToInput.getOfficeFloorManagedObjectSoruceFlow());
 		assertEquals("office floor managed object source flow -> office input",
 				officeInput, flowToInput.getDeployedOfficeInput());
+
+		// Ensure managed object source team connected to office floor team
+		assertEquals(
+				"office floor managed object source team <- office floor team",
+				mosTeam, mosTeamToTeam.getOfficeFloorManagedObjectSourceTeam());
+		assertEquals(
+				"office floor managed object source team -> office floor team",
+				officeFloorTeam, mosTeamToTeam.getOfficeFloorTeam());
 
 		// Ensure office object connected to office floor managed object
 		assertEquals("office object <- office floor managed object",
@@ -278,6 +297,16 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		flowToInput.setDeployedOfficeInput(officeInput);
 		flowToInput.connect();
 
+		// office floor managed object source team -> office floor team
+		OfficeFloorManagedObjectSourceTeamModel mosTeam = new OfficeFloorManagedObjectSourceTeamModel(
+				"MO_TEAM");
+		officeFloorManagedObjectSource
+				.addOfficeFloorManagedObjectSourceTeam(mosTeam);
+		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel mosTeamToTeam = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel();
+		mosTeamToTeam.setOfficeFloorManagedObjectSourceTeam(mosTeam);
+		mosTeamToTeam.setOfficeFloorTeam(officeFloorTeam);
+		mosTeamToTeam.connect();
+
 		// office object -> office floor managed object
 		DeployedOfficeObjectToOfficeFloorManagedObjectModel officeObjectToManagedObject = new DeployedOfficeObjectToOfficeFloorManagedObjectModel();
 		officeObjectToManagedObject.setDeployedOfficeObject(officeObject);
@@ -318,6 +347,8 @@ public class OfficeFloorRepositoryTest extends OfficeFrameTestCase {
 		assertEquals(
 				"office floor managed object source flow - office input (input)",
 				"INPUT", flowToInput.getSectionInputName());
+		assertEquals("office floor managed object team - office floor team",
+				"OFFICE_FLOOR_TEAM", mosTeamToTeam.getOfficeFloorTeamName());
 		assertEquals("office object - office floor managed object",
 				"MANAGED_OBJECT", officeObjectToManagedObject
 						.getOfficeFloorManagedObjectName());

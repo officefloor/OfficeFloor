@@ -19,22 +19,30 @@ package net.officefloor.compile.integrate.managedobject;
 import net.officefloor.compile.integrate.AbstractCompileTestCase;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
+import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.test.issues.StderrCompilerIssuesWrapper;
 import net.officefloor.frame.api.build.DependencyMappingBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.api.build.None;
 import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.TaskBuilder;
+import net.officefloor.frame.api.build.TaskFactory;
+import net.officefloor.frame.api.build.WorkFactory;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
 import net.officefloor.frame.impl.spi.team.OnePersonTeamSource;
 import net.officefloor.frame.internal.structure.ProcessState;
 import net.officefloor.frame.spi.managedobject.ManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceContext;
+import net.officefloor.frame.spi.managedobject.source.impl.AbstractManagedObjectSource;
+import net.officefloor.frame.spi.team.Team;
 import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
 import net.officefloor.plugin.managedobject.clazz.ProcessInterface;
@@ -268,6 +276,46 @@ public class CompileOfficeFloorManagedObjectTest extends
 	}
 
 	/**
+	 * Ensure issue if {@link ManagedObjectTeam} of {@link ManagedObjectSource}
+	 * is not linked.
+	 */
+	public void testManagedObjectSourceTeamNotLinked() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.issues
+				.addIssue(LocationType.OFFICE_FLOOR, "office-floor",
+						AssetType.MANAGED_OBJECT, "MANAGED_OBJECT_SOURCE",
+						"Managed object team MANAGED_OBJECT_SOURCE_TEAM is not linked to a TeamNode");
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
+	 * Ensure able to link in {@link Team} required by a
+	 * {@link ManagedObjectSource}.
+	 */
+	public void testManagedObjectSourceTeamLinked() {
+
+		// Record building the office floor
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", TeamManagedObject.class);
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
+		this.record_officeFloorBuilder_addTeam("TEAM",
+				OnePersonTeamSource.class);
+		this.record_officeFloorBuilder_addOffice("OFFICE");
+		this.record_officeBuilder_registerTeam(
+				"MANAGED_OBJECT_SOURCE.MANAGED_OBJECT_SOURCE_TEAM", "TEAM");
+
+		// Compile the office floor
+		this.compile(true);
+	}
+
+	/**
 	 * Simple class for {@link ClassManagedObjectSource}.
 	 */
 	public static class SimpleManagedObject {
@@ -305,4 +353,60 @@ public class CompileOfficeFloorManagedObjectTest extends
 		@ProcessInterface
 		Processes processes;
 	}
+
+	/**
+	 * {@link ManagedObjectSource} requiring a {@link Team}.
+	 */
+	public static class TeamManagedObject extends
+			AbstractManagedObjectSource<None, None> implements
+			WorkFactory<Work>, TaskFactory<Work, None, None> {
+
+		/*
+		 * ================= AbstractManagedObjectSource =====================
+		 */
+
+		@Override
+		protected void loadSpecification(SpecificationContext context) {
+			// No specification
+		}
+
+		@Override
+		protected void loadMetaData(MetaDataContext<None, None> context)
+				throws Exception {
+			context.setObjectClass(Object.class);
+
+			// Require a team
+			ManagedObjectSourceContext<?> mosContext = context
+					.getManagedObjectSourceContext();
+			mosContext.addWork("WORK", this).addTask("TASK", this).setTeam(
+					"MANAGED_OBJECT_SOURCE_TEAM");
+		}
+
+		@Override
+		protected ManagedObject getManagedObject() throws Throwable {
+			fail("Should not require obtaining managed object in compiling");
+			return null;
+		}
+
+		/*
+		 * =================== WorkFactory =================================
+		 */
+
+		@Override
+		public Work createWork() {
+			fail("Should not require work in compiling");
+			return null;
+		}
+
+		/*
+		 * ==================== TaskFactory ================================
+		 */
+
+		@Override
+		public Task<Work, None, None> createTask(Work work) {
+			fail("Should not require task in compiling");
+			return null;
+		}
+	}
+
 }

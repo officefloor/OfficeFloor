@@ -36,6 +36,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -122,6 +123,12 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 				new String[] { "getOfficeFloorManagedObjectSourceTeamName" },
 				moSource.getOfficeFloorManagedObjectSourceTeams(),
 				new OfficeFloorManagedObjectSourceTeamModel("MO_TEAM"));
+		OfficeFloorManagedObjectSourceTeamModel mosTeam = moSource
+				.getOfficeFloorManagedObjectSourceTeams().get(0);
+		assertProperties(
+				new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel(
+						"TEAM"), mosTeam.getOfficeFloorTeam(),
+				"getOfficeFloorTeamName");
 
 		// ----------------------------------------
 		// Validate the office floor managed objects
@@ -163,7 +170,7 @@ public class OfficeFloorModelRepositoryTest extends OfficeFrameTestCase {
 		assertList(new String[] { "getOfficeFloorTeamName",
 				"getTeamSourceClassName", "getX", "getY" }, officeFloor
 				.getOfficeFloorTeams(), new OfficeFloorTeamModel("TEAM",
-				"net.example.ExampleTeamSource", null, null, 300, 301));
+				"net.example.ExampleTeamSource", null, null, null, 300, 301));
 		OfficeFloorTeamModel team = officeFloor.getOfficeFloorTeams().get(0);
 		assertList(new String[] { "getName", "getValue" },
 				team.getProperties(),
