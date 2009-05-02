@@ -31,6 +31,7 @@ import net.officefloor.compile.internal.structure.OfficeNode;
 import net.officefloor.compile.internal.structure.OfficeTeamNode;
 import net.officefloor.compile.internal.structure.SectionNode;
 import net.officefloor.compile.internal.structure.TaskNode;
+import net.officefloor.compile.internal.structure.TeamNode;
 import net.officefloor.compile.internal.structure.WorkNode;
 import net.officefloor.compile.issues.CompilerIssues.LocationType;
 import net.officefloor.compile.managedobject.ManagedObjectFlowType;
@@ -411,6 +412,26 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 							taskName);
 				}
 			}
+		}
+
+		// Link in the teams for the managed object source
+		for (ManagedObjectTeamType teamType : managedObjectType.getTeamTypes()) {
+
+			// Obtain the team type details
+			String teamName = teamType.getTeamName();
+
+			// Obtain the team
+			OfficeTeamNode managedObjectTeam = this.teams.get(teamName);
+			TeamNode team = LinkUtil.retrieveTarget(managedObjectTeam,
+					TeamNode.class, "Managed object team " + teamName,
+					this.locationType, this.location, AssetType.MANAGED_OBJECT,
+					this.managedObjectSourceName, this.context
+							.getCompilerIssues());
+			if (team == null) {
+				continue; // must have the team
+			}
+
+			// TODO register the team to the office
 		}
 	}
 

@@ -4,4 +4,6 @@
     <field type="String" name="team source class name" />
     <list type="PropertyModel" name="property" plural="properties" />
     <list type="DeployedOfficeTeamToOfficeFloorTeamModel" name="deployed office team" />
+    <list type="OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel"
+        name="office floor managed object source team" />
 </model>

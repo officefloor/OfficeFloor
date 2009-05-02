@@ -67,6 +67,12 @@
                             method="getOfficeFloorManagedObjectSourceTeamName"
                             attribute="name" />
                     </attributes>
+                    <object method="getOfficeFloorTeam" element="office-floor-team">
+                        <attributes>
+                            <attribute method="getOfficeFloorTeamName"
+                                attribute="name" />
+                        </attributes>
+                    </object>
                 </item>
             </collection>
         </item>

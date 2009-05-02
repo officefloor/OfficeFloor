@@ -38,6 +38,10 @@
             class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel">
             <value method="setOfficeFloorManagedObjectSourceTeamName"
                 node="team@name" />
+            <object method="setOfficeFloorTeam" node="office-floor-team"
+                class="net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel">
+                <value method="setOfficeFloorTeamName" node="office-floor-team@name" />
+            </object>
         </object>
     </object>
     <!-- MANAGED OBJECTS -->
