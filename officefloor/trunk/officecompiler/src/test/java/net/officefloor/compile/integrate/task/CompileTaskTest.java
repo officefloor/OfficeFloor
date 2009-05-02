@@ -285,10 +285,6 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 	public void testLinkTaskObjectToOfficeFloorManagedObject() {
 
 		// Record building the office floor
-		this.record_officeFloorBuilder_addManagedObject(
-				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
-				"class.name", CompileManagedObject.class.getName());
-		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 		this.record_officeFloorBuilder_addTeam("TEAM",
 				OnePersonTeamSource.class);
 		OfficeBuilder office = this.record_officeFloorBuilder_addOffice(
@@ -301,6 +297,10 @@ public class CompileTaskTest extends AbstractCompileTestCase {
 		TaskBuilder<?, ?, ?> task = this.record_workBuilder_addTask("TASK",
 				"OFFICE_TEAM");
 		task.linkManagedObject(0, "MANAGED_OBJECT", CompileManagedObject.class);
+		this.record_officeFloorBuilder_addManagedObject(
+				"MANAGED_OBJECT_SOURCE", ClassManagedObjectSource.class,
+				"class.name", CompileManagedObject.class.getName());
+		this.record_managedObjectBuilder_setManagingOffice("OFFICE");
 
 		// Compile the office floor
 		this.compile(true);

@@ -21,6 +21,7 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeArchitect;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.DeployedOffice;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -59,7 +60,8 @@ public interface OfficeNode extends OfficeType, OfficeArchitect,
 	 * 
 	 * @param builder
 	 *            {@link OfficeFloorBuilder}.
+	 * @return {@link OfficeBuilder} for the built {@link Office}.
 	 */
-	void buildOffice(OfficeFloorBuilder builder);
+	OfficeBuilder buildOffice(OfficeFloorBuilder builder);
 
 }

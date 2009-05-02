@@ -43,13 +43,13 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.ManagedObjectTeam;
 import net.officefloor.compile.spi.office.OfficeManagedObject;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObject;
-import net.officefloor.compile.spi.officefloor.DeployedOffice;
 import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.frame.api.build.ManagedObjectBuilder;
 import net.officefloor.frame.api.build.ManagingOfficeBuilder;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.manage.Office;
@@ -326,8 +326,23 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 	}
 
 	@Override
+	public OfficeNode getManagingOfficeNode() {
+
+		// Obtain the managing office
+		OfficeNode managingOffice = LinkUtil.retrieveTarget(
+				this.managingOffice, OfficeNode.class, "Managed Object Source "
+						+ managedObjectSourceName, LocationType.OFFICE_FLOOR,
+				this.officeFloorLocation, AssetType.MANAGED_OBJECT,
+				this.managedObjectSourceName, this.context.getCompilerIssues());
+
+		// Return the managing office
+		return managingOffice;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
-	public void buildManagedObject(OfficeFloorBuilder builder) {
+	public void buildManagedObject(OfficeFloorBuilder builder,
+			OfficeNode managingOffice, OfficeBuilder officeBuilder) {
 
 		// Obtain the name to add this managed object source
 		String managedObjectSourceName = this.getManagedObjectSourceName();
@@ -351,66 +366,56 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 			moBuilder.addProperty(property.getName(), property.getValue());
 		}
 
-		// Obtain the managing office
-		DeployedOffice managingOffice = LinkUtil.retrieveTarget(
-				this.managingOffice, DeployedOffice.class,
-				"Managed Object Source " + managedObjectSourceName,
-				LocationType.OFFICE_FLOOR, this.officeFloorLocation,
-				AssetType.MANAGED_OBJECT, this.managedObjectSourceName,
-				this.context.getCompilerIssues());
-		if (managingOffice != null) {
-			// Specify the managing office
-			ManagingOfficeBuilder managingOfficeBuilder = moBuilder
-					.setManagingOffice(managingOffice.getDeployedOfficeName());
+		// Specify the managing office
+		ManagingOfficeBuilder managingOfficeBuilder = moBuilder
+				.setManagingOffice(managingOffice.getDeployedOfficeName());
 
-			// Link in the flows for the managed object source
-			for (ManagedObjectFlowType<?> flowType : managedObjectType
-					.getFlowTypes()) {
+		// Link in the flows for the managed object source
+		for (ManagedObjectFlowType<?> flowType : managedObjectType
+				.getFlowTypes()) {
 
-				// Obtain the flow type details
-				String flowName = flowType.getFlowName();
-				Enum<?> flowKey = flowType.getKey();
-				int flowIndex = flowType.getIndex();
+			// Obtain the flow type details
+			String flowName = flowType.getFlowName();
+			Enum<?> flowKey = flowType.getKey();
+			int flowIndex = flowType.getIndex();
 
-				// Obtain the task for the flow
-				ManagedObjectFlowNode flowNode = this.flows.get(flowName);
-				TaskNode taskNode = LinkUtil.retrieveTarget(flowNode,
-						TaskNode.class, "Managed object flow " + flowName,
-						this.locationType, this.location,
-						AssetType.MANAGED_OBJECT, this.managedObjectSourceName,
-						this.context.getCompilerIssues());
-				if (taskNode == null) {
-					continue; // must have task node
-				}
+			// Obtain the task for the flow
+			ManagedObjectFlowNode flowNode = this.flows.get(flowName);
+			TaskNode taskNode = LinkUtil.retrieveTarget(flowNode,
+					TaskNode.class, "Managed object flow " + flowName,
+					this.locationType, this.location, AssetType.MANAGED_OBJECT,
+					this.managedObjectSourceName, this.context
+							.getCompilerIssues());
+			if (taskNode == null) {
+				continue; // must have task node
+			}
 
-				// Ensure the task is contained in the managing office
-				WorkNode workNode = taskNode.getWorkNode();
-				SectionNode section = workNode.getSectionNode();
-				OfficeNode taskOffice = section.getOfficeNode();
-				if (taskOffice != managingOffice) {
-					this.context
-							.getCompilerIssues()
-							.addIssue(
-									this.locationType,
-									this.location,
-									AssetType.MANAGED_OBJECT,
-									this.managedObjectSourceName,
-									"Flow "
-											+ flowName
-											+ " linked task must be within the managing office");
-					continue; // task must be within managing office
-				}
+			// Ensure the task is contained in the managing office
+			WorkNode workNode = taskNode.getWorkNode();
+			SectionNode section = workNode.getSectionNode();
+			OfficeNode taskOffice = section.getOfficeNode();
+			if (taskOffice != managingOffice) {
+				this.context
+						.getCompilerIssues()
+						.addIssue(
+								this.locationType,
+								this.location,
+								AssetType.MANAGED_OBJECT,
+								this.managedObjectSourceName,
+								"Flow "
+										+ flowName
+										+ " linked task must be within the managing office");
+				continue; // task must be within managing office
+			}
 
-				// Link the flow to the task
-				String workName = workNode.getQualifiedWorkName();
-				String taskName = taskNode.getOfficeTaskName();
-				if (flowKey != null) {
-					managingOfficeBuilder.linkProcess(flowKey, workName,
-							taskName);
-				} else {
-					managingOfficeBuilder.linkProcess(flowIndex, workName,
-							taskName);
-				}
+			// Link the flow to the task
+			String workName = workNode.getQualifiedWorkName();
+			String taskName = taskNode.getOfficeTaskName();
+			if (flowKey != null) {
+				managingOfficeBuilder.linkProcess(flowKey, workName, taskName);
+			} else {
+				managingOfficeBuilder
+						.linkProcess(flowIndex, workName, taskName);
 			}
 		}
 
@@ -431,7 +436,11 @@ public class ManagedObjectSourceNodeImpl implements ManagedObjectSourceNode {
 				continue; // must have the team
 			}
 
-			// TODO register the team to the office
+			// Register the team to the office
+			String officeTeamName = this.managedObjectSourceName + "."
+					+ teamName;
+			officeBuilder.registerTeam(officeTeamName, team
+					.getOfficeFloorTeamName());
 		}
 	}
 
