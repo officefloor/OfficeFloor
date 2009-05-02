@@ -364,7 +364,7 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 	}
 
 	@Override
-	public void buildOffice(OfficeFloorBuilder builder) {
+	public OfficeBuilder buildOffice(OfficeFloorBuilder builder) {
 
 		// Build this office
 		OfficeBuilder officeBuilder = builder.addOffice(this.officeName);
@@ -432,6 +432,9 @@ public class OfficeNodeImpl extends AbstractNode implements OfficeNode {
 		for (SectionNode section : sections) {
 			section.buildSection(officeBuilder);
 		}
+
+		// Return the office builder
+		return officeBuilder;
 	}
 
 	/*

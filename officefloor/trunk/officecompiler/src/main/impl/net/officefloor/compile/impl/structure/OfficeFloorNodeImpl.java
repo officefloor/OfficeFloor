@@ -40,6 +40,7 @@ import net.officefloor.compile.spi.officefloor.OfficeFloorTeam;
 import net.officefloor.compile.spi.section.ManagedObjectDependency;
 import net.officefloor.compile.spi.section.ManagedObjectFlow;
 import net.officefloor.frame.api.OfficeFrame;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.build.OfficeFloorIssues;
 import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
@@ -242,7 +243,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 			office.loadOffice();
 		}
 
-		// Build the managed object sources (in deterministic order)
+		// Load the managed object sources (in deterministic order)
 		ManagedObjectSourceNode[] managedObjectSources = CompileUtil
 				.toSortedArray(this.managedObjectSources.values(),
 						new ManagedObjectSourceNode[0],
@@ -255,12 +256,7 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 							}
 						});
 		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
-
-			// Ensure load managed object type for managed object source
 			managedObjectSource.loadManagedObjectType();
-
-			// Build the managed object source
-			managedObjectSource.buildManagedObject(builder);
 		}
 
 		// Build the teams (in deterministic order)
@@ -276,8 +272,29 @@ public class OfficeFloorNodeImpl extends AbstractNode implements
 		}
 
 		// Build the offices (in deterministic order)
+		Map<OfficeNode, OfficeBuilder> officeBuilders = new HashMap<OfficeNode, OfficeBuilder>();
 		for (OfficeNode office : offices) {
-			office.buildOffice(builder);
+			// Build the office
+			OfficeBuilder officeBuilder = office.buildOffice(builder);
+
+			// Keep track of the office builders
+			officeBuilders.put(office, officeBuilder);
+		}
+
+		// Build the managed object sources (in deterministic order)
+		for (ManagedObjectSourceNode managedObjectSource : managedObjectSources) {
+
+			// Obtain the managing office for the managed object source
+			OfficeNode managingOffice = managedObjectSource
+					.getManagingOfficeNode();
+			OfficeBuilder officeBuilder = officeBuilders.get(managingOffice);
+			if (officeBuilder == null) {
+				continue; // must have managing office
+			}
+
+			// Build the managed object source
+			managedObjectSource.buildManagedObject(builder, managingOffice,
+					officeBuilder);
 		}
 
 		// Return the built office floor

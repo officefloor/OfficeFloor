@@ -20,10 +20,12 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.spi.office.OfficeManagedObjectSource;
 import net.officefloor.compile.spi.office.OfficeSectionManagedObjectSource;
+import net.officefloor.compile.spi.officefloor.ManagingOffice;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObject;
 import net.officefloor.compile.spi.officefloor.OfficeFloorManagedObjectSource;
 import net.officefloor.compile.spi.section.SectionManagedObject;
 import net.officefloor.compile.spi.section.SectionManagedObjectSource;
+import net.officefloor.frame.api.build.OfficeBuilder;
 import net.officefloor.frame.api.build.OfficeFloorBuilder;
 import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.api.manage.OfficeFloor;
@@ -79,11 +81,27 @@ public interface ManagedObjectSourceNode extends SectionManagedObjectSource,
 	String getManagedObjectSourceName();
 
 	/**
+	 * Obtains the {@link OfficeNode} of the {@link ManagingOffice} for this
+	 * {@link ManagedObjectSource}.
+	 * 
+	 * @return {@link OfficeNode} of the {@link ManagingOffice} for this
+	 *         {@link ManagedObjectSource} or <code>null</code> if can not
+	 *         obtain it.
+	 */
+	OfficeNode getManagingOfficeNode();
+
+	/**
 	 * Builds {@link ManagedObjectSource} for this {@link ManagedObjectNode}.
 	 * 
 	 * @param builder
 	 *            {@link OfficeFloorBuilder}.
+	 * @param managingOffice
+	 *            {@link OfficeNode} of the {@link ManagingOffice} for this
+	 *            {@link ManagedObjectSource}.
+	 * @param managingOfficeBuilder
+	 *            {@link OfficeBuilder} for the {@link ManagingOffice}.
 	 */
-	void buildManagedObject(OfficeFloorBuilder builder);
+	void buildManagedObject(OfficeFloorBuilder builder,
+			OfficeNode managingOffice, OfficeBuilder managingOfficeBuilder);
 
 }
