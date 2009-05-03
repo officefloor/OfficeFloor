@@ -21,175 +21,100 @@ import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.room.editparts.ExternalEscalationEditPart;
 import net.officefloor.eclipse.room.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.room.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.room.editparts.RoomEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomEditPart;
-import net.officefloor.eclipse.room.editparts.SubRoomEscalationEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomInputFlowEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomManagedObjectEditPart;
 import net.officefloor.eclipse.room.editparts.SubRoomOutputFlowEditPart;
-import net.officefloor.eclipse.room.operations.AddExternalEscalationOperation;
 import net.officefloor.eclipse.room.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.room.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.room.operations.AddSubRoomOperation;
 import net.officefloor.eclipse.room.operations.RefreshSubRoomOperation;
 import net.officefloor.eclipse.room.operations.ToggleSubRoomInputFlowPublicOperation;
-import net.officefloor.model.room.EscalationToExternalEscalationModel;
-import net.officefloor.model.room.EscalationToInputFlowModel;
-import net.officefloor.model.room.ExternalEscalationModel;
-import net.officefloor.model.room.ExternalFlowModel;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel;
-import net.officefloor.model.room.OutputFlowToExternalFlowModel;
-import net.officefloor.model.room.OutputFlowToInputFlowModel;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomEscalationModel;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.repository.ModelRepository;
-import net.officefloor.room.RoomLoader;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.impl.section.SectionRepositoryImpl;
+import net.officefloor.model.repository.ConfigurationItem;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.IEditorPart;
 
 /**
- * Editor for the {@link net.officefloor.model.room.RoomModel}.
+ * Editor for the {@link SectionModel}.
  * 
  * @author Daniel
  */
+// TODO rename to SectionEditor
 public class RoomEditor extends
-		AbstractOfficeFloorEditor<RoomModel, RoomEditPart> {
+		AbstractOfficeFloorEditor<SectionModel, RoomEditPart> {
 
 	/**
 	 * ID for this {@link IEditorPart}.
 	 */
-	public static final String EDITOR_ID = "net.officefloor.editors.room";
+	public static final String EDITOR_ID = "net.officefloor.editors.section";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
-	 * populateEditPartTypes(java.util.Map)
-	 */
+	@Override
 	protected void populateEditPartTypes(
 			Map<Class<?>, Class<? extends EditPart>> map) {
 		// Entities
-		map.put(RoomModel.class, RoomEditPart.class);
+		map.put(SectionModel.class, RoomEditPart.class);
 		map.put(ExternalManagedObjectModel.class,
 				ExternalManagedObjectEditPart.class);
 		map.put(ExternalFlowModel.class, ExternalFlowEditPart.class);
+		map.put(SubSectionModel.class, SubRoomEditPart.class);
+		map.put(SubSectionInputModel.class, SubRoomInputFlowEditPart.class);
+		map.put(SubSectionOutputModel.class, SubRoomOutputFlowEditPart.class);
 		map
-				.put(ExternalEscalationModel.class,
-						ExternalEscalationEditPart.class);
-		map.put(SubRoomModel.class, SubRoomEditPart.class);
-		map.put(SubRoomInputFlowModel.class, SubRoomInputFlowEditPart.class);
-		map.put(SubRoomManagedObjectModel.class,
-				SubRoomManagedObjectEditPart.class);
-		map.put(SubRoomOutputFlowModel.class, SubRoomOutputFlowEditPart.class);
-		map.put(SubRoomEscalationModel.class, SubRoomEscalationEditPart.class);
+				.put(SubSectionObjectModel.class,
+						SubRoomManagedObjectEditPart.class);
 
 		// Connections
-		map.put(ManagedObjectToExternalManagedObjectModel.class,
+		map.put(SubSectionObjectToExternalManagedObjectModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(OutputFlowToExternalFlowModel.class,
+		map.put(SubSectionOutputToExternalFlowModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(OutputFlowToInputFlowModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(EscalationToInputFlowModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(EscalationToExternalEscalationModel.class,
+		map.put(SubSectionOutputToSubSectionInputModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
-	 */
+	@Override
 	protected boolean isDragTarget() {
 		// Disallow as drag target
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel
-	 * (net.officefloor.repository.ConfigurationItem)
-	 */
-	protected RoomModel retrieveModel(ConfigurationItem configuration)
+	@Override
+	protected SectionModel retrieveModel(ConfigurationItem configuration)
 			throws Exception {
-		// Return the loaded Room
-		return this.getRoomLoader().loadRoom(configuration);
+		return new SectionRepositoryImpl(new ModelRepositoryImpl())
+				.retrieveSection(configuration);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
-	 * net.officefloor.repository.ConfigurationItem)
-	 */
-	protected void storeModel(RoomModel model, ConfigurationItem configuration)
-			throws Exception {
-		// Store the Room
-		this.getRoomLoader().storeRoom(model, configuration);
+	@Override
+	protected void storeModel(SectionModel model,
+			ConfigurationItem configuration) throws Exception {
+		new SectionRepositoryImpl(new ModelRepositoryImpl()).storeSection(
+				model, configuration);
 	}
 
-	/**
-	 * Obtain the {@link RoomLoader}.
-	 * 
-	 * @return {@link RoomLoader}.
-	 */
-	private RoomLoader getRoomLoader() {
-		return new RoomLoader(new ModelRepository());
-	}
-
-	/**
-	 * Initiate the specialised
-	 * {@link net.officefloor.eclipse.common.editparts.FigureFactory} instances
-	 * for the model types.
-	 */
-	static {
-		// Managed object
-		OfficeFloorConnectionEditPart.registerFigureFactory(
-				ManagedObjectToExternalManagedObjectModel.class,
-				new FigureFactory<ManagedObjectToExternalManagedObjectModel>() {
-					public IFigure createFigure(
-							ManagedObjectToExternalManagedObjectModel model) {
-						PolylineConnection figure = new PolylineConnection();
-						figure.setForegroundColor(ColorConstants.darkGreen);
-						return figure;
-					}
-				});
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateOperations
-	 * (java.util.List)
-	 */
 	@Override
 	protected void populateOperations(List<Operation> list) {
 		// Add model add operations
 		list.add(new AddSubRoomOperation());
 		list.add(new AddExternalManagedObjectOperation());
 		list.add(new AddExternalFlowOperation());
-		list.add(new AddExternalEscalationOperation());
 
 		// Add refresh operations
 		list.add(new RefreshSubRoomOperation());

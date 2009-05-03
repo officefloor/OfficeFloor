@@ -16,15 +16,16 @@
  */
 package net.officefloor.eclipse.skin.desk;
 
+import net.officefloor.model.desk.TaskEscalationModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.desk.FlowItemEscalationModel;
-
 /**
- * Context for the {@link FlowItemEscalationModel} {@link IFigure}.
+ * Context for the {@link TaskEscalationModel} {@link IFigure}.
  * 
  * @author Daniel
  */
+// TODO rename to TaskEscalationFigureContext
 public interface FlowItemEscalationFigureContext {
 
 	/**

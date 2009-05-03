@@ -17,11 +17,7 @@
 package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
-import net.officefloor.model.desk.DeskTaskObjectModel;
-import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
 
 /**
  * Toggles whether the {@link DeskTaskObjectModel} is a parameter.
@@ -46,67 +42,67 @@ public class ToggleTaskObjectParameterOperation extends
 	 */
 	@Override
 	protected void perform(Context context) {
-
-		// Obtain the edit part
-		DeskTaskObjectEditPart editPart = context.getEditPart();
-		final DeskTaskObjectModel deskTaskObject = editPart.getCastedModel();
-		final DeskTaskObjectToExternalManagedObjectModel moConnection = deskTaskObject
-				.getManagedObject();
-
-		// Indicates if initially parameter
-		final boolean isInitiallyParameter = deskTaskObject.getIsParameter();
-
-		// Obtain the existing parameter
-		DeskTaskObjectModel parameter = null;
-		DeskTaskEditPart deskTaskEditPart = (DeskTaskEditPart) editPart
-				.getParent();
-		for (DeskTaskObjectModel object : deskTaskEditPart.getCastedModel()
-				.getObjects()) {
-			if (object.getIsParameter()) {
-				parameter = object;
-			}
-		}
-		final DeskTaskObjectModel currentParameter = parameter;
-
-		// Make changes
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				if (!isInitiallyParameter) {
-					// Remove managed object connection
-					if (moConnection != null) {
-						moConnection.remove();
-					}
-
-					// Unset current parameter
-					if (currentParameter != null) {
-						currentParameter.setIsParameter(false);
-					}
-				}
-
-				// Toggle as parameter
-				deskTaskObject.setIsParameter(!isInitiallyParameter);
-			}
-
-			@Override
-			protected void undoCommand() {
-				if (!isInitiallyParameter) {
-					// Reinstate managed object connection
-					if (moConnection != null) {
-						moConnection.connect();
-					}
-
-					// Reset current parameter
-					if (currentParameter != null) {
-						currentParameter.setIsParameter(true);
-					}
-				}
-
-				// Toggle as parameter
-				deskTaskObject.setIsParameter(isInitiallyParameter);
-			}
-		});
+//
+//		// Obtain the edit part
+//		DeskTaskObjectEditPart editPart = context.getEditPart();
+//		final DeskTaskObjectModel deskTaskObject = editPart.getCastedModel();
+//		final DeskTaskObjectToExternalManagedObjectModel moConnection = deskTaskObject
+//				.getManagedObject();
+//
+//		// Indicates if initially parameter
+//		final boolean isInitiallyParameter = deskTaskObject.getIsParameter();
+//
+//		// Obtain the existing parameter
+//		DeskTaskObjectModel parameter = null;
+//		DeskTaskEditPart deskTaskEditPart = (DeskTaskEditPart) editPart
+//				.getParent();
+//		for (DeskTaskObjectModel object : deskTaskEditPart.getCastedModel()
+//				.getObjects()) {
+//			if (object.getIsParameter()) {
+//				parameter = object;
+//			}
+//		}
+//		final DeskTaskObjectModel currentParameter = parameter;
+//
+//		// Make changes
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				if (!isInitiallyParameter) {
+//					// Remove managed object connection
+//					if (moConnection != null) {
+//						moConnection.remove();
+//					}
+//
+//					// Unset current parameter
+//					if (currentParameter != null) {
+//						currentParameter.setIsParameter(false);
+//					}
+//				}
+//
+//				// Toggle as parameter
+//				deskTaskObject.setIsParameter(!isInitiallyParameter);
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				if (!isInitiallyParameter) {
+//					// Reinstate managed object connection
+//					if (moConnection != null) {
+//						moConnection.connect();
+//					}
+//
+//					// Reset current parameter
+//					if (currentParameter != null) {
+//						currentParameter.setIsParameter(true);
+//					}
+//				}
+//
+//				// Toggle as parameter
+//				deskTaskObject.setIsParameter(isInitiallyParameter);
+//			}
+//		});
 	}
 
 }

@@ -16,16 +16,14 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.ConnectionAnchor;
-
 import net.officefloor.eclipse.skin.office.ExternalTeamFigure;
 import net.officefloor.eclipse.skin.office.ExternalTeamFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.office.AdministratorToTeamModel;
-import net.officefloor.model.office.FlowItemToTeamModel;
+
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link ExternalTeamFigure}.
@@ -45,8 +43,8 @@ public class StandardExternalTeamFigure extends AbstractOfficeFloorFigure
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
 				.getTeamName(), ConnectorDirection.EAST, ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this.registerConnectionAnchor(FlowItemToTeamModel.class, anchor);
-		this.registerConnectionAnchor(AdministratorToTeamModel.class, anchor);
+//		this.registerConnectionAnchor(FlowItemToTeamModel.class, anchor);
+//		this.registerConnectionAnchor(AdministratorToTeamModel.class, anchor);
 		this.setFigure(figure);
 	}
 }

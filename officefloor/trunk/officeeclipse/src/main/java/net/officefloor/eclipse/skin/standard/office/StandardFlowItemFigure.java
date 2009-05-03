@@ -16,17 +16,16 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.ConnectionAnchor;
-import org.eclipse.draw2d.Figure;
-
 import net.officefloor.eclipse.skin.office.FlowItemFigure;
 import net.officefloor.eclipse.skin.office.FlowItemFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.office.FlowItemToTeamModel;
+
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.Figure;
 
 /**
  * Standard {@link FlowItemFigure}.
@@ -54,7 +53,7 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 				.getFlowItemName(), ConnectorDirection.WEST,
 				ColorConstants.black);
 		ConnectionAnchor anchor = flowItem.getConnectionAnchor();
-		this.registerConnectionAnchor(FlowItemToTeamModel.class, anchor);
+//		this.registerConnectionAnchor(FlowItemToTeamModel.class, anchor);
 		figure.add(flowItem);
 
 		// Create the container for child connectors

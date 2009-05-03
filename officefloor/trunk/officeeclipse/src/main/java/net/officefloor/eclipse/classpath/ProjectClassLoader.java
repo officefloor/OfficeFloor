@@ -26,8 +26,8 @@ import java.util.List;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.IEditorPart;
@@ -163,7 +163,7 @@ public class ProjectClassLoader extends URLClassLoader {
 		}
 
 		// Return the class loader
-		return create(context.getId(), context.getClasspath(),
+		return create(context.getLocation(), context.getClasspath(),
 				parentClassLoader);
 	}
 
@@ -238,7 +238,8 @@ public class ProjectClassLoader extends URLClassLoader {
 	 * @param path
 	 *            Path of the {@link ConfigurationItem}.
 	 * @param context
-	 *            {@link ConfigurationContext} for the {@link ConfigurationItem}.
+	 *            {@link ConfigurationContext} for the {@link ConfigurationItem}
+	 *            .
 	 * @return {@link ConfigurationItem} or <code>null</code> if not found.
 	 */
 	private ConfigurationItem findConfigurationItem(String path,
@@ -286,9 +287,9 @@ public class ProjectClassLoader extends URLClassLoader {
 			ConfigurationItem {
 
 		/**
-		 * Path to the resource.
+		 * Location to the resource.
 		 */
-		private final String path;
+		private final String location;
 
 		/**
 		 * {@link ConfigurationContext}.
@@ -310,48 +311,32 @@ public class ProjectClassLoader extends URLClassLoader {
 		 * @param resource
 		 *            {@link InputStream} to the resource.
 		 */
-		public InputStreamConfigurationItem(String path,
+		public InputStreamConfigurationItem(String location,
 				ConfigurationContext context, InputStream resource) {
-			this.path = path;
+			this.location = location;
 			this.context = context;
 			this.resource = resource;
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.repository.ConfigurationItem#getId()
+		 * ================= ConfigurationItem ============================
 		 */
+
 		@Override
-		public String getId() {
-			return this.path;
+		public String getLocation() {
+			return this.location;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.repository.ConfigurationItem#getContext()
-		 */
 		@Override
 		public ConfigurationContext getContext() {
 			return this.context;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.repository.ConfigurationItem#getConfiguration()
-		 */
 		@Override
 		public InputStream getConfiguration() throws Exception {
 			return this.resource;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.repository.ConfigurationItem#setConfiguration(java.io.InputStream)
-		 */
 		@Override
 		public void setConfiguration(InputStream configuration)
 				throws Exception {
@@ -367,9 +352,9 @@ public class ProjectClassLoader extends URLClassLoader {
 			ConfigurationContext {
 
 		/**
-		 * Id of this {@link ConfigurationContext}.
+		 * Location of this {@link ConfigurationContext}.
 		 */
-		private final String id;
+		private final String location;
 
 		/**
 		 * {@link ProjectClassLoader}.
@@ -379,66 +364,49 @@ public class ProjectClassLoader extends URLClassLoader {
 		/**
 		 * Initiate.
 		 * 
-		 * @param id
-		 *            Id of the {@link ConfigurationContext}.
+		 * @param location
+		 *            Location of this {@link ConfigurationContext}.
 		 * @param classLoader
 		 *            {@link ProjectClassLoader}.
 		 */
-		public ClassPathConfigurationContext(String id,
+		public ClassPathConfigurationContext(String location,
 				ProjectClassLoader classLoader) {
-			this.id = this.getClass().getSimpleName() + "-" + id;
+			this.location = this.getClass().getSimpleName() + "-" + location;
 			this.classLoader = classLoader;
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.repository.ConfigurationContext#getId()
+		 * ================ ConfigurationContext ========================
 		 */
+
 		@Override
-		public String getId() {
-			return this.id;
+		public String getLocation() {
+			return this.location;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.repository.ConfigurationContext#getClasspath()
-		 */
 		@Override
 		public String[] getClasspath() {
 
-			// Obtain the classpath as strings
+			// Obtain the class path as strings
 			URL[] urls = this.classLoader.getURLs();
 			String[] classpath = new String[urls.length];
 			for (int i = 0; i < classpath.length; i++) {
 				classpath[i] = urls[i].toExternalForm();
 			}
 
-			// Return the classpath
+			// Return the class path
 			return classpath;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.repository.ConfigurationContext#getConfigurationItem(java.lang.String)
-		 */
 		@Override
-		public ConfigurationItem getConfigurationItem(String id)
+		public ConfigurationItem getConfigurationItem(String location)
 				throws Exception {
 			// Return the found configuration item
-			return this.classLoader.findConfigurationItem(id, this);
+			return this.classLoader.findConfigurationItem(location, this);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see net.officefloor.repository.ConfigurationContext#createConfigurationItem(java.lang.String,
-		 *      java.io.InputStream)
-		 */
 		@Override
-		public ConfigurationItem createConfigurationItem(String id,
+		public ConfigurationItem createConfigurationItem(String location,
 				InputStream configuration) throws Exception {
 			throw new UnsupportedOperationException(
 					"May not create a resource on the classpath");

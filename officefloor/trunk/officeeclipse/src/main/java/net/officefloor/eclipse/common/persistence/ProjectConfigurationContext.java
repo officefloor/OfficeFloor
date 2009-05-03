@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -35,10 +35,8 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.IEditorInput;
 
 /**
- * Implementation of
- * {@link net.officefloor.model.persistence.ConfigurationContext} for a
- * {@link org.eclipse.core.resources.IProject} providing context for a
- * {@link org.eclipse.core.resources.IFile}.
+ * Implementation of {@link ConfigurationContext} for a {@link IProject}
+ * providing context for a {@link IFile}.
  * 
  * @author Daniel
  */
@@ -47,17 +45,17 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	/**
 	 * {@link IProject} specifying context.
 	 */
-	protected final IProject project;
+	private final IProject project;
 
 	/**
 	 * Class path for the {@link IProject}.
 	 */
-	protected final String[] classpath;
+	private final String[] classpath;
 
 	/**
 	 * {@link IProgressMonitor}.
 	 */
-	protected final IProgressMonitor monitor;
+	private final IProgressMonitor monitor;
 
 	/**
 	 * Obtains the {@link IProject} from the input {@link IEditorInput}.
@@ -109,7 +107,6 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	 */
 	public ProjectConfigurationContext(IProject project,
 			IProgressMonitor monitor) throws OfficeFloorPluginFailure {
-		// Store state
 		this.project = project;
 		this.monitor = monitor;
 
@@ -140,57 +137,45 @@ public class ProjectConfigurationContext implements ConfigurationContext {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.persistence.ConfigurationContext#getId()
+	 * ===================== ConfigurationContext ======================
 	 */
-	public String getId() {
+
+	@Override
+	public String getLocation() {
 		return this.project.getFullPath().toPortableString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.persistence.ConfigurationContext#getClasspath()
-	 */
+	@Override
 	public String[] getClasspath() {
 		return this.classpath;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.persistence.ConfigurationContext#getConfigurationItem(java.lang.String)
-	 */
-	public ConfigurationItem getConfigurationItem(String id) throws Exception {
+	@Override
+	public ConfigurationItem getConfigurationItem(String location)
+			throws Exception {
 
 		// Obtain the file
-		IFile file = this.project.getFile(Path.fromPortableString(id));
+		IFile file = this.project.getFile(Path.fromPortableString(location));
 
 		// Ensure the file exists
 		if (!file.exists()) {
-			throw new IOException("File '" + id + "' can not be found");
+			throw new IOException("File '" + location + "' can not be found");
 		}
 
-		// Obtains the File by the Id of the Project
+		// Return the configuration of the file
 		return new FileConfigurationItem(file, this.monitor);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.persistence.ConfigurationContext#createConfigurationItem(java.lang.String,
-	 *      java.io.InputStream)
-	 */
-	public ConfigurationItem createConfigurationItem(String id,
+	@Override
+	public ConfigurationItem createConfigurationItem(String location,
 			InputStream configuration) throws Exception {
 
 		// Obtain the file
-		IFile file = this.project.getFile(Path.fromPortableString(id));
+		IFile file = this.project.getFile(Path.fromPortableString(location));
 
 		// Ensure the file does not exists
 		if (file.exists()) {
-			throw new IOException("File '" + id
+			throw new IOException("File '" + location
 					+ "' can not be created as already exists");
 		}
 

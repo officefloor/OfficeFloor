@@ -24,40 +24,33 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext;
-import net.officefloor.model.officefloor.OfficeTaskModel;
-import net.officefloor.model.officefloor.OfficeTaskModel.OfficeTaskEvent;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel.DeployedOfficeInputEvent;
 
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the {@link OfficeTaskModel}.
+ * {@link EditPart} for the {@link DeployedOfficeInputModel}.
  * 
  * @author Daniel
  */
-public class OfficeTaskEditPart extends
-		AbstractOfficeFloorNodeEditPart<OfficeTaskModel, OfficeFloorFigure>
+// TODO rename to DeployedOfficeInputEditPart
+public class OfficeTaskEditPart
+		extends
+		AbstractOfficeFloorNodeEditPart<DeployedOfficeInputModel, OfficeFloorFigure>
 		implements OfficeTaskFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<OfficeTaskEvent>(OfficeTaskEvent
-				.values()) {
+		handlers.add(new PropertyChangeHandler<DeployedOfficeInputEvent>(
+				DeployedOfficeInputEvent.values()) {
 			@Override
-			protected void handlePropertyChange(OfficeTaskEvent property,
-					PropertyChangeEvent evt) {
+			protected void handlePropertyChange(
+					DeployedOfficeInputEvent property, PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_LINK_PROCESS:
-				case REMOVE_LINK_PROCESS:
-				case ADD_TASK_FLOW:
-				case REMOVE_TASK_FLOW:
+				case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
+				case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
 					OfficeTaskEditPart.this.refreshTargetConnections();
 					break;
 				}
@@ -65,70 +58,38 @@ public class OfficeTaskEditPart extends
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createOfficeTaskFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Never a source
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getLinkProcesses());
-		models.addAll(this.getCastedModel().getTaskFlows());
+		models.addAll(this.getCastedModel()
+				.getOfficeFloorManagedObjectSourceFlows());
 	}
 
 	/*
 	 * ====================== OfficeTaskFigureContext ====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext#getWorkName
-	 * ()
-	 */
+	// TODO rename to getSectionInputName
 	@Override
 	public String getWorkName() {
-		return this.getCastedModel().getWorkName();
+		return this.getCastedModel().getSectionInputName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext#getTaskName
-	 * ()
-	 */
+	// TODO remove as only require section input name
 	@Override
 	public String getTaskName() {
-		return this.getCastedModel().getTaskName();
+		// return this.getCastedModel().getTaskName();
+		return null;
 	}
 
 }

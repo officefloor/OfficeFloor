@@ -16,21 +16,22 @@
  */
 package net.officefloor.eclipse.skin.desk;
 
+import net.officefloor.model.desk.TaskFlowModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.desk.FlowItemOutputModel;
-
 /**
- * Context for the {@link FlowItemOutputModel} {@link IFigure}.
+ * Context for the {@link TaskFlowModel} {@link IFigure}.
  * 
  * @author Daniel
  */
+// TODO rename to TaskFlowFigureContext
 public interface FlowItemOutputFigureContext {
 
 	/**
-	 * Obtains the {@link FlowItemOutputModel} name.
+	 * Obtains the {@link TaskFlowModel} name.
 	 * 
-	 * @return {@link FlowItemOutputModel} name.
+	 * @return {@link TaskFlowModel} name.
 	 */
 	String getFlowItemOutputName();
 

@@ -16,10 +16,12 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
+
 import org.eclipse.draw2d.IFigure;
 
 /**
- * Context for the {@link OfficeTaskFigureContext} {@link IFigure}.
+ * Context for the {@link DeployedOfficeInputModel} {@link IFigure}.
  * 
  * @author Daniel
  */

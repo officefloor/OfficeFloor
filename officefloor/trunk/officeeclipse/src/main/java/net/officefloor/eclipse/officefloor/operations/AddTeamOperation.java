@@ -16,16 +16,9 @@
  */
 package net.officefloor.eclipse.officefloor.operations;
 
-import org.eclipse.core.resources.IProject;
-
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.dialog.TeamCreateDialog;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.officefloor.TeamModel;
 
 /**
  * Adds a {@link TeamModel} to the {@link OfficeFloorModel}.
@@ -41,53 +34,47 @@ public class AddTeamOperation extends AbstractOperation<OfficeFloorEditPart> {
 		super("Add team", OfficeFloorEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(Context context) {
-
-		// Obtain the edit part
-		final OfficeFloorEditPart editPart = context.getEditPart();
-
-		// Create the Team
-		TeamModel team = null;
-		try {
-			AbstractOfficeFloorEditor<?, ?> editor = editPart.getEditor();
-			IProject project = ProjectConfigurationContext.getProject(editor
-					.getEditorInput());
-			TeamCreateDialog dialog = new TeamCreateDialog(editor.getSite()
-					.getShell(), project);
-			team = dialog.createTeam();
-		} catch (Exception ex) {
-			editPart.messageError(ex);
-		}
-
-		// Ensure created
-		if (team == null) {
-			return;
-		}
-
-		// Set location
-		context.positionModel(team);
-
-		// Make changes
-		final TeamModel newTeam = team;
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				editPart.getCastedModel().addTeam(newTeam);
-			}
-
-			@Override
-			protected void undoCommand() {
-				editPart.getCastedModel().removeTeam(newTeam);
-			}
-		});
+//
+//		// Obtain the edit part
+//		final OfficeFloorEditPart editPart = context.getEditPart();
+//
+//		// Create the Team
+//		TeamModel team = null;
+//		try {
+//			AbstractOfficeFloorEditor<?, ?> editor = editPart.getEditor();
+//			IProject project = ProjectConfigurationContext.getProject(editor
+//					.getEditorInput());
+//			TeamCreateDialog dialog = new TeamCreateDialog(editor.getSite()
+//					.getShell(), project);
+//			team = dialog.createTeam();
+//		} catch (Exception ex) {
+//			editPart.messageError(ex);
+//		}
+//
+//		// Ensure created
+//		if (team == null) {
+//			return;
+//		}
+//
+//		// Set location
+//		context.positionModel(team);
+//
+//		// Make changes
+//		final TeamModel newTeam = team;
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				editPart.getCastedModel().addTeam(newTeam);
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				editPart.getCastedModel().removeTeam(newTeam);
+//			}
+//		});
 	}
 
 }

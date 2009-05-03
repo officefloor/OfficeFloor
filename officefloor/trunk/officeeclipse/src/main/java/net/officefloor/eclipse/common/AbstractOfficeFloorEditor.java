@@ -31,7 +31,7 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.Model;
-import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.geometry.Point;
@@ -52,6 +52,7 @@ import org.eclipse.gef.palette.SelectionToolEntry;
 import org.eclipse.gef.requests.CreationFactory;
 import org.eclipse.gef.tools.SelectionTool;
 import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
+import org.eclipse.gef.ui.parts.GraphicalEditor;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.util.TransferDropTargetListener;
@@ -59,10 +60,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 
 /**
- * Provides an abstract {@link org.eclipse.gef.ui.parts.GraphicalEditor} for the
- * Office Floor items to edit.
+ * Provides an abstract {@link GraphicalEditor} for the Office Floor items to
+ * edit.
  * 
  * @author Daniel
  */
@@ -123,7 +125,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 
 	/**
 	 * <p>
-	 * Flags this {@link org.eclipse.ui.IEditorPart} as dirty requiring a save.
+	 * Flags this {@link IEditorPart} as dirty requiring a save.
 	 * <p>
 	 * Note this is mainly used for testing.
 	 */
@@ -161,10 +163,10 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.ui.parts.GraphicalEditor#initializeGraphicalViewer()
+	 * =================== GraphicalEditor =========================
 	 */
+
+	@Override
 	protected void initializeGraphicalViewer() {
 		super.initializeGraphicalViewer();
 
@@ -369,10 +371,10 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	protected abstract boolean isDragTarget();
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.part.EditorPart#setInput(org.eclipse.ui.IEditorInput)
+	 * ================== EditorPart ====================================
 	 */
+
+	@Override
 	protected void setInput(IEditorInput input) {
 		super.setInput(input);
 
@@ -397,7 +399,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	 * 
 	 * @param configuration
 	 *            Configuration of the Model.
-	 * @return Model to be editted.
+	 * @return Model to be edited.
 	 * @throws Exception
 	 *             If fails to obtain the Model.
 	 */
@@ -405,11 +407,10 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 			throws Exception;
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.eclipse.ui.part.EditorPart#doSave(org.eclipse.core.runtime.
-	 * IProgressMonitor)
+	 * ==================== EditorPart ====================================
 	 */
+
+	@Override
 	public void doSave(IProgressMonitor monitor) {
 		// Obtain the configuration
 		FileConfigurationItem configuration = new FileConfigurationItem(this
@@ -441,42 +442,23 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	protected abstract void storeModel(M model, ConfigurationItem configuration)
 			throws Exception;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
-	 */
+	@Override
 	public void doSaveAs() {
 		// Provide empty method implementation.
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.part.EditorPart#isSaveAsAllowed()
-	 */
+	@Override
 	public boolean isSaveAsAllowed() {
 		// Always able to save
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seeorg.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette#
-	 * getPalettePreferences()
-	 */
+	@Override
 	protected FlyoutPreferences getPalettePreferences() {
 		return new CommonFlyoutPreferences();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette#getPaletteRoot
-	 * ()
-	 */
+	@Override
 	protected PaletteRoot getPaletteRoot() {
 		// Create the root (if not created)
 		if (this.paletteRoot == null) {
@@ -558,18 +540,15 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 		 */
 		public WrappingEditPartFactory(EditPartFactory editPartFactory,
 				AbstractOfficeFloorEditor<?, ?> editor) {
-			// Store state
 			this.editPartFactory = editPartFactory;
 			this.editor = editor;
 		}
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.gef.EditPartFactory#createEditPart(org.eclipse.gef.EditPart
-		 * , java.lang.Object)
+		 * ================== EditPartFactory ============================
 		 */
+
+		@Override
 		public EditPart createEditPart(EditPart context, Object model) {
 			// Create the Edit Part
 			EditPart editPart = this.editPartFactory.createEditPart(context,

@@ -38,28 +38,14 @@ public class RemoveAdministratorOperation
 		super("Remove administrator", AdministratorEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #remove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
 	protected void remove(AdministratorModel model, OfficeModel parent) {
-		parent.removeAdministrator(model);
+		parent.removeOfficeAdministrator(model);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #unremove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
 	protected void unremove(AdministratorModel model, OfficeModel parent) {
-		parent.addAdministrator(model);
+		parent.addOfficeAdministrator(model);
 	}
 
 }

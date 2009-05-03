@@ -16,21 +16,21 @@
  */
 package net.officefloor.eclipse.skin.office;
 
+import net.officefloor.model.office.OfficeTeamModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.office.ExternalTeamModel;
-
 /**
- * Context for the {@link ExternalTeamModel} {@link IFigure}.
+ * Context for the {@link OfficeTeamModel} {@link IFigure}.
  * 
  * @author Daniel
  */
 public interface ExternalTeamFigureContext {
 
 	/**
-	 * Obtains the {@link ExternalTeamModel} name.
+	 * Obtains the {@link OfficeTeamModel} name.
 	 * 
-	 * @return {@link ExternalTeamModel} name.
+	 * @return {@link OfficeTeamModel} name.
 	 */
 	String getTeamName();
 

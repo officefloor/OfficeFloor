@@ -20,11 +20,11 @@ import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.room.editparts.RoomEditPart;
-import net.officefloor.model.room.ExternalFlowModel;
-import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.SectionModel;
 
 /**
- * Adds an {@link ExternalFlowModel} to the {@link RoomModel}.
+ * Adds an {@link ExternalFlowModel} to the {@link SectionModel}.
  * 
  * @author Daniel
  */
@@ -37,12 +37,6 @@ public class AddExternalFlowOperation extends AbstractOperation<RoomEditPart> {
 		super("Add external flow", RoomEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(Context context) {
 

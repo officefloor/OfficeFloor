@@ -17,13 +17,13 @@
 package net.officefloor.eclipse.skin.desk;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.desk.DeskTaskModel;
+import net.officefloor.model.desk.WorkTaskModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link DeskTaskModel}.
+ * {@link OfficeFloorFigure} for the {@link WorkTaskModel}.
  * 
  * @author Daniel
  */
+// TODO rename to WorkTaskFigure
 public interface DeskTaskFigure extends OfficeFloorFigure {
-
 }

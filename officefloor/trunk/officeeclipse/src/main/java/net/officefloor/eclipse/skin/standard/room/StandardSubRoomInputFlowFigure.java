@@ -21,15 +21,14 @@ import net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.SubRoomItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.room.EscalationToInputFlowModel;
-import net.officefloor.model.room.OutputFlowToInputFlowModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 
 /**
- * Standard {@link SubRoomInputFlowFigure}.
+ * Standard {@link SubSectionInputFigure}.
  * 
  * @author Daniel
  */
@@ -45,25 +44,18 @@ public class StandardSubRoomInputFlowFigure extends AbstractOfficeFloorFigure
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link SubRoomInputFlowFigureContext}.
+	 *            {@link SubSectionInputFigureContext}.
 	 */
 	public StandardSubRoomInputFlowFigure(SubRoomInputFlowFigureContext context) {
 		this.figure = new SubRoomItemFigure(context.getSubRoomInputFlowName(),
 				context.isPublic(), ConnectorDirection.WEST,
 				ColorConstants.black);
 		ConnectionAnchor anchor = this.figure.getConnectionAnchor();
-		this.registerConnectionAnchor(EscalationToInputFlowModel.class, anchor);
-		this.registerConnectionAnchor(OutputFlowToInputFlowModel.class, anchor);
+		this.registerConnectionAnchor(
+				SubSectionOutputToSubSectionInputModel.class, anchor);
 		this.setFigure(figure);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.room.SubRoomInputFlowFigure#setIsPublic(
-	 * boolean)
-	 */
 	@Override
 	public void setIsPublic(boolean isPublic) {
 		this.figure.setIsPublic(isPublic);

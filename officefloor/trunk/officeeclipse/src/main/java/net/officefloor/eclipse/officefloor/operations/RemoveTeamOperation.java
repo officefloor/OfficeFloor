@@ -20,16 +20,16 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
 import net.officefloor.eclipse.officefloor.editparts.TeamEditPart;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.officefloor.TeamModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 
 /**
- * {@link Operation} to remove the {@link TeamModel}.
+ * {@link Operation} to remove the {@link OfficeFloorTeamModel}.
  * 
  * @author Daniel
  */
 public class RemoveTeamOperation
 		extends
-		AbstractRemoveItemModelOperation<TeamEditPart, TeamModel, OfficeFloorModel> {
+		AbstractRemoveItemModelOperation<TeamEditPart, OfficeFloorTeamModel, OfficeFloorModel> {
 
 	/**
 	 * Initiate.
@@ -38,28 +38,14 @@ public class RemoveTeamOperation
 		super("Remove team", TeamEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #remove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void remove(TeamModel model, OfficeFloorModel parent) {
-		parent.removeTeam(model);
+	protected void remove(OfficeFloorTeamModel model, OfficeFloorModel parent) {
+		parent.removeOfficeFloorTeam(model);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #unremove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void unremove(TeamModel model, OfficeFloorModel parent) {
-		parent.addTeam(model);
+	protected void unremove(OfficeFloorTeamModel model, OfficeFloorModel parent) {
+		parent.addOfficeFloorTeam(model);
 	}
 
 }

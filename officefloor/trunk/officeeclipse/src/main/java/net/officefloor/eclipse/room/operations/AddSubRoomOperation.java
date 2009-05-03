@@ -16,28 +16,17 @@
  */
 package net.officefloor.eclipse.room.operations;
 
-import net.officefloor.eclipse.classpath.ClasspathUtil;
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.dialog.BeanDialog;
-import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
-import net.officefloor.eclipse.common.dialog.input.filter.FileExtensionInputFilter;
-import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
-import net.officefloor.eclipse.common.dialog.input.translator.ResourceFullPathValueTranslator;
 import net.officefloor.eclipse.room.editparts.RoomEditPart;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.room.RoomLoader;
-
-import org.eclipse.core.resources.IFile;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionModel;
 
 /**
- * Adds a {@link SubRoomModel} to the {@link RoomModel}.
+ * Adds a {@link SubSectionModel} to the {@link SectionModel}.
  * 
  * @author Daniel
  */
+// TODO rename to AddSubSectionOperation
 public class AddSubRoomOperation extends AbstractOperation<RoomEditPart> {
 
 	/**
@@ -47,77 +36,71 @@ public class AddSubRoomOperation extends AbstractOperation<RoomEditPart> {
 		super("Add sub room", RoomEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(Context context) {
-
-		// Obtain the room edit part
-		final RoomEditPart editPart = context.getEditPart();
-
-		// Add the Sub Room
-		SubRoomAddBean bean = new SubRoomAddBean();
-		BeanDialog dialog = editPart.createBeanDialog(bean);
-		dialog.registerPropertyInput("File", new ClasspathSelectionInput(
-				editPart.getEditor(), new ClasspathFilter(IFile.class,
-						new FileExtensionInputFilter("desk", "room"))));
-		dialog.registerPropertyValueTranslator("File",
-				new ResourceFullPathValueTranslator());
-		SubRoomModel subRoom = null;
-		if (dialog.populate()) {
-			try {
-				// Obtain the class path location
-				String classPathLocation = ClasspathUtil
-						.getClassPathLocation(bean.file);
-
-				// Obtain the configuration item
-				ConfigurationItem configItem = ProjectClassLoader
-						.findConfigurationItem(editPart.getEditor(),
-								classPathLocation);
-				if (configItem == null) {
-					editPart.messageError("Can not find '" + classPathLocation
-							+ "' on class path");
-					return;
-				}
-
-				// Create the sub room
-				RoomLoader roomLoader = new RoomLoader();
-				subRoom = roomLoader.loadSubRoom(configItem);
-				subRoom.setId(bean.name);
-
-			} catch (Exception ex) {
-				editPart.messageError(ex);
-			}
-		}
-
-		// Ensure have the sub room
-		if (subRoom == null) {
-			return;
-		}
-
-		// Set location
-		context.positionModel(subRoom);
-
-		// Make the change
-		final SubRoomModel newSubRoom = subRoom;
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				// Add the sub room
-				editPart.getCastedModel().addSubRoom(newSubRoom);
-			}
-
-			@Override
-			protected void undoCommand() {
-				// Remove the sub room
-				editPart.getCastedModel().removeSubRoom(newSubRoom);
-			}
-		});
+//
+//		// Obtain the room edit part
+//		final RoomEditPart editPart = context.getEditPart();
+//
+//		// Add the Sub Room
+//		SubRoomAddBean bean = new SubRoomAddBean();
+//		BeanDialog dialog = editPart.createBeanDialog(bean);
+//		dialog.registerPropertyInput("File", new ClasspathSelectionInput(
+//				editPart.getEditor(), new ClasspathFilter(IFile.class,
+//						new FileExtensionInputFilter("desk", "room"))));
+//		dialog.registerPropertyValueTranslator("File",
+//				new ResourceFullPathValueTranslator());
+//		SubRoomModel subRoom = null;
+//		if (dialog.populate()) {
+//			try {
+//				// Obtain the class path location
+//				String classPathLocation = ClasspathUtil
+//						.getClassPathLocation(bean.file);
+//
+//				// Obtain the configuration item
+//				ConfigurationItem configItem = ProjectClassLoader
+//						.findConfigurationItem(editPart.getEditor(),
+//								classPathLocation);
+//				if (configItem == null) {
+//					editPart.messageError("Can not find '" + classPathLocation
+//							+ "' on class path");
+//					return;
+//				}
+//
+//				// Create the sub room
+//				RoomLoader roomLoader = new RoomLoader();
+//				subRoom = roomLoader.loadSubRoom(configItem);
+//				subRoom.setId(bean.name);
+//
+//			} catch (Exception ex) {
+//				editPart.messageError(ex);
+//			}
+//		}
+//
+//		// Ensure have the sub room
+//		if (subRoom == null) {
+//			return;
+//		}
+//
+//		// Set location
+//		context.positionModel(subRoom);
+//
+//		// Make the change
+//		final SubRoomModel newSubRoom = subRoom;
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				// Add the sub room
+//				editPart.getCastedModel().addSubRoom(newSubRoom);
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				// Remove the sub room
+//				editPart.getCastedModel().removeSubRoom(newSubRoom);
+//			}
+//		});
 	}
 
 	/**

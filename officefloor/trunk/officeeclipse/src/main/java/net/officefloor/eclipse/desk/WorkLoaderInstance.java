@@ -20,19 +20,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import net.officefloor.desk.WorkLoaderContextImpl;
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
-import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.work.WorkModel;
-import net.officefloor.work.WorkLoader;
-import net.officefloor.work.WorkProperty;
-import net.officefloor.work.WorkSpecification;
+import net.officefloor.model.desk.WorkModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.SWT;
@@ -158,16 +158,16 @@ public class WorkLoaderInstance {
 			return null;
 		}
 
-		// Obtain the work specification
-		WorkSpecification workSpecification = workLoader.getSpecification();
+		// TODO use compiler to obtain properties from work source
+		Class<? extends WorkSource<?>> workSource = null;
+		OfficeFloorCompiler compiler = null;
+		PropertyList properties = compiler.getWorkLoader().loadSpecification(
+				workSource);
 
 		// Create the property models from specification
 		List<PropertyModel> propertyModels = new LinkedList<PropertyModel>();
-		if (workSpecification != null) {
-			for (WorkProperty workProperty : workSpecification.getProperties()) {
-				propertyModels.add(new PropertyModel(workProperty.getName(),
-						null));
-			}
+		for (Property property : properties) {
+			propertyModels.add(new PropertyModel(property.getName(), null));
 		}
 
 		// Determine if have extension
@@ -246,7 +246,7 @@ public class WorkLoaderInstance {
 	 * @throws Exception
 	 *             If fails to create the {@link WorkModel}.
 	 */
-	public WorkModel<?> createWorkModel(List<PropertyModel> propertyModels)
+	public WorkModel createWorkModel(List<PropertyModel> propertyModels)
 			throws Exception {
 
 		// Create the properties
@@ -264,13 +264,15 @@ public class WorkLoaderInstance {
 			properties.setProperty(name, value);
 		}
 
-		// Attempt to load the work
-		WorkModel<?> workModel = this.getWorkLoader().loadWork(
-				new WorkLoaderContextImpl(propertyNames, properties,
-						this.classLoader));
-
-		// Return the work model
-		return workModel;
+		// TODO load work type and return work model for type
+		// // Attempt to load the work
+		// WorkModel workModel = this.getWorkLoader().loadWork(
+		// new WorkLoaderContextImpl(propertyNames, properties,
+		// this.classLoader));
+		//
+		// // Return the work model
+		// return workModel;
+		return null;
 	}
 
 	/**
@@ -287,11 +289,13 @@ public class WorkLoaderInstance {
 			return this.workLoader;
 		}
 
+		// TODO obtain the work source (work loader is from compiler)
+
 		// Obtain the work loader class
 		Class<?> workLoaderClass;
 		if (this.extension != null) {
 			// Obtain from extension
-			workLoaderClass = this.extension.getWorkLoaderClass();
+			workLoaderClass = this.extension.getWorkSourceClass();
 		} else {
 			// Obtain from class name
 			workLoaderClass = this.classLoader.loadClass(this.className);

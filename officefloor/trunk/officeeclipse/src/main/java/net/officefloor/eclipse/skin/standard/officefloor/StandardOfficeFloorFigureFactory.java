@@ -18,16 +18,8 @@ package net.officefloor.eclipse.skin.standard.officefloor;
 
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigureContext;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigure;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerFigureContext;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerInstanceFigure;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerInstanceFigureContext;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerLinkProcessFigure;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectHandlerLinkProcessFigureContext;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigureContext;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFigure;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFigureContext;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigure;
@@ -51,175 +43,53 @@ import net.officefloor.eclipse.skin.officefloor.TeamFigureContext;
 public class StandardOfficeFloorFigureFactory implements
 		OfficeFloorFigureFactory {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createManagedObjectDependencyFigure
-	 * (net.officefloor.eclipse.skin.officefloor
-	 * .ManagedObjectDependencyFigureContext)
-	 */
 	@Override
 	public ManagedObjectDependencyFigure createManagedObjectDependencyFigure(
 			ManagedObjectDependencyFigureContext context) {
 		return new StandardManagedObjectDependencyFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createManagedObjectHandlerFigure
-	 * (net.officefloor.eclipse.skin.officefloor.
-	 * ManagedObjectHandlerFigureContext)
-	 */
-	@Override
-	public ManagedObjectHandlerFigure createManagedObjectHandlerFigure(
-			ManagedObjectHandlerFigureContext context) {
-		return new StandardManagedObjectHandlerFigure(context);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createManagedObjectHandlerInstanceFigure
-	 * (net.officefloor.eclipse.skin.officefloor
-	 * .ManagedObjectHandlerInstanceFigureContext)
-	 */
-	@Override
-	public ManagedObjectHandlerInstanceFigure createManagedObjectHandlerInstanceFigure(
-			ManagedObjectHandlerInstanceFigureContext context) {
-		return new StandardManagedObjectHandlerInstanceFigure(context);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createManagedObjectHandlerLinkProcessFigure
-	 * (net.officefloor.eclipse.skin.officefloor
-	 * .ManagedObjectHandlerLinkProcessFigureContext)
-	 */
-	@Override
-	public ManagedObjectHandlerLinkProcessFigure createManagedObjectHandlerLinkProcessFigure(
-			ManagedObjectHandlerLinkProcessFigureContext context) {
-		return new StandardManagedObjectHandlerLinkProcessFigure(context);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createManagedObjectSourceFigure
-	 * (net.officefloor.eclipse.skin.officefloor.
-	 * ManagedObjectSourceFigureContext )
-	 */
 	@Override
 	public ManagedObjectSourceFigure createManagedObjectSourceFigure(
 			ManagedObjectSourceFigureContext context) {
 		return new StandardManagedObjectSourceFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createManagedObjectTaskFigure
-	 * (net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFigureContext)
-	 */
-	@Override
-	public ManagedObjectTaskFigure createManagedObjectTaskFigure(
-			ManagedObjectTaskFigureContext context) {
-		return new StandardManagedObjectTaskFigure(context);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createManagedObjectTaskFlowFigure
-	 * (net.officefloor.eclipse.skin.officefloor
-	 * .ManagedObjectTaskFlowFigureContext)
-	 */
 	@Override
 	public ManagedObjectTaskFlowFigure createManagedObjectTaskFlowFigure(
 			ManagedObjectTaskFlowFigureContext context) {
 		return new StandardManagedObjectTaskFlowFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createManagedObjectTeamFigure
-	 * (net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigureContext)
-	 */
 	@Override
 	public ManagedObjectTeamFigure createManagedObjectTeamFigure(
 			ManagedObjectTeamFigureContext context) {
 		return new StandardManagedObjectTeamFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createOfficeFigure
-	 * (net.officefloor.eclipse.skin.officefloor.OfficeFigureContext)
-	 */
 	@Override
 	public OfficeFigure createOfficeFigure(OfficeFigureContext context) {
 		return new StandardOfficeFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createOfficeManagedObject
-	 * (net.officefloor.eclipse.skin.officefloor.OfficeManagedObjectFigureContext
-	 * )
-	 */
 	@Override
 	public OfficeManagedObjectFigure createOfficeManagedObject(
 			OfficeManagedObjectFigureContext context) {
 		return new StandardOfficeManagedObjectFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createOfficeTaskFigure
-	 * (net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext)
-	 */
 	@Override
 	public net.officefloor.eclipse.skin.officefloor.OfficeTaskFigure createOfficeTaskFigure(
 			OfficeTaskFigureContext context) {
 		return new StandardOfficeTaskFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createOfficeTeamFigure
-	 * (net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext)
-	 */
 	@Override
 	public OfficeTeamFigure createOfficeTeamFigure(
 			OfficeTeamFigureContext context) {
 		return new StandardOfficeTeamFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory#
-	 * createTeamFigure
-	 * (net.officefloor.eclipse.skin.officefloor.TeamFigureContext)
-	 */
 	@Override
 	public TeamFigure createTeamFigure(TeamFigureContext context) {
 		return new StandardTeamFigure(context);

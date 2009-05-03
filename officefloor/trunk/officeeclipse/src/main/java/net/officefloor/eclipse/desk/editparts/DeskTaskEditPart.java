@@ -28,67 +28,49 @@ import net.officefloor.eclipse.desk.operations.CreateFlowItemFromDeskTaskOperati
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.DeskTaskFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskToFlowItemModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.DeskTaskModel.DeskTaskEvent;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.desk.WorkTaskModel.WorkTaskEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.desk.DeskTaskModel}.
+ * {@link EditPart} for the {@link WorkTaskModel}.
  * 
  * @author Daniel
  */
+// rename to WorkTaskEditPart
 public class DeskTaskEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<DeskTaskModel, OfficeFloorFigure>
+		AbstractOfficeFloorSourceNodeEditPart<WorkTaskModel, OfficeFloorFigure>
 		implements DeskTaskFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createDeskTaskFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populateModelChildren(java.util.List)
-	 */
+	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel().getObjects());
+		childModels.addAll(this.getCastedModel().getTaskObjects());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
+	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<DeskTaskEvent>(DeskTaskEvent
+		handlers.add(new PropertyChangeHandler<WorkTaskEvent>(WorkTaskEvent
 				.values()) {
-			protected void handlePropertyChange(DeskTaskEvent property,
+			protected void handlePropertyChange(WorkTaskEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_FLOW_ITEM:
-				case REMOVE_FLOW_ITEM:
+				case ADD_TASK:
+				case REMOVE_TASK:
 					DeskTaskEditPart.this.refreshSourceConnections();
 					break;
-				case ADD_OBJECT:
-				case REMOVE_OBJECT:
+				case ADD_TASK_OBJECT:
+				case REMOVE_TASK_OBJECT:
 					DeskTaskEditPart.this.refreshChildren();
 					break;
 				}
@@ -96,54 +78,31 @@ public class DeskTaskEditPart extends
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
+	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
-				DeskTaskToFlowItemModel conn = new DeskTaskToFlowItemModel();
-				conn.setTask((DeskTaskModel) source);
-				conn.setFlowItem((FlowItemModel) target);
+				WorkTaskToTaskModel conn = new WorkTaskToTaskModel();
+				conn.setWorkTask((WorkTaskModel) source);
+				conn.setTask((TaskModel) target);
 				conn.connect();
 				return conn;
 			}
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(FlowItemModel.class);
+		types.add(TaskModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getFlowItems());
+		models.addAll(this.getCastedModel().getTasks());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
 	}
@@ -152,24 +111,13 @@ public class DeskTaskEditPart extends
 	 * ============ DeskTaskFigureContext ============
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskTaskFigureContext#getTaskName()
-	 */
+	// TODO rename to getWorkTaskName
 	@Override
 	public String getTaskName() {
-		return this.getCastedModel().getName();
+		return this.getCastedModel().getWorkTaskName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskTaskFigureContext#createAsNewFlowItem
-	 * ()
-	 */
+	// TODO rename to createAsNewTask
 	@Override
 	public void createAsNewFlowItem() {
 		OperationUtil.execute(new CreateFlowItemFromDeskTaskOperation(), 100,

@@ -16,12 +16,13 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
+import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.office.OfficeModel;
-
 /**
- * Context for the {@link OfficeModel} {@link IFigure}.
+ * Context for the {@link DeployedOfficeModel} {@link IFigure}.
  * 
  * @author Daniel
  */

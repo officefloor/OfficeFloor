@@ -16,23 +16,24 @@
  */
 package net.officefloor.eclipse.wizard.file;
 
-import net.officefloor.eclipse.wizard.file.AbstractNewWizard;
-import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.section.SectionModel;
 
 import org.eclipse.jface.wizard.IWizard;
 
 /**
- * {@link IWizard} to create a {@link RoomModel}.
+ * {@link IWizard} to create a {@link SectionModel}.
  * 
  * @author Daniel
  */
+// TODO rename to SectionNewWizard
 public class RoomNewWizard extends AbstractNewWizard {
 
 	/**
 	 * Initiate.
 	 */
 	public RoomNewWizard() {
-		super("New Room", "Create a new Room", "new_room", "room", "<room/>");
+		super("New Section", "Create a new Section", "new_section", "section",
+				"<section/>");
 	}
 
 }

@@ -16,15 +16,15 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.ConnectionAnchor;
-
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
+
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link ManagedObjectTeamFigure}.
@@ -45,8 +45,10 @@ public class StandardManagedObjectTeamFigure extends AbstractOfficeFloorFigure
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
 				.getTeamName(), ConnectorDirection.WEST, ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this.registerConnectionAnchor(ManagedObjectTeamToTeamModel.class,
+		this.registerConnectionAnchor(
+				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
 				anchor);
 		this.setFigure(figure);
 	}
+
 }

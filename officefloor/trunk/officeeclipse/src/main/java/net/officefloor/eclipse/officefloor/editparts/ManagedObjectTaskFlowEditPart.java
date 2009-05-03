@@ -20,95 +20,68 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.dialog.OfficeTaskDialog;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
-import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
-import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
-import net.officefloor.model.officefloor.OfficeTaskModel;
-import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel.ManagedObjectTaskFlowEvent;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel.OfficeFloorManagedObjectSourceFlowEvent;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link EditPart} for the {@link ManagedObjectTaskFlowModel}.
+ * {@link EditPart} for the {@link OfficeFloorManagedObjectSourceFlowModel}.
  * 
  * @author Daniel
  */
+// TODO rename to OfficeFloorManagedObjectSourceFlowModel
 public class ManagedObjectTaskFlowEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTaskFlowModel, OfficeFloorFigure>
+		AbstractOfficeFloorSourceNodeEditPart<OfficeFloorManagedObjectSourceFlowModel, OfficeFloorFigure>
 		implements ManagedObjectTaskFlowFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ManagedObjectTaskFlowEvent>(
-				ManagedObjectTaskFlowEvent.values()) {
-			@Override
-			protected void handlePropertyChange(
-					ManagedObjectTaskFlowEvent property, PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_OFFICE_TASK:
-					ManagedObjectTaskFlowEditPart.this
-							.refreshSourceConnections();
-					break;
-				}
-			}
-		});
+		handlers
+				.add(new PropertyChangeHandler<OfficeFloorManagedObjectSourceFlowEvent>(
+						OfficeFloorManagedObjectSourceFlowEvent.values()) {
+					@Override
+					protected void handlePropertyChange(
+							OfficeFloorManagedObjectSourceFlowEvent property,
+							PropertyChangeEvent evt) {
+						switch (property) {
+						case CHANGE_DEPLOYED_OFFICE_INPUT:
+							ManagedObjectTaskFlowEditPart.this
+									.refreshSourceConnections();
+							break;
+						}
+					}
+				});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createManagedObjectTaskFlowFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
 			@Override
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
-
-				// Obtain the office task
-				OfficeTaskModel task = OfficeTaskDialog.getOfficeTaskModel(
-						target, ManagedObjectTaskFlowEditPart.this.getEditor());
-				if (task == null) {
-					// No task
-					return null;
-				}
-
-				// Create the connection to the task
-				FlowTaskToOfficeTaskModel conn = new FlowTaskToOfficeTaskModel();
-				conn.setTaskFlow((ManagedObjectTaskFlowModel) source);
-				conn.setOfficeTask(task);
+				// Create the connection to the office input
+				OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel conn = new OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel();
+				conn
+						.setOfficeFloorManagedObjectSoruceFlow((OfficeFloorManagedObjectSourceFlowModel) source);
+				conn.setDeployedOfficeInput((DeployedOfficeInputModel) target);
 				conn.connect();
 
 				// Return the connection
@@ -117,41 +90,20 @@ public class ManagedObjectTaskFlowEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(OfficeTaskModel.class);
-		types.add(OfficeFloorOfficeModel.class);
+		types.add(DeployedOfficeInputModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		FlowTaskToOfficeTaskModel conn = this.getCastedModel().getOfficeTask();
+		OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel conn = this
+				.getCastedModel().getDeployedOfficeInput();
 		if (conn != null) {
 			models.add(conn);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Never a target
@@ -161,40 +113,21 @@ public class ManagedObjectTaskFlowEditPart
 	 * ================ ManagedObjectTaskFlowFigureContext ====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext
-	 * #getFlowName()
-	 */
 	@Override
 	public String getFlowName() {
-		return this.getCastedModel().getFlowId();
+		return this.getCastedModel().getOfficeFloorManagedObjectSourceFlowName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext
-	 * #getInitialTaskName()
-	 */
 	@Override
 	public String getInitialTaskName() {
-		return this.getCastedModel().getInitialTaskName();
+//		return this.getCastedModel().getInitialTaskName();
+		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext
-	 * #getInitialWorkName()
-	 */
 	@Override
 	public String getInitialWorkName() {
-		return this.getCastedModel().getInitialWorkName();
+//		return this.getCastedModel().getInitialWorkName();
+		return null;
 	}
 
 }

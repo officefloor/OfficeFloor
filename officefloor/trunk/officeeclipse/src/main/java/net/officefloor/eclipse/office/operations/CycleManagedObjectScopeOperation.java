@@ -17,7 +17,6 @@
 package net.officefloor.eclipse.office.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.office.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 
@@ -36,34 +35,28 @@ public class CycleManagedObjectScopeOperation extends
 		super("Cycle managed object scope", ExternalManagedObjectEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(Context context) {
 
-		// Obtain the edit part
-		final ExternalManagedObjectEditPart editPart = context.getEditPart();
-
-		// Obtain the initial and next scope
-		final String initialScope = editPart.getCastedModel().getScope();
-		final String nextScope = editPart.getNextScope(initialScope);
-
-		// Make changes
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				editPart.getCastedModel().setScope(nextScope);
-			}
-
-			@Override
-			protected void undoCommand() {
-				editPart.getCastedModel().setScope(initialScope);
-			}
-		});
+//		// Obtain the edit part
+//		final ExternalManagedObjectEditPart editPart = context.getEditPart();
+//
+//		// Obtain the initial and next scope
+//		final String initialScope = editPart.getCastedModel().getScope();
+//		final String nextScope = editPart.getNextScope(initialScope);
+//
+//		// Make changes
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				editPart.getCastedModel().setScope(nextScope);
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				editPart.getCastedModel().setScope(initialScope);
+//			}
+//		});
 	}
 }

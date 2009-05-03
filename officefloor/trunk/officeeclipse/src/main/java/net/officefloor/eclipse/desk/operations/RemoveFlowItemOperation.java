@@ -20,16 +20,16 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
 import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.TaskModel;
 
 /**
- * {@link Operation} to remove the {@link FlowItemModel}.
+ * {@link Operation} to remove the {@link TaskModel}.
  * 
  * @author Daniel
  */
 public class RemoveFlowItemOperation
 		extends
-		AbstractRemoveItemModelOperation<FlowItemEditPart, FlowItemModel, DeskModel> {
+		AbstractRemoveItemModelOperation<FlowItemEditPart, TaskModel, DeskModel> {
 
 	/**
 	 * Initiate.
@@ -38,28 +38,14 @@ public class RemoveFlowItemOperation
 		super("Remove flow item", FlowItemEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #remove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void remove(FlowItemModel model, DeskModel parent) {
-		parent.removeFlowItem(model);
+	protected void remove(TaskModel model, DeskModel parent) {
+		parent.removeTask(model);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #unremove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void unremove(FlowItemModel model, DeskModel parent) {
-		parent.addFlowItem(model);
+	protected void unremove(TaskModel model, DeskModel parent) {
+		parent.addTask(model);
 	}
 
 }

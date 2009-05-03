@@ -31,8 +31,7 @@ import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalFlowModel.ExternalFlowEvent;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.desk.ExternalFlowModel}.
+ * {@link EditPart} for the {@link ExternalFlowModel}.
  * 
  * @author Daniel
  */
@@ -40,61 +39,30 @@ public class ExternalFlowEditPart extends
 		AbstractOfficeFloorNodeEditPart<ExternalFlowModel, OfficeFloorFigure>
 		implements RemovableEditPart, ExternalFlowFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createExternalFlowFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Not a source
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getOutputs());
-		models.addAll(this.getCastedModel().getPreviousFlowItems());
+		models.addAll(this.getCastedModel().getTaskFlows());
+		models.addAll(this.getCastedModel().getTaskEscalations());
+		models.addAll(this.getCastedModel().getPreviousTasks());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
+	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<ExternalFlowEvent>(
@@ -102,10 +70,12 @@ public class ExternalFlowEditPart extends
 			protected void handlePropertyChange(ExternalFlowEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_OUTPUT:
-				case REMOVE_OUTPUT:
-				case ADD_PREVIOUS_FLOW_ITEM:
-				case REMOVE_PREVIOUS_FLOW_ITEM:
+				case ADD_TASK_FLOW:
+				case REMOVE_TASK_FLOW:
+				case ADD_TASK_ESCALATION:
+				case REMOVE_TASK_ESCALATION:
+				case ADD_PREVIOUS_TASK:
+				case REMOVE_PREVIOUS_TASK:
 					ExternalFlowEditPart.this.refreshTargetConnections();
 					break;
 				}
@@ -113,13 +83,6 @@ public class ExternalFlowEditPart extends
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveExternalFlowOperation();
@@ -129,15 +92,9 @@ public class ExternalFlowEditPart extends
 	 * ================= ExternalFlowFigureContext =====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.desk.ExternalFlowFigureContext#
-	 * getExternalFlowName()
-	 */
 	@Override
 	public String getExternalFlowName() {
-		return this.getCastedModel().getName();
+		return this.getCastedModel().getExternalFlowName();
 	}
 
 }

@@ -23,8 +23,6 @@ import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.office.FlowItemToPostAdministratorDutyModel;
-import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -54,10 +52,10 @@ public class StandardDutyFigure extends AbstractOfficeFloorFigure implements
 		LabelConnectorFigure duty = new LabelConnectorFigure(context
 				.getDutyName(), ConnectorDirection.WEST, ColorConstants.black);
 		ConnectionAnchor anchor = duty.getConnectionAnchor();
-		this.registerConnectionAnchor(
-				FlowItemToPreAdministratorDutyModel.class, anchor);
-		this.registerConnectionAnchor(
-				FlowItemToPostAdministratorDutyModel.class, anchor);
+//		this.registerConnectionAnchor(
+//				FlowItemToPreAdministratorDutyModel.class, anchor);
+//		this.registerConnectionAnchor(
+//				FlowItemToPostAdministratorDutyModel.class, anchor);
 		figure.add(duty);
 
 		// Create the content pane

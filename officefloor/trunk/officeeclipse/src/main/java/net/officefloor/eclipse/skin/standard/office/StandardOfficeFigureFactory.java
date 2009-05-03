@@ -18,12 +18,8 @@ package net.officefloor.eclipse.skin.standard.office;
 
 import net.officefloor.eclipse.skin.office.AdministratorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
-import net.officefloor.eclipse.skin.office.DeskFigure;
-import net.officefloor.eclipse.skin.office.DeskFigureContext;
 import net.officefloor.eclipse.skin.office.DutyFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
-import net.officefloor.eclipse.skin.office.DutyFlowFigure;
-import net.officefloor.eclipse.skin.office.DutyFlowFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalTeamFigure;
@@ -42,111 +38,39 @@ import net.officefloor.eclipse.skin.office.RoomFigureContext;
  */
 public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.office.OfficeFigureFactory#
-	 * createAdministratorFigure
-	 * (net.officefloor.eclipse.skin.office.AdministratorFigureContext)
-	 */
 	@Override
 	public AdministratorFigure createAdministratorFigure(
 			AdministratorFigureContext context) {
 		return new StandardAdministratorFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.office.OfficeFigureFactory#createDeskFigure
-	 * (net.officefloor.eclipse.skin.office.DeskFigureContext)
-	 */
-	@Override
-	public DeskFigure createDeskFigure(DeskFigureContext context) {
-		return new StandardDeskFigure(context);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.office.OfficeFigureFactory#createDutyFigure
-	 * (net.officefloor.eclipse.skin.office.DutyFigureContext)
-	 */
 	@Override
 	public DutyFigure createDutyFigure(DutyFigureContext context) {
 		return new StandardDutyFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.office.OfficeFigureFactory#createDutyFlowFigure
-	 * (net.officefloor.eclipse.skin.office.DutyFlowFigureContext)
-	 */
-	@Override
-	public DutyFlowFigure createDutyFlowFigure(DutyFlowFigureContext context) {
-		return new StandardDutyFlowFigure(context);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.office.OfficeFigureFactory#
-	 * createExternalManagedObjectFigure
-	 * (net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext)
-	 */
 	@Override
 	public ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			final ExternalManagedObjectFigureContext context) {
 		return new StandardExternalManagedObjectFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.office.OfficeFigureFactory#
-	 * createExternalTeamFigure
-	 * (net.officefloor.eclipse.skin.office.ExternalTeamFigureContext)
-	 */
 	@Override
 	public ExternalTeamFigure createExternalTeamFigure(
 			ExternalTeamFigureContext context) {
 		return new StandardExternalTeamFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.office.OfficeFigureFactory#createFlowItemFigure
-	 * (net.officefloor.eclipse.skin.office.FlowItemFigureContext)
-	 */
 	@Override
 	public FlowItemFigure createFlowItemFigure(FlowItemFigureContext context) {
 		return new StandardFlowItemFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.office.OfficeFigureFactory#createRoomFigure
-	 * (net.officefloor.eclipse.skin.office.RoomFigureContext)
-	 */
 	@Override
 	public RoomFigure createRoomFigure(RoomFigureContext context) {
 		return new StandardRoomFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.office.OfficeFigureFactory#
-	 * createFlowItemAdministrationJoinPointFigure()
-	 */
 	@Override
 	public FlowItemAdministrationJoinPointFigure createFlowItemAdministrationJoinPointFigure() {
 		return new StandardFlowItemAdministrationJoinPointFigure();

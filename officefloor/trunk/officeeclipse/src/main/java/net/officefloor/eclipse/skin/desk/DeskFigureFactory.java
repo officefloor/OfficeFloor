@@ -18,14 +18,8 @@ package net.officefloor.eclipse.skin.desk;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskObjectModel;
-import net.officefloor.model.desk.DeskWorkModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.FlowItemEscalationModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputModel;
 
 import org.eclipse.draw2d.IFigure;
 
@@ -65,17 +59,6 @@ public interface DeskFigureFactory {
 	 */
 	DeskTaskObjectFigure createDeskTaskObjectFigure(
 			DeskTaskObjectFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ExternalEscalationFigureContext}.
-	 * 
-	 * @param context
-	 *            {@link ExternalEscalationFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	ExternalEscalationFigure createExternalEscalationFigure(
-			ExternalEscalationFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link ExternalFlowModel}.

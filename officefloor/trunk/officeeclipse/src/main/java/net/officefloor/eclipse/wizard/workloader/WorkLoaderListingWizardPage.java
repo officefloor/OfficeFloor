@@ -16,7 +16,7 @@
  */
 package net.officefloor.eclipse.wizard.workloader;
 
-import net.officefloor.work.WorkLoader;
+import net.officefloor.compile.work.WorkLoader;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -68,12 +68,9 @@ public class WorkLoaderListingWizardPage extends WizardPage {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets
-	 * .Composite)
+	 * ==================== IDialogPage ======================================
 	 */
+	
 	@Override
 	public void createControl(Composite parent) {
 

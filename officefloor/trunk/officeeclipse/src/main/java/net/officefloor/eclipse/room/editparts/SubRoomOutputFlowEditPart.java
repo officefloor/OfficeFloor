@@ -26,32 +26,27 @@ import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.room.SubRoomOutputFlowFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.room.ExternalFlowModel;
-import net.officefloor.model.room.OutputFlowToExternalFlowModel;
-import net.officefloor.model.room.OutputFlowToInputFlowModel;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel.SubRoomOutputFlowEvent;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionOutputModel;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
+import net.officefloor.model.section.SubSectionOutputModel.SubSectionOutputEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.room.SubRoomOutputFlowModel}.
+ * {@link EditPart} for the {@link SubSectionOutputModel}.
  * 
  * @author Daniel
  */
+// TODO rename to SubSectionOutputModel
 public class SubRoomOutputFlowEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<SubRoomOutputFlowModel, OfficeFloorFigure>
+		AbstractOfficeFloorSourceNodeEditPart<SubSectionOutputModel, OfficeFloorFigure>
 		implements SubRoomOutputFlowFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
@@ -60,18 +55,18 @@ public class SubRoomOutputFlowEditPart
 
 				// TODO Handle always only connected to one type
 
-				if (target instanceof SubRoomInputFlowModel) {
+				if (target instanceof SubSectionInputModel) {
 					// Create the flow connection
-					OutputFlowToInputFlowModel conn = new OutputFlowToInputFlowModel();
-					conn.setOutput((SubRoomOutputFlowModel) source);
-					conn.setInput((SubRoomInputFlowModel) target);
+					SubSectionOutputToSubSectionInputModel conn = new SubSectionOutputToSubSectionInputModel();
+					conn.setSubSectionOutput((SubSectionOutputModel) source);
+					conn.setSubSectionInput((SubSectionInputModel) target);
 					conn.connect();
 					return conn;
 
 				} else if (target instanceof ExternalFlowModel) {
 					// Create the external flow connection
-					OutputFlowToExternalFlowModel conn = new OutputFlowToExternalFlowModel();
-					conn.setOutput((SubRoomOutputFlowModel) source);
+					SubSectionOutputToExternalFlowModel conn = new SubSectionOutputToExternalFlowModel();
+					conn.setSubSectionOutput((SubSectionOutputModel) source);
 					conn.setExternalFlow((ExternalFlowModel) target);
 					conn.connect();
 					return conn;
@@ -87,70 +82,42 @@ public class SubRoomOutputFlowEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(SubRoomInputFlowModel.class);
+		types.add(SubSectionInputModel.class);
 		types.add(ExternalFlowModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		OutputFlowToInputFlowModel sourceInput = this.getCastedModel()
-				.getInput();
+		SubSectionOutputToSubSectionInputModel sourceInput = this
+				.getCastedModel().getSubSectionInput();
 		if (sourceInput != null) {
 			models.add(sourceInput);
 		}
-		OutputFlowToExternalFlowModel sourceExternal = this.getCastedModel()
-				.getExternalFlow();
+		SubSectionOutputToExternalFlowModel sourceExternal = this
+				.getCastedModel().getExternalFlow();
 		if (sourceExternal != null) {
 			models.add(sourceExternal);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<SubRoomOutputFlowEvent>(
-				SubRoomOutputFlowEvent.values()) {
+		handlers.add(new PropertyChangeHandler<SubSectionOutputEvent>(
+				SubSectionOutputEvent.values()) {
 			@Override
-			protected void handlePropertyChange(
-					SubRoomOutputFlowEvent property, PropertyChangeEvent evt) {
+			protected void handlePropertyChange(SubSectionOutputEvent property,
+					PropertyChangeEvent evt) {
 				switch (property) {
 				case CHANGE_EXTERNAL_FLOW:
-				case CHANGE_INPUT:
+				case CHANGE_SUB_SECTION_INPUT:
 					SubRoomOutputFlowEditPart.this.refreshSourceConnections();
 					break;
 				}
@@ -158,13 +125,6 @@ public class SubRoomOutputFlowEditPart
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
@@ -175,15 +135,9 @@ public class SubRoomOutputFlowEditPart
 	 * ==================== SubRoomOutputFlowFigureContext ==================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.room.SubRoomOutputFlowFigureContext#
-	 * getSubRoomOutputFlowName()
-	 */
 	@Override
 	public String getSubRoomOutputFlowName() {
-		return this.getCastedModel().getName();
+		return this.getCastedModel().getSubSectionOutputName();
 	}
 
 }

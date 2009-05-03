@@ -17,9 +17,7 @@
 package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
-import net.officefloor.model.desk.FlowItemModel;
 
 /**
  * Toggles {@link FlowItemModel} being public.
@@ -44,28 +42,28 @@ public class ToggleFlowItemPublicOperation extends
 	 */
 	@Override
 	protected void perform(Context context) {
-
-		// Obtain the flow item
-		final FlowItemModel flowItem = context.getEditPart().getCastedModel();
-
-		// Obtain initial public state
-		final boolean initialState = flowItem.getIsPublic();
-
-		// Make change
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				// Toggle
-				flowItem.setIsPublic(!initialState);
-			}
-
-			@Override
-			protected void undoCommand() {
-				// Set back to initial state
-				flowItem.setIsPublic(initialState);
-			}
-		});
+//
+//		// Obtain the flow item
+//		final FlowItemModel flowItem = context.getEditPart().getCastedModel();
+//
+//		// Obtain initial public state
+//		final boolean initialState = flowItem.getIsPublic();
+//
+//		// Make change
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				// Toggle
+//				flowItem.setIsPublic(!initialState);
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				// Set back to initial state
+//				flowItem.setIsPublic(initialState);
+//			}
+//		});
 	}
 
 }

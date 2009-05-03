@@ -23,9 +23,7 @@ import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
-import net.officefloor.eclipse.office.editparts.DeskEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
-import net.officefloor.eclipse.office.editparts.DutyFlowEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalTeamEditPart;
 import net.officefloor.eclipse.office.editparts.FlowItemAdministrationJoinPointEditPart;
@@ -37,31 +35,26 @@ import net.officefloor.eclipse.office.models.PreFlowItemAdministrationJointPoint
 import net.officefloor.eclipse.office.operations.AddAdministratorOperation;
 import net.officefloor.eclipse.office.operations.AddExternalTeamOperation;
 import net.officefloor.eclipse.office.operations.CycleManagedObjectScopeOperation;
-import net.officefloor.eclipse.office.operations.ManageOfficeRoomOperation;
 import net.officefloor.eclipse.office.operations.RefreshOfficeRoomOperation;
+import net.officefloor.model.impl.office.OfficeRepositoryImpl;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministratorModel;
-import net.officefloor.model.office.AdministratorToManagedObjectModel;
-import net.officefloor.model.office.AdministratorToTeamModel;
-import net.officefloor.model.office.DutyFlowModel;
-import net.officefloor.model.office.DutyFlowToFlowItemModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.ExternalTeamModel;
-import net.officefloor.model.office.FlowItemModel;
-import net.officefloor.model.office.FlowItemToPostAdministratorDutyModel;
-import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
-import net.officefloor.model.office.FlowItemToTeamModel;
-import net.officefloor.model.office.OfficeDeskModel;
 import net.officefloor.model.office.OfficeModel;
-import net.officefloor.model.office.OfficeRoomModel;
-import net.officefloor.office.OfficeLoader;
-import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
+import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.office.OfficeTeamModel;
+import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.IEditorPart;
 
 /**
- * Editor for the {@link net.officefloor.model.office.OfficeModel}.
+ * Editor for the {@link OfficeModel}.
  * 
  * @author Daniel
  */
@@ -73,106 +66,58 @@ public class OfficeEditor extends
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.office";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
-	 * populateEditPartTypes(java.util.Map)
-	 */
 	@Override
 	protected void populateEditPartTypes(
 			Map<Class<?>, Class<? extends EditPart>> map) {
 
 		// Entities
 		map.put(OfficeModel.class, OfficeEditPart.class);
-		map.put(ExternalTeamModel.class, ExternalTeamEditPart.class);
+		map.put(OfficeTeamModel.class, ExternalTeamEditPart.class);
 		map.put(ExternalManagedObjectModel.class,
 				ExternalManagedObjectEditPart.class);
-		map.put(OfficeRoomModel.class, RoomEditPart.class);
-		map.put(OfficeDeskModel.class, DeskEditPart.class);
-		map.put(FlowItemModel.class, FlowItemEditPart.class);
+		map.put(OfficeSectionModel.class, RoomEditPart.class);
+		map.put(OfficeTaskModel.class, FlowItemEditPart.class);
 		map.put(AdministratorModel.class, AdministratorEditPart.class);
 		map.put(DutyModel.class, DutyEditPart.class);
-		map.put(DutyFlowModel.class, DutyFlowEditPart.class);
 		map.put(PreFlowItemAdministrationJointPointModel.class,
 				FlowItemAdministrationJoinPointEditPart.class);
 		map.put(PostFlowItemAdministrationJointPointModel.class,
 				FlowItemAdministrationJoinPointEditPart.class);
 
 		// Connections
-		map.put(FlowItemToTeamModel.class, OfficeFloorConnectionEditPart.class);
-		map.put(AdministratorToManagedObjectModel.class,
+		map.put(OfficeSectionOutputToOfficeSectionInputModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(AdministratorToTeamModel.class,
+		map.put(OfficeSectionObjectToExternalManagedObjectModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(FlowItemToPreAdministratorDutyModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(FlowItemToPostAdministratorDutyModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(DutyFlowToFlowItemModel.class,
+		map.put(OfficeSectionResponsibilityToOfficeTeamModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
-	 */
 	@Override
 	protected boolean isDragTarget() {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel
-	 * (net.officefloor.repository.ConfigurationItem)
-	 */
 	@Override
 	protected OfficeModel retrieveModel(ConfigurationItem configuration)
 			throws Exception {
-		return this.getOfficeLoader().loadOffice(configuration);
+		return new OfficeRepositoryImpl(new ModelRepositoryImpl())
+				.retrieveOffice(configuration);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
-	 * net.officefloor.repository.ConfigurationItem)
-	 */
 	@Override
 	protected void storeModel(OfficeModel model, ConfigurationItem configuration)
 			throws Exception {
-		this.getOfficeLoader().storeOffice(model, configuration);
+		new OfficeRepositoryImpl(new ModelRepositoryImpl()).storeOffice(model,
+				configuration);
 	}
 
-	/**
-	 * Obtains the {@link OfficeLoader}.
-	 * 
-	 * @return {@link OfficeLoader}.
-	 */
-	private OfficeLoader getOfficeLoader() {
-		return new OfficeLoader();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateOperations
-	 * (java.util.List)
-	 */
 	@Override
 	protected void populateOperations(List<Operation> list) {
 
 		// Add model operations
 		list.add(new AddAdministratorOperation());
 		list.add(new AddExternalTeamOperation());
-		list.add(new ManageOfficeRoomOperation(this.getRootEditPart()));
 		list.add(new CycleManagedObjectScopeOperation());
 
 		// Refresh model operations

@@ -18,24 +18,24 @@ package net.officefloor.eclipse.extension.workloader;
 
 import java.util.List;
 
+import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.work.WorkModel;
-import net.officefloor.work.WorkLoader;
-import net.officefloor.work.WorkSpecification;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 /**
- * Interface for extension to provide enriched {@link WorkLoader} usage.
+ * Interface for extension to provide enriched {@link WorkSource} usage.
  * 
  * @author Daniel
  * 
  * @see ExtensionClasspathProvider
  */
-public interface WorkLoaderExtension {
+// TODO rename this to WorkSourceExtension
+public interface WorkLoaderExtension<W extends Work, S extends WorkSource<W>> {
 
 	/**
 	 * Extension ID.
@@ -44,15 +44,15 @@ public interface WorkLoaderExtension {
 			.getExtensionId("workloader");
 
 	/**
-	 * Obtains the class of the {@link WorkLoader} being enriched in its usage.
+	 * Obtains the class of the {@link WorkSource} being enriched in its usage.
 	 * 
-	 * @return Class of the {@link WorkLoader} being enriched in its usage.
+	 * @return Class of the {@link WorkSource} being enriched in its usage.
 	 */
-	Class<? extends WorkLoader> getWorkLoaderClass();
+	Class<S> getWorkSourceClass();
 
 	/**
 	 * Obtains the display name. This is a descriptive name that can be used
-	 * other than the fully qualified name of the {@link WorkLoader}.
+	 * other than the fully qualified name of the {@link WorkSource}.
 	 * 
 	 * @return Display name.
 	 */
@@ -76,11 +76,11 @@ public interface WorkLoaderExtension {
 			WorkLoaderExtensionContext context);
 
 	/**
-	 * Obtains the suggested name of the {@link WorkModel}.
+	 * Obtains the suggested name of the {@link Work}.
 	 * 
 	 * @param properties
 	 *            Listing of populated {@link WorkLoaderProperty} instances.
-	 * @return Suggested {@link WorkModel} name or <code>null</code> if no
+	 * @return Suggested {@link Work} name or <code>null</code> if no
 	 *         suggestion.
 	 */
 	String getSuggestedWorkName(List<WorkLoaderProperty> properties);

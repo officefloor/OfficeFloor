@@ -17,7 +17,7 @@
 package net.officefloor.eclipse.skin.room;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.room.ExternalFlowModel;
+import net.officefloor.model.section.ExternalFlowModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link ExternalFlowModel}.
@@ -25,5 +25,4 @@ import net.officefloor.model.room.ExternalFlowModel;
  * @author Daniel
  */
 public interface ExternalFlowFigure extends OfficeFloorFigure {
-
 }

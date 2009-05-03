@@ -29,46 +29,38 @@ import net.officefloor.eclipse.room.RoomEditor;
 import net.officefloor.eclipse.room.operations.RemoveSubRoomOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.room.SubRoomFigureContext;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.model.room.SubRoomModel.SubRoomEvent;
+import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionModel.SubSectionEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.room.SubRoomModel}.
+ * {@link EditPart} for the {@link SubSectionModel}.
  * 
  * @author Daniel
  */
+// TODO rename to SubSectionEditPart
 public class SubRoomEditPart extends
-		AbstractOfficeFloorEditPart<SubRoomModel, OfficeFloorFigure> implements
-		RemovableEditPart, SubRoomFigureContext {
+		AbstractOfficeFloorEditPart<SubSectionModel, OfficeFloorFigure>
+		implements RemovableEditPart, SubRoomFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<SubRoomEvent>(SubRoomEvent
+		handlers.add(new PropertyChangeHandler<SubSectionEvent>(SubSectionEvent
 				.values()) {
 			@Override
-			protected void handlePropertyChange(SubRoomEvent property,
+			protected void handlePropertyChange(SubSectionEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_INPUT_FLOW:
-				case REMOVE_INPUT_FLOW:
-				case ADD_MANAGED_OBJECT:
-				case REMOVE_MANAGED_OBJECT:
-				case ADD_OUTPUT_FLOW:
-				case REMOVE_OUTPUT_FLOW:
-				case ADD_ESCALATION:
-				case REMOVE_ESCALATION:
+				case ADD_SUB_SECTION_INPUT:
+				case REMOVE_SUB_SECTION_INPUT:
+				case ADD_SUB_SECTION_OUTPUT:
+				case REMOVE_SUB_SECTION_OUTPUT:
+				case ADD_SUB_SECTION_OBJECT:
+				case REMOVE_SUB_SECTION_OBJECT:
 					SubRoomEditPart.this.refreshChildren();
 					break;
 				}
@@ -76,79 +68,45 @@ public class SubRoomEditPart extends
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
 				.createSubRoomFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populateModelChildren(java.util.List)
-	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel().getInputFlows());
-		childModels.addAll(this.getCastedModel().getOutputFlows());
-		childModels.addAll(this.getCastedModel().getEscalations());
-		childModels.addAll(this.getCastedModel().getManagedObjects());
+		childModels.addAll(this.getCastedModel().getSubSectionInputs());
+		childModels.addAll(this.getCastedModel().getSubSectionOutputs());
+		childModels.addAll(this.getCastedModel().getSubSectionObjects());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveSubRoomOperation();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * handleDoubleClick(org.eclipse.gef.Request)
-	 */
 	@Override
 	protected Command handleDoubleClick(Request request) {
 
-		// Determine if open the desk
-		String deskPath = this.getCastedModel().getDesk();
-		if (deskPath != null) {
-			// Is desk, so open it
-			this.openClasspathFile(deskPath, DeskEditor.EDITOR_ID);
-			return null;
-		}
+		// TODO handle opening the sub section
 
-		// Not a desk, so must be a room
-		String roomPath = this.getCastedModel().getRoom();
-		this.openClasspathFile(roomPath, RoomEditor.EDITOR_ID);
+		// // Determine if open the desk
+		// String deskPath = this.getCastedModel().getDesk();
+		// if (deskPath != null) {
+		// // Is desk, so open it
+		// this.openClasspathFile(deskPath, DeskEditor.EDITOR_ID);
+		// return null;
+		// }
+		//
+		// // Not a desk, so must be a room
+		// String roomPath = this.getCastedModel().getRoom();
+		// this.openClasspathFile(roomPath, RoomEditor.EDITOR_ID);
 
 		// No command, as no need for undo
 		return null;
@@ -158,15 +116,9 @@ public class SubRoomEditPart extends
 	 * ================= SubRoomFigureContext =======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.room.SubRoomFigureContext#getSubRoomName()
-	 */
 	@Override
 	public String getSubRoomName() {
-		return this.getCastedModel().getId();
+		return this.getCastedModel().getSubSectionName();
 	}
 
 }

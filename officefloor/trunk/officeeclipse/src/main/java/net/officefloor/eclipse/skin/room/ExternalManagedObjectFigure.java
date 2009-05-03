@@ -17,7 +17,7 @@
 package net.officefloor.eclipse.skin.room;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.room.ExternalManagedObjectModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
 
 /**
  * {@link OfficeFloorFigure} for the {@link ExternalManagedObjectModel}.
@@ -25,5 +25,4 @@ import net.officefloor.model.room.ExternalManagedObjectModel;
  * @author Daniel
  */
 public interface ExternalManagedObjectFigure extends OfficeFloorFigure {
-
 }

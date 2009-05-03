@@ -28,7 +28,7 @@ import net.officefloor.eclipse.office.models.FlowItemAdministrationJoinPointEven
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.DutyModel;
-import net.officefloor.model.office.FlowItemModel;
+import net.officefloor.model.office.OfficeTaskModel;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
@@ -42,26 +42,12 @@ public class FlowItemAdministrationJoinPointEditPart
 		extends
 		AbstractOfficeFloorSourceNodeEditPart<AbstractFlowItemAdministrationJoinPointModel<? extends ConnectionModel>, OfficeFloorFigure> {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createFlowItemAdministrationJoinPointFigure();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -82,12 +68,6 @@ public class FlowItemAdministrationJoinPointEditPart
 				});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
@@ -97,12 +77,12 @@ public class FlowItemAdministrationJoinPointEditPart
 
 				// Obtain the types
 				AbstractFlowItemAdministrationJoinPointModel<?> joinPoint = (AbstractFlowItemAdministrationJoinPointModel<?>) source;
-				FlowItemModel flowItem = joinPoint.getFlowItem();
+				OfficeTaskModel task = joinPoint.getTask();
 				DutyModel duty = (DutyModel) target;
 
 				// Create the connection to the duty
 				ConnectionModel connection = FlowItemAdministrationJoinPointEditPart.this
-						.getCastedModel().createDutyConnection(flowItem, duty);
+						.getCastedModel().createDutyConnection(task, duty);
 
 				// Connect and return the connection
 				connection.connect();
@@ -111,37 +91,16 @@ public class FlowItemAdministrationJoinPointEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(DutyModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getDutyConnections());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Never a target

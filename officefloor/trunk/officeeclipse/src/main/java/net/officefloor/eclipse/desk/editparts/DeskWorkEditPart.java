@@ -29,134 +29,85 @@ import net.officefloor.eclipse.desk.operations.RemoveWorkOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.DeskWorkFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.DeskWorkToFlowItemModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.DeskWorkModel.DeskWorkEvent;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
+import net.officefloor.model.desk.WorkModel.WorkEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.desk.DeskWorkModel}.
+ * {@link EditPart} for the {@link WorkModel}.
  * 
  * @author Daniel
  */
+// TODO rename to WorkEditPart
 public class DeskWorkEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<DeskWorkModel, OfficeFloorFigure>
+		AbstractOfficeFloorSourceNodeEditPart<WorkModel, OfficeFloorFigure>
 		implements RemovableEditPart, DeskWorkFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createDeskWorkFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populateModelChildren(java.util.List)
-	 */
+	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel().getTasks());
+		childModels.addAll(this.getCastedModel().getWorkTasks());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
+	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
-				DeskWorkToFlowItemModel conn = new DeskWorkToFlowItemModel();
-				conn.setDeskWork((DeskWorkModel) source);
-				conn.setInitialFlowItem((FlowItemModel) target);
+				WorkToInitialTaskModel conn = new WorkToInitialTaskModel();
+				conn.setWork((WorkModel) source);
+				conn.setInitialTask((TaskModel) target);
 				conn.connect();
 				return conn;
 			}
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(FlowItemModel.class);
+		types.add(TaskModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		DeskWorkToFlowItemModel initialFlow = this.getCastedModel()
-				.getInitialFlowItem();
-		if (initialFlow != null) {
-			models.add(initialFlow);
+		WorkToInitialTaskModel initialTask = this.getCastedModel()
+				.getInitialTask();
+		if (initialTask != null) {
+			models.add(initialTask);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
+	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<DeskWorkEvent>(DeskWorkEvent
-				.values()) {
-			protected void handlePropertyChange(DeskWorkEvent property,
+		handlers.add(new PropertyChangeHandler<WorkEvent>(WorkEvent.values()) {
+			protected void handlePropertyChange(WorkEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case CHANGE_INITIAL_FLOW_ITEM:
+				case CHANGE_INITIAL_TASK:
 					DeskWorkEditPart.this.refreshSourceConnections();
 					break;
-				case ADD_TASK:
-				case REMOVE_TASK:
+				case ADD_WORK_TASK:
+				case REMOVE_WORK_TASK:
 					DeskWorkEditPart.this.refreshChildren();
 					break;
 				}
@@ -164,33 +115,18 @@ public class DeskWorkEditPart extends
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveWorkOperation();
 	}
 
 	/*
-	 * ====================================================
-	 * DeskWorkFigureContext
-	 * ====================================================
+	 * =============== DeskWorkFigureContext =======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.desk.skin.DeskWorkFigureContext#getWorkName()
-	 */
 	@Override
 	public String getWorkName() {
-		return this.getCastedModel().getId();
+		return this.getCastedModel().getWorkName();
 	}
 
 }

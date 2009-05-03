@@ -16,33 +16,34 @@
  */
 package net.officefloor.eclipse.skin.desk;
 
+import net.officefloor.model.desk.TaskModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.desk.FlowItemModel;
-
 /**
- * Context for the {@link FlowItemModel} {@link IFigure}.
+ * Context for the {@link TaskModel} {@link IFigure}.
  * 
  * @author Daniel
  */
+// TODO rename to TaskFigureContext
 public interface FlowItemFigureContext {
 
 	/**
-	 * Obtains the {@link FlowItemModel} name.
+	 * Obtains the {@link TaskModel} name.
 	 * 
-	 * @return {@link FlowItemModel} name.
+	 * @return {@link TaskModel} name.
 	 */
 	String getFlowItemName();
 
 	/**
-	 * Indicates if the {@link FlowItemModel} is public.
+	 * Indicates if the {@link TaskModel} is public.
 	 * 
 	 * @return <code>true</code> if public.
 	 */
 	boolean isPublic();
 
 	/**
-	 * Flags whether the {@link FlowItemModel} is public.
+	 * Flags whether the {@link TaskModel} is public.
 	 * 
 	 * @param isPublic
 	 *            <code>true</code> if to be public.

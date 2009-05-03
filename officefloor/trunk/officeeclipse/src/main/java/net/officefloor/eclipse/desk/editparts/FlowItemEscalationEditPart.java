@@ -27,12 +27,12 @@ import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemEscalationModel.FlowItemEscalationEvent;
+import net.officefloor.model.desk.ExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationToTaskModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskEscalationModel.TaskEscalationEvent;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
@@ -42,29 +42,23 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
+// TODO rename to TaskEscalationEditPart
 public class FlowItemEscalationEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<FlowItemEscalationModel, OfficeFloorFigure>
+		AbstractOfficeFloorSourceNodeEditPart<TaskEscalationModel, OfficeFloorFigure>
 		implements FlowItemEscalationFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<FlowItemEscalationEvent>(
-				FlowItemEscalationEvent.values()) {
+		handlers.add(new PropertyChangeHandler<TaskEscalationEvent>(
+				TaskEscalationEvent.values()) {
 			@Override
-			protected void handlePropertyChange(
-					FlowItemEscalationEvent property, PropertyChangeEvent evt) {
+			protected void handlePropertyChange(TaskEscalationEvent property,
+					PropertyChangeEvent evt) {
 				switch (property) {
-				case CHANGE_ESCALATION_HANDLER:
-				case CHANGE_EXTERNAL_ESCALATION:
+				case CHANGE_TASK:
+				case CHANGE_EXTERNAL_FLOW:
 					FlowItemEscalationEditPart.this.refreshSourceConnections();
 					break;
 				}
@@ -72,25 +66,12 @@ public class FlowItemEscalationEditPart
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createFlowItemEscalation(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
@@ -98,20 +79,19 @@ public class FlowItemEscalationEditPart
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
 
-				if (target instanceof FlowItemModel) {
-					// Create the flow connection
-					FlowItemEscalationToFlowItemModel conn = new FlowItemEscalationToFlowItemModel();
-					conn.setEscalation((FlowItemEscalationModel) source);
-					conn.setHandler((FlowItemModel) target);
+				if (target instanceof TaskModel) {
+					// Create the task connection
+					TaskEscalationToTaskModel conn = new TaskEscalationToTaskModel();
+					conn.setEscalation((TaskEscalationModel) source);
+					conn.setTask((TaskModel) target);
 					conn.connect();
 					return conn;
 
-				} else if (target instanceof ExternalEscalationModel) {
-					// Create the external escalation connection
-					FlowItemEscalationToExternalEscalationModel conn = new FlowItemEscalationToExternalEscalationModel();
-					conn.setEscalation((FlowItemEscalationModel) source);
-					conn
-							.setExternalEscalation((ExternalEscalationModel) target);
+				} else if (target instanceof ExternalFlowModel) {
+					// Create the external flow connection
+					TaskEscalationToExternalFlowModel conn = new TaskEscalationToExternalFlowModel();
+					conn.setTaskEscalation((TaskEscalationModel) source);
+					conn.setExternalFlow((ExternalFlowModel) target);
 					conn.connect();
 					return conn;
 
@@ -124,65 +104,37 @@ public class FlowItemEscalationEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(FlowItemModel.class);
-		types.add(ExternalEscalationModel.class);
+		types.add(TaskModel.class);
+		types.add(ExternalFlowModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		// Flow
-		FlowItemEscalationToFlowItemModel flow = this.getCastedModel()
-				.getEscalationHandler();
-		if (flow != null) {
-			models.add(flow);
+		// Task
+		TaskEscalationToTaskModel task = this.getCastedModel().getTask();
+		if (task != null) {
+			models.add(task);
 		}
 
-		// External escalation
-		FlowItemEscalationToExternalEscalationModel escalation = this
-				.getCastedModel().getExternalEscalation();
-		if (escalation != null) {
-			models.add(escalation);
+		// External flow
+		TaskEscalationToExternalFlowModel extFlow = this.getCastedModel()
+				.getExternalFlow();
+		if (extFlow != null) {
+			models.add(extFlow);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
 	}
 
 	/*
-	 * ================== FlowItemEscalationFigureContext ================
+	 * ================== TaskEscalationFigureContext ================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext#
-	 * getEscalationType()
-	 */
 	@Override
 	public String getEscalationType() {
 		return this.getCastedModel().getEscalationType();

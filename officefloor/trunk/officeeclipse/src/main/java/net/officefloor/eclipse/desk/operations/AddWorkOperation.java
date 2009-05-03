@@ -16,14 +16,9 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
-import net.officefloor.eclipse.wizard.WizardUtil;
-import net.officefloor.eclipse.wizard.workloader.WorkLoaderWizard;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskWorkModel;
 
 /**
  * Adds a {@link DeskWorkModel} to the {@link DeskModel}.
@@ -47,48 +42,48 @@ public class AddWorkOperation extends AbstractOperation<DeskEditPart> {
 	 */
 	@Override
 	protected void perform(Context context) {
-
-		// Obtain the desk edit part
-		final DeskEditPart editPart = context.getEditPart();
-
-		// Create the work
-		DeskWorkModel deskWork = null;
-		try {
-			WorkLoaderWizard workWizard = new WorkLoaderWizard(editPart);
-			if (WizardUtil.runWizard(workWizard, editPart)) {
-				deskWork = workWizard.getDeskWorkModel();
-			}
-		} catch (Throwable ex) {
-			editPart.messageError(ex);
-			return;
-		}
-
-		// Ensure have the work
-		if (deskWork == null) {
-			return;
-		}
-
-		// Set location
-		context.positionModel(deskWork);
-
-		// Update the class path to possibly include the loader
-		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
-				deskWork.getLoader());
-
-		// Add the work
-		final DeskWorkModel work = deskWork;
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				editPart.getCastedModel().addWork(work);
-			}
-
-			@Override
-			protected void undoCommand() {
-				editPart.getCastedModel().removeWork(work);
-			}
-		});
+//
+//		// Obtain the desk edit part
+//		final DeskEditPart editPart = context.getEditPart();
+//
+//		// Create the work
+//		WorkModel deskWork = null;
+//		try {
+//			WorkLoaderWizard workWizard = new WorkLoaderWizard(editPart);
+//			if (WizardUtil.runWizard(workWizard, editPart)) {
+//				deskWork = workWizard.getDeskWorkModel();
+//			}
+//		} catch (Throwable ex) {
+//			editPart.messageError(ex);
+//			return;
+//		}
+//
+//		// Ensure have the work
+//		if (deskWork == null) {
+//			return;
+//		}
+//
+//		// Set location
+//		context.positionModel(deskWork);
+//
+//		// Update the class path to possibly include the loader
+//		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
+//				deskWork.getLoader());
+//
+//		// Add the work
+//		final WorkModel work = deskWork;
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				editPart.getCastedModel().addWork(work);
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				editPart.getCastedModel().removeWork(work);
+//			}
+//		});
 	}
 
 }

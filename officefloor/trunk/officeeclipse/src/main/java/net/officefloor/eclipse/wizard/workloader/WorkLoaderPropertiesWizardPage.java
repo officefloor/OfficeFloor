@@ -19,13 +19,13 @@ package net.officefloor.eclipse.wizard.workloader;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.eclipse.desk.DeskUtil;
 import net.officefloor.eclipse.desk.WorkLoaderInstance;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
 import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.work.WorkModel;
-import net.officefloor.work.WorkLoader;
+import net.officefloor.model.desk.WorkModel;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -63,7 +63,7 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 	/**
 	 * {@link WorkModel}.
 	 */
-	private WorkModel<?> workModel = null;
+	private WorkModel workModel = null;
 
 	/**
 	 * Initiate.
@@ -113,7 +113,7 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 	 * 
 	 * @return {@link WorkModel}.
 	 */
-	public WorkModel<?> getWorkModel() {
+	public WorkModel getWorkModel() {
 		return this.workModel;
 	}
 

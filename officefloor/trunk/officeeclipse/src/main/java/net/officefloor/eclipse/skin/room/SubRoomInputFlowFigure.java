@@ -17,10 +17,10 @@
 package net.officefloor.eclipse.skin.room;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.room.SubRoomInputFlowModel;
+import net.officefloor.model.section.SubSectionInputModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link SubRoomInputFlowModel}.
+ * {@link OfficeFloorFigure} for the {@link SubSectionInputModel}.
  * 
  * @author Daniel
  */

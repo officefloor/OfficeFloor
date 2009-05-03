@@ -23,7 +23,6 @@ import net.officefloor.eclipse.skin.room.RoomFigureFactory;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.room.RoomModel;
 
 import org.eclipse.draw2d.IFigure;
 

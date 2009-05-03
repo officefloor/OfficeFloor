@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import net.officefloor.administratorsource.AdministratorSourceLoader;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
@@ -136,7 +135,9 @@ public class AdministratorSourceCreateDialog extends Dialog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets
+	 * .Composite)
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
@@ -288,15 +289,16 @@ public class AdministratorSourceCreateDialog extends Dialog {
 			ClassLoader projectClassLoader = ProjectClassLoader
 					.create(this.project);
 
-			// Load and specify the administrator source model
-			AdministratorSourceLoader loader = new AdministratorSourceLoader();
-			AdministratorModel administratorSourceModel = loader
-					.loadAdministratorSource(administratorSourceName,
-							administratorSourceInstance, properties,
-							projectClassLoader);
-
-			// Specify the model for return
-			this.administratorSource = administratorSourceModel;
+			// TODO load the administrator model
+//			// Load and specify the administrator source model
+//			AdministratorSourceLoader loader = new AdministratorSourceLoader();
+//			AdministratorModel administratorSourceModel = loader
+//					.loadAdministratorSource(administratorSourceName,
+//							administratorSourceInstance, properties,
+//							projectClassLoader);
+//
+//			// Specify the model for return
+//			this.administratorSource = administratorSourceModel;
 
 		} catch (Throwable ex) {
 			// Failed, report error and do not close dialog
@@ -311,8 +313,7 @@ public class AdministratorSourceCreateDialog extends Dialog {
 	/**
 	 * Creates an instance of {@link AdministratorSource}.
 	 * 
-	 * @return {@link AdministratorSource} or <code>null</code> if not
-	 *         created.
+	 * @return {@link AdministratorSource} or <code>null</code> if not created.
 	 */
 	private AdministratorSource<?, ?> createAdministratorSourceInstance() {
 

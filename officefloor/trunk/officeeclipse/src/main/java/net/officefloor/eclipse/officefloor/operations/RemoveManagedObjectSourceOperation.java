@@ -20,7 +20,7 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectSourceEditPart;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 
 /**
@@ -30,7 +30,7 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
  */
 public class RemoveManagedObjectSourceOperation
 		extends
-		AbstractRemoveItemModelOperation<ManagedObjectSourceEditPart, ManagedObjectSourceModel, OfficeFloorModel> {
+		AbstractRemoveItemModelOperation<ManagedObjectSourceEditPart, OfficeFloorManagedObjectSourceModel, OfficeFloorModel> {
 
 	/**
 	 * Initiate.
@@ -39,30 +39,16 @@ public class RemoveManagedObjectSourceOperation
 		super("Remove managed object source", ManagedObjectSourceEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #remove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void remove(ManagedObjectSourceModel model,
+	protected void remove(OfficeFloorManagedObjectSourceModel model,
 			OfficeFloorModel parent) {
-		parent.removeManagedObjectSource(model);
+		parent.removeOfficeFloorManagedObjectSource(model);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #unremove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void unremove(ManagedObjectSourceModel model,
+	protected void unremove(OfficeFloorManagedObjectSourceModel model,
 			OfficeFloorModel parent) {
-		parent.addManagedObjectSource(model);
+		parent.addOfficeFloorManagedObjectSource(model);
 	}
 
 }

@@ -29,8 +29,7 @@ import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSource
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
-import net.officefloor.managedobjectsource.ManagedObjectSourceLoader;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.PropertyModel;
 
 import org.eclipse.draw2d.ColorConstants;
@@ -258,7 +257,7 @@ public class ManagedObjectSourceInstance {
 	 * @throws Exception
 	 *             If fails to create the {@link ManagedObjectSourceModel}.
 	 */
-	public ManagedObjectSourceModel createManagedObjectSourceModel(
+	public OfficeFloorManagedObjectSourceModel createManagedObjectSourceModel(
 			List<PropertyModel> propertyModels) throws Throwable {
 
 		// Clear the initiated managed object source
@@ -287,17 +286,18 @@ public class ManagedObjectSourceInstance {
 		String managedObjectSourceName = null;
 		long defaultTimeout = 0;
 
-		// Load the managed object source model
-		ManagedObjectSourceModel managedObjectSourceModel = ManagedObjectSourceLoader
-				.loadManagedObjectSource(managedObjectSourceName,
-						managedObjectSource, properties, defaultTimeout,
-						this.classLoader);
-
-		// Managed object source initiated in loading
-		this.initiatedManagedObjectSource = managedObjectSource;
-
-		// Return the managed object source model
-		return managedObjectSourceModel;
+		// TODO Load the managed object source model
+//		OfficeFloorManagedObjectSourceModel managedObjectSourceModel = ManagedObjectSourceLoader
+//				.loadManagedObjectSource(managedObjectSourceName,
+//						managedObjectSource, properties, defaultTimeout,
+//						this.classLoader);
+//
+//		// Managed object source initiated in loading
+//		this.initiatedManagedObjectSource = managedObjectSource;
+//
+//		// Return the managed object source model
+//		return managedObjectSourceModel;
+		return null;
 	}
 
 	/**

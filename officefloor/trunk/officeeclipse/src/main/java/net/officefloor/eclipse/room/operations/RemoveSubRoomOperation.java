@@ -19,17 +19,17 @@ package net.officefloor.eclipse.room.operations;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
 import net.officefloor.eclipse.room.editparts.SubRoomEditPart;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomModel;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SubSectionModel;
 
 /**
- * {@link Operation} to remove the {@link SubRoomModel}.
+ * {@link Operation} to remove the {@link SubSectionModel}.
  * 
  * @author Daniel
  */
 public class RemoveSubRoomOperation
 		extends
-		AbstractRemoveItemModelOperation<SubRoomEditPart, SubRoomModel, RoomModel> {
+		AbstractRemoveItemModelOperation<SubRoomEditPart, SubSectionModel, SectionModel> {
 
 	/**
 	 * Initiate.
@@ -38,28 +38,14 @@ public class RemoveSubRoomOperation
 		super("Remove sub room", SubRoomEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #remove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void remove(SubRoomModel model, RoomModel parent) {
-		parent.removeSubRoom(model);
+	protected void remove(SubSectionModel model, SectionModel parent) {
+		parent.removeSubSection(model);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #unremove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void unremove(SubRoomModel model, RoomModel parent) {
-		parent.addSubRoom(model);
+	protected void unremove(SubSectionModel model, SectionModel parent) {
+		parent.addSubSection(model);
 	}
 
 }

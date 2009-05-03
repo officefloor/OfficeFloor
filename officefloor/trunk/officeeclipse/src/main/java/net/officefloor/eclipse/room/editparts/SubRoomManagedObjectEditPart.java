@@ -26,37 +26,32 @@ import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.room.SubRoomManagedObjectFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel.SubRoomManagedObjectEvent;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectModel.SubSectionObjectEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.room.SubRoomManagedObjectModel}.
+ * {@link EditPart} for the {@link SubSectionObjectModel}.
  * 
  * @author Daniel
  */
+// TODO rename to SubSectionObjectEditPart
 public class SubRoomManagedObjectEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<SubRoomManagedObjectModel, OfficeFloorFigure>
+		AbstractOfficeFloorSourceNodeEditPart<SubSectionObjectModel, OfficeFloorFigure>
 		implements SubRoomManagedObjectFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
-				ManagedObjectToExternalManagedObjectModel conn = new ManagedObjectToExternalManagedObjectModel();
-				conn.setManagedObject((SubRoomManagedObjectModel) source);
+				SubSectionObjectToExternalManagedObjectModel conn = new SubSectionObjectToExternalManagedObjectModel();
+				conn.setSubSectionObject((SubSectionObjectModel) source);
 				conn
 						.setExternalManagedObject((ExternalManagedObjectModel) target);
 				conn.connect();
@@ -65,61 +60,33 @@ public class SubRoomManagedObjectEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(ExternalManagedObjectModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		ManagedObjectToExternalManagedObjectModel source = this
+		SubSectionObjectToExternalManagedObjectModel source = this
 				.getCastedModel().getExternalManagedObject();
 		if (source != null) {
 			models.add(source);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<SubRoomManagedObjectEvent>(
-				SubRoomManagedObjectEvent.values()) {
+		handlers.add(new PropertyChangeHandler<SubSectionObjectEvent>(
+				SubSectionObjectEvent.values()) {
 			@Override
-			protected void handlePropertyChange(
-					SubRoomManagedObjectEvent property, PropertyChangeEvent evt) {
+			protected void handlePropertyChange(SubSectionObjectEvent property,
+					PropertyChangeEvent evt) {
 				switch (property) {
 				case CHANGE_EXTERNAL_MANAGED_OBJECT:
 					SubRoomManagedObjectEditPart.this
@@ -130,13 +97,6 @@ public class SubRoomManagedObjectEditPart
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
@@ -147,15 +107,9 @@ public class SubRoomManagedObjectEditPart
 	 * ==================== SubRoomManagedObjectFigureContext ===============
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.room.SubRoomManagedObjectFigureContext#
-	 * getSubRoomManagedObjectName()
-	 */
 	@Override
 	public String getSubRoomManagedObjectName() {
-		return this.getCastedModel().getName();
+		return this.getCastedModel().getSubSectionObjectName();
 	}
 
 }

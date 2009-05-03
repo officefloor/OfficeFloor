@@ -19,26 +19,19 @@ package net.officefloor.eclipse.desk;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.LoaderContext;
-import net.officefloor.desk.DeskLoader;
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.TagFactory;
-import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
-import net.officefloor.eclipse.desk.editparts.ExternalEscalationEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
 import net.officefloor.eclipse.desk.editparts.FlowItemEscalationEditPart;
 import net.officefloor.eclipse.desk.editparts.FlowItemOutputEditPart;
-import net.officefloor.eclipse.desk.operations.AddExternalEscalationOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.AddWorkOperation;
@@ -47,39 +40,35 @@ import net.officefloor.eclipse.desk.operations.RefreshWorkOperation;
 import net.officefloor.eclipse.desk.operations.ToggleFlowItemPublicOperation;
 import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperation;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskObjectModel;
-import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
-import net.officefloor.model.desk.DeskTaskToFlowItemModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.DeskWorkToFlowItemModel;
-import net.officefloor.model.desk.ExternalEscalationModel;
+import net.officefloor.model.desk.DeskOperations;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.FlowItemEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputModel;
-import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
-import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
-import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
-import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
-import net.officefloor.repository.ConfigurationItem;
-import net.officefloor.repository.ModelRepository;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationToTaskModel;
+import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskToNextExternalFlowModel;
+import net.officefloor.model.desk.TaskToNextTaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
+import net.officefloor.model.impl.desk.DeskRepositoryImpl;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.repository.ConfigurationItem;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Graphics;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.PolygonDecoration;
-import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.palette.ConnectionCreationToolEntry;
 import org.eclipse.gef.palette.PaletteGroup;
 import org.eclipse.ui.IEditorPart;
 
 /**
- * Editor for the {@link net.officefloor.model.desk.DeskModel}.
+ * Editor for the {@link DeskModel}.
  * 
  * @author Daniel
  */
@@ -91,185 +80,27 @@ public class DeskEditor extends
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.desk";
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
-	 */
+	@Override
 	protected boolean isDragTarget() {
 		// Disallow as drag target
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel
-	 * (net.officefloor.model.repository.ConfigurationItem)
-	 */
+	@Override
 	protected DeskModel retrieveModel(ConfigurationItem configuration)
 			throws Exception {
-		// Return the loaded Desk
-		return this.getDeskLoader(configuration).loadDesk(configuration);
+		return new DeskRepositoryImpl(new ModelRepositoryImpl())
+				.retrieveDesk(configuration);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
-	 * net.officefloor.model.repository.ConfigurationItem)
-	 */
+	@Override
 	protected void storeModel(DeskModel model, ConfigurationItem configuration)
 			throws Exception {
-		// Store the Desk
-		this.getDeskLoader(configuration).storeDesk(model, configuration);
+		new DeskRepositoryImpl(new ModelRepositoryImpl()).storeDesk(model,
+				configuration);
 	}
 
-	/**
-	 * Obtains the {@link DeskLoader}.
-	 * 
-	 * @return {@link DeskLoader}.
-	 */
-	private DeskLoader getDeskLoader(ConfigurationItem configurationItem) {
-		return new DeskLoader(new LoaderContext(ProjectClassLoader
-				.create(configurationItem.getContext())), new ModelRepository());
-	}
-
-	/**
-	 * Initiate the specialised
-	 * {@link net.officefloor.eclipse.common.editparts.FigureFactory} instances
-	 * for the model types.
-	 */
-	static {
-		// Initial flow of work
-		OfficeFloorConnectionEditPart.registerFigureFactory(
-				DeskWorkToFlowItemModel.class,
-				new FigureFactory<DeskWorkToFlowItemModel>() {
-					public IFigure createFigure(DeskWorkToFlowItemModel model) {
-						PolylineConnection figure = new PolylineConnection();
-						figure.setForegroundColor(ColorConstants.lightBlue);
-						return figure;
-					}
-				});
-
-		// Managed object
-		OfficeFloorConnectionEditPart
-				.registerFigureFactory(
-						DeskTaskObjectToExternalManagedObjectModel.class,
-						new FigureFactory<DeskTaskObjectToExternalManagedObjectModel>() {
-							public IFigure createFigure(
-									DeskTaskObjectToExternalManagedObjectModel model) {
-								PolylineConnection figure = new PolylineConnection();
-								figure
-										.setForegroundColor(ColorConstants.darkGreen);
-								return figure;
-							}
-						});
-
-		// Task to Flow Item
-		OfficeFloorConnectionEditPart.registerFigureFactory(
-				DeskTaskToFlowItemModel.class,
-				new FigureFactory<DeskTaskToFlowItemModel>() {
-					public IFigure createFigure(DeskTaskToFlowItemModel model) {
-						PolylineConnection figure = new PolylineConnection();
-						figure.setForegroundColor(ColorConstants.lightGray);
-						figure.setLineStyle(Graphics.LINE_DASH);
-						return figure;
-					}
-				});
-
-		// Create the Figure Factory for flow links
-		FigureFactory<Object> linkFigureFactory = new FigureFactory<Object>() {
-			public IFigure createFigure(Object model) {
-
-				// Obtain the link type
-				String linkType;
-				if (model instanceof FlowItemOutputToFlowItemModel) {
-					linkType = ((FlowItemOutputToFlowItemModel) model)
-							.getLinkType();
-				} else if (model instanceof FlowItemOutputToExternalFlowModel) {
-					linkType = ((FlowItemOutputToExternalFlowModel) model)
-							.getLinkType();
-				} else {
-					// Unknown model type
-					throw new OfficeFloorPluginFailure("Unknown model type: "
-							+ model.getClass().getName());
-				}
-
-				// Create link
-				if (DeskLoader.SEQUENTIAL_LINK_TYPE.equals(linkType)) {
-					PolylineConnection figure = new PolylineConnection();
-					figure.setTargetDecoration(new PolygonDecoration());
-					return figure;
-
-				} else if (DeskLoader.PARALLEL_LINK_TYPE.equals(linkType)) {
-					PolylineConnection figure = new PolylineConnection();
-					figure.setTargetDecoration(new PolygonDecoration());
-					figure.setSourceDecoration(new PolygonDecoration());
-					return figure;
-
-				} else if (DeskLoader.ASYNCHRONOUS_LINK_TYPE.equals(linkType)) {
-					PolylineConnection figure = new PolylineConnection();
-					figure.setTargetDecoration(new PolygonDecoration());
-					figure.setLineStyle(Graphics.LINE_DASH);
-					return figure;
-
-				} else {
-					PolylineConnection figure = new PolylineConnection();
-					figure.setForegroundColor(ColorConstants.red);
-					return figure;
-				}
-			}
-		};
-
-		// Flow Item Output to Flow Item
-		OfficeFloorConnectionEditPart.registerFigureFactory(
-				FlowItemOutputToFlowItemModel.class, linkFigureFactory);
-
-		// Flow Item Output to External Flow Item
-		OfficeFloorConnectionEditPart.registerFigureFactory(
-				FlowItemOutputToExternalFlowModel.class, linkFigureFactory);
-
-		// Escalation to flow item handling
-		OfficeFloorConnectionEditPart.registerFigureFactory(
-				FlowItemEscalationToFlowItemModel.class,
-				new FigureFactory<FlowItemEscalationToFlowItemModel>() {
-					public IFigure createFigure(
-							FlowItemEscalationToFlowItemModel model) {
-						PolylineConnection figure = new PolylineConnection();
-						figure.setTargetDecoration(new PolygonDecoration());
-						figure.setForegroundColor(ColorConstants.lightGray);
-						return figure;
-					}
-				});
-
-		// Escalation to external escalation
-		OfficeFloorConnectionEditPart
-				.registerFigureFactory(
-						FlowItemEscalationToExternalEscalationModel.class,
-						new FigureFactory<FlowItemEscalationToExternalEscalationModel>() {
-							@Override
-							public IFigure createFigure(
-									FlowItemEscalationToExternalEscalationModel model) {
-								PolylineConnection figure = new PolylineConnection();
-								figure
-										.setTargetDecoration(new PolygonDecoration());
-								figure
-										.setForegroundColor(ColorConstants.lightGray);
-								return figure;
-							}
-						});
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
-	 * populateEditPartTypes(java.util.Map)
-	 */
+	@Override
 	protected void populateEditPartTypes(
 			Map<Class<?>, Class<? extends EditPart>> map) {
 
@@ -277,74 +108,53 @@ public class DeskEditor extends
 		map.put(DeskModel.class, DeskEditPart.class);
 		map.put(ExternalManagedObjectModel.class,
 				ExternalManagedObjectEditPart.class);
-		map.put(DeskWorkModel.class, DeskWorkEditPart.class);
-		map.put(DeskTaskModel.class, DeskTaskEditPart.class);
-		map.put(DeskTaskObjectModel.class, DeskTaskObjectEditPart.class);
-		map.put(FlowItemModel.class, FlowItemEditPart.class);
-		map.put(FlowItemOutputModel.class, FlowItemOutputEditPart.class);
-		map
-				.put(FlowItemEscalationModel.class,
-						FlowItemEscalationEditPart.class);
+		map.put(WorkModel.class, DeskWorkEditPart.class);
+		map.put(WorkTaskModel.class, DeskTaskEditPart.class);
+		map.put(WorkTaskObjectModel.class, DeskTaskObjectEditPart.class);
+		map.put(TaskModel.class, FlowItemEditPart.class);
+		map.put(TaskFlowModel.class, FlowItemOutputEditPart.class);
+		map.put(TaskEscalationModel.class, FlowItemEscalationEditPart.class);
 		map.put(ExternalFlowModel.class, ExternalFlowEditPart.class);
-		map
-				.put(ExternalEscalationModel.class,
-						ExternalEscalationEditPart.class);
 
 		// Connections
-		map.put(DeskTaskObjectToExternalManagedObjectModel.class,
+		map.put(WorkTaskObjectToExternalManagedObjectModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(FlowItemOutputToFlowItemModel.class,
+		map.put(TaskFlowToTaskModel.class, OfficeFloorConnectionEditPart.class);
+		map.put(TaskFlowToExternalFlowModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(FlowItemOutputToExternalFlowModel.class,
+		map.put(WorkTaskToTaskModel.class, OfficeFloorConnectionEditPart.class);
+		map.put(WorkToInitialTaskModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(DeskTaskToFlowItemModel.class,
+		map.put(TaskToNextTaskModel.class, OfficeFloorConnectionEditPart.class);
+		map.put(TaskToNextExternalFlowModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(DeskWorkToFlowItemModel.class,
+		map.put(TaskEscalationToTaskModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(FlowItemToNextFlowItemModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(FlowItemToNextExternalFlowModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(FlowItemEscalationToFlowItemModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(FlowItemEscalationToExternalEscalationModel.class,
+		map.put(TaskEscalationToExternalFlowModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
-	 * initialisePaletteRoot()
-	 */
+	@Override
 	protected void initialisePaletteRoot() {
 		// Add the link group
 		PaletteGroup linkGroup = new PaletteGroup("Links");
 		linkGroup.add(new ConnectionCreationToolEntry("Sequential",
-				"sequential", new TagFactory(DeskLoader.SEQUENTIAL_LINK_TYPE),
+				"sequential", new TagFactory(DeskOperations.SEQUENTIAL_LINK),
 				null, null));
 		linkGroup.add(new ConnectionCreationToolEntry("Parallel", "parallel",
-				new TagFactory(DeskLoader.PARALLEL_LINK_TYPE), null, null));
+				new TagFactory(DeskOperations.PARALLEL_LINK), null, null));
 		linkGroup.add(new ConnectionCreationToolEntry("Asynchronous",
-				"asynchronous", new TagFactory(
-						DeskLoader.ASYNCHRONOUS_LINK_TYPE), null, null));
+				"asynchronous",
+				new TagFactory(DeskOperations.ASYNCHRONOUS_LINK), null, null));
 		this.paletteRoot.add(linkGroup);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateOperations
-	 * (java.util.List)
-	 */
 	@Override
 	protected void populateOperations(List<Operation> list) {
 		// Add model actions
 		list.add(new AddExternalManagedObjectOperation());
 		list.add(new AddWorkOperation());
 		list.add(new AddExternalFlowOperation());
-		list.add(new AddExternalEscalationOperation());
 
 		// Refresh work action
 		list.add(new RefreshWorkOperation());

@@ -31,83 +31,50 @@ import net.officefloor.eclipse.desk.operations.RemoveFlowItemOperation;
 import net.officefloor.eclipse.skin.desk.FlowItemFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.DeskTaskToFlowItemModel;
-import net.officefloor.model.desk.DeskWorkToFlowItemModel;
 import net.officefloor.model.desk.ExternalFlowModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
-import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
-import net.officefloor.model.desk.FlowItemModel.FlowItemEvent;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskToNextExternalFlowModel;
+import net.officefloor.model.desk.TaskToNextTaskModel;
+import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
+import net.officefloor.model.desk.TaskModel.TaskEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.desk.FlowItemModel}.
+ * {@link EditPart} for the {@link TaskModel}.
  * 
  * @author Daniel
  */
+// TODO rename to TaskEditPart
 public class FlowItemEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<FlowItemModel, FlowItemFigure>
+		AbstractOfficeFloorSourceNodeEditPart<TaskModel, FlowItemFigure>
 		implements RemovableEditPart, FlowItemFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected FlowItemFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createFlowItemFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populateModelChildren(java.util.List)
-	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel().getOutputs());
-		childModels.addAll(this.getCastedModel().getEscalations());
+		childModels.addAll(this.getCastedModel().getTaskFlows());
+		childModels.addAll(this.getCastedModel().getTaskEscalations());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(FlowItemModel.class);
+		types.add(TaskModel.class);
 		types.add(ExternalFlowModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
@@ -115,18 +82,18 @@ public class FlowItemEditPart extends
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
 				ConnectionModel returnConn;
-				if (target instanceof FlowItemModel) {
-					// Create the connection to flow item
-					FlowItemToNextFlowItemModel conn = new FlowItemToNextFlowItemModel();
-					conn.setPreviousFlowItem((FlowItemModel) source);
-					conn.setNextFlowItem((FlowItemModel) target);
+				if (target instanceof TaskModel) {
+					// Create the connection to next task
+					TaskToNextTaskModel conn = new TaskToNextTaskModel();
+					conn.setPreviousTask((TaskModel) source);
+					conn.setNextTask((TaskModel) target);
 					conn.connect();
 					returnConn = conn;
 
 				} else if (target instanceof ExternalFlowModel) {
 					// Create the connection to external flow
-					FlowItemToNextExternalFlowModel conn = new FlowItemToNextExternalFlowModel();
-					conn.setPreviousFlowItem((FlowItemModel) source);
+					TaskToNextExternalFlowModel conn = new TaskToNextExternalFlowModel();
+					conn.setPreviousTask((TaskModel) source);
 					conn.setNextExternalFlow((ExternalFlowModel) target);
 					conn.connect();
 					returnConn = conn;
@@ -143,71 +110,52 @@ public class FlowItemEditPart extends
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		// Add flow to next flow
-		FlowItemToNextFlowItemModel nextFlowItem = this.getCastedModel()
-				.getNextFlowItem();
-		if (nextFlowItem != null) {
-			models.add(nextFlowItem);
+		// Add task to next task
+		TaskToNextTaskModel nextTask = this.getCastedModel().getNextTask();
+		if (nextTask != null) {
+			models.add(nextTask);
 		}
 
-		// Add flow to next external flow
-		FlowItemToNextExternalFlowModel nextExternalFlow = this
-				.getCastedModel().getNextExternalFlow();
+		// Add task to next external flow
+		TaskToNextExternalFlowModel nextExternalFlow = this.getCastedModel()
+				.getNextExternalFlow();
 		if (nextExternalFlow != null) {
 			models.add(nextExternalFlow);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		// Add work that this is initial flow
-		DeskWorkToFlowItemModel work = this.getCastedModel().getDeskWork();
+		// Add work that this is initial task
+		WorkToInitialTaskModel work = this.getCastedModel()
+				.getInitialTaskForWork();
 		if (work != null) {
 			models.add(work);
 		}
 
-		// Add desk task
-		DeskTaskToFlowItemModel task = this.getCastedModel().getDeskTask();
+		// Add work task
+		WorkTaskToTaskModel task = this.getCastedModel().getWorkTask();
 		if (task != null) {
 			models.add(task);
 		}
 
-		// Add flow inputs
-		models.addAll(this.getCastedModel().getInputs());
+		// Add task inputs
+		models.addAll(this.getCastedModel().getTaskFlowInputs());
 
 		// Add handled escalations
-		models.addAll(this.getCastedModel().getHandledEscalations());
+		models.addAll(this.getCastedModel().getTaskEscalationInputs());
 
-		// Add flow previous
-		models.addAll(this.getCastedModel().getPreviousFlowItems());
+		// Add previous tasks
+		models.addAll(this.getCastedModel().getPreviousTasks());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
+	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<FlowItemEvent>(FlowItemEvent
-				.values()) {
-			protected void handlePropertyChange(FlowItemEvent property,
+		handlers.add(new PropertyChangeHandler<TaskEvent>(TaskEvent.values()) {
+			protected void handlePropertyChange(TaskEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
 				case CHANGE_IS_PUBLIC:
@@ -216,24 +164,24 @@ public class FlowItemEditPart extends
 							FlowItemEditPart.this.getCastedModel()
 									.getIsPublic());
 					break;
-				case CHANGE_NEXT_FLOW_ITEM:
+				case CHANGE_NEXT_TASK:
 				case CHANGE_NEXT_EXTERNAL_FLOW:
 					FlowItemEditPart.this.refreshSourceConnections();
 					break;
-				case CHANGE_DESK_WORK:
-				case CHANGE_DESK_TASK:
-				case ADD_INPUT:
-				case REMOVE_INPUT:
-				case ADD_HANDLED_ESCALATION:
-				case REMOVE_HANDLED_ESCALATION:
-				case ADD_PREVIOUS_FLOW_ITEM:
-				case REMOVE_PREVIOUS_FLOW_ITEM:
+				case CHANGE_INITIAL_TASK_FOR_WORK:
+				case CHANGE_WORK_TASK:
+				case ADD_TASK_FLOW_INPUT:
+				case REMOVE_TASK_FLOW_INPUT:
+				case ADD_TASK_ESCALATION_INPUT:
+				case REMOVE_TASK_ESCALATION_INPUT:
+				case ADD_PREVIOUS_TASK:
+				case REMOVE_PREVIOUS_TASK:
 					FlowItemEditPart.this.refreshTargetConnections();
 					break;
-				case ADD_OUTPUT:
-				case REMOVE_OUTPUT:
-				case ADD_ESCALATION:
-				case REMOVE_ESCALATION:
+				case ADD_TASK_FLOW:
+				case REMOVE_TASK_FLOW:
+				case ADD_TASK_ESCALATION:
+				case REMOVE_TASK_ESCALATION:
 					FlowItemEditPart.this.refreshChildren();
 					break;
 				}
@@ -241,13 +189,6 @@ public class FlowItemEditPart extends
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveFlowItemOperation();
@@ -257,34 +198,17 @@ public class FlowItemEditPart extends
 	 * ======================= FlowItemFigureContext ========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.FlowItemFigureContext#getFlowItemName()
-	 */
+	// TODO rename to getTaskName
 	@Override
 	public String getFlowItemName() {
-		return this.getCastedModel().getId();
+		return this.getCastedModel().getTaskName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.skin.desk.FlowItemFigureContext#isPublic()
-	 */
 	@Override
 	public boolean isPublic() {
 		return this.getCastedModel().getIsPublic();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.FlowItemFigureContext#setIsPublic(boolean
-	 * )
-	 */
 	@Override
 	public void setIsPublic(final boolean isPublic) {
 

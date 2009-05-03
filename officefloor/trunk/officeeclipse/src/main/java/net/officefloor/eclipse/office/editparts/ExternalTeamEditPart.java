@@ -27,102 +27,65 @@ import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.office.operations.RemoveExternalTeamOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.ExternalTeamFigureContext;
-import net.officefloor.model.office.ExternalTeamModel;
-import net.officefloor.model.office.ExternalTeamModel.ExternalTeamEvent;
+import net.officefloor.model.office.OfficeTeamModel;
+import net.officefloor.model.office.OfficeTeamModel.OfficeTeamEvent;
 
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the {@link ExternalTeamModel}.
+ * {@link EditPart} for the {@link OfficeTeamModel}.
  * 
  * @author Daniel
  */
+// TODO rename to OfficeTeamEditPart
 public class ExternalTeamEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalTeamModel, OfficeFloorFigure>
+		AbstractOfficeFloorNodeEditPart<OfficeTeamModel, OfficeFloorFigure>
 		implements RemovableEditPart, ExternalTeamFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Never a source
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getFlowItems());
-		models.addAll(this.getCastedModel().getAdministrators());
+		models.addAll(this.getCastedModel().getOfficeSectionResponsibilities());
+		// models.addAll(this.getCastedModel().getAdministrators());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ExternalTeamEvent>(
-				ExternalTeamEvent.values()) {
+		handlers.add(new PropertyChangeHandler<OfficeTeamEvent>(OfficeTeamEvent
+				.values()) {
 			@Override
-			protected void handlePropertyChange(ExternalTeamEvent property,
+			protected void handlePropertyChange(OfficeTeamEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_FLOW_ITEM:
-				case REMOVE_FLOW_ITEM:
+				case ADD_OFFICE_SECTION_RESPONSIBILITY:
+				case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
 					ExternalTeamEditPart.this.refreshTargetConnections();
 					break;
-				case ADD_ADMINISTRATOR:
-				case REMOVE_ADMINISTRATOR:
-					ExternalTeamEditPart.this.refreshTargetConnections();
-					break;
+				// case ADD_ADMINISTRATOR:
+				// case REMOVE_ADMINISTRATOR:
+				// ExternalTeamEditPart.this.refreshTargetConnections();
+				// break;
 				}
 			}
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createExternalTeamFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveExternalTeamOperation();
@@ -132,16 +95,9 @@ public class ExternalTeamEditPart extends
 	 * =================== ExternalTeamFigureContext ========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.office.ExternalTeamFigureContext#getTeamName
-	 * ()
-	 */
 	@Override
 	public String getTeamName() {
-		return this.getCastedModel().getName();
+		return this.getCastedModel().getOfficeTeamName();
 	}
 
 }

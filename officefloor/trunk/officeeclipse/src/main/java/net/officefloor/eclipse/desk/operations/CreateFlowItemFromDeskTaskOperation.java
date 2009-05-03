@@ -18,7 +18,6 @@ package net.officefloor.eclipse.desk.operations;
 
 import java.util.List;
 
-import net.officefloor.desk.TaskToFlowItemSynchroniser;
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
@@ -28,13 +27,10 @@ import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskTaskToFlowItemModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.work.TaskModel;
-import net.officefloor.model.work.WorkModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkTaskModel;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.geometry.Point;
@@ -63,113 +59,113 @@ public class CreateFlowItemFromDeskTaskOperation extends
 	@Override
 	protected void perform(Context context) {
 
-		// Obtain the desk task edit part
-		final DeskTaskEditPart taskEditPart = context.getEditPart();
-		final DeskTaskModel task = taskEditPart.getCastedModel();
-
-		// Obtain the work
-		DeskWorkEditPart workEditPart = (DeskWorkEditPart) taskEditPart
-				.getParent();
-		DeskWorkModel work = workEditPart.getCastedModel();
-
-		// Obtain the desk
-		DeskEditPart deskEditPart = (DeskEditPart) workEditPart.getParent();
-		final DeskModel desk = deskEditPart.getCastedModel();
-
-		// Obtain the project
-		IProject project = FileConfigurationItem.getProject(taskEditPart);
-
-		// Obtain the work loader instance
-		String workLoaderClassName = work.getLoader();
-		if ((workLoaderClassName == null)
-				|| (workLoaderClassName.trim().length() == 0)) {
-			// Must have work loader specified
-			taskEditPart.messageError("No loader specified for work "
-					+ work.getId());
-			return;
-		}
-		WorkLoaderInstance workLoaderInstance = DeskUtil
-				.createWorkLoaderInstance(workLoaderClassName, project);
-		if (workLoaderInstance == null) {
-			taskEditPart
-					.messageError("Can not load work to obtain details of the flow item");
-			return;
-		}
-
-		// Obtain the work
-		List<PropertyModel> properties = work.getProperties();
-		WorkModel<?> workModel;
-		try {
-			workModel = workLoaderInstance.createWorkModel(properties);
-		} catch (Exception ex) {
-			// Failed to obtain work
-			taskEditPart.messageError(ex);
-			return;
-		}
-
-		// Find the corresponding task model
-		String taskName = task.getName();
-		TaskModel<?, ?> taskModel = null;
-		for (TaskModel<?, ?> possibleTask : workModel.getTasks()) {
-			if (taskName.equals(possibleTask.getTaskName())) {
-				taskModel = possibleTask;
-			}
-		}
-
-		// Ensure have the corresponding task
-		if (taskModel == null) {
-			taskEditPart.messageError("No task on work by name " + taskName
-					+ ".  Likely work requires to be refreshed.");
-			return;
-
-		}
-
-		// Create the flow item for this task
-		final FlowItemModel flowItem = new FlowItemModel(task.getName(), false,
-				work.getId(), task.getName(), taskModel, null, null, null,
-				null, null, null, null, null, null);
-		flowItem.setId(deskEditPart.getUniqueFlowItemId(flowItem));
-
-		// Ensure flow item synchronised to the task
-		try {
-			TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(taskModel,
-					flowItem);
-		} catch (Exception ex) {
-			// Failed to synchronise
-			taskEditPart.messageError(ex);
-			return;
-		}
-
-		// Position the flow item
-		Point location = context.getLocation();
-		flowItem.setX(location.x + 100);
-		flowItem.setY(location.y);
-
-		// Link the flow item with the task
-		final DeskTaskToFlowItemModel conn = new DeskTaskToFlowItemModel(
-				flowItem, task);
-
-		// Make the change
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				// Add the flow item to the desk
-				desk.addFlowItem(flowItem);
-
-				// Connect the flow
-				conn.connect();
-			}
-
-			@Override
-			protected void undoCommand() {
-				// Disconnect the flow
-				conn.remove();
-
-				// Remove the flow item from the desk
-				desk.removeFlowItem(flowItem);
-			}
-		});
+//		// Obtain the desk task edit part
+//		final DeskTaskEditPart taskEditPart = context.getEditPart();
+//		final WorkTaskModel task = taskEditPart.getCastedModel();
+//
+//		// Obtain the work
+//		DeskWorkEditPart workEditPart = (DeskWorkEditPart) taskEditPart
+//				.getParent();
+//		WorkModel work = workEditPart.getCastedModel();
+//
+//		// Obtain the desk
+//		DeskEditPart deskEditPart = (DeskEditPart) workEditPart.getParent();
+//		final DeskModel desk = deskEditPart.getCastedModel();
+//
+//		// Obtain the project
+//		IProject project = FileConfigurationItem.getProject(taskEditPart);
+//
+//		// Obtain the work loader instance
+//		String workLoaderClassName = work.getLoader();
+//		if ((workLoaderClassName == null)
+//				|| (workLoaderClassName.trim().length() == 0)) {
+//			// Must have work loader specified
+//			taskEditPart.messageError("No loader specified for work "
+//					+ work.getId());
+//			return;
+//		}
+//		WorkLoaderInstance workLoaderInstance = DeskUtil
+//				.createWorkLoaderInstance(workLoaderClassName, project);
+//		if (workLoaderInstance == null) {
+//			taskEditPart
+//					.messageError("Can not load work to obtain details of the flow item");
+//			return;
+//		}
+//
+//		// Obtain the work
+//		List<PropertyModel> properties = work.getProperties();
+//		WorkModel<?> workModel;
+//		try {
+//			workModel = workLoaderInstance.createWorkModel(properties);
+//		} catch (Exception ex) {
+//			// Failed to obtain work
+//			taskEditPart.messageError(ex);
+//			return;
+//		}
+//
+//		// Find the corresponding task model
+//		String taskName = task.getName();
+//		TaskModel<?, ?> taskModel = null;
+//		for (TaskModel<?, ?> possibleTask : workModel.getTasks()) {
+//			if (taskName.equals(possibleTask.getTaskName())) {
+//				taskModel = possibleTask;
+//			}
+//		}
+//
+//		// Ensure have the corresponding task
+//		if (taskModel == null) {
+//			taskEditPart.messageError("No task on work by name " + taskName
+//					+ ".  Likely work requires to be refreshed.");
+//			return;
+//
+//		}
+//
+//		// Create the flow item for this task
+//		final FlowItemModel flowItem = new FlowItemModel(task.getName(), false,
+//				work.getId(), task.getName(), taskModel, null, null, null,
+//				null, null, null, null, null, null);
+//		flowItem.setId(deskEditPart.getUniqueFlowItemId(flowItem));
+//
+//		// Ensure flow item synchronised to the task
+//		try {
+//			TaskToFlowItemSynchroniser.synchroniseTaskOntoFlowItem(taskModel,
+//					flowItem);
+//		} catch (Exception ex) {
+//			// Failed to synchronise
+//			taskEditPart.messageError(ex);
+//			return;
+//		}
+//
+//		// Position the flow item
+//		Point location = context.getLocation();
+//		flowItem.setX(location.x + 100);
+//		flowItem.setY(location.y);
+//
+//		// Link the flow item with the task
+//		final DeskTaskToFlowItemModel conn = new DeskTaskToFlowItemModel(
+//				flowItem, task);
+//
+//		// Make the change
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				// Add the flow item to the desk
+//				desk.addFlowItem(flowItem);
+//
+//				// Connect the flow
+//				conn.connect();
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				// Disconnect the flow
+//				conn.remove();
+//
+//				// Remove the flow item from the desk
+//				desk.removeFlowItem(flowItem);
+//			}
+//		});
 	}
 
 }

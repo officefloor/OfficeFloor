@@ -17,13 +17,12 @@
 package net.officefloor.eclipse.skin.room;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link SubRoomManagedObjectModel}.
+ * {@link OfficeFloorFigure} for the {@link SubSectionObjectModel}.
  * 
  * @author Daniel
  */
 public interface SubRoomManagedObjectFigure extends OfficeFloorFigure {
-
 }

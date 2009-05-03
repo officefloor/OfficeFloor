@@ -21,7 +21,7 @@ import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -55,7 +55,7 @@ public class StandardDeskTaskObjectFigure extends AbstractOfficeFloorFigure
 		this.parameterFigure = new LabelConnectorFigure(shortObjectTypeName,
 				ConnectorDirection.WEST, ColorConstants.black);
 		this.registerConnectionAnchor(
-				DeskTaskObjectToExternalManagedObjectModel.class,
+				WorkTaskObjectToExternalManagedObjectModel.class,
 				this.parameterFigure.getConnectionAnchor());
 
 		// Specify initial state

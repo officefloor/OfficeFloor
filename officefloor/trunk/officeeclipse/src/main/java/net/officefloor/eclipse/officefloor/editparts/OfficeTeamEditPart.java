@@ -26,39 +26,33 @@ import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.officefloor.OfficeTeamModel;
-import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
-import net.officefloor.model.officefloor.TeamModel;
-import net.officefloor.model.officefloor.OfficeTeamModel.OfficeTeamEvent;
+import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamModel.DeployedOfficeTeamEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.officefloor.OfficeTeamModel}.
+ * {@link EditPart} for the {@link DeployedOfficeTeamModel}.
  * 
  * @author Daniel
  */
 public class OfficeTeamEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<OfficeTeamModel, OfficeFloorFigure>
+		AbstractOfficeFloorSourceNodeEditPart<DeployedOfficeTeamModel, OfficeFloorFigure>
 		implements OfficeTeamFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
 				// Create and connection
-				OfficeTeamToTeamModel conn = new OfficeTeamToTeamModel();
-				conn.setOfficeTeam((OfficeTeamModel) source);
-				conn.setTeam((TeamModel) target);
+				DeployedOfficeTeamToOfficeFloorTeamModel conn = new DeployedOfficeTeamToOfficeFloorTeamModel();
+				conn.setDeployedOfficeTeam((DeployedOfficeTeamModel) source);
+				conn.setOfficeFloorTeam((OfficeFloorTeamModel) target);
 				conn.connect();
 
 				// Return the connection
@@ -67,62 +61,35 @@ public class OfficeTeamEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(TeamModel.class);
+		types.add(OfficeFloorTeamModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		OfficeTeamToTeamModel conn = this.getCastedModel().getTeam();
+		DeployedOfficeTeamToOfficeFloorTeamModel conn = this.getCastedModel()
+				.getOfficeFloorTeam();
 		if (conn != null) {
 			models.add(conn);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Never a target
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<OfficeTeamEvent>(OfficeTeamEvent
-				.values()) {
+		handlers.add(new PropertyChangeHandler<DeployedOfficeTeamEvent>(
+				DeployedOfficeTeamEvent.values()) {
 			@Override
-			protected void handlePropertyChange(OfficeTeamEvent property,
-					PropertyChangeEvent evt) {
+			protected void handlePropertyChange(
+					DeployedOfficeTeamEvent property, PropertyChangeEvent evt) {
 				switch (property) {
-				case CHANGE_TEAM:
+				case CHANGE_OFFICE_FLOOR_TEAM:
 					OfficeTeamEditPart.this.refreshSourceConnections();
 					break;
 				}
@@ -130,13 +97,6 @@ public class OfficeTeamEditPart
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
@@ -147,15 +107,9 @@ public class OfficeTeamEditPart
 	 * ================ OfficeTeamFigureContext =======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext#
-	 * getOfficeTeamName()
-	 */
 	@Override
 	public String getOfficeTeamName() {
-		return this.getCastedModel().getTeamName();
+		return this.getCastedModel().getDeployedOfficeTeamName();
 	}
 
 }

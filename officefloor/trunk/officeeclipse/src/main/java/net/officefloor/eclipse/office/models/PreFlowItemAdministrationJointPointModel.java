@@ -20,8 +20,7 @@ import java.util.List;
 
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.DutyModel;
-import net.officefloor.model.office.FlowItemModel;
-import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
+import net.officefloor.model.office.OfficeTaskModel;
 
 /**
  * Pre {@link AbstractFlowItemAdministrationJoinPointModel}.
@@ -30,44 +29,32 @@ import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
  */
 public class PreFlowItemAdministrationJointPointModel
 		extends
-		AbstractFlowItemAdministrationJoinPointModel<FlowItemToPreAdministratorDutyModel> {
+		AbstractFlowItemAdministrationJoinPointModel<ConnectionModel> {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param flowItem
-	 *            {@link FlowItemModel}.
+	 * @param task
+	 *            {@link OfficeTaskModel}.
 	 */
-	public PreFlowItemAdministrationJointPointModel(FlowItemModel flowItem) {
-		super(flowItem);
+	public PreFlowItemAdministrationJointPointModel(OfficeTaskModel task) {
+		super(task);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.office.models.
-	 * AbstractFlowItemAdministrationJoinPointModel
-	 * #createDutyConnection(net.officefloor.model.office.FlowItemModel,
-	 * net.officefloor.model.office.DutyModel)
-	 */
 	@Override
-	public ConnectionModel createDutyConnection(FlowItemModel flowItem,
+	public ConnectionModel createDutyConnection(OfficeTaskModel task,
 			DutyModel duty) {
-		FlowItemToPreAdministratorDutyModel connection = new FlowItemToPreAdministratorDutyModel();
-		connection.setFlowItem(flowItem);
-		connection.setDuty(duty);
-		return connection;
+//		FlowItemToPreAdministratorDutyModel connection = new FlowItemToPreAdministratorDutyModel();
+//		connection.setFlowItem(flowItem);
+//		connection.setDuty(duty);
+//		return connection;
+		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.office.models.
-	 * AbstractFlowItemAdministrationJoinPointModel#getDutyConnections()
-	 */
 	@Override
-	public List<FlowItemToPreAdministratorDutyModel> getDutyConnections() {
-		return this.getFlowItem().getPreAdminDutys();
+	public List<ConnectionModel> getDutyConnections() {
+//		return this.getFlowItem().getPreAdminDutys();
+		return null;
 	}
 
 }

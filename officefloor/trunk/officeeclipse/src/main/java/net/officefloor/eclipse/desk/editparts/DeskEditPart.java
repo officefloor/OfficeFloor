@@ -17,99 +17,40 @@
 package net.officefloor.eclipse.desk.editparts;
 
 import java.beans.PropertyChangeEvent;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.FlowItemModel;
 import net.officefloor.model.desk.DeskModel.DeskEvent;
 
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.desk.DeskModel}.
+ * {@link EditPart} for the {@link DeskModel}.
  * 
  * @author Daniel
  */
 public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> {
 
-	/**
-	 * Obtains the unique {@link FlowItemModel} id for the input
-	 * {@link FlowItemModel}.
-	 * 
-	 * @param flowItem
-	 *            {@link FlowItemModel}.
-	 * @return Unique {@link FlowItemModel} id.
-	 */
-	public String getUniqueFlowItemId(FlowItemModel flowItem) {
-
-		// Create the set of existing flow items
-		Map<String, FlowItemModel> existingFlowItems = new HashMap<String, FlowItemModel>();
-		for (FlowItemModel existingFlowItem : this.getCastedModel()
-				.getFlowItems()) {
-			existingFlowItems.put(existingFlowItem.getId(), existingFlowItem);
-		}
-
-		// Obtain the unique id
-		String suffix = "";
-		int index = 0;
-		for (;;) {
-			// Try for uniqueness
-			String uniqueIdAttempt = flowItem.getTaskName() + suffix;
-
-			// Determine if unique (not registered or same flow item)
-			FlowItemModel existingFlowItem = existingFlowItems
-					.get(uniqueIdAttempt);
-			if ((existingFlowItem == null) || (existingFlowItem == flowItem)) {
-				return uniqueIdAttempt;
-			}
-
-			// Setup for next attempt
-			index++;
-			suffix = String.valueOf(index);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart
-	 * #createLayoutEditPolicy()
-	 */
+	@Override
 	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
 		return new DeskLayoutEditPolicy();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart
-	 * #populateChildren(java.util.List)
-	 */
+	@Override
 	protected void populateChildren(List<Object> childModels) {
-		// Add the children
 		childModels.addAll(this.getCastedModel().getWorks());
 		childModels.addAll(this.getCastedModel().getExternalManagedObjects());
-		childModels.addAll(this.getCastedModel().getFlowItems());
+		childModels.addAll(this.getCastedModel().getTasks());
 		childModels.addAll(this.getCastedModel().getExternalFlows());
-		childModels.addAll(this.getCastedModel().getExternalEscalations());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
+	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<DeskEvent>(DeskEvent.values()) {
@@ -128,12 +69,8 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 				case REMOVE_EXTERNAL_FLOW:
 					DeskEditPart.this.refresh();
 					break;
-				case ADD_EXTERNAL_ESCALATION:
-				case REMOVE_EXTERNAL_ESCALATION:
-					DeskEditPart.this.refresh();
-					break;
-				case ADD_FLOW_ITEM:
-				case REMOVE_FLOW_ITEM:
+				case ADD_TASK:
+				case REMOVE_TASK:
 					DeskEditPart.this.refresh();
 					break;
 				}
@@ -143,19 +80,11 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 }
 
 /**
- * {@link org.eclipse.gef.editpolicies.LayoutEditPolicy} for the
- * {@link net.officefloor.model.desk.DeskModel}.
+ * {@link LayoutEditPolicy} for the {@link DeskModel}.
  */
 class DeskLayoutEditPolicy extends OfficeFloorLayoutEditPolicy<DeskModel> {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy
-	 * #createCreateComand(P, java.lang.Object,
-	 * org.eclipse.draw2d.geometry.Point)
-	 */
+	@Override
 	protected CreateCommand<?, ?> createCreateComand(DeskModel parentModel,
 			Object newModel, Point location) {
 		// TODO Auto-generated method stub

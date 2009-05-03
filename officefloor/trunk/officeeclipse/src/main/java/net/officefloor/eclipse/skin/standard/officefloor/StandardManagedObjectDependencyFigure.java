@@ -25,7 +25,7 @@ import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 
 /**
- * Standard {@link ManagedObjectDependencyFigure}.
+ * Standard {@link OfficeFloorManagedObjectDependencyFigure}.
  * 
  * @author Daniel
  */
@@ -45,4 +45,5 @@ public class StandardManagedObjectDependencyFigure extends
 				ColorConstants.black);
 		this.setFigure(figure);
 	}
+
 }

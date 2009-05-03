@@ -21,7 +21,7 @@ import net.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel;
 
 import org.eclipse.draw2d.ColorConstants;
 
@@ -43,7 +43,7 @@ public class StandardFlowItemOutputFigure extends AbstractOfficeFloorFigure
 		LabelConnectorFigure connector = new LabelConnectorFigure(context
 				.getFlowItemOutputName(), ConnectorDirection.EAST,
 				ColorConstants.black);
-		this.registerConnectionAnchor(FlowItemOutputToFlowItemModel.class,
+		this.registerConnectionAnchor(TaskFlowToTaskModel.class,
 				connector.getConnectionAnchor());
 		this.setFigure(connector);
 	}

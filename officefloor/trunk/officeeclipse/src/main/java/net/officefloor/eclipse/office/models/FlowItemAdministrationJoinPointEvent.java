@@ -16,8 +16,8 @@
  */
 package net.officefloor.eclipse.office.models;
 
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.office.DutyModel;
-import net.officefloor.model.office.FlowItemModel;
 
 /**
  * Events for the {@link AbstractFlowItemAdministrationJoinPointModel}.
@@ -28,7 +28,8 @@ public enum FlowItemAdministrationJoinPointEvent {
 
 	/**
 	 * Indicates a change to the {@link DutyModel} instances connected to the
-	 * {@link FlowItemModel}.
+	 * {@link TaskModel}.
 	 */
 	CHANGE_DUTIES
+
 }

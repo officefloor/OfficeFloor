@@ -17,13 +17,12 @@
 package net.officefloor.eclipse.skin.officefloor;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link ManagedObjectSourceModel}.
+ * {@link OfficeFloorFigure} for the {@link OfficeFloorManagedObjectSourceModel}.
  * 
  * @author Daniel
  */
 public interface ManagedObjectSourceFigure extends OfficeFloorFigure {
-
 }

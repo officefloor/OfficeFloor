@@ -16,13 +16,8 @@
  */
 package net.officefloor.eclipse.officefloor.operations;
 
-import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
-import net.officefloor.eclipse.wizard.WizardUtil;
-import net.officefloor.eclipse.wizard.managedobjectsource.ManagedObjectSourceWizard;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 
 /**
@@ -40,60 +35,54 @@ public class AddManagedObjectOperation extends
 		super("Add managed object", OfficeFloorEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(Context context) {
-
-		// Obtain the edit part
-		final OfficeFloorEditPart editPart = context.getEditPart();
-
-		// Create the managed object source
-		ManagedObjectSourceModel managedObjectSource = null;
-		try {
-			ManagedObjectSourceWizard managedObjectSourceWizard = new ManagedObjectSourceWizard(
-					editPart);
-			if (WizardUtil.runWizard(managedObjectSourceWizard, editPart)) {
-				managedObjectSource = managedObjectSourceWizard
-						.getManagedObjectSourceModel();
-			}
-		} catch (Throwable ex) {
-			editPart.messageError(ex);
-			return;
-		}
-
-		// Ensure managed object created
-		if (managedObjectSource == null) {
-			return;
-		}
-
-		// Set location
-		context.positionModel(managedObjectSource);
-
-		// Update the class path to possibly include the managed object source
-		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
-				managedObjectSource.getSource());
-
-		// Add managed object source
-		final ManagedObjectSourceModel newManagedObjectSource = managedObjectSource;
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				editPart.getCastedModel().addManagedObjectSource(
-						newManagedObjectSource);
-			}
-
-			@Override
-			protected void undoCommand() {
-				editPart.getCastedModel().removeManagedObjectSource(
-						newManagedObjectSource);
-			}
-		});
+//
+//		// Obtain the edit part
+//		final OfficeFloorEditPart editPart = context.getEditPart();
+//
+//		// Create the managed object source
+//		ManagedObjectSourceModel managedObjectSource = null;
+//		try {
+//			ManagedObjectSourceWizard managedObjectSourceWizard = new ManagedObjectSourceWizard(
+//					editPart);
+//			if (WizardUtil.runWizard(managedObjectSourceWizard, editPart)) {
+//				managedObjectSource = managedObjectSourceWizard
+//						.getManagedObjectSourceModel();
+//			}
+//		} catch (Throwable ex) {
+//			editPart.messageError(ex);
+//			return;
+//		}
+//
+//		// Ensure managed object created
+//		if (managedObjectSource == null) {
+//			return;
+//		}
+//
+//		// Set location
+//		context.positionModel(managedObjectSource);
+//
+//		// Update the class path to possibly include the managed object source
+//		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
+//				managedObjectSource.getSource());
+//
+//		// Add managed object source
+//		final ManagedObjectSourceModel newManagedObjectSource = managedObjectSource;
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				editPart.getCastedModel().addManagedObjectSource(
+//						newManagedObjectSource);
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				editPart.getCastedModel().removeManagedObjectSource(
+//						newManagedObjectSource);
+//			}
+//		});
 	}
 
 }

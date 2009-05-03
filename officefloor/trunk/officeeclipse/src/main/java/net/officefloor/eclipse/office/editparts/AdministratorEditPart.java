@@ -31,10 +31,8 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.AdministratorModel;
-import net.officefloor.model.office.AdministratorToManagedObjectModel;
-import net.officefloor.model.office.AdministratorToTeamModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.ExternalTeamModel;
+import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.AdministratorModel.AdministratorEvent;
 
 import org.eclipse.gef.EditPart;
@@ -50,13 +48,6 @@ public class AdministratorEditPart
 		AbstractOfficeFloorSourceNodeEditPart<AdministratorModel, OfficeFloorFigure>
 		implements RemovableEditPart, AdministratorFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -70,61 +61,34 @@ public class AdministratorEditPart
 				case REMOVE_DUTY:
 					AdministratorEditPart.this.refreshChildren();
 					break;
-				case ADD_MANAGED_OBJECT:
-				case REMOVE_MANAGED_OBJECT:
-					AdministratorEditPart.this.refreshSourceConnections();
-					break;
-				case CHANGE_TEAM:
-					AdministratorEditPart.this.refreshSourceConnections();
-					break;
+//				case ADD_MANAGED_OBJECT:
+//				case REMOVE_MANAGED_OBJECT:
+//					AdministratorEditPart.this.refreshSourceConnections();
+//					break;
+//				case CHANGE_TEAM:
+//					AdministratorEditPart.this.refreshSourceConnections();
+//					break;
 				}
 			}
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createAdministratorFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populateModelChildren(java.util.List)
-	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getDuties());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
@@ -133,19 +97,21 @@ public class AdministratorEditPart
 
 				if (target instanceof ExternalManagedObjectModel) {
 					// Create the connection
-					AdministratorToManagedObjectModel conn = new AdministratorToManagedObjectModel();
-					conn.setAdministrator((AdministratorModel) source);
-					conn.setManagedObject((ExternalManagedObjectModel) target);
-					conn.connect();
-					return conn;
+//					AdministratorToManagedObjectModel conn = new AdministratorToManagedObjectModel();
+//					conn.setAdministrator((AdministratorModel) source);
+//					conn.setManagedObject((ExternalManagedObjectModel) target);
+//					conn.connect();
+//					return conn;
+					return null;
 
-				} else if (target instanceof ExternalTeamModel) {
+				} else if (target instanceof OfficeTeamModel) {
 					// Create the connection
-					AdministratorToTeamModel conn = new AdministratorToTeamModel();
-					conn.setAdministrator((AdministratorModel) source);
-					conn.setTeam((ExternalTeamModel) target);
-					conn.connect();
-					return conn;
+//					AdministratorToTeamModel conn = new AdministratorToTeamModel();
+//					conn.setAdministrator((AdministratorModel) source);
+//					conn.setTeam((ExternalTeamModel) target);
+//					conn.connect();
+//					return conn;
+					return null;
 
 				} else {
 					throw new OfficeFloorPluginFailure("Unknown target "
@@ -158,54 +124,26 @@ public class AdministratorEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(ExternalManagedObjectModel.class);
-		types.add(ExternalTeamModel.class);
+		types.add(OfficeTeamModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getManagedObjects());
-		AdministratorToTeamModel team = this.getCastedModel().getTeam();
-		if (team != null) {
-			models.add(team);
-		}
+//		models.addAll(this.getCastedModel().getManagedObjects());
+//		AdministratorToTeamModel team = this.getCastedModel().getTeam();
+//		if (team != null) {
+//			models.add(team);
+//		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Never a target
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveAdministratorOperation();
@@ -215,15 +153,9 @@ public class AdministratorEditPart
 	 * ==================== AdministratorFigureContext ======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.office.AdministratorFigureContext#
-	 * getAdministratorName()
-	 */
 	@Override
 	public String getAdministratorName() {
-		return this.getCastedModel().getId();
+		return this.getCastedModel().getAdministratorName();
 	}
 
 }

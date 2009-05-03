@@ -17,7 +17,6 @@
 package net.officefloor.eclipse.skin.standard.figure;
 
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.room.SubRoomModel;
 
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Ellipse;

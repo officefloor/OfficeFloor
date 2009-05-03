@@ -23,11 +23,10 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.model.office.OfficeModel;
-import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
-import net.officefloor.model.officefloor.OfficeTaskModel;
-import net.officefloor.officefloor.OfficeFloorLoader;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.model.office.OfficeTaskModel;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
@@ -69,9 +68,9 @@ public class OfficeTaskDialog extends Dialog {
 				// Office task specified
 				task = (OfficeTaskModel) target;
 
-			} else if (target instanceof OfficeFloorOfficeModel) {
+			} else if (target instanceof DeployedOfficeModel) {
 				// Obtain the task from the office
-				OfficeFloorOfficeModel office = (OfficeFloorOfficeModel) target;
+				DeployedOfficeModel office = (DeployedOfficeModel) target;
 
 				// Obtain the project
 				IProject project = ProjectConfigurationContext
@@ -83,7 +82,8 @@ public class OfficeTaskDialog extends Dialog {
 				task = dialog.createOfficeTask();
 				if (task != null) {
 					// Add the task to the office, so may connect
-					office.addTask(task);
+					// TODO should be linking to office input
+					// office.addTask(task);
 				}
 			}
 		} catch (Exception ex) {
@@ -137,7 +137,7 @@ public class OfficeTaskDialog extends Dialog {
 	 * @throws Exception
 	 *             If fails to initialise.
 	 */
-	public OfficeTaskDialog(Shell parentShell, OfficeFloorOfficeModel office,
+	public OfficeTaskDialog(Shell parentShell, DeployedOfficeModel office,
 			IProject project) throws Exception {
 		super(parentShell);
 
@@ -145,9 +145,11 @@ public class OfficeTaskDialog extends Dialog {
 		ConfigurationContext configurationContext = ProjectClassLoader.create(
 				project).getConfigurationContext();
 
-		// Obtain the listing of office tasks
-		this.officeTasks = new OfficeFloorLoader().loadOfficeTasks(office,
-				configurationContext);
+		// TODO should link to office input rather than internals
+//		// Obtain the listing of office tasks
+//		this.officeTasks = new OfficeFloorLoader().loadOfficeTasks(office,
+//				configurationContext);
+		this.officeTasks = null;
 	}
 
 	/**
@@ -180,8 +182,7 @@ public class OfficeTaskDialog extends Dialog {
 		new Label(composite, SWT.WRAP).setText("Select Office task:");
 		this.officeTaskList = new List(composite, SWT.SINGLE | SWT.BORDER);
 		for (OfficeTaskModel officeTask : this.officeTasks) {
-			this.officeTaskList.add(officeTask.getWorkName() + "."
-					+ officeTask.getTaskName());
+			this.officeTaskList.add(officeTask.getOfficeTaskName());
 		}
 
 		// Error text

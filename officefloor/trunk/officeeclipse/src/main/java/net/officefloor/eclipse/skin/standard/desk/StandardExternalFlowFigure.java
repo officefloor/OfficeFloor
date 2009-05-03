@@ -21,8 +21,8 @@ import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
-import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
+import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
+import net.officefloor.model.desk.TaskToNextExternalFlowModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -46,9 +46,9 @@ public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 				.getExternalFlowName(), ConnectorDirection.WEST,
 				ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this.registerConnectionAnchor(FlowItemToNextExternalFlowModel.class,
+		this.registerConnectionAnchor(TaskToNextExternalFlowModel.class,
 				anchor);
-		this.registerConnectionAnchor(FlowItemOutputToExternalFlowModel.class,
+		this.registerConnectionAnchor(TaskFlowToExternalFlowModel.class,
 				anchor);
 		this.setFigure(figure);
 	}

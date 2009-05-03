@@ -16,9 +16,9 @@
  */
 package net.officefloor.eclipse.skin.room;
 
-import org.eclipse.draw2d.IFigure;
+import net.officefloor.model.section.ExternalManagedObjectModel;
 
-import net.officefloor.model.room.ExternalManagedObjectModel;
+import org.eclipse.draw2d.IFigure;
 
 /**
  * Context for the {@link ExternalManagedObjectModel} {@link IFigure}.

@@ -27,12 +27,13 @@ import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.room.operations.RemoveExternalManagedObjectOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.room.ExternalManagedObjectFigureContext;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.ExternalManagedObjectModel.ExternalManagedObjectEvent;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.ExternalManagedObjectModel.ExternalManagedObjectEvent;
+
+import org.eclipse.gef.EditPart;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart}.
+ * {@link EditPart} for the {@link ExternalManagedObjectEditPart}.
  * 
  * @author Daniel
  */
@@ -41,35 +42,17 @@ public class ExternalManagedObjectEditPart
 		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel, OfficeFloorFigure>
 		implements RemovableEditPart, ExternalManagedObjectFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Not a source
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getSubRoomManagedObjects());
+		models.addAll(this.getCastedModel().getSubSectionObjects());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
+	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
 		handlers.add(new PropertyChangeHandler<ExternalManagedObjectEvent>(
@@ -77,8 +60,8 @@ public class ExternalManagedObjectEditPart
 			protected void handlePropertyChange(
 					ExternalManagedObjectEvent property, PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_SUB_ROOM_MANAGED_OBJECT:
-				case REMOVE_SUB_ROOM_MANAGED_OBJECT:
+				case ADD_SUB_SECTION_OBJECT:
+				case REMOVE_SUB_SECTION_OBJECT:
 					ExternalManagedObjectEditPart.this
 							.refreshTargetConnections();
 					break;
@@ -87,38 +70,17 @@ public class ExternalManagedObjectEditPart
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
 				.createExternalManagedObjectFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveExternalManagedObjectOperation();
@@ -128,16 +90,9 @@ public class ExternalManagedObjectEditPart
 	 * =================== ExternalManagedObjectFigureContext =================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.room.ExternalManagedObjectFigureContext#
-	 * getExternalManagedObjectName()
-	 */
 	@Override
 	public String getExternalManagedObjectName() {
-		return this.getCastedModel().getName();
+		return this.getCastedModel().getExternalManagedObjectName();
 	}
 
 }

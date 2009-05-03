@@ -21,7 +21,7 @@ import net.officefloor.eclipse.skin.officefloor.OfficeManagedObjectFigureContext
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.OfficeItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourceModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -47,7 +47,9 @@ public class StandardOfficeManagedObjectFigure extends
 				ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				OfficeManagedObjectToManagedObjectSourceModel.class, anchor);
+				DeployedOfficeObjectToOfficeFloorManagedObjectModel.class,
+				anchor);
 		this.setFigure(figure);
 	}
+
 }

@@ -17,10 +17,7 @@
 package net.officefloor.eclipse.office.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
-import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
 
 /**
@@ -37,42 +34,36 @@ public class AddExternalTeamOperation extends AbstractOperation<OfficeEditPart> 
 		super("Add team", OfficeEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(Context context) {
 
-		// Obtain the edit part
-		final OfficeEditPart editPart = context.getEditPart();
-
-		// Add the team
-		final ExternalTeamModel team = new ExternalTeamModel();
-		BeanDialog dialog = editPart.createBeanDialog(team, "X", "Y");
-		if (!dialog.populate()) {
-			// Not created
-			return;
-		}
-		
-		// Set location
-		context.positionModel(team);
-
-		// Make changes
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				editPart.getCastedModel().addExternalTeam(team);
-			}
-
-			@Override
-			protected void undoCommand() {
-				editPart.getCastedModel().removeExternalTeam(team);
-			}
-		});
+//		// Obtain the edit part
+//		final OfficeEditPart editPart = context.getEditPart();
+//
+//		// Add the team
+//		final ExternalTeamModel team = new ExternalTeamModel();
+//		BeanDialog dialog = editPart.createBeanDialog(team, "X", "Y");
+//		if (!dialog.populate()) {
+//			// Not created
+//			return;
+//		}
+//		
+//		// Set location
+//		context.positionModel(team);
+//
+//		// Make changes
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				editPart.getCastedModel().addExternalTeam(team);
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				editPart.getCastedModel().removeExternalTeam(team);
+//			}
+//		});
 	}
 
 }
