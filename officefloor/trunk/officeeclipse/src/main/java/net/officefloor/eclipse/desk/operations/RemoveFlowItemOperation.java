@@ -18,7 +18,7 @@ package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
-import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskEditPart;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.TaskModel;
 
@@ -29,13 +29,13 @@ import net.officefloor.model.desk.TaskModel;
  */
 public class RemoveFlowItemOperation
 		extends
-		AbstractRemoveItemModelOperation<FlowItemEditPart, TaskModel, DeskModel> {
+		AbstractRemoveItemModelOperation<TaskEditPart, TaskModel, DeskModel> {
 
 	/**
 	 * Initiate.
 	 */
 	public RemoveFlowItemOperation() {
-		super("Remove flow item", FlowItemEditPart.class);
+		super("Remove flow item", TaskEditPart.class);
 	}
 
 	@Override

@@ -19,7 +19,7 @@ package net.officefloor.eclipse.skin;
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory;
-import net.officefloor.eclipse.skin.room.RoomFigureFactory;
+import net.officefloor.eclipse.skin.section.SectionFigureFactory;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
@@ -59,11 +59,11 @@ public interface OfficeFloorSkin {
 	OfficeFloorFigureFactory getOfficeFloorFigureFactory();
 
 	/**
-	 * Obtains the {@link RoomFigureFactory} to create necessary {@link IFigure}
+	 * Obtains the {@link SectionFigureFactory} to create necessary {@link IFigure}
 	 * instances for the {@link RoomModel}.
 	 * 
-	 * @return {@link RoomFigureFactory}.
+	 * @return {@link SectionFigureFactory}.
 	 */
-	RoomFigureFactory getRoomFigureFactory();
+	SectionFigureFactory getRoomFigureFactory();
 
 }

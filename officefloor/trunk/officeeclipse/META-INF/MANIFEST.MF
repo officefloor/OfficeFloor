@@ -52,8 +52,8 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.office.models,
  net.officefloor.eclipse.officefloor,
  net.officefloor.eclipse.officefloor.editparts,
- net.officefloor.eclipse.room,
- net.officefloor.eclipse.room.editparts,
+ net.officefloor.eclipse.section,
+ net.officefloor.eclipse.section.editparts,
  net.officefloor.eclipse.util,
  net.officefloor.eclipse.wizard
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

@@ -27,5 +27,4 @@ import org.eclipse.draw2d.IFigure;
  * @author Daniel
  */
 public interface ExternalManagedObjectFigure extends OfficeFloorFigure {
-
 }

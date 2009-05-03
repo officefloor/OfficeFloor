@@ -22,14 +22,14 @@ import net.officefloor.eclipse.skin.office.DutyFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
-import net.officefloor.eclipse.skin.office.ExternalTeamFigure;
-import net.officefloor.eclipse.skin.office.ExternalTeamFigureContext;
-import net.officefloor.eclipse.skin.office.FlowItemAdministrationJoinPointFigure;
-import net.officefloor.eclipse.skin.office.FlowItemFigure;
-import net.officefloor.eclipse.skin.office.FlowItemFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeTeamFigure;
+import net.officefloor.eclipse.skin.office.OfficeTeamFigureContext;
+import net.officefloor.eclipse.skin.office.TaskAdministrationJoinPointFigure;
+import net.officefloor.eclipse.skin.office.OfficeTaskFigure;
+import net.officefloor.eclipse.skin.office.OfficeTaskFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
-import net.officefloor.eclipse.skin.office.RoomFigure;
-import net.officefloor.eclipse.skin.office.RoomFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionFigure;
+import net.officefloor.eclipse.skin.office.OfficeSectionFigureContext;
 
 /**
  * Standard {@link OfficeFigureFactory}.
@@ -56,24 +56,24 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	}
 
 	@Override
-	public ExternalTeamFigure createExternalTeamFigure(
-			ExternalTeamFigureContext context) {
-		return new StandardExternalTeamFigure(context);
+	public OfficeTeamFigure createOfficeTeamFigure(
+			OfficeTeamFigureContext context) {
+		return new StandardOfficeTeamFigure(context);
 	}
 
 	@Override
-	public FlowItemFigure createFlowItemFigure(FlowItemFigureContext context) {
-		return new StandardFlowItemFigure(context);
+	public OfficeTaskFigure createOfficeTaskFigure(OfficeTaskFigureContext context) {
+		return new StandardOfficeTaskFigure(context);
 	}
 
 	@Override
-	public RoomFigure createRoomFigure(RoomFigureContext context) {
-		return new StandardRoomFigure(context);
+	public OfficeSectionFigure createOfficeSectionFigure(OfficeSectionFigureContext context) {
+		return new StandardOfficeSectionFigure(context);
 	}
 
 	@Override
-	public FlowItemAdministrationJoinPointFigure createFlowItemAdministrationJoinPointFigure() {
-		return new StandardFlowItemAdministrationJoinPointFigure();
+	public TaskAdministrationJoinPointFigure createTaskAdministrationJoinPointFigure() {
+		return new StandardTaskAdministrationJoinPointFigure();
 	}
 
 }

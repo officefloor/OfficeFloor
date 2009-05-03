@@ -16,12 +16,13 @@
  */
 package net.officefloor.eclipse.skin.office;
 
-import net.officefloor.eclipse.office.models.AbstractFlowItemAdministrationJoinPointModel;
+import net.officefloor.eclipse.office.models.AbstractTaskAdministrationJoinPointModel;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeTeamModel;
 
 import org.eclipse.draw2d.IFigure;
 
@@ -64,39 +65,39 @@ public interface OfficeFigureFactory {
 			ExternalManagedObjectFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link ExternalTeamModel}.
+	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTeamModel}.
 	 * 
 	 * @param context
-	 *            {@link ExternalTeamFigureContext}.
+	 *            {@link OfficeTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	ExternalTeamFigure createExternalTeamFigure(
-			ExternalTeamFigureContext context);
+	OfficeTeamFigure createOfficeTeamFigure(
+			OfficeTeamFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link FlowItemModel}.
+	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
 	 * 
 	 * @param context
-	 *            {@link FlowItemFigureContext}.
+	 *            {@link OfficeTaskFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	FlowItemFigure createFlowItemFigure(FlowItemFigureContext context);
+	OfficeTaskFigure createOfficeTaskFigure(OfficeTaskFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link RoomModel}.
+	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeSectionModel}.
 	 * 
 	 * @param context
-	 *            {@link RoomFigureContext}.
+	 *            {@link OfficeSectionFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	RoomFigure createRoomFigure(RoomFigureContext context);
+	OfficeSectionFigure createOfficeSectionFigure(OfficeSectionFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link AbstractFlowItemAdministrationJoinPointModel}.
+	 * {@link AbstractTaskAdministrationJoinPointModel}.
 	 * 
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	FlowItemAdministrationJoinPointFigure createFlowItemAdministrationJoinPointFigure();
+	TaskAdministrationJoinPointFigure createTaskAdministrationJoinPointFigure();
 
 }

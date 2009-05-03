@@ -25,5 +25,4 @@ import net.officefloor.model.desk.ExternalFlowModel;
  * @author Daniel
  */
 public interface ExternalFlowFigure extends OfficeFloorFigure {
-
 }

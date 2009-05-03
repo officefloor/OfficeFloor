@@ -13,7 +13,7 @@
               id="net.officefloor.editors.desk"
               name="Desk Editor"/>
         <editor
-              class="net.officefloor.eclipse.room.RoomEditor"
+              class="net.officefloor.eclipse.section.SectionEditor"
               contributorClass="net.officefloor.eclipse.common.CoreEditorActionContributor"
               default="true"
               extensions="room"

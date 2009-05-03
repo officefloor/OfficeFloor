@@ -24,8 +24,8 @@ import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.desk.DeskUtil;
 import net.officefloor.eclipse.desk.WorkLoaderInstance;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
-import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
-import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkTaskEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkEditPart;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.TaskModel;
@@ -41,13 +41,13 @@ import org.eclipse.draw2d.geometry.Point;
  * @author Daniel
  */
 public class CreateFlowItemFromDeskTaskOperation extends
-		AbstractOperation<DeskTaskEditPart> {
+		AbstractOperation<WorkTaskEditPart> {
 
 	/**
 	 * Initiate.
 	 */
 	public CreateFlowItemFromDeskTaskOperation() {
-		super("Add as flow item", DeskTaskEditPart.class);
+		super("Add as flow item", WorkTaskEditPart.class);
 	}
 
 	/*

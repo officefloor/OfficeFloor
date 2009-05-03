@@ -18,20 +18,20 @@ package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkEditPart;
 
 /**
  * {@link Operation} to remove a {@link DeskWorkModel}.
  * 
  * @author Daniel
  */
-public class RemoveWorkOperation extends AbstractOperation<DeskWorkEditPart> {
+public class RemoveWorkOperation extends AbstractOperation<WorkEditPart> {
 
 	/**
 	 * Initiate.
 	 */
 	public RemoveWorkOperation() {
-		super("Remove work", DeskWorkEditPart.class);
+		super("Remove work", WorkEditPart.class);
 	}
 
 	/*
