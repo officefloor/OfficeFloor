@@ -16,13 +16,7 @@
  */
 package net.officefloor.eclipse.office.operations;
 
-import org.eclipse.core.resources.IProject;
-
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.dialog.AdministratorSourceCreateDialog;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.OfficeModel;
@@ -42,53 +36,47 @@ public class AddAdministratorOperation extends
 		super("Add administrator", OfficeEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(Context context) {
 
-		// Obtain the edit part
-		final OfficeEditPart editPart = context.getEditPart();
-
-		// Create the Administrator Source
-		AdministratorModel administrator = null;
-		try {
-			AbstractOfficeFloorEditor<?, ?> editor = editPart.getEditor();
-			IProject project = ProjectConfigurationContext.getProject(editor
-					.getEditorInput());
-			AdministratorSourceCreateDialog dialog = new AdministratorSourceCreateDialog(
-					editor.getSite().getShell(), project);
-			administrator = dialog.createAdministratorSource();
-		} catch (Throwable ex) {
-			editPart.messageError(ex);
-		}
-
-		// Ensure created
-		if (administrator == null) {
-			return;
-		}
-
-		// Set location
-		context.positionModel(administrator);
-
-		// Make the change
-		final AdministratorModel newAdministrator = administrator;
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				editPart.getCastedModel().addAdministrator(newAdministrator);
-			}
-
-			@Override
-			protected void undoCommand() {
-				editPart.getCastedModel().removeAdministrator(newAdministrator);
-			}
-		});
+//		// Obtain the edit part
+//		final OfficeEditPart editPart = context.getEditPart();
+//
+//		// Create the Administrator Source
+//		AdministratorModel administrator = null;
+//		try {
+//			AbstractOfficeFloorEditor<?, ?> editor = editPart.getEditor();
+//			IProject project = ProjectConfigurationContext.getProject(editor
+//					.getEditorInput());
+//			AdministratorSourceCreateDialog dialog = new AdministratorSourceCreateDialog(
+//					editor.getSite().getShell(), project);
+//			administrator = dialog.createAdministratorSource();
+//		} catch (Throwable ex) {
+//			editPart.messageError(ex);
+//		}
+//
+//		// Ensure created
+//		if (administrator == null) {
+//			return;
+//		}
+//
+//		// Set location
+//		context.positionModel(administrator);
+//
+//		// Make the change
+//		final AdministratorModel newAdministrator = administrator;
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			protected void doCommand() {
+//				editPart.getCastedModel().addAdministrator(newAdministrator);
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				editPart.getCastedModel().removeAdministrator(newAdministrator);
+//			}
+//		});
 	}
 
 }

@@ -19,6 +19,7 @@ package net.officefloor.eclipse.extension.workloader.clazz;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.InputFilter;
@@ -31,9 +32,9 @@ import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
-import net.officefloor.work.WorkLoader;
-import net.officefloor.work.clazz.ClassWorkLoader;
-import net.officefloor.work.clazz.Flow;
+import net.officefloor.frame.internal.structure.Flow;
+import net.officefloor.plugin.work.clazz.ClassWork;
+import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -45,42 +46,24 @@ import org.eclipse.swt.widgets.Composite;
  * 
  * @author Daniel
  */
-public class ClassWorkLoaderExtension implements WorkLoaderExtension,
+public class ClassWorkLoaderExtension implements
+		WorkLoaderExtension<ClassWork, ClassWorkSource>,
 		ExtensionClasspathProvider {
 
 	/*
 	 * =================== WorkLoaderExtension ==========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.workloader.WorkLoaderExtension#
-	 * getWorkLoaderClass()
-	 */
 	@Override
-	public Class<? extends WorkLoader> getWorkLoaderClass() {
-		return ClassWorkLoader.class;
+	public Class<ClassWorkSource> getWorkSourceClass() {
+		return ClassWorkSource.class;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.workloader.WorkLoaderExtension#
-	 * getDisplayName()
-	 */
 	@Override
 	public String getDisplayName() {
 		return "Class";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.workloader.WorkLoaderExtension#
-	 * createControl(org.eclipse.swt.widgets.Composite,
-	 * net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext)
-	 */
 	@Override
 	public List<WorkLoaderProperty> createControl(Composite page,
 			final WorkLoaderExtensionContext context) {
@@ -90,7 +73,7 @@ public class ClassWorkLoaderExtension implements WorkLoaderExtension,
 
 		// Provide the only property which is the class name
 		final WorkLoaderProperty property = new WorkLoaderProperty(
-				ClassWorkLoader.CLASS_NAME_PROPERTY_NAME);
+				ClassWorkSource.CLASS_NAME_PROPERTY_NAME);
 		final List<WorkLoaderProperty> properties = new ArrayList<WorkLoaderProperty>(
 				1);
 		properties.add(property);
@@ -130,19 +113,13 @@ public class ClassWorkLoaderExtension implements WorkLoaderExtension,
 		return properties;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.extension.workloader.WorkLoaderExtension#
-	 * getSuggestedWorkName(java.util.List)
-	 */
 	@Override
 	public String getSuggestedWorkName(List<WorkLoaderProperty> properties) {
 
 		// Find the property containing the class name
 		WorkLoaderProperty classNameProperty = null;
 		for (WorkLoaderProperty property : properties) {
-			if (ClassWorkLoader.CLASS_NAME_PROPERTY_NAME.equals(property
+			if (ClassWorkSource.CLASS_NAME_PROPERTY_NAME.equals(property
 					.getName())) {
 				classNameProperty = property;
 			}
@@ -181,6 +158,6 @@ public class ClassWorkLoaderExtension implements WorkLoaderExtension,
 	 */
 	@Override
 	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[]{new TypeClasspathProvision(Flow.class)};
+		return new ClasspathProvision[] { new TypeClasspathProvision(Flow.class) };
 	}
 }

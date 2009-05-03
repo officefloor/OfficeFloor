@@ -16,21 +16,22 @@
  */
 package net.officefloor.eclipse.skin.office;
 
+import net.officefloor.model.office.OfficeTaskModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.office.FlowItemModel;
-
 /**
- * Context for the {@link FlowItemModel} {@link IFigure}.
+ * Context for the {@link OfficeTaskModel} {@link IFigure}.
  * 
  * @author Daniel
  */
+// TODO rename to OfficeTaskFigureContext
 public interface FlowItemFigureContext {
 
 	/**
-	 * Obtains the {@link FlowItemModel} name.
+	 * Obtains the {@link OfficeTaskModel} name.
 	 * 
-	 * @return {@link FlowItemModel} name.
+	 * @return {@link OfficeTaskModel} name.
 	 */
 	String getFlowItemName();
 

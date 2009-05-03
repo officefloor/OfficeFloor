@@ -27,9 +27,10 @@ import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.DutyModel.DutyEvent;
 
+import org.eclipse.gef.EditPart;
+
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.office.DutyModel}.
+ * {@link EditPart} for the {@link DutyModel}.
  * 
  * @author Daniel
  */
@@ -37,38 +38,17 @@ public class DutyEditPart extends
 		AbstractOfficeFloorNodeEditPart<DutyModel, OfficeFloorFigure> implements
 		DutyFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Never a source
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getPreAdminFlowItems());
-		models.addAll(this.getCastedModel().getPostAdminFlowItems());
+//		models.addAll(this.getCastedModel().getPreAdminFlowItems());
+//		models.addAll(this.getCastedModel().getPostAdminFlowItems());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -77,58 +57,39 @@ public class DutyEditPart extends
 			protected void handlePropertyChange(DutyEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_FLOW:
-				case REMOVE_FLOW:
-					DutyEditPart.this.refreshChildren();
-					break;
-				case ADD_PRE_ADMIN_FLOW_ITEM:
-				case REMOVE_PRE_ADMIN_FLOW_ITEM:
-				case ADD_POST_ADMIN_FLOW_ITEM:
-				case REMOVE_POST_ADMIN_FLOW_ITEM:
-					DutyEditPart.this.refreshTargetConnections();
-					break;
+//				case ADD_FLOW:
+//				case REMOVE_FLOW:
+//					DutyEditPart.this.refreshChildren();
+//					break;
+//				case ADD_PRE_ADMIN_FLOW_ITEM:
+//				case REMOVE_PRE_ADMIN_FLOW_ITEM:
+//				case ADD_POST_ADMIN_FLOW_ITEM:
+//				case REMOVE_POST_ADMIN_FLOW_ITEM:
+//					DutyEditPart.this.refreshTargetConnections();
+//					break;
 				}
 			}
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createDutyFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populateModelChildren(java.util.List)
-	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel().getFlows());
+//		childModels.addAll(this.getCastedModel().getFlows());
 	}
 
 	/*
 	 * =================== DutyFigureContext ========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.skin.office.DutyFigureContext#getDutyName()
-	 */
 	@Override
 	public String getDutyName() {
-		return this.getCastedModel().getKey();
+		return this.getCastedModel().getDutyName();
 	}
 
 }

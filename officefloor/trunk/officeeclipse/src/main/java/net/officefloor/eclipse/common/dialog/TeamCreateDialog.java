@@ -25,9 +25,9 @@ import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.BeanListInput;
 import net.officefloor.eclipse.common.dialog.input.impl.SubTypeSelectionInput;
 import net.officefloor.frame.spi.team.Team;
-import net.officefloor.frame.spi.team.TeamFactory;
+import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
-import net.officefloor.model.officefloor.TeamModel;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * {@link Dialog} to create a {@link TeamModel}.
+ * {@link Dialog} to create a {@link OfficeFloorTeamModel}.
  * 
  * @author Daniel
  */
@@ -53,9 +53,9 @@ public class TeamCreateDialog extends Dialog {
 	private final IProject project;
 
 	/**
-	 * {@link TeamModel} to create.
+	 * {@link OfficeFloorTeamModel} to create.
 	 */
-	private TeamModel team = null;
+	private OfficeFloorTeamModel team = null;
 
 	/**
 	 * {@link Text} to get the team name.
@@ -63,9 +63,9 @@ public class TeamCreateDialog extends Dialog {
 	private Text teamName;
 
 	/**
-	 * List to obtain the {@link TeamFactory} class name.
+	 * List to obtain the {@link TeamSource} class name.
 	 */
-	private InputHandler<String> teamFactoryList;
+	private InputHandler<String> teamSourceList;
 
 	/**
 	 * {@link Input} for the properties to create the {@link Team}.
@@ -96,11 +96,11 @@ public class TeamCreateDialog extends Dialog {
 	}
 
 	/**
-	 * Creates the {@link TeamModel}.
+	 * Creates the {@link OfficeFloorTeamModel}.
 	 * 
-	 * @return {@link TeamModel}.
+	 * @return {@link OfficeFloorTeamModel}.
 	 */
-	public TeamModel createTeam() throws Exception {
+	public OfficeFloorTeamModel createTeam() throws Exception {
 
 		// Block to open
 		this.setBlockOnOpen(true);
@@ -113,7 +113,9 @@ public class TeamCreateDialog extends Dialog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets
+	 * .Composite)
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
@@ -125,10 +127,11 @@ public class TeamCreateDialog extends Dialog {
 		new Label(composite, SWT.WRAP).setText("Name");
 		this.teamName = new Text(composite, SWT.SINGLE | SWT.BORDER);
 
-		// Enter the team factory
-		new Label(composite, SWT.WRAP).setText("Team Factory");
-		this.teamFactoryList = new InputHandler<String>(composite,
-				new SubTypeSelectionInput(this.project, TeamFactory.class.getName()));
+		// Enter the team source
+		new Label(composite, SWT.WRAP).setText("Team Source");
+		this.teamSourceList = new InputHandler<String>(composite,
+				new SubTypeSelectionInput(this.project, TeamSource.class
+						.getName()));
 
 		// Enter the properties
 		new Label(composite, SWT.WRAP).setText("Properties");
@@ -167,11 +170,11 @@ public class TeamCreateDialog extends Dialog {
 			return;
 		}
 
-		// Ensure team factory provided
-		String teamFactoryClassName = this.teamFactoryList.getTrySafeValue();
-		if ((teamFactoryClassName == null)
-				|| (teamFactoryClassName.trim().length() == 0)) {
-			this.errorText.setText("Select a team factory");
+		// Ensure team source provided
+		String teamSourceClassName = this.teamSourceList.getTrySafeValue();
+		if ((teamSourceClassName == null)
+				|| (teamSourceClassName.trim().length() == 0)) {
+			this.errorText.setText("Select a team source");
 			return;
 		}
 
@@ -184,19 +187,19 @@ public class TeamCreateDialog extends Dialog {
 		}
 
 		// Attempt to create the instance of the team
-		TeamFactory teamFactory;
+		TeamSource teamSource;
 		try {
 			ProjectClassLoader classLoader = ProjectClassLoader
 					.create(this.project);
-			Class<?> teamFactoryClass = classLoader
-					.loadClass(teamFactoryClassName);
-			Object instance = teamFactoryClass.newInstance();
-			if (!(instance instanceof TeamFactory)) {
-				throw new Exception(teamFactoryClassName
+			Class<?> teamSourceClass = classLoader
+					.loadClass(teamSourceClassName);
+			Object instance = teamSourceClass.newInstance();
+			if (!(instance instanceof TeamSource)) {
+				throw new Exception(teamSourceClassName
 						+ " must be an instance of "
-						+ TeamFactory.class.getName());
+						+ TeamSource.class.getName());
 			}
-			teamFactory = (TeamFactory) instance;
+			teamSource = (TeamSource) instance;
 		} catch (Exception ex) {
 			this.errorText.setText(ex.getMessage());
 			return;
@@ -205,12 +208,13 @@ public class TeamCreateDialog extends Dialog {
 		// Attempt to create the team
 		try {
 			// Attempt to create the team
-			Team team = teamFactory.createTeam(properties);
+			// TODO provide properties to team source
+			Team team = teamSource.createTeam();
 
 			// Ensure the team was created
 			if (team == null) {
-				throw new Exception(TeamFactory.class.getSimpleName()
-						+ " did create a " + Team.class.getSimpleName());
+				throw new Exception(TeamSource.class.getSimpleName()
+						+ " did not source a " + Team.class.getSimpleName());
 			}
 		} catch (Exception ex) {
 			this.errorText.setText("Team failed creation: " + ex.getMessage());
@@ -218,7 +222,7 @@ public class TeamCreateDialog extends Dialog {
 		}
 
 		// Team configuration valid (as at this point)
-		this.team = new TeamModel(teamName, teamFactoryClassName,
+		this.team = new OfficeFloorTeamModel(teamName, teamSourceClassName,
 				propertyModels, null, null);
 
 		// Successful

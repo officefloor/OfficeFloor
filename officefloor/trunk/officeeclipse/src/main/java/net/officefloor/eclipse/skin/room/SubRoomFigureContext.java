@@ -16,21 +16,21 @@
  */
 package net.officefloor.eclipse.skin.room;
 
+import net.officefloor.model.section.SubSectionModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.room.SubRoomModel;
-
 /**
- * Context for the {@link SubRoomModel} {@link IFigure}.
+ * Context for the {@link SubSectionModel} {@link IFigure}.
  * 
  * @author Daniel
  */
 public interface SubRoomFigureContext {
 
 	/**
-	 * Obtains the {@link SubRoomModel} name.
+	 * Obtains the {@link SubSectionModel} name.
 	 * 
-	 * @return {@link SubRoomModel} name.
+	 * @return {@link SubSectionModel} name.
 	 */
 	String getSubRoomName();
 

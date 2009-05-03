@@ -32,7 +32,7 @@ import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
-import net.officefloor.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationContext;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -63,11 +63,11 @@ import org.eclipse.ui.ide.IDE;
 
 /**
  * <p>
- * Abstract {@link org.eclipse.gef.EditPart} for the Office.
+ * Abstract {@link EditPart} for the Office.
  * <p>
- * This provides the implementation of a {@link org.eclipse.gef.NodeEditPart}
- * but does not implement the interface. Subclasses may therefore choose to
- * implement the interface if it requires this functionality.
+ * This provides the implementation of a {@link NodeEditPart} but does not
+ * implement the interface. Subclasses may therefore choose to implement the
+ * interface if it requires this functionality.
  * 
  * @author Daniel
  */
@@ -99,7 +99,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 
 	/**
 	 * Specifies the {@link AbstractOfficeFloorEditor} that contains this
-	 * {@link org.eclipse.gef.EditPart}.
+	 * {@link EditPart}.
 	 * 
 	 * @param editor
 	 *            Editor containing this.
@@ -118,10 +118,9 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#getRoot()
+	 * ================== AbstractGraphicalEditPart ========================
 	 */
+
 	@Override
 	public RootEditPart getRoot() {
 		// Sometimes parent may not be set
@@ -137,11 +136,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#createEditPolicies()
-	 */
+	@Override
 	protected void createEditPolicies() {
 		// Disallow resizing
 		this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
@@ -160,12 +155,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	protected void init() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.gef.editparts.AbstractEditPart#setModel(java.lang.Object)
-	 */
+	@Override
 	public void setModel(Object model) {
 
 		// Register with the model if capable
@@ -198,11 +188,6 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	protected abstract void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#createFigure()
-	 */
 	@Override
 	protected IFigure createFigure() {
 
@@ -250,11 +235,6 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 */
 	protected abstract F createOfficeFloorFigure();
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#getContentPane()
-	 */
 	@Override
 	public IFigure getContentPane() {
 		// Return the content pane of the Office Floor Figure
@@ -265,11 +245,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 		return (contentPane == null ? this.getFigure() : contentPane);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#getModelChildren()
-	 */
+	@Override
 	protected List<?> getModelChildren() {
 		// Create the list of model children
 		List<Object> models = new LinkedList<Object>();
@@ -345,13 +321,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.gef.editparts.AbstractEditPart#performRequest(org.eclipse
-	 * .gef.Request)
-	 */
+	@Override
 	public void performRequest(Request req) {
 		// Obtain the command and execute if have
 		Command command = this.getCommand(req);
@@ -362,11 +332,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#activate()
-	 */
+	@Override
 	public void activate() {
 		if (!this.isActive()) {
 			super.activate();
@@ -376,11 +342,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractGraphicalEditPart#deactivate()
-	 */
+	@Override
 	public void deactivate() {
 		if (this.isActive()) {
 			// Stop listening to model
@@ -392,15 +354,15 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 
 	/**
 	 * Provides an {@link EditPolicy} that delegates back to this
-	 * {@link org.eclipse.gef.EditPart}.
+	 * {@link EditPart}.
 	 */
 	private class OfficeFloorEditPolicy extends AbstractEditPolicy {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.gef.EditPolicy#getCommand(org.eclipse.gef.Request)
+		 * ==================== EditPolicy ===========================
 		 */
+
+		@Override
 		public Command getCommand(Request request) {
 			// Obtain request type
 			Object type = request.getType();
@@ -418,8 +380,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	}
 
 	/**
-	 * Override to handle the double click on the
-	 * {@link org.eclipse.gef.EditPart}.
+	 * Override to handle the double click on the {@link EditPart}.
 	 * 
 	 * @param request
 	 *            Request.

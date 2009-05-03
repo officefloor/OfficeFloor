@@ -19,8 +19,7 @@ package net.officefloor.eclipse.room.operations;
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.room.editparts.SubRoomInputFlowEditPart;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomModel;
+import net.officefloor.model.section.SubSectionInputModel;
 
 /**
  * Toggle {@link SubRoomModel} is public.
@@ -37,21 +36,15 @@ public class ToggleSubRoomInputFlowPublicOperation extends
 		super("Toggle public", SubRoomInputFlowEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(Context context) {
 
-		// Obtain the sub room input flow model
-		final SubRoomInputFlowModel subRoomInputFlow = context.getEditPart()
+		// Obtain the sub section input flow model
+		final SubSectionInputModel subSectionInput = context.getEditPart()
 				.getCastedModel();
 
 		// Initial public state
-		final boolean initialPublicState = subRoomInputFlow.getIsPublic();
+		final boolean initialPublicState = subSectionInput.getIsPublic();
 
 		// Make change
 		context.execute(new OfficeFloorCommand() {
@@ -59,14 +52,15 @@ public class ToggleSubRoomInputFlowPublicOperation extends
 			@Override
 			protected void doCommand() {
 				// Toggle public state
-				subRoomInputFlow.setIsPublic(!initialPublicState);
+				subSectionInput.setIsPublic(!initialPublicState);
 			}
 
 			@Override
 			protected void undoCommand() {
 				// Reset to initial public state
-				subRoomInputFlow.setIsPublic(initialPublicState);
+				subSectionInput.setIsPublic(initialPublicState);
 			}
 		});
 	}
+
 }

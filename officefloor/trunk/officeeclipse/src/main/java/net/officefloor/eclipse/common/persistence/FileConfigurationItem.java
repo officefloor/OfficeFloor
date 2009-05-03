@@ -19,18 +19,18 @@ package net.officefloor.eclipse.common.persistence;
 import java.io.InputStream;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.model.repository.ConfigurationContext;
+import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 
 /**
- * Implementation of {@link net.officefloor.model.persistence.ConfigurationItem}
- * for a {@link org.eclipse.core.resources.IFile}.
+ * Implementation of {@link ConfigurationItem} for a {@link IFile}.
  * 
  * @author Daniel
  */
@@ -39,12 +39,12 @@ public class FileConfigurationItem implements ConfigurationItem {
 	/**
 	 * {@link IFile} containing the configuration.
 	 */
-	protected final IFile file;
+	private final IFile file;
 
 	/**
 	 * Progress monitor.
 	 */
-	protected final IProgressMonitor monitor;
+	private final IProgressMonitor monitor;
 
 	/**
 	 * Obtains the {@link IFile} from the input {@link IEditorInput}.
@@ -92,22 +92,20 @@ public class FileConfigurationItem implements ConfigurationItem {
 	}
 
 	/**
-	 * Convenience constructor for use by {@link org.eclipse.ui.IEditorPart}.
+	 * Convenience constructor for use by {@link IEditorPart}.
 	 * 
 	 * @param editorInput
-	 *            {@link IEditorInput} for the
-	 *            {@link org.eclipse.ui.IEditorPart}.
+	 *            {@link IEditorInput} for the {@link IEditorPart}.
 	 */
 	public FileConfigurationItem(IEditorInput editorInput) {
 		this(editorInput, null);
 	}
 
 	/**
-	 * Convenience constructor for use by {@link org.eclipse.ui.IEditorPart}.
+	 * Convenience constructor for use by {@link IEditorPart}.
 	 * 
 	 * @param editorInput
-	 *            {@link IEditorInput} for the
-	 *            {@link org.eclipse.ui.IEditorPart}.
+	 *            {@link IEditorInput} for the {@link IEditorPart}.
 	 * @param monitor
 	 *            {@link IProgressMonitor}.
 	 */
@@ -126,46 +124,30 @@ public class FileConfigurationItem implements ConfigurationItem {
 	 *            {@link IProgressMonitor}.
 	 */
 	public FileConfigurationItem(IFile file, IProgressMonitor monitor) {
-		// Store state
 		this.file = file;
 		this.monitor = monitor;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.persistence.ConfigurationItem#getId()
+	 * ================== ConfigurationItem ===================================
 	 */
-	public String getId() {
+
+	@Override
+	public String getLocation() {
 		return this.file.getProjectRelativePath().toPortableString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.model.persistence.ConfigurationItem#getConfiguration()
-	 */
+	@Override
 	public InputStream getConfiguration() throws Exception {
 		return this.file.getContents();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.model.persistence.ConfigurationItem#setConfiguration(
-	 * java.io.InputStream)
-	 */
+	@Override
 	public void setConfiguration(InputStream configuration) throws Exception {
 		this.file.setContents(configuration, true, true, this.monitor);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.model.persistence.ConfigurationItem#getContext()
-	 */
+	@Override
 	public ConfigurationContext getContext() {
 		return new ProjectConfigurationContext(this.file.getProject(),
 				this.monitor);

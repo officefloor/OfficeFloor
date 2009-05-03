@@ -23,8 +23,7 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
-import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -75,8 +74,10 @@ public class StandardManagedObjectTaskFlowFigure extends
 		// Create the connector
 		this.connector = new ConnectorFigure(ConnectorDirection.WEST,
 				taskFlowColour);
-		this.registerConnectionAnchor(FlowTaskToOfficeTaskModel.class,
-				this.connector.getConnectionAnchor());
+		this
+				.registerConnectionAnchor(
+						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
+						this.connector.getConnectionAnchor());
 		figure.add(this.connector);
 
 		// Create the flow name

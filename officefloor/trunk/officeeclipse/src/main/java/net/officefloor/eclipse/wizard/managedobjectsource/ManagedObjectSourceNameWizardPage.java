@@ -19,7 +19,7 @@ package net.officefloor.eclipse.wizard.managedobjectsource;
 import net.officefloor.frame.spi.managedobject.AsynchronousManagedObject;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -63,7 +63,7 @@ public class ManagedObjectSourceNameWizardPage extends WizardPage {
 	/**
 	 * {@link ManagedObjectSourceModel}.
 	 */
-	private ManagedObjectSourceModel managedObjectSourceModel = null;
+	private OfficeFloorManagedObjectSourceModel managedObjectSourceModel = null;
 
 	/**
 	 * Initiate.
@@ -89,7 +89,7 @@ public class ManagedObjectSourceNameWizardPage extends WizardPage {
 	 */
 	public void loadManagedObjectSourceModel(
 			ManagedObjectSource<?, ?> initiatedManagedObjectSource,
-			ManagedObjectSourceModel managedObjectSourceModel,
+			OfficeFloorManagedObjectSourceModel managedObjectSourceModel,
 			String suggestedManagedObjectSourceName) {
 
 		// Do nothing if same managed object source model
@@ -177,11 +177,9 @@ public class ManagedObjectSourceNameWizardPage extends WizardPage {
 		});
 
 		// Provide control to specify default timeout
-		this.defaultTimeoutLabel = new Label(page,
-				SWT.NONE);
+		this.defaultTimeoutLabel = new Label(page, SWT.NONE);
 		this.defaultTimeoutLabel.setText("Default timeout: ");
-		this.defaultTimeoutText = new Text(page, SWT.SINGLE
-				| SWT.BORDER);
+		this.defaultTimeoutText = new Text(page, SWT.SINGLE | SWT.BORDER);
 		this.defaultTimeoutText.setLayoutData(new GridData(SWT.FILL, SWT.NONE,
 				true, false));
 		this.defaultTimeoutText.addModifyListener(new ModifyListener() {

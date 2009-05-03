@@ -16,9 +16,9 @@
  */
 package net.officefloor.eclipse.skin.room;
 
-import org.eclipse.draw2d.IFigure;
+import net.officefloor.model.section.ExternalFlowModel;
 
-import net.officefloor.model.room.ExternalFlowModel;
+import org.eclipse.draw2d.IFigure;
 
 /**
  * Context for the {@link ExternalFlowModel} {@link IFigure}.

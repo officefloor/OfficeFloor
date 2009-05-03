@@ -21,14 +21,9 @@ import java.util.Map;
 
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.FigureFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectDependencyEditPart;
-import net.officefloor.eclipse.officefloor.editparts.ManagedObjectHandlerEditPart;
-import net.officefloor.eclipse.officefloor.editparts.ManagedObjectHandlerInstanceEditPart;
-import net.officefloor.eclipse.officefloor.editparts.ManagedObjectHandlerLinkProcessEditPart;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectSourceEditPart;
-import net.officefloor.eclipse.officefloor.editparts.ManagedObjectTaskEditPart;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectTaskFlowEditPart;
 import net.officefloor.eclipse.officefloor.editparts.ManagedObjectTeamEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeEditPart;
@@ -40,32 +35,23 @@ import net.officefloor.eclipse.officefloor.editparts.TeamEditPart;
 import net.officefloor.eclipse.officefloor.operations.AddManagedObjectOperation;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeOperation;
 import net.officefloor.eclipse.officefloor.operations.AddTeamOperation;
-import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
-import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
-import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
-import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
-import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
-import net.officefloor.model.officefloor.ManagedObjectTaskModel;
-import net.officefloor.model.officefloor.ManagedObjectTeamModel;
-import net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel;
+import net.officefloor.model.impl.officefloor.OfficeFloorRepositoryImpl;
+import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
-import net.officefloor.model.officefloor.OfficeManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourceModel;
-import net.officefloor.model.officefloor.OfficeTaskModel;
-import net.officefloor.model.officefloor.OfficeTeamModel;
-import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
-import net.officefloor.model.officefloor.TeamModel;
-import net.officefloor.officefloor.OfficeFloorLoader;
-import net.officefloor.repository.ConfigurationItem;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
+import net.officefloor.model.repository.ConfigurationItem;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
 import org.eclipse.ui.IEditorPart;
 
@@ -82,127 +68,57 @@ public class OfficeFloorEditor extends
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.officefloor";
 
-	/**
-	 * Initialise the specialised {@link FigureFactory} for the model types.
-	 */
-	static {
-		// Managing Office of Managed Object
-		OfficeFloorConnectionEditPart
-				.registerFigureFactory(
-						ManagedObjectSourceToOfficeFloorOfficeModel.class,
-						new FigureFactory<ManagedObjectSourceToOfficeFloorOfficeModel>() {
-							@Override
-							public IFigure createFigure(
-									ManagedObjectSourceToOfficeFloorOfficeModel model) {
-								PolylineConnection figure = new PolylineConnection();
-								figure
-										.setForegroundColor(ColorConstants.lightGray);
-								return figure;
-							}
-						});
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.AbstractOfficeFloorEditor#
-	 * populateEditPartTypes(java.util.Map)
-	 */
 	@Override
 	protected void populateEditPartTypes(
 			Map<Class<?>, Class<? extends EditPart>> map) {
 
 		// Entities
 		map.put(OfficeFloorModel.class, OfficeFloorEditPart.class);
-		map.put(ManagedObjectSourceModel.class,
+		map.put(OfficeFloorManagedObjectSourceModel.class,
 				ManagedObjectSourceEditPart.class);
-		map.put(TeamModel.class, TeamEditPart.class);
-		map.put(OfficeFloorOfficeModel.class, OfficeEditPart.class);
-		map.put(OfficeTeamModel.class, OfficeTeamEditPart.class);
-		map.put(OfficeTaskModel.class, OfficeTaskEditPart.class);
-		map.put(OfficeManagedObjectModel.class,
+		map.put(OfficeFloorTeamModel.class, TeamEditPart.class);
+		map.put(DeployedOfficeModel.class, OfficeEditPart.class);
+		map.put(DeployedOfficeTeamModel.class, OfficeTeamEditPart.class);
+		map.put(DeployedOfficeInputModel.class, OfficeTaskEditPart.class);
+		map.put(DeployedOfficeObjectModel.class,
 				OfficeManagedObjectEditPart.class);
-		map.put(ManagedObjectDependencyModel.class,
+		map.put(OfficeFloorManagedObjectDependencyModel.class,
 				ManagedObjectDependencyEditPart.class);
-		map.put(ManagedObjectHandlerModel.class,
-				ManagedObjectHandlerEditPart.class);
-		map.put(ManagedObjectHandlerInstanceModel.class,
-				ManagedObjectHandlerInstanceEditPart.class);
-		map.put(ManagedObjectHandlerLinkProcessModel.class,
-				ManagedObjectHandlerLinkProcessEditPart.class);
-		map.put(ManagedObjectTaskModel.class, ManagedObjectTaskEditPart.class);
-		map.put(ManagedObjectTaskFlowModel.class,
+		map.put(OfficeFloorManagedObjectSourceFlowModel.class,
 				ManagedObjectTaskFlowEditPart.class);
-		map.put(ManagedObjectTeamModel.class, ManagedObjectTeamEditPart.class);
+		map.put(OfficeFloorManagedObjectSourceTeamModel.class,
+				ManagedObjectTeamEditPart.class);
 
 		// Connections
-		map.put(OfficeTeamToTeamModel.class,
+		map.put(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
 				OfficeFloorConnectionEditPart.class);
-		map.put(OfficeManagedObjectToManagedObjectSourceModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(ManagedObjectSourceToOfficeFloorOfficeModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(ManagedObjectTeamToTeamModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(LinkProcessToOfficeTaskModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(FlowTaskToOfficeTaskModel.class,
+		map
+				.put(
+						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
+						OfficeFloorConnectionEditPart.class);
+		map.put(OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
 				OfficeFloorConnectionEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#isDragTarget()
-	 */
 	@Override
 	protected boolean isDragTarget() {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#retrieveModel
-	 * (net.officefloor.repository.ConfigurationItem)
-	 */
 	@Override
 	protected OfficeFloorModel retrieveModel(ConfigurationItem configuration)
 			throws Exception {
-		return this.getOfficeFloorLoader().loadOfficeFloor(configuration);
+		return new OfficeFloorRepositoryImpl(new ModelRepositoryImpl())
+				.retrieveOfficeFloor(configuration);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#storeModel(T,
-	 * net.officefloor.repository.ConfigurationItem)
-	 */
 	@Override
 	protected void storeModel(OfficeFloorModel model,
 			ConfigurationItem configuration) throws Exception {
-		this.getOfficeFloorLoader().storeOfficeFloor(model, configuration);
+		new OfficeFloorRepositoryImpl(new ModelRepositoryImpl())
+				.storeOfficeFloor(model, configuration);
 	}
 
-	/**
-	 * Obtains the {@link OfficeFloorLoader}.
-	 * 
-	 * @return {@link OfficeFloorLoader}.
-	 */
-	private OfficeFloorLoader getOfficeFloorLoader() {
-		return new OfficeFloorLoader();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.AbstractOfficeFloorEditor#populateOperations
-	 * (java.util.List)
-	 */
 	@Override
 	protected void populateOperations(List<Operation> list) {
 		// Add model operations
@@ -210,4 +126,5 @@ public class OfficeFloorEditor extends
 		list.add(new AddTeamOperation());
 		list.add(new AddManagedObjectOperation());
 	}
+
 }

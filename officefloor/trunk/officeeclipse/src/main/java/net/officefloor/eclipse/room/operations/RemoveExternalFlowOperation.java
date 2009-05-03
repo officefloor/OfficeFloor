@@ -19,8 +19,8 @@ package net.officefloor.eclipse.room.operations;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
 import net.officefloor.eclipse.room.editparts.ExternalFlowEditPart;
-import net.officefloor.model.room.ExternalFlowModel;
-import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.SectionModel;
 
 /**
  * {@link Operation} to remove the {@link ExternalFlowModel}.
@@ -29,7 +29,7 @@ import net.officefloor.model.room.RoomModel;
  */
 public class RemoveExternalFlowOperation
 		extends
-		AbstractRemoveItemModelOperation<ExternalFlowEditPart, ExternalFlowModel, RoomModel> {
+		AbstractRemoveItemModelOperation<ExternalFlowEditPart, ExternalFlowModel, SectionModel> {
 
 	/**
 	 * Initiate.
@@ -38,27 +38,13 @@ public class RemoveExternalFlowOperation
 		super("Remove external flow", ExternalFlowEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #remove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void remove(ExternalFlowModel model, RoomModel parent) {
+	protected void remove(ExternalFlowModel model, SectionModel parent) {
 		parent.removeExternalFlow(model);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #unremove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void unremove(ExternalFlowModel model, RoomModel parent) {
+	protected void unremove(ExternalFlowModel model, SectionModel parent) {
 		parent.addExternalFlow(model);
 	}
 

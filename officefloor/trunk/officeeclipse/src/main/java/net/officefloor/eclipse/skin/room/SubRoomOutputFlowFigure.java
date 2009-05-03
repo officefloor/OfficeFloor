@@ -17,13 +17,12 @@
 package net.officefloor.eclipse.skin.room;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
+import net.officefloor.model.section.SubSectionOutputModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link SubRoomOutputFlowModel}.
+ * {@link OfficeFloorFigure} for the {@link SubSectionOutputModel}.
  * 
  * @author Daniel
  */
 public interface SubRoomOutputFlowFigure extends OfficeFloorFigure {
-
 }

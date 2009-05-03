@@ -23,8 +23,7 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
-import net.officefloor.model.officefloor.OfficeManagedObjectToManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -64,9 +63,9 @@ public class StandardManagedObjectSourceFigure extends
 		office.setBorder(new MarginBorder(10, 0, 0, 0));
 		ConnectionAnchor anchor = office.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				ManagedObjectSourceToOfficeFloorOfficeModel.class, anchor);
-		this.registerConnectionAnchor(
-				OfficeManagedObjectToManagedObjectSourceModel.class, anchor);
+				OfficeFloorManagedObjectSourceToDeployedOfficeModel.class, anchor);
+//		this.registerConnectionAnchor(
+//				OfficeManagedObjectToManagedObjectSourceModel.class, anchor);
 		figure.add(office);
 		figureLayout.setConstraint(office, new GridData(SWT.BEGINNING,
 				SWT.BEGINNING, false, false));

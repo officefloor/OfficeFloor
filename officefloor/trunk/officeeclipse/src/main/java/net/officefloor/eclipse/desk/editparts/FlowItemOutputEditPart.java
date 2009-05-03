@@ -28,44 +28,32 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.desk.ExternalFlowModel;
-import net.officefloor.model.desk.FlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputModel;
-import net.officefloor.model.desk.FlowItemOutputToExternalFlowModel;
-import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputModel.FlowItemOutputEvent;
+import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskFlowModel.TaskFlowEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.desk.FlowItemOutputModel}.
+ * {@link EditPart} for the {@link TaskFlowModel}.
  * 
  * @author Daniel
  */
-public class FlowItemOutputEditPart
-		extends
-		AbstractOfficeFloorSourceNodeEditPart<FlowItemOutputModel, OfficeFloorFigure>
+// TODO rename to TaskFlowEditPart
+public class FlowItemOutputEditPart extends
+		AbstractOfficeFloorSourceNodeEditPart<TaskFlowModel, OfficeFloorFigure>
 		implements FlowItemOutputFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createFlowItemOutputFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
+	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
 			public ConnectionModel createConnection(Object source,
@@ -76,24 +64,24 @@ public class FlowItemOutputEditPart
 				// Obtain the type of link
 				String linkType = (String) request.getNewObject();
 
-				if (target instanceof FlowItemModel) {
-
-					// Create the flow connection
-					FlowItemOutputToFlowItemModel conn = new FlowItemOutputToFlowItemModel();
-					conn.setOutput((FlowItemOutputModel) source);
-					conn.setFlowItem((FlowItemModel) target);
+				if (target instanceof TaskModel) {
+					// Create the task connection
+					TaskFlowToTaskModel conn = new TaskFlowToTaskModel();
+					conn.setTaskFlow((TaskFlowModel) source);
+					conn.setTask((TaskModel) target);
 					conn.setLinkType(linkType);
 					conn.connect();
 					return conn;
-				} else if (target instanceof ExternalFlowModel) {
 
+				} else if (target instanceof ExternalFlowModel) {
 					// Create the external flow connection
-					FlowItemOutputToExternalFlowModel conn = new FlowItemOutputToExternalFlowModel();
-					conn.setOutput((FlowItemOutputModel) source);
+					TaskFlowToExternalFlowModel conn = new TaskFlowToExternalFlowModel();
+					conn.setTaskFlow((TaskFlowModel) source);
 					conn.setExternalFlow((ExternalFlowModel) target);
 					conn.setLinkType(linkType);
 					conn.connect();
 					return conn;
+
 				} else {
 					throw new OfficeFloorPluginFailure(
 							"Unknown connection target type "
@@ -106,67 +94,42 @@ public class FlowItemOutputEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(FlowItemModel.class);
+		types.add(TaskModel.class);
 		types.add(ExternalFlowModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		// Flow
-		FlowItemOutputToFlowItemModel flow = this.getCastedModel()
-				.getFlowItem();
-		if (flow != null) {
-			models.add(flow);
+		// Task
+		TaskFlowToTaskModel flowTask = this.getCastedModel().getTask();
+		if (flowTask != null) {
+			models.add(flowTask);
 		}
 
 		// External flow
-		FlowItemOutputToExternalFlowModel extFlow = this.getCastedModel()
+		TaskFlowToExternalFlowModel extFlow = this.getCastedModel()
 				.getExternalFlow();
 		if (extFlow != null) {
 			models.add(extFlow);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
+	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<FlowItemOutputEvent>(
-				FlowItemOutputEvent.values()) {
-			protected void handlePropertyChange(FlowItemOutputEvent property,
+		handlers.add(new PropertyChangeHandler<TaskFlowEvent>(TaskFlowEvent
+				.values()) {
+			protected void handlePropertyChange(TaskFlowEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case CHANGE_FLOW_ITEM:
+				case CHANGE_TASK:
 				case CHANGE_EXTERNAL_FLOW:
 					FlowItemOutputEditPart.this.refreshSourceConnections();
 					break;
@@ -179,24 +142,9 @@ public class FlowItemOutputEditPart
 	 * ======================= FlowItemOutputFigureContext ================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext#
-	 * getFlowItemOutputName()
-	 */
 	@Override
 	public String getFlowItemOutputName() {
-
-		// Obtain the name
-		String name = this.getCastedModel().getLabel();
-		if ((name == null) || (name.trim().length() == 0)) {
-			// Label not provided, so use the id
-			name = this.getCastedModel().getId();
-		}
-
-		// Return the name
-		return name;
+		return this.getCastedModel().getFlowName();
 	}
 
 }

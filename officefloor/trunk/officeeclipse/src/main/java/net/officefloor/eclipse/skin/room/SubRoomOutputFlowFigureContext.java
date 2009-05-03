@@ -16,21 +16,21 @@
  */
 package net.officefloor.eclipse.skin.room;
 
+import net.officefloor.model.section.SubSectionOutputModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.room.SubRoomOutputFlowModel;
-
 /**
- * Context for the {@link SubRoomOutputFlowModel} {@link IFigure}.
+ * Context for the {@link SubSectionOutputModel} {@link IFigure}.
  * 
  * @author Daniel
  */
 public interface SubRoomOutputFlowFigureContext {
 
 	/**
-	 * Obtains the {@link SubRoomOutputFlowModel} name.
+	 * Obtains the {@link SubSectionOutputModel} name.
 	 * 
-	 * @return {@link SubRoomOutputFlowModel} name.
+	 * @return {@link SubSectionOutputModel} name.
 	 */
 	String getSubRoomOutputFlowName();
 

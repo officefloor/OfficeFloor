@@ -16,15 +16,15 @@
  */
 package net.officefloor.eclipse.skin.standard.desk;
 
-import org.eclipse.draw2d.ColorConstants;
-
 import net.officefloor.eclipse.skin.desk.FlowItemEscalationFigure;
 import net.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.desk.FlowItemEscalationToExternalEscalationModel;
-import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
+import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationToTaskModel;
+
+import org.eclipse.draw2d.ColorConstants;
 
 /**
  * Standard {@link FlowItemEscalationFigure}.
@@ -52,10 +52,10 @@ public class StandardFlowItemEscalationFigure extends AbstractOfficeFloorFigure
 
 		LabelConnectorFigure figure = new LabelConnectorFigure(simpleType,
 				ConnectorDirection.EAST, ColorConstants.red);
-		this.registerConnectionAnchor(FlowItemEscalationToFlowItemModel.class,
+		this.registerConnectionAnchor(TaskEscalationToTaskModel.class,
 				figure.getConnectionAnchor());
 		this.registerConnectionAnchor(
-				FlowItemEscalationToExternalEscalationModel.class, figure
+				TaskEscalationToExternalFlowModel.class, figure
 						.getConnectionAnchor());
 		this.setFigure(figure);
 	}

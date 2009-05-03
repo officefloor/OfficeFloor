@@ -24,12 +24,12 @@ import java.sql.DriverManager;
 import java.util.Map;
 
 import net.officefloor.eclipse.bootstrap.Bootable;
+import net.officefloor.model.impl.repository.filesystem.FileSystemConfigurationContext;
+import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.plugin.filingcabinet.CommonDatabaseAwareness;
 import net.officefloor.plugin.filingcabinet.FilingCabinetGenerator;
 import net.officefloor.plugin.filingcabinet.TableGenerator;
 import net.officefloor.plugin.filingcabinet.TableMetaData;
-import net.officefloor.repository.ConfigurationContext;
-import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
 
 /**
  * Main for the {@link FilingCabinetGenerator}.
@@ -38,11 +38,6 @@ import net.officefloor.repository.filesystem.FileSystemConfigurationContext;
  */
 public class FilingCabinetBootable implements Bootable {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.bootstrap.Bootable#boot(java.util.Map)
-	 */
 	@Override
 	public void boot(Map<String, String> arguments) throws Throwable {
 

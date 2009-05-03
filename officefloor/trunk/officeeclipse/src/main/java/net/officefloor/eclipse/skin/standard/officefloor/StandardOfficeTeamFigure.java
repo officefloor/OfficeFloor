@@ -16,15 +16,15 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.ConnectionAnchor;
-
 import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.OfficeItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link OfficeTeamFigure}.
@@ -45,7 +45,9 @@ public class StandardOfficeTeamFigure extends AbstractOfficeFloorFigure
 				.getOfficeTeamName(), ConnectorDirection.WEST,
 				ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this.registerConnectionAnchor(OfficeTeamToTeamModel.class, anchor);
+		this.registerConnectionAnchor(
+				DeployedOfficeTeamToOfficeFloorTeamModel.class, anchor);
 		this.setFigure(figure);
 	}
+
 }

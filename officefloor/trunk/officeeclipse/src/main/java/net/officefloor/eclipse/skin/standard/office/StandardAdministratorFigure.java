@@ -23,8 +23,6 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.office.AdministratorToManagedObjectModel;
-import net.officefloor.model.office.AdministratorToTeamModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -60,8 +58,8 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 		ConnectorFigure team = new ConnectorFigure(ConnectorDirection.WEST,
 				ColorConstants.black);
 		team.setBorder(new MarginBorder(10, 0, 0, 0));
-		this.registerConnectionAnchor(AdministratorToTeamModel.class, team
-				.getConnectionAnchor());
+//		this.registerConnectionAnchor(AdministratorToTeamModel.class, team
+//				.getConnectionAnchor());
 		figure.add(team);
 		layout
 				.setConstraint(team, new GridData(0, SWT.BEGINNING, false,
@@ -76,8 +74,8 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 		ConnectorFigure mo = new ConnectorFigure(ConnectorDirection.EAST,
 				ColorConstants.black);
 		mo.setBorder(new MarginBorder(10, 0, 0, 0));
-		this.registerConnectionAnchor(AdministratorToManagedObjectModel.class,
-				mo.getConnectionAnchor());
+//		this.registerConnectionAnchor(AdministratorToManagedObjectModel.class,
+//				mo.getConnectionAnchor());
 		figure.add(mo);
 		layout.setConstraint(mo, new GridData(0, SWT.BEGINNING, false, false));
 

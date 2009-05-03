@@ -16,16 +16,15 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.ConnectionAnchor;
-
 import net.officefloor.eclipse.skin.officefloor.OfficeTaskFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.OfficeItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.officefloor.FlowTaskToOfficeTaskModel;
-import net.officefloor.model.officefloor.LinkProcessToOfficeTaskModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
+
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link OfficeTaskFigure}.
@@ -45,10 +44,11 @@ public class StandardOfficeTaskFigure extends AbstractOfficeFloorFigure
 		OfficeItemFigure figure = new OfficeItemFigure(context.getTaskName(),
 				ConnectorDirection.EAST, ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this.registerConnectionAnchor(LinkProcessToOfficeTaskModel.class,
-				anchor);
-		this.registerConnectionAnchor(FlowTaskToOfficeTaskModel.class,
-				anchor);
+		this
+				.registerConnectionAnchor(
+						OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel.class,
+						anchor);
 		this.setFigure(figure);
 	}
+
 }

@@ -21,7 +21,7 @@ import net.officefloor.eclipse.skin.room.SubRoomManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.SubRoomItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.room.ManagedObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -47,7 +47,7 @@ public class StandardSubRoomManagedObjectFigure extends
 				ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				ManagedObjectToExternalManagedObjectModel.class, anchor);
+				SubSectionObjectToExternalManagedObjectModel.class, anchor);
 		this.setFigure(figure);
 	}
 }

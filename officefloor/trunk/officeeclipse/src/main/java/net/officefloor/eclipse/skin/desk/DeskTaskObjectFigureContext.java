@@ -16,34 +16,35 @@
  */
 package net.officefloor.eclipse.skin.desk;
 
+import net.officefloor.model.desk.WorkTaskObjectModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.desk.DeskTaskObjectModel;
-
 /**
- * Context for the {@link DeskTaskObjectModel} {@link IFigure}.
+ * Context for the {@link WorkTaskObjectModel} {@link IFigure}.
  * 
  * @author Daniel
  */
+// rename to WorkTaskObjectFigureContext
 public interface DeskTaskObjectFigureContext {
 
 	/**
-	 * Obtains the object type for the {@link DeskTaskObjectModel}.
+	 * Obtains the object type for the {@link WorkTaskObjectModel}.
 	 * 
-	 * @return Object type for the {@link DeskTaskObjectModel}.
+	 * @return Object type for the {@link WorkTaskObjectModel}.
 	 */
 	String getObjectType();
 
 	/**
-	 * Flags if this {@link DeskTaskObjectModel} is the parameter.
+	 * Flags if this {@link WorkTaskObjectModel} is the parameter.
 	 * 
-	 * @return <code>true</code> if the {@link DeskTaskObjectModel} is the
+	 * @return <code>true</code> if the {@link WorkTaskObjectModel} is the
 	 *         parameter.
 	 */
 	boolean isParameter();
 
 	/**
-	 * Flags whether the {@link DeskTaskObjectModel} is the parameter.
+	 * Flags whether the {@link WorkTaskObjectModel} is the parameter.
 	 * 
 	 * @param isParameter
 	 *            Flag indicating if the parameter.

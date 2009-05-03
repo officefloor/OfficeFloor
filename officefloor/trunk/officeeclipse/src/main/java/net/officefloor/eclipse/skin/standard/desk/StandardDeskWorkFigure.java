@@ -23,7 +23,7 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.desk.DeskWorkToFlowItemModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
 
 import org.eclipse.draw2d.AbstractBorder;
 import org.eclipse.draw2d.Border;
@@ -91,7 +91,7 @@ public class StandardDeskWorkFigure extends AbstractOfficeFloorFigure implements
 		ConnectorFigure initialFlowConnector = new ConnectorFigure(
 				ConnectorDirection.EAST, ColorConstants.lightBlue);
 		figure.add(initialFlowConnector);
-		this.registerConnectionAnchor(DeskWorkToFlowItemModel.class,
+		this.registerConnectionAnchor(WorkToInitialTaskModel.class,
 				initialFlowConnector.getConnectionAnchor());
 		layout.setConstraint(initialFlowConnector, new GridData(SWT.BEGINNING,
 				SWT.BEGINNING, false, false));

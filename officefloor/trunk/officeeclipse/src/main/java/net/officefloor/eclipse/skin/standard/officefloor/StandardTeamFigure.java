@@ -16,16 +16,16 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.ConnectionAnchor;
-
 import net.officefloor.eclipse.skin.officefloor.TeamFigure;
 import net.officefloor.eclipse.skin.officefloor.TeamFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel;
-import net.officefloor.model.officefloor.OfficeTeamToTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
+
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionAnchor;
 
 /**
  * Standard {@link TeamFigure}.
@@ -45,9 +45,12 @@ public class StandardTeamFigure extends AbstractOfficeFloorFigure implements
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
 				.getTeamName(), ConnectorDirection.EAST, ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this.registerConnectionAnchor(OfficeTeamToTeamModel.class, anchor);
-		this.registerConnectionAnchor(ManagedObjectTeamToTeamModel.class,
+		this.registerConnectionAnchor(
+				DeployedOfficeTeamToOfficeFloorTeamModel.class, anchor);
+		this.registerConnectionAnchor(
+				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
 				anchor);
 		this.setFigure(figure);
 	}
+
 }

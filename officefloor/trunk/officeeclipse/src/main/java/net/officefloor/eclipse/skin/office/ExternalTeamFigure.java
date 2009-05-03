@@ -17,15 +17,15 @@
 package net.officefloor.eclipse.skin.office;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.office.ExternalTeamModel;
+import net.officefloor.model.office.OfficeTeamModel;
 
 import org.eclipse.draw2d.Figure;
 
 /**
- * {@link Figure} for the {@link ExternalTeamModel}.
+ * {@link Figure} for the {@link OfficeTeamModel}.
  * 
  * @author Daniel
  */
+// TODO rename to OfficeTeamFigure
 public interface ExternalTeamFigure extends OfficeFloorFigure {
-
 }

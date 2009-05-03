@@ -18,18 +18,8 @@ package net.officefloor.eclipse.skin.officefloor;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.office.OfficeModel;
-import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerInstanceModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerModel;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
-import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
-import net.officefloor.model.officefloor.ManagedObjectTaskModel;
-import net.officefloor.model.officefloor.ManagedObjectTeamModel;
+import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.officefloor.OfficeManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeTaskModel;
-import net.officefloor.model.officefloor.TeamModel;
-import net.officefloor.model.officefloor.ManagedObjectHandlerLinkProcessModel.ManagedObjectHandlerLinkProcessEvent;
 
 import org.eclipse.draw2d.IFigure;
 
@@ -54,39 +44,6 @@ public interface OfficeFloorFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectHandlerModel}.
-	 * 
-	 * @param context
-	 *            {@link ManagedObjectHandlerFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	ManagedObjectHandlerFigure createManagedObjectHandlerFigure(
-			ManagedObjectHandlerFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectHandlerInstanceModel}.
-	 * 
-	 * @param context
-	 *            {@link ManagedObjectHandlerFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	ManagedObjectHandlerInstanceFigure createManagedObjectHandlerInstanceFigure(
-			ManagedObjectHandlerInstanceFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectHandlerLinkProcessEvent}.
-	 * 
-	 * @param context
-	 *            {@link ManagedObjectHandlerLinkProcessFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	ManagedObjectHandlerLinkProcessFigure createManagedObjectHandlerLinkProcessFigure(
-			ManagedObjectHandlerLinkProcessFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ManagedObjectSourceModel}.
 	 * 
 	 * @param context
@@ -95,17 +52,6 @@ public interface OfficeFloorFigureFactory {
 	 */
 	ManagedObjectSourceFigure createManagedObjectSourceFigure(
 			ManagedObjectSourceFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ManagedObjectTaskModel}.
-	 * 
-	 * @param context
-	 *            {@link ManagedObjectTaskFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	ManagedObjectTaskFigure createManagedObjectTaskFigure(
-			ManagedObjectTaskFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the

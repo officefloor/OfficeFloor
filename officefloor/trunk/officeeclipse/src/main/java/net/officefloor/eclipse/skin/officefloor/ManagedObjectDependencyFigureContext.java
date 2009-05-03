@@ -16,21 +16,21 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
-
 /**
- * Context for the {@link ManagedObjectDependencyModel} {@link IFigure}.
+ * Context for the {@link OfficeFloorManagedObjectDependencyModel} {@link IFigure}.
  * 
  * @author Daniel
  */
 public interface ManagedObjectDependencyFigureContext {
 
 	/**
-	 * Obtains the {@link ManagedObjectDependencyModel} name.
+	 * Obtains the {@link OfficeFloorManagedObjectDependencyModel} name.
 	 * 
-	 * @return {@link ManagedObjectDependencyModel} name.
+	 * @return {@link OfficeFloorManagedObjectDependencyModel} name.
 	 */
 	String getManagedObjectDependencyName();
 

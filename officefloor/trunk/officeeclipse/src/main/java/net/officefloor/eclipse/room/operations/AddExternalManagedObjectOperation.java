@@ -20,11 +20,11 @@ import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.room.editparts.RoomEditPart;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionModel;
 
 /**
- * Adds an {@link ExternalManagedObjectModel} to an {@link RoomModel}.
+ * Adds an {@link ExternalManagedObjectModel} to an {@link SectionModel}.
  * 
  * @author Daniel
  */
@@ -38,12 +38,6 @@ public class AddExternalManagedObjectOperation extends
 		super("Add managed object", RoomEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(Context context) {
 

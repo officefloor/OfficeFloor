@@ -21,8 +21,8 @@ import net.officefloor.eclipse.skin.room.SubRoomOutputFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.SubRoomItemFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.room.OutputFlowToExternalFlowModel;
-import net.officefloor.model.room.OutputFlowToInputFlowModel;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -47,9 +47,9 @@ public class StandardSubRoomOutputFlowFigure extends AbstractOfficeFloorFigure
 				.getSubRoomOutputFlowName(), false, ConnectorDirection.EAST,
 				ColorConstants.black);
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this.registerConnectionAnchor(OutputFlowToExternalFlowModel.class,
+		this.registerConnectionAnchor(SubSectionOutputToExternalFlowModel.class,
 				anchor);
-		this.registerConnectionAnchor(OutputFlowToInputFlowModel.class, anchor);
+		this.registerConnectionAnchor(SubSectionOutputToSubSectionInputModel.class, anchor);
 		this.setFigure(figure);
 	}
 }

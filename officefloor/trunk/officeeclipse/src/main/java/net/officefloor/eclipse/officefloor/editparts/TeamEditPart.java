@@ -27,38 +27,35 @@ import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.officefloor.operations.RemoveTeamOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.TeamFigureContext;
-import net.officefloor.model.officefloor.TeamModel;
-import net.officefloor.model.officefloor.TeamModel.TeamEvent;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel.OfficeFloorTeamEvent;
+
+import org.eclipse.gef.EditPart;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.officefloor.TeamModel}.
+ * {@link EditPart} for the {@link OfficeFloorTeamModel}.
  * 
  * @author Daniel
  */
-public class TeamEditPart extends
-		AbstractOfficeFloorNodeEditPart<TeamModel, OfficeFloorFigure> implements
-		RemovableEditPart, TeamFigureContext {
+// TODO rename to OfficeFloorTeamModel
+public class TeamEditPart
+		extends
+		AbstractOfficeFloorNodeEditPart<OfficeFloorTeamModel, OfficeFloorFigure>
+		implements RemovableEditPart, TeamFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<TeamEvent>(TeamEvent.values()) {
+		handlers.add(new PropertyChangeHandler<OfficeFloorTeamEvent>(
+				OfficeFloorTeamEvent.values()) {
 			@Override
-			protected void handlePropertyChange(TeamEvent property,
+			protected void handlePropertyChange(OfficeFloorTeamEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_OFFICE_TEAM:
-				case REMOVE_OFFICE_TEAM:
-				case ADD_MANAGED_OBJECT_TEAM:
-				case REMOVE_MANAGED_OBJECT_TEAM:
+				case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
+				case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
+				case ADD_DEPLOYED_OFFICE_TEAM:
+				case REMOVE_DEPLOYED_OFFICE_TEAM:
 					TeamEditPart.this.refreshTargetConnections();
 					break;
 				}
@@ -66,63 +63,29 @@ public class TeamEditPart extends
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createTeamFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Never a source
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getOfficeTeams());
-		models.addAll(this.getCastedModel().getManagedObjectTeams());
+		models.addAll(this.getCastedModel().getDeployedOfficeTeams());
+		models.addAll(this.getCastedModel()
+				.getOfficeFloorManagedObjectSourceTeams());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveTeamOperation();
@@ -132,15 +95,9 @@ public class TeamEditPart extends
 	 * ======================== TeamFigureContext ============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.officefloor.TeamFigureContext#getTeamName()
-	 */
 	@Override
 	public String getTeamName() {
-		return this.getCastedModel().getId();
+		return this.getCastedModel().getOfficeFloorTeamName();
 	}
 
 }

@@ -19,8 +19,8 @@ package net.officefloor.eclipse.room.operations;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
 import net.officefloor.eclipse.room.editparts.ExternalManagedObjectEditPart;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.RoomModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionModel;
 
 /**
  * {@link Operation} to remove the {@link ExternalManagedObjectModel}.
@@ -29,7 +29,7 @@ import net.officefloor.model.room.RoomModel;
  */
 public class RemoveExternalManagedObjectOperation
 		extends
-		AbstractRemoveItemModelOperation<ExternalManagedObjectEditPart, ExternalManagedObjectModel, RoomModel> {
+		AbstractRemoveItemModelOperation<ExternalManagedObjectEditPart, ExternalManagedObjectModel, SectionModel> {
 
 	/**
 	 * Initiate.
@@ -39,27 +39,13 @@ public class RemoveExternalManagedObjectOperation
 				ExternalManagedObjectEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #remove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void remove(ExternalManagedObjectModel model, RoomModel parent) {
+	protected void remove(ExternalManagedObjectModel model, SectionModel parent) {
 		parent.removeExternalManagedObject(model);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #unremove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void unremove(ExternalManagedObjectModel model, RoomModel parent) {
+	protected void unremove(ExternalManagedObjectModel model, SectionModel parent) {
 		parent.addExternalManagedObject(model);
 	}
 

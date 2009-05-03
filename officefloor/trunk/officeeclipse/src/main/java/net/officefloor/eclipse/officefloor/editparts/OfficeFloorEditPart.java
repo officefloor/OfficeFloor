@@ -27,50 +27,31 @@ import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorModel.OfficeFloorEvent;
 
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.officefloor.OfficeFloorModel}.
+ * {@link EditPart} for the {@link OfficeFloorModel}.
  * 
  * @author Daniel
  */
 public class OfficeFloorEditPart extends
 		AbstractOfficeFloorDiagramEditPart<OfficeFloorModel> {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart
-	 * #createLayoutEditPolicy()
-	 */
 	@Override
 	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
 		return new OfficeFloorOfficeFloorLayoutEditPolicy();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart
-	 * #populateChildren(java.util.List)
-	 */
 	@Override
 	protected void populateChildren(List<Object> childModels) {
 		OfficeFloorModel officeFloor = this.getCastedModel();
-		childModels.addAll(officeFloor.getOffices());
-		childModels.addAll(officeFloor.getTeams());
-		childModels.addAll(officeFloor.getManagedObjectSources());
+		childModels.addAll(officeFloor.getDeployedOffices());
+		childModels.addAll(officeFloor.getOfficeFloorTeams());
+		childModels.addAll(officeFloor.getOfficeFloorManagedObjectSources());
+		childModels.addAll(officeFloor.getOfficeFloorManagedObjects());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
@@ -80,12 +61,14 @@ public class OfficeFloorEditPart extends
 			protected void handlePropertyChange(OfficeFloorEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_MANAGED_OBJECT_SOURCE:
-				case REMOVE_MANAGED_OBJECT_SOURCE:
-				case ADD_TEAM:
-				case REMOVE_TEAM:
-				case ADD_OFFICE:
-				case REMOVE_OFFICE:
+				case ADD_DEPLOYED_OFFICE:
+				case REMOVE_DEPLOYED_OFFICE:
+				case ADD_OFFICE_FLOOR_TEAM:
+				case REMOVE_OFFICE_FLOOR_TEAM:
+				case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
+				case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
+				case ADD_OFFICE_FLOOR_MANAGED_OBJECT:
+				case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT:
 					OfficeFloorEditPart.this.refreshChildren();
 					break;
 				}
@@ -96,20 +79,11 @@ public class OfficeFloorEditPart extends
 }
 
 /**
- * {@link org.eclipse.gef.editpolicies.LayoutEditPolicy} for the
- * {@link net.officefloor.model.officefloor.OfficeFloorModel}.
+ * {@link LayoutEditPolicy} for the {@link OfficeFloorModel}.
  */
 class OfficeFloorOfficeFloorLayoutEditPolicy extends
 		OfficeFloorLayoutEditPolicy<OfficeFloorModel> {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy
-	 * #createCreateComand(P, java.lang.Object,
-	 * org.eclipse.draw2d.geometry.Point)
-	 */
 	@Override
 	protected CreateCommand<?, ?> createCreateComand(
 			OfficeFloorModel parentModel, Object newModel, Point location) {

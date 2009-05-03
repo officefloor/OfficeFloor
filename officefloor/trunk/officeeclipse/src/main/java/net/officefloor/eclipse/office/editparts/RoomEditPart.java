@@ -19,64 +19,47 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import org.eclipse.gef.Request;
-import org.eclipse.gef.commands.Command;
-
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.office.operations.OpenRoomOperation;
-import net.officefloor.eclipse.office.operations.RemoveRoomOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.RoomFigureContext;
-import net.officefloor.model.office.OfficeModel;
-import net.officefloor.model.office.OfficeRoomModel;
-import net.officefloor.model.office.OfficeRoomModel.OfficeRoomEvent;
+import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionModel.OfficeSectionEvent;
+
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.Request;
+import org.eclipse.gef.commands.Command;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.office.OfficeRoomModel}.
+ * {@link EditPart} for the {@link OfficeSectionModel}.
  * 
  * @author Daniel
  */
+// TODO rename to SectionEditPart
 public class RoomEditPart extends
-		AbstractOfficeFloorEditPart<OfficeRoomModel, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeSectionModel, OfficeFloorFigure>
 		implements RemovableEditPart, RoomFigureContext {
 
-	/**
-	 * Determines if this is the top level {@link OfficeRoomModel}.
-	 * 
-	 * @return <code>true</code> if top level {@link OfficeRoomModel}.
-	 */
-	public boolean isTopLevelRoom() {
-		// Top level if parent the office
-		Object parentModel = this.getParent().getModel();
-		return (parentModel instanceof OfficeModel);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<OfficeRoomEvent>(OfficeRoomEvent
-				.values()) {
+		handlers.add(new PropertyChangeHandler<OfficeSectionEvent>(
+				OfficeSectionEvent.values()) {
 			@Override
-			protected void handlePropertyChange(OfficeRoomEvent property,
+			protected void handlePropertyChange(OfficeSectionEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_DESK:
-				case REMOVE_DESK:
-				case ADD_SUB_ROOM:
-				case REMOVE_SUB_ROOM:
+				case ADD_OFFICE_SECTION_INPUT:
+				case REMOVE_OFFICE_SECTION_INPUT:
+				case ADD_OFFICE_SECTION_OUTPUT:
+				case REMOVE_OFFICE_SECTION_OUTPUT:
+				case ADD_OFFICE_SECTION_OBJECT:
+				case REMOVE_OFFICE_SECTION_OBJECT:
+				case ADD_OFFICE_SECTION_RESPONSIBILITY:
+				case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
 					RoomEditPart.this.refreshChildren();
 					break;
 				}
@@ -84,67 +67,35 @@ public class RoomEditPart extends
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createRoomFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
-		// Free-form if only top level room
-		return this.isTopLevelRoom();
+		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populateModelChildren(java.util.List)
-	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel().getSubRooms());
-		childModels.addAll(this.getCastedModel().getDesks());
+		childModels.addAll(this.getCastedModel().getOfficeSectionInputs());
+		childModels.addAll(this.getCastedModel().getOfficeSectionOutputs());
+		childModels.addAll(this.getCastedModel().getOfficeSectionObjects());
+		childModels.addAll(this.getCastedModel()
+				.getOfficeSectionResponsibilities());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
-		return RemoveRoomOperation.createFromRoom();
+//		return RemoveRoomOperation.createFromRoom();
+		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * handleDoubleClick(org.eclipse.gef.Request)
-	 */
 	@Override
 	protected Command handleDoubleClick(Request request) {
-		OperationUtil.execute(OpenRoomOperation.createFromRoom(), -1, -1, this);
+//		OperationUtil.execute(OpenRoomOperation.createFromRoom(), -1, -1, this);
 		return null;
 	}
 
@@ -152,14 +103,9 @@ public class RoomEditPart extends
 	 * ================== RoomFigureContext ===============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.skin.office.RoomFigureContext#getRoomName()
-	 */
 	@Override
 	public String getRoomName() {
-		return this.getCastedModel().getName();
+		return this.getCastedModel().getOfficeSectionName();
 	}
 
 }

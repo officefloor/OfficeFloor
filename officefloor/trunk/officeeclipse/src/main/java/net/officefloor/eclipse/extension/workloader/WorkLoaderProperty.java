@@ -16,13 +16,15 @@
  */
 package net.officefloor.eclipse.extension.workloader;
 
-import net.officefloor.work.WorkLoader;
+import net.officefloor.compile.work.WorkLoader;
 
 /**
  * Property for the {@link WorkLoader}.
  * 
  * @author Daniel
  */
+// TODO use PropertyList rather than WorkLoaderProperty
+@Deprecated
 public class WorkLoaderProperty {
 
 	/**

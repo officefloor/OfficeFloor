@@ -25,7 +25,7 @@ import net.officefloor.eclipse.officefloor.ManagedObjectSourceInstance;
 import net.officefloor.eclipse.officefloor.OfficeFloorUtil;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceMetaData;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.PropertyModel;
 
 import org.eclipse.core.resources.IProject;
@@ -71,7 +71,7 @@ public class ManagedObjectSourcePropertiesWizardPage extends WizardPage {
 	/**
 	 * {@link ManagedObjectSourceModel}.
 	 */
-	private ManagedObjectSourceModel managedObjectSourceModel = null;
+	private OfficeFloorManagedObjectSourceModel managedObjectSourceModel = null;
 
 	/**
 	 * Initiate.
@@ -132,7 +132,7 @@ public class ManagedObjectSourcePropertiesWizardPage extends WizardPage {
 	 * 
 	 * @return {@link ManagedObjectSourceModel}.
 	 */
-	public ManagedObjectSourceModel getManagedObjectSourceModel() {
+	public OfficeFloorManagedObjectSourceModel getManagedObjectSourceModel() {
 		return this.managedObjectSourceModel;
 	}
 
@@ -210,7 +210,7 @@ public class ManagedObjectSourcePropertiesWizardPage extends WizardPage {
 				this.setErrorMessage(this.managedObjectSourceInstance
 						.getClassName()
 						+ " failed to provide a "
-						+ ManagedObjectSourceModel.class.getName());
+						+ OfficeFloorManagedObjectSourceModel.class.getName());
 				return;
 			}
 

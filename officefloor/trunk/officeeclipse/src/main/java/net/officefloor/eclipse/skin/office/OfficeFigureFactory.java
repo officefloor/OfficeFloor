@@ -18,15 +18,10 @@ package net.officefloor.eclipse.skin.office;
 
 import net.officefloor.eclipse.office.models.AbstractFlowItemAdministrationJoinPointModel;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.office.AdministratorModel;
-import net.officefloor.model.office.DutyFlowModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
-import net.officefloor.model.office.ExternalTeamModel;
-import net.officefloor.model.office.FlowItemModel;
 import net.officefloor.model.office.OfficeModel;
-import net.officefloor.model.room.RoomModel;
 
 import org.eclipse.draw2d.IFigure;
 
@@ -49,15 +44,6 @@ public interface OfficeFigureFactory {
 			AdministratorFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link DeskModel}.
-	 * 
-	 * @param context
-	 *            {@link DeskFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	DeskFigure createDeskFigure(DeskFigureContext context);
-
-	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link DutyModel}.
 	 * 
 	 * @param context
@@ -65,15 +51,6 @@ public interface OfficeFigureFactory {
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	DutyFigure createDutyFigure(DutyFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link DutyFlowModel}.
-	 * 
-	 * @param context
-	 *            {@link DutyFlowFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	DutyFlowFigure createDutyFlowFigure(DutyFlowFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the

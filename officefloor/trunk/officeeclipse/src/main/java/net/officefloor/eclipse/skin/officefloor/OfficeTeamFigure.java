@@ -17,13 +17,12 @@
 package net.officefloor.eclipse.skin.officefloor;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.officefloor.OfficeTeamModel;
+import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link OfficeTeamModel}.
+ * {@link OfficeFloorFigure} for the {@link DeployedOfficeTeamModel}.
  * 
  * @author Daniel
  */
 public interface OfficeTeamFigure extends OfficeFloorFigure {
-
 }

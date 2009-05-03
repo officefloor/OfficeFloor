@@ -17,15 +17,10 @@
 package net.officefloor.eclipse.skin.room;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.room.ExternalEscalationModel;
-import net.officefloor.model.room.ExternalFlowModel;
-import net.officefloor.model.room.ExternalManagedObjectModel;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.SubRoomEscalationModel;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomManagedObjectModel;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.model.room.SubRoomOutputFlowModel;
+import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionModel;
 
 import org.eclipse.draw2d.IFigure;
 
@@ -38,24 +33,14 @@ import org.eclipse.draw2d.IFigure;
 public interface RoomFigureFactory {
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link ExternalEscalationModel}.
-	 * 
-	 * @param context
-	 *            {@link ExternalEscalationFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	ExternalEscalationFigure createExternalEscalationFigure(
-			ExternalEscalationFigureContext context);
-
-	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link ExternalFlowModel}.
 	 * 
 	 * @param context
 	 *            {@link ExternalFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	ExternalFlowFigure createExternalFlowFigure(ExternalFlowFigureContext context);
+	ExternalFlowFigure createExternalFlowFigure(
+			ExternalFlowFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
@@ -69,42 +54,31 @@ public interface RoomFigureFactory {
 			ExternalManagedObjectFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link SubRoomModel}.
+	 * Creates the {@link OfficeFloorFigure} for the {@link SubSectionModel}.
 	 * 
 	 * @param context
-	 *            {@link SubRoomFigureContext}.
+	 *            {@link SubSectionFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	SubRoomFigure createSubRoomFigure(SubRoomFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link SubRoomEscalationModel}.
+	 * {@link SubSectionInputModel}.
 	 * 
 	 * @param context
-	 *            {@link SubRoomFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	SubRoomEscalationFigure createSubRoomEscalationFigure(
-			SubRoomEscalationFigureContext context);
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link SubRoomInputFlowModel}.
-	 * 
-	 * @param context
-	 *            {@link SubRoomInputFlowFigureContext}.
-	 * @return {@link SubRoomInputFlowFigure}.
+	 *            {@link SubSectionInputFigureContext}.
+	 * @return {@link SubSectionInputFigure}.
 	 */
 	SubRoomInputFlowFigure createSubRoomInputFlowFigure(
 			SubRoomInputFlowFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link SubRoomManagedObjectModel}.
+	 * {@link SubSectionObjectModel}.
 	 * 
 	 * @param context
-	 *            {@link SubRoomManagedObjectFigureContext}.
+	 *            {@link SubSectionObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	SubRoomManagedObjectFigure createSubRoomManagedObjectFigure(
@@ -112,10 +86,10 @@ public interface RoomFigureFactory {
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link SubRoomOutputFlowModel}.
+	 * {@link SubSectionOutputModel}.
 	 * 
 	 * @param context
-	 *            {@link SubRoomOutputFlowFigureContext}.
+	 *            {@link SubSectionOutputFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	SubRoomOutputFlowFigure createSubRoomOutputFlowFigure(

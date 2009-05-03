@@ -27,105 +27,71 @@ import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigure;
 import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.DeskTaskObjectModel;
-import net.officefloor.model.desk.DeskTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
-import net.officefloor.model.desk.DeskTaskObjectModel.DeskTaskObjectEvent;
+import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectModel.WorkTaskObjectEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.desk.DeskTaskObjectModel}.
+ * {@link EditPart} for the {@link DeskTaskObjectModel}.
  * 
  * @author Daniel
  */
+// TODO rename to WorkTaskObjectEditPart
 public class DeskTaskObjectEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<DeskTaskObjectModel, DeskTaskObjectFigure>
+		AbstractOfficeFloorSourceNodeEditPart<WorkTaskObjectModel, DeskTaskObjectFigure>
 		implements DeskTaskObjectFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected DeskTaskObjectFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createDeskTaskObjectFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
+	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
-				DeskTaskObjectToExternalManagedObjectModel conn = new DeskTaskObjectToExternalManagedObjectModel();
-				conn.setTaskObject((DeskTaskObjectModel) source);
-				conn.setManagedObject((ExternalManagedObjectModel) target);
+				WorkTaskObjectToExternalManagedObjectModel conn = new WorkTaskObjectToExternalManagedObjectModel();
+				conn.setTaskObject((WorkTaskObjectModel) source);
+				conn
+						.setExternalManagedObject((ExternalManagedObjectModel) target);
 				conn.connect();
 				return conn;
 			}
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
 		types.add(ExternalManagedObjectModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		DeskTaskObjectToExternalManagedObjectModel source = this
-				.getCastedModel().getManagedObject();
+		WorkTaskObjectToExternalManagedObjectModel source = this
+				.getCastedModel().getExternalManagedObject();
 		if (source != null) {
 			models.add(source);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
+	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Not a target
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
+	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<DeskTaskObjectEvent>(
-				DeskTaskObjectEvent.values()) {
-			protected void handlePropertyChange(DeskTaskObjectEvent property,
+		handlers.add(new PropertyChangeHandler<WorkTaskObjectEvent>(
+				WorkTaskObjectEvent.values()) {
+			protected void handlePropertyChange(WorkTaskObjectEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
 				case CHANGE_IS_PARAMETER:
@@ -135,7 +101,7 @@ public class DeskTaskObjectEditPart
 									DeskTaskObjectEditPart.this
 											.getCastedModel().getIsParameter());
 					break;
-				case CHANGE_MANAGED_OBJECT:
+				case CHANGE_EXTERNAL_MANAGED_OBJECT:
 					DeskTaskObjectEditPart.this.refreshSourceConnections();
 					break;
 				}
@@ -147,37 +113,16 @@ public class DeskTaskObjectEditPart
 	 * =================== DeskTaskObjectFigureContext ========================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext#getObjectType
-	 * ()
-	 */
 	@Override
 	public String getObjectType() {
 		return this.getCastedModel().getObjectType();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext#isParameter
-	 * ()
-	 */
 	@Override
 	public boolean isParameter() {
 		return this.getCastedModel().getIsParameter();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext#setIsParameter
-	 * (boolean)
-	 */
 	@Override
 	public void setIsParameter(final boolean isParameter) {
 

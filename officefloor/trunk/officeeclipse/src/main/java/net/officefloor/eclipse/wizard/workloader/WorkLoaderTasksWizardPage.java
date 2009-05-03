@@ -22,9 +22,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.work.TaskModel;
-import net.officefloor.model.work.WorkModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkTaskModel;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -62,12 +62,12 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 	/**
 	 * Mapping of the {@link TaskModel} by its task name.
 	 */
-	private Map<String, TaskModel<?, ?>> nameToTaskMap = null;
+	private Map<String, WorkTaskModel> nameToTaskMap = null;
 
 	/**
 	 * {@link WorkModel}.
 	 */
-	private WorkModel<?> workModel = null;
+	private WorkModel workModel = null;
 
 	/**
 	 * Initiate.
@@ -88,7 +88,7 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 	 * @param suggestedWorkName
 	 *            Suggested work name.
 	 */
-	public void loadWorkModel(WorkModel<?> workModel, String suggestedWorkName) {
+	public void loadWorkModel(WorkModel workModel, String suggestedWorkName) {
 
 		// Do nothing if same work model
 		if (this.workModel == workModel) {
@@ -107,13 +107,13 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 
 		} else {
 			// Create the listing of the task names
-			List<TaskModel<?, ?>> tasks = this.workModel.getTasks();
+			List<WorkTaskModel> tasks = this.workModel.getWorkTasks();
 			taskNames = new String[tasks.size()];
-			this.nameToTaskMap = new HashMap<String, TaskModel<?, ?>>(tasks
+			this.nameToTaskMap = new HashMap<String, WorkTaskModel>(tasks
 					.size());
 			for (int i = 0; i < taskNames.length; i++) {
-				TaskModel<?, ?> task = tasks.get(i);
-				String taskName = task.getTaskName();
+				WorkTaskModel task = tasks.get(i);
+				String taskName = task.getWorkTaskName();
 
 				// Specify task name and register task
 				taskNames[i] = taskName;
@@ -150,11 +150,11 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 	 * 
 	 * @return Selected {@link TaskModel} instances.
 	 */
-	public List<TaskModel<?, ?>> getChosenTaskModels() {
+	public List<WorkTaskModel> getChosenTaskModels() {
 
 		// Ensure have tasks registered
 		if (this.nameToTaskMap == null) {
-			return new ArrayList<TaskModel<?, ?>>(0);
+			return new ArrayList<WorkTaskModel>(0);
 		}
 
 		// Obtain the listing of checked rows
@@ -166,7 +166,7 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 		}
 
 		// Obtain the subsequent tasks
-		List<TaskModel<?, ?>> chosenTasks = new ArrayList<TaskModel<?, ?>>(
+		List<WorkTaskModel> chosenTasks = new ArrayList<WorkTaskModel>(
 				checkedRows.size());
 		for (TableItem checkedRow : checkedRows) {
 
@@ -174,7 +174,7 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 			String taskName = checkedRow.getText();
 
 			// Obtain the selected task
-			TaskModel<?, ?> task = this.nameToTaskMap.get(taskName);
+			WorkTaskModel task = this.nameToTaskMap.get(taskName);
 
 			// Load if have the task
 			if (task != null) {
@@ -186,13 +186,6 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 		return chosenTasks;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets
-	 * .Composite)
-	 */
 	@Override
 	public void createControl(Composite parent) {
 

@@ -17,13 +17,13 @@
 package net.officefloor.eclipse.skin.office;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.office.OfficeRoomModel;
+import net.officefloor.model.office.OfficeSectionModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link OfficeRoomModel}.
+ * {@link OfficeFloorFigure} for the {@link OfficeSectionModel}.
  * 
  * @author Daniel
  */
+// TODO rename to OfficeSectionFigure
 public interface RoomFigure extends OfficeFloorFigure {
-
 }

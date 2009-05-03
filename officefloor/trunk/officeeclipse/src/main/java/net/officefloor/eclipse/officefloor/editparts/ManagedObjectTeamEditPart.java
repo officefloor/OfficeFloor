@@ -26,10 +26,10 @@ import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.officefloor.ManagedObjectTeamModel;
-import net.officefloor.model.officefloor.ManagedObjectTeamToTeamModel;
-import net.officefloor.model.officefloor.TeamModel;
-import net.officefloor.model.officefloor.ManagedObjectTeamModel.ManagedObjectTeamEvent;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamModel.OfficeFloorManagedObjectSourceTeamEvent;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
@@ -39,54 +39,38 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * 
  * @author Daniel
  */
+// TODO rename to OfficeFloorManagedObjectSourceTeamEditPart
 public class ManagedObjectTeamEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectTeamModel, OfficeFloorFigure>
+		AbstractOfficeFloorSourceNodeEditPart<OfficeFloorManagedObjectSourceTeamModel, OfficeFloorFigure>
 		implements ManagedObjectTeamFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ManagedObjectTeamEvent>(
-				ManagedObjectTeamEvent.values()) {
-			@Override
-			protected void handlePropertyChange(
-					ManagedObjectTeamEvent property, PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_TEAM:
-					ManagedObjectTeamEditPart.this.refreshSourceConnections();
-					break;
-				}
-			}
-		});
+		handlers
+				.add(new PropertyChangeHandler<OfficeFloorManagedObjectSourceTeamEvent>(
+						OfficeFloorManagedObjectSourceTeamEvent.values()) {
+					@Override
+					protected void handlePropertyChange(
+							OfficeFloorManagedObjectSourceTeamEvent property,
+							PropertyChangeEvent evt) {
+						switch (property) {
+						case CHANGE_OFFICE_FLOOR_TEAM:
+							ManagedObjectTeamEditPart.this
+									.refreshSourceConnections();
+							break;
+						}
+					}
+				});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createManagedObjectTeamFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
@@ -94,9 +78,10 @@ public class ManagedObjectTeamEditPart
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
 				// Create the connection
-				ManagedObjectTeamToTeamModel conn = new ManagedObjectTeamToTeamModel();
-				conn.setManagedObjectTeam((ManagedObjectTeamModel) source);
-				conn.setTeam((TeamModel) target);
+				OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel conn = new OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel();
+				conn
+						.setOfficeFloorManagedObjectSourceTeam((OfficeFloorManagedObjectSourceTeamModel) source);
+				conn.setOfficeFloorTeam((OfficeFloorTeamModel) target);
 				conn.connect();
 
 				// Return the connection
@@ -105,40 +90,20 @@ public class ManagedObjectTeamEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(TeamModel.class);
+		types.add(OfficeFloorTeamModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		ManagedObjectTeamToTeamModel model = this.getCastedModel().getTeam();
+		OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel model = this
+				.getCastedModel().getOfficeFloorTeam();
 		if (model != null) {
 			models.add(model);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Never a target
@@ -148,16 +113,10 @@ public class ManagedObjectTeamEditPart
 	 * ================== ManagedObjectTeamFigureContext ======================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigureContext
-	 * #getTeamName()
-	 */
 	@Override
 	public String getTeamName() {
-		return this.getCastedModel().getTeamName();
+		return this.getCastedModel()
+				.getOfficeFloorManagedObjectSourceTeamName();
 	}
 
 }

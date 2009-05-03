@@ -17,13 +17,12 @@
 package net.officefloor.eclipse.skin.officefloor;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.officefloor.OfficeTaskModel;
+import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
+ * {@link OfficeFloorFigure} for the {@link DeployedOfficeInputModel}.
  * 
  * @author Daniel
  */
 public interface OfficeTaskFigure extends OfficeFloorFigure {
-
 }

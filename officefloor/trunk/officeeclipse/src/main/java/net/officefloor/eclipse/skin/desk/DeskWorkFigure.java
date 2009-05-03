@@ -17,13 +17,13 @@
 package net.officefloor.eclipse.skin.desk;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.desk.DeskWorkModel;
+import net.officefloor.model.desk.WorkModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link DeskWorkModel}.
+ * {@link OfficeFloorFigure} for the {@link WorkModel}.
  * 
  * @author Daniel
  */
+// rename to WorkFigure
 public interface DeskWorkFigure extends OfficeFloorFigure {
-
 }

@@ -19,8 +19,8 @@ package net.officefloor.eclipse.officefloor.operations;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
 import net.officefloor.eclipse.officefloor.editparts.OfficeEditPart;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
 
 /**
  * {@link Operation} to remove the {@link OfficeFloorOfficeModel}.
@@ -29,7 +29,7 @@ import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
  */
 public class RemoveOfficeOperation
 		extends
-		AbstractRemoveItemModelOperation<OfficeEditPart, OfficeFloorOfficeModel, OfficeFloorModel> {
+		AbstractRemoveItemModelOperation<OfficeEditPart, DeployedOfficeModel, OfficeFloorModel> {
 
 	/**
 	 * Initiate.
@@ -38,29 +38,15 @@ public class RemoveOfficeOperation
 		super("Remove office", OfficeEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #remove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void remove(OfficeFloorOfficeModel model, OfficeFloorModel parent) {
-		parent.removeOffice(model);
+	protected void remove(DeployedOfficeModel model, OfficeFloorModel parent) {
+		parent.removeDeployedOffice(model);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #unremove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void unremove(OfficeFloorOfficeModel model,
+	protected void unremove(DeployedOfficeModel model,
 			OfficeFloorModel parent) {
-		parent.addOffice(model);
+		parent.addDeployedOffice(model);
 	}
 
 }

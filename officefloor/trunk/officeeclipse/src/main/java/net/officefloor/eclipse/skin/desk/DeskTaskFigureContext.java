@@ -16,27 +16,28 @@
  */
 package net.officefloor.eclipse.skin.desk;
 
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkTaskModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.FlowItemModel;
-
 /**
- * Context for the {@link DeskTaskModel} {@link IFigure}.
+ * Context for the {@link WorkTaskModel} {@link IFigure}.
  * 
  * @author Daniel
  */
+// TODO rename to WorkTaskFigureContext
 public interface DeskTaskFigureContext {
 
 	/**
-	 * Obtains the name of the {@link DeskTaskModel}.
+	 * Obtains the name of the {@link WorkTaskModel}.
 	 * 
-	 * @return Name of the {@link DeskTaskModel}.
+	 * @return Name of the {@link WorkTaskModel}.
 	 */
 	String getTaskName();
 
 	/**
-	 * Creates a {@link FlowItemModel} from the {@link DeskTaskModel}.
+	 * Creates a {@link TaskModel} from the {@link WorkTaskModel}.
 	 */
 	void createAsNewFlowItem();
 }

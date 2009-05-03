@@ -108,7 +108,7 @@ public class ExtensionUtil {
 			if (workLoaderExtension instanceof ExtensionClasspathProvider) {
 				ExtensionClasspathProvider provider = (ExtensionClasspathProvider) workLoaderExtension;
 				String extensionClassName = workLoaderExtension
-						.getWorkLoaderClass().getName();
+						.getWorkSourceClass().getName();
 				providers.put(extensionClassName, provider);
 			}
 		}

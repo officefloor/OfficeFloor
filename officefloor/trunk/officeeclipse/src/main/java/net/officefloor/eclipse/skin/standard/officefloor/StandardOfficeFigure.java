@@ -16,13 +16,6 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.GridData;
-import org.eclipse.draw2d.MarginBorder;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
-
 import net.officefloor.eclipse.skin.officefloor.OfficeFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
@@ -30,7 +23,14 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.GridData;
+import org.eclipse.draw2d.MarginBorder;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 
 /**
  * Standard {@link OfficeFigure}.
@@ -65,7 +65,7 @@ public class StandardOfficeFigure extends AbstractOfficeFloorFigure implements
 				ConnectorDirection.EAST, ColorConstants.black);
 		managingObject.setBorder(new MarginBorder(10, 0, 0, 0));
 		this.registerConnectionAnchor(
-				ManagedObjectSourceToOfficeFloorOfficeModel.class,
+				OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
 				managingObject.getConnectionAnchor());
 		figure.add(managingObject);
 		figureLayout.setConstraint(managingObject, new GridData(SWT.BEGINNING,
@@ -75,4 +75,5 @@ public class StandardOfficeFigure extends AbstractOfficeFloorFigure implements
 		this.setFigure(figure);
 		this.setContentPane(office.getContentPane());
 	}
+
 }

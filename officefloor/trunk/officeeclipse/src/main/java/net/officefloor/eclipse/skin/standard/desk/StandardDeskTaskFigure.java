@@ -22,7 +22,7 @@ import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.desk.DeskTaskToFlowItemModel;
+import net.officefloor.model.desk.WorkTaskToTaskModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
@@ -52,7 +52,7 @@ public class StandardDeskTaskFigure extends AbstractOfficeFloorFigure implements
 		// Task name
 		LabelConnectorFigure nameFigure = new LabelConnectorFigure(context
 				.getTaskName(), ConnectorDirection.EAST, ColorConstants.black);
-		this.registerConnectionAnchor(DeskTaskToFlowItemModel.class, nameFigure
+		this.registerConnectionAnchor(WorkTaskToTaskModel.class, nameFigure
 				.getConnectionAnchor());
 		figure.add(nameFigure);
 

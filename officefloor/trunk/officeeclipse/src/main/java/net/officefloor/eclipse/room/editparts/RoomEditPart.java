@@ -23,66 +23,48 @@ import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
-import net.officefloor.model.room.RoomModel;
-import net.officefloor.model.room.RoomModel.RoomEvent;
+import net.officefloor.model.section.SectionModel;
+import net.officefloor.model.section.SectionModel.SectionEvent;
 
 import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.gef.EditPart;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.room.RoomModel}.
+ * {@link EditPart} for the {@link SectionModel}.
  * 
  * @author Daniel
  */
-public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> {
+// TODO rename to SectionEditPart
+public class RoomEditPart extends
+		AbstractOfficeFloorDiagramEditPart<SectionModel> {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart
-	 * #createLayoutEditPolicy()
-	 */
+	@Override
 	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
 		return new RoomLayoutEditPolicy();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart
-	 * #populateChildren(java.util.List)
-	 */
+	@Override
 	protected void populateChildren(List<Object> childModels) {
-		RoomModel room = this.getCastedModel();
-		childModels.addAll(room.getSubRooms());
-		childModels.addAll(room.getExternalManagedObjects());
-		childModels.addAll(room.getExternalFlows());
-		childModels.addAll(room.getExternalEscalations());
+		SectionModel section = this.getCastedModel();
+		childModels.addAll(section.getSubSections());
+		childModels.addAll(section.getExternalManagedObjects());
+		childModels.addAll(section.getExternalFlows());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
+	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<RoomEvent>(RoomEvent.values()) {
-			protected void handlePropertyChange(RoomEvent property,
+		handlers.add(new PropertyChangeHandler<SectionEvent>(SectionEvent
+				.values()) {
+			protected void handlePropertyChange(SectionEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
-				case ADD_EXTERNAL_ESCALATION:
-				case REMOVE_EXTERNAL_ESCALATION:
 				case ADD_EXTERNAL_FLOW:
 				case REMOVE_EXTERNAL_FLOW:
 				case ADD_EXTERNAL_MANAGED_OBJECT:
 				case REMOVE_EXTERNAL_MANAGED_OBJECT:
-				case ADD_SUB_ROOM:
-				case REMOVE_SUB_ROOM:
+				case ADD_SUB_SECTION:
+				case REMOVE_SUB_SECTION:
 					RoomEditPart.this.refreshChildren();
 					break;
 				}
@@ -92,20 +74,13 @@ public class RoomEditPart extends AbstractOfficeFloorDiagramEditPart<RoomModel> 
 }
 
 /**
- * {@link org.eclipse.gef.editpolicies.LayoutEditPolicy} for the
- * {@link net.officefloor.model.room.RoomModel}.
+ * {@link LayoutEditPolicy} for the {@link RoomModel}.
  */
-class RoomLayoutEditPolicy extends OfficeFloorLayoutEditPolicy<RoomModel> {
+// TODO rename to SectionLayoutEditPolicy
+class RoomLayoutEditPolicy extends OfficeFloorLayoutEditPolicy<SectionModel> {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy
-	 * #createCreateComand(P, java.lang.Object,
-	 * org.eclipse.draw2d.geometry.Point)
-	 */
-	protected CreateCommand<?, ?> createCreateComand(RoomModel parentModel,
+	@Override
+	protected CreateCommand<?, ?> createCreateComand(SectionModel parentModel,
 			Object newModel, Point location) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("TODO implement");

@@ -17,13 +17,14 @@
 package net.officefloor.eclipse.skin.desk;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.desk.FlowItemModel;
+import net.officefloor.model.desk.TaskModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link FlowItemModel}.
+ * {@link OfficeFloorFigure} for the {@link TaskModel}.
  * 
  * @author Daniel
  */
+// TODO rename to TaskFigure
 public interface FlowItemFigure extends OfficeFloorFigure {
 
 	/**

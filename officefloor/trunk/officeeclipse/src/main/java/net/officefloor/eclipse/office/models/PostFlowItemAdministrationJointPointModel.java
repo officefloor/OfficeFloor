@@ -20,55 +20,41 @@ import java.util.List;
 
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.DutyModel;
-import net.officefloor.model.office.FlowItemModel;
-import net.officefloor.model.office.FlowItemToPostAdministratorDutyModel;
-import net.officefloor.model.office.FlowItemToPreAdministratorDutyModel;
+import net.officefloor.model.office.OfficeTaskModel;
 
 /**
  * Post {@link AbstractFlowItemAdministrationJoinPointModel}.
  * 
  * @author Daniel
  */
-public class PostFlowItemAdministrationJointPointModel
-		extends
-		AbstractFlowItemAdministrationJoinPointModel<FlowItemToPostAdministratorDutyModel> {
+public class PostFlowItemAdministrationJointPointModel extends
+		AbstractFlowItemAdministrationJoinPointModel<ConnectionModel> {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param flowItem
-	 *            {@link FlowItemModel}.
+	 * @param task
+	 *            {@link OfficeTaskModel}.
 	 */
-	public PostFlowItemAdministrationJointPointModel(FlowItemModel flowItem) {
-		super(flowItem);
+	public PostFlowItemAdministrationJointPointModel(OfficeTaskModel task) {
+		super(task);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.office.models.
-	 * AbstractFlowItemAdministrationJoinPointModel
-	 * #createDutyConnection(net.officefloor.model.office.FlowItemModel,
-	 * net.officefloor.model.office.DutyModel)
-	 */
 	@Override
-	public ConnectionModel createDutyConnection(FlowItemModel flowItem,
-			DutyModel duty) {
-		FlowItemToPreAdministratorDutyModel connection = new FlowItemToPreAdministratorDutyModel();
-		connection.setFlowItem(flowItem);
-		connection.setDuty(duty);
-		return connection;
+	public ConnectionModel createDutyConnection(OfficeTaskModel task, DutyModel duty) {
+		// TODO create connection
+		// TaskToPreAdministratorDutyModel connection = new
+		// TaskToPreAdministratorDutyModel();
+		// connection.setFlowItem(flowItem);
+		// connection.setDuty(duty);
+		// return connection;
+		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.office.models.
-	 * AbstractFlowItemAdministrationJoinPointModel#getDutyConnections()
-	 */
 	@Override
-	public List<FlowItemToPostAdministratorDutyModel> getDutyConnections() {
-		return this.getFlowItem().getPostAdminDutys();
+	public List<ConnectionModel> getDutyConnections() {
+		return null;
+		// return this.getTask().getPostAdminDutys();
 	}
 
 }

@@ -23,12 +23,12 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.desk.DeskTaskToFlowItemModel;
-import net.officefloor.model.desk.DeskWorkToFlowItemModel;
-import net.officefloor.model.desk.FlowItemEscalationToFlowItemModel;
-import net.officefloor.model.desk.FlowItemOutputToFlowItemModel;
-import net.officefloor.model.desk.FlowItemToNextExternalFlowModel;
-import net.officefloor.model.desk.FlowItemToNextFlowItemModel;
+import net.officefloor.model.desk.TaskEscalationToTaskModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel;
+import net.officefloor.model.desk.TaskToNextExternalFlowModel;
+import net.officefloor.model.desk.TaskToNextTaskModel;
+import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -68,13 +68,13 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 				ConnectorDirection.WEST, ColorConstants.black);
 		inputConnector.setBorder(new MarginBorder(10, 0, 0, 0));
 		ConnectionAnchor inputAnchor = inputConnector.getConnectionAnchor();
-		this.registerConnectionAnchor(FlowItemOutputToFlowItemModel.class,
+		this.registerConnectionAnchor(TaskFlowToTaskModel.class, inputAnchor);
+		this.registerConnectionAnchor(TaskEscalationToTaskModel.class,
 				inputAnchor);
-		this.registerConnectionAnchor(FlowItemEscalationToFlowItemModel.class,
-				inputAnchor);
-		this.registerConnectionAnchor(DeskWorkToFlowItemModel.class,
-				inputAnchor);
-		this.registerTargetConnectionAnchor(FlowItemToNextFlowItemModel.class,
+		this
+				.registerConnectionAnchor(WorkToInitialTaskModel.class,
+						inputAnchor);
+		this.registerTargetConnectionAnchor(TaskToNextTaskModel.class,
 				inputAnchor);
 		figure.add(inputConnector);
 		layout.setConstraint(inputConnector, new GridData(SWT.BEGINNING,
@@ -88,8 +88,8 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 		figure.add(flowItemAndTaskLink);
 
 		// Create the flow item container
-		this.flowItem = new ContainerFigure(context
-				.getFlowItemName(), flowColour, 20, true);
+		this.flowItem = new ContainerFigure(context.getFlowItemName(),
+				flowColour, 20, true);
 		flowItemAndTaskLink.add(this.flowItem);
 
 		// Initiate state of is public
@@ -99,8 +99,8 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 		ConnectorFigure taskConnector = new ConnectorFigure(
 				ConnectorDirection.SOUTH, ColorConstants.lightGray);
 		taskConnector.setBorder(new MarginBorder(0, 20, 0, 0));
-		this.registerConnectionAnchor(DeskTaskToFlowItemModel.class,
-				taskConnector.getConnectionAnchor());
+		this.registerConnectionAnchor(WorkTaskToTaskModel.class, taskConnector
+				.getConnectionAnchor());
 		flowItemAndTaskLink.add(taskConnector);
 
 		// Add next flow connector
@@ -108,9 +108,9 @@ public class StandardFlowItemFigure extends AbstractOfficeFloorFigure implements
 				ColorConstants.black);
 		nextFlow.setBorder(new MarginBorder(10, 0, 0, 0));
 		ConnectionAnchor nextFlowAnchor = nextFlow.getConnectionAnchor();
-		this.registerSourceConnectionAnchor(FlowItemToNextFlowItemModel.class,
+		this.registerSourceConnectionAnchor(TaskToNextTaskModel.class,
 				nextFlowAnchor);
-		this.registerConnectionAnchor(FlowItemToNextExternalFlowModel.class,
+		this.registerConnectionAnchor(TaskToNextExternalFlowModel.class,
 				nextFlowAnchor);
 		layout.setConstraint(nextFlow, new GridData(SWT.BEGINNING,
 				SWT.BEGINNING, true, false));

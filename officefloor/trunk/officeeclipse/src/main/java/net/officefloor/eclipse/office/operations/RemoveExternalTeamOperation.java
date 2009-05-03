@@ -19,17 +19,17 @@ package net.officefloor.eclipse.office.operations;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
 import net.officefloor.eclipse.office.editparts.ExternalTeamEditPart;
-import net.officefloor.model.office.ExternalTeamModel;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeTeamModel;
 
 /**
- * {@link Operation} to remove the {@link ExternalTeamModel}/
+ * {@link Operation} to remove the {@link OfficeTeamModel}.
  * 
  * @author Daniel
  */
 public class RemoveExternalTeamOperation
 		extends
-		AbstractRemoveItemModelOperation<ExternalTeamEditPart, ExternalTeamModel, OfficeModel> {
+		AbstractRemoveItemModelOperation<ExternalTeamEditPart, OfficeTeamModel, OfficeModel> {
 
 	/**
 	 * Initiate.
@@ -38,28 +38,14 @@ public class RemoveExternalTeamOperation
 		super("Remove external team", ExternalTeamEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #remove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void remove(ExternalTeamModel model, OfficeModel parent) {
-		parent.removeExternalTeam(model);
+	protected void remove(OfficeTeamModel model, OfficeModel parent) {
+		parent.removeOfficeTeam(model);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation
-	 * #unremove(net.officefloor.model.ItemModel, net.officefloor.model.Model)
-	 */
 	@Override
-	protected void unremove(ExternalTeamModel model, OfficeModel parent) {
-		parent.addExternalTeam(model);
+	protected void unremove(OfficeTeamModel model, OfficeModel parent) {
+		parent.addOfficeTeam(model);
 	}
 
 }

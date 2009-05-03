@@ -20,12 +20,13 @@ import java.util.List;
 
 import net.officefloor.model.AbstractModel;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.office.DutyModel;
-import net.officefloor.model.office.FlowItemModel;
+import net.officefloor.model.office.OfficeTaskModel;
 
 /**
- * Links the {@link DutyModel} to the {@link FlowItemModel} administration join
- * point.
+ * Links the {@link DutyModel} to the {@link OfficeTaskModel} administration
+ * join point.
  * 
  * @author Daniel
  */
@@ -33,27 +34,27 @@ public abstract class AbstractFlowItemAdministrationJoinPointModel<C extends Con
 		extends AbstractModel {
 
 	/**
-	 * {@link FlowItemModel}.
+	 * {@link OfficeTaskModel}.
 	 */
-	private final FlowItemModel flowItem;
+	private final OfficeTaskModel task;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param flowItem
-	 *            {@link FlowItemModel}.
+	 * @param task
+	 *            {@link OfficeTaskModel}.
 	 */
-	public AbstractFlowItemAdministrationJoinPointModel(FlowItemModel flowItem) {
-		this.flowItem = flowItem;
+	public AbstractFlowItemAdministrationJoinPointModel(OfficeTaskModel task) {
+		this.task = task;
 	}
 
 	/**
-	 * Obtains the {@link FlowItemModel}.
+	 * Obtains the {@link OfficeTaskModel}.
 	 * 
-	 * @return {@link FlowItemModel}.
+	 * @return {@link OfficeTaskModel}.
 	 */
-	public FlowItemModel getFlowItem() {
-		return this.flowItem;
+	public OfficeTaskModel getTask() {
+		return this.task;
 	}
 
 	/**
@@ -72,17 +73,17 @@ public abstract class AbstractFlowItemAdministrationJoinPointModel<C extends Con
 	public abstract List<C> getDutyConnections();
 
 	/**
-	 * Creates the {@link ConnectionModel} from the {@link FlowItemModel} to the
+	 * Creates the {@link ConnectionModel} from the {@link TaskModel} to the
 	 * {@link DutyModel}.
 	 * 
-	 * @param flowItem
-	 *            {@link FlowItemModel}.
+	 * @param task
+	 *            {@link OfficeTaskModel}.
 	 * @param duty
 	 *            {@link DutyModel}.
-	 * @return {@link ConnectionModel} between {@link FlowItemModel} to the
+	 * @return {@link ConnectionModel} between {@link OfficeTaskModel} to the
 	 *         {@link DutyModel}.
 	 */
-	public abstract ConnectionModel createDutyConnection(FlowItemModel flowItem,
-			DutyModel duty);
+	public abstract ConnectionModel createDutyConnection(
+			OfficeTaskModel task, DutyModel duty);
 
 }

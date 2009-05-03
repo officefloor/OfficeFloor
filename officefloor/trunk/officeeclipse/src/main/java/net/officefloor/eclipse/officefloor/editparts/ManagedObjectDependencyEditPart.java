@@ -24,8 +24,8 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigureContext;
-import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
-import net.officefloor.model.officefloor.ManagedObjectDependencyModel.ManagedObjectDependencyEvent;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel.OfficeFloorManagedObjectDependencyEvent;
 
 import org.eclipse.gef.EditPart;
 
@@ -34,41 +34,29 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
+// TODO rename to OfficeFloorManagedObjectDependencyEditPart
 public class ManagedObjectDependencyEditPart
 		extends
-		AbstractOfficeFloorEditPart<ManagedObjectDependencyModel, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeFloorManagedObjectDependencyModel, OfficeFloorFigure>
 		implements ManagedObjectDependencyFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ManagedObjectDependencyEvent>(
-				ManagedObjectDependencyEvent.values()) {
-			@Override
-			protected void handlePropertyChange(
-					ManagedObjectDependencyEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				// TODO provide connection handling
-				}
-			}
-		});
+		handlers
+				.add(new PropertyChangeHandler<OfficeFloorManagedObjectDependencyEvent>(
+						OfficeFloorManagedObjectDependencyEvent.values()) {
+					@Override
+					protected void handlePropertyChange(
+							OfficeFloorManagedObjectDependencyEvent property,
+							PropertyChangeEvent evt) {
+						switch (property) {
+						// TODO provide connection handling
+						}
+					}
+				});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
@@ -79,16 +67,10 @@ public class ManagedObjectDependencyEditPart
 	 * ==================== ManagedObjectDependencyFigureContext ============
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigureContext
-	 * #getManagedObjectDependencyName()
-	 */
 	@Override
 	public String getManagedObjectDependencyName() {
-		return this.getCastedModel().getDependencyKey();
+		return this.getCastedModel()
+				.getOfficeFloorManagedObjectDependencyName();
 	}
 
 }

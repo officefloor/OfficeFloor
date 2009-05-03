@@ -16,12 +16,13 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.officefloor.ManagedObjectTaskFlowModel;
-
 /**
- * Context for the {@link ManagedObjectTaskFlowModel} {@link IFigure}.
+ * Context for the {@link OfficeFloorManagedObjectSourceFlowModel}
+ * {@link IFigure}.
  * 
  * @author Daniel
  */

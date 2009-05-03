@@ -16,19 +16,14 @@
  */
 package net.officefloor.eclipse.wizard.workloader;
 
-import java.util.Iterator;
 import java.util.List;
 
-import net.officefloor.desk.WorkToDeskWorkSynchroniser;
 import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.desk.DeskUtil;
 import net.officefloor.eclipse.desk.WorkLoaderInstance;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
-import net.officefloor.model.desk.DeskTaskModel;
-import net.officefloor.model.desk.DeskWorkModel;
-import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.work.TaskModel;
-import net.officefloor.model.work.WorkModel;
+import net.officefloor.model.desk.WorkModel;
+import net.officefloor.model.desk.WorkTaskModel;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.IWizard;
@@ -69,9 +64,9 @@ public class WorkLoaderWizard extends Wizard {
 	private WorkLoaderPropertiesWizardPage currentPropertiesPage = null;
 
 	/**
-	 * {@link DeskWorkModel}.
+	 * {@link WorkModel}.
 	 */
-	private DeskWorkModel deskWork = null;
+	private WorkModel work = null;
 
 	/**
 	 * Initiate.
@@ -106,19 +101,18 @@ public class WorkLoaderWizard extends Wizard {
 	}
 
 	/**
-	 * Obtains the {@link DeskWorkModel}.
+	 * Obtains the {@link WorkModel}.
 	 * 
-	 * @return {@link DeskWorkModel} or <code>null</code> if not created.
+	 * @return {@link WorkModel} or <code>null</code> if not created.
 	 */
-	public DeskWorkModel getDeskWorkModel() {
-		return this.deskWork;
+	public WorkModel getDeskWorkModel() {
+		return this.work;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#addPages()
+	 * ====================== Wizard ==================================
 	 */
+	
 	@Override
 	public void addPages() {
 		this.addPage(this.listingPage);
@@ -128,13 +122,6 @@ public class WorkLoaderWizard extends Wizard {
 		this.addPage(this.tasksPage);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.wizard.Wizard#getNextPage(org.eclipse.jface.wizard.
-	 * IWizardPage)
-	 */
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		// Handle based on current page
@@ -157,11 +144,6 @@ public class WorkLoaderWizard extends Wizard {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#canFinish()
-	 */
 	@Override
 	public boolean canFinish() {
 
@@ -196,43 +178,45 @@ public class WorkLoaderWizard extends Wizard {
 	public boolean performFinish() {
 
 		// Obtain the work and the loader
-		WorkModel<?> workModel = this.currentPropertiesPage.getWorkModel();
+		this.work = this.currentPropertiesPage.getWorkModel();
 		String loader = this.currentPropertiesPage.getWorkLoaderInstance()
 				.getClassName();
 
 		// Obtain the tasks to provide
-		List<TaskModel<?, ?>> selectedTasks = this.tasksPage
+		List<WorkTaskModel> selectedTasks = this.tasksPage
 				.getChosenTaskModels();
 
-		// Create and load the desk work
-		DeskWorkModel deskWorkModel = new DeskWorkModel();
-		WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
-				deskWorkModel);
-
-		// Specify the loader and properties on the work
-		deskWorkModel.setLoader(loader);
-		for (PropertyModel property : this.currentPropertiesPage
-				.getPropertyModels()) {
-			deskWorkModel.addProperty(property);
-		}
-
-		// Iterate over removing the unselected desk tasks
-		// TODO: include this as part of synchroniseWorkOntoDeskWork
-		for (Iterator<DeskTaskModel> iterator = deskWorkModel.getTasks()
-				.iterator(); iterator.hasNext();) {
-			DeskTaskModel deskTask = iterator.next();
-
-			// Remove if task not contained in selected
-			if (!selectedTasks.contains(deskTask.getTask())) {
-				iterator.remove();
-			}
-		}
-
-		// Specify the name of the work
-		deskWorkModel.setId(this.tasksPage.getWorkName());
-
-		// Specify the desk work
-		this.deskWork = deskWorkModel;
+		// TODO load WorkType and translate into WorkModel
+//		
+//		// Create and load the desk work
+//		WorkModel deskWorkModel = new WorkModel();
+//		WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
+//				deskWorkModel);
+//
+//		// Specify the loader and properties on the work
+//		deskWorkModel.setLoader(loader);
+//		for (PropertyModel property : this.currentPropertiesPage
+//				.getPropertyModels()) {
+//			deskWorkModel.addProperty(property);
+//		}
+//
+//		// Iterate over removing the unselected desk tasks
+//		// TODO: include this as part of synchroniseWorkOntoDeskWork
+//		for (Iterator<DeskTaskModel> iterator = deskWorkModel.getTasks()
+//				.iterator(); iterator.hasNext();) {
+//			DeskTaskModel deskTask = iterator.next();
+//
+//			// Remove if task not contained in selected
+//			if (!selectedTasks.contains(deskTask.getTask())) {
+//				iterator.remove();
+//			}
+//		}
+//
+//		// Specify the name of the work
+//		deskWorkModel.setId(this.tasksPage.getWorkName());
+//
+//		// Specify the desk work
+//		this.deskWork = deskWorkModel;
 
 		// Finished
 		return true;

@@ -17,13 +17,13 @@
 package net.officefloor.eclipse.skin.officefloor;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.officefloor.ManagedObjectDependencyModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link ManagedObjectDependencyModel}.
+ * {@link OfficeFloorFigure} for the {@link OfficeFloorManagedObjectDependencyModel}.
  * 
  * @author Daniel
  */
+// TODO rename to OfficeFloorManagedObjectDependencyFigure
 public interface ManagedObjectDependencyFigure extends OfficeFloorFigure {
-
 }

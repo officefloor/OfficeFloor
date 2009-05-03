@@ -22,8 +22,6 @@ import net.officefloor.eclipse.skin.desk.DeskTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.DeskWorkFigure;
 import net.officefloor.eclipse.skin.desk.DeskWorkFigureContext;
-import net.officefloor.eclipse.skin.desk.ExternalEscalationFigure;
-import net.officefloor.eclipse.skin.desk.ExternalEscalationFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
@@ -43,115 +41,50 @@ import net.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext;
 public class StandardDeskFigureFactory implements DeskFigureFactory {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.desk.skin.DeskFigureFactory#createDeskWorkFigure
-	 * (net.officefloor.eclipse.desk.skin.DeskWorkFigureContext)
+	 * ===================== DeskFigureFactory ============================
 	 */
+
 	@Override
 	public DeskWorkFigure createDeskWorkFigure(DeskWorkFigureContext context) {
 		return new StandardDeskWorkFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskFigureFactory#createDeskTaskFigure
-	 * (net.officefloor.eclipse.skin.desk.DeskTaskFigureContext)
-	 */
 	@Override
 	public DeskTaskFigure createDeskTaskFigure(
 			final DeskTaskFigureContext context) {
 		return new StandardDeskTaskFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.desk.DeskFigureFactory#
-	 * createDeskTaskObjectFigure
-	 * (net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext)
-	 */
 	@Override
 	public net.officefloor.eclipse.skin.desk.DeskTaskObjectFigure createDeskTaskObjectFigure(
 			final DeskTaskObjectFigureContext context) {
 		return new StandardDeskTaskObjectFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.desk.DeskFigureFactory#
-	 * createExternalEscalationFigure
-	 * (net.officefloor.eclipse.skin.desk.ExternalEscalationFigureContext)
-	 */
-	@Override
-	public ExternalEscalationFigure createExternalEscalationFigure(
-			ExternalEscalationFigureContext context) {
-		return new StandardExternalEscalationFigure(context);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskFigureFactory#createExternalFlowFigure
-	 * (net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext)
-	 */
 	@Override
 	public ExternalFlowFigure createExternalFlowFigure(
 			ExternalFlowFigureContext context) {
 		return new StandardExternalFlowFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.desk.DeskFigureFactory#
-	 * createExternalManagedObjectFigure
-	 * (net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext)
-	 */
 	@Override
 	public ExternalManagedObjectFigure createExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context) {
 		return new StandardExternalManagedObjectFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskFigureFactory#createFlowItemFigure
-	 * (net.officefloor.eclipse.skin.desk.FlowItemFigureContext)
-	 */
 	@Override
 	public FlowItemFigure createFlowItemFigure(
 			final FlowItemFigureContext context) {
 		return new StandardFlowItemFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.DeskFigureFactory#createFlowItemEscalation
-	 * (net.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext)
-	 */
 	@Override
 	public FlowItemEscalationFigure createFlowItemEscalation(
 			FlowItemEscalationFigureContext context) {
 		return new StandardFlowItemEscalationFigure(context);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.desk.DeskFigureFactory#
-	 * createFlowItemOutputFigure
-	 * (net.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext)
-	 */
 	@Override
 	public FlowItemOutputFigure createFlowItemOutputFigure(
 			FlowItemOutputFigureContext context) {

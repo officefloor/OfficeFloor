@@ -16,21 +16,22 @@
  */
 package net.officefloor.eclipse.skin.office;
 
+import net.officefloor.model.office.OfficeSectionModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.room.RoomModel;
-
 /**
- * Context for the {@link RoomModel} {@link IFigure}.
+ * Context for the {@link OfficeSectionModel} {@link IFigure}.
  * 
  * @author Daniel
  */
+// TODO rename to OfficeSectionFigureContext
 public interface RoomFigureContext {
 
 	/**
-	 * Obtains the {@link RoomModel} name.
+	 * Obtains the {@link OfficeSectionModel} name.
 	 * 
-	 * @return {@link RoomModel} name.
+	 * @return {@link OfficeSectionModel} name.
 	 */
 	String getRoomName();
 

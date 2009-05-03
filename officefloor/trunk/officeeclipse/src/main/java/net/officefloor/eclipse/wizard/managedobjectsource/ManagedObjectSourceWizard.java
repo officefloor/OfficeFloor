@@ -23,7 +23,7 @@ import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.officefloor.ManagedObjectSourceInstance;
 import net.officefloor.eclipse.officefloor.OfficeFloorUtil;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.IWizard;
@@ -66,7 +66,7 @@ public class ManagedObjectSourceWizard extends Wizard {
 	/**
 	 * {@link ManagedObjectSourceModel}.
 	 */
-	private ManagedObjectSourceModel managedObjectSource = null;
+	private OfficeFloorManagedObjectSourceModel managedObjectSource = null;
 
 	/**
 	 * Initiate.
@@ -122,15 +122,14 @@ public class ManagedObjectSourceWizard extends Wizard {
 	 * @return {@link ManagedObjectSourceModel} or <code>null</code> if not
 	 *         created.
 	 */
-	public ManagedObjectSourceModel getManagedObjectSourceModel() {
+	public OfficeFloorManagedObjectSourceModel getManagedObjectSourceModel() {
 		return this.managedObjectSource;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#addPages()
+	 * ====================== Wizard =========================================
 	 */
+
 	@Override
 	public void addPages() {
 		this.addPage(this.listingPage);
@@ -140,13 +139,6 @@ public class ManagedObjectSourceWizard extends Wizard {
 		this.addPage(this.namePage);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.wizard.Wizard#getNextPage(org.eclipse.jface.wizard.
-	 * IWizardPage)
-	 */
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 		// Handle based on current page
@@ -172,11 +164,6 @@ public class ManagedObjectSourceWizard extends Wizard {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#canFinish()
-	 */
 	@Override
 	public boolean canFinish() {
 
@@ -202,25 +189,21 @@ public class ManagedObjectSourceWizard extends Wizard {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish() {
 
 		// Obtain the managed object source
-		ManagedObjectSourceModel managedObjectSourceModel = this.currentPropertiesPage
+		OfficeFloorManagedObjectSourceModel managedObjectSourceModel = this.currentPropertiesPage
 				.getManagedObjectSourceModel();
 
 		// Specify the name of the managed object source
-		managedObjectSourceModel.setId(this.namePage
-				.getManagedObjectSourceName());
+		managedObjectSourceModel
+				.setOfficeFloorManagedObjectSourceName(this.namePage
+						.getManagedObjectSourceName());
 
-		// Specify the default timeout of the managed object source
-		managedObjectSourceModel.setDefaultTimeout(String.valueOf(this.namePage
-				.getDefaultTimeoutValue()));
+		// TODO Specify the default timeout of the managed object source
+//		managedObjectSourceModel.setDefaultTimeout(String.valueOf(this.namePage
+//				.getDefaultTimeoutValue()));
 
 		// Specify the managed object source
 		this.managedObjectSource = managedObjectSourceModel;

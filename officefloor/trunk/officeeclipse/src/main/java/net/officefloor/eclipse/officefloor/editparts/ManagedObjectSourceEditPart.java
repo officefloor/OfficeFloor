@@ -29,120 +29,75 @@ import net.officefloor.eclipse.officefloor.operations.RemoveManagedObjectSourceO
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigureContext;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel;
-import net.officefloor.model.officefloor.ManagedObjectSourceToOfficeFloorOfficeModel;
-import net.officefloor.model.officefloor.OfficeFloorOfficeModel;
-import net.officefloor.model.officefloor.ManagedObjectSourceModel.ManagedObjectSourceEvent;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel.OfficeFloorManagedObjectSourceEvent;
 
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.officefloor.ManagedObjectSourceModel}.
+ * {@link EditPart} for the {@link OfficeFloorManagedObjectSourceModel}.
  * 
  * @author Daniel
  */
+// TODO rename to OfficeFloorManagedObjectSourceEditPart
 public class ManagedObjectSourceEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<ManagedObjectSourceModel, OfficeFloorFigure>
+		AbstractOfficeFloorSourceNodeEditPart<OfficeFloorManagedObjectSourceModel, OfficeFloorFigure>
 		implements RemovableEditPart, ManagedObjectSourceFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ManagedObjectSourceEvent>(
-				ManagedObjectSourceEvent.values()) {
-			@Override
-			protected void handlePropertyChange(
-					ManagedObjectSourceEvent property, PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_OFFICE_MANAGED_OBJECT:
-				case REMOVE_OFFICE_MANAGED_OBJECT:
-					ManagedObjectSourceEditPart.this.refreshTargetConnections();
-					break;
-				case CHANGE_MANAGING_OFFICE:
-					ManagedObjectSourceEditPart.this.refreshSourceConnections();
-					break;
-				case ADD_DEPENDENCY:
-				case REMOVE_DEPENDENCY:
-				case ADD_HANDLER:
-				case REMOVE_HANDLER:
-				case ADD_TASK:
-				case REMOVE_TASK:
-				case ADD_TEAM:
-				case REMOVE_TEAM:
-					ManagedObjectSourceEditPart.this.refreshChildren();
-					break;
-				}
-			}
-		});
+		handlers
+				.add(new PropertyChangeHandler<OfficeFloorManagedObjectSourceEvent>(
+						OfficeFloorManagedObjectSourceEvent.values()) {
+					@Override
+					protected void handlePropertyChange(
+							OfficeFloorManagedObjectSourceEvent property,
+							PropertyChangeEvent evt) {
+						switch (property) {
+						case CHANGE_MANAGING_OFFICE:
+							ManagedObjectSourceEditPart.this
+									.refreshSourceConnections();
+							break;
+						case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
+						case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
+						case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
+						case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
+							ManagedObjectSourceEditPart.this.refreshChildren();
+							break;
+						}
+					}
+				});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createManagedObjectSourceFigure(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * isFreeformFigure()
-	 */
 	@Override
 	protected boolean isFreeformFigure() {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populateModelChildren(java.util.List)
-	 */
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-		childModels.addAll(this.getCastedModel().getDependencies());
-		childModels.addAll(this.getCastedModel().getHandlers());
-		childModels.addAll(this.getCastedModel().getTasks());
-		childModels.addAll(this.getCastedModel().getTeams());
+		childModels.addAll(this.getCastedModel()
+				.getOfficeFloorManagedObjectSourceFlows());
+		childModels.addAll(this.getCastedModel()
+				.getOfficeFloorManagedObjectSourceTeams());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getOfficeManagedObjects());
+		// No target connections
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart#createConnectionModelFactory()
-	 */
 	@Override
 	protected ConnectionModelFactory createConnectionModelFactory() {
 		return new ConnectionModelFactory() {
@@ -150,9 +105,10 @@ public class ManagedObjectSourceEditPart
 			public ConnectionModel createConnection(Object source,
 					Object target, CreateConnectionRequest request) {
 				// Create the connection
-				ManagedObjectSourceToOfficeFloorOfficeModel conn = new ManagedObjectSourceToOfficeFloorOfficeModel();
-				conn.setManagedObjectSource((ManagedObjectSourceModel) source);
-				conn.setManagingOffice((OfficeFloorOfficeModel) target);
+				OfficeFloorManagedObjectSourceToDeployedOfficeModel conn = new OfficeFloorManagedObjectSourceToDeployedOfficeModel();
+				conn
+						.setOfficeFloorManagedObjectSource((OfficeFloorManagedObjectSourceModel) source);
+				conn.setManagingOffice((DeployedOfficeModel) target);
 				conn.connect();
 
 				// Return the connection
@@ -161,41 +117,20 @@ public class ManagedObjectSourceEditPart
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.editparts.
-	 * AbstractOfficeFloorSourceNodeEditPart
-	 * #populateConnectionTargetTypes(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(OfficeFloorOfficeModel.class);
+		types.add(DeployedOfficeModel.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		ManagedObjectSourceToOfficeFloorOfficeModel conn = this
+		OfficeFloorManagedObjectSourceToDeployedOfficeModel conn = this
 				.getCastedModel().getManagingOffice();
 		if (conn != null) {
 			models.add(conn);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
 	@Override
 	public Operation getRemoveOperation() {
 		return new RemoveManagedObjectSourceOperation();
@@ -205,16 +140,9 @@ public class ManagedObjectSourceEditPart
 	 * ================== ManagedObjectSourceFigureContext =====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigureContext
-	 * #getManagedObjectSourceName()
-	 */
 	@Override
 	public String getManagedObjectSourceName() {
-		return this.getCastedModel().getId();
+		return this.getCastedModel().getOfficeFloorManagedObjectSourceName();
 	}
 
 }

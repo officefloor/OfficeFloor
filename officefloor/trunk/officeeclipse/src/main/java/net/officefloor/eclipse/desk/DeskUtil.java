@@ -23,10 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
+import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
@@ -34,7 +31,10 @@ import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
 import net.officefloor.eclipse.java.JavaUtil;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.work.WorkLoader;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Utility methods for the {@link DeskModel}.
@@ -132,7 +132,7 @@ public class DeskUtil {
 							WorkLoaderExtension.class);
 			for (WorkLoaderExtension workLoaderExtension : workLoaderExtensions) {
 				Class<?> workLoaderClass = workLoaderExtension
-						.getWorkLoaderClass();
+						.getWorkSourceClass();
 				String className = workLoaderClass.getName();
 				workLoaderInstances.put(className, new WorkLoaderInstance(
 						className, workLoaderExtension, classLoader));

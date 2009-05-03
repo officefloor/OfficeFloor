@@ -16,21 +16,22 @@
  */
 package net.officefloor.eclipse.skin.desk;
 
+import net.officefloor.model.desk.WorkModel;
+
 import org.eclipse.draw2d.IFigure;
 
-import net.officefloor.model.desk.DeskWorkModel;
-
 /**
- * Context for the {@link DeskWorkModel} {@link IFigure}.
+ * Context for the {@link WorkModel} {@link IFigure}.
  * 
  * @author Daniel
  */
+// TODO rename to WorkFigureContext
 public interface DeskWorkFigureContext {
 
 	/**
-	 * Obtains the name of the {@link DeskWorkModel}.
+	 * Obtains the name of the {@link WorkModel}.
 	 * 
-	 * @return Name of the {@link DeskWorkModel}.
+	 * @return Name of the {@link WorkModel}.
 	 */
 	String getWorkName();
 }

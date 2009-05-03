@@ -25,59 +25,39 @@ import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.skin.room.SubRoomInputFlowFigure;
 import net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext;
-import net.officefloor.model.room.SubRoomInputFlowModel;
-import net.officefloor.model.room.SubRoomInputFlowModel.SubRoomInputFlowEvent;
+import net.officefloor.model.section.SubSectionInputModel;
+import net.officefloor.model.section.SubSectionInputModel.SubSectionInputEvent;
+
+import org.eclipse.gef.EditPart;
 
 /**
- * {@link org.eclipse.gef.EditPart} for the
- * {@link net.officefloor.model.room.SubRoomInputFlowModel}.
+ * {@link EditPart} for the {@link SubSectionInputModel}.
  * 
  * @author Daniel
  */
+// TODO rename to SubSectionInputEditPart
 public class SubRoomInputFlowEditPart
 		extends
-		AbstractOfficeFloorNodeEditPart<SubRoomInputFlowModel, SubRoomInputFlowFigure>
+		AbstractOfficeFloorNodeEditPart<SubSectionInputModel, SubRoomInputFlowFigure>
 		implements SubRoomInputFlowFigureContext {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionSourceModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		// Not a source
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart
-	 * #populateConnectionTargetModels(java.util.List)
-	 */
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getOutputs());
-		models.addAll(this.getCastedModel().getEscalations());
+		models.addAll(this.getCastedModel().getSubSectionOutputs());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * populatePropertyChangeHandlers(java.util.List)
-	 */
 	@Override
 	protected void populatePropertyChangeHandlers(
 			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<SubRoomInputFlowEvent>(
-				SubRoomInputFlowEvent.values()) {
+		handlers.add(new PropertyChangeHandler<SubSectionInputEvent>(
+				SubSectionInputEvent.values()) {
 			@Override
-			protected void handlePropertyChange(SubRoomInputFlowEvent property,
+			protected void handlePropertyChange(SubSectionInputEvent property,
 					PropertyChangeEvent evt) {
 				switch (property) {
 				case CHANGE_IS_PUBLIC:
@@ -86,10 +66,8 @@ public class SubRoomInputFlowEditPart
 									SubRoomInputFlowEditPart.this
 											.getCastedModel().getIsPublic());
 					break;
-				case ADD_OUTPUT:
-				case REMOVE_OUTPUT:
-				case ADD_ESCALATION:
-				case REMOVE_ESCALATION:
+				case ADD_SUB_SECTION_OUTPUT:
+				case REMOVE_SUB_SECTION_OUTPUT:
 					SubRoomInputFlowEditPart.this.refreshTargetConnections();
 					break;
 				}
@@ -97,13 +75,6 @@ public class SubRoomInputFlowEditPart
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
-	 */
 	@Override
 	protected SubRoomInputFlowFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
@@ -114,36 +85,16 @@ public class SubRoomInputFlowEditPart
 	 * ================= SubRoomInputFlowFigureContext =====================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext#
-	 * getSubRoomInputFlowName()
-	 */
 	@Override
 	public String getSubRoomInputFlowName() {
-		return this.getCastedModel().getName();
+		return this.getCastedModel().getSubSectionInputName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext#isPublic
-	 * ()
-	 */
 	@Override
 	public boolean isPublic() {
 		return this.getCastedModel().getIsPublic();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.room.SubRoomInputFlowFigureContext#setIsPublic
-	 * (boolean)
-	 */
 	@Override
 	public void setIsPublic(final boolean isPublic) {
 

@@ -21,11 +21,10 @@ import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.room.editparts.SubRoomEditPart;
-import net.officefloor.model.room.SubRoomModel;
-import net.officefloor.room.RoomLoader;
+import net.officefloor.model.section.SubSectionModel;
 
 /**
- * Refreshes the {@link SubRoomModel}.
+ * Refreshes the {@link SubSectionModel}.
  * 
  * @author Daniel
  */
@@ -38,53 +37,47 @@ public class RefreshSubRoomOperation extends AbstractOperation<SubRoomEditPart> 
 		super("Refresh sub room", SubRoomEditPart.class);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
-	 */
 	@Override
 	protected void perform(final Context context) {
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			public void doCommand() {
-				try {
-
-					// Create the Project class loader
-					ProjectClassLoader projectClassLoader = ProjectClassLoader
-							.create(context.getEditPart().getEditor());
-
-					// Create the room loader
-					RoomLoader roomLoader = new RoomLoader();
-
-					// Load the sub room
-					roomLoader.loadSubRoom(context.getEditPart()
-							.getCastedModel(), projectClassLoader
-							.getConfigurationContext());
-
-				} catch (Throwable ex) {
-
-					// TODO implement, provide message error (or error)
-					// (extend Command to provide method invoked from execute to
-					// throw exception and handle by message box and possibly
-					// eclipse error)
-					System.err.println("Failed refreshing the sub room");
-					ex.printStackTrace();
-					throw new UnsupportedOperationException(
-							"TODO provide Exception to createCommand of "
-									+ Operation.class.getName());
-				}
-			}
-
-			@Override
-			protected void undoCommand() {
-				// TODO Implement
-				throw new UnsupportedOperationException(
-						"TODO implement OfficeFloorCommand.undoCommand");
-			}
-		});
+//		context.execute(new OfficeFloorCommand() {
+//
+//			@Override
+//			public void doCommand() {
+//				try {
+//
+//					// Create the Project class loader
+//					ProjectClassLoader projectClassLoader = ProjectClassLoader
+//							.create(context.getEditPart().getEditor());
+//
+//					// Create the room loader
+//					RoomLoader roomLoader = new RoomLoader();
+//
+//					// Load the sub room
+//					roomLoader.loadSubRoom(context.getEditPart()
+//							.getCastedModel(), projectClassLoader
+//							.getConfigurationContext());
+//
+//				} catch (Throwable ex) {
+//
+//					// TODO implement, provide message error (or error)
+//					// (extend Command to provide method invoked from execute to
+//					// throw exception and handle by message box and possibly
+//					// eclipse error)
+//					System.err.println("Failed refreshing the sub room");
+//					ex.printStackTrace();
+//					throw new UnsupportedOperationException(
+//							"TODO provide Exception to createCommand of "
+//									+ Operation.class.getName());
+//				}
+//			}
+//
+//			@Override
+//			protected void undoCommand() {
+//				// TODO Implement
+//				throw new UnsupportedOperationException(
+//						"TODO implement OfficeFloorCommand.undoCommand");
+//			}
+//		});
 	}
 
 }
