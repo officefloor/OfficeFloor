@@ -5,20 +5,32 @@ Bundle-SymbolicName: net.officefloor.compiler;singleton:=true
 Bundle-Version: 1.0.0
 Bundle-Vendor: Daniel Sagenschneider
 Export-Package: 
+ net.officefloor.compile,
+ net.officefloor.compile.administrator,
+ net.officefloor.compile.officefloor,
+ net.officefloor.compile.properties,
  net.officefloor.compile.spi.work.source,
  net.officefloor.compile.spi.work.source.impl,
  net.officefloor.compile.test.work,
  net.officefloor.compile.work,
  net.officefloor.main,
+ net.officefloor.model.change,
+ net.officefloor.model.desk,
  net.officefloor.model.impl.desk,
+ net.officefloor.model.impl.office,
+ net.officefloor.model.impl.officefloor,
+ net.officefloor.model.impl.repository,
  net.officefloor.model.impl.repository.classloader,
  net.officefloor.model.impl.repository.filesystem,
+ net.officefloor.model.impl.section,
+ net.officefloor.model.office,
+ net.officefloor.model.officefloor,
  net.officefloor.model.repository,
+ net.officefloor.model.section,
  net.officefloor.plugin.work.clazz
 Require-Bundle: 
  net.officefloor.frame,
  net.officefloor.xml,
  net.officefloor.model,
- net.officefloor.eclipse.jars;bundle-version="1.0.0",
- org.junit;bundle-version="3.8.2"
+ net.officefloor.eclipse.jars;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
