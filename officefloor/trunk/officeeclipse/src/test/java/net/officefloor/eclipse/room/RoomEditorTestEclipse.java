@@ -18,9 +18,10 @@ package net.officefloor.eclipse.room;
 
 import net.officefloor.eclipse.AbstractEditorTest;
 import net.officefloor.eclipse.EditorTestSpecific;
+import net.officefloor.eclipse.section.SectionEditor;
 
 /**
- * Tests the {@link net.officefloor.eclipse.room.RoomEditor}.
+ * Tests the {@link net.officefloor.eclipse.section.SectionEditor}.
  * 
  * @author Daniel
  */
@@ -37,11 +38,11 @@ public class RoomEditorTestEclipse extends AbstractEditorTest {
 	}
 
 	/**
-	 * Open the {@link RoomEditor}.
+	 * Open the {@link SectionEditor}.
 	 */
 	public void testOpenRoomEditor() {
 		// Flag Room Editor as dirty so will not exit
-		RoomEditor roomEditor = (RoomEditor) this.getEditorPart();
+		SectionEditor roomEditor = (SectionEditor) this.getEditorPart();
 		roomEditor.flagDirty();
 	}
 

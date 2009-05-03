@@ -22,19 +22,19 @@ import java.util.Map;
 import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.officefloor.editparts.ManagedObjectDependencyEditPart;
-import net.officefloor.eclipse.officefloor.editparts.ManagedObjectSourceEditPart;
-import net.officefloor.eclipse.officefloor.editparts.ManagedObjectTaskFlowEditPart;
-import net.officefloor.eclipse.officefloor.editparts.ManagedObjectTeamEditPart;
-import net.officefloor.eclipse.officefloor.editparts.OfficeEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectDependencyEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceFlowEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceTeamEditPart;
+import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
-import net.officefloor.eclipse.officefloor.editparts.OfficeManagedObjectEditPart;
-import net.officefloor.eclipse.officefloor.editparts.OfficeTaskEditPart;
-import net.officefloor.eclipse.officefloor.editparts.OfficeTeamEditPart;
-import net.officefloor.eclipse.officefloor.editparts.TeamEditPart;
-import net.officefloor.eclipse.officefloor.operations.AddManagedObjectOperation;
-import net.officefloor.eclipse.officefloor.operations.AddOfficeOperation;
-import net.officefloor.eclipse.officefloor.operations.AddTeamOperation;
+import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeObjectEditPart;
+import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeInputEditPart;
+import net.officefloor.eclipse.officefloor.editparts.DeployedOfficeTeamEditPart;
+import net.officefloor.eclipse.officefloor.editparts.OfficeFloorTeamEditPart;
+import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorManagedObjectSourceOperation;
+import net.officefloor.eclipse.officefloor.operations.AddDeployedOfficeOperation;
+import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorTeamOperation;
 import net.officefloor.model.impl.officefloor.OfficeFloorRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
@@ -75,19 +75,19 @@ public class OfficeFloorEditor extends
 		// Entities
 		map.put(OfficeFloorModel.class, OfficeFloorEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceModel.class,
-				ManagedObjectSourceEditPart.class);
-		map.put(OfficeFloorTeamModel.class, TeamEditPart.class);
-		map.put(DeployedOfficeModel.class, OfficeEditPart.class);
-		map.put(DeployedOfficeTeamModel.class, OfficeTeamEditPart.class);
-		map.put(DeployedOfficeInputModel.class, OfficeTaskEditPart.class);
+				OfficeFloorManagedObjectSourceEditPart.class);
+		map.put(OfficeFloorTeamModel.class, OfficeFloorTeamEditPart.class);
+		map.put(DeployedOfficeModel.class, DeployedOfficeEditPart.class);
+		map.put(DeployedOfficeTeamModel.class, DeployedOfficeTeamEditPart.class);
+		map.put(DeployedOfficeInputModel.class, DeployedOfficeInputEditPart.class);
 		map.put(DeployedOfficeObjectModel.class,
-				OfficeManagedObjectEditPart.class);
+				DeployedOfficeObjectEditPart.class);
 		map.put(OfficeFloorManagedObjectDependencyModel.class,
-				ManagedObjectDependencyEditPart.class);
+				OfficeFloorManagedObjectDependencyEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceFlowModel.class,
-				ManagedObjectTaskFlowEditPart.class);
+				OfficeFloorManagedObjectSourceFlowEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceTeamModel.class,
-				ManagedObjectTeamEditPart.class);
+				OfficeFloorManagedObjectSourceTeamEditPart.class);
 
 		// Connections
 		map.put(OfficeFloorManagedObjectSourceTeamToOfficeFloorTeamModel.class,
@@ -122,9 +122,9 @@ public class OfficeFloorEditor extends
 	@Override
 	protected void populateOperations(List<Operation> list) {
 		// Add model operations
-		list.add(new AddOfficeOperation());
-		list.add(new AddTeamOperation());
-		list.add(new AddManagedObjectOperation());
+		list.add(new AddDeployedOfficeOperation());
+		list.add(new AddOfficeFloorTeamOperation());
+		list.add(new AddOfficeFloorManagedObjectSourceOperation());
 	}
 
 }

@@ -20,6 +20,11 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.model.desk.WorkTaskObjectModel;
 
 import org.eclipse.draw2d.IFigure;
 
@@ -32,33 +37,32 @@ import org.eclipse.draw2d.IFigure;
 public interface DeskFigureFactory {
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link DeskWorkModel}.
+	 * Creates the {@link OfficeFloorFigure} for the {@link WorkModel}.
 	 * 
 	 * @param context
-	 *            {@link DeskWorkFigureContext}.
+	 *            {@link WorkFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	DeskWorkFigure createDeskWorkFigure(DeskWorkFigureContext context);
+	WorkFigure createWorkFigure(WorkFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link DeskTaskModel}.
+	 * Creates the {@link OfficeFloorFigure} for the {@link WorkTaskModel}.
 	 * 
 	 * @param context
-	 *            {@link DeskTaskFigureContext}.
+	 *            {@link WorkTaskFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	DeskTaskFigure createDeskTaskFigure(DeskTaskFigureContext context);
+	WorkTaskFigure createWorkTaskFigure(WorkTaskFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link DeskTaskObjectModel}
-	 * .
+	 * Creates {@link OfficeFloorFigure} for the {@link WorkTaskObjectModel}.
 	 * 
 	 * @param context
-	 *            {@link DeskTaskObjectFigureContext}.
-	 * @return {@link DeskTaskObjectFigure}.
+	 *            {@link WorkTaskObjectFigureContext}.
+	 * @return {@link WorkTaskObjectFigure}.
 	 */
-	DeskTaskObjectFigure createDeskTaskObjectFigure(
-			DeskTaskObjectFigureContext context);
+	WorkTaskObjectFigure createWorkTaskObjectFigure(
+			WorkTaskObjectFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link ExternalFlowModel}.
@@ -67,7 +71,8 @@ public interface DeskFigureFactory {
 	 *            {@link ExternalFlowModel}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	ExternalFlowFigure createExternalFlowFigure(ExternalFlowFigureContext context);
+	ExternalFlowFigure createExternalFlowFigure(
+			ExternalFlowFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
@@ -81,33 +86,31 @@ public interface DeskFigureFactory {
 			ExternalManagedObjectFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link FlowItemModel}.
+	 * Creates the {@link OfficeFloorFigure} for the {@link TaskModel}.
 	 * 
 	 * @param context
-	 *            {@link FlowItemFigureContext}.
-	 * @return {@link FlowItemFigure}.
+	 *            {@link TaskFigureContext}.
+	 * @return {@link TaskFigure}.
 	 */
-	FlowItemFigure createFlowItemFigure(FlowItemFigureContext context);
+	TaskFigure createTaskFigure(TaskFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the
-	 * {@link FlowItemEscalationModel}.
+	 * Creates the {@link OfficeFloorFigure} for the {@link TaskFlowModel}.
 	 * 
 	 * @param context
-	 *            {@link FlowItemEscalationFigureContext}.
+	 *            {@link TaskFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	FlowItemEscalationFigure createFlowItemEscalation(
-			FlowItemEscalationFigureContext context);
+	TaskFlowFigure createTaskFlowFigure(TaskFlowFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link FlowItemOutputModel}
-	 * .
+	 * Creates {@link OfficeFloorFigure} for the {@link TaskEscalationModel}.
 	 * 
-	 * @param flowItemOutputEditPart
-	 *            {@link FlowItemOutputFigureContext}.
+	 * @param context
+	 *            {@link TaskEscalationFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	FlowItemOutputFigure createFlowItemOutputFigure(
-			FlowItemOutputFigureContext context);
+	TaskEscalationFigure createTaskEscalationFigure(
+			TaskEscalationFigureContext context);
+
 }

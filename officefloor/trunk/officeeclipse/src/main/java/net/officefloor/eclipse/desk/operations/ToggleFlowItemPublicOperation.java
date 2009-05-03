@@ -17,7 +17,7 @@
 package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskEditPart;
 
 /**
  * Toggles {@link FlowItemModel} being public.
@@ -25,13 +25,13 @@ import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
  * @author Daniel
  */
 public class ToggleFlowItemPublicOperation extends
-		AbstractOperation<FlowItemEditPart> {
+		AbstractOperation<TaskEditPart> {
 
 	/**
 	 * Initiate.
 	 */
 	public ToggleFlowItemPublicOperation() {
-		super("Toggle public", FlowItemEditPart.class);
+		super("Toggle public", TaskEditPart.class);
 	}
 
 	/*

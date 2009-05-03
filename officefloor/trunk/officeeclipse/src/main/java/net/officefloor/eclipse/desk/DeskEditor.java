@@ -24,14 +24,14 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.TagFactory;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
-import net.officefloor.eclipse.desk.editparts.DeskTaskEditPart;
-import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
-import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkTaskEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
-import net.officefloor.eclipse.desk.editparts.FlowItemEditPart;
-import net.officefloor.eclipse.desk.editparts.FlowItemEscalationEditPart;
-import net.officefloor.eclipse.desk.editparts.FlowItemOutputEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskEscalationEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskFlowEditPart;
 import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.AddWorkOperation;
@@ -108,12 +108,12 @@ public class DeskEditor extends
 		map.put(DeskModel.class, DeskEditPart.class);
 		map.put(ExternalManagedObjectModel.class,
 				ExternalManagedObjectEditPart.class);
-		map.put(WorkModel.class, DeskWorkEditPart.class);
-		map.put(WorkTaskModel.class, DeskTaskEditPart.class);
-		map.put(WorkTaskObjectModel.class, DeskTaskObjectEditPart.class);
-		map.put(TaskModel.class, FlowItemEditPart.class);
-		map.put(TaskFlowModel.class, FlowItemOutputEditPart.class);
-		map.put(TaskEscalationModel.class, FlowItemEscalationEditPart.class);
+		map.put(WorkModel.class, WorkEditPart.class);
+		map.put(WorkTaskModel.class, WorkTaskEditPart.class);
+		map.put(WorkTaskObjectModel.class, WorkTaskObjectEditPart.class);
+		map.put(TaskModel.class, TaskEditPart.class);
+		map.put(TaskFlowModel.class, TaskFlowEditPart.class);
+		map.put(TaskEscalationModel.class, TaskEscalationEditPart.class);
 		map.put(ExternalFlowModel.class, ExternalFlowEditPart.class);
 
 		// Connections

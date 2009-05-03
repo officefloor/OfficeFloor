@@ -20,11 +20,11 @@ import net.officefloor.eclipse.skin.OfficeFloorSkin;
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
 import net.officefloor.eclipse.skin.office.OfficeFigureFactory;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory;
-import net.officefloor.eclipse.skin.room.RoomFigureFactory;
+import net.officefloor.eclipse.skin.section.SectionFigureFactory;
 import net.officefloor.eclipse.skin.standard.desk.StandardDeskFigureFactory;
 import net.officefloor.eclipse.skin.standard.office.StandardOfficeFigureFactory;
 import net.officefloor.eclipse.skin.standard.officefloor.StandardOfficeFloorFigureFactory;
-import net.officefloor.eclipse.skin.standard.room.StandardRoomFigureFactory;
+import net.officefloor.eclipse.skin.standard.section.StandardSectionFigureFactory;
 
 /**
  * The standard {@link OfficeFloorSkin}.
@@ -49,9 +49,9 @@ public class StandardOfficeFloorSkin implements OfficeFloorSkin {
 	private final OfficeFloorFigureFactory officeFloorFigureFactory = new StandardOfficeFloorFigureFactory();
 
 	/**
-	 * {@link RoomFigureFactory}.
+	 * {@link SectionFigureFactory}.
 	 */
-	private final RoomFigureFactory roomFigureFactory = new StandardRoomFigureFactory();
+	private final SectionFigureFactory roomFigureFactory = new StandardSectionFigureFactory();
 
 	/*
 	 * (non-Javadoc)
@@ -92,7 +92,7 @@ public class StandardOfficeFloorSkin implements OfficeFloorSkin {
 	 * @see net.officefloor.eclipse.skin.OfficeFloorSkin#getRoomFigureFactory()
 	 */
 	@Override
-	public RoomFigureFactory getRoomFigureFactory() {
+	public SectionFigureFactory getRoomFigureFactory() {
 		return this.roomFigureFactory;
 	}
 

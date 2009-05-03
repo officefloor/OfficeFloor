@@ -25,5 +25,4 @@ import net.officefloor.model.office.DutyModel;
  * @author Daniel
  */
 public interface DutyFigure extends OfficeFloorFigure {
-
 }

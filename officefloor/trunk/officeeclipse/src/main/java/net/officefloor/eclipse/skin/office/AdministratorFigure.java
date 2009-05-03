@@ -27,5 +27,4 @@ import org.eclipse.draw2d.Figure;
  * @author Daniel
  */
 public interface AdministratorFigure extends OfficeFloorFigure {
-
 }

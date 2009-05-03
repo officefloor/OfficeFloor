@@ -16,24 +16,24 @@
  */
 package net.officefloor.eclipse.skin.standard.officefloor;
 
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigure;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectDependencyFigureContext;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigure;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectSourceFigureContext;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigure;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectTaskFlowFigureContext;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigure;
-import net.officefloor.eclipse.skin.officefloor.ManagedObjectTeamFigureContext;
-import net.officefloor.eclipse.skin.officefloor.OfficeFigure;
-import net.officefloor.eclipse.skin.officefloor.OfficeFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFlowFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceTeamFigureContext;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigure;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigureContext;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorFigureFactory;
-import net.officefloor.eclipse.skin.officefloor.OfficeManagedObjectFigure;
-import net.officefloor.eclipse.skin.officefloor.OfficeManagedObjectFigureContext;
-import net.officefloor.eclipse.skin.officefloor.OfficeTaskFigureContext;
-import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigure;
-import net.officefloor.eclipse.skin.officefloor.OfficeTeamFigureContext;
-import net.officefloor.eclipse.skin.officefloor.TeamFigure;
-import net.officefloor.eclipse.skin.officefloor.TeamFigureContext;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigure;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigureContext;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigureContext;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigure;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigureContext;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigure;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigureContext;
 
 /**
  * Standard {@link OfficeFloorFigureFactory}.
@@ -44,55 +44,55 @@ public class StandardOfficeFloorFigureFactory implements
 		OfficeFloorFigureFactory {
 
 	@Override
-	public ManagedObjectDependencyFigure createManagedObjectDependencyFigure(
-			ManagedObjectDependencyFigureContext context) {
-		return new StandardManagedObjectDependencyFigure(context);
+	public OfficeFloorManagedObjectDependencyFigure createOfficeFloorManagedObjectDependencyFigure(
+			OfficeFloorManagedObjectDependencyFigureContext context) {
+		return new StandardOfficeFloorManagedObjectDependencyFigure(context);
 	}
 
 	@Override
-	public ManagedObjectSourceFigure createManagedObjectSourceFigure(
-			ManagedObjectSourceFigureContext context) {
-		return new StandardManagedObjectSourceFigure(context);
+	public OfficeFloorManagedObjectSourceFigure createOfficeFloorManagedObjectSourceFigure(
+			OfficeFloorManagedObjectSourceFigureContext context) {
+		return new StandardOfficeFloorManagedObjectSourceFigure(context);
 	}
 
 	@Override
-	public ManagedObjectTaskFlowFigure createManagedObjectTaskFlowFigure(
-			ManagedObjectTaskFlowFigureContext context) {
-		return new StandardManagedObjectTaskFlowFigure(context);
+	public OfficeFloorManagedObjectSourceFlowFigure createOfficeFloorManagedObjectSourceFlowFigure(
+			OfficeFloorManagedObjectSourceFlowFigureContext context) {
+		return new StandardOfficeFloorManagedObjectSourceFlowFigure(context);
 	}
 
 	@Override
-	public ManagedObjectTeamFigure createManagedObjectTeamFigure(
-			ManagedObjectTeamFigureContext context) {
-		return new StandardManagedObjectTeamFigure(context);
+	public OfficeFloorManagedObjectSourceTeamFigure createOfficeFloorManagedObjectSourceTeamFigure(
+			OfficeFloorManagedObjectSourceTeamFigureContext context) {
+		return new StandardOfficeFloorManagedObjectSourceTeamFigure(context);
 	}
 
 	@Override
-	public OfficeFigure createOfficeFigure(OfficeFigureContext context) {
-		return new StandardOfficeFigure(context);
+	public DeployedOfficeFigure createDeployedOfficeFigure(DeployedOfficeFigureContext context) {
+		return new StandardDeployedOfficeFigure(context);
 	}
 
 	@Override
-	public OfficeManagedObjectFigure createOfficeManagedObject(
-			OfficeManagedObjectFigureContext context) {
-		return new StandardOfficeManagedObjectFigure(context);
+	public DeployedOfficeObjectFigure createDeployedOfficeObjectFigure(
+			DeployedOfficeObjectFigureContext context) {
+		return new StandardDeployedOfficeObjectFigure(context);
 	}
 
 	@Override
-	public net.officefloor.eclipse.skin.officefloor.OfficeTaskFigure createOfficeTaskFigure(
-			OfficeTaskFigureContext context) {
-		return new StandardOfficeTaskFigure(context);
+	public net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigure createDeployedOfficeInputFigure(
+			DeployedOfficeInputFigureContext context) {
+		return new StandardDeployedOfficeInputFigure(context);
 	}
 
 	@Override
-	public OfficeTeamFigure createOfficeTeamFigure(
-			OfficeTeamFigureContext context) {
-		return new StandardOfficeTeamFigure(context);
+	public DeployedOfficeTeamFigure createDeployedOfficeTeamFigure(
+			DeployedOfficeTeamFigureContext context) {
+		return new StandardDeployedOfficeTeamFigure(context);
 	}
 
 	@Override
-	public TeamFigure createTeamFigure(TeamFigureContext context) {
-		return new StandardTeamFigure(context);
+	public OfficeFloorTeamFigure createOfficeFloorTeamFigure(OfficeFloorTeamFigureContext context) {
+		return new StandardOfficeFloorTeamFigure(context);
 	}
 
 }

@@ -17,7 +17,7 @@
 package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
 
 /**
  * Toggles whether the {@link DeskTaskObjectModel} is a parameter.
@@ -25,13 +25,13 @@ import net.officefloor.eclipse.desk.editparts.DeskTaskObjectEditPart;
  * @author Daniel
  */
 public class ToggleTaskObjectParameterOperation extends
-		AbstractOperation<DeskTaskObjectEditPart> {
+		AbstractOperation<WorkTaskObjectEditPart> {
 
 	/**
 	 * Initiate.
 	 */
 	public ToggleTaskObjectParameterOperation() {
-		super("Toggle as parameter", DeskTaskObjectEditPart.class);
+		super("Toggle as parameter", WorkTaskObjectEditPart.class);
 	}
 
 	/*

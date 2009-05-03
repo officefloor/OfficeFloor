@@ -36,90 +36,94 @@ public interface OfficeFloorFigureFactory {
 	 * {@link ManagedObjectDependencyModel}.
 	 * 
 	 * @param context
-	 *            {@link ManagedObjectDependencyFigureContext}.
+	 *            {@link OfficeFloorManagedObjectDependencyFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	ManagedObjectDependencyFigure createManagedObjectDependencyFigure(
-			ManagedObjectDependencyFigureContext context);
+	OfficeFloorManagedObjectDependencyFigure createOfficeFloorManagedObjectDependencyFigure(
+			OfficeFloorManagedObjectDependencyFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ManagedObjectSourceModel}.
 	 * 
 	 * @param context
-	 *            {@link ManagedObjectSourceFigureContext}.
+	 *            {@link OfficeFloorManagedObjectSourceFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	ManagedObjectSourceFigure createManagedObjectSourceFigure(
-			ManagedObjectSourceFigureContext context);
+	OfficeFloorManagedObjectSourceFigure createOfficeFloorManagedObjectSourceFigure(
+			OfficeFloorManagedObjectSourceFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ManagedObjectTaskFlowModel}.
 	 * 
 	 * @param context
-	 *            {@link ManagedObjectTaskFlowFigureContext}.
+	 *            {@link OfficeFloorManagedObjectSourceFlowFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	ManagedObjectTaskFlowFigure createManagedObjectTaskFlowFigure(
-			ManagedObjectTaskFlowFigureContext context);
+	OfficeFloorManagedObjectSourceFlowFigure createOfficeFloorManagedObjectSourceFlowFigure(
+			OfficeFloorManagedObjectSourceFlowFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link ManagedObjectTeamModel}.
 	 * 
 	 * @param context
-	 *            {@link ManagedObjectTeamFigureContext}.
+	 *            {@link OfficeFloorManagedObjectSourceTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	ManagedObjectTeamFigure createManagedObjectTeamFigure(
-			ManagedObjectTeamFigureContext context);
+	OfficeFloorManagedObjectSourceTeamFigure createOfficeFloorManagedObjectSourceTeamFigure(
+			OfficeFloorManagedObjectSourceTeamFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeModel}.
 	 * 
 	 * @param context
-	 *            {@link OfficeFigureContext}.
+	 *            {@link DeployedOfficeFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeFigure createOfficeFigure(OfficeFigureContext context);
+	DeployedOfficeFigure createDeployedOfficeFigure(
+			DeployedOfficeFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link OfficeManagedObjectModel}.
 	 * 
 	 * @param context
-	 *            {@link OfficeManagedObjectFigureContext}.
+	 *            {@link DeployedOfficeObjectFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeManagedObjectFigure createOfficeManagedObject(
-			OfficeManagedObjectFigureContext context);
+	DeployedOfficeObjectFigure createDeployedOfficeObjectFigure(
+			DeployedOfficeObjectFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
 	 * 
 	 * @param context
-	 *            {@link OfficeTaskFigureContext}.
+	 *            {@link DeployedOfficeInputFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeTaskFigure createOfficeTaskFigure(OfficeTaskFigureContext context);
+	DeployedOfficeInputFigure createDeployedOfficeInputFigure(
+			DeployedOfficeInputFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link }.
 	 * 
 	 * @param context
-	 *            {@link }.
+	 *            {@link DeployedOfficeTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeTeamFigure createOfficeTeamFigure(OfficeTeamFigureContext context);
+	DeployedOfficeTeamFigure createDeployedOfficeTeamFigure(
+			DeployedOfficeTeamFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link TeamModel}.
 	 * 
 	 * @param context
-	 *            {@link TeamFigureContext}.
+	 *            {@link OfficeFloorTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	TeamFigure createTeamFigure(TeamFigureContext context);
+	OfficeFloorTeamFigure createOfficeFloorTeamFigure(
+			OfficeFloorTeamFigureContext context);
 
 }

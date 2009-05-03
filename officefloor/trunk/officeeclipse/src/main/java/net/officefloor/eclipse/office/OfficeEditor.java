@@ -25,17 +25,17 @@ import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalManagedObjectEditPart;
-import net.officefloor.eclipse.office.editparts.ExternalTeamEditPart;
-import net.officefloor.eclipse.office.editparts.FlowItemAdministrationJoinPointEditPart;
-import net.officefloor.eclipse.office.editparts.FlowItemEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeTeamEditPart;
+import net.officefloor.eclipse.office.editparts.TaskAdministrationJoinPointEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeTaskEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
-import net.officefloor.eclipse.office.editparts.RoomEditPart;
-import net.officefloor.eclipse.office.models.PostFlowItemAdministrationJointPointModel;
-import net.officefloor.eclipse.office.models.PreFlowItemAdministrationJointPointModel;
+import net.officefloor.eclipse.office.editparts.OfficeSectionEditPart;
+import net.officefloor.eclipse.office.models.PostTaskAdministrationJointPointModel;
+import net.officefloor.eclipse.office.models.PreTaskAdministrationJointPointModel;
 import net.officefloor.eclipse.office.operations.AddAdministratorOperation;
-import net.officefloor.eclipse.office.operations.AddExternalTeamOperation;
+import net.officefloor.eclipse.office.operations.AddOfficeTeamOperation;
 import net.officefloor.eclipse.office.operations.CycleManagedObjectScopeOperation;
-import net.officefloor.eclipse.office.operations.RefreshOfficeRoomOperation;
+import net.officefloor.eclipse.office.operations.RefreshOfficeSectionOperation;
 import net.officefloor.model.impl.office.OfficeRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministratorModel;
@@ -72,17 +72,17 @@ public class OfficeEditor extends
 
 		// Entities
 		map.put(OfficeModel.class, OfficeEditPart.class);
-		map.put(OfficeTeamModel.class, ExternalTeamEditPart.class);
+		map.put(OfficeTeamModel.class, OfficeTeamEditPart.class);
 		map.put(ExternalManagedObjectModel.class,
 				ExternalManagedObjectEditPart.class);
-		map.put(OfficeSectionModel.class, RoomEditPart.class);
-		map.put(OfficeTaskModel.class, FlowItemEditPart.class);
+		map.put(OfficeSectionModel.class, OfficeSectionEditPart.class);
+		map.put(OfficeTaskModel.class, OfficeTaskEditPart.class);
 		map.put(AdministratorModel.class, AdministratorEditPart.class);
 		map.put(DutyModel.class, DutyEditPart.class);
-		map.put(PreFlowItemAdministrationJointPointModel.class,
-				FlowItemAdministrationJoinPointEditPart.class);
-		map.put(PostFlowItemAdministrationJointPointModel.class,
-				FlowItemAdministrationJoinPointEditPart.class);
+		map.put(PreTaskAdministrationJointPointModel.class,
+				TaskAdministrationJoinPointEditPart.class);
+		map.put(PostTaskAdministrationJointPointModel.class,
+				TaskAdministrationJoinPointEditPart.class);
 
 		// Connections
 		map.put(OfficeSectionOutputToOfficeSectionInputModel.class,
@@ -117,10 +117,10 @@ public class OfficeEditor extends
 
 		// Add model operations
 		list.add(new AddAdministratorOperation());
-		list.add(new AddExternalTeamOperation());
+		list.add(new AddOfficeTeamOperation());
 		list.add(new CycleManagedObjectScopeOperation());
 
 		// Refresh model operations
-		list.add(new RefreshOfficeRoomOperation());
+		list.add(new RefreshOfficeSectionOperation());
 	}
 }

@@ -17,20 +17,20 @@
 package net.officefloor.eclipse.desk.operations;
 
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.desk.editparts.DeskWorkEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkEditPart;
 
 /**
  * Refreshes the {@link DeskWorkModel}.
  * 
  * @author Daniel
  */
-public class RefreshWorkOperation extends AbstractOperation<DeskWorkEditPart> {
+public class RefreshWorkOperation extends AbstractOperation<WorkEditPart> {
 
 	/**
 	 * Initiate.
 	 */
 	public RefreshWorkOperation() {
-		super("Refresh Work", DeskWorkEditPart.class);
+		super("Refresh Work", WorkEditPart.class);
 	}
 
 	/*

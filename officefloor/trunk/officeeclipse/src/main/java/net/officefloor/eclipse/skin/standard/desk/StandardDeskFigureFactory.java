@@ -17,21 +17,21 @@
 package net.officefloor.eclipse.skin.standard.desk;
 
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
-import net.officefloor.eclipse.skin.desk.DeskTaskFigure;
-import net.officefloor.eclipse.skin.desk.DeskTaskFigureContext;
-import net.officefloor.eclipse.skin.desk.DeskTaskObjectFigureContext;
-import net.officefloor.eclipse.skin.desk.DeskWorkFigure;
-import net.officefloor.eclipse.skin.desk.DeskWorkFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkTaskFigure;
+import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkFigure;
+import net.officefloor.eclipse.skin.desk.WorkFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
-import net.officefloor.eclipse.skin.desk.FlowItemEscalationFigure;
-import net.officefloor.eclipse.skin.desk.FlowItemEscalationFigureContext;
-import net.officefloor.eclipse.skin.desk.FlowItemFigure;
-import net.officefloor.eclipse.skin.desk.FlowItemFigureContext;
-import net.officefloor.eclipse.skin.desk.FlowItemOutputFigure;
-import net.officefloor.eclipse.skin.desk.FlowItemOutputFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskEscalationFigure;
+import net.officefloor.eclipse.skin.desk.TaskEscalationFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskFigure;
+import net.officefloor.eclipse.skin.desk.TaskFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskFlowFigure;
+import net.officefloor.eclipse.skin.desk.TaskFlowFigureContext;
 
 /**
  * Standard {@link DeskFigureFactory}.
@@ -45,20 +45,20 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	 */
 
 	@Override
-	public DeskWorkFigure createDeskWorkFigure(DeskWorkFigureContext context) {
-		return new StandardDeskWorkFigure(context);
+	public WorkFigure createWorkFigure(WorkFigureContext context) {
+		return new StandardWorkFigure(context);
 	}
 
 	@Override
-	public DeskTaskFigure createDeskTaskFigure(
-			final DeskTaskFigureContext context) {
-		return new StandardDeskTaskFigure(context);
+	public WorkTaskFigure createWorkTaskFigure(
+			final WorkTaskFigureContext context) {
+		return new StandardWorkTaskFigure(context);
 	}
 
 	@Override
-	public net.officefloor.eclipse.skin.desk.DeskTaskObjectFigure createDeskTaskObjectFigure(
-			final DeskTaskObjectFigureContext context) {
-		return new StandardDeskTaskObjectFigure(context);
+	public net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure createWorkTaskObjectFigure(
+			final WorkTaskObjectFigureContext context) {
+		return new StandardWorkTaskObjectFigure(context);
 	}
 
 	@Override
@@ -74,21 +74,21 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	}
 
 	@Override
-	public FlowItemFigure createFlowItemFigure(
-			final FlowItemFigureContext context) {
-		return new StandardFlowItemFigure(context);
+	public TaskFigure createTaskFigure(
+			final TaskFigureContext context) {
+		return new StandardTaskFigure(context);
 	}
 
 	@Override
-	public FlowItemEscalationFigure createFlowItemEscalation(
-			FlowItemEscalationFigureContext context) {
-		return new StandardFlowItemEscalationFigure(context);
+	public TaskEscalationFigure createTaskEscalationFigure(
+			TaskEscalationFigureContext context) {
+		return new StandardTaskEscalationFigure(context);
 	}
 
 	@Override
-	public FlowItemOutputFigure createFlowItemOutputFigure(
-			FlowItemOutputFigureContext context) {
-		return new StandardFlowItemOutputFigure(context);
+	public TaskFlowFigure createTaskFlowFigure(
+			TaskFlowFigureContext context) {
+		return new StandardTaskFlowFigure(context);
 	}
 
 }
