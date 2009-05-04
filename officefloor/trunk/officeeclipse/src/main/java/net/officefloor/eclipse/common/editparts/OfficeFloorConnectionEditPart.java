@@ -16,14 +16,8 @@
  */
 package net.officefloor.eclipse.common.editparts;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.operation.RemoveConnectionOperation;
 import net.officefloor.model.ConnectionModel;
 
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PolygonDecoration;
 import org.eclipse.draw2d.PolylineConnection;
@@ -32,70 +26,30 @@ import org.eclipse.gef.editparts.AbstractConnectionEditPart;
 import org.eclipse.gef.editpolicies.ConnectionEndpointEditPolicy;
 
 /**
- * Abstract Office Floor
- * {@link org.eclipse.gef.editparts.AbstractConnectionEditPart}.
+ * Abstract Office Floor {@link AbstractConnectionEditPart}.
  * 
  * @author Daniel
  */
 public class OfficeFloorConnectionEditPart<M extends ConnectionModel> extends
-		AbstractConnectionEditPart implements RemovableEditPart {
-
-	/**
-	 * Registry of {@link FigureFactory} by the model types.
-	 */
-	private static final Map<Class<?>, FigureFactory<?>> factories = new HashMap<Class<?>, FigureFactory<?>>();
-
-	/**
-	 * Registers the {@link FigureFactory} for the model type.
-	 * 
-	 * @param modelType
-	 *            Type of model.
-	 * @param figureFactory
-	 *            {@link FigureFactory}.
-	 */
-	public synchronized static void registerFigureFactory(Class<?> modelType,
-			FigureFactory<?> figureFactory) {
-		factories.put(modelType, figureFactory);
-	}
+		AbstractConnectionEditPart {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractConnectionEditPart#createFigure()
+	 * =============== AbstractConnectionEditPart =============================
 	 */
-	@SuppressWarnings("unchecked")
+
+	@Override
 	protected IFigure createFigure() {
 
-		IFigure figure;
-
-		// Obtain figure factory
-		FigureFactory figureFactory = factories.get(this.getCastedModel()
-				.getClass());
-		if (figureFactory != null) {
-			// Create the figure
-			figure = figureFactory.createFigure(this.getCastedModel());
-		} else {
-			// Create the default connection figure
-			PolylineConnection connFigure = (PolylineConnection) super
-					.createFigure();
-			connFigure.setTargetDecoration(new PolygonDecoration());
-			figure = connFigure;
-		}
-
-		// Indicate if able to remove connection
-		if (!this.getCastedModel().isRemovable()) {
-			figure.setForegroundColor(ColorConstants.gray);
-		}
+		// Create the default connection figure
+		PolylineConnection connFigure = (PolylineConnection) super
+				.createFigure();
+		connFigure.setTargetDecoration(new PolygonDecoration());
 
 		// Return the figure
-		return figure;
+		return connFigure;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#createEditPolicies()
-	 */
+	@Override
 	protected void createEditPolicies() {
 		this.installEditPolicy(EditPolicy.CONNECTION_ENDPOINTS_ROLE,
 				new ConnectionEndpointEditPolicy());
@@ -111,15 +65,4 @@ public class OfficeFloorConnectionEditPart<M extends ConnectionModel> extends
 		return (M) this.getModel();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.RemovableEditPart#getRemoveOperation
-	 * ()
-	 */
-	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveConnectionOperation();
-	}
 }

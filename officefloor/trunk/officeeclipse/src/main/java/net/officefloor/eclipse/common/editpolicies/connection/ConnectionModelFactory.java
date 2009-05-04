@@ -25,6 +25,8 @@ import net.officefloor.model.ConnectionModel;
  * 
  * @author Daniel
  */
+// TODO use the ConnectionCreateFactory.
+@Deprecated
 public interface ConnectionModelFactory {
 
 	/**

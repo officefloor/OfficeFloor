@@ -22,6 +22,7 @@ import java.util.Map;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.editpolicies.connection.ConnectionGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
@@ -105,6 +106,12 @@ public class OfficeEditor extends
 	@Override
 	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
 		// TODO populate layout edit policy for Office
+	}
+
+	@Override
+	protected void populateGraphicalEditPolicy(
+			ConnectionGraphicalNodeEditPolicy policy) {
+		// TODO populate the connection policy for Office
 	}
 
 	@Override

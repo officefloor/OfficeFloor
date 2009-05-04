@@ -19,7 +19,6 @@ package net.officefloor.eclipse.common.editparts;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
@@ -32,6 +31,8 @@ import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
  * 
  * @author Daniel
  */
+// TODO no longer required with OfficeFloorGraphicalNodeEditPolicy
+@Deprecated
 public abstract class AbstractOfficeFloorSourceNodeEditPart<M extends Model, F extends OfficeFloorFigure>
 		extends AbstractOfficeFloorNodeEditPart<M, F> {
 
@@ -51,8 +52,7 @@ public abstract class AbstractOfficeFloorSourceNodeEditPart<M extends Model, F e
 		this.populateConnectionTargetTypes(targetTypes);
 
 		// Return the graphical node edit policy
-		return new ConnectionGraphicalNodeEditPolicy(connectionFactory,
-				targetTypes);
+		return this.getEditor().createGraphicalEditPolicy();
 	}
 
 	/**

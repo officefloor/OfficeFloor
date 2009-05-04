@@ -29,6 +29,7 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.action.OperationAction;
 import net.officefloor.eclipse.common.drag.LocalSelectionTransferDragTargetListener;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editpolicies.connection.ConnectionGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.CommonGraphicalViewerKeyHandler;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.repository.project.FileConfigurationItem;
@@ -50,6 +51,8 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
+import org.eclipse.gef.editpolicies.GraphicalEditPolicy;
+import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
 import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 import org.eclipse.gef.palette.ConnectionCreationToolEntry;
 import org.eclipse.gef.palette.PaletteGroup;
@@ -76,8 +79,8 @@ import org.eclipse.ui.IEditorPart;
  * 
  * @author Daniel
  */
-public abstract class AbstractOfficeFloorEditor<M extends Model, C>
-		extends GraphicalEditorWithFlyoutPalette implements EditPartFactory {
+public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
+		GraphicalEditorWithFlyoutPalette implements EditPartFactory {
 
 	/**
 	 * Root {@link Model} being edited.
@@ -247,6 +250,26 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C>
 	 */
 	protected abstract void populateLayoutEditPolicy(
 			OfficeFloorLayoutEditPolicy policy);
+
+	/**
+	 * Creates the {@link GraphicalEditPolicy} to be installed.
+	 * 
+	 * @return {@link GraphicalEditPolicy} to be installed.
+	 */
+	public GraphicalNodeEditPolicy createGraphicalEditPolicy() {
+		ConnectionGraphicalNodeEditPolicy policy = new ConnectionGraphicalNodeEditPolicy();
+		this.populateGraphicalEditPolicy(policy);
+		return policy;
+	}
+
+	/**
+	 * Populates the {@link ConnectionGraphicalNodeEditPolicy}.
+	 * 
+	 * @param policy
+	 *            {@link ConnectionGraphicalNodeEditPolicy}.
+	 */
+	protected abstract void populateGraphicalEditPolicy(
+			ConnectionGraphicalNodeEditPolicy policy);
 
 	/*
 	 * =================== GraphicalEditor =========================
