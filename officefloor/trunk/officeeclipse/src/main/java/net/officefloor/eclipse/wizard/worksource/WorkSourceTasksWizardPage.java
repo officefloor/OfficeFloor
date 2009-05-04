@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.wizard.workloader;
+package net.officefloor.eclipse.wizard.worksource;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.Text;
  * 
  * @author Daniel
  */
-public class WorkLoaderTasksWizardPage extends WizardPage {
+public class WorkSourceTasksWizardPage extends WizardPage {
 
 	/**
 	 * Display to obtain the {@link DeskWorkModel} name.
@@ -72,7 +72,7 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 	/**
 	 * Initiate.
 	 */
-	protected WorkLoaderTasksWizardPage() {
+	protected WorkSourceTasksWizardPage() {
 		super("WorkLoader tasks");
 
 		// Specify page details
@@ -204,7 +204,7 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 		this.workName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				WorkLoaderTasksWizardPage.this.handlePageChange();
+				WorkSourceTasksWizardPage.this.handlePageChange();
 			}
 		});
 
@@ -223,7 +223,7 @@ public class WorkLoaderTasksWizardPage extends WizardPage {
 				}
 
 				// Handle check box change
-				WorkLoaderTasksWizardPage.this.handlePageChange();
+				WorkSourceTasksWizardPage.this.handlePageChange();
 			}
 		});
 

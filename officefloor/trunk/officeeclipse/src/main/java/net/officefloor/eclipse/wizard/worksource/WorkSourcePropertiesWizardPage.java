@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.wizard.workloader;
+package net.officefloor.eclipse.wizard.worksource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,12 +38,12 @@ import org.eclipse.swt.widgets.Composite;
  * 
  * @author Daniel
  */
-public class WorkLoaderPropertiesWizardPage extends WizardPage {
+public class WorkSourcePropertiesWizardPage extends WizardPage {
 
 	/**
-	 * {@link WorkLoaderWizard}.
+	 * {@link WorkSourceWizard}.
 	 */
-	private final WorkLoaderWizard workLoaderWizard;
+	private final WorkSourceWizard workLoaderWizard;
 
 	/**
 	 * {@link WorkLoaderInstance} instance.
@@ -69,7 +69,7 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 	 * Initiate.
 	 * 
 	 * @param workLoaderWizard
-	 *            Owning {@link WorkLoaderWizard}.
+	 *            Owning {@link WorkSourceWizard}.
 	 * @param workLoaderInstance
 	 *            {@link WorkLoaderInstance} instances.
 	 * @param project
@@ -77,7 +77,7 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 	 * @throws Exception
 	 *             If fails to create.
 	 */
-	public WorkLoaderPropertiesWizardPage(WorkLoaderWizard workLoaderWizard,
+	public WorkSourcePropertiesWizardPage(WorkSourceWizard workLoaderWizard,
 			WorkLoaderInstance workLoaderInstance, IProject project)
 			throws Exception {
 		super("WorkLoader properties");
@@ -227,27 +227,27 @@ public class WorkLoaderPropertiesWizardPage extends WizardPage {
 
 					@Override
 					public void setTitle(String title) {
-						WorkLoaderPropertiesWizardPage.this.setTitle(title);
+						WorkSourcePropertiesWizardPage.this.setTitle(title);
 					}
 
 					@Override
 					public void notifyPropertiesChanged(
 							List<WorkLoaderProperty> properties) {
 						// Notify of property changes
-						WorkLoaderPropertiesWizardPage.this
+						WorkSourcePropertiesWizardPage.this
 								.handlePropertiesChanged(DeskUtil
 										.translateForWorkLoader(properties));
 					}
 
 					@Override
 					public void setErrorMessage(String message) {
-						WorkLoaderPropertiesWizardPage.this
+						WorkSourcePropertiesWizardPage.this
 								.setErrorMessage(message);
 					}
 
 					@Override
 					public IProject getProject() {
-						return WorkLoaderPropertiesWizardPage.this.project;
+						return WorkSourcePropertiesWizardPage.this.project;
 					}
 
 				});

@@ -63,7 +63,7 @@ Export-Package: net.officefloor.eclipse,
  net.officefloor.eclipse.wizard,
  net.officefloor.eclipse.wizard.file,
  net.officefloor.eclipse.wizard.managedobjectsource,
- net.officefloor.eclipse.wizard.workloader
+ net.officefloor.eclipse.wizard.worksource
 Require-Bundle: net.officefloor.compiler,
  net.officefloor.xml;bundle-version="1.0.0",
  net.officefloor.model,
