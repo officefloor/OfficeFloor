@@ -23,7 +23,7 @@ import org.easymock.AbstractMatcher;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskOperations;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskRepository;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -103,7 +103,7 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 				"taskFlow - extFlow", String.class.getName());
 		desk.addExternalFlow(extFlow_taskFlow);
 		TaskFlowToExternalFlowModel flowToExtFlow = new TaskFlowToExternalFlowModel(
-				"taskFlow - extFlow", DeskOperations.SEQUENTIAL_LINK);
+				"taskFlow - extFlow", DeskChanges.SEQUENTIAL_LINK);
 		taskFlow_extFlow.setExternalFlow(flowToExtFlow);
 
 		// next -> extFlow
@@ -121,7 +121,7 @@ public class DeskRepositoryTest extends OfficeFrameTestCase {
 				"work_task", Object.class.getName());
 		desk.addTask(task_taskFlow);
 		TaskFlowToTaskModel flowToTask = new TaskFlowToTaskModel("flow - task",
-				DeskOperations.PARALLEL_LINK);
+				DeskChanges.PARALLEL_LINK);
 		taskFlow_task.setTask(flowToTask);
 
 		// taskEscalation -> task

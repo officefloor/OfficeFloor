@@ -36,7 +36,7 @@ import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskOperations;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
@@ -396,11 +396,11 @@ public class DeskModelSectionSource extends AbstractSectionSource implements
 			String taskName, String flowName) {
 
 		// Obtain the flow instigation strategy
-		if (DeskOperations.SEQUENTIAL_LINK.equals(instigationStrategyName)) {
+		if (DeskChanges.SEQUENTIAL_LINK.equals(instigationStrategyName)) {
 			return FlowInstigationStrategyEnum.SEQUENTIAL;
-		} else if (DeskOperations.PARALLEL_LINK.equals(instigationStrategyName)) {
+		} else if (DeskChanges.PARALLEL_LINK.equals(instigationStrategyName)) {
 			return FlowInstigationStrategyEnum.PARALLEL;
-		} else if (DeskOperations.ASYNCHRONOUS_LINK
+		} else if (DeskChanges.ASYNCHRONOUS_LINK
 				.equals(instigationStrategyName)) {
 			return FlowInstigationStrategyEnum.ASYNCHRONOUS;
 		}

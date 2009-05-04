@@ -26,7 +26,7 @@ import net.officefloor.model.desk.ExternalManagedObjectModel;
  * @author Daniel
  */
 public class RemoveExternalManagedObjectTest extends
-		AbstractDeskOperationsTestCase {
+		AbstractDeskChangesTestCase {
 
 	/**
 	 * Initiate to use specific setup {@link DeskModel}.

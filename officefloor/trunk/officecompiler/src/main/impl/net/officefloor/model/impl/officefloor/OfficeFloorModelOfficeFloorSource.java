@@ -56,7 +56,7 @@ import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceTeamToOff
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.officefloor.OfficeFloorOperations;
+import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -444,13 +444,13 @@ public class OfficeFloorModelOfficeFloorSource extends
 			OfficeFloorDeployer deployer, String managedObjectName) {
 
 		// Obtain the managed object scope
-		if (OfficeFloorOperations.PROCESS_MANAGED_OBJECT_SCOPE
+		if (OfficeFloorChanges.PROCESS_MANAGED_OBJECT_SCOPE
 				.equals(managedObjectScope)) {
 			return ManagedObjectScope.PROCESS;
-		} else if (OfficeFloorOperations.THREAD_MANAGED_OBJECT_SCOPE
+		} else if (OfficeFloorChanges.THREAD_MANAGED_OBJECT_SCOPE
 				.equals(managedObjectScope)) {
 			return ManagedObjectScope.THREAD;
-		} else if (OfficeFloorOperations.WORK_MANAGED_OBJECT_SCOPE
+		} else if (OfficeFloorChanges.WORK_MANAGED_OBJECT_SCOPE
 				.equals(managedObjectScope)) {
 			return ManagedObjectScope.WORK;
 		}

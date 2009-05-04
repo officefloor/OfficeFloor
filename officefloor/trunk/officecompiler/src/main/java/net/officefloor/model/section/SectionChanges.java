@@ -26,7 +26,7 @@ import net.officefloor.model.change.Change;
  * 
  * @author Daniel
  */
-public interface SectionOperations {
+public interface SectionChanges {
 
 	/**
 	 * Adds a {@link SubSectionModel} to the {@link SectionModel}.

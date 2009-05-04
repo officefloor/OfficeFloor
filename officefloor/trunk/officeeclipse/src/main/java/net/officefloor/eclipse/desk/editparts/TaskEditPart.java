@@ -197,7 +197,6 @@ public class TaskEditPart extends
 	 * ======================= FlowItemFigureContext ========================
 	 */
 
-	// TODO rename to getTaskName
 	@Override
 	public String getTaskName() {
 		return this.getCastedModel().getTaskName();

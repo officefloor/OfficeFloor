@@ -24,7 +24,7 @@ import net.officefloor.model.section.ExternalFlowModel;
  * 
  * @author Daniel
  */
-public class AddExternalFlowTest extends AbstractSectionOperationsTestCase {
+public class AddExternalFlowTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Ensures that can add an {@link ExternalFlowModel}.

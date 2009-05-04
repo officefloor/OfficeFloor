@@ -27,9 +27,8 @@ import net.officefloor.model.Model;
 import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
 
 /**
- * Abstract
- * {@link net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart}
- * that provides functionality to allow this to be a source.
+ * Abstract {@link AbstractOfficeFloorNodeEditPart} that provides functionality
+ * to allow this to be a source.
  * 
  * @author Daniel
  */
@@ -41,6 +40,7 @@ public abstract class AbstractOfficeFloorSourceNodeEditPart<M extends Model, F e
 	 * 
 	 * @return {@link GraphicalNodeEditPolicy}.
 	 */
+	@Override
 	protected GraphicalNodeEditPolicy createGraphicalNodeEditPolicy() {
 		// Obtain the connection factory
 		ConnectionModelFactory connectionFactory = this

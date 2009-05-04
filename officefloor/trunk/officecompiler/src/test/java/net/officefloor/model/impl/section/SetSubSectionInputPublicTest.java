@@ -27,7 +27,7 @@ import net.officefloor.model.section.SubSectionModel;
  * @author Daniel
  */
 public class SetSubSectionInputPublicTest extends
-		AbstractSectionOperationsTestCase {
+		AbstractSectionChangesTestCase {
 
 	/**
 	 * Private {@link SubSectionInputModel}.

@@ -32,7 +32,7 @@ import net.officefloor.model.desk.WorkTaskModel;
  * 
  * @author Daniel
  */
-public class AddTaskTest extends AbstractDeskOperationsTestCase {
+public class AddTaskTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * {@link WorkTaskModel}.

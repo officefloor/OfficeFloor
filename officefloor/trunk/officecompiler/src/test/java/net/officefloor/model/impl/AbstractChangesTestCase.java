@@ -33,7 +33,7 @@ import net.officefloor.model.repository.ConfigurationItem;
  * 
  * @author Daniel
  */
-public abstract class AbstractOperationsTestCase<M extends Model, O> extends
+public abstract class AbstractChangesTestCase<M extends Model, O> extends
 		OfficeFrameTestCase {
 
 	/**
@@ -54,7 +54,7 @@ public abstract class AbstractOperationsTestCase<M extends Model, O> extends
 	/**
 	 * Initiate.
 	 */
-	public AbstractOperationsTestCase() {
+	public AbstractChangesTestCase() {
 		this.isSpecificSetupFilePerTest = false;
 	}
 
@@ -64,7 +64,7 @@ public abstract class AbstractOperationsTestCase<M extends Model, O> extends
 	 * @param isSpecificSetupFilePerTest
 	 *            Flags if there is a specific setup file per test.
 	 */
-	public AbstractOperationsTestCase(boolean isSpecificSetupFilePerTest) {
+	public AbstractChangesTestCase(boolean isSpecificSetupFilePerTest) {
 		this.isSpecificSetupFilePerTest = isSpecificSetupFilePerTest;
 	}
 

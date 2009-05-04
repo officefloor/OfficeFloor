@@ -25,7 +25,7 @@ import net.officefloor.model.section.SectionModel;
  * 
  * @author Daniel
  */
-public class RemoveExternalFlowTest extends AbstractSectionOperationsTestCase {
+public class RemoveExternalFlowTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Initiate to use specific setup {@link SectionModel}.

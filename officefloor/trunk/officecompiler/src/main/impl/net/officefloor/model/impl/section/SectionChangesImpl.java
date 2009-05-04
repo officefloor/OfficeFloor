@@ -36,7 +36,7 @@ import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.PropertyModel;
 import net.officefloor.model.section.SectionModel;
-import net.officefloor.model.section.SectionOperations;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionObjectModel;
@@ -46,11 +46,11 @@ import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 /**
- * {@link SectionOperations} implementation.
+ * {@link SectionChanges} implementation.
  * 
  * @author Daniel
  */
-public class SectionOperationsImpl implements SectionOperations {
+public class SectionChangesImpl implements SectionChanges {
 
 	/**
 	 * Sorts the {@link SubSectionModel} instances.
@@ -119,7 +119,7 @@ public class SectionOperationsImpl implements SectionOperations {
 	 * @param section
 	 *            {@link SectionModel}.
 	 */
-	public SectionOperationsImpl(SectionModel section) {
+	public SectionChangesImpl(SectionModel section) {
 		this.section = section;
 	}
 
@@ -216,14 +216,14 @@ public class SectionOperationsImpl implements SectionOperations {
 			@Override
 			public void apply() {
 				// Add the sub section (ensuring ordering)
-				SectionOperationsImpl.this.section.addSubSection(subSection);
-				SectionOperationsImpl.this.sortSubSections();
+				SectionChangesImpl.this.section.addSubSection(subSection);
+				SectionChangesImpl.this.sortSubSections();
 			}
 
 			@Override
 			public void revert() {
 				// Remove the sub section (should maintain order)
-				SectionOperationsImpl.this.section.removeSubSection(subSection);
+				SectionChangesImpl.this.section.removeSubSection(subSection);
 			}
 		};
 	}
@@ -296,14 +296,14 @@ public class SectionOperationsImpl implements SectionOperations {
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
 				// Remove the sub section (should maintain order)
-				SectionOperationsImpl.this.section.removeSubSection(subSection);
+				SectionChangesImpl.this.section.removeSubSection(subSection);
 			}
 
 			@Override
 			public void revert() {
 				// Add the sub section (ensuring order)
-				SectionOperationsImpl.this.section.addSubSection(subSection);
-				SectionOperationsImpl.this.sortSubSections();
+				SectionChangesImpl.this.section.addSubSection(subSection);
+				SectionChangesImpl.this.sortSubSections();
 
 				// Reconnect the connections
 				for (ConnectionModel conn : this.connections) {
@@ -344,14 +344,14 @@ public class SectionOperationsImpl implements SectionOperations {
 			public void apply() {
 				// Rename the sub section (ensuring order)
 				subSection.setSubSectionName(newSubSectionName);
-				SectionOperationsImpl.this.sortSubSections();
+				SectionChangesImpl.this.sortSubSections();
 			}
 
 			@Override
 			public void revert() {
 				// Revert to old name (ensuring order)
 				subSection.setSubSectionName(oldSubSectionName);
-				SectionOperationsImpl.this.sortSubSections();
+				SectionChangesImpl.this.sortSubSections();
 			}
 		};
 	}
@@ -418,15 +418,15 @@ public class SectionOperationsImpl implements SectionOperations {
 			@Override
 			public void apply() {
 				// Add the external flow (ensuring ordering)
-				SectionOperationsImpl.this.section
+				SectionChangesImpl.this.section
 						.addExternalFlow(externalFlow);
-				SectionOperationsImpl.this.sortExternalFlows();
+				SectionChangesImpl.this.sortExternalFlows();
 			}
 
 			@Override
 			public void revert() {
 				// Remove the external flow (should maintain order)
-				SectionOperationsImpl.this.section
+				SectionChangesImpl.this.section
 						.removeExternalFlow(externalFlow);
 			}
 		};
@@ -475,16 +475,16 @@ public class SectionOperationsImpl implements SectionOperations {
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
 				// Remove the external flow (should maintain order)
-				SectionOperationsImpl.this.section
+				SectionChangesImpl.this.section
 						.removeExternalFlow(externalFlow);
 			}
 
 			@Override
 			public void revert() {
 				// Add the external flow (ensuring order)
-				SectionOperationsImpl.this.section
+				SectionChangesImpl.this.section
 						.addExternalFlow(externalFlow);
-				SectionOperationsImpl.this.sortExternalFlows();
+				SectionChangesImpl.this.sortExternalFlows();
 
 				// Reconnect the connections
 				for (ConnectionModel conn : this.connections) {
@@ -508,15 +508,15 @@ public class SectionOperationsImpl implements SectionOperations {
 			@Override
 			public void apply() {
 				// Add the external managed object (ensuring order)
-				SectionOperationsImpl.this.section
+				SectionChangesImpl.this.section
 						.addExternalManagedObject(extMo);
-				SectionOperationsImpl.this.sortExternalManagedObjects();
+				SectionChangesImpl.this.sortExternalManagedObjects();
 			}
 
 			@Override
 			public void revert() {
 				// Remove the external managed object (should maintain order)
-				SectionOperationsImpl.this.section
+				SectionChangesImpl.this.section
 						.removeExternalManagedObject(extMo);
 			}
 		};
@@ -528,7 +528,7 @@ public class SectionOperationsImpl implements SectionOperations {
 
 		// Ensure the external managed object in the section
 		boolean isInSection = false;
-		for (ExternalManagedObjectModel externalMoModel : SectionOperationsImpl.this.section
+		for (ExternalManagedObjectModel externalMoModel : SectionChangesImpl.this.section
 				.getExternalManagedObjects()) {
 			if (externalManagedObject == externalMoModel) {
 				isInSection = true;
@@ -569,16 +569,16 @@ public class SectionOperationsImpl implements SectionOperations {
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
 				// Remove the external managed object (should maintain order)
-				SectionOperationsImpl.this.section
+				SectionChangesImpl.this.section
 						.removeExternalManagedObject(externalManagedObject);
 			}
 
 			@Override
 			public void revert() {
 				// Add the external managed object (ensuring order)
-				SectionOperationsImpl.this.section
+				SectionChangesImpl.this.section
 						.addExternalManagedObject(externalManagedObject);
-				SectionOperationsImpl.this.sortExternalManagedObjects();
+				SectionChangesImpl.this.sortExternalManagedObjects();
 
 				// Reconnect the connections
 				for (ConnectionModel conn : this.connections) {

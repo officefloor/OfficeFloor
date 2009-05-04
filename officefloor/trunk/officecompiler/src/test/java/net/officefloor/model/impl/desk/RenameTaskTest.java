@@ -25,7 +25,7 @@ import net.officefloor.model.desk.TaskModel;
  * 
  * @author Daniel
  */
-public class RenameTaskTest extends AbstractDeskOperationsTestCase {
+public class RenameTaskTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensures handles {@link TaskModel} not being on the {@link DeskModel}.
