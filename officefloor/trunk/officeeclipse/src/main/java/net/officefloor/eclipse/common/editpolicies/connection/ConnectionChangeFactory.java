@@ -14,24 +14,30 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.editparts;
+package net.officefloor.eclipse.common.editpolicies.connection;
 
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.IFigure;
+import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.Model;
+import net.officefloor.model.change.Change;
 
 /**
- * Factory for the creation of a {@link org.eclipse.draw2d.Figure}.
+ * Factory to create a {@link Change} to add a {@link ConnectionModel}.
  * 
  * @author Daniel
  */
-public interface FigureFactory<M> {
+public interface ConnectionChangeFactory<S, T> {
 
 	/**
-	 * Creates the {@link org.eclipse.draw2d.Figure} for the input model.
+	 * Creates a {@link Change} to add a {@link ConnectionModel} between the
+	 * source and target.
 	 * 
-	 * @param model
-	 *            Model to have the {@link Figure} created for it.
-	 * @return {@link Figure}.
+	 * @param source
+	 *            Source {@link Model} of the {@link ConnectionModel}.
+	 * @param target
+	 *            Target {@link Model} of the {@link ConnectionModel}.
+	 * @return {@link Change} to add a {@link ConnectionModel} between the
+	 *         source and target.
 	 */
-	IFigure createFigure(M model);
+	Change<?> createChange(S source, T target);
+
 }

@@ -337,6 +337,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 * Provides an {@link EditPolicy} that delegates back to this
 	 * {@link EditPart}.
 	 */
+	// TODO move out to its own package
 	private class OfficeFloorEditPolicy extends AbstractEditPolicy {
 
 		/*

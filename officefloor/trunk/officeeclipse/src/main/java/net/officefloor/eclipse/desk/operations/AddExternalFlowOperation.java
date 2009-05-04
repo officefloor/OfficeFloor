@@ -16,10 +16,10 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 
@@ -28,23 +28,25 @@ import net.officefloor.model.desk.ExternalFlowModel;
  * 
  * @author Daniel
  */
-public class AddExternalFlowOperation extends AbstractOperation<DeskEditPart> {
+public class AddExternalFlowOperation extends
+		AbstractDeskChangeOperation<DeskEditPart> {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param deskChanges
+	 *            {@link DeskChanges}.
 	 */
-	public AddExternalFlowOperation() {
-		super("Add external flow", DeskEditPart.class);
+	public AddExternalFlowOperation(DeskChanges deskChanges) {
+		super("Add external flow", DeskEditPart.class, deskChanges);
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
+	 * ================== AbstractDeskChangeOperation ========================
 	 */
+
 	@Override
-	protected void perform(final Context context) {
+	protected Change<?> getChange(DeskChanges changes, Context context) {
 
 		// Create the populated External Flow
 		final ExternalFlowModel flow = new ExternalFlowModel();
@@ -52,25 +54,18 @@ public class AddExternalFlowOperation extends AbstractOperation<DeskEditPart> {
 				"Y");
 		if (!dialog.populate()) {
 			// Not created
-			return;
+			return null;
 		}
 
-		// Set location
-		context.positionModel(flow);
+		// Create the change
+		Change<ExternalFlowModel> change = changes.addExternalFlow(flow
+				.getExternalFlowName(), flow.getArgumentType());
 
-		// Make the change
-		context.execute(new OfficeFloorCommand() {
+		// Position the flow
+		context.positionModel(change.getTarget());
 
-			@Override
-			protected void doCommand() {
-				context.getEditPart().getCastedModel().addExternalFlow(flow);
-			}
-
-			@Override
-			protected void undoCommand() {
-				context.getEditPart().getCastedModel().removeExternalFlow(flow);
-			}
-		});
+		// Return the change
+		return change;
 	}
 
 }

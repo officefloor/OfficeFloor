@@ -16,43 +16,21 @@
  */
 package net.officefloor.eclipse.common.editpolicies.connection;
 
-import net.officefloor.model.ConnectionModel;
-
+import org.eclipse.gef.ConnectionEditPart;
 import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
- * Provides generic {@link org.eclipse.gef.commands.Command} to create a
- * connection.
+ * {@link Command} to make the source of a {@link ConnectionEditPart} available
+ * to create a connection.
  * 
  * @author Daniel
  */
 public class ConnectionCreateCommand extends Command {
 
 	/**
-	 * {@link ConnectionGraphicalNodeEditPolicy} that created this command.
-	 */
-	protected final ConnectionGraphicalNodeEditPolicy policy;
-
-	/**
 	 * Source of the connection.
 	 */
-	protected final Object source;
-
-	/**
-	 * Target of the connection.
-	 */
-	protected Object target = null;
-
-	/**
-	 * {@link CreateConnectionRequest}.
-	 */
-	protected CreateConnectionRequest createConnectionRequest = null;
-
-	/**
-	 * Connection that was created.
-	 */
-	protected ConnectionModel connection = null;
+	private final Object source;
 
 	/**
 	 * Initiate with source of connection.
@@ -60,63 +38,17 @@ public class ConnectionCreateCommand extends Command {
 	 * @param source
 	 *            Source of connection.
 	 */
-	public ConnectionCreateCommand(ConnectionGraphicalNodeEditPolicy policy,
-			Object source) {
-		this.policy = policy;
+	public ConnectionCreateCommand(Object source) {
 		this.source = source;
 	}
 
 	/**
-	 * Indicates if connection may target the input model.
+	 * Obtains the source of the connection.
 	 * 
-	 * @param model
-	 *            Model to possibly be the target.
-	 * @return True if may target the model.
+	 * @return Source of the connection.
 	 */
-	public boolean canTarget(Object model) {
-		// Indicate if may target
-		return this.policy.canTarget(model);
-	}
-
-	/**
-	 * Specifies the target for this connection.
-	 * 
-	 * @param model
-	 *            Model to be target of connection.
-	 */
-	public void setTarget(Object model) {
-		this.target = model;
-	}
-
-	/**
-	 * Specifies the {@link CreateConnectionRequest}.
-	 * 
-	 * @param request
-	 *            {@link CreateConnectionRequest}.
-	 */
-	public void setCreateConnectionRequest(CreateConnectionRequest request) {
-		this.createConnectionRequest = request;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#execute()
-	 */
-	public void execute() {
-		// Create the connection
-		this.connection = policy.createConnection(this.source, this.target,
-				this.createConnectionRequest);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#undo()
-	 */
-	public void undo() {
-		// Remove the connection
-		this.connection.remove();
+	public Object getSource() {
+		return this.source;
 	}
 
 }

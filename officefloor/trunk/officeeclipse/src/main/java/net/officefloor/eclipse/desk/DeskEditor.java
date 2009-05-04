@@ -22,6 +22,7 @@ import java.util.Map;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.editpolicies.connection.ConnectionGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
@@ -155,6 +156,35 @@ public class DeskEditor extends
 	}
 
 	@Override
+	protected void populateGraphicalEditPolicy(
+			ConnectionGraphicalNodeEditPolicy policy) {
+		// TODO populate the connection policy for Desk
+	}
+
+	@Override
+	protected void populateOperations(List<Operation> list) {
+
+		// Obtain the desk model and create changes for it
+		DeskModel desk = this.getCastedModel();
+		DeskChanges deskChanges = new DeskChangesImpl(desk);
+
+		// Add model actions
+		list.add(new AddExternalManagedObjectOperation());
+		list.add(new AddWorkOperation(deskChanges));
+		list.add(new AddExternalFlowOperation(deskChanges));
+
+		// Refresh work action
+		list.add(new RefreshWorkOperation());
+
+		// Flow item operations
+		list.add(new CreateFlowItemFromDeskTaskOperation());
+		list.add(new ToggleFlowItemPublicOperation());
+
+		// Toggle as parameter
+		list.add(new ToggleTaskObjectParameterOperation());
+	}
+
+	@Override
 	protected void initialisePaletteRoot() {
 		// Add the link group
 		PaletteGroup linkGroup = new PaletteGroup("Links");
@@ -168,29 +198,6 @@ public class DeskEditor extends
 				"asynchronous", new FlowInstigationTagFactory(
 						DeskChanges.ASYNCHRONOUS_LINK), null, null));
 		this.paletteRoot.add(linkGroup);
-	}
-
-	@Override
-	protected void populateOperations(List<Operation> list) {
-
-		// Obtain the desk model and create changes for it
-		DeskModel desk = this.getCastedModel();
-		DeskChanges deskChanges = new DeskChangesImpl(desk);
-
-		// Add model actions
-		list.add(new AddExternalManagedObjectOperation());
-		list.add(new AddWorkOperation(deskChanges));
-		list.add(new AddExternalFlowOperation());
-
-		// Refresh work action
-		list.add(new RefreshWorkOperation());
-
-		// Flow item operations
-		list.add(new CreateFlowItemFromDeskTaskOperation());
-		list.add(new ToggleFlowItemPublicOperation());
-
-		// Toggle as parameter
-		list.add(new ToggleTaskObjectParameterOperation());
 	}
 
 }

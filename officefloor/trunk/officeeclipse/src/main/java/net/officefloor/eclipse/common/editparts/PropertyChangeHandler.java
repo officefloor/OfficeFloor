@@ -30,7 +30,7 @@ public abstract class PropertyChangeHandler<E extends Enum<E>> implements
 	/**
 	 * List of events to be handled.
 	 */
-	protected final E[] events;
+	private final E[] events;
 
 	/**
 	 * Initiate with the list of events to handle.
@@ -38,15 +38,16 @@ public abstract class PropertyChangeHandler<E extends Enum<E>> implements
 	 * @param events
 	 *            List of events.
 	 */
+	// TODO change to addPropertyChangeHandler method by EditPart
 	public PropertyChangeHandler(E[] events) {
 		this.events = events;
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 * ================ PropertyChangeListener ==========================
 	 */
+
+	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		// Obtain the event name
@@ -76,4 +77,5 @@ public abstract class PropertyChangeHandler<E extends Enum<E>> implements
 	 */
 	protected abstract void handlePropertyChange(E property,
 			PropertyChangeEvent evt);
+
 }

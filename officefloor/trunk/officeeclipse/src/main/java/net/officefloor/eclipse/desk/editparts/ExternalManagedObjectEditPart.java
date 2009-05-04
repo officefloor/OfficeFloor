@@ -30,6 +30,8 @@ import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel.ExternalManagedObjectEvent;
 
+import org.eclipse.gef.EditPart;
+
 /**
  * {@link EditPart} for the {@link ExternalManagedObjectModel}.
  * 

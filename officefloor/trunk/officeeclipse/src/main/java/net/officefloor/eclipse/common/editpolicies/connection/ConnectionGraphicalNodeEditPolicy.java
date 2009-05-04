@@ -16,9 +16,13 @@
  */
 package net.officefloor.eclipse.common.editpolicies.connection;
 
+import java.util.LinkedList;
 import java.util.List;
 
+import net.officefloor.eclipse.common.commands.ChangeCommand;
 import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.Model;
+import net.officefloor.model.change.Change;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
@@ -32,94 +36,100 @@ import org.eclipse.gef.requests.ReconnectRequest;
  * 
  * @author Daniel
  */
+// TODO rename to OfficeFloorGraphicalNodeEditPolicy
 public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 
 	/**
-	 * Creates the connection.
+	 * {@link Link} instances.
 	 */
-	private final ConnectionModelFactory connectionFactory;
+	private List<Link> links = new LinkedList<Link>();
 
 	/**
-	 * List of target types allowable.
-	 */
-	private final List<Class<?>> targetTypes;
-
-	/**
-	 * Indicates details of how the {@link EditPolicy} may participate in
-	 * connections.
+	 * Registers a {@link ConnectionChangeFactory}.
 	 * 
-	 * @param connectionFactory
-	 *            Specific functionality to create a connection the
-	 *            {@link EditPart}. Inputing <code>null</code> indicates the
-	 *            {@link EditPart} can not be a source of a connection.
-	 * @param targetTypes
-	 *            List of types which may be a target of a connection.
+	 * @param sourceType
+	 *            Source {@link Model} type.
+	 * @param targetType
+	 *            Target {@link Model} type.
+	 * @param factory
+	 *            {@link ConnectionChangeFactory}.
 	 */
-	public ConnectionGraphicalNodeEditPolicy(
-			ConnectionModelFactory connectionFactory, List<Class<?>> targetTypes) {
-		this.connectionFactory = connectionFactory;
-		this.targetTypes = targetTypes;
+	public <S, T> void addConnection(Class<S> sourceType, Class<T> targetType,
+			ConnectionChangeFactory<S, T> factory) {
+		this.links.add(new Link(sourceType, targetType, factory));
 	}
+
+	/*
+	 * =============== GraphicalNodeEditPolicy =================================
+	 */
 
 	@Override
 	protected Command getConnectionCreateCommand(CreateConnectionRequest request) {
 
-		// Check if able to source connections
-		if (this.connectionFactory == null) {
-			// Not able to source
-			return null;
-		}
-
 		// Obtain the model
 		Object model = this.getHost().getModel();
 
-		// Create the Connection
-		ConnectionCreateCommand command = new ConnectionCreateCommand(this,
-				model);
+		// Determine if model can be source of connection
+		Class<?> modelType = model.getClass();
+		boolean isSource = false;
+		for (Link link : this.links) {
+			if (link.sourceType.equals(modelType)) {
+				isSource = true;
+				break;
+			}
+		}
+		if (!isSource) {
+			return null; // model can not be source
+		}
 
-		// Specify the create command
+		// Create the command and make available to request
+		ConnectionCreateCommand command = new ConnectionCreateCommand(model);
 		request.setStartCommand(command);
-
-		// Return command
 		return command;
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Command getConnectionCompleteCommand(
 			CreateConnectionRequest request) {
 
-		// Check if appropriate create command
-		if (!(request.getStartCommand() instanceof ConnectionCreateCommand)) {
+		// Obtain create command
+		Command startCommand = request.getStartCommand();
+		if (!(startCommand instanceof ConnectionCreateCommand)) {
 			return null;
 		}
+		ConnectionCreateCommand createCommand = (ConnectionCreateCommand) startCommand;
 
-		// Obtain command
-		ConnectionCreateCommand command = (ConnectionCreateCommand) request
-				.getStartCommand();
+		// Obtain the source type
+		Object source = createCommand.getSource();
+		Class<?> sourceType = source.getClass();
 
-		// Obtain the host's model
-		Object model = this.getHost().getModel();
+		// Obtain the target type
+		Object target = this.getHost().getModel();
+		Class<?> targetType = target.getClass();
 
-		// Check if can target the host
-		if (!command.canTarget(model)) {
-			// Not able to target
-			return null;
+		// Obtain link to connect source to target
+		Link connectLink = null;
+		FOUND: for (Link link : this.links) {
+			if (link.sourceType.equals(sourceType)) {
+				if (link.targetType.equals(targetType)) {
+					connectLink = link;
+					break FOUND;
+				}
+			}
+		}
+		if (connectLink == null) {
+			return null; // no link to connect source to target
 		}
 
-		// Specify host model as target
-		command.setTarget(model);
+		// Create the change to connect source to target
+		Change<?> change = connectLink.factory.createChange(source, target);
+		if (change != null) {
+			return null; // must have change
+		}
 
-		// Specify the create connection request
-		command.setCreateConnectionRequest(request);
-
-		// Return command
-		return command;
-	}
-
-	@Override
-	protected Command getReconnectTargetCommand(ReconnectRequest request) {
-		// TODO Auto-generated method stub
-		return null;
+		// Return command to change
+		return new ChangeCommand(change);
 	}
 
 	@Override
@@ -128,42 +138,49 @@ public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 		return null;
 	}
 
-	/**
-	 * Indicates if the model may be the target of the created connection.
-	 * 
-	 * @param model
-	 *            Model to be target checked if may be target of created
-	 *            connection.
-	 * @return True if model may be target of created connection.
-	 */
-	public boolean canTarget(Object model) {
-
-		// Check if may target
-		for (Class<?> type : this.targetTypes) {
-			if (type.isAssignableFrom(model.getClass())) {
-				// Able to assign thus may target
-				return true;
-			}
-		}
-
-		// May not assign thus may not target
-		return false;
+	@Override
+	protected Command getReconnectTargetCommand(ReconnectRequest request) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
-	 * Creates the connection.
-	 * 
-	 * @param source
-	 *            Source model of connection.
-	 * @param target
-	 *            Target model of connection.
-	 * @param request
-	 *            {@link CreateConnectionRequest}.
-	 * @return Connection.
+	 * Link for {@link ConnectionModel}.
 	 */
-	public ConnectionModel createConnection(Object source, Object target,
-			CreateConnectionRequest request) {
-		return this.connectionFactory.createConnection(source, target, request);
+	private class Link {
+
+		/**
+		 * Source type.
+		 */
+		public final Class<?> sourceType;
+
+		/**
+		 * Target type.
+		 */
+		public final Class<?> targetType;
+
+		/**
+		 * {@link ConnectionChangeFactory}.
+		 */
+		@SuppressWarnings("unchecked")
+		public final ConnectionChangeFactory factory;
+
+		/**
+		 * Initiate.
+		 * 
+		 * @param sourceType
+		 *            Source type.
+		 * @param targetType
+		 *            Target type.
+		 * @param factory
+		 *            {@link ConnectionChangeFactory}.
+		 */
+		public Link(Class<?> sourceType, Class<?> targetType,
+				ConnectionChangeFactory<?, ?> factory) {
+			this.sourceType = sourceType;
+			this.targetType = targetType;
+			this.factory = factory;
+		}
 	}
 
 }
