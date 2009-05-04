@@ -58,6 +58,7 @@ import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
+import net.officefloor.model.impl.desk.DeskChangesImpl;
 import net.officefloor.model.impl.desk.DeskRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
@@ -144,16 +145,21 @@ public class DeskEditor extends
 		linkGroup.add(new ConnectionCreationToolEntry("Parallel", "parallel",
 				new TagFactory(DeskChanges.PARALLEL_LINK), null, null));
 		linkGroup.add(new ConnectionCreationToolEntry("Asynchronous",
-				"asynchronous",
-				new TagFactory(DeskChanges.ASYNCHRONOUS_LINK), null, null));
+				"asynchronous", new TagFactory(DeskChanges.ASYNCHRONOUS_LINK),
+				null, null));
 		this.paletteRoot.add(linkGroup);
 	}
 
 	@Override
 	protected void populateOperations(List<Operation> list) {
+
+		// Obtain the desk model and create changes for it
+		DeskModel desk = this.getCastedModel();
+		DeskChanges deskChanges = new DeskChangesImpl(desk);
+
 		// Add model actions
 		list.add(new AddExternalManagedObjectOperation());
-		list.add(new AddWorkOperation());
+		list.add(new AddWorkOperation(deskChanges));
 		list.add(new AddExternalFlowOperation());
 
 		// Refresh work action

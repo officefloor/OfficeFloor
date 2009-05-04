@@ -2,23 +2,23 @@
 <!-- Schema file written by PDE -->
 <schema targetNamespace="net.officefloor.eclipse" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
-      <appinfo>
-         <meta.schema plugin="net.officefloor.eclipse" id="workloader" name="Work Loader"/>
-      </appinfo>
+      <appInfo>
+         <meta.schema plugin="net.officefloor.eclipse" id="worksource" name="Work Source"/>
+      </appInfo>
       <documentation>
-         Extension to obtain plug-in WorkLoader instances.
+         Extension to obtain plug-in WorkSource instances.
       </documentation>
    </annotation>
 
    <element name="extension">
       <annotation>
-         <appinfo>
+         <appInfo>
             <meta.element />
-         </appinfo>
+         </appInfo>
       </annotation>
       <complexType>
          <sequence>
-            <element ref="workloader"/>
+            <element ref="worksource"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -39,60 +39,60 @@
                <documentation>
                   
                </documentation>
-               <appinfo>
+               <appInfo>
                   <meta.attribute translatable="true"/>
-               </appinfo>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
-   <element name="workloader">
+   <element name="worksource">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
-               <appinfo>
-                  <meta.attribute kind="java" basedOn=":net.officefloor.eclipse.extension.workloader.WorkLoaderExtension"/>
-               </appinfo>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":net.officefloor.eclipse.extension.workloader.WorkSourceExtension"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
    </element>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="since"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          3.4
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="examples"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          [Enter extension point usage example here.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="apiinfo"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          [Enter API information here.]
       </documentation>
    </annotation>
 
    <annotation>
-      <appinfo>
+      <appInfo>
          <meta.section type="implementation"/>
-      </appinfo>
+      </appInfo>
       <documentation>
          [Enter information about supplied implementation of this extension point.]
       </documentation>

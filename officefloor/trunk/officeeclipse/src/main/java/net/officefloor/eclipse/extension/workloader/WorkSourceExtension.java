@@ -16,13 +16,12 @@
  */
 package net.officefloor.eclipse.extension.workloader;
 
-import java.util.List;
-
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.PropertyModel;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -34,14 +33,13 @@ import org.eclipse.swt.widgets.Control;
  * 
  * @see ExtensionClasspathProvider
  */
-// TODO rename this to WorkSourceExtension
-public interface WorkLoaderExtension<W extends Work, S extends WorkSource<W>> {
+public interface WorkSourceExtension<W extends Work, S extends WorkSource<W>> {
 
 	/**
 	 * Extension ID.
 	 */
 	public static final String EXTENSION_ID = ExtensionUtil
-			.getExtensionId("workloader");
+			.getExtensionId("worksource");
 
 	/**
 	 * Obtains the class of the {@link WorkSource} being enriched in its usage.
@@ -51,37 +49,36 @@ public interface WorkLoaderExtension<W extends Work, S extends WorkSource<W>> {
 	Class<S> getWorkSourceClass();
 
 	/**
-	 * Obtains the display name. This is a descriptive name that can be used
-	 * other than the fully qualified name of the {@link WorkSource}.
+	 * <p>
+	 * Obtains the label for the {@link WorkSource}.
+	 * <p>
+	 * This is a descriptive name that can be used other than the fully
+	 * qualified name of the {@link WorkSource}.
 	 * 
-	 * @return Display name.
+	 * @return Label for the {@link WorkSource}.
 	 */
-	String getDisplayName();
+	String getWorkSourceLabel();
 
 	/**
-	 * Populates the input page with the necessary {@link Control} instances to
-	 * obtain the properties. Also allows notifying of changes to properties via
-	 * the {@link WorkLoaderExtensionContext}.
+	 * Loads the input page with the necessary {@link Control} instances to
+	 * populate the {@link PropertyList}. Also allows notifying of changes to
+	 * {@link Property} instances via the {@link WorkSourceExtensionContext}.
 	 * 
 	 * @param page
-	 *            Page to be setup for obtaining the properties.
+	 *            Page to be setup for populating the {@link PropertyList}.
 	 * @param context
-	 *            {@link WorkLoaderExtensionContext} to notify of changes to the
-	 *            properties.
-	 * @return Initial set of properties. Providing <code>null</code> or an
-	 *         empty list will initiate on the {@link PropertyModel} instances
-	 *         obtained from the {@link WorkSpecification}.
+	 *            {@link WorkSourceExtensionContext}.
 	 */
-	List<WorkLoaderProperty> createControl(Composite page,
-			WorkLoaderExtensionContext context);
+	void createControl(Composite page, WorkSourceExtensionContext context);
 
 	/**
 	 * Obtains the suggested name of the {@link Work}.
 	 * 
 	 * @param properties
-	 *            Listing of populated {@link WorkLoaderProperty} instances.
+	 *            {@link PropertyList}.
 	 * @return Suggested {@link Work} name or <code>null</code> if no
 	 *         suggestion.
 	 */
-	String getSuggestedWorkName(List<WorkLoaderProperty> properties);
+	String getSuggestedWorkName(PropertyList properties);
+
 }

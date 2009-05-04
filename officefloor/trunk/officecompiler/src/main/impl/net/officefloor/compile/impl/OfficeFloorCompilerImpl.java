@@ -251,6 +251,11 @@ public class OfficeFloorCompilerImpl extends OfficeFloorCompiler implements
 	}
 
 	@Override
+	public PropertyList createPropertyList() {
+		return new PropertyListImpl();
+	}
+
+	@Override
 	public OfficeFloorLoader getOfficeFloorLoader() {
 		return new OfficeFloorLoaderImpl(this);
 	}

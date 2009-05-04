@@ -16,24 +16,8 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import java.util.List;
-
 import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
-import net.officefloor.eclipse.desk.DeskUtil;
-import net.officefloor.eclipse.desk.WorkLoaderInstance;
-import net.officefloor.eclipse.desk.editparts.DeskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskEditPart;
-import net.officefloor.eclipse.desk.editparts.WorkEditPart;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.desk.WorkModel;
-import net.officefloor.model.desk.WorkTaskModel;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.draw2d.geometry.Point;
 
 /**
  * Creates a {@link FlowItemModel} from a {@link DeskTaskModel}.

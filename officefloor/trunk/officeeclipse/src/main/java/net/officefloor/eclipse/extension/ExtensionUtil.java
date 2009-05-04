@@ -24,7 +24,7 @@ import java.util.Map;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
-import net.officefloor.eclipse.extension.workloader.WorkLoaderExtension;
+import net.officefloor.eclipse.extension.workloader.WorkSourceExtension;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -102,9 +102,9 @@ public class ExtensionUtil {
 		Map<String, ExtensionClasspathProvider> providers = new HashMap<String, ExtensionClasspathProvider>();
 
 		// Obtain the extensions for work loaders
-		List<WorkLoaderExtension> workLoaderExtensions = createExecutableExtensions(
-				WorkLoaderExtension.EXTENSION_ID, WorkLoaderExtension.class);
-		for (WorkLoaderExtension workLoaderExtension : workLoaderExtensions) {
+		List<WorkSourceExtension> workLoaderExtensions = createExecutableExtensions(
+				WorkSourceExtension.EXTENSION_ID, WorkSourceExtension.class);
+		for (WorkSourceExtension workLoaderExtension : workLoaderExtensions) {
 			if (workLoaderExtension instanceof ExtensionClasspathProvider) {
 				ExtensionClasspathProvider provider = (ExtensionClasspathProvider) workLoaderExtension;
 				String extensionClassName = workLoaderExtension

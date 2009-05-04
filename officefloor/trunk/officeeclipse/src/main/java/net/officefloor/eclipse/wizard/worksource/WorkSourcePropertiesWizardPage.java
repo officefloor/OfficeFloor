@@ -16,25 +16,18 @@
  */
 package net.officefloor.eclipse.wizard.worksource;
 
-import java.util.ArrayList;
-import java.util.List;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.work.WorkType;
 
-import net.officefloor.compile.work.WorkLoader;
-import net.officefloor.eclipse.desk.DeskUtil;
-import net.officefloor.eclipse.desk.WorkLoaderInstance;
-import net.officefloor.eclipse.extension.workloader.WorkLoaderExtensionContext;
-import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
-import net.officefloor.model.desk.PropertyModel;
-import net.officefloor.model.desk.WorkModel;
-
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link IWizardPage} providing the properties of the {@link WorkLoader}.
+ * {@link IWizardPage} providing the {@link PropertyList} for the
+ * {@link WorkSource}.
  * 
  * @author Daniel
  */
@@ -43,175 +36,43 @@ public class WorkSourcePropertiesWizardPage extends WizardPage {
 	/**
 	 * {@link WorkSourceWizard}.
 	 */
-	private final WorkSourceWizard workLoaderWizard;
+	private final WorkSourceWizard workSourceWizard;
 
 	/**
-	 * {@link WorkLoaderInstance} instance.
+	 * {@link WorkSourceInstance} instance.
 	 */
-	private final WorkLoaderInstance workLoaderInstance;
-
-	/**
-	 * {@link IProject}.
-	 */
-	private final IProject project;
-
-	/**
-	 * {@link PropertyModel} instances.
-	 */
-	private List<PropertyModel> propertyModels = null;
-
-	/**
-	 * {@link WorkModel}.
-	 */
-	private WorkModel workModel = null;
+	private final WorkSourceInstance workSourceInstance;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param workLoaderWizard
+	 * @param workSourceWizard
 	 *            Owning {@link WorkSourceWizard}.
-	 * @param workLoaderInstance
-	 *            {@link WorkLoaderInstance} instances.
-	 * @param project
-	 *            {@link IProject}.
-	 * @throws Exception
-	 *             If fails to create.
+	 * @param workSourceInstance
+	 *            {@link WorkSourceInstance} instances.
 	 */
-	public WorkSourcePropertiesWizardPage(WorkSourceWizard workLoaderWizard,
-			WorkLoaderInstance workLoaderInstance, IProject project)
-			throws Exception {
-		super("WorkLoader properties");
-		this.workLoaderWizard = workLoaderWizard;
-		this.workLoaderInstance = workLoaderInstance;
-		this.project = project;
+	WorkSourcePropertiesWizardPage(WorkSourceWizard workSourceWizard,
+			WorkSourceInstance workSourceInstance) {
+		super("WorkSource properties");
+		this.workSourceWizard = workSourceWizard;
+		this.workSourceInstance = workSourceInstance;
 
 		// Specify wizard and initially not complete
-		this.setWizard(this.workLoaderWizard);
+		this.setWizard(this.workSourceWizard);
 		this.setPageComplete(false);
 	}
 
 	/**
-	 * Obtains the {@link WorkLoaderInstance}.
-	 * 
-	 * @return {@link WorkLoaderInstance}.
+	 * Loads the {@link WorkType} for the {@link WorkSourceInstance}.
 	 */
-	public WorkLoaderInstance getWorkLoaderInstance() {
-		return this.workLoaderInstance;
-	}
-
-	/**
-	 * Obtains the {@link PropertyModel} instances.
-	 * 
-	 * @return {@link PropertyModel} instances.
-	 */
-	public List<PropertyModel> getPropertyModels() {
-		return this.propertyModels;
-	}
-
-	/**
-	 * Obtains the {@link WorkModel}.
-	 * 
-	 * @return {@link WorkModel}.
-	 */
-	public WorkModel getWorkModel() {
-		return this.workModel;
-	}
-
-	/**
-	 * Obtains the suggested name of the {@link WorkModel}.
-	 * 
-	 * @return Suggested name of the {@link WorkModel}.
-	 */
-	public String getSuggestedWorkName() {
-
-		// Ensure have property models
-		List<PropertyModel> properties = this.getPropertyModels();
-		if (properties == null) {
-			return ""; // no suggestion
-		}
-
-		// Obtain the suggested name
-		String suggestedWorkName = this.workLoaderInstance
-				.getSuggestedWorkName(DeskUtil
-						.translateForExtension(properties));
-
-		// Return the suggested name
-		return (suggestedWorkName == null ? "" : suggestedWorkName);
-	}
-
-	/**
-	 * Handles change to the properties.
-	 * 
-	 * @param propertyModels
-	 *            {@link PropertyModel} instances.
-	 */
-	private void handlePropertiesChanged(List<PropertyModel> propertyModels) {
-
-		// Ensure have the properties
-		if (propertyModels == null) {
-			propertyModels = new ArrayList<PropertyModel>(0);
-		}
-
-		// Clear the work model and error message
-		this.propertyModels = propertyModels;
-		this.workModel = null;
-		this.setErrorMessage(null);
-
-		// Page not complete until able to load work
-		this.setPageComplete(false);
-
-		// Ensure properties populated
-		for (PropertyModel propertyModel : propertyModels) {
-
-			// Ensure have property name
-			String name = propertyModel.getName();
-			if ((name == null) || (name.trim().length() == 0)) {
-				this.setErrorMessage("Name not provided for property");
-				return;
-			}
-
-			// Ensure have property value
-			String value = propertyModel.getValue();
-			if ((value == null) || (value.trim().length() == 0)) {
-				this.setErrorMessage("Value not provided for property '" + name
-						+ "'");
-				return;
-			}
-		}
-
-		try {
-			// Attempt to load the work
-			this.workModel = this.workLoaderInstance
-					.createWorkModel(propertyModels);
-
-			// Determine if work loaded
-			if (this.workModel == null) {
-				// Work model must be created
-				this.setErrorMessage(this.workLoaderInstance.getClassName()
-						+ " failed to provide a " + WorkModel.class.getName());
-				return;
-			}
-
-			// If here successful, may move to next page
-			this.setPageComplete(true);
-
-		} catch (Throwable ex) {
-			// Indicate failure to create the work model
-			String message = ex.getMessage();
-			if ((message == null) || (message.trim().length() == 0)) {
-				message = ex.getClass().getName();
-			}
-			this.setErrorMessage("Failed creating work: " + message);
-		}
+	public void loadWorkType() {
+		this.workSourceInstance.loadWorkType();
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets
-	 * .Composite)
+	 * ===================== IDialogPage ==================================
 	 */
+
 	@Override
 	public void createControl(Composite parent) {
 
@@ -222,38 +83,7 @@ public class WorkSourcePropertiesWizardPage extends WizardPage {
 		Composite page = new Composite(parent, SWT.NONE);
 
 		// Create controls to populate the properties
-		List<PropertyModel> initialProperties = this.workLoaderInstance
-				.createControls(page, new WorkLoaderExtensionContext() {
-
-					@Override
-					public void setTitle(String title) {
-						WorkSourcePropertiesWizardPage.this.setTitle(title);
-					}
-
-					@Override
-					public void notifyPropertiesChanged(
-							List<WorkLoaderProperty> properties) {
-						// Notify of property changes
-						WorkSourcePropertiesWizardPage.this
-								.handlePropertiesChanged(DeskUtil
-										.translateForWorkLoader(properties));
-					}
-
-					@Override
-					public void setErrorMessage(String message) {
-						WorkSourcePropertiesWizardPage.this
-								.setErrorMessage(message);
-					}
-
-					@Override
-					public IProject getProject() {
-						return WorkSourcePropertiesWizardPage.this.project;
-					}
-
-				});
-
-		// Indicate initial state
-		this.handlePropertiesChanged(initialProperties);
+		this.workSourceInstance.createControls(page);
 
 		// Specify control
 		this.setControl(page);
