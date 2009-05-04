@@ -19,7 +19,7 @@ package net.officefloor.eclipse.java;
 import java.util.LinkedList;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
+import net.officefloor.eclipse.repository.project.FileConfigurationItem;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.Flags;

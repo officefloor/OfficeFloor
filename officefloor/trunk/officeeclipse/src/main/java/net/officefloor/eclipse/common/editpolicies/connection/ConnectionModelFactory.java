@@ -14,49 +14,30 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.commands;
+package net.officefloor.eclipse.common.editpolicies.connection;
 
-import org.eclipse.gef.requests.CreationFactory;
+import org.eclipse.gef.requests.CreateConnectionRequest;
+
+import net.officefloor.model.ConnectionModel;
 
 /**
- * Implementation of the {@link org.eclipse.gef.requests.CreationFactory} that
- * returns the tag from the initiation.
+ * Provides the specific functionality to create a connection.
  * 
  * @author Daniel
  */
-public class TagFactory implements CreationFactory {
+public interface ConnectionModelFactory {
 
 	/**
-	 * Tag.
-	 */
-	private final Object tag;
-
-	/**
-	 * Initiate.
+	 * Creates the {@link ConnectionModel}.
 	 * 
-	 * @param tag
-	 *            Tag to be returned from {@link #getNewObject()}.
+	 * @param source
+	 *            Source of connection.
+	 * @param target
+	 *            Target of connection.
+	 * @param request
+	 *            {@link CreateConnectionRequest}.
+	 * @return {@link ConnectionModel}.
 	 */
-	public TagFactory(Object tag) {
-		this.tag = tag;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.requests.CreationFactory#getNewObject()
-	 */
-	public Object getNewObject() {
-		return this.tag;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.requests.CreationFactory#getObjectType()
-	 */
-	public Object getObjectType() {
-		return this.tag.getClass();
-	}
-
+	ConnectionModel createConnection(Object source, Object target,
+			CreateConnectionRequest request);
 }

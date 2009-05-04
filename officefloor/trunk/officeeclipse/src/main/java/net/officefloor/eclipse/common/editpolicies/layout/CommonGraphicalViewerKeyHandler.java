@@ -14,9 +14,9 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common;
+package net.officefloor.eclipse.common.editpolicies.layout;
 
-import net.officefloor.eclipse.common.requests.DeleteRequest;
+import java.util.List;
 
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.GraphicalViewer;
@@ -47,20 +47,22 @@ public class CommonGraphicalViewerKeyHandler extends GraphicalViewerKeyHandler {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.ui.parts.GraphicalViewerKeyHandler#keyPressed(org.eclipse.swt.events.KeyEvent)
+	 * ==================== GraphicalViewerKeyHandler =========================
 	 */
+
+	@Override
 	public boolean keyPressed(KeyEvent event) {
 
 		// Check if event is delete
 		if ((SWT.DEL == event.keyCode) || ('\b' == event.character)) {
-			// Obtain the edit part under focus
-			EditPart focusEditPart = this.getFocusEditPart();
-			if (focusEditPart != null) {
-				// Forward the delete request
+			// Obtain the selected edit parts
+			List<?> selectedEditParts = this.getViewer().getSelectedEditParts();
+			if (selectedEditParts.size() > 0) {
+				// Request deletion of the edit parts
+				EditPart[] editParts = selectedEditParts
+						.toArray(new EditPart[0]);
 				this.getViewer().getContents().performRequest(
-						new DeleteRequest(focusEditPart));
+						new DeleteRequest(editParts));
 			}
 		}
 

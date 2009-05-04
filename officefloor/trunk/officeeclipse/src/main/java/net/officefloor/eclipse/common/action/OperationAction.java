@@ -69,8 +69,7 @@ public class OperationAction extends Action {
 	 *            Location.
 	 */
 	public OperationAction(CommandStack commandStack, Operation operation,
-			EditPart[] selectedEditParts,
-			Point location) {
+			EditPart[] selectedEditParts, Point location) {
 		super(operation.getActionText());
 		this.commandStack = commandStack;
 		this.operation = operation;
@@ -79,10 +78,9 @@ public class OperationAction extends Action {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.action.Action#run()
+	 * ======================== Action ===================================
 	 */
+
 	@Override
 	public void run() {
 
@@ -121,34 +119,19 @@ public class OperationAction extends Action {
 		public final List<OfficeFloorCommand> commands = new LinkedList<OfficeFloorCommand>();
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.eclipse.common.action.OperationContext#getEditParts()
+		 * ===================== OperationContext =======================
 		 */
+		
 		@Override
 		public EditPart[] getEditParts() {
 			return OperationAction.this.selectedEditParts;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.eclipse.common.action.OperationContext#getLocation()
-		 */
 		@Override
 		public Point getLocation() {
 			return OperationAction.this.location;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * net.officefloor.eclipse.common.action.OperationContext#execute(net
-		 * .officefloor.eclipse.common.commands.OfficeFloorCommand)
-		 */
 		@Override
 		public void execute(OfficeFloorCommand command) {
 			this.commands.add(command);

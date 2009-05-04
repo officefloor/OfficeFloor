@@ -27,6 +27,8 @@ import net.officefloor.model.ConnectionModel;
  * 
  * @author Daniel
  */
+// TODO remove to be done by OfficeFloorLayoutEditPolicy.
+@Deprecated
 @SuppressWarnings("unchecked")
 public class RemoveConnectionOperation extends
 		AbstractOperation<OfficeFloorConnectionEditPart> {

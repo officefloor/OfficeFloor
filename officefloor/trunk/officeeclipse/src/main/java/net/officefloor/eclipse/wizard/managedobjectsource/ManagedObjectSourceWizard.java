@@ -19,10 +19,10 @@ package net.officefloor.eclipse.wizard.managedobjectsource;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.officefloor.ManagedObjectSourceInstance;
 import net.officefloor.eclipse.officefloor.OfficeFloorUtil;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
+import net.officefloor.eclipse.repository.project.FileConfigurationItem;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 
 import org.eclipse.core.resources.IProject;

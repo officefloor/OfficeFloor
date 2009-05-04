@@ -14,26 +14,45 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.requests;
+package net.officefloor.eclipse.desk;
 
-import org.eclipse.gef.EditPart;
-import org.eclipse.gef.RequestConstants;
-import org.eclipse.gef.requests.ForwardedRequest;
+import org.eclipse.gef.requests.CreationFactory;
 
 /**
- * Request to delete a model from the office.
+ * Implementation of the {@link CreationFactory} that returns the tag from the
+ * initiation.
  * 
  * @author Daniel
  */
-public class DeleteRequest extends ForwardedRequest {
+public class FlowInstigationTagFactory implements CreationFactory {
 
 	/**
-	 * Deletes the sender of this request.
-	 * 
-	 * @param editPartToDelete
+	 * Tag.
 	 */
-	public DeleteRequest(EditPart editPartToDelete) {
-		super(RequestConstants.REQ_DELETE_DEPENDANT, editPartToDelete);
+	private final Object tag;
+
+	/**
+	 * Initiate.
+	 * 
+	 * @param tag
+	 *            Tag to be returned from {@link #getNewObject()}.
+	 */
+	public FlowInstigationTagFactory(Object tag) {
+		this.tag = tag;
+	}
+
+	/*
+	 * ==================== CreationFactory ===========================
+	 */
+	
+	@Override
+	public Object getNewObject() {
+		return this.tag;
+	}
+
+	@Override
+	public Object getObjectType() {
+		return this.tag.getClass();
 	}
 
 }

@@ -14,27 +14,44 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.editparts;
+package net.officefloor.eclipse.common.commands;
 
-import org.eclipse.gef.EditPart;
-
-import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.model.change.Change;
 
 /**
- * Contract for an {@link org.eclipse.gef.EditPart} to make it possible to
- * delete it and its subsequent contained model.
+ * {@link OfficeFloorCommand} for a {@link Change}.
  * 
  * @author Daniel
  */
-// Using edit policy to delete
-@Deprecated
-public interface RemovableEditPart {
+public class ChangeCommand extends OfficeFloorCommand {
 
 	/**
-	 * Obtains the {@link Operation} to remove the particular {@link EditPart}.
-	 * 
-	 * @return {@link Operation} to remove the particular {@link EditPart}.
+	 * {@link Change}.
 	 */
-	Operation getRemoveOperation();
+	private Change<?> change;
+
+	/**
+	 * Initialise.
+	 * 
+	 * @param change
+	 *            {@link Change}.
+	 */
+	public ChangeCommand(Change<?> change) {
+		this.change = change;
+	}
+
+	/*
+	 * ================== OfficeFloorCommand ===========================
+	 */
+
+	@Override
+	protected void doCommand() {
+		this.change.apply();
+	}
+
+	@Override
+	protected void undoCommand() {
+		this.change.revert();
+	}
 
 }

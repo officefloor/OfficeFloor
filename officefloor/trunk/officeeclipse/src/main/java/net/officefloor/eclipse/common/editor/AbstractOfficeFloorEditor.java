@@ -14,8 +14,9 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common;
+package net.officefloor.eclipse.common.editor;
 
+import java.awt.Dialog;
 import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,17 +24,21 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
+import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.action.OperationAction;
 import net.officefloor.eclipse.common.drag.LocalSelectionTransferDragTargetListener;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
+import net.officefloor.eclipse.common.editpolicies.layout.CommonGraphicalViewerKeyHandler;
+import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
+import net.officefloor.eclipse.repository.project.FileConfigurationItem;
 import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.Model;
 import net.officefloor.model.repository.ConfigurationItem;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.ContextMenuProvider;
 import org.eclipse.gef.DefaultEditDomain;
@@ -45,6 +50,7 @@ import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
 import org.eclipse.gef.commands.CommandStackListener;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
+import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 import org.eclipse.gef.palette.ConnectionCreationToolEntry;
 import org.eclipse.gef.palette.PaletteGroup;
 import org.eclipse.gef.palette.PaletteRoot;
@@ -55,6 +61,8 @@ import org.eclipse.gef.ui.palette.FlyoutPaletteComposite.FlyoutPreferences;
 import org.eclipse.gef.ui.parts.GraphicalEditor;
 import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -68,23 +76,23 @@ import org.eclipse.ui.IEditorPart;
  * 
  * @author Daniel
  */
-public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditPart>
+public abstract class AbstractOfficeFloorEditor<M extends Model, C>
 		extends GraphicalEditorWithFlyoutPalette implements EditPartFactory {
 
 	/**
 	 * Root {@link Model} being edited.
 	 */
-	protected M rootModel;
+	private M rootModel;
 
 	/**
-	 * Root {@link EditPart}.
+	 * Provides change functionality for the {@link Model}.
 	 */
-	protected E rootEditPart;
+	private C modelChanges;
 
 	/**
 	 * Map of {@link Model} type to {@link EditPart} type.
 	 */
-	protected Map<Class<?>, Class<? extends EditPart>> modelTypeToEditPartTypeMap = new HashMap<Class<?>, Class<? extends EditPart>>();
+	private Map<Class<?>, Class<? extends EditPart>> modelTypeToEditPartTypeMap = new HashMap<Class<?>, Class<? extends EditPart>>();
 
 	/**
 	 * Listing of the {@link Operation} instances for the context {@link Menu}.
@@ -154,13 +162,91 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 	}
 
 	/**
-	 * Obtains the root {@link EditPart}.
+	 * Obtains the {@link Model} change functionality.
 	 * 
-	 * @return Root {@link EditPart}.
+	 * @return {@link Model} change functionality.
 	 */
-	public E getRootEditPart() {
-		return this.rootEditPart;
+	public C getModelChanges() {
+		return this.modelChanges;
 	}
+
+	/**
+	 * Displays the {@link Throwable} error details as an error
+	 * {@link MessageDialog}.
+	 * 
+	 * @param error
+	 *            Error.
+	 */
+	public void messageError(Throwable error) {
+		this.messageError(new Status(IStatus.ERROR,
+				OfficeFloorPlugin.PLUGIN_ID, error.getClass().getSimpleName()
+						+ ": " + error.getMessage(), error));
+	}
+
+	/**
+	 * Displays the message as an error {@link MessageDialog}.
+	 * 
+	 * @param message
+	 *            Error message.
+	 */
+	public void messageError(String message) {
+		this.messageError(new Status(IStatus.ERROR,
+				OfficeFloorPlugin.PLUGIN_ID, message));
+	}
+
+	/**
+	 * Displays the message as a warning {@link MessageDialog}.
+	 * 
+	 * @param message
+	 *            Warning message
+	 */
+	public void messageWarning(String message) {
+		this.messageStatus(new Status(IStatus.WARNING,
+				OfficeFloorPlugin.PLUGIN_ID, message), "Warning");
+	}
+
+	/**
+	 * Displays the {@link IStatus} error.
+	 * 
+	 * @param status
+	 *            {@link IStatus} error.
+	 */
+	public void messageError(IStatus status) {
+		this.messageStatus(status, "Error");
+	}
+
+	/**
+	 * Displays a {@link Dialog} for the {@link IStatus}.
+	 * 
+	 * @param status
+	 *            {@link IStatus}.
+	 * @param title
+	 *            Title for {@link Dialog}.
+	 */
+	public void messageStatus(IStatus status, String title) {
+		ErrorDialog.openError(this.getEditorSite().getShell(), title, null,
+				status);
+	}
+
+	/**
+	 * Creates the {@link LayoutEditPolicy} to be installed.
+	 * 
+	 * @return {@link LayoutEditPolicy} to be installed.
+	 */
+	public LayoutEditPolicy createLayoutEditPolicy() {
+		OfficeFloorLayoutEditPolicy policy = new OfficeFloorLayoutEditPolicy();
+		this.populateLayoutEditPolicy(policy);
+		return policy;
+	}
+
+	/**
+	 * Populates the {@link OfficeFloorLayoutEditPolicy}.
+	 * 
+	 * @param policy
+	 *            {@link OfficeFloorLayoutEditPolicy}.
+	 */
+	protected abstract void populateLayoutEditPolicy(
+			OfficeFloorLayoutEditPolicy policy);
 
 	/*
 	 * =================== GraphicalEditor =========================
@@ -325,8 +411,8 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 
 		// Ensure have a model
 		if (model == null) {
-			throw new OfficeFloorPluginFailure(
-					"Must be provided a model to create an EditPart");
+			this.messageError("No model");
+			return null;
 		}
 
 		// Obtain the edit part type for the model
@@ -335,20 +421,13 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 
 		// Ensure have type
 		if (editPartType == null) {
-			throw new OfficeFloorPluginFailure("Unknown model '"
-					+ model.getClass().getName()
-					+ "' to create EditPart for Editor "
-					+ this.getClass().getName());
+			this.messageError("No EditPart for model "
+					+ model.getClass().getSimpleName());
+			return null;
 		}
 
 		// Create the instance of the edit part
 		EditPart editPart = EclipseUtil.createInstance(editPartType);
-
-		// Determine if created the root edit part
-		if (this.getCastedModel().getClass() == model.getClass()) {
-			// Specify the root edit part
-			this.rootEditPart = (E) editPart;
-		}
 
 		// Return the edit part
 		return editPart;
@@ -386,13 +465,25 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 		try {
 			this.setCastedModel(this.retrieveModel(configuration));
 		} catch (Exception ex) {
-			// Propagate failure
-			throw new OfficeFloorPluginFailure(ex);
+			this.messageError(ex);
+			return;
 		}
 
 		// Specify Title of editor
 		this.setPartName(configuration.getFileName());
+
+		// Create the model changes
+		this.modelChanges = this.createModelChanges(this.getCastedModel());
 	}
+
+	/**
+	 * Creates the {@link Model} change functionality.
+	 * 
+	 * @param model
+	 *            Root {@link Model}.
+	 * @return {@link Model} change functionality.
+	 */
+	protected abstract C createModelChanges(M model);
 
 	/**
 	 * Retrieves the Model.
@@ -424,8 +515,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 			this.getCommandStack().markSaveLocation();
 
 		} catch (Exception ex) {
-			// Propagate failure
-			throw new OfficeFloorPluginFailure(ex);
+			this.messageError(ex);
 		}
 	}
 
@@ -566,4 +656,5 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, E extends EditP
 			return editPart;
 		}
 	}
+
 }

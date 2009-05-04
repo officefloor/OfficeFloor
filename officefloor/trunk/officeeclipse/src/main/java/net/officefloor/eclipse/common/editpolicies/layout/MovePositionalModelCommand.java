@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.commands;
+package net.officefloor.eclipse.common.editpolicies.layout;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 
@@ -63,20 +63,16 @@ public class MovePositionalModelCommand extends Command {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#execute()
+	 * ==================== Command ====================================
 	 */
+
+	@Override
 	public void execute() {
 		// Move to new location
 		this.move(this.newLocation);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.commands.Command#undo()
-	 */
+	@Override
 	public void undo() {
 		// Move back to old location
 		this.move(this.oldLocation);

@@ -21,7 +21,7 @@ import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.Input;
 import net.officefloor.eclipse.common.dialog.input.InputContext;
 import net.officefloor.eclipse.common.dialog.input.filter.AlwaysIncludeInputFilter;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
+import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;

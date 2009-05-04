@@ -25,10 +25,10 @@ import java.util.List;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainer;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.VariableClasspathProvision;
+import net.officefloor.eclipse.repository.project.FileConfigurationItem;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;

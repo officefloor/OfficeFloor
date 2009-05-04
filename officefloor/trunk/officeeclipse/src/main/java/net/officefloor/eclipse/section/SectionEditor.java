@@ -19,9 +19,10 @@ package net.officefloor.eclipse.section;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.section.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.section.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.section.editparts.SectionEditPart;
@@ -35,10 +36,12 @@ import net.officefloor.eclipse.section.operations.AddSubSectionOperation;
 import net.officefloor.eclipse.section.operations.RefreshSubSectionOperation;
 import net.officefloor.eclipse.section.operations.ToggleSubSectionInputPublicOperation;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
+import net.officefloor.model.impl.section.SectionChangesImpl;
 import net.officefloor.model.impl.section.SectionRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
@@ -57,12 +60,17 @@ import org.eclipse.ui.IEditorPart;
  * @author Daniel
  */
 public class SectionEditor extends
-		AbstractOfficeFloorEditor<SectionModel, SectionEditPart> {
+		AbstractOfficeFloorEditor<SectionModel, SectionChanges> {
 
 	/**
 	 * ID for this {@link IEditorPart}.
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.section";
+
+	@Override
+	protected SectionChanges createModelChanges(SectionModel model) {
+		return new SectionChangesImpl(model);
+	}
 
 	@Override
 	protected void populateEditPartTypes(
@@ -75,9 +83,7 @@ public class SectionEditor extends
 		map.put(SubSectionModel.class, SubSectionEditPart.class);
 		map.put(SubSectionInputModel.class, SubSectionInputEditPart.class);
 		map.put(SubSectionOutputModel.class, SubSectionOutputEditPart.class);
-		map
-				.put(SubSectionObjectModel.class,
-						SubSectionObjectEditPart.class);
+		map.put(SubSectionObjectModel.class, SubSectionObjectEditPart.class);
 
 		// Connections
 		map.put(SubSectionObjectToExternalManagedObjectModel.class,
@@ -86,6 +92,11 @@ public class SectionEditor extends
 				OfficeFloorConnectionEditPart.class);
 		map.put(SubSectionOutputToSubSectionInputModel.class,
 				OfficeFloorConnectionEditPart.class);
+	}
+
+	@Override
+	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
+		// TODO populate layout edit policy for the Section
 	}
 
 	@Override

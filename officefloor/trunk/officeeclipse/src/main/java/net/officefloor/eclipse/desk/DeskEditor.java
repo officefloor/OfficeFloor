@@ -19,19 +19,20 @@ package net.officefloor.eclipse.desk;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.commands.TagFactory;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
+import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
-import net.officefloor.eclipse.desk.editparts.WorkTaskEditPart;
-import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
-import net.officefloor.eclipse.desk.editparts.WorkEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskEscalationEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskFlowEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkTaskEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
 import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.AddWorkOperation;
@@ -39,8 +40,9 @@ import net.officefloor.eclipse.desk.operations.CreateFlowItemFromDeskTaskOperati
 import net.officefloor.eclipse.desk.operations.RefreshWorkOperation;
 import net.officefloor.eclipse.desk.operations.ToggleFlowItemPublicOperation;
 import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperation;
-import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskEscalationModel;
@@ -74,12 +76,17 @@ import org.eclipse.ui.IEditorPart;
  * @author Daniel
  */
 public class DeskEditor extends
-		AbstractOfficeFloorEditor<DeskModel, DeskEditPart> {
+		AbstractOfficeFloorEditor<DeskModel, DeskChanges> {
 
 	/**
 	 * ID for this {@link IEditorPart}.
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.desk";
+
+	@Override
+	protected DeskChanges createModelChanges(DeskModel model) {
+		return new DeskChangesImpl(model);
+	}
 
 	@Override
 	protected boolean isDragTarget() {
@@ -136,17 +143,30 @@ public class DeskEditor extends
 	}
 
 	@Override
+	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
+
+		// Allow deleting the work
+		policy.addDelete(WorkModel.class, new DeleteChangeFactory<WorkModel>() {
+			@Override
+			public Change<WorkModel> createChange(WorkModel target) {
+				return DeskEditor.this.getModelChanges().removeWork(target);
+			}
+		});
+	}
+
+	@Override
 	protected void initialisePaletteRoot() {
 		// Add the link group
 		PaletteGroup linkGroup = new PaletteGroup("Links");
 		linkGroup.add(new ConnectionCreationToolEntry("Sequential",
-				"sequential", new TagFactory(DeskChanges.SEQUENTIAL_LINK),
-				null, null));
+				"sequential", new FlowInstigationTagFactory(
+						DeskChanges.SEQUENTIAL_LINK), null, null));
 		linkGroup.add(new ConnectionCreationToolEntry("Parallel", "parallel",
-				new TagFactory(DeskChanges.PARALLEL_LINK), null, null));
+				new FlowInstigationTagFactory(DeskChanges.PARALLEL_LINK), null,
+				null));
 		linkGroup.add(new ConnectionCreationToolEntry("Asynchronous",
-				"asynchronous", new TagFactory(DeskChanges.ASYNCHRONOUS_LINK),
-				null, null));
+				"asynchronous", new FlowInstigationTagFactory(
+						DeskChanges.ASYNCHRONOUS_LINK), null, null));
 		this.paletteRoot.add(linkGroup);
 	}
 

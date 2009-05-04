@@ -19,9 +19,10 @@ package net.officefloor.eclipse.office;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalManagedObjectEditPart;
@@ -58,13 +59,21 @@ import org.eclipse.ui.IEditorPart;
  * 
  * @author Daniel
  */
+// TODO provide OfficeChanges
 public class OfficeEditor extends
-		AbstractOfficeFloorEditor<OfficeModel, OfficeEditPart> {
+		AbstractOfficeFloorEditor<OfficeModel, OfficeModel> {
 
 	/**
 	 * ID for this {@link IEditorPart}.
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.office";
+
+	@Override
+	protected OfficeModel createModelChanges(OfficeModel model) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement AbstractOfficeFloorEditor<OfficeModel,OfficeModel,OfficeEditPart>.createModelChanges");
+	}
 
 	@Override
 	protected void populateEditPartTypes(
@@ -91,6 +100,11 @@ public class OfficeEditor extends
 				OfficeFloorConnectionEditPart.class);
 		map.put(OfficeSectionResponsibilityToOfficeTeamModel.class,
 				OfficeFloorConnectionEditPart.class);
+	}
+
+	@Override
+	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
+		// TODO populate layout edit policy for Office
 	}
 
 	@Override
@@ -123,4 +137,5 @@ public class OfficeEditor extends
 		// Refresh model operations
 		list.add(new RefreshOfficeSectionOperation());
 	}
+
 }
