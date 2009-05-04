@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.wizard.workloader;
+package net.officefloor.eclipse.wizard.worksource;
 
 import net.officefloor.compile.work.WorkLoader;
 
@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.List;
  * 
  * @author Daniel
  */
-public class WorkLoaderListingWizardPage extends WizardPage {
+public class WorkSourceListingWizardPage extends WizardPage {
 
 	/**
 	 * Set of {@link WorkLoader} names.
@@ -49,7 +49,7 @@ public class WorkLoaderListingWizardPage extends WizardPage {
 	 * 
 	 * @param pageName
 	 */
-	protected WorkLoaderListingWizardPage(String[] workLoaderNames) {
+	protected WorkSourceListingWizardPage(String[] workLoaderNames) {
 		super("WorkLoader listing");
 		this.workLoaderNames = workLoaderNames;
 
@@ -85,11 +85,11 @@ public class WorkLoaderListingWizardPage extends WizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				// Determine if selected
-				boolean isSelected = (WorkLoaderListingWizardPage.this
+				boolean isSelected = (WorkSourceListingWizardPage.this
 						.getSelectionIndex() >= 0);
 
 				// Page complete when work loader selected
-				WorkLoaderListingWizardPage.this.setPageComplete(isSelected);
+				WorkSourceListingWizardPage.this.setPageComplete(isSelected);
 			}
 		});
 

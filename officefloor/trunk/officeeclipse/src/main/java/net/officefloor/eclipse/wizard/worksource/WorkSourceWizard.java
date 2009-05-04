@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.wizard.workloader;
+package net.officefloor.eclipse.wizard.worksource;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ import org.eclipse.jface.wizard.Wizard;
  * 
  * @author Daniel
  */
-public class WorkLoaderWizard extends Wizard {
+public class WorkSourceWizard extends Wizard {
 
 	/**
 	 * {@link WorkLoaderInstance} instances.
@@ -43,25 +43,25 @@ public class WorkLoaderWizard extends Wizard {
 	private final WorkLoaderInstance[] workLoaders;
 
 	/**
-	 * {@link WorkLoaderListingWizardPage}.
+	 * {@link WorkSourceListingWizardPage}.
 	 */
-	private final WorkLoaderListingWizardPage listingPage;
+	private final WorkSourceListingWizardPage listingPage;
 
 	/**
-	 * {@link WorkLoaderPropertiesWizardPage} pages one each for the
+	 * {@link WorkSourcePropertiesWizardPage} pages one each for the
 	 * {@link WorkLoaderInstance}.
 	 */
-	private final WorkLoaderPropertiesWizardPage[] propertiesPages;
+	private final WorkSourcePropertiesWizardPage[] propertiesPages;
 
 	/**
-	 * {@link WorkLoaderTasksWizardPage}.
+	 * {@link WorkSourceTasksWizardPage}.
 	 */
-	private final WorkLoaderTasksWizardPage tasksPage;
+	private final WorkSourceTasksWizardPage tasksPage;
 
 	/**
-	 * Current {@link WorkLoaderPropertiesWizardPage}.
+	 * Current {@link WorkSourcePropertiesWizardPage}.
 	 */
-	private WorkLoaderPropertiesWizardPage currentPropertiesPage = null;
+	private WorkSourcePropertiesWizardPage currentPropertiesPage = null;
 
 	/**
 	 * {@link WorkModel}.
@@ -76,7 +76,7 @@ public class WorkLoaderWizard extends Wizard {
 	 * @throws Exception
 	 *             If fails to create.
 	 */
-	public WorkLoaderWizard(DeskEditPart deskEditPart) throws Exception {
+	public WorkSourceWizard(DeskEditPart deskEditPart) throws Exception {
 
 		// Obtains the project
 		IProject project = FileConfigurationItem.getProject(deskEditPart);
@@ -91,13 +91,13 @@ public class WorkLoaderWizard extends Wizard {
 		}
 
 		// Create the pages
-		this.listingPage = new WorkLoaderListingWizardPage(workLoaderNames);
-		this.propertiesPages = new WorkLoaderPropertiesWizardPage[this.workLoaders.length];
+		this.listingPage = new WorkSourceListingWizardPage(workLoaderNames);
+		this.propertiesPages = new WorkSourcePropertiesWizardPage[this.workLoaders.length];
 		for (int i = 0; i < this.propertiesPages.length; i++) {
-			this.propertiesPages[i] = new WorkLoaderPropertiesWizardPage(this,
+			this.propertiesPages[i] = new WorkSourcePropertiesWizardPage(this,
 					this.workLoaders[i], project);
 		}
-		this.tasksPage = new WorkLoaderTasksWizardPage();
+		this.tasksPage = new WorkSourceTasksWizardPage();
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class WorkLoaderWizard extends Wizard {
 			this.currentPropertiesPage = this.propertiesPages[selection];
 			return this.currentPropertiesPage;
 
-		} else if (page instanceof WorkLoaderPropertiesWizardPage) {
+		} else if (page instanceof WorkSourcePropertiesWizardPage) {
 			// Properties specified, so now select tasks
 			this.tasksPage.loadWorkModel(this.currentPropertiesPage
 					.getWorkModel(), this.currentPropertiesPage
