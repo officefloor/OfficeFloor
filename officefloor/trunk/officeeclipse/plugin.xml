@@ -95,6 +95,12 @@
       </actionSet>
    </extension>
     <extension
+          point="net.officefloor.eclipse.worksource">
+       <worksource
+             class="net.officefloor.eclipse.extension.worksource.clazz.ClassWorkSourceExtension">
+       </worksource>
+    </extension>
+    <extension
           point="net.officefloor.eclipse.managedobjectsource">
        <managedobjectsource
              class="net.officefloor.eclipse.extension.managedobjectsource.internal.MockManagedObjectSourceExtension">
@@ -106,11 +112,5 @@
              class="net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainerInitialiser"
              id="net.officefloor.eclipse.OFFICE_FLOOR">
        </classpathContainerInitializer>
-    </extension>
-    <extension
-          point="net.officefloor.eclipse.worksource">
-       <worksource
-             class="net.officefloor.eclipse.extension.workloader.clazz.ClassWorkSourceExtension">
-       </worksource>
     </extension>
 </plugin>

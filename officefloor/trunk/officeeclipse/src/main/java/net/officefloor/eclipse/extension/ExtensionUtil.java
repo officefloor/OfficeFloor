@@ -24,7 +24,7 @@ import java.util.Map;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
-import net.officefloor.eclipse.extension.workloader.WorkSourceExtension;
+import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -95,6 +95,7 @@ public class ExtensionUtil {
 	 * @throws Exception
 	 *             If fails to obtain the map.
 	 */
+	@SuppressWarnings("unchecked")
 	public static Map<String, ExtensionClasspathProvider> createClasspathProvidersByExtensionClassNames()
 			throws Exception {
 
