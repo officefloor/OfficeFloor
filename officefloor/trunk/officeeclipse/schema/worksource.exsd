@@ -55,7 +55,7 @@
                   
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn=":net.officefloor.eclipse.extension.workloader.WorkSourceExtension"/>
+                  <meta.attribute kind="java" basedOn=":net.officefloor.eclipse.extension.worksource.WorkSourceExtension"/>
                </appInfo>
             </annotation>
          </attribute>

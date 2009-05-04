@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.extension.workloader.clazz;
+package net.officefloor.eclipse.extension.worksource.clazz;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -27,8 +27,8 @@ import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
-import net.officefloor.eclipse.extension.workloader.WorkSourceExtensionContext;
-import net.officefloor.eclipse.extension.workloader.WorkSourceExtension;
+import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
+import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
 import net.officefloor.plugin.work.clazz.ClassWork;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 

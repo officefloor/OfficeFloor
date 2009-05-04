@@ -30,7 +30,7 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
 import net.officefloor.eclipse.extension.ExtensionUtil;
-import net.officefloor.eclipse.extension.workloader.WorkSourceExtension;
+import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
 import net.officefloor.eclipse.java.JavaUtil;
 import net.officefloor.eclipse.wizard.WizardUtil;
 import net.officefloor.frame.api.execute.Work;
