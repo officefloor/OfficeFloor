@@ -84,36 +84,17 @@ public abstract class AbstractOperation<E extends EditPart> implements
 	 * ======================= Operation ============================
 	 */
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see net.officefloor.eclipse.common.action.CommandFactory#getActionText()
-	 */
 	@Override
 	public String getActionText() {
 		return this.actionText;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.Operation#isApplicable(org.eclipse
-	 * .gef.EditPart[])
-	 */
 	@Override
 	public boolean isApplicable(EditPart[] editParts) {
 		// Is applicable, if assignable to all edit part types
 		return isAssignable(this.editPartType, editParts);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.action.Operation#perform(net.officefloor
-	 * .eclipse.common.action.OperationContext)
-	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public void perform(OperationContext context) {

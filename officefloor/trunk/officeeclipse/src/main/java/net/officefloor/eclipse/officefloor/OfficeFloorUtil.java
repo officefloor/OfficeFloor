@@ -27,11 +27,10 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.managedobjectsource.InitiateProperty;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
-import net.officefloor.eclipse.extension.workloader.WorkLoaderProperty;
 import net.officefloor.eclipse.java.JavaUtil;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.model.officefloor.PropertyModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
+import net.officefloor.model.officefloor.PropertyModel;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jdt.core.IType;

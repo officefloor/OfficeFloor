@@ -16,74 +16,55 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
+import net.officefloor.eclipse.wizard.worksource.WorkInstance;
+import net.officefloor.eclipse.wizard.worksource.WorkSourceWizard;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskModel;
+import net.officefloor.model.desk.WorkModel;
 
 /**
- * Adds a {@link DeskWorkModel} to the {@link DeskModel}.
+ * Adds a {@link WorkModel} to the {@link DeskModel}.
  * 
  * @author Daniel
  */
-public class AddWorkOperation extends AbstractOperation<DeskEditPart> {
+public class AddWorkOperation extends AbstractDeskChangeOperation<DeskEditPart> {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param deskChanges
+	 *            {@link DeskChanges}.
 	 */
-	public AddWorkOperation() {
-		super("Add work", DeskEditPart.class);
+	public AddWorkOperation(DeskChanges deskChanges) {
+		super("Add work", DeskEditPart.class, deskChanges);
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
+	 * ================ AbstractDeskChangeOperation ======================
 	 */
+
 	@Override
-	protected void perform(Context context) {
-//
-//		// Obtain the desk edit part
-//		final DeskEditPart editPart = context.getEditPart();
-//
-//		// Create the work
-//		WorkModel deskWork = null;
-//		try {
-//			WorkLoaderWizard workWizard = new WorkLoaderWizard(editPart);
-//			if (WizardUtil.runWizard(workWizard, editPart)) {
-//				deskWork = workWizard.getDeskWorkModel();
-//			}
-//		} catch (Throwable ex) {
-//			editPart.messageError(ex);
-//			return;
-//		}
-//
-//		// Ensure have the work
-//		if (deskWork == null) {
-//			return;
-//		}
-//
-//		// Set location
-//		context.positionModel(deskWork);
-//
-//		// Update the class path to possibly include the loader
-//		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
-//				deskWork.getLoader());
-//
-//		// Add the work
-//		final WorkModel work = deskWork;
-//		context.execute(new OfficeFloorCommand() {
-//
-//			@Override
-//			protected void doCommand() {
-//				editPart.getCastedModel().addWork(work);
-//			}
-//
-//			@Override
-//			protected void undoCommand() {
-//				editPart.getCastedModel().removeWork(work);
-//			}
-//		});
+	protected Change<?> getChange(DeskChanges changes, Context context) {
+
+		// Obtain the work instance
+		WorkInstance work = WorkSourceWizard.getWorkInstance(context
+				.getEditPart(), null);
+		if (work == null) {
+			return null; // must have work to add
+		}
+
+		// Obtain the add work change
+		Change<WorkModel> change = changes.addWork(work.getWorkName(), work
+				.getWorkSourceClassName(), work.getPropertylist(), work
+				.getWorkType(), work.getTaskTypeNames());
+
+		// Position the work
+		context.positionModel(change.getTarget());
+
+		// Return the change
+		return change;
 	}
 
 }

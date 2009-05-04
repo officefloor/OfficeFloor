@@ -28,6 +28,7 @@ import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.office.OfficeLoader;
 import net.officefloor.compile.officefloor.OfficeFloorLoader;
 import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionLoader;
 import net.officefloor.compile.spi.office.source.OfficeSource;
 import net.officefloor.compile.spi.officefloor.source.OfficeFloorSource;
@@ -152,6 +153,20 @@ public abstract class OfficeFloorCompiler {
 
 		// Return the office floor compiler
 		return compiler;
+	}
+
+	/**
+	 * Convenience method to create a new {@link PropertyList}.
+	 * 
+	 * @return New {@link PropertyList}.
+	 */
+	public static final PropertyList newPropertyList() {
+
+		// Create the office floor compiler
+		OfficeFloorCompiler compiler = newOfficeFloorCompiler();
+
+		// Use the compiler to return a new property list
+		return compiler.createPropertyList();
 	}
 
 	/**
@@ -475,6 +490,13 @@ public abstract class OfficeFloorCompiler {
 	 */
 	public abstract <S extends TeamSource> void addTeamSourceAlias(
 			String alias, Class<S> teamSourceClass);
+
+	/**
+	 * Creates a new empty {@link PropertyList}.
+	 * 
+	 * @return New empty {@link PropertyList}.
+	 */
+	public abstract PropertyList createPropertyList();
 
 	/**
 	 * Obtains the {@link OfficeFloorLoader}.

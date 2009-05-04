@@ -16,18 +16,21 @@
  */
 package net.officefloor.eclipse.extension.workloader;
 
-import java.util.List;
-
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.spi.work.source.WorkSourceSpecification;
+import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
 
 import org.eclipse.core.resources.IProject;
 
 /**
- * Context for the {@link WorkLoaderExtension}.
+ * Context for the {@link WorkSourceExtension}.
  * 
  * @author Daniel
  */
-public interface WorkLoaderExtensionContext {
+public interface WorkSourceExtensionContext {
 
 	/**
 	 * Specifies the title.
@@ -38,12 +41,32 @@ public interface WorkLoaderExtensionContext {
 	void setTitle(String title);
 
 	/**
-	 * Notifies of a change to the properties.
+	 * <p>
+	 * Obtains the {@link PropertyList}. All changes to {@link Property}
+	 * instances for the {@link WorkSource} are to be done on this
+	 * {@link PropertyList}.
+	 * <p>
+	 * The {@link PropertyList} may be in any state:
+	 * <ol>
+	 * <li>no value {@link PropertyList} populated from the
+	 * {@link WorkSourceSpecification} (creating a {@link Work})</li>
+	 * <li>any changed state based on editing of the {@link Work} (editing
+	 * {@link Work})</li>
+	 * </ol>
 	 * 
-	 * @param properties
-	 *            {@link WorkLoaderProperty} instances.
+	 * @return {@link PropertyList}.
 	 */
-	void notifyPropertiesChanged(List<WorkLoaderProperty> properties);
+	PropertyList getPropertyList();
+
+	/**
+	 * <p>
+	 * Notifies of a change to the {@link PropertyList}.
+	 * <p>
+	 * This allows for to report issues in attempting to source the
+	 * {@link WorkType} from the {@link WorkSource} with the
+	 * {@link PropertyList}.
+	 */
+	void notifyPropertiesChanged();
 
 	/**
 	 * Specifies an error message. Calling this after notifying of property

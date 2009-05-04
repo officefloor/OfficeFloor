@@ -14,47 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse;
+package net.officefloor.eclipse.wizard.worksource;
+
+import net.officefloor.compile.work.WorkType;
 
 /**
- * Failure of the {@link net.officefloor.eclipse.OfficeFloorPlugin}.
+ * Context for a {@link WorkSourceInstance}.
  * 
  * @author Daniel
  */
-// TODO do not throw issue. Handle via providing to UI.
-@Deprecated
-public class OfficeFloorPluginFailure extends RuntimeException {
+public interface WorkSourceInstanceContext {
 
 	/**
-	 * Enforce reason.
+	 * Specifies the title.
 	 * 
-	 * @param reason
-	 *            Reason.
+	 * @param title
+	 *            Title.
 	 */
-	public OfficeFloorPluginFailure(String reason) {
-		super(reason);
-	}
+	void setTitle(String title);
 
 	/**
-	 * Enforce reason and allow cause.
+	 * Specifies an error message.
 	 * 
-	 * @param reason
-	 *            Reason.
-	 * @param cause
-	 *            Cause.
+	 * @param message
+	 *            Error message or <code>null</code> to indicate no error.
 	 */
-	public OfficeFloorPluginFailure(String reason, Throwable cause) {
-		super(reason, cause);
-	}
+	void setErrorMessage(String message);
 
 	/**
-	 * Allow cause.
+	 * Flags if {@link WorkType} is loaded.
 	 * 
-	 * @param cause
-	 *            Cause.
+	 * @param isWorkTypeLoade
+	 *            <code>true</code> {@link WorkType} loaded.
 	 */
-	public OfficeFloorPluginFailure(Throwable cause) {
-		super(cause);
-	}
+	void setWorkTypeLoaded(boolean isWorkTypeLoaded);
 
 }

@@ -16,31 +16,127 @@
  */
 package net.officefloor.eclipse.wizard.worksource;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
-import net.officefloor.eclipse.desk.DeskUtil;
-import net.officefloor.eclipse.desk.WorkLoaderInstance;
-import net.officefloor.eclipse.desk.editparts.DeskEditPart;
-import net.officefloor.model.desk.WorkModel;
-import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.work.source.WorkSource;
+import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.work.WorkType;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
+import net.officefloor.eclipse.extension.ExtensionUtil;
+import net.officefloor.eclipse.extension.workloader.WorkSourceExtension;
+import net.officefloor.eclipse.java.JavaUtil;
+import net.officefloor.eclipse.wizard.WizardUtil;
+import net.officefloor.frame.api.execute.Work;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
 /**
- * {@link IWizard} to add and managed {@link WorkModel} instances.
+ * {@link IWizard} to add and manage {@link Work} instances.
  * 
  * @author Daniel
  */
-public class WorkSourceWizard extends Wizard {
+public class WorkSourceWizard extends Wizard implements
+		WorkSourceInstanceContext {
 
 	/**
-	 * {@link WorkLoaderInstance} instances.
+	 * Facade method to obtain the {@link WorkInstance}.
+	 * 
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
+	 *            objects to run the {@link WorkSourceWizard}.
+	 * @param workInstance
+	 *            {@link WorkInstance} to based decisions. <code>null</code> if
+	 *            creating new {@link WorkInstance}.
+	 * @return {@link WorkInstance} or <code>null</code> if cancelled.
 	 */
-	private final WorkLoaderInstance[] workLoaders;
+	public static WorkInstance getWorkInstance(
+			AbstractOfficeFloorEditPart<?, ?> editPart,
+			WorkInstance workInstance) {
+
+		// Obtain the project
+		IProject project = ProjectConfigurationContext.getProject(editPart
+				.getEditor().getEditorInput());
+
+		// Create and run the wizard
+		WorkSourceWizard wizard = new WorkSourceWizard(project);
+		if (WizardUtil.runWizard(wizard, editPart)) {
+			// Successful so return the work instance
+			return wizard.getWorkInstance();
+		} else {
+			// Cancelled so no instance
+			return null;
+		}
+	}
+
+	/**
+	 * Creates the mapping of {@link WorkSource} class name to its
+	 * {@link WorkSourceInstance}.
+	 * 
+	 * @param classLoader
+	 *            {@link ClassLoader}.
+	 * @param project
+	 *            {@link IProject}.
+	 * @param context
+	 *            {@link WorkSourceInstanceContext}.
+	 * @return Mapping of {@link WorkSource} class name to its
+	 *         {@link WorkSourceInstance}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static Map<String, WorkSourceInstance> createWorkSourceInstanceMap(
+			ClassLoader classLoader, IProject project,
+			WorkSourceInstanceContext context) {
+
+		// Obtain the work source instances (by class name to get unique set)
+		Map<String, WorkSourceInstance> workSourceInstances = new HashMap<String, WorkSourceInstance>();
+
+		// Obtain from project class path
+		try {
+			// Obtain the types on the class path
+			IType[] types = JavaUtil.getSubTypes(project, WorkSource.class
+					.getName());
+			for (IType type : types) {
+				String className = type.getFullyQualifiedName();
+				workSourceInstances.put(className, new WorkSourceInstance(
+						className, null, classLoader, project, context));
+			}
+		} catch (JavaModelException ex) {
+			// Do not add the types
+		}
+
+		// Obtain via extension point second to override
+		try {
+			List<WorkSourceExtension> workSourceExtensions = ExtensionUtil
+					.createExecutableExtensions(
+							WorkSourceExtension.EXTENSION_ID,
+							WorkSourceExtension.class);
+			for (WorkSourceExtension workSourceExtension : workSourceExtensions) {
+				Class<?> workSourceClass = workSourceExtension
+						.getWorkSourceClass();
+				String workSourceClassName = workSourceClass.getName();
+				workSourceInstances.put(workSourceClassName,
+						new WorkSourceInstance(workSourceClassName,
+								workSourceExtension, classLoader, project,
+								context));
+			}
+		} catch (Exception ex) {
+			// Do not add the types
+		}
+
+		// Return work source instances by the work source class name
+		return workSourceInstances;
+	}
 
 	/**
 	 * {@link WorkSourceListingWizardPage}.
@@ -48,10 +144,10 @@ public class WorkSourceWizard extends Wizard {
 	private final WorkSourceListingWizardPage listingPage;
 
 	/**
-	 * {@link WorkSourcePropertiesWizardPage} pages one each for the
-	 * {@link WorkLoaderInstance}.
+	 * {@link WorkSourcePropertiesWizardPage} pages by their
+	 * {@link WorkSourceInstance}.
 	 */
-	private final WorkSourcePropertiesWizardPage[] propertiesPages;
+	private final Map<WorkSourceInstance, WorkSourcePropertiesWizardPage> propertiesPages = new HashMap<WorkSourceInstance, WorkSourcePropertiesWizardPage>();
 
 	/**
 	 * {@link WorkSourceTasksWizardPage}.
@@ -59,65 +155,93 @@ public class WorkSourceWizard extends Wizard {
 	private final WorkSourceTasksWizardPage tasksPage;
 
 	/**
+	 * Selected {@link WorkSourceInstance}.
+	 */
+	private WorkSourceInstance selectedWorkSourceInstance = null;
+
+	/**
 	 * Current {@link WorkSourcePropertiesWizardPage}.
 	 */
 	private WorkSourcePropertiesWizardPage currentPropertiesPage = null;
 
 	/**
-	 * {@link WorkModel}.
+	 * {@link WorkInstance}.
 	 */
-	private WorkModel work = null;
+	private WorkInstance workInstance = null;
+
+	/**
+	 * Initiate to create a new {@link WorkInstance}.
+	 * 
+	 * @param project
+	 *            {@link IProject}.
+	 */
+	public WorkSourceWizard(IProject project) {
+		this(project, null);
+	}
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param deskEditPart
-	 *            {@link DeskEditPart}.
-	 * @throws Exception
-	 *             If fails to create.
+	 * @param project
+	 *            {@link IProject}.
+	 * @param workInstance
+	 *            {@link WorkInstance} to be edited, or <code>null</code> to
+	 *            create a new {@link WorkInstance}.
 	 */
-	public WorkSourceWizard(DeskEditPart deskEditPart) throws Exception {
+	public WorkSourceWizard(IProject project, WorkInstance workInstance) {
 
-		// Obtains the project
-		IProject project = FileConfigurationItem.getProject(deskEditPart);
+		// Obtain the class loader for the project
+		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
 
-		// Obtain the work loader instances
-		this.workLoaders = DeskUtil.createWorkLoaderInstances(project);
+		// Obtain the map of work source instances
+		Map<String, WorkSourceInstance> workSourceInstanceMap = createWorkSourceInstanceMap(
+				classLoader, project, this);
 
-		// Obtain the listing of work loader names
-		String[] workLoaderNames = new String[this.workLoaders.length];
-		for (int i = 0; i < workLoaderNames.length; i++) {
-			workLoaderNames[i] = this.workLoaders[i].getDisplayName();
-		}
+		// Obtain the listing of work source instances (in order)
+		WorkSourceInstance[] workSourceInstanceListing = workSourceInstanceMap
+				.values().toArray(new WorkSourceInstance[0]);
+		Arrays.sort(workSourceInstanceListing,
+				new Comparator<WorkSourceInstance>() {
+					@Override
+					public int compare(WorkSourceInstance a,
+							WorkSourceInstance b) {
+						return a.getWorkSourceClassName().compareTo(
+								b.getWorkSourceClassName());
+					}
+				});
 
 		// Create the pages
-		this.listingPage = new WorkSourceListingWizardPage(workLoaderNames);
-		this.propertiesPages = new WorkSourcePropertiesWizardPage[this.workLoaders.length];
-		for (int i = 0; i < this.propertiesPages.length; i++) {
-			this.propertiesPages[i] = new WorkSourcePropertiesWizardPage(this,
-					this.workLoaders[i], project);
+		this.listingPage = new WorkSourceListingWizardPage(
+				workSourceInstanceListing);
+		for (WorkSourceInstance workSourceInstance : workSourceInstanceListing) {
+			this.propertiesPages
+					.put(workSourceInstance,
+							new WorkSourcePropertiesWizardPage(this,
+									workSourceInstance));
 		}
 		this.tasksPage = new WorkSourceTasksWizardPage();
 	}
 
 	/**
-	 * Obtains the {@link WorkModel}.
+	 * Obtains the {@link WorkInstance}.
 	 * 
-	 * @return {@link WorkModel} or <code>null</code> if not created.
+	 * @return {@link WorkInstance}.
 	 */
-	public WorkModel getDeskWorkModel() {
-		return this.work;
+	public WorkInstance getWorkInstance() {
+		return this.workInstance;
 	}
 
 	/*
 	 * ====================== Wizard ==================================
 	 */
-	
+
 	@Override
 	public void addPages() {
 		this.addPage(this.listingPage);
-		if (this.propertiesPages.length > 0) {
-			this.addPage(this.propertiesPages[0]);
+		if (this.propertiesPages.size() > 0) {
+			// Load the first properties page
+			this.addPage(this.propertiesPages.values().toArray(
+					new IWizardPage[0])[0]);
 		}
 		this.addPage(this.tasksPage);
 	}
@@ -127,19 +251,22 @@ public class WorkSourceWizard extends Wizard {
 		// Handle based on current page
 		if (page == this.listingPage) {
 			// Listing page, so obtain properties page based on selection
-			int selection = this.listingPage.getSelectionIndex();
-			this.currentPropertiesPage = this.propertiesPages[selection];
+			this.selectedWorkSourceInstance = this.listingPage
+					.getSelectedWorkSourceInstance();
+			this.currentPropertiesPage = this.propertiesPages
+					.get(this.selectedWorkSourceInstance);
+
+			// Load work type to set state and return as next page
 			return this.currentPropertiesPage;
 
 		} else if (page instanceof WorkSourcePropertiesWizardPage) {
 			// Properties specified, so now select tasks
-			this.tasksPage.loadWorkModel(this.currentPropertiesPage
-					.getWorkModel(), this.currentPropertiesPage
-					.getSuggestedWorkName());
+			this.tasksPage
+					.loadWorkSourceInstance(this.selectedWorkSourceInstance);
 			return this.tasksPage;
 
 		} else {
-			// Tasks being selected, nothing further
+			// Tasks selected, nothing further
 			return null;
 		}
 	}
@@ -169,57 +296,50 @@ public class WorkSourceWizard extends Wizard {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish() {
 
-		// Obtain the work and the loader
-		this.work = this.currentPropertiesPage.getWorkModel();
-		String loader = this.currentPropertiesPage.getWorkLoaderInstance()
-				.getClassName();
+		// Obtain the details of the work instance
+		String workName = this.tasksPage.getWorkName();
+		String workSourceClassName = this.selectedWorkSourceInstance
+				.getWorkSourceClassName();
+		PropertyList propertyList = this.selectedWorkSourceInstance
+				.getPropertyList();
+		WorkType<?> workType = this.selectedWorkSourceInstance.getWorkType();
+		TaskType<?, ?, ?>[] taskTypes = this.tasksPage.getSelectedTaskTypes()
+				.toArray(new TaskType[0]);
 
-		// Obtain the tasks to provide
-		List<WorkTaskModel> selectedTasks = this.tasksPage
-				.getChosenTaskModels();
-
-		// TODO load WorkType and translate into WorkModel
-//		
-//		// Create and load the desk work
-//		WorkModel deskWorkModel = new WorkModel();
-//		WorkToDeskWorkSynchroniser.synchroniseWorkOntoDeskWork(workModel,
-//				deskWorkModel);
-//
-//		// Specify the loader and properties on the work
-//		deskWorkModel.setLoader(loader);
-//		for (PropertyModel property : this.currentPropertiesPage
-//				.getPropertyModels()) {
-//			deskWorkModel.addProperty(property);
-//		}
-//
-//		// Iterate over removing the unselected desk tasks
-//		// TODO: include this as part of synchroniseWorkOntoDeskWork
-//		for (Iterator<DeskTaskModel> iterator = deskWorkModel.getTasks()
-//				.iterator(); iterator.hasNext();) {
-//			DeskTaskModel deskTask = iterator.next();
-//
-//			// Remove if task not contained in selected
-//			if (!selectedTasks.contains(deskTask.getTask())) {
-//				iterator.remove();
-//			}
-//		}
-//
-//		// Specify the name of the work
-//		deskWorkModel.setId(this.tasksPage.getWorkName());
-//
-//		// Specify the desk work
-//		this.deskWork = deskWorkModel;
+		// Specify the work instance
+		this.workInstance = new WorkInstance(workName, workSourceClassName,
+				propertyList, workType, taskTypes);
 
 		// Finished
 		return true;
+	}
+
+	/*
+	 * ================== WorkSourceInstanceContext ==========================
+	 */
+
+	@Override
+	public void setTitle(String title) {
+		if (this.currentPropertiesPage != null) {
+			this.currentPropertiesPage.setTitle(title);
+		}
+	}
+
+	@Override
+	public void setErrorMessage(String message) {
+		if (this.currentPropertiesPage != null) {
+			this.currentPropertiesPage.setErrorMessage(message);
+		}
+	}
+
+	@Override
+	public void setWorkTypeLoaded(boolean isWorkTypeLoaded) {
+		if (this.currentPropertiesPage != null) {
+			this.currentPropertiesPage.setPageComplete(isWorkTypeLoaded);
+		}
 	}
 
 }

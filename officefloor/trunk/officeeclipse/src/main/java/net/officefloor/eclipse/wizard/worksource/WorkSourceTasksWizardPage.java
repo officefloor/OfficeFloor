@@ -22,9 +22,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.model.desk.TaskModel;
-import net.officefloor.model.desk.WorkModel;
-import net.officefloor.model.desk.WorkTaskModel;
+import net.officefloor.compile.work.TaskType;
+import net.officefloor.compile.work.WorkType;
+import net.officefloor.frame.api.execute.Work;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -42,38 +42,38 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 /**
- * {@link IWizardPage} to select the {@link TaskModel} instances of the
- * {@link WorkModel} to include.
+ * {@link IWizardPage} to select the {@link TaskType} instances of the
+ * {@link WorkType} to include.
  * 
  * @author Daniel
  */
 public class WorkSourceTasksWizardPage extends WizardPage {
 
 	/**
-	 * Display to obtain the {@link DeskWorkModel} name.
+	 * Display to obtain the {@link Work} name.
 	 */
 	private Text workName;
 
 	/**
-	 * Display of the tasks.
+	 * Display of the {@link TaskType} instances.
 	 */
 	private Table tasks;
 
 	/**
-	 * Mapping of the {@link TaskModel} by its task name.
+	 * {@link WorkSourceInstance}.
 	 */
-	private Map<String, WorkTaskModel> nameToTaskMap = null;
+	private WorkSourceInstance workSourceInstance;
 
 	/**
-	 * {@link WorkModel}.
+	 * {@link TaskType} instances by their names.
 	 */
-	private WorkModel workModel = null;
+	private Map<String, TaskType<?, ?, ?>> taskTypes = null;
 
 	/**
 	 * Initiate.
 	 */
 	protected WorkSourceTasksWizardPage() {
-		super("WorkLoader tasks");
+		super("WorkSource tasks");
 
 		// Specify page details
 		this.setTitle("Select tasks");
@@ -81,80 +81,84 @@ public class WorkSourceTasksWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Specifies the {@link WorkModel}.
+	 * Specifies the {@link WorkSourceInstance}.
 	 * 
-	 * @param workModel
-	 *            {@link WorkModel}.
-	 * @param suggestedWorkName
-	 *            Suggested work name.
+	 * @param workSourceInstance
+	 *            {@link WorkSourceInstance}.
 	 */
-	public void loadWorkModel(WorkModel workModel, String suggestedWorkName) {
+	public void loadWorkSourceInstance(WorkSourceInstance workSourceInstance) {
 
-		// Do nothing if same work model
-		if (this.workModel == workModel) {
+		// Do nothing if same work source
+		if (this.workSourceInstance == workSourceInstance) {
 			return;
 		}
 
-		// Specify the work model
-		this.workModel = workModel;
-
-		// Specify based on whether have work
-		String[] taskNames;
-		if (this.workModel == null) {
-			// No tasks
-			taskNames = new String[0];
-			this.nameToTaskMap = null;
-
-		} else {
-			// Create the listing of the task names
-			List<WorkTaskModel> tasks = this.workModel.getWorkTasks();
-			taskNames = new String[tasks.size()];
-			this.nameToTaskMap = new HashMap<String, WorkTaskModel>(tasks
-					.size());
-			for (int i = 0; i < taskNames.length; i++) {
-				WorkTaskModel task = tasks.get(i);
-				String taskName = task.getWorkTaskName();
-
-				// Specify task name and register task
-				taskNames[i] = taskName;
-				this.nameToTaskMap.put(taskName, task);
-			}
-		}
-
-		// Load the tasks to choose from (by default all chosen)
-		this.tasks.removeAll();
-		for (String taskName : taskNames) {
-			TableItem item = new TableItem(this.tasks, SWT.LEFT);
-			item.setText(taskName);
-			item.setChecked(true);
-		}
+		// Specify the work source instance and obtain work type (may be null)
+		this.workSourceInstance = workSourceInstance;
+		WorkType<?> workType = (this.workSourceInstance != null ? this.workSourceInstance
+				.getWorkType()
+				: null);
+		String suggestedWorkName = (this.workSourceInstance != null ? this.workSourceInstance
+				.getSuggestedWorkName()
+				: "");
 
 		// Specify the suggested work name
 		this.workName.setText(suggestedWorkName);
+
+		// Create the list of task types
+		String[] taskTypeNames;
+		if (workType == null) {
+			// No work type, no tasks
+			taskTypeNames = new String[0];
+			this.taskTypes = null;
+
+		} else {
+			// Create the listing of the task type names
+			TaskType<?, ?, ?>[] taskTypes = workType.getTaskTypes();
+			taskTypeNames = new String[taskTypes.length];
+			this.taskTypes = new HashMap<String, TaskType<?, ?, ?>>(
+					taskTypes.length);
+			for (int i = 0; i < taskTypeNames.length; i++) {
+				TaskType<?, ?, ?> taskType = taskTypes[i];
+
+				// Specify task type name and register task type
+				String taskTypeName = taskType.getTaskName();
+				taskTypeNames[i] = taskTypeName;
+				this.taskTypes.put(taskTypeName, taskType);
+			}
+		}
+
+		// Load the task types to choose from (by default all chosen)
+		this.tasks.removeAll();
+		for (String taskTypeName : taskTypeNames) {
+			TableItem item = new TableItem(this.tasks, SWT.LEFT);
+			item.setText(taskTypeName);
+			item.setChecked(true);
+		}
 
 		// Initiate state
 		this.handlePageChange();
 	}
 
 	/**
-	 * Obtains the name of the {@link DeskWorkModel}.
+	 * Obtains the name of the {@link Work}.
 	 * 
-	 * @return Name of the {@link DeskWorkModel}.
+	 * @return Name of the {@link Work}.
 	 */
 	public String getWorkName() {
 		return this.workName.getText();
 	}
 
 	/**
-	 * Obtains the selected {@link TaskModel} instances.
+	 * Obtains the selected {@link TaskType} instances.
 	 * 
-	 * @return Selected {@link TaskModel} instances.
+	 * @return Selected {@link TaskType} instances.
 	 */
-	public List<WorkTaskModel> getChosenTaskModels() {
+	public List<TaskType<?, ?, ?>> getSelectedTaskTypes() {
 
-		// Ensure have tasks registered
-		if (this.nameToTaskMap == null) {
-			return new ArrayList<WorkTaskModel>(0);
+		// Ensure have task types registered
+		if (this.taskTypes == null) {
+			return new ArrayList<TaskType<?, ?, ?>>(0);
 		}
 
 		// Obtain the listing of checked rows
@@ -165,31 +169,29 @@ public class WorkSourceTasksWizardPage extends WizardPage {
 			}
 		}
 
-		// Obtain the subsequent tasks
-		List<WorkTaskModel> chosenTasks = new ArrayList<WorkTaskModel>(
+		// Obtain the subsequent task types
+		List<TaskType<?, ?, ?>> chosenTaskTypes = new ArrayList<TaskType<?, ?, ?>>(
 				checkedRows.size());
 		for (TableItem checkedRow : checkedRows) {
 
-			// Obtain the chosen task name
-			String taskName = checkedRow.getText();
+			// Obtain the chosen task type name
+			String taskTypeName = checkedRow.getText();
 
-			// Obtain the selected task
-			WorkTaskModel task = this.nameToTaskMap.get(taskName);
-
-			// Load if have the task
-			if (task != null) {
-				chosenTasks.add(task);
+			// Obtain and add the selected task type
+			TaskType<?, ?, ?> taskType = this.taskTypes.get(taskTypeName);
+			if (taskType != null) {
+				chosenTaskTypes.add(taskType);
 			}
 		}
 
-		// Return the chosen tasks
-		return chosenTasks;
+		// Return the chosen task types
+		return chosenTaskTypes;
 	}
 
 	@Override
 	public void createControl(Composite parent) {
 
-		// Create the page for the work loader
+		// Create the page for the work source
 		Composite page = new Composite(parent, SWT.NONE);
 		page.setLayout(new GridLayout(1, false));
 
@@ -227,8 +229,8 @@ public class WorkSourceTasksWizardPage extends WizardPage {
 			}
 		});
 
-		// Initiate state (currently no work)
-		this.loadWorkModel(null, "");
+		// Initiate state (currently no work source instance)
+		this.loadWorkSourceInstance(null);
 		this.handlePageChange();
 
 		// Specify control
@@ -248,8 +250,8 @@ public class WorkSourceTasksWizardPage extends WizardPage {
 			return;
 		}
 
-		// Ensure that one or more tasks are chosen
-		int selectionCount = this.getChosenTaskModels().size();
+		// Ensure that one or more tasks are selected
+		int selectionCount = this.getSelectedTaskTypes().size();
 		if (selectionCount == 0) {
 			this.setErrorMessage("Must select at least one task");
 			this.setPageComplete(false);

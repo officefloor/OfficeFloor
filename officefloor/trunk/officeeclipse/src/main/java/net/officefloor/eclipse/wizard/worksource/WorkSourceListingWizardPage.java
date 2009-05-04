@@ -16,7 +16,7 @@
  */
 package net.officefloor.eclipse.wizard.worksource;
 
-import net.officefloor.compile.work.WorkLoader;
+import net.officefloor.compile.spi.work.source.WorkSource;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -28,49 +28,70 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.List;
 
 /**
- * {@link IWizardPage} providing the listing of {@link WorkLoader} instances.
+ * {@link IWizardPage} providing the listing of {@link WorkSourceInstance}.
  * 
  * @author Daniel
  */
 public class WorkSourceListingWizardPage extends WizardPage {
 
 	/**
-	 * Set of {@link WorkLoader} names.
+	 * {@link WorkSourceInstance} listing.
 	 */
-	private final String[] workLoaderNames;
+	private final WorkSourceInstance[] workSourceInstances;
 
 	/**
-	 * List containing the {@link WorkLoader} names.
+	 * Listing of {@link WorkSource} labels in order of
+	 * {@link WorkSourceInstance} listing.
+	 */
+	private final String[] workSourceLabels;
+
+	/**
+	 * List containing the {@link WorkSource} labels.
 	 */
 	private List list;
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param pageName
+	 * @param workSourceInstances
+	 *            Listing of {@link WorkSourceInstance}.
 	 */
-	protected WorkSourceListingWizardPage(String[] workLoaderNames) {
-		super("WorkLoader listing");
-		this.workLoaderNames = workLoaderNames;
+	WorkSourceListingWizardPage(WorkSourceInstance[] workSourceInstances) {
+		super("WorkSource listing");
+		this.workSourceInstances = workSourceInstances;
+
+		// Create the listing of labels
+		this.workSourceLabels = new String[this.workSourceInstances.length];
+		for (int i = 0; i < this.workSourceLabels.length; i++) {
+			this.workSourceLabels[i] = this.workSourceInstances[i]
+					.getWorkSourceLabel();
+		}
 
 		// Specify page details
-		this.setTitle("Select a " + WorkLoader.class.getSimpleName());
+		this.setTitle("Select a " + WorkSource.class.getSimpleName());
 	}
 
 	/**
-	 * Obtains the index of the selected {@link WorkLoader} or <code>-1</code>
-	 * if one not selected.
+	 * Obtains the selected {@link WorkSourceInstance}.
 	 * 
-	 * @return Selected {@link WorkLoader} index.
+	 * @return Selected {@link WorkSourceInstance} or <code>null</code> if not
+	 *         selected.
 	 */
-	public int getSelectionIndex() {
-		return this.list.getSelectionIndex();
+	public WorkSourceInstance getSelectedWorkSourceInstance() {
+		int selectedIndex = this.list.getSelectionIndex();
+		if (selectedIndex < 0) {
+			// No selected work source instance
+			return null;
+		} else {
+			// Return the selected work source instance
+			return this.workSourceInstances[selectedIndex];
+		}
 	}
 
 	/*
 	 * ==================== IDialogPage ======================================
 	 */
-	
+
 	@Override
 	public void createControl(Composite parent) {
 
@@ -80,12 +101,12 @@ public class WorkSourceListingWizardPage extends WizardPage {
 
 		// Add listing
 		this.list = new List(page, SWT.SINGLE | SWT.BORDER);
-		this.list.setItems(this.workLoaderNames);
+		this.list.setItems(this.workSourceLabels);
 		this.list.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				// Determine if selected
-				boolean isSelected = (WorkSourceListingWizardPage.this
+				boolean isSelected = (WorkSourceListingWizardPage.this.list
 						.getSelectionIndex() >= 0);
 
 				// Page complete when work loader selected
@@ -97,8 +118,8 @@ public class WorkSourceListingWizardPage extends WizardPage {
 		this.setPageComplete(false);
 
 		// Provide error if no work loaders available
-		if (this.workLoaderNames.length == 0) {
-			this.setErrorMessage("No WorkLoaders available");
+		if (this.workSourceInstances.length == 0) {
+			this.setErrorMessage("No WorkSource classes found");
 		}
 
 		// Specify the control
