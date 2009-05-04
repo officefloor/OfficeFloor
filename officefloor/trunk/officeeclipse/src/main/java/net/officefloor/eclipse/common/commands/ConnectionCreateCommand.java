@@ -63,7 +63,6 @@ public class ConnectionCreateCommand extends Command {
 	 */
 	public ConnectionCreateCommand(ConnectionGraphicalNodeEditPolicy policy,
 			Object source) {
-		// Store state
 		this.policy = policy;
 		this.source = source;
 	}

@@ -23,7 +23,7 @@ import net.officefloor.frame.internal.structure.ManagedObjectScope;
  * 
  * @author Daniel
  */
-public interface OfficeFloorOperations {
+public interface OfficeFloorChanges {
 
 	/**
 	 * Value for {@link ManagedObjectScope#PROCESS} on

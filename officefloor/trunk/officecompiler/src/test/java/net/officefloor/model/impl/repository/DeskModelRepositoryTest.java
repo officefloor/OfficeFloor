@@ -22,7 +22,7 @@ import java.util.List;
 import net.officefloor.frame.test.OfficeFrameTestCase;
 import net.officefloor.model.RemoveConnectionsAction;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskOperations;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
@@ -175,14 +175,14 @@ public class DeskModelRepositoryTest extends OfficeFrameTestCase {
 		// Validate the flow connections
 		TaskFlowModel taskOneFirst = taskOne.getTaskFlows().get(0);
 		assertProperties(new TaskFlowToExternalFlowModel("flow",
-				DeskOperations.SEQUENTIAL_LINK),
+				DeskChanges.SEQUENTIAL_LINK),
 				taskOneFirst.getExternalFlow(), "getExternalFlowName",
 				"getLinkType");
 		assertNull(taskOneFirst.getTask());
 		TaskFlowModel taskOneSecond = taskOne.getTaskFlows().get(1);
 		assertNull(taskOneSecond.getExternalFlow());
 		assertProperties(new TaskFlowToTaskModel("taskTwo",
-				DeskOperations.PARALLEL_LINK), taskOneSecond.getTask(),
+				DeskChanges.PARALLEL_LINK), taskOneSecond.getTask(),
 				"getTaskName", "getLinkType");
 
 		// Validate next flows

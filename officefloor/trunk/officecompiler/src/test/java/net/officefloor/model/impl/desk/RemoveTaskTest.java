@@ -25,7 +25,7 @@ import net.officefloor.model.desk.TaskModel;
  * 
  * @author Daniel
  */
-public class RemoveTaskTest extends AbstractDeskOperationsTestCase {
+public class RemoveTaskTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Initiate to use specific setup {@link DeskModel}.

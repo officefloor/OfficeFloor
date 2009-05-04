@@ -40,7 +40,7 @@ import net.officefloor.eclipse.desk.operations.RefreshWorkOperation;
 import net.officefloor.eclipse.desk.operations.ToggleFlowItemPublicOperation;
 import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperation;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskOperations;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskEscalationModel;
@@ -139,13 +139,13 @@ public class DeskEditor extends
 		// Add the link group
 		PaletteGroup linkGroup = new PaletteGroup("Links");
 		linkGroup.add(new ConnectionCreationToolEntry("Sequential",
-				"sequential", new TagFactory(DeskOperations.SEQUENTIAL_LINK),
+				"sequential", new TagFactory(DeskChanges.SEQUENTIAL_LINK),
 				null, null));
 		linkGroup.add(new ConnectionCreationToolEntry("Parallel", "parallel",
-				new TagFactory(DeskOperations.PARALLEL_LINK), null, null));
+				new TagFactory(DeskChanges.PARALLEL_LINK), null, null));
 		linkGroup.add(new ConnectionCreationToolEntry("Asynchronous",
 				"asynchronous",
-				new TagFactory(DeskOperations.ASYNCHRONOUS_LINK), null, null));
+				new TagFactory(DeskChanges.ASYNCHRONOUS_LINK), null, null));
 		this.paletteRoot.add(linkGroup);
 	}
 

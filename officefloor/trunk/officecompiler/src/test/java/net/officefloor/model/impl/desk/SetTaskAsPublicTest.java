@@ -25,7 +25,7 @@ import net.officefloor.model.desk.TaskModel;
  * 
  * @author Daniel
  */
-public class SetTaskAsPublicTest extends AbstractDeskOperationsTestCase {
+public class SetTaskAsPublicTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Public {@link TaskModel}.

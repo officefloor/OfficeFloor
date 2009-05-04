@@ -27,7 +27,7 @@ import net.officefloor.model.section.ExternalManagedObjectModel;
  * @author Daniel
  */
 public class AddExternalManagedObjectTest extends
-		AbstractSectionOperationsTestCase {
+		AbstractSectionChangesTestCase {
 
 	/**
 	 * Ensures that can add an {@link ExternalManagedObjectModel}.

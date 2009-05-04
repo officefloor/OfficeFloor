@@ -21,13 +21,15 @@ import java.util.List;
 import net.officefloor.eclipse.common.commands.ConnectionCreateCommand;
 import net.officefloor.model.ConnectionModel;
 
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
 import org.eclipse.gef.requests.CreateConnectionRequest;
 import org.eclipse.gef.requests.ReconnectRequest;
 
 /**
- * {@link org.eclipse.gef.EditPolicy} for creating connections.
+ * {@link EditPolicy} for creating connections.
  * 
  * @author Daniel
  */
@@ -36,37 +38,31 @@ public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 	/**
 	 * Creates the connection.
 	 */
-	protected final ConnectionModelFactory connectionFactory;
+	private final ConnectionModelFactory connectionFactory;
 
 	/**
 	 * List of target types allowable.
 	 */
-	protected final List<Class<?>> targetTypes;
+	private final List<Class<?>> targetTypes;
 
 	/**
-	 * Indicates details of how the {@link org.eclipse.gef.EditPolicy} may
-	 * participate in connections.
+	 * Indicates details of how the {@link EditPolicy} may participate in
+	 * connections.
 	 * 
 	 * @param connectionFactory
 	 *            Specific functionality to create a connection the
-	 *            {@link org.eclipse.gef.EditPart}. Inputing <code>null</code>
-	 *            indicates the {@link org.eclipse.gef.EditPart} can not be a
-	 *            source of a connection.
+	 *            {@link EditPart}. Inputing <code>null</code> indicates the
+	 *            {@link EditPart} can not be a source of a connection.
 	 * @param targetTypes
 	 *            List of types which may be a target of a connection.
 	 */
 	public ConnectionGraphicalNodeEditPolicy(
 			ConnectionModelFactory connectionFactory, List<Class<?>> targetTypes) {
-		// Store state
 		this.connectionFactory = connectionFactory;
 		this.targetTypes = targetTypes;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy#getConnectionCreateCommand(org.eclipse.gef.requests.CreateConnectionRequest)
-	 */
+	@Override
 	protected Command getConnectionCreateCommand(CreateConnectionRequest request) {
 
 		// Check if able to source connections
@@ -89,11 +85,7 @@ public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 		return command;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy#getConnectionCompleteCommand(org.eclipse.gef.requests.CreateConnectionRequest)
-	 */
+	@Override
 	protected Command getConnectionCompleteCommand(
 			CreateConnectionRequest request) {
 
@@ -125,21 +117,13 @@ public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 		return command;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy#getReconnectTargetCommand(org.eclipse.gef.requests.ReconnectRequest)
-	 */
+	@Override
 	protected Command getReconnectTargetCommand(ReconnectRequest request) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy#getReconnectSourceCommand(org.eclipse.gef.requests.ReconnectRequest)
-	 */
+	@Override
 	protected Command getReconnectSourceCommand(ReconnectRequest request) {
 		// TODO Auto-generated method stub
 		return null;
@@ -180,7 +164,6 @@ public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 	 */
 	public ConnectionModel createConnection(Object source, Object target,
 			CreateConnectionRequest request) {
-		// Create the connection
 		return this.connectionFactory.createConnection(source, target, request);
 	}
 

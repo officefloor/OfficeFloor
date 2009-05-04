@@ -16,24 +16,24 @@
  */
 package net.officefloor.model.impl.section;
 
-import net.officefloor.model.impl.AbstractOperationsTestCase;
+import net.officefloor.model.impl.AbstractChangesTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 import net.officefloor.model.section.SectionModel;
-import net.officefloor.model.section.SectionOperations;
+import net.officefloor.model.section.SectionChanges;
 
 /**
- * Abstract functionality for testing the {@link SectionOperations}.
+ * Abstract functionality for testing the {@link SectionChanges}.
  * 
  * @author Daniel
  */
-public abstract class AbstractSectionOperationsTestCase extends
-		AbstractOperationsTestCase<SectionModel, SectionOperations> {
+public abstract class AbstractSectionChangesTestCase extends
+		AbstractChangesTestCase<SectionModel, SectionChanges> {
 
 	/**
 	 * Initiate.
 	 */
-	public AbstractSectionOperationsTestCase() {
+	public AbstractSectionChangesTestCase() {
 	}
 
 	/**
@@ -42,7 +42,7 @@ public abstract class AbstractSectionOperationsTestCase extends
 	 * @param isSpecificSetupFilePerTest
 	 *            Flag if specific setup file to be used.
 	 */
-	public AbstractSectionOperationsTestCase(boolean isSpecificSetupFilePerTest) {
+	public AbstractSectionChangesTestCase(boolean isSpecificSetupFilePerTest) {
 		super(isSpecificSetupFilePerTest);
 	}
 
@@ -58,8 +58,8 @@ public abstract class AbstractSectionOperationsTestCase extends
 	}
 
 	@Override
-	protected SectionOperations createModelOperations(SectionModel model) {
-		return new SectionOperationsImpl(model);
+	protected SectionChanges createModelOperations(SectionModel model) {
+		return new SectionChangesImpl(model);
 	}
 
 	@Override

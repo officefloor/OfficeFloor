@@ -24,7 +24,7 @@ import net.officefloor.model.desk.ExternalFlowModel;
  * 
  * @author Daniel
  */
-public class AddExternalFlowTest extends AbstractDeskOperationsTestCase {
+public class AddExternalFlowTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensures that can add an {@link ExternalFlowModel}.

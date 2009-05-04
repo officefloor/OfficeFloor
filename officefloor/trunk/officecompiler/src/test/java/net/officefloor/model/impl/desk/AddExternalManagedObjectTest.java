@@ -25,7 +25,7 @@ import net.officefloor.model.desk.ExternalManagedObjectModel;
  * @author Daniel
  */
 public class AddExternalManagedObjectTest extends
-		AbstractDeskOperationsTestCase {
+		AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensures that can add an {@link ExternalManagedObjectModel}.

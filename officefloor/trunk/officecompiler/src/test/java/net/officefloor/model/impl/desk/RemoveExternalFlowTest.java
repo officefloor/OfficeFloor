@@ -25,7 +25,7 @@ import net.officefloor.model.desk.ExternalFlowModel;
  * 
  * @author Daniel
  */
-public class RemoveExternalFlowTest extends AbstractDeskOperationsTestCase {
+public class RemoveExternalFlowTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Initiate to use specific setup {@link DeskModel}.

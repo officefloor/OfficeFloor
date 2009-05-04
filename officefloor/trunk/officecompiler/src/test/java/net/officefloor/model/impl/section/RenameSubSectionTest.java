@@ -25,7 +25,7 @@ import net.officefloor.model.section.SubSectionModel;
  * 
  * @author Daniel
  */
-public class RenameSubSectionTest extends AbstractSectionOperationsTestCase {
+public class RenameSubSectionTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Ensures handles {@link SubSectionModel} not being in the

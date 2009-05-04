@@ -23,16 +23,16 @@ import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskOperations;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 
 /**
- * Tests the {@link DeskOperations}.
+ * Tests the {@link DeskChanges}.
  * 
  * @author Daniel
  */
-public class AddWorkTest extends AbstractDeskOperationsTestCase {
+public class AddWorkTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Ensure can add {@link WorkModel} that uses indexing.

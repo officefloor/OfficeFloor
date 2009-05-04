@@ -35,7 +35,7 @@ import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskOperations;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.PropertyModel;
@@ -57,11 +57,11 @@ import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.NoChange;
 
 /**
- * {@link DeskOperations} implementation.
+ * {@link DeskChanges} implementation.
  * 
  * @author Daniel
  */
-public class DeskOperationsImpl implements DeskOperations {
+public class DeskChangesImpl implements DeskChanges {
 
 	/**
 	 * <p>
@@ -188,7 +188,7 @@ public class DeskOperationsImpl implements DeskOperations {
 	 * @param desk
 	 *            {@link DeskModel}.
 	 */
-	public DeskOperationsImpl(DeskModel desk) {
+	public DeskChangesImpl(DeskModel desk) {
 		this.desk = desk;
 	}
 
@@ -362,7 +362,7 @@ public class DeskOperationsImpl implements DeskOperations {
 			TaskModel task = conn.getTask();
 
 			// Remove task and store for revert
-			DeskOperationsImpl.this.desk.removeTask(task);
+			DeskChangesImpl.this.desk.removeTask(task);
 			taskList.add(task);
 		}
 	}
@@ -403,26 +403,26 @@ public class DeskOperationsImpl implements DeskOperations {
 			}
 
 			// Create and add the work task model
-			WorkTaskModel workTask = DeskOperationsImpl.this
+			WorkTaskModel workTask = DeskChangesImpl.this
 					.createWorkTaskModel(taskType);
 			work.addWorkTask(workTask);
 		}
 
 		// Ensure work task models in sorted order
-		DeskOperationsImpl.sortWorkTaskModels(work.getWorkTasks());
+		DeskChangesImpl.sortWorkTaskModels(work.getWorkTasks());
 
 		// Return the change to add the work
 		return new AbstractChange<WorkModel>(work, "Add work " + workName) {
 			@Override
 			public void apply() {
 				// Add the work (ensuring in sorted order)
-				DeskOperationsImpl.this.desk.addWork(work);
-				DeskOperationsImpl.this.sortWorkModels();
+				DeskChangesImpl.this.desk.addWork(work);
+				DeskChangesImpl.this.sortWorkModels();
 			}
 
 			@Override
 			public void revert() {
-				DeskOperationsImpl.this.desk.removeWork(work);
+				DeskChangesImpl.this.desk.removeWork(work);
 			}
 		};
 	}
@@ -465,7 +465,7 @@ public class DeskOperationsImpl implements DeskOperations {
 				// Remove connections to work and its tasks
 				List<ConnectionModel> connectionList = new LinkedList<ConnectionModel>();
 				for (WorkTaskModel workTask : workModel.getWorkTasks()) {
-					DeskOperationsImpl.this.removeWorkTaskConnections(workTask,
+					DeskChangesImpl.this.removeWorkTaskConnections(workTask,
 							connectionList);
 				}
 				this.connections = connectionList
@@ -474,25 +474,25 @@ public class DeskOperationsImpl implements DeskOperations {
 				// Remove the associated tasks (storing for revert)
 				List<TaskModel> taskList = new LinkedList<TaskModel>();
 				for (WorkTaskModel workTask : workModel.getWorkTasks()) {
-					DeskOperationsImpl.this.removeWorkTask(workTask, taskList);
+					DeskChangesImpl.this.removeWorkTask(workTask, taskList);
 				}
 				this.tasks = taskList.toArray(new TaskModel[0]);
 
 				// Remove the work
-				DeskOperationsImpl.this.desk.removeWork(workModel);
+				DeskChangesImpl.this.desk.removeWork(workModel);
 			}
 
 			@Override
 			public void revert() {
 				// Add the work (ensuring in sorted order)
-				DeskOperationsImpl.this.desk.addWork(workModel);
-				DeskOperationsImpl.this.sortWorkModels();
+				DeskChangesImpl.this.desk.addWork(workModel);
+				DeskChangesImpl.this.sortWorkModels();
 
 				// Add the tasks (in reverse order, ensuring sorted)
 				for (int i = (this.tasks.length - 1); i >= 0; i--) {
-					DeskOperationsImpl.this.desk.addTask(this.tasks[i]);
+					DeskChangesImpl.this.desk.addTask(this.tasks[i]);
 				}
-				DeskOperationsImpl.this.sortTaskModels();
+				DeskChangesImpl.this.sortTaskModels();
 
 				// Reconnect connections
 				for (ConnectionModel connection : this.connections) {
@@ -530,14 +530,14 @@ public class DeskOperationsImpl implements DeskOperations {
 			public void apply() {
 				// Rename and ensure work in sorted order
 				workModel.setWorkName(newWorkName);
-				DeskOperationsImpl.this.sortWorkModels();
+				DeskChangesImpl.this.sortWorkModels();
 			}
 
 			@Override
 			public void revert() {
 				// Revert to old name, ensuring work sorted
 				workModel.setWorkName(oldWorkName);
-				DeskOperationsImpl.this.sortWorkModels();
+				DeskChangesImpl.this.sortWorkModels();
 			}
 		};
 	}
@@ -566,7 +566,7 @@ public class DeskOperationsImpl implements DeskOperations {
 		}
 
 		// Create the work task model
-		final WorkTaskModel workTask = DeskOperationsImpl.this
+		final WorkTaskModel workTask = DeskChangesImpl.this
 				.createWorkTaskModel(taskType);
 
 		// Return the add work task change
@@ -576,7 +576,7 @@ public class DeskOperationsImpl implements DeskOperations {
 			public void apply() {
 				// Add work task (ensuring work tasks sorted)
 				workModel.addWorkTask(workTask);
-				DeskOperationsImpl.sortWorkTaskModels(workModel.getWorkTasks());
+				DeskChangesImpl.sortWorkTaskModels(workModel.getWorkTasks());
 			}
 
 			@Override
@@ -624,13 +624,13 @@ public class DeskOperationsImpl implements DeskOperations {
 			public void apply() {
 				// Remove the connections
 				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
-				DeskOperationsImpl.this.removeWorkTaskConnections(workTask,
+				DeskChangesImpl.this.removeWorkTaskConnections(workTask,
 						connList);
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
 				// Remove the tasks of the work task
 				List<TaskModel> taskList = new LinkedList<TaskModel>();
-				DeskOperationsImpl.this.removeWorkTask(workTask, taskList);
+				DeskChangesImpl.this.removeWorkTask(workTask, taskList);
 				this.tasks = taskList.toArray(new TaskModel[0]);
 
 				// Remove the work task
@@ -641,13 +641,13 @@ public class DeskOperationsImpl implements DeskOperations {
 			public void revert() {
 				// Add the work task (ensuring sorted)
 				work.addWorkTask(workTask);
-				DeskOperationsImpl.sortWorkTaskModels(work.getWorkTasks());
+				DeskChangesImpl.sortWorkTaskModels(work.getWorkTasks());
 
 				// Add the tasks (in reverse order, ensuring sorted)
 				for (int i = (this.tasks.length - 1); i >= 0; i--) {
-					DeskOperationsImpl.this.desk.addTask(this.tasks[i]);
+					DeskChangesImpl.this.desk.addTask(this.tasks[i]);
 				}
-				DeskOperationsImpl.this.sortTaskModels();
+				DeskChangesImpl.this.sortTaskModels();
 
 				// Reconnect connections
 				for (ConnectionModel connection : this.connections) {
@@ -717,12 +717,12 @@ public class DeskOperationsImpl implements DeskOperations {
 			@Override
 			public void apply() {
 				// Add the task ensuring ordering
-				DeskOperationsImpl.this.desk.addTask(task);
-				DeskOperationsImpl.this.sortTaskModels();
+				DeskChangesImpl.this.desk.addTask(task);
+				DeskChangesImpl.this.sortTaskModels();
 
 				// Connect work task to the task (ensuring ordering)
 				conn.connect();
-				DeskOperationsImpl.sortWorkTaskToTaskConnections(workTask
+				DeskChangesImpl.sortWorkTaskToTaskConnections(workTask
 						.getTasks());
 			}
 
@@ -732,7 +732,7 @@ public class DeskOperationsImpl implements DeskOperations {
 				conn.remove();
 
 				// Remove task (should maintain ordering)
-				DeskOperationsImpl.this.desk.removeTask(task);
+				DeskChangesImpl.this.desk.removeTask(task);
 			}
 		};
 	}
@@ -767,7 +767,7 @@ public class DeskOperationsImpl implements DeskOperations {
 			public void apply() {
 				// Remove connections to the task
 				List<ConnectionModel> connList = new LinkedList<ConnectionModel>();
-				DeskOperationsImpl.this.removeTaskConnections(task, connList);
+				DeskChangesImpl.this.removeTaskConnections(task, connList);
 
 				// Remove connection to work task
 				WorkTaskToTaskModel workTaskConn = task.getWorkTask();
@@ -778,14 +778,14 @@ public class DeskOperationsImpl implements DeskOperations {
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
 				// Remove the task (should maintain order)
-				DeskOperationsImpl.this.desk.removeTask(task);
+				DeskChangesImpl.this.desk.removeTask(task);
 			}
 
 			@Override
 			public void revert() {
 				// Add task back in (ensuring order)
-				DeskOperationsImpl.this.desk.addTask(task);
-				DeskOperationsImpl.this.sortTaskModels();
+				DeskChangesImpl.this.desk.addTask(task);
+				DeskChangesImpl.this.sortTaskModels();
 
 				// Reconnect connections
 				for (ConnectionModel conn : this.connections) {
@@ -793,7 +793,7 @@ public class DeskOperationsImpl implements DeskOperations {
 				}
 
 				// Ensure work task connections sorted by task name
-				DeskOperationsImpl.sortWorkTaskToTaskConnections(task
+				DeskChangesImpl.sortWorkTaskToTaskConnections(task
 						.getWorkTask().getWorkTask().getTasks());
 			}
 		};
@@ -805,7 +805,7 @@ public class DeskOperationsImpl implements DeskOperations {
 
 		// Ensure the task is on the desk
 		boolean isOnDesk = false;
-		for (TaskModel taskModel : DeskOperationsImpl.this.desk.getTasks()) {
+		for (TaskModel taskModel : DeskChangesImpl.this.desk.getTasks()) {
 			if (task == taskModel) {
 				isOnDesk = true; // task on desk
 			}
@@ -827,8 +827,8 @@ public class DeskOperationsImpl implements DeskOperations {
 			public void apply() {
 				// Rename task (ensuring ordering)
 				task.setTaskName(newTaskName);
-				DeskOperationsImpl.this.sortTaskModels();
-				DeskOperationsImpl.sortWorkTaskToTaskConnections(task
+				DeskChangesImpl.this.sortTaskModels();
+				DeskChangesImpl.sortWorkTaskToTaskConnections(task
 						.getWorkTask().getWorkTask().getTasks());
 			}
 
@@ -836,8 +836,8 @@ public class DeskOperationsImpl implements DeskOperations {
 			public void revert() {
 				// Revert to old task name (ensuring ordering)
 				task.setTaskName(oldTaskName);
-				DeskOperationsImpl.this.sortTaskModels();
-				DeskOperationsImpl.sortWorkTaskToTaskConnections(task
+				DeskChangesImpl.this.sortTaskModels();
+				DeskChangesImpl.sortWorkTaskToTaskConnections(task
 						.getWorkTask().getWorkTask().getTasks());
 			}
 		};
@@ -849,7 +849,7 @@ public class DeskOperationsImpl implements DeskOperations {
 
 		// Ensure the task object on the desk
 		boolean isOnDesk = false;
-		for (WorkModel work : DeskOperationsImpl.this.desk.getWorks()) {
+		for (WorkModel work : DeskChangesImpl.this.desk.getWorks()) {
 			for (WorkTaskModel workTask : work.getWorkTasks()) {
 				for (WorkTaskObjectModel taskObjectModel : workTask
 						.getTaskObjects()) {
@@ -924,7 +924,7 @@ public class DeskOperationsImpl implements DeskOperations {
 
 		// Ensure task on desk
 		boolean isOnDesk = false;
-		for (TaskModel taskModel : DeskOperationsImpl.this.desk.getTasks()) {
+		for (TaskModel taskModel : DeskChangesImpl.this.desk.getTasks()) {
 			if (task == taskModel) {
 				isOnDesk = true; // task on desk
 			}
@@ -975,14 +975,14 @@ public class DeskOperationsImpl implements DeskOperations {
 			@Override
 			public void apply() {
 				// Add external flow (ensuring ordering)
-				DeskOperationsImpl.this.desk.addExternalFlow(externalFlow);
-				DeskOperationsImpl.this.sortExternalFlows();
+				DeskChangesImpl.this.desk.addExternalFlow(externalFlow);
+				DeskChangesImpl.this.sortExternalFlows();
 			}
 
 			@Override
 			public void revert() {
 				// Remove external flow (should maintain order)
-				DeskOperationsImpl.this.desk.removeExternalFlow(externalFlow);
+				DeskChangesImpl.this.desk.removeExternalFlow(externalFlow);
 			}
 		};
 	}
@@ -993,7 +993,7 @@ public class DeskOperationsImpl implements DeskOperations {
 
 		// Ensure external flow on desk
 		boolean isOnDesk = false;
-		for (ExternalFlowModel externalFlowModel : DeskOperationsImpl.this.desk
+		for (ExternalFlowModel externalFlowModel : DeskChangesImpl.this.desk
 				.getExternalFlows()) {
 			if (externalFlow == externalFlowModel) {
 				isOnDesk = true; // on the desk
@@ -1039,14 +1039,14 @@ public class DeskOperationsImpl implements DeskOperations {
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
 				// Remove the external flow (should maintain order)
-				DeskOperationsImpl.this.desk.removeExternalFlow(externalFlow);
+				DeskChangesImpl.this.desk.removeExternalFlow(externalFlow);
 			}
 
 			@Override
 			public void revert() {
 				// Add the external flow back (ensure ordering)
-				DeskOperationsImpl.this.desk.addExternalFlow(externalFlow);
-				DeskOperationsImpl.this.sortExternalFlows();
+				DeskChangesImpl.this.desk.addExternalFlow(externalFlow);
+				DeskChangesImpl.this.sortExternalFlows();
 
 				// Reconnect connections
 				for (ConnectionModel conn : this.connections) {
@@ -1070,15 +1070,15 @@ public class DeskOperationsImpl implements DeskOperations {
 			@Override
 			public void apply() {
 				// Add external managed object (ensure ordering)
-				DeskOperationsImpl.this.desk
+				DeskChangesImpl.this.desk
 						.addExternalManagedObject(externalMo);
-				DeskOperationsImpl.this.sortExternalManagedObjects();
+				DeskChangesImpl.this.sortExternalManagedObjects();
 			}
 
 			@Override
 			public void revert() {
 				// Remove external managed object (should maintain order)
-				DeskOperationsImpl.this.desk
+				DeskChangesImpl.this.desk
 						.removeExternalManagedObject(externalMo);
 			}
 		};
@@ -1090,7 +1090,7 @@ public class DeskOperationsImpl implements DeskOperations {
 
 		// Ensure external managed object on desk
 		boolean isOnDesk = false;
-		for (ExternalManagedObjectModel externalManagedObjectModel : DeskOperationsImpl.this.desk
+		for (ExternalManagedObjectModel externalManagedObjectModel : DeskChangesImpl.this.desk
 				.getExternalManagedObjects()) {
 			if (externalManagedObject == externalManagedObjectModel) {
 				isOnDesk = true; // on the desk
@@ -1130,16 +1130,16 @@ public class DeskOperationsImpl implements DeskOperations {
 				this.connections = connList.toArray(new ConnectionModel[0]);
 
 				// Remove the external managed object (should maintain order)
-				DeskOperationsImpl.this.desk
+				DeskChangesImpl.this.desk
 						.removeExternalManagedObject(externalManagedObject);
 			}
 
 			@Override
 			public void revert() {
 				// Add back the external managed object (ensure ordering)
-				DeskOperationsImpl.this.desk
+				DeskChangesImpl.this.desk
 						.addExternalManagedObject(externalManagedObject);
-				DeskOperationsImpl.this.sortExternalManagedObjects();
+				DeskChangesImpl.this.sortExternalManagedObjects();
 
 				// Reconnect connections
 				for (ConnectionModel conn : this.connections) {

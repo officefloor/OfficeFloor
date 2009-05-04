@@ -31,23 +31,23 @@ import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.frame.api.execute.Task;
 import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskOperations;
-import net.officefloor.model.impl.AbstractOperationsTestCase;
+import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.impl.AbstractChangesTestCase;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.repository.ConfigurationItem;
 
 /**
- * Provides abstract functionality for the {@link DeskOperations}.
+ * Provides abstract functionality for the {@link DeskChanges}.
  * 
  * @author Daniel
  */
-public abstract class AbstractDeskOperationsTestCase extends
-		AbstractOperationsTestCase<DeskModel, DeskOperations> {
+public abstract class AbstractDeskChangesTestCase extends
+		AbstractChangesTestCase<DeskModel, DeskChanges> {
 
 	/**
 	 * Initiate.
 	 */
-	public AbstractDeskOperationsTestCase() {
+	public AbstractDeskChangesTestCase() {
 	}
 
 	/**
@@ -56,7 +56,7 @@ public abstract class AbstractDeskOperationsTestCase extends
 	 * @param isSpecificSetupFilePerTest
 	 *            Flags if there is a specific setup file per test.
 	 */
-	public AbstractDeskOperationsTestCase(boolean isSpecificSetupFilePerTest) {
+	public AbstractDeskChangesTestCase(boolean isSpecificSetupFilePerTest) {
 		super(isSpecificSetupFilePerTest);
 	}
 
@@ -72,8 +72,8 @@ public abstract class AbstractDeskOperationsTestCase extends
 	}
 
 	@Override
-	protected DeskOperations createModelOperations(DeskModel model) {
-		return new DeskOperationsImpl(model);
+	protected DeskChanges createModelOperations(DeskModel model) {
+		return new DeskChangesImpl(model);
 	}
 
 	@Override

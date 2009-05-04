@@ -27,7 +27,7 @@ import net.officefloor.model.desk.WorkModel;
  * 
  * @author Daniel
  */
-public class RemoveWorkTest extends AbstractDeskOperationsTestCase {
+public class RemoveWorkTest extends AbstractDeskChangesTestCase {
 
 	/**
 	 * Specific setup file per test.

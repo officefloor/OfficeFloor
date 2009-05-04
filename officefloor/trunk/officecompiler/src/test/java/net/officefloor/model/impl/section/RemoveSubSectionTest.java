@@ -26,7 +26,7 @@ import net.officefloor.model.section.SubSectionModel;
  * 
  * @author Daniel
  */
-public class RemoveSubSectionTest extends AbstractSectionOperationsTestCase {
+public class RemoveSubSectionTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Use specific setup file.

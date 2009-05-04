@@ -32,7 +32,7 @@ import net.officefloor.model.section.SubSectionOutputModel;
  * 
  * @author Daniel
  */
-public class AddSubSectionTest extends AbstractSectionOperationsTestCase {
+public class AddSubSectionTest extends AbstractSectionChangesTestCase {
 
 	/**
 	 * Ensure can add a {@link SubSectionModel} that only has properties.

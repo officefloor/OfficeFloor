@@ -27,13 +27,14 @@ import net.officefloor.model.Model;
 import org.eclipse.draw2d.ChopboxAnchor;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.gef.ConnectionEditPart;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.NodeEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
 
 /**
- * Abstract {@link org.eclipse.gef.EditPart} for a node of the Office.
+ * Abstract {@link EditPart} for a node of the Office.
  * 
  * @author Daniel
  * @see net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart
@@ -42,10 +43,10 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 		extends AbstractOfficeFloorEditPart<M, F> implements NodeEditPart {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#createEditPolicies()
+	 * =================== AbstractEditPart =============================
 	 */
+	
+	@Override
 	protected void createEditPolicies() {
 		super.createEditPolicies();
 
@@ -65,13 +66,7 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 				(List<Class<?>>) Collections.EMPTY_LIST);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.gef.editparts.AbstractGraphicalEditPart#getModelSourceConnections
-	 * ()
-	 */
+	@Override
 	protected List<?> getModelSourceConnections() {
 		// Create list of connections
 		List<Object> connections = new LinkedList<Object>();
@@ -92,13 +87,7 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 	 */
 	protected abstract void populateConnectionSourceModels(List<Object> models);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.gef.editparts.AbstractGraphicalEditPart#getModelTargetConnections
-	 * ()
-	 */
+	@Override
 	protected List<?> getModelTargetConnections() {
 		// Create list of connections
 		List<Object> connections = new LinkedList<Object>();
@@ -119,13 +108,7 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 	 */
 	protected abstract void populateConnectionTargetModels(List<Object> models);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.gef.NodeEditPart#getSourceConnectionAnchor(org.eclipse.gef
-	 * .ConnectionEditPart)
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public ConnectionAnchor getSourceConnectionAnchor(
 			ConnectionEditPart connection) {
@@ -141,13 +124,7 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 		return new ChopboxAnchor(this.getFigure());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.gef.NodeEditPart#getTargetConnectionAnchor(org.eclipse.gef
-	 * .ConnectionEditPart)
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public ConnectionAnchor getTargetConnectionAnchor(
 			ConnectionEditPart connection) {
@@ -163,24 +140,12 @@ public abstract class AbstractOfficeFloorNodeEditPart<M extends Model, F extends
 		return new ChopboxAnchor(this.getFigure());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.gef.NodeEditPart#getSourceConnectionAnchor(org.eclipse.gef
-	 * .Request)
-	 */
+	@Override
 	public ConnectionAnchor getSourceConnectionAnchor(Request request) {
 		return new ChopboxAnchor(this.getFigure());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.gef.NodeEditPart#getTargetConnectionAnchor(org.eclipse.gef
-	 * .Request)
-	 */
+	@Override
 	public ConnectionAnchor getTargetConnectionAnchor(Request request) {
 		return new ChopboxAnchor(this.getFigure());
 	}

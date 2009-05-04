@@ -38,7 +38,7 @@ import net.officefloor.model.desk.WorkTaskObjectModel;
  * 
  * @author Daniel
  */
-public interface DeskOperations {
+public interface DeskChanges {
 
 	/**
 	 * Value for {@link FlowInstigationStrategyEnum#SEQUENTIAL} on the
