@@ -14,27 +14,41 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.editparts;
+package net.officefloor.eclipse.common.editpolicies.layout;
 
 import org.eclipse.gef.EditPart;
-
-import net.officefloor.eclipse.common.action.Operation;
+import org.eclipse.gef.Request;
+import org.eclipse.gef.RequestConstants;
 
 /**
- * Contract for an {@link org.eclipse.gef.EditPart} to make it possible to
- * delete it and its subsequent contained model.
+ * Request to delete a model from the office.
  * 
  * @author Daniel
  */
-// Using edit policy to delete
-@Deprecated
-public interface RemovableEditPart {
+public class DeleteRequest extends Request {
 
 	/**
-	 * Obtains the {@link Operation} to remove the particular {@link EditPart}.
-	 * 
-	 * @return {@link Operation} to remove the particular {@link EditPart}.
+	 * {@link EditPart} instance to delete.
 	 */
-	Operation getRemoveOperation();
+	private final EditPart[] editPartsToDelete;
 
+	/**
+	 * Deletes the sender of this request.
+	 * 
+	 * @param editPartsToDelete
+	 *            {@link EditPart} instance to delete.
+	 */
+	public DeleteRequest(EditPart[] editPartsToDelete) {
+		super(RequestConstants.REQ_DELETE_DEPENDANT);
+		this.editPartsToDelete = editPartsToDelete;
+	}
+
+	/**
+	 * Obtains the {@link EditPart} instances to delete.
+	 * 
+	 * @return {@link EditPart} instances to delete.
+	 */
+	public EditPart[] getEditPartsToDelete() {
+		return this.editPartsToDelete;
+	}
 }

@@ -14,27 +14,25 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.editparts;
+package net.officefloor.eclipse.common.editpolicies.layout;
 
-import org.eclipse.gef.EditPart;
-
-import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.model.Model;
+import net.officefloor.model.change.Change;
 
 /**
- * Contract for an {@link org.eclipse.gef.EditPart} to make it possible to
- * delete it and its subsequent contained model.
+ * Factory to create a {@link Change} to delete a {@link Model}.
  * 
  * @author Daniel
  */
-// Using edit policy to delete
-@Deprecated
-public interface RemovableEditPart {
+public interface DeleteChangeFactory<M> {
 
 	/**
-	 * Obtains the {@link Operation} to remove the particular {@link EditPart}.
+	 * Creates the {@link Change}.
 	 * 
-	 * @return {@link Operation} to remove the particular {@link EditPart}.
+	 * @param target
+	 *            {@link Model} to be deleted.
+	 * @return {@link Change} to delete the {@link Model}.
 	 */
-	Operation getRemoveOperation();
+	Change<M> createChange(M target);
 
 }

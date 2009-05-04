@@ -16,15 +16,15 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import org.eclipse.gef.EditPart;
-import org.eclipse.jface.action.Action;
-
 import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
+import net.officefloor.eclipse.common.commands.ChangeCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
+
+import org.eclipse.gef.EditPart;
+import org.eclipse.jface.action.Action;
 
 /**
  * Abstract {@link DeskChanges} {@link Operation}.
@@ -70,18 +70,7 @@ public abstract class AbstractDeskChangeOperation<E extends EditPart> extends
 		}
 
 		// Execute the change
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				change.apply();
-			}
-
-			@Override
-			protected void undoCommand() {
-				change.revert();
-			}
-		});
+		context.execute(new ChangeCommand(change));
 	}
 
 	/**

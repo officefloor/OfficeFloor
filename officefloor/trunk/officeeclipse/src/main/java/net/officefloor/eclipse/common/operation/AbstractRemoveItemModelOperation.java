@@ -32,6 +32,8 @@ import org.eclipse.jface.action.IAction;
  * 
  * @author Daniel
  */
+// Removing is to be done by OfficeFloorLayoutEditPolicy via ModelChanges.
+@Deprecated
 public abstract class AbstractRemoveItemModelOperation<E extends AbstractOfficeFloorEditPart<R, ?>, R extends ItemModel<R>, P extends Model>
 		extends AbstractOperation<E> {
 

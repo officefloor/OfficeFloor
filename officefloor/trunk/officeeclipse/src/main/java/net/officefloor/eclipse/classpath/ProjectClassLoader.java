@@ -25,7 +25,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
+import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.model.repository.ConfigurationContext;
 import net.officefloor.model.repository.ConfigurationItem;
 

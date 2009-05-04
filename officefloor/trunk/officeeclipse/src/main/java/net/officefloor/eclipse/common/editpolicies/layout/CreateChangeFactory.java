@@ -14,30 +14,31 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common.editpolicies;
+package net.officefloor.eclipse.common.editpolicies.layout;
 
-import org.eclipse.gef.requests.CreateConnectionRequest;
+import org.eclipse.draw2d.geometry.Point;
 
-import net.officefloor.model.ConnectionModel;
+import net.officefloor.model.change.Change;
 
 /**
- * Provides the specific functionality to create a connection.
+ * <p>
+ * Factory to create a {@link Change} to add a new {@link Object}.
+ * <p>
+ * Typically this will be from dragging an {@link Object} into the diagram.
  * 
  * @author Daniel
  */
-public interface ConnectionModelFactory {
+public interface CreateChangeFactory<O> {
 
 	/**
-	 * Creates the {@link ConnectionModel}.
+	 * Creates a {@link Change} to add a new {@link Object}.
 	 * 
-	 * @param source
-	 *            Source of connection.
-	 * @param target
-	 *            Target of connection.
-	 * @param request
-	 *            {@link CreateConnectionRequest}.
-	 * @return {@link ConnectionModel}.
+	 * @param newObject
+	 *            New {@link Object} to add.
+	 * @param location
+	 *            Location to add the {@link Object}.
+	 * @return {@link Change} to add the new {@link Object}.
 	 */
-	ConnectionModel createConnection(Object source, Object target,
-			CreateConnectionRequest request);
+	Change<?> createChange(Object newObject, Point location);
+
 }

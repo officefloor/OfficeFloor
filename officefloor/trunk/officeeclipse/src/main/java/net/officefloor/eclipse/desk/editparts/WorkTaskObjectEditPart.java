@@ -23,7 +23,7 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
 import net.officefloor.model.ConnectionModel;

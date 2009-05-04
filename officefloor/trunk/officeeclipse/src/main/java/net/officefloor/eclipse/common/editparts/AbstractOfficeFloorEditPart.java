@@ -16,20 +16,18 @@
  */
 package net.officefloor.eclipse.common.editparts;
 
-import java.awt.Dialog;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
-import net.officefloor.eclipse.common.persistence.FileConfigurationItem;
+import net.officefloor.eclipse.repository.project.FileConfigurationItem;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 import net.officefloor.model.repository.ConfigurationContext;
@@ -40,7 +38,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -48,13 +45,12 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.NodeEditPart;
 import org.eclipse.gef.Request;
-import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.editpolicies.AbstractEditPolicy;
 import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
@@ -120,21 +116,6 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	/*
 	 * ================== AbstractGraphicalEditPart ========================
 	 */
-
-	@Override
-	public RootEditPart getRoot() {
-		// Sometimes parent may not be set
-		if (this.getParent() != null) {
-			// Parent available, so follow to get root
-			return super.getRoot();
-		} else if (this.editor != null) {
-			// Return from editor
-			return ((EditPart) this.editor.getRootEditPart()).getRoot();
-		} else {
-			// Can not obtain root
-			return null;
-		}
-	}
 
 	@Override
 	protected void createEditPolicies() {
@@ -385,6 +366,8 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 * @param request
 	 *            Request.
 	 */
+	// TODO use EditPolicy
+	@Deprecated
 	protected Command handleDoubleClick(Request request) {
 		// By default not handled
 		return null;
@@ -472,8 +455,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            Error message.
 	 */
 	public void messageError(String message) {
-		this.messageError(new Status(IStatus.ERROR,
-				OfficeFloorPlugin.PLUGIN_ID, message));
+		this.getEditor().messageError(message);
 	}
 
 	/**
@@ -484,8 +466,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            Error.
 	 */
 	public void messageError(Throwable error) {
-		this.messageError(new Status(IStatus.ERROR,
-				OfficeFloorPlugin.PLUGIN_ID, error.getMessage(), error));
+		this.getEditor().messageError(error);
 	}
 
 	/**
@@ -495,7 +476,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            {@link IStatus} error.
 	 */
 	public void messageError(IStatus status) {
-		this.messageStatus(status, "Error");
+		this.getEditor().messageError(status);
 	}
 
 	/**
@@ -505,22 +486,7 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 *            Warning message
 	 */
 	public void messageWarning(String message) {
-		this.messageStatus(new Status(IStatus.WARNING,
-				OfficeFloorPlugin.PLUGIN_ID, message), "Warning");
-	}
-
-	/**
-	 * Displays a {@link Dialog} for the {@link IStatus}.
-	 * 
-	 * @param status
-	 *            {@link IStatus}.
-	 * @param title
-	 *            Title for {@link Dialog}.
-	 */
-	private void messageStatus(IStatus status, String title) {
-		// Display the error
-		ErrorDialog.openError(this.getEditor().getEditorSite().getShell(),
-				title, null, status);
+		this.getEditor().messageWarning(message);
 	}
 
 }

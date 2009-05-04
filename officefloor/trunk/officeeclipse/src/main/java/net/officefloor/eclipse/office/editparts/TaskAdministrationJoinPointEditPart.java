@@ -22,7 +22,7 @@ import java.util.List;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
 import net.officefloor.eclipse.office.models.AbstractTaskAdministrationJoinPointModel;
 import net.officefloor.eclipse.office.models.TaskAdministrationJoinPointEvent;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;

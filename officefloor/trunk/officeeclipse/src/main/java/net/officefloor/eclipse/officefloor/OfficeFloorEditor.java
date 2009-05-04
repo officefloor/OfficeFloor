@@ -19,9 +19,10 @@ package net.officefloor.eclipse.officefloor;
 import java.util.List;
 import java.util.Map;
 
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectDependencyEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceEditPart;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorManagedObjectSourceFlowEditPart;
@@ -41,6 +42,7 @@ import net.officefloor.model.officefloor.DeployedOfficeInputModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceFlowToDeployedOfficeInputModel;
@@ -61,12 +63,19 @@ import org.eclipse.ui.IEditorPart;
  * @author Daniel
  */
 public class OfficeFloorEditor extends
-		AbstractOfficeFloorEditor<OfficeFloorModel, OfficeFloorEditPart> {
+		AbstractOfficeFloorEditor<OfficeFloorModel, OfficeFloorChanges> {
 
 	/**
 	 * ID for this {@link IEditorPart}.
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.officefloor";
+
+	@Override
+	protected OfficeFloorChanges createModelChanges(OfficeFloorModel model) {
+		// TODO Implement
+		throw new UnsupportedOperationException(
+				"TODO implement AbstractOfficeFloorEditor<OfficeFloorModel,OfficeFloorChanges,OfficeFloorEditPart>.createModelChanges");
+	}
 
 	@Override
 	protected void populateEditPartTypes(
@@ -78,8 +87,11 @@ public class OfficeFloorEditor extends
 				OfficeFloorManagedObjectSourceEditPart.class);
 		map.put(OfficeFloorTeamModel.class, OfficeFloorTeamEditPart.class);
 		map.put(DeployedOfficeModel.class, DeployedOfficeEditPart.class);
-		map.put(DeployedOfficeTeamModel.class, DeployedOfficeTeamEditPart.class);
-		map.put(DeployedOfficeInputModel.class, DeployedOfficeInputEditPart.class);
+		map
+				.put(DeployedOfficeTeamModel.class,
+						DeployedOfficeTeamEditPart.class);
+		map.put(DeployedOfficeInputModel.class,
+				DeployedOfficeInputEditPart.class);
 		map.put(DeployedOfficeObjectModel.class,
 				DeployedOfficeObjectEditPart.class);
 		map.put(OfficeFloorManagedObjectDependencyModel.class,
@@ -98,6 +110,11 @@ public class OfficeFloorEditor extends
 						OfficeFloorConnectionEditPart.class);
 		map.put(OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
 				OfficeFloorConnectionEditPart.class);
+	}
+
+	@Override
+	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
+		// TODO populate layout edit policty for the OfficeFloor
 	}
 
 	@Override

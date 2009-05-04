@@ -19,7 +19,6 @@ package net.officefloor.eclipse.common.editparts;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
@@ -28,12 +27,13 @@ import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.FreeformLayer;
 import org.eclipse.draw2d.FreeformLayout;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 import org.eclipse.gef.editpolicies.RootComponentEditPolicy;
 
 /**
- * Abstract {@link org.eclipse.gef.EditPart} for a diagram of the Office.
+ * Abstract {@link EditPart} for a diagram.
  * 
  * @author Daniel
  */
@@ -41,12 +41,9 @@ public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
 		extends AbstractOfficeFloorEditPart<M, OfficeFloorFigure> {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart#
-	 * createOfficeFloorFigure()
+	 * ================= AbstractOfficeFloorEditPart ========================
 	 */
+
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		// Create the figure
@@ -80,35 +77,23 @@ public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
 		};
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#createEditPolicies()
-	 */
+	@Override
 	protected void createEditPolicies() {
 		// Install policies
 		this.installEditPolicy(EditPolicy.COMPONENT_ROLE,
 				new RootComponentEditPolicy());
 		this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE, null);
-		this.installEditPolicy(EditPolicy.LAYOUT_ROLE, this
-				.createLayoutEditPolicy());
+
+		// Install the layout edit policy
+		LayoutEditPolicy layoutEditPolicy = this.getEditor()
+				.createLayoutEditPolicy();
+		this.installEditPolicy(EditPolicy.LAYOUT_ROLE, layoutEditPolicy);
 
 		// Initialise
 		this.init();
 	}
 
-	/**
-	 * Obtains the {@link LayoutEditPolicy} to be installed.
-	 * 
-	 * @return {@link LayoutEditPolicy} to be installed.
-	 */
-	protected abstract OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy();
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.gef.editparts.AbstractEditPart#getModelChildren()
-	 */
+	@Override
 	protected List<?> getModelChildren() {
 		// Create the list of model children
 		List<Object> models = new LinkedList<Object>();

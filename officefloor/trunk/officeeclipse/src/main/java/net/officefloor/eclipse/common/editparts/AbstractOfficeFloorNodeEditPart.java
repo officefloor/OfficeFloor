@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.eclipse.common.editpolicies.ConnectionGraphicalNodeEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.connection.ConnectionGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.Model;
 

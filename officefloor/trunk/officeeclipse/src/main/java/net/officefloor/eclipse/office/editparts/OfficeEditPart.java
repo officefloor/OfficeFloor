@@ -19,16 +19,12 @@ package net.officefloor.eclipse.office.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeModel.OfficeEvent;
 
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 
 /**
  * {@link EditPart} for the {@link OfficeModel}.
@@ -37,11 +33,6 @@ import org.eclipse.gef.editpolicies.LayoutEditPolicy;
  */
 public class OfficeEditPart extends
 		AbstractOfficeFloorDiagramEditPart<OfficeModel> {
-
-	@Override
-	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
-		return new OfficeLayoutEditPolicy();
-	}
 
 	@Override
 	protected void populateChildren(List<Object> childModels) {
@@ -61,36 +52,9 @@ public class OfficeEditPart extends
 			@Override
 			protected void handlePropertyChange(OfficeEvent property,
 					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_OFFICE_SECTION:
-				case REMOVE_OFFICE_SECTION:
-				case ADD_OFFICE_TEAM:
-				case REMOVE_OFFICE_TEAM:
-				case ADD_OFFICE_ADMINISTRATOR:
-				case REMOVE_OFFICE_ADMINISTRATOR:
-				case ADD_EXTERNAL_MANAGED_OBJECT:
-				case REMOVE_EXTERNAL_MANAGED_OBJECT:
-				case ADD_OFFICE_ESCALATION:
-				case REMOVE_OFFICE_ESCALATION:
-					OfficeEditPart.this.refreshChildren();
-					break;
-				}
+				OfficeEditPart.this.refreshChildren();
 			}
 		});
-	}
-}
-
-/**
- * {@link LayoutEditPolicy} for the
- * {@link OfficeModel}.
- */
-class OfficeLayoutEditPolicy extends OfficeFloorLayoutEditPolicy<OfficeModel> {
-
-	@Override
-	protected CreateCommand<?, ?> createCreateComand(OfficeModel parentModel,
-			Object newModel, Point location) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
 	}
 
 }

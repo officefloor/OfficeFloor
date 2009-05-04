@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.common;
+package net.officefloor.eclipse.common.editor;
 
 import net.officefloor.eclipse.desk.DeskEditor;
 
@@ -34,23 +34,13 @@ import org.eclipse.ui.actions.ActionFactory;
 public class CoreEditorActionContributor implements IEditorActionBarContributor {
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.IEditorActionBarContributor#init(org.eclipse.ui.IActionBars
-	 * , org.eclipse.ui.IWorkbenchPage)
+	 * ================ IEditorActionBarContributor =========================
 	 */
+
 	@Override
 	public void init(IActionBars bars, IWorkbenchPage page) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.IEditorActionBarContributor#setActiveEditor(org.eclipse
-	 * .ui.IEditorPart)
-	 */
 	@Override
 	public void setActiveEditor(IEditorPart targetEditor) {
 
@@ -106,11 +96,6 @@ public class CoreEditorActionContributor implements IEditorActionBarContributor 
 				actionId, action);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IEditorActionBarContributor#dispose()
-	 */
 	@Override
 	public void dispose() {
 	}

@@ -19,14 +19,11 @@ package net.officefloor.eclipse.section.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SectionModel.SectionEvent;
 
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -36,11 +33,6 @@ import org.eclipse.gef.EditPart;
  */
 public class SectionEditPart extends
 		AbstractOfficeFloorDiagramEditPart<SectionModel> {
-
-	@Override
-	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
-		return new SectionLayoutEditPolicy();
-	}
 
 	@Override
 	protected void populateChildren(List<Object> childModels) {
@@ -57,31 +49,9 @@ public class SectionEditPart extends
 				.values()) {
 			protected void handlePropertyChange(SectionEvent property,
 					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_EXTERNAL_FLOW:
-				case REMOVE_EXTERNAL_FLOW:
-				case ADD_EXTERNAL_MANAGED_OBJECT:
-				case REMOVE_EXTERNAL_MANAGED_OBJECT:
-				case ADD_SUB_SECTION:
-				case REMOVE_SUB_SECTION:
-					SectionEditPart.this.refreshChildren();
-					break;
-				}
+				SectionEditPart.this.refreshChildren();
 			}
 		});
-	}
-}
-
-/**
- * {@link LayoutEditPolicy} for the {@link RoomModel}.
- */
-class SectionLayoutEditPolicy extends OfficeFloorLayoutEditPolicy<SectionModel> {
-
-	@Override
-	protected CreateCommand<?, ?> createCreateComand(SectionModel parentModel,
-			Object newModel, Point location) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
 	}
 
 }

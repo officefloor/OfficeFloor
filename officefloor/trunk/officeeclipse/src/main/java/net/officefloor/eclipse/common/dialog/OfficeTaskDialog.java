@@ -20,8 +20,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
-import net.officefloor.eclipse.common.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.persistence.ProjectConfigurationContext;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.repository.project.ProjectConfigurationContext;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
@@ -55,8 +55,8 @@ public class OfficeTaskDialog extends Dialog {
 	 *            {@link OfficeFloorOfficeModel}.
 	 * @param editor
 	 *            {@link AbstractOfficeFloorEditor}.
-	 * @return {@link OfficeTaskModel} or <code>null</code> if none selected
-	 *         or issue in obtaining.
+	 * @return {@link OfficeTaskModel} or <code>null</code> if none selected or
+	 *         issue in obtaining.
 	 */
 	public static OfficeTaskModel getOfficeTaskModel(Object target,
 			AbstractOfficeFloorEditor<?, ?> editor) {
@@ -146,9 +146,9 @@ public class OfficeTaskDialog extends Dialog {
 				project).getConfigurationContext();
 
 		// TODO should link to office input rather than internals
-//		// Obtain the listing of office tasks
-//		this.officeTasks = new OfficeFloorLoader().loadOfficeTasks(office,
-//				configurationContext);
+		// // Obtain the listing of office tasks
+		// this.officeTasks = new OfficeFloorLoader().loadOfficeTasks(office,
+		// configurationContext);
 		this.officeTasks = null;
 	}
 
@@ -170,7 +170,9 @@ public class OfficeTaskDialog extends Dialog {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+	 * @see
+	 * org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets
+	 * .Composite)
 	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {

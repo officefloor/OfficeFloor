@@ -19,16 +19,12 @@ package net.officefloor.eclipse.officefloor.editparts;
 import java.beans.PropertyChangeEvent;
 import java.util.List;
 
-import net.officefloor.eclipse.common.commands.CreateCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
 import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.OfficeFloorLayoutEditPolicy;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 import net.officefloor.model.officefloor.OfficeFloorModel.OfficeFloorEvent;
 
-import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.editpolicies.LayoutEditPolicy;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorModel}.
@@ -37,11 +33,6 @@ import org.eclipse.gef.editpolicies.LayoutEditPolicy;
  */
 public class OfficeFloorEditPart extends
 		AbstractOfficeFloorDiagramEditPart<OfficeFloorModel> {
-
-	@Override
-	protected OfficeFloorLayoutEditPolicy<?> createLayoutEditPolicy() {
-		return new OfficeFloorOfficeFloorLayoutEditPolicy();
-	}
 
 	@Override
 	protected void populateChildren(List<Object> childModels) {
@@ -60,35 +51,9 @@ public class OfficeFloorEditPart extends
 			@Override
 			protected void handlePropertyChange(OfficeFloorEvent property,
 					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_DEPLOYED_OFFICE:
-				case REMOVE_DEPLOYED_OFFICE:
-				case ADD_OFFICE_FLOOR_TEAM:
-				case REMOVE_OFFICE_FLOOR_TEAM:
-				case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
-				case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
-				case ADD_OFFICE_FLOOR_MANAGED_OBJECT:
-				case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT:
-					OfficeFloorEditPart.this.refreshChildren();
-					break;
-				}
+				OfficeFloorEditPart.this.refreshChildren();
 			}
 		});
-	}
-
-}
-
-/**
- * {@link LayoutEditPolicy} for the {@link OfficeFloorModel}.
- */
-class OfficeFloorOfficeFloorLayoutEditPolicy extends
-		OfficeFloorLayoutEditPolicy<OfficeFloorModel> {
-
-	@Override
-	protected CreateCommand<?, ?> createCreateComand(
-			OfficeFloorModel parentModel, Object newModel, Point location) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("TODO implement");
 	}
 
 }
