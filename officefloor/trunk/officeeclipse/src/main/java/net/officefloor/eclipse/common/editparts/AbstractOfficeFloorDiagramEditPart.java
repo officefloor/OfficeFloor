@@ -16,11 +16,11 @@
  */
 package net.officefloor.eclipse.common.editparts;
 
-import java.util.LinkedList;
+import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.ConnectionModel;
+import net.officefloor.frame.api.build.Indexed;
 import net.officefloor.model.Model;
 
 import org.eclipse.draw2d.ConnectionAnchor;
@@ -38,7 +38,7 @@ import org.eclipse.gef.editpolicies.RootComponentEditPolicy;
  * @author Daniel
  */
 public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
-		extends AbstractOfficeFloorEditPart<M, OfficeFloorFigure> {
+		extends AbstractOfficeFloorEditPart<M, Indexed, OfficeFloorFigure> {
 
 	/*
 	 * ================= AbstractOfficeFloorEditPart ========================
@@ -65,13 +65,13 @@ public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
 
 			@Override
 			public ConnectionAnchor getSourceConnectionAnchor(
-					Class<? extends ConnectionModel> connectionModelType) {
+					Class<?> connectionModelType) {
 				return null;
 			}
 
 			@Override
 			public ConnectionAnchor getTargetConnectionAnchor(
-					Class<? extends ConnectionModel> connectionModelType) {
+					Class<?> connectionModelType) {
 				return null;
 			}
 		};
@@ -94,15 +94,26 @@ public abstract class AbstractOfficeFloorDiagramEditPart<M extends Model>
 	}
 
 	@Override
-	protected List<?> getModelChildren() {
-		// Create the list of model children
-		List<Object> models = new LinkedList<Object>();
+	public void propertyChange(PropertyChangeEvent evt) {
+		// Diagram to refresh children on any event
+		this.refreshChildren();
+	}
 
-		// Populate the children
-		this.populateChildren(models);
+	@Override
+	protected Class<Indexed> getPropertyChangeEventType() {
+		this.messageError("Diagram should always refresh children");
+		return null;
+	}
 
-		// Return the children
-		return models;
+	@Override
+	protected void handlePropertyChange(Indexed property,
+			PropertyChangeEvent evt) {
+		this.messageError("Diagram should always refresh children");
+	}
+
+	@Override
+	protected void populateModelChildren(List<Object> childModels) {
+		this.populateChildren(childModels);
 	}
 
 	/**

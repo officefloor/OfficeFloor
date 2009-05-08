@@ -20,18 +20,10 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
-import net.officefloor.eclipse.desk.operations.RemoveFlowItemOperation;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.desk.TaskFigure;
 import net.officefloor.eclipse.skin.desk.TaskFigureContext;
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.TaskToNextExternalFlowModel;
 import net.officefloor.model.desk.TaskToNextTaskModel;
@@ -40,7 +32,6 @@ import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.desk.TaskModel.TaskEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link TaskModel}.
@@ -48,8 +39,8 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  * @author Daniel
  */
 public class TaskEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<TaskModel, TaskFigure>
-		implements RemovableEditPart, TaskFigureContext {
+		AbstractOfficeFloorEditPart<TaskModel, TaskEvent, TaskFigure> implements
+		TaskFigureContext {
 
 	@Override
 	protected TaskFigure createOfficeFloorFigure() {
@@ -58,55 +49,9 @@ public class TaskEditPart extends
 	}
 
 	@Override
-	protected boolean isFreeformFigure() {
-		return true;
-	}
-
-	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getTaskFlows());
 		childModels.addAll(this.getCastedModel().getTaskEscalations());
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(TaskModel.class);
-		types.add(ExternalFlowModel.class);
-	}
-
-	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			@Override
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-				ConnectionModel returnConn;
-				if (target instanceof TaskModel) {
-					// Create the connection to next task
-					TaskToNextTaskModel conn = new TaskToNextTaskModel();
-					conn.setPreviousTask((TaskModel) source);
-					conn.setNextTask((TaskModel) target);
-					conn.connect();
-					returnConn = conn;
-
-				} else if (target instanceof ExternalFlowModel) {
-					// Create the connection to external flow
-					TaskToNextExternalFlowModel conn = new TaskToNextExternalFlowModel();
-					conn.setPreviousTask((TaskModel) source);
-					conn.setNextExternalFlow((ExternalFlowModel) target);
-					conn.connect();
-					returnConn = conn;
-
-				} else {
-					// Unknown target
-					throw new OfficeFloorPluginFailure("Unknown target type "
-							+ target.getClass().getName());
-				}
-
-				// Return the connection
-				return returnConn;
-			}
-		};
 	}
 
 	@Override
@@ -140,57 +85,47 @@ public class TaskEditPart extends
 			models.add(task);
 		}
 
-		// Add task inputs
+		// Add task inputs, handled escalations, previous tasks
 		models.addAll(this.getCastedModel().getTaskFlowInputs());
-
-		// Add handled escalations
 		models.addAll(this.getCastedModel().getTaskEscalationInputs());
-
-		// Add previous tasks
 		models.addAll(this.getCastedModel().getPreviousTasks());
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<TaskEvent>(TaskEvent.values()) {
-			protected void handlePropertyChange(TaskEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_IS_PUBLIC:
-					// Ensure display is public
-					TaskEditPart.this.getOfficeFloorFigure().setIsPublic(
-							TaskEditPart.this.getCastedModel()
-									.getIsPublic());
-					break;
-				case CHANGE_NEXT_TASK:
-				case CHANGE_NEXT_EXTERNAL_FLOW:
-					TaskEditPart.this.refreshSourceConnections();
-					break;
-				case CHANGE_INITIAL_TASK_FOR_WORK:
-				case CHANGE_WORK_TASK:
-				case ADD_TASK_FLOW_INPUT:
-				case REMOVE_TASK_FLOW_INPUT:
-				case ADD_TASK_ESCALATION_INPUT:
-				case REMOVE_TASK_ESCALATION_INPUT:
-				case ADD_PREVIOUS_TASK:
-				case REMOVE_PREVIOUS_TASK:
-					TaskEditPart.this.refreshTargetConnections();
-					break;
-				case ADD_TASK_FLOW:
-				case REMOVE_TASK_FLOW:
-				case ADD_TASK_ESCALATION:
-				case REMOVE_TASK_ESCALATION:
-					TaskEditPart.this.refreshChildren();
-					break;
-				}
-			}
-		});
+	protected Class<TaskEvent> getPropertyChangeEventType() {
+		return TaskEvent.class;
 	}
 
 	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveFlowItemOperation();
+	protected void handlePropertyChange(TaskEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_IS_PUBLIC:
+			// Ensure display is public
+			this.getOfficeFloorFigure().setIsPublic(
+					this.getCastedModel().getIsPublic());
+			break;
+		case CHANGE_NEXT_TASK:
+		case CHANGE_NEXT_EXTERNAL_FLOW:
+			this.refreshSourceConnections();
+			break;
+		case CHANGE_INITIAL_TASK_FOR_WORK:
+		case CHANGE_WORK_TASK:
+		case ADD_TASK_FLOW_INPUT:
+		case REMOVE_TASK_FLOW_INPUT:
+		case ADD_TASK_ESCALATION_INPUT:
+		case REMOVE_TASK_ESCALATION_INPUT:
+		case ADD_PREVIOUS_TASK:
+		case REMOVE_PREVIOUS_TASK:
+			this.refreshTargetConnections();
+			break;
+		case ADD_TASK_FLOW:
+		case REMOVE_TASK_FLOW:
+		case ADD_TASK_ESCALATION:
+		case REMOVE_TASK_ESCALATION:
+			this.refreshChildren();
+			break;
+		}
 	}
 
 	/*
@@ -223,8 +158,7 @@ public class TaskEditPart extends
 
 			@Override
 			protected void undoCommand() {
-				TaskEditPart.this.getCastedModel().setIsPublic(
-						currentIsPublic);
+				TaskEditPart.this.getCastedModel().setIsPublic(currentIsPublic);
 			}
 		});
 	}

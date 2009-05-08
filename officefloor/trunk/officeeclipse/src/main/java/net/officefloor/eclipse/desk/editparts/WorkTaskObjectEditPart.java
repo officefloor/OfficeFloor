@@ -21,19 +21,14 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectModel.WorkTaskObjectEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link WorkTaskObjectModel}.
@@ -42,33 +37,13 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class WorkTaskObjectEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<WorkTaskObjectModel, WorkTaskObjectFigure>
+		AbstractOfficeFloorEditPart<WorkTaskObjectModel, WorkTaskObjectEvent, WorkTaskObjectFigure>
 		implements WorkTaskObjectFigureContext {
 
 	@Override
 	protected WorkTaskObjectFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createWorkTaskObjectFigure(this);
-	}
-
-	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-				WorkTaskObjectToExternalManagedObjectModel conn = new WorkTaskObjectToExternalManagedObjectModel();
-				conn.setTaskObject((WorkTaskObjectModel) source);
-				conn
-						.setExternalManagedObject((ExternalManagedObjectModel) target);
-				conn.connect();
-				return conn;
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(ExternalManagedObjectModel.class);
 	}
 
 	@Override
@@ -81,31 +56,24 @@ public class WorkTaskObjectEditPart
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// Not a target
+	protected Class<WorkTaskObjectEvent> getPropertyChangeEventType() {
+		return WorkTaskObjectEvent.class;
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<WorkTaskObjectEvent>(
-				WorkTaskObjectEvent.values()) {
-			protected void handlePropertyChange(WorkTaskObjectEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_IS_PARAMETER:
-					// Indicate is parameter changed
-					WorkTaskObjectEditPart.this.getOfficeFloorFigure()
-							.setIsParameter(
-									WorkTaskObjectEditPart.this
-											.getCastedModel().getIsParameter());
-					break;
-				case CHANGE_EXTERNAL_MANAGED_OBJECT:
-					WorkTaskObjectEditPart.this.refreshSourceConnections();
-					break;
-				}
-			}
-		});
+	protected void handlePropertyChange(WorkTaskObjectEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_IS_PARAMETER:
+			// Indicate is parameter changed
+			WorkTaskObjectEditPart.this.getOfficeFloorFigure().setIsParameter(
+					WorkTaskObjectEditPart.this.getCastedModel()
+							.getIsParameter());
+			break;
+		case CHANGE_EXTERNAL_MANAGED_OBJECT:
+			WorkTaskObjectEditPart.this.refreshSourceConnections();
+			break;
+		}
 	}
 
 	/*

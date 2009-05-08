@@ -20,18 +20,13 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.office.models.AbstractTaskAdministrationJoinPointModel;
 import net.officefloor.eclipse.office.models.TaskAdministrationJoinPointEvent;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.office.DutyModel;
-import net.officefloor.model.office.OfficeTaskModel;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for {@link AbstractTaskAdministrationJoinPointModel}.
@@ -40,7 +35,7 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class TaskAdministrationJoinPointEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<AbstractTaskAdministrationJoinPointModel<? extends ConnectionModel>, OfficeFloorFigure> {
+		AbstractOfficeFloorEditPart<AbstractTaskAdministrationJoinPointModel<? extends ConnectionModel>, TaskAdministrationJoinPointEvent, OfficeFloorFigure> {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
@@ -49,61 +44,23 @@ public class TaskAdministrationJoinPointEditPart
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers
-				.add(new PropertyChangeHandler<TaskAdministrationJoinPointEvent>(
-						TaskAdministrationJoinPointEvent.values()) {
-					@Override
-					protected void handlePropertyChange(
-							TaskAdministrationJoinPointEvent property,
-							PropertyChangeEvent evt) {
-						switch (property) {
-						case CHANGE_DUTIES:
-							TaskAdministrationJoinPointEditPart.this
-									.refreshSourceConnections();
-							break;
-						}
-					}
-				});
-	}
-
-	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			@Override
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-
-				// Obtain the types
-				AbstractTaskAdministrationJoinPointModel<?> joinPoint = (AbstractTaskAdministrationJoinPointModel<?>) source;
-				OfficeTaskModel task = joinPoint.getTask();
-				DutyModel duty = (DutyModel) target;
-
-				// Create the connection to the duty
-				ConnectionModel connection = TaskAdministrationJoinPointEditPart.this
-						.getCastedModel().createDutyConnection(task, duty);
-
-				// Connect and return the connection
-				connection.connect();
-				return connection;
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(DutyModel.class);
-	}
-
-	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getDutyConnections());
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// Never a target
+	protected Class<TaskAdministrationJoinPointEvent> getPropertyChangeEventType() {
+		return TaskAdministrationJoinPointEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(
+			TaskAdministrationJoinPointEvent property, PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_DUTIES:
+			TaskAdministrationJoinPointEditPart.this.refreshSourceConnections();
+			break;
+		}
 	}
 
 }

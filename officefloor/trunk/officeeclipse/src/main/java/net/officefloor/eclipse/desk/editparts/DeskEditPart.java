@@ -16,13 +16,10 @@
  */
 package net.officefloor.eclipse.desk.editparts;
 
-import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.DeskModel.DeskEvent;
 
 import org.eclipse.gef.EditPart;
 
@@ -39,17 +36,6 @@ public class DeskEditPart extends AbstractOfficeFloorDiagramEditPart<DeskModel> 
 		childModels.addAll(this.getCastedModel().getExternalManagedObjects());
 		childModels.addAll(this.getCastedModel().getTasks());
 		childModels.addAll(this.getCastedModel().getExternalFlows());
-	}
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<DeskEvent>(DeskEvent.values()) {
-			protected void handlePropertyChange(DeskEvent property,
-					PropertyChangeEvent evt) {
-				DeskEditPart.this.refreshChildren();
-			}
-		});
 	}
 
 }

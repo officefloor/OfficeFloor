@@ -20,8 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.model.office.DutyModel;
@@ -35,42 +34,8 @@ import org.eclipse.gef.EditPart;
  * @author Daniel
  */
 public class DutyEditPart extends
-		AbstractOfficeFloorNodeEditPart<DutyModel, OfficeFloorFigure> implements
-		DutyFigureContext {
-
-	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Never a source
-	}
-
-	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-//		models.addAll(this.getCastedModel().getPreAdminFlowItems());
-//		models.addAll(this.getCastedModel().getPostAdminFlowItems());
-	}
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<DutyEvent>(DutyEvent.values()) {
-			@Override
-			protected void handlePropertyChange(DutyEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-//				case ADD_FLOW:
-//				case REMOVE_FLOW:
-//					DutyEditPart.this.refreshChildren();
-//					break;
-//				case ADD_PRE_ADMIN_FLOW_ITEM:
-//				case REMOVE_PRE_ADMIN_FLOW_ITEM:
-//				case ADD_POST_ADMIN_FLOW_ITEM:
-//				case REMOVE_POST_ADMIN_FLOW_ITEM:
-//					DutyEditPart.this.refreshTargetConnections();
-//					break;
-				}
-			}
-		});
-	}
+		AbstractOfficeFloorEditPart<DutyModel, DutyEvent, OfficeFloorFigure>
+		implements DutyFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
@@ -80,7 +45,35 @@ public class DutyEditPart extends
 
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
-//		childModels.addAll(this.getCastedModel().getFlows());
+		// childModels.addAll(this.getCastedModel().getFlows());
+	}
+
+	@Override
+	protected void populateConnectionTargetModels(List<Object> models) {
+		// models.addAll(this.getCastedModel().getPreAdminFlowItems());
+		// models.addAll(this.getCastedModel().getPostAdminFlowItems());
+	}
+
+	@Override
+	protected Class<DutyEvent> getPropertyChangeEventType() {
+		return DutyEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(DutyEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		// case ADD_FLOW:
+		// case REMOVE_FLOW:
+		// DutyEditPart.this.refreshChildren();
+		// break;
+		// case ADD_PRE_ADMIN_FLOW_ITEM:
+		// case REMOVE_PRE_ADMIN_FLOW_ITEM:
+		// case ADD_POST_ADMIN_FLOW_ITEM:
+		// case REMOVE_POST_ADMIN_FLOW_ITEM:
+		// DutyEditPart.this.refreshTargetConnections();
+		// break;
+		}
 	}
 
 	/*

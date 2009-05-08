@@ -21,28 +21,23 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.action.OperationUtil;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.desk.operations.CreateFlowItemFromDeskTaskOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.WorkTaskModel;
-import net.officefloor.model.desk.WorkTaskToTaskModel;
 import net.officefloor.model.desk.WorkTaskModel.WorkTaskEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link WorkTaskModel}.
  * 
  * @author Daniel
  */
-public class WorkTaskEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<WorkTaskModel, OfficeFloorFigure>
+public class WorkTaskEditPart
+		extends
+		AbstractOfficeFloorEditPart<WorkTaskModel, WorkTaskEvent, OfficeFloorFigure>
 		implements WorkTaskFigureContext {
 
 	@Override
@@ -57,66 +52,39 @@ public class WorkTaskEditPart extends
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<WorkTaskEvent>(WorkTaskEvent
-				.values()) {
-			protected void handlePropertyChange(WorkTaskEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_TASK:
-				case REMOVE_TASK:
-					WorkTaskEditPart.this.refreshSourceConnections();
-					break;
-				case ADD_TASK_OBJECT:
-				case REMOVE_TASK_OBJECT:
-					WorkTaskEditPart.this.refreshChildren();
-					break;
-				}
-			}
-		});
-	}
-
-	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-				WorkTaskToTaskModel conn = new WorkTaskToTaskModel();
-				conn.setWorkTask((WorkTaskModel) source);
-				conn.setTask((TaskModel) target);
-				conn.connect();
-				return conn;
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(TaskModel.class);
-	}
-
-	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getTasks());
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// Not a target
+	protected Class<WorkTaskEvent> getPropertyChangeEventType() {
+		return WorkTaskEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(WorkTaskEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_TASK:
+		case REMOVE_TASK:
+			WorkTaskEditPart.this.refreshSourceConnections();
+			break;
+		case ADD_TASK_OBJECT:
+		case REMOVE_TASK_OBJECT:
+			WorkTaskEditPart.this.refreshChildren();
+			break;
+		}
 	}
 
 	/*
 	 * ============ DeskTaskFigureContext ============
 	 */
 
-	// TODO rename to getWorkTaskName
 	@Override
 	public String getWorkTaskName() {
 		return this.getCastedModel().getWorkTaskName();
 	}
 
-	// TODO rename to createAsNewTask
 	@Override
 	public void createAsNewTask() {
 		OperationUtil.execute(new CreateFlowItemFromDeskTaskOperation(), 100,

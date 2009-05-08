@@ -16,13 +16,10 @@
  */
 package net.officefloor.eclipse.officefloor.editparts;
 
-import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.model.officefloor.OfficeFloorModel;
-import net.officefloor.model.officefloor.OfficeFloorModel.OfficeFloorEvent;
 
 import org.eclipse.gef.EditPart;
 
@@ -41,19 +38,6 @@ public class OfficeFloorEditPart extends
 		childModels.addAll(officeFloor.getOfficeFloorTeams());
 		childModels.addAll(officeFloor.getOfficeFloorManagedObjectSources());
 		childModels.addAll(officeFloor.getOfficeFloorManagedObjects());
-	}
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<OfficeFloorEvent>(
-				OfficeFloorEvent.values()) {
-			@Override
-			protected void handlePropertyChange(OfficeFloorEvent property,
-					PropertyChangeEvent evt) {
-				OfficeFloorEditPart.this.refreshChildren();
-			}
-		});
 	}
 
 }

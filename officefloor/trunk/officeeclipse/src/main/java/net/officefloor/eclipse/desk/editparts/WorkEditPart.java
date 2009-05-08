@@ -20,31 +20,24 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
-import net.officefloor.eclipse.desk.operations.RemoveWorkOperation;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.WorkFigureContext;
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.desk.WorkModel.WorkEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link WorkModel}.
  * 
  * @author Daniel
  */
-public class WorkEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<WorkModel, OfficeFloorFigure>
-		implements RemovableEditPart, WorkFigureContext {
+public class WorkEditPart
+		extends
+		AbstractOfficeFloorEditPart<WorkModel, WorkEvent, OfficeFloorFigure>
+		implements WorkFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
@@ -53,33 +46,10 @@ public class WorkEditPart extends
 	}
 
 	@Override
-	protected boolean isFreeformFigure() {
-		return true;
-	}
-
-	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getWorkTasks());
 	}
 
-	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-				WorkToInitialTaskModel conn = new WorkToInitialTaskModel();
-				conn.setWork((WorkModel) source);
-				conn.setInitialTask((TaskModel) target);
-				conn.connect();
-				return conn;
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(TaskModel.class);
-	}
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -91,32 +61,22 @@ public class WorkEditPart extends
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// Not a target
+	protected Class<WorkEvent> getPropertyChangeEventType() {
+		return WorkEvent.class;
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<WorkEvent>(WorkEvent.values()) {
-			protected void handlePropertyChange(WorkEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_INITIAL_TASK:
-					WorkEditPart.this.refreshSourceConnections();
-					break;
-				case ADD_WORK_TASK:
-				case REMOVE_WORK_TASK:
-					WorkEditPart.this.refreshChildren();
-					break;
-				}
-			}
-		});
-	}
-
-	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveWorkOperation();
+	protected void handlePropertyChange(WorkEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_INITIAL_TASK:
+			WorkEditPart.this.refreshSourceConnections();
+			break;
+		case ADD_WORK_TASK:
+		case REMOVE_WORK_TASK:
+			WorkEditPart.this.refreshChildren();
+			break;
+		}
 	}
 
 	/*

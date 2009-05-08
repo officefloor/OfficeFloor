@@ -20,39 +20,28 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.desk.operations.RemoveExternalFlowOperation;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalFlowModel.ExternalFlowEvent;
+
+import org.eclipse.gef.EditPart;
 
 /**
  * {@link EditPart} for the {@link ExternalFlowModel}.
  * 
  * @author Daniel
  */
-public class ExternalFlowEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalFlowModel, OfficeFloorFigure>
-		implements RemovableEditPart, ExternalFlowFigureContext {
+public class ExternalFlowEditPart
+		extends
+		AbstractOfficeFloorEditPart<ExternalFlowModel, ExternalFlowEvent, OfficeFloorFigure>
+		implements ExternalFlowFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createExternalFlowFigure(this);
-	}
-
-	@Override
-	protected boolean isFreeformFigure() {
-		return true;
-	}
-
-	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Not a source
 	}
 
 	@Override
@@ -63,29 +52,23 @@ public class ExternalFlowEditPart extends
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ExternalFlowEvent>(
-				ExternalFlowEvent.values()) {
-			protected void handlePropertyChange(ExternalFlowEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_TASK_FLOW:
-				case REMOVE_TASK_FLOW:
-				case ADD_TASK_ESCALATION:
-				case REMOVE_TASK_ESCALATION:
-				case ADD_PREVIOUS_TASK:
-				case REMOVE_PREVIOUS_TASK:
-					ExternalFlowEditPart.this.refreshTargetConnections();
-					break;
-				}
-			}
-		});
+	protected Class<ExternalFlowEvent> getPropertyChangeEventType() {
+		return ExternalFlowEvent.class;
 	}
 
 	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveExternalFlowOperation();
+	protected void handlePropertyChange(ExternalFlowEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_TASK_FLOW:
+		case REMOVE_TASK_FLOW:
+		case ADD_TASK_ESCALATION:
+		case REMOVE_TASK_ESCALATION:
+		case ADD_PREVIOUS_TASK:
+		case REMOVE_PREVIOUS_TASK:
+			ExternalFlowEditPart.this.refreshTargetConnections();
+			break;
+		}
 	}
 
 	/*

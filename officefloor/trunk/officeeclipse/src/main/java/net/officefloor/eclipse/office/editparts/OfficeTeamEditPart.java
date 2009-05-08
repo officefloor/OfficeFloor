@@ -20,11 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.office.operations.RemoveOfficeTeamOperation;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.OfficeTeamFigureContext;
 import net.officefloor.model.office.OfficeTeamModel;
@@ -37,13 +33,15 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public class OfficeTeamEditPart extends
-		AbstractOfficeFloorNodeEditPart<OfficeTeamModel, OfficeFloorFigure>
-		implements RemovableEditPart, OfficeTeamFigureContext {
+public class OfficeTeamEditPart
+		extends
+		AbstractOfficeFloorEditPart<OfficeTeamModel, OfficeTeamEvent, OfficeFloorFigure>
+		implements OfficeTeamFigureContext {
 
 	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Never a source
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
+				.createOfficeTeamFigure(this);
 	}
 
 	@Override
@@ -53,41 +51,23 @@ public class OfficeTeamEditPart extends
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<OfficeTeamEvent>(OfficeTeamEvent
-				.values()) {
-			@Override
-			protected void handlePropertyChange(OfficeTeamEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_OFFICE_SECTION_RESPONSIBILITY:
-				case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
-					OfficeTeamEditPart.this.refreshTargetConnections();
-					break;
-				// case ADD_ADMINISTRATOR:
-				// case REMOVE_ADMINISTRATOR:
-				// ExternalTeamEditPart.this.refreshTargetConnections();
-				// break;
-				}
-			}
-		});
+	protected Class<OfficeTeamEvent> getPropertyChangeEventType() {
+		return OfficeTeamEvent.class;
 	}
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
-				.createOfficeTeamFigure(this);
-	}
-
-	@Override
-	protected boolean isFreeformFigure() {
-		return true;
-	}
-
-	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveOfficeTeamOperation();
+	protected void handlePropertyChange(OfficeTeamEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_OFFICE_SECTION_RESPONSIBILITY:
+		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
+			OfficeTeamEditPart.this.refreshTargetConnections();
+			break;
+		// case ADD_ADMINISTRATOR:
+		// case REMOVE_ADMINISTRATOR:
+		// ExternalTeamEditPart.this.refreshTargetConnections();
+		// break;
+		}
 	}
 
 	/*

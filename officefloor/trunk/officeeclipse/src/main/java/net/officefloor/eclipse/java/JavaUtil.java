@@ -49,7 +49,7 @@ public class JavaUtil {
 	 *             If fails to obtain sub types.
 	 */
 	public static IType[] getSubTypes(
-			AbstractOfficeFloorEditPart<?, ?> editPart, String typeName)
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart, String typeName)
 			throws JavaModelException {
 
 		// Obtain the project

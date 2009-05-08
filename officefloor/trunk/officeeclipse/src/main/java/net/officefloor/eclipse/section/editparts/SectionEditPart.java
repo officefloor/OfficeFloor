@@ -16,13 +16,10 @@
  */
 package net.officefloor.eclipse.section.editparts;
 
-import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorDiagramEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.model.section.SectionModel;
-import net.officefloor.model.section.SectionModel.SectionEvent;
 
 import org.eclipse.gef.EditPart;
 
@@ -40,18 +37,6 @@ public class SectionEditPart extends
 		childModels.addAll(section.getSubSections());
 		childModels.addAll(section.getExternalManagedObjects());
 		childModels.addAll(section.getExternalFlows());
-	}
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<SectionEvent>(SectionEvent
-				.values()) {
-			protected void handlePropertyChange(SectionEvent property,
-					PropertyChangeEvent evt) {
-				SectionEditPart.this.refreshChildren();
-			}
-		});
 	}
 
 }

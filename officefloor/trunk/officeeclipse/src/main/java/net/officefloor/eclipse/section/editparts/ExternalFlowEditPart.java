@@ -20,11 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.section.operations.RemoveExternalFlowOperation;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.section.ExternalFlowFigureContext;
 import net.officefloor.model.section.ExternalFlowModel;
@@ -37,37 +33,10 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public class ExternalFlowEditPart extends
-		AbstractOfficeFloorNodeEditPart<ExternalFlowModel, OfficeFloorFigure>
-		implements RemovableEditPart, ExternalFlowFigureContext {
-
-	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Not a source
-	}
-
-	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getSubSectionOutputs());
-	}
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ExternalFlowEvent>(
-				ExternalFlowEvent.values()) {
-			@Override
-			protected void handlePropertyChange(ExternalFlowEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_SUB_SECTION_OUTPUT:
-				case REMOVE_SUB_SECTION_OUTPUT:
-					ExternalFlowEditPart.this.refreshTargetConnections();
-					break;
-				}
-			}
-		});
-	}
+public class ExternalFlowEditPart
+		extends
+		AbstractOfficeFloorEditPart<ExternalFlowModel, ExternalFlowEvent, OfficeFloorFigure>
+		implements ExternalFlowFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
@@ -76,13 +45,24 @@ public class ExternalFlowEditPart extends
 	}
 
 	@Override
-	protected boolean isFreeformFigure() {
-		return true;
+	protected void populateConnectionTargetModels(List<Object> models) {
+		models.addAll(this.getCastedModel().getSubSectionOutputs());
 	}
 
 	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveExternalFlowOperation();
+	protected Class<ExternalFlowEvent> getPropertyChangeEventType() {
+		return ExternalFlowEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(ExternalFlowEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_SUB_SECTION_OUTPUT:
+		case REMOVE_SUB_SECTION_OUTPUT:
+			ExternalFlowEditPart.this.refreshTargetConnections();
+			break;
+		}
 	}
 
 	/*

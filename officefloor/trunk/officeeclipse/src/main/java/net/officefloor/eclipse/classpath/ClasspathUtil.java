@@ -99,7 +99,7 @@ public class ClasspathUtil {
 	 *            Listing of class names that may have extension associated.
 	 */
 	public static void attemptUpdateOfficeFloorClasspath(
-			AbstractOfficeFloorEditPart<?, ?> editPart,
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			IProgressMonitor monitor, String... extensionClassNames) {
 		try {
 			// Obtain the project for the edit part
