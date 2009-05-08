@@ -16,12 +16,14 @@
  */
 package net.officefloor.eclipse.util;
 
+import java.util.List;
+
+import net.officefloor.eclipse.OfficeFloorPlugin;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
 
 /**
  * Utility methods for working in Eclipse.
@@ -49,50 +51,49 @@ public class EclipseUtil {
 	 *            Fully qualified name of the class.
 	 * @param superType
 	 *            Type that the class must be a sub type.
-	 * @return {@link Class}.
-	 * @throws OfficeFloorPluginFailure
-	 *             If unknown class or is not of superType.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} to report issues.
+	 * @return {@link Class} or <code>null</code> if could not obtain.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <S> Class<S> obtainClass(String className, Class<S> superType)
-			throws OfficeFloorPluginFailure {
+	public static <S> Class<S> obtainClass(String className,
+			Class<S> superType, AbstractOfficeFloorEditor<?, ?> editor) {
 		try {
 			// Create the class
 			Class clazz = Class.forName(className);
 
 			// Ensure correct super type
 			if (!(superType.isAssignableFrom(clazz))) {
-				throw new OfficeFloorPluginFailure("Class '" + clazz.getName()
+				editor.messageError("Class '" + clazz.getName()
 						+ "' must be a sub type of " + superType.getName());
 			}
 
 			// Return the class
 			return (Class<S>) clazz;
 
-		} catch (ClassNotFoundException ex) {
-			throw new OfficeFloorPluginFailure(ex);
+		} catch (Throwable ex) {
+			editor.messageError("Failed to obtain class " + className, ex);
+			return null; // can not obtain class
 		}
 	}
 
 	/**
 	 * Creates an instance of the class.
 	 * 
-	 * @param T
-	 *            Type of class.
 	 * @param clazz
 	 *            Class to create an instance from.
-	 * @return Instance of the class.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to create an instance.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} to report issues.
+	 * @return Instance of the class or <code>null</code> if unable to
+	 *         instantiate.
 	 */
-	public static <T> T createInstance(Class<T> clazz)
-			throws OfficeFloorPluginFailure {
+	public static <T> T createInstance(Class<T> clazz,
+			AbstractOfficeFloorEditor<?, ?> editor) {
 		try {
 			return clazz.newInstance();
-		} catch (InstantiationException ex) {
-			throw new OfficeFloorPluginFailure(ex);
-		} catch (IllegalAccessException ex) {
-			throw new OfficeFloorPluginFailure(ex);
+		} catch (Throwable ex) {
+			editor.messageError("Faile to instantiate " + clazz.getName(), ex);
+			return null;
 		}
 	}
 
@@ -103,13 +104,13 @@ public class EclipseUtil {
 	 *            Fully qualified name of class.
 	 * @param superType
 	 *            Type that the class of instance must be a sub type.
-	 * @return Instance.
-	 * @throws OfficeFloorPluginFailure
-	 *             If fails to create the instance.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} to report issues.
+	 * @return Instance or <code>null</code> if unable to instantiate.
 	 */
-	public static <S> S createInstance(String className, Class<S> superType)
-			throws OfficeFloorPluginFailure {
-		return createInstance(obtainClass(className, superType));
+	public static <S> S createInstance(String className, Class<S> superType,
+			AbstractOfficeFloorEditor<?, ?> editor) {
+		return createInstance(obtainClass(className, superType, editor), editor);
 	}
 
 	/**
@@ -129,6 +130,22 @@ public class EclipseUtil {
 		// Create and return core exception for failure
 		return new CoreException(new Status(IStatus.ERROR,
 				OfficeFloorPlugin.PLUGIN_ID, failure.getMessage(), failure));
+	}
+
+	/**
+	 * Convenience method to add an item to a list. Will not add to list if
+	 * <code>null</code>.
+	 * 
+	 * @param list
+	 *            List.
+	 * @param item
+	 *            Item to be added to the list. Will not be added if
+	 *            <code>null</code>.
+	 */
+	public static <L, I extends L> void addToList(List<L> list, I item) {
+		if (item != null) {
+			list.add(item);
+		}
 	}
 
 	/**

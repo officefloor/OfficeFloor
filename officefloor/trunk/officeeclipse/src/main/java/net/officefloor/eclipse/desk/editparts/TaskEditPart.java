@@ -24,11 +24,10 @@ import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.desk.TaskFigure;
 import net.officefloor.eclipse.skin.desk.TaskFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.TaskToNextExternalFlowModel;
 import net.officefloor.model.desk.TaskToNextTaskModel;
-import net.officefloor.model.desk.WorkTaskToTaskModel;
-import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.desk.TaskModel.TaskEvent;
 
 import org.eclipse.gef.EditPart;
@@ -73,17 +72,11 @@ public class TaskEditPart extends
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// Add work that this is initial task
-		WorkToInitialTaskModel work = this.getCastedModel()
-				.getInitialTaskForWork();
-		if (work != null) {
-			models.add(work);
-		}
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getInitialTaskForWork());
 
 		// Add work task
-		WorkTaskToTaskModel task = this.getCastedModel().getWorkTask();
-		if (task != null) {
-			models.add(task);
-		}
+		EclipseUtil.addToList(models, this.getCastedModel().getWorkTask());
 
 		// Add task inputs, handled escalations, previous tasks
 		models.addAll(this.getCastedModel().getTaskFlowInputs());

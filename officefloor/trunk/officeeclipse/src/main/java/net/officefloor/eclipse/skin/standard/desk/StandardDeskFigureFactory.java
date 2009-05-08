@@ -17,11 +17,6 @@
 package net.officefloor.eclipse.skin.standard.desk;
 
 import net.officefloor.eclipse.skin.desk.DeskFigureFactory;
-import net.officefloor.eclipse.skin.desk.WorkTaskFigure;
-import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
-import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
-import net.officefloor.eclipse.skin.desk.WorkFigure;
-import net.officefloor.eclipse.skin.desk.WorkFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
@@ -32,6 +27,14 @@ import net.officefloor.eclipse.skin.desk.TaskFigure;
 import net.officefloor.eclipse.skin.desk.TaskFigureContext;
 import net.officefloor.eclipse.skin.desk.TaskFlowFigure;
 import net.officefloor.eclipse.skin.desk.TaskFlowFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkFigure;
+import net.officefloor.eclipse.skin.desk.WorkFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkTaskFigure;
+import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
+
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.PolylineConnection;
 
 /**
  * Standard {@link DeskFigureFactory}.
@@ -74,8 +77,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	}
 
 	@Override
-	public TaskFigure createTaskFigure(
-			final TaskFigureContext context) {
+	public TaskFigure createTaskFigure(final TaskFigureContext context) {
 		return new StandardTaskFigure(context);
 	}
 
@@ -86,9 +88,24 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	}
 
 	@Override
-	public TaskFlowFigure createTaskFlowFigure(
-			TaskFlowFigureContext context) {
+	public TaskFlowFigure createTaskFlowFigure(TaskFlowFigureContext context) {
 		return new StandardTaskFlowFigure(context);
+	}
+
+	@Override
+	public void decorateWorkTaskToTaskFigure(PolylineConnection figure) {
+		figure.setForegroundColor(ColorConstants.lightGray);
+	}
+
+	@Override
+	public void decorateWorkTaskObjectToExternalManagedObjectFigure(
+			PolylineConnection figure) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateTaskFlowToTaskFigure(PolylineConnection figure) {
+		// TODO provide decoration based on instigation strategy
 	}
 
 }

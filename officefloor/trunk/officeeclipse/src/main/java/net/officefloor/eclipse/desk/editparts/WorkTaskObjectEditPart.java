@@ -24,8 +24,8 @@ import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.desk.WorkTaskObjectModel;
-import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectModel.WorkTaskObjectEvent;
 
 import org.eclipse.gef.EditPart;
@@ -48,11 +48,8 @@ public class WorkTaskObjectEditPart
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		WorkTaskObjectToExternalManagedObjectModel source = this
-				.getCastedModel().getExternalManagedObject();
-		if (source != null) {
-			models.add(source);
-		}
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getExternalManagedObject());
 	}
 
 	@Override

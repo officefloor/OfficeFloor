@@ -3,6 +3,7 @@ package net.officefloor.eclipse;
 import net.officefloor.compile.OfficeFloorCompiler;
 import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorSkin;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorSkin;
@@ -92,20 +93,19 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	 * Creates a new {@link OfficeFloorCompiler} for the input
 	 * {@link AbstractOfficeFloorEditPart}.
 	 * 
-	 * @param editPart
-	 *            {@link AbstractOfficeFloorEditPart}.
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor}.
 	 * @return {@link OfficeFloorCompiler}.
 	 */
 	public OfficeFloorCompiler createCompiler(
-			final AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+			final AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Create the compiler
 		OfficeFloorCompiler compiler = OfficeFloorCompiler
 				.newOfficeFloorCompiler();
 
 		// Obtain the class loader for the project
-		ClassLoader classLoader = ProjectClassLoader.create(editPart
-				.getEditor());
+		ClassLoader classLoader = ProjectClassLoader.create(editor);
 		compiler.setClassLoader(classLoader);
 
 		// Provide error reporting
@@ -115,14 +115,14 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 			public void addIssue(LocationType locationType, String location,
 					AssetType assetType, String assetName,
 					String issueDescription) {
-				editPart.messageError(issueDescription);
+				editor.messageError(issueDescription);
 			}
 
 			@Override
 			public void addIssue(LocationType locationType, String location,
 					AssetType assetType, String assetName,
 					String issueDescription, Throwable cause) {
-				editPart.messageError(issueDescription + "\n\n"
+				editor.messageError(issueDescription + "\n\n"
 						+ cause.getClass().getSimpleName() + ": "
 						+ cause.getMessage());
 			}

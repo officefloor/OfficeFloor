@@ -244,4 +244,43 @@ public interface DeskChanges {
 	Change<ExternalManagedObjectModel> removeExternalManagedObject(
 			ExternalManagedObjectModel externalManagedObject);
 
+	/**
+	 * Links the {@link WorkTaskObjectModel} to be the
+	 * {@link ExternalManagedObjectModel}.
+	 * 
+	 * @param workTaskObject
+	 *            {@link WorkTaskObjectModel}.
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to add a
+	 *         {@link WorkTaskObjectToExternalManagedObjectModel}.
+	 */
+	Change<WorkTaskObjectToExternalManagedObjectModel> linkWorkTaskObjectToExternalManagedObject(
+			WorkTaskObjectModel workTaskObject,
+			ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Links the {@link TaskFlowModel} to the {@link TaskModel}.
+	 * 
+	 * @param taskFlow
+	 *            {@link TaskFlowModel}.
+	 * @param task
+	 *            {@link TaskModel}.
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 * @return {@link Change} to add a {@link TaskFlowToTaskModel}.
+	 */
+	Change<TaskFlowToTaskModel> linkTaskFlowToTask(TaskFlowModel taskFlow,
+			TaskModel task, FlowInstigationStrategyEnum instigationStrategy);
+
+	/**
+	 * Removes the {@link TaskFlowToTaskModel}.
+	 * 
+	 * @param taskFlowToTask
+	 *            {@link TaskFlowToTaskModel}.
+	 * @return {@link TaskFlowToTaskModel} to remove.
+	 */
+	Change<TaskFlowToTaskModel> removeTaskFlowToTask(
+			TaskFlowToTaskModel taskFlowToTask);
+
 }

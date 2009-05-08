@@ -24,7 +24,6 @@ import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
 
-import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editpolicies.GraphicalNodeEditPolicy;
@@ -36,8 +35,7 @@ import org.eclipse.gef.requests.ReconnectRequest;
  * 
  * @author Daniel
  */
-// TODO rename to OfficeFloorGraphicalNodeEditPolicy
-public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
+public class OfficeFloorGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 
 	/**
 	 * {@link Link} instances.
@@ -123,8 +121,9 @@ public class ConnectionGraphicalNodeEditPolicy extends GraphicalNodeEditPolicy {
 		}
 
 		// Create the change to connect source to target
-		Change<?> change = connectLink.factory.createChange(source, target);
-		if (change != null) {
+		Change<?> change = connectLink.factory.createChange(source, target,
+				request);
+		if (change == null) {
 			return null; // must have change
 		}
 
