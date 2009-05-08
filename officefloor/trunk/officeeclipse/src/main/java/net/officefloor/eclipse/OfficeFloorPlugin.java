@@ -1,10 +1,15 @@
 package net.officefloor.eclipse;
 
+import net.officefloor.compile.OfficeFloorCompiler;
+import net.officefloor.compile.issues.CompilerIssues;
+import net.officefloor.eclipse.classpath.ProjectClassLoader;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorSkin;
 import net.officefloor.eclipse.skin.standard.StandardOfficeFloorSkin;
+import net.officefloor.frame.api.build.OfficeFloorIssues.AssetType;
 
-import org.eclipse.ui.plugin.*;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -16,7 +21,7 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	 * Plug-in Id for the {@link OfficeFloorPlugin}.
 	 */
 	public static final String PLUGIN_ID = "net.officefloor.eclipse";
-	
+
 	/**
 	 * Shared instance.
 	 */
@@ -82,4 +87,49 @@ public class OfficeFloorPlugin extends AbstractUIPlugin {
 	public static OfficeFloorSkin getSkin() {
 		return skin;
 	}
+
+	/**
+	 * Creates a new {@link OfficeFloorCompiler} for the input
+	 * {@link AbstractOfficeFloorEditPart}.
+	 * 
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart}.
+	 * @return {@link OfficeFloorCompiler}.
+	 */
+	public OfficeFloorCompiler createCompiler(
+			final AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+
+		// Create the compiler
+		OfficeFloorCompiler compiler = OfficeFloorCompiler
+				.newOfficeFloorCompiler();
+
+		// Obtain the class loader for the project
+		ClassLoader classLoader = ProjectClassLoader.create(editPart
+				.getEditor());
+		compiler.setClassLoader(classLoader);
+
+		// Provide error reporting
+		compiler.setCompilerIssues(new CompilerIssues() {
+
+			@Override
+			public void addIssue(LocationType locationType, String location,
+					AssetType assetType, String assetName,
+					String issueDescription) {
+				editPart.messageError(issueDescription);
+			}
+
+			@Override
+			public void addIssue(LocationType locationType, String location,
+					AssetType assetType, String assetName,
+					String issueDescription, Throwable cause) {
+				editPart.messageError(issueDescription + "\n\n"
+						+ cause.getClass().getSimpleName() + ": "
+						+ cause.getMessage());
+			}
+		});
+
+		// Return the compiler
+		return compiler;
+	}
+
 }

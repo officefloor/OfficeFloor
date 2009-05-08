@@ -52,6 +52,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.NodeEditPart;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
@@ -288,6 +289,13 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 */
 
 	@Override
+	public RootEditPart getRoot() {
+		// Overridden to prevent NPE issues.
+		// NPE occurs when undo'ing delete operations involving connections.
+		return this.getEditor().getRootEditPart();
+	}
+
+	@Override
 	protected void createEditPolicies() {
 		// Disallow resizing
 		this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
@@ -473,7 +481,8 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 * Refresh the visuals.
 	 */
 	protected void refreshVisuals() {
-		// Specify location for the model
+
+		// Obtain model for location to refresh
 		Model model = this.getCastedModel();
 
 		// Obtain the size of the figure

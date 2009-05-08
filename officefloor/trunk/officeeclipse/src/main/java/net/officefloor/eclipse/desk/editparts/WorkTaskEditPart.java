@@ -22,9 +22,10 @@ import java.util.List;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.action.OperationUtil;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.desk.operations.CreateFlowItemFromDeskTaskOperation;
+import net.officefloor.eclipse.desk.operations.CreateTaskFromWorkTaskOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskModel.WorkTaskEvent;
 
@@ -87,8 +88,15 @@ public class WorkTaskEditPart
 
 	@Override
 	public void createAsNewTask() {
-		OperationUtil.execute(new CreateFlowItemFromDeskTaskOperation(), 100,
-				100, this);
+
+		// Obtain the desk changes
+		DeskChanges deskChanges = (DeskChanges) this.getEditor()
+				.getModelChanges();
+
+		// Execute operation to add as task (to right of this work task)
+		OperationUtil.execute(new CreateTaskFromWorkTaskOperation(deskChanges),
+				this.getCastedModel().getX() + 100, this.getCastedModel()
+						.getY(), this);
 	}
 
 }
