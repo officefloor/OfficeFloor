@@ -37,7 +37,7 @@ import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
 import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.AddWorkOperation;
-import net.officefloor.eclipse.desk.operations.CreateFlowItemFromDeskTaskOperation;
+import net.officefloor.eclipse.desk.operations.CreateTaskFromWorkTaskOperation;
 import net.officefloor.eclipse.desk.operations.RefreshWorkOperation;
 import net.officefloor.eclipse.desk.operations.ToggleFlowItemPublicOperation;
 import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperation;
@@ -146,11 +146,19 @@ public class DeskEditor extends
 	@Override
 	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
 
-		// Allow deleting the work
+		// Allow deleting work
 		policy.addDelete(WorkModel.class, new DeleteChangeFactory<WorkModel>() {
 			@Override
 			public Change<WorkModel> createChange(WorkModel target) {
 				return DeskEditor.this.getModelChanges().removeWork(target);
+			}
+		});
+
+		// Allow deleting task
+		policy.addDelete(TaskModel.class, new DeleteChangeFactory<TaskModel>() {
+			@Override
+			public Change<TaskModel> createChange(TaskModel target) {
+				return DeskEditor.this.getModelChanges().removeTask(target);
 			}
 		});
 	}
@@ -176,8 +184,8 @@ public class DeskEditor extends
 		// Refresh work action
 		list.add(new RefreshWorkOperation());
 
-		// Flow item operations
-		list.add(new CreateFlowItemFromDeskTaskOperation());
+		// Task operations
+		list.add(new CreateTaskFromWorkTaskOperation(deskChanges));
 		list.add(new ToggleFlowItemPublicOperation());
 
 		// Toggle as parameter

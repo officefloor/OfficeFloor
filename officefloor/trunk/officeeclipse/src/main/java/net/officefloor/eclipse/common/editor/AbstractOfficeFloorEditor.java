@@ -46,6 +46,7 @@ import org.eclipse.gef.DefaultEditDomain;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
 import org.eclipse.gef.GraphicalViewer;
+import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.Tool;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.commands.CommandStack;
@@ -86,6 +87,11 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 * Root {@link Model} being edited.
 	 */
 	private M rootModel;
+
+	/**
+	 * Root {@link EditPart}.
+	 */
+	private RootEditPart rootEditPart;
 
 	/**
 	 * Provides change functionality for the {@link Model}.
@@ -162,6 +168,15 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 */
 	public M getCastedModel() {
 		return this.rootModel;
+	}
+
+	/**
+	 * Obtains the {@link RootEditPart}.
+	 * 
+	 * @return {@link RootEditPart}.
+	 */
+	public RootEditPart getRootEditPart() {
+		return this.rootEditPart;
 	}
 
 	/**
@@ -279,14 +294,17 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	protected void initializeGraphicalViewer() {
 		super.initializeGraphicalViewer();
 
+		// Make the root edit part available for return
+		this.rootEditPart = new ScalableFreeformRootEditPart();
+
 		// Initialise the graphical viewer
 		GraphicalViewer viewer = this.getGraphicalViewer();
-		viewer.setRootEditPart(new ScalableFreeformRootEditPart());
+		viewer.setRootEditPart(this.rootEditPart);
 		viewer.setKeyHandler(new CommonGraphicalViewerKeyHandler(viewer));
 
-		// Load the model
-		viewer.setEditPartFactory(new WrappingEditPartFactory(this
-				.createEditPartFactory(), this));
+		// Load the edit part factory and initialise contents
+		this.populateEditPartTypes(this.modelTypeToEditPartTypeMap);
+		viewer.setEditPartFactory(this);
 		viewer.setContents(this.getCastedModel());
 
 		// Specify if capable of dropping items into editor
@@ -392,40 +410,6 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	protected abstract void populateOperations(List<Operation> list);
 
 	/**
-	 * Allow to override to specify another {@link EditPartFactory}.
-	 * 
-	 * @return <code>this</code> if not overridden.
-	 */
-	protected EditPartFactory createEditPartFactory() {
-
-		// Populate the map
-		this.modelTypeToEditPartTypeMap.clear();
-		this.populateEditPartTypes(this.modelTypeToEditPartTypeMap);
-
-		// Wrap to ensure model is set on the edit part
-		return new EditPartFactory() {
-			public EditPart createEditPart(EditPart context, Object model) {
-
-				// Determine if wrapping
-				EditPart editPart = AbstractOfficeFloorEditor.this
-						.createEditPart(context, model);
-
-				// Ensure created an edit part
-				if (editPart == null) {
-					System.out.println("Unknown model for EditPart - "
-							+ model.getClass().getName());
-				}
-
-				// Set model on the Edit Part
-				editPart.setModel(model);
-
-				// Return the Edit Part
-				return editPart;
-			}
-		};
-	}
-
-	/**
 	 * Use the model type to {@link EditPart} map to create the appropriate
 	 * {@link EditPart} via its default constructor.
 	 */
@@ -451,6 +435,17 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 		// Create the instance of the edit part
 		EditPart editPart = EclipseUtil.createInstance(editPartType);
+
+		// Load in the model
+		editPart.setModel(model);
+
+		// Enrich the edit part
+		if (editPart instanceof AbstractOfficeFloorEditPart) {
+			AbstractOfficeFloorEditPart<?, ?, ?> officeFloorEditPart = (AbstractOfficeFloorEditPart<?, ?, ?>) editPart;
+
+			// Specify details on edit part
+			officeFloorEditPart.setOfficeFloorEditor(this);
+		}
 
 		// Return the edit part
 		return editPart;
@@ -624,59 +619,6 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		@Override
 		public Point getLocation() {
 			return super.getLocation();
-		}
-	}
-
-	/**
-	 * Wraps the {@link EditPartFactory} to provide additional details to the
-	 * {@link EditPart} instances created.
-	 */
-	private class WrappingEditPartFactory implements EditPartFactory {
-
-		/**
-		 * {@link EditPartFactory} that is being wrapped.
-		 */
-		protected final EditPartFactory editPartFactory;
-
-		/**
-		 * Editor.
-		 */
-		protected final AbstractOfficeFloorEditor<?, ?> editor;
-
-		/**
-		 * Initiate with the {@link EditPartFactory} being wrapped.
-		 * 
-		 * @param editPartFactory
-		 *            {@link EditPartFactory} to be wrapped.
-		 * @param editor
-		 *            Editor.
-		 */
-		public WrappingEditPartFactory(EditPartFactory editPartFactory,
-				AbstractOfficeFloorEditor<?, ?> editor) {
-			this.editPartFactory = editPartFactory;
-			this.editor = editor;
-		}
-
-		/*
-		 * ================== EditPartFactory ============================
-		 */
-
-		@Override
-		public EditPart createEditPart(EditPart context, Object model) {
-			// Create the Edit Part
-			EditPart editPart = this.editPartFactory.createEditPart(context,
-					model);
-
-			// Enrich the edit part
-			if (editPart instanceof AbstractOfficeFloorEditPart) {
-				AbstractOfficeFloorEditPart<?, ?, ?> officeFloorEditPart = (AbstractOfficeFloorEditPart<?, ?, ?>) editPart;
-
-				// Specify details on edit part
-				officeFloorEditPart.setOfficeFloorEditor(this.editor);
-			}
-
-			// Return the Edit Part
-			return editPart;
 		}
 	}
 
