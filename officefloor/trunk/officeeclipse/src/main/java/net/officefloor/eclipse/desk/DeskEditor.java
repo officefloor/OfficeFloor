@@ -161,6 +161,28 @@ public class DeskEditor extends
 				return DeskEditor.this.getModelChanges().removeTask(target);
 			}
 		});
+
+		// Allow deleting external managed object
+		policy.addDelete(ExternalManagedObjectModel.class,
+				new DeleteChangeFactory<ExternalManagedObjectModel>() {
+					@Override
+					public Change<ExternalManagedObjectModel> createChange(
+							ExternalManagedObjectModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeExternalManagedObject(target);
+					}
+				});
+
+		// Allow deleting external flow
+		policy.addDelete(ExternalFlowModel.class,
+				new DeleteChangeFactory<ExternalFlowModel>() {
+					@Override
+					public Change<ExternalFlowModel> createChange(
+							ExternalFlowModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeExternalFlow(target);
+					}
+				});
 	}
 
 	@Override
@@ -177,9 +199,9 @@ public class DeskEditor extends
 		DeskChanges deskChanges = new DeskChangesImpl(desk);
 
 		// Add model actions
-		list.add(new AddExternalManagedObjectOperation());
 		list.add(new AddWorkOperation(deskChanges));
 		list.add(new AddExternalFlowOperation(deskChanges));
+		list.add(new AddExternalManagedObjectOperation(deskChanges));
 
 		// Refresh work action
 		list.add(new RefreshWorkOperation());
