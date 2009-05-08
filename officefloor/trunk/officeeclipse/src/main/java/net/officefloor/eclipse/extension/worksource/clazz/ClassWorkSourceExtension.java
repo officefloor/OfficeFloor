@@ -20,7 +20,6 @@ import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
-import net.officefloor.eclipse.common.dialog.input.InputFilter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
@@ -33,7 +32,6 @@ import net.officefloor.plugin.work.clazz.ClassWork;
 import net.officefloor.plugin.work.clazz.ClassWorkSource;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
@@ -78,12 +76,7 @@ public class ClassWorkSourceExtension implements
 
 		// Provide listing of class names
 		ClasspathFilter filter = new ClasspathFilter();
-		filter.addJavaElementFilter(new InputFilter<IJavaElement>() {
-			@Override
-			public boolean isFilter(IJavaElement item) {
-				return !(item instanceof ITypeRoot);
-			}
-		});
+		filter.addJavaClassFilter();
 		new InputHandler<String>(page, new ClasspathSelectionInput(context
 				.getProject(), filter), new InputListener() {
 

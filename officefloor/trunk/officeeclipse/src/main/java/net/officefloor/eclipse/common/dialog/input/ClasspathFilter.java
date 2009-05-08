@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ITypeRoot;
 
 /**
  * Provides filtering based on the various class path types.
@@ -172,6 +173,18 @@ public class ClasspathFilter {
 
 		// Return the included items
 		return includedItems.toArray();
+	}
+
+	/**
+	 * Facade method to filter to just classes.
+	 */
+	public void addJavaClassFilter() {
+		this.addJavaElementFilter(new InputFilter<IJavaElement>() {
+			@Override
+			public boolean isFilter(IJavaElement item) {
+				return !(item instanceof ITypeRoot);
+			}
+		});
 	}
 
 	/**
