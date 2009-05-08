@@ -51,8 +51,7 @@ public interface OfficeFloorFigure {
 	 *            {@link ConnectionModel} type.
 	 * @return {@link ConnectionAnchor}.
 	 */
-	ConnectionAnchor getSourceConnectionAnchor(
-			Class<? extends ConnectionModel> connectionModelType);
+	ConnectionAnchor getSourceConnectionAnchor(Class<?> connectionModelType);
 
 	/**
 	 * Obtains the target {@link ConnectionAnchor} for the particular
@@ -62,7 +61,6 @@ public interface OfficeFloorFigure {
 	 *            {@link ConnectionModel} type.
 	 * @return {@link ConnectionAnchor}.
 	 */
-	ConnectionAnchor getTargetConnectionAnchor(
-			Class<? extends ConnectionModel> connectionModelType);
+	ConnectionAnchor getTargetConnectionAnchor(Class<?> connectionModelType);
 
 }

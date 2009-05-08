@@ -21,8 +21,7 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.section.SubSectionInputFigure;
 import net.officefloor.eclipse.skin.section.SubSectionInputFigureContext;
 import net.officefloor.model.section.SubSectionInputModel;
@@ -37,12 +36,13 @@ import org.eclipse.gef.EditPart;
  */
 public class SubSectionInputEditPart
 		extends
-		AbstractOfficeFloorNodeEditPart<SubSectionInputModel, SubSectionInputFigure>
+		AbstractOfficeFloorEditPart<SubSectionInputModel, SubSectionInputEvent, SubSectionInputFigure>
 		implements SubSectionInputFigureContext {
 
 	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Not a source
+	protected SubSectionInputFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+				.createSubSectionInputFigure(this);
 	}
 
 	@Override
@@ -51,33 +51,25 @@ public class SubSectionInputEditPart
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<SubSectionInputEvent>(
-				SubSectionInputEvent.values()) {
-			@Override
-			protected void handlePropertyChange(SubSectionInputEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_IS_PUBLIC:
-					SubSectionInputEditPart.this.getOfficeFloorFigure()
-							.setIsPublic(
-									SubSectionInputEditPart.this
-											.getCastedModel().getIsPublic());
-					break;
-				case ADD_SUB_SECTION_OUTPUT:
-				case REMOVE_SUB_SECTION_OUTPUT:
-					SubSectionInputEditPart.this.refreshTargetConnections();
-					break;
-				}
-			}
-		});
+	protected Class<SubSectionInputEvent> getPropertyChangeEventType() {
+		return SubSectionInputEvent.class;
 	}
 
 	@Override
-	protected SubSectionInputFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
-				.createSubSectionInputFigure(this);
+	protected void handlePropertyChange(SubSectionInputEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_IS_PUBLIC:
+			SubSectionInputEditPart.this.getOfficeFloorFigure()
+					.setIsPublic(
+							SubSectionInputEditPart.this.getCastedModel()
+									.getIsPublic());
+			break;
+		case ADD_SUB_SECTION_OUTPUT:
+		case REMOVE_SUB_SECTION_OUTPUT:
+			SubSectionInputEditPart.this.refreshTargetConnections();
+			break;
+		}
 	}
 
 	/*

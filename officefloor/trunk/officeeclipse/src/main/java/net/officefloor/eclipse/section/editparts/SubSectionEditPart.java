@@ -20,60 +20,28 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.section.operations.RemoveSubSectionOperation;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.section.SubSectionFigureContext;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionModel.SubSectionEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.Request;
-import org.eclipse.gef.commands.Command;
 
 /**
  * {@link EditPart} for the {@link SubSectionModel}.
  * 
  * @author Daniel
  */
-public class SubSectionEditPart extends
-		AbstractOfficeFloorEditPart<SubSectionModel, OfficeFloorFigure>
-		implements RemovableEditPart, SubSectionFigureContext {
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<SubSectionEvent>(SubSectionEvent
-				.values()) {
-			@Override
-			protected void handlePropertyChange(SubSectionEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_SUB_SECTION_INPUT:
-				case REMOVE_SUB_SECTION_INPUT:
-				case ADD_SUB_SECTION_OUTPUT:
-				case REMOVE_SUB_SECTION_OUTPUT:
-				case ADD_SUB_SECTION_OBJECT:
-				case REMOVE_SUB_SECTION_OBJECT:
-					SubSectionEditPart.this.refreshChildren();
-					break;
-				}
-			}
-		});
-	}
+public class SubSectionEditPart
+		extends
+		AbstractOfficeFloorEditPart<SubSectionModel, SubSectionEvent, OfficeFloorFigure>
+		implements SubSectionFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
 				.createSubSectionFigure(this);
-	}
-
-	@Override
-	protected boolean isFreeformFigure() {
-		return true;
 	}
 
 	@Override
@@ -84,29 +52,23 @@ public class SubSectionEditPart extends
 	}
 
 	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveSubSectionOperation();
+	protected Class<SubSectionEvent> getPropertyChangeEventType() {
+		return SubSectionEvent.class;
 	}
 
 	@Override
-	protected Command handleDoubleClick(Request request) {
-
-		// TODO handle opening the sub section
-
-		// // Determine if open the desk
-		// String deskPath = this.getCastedModel().getDesk();
-		// if (deskPath != null) {
-		// // Is desk, so open it
-		// this.openClasspathFile(deskPath, DeskEditor.EDITOR_ID);
-		// return null;
-		// }
-		//
-		// // Not a desk, so must be a room
-		// String roomPath = this.getCastedModel().getRoom();
-		// this.openClasspathFile(roomPath, RoomEditor.EDITOR_ID);
-
-		// No command, as no need for undo
-		return null;
+	protected void handlePropertyChange(SubSectionEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_SUB_SECTION_INPUT:
+		case REMOVE_SUB_SECTION_INPUT:
+		case ADD_SUB_SECTION_OUTPUT:
+		case REMOVE_SUB_SECTION_OUTPUT:
+		case ADD_SUB_SECTION_OBJECT:
+		case REMOVE_SUB_SECTION_OBJECT:
+			SubSectionEditPart.this.refreshChildren();
+			break;
+		}
 	}
 
 	/*

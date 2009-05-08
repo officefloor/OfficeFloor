@@ -20,59 +20,24 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
-import net.officefloor.eclipse.officefloor.operations.RemoveOfficeFloorManagedObjectSourceOperation;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigureContext;
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel.OfficeFloorManagedObjectSourceEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorManagedObjectSourceModel}.
  * 
  * @author Daniel
  */
-// TODO rename to OfficeFloorManagedObjectSourceEditPart
 public class OfficeFloorManagedObjectSourceEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<OfficeFloorManagedObjectSourceModel, OfficeFloorFigure>
-		implements RemovableEditPart, OfficeFloorManagedObjectSourceFigureContext {
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers
-				.add(new PropertyChangeHandler<OfficeFloorManagedObjectSourceEvent>(
-						OfficeFloorManagedObjectSourceEvent.values()) {
-					@Override
-					protected void handlePropertyChange(
-							OfficeFloorManagedObjectSourceEvent property,
-							PropertyChangeEvent evt) {
-						switch (property) {
-						case CHANGE_MANAGING_OFFICE:
-							OfficeFloorManagedObjectSourceEditPart.this
-									.refreshSourceConnections();
-							break;
-						case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
-						case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
-						case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
-						case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
-							OfficeFloorManagedObjectSourceEditPart.this.refreshChildren();
-							break;
-						}
-					}
-				});
-	}
+		AbstractOfficeFloorEditPart<OfficeFloorManagedObjectSourceModel, OfficeFloorManagedObjectSourceEvent, OfficeFloorFigure>
+		implements OfficeFloorManagedObjectSourceFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
@@ -81,45 +46,11 @@ public class OfficeFloorManagedObjectSourceEditPart
 	}
 
 	@Override
-	protected boolean isFreeformFigure() {
-		return true;
-	}
-
-	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel()
 				.getOfficeFloorManagedObjectSourceFlows());
 		childModels.addAll(this.getCastedModel()
 				.getOfficeFloorManagedObjectSourceTeams());
-	}
-
-	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// No target connections
-	}
-
-	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			@Override
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-				// Create the connection
-				OfficeFloorManagedObjectSourceToDeployedOfficeModel conn = new OfficeFloorManagedObjectSourceToDeployedOfficeModel();
-				conn
-						.setOfficeFloorManagedObjectSource((OfficeFloorManagedObjectSourceModel) source);
-				conn.setManagingOffice((DeployedOfficeModel) target);
-				conn.connect();
-
-				// Return the connection
-				return conn;
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(DeployedOfficeModel.class);
 	}
 
 	@Override
@@ -132,8 +63,26 @@ public class OfficeFloorManagedObjectSourceEditPart
 	}
 
 	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveOfficeFloorManagedObjectSourceOperation();
+	protected Class<OfficeFloorManagedObjectSourceEvent> getPropertyChangeEventType() {
+		return OfficeFloorManagedObjectSourceEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(
+			OfficeFloorManagedObjectSourceEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_MANAGING_OFFICE:
+			OfficeFloorManagedObjectSourceEditPart.this
+					.refreshSourceConnections();
+			break;
+		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
+		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
+		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
+		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
+			OfficeFloorManagedObjectSourceEditPart.this.refreshChildren();
+			break;
+		}
 	}
 
 	/*

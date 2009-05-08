@@ -669,7 +669,7 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 
 			// Enrich the edit part
 			if (editPart instanceof AbstractOfficeFloorEditPart) {
-				AbstractOfficeFloorEditPart<?, ?> officeFloorEditPart = (AbstractOfficeFloorEditPart<?, ?>) editPart;
+				AbstractOfficeFloorEditPart<?, ?, ?> officeFloorEditPart = (AbstractOfficeFloorEditPart<?, ?, ?>) editPart;
 
 				// Specify details on edit part
 				officeFloorEditPart.setOfficeFloorEditor(this.editor);

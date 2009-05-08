@@ -65,7 +65,7 @@ public class FileConfigurationItem implements ConfigurationItem {
 	 *            {@link AbstractOfficeFloorEditPart}.
 	 * @return {@link IFile}.
 	 */
-	public static IFile getFile(AbstractOfficeFloorEditPart<?, ?> editPart) {
+	public static IFile getFile(AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
 		return getFile(editPart.getEditor().getEditorInput());
 	}
 
@@ -77,7 +77,8 @@ public class FileConfigurationItem implements ConfigurationItem {
 	 *            {@link AbstractOfficeFloorEditPart}.
 	 * @return {@link IProject}.
 	 */
-	public static IProject getProject(AbstractOfficeFloorEditPart<?, ?> editPart) {
+	public static IProject getProject(
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
 		return getFile(editPart).getProject();
 	}
 

@@ -20,11 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.desk.operations.RemoveExternalManagedObjectOperation;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
@@ -39,8 +35,8 @@ import org.eclipse.gef.EditPart;
  */
 public class ExternalManagedObjectEditPart
 		extends
-		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel, OfficeFloorFigure>
-		implements RemovableEditPart, ExternalManagedObjectFigureContext {
+		AbstractOfficeFloorEditPart<ExternalManagedObjectModel, ExternalManagedObjectEvent, OfficeFloorFigure>
+		implements ExternalManagedObjectFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
@@ -49,41 +45,24 @@ public class ExternalManagedObjectEditPart
 	}
 
 	@Override
-	protected boolean isFreeformFigure() {
-		return true;
-	}
-
-	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Not a source
-	}
-
-	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getTaskObjects());
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ExternalManagedObjectEvent>(
-				ExternalManagedObjectEvent.values()) {
-			protected void handlePropertyChange(
-					ExternalManagedObjectEvent property, PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_TASK_OBJECT:
-				case REMOVE_TASK_OBJECT:
-					ExternalManagedObjectEditPart.this
-							.refreshTargetConnections();
-					break;
-				}
-			}
-		});
+	protected Class<ExternalManagedObjectEvent> getPropertyChangeEventType() {
+		return ExternalManagedObjectEvent.class;
 	}
 
 	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveExternalManagedObjectOperation();
+	protected void handlePropertyChange(ExternalManagedObjectEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_TASK_OBJECT:
+		case REMOVE_TASK_OBJECT:
+			ExternalManagedObjectEditPart.this.refreshTargetConnections();
+			break;
+		}
 	}
 
 	/*

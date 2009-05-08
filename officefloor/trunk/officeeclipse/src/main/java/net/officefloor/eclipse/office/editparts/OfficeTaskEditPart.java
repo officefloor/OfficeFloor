@@ -20,23 +20,15 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.office.models.PostTaskAdministrationJointPointModel;
 import net.officefloor.eclipse.office.models.PreTaskAdministrationJointPointModel;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.OfficeTaskFigureContext;
-import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.office.OfficeTaskModel.OfficeTaskEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.Request;
-import org.eclipse.gef.commands.Command;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link OfficeTaskModel}.
@@ -45,8 +37,8 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class OfficeTaskEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<OfficeTaskModel, OfficeFloorFigure>
-		implements RemovableEditPart, OfficeTaskFigureContext {
+		AbstractOfficeFloorEditPart<OfficeTaskModel, OfficeTaskEvent, OfficeFloorFigure>
+		implements OfficeTaskFigureContext {
 
 	/**
 	 * {@link PreTaskAdministrationJointPointModel}.
@@ -68,47 +60,16 @@ public class OfficeTaskEditPart
 	}
 
 	@Override
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
+				.createOfficeTaskFigure(this);
+	}
+
+	@Override
 	protected void populateModelChildren(List<Object> childModels) {
 		// Add flow item administration join points
 		childModels.add(this.preFlowItemAdministrationJoinPoint);
 		childModels.add(this.postFlowItemAdministrationJoinPoint);
-	}
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<OfficeTaskEvent>(OfficeTaskEvent
-				.values()) {
-			@Override
-			protected void handlePropertyChange(OfficeTaskEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				// case ADD_PRE_ADMIN_DUTY:
-				// case REMOVE_PRE_ADMIN_DUTY:
-				// FlowItemEditPart.this.preFlowItemAdministrationJoinPoint
-				// .triggerRefreshConnections();
-				// break;
-				// case ADD_POST_ADMIN_DUTY:
-				// case REMOVE_POST_ADMIN_DUTY:
-				// FlowItemEditPart.this.postFlowItemAdministrationJoinPoint
-				// .triggerRefreshConnections();
-				// break;
-				// case CHANGE_TEAM:
-				// FlowItemEditPart.this.refreshSourceConnections();
-				// break;
-				// case ADD_DUTY_FLOW:
-				// case REMOVE_DUTY_FLOW:
-				// FlowItemEditPart.this.refreshTargetConnections();
-				// break;
-				}
-			}
-		});
-	}
-
-	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
-				.createOfficeTaskFigure(this);
 	}
 
 	@Override
@@ -125,36 +86,32 @@ public class OfficeTaskEditPart
 	}
 
 	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-				// FlowItemToTeamModel conn = new FlowItemToTeamModel();
-				// conn.setFlowItem((FlowItemModel) source);
-				// conn.setTeam((ExternalTeamModel) target);
-				// conn.connect();
-				// return conn;
-				return null;
-			}
-		};
+	protected Class<OfficeTaskEvent> getPropertyChangeEventType() {
+		return OfficeTaskEvent.class;
 	}
 
 	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		// types.add(OfficeTeamModel.class);
-	}
-
-	@Override
-	public Operation getRemoveOperation() {
-//		return RemoveRoomOperation.createFromFlowItem();
-		return null;
-	}
-
-	@Override
-	protected Command handleDoubleClick(Request request) {
-//		OperationUtil.execute(OpenRoomOperation.createFromFlowItem(), -1, -1,
-//				this);
-		return null;
+	protected void handlePropertyChange(OfficeTaskEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		// case ADD_PRE_ADMIN_DUTY:
+		// case REMOVE_PRE_ADMIN_DUTY:
+		// FlowItemEditPart.this.preFlowItemAdministrationJoinPoint
+		// .triggerRefreshConnections();
+		// break;
+		// case ADD_POST_ADMIN_DUTY:
+		// case REMOVE_POST_ADMIN_DUTY:
+		// FlowItemEditPart.this.postFlowItemAdministrationJoinPoint
+		// .triggerRefreshConnections();
+		// break;
+		// case CHANGE_TEAM:
+		// FlowItemEditPart.this.refreshSourceConnections();
+		// break;
+		// case ADD_DUTY_FLOW:
+		// case REMOVE_DUTY_FLOW:
+		// FlowItemEditPart.this.refreshTargetConnections();
+		// break;
+		}
 	}
 
 	/*

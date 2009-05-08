@@ -20,19 +20,14 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeTeamFigureContext;
-import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamToOfficeFloorTeamModel;
-import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.DeployedOfficeTeamModel.DeployedOfficeTeamEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link DeployedOfficeTeamModel}.
@@ -41,29 +36,13 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class DeployedOfficeTeamEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<DeployedOfficeTeamModel, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<DeployedOfficeTeamModel, DeployedOfficeTeamEvent, OfficeFloorFigure>
 		implements DeployedOfficeTeamFigureContext {
 
 	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-				// Create and connection
-				DeployedOfficeTeamToOfficeFloorTeamModel conn = new DeployedOfficeTeamToOfficeFloorTeamModel();
-				conn.setDeployedOfficeTeam((DeployedOfficeTeamModel) source);
-				conn.setOfficeFloorTeam((OfficeFloorTeamModel) target);
-				conn.connect();
-
-				// Return the connection
-				return conn;
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(OfficeFloorTeamModel.class);
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
+				.createDeployedOfficeTeamFigure(this);
 	}
 
 	@Override
@@ -76,31 +55,18 @@ public class DeployedOfficeTeamEditPart
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// Never a target
+	protected Class<DeployedOfficeTeamEvent> getPropertyChangeEventType() {
+		return DeployedOfficeTeamEvent.class;
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<DeployedOfficeTeamEvent>(
-				DeployedOfficeTeamEvent.values()) {
-			@Override
-			protected void handlePropertyChange(
-					DeployedOfficeTeamEvent property, PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_OFFICE_FLOOR_TEAM:
-					DeployedOfficeTeamEditPart.this.refreshSourceConnections();
-					break;
-				}
-			}
-		});
-	}
-
-	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
-				.createDeployedOfficeTeamFigure(this);
+	protected void handlePropertyChange(DeployedOfficeTeamEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_OFFICE_FLOOR_TEAM:
+			DeployedOfficeTeamEditPart.this.refreshSourceConnections();
+			break;
+		}
 	}
 
 	/*

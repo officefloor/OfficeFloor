@@ -20,61 +20,28 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigureContext;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionModel.OfficeSectionEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.Request;
-import org.eclipse.gef.commands.Command;
 
 /**
  * {@link EditPart} for the {@link OfficeSectionModel}.
  * 
  * @author Daniel
  */
-public class OfficeSectionEditPart extends
-		AbstractOfficeFloorEditPart<OfficeSectionModel, OfficeFloorFigure>
-		implements RemovableEditPart, OfficeSectionFigureContext {
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<OfficeSectionEvent>(
-				OfficeSectionEvent.values()) {
-			@Override
-			protected void handlePropertyChange(OfficeSectionEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_OFFICE_SECTION_INPUT:
-				case REMOVE_OFFICE_SECTION_INPUT:
-				case ADD_OFFICE_SECTION_OUTPUT:
-				case REMOVE_OFFICE_SECTION_OUTPUT:
-				case ADD_OFFICE_SECTION_OBJECT:
-				case REMOVE_OFFICE_SECTION_OBJECT:
-				case ADD_OFFICE_SECTION_RESPONSIBILITY:
-				case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
-					OfficeSectionEditPart.this.refreshChildren();
-					break;
-				}
-			}
-		});
-	}
+public class OfficeSectionEditPart
+		extends
+		AbstractOfficeFloorEditPart<OfficeSectionModel, OfficeSectionEvent, OfficeFloorFigure>
+		implements OfficeSectionFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createOfficeSectionFigure(this);
-	}
-
-	@Override
-	protected boolean isFreeformFigure() {
-		return true;
 	}
 
 	@Override
@@ -87,16 +54,25 @@ public class OfficeSectionEditPart extends
 	}
 
 	@Override
-	public Operation getRemoveOperation() {
-		// return RemoveRoomOperation.createFromRoom();
-		return null;
+	protected Class<OfficeSectionEvent> getPropertyChangeEventType() {
+		return OfficeSectionEvent.class;
 	}
 
 	@Override
-	protected Command handleDoubleClick(Request request) {
-		// OperationUtil.execute(OpenRoomOperation.createFromRoom(), -1, -1,
-		// this);
-		return null;
+	protected void handlePropertyChange(OfficeSectionEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_OFFICE_SECTION_INPUT:
+		case REMOVE_OFFICE_SECTION_INPUT:
+		case ADD_OFFICE_SECTION_OUTPUT:
+		case REMOVE_OFFICE_SECTION_OUTPUT:
+		case ADD_OFFICE_SECTION_OBJECT:
+		case REMOVE_OFFICE_SECTION_OBJECT:
+		case ADD_OFFICE_SECTION_RESPONSIBILITY:
+		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
+			OfficeSectionEditPart.this.refreshChildren();
+			break;
+		}
 	}
 
 	/*

@@ -20,8 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeInputFigureContext;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
@@ -34,29 +33,10 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-// TODO rename to DeployedOfficeInputEditPart
 public class DeployedOfficeInputEditPart
 		extends
-		AbstractOfficeFloorNodeEditPart<DeployedOfficeInputModel, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<DeployedOfficeInputModel, DeployedOfficeInputEvent, OfficeFloorFigure>
 		implements DeployedOfficeInputFigureContext {
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<DeployedOfficeInputEvent>(
-				DeployedOfficeInputEvent.values()) {
-			@Override
-			protected void handlePropertyChange(
-					DeployedOfficeInputEvent property, PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
-				case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
-					DeployedOfficeInputEditPart.this.refreshTargetConnections();
-					break;
-				}
-			}
-		});
-	}
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
@@ -65,27 +45,36 @@ public class DeployedOfficeInputEditPart
 	}
 
 	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Never a source
-	}
-
-	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel()
 				.getOfficeFloorManagedObjectSourceFlows());
+	}
+
+	@Override
+	protected Class<DeployedOfficeInputEvent> getPropertyChangeEventType() {
+		return DeployedOfficeInputEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(DeployedOfficeInputEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
+		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_FLOW:
+			DeployedOfficeInputEditPart.this.refreshTargetConnections();
+			break;
+		}
 	}
 
 	/*
 	 * ====================== OfficeTaskFigureContext ====================
 	 */
 
-	// TODO rename to getSectionInputName
 	@Override
 	public String getWorkName() {
 		return this.getCastedModel().getSectionInputName();
 	}
 
-	// TODO remove as only require section input name
 	@Override
 	public String getTaskName() {
 		// return this.getCastedModel().getTaskName();

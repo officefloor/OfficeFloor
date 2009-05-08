@@ -43,7 +43,7 @@ public class WizardUtil {
 	 * @return <code>true</code> if successful.
 	 */
 	public static boolean runWizard(IWizard wizard,
-			AbstractOfficeFloorEditPart<?, ?> editPart) {
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
 
 		// Obtain the editor size
 		IEditorSite editorSite = editPart.getEditor().getEditorSite();

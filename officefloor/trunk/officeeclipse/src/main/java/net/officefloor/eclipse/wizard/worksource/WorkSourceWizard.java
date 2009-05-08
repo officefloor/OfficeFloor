@@ -62,7 +62,7 @@ public class WorkSourceWizard extends Wizard implements
 	 * @return {@link WorkInstance} or <code>null</code> if cancelled.
 	 */
 	public static WorkInstance getWorkInstance(
-			AbstractOfficeFloorEditPart<?, ?> editPart,
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			WorkInstance workInstance) {
 
 		// Obtain the project

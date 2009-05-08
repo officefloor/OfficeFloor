@@ -92,7 +92,7 @@ public class OfficeFloorLayoutEditPolicy extends XYLayoutEditPolicy {
 		Rectangle rectangle = (Rectangle) constraint;
 
 		// Obtain the edit part and its positional model
-		AbstractOfficeFloorEditPart<?, ?> editPart = (AbstractOfficeFloorEditPart<?, ?>) child;
+		AbstractOfficeFloorEditPart<?, ?, ?> editPart = (AbstractOfficeFloorEditPart<?, ?, ?>) child;
 
 		// Return the move command
 		return new MovePositionalModelCommand(editPart, rectangle.getLocation());

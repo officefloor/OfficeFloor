@@ -20,21 +20,15 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.section.SubSectionOutputFigureContext;
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.section.ExternalFlowModel;
-import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionOutputModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 import net.officefloor.model.section.SubSectionOutputModel.SubSectionOutputEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link SubSectionOutputModel}.
@@ -43,48 +37,13 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class SubSectionOutputEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<SubSectionOutputModel, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<SubSectionOutputModel, SubSectionOutputEvent, OfficeFloorFigure>
 		implements SubSectionOutputFigureContext {
 
 	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-
-				// TODO Handle always only connected to one type
-
-				if (target instanceof SubSectionInputModel) {
-					// Create the flow connection
-					SubSectionOutputToSubSectionInputModel conn = new SubSectionOutputToSubSectionInputModel();
-					conn.setSubSectionOutput((SubSectionOutputModel) source);
-					conn.setSubSectionInput((SubSectionInputModel) target);
-					conn.connect();
-					return conn;
-
-				} else if (target instanceof ExternalFlowModel) {
-					// Create the external flow connection
-					SubSectionOutputToExternalFlowModel conn = new SubSectionOutputToExternalFlowModel();
-					conn.setSubSectionOutput((SubSectionOutputModel) source);
-					conn.setExternalFlow((ExternalFlowModel) target);
-					conn.connect();
-					return conn;
-
-				} else {
-					throw new IllegalArgumentException("Unknown target '"
-							+ target.getClass().getName()
-							+ "' for "
-							+ SubSectionOutputEditPart.this.getClass()
-									.getName());
-				}
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(SubSectionInputModel.class);
-		types.add(ExternalFlowModel.class);
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+				.createSubSectionOutputFigure(this);
 	}
 
 	@Override
@@ -102,32 +61,19 @@ public class SubSectionOutputEditPart
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// Not a target
+	protected Class<SubSectionOutputEvent> getPropertyChangeEventType() {
+		return SubSectionOutputEvent.class;
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<SubSectionOutputEvent>(
-				SubSectionOutputEvent.values()) {
-			@Override
-			protected void handlePropertyChange(SubSectionOutputEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_EXTERNAL_FLOW:
-				case CHANGE_SUB_SECTION_INPUT:
-					SubSectionOutputEditPart.this.refreshSourceConnections();
-					break;
-				}
-			}
-		});
-	}
-
-	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
-				.createSubSectionOutputFigure(this);
+	protected void handlePropertyChange(SubSectionOutputEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_EXTERNAL_FLOW:
+		case CHANGE_SUB_SECTION_INPUT:
+			SubSectionOutputEditPart.this.refreshSourceConnections();
+			break;
+		}
 	}
 
 	/*

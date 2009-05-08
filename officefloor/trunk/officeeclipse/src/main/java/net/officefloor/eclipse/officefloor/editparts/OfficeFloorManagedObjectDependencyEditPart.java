@@ -17,11 +17,9 @@
 package net.officefloor.eclipse.officefloor.editparts;
 
 import java.beans.PropertyChangeEvent;
-import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
@@ -34,33 +32,29 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-// TODO rename to OfficeFloorManagedObjectDependencyEditPart
 public class OfficeFloorManagedObjectDependencyEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeFloorManagedObjectDependencyModel, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeFloorManagedObjectDependencyModel, OfficeFloorManagedObjectDependencyEvent, OfficeFloorFigure>
 		implements OfficeFloorManagedObjectDependencyFigureContext {
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers
-				.add(new PropertyChangeHandler<OfficeFloorManagedObjectDependencyEvent>(
-						OfficeFloorManagedObjectDependencyEvent.values()) {
-					@Override
-					protected void handlePropertyChange(
-							OfficeFloorManagedObjectDependencyEvent property,
-							PropertyChangeEvent evt) {
-						switch (property) {
-						// TODO provide connection handling
-						}
-					}
-				});
-	}
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createOfficeFloorManagedObjectDependencyFigure(this);
+	}
+
+	@Override
+	protected Class<OfficeFloorManagedObjectDependencyEvent> getPropertyChangeEventType() {
+		return OfficeFloorManagedObjectDependencyEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(
+			OfficeFloorManagedObjectDependencyEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		// TODO provide connection handling
+		}
 	}
 
 	/*

@@ -14,38 +14,27 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.operations;
+package net.officefloor.eclipse.common.editpolicies.officefloor;
 
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.operation.AbstractRemoveItemModelOperation;
-import net.officefloor.eclipse.desk.editparts.TaskEditPart;
-import net.officefloor.model.desk.DeskModel;
-import net.officefloor.model.desk.TaskModel;
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.commands.Command;
 
 /**
- * {@link Operation} to remove the {@link TaskModel}.
+ * {@link Command} factory for a double click.
  * 
  * @author Daniel
  */
-public class RemoveFlowItemOperation
-		extends
-		AbstractRemoveItemModelOperation<TaskEditPart, TaskModel, DeskModel> {
+public interface DoubleClickCommandFactory<M> {
 
 	/**
-	 * Initiate.
+	 * Creates {@link Command} for the double click.
+	 * 
+	 * @param model
+	 *            Model being double clicked.
+	 * @param editPart
+	 *            {@link EditPart} being double clicked.
+	 * @return {@link Command} or <code>null</code> if nothing to be done.
 	 */
-	public RemoveFlowItemOperation() {
-		super("Remove flow item", TaskEditPart.class);
-	}
-
-	@Override
-	protected void remove(TaskModel model, DeskModel parent) {
-		parent.removeTask(model);
-	}
-
-	@Override
-	protected void unremove(TaskModel model, DeskModel parent) {
-		parent.addTask(model);
-	}
+	Command createCommand(M model, EditPart editPart);
 
 }

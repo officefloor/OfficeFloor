@@ -20,53 +20,29 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeObjectFigureContext;
-import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectToOfficeFloorManagedObjectModel;
-import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 import net.officefloor.model.officefloor.DeployedOfficeObjectModel.DeployedOfficeObjectEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link DeployedOfficeObjectModel}.
  * 
  * @author Daniel
  */
-// TODO rename to DeployedOfficeObjectModel
 public class DeployedOfficeObjectEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<DeployedOfficeObjectModel, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<DeployedOfficeObjectModel, DeployedOfficeObjectEvent, OfficeFloorFigure>
 		implements DeployedOfficeObjectFigureContext {
 
 	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-				// Create the connection
-				DeployedOfficeObjectToOfficeFloorManagedObjectModel conn = new DeployedOfficeObjectToOfficeFloorManagedObjectModel();
-				conn
-						.setDeployedOfficeObject((DeployedOfficeObjectModel) source);
-				conn
-						.setOfficeFloorManagedObject((OfficeFloorManagedObjectModel) target);
-				conn.connect();
-
-				// Return the connection
-				return conn;
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(OfficeFloorManagedObjectModel.class);
+	protected OfficeFloorFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
+				.createDeployedOfficeObjectFigure(this);
 	}
 
 	@Override
@@ -79,31 +55,18 @@ public class DeployedOfficeObjectEditPart
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// Never a target
+	protected Class<DeployedOfficeObjectEvent> getPropertyChangeEventType() {
+		return DeployedOfficeObjectEvent.class;
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<DeployedOfficeObjectEvent>(
-				DeployedOfficeObjectEvent.values()) {
-			@Override
-			protected void handlePropertyChange(
-					DeployedOfficeObjectEvent property, PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT:
-					DeployedOfficeObjectEditPart.this.refreshSourceConnections();
-					break;
-				}
-			}
-		});
-	}
-
-	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
-				.createDeployedOfficeObjectFigure(this);
+	protected void handlePropertyChange(DeployedOfficeObjectEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT:
+			DeployedOfficeObjectEditPart.this.refreshSourceConnections();
+			break;
+		}
 	}
 
 	/*

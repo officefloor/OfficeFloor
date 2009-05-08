@@ -20,66 +20,28 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.office.OfficeEditor;
-import net.officefloor.eclipse.officefloor.operations.RemoveDeployedOfficeOperation;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigureContext;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.DeployedOfficeModel.DeployedOfficeEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.Request;
-import org.eclipse.gef.commands.Command;
 
 /**
  * {@link EditPart} for the {@link OfficeFloorOfficeModel}.
  * 
  * @author Daniel
  */
-// TODO rename to DeployedOfficeEditPart
-public class DeployedOfficeEditPart extends
-		AbstractOfficeFloorNodeEditPart<DeployedOfficeModel, OfficeFloorFigure>
-		implements RemovableEditPart, DeployedOfficeFigureContext {
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<DeployedOfficeEvent>(
-				DeployedOfficeEvent.values()) {
-			@Override
-			protected void handlePropertyChange(DeployedOfficeEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_DEPLOYED_OFFICE_OBJECT:
-				case REMOVE_DEPLOYED_OFFICE_OBJECT:
-				case ADD_DEPLOYED_OFFICE_TEAM:
-				case REMOVE_DEPLOYED_OFFICE_TEAM:
-				case ADD_DEPLOYED_OFFICE_INPUT:
-				case REMOVE_DEPLOYED_OFFICE_INPUT:
-					DeployedOfficeEditPart.this.refreshChildren();
-					break;
-				// case ADD_RESPONSIBLE_MANAGED_OBJECT:
-				// case REMOVE_RESPONSIBLE_MANAGED_OBJECT:
-				// OfficeEditPart.this.refreshTargetConnections();
-				// break;
-				}
-			}
-		});
-	}
+public class DeployedOfficeEditPart
+		extends
+		AbstractOfficeFloorEditPart<DeployedOfficeModel, DeployedOfficeEvent, OfficeFloorFigure>
+		implements DeployedOfficeFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createDeployedOfficeFigure(this);
-	}
-
-	@Override
-	protected boolean isFreeformFigure() {
-		return true;
 	}
 
 	@Override
@@ -90,26 +52,32 @@ public class DeployedOfficeEditPart extends
 	}
 
 	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Never a source
-	}
-
-	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		// models.addAll(this.getCastedModel().getResponsibleManagedObjects());
 	}
 
 	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveDeployedOfficeOperation();
+	protected Class<DeployedOfficeEvent> getPropertyChangeEventType() {
+		return DeployedOfficeEvent.class;
 	}
 
 	@Override
-	protected Command handleDoubleClick(Request request) {
-		// Open the office
-		this.openClasspathFile(this.getCastedModel().getDeployedOfficeName(),
-				OfficeEditor.EDITOR_ID);
-		return null;
+	protected void handlePropertyChange(DeployedOfficeEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_DEPLOYED_OFFICE_OBJECT:
+		case REMOVE_DEPLOYED_OFFICE_OBJECT:
+		case ADD_DEPLOYED_OFFICE_TEAM:
+		case REMOVE_DEPLOYED_OFFICE_TEAM:
+		case ADD_DEPLOYED_OFFICE_INPUT:
+		case REMOVE_DEPLOYED_OFFICE_INPUT:
+			DeployedOfficeEditPart.this.refreshChildren();
+			break;
+		// case ADD_RESPONSIBLE_MANAGED_OBJECT:
+		// case REMOVE_RESPONSIBLE_MANAGED_OBJECT:
+		// OfficeEditPart.this.refreshTargetConnections();
+		// break;
+		}
 	}
 
 	/*

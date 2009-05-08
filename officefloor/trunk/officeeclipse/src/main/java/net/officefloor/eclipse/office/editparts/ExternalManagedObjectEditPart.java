@@ -17,11 +17,9 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
-import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
 import net.officefloor.model.office.ExternalManagedObjectModel;
@@ -30,44 +28,14 @@ import net.officefloor.model.office.ExternalManagedObjectModel.ExternalManagedOb
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the
- * {@link ExternalManagedObjectModel}.
+ * {@link EditPart} for the {@link ExternalManagedObjectModel}.
  * 
  * @author Daniel
  */
 public class ExternalManagedObjectEditPart
 		extends
-		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel, ExternalManagedObjectFigure>
+		AbstractOfficeFloorEditPart<ExternalManagedObjectModel, ExternalManagedObjectEvent, ExternalManagedObjectFigure>
 		implements ExternalManagedObjectFigureContext {
-
-	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Not a source
-	}
-
-	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-//		models.addAll(this.getCastedModel().getAdministrators());
-	}
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ExternalManagedObjectEvent>(
-				ExternalManagedObjectEvent.values()) {
-			@Override
-			protected void handlePropertyChange(
-					ExternalManagedObjectEvent property, PropertyChangeEvent evt) {
-				switch (property) {
-//				case ADD_ADMINISTRATOR:
-//				case REMOVE_ADMINISTRATOR:
-//					ExternalManagedObjectEditPart.this
-//							.refreshTargetConnections();
-//					break;
-				}
-			}
-		});
-	}
 
 	@Override
 	protected ExternalManagedObjectFigure createOfficeFloorFigure() {
@@ -76,8 +44,20 @@ public class ExternalManagedObjectEditPart
 	}
 
 	@Override
-	protected boolean isFreeformFigure() {
-		return true;
+	protected Class<ExternalManagedObjectEvent> getPropertyChangeEventType() {
+		return ExternalManagedObjectEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(ExternalManagedObjectEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		// case ADD_ADMINISTRATOR:
+		// case REMOVE_ADMINISTRATOR:
+		// ExternalManagedObjectEditPart.this
+		// .refreshTargetConnections();
+		// break;
+		}
 	}
 
 	/*
@@ -91,50 +71,50 @@ public class ExternalManagedObjectEditPart
 
 	@Override
 	public String getNextScope(String currentScope) {
-//		// Find the index of the current scope
-//		int currentScopeIndex = -1;
-//		for (int i = 0; i < WorkEntry.MANAGED_OBJECT_SCOPES.length; i++) {
-//			if (WorkEntry.MANAGED_OBJECT_SCOPES[i].equals(currentScope)) {
-//				currentScopeIndex = i;
-//			}
-//		}
-//
-//		// Move to the next scope (and cycle back to first if necessary)
-//		int nextScopeIndex = (currentScopeIndex + 1)
-//				% WorkEntry.MANAGED_OBJECT_SCOPES.length;
-//
-//		// Return the next scope
-//		return WorkEntry.MANAGED_OBJECT_SCOPES[nextScopeIndex];
+		// // Find the index of the current scope
+		// int currentScopeIndex = -1;
+		// for (int i = 0; i < WorkEntry.MANAGED_OBJECT_SCOPES.length; i++) {
+		// if (WorkEntry.MANAGED_OBJECT_SCOPES[i].equals(currentScope)) {
+		// currentScopeIndex = i;
+		// }
+		// }
+		//
+		// // Move to the next scope (and cycle back to first if necessary)
+		// int nextScopeIndex = (currentScopeIndex + 1)
+		// % WorkEntry.MANAGED_OBJECT_SCOPES.length;
+		//
+		// // Return the next scope
+		// return WorkEntry.MANAGED_OBJECT_SCOPES[nextScopeIndex];
 		return null;
 	}
 
 	@Override
 	public String getScope() {
-//		return this.getCastedModel().getScope();
+		// return this.getCastedModel().getScope();
 		return null;
 	}
 
 	@Override
 	public void setScope(final String scope) {
 
-//		// Maintain current scope
-//		final String currentScope = this.getCastedModel().getScope();
-//
-//		// Change the scope
-//		this.executeCommand(new OfficeFloorCommand() {
-//
-//			@Override
-//			protected void doCommand() {
-//				ExternalManagedObjectEditPart.this.getCastedModel().setScope(
-//						scope);
-//			}
-//
-//			@Override
-//			protected void undoCommand() {
-//				ExternalManagedObjectEditPart.this.getCastedModel().setScope(
-//						currentScope);
-//			}
-//		});
+		// // Maintain current scope
+		// final String currentScope = this.getCastedModel().getScope();
+		//
+		// // Change the scope
+		// this.executeCommand(new OfficeFloorCommand() {
+		//
+		// @Override
+		// protected void doCommand() {
+		// ExternalManagedObjectEditPart.this.getCastedModel().setScope(
+		// scope);
+		// }
+		//
+		// @Override
+		// protected void undoCommand() {
+		// ExternalManagedObjectEditPart.this.getCastedModel().setScope(
+		// currentScope);
+		// }
+		// });
 	}
 
 }

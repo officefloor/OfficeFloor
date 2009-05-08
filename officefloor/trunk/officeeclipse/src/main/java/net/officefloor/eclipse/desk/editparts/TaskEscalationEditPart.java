@@ -20,22 +20,15 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.TaskEscalationFigureContext;
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.TaskEscalationModel;
 import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
 import net.officefloor.model.desk.TaskEscalationToTaskModel;
-import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.TaskEscalationModel.TaskEscalationEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link TaskEscalationModel}.
@@ -44,69 +37,13 @@ import org.eclipse.gef.requests.CreateConnectionRequest;
  */
 public class TaskEscalationEditPart
 		extends
-		AbstractOfficeFloorSourceNodeEditPart<TaskEscalationModel, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<TaskEscalationModel, TaskEscalationEvent, OfficeFloorFigure>
 		implements TaskEscalationFigureContext {
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<TaskEscalationEvent>(
-				TaskEscalationEvent.values()) {
-			@Override
-			protected void handlePropertyChange(TaskEscalationEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_TASK:
-				case CHANGE_EXTERNAL_FLOW:
-					TaskEscalationEditPart.this.refreshSourceConnections();
-					break;
-				}
-			}
-		});
-	}
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createTaskEscalationFigure(this);
-	}
-
-	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			@Override
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-
-				if (target instanceof TaskModel) {
-					// Create the task connection
-					TaskEscalationToTaskModel conn = new TaskEscalationToTaskModel();
-					conn.setEscalation((TaskEscalationModel) source);
-					conn.setTask((TaskModel) target);
-					conn.connect();
-					return conn;
-
-				} else if (target instanceof ExternalFlowModel) {
-					// Create the external flow connection
-					TaskEscalationToExternalFlowModel conn = new TaskEscalationToExternalFlowModel();
-					conn.setTaskEscalation((TaskEscalationModel) source);
-					conn.setExternalFlow((ExternalFlowModel) target);
-					conn.connect();
-					return conn;
-
-				} else {
-					// Unknown type
-					throw new OfficeFloorPluginFailure("Unknown target model "
-							+ target.getClass().getName());
-				}
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(TaskModel.class);
-		types.add(ExternalFlowModel.class);
 	}
 
 	@Override
@@ -126,8 +63,19 @@ public class TaskEscalationEditPart
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// Not a target
+	protected Class<TaskEscalationEvent> getPropertyChangeEventType() {
+		return TaskEscalationEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(TaskEscalationEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_TASK:
+		case CHANGE_EXTERNAL_FLOW:
+			TaskEscalationEditPart.this.refreshSourceConnections();
+			break;
+		}
 	}
 
 	/*

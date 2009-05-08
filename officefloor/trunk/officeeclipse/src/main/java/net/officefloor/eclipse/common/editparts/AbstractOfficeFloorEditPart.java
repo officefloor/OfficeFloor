@@ -26,6 +26,8 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.common.editpolicies.layout.MovePositionalModelCommand;
+import net.officefloor.eclipse.common.editpolicies.officefloor.OfficeFloorEditPolicy;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
 import net.officefloor.eclipse.repository.project.FileConfigurationItem;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
@@ -38,18 +40,20 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.draw2d.ChopboxAnchor;
+import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.ConnectionEditPart;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.NodeEditPart;
 import org.eclipse.gef.Request;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
-import org.eclipse.gef.editpolicies.AbstractEditPolicy;
 import org.eclipse.gef.editpolicies.NonResizableEditPolicy;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
@@ -67,8 +71,9 @@ import org.eclipse.ui.ide.IDE;
  * 
  * @author Daniel
  */
-public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends OfficeFloorFigure>
-		extends AbstractGraphicalEditPart implements PropertyChangeListener {
+public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enum<E>, F extends OfficeFloorFigure>
+		extends AbstractGraphicalEditPart implements PropertyChangeListener,
+		NodeEditPart {
 
 	/**
 	 * Editor containing this.
@@ -76,22 +81,9 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	private AbstractOfficeFloorEditor<?, ?> editor = null;
 
 	/**
-	 * Listing of the {@link PropertyChangeHandler} instances.
-	 */
-	protected final List<PropertyChangeHandler<?>> propertyChangeHandlers = new LinkedList<PropertyChangeHandler<?>>();
-
-	/**
 	 * {@link OfficeFloorFigure} for this {@link EditPart}.
 	 */
 	private F officeFloorFigure = null;
-
-	/**
-	 * Initiates the Edit Part.
-	 */
-	public AbstractOfficeFloorEditPart() {
-		// Populate the property change handlers
-		this.populatePropertyChangeHandlers(this.propertyChangeHandlers);
-	}
 
 	/**
 	 * Specifies the {@link AbstractOfficeFloorEditor} that contains this
@@ -113,169 +105,11 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 		return this.editor;
 	}
 
-	/*
-	 * ================== AbstractGraphicalEditPart ========================
-	 */
-
-	@Override
-	protected void createEditPolicies() {
-		// Disallow resizing
-		this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
-				new NonResizableEditPolicy());
-
-		// Allow delegating back to this EditPart
-		this.installEditPolicy("OfficeFloor", new OfficeFloorEditPolicy());
-
-		// Initialise
-		this.init();
-	}
-
-	/**
-	 * Sub classes may override this method to initialise various state.
-	 */
-	protected void init() {
-	}
-
-	@Override
-	public void setModel(Object model) {
-
-		// Register with the model if capable
-		if (model instanceof Model) {
-			Model modelElement = (Model) model;
-			modelElement.addPropertyChangeListener(this);
-		}
-
-		// Now register the model
-		super.setModel(model);
-	}
-
-	/**
-	 * Handles property changes by utilising registered
-	 * {@link PropertyChangeHandler} instances.
-	 */
-	public void propertyChange(PropertyChangeEvent evt) {
-		// Handle property change
-		for (PropertyChangeHandler<?> handler : this.propertyChangeHandlers) {
-			handler.propertyChange(evt);
-		}
-	}
-
-	/**
-	 * Populates the handlers to handle property changes.
-	 * 
-	 * @param handlers
-	 *            List of {@link PropertyChangeHandler} to be populated.
-	 */
-	protected abstract void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers);
-
-	@Override
-	protected IFigure createFigure() {
-
-		// Obtain the figure
-		IFigure figure = this.getOfficeFloorFigure().getFigure();
-		if (this.isFreeformFigure()) {
-			// Wrap with free form wrapper
-			figure = new FreeformWrapperFigure((Figure) figure);
-		}
-
-		// Return the figure
-		return figure;
-	}
-
 	/**
 	 * <p>
-	 * Obtains the {@link OfficeFloorFigure} for this {@link EditPart}.
-	 * <p>
-	 * This will lazy create the {@link OfficeFloorFigure}.
-	 * 
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	public F getOfficeFloorFigure() {
-		if (this.officeFloorFigure == null) {
-			this.officeFloorFigure = this.createOfficeFloorFigure();
-		}
-		return this.officeFloorFigure;
-	}
-
-	/**
-	 * Override to indicate that {@link IFigure} needs a
-	 * {@link FreeformWrapperFigure}.
-	 * 
-	 * @return <code>true</code> if {@link IFigure} needs a
-	 *         {@link FreeformWrapperFigure}.
-	 */
-	protected boolean isFreeformFigure() {
-		return false;
-	}
-
-	/**
-	 * Creates the {@link OfficeFloorFigure} for this {@link EditPart}.
-	 * 
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	protected abstract F createOfficeFloorFigure();
-
-	@Override
-	public IFigure getContentPane() {
-		// Return the content pane of the Office Floor Figure
-		OfficeFloorFigure officeFloorFigure = this.getOfficeFloorFigure();
-		IFigure contentPane = officeFloorFigure.getContentPane();
-
-		// Use top level figure if no content pane provided
-		return (contentPane == null ? this.getFigure() : contentPane);
-	}
-
-	@Override
-	protected List<?> getModelChildren() {
-		// Create the list of model children
-		List<Object> models = new LinkedList<Object>();
-
-		// Populate the children
-		this.populateModelChildren(models);
-
-		// Return the children
-		return models;
-	}
-
-	/**
-	 * Override to populate the children of this model.
-	 * 
-	 * @param childModels
-	 *            List to be populated with the children models.
-	 */
-	protected void populateModelChildren(List<Object> childModels) {
-		// By Default no children
-	}
-
-	/**
-	 * Refresh the visuals.
-	 */
-	protected void refreshVisuals() {
-		// Specify location for the model
-		Model model = this.getCastedModel();
-
-		// Obtain the size of the figure
-		Dimension figureSize = this.getFigure().getSize();
-
-		// Refresh the view off the model
-		this.getFigure().setBounds(
-				new Rectangle(model.getX(), model.getY(), figureSize.width,
-						figureSize.height));
-	}
-
-	/**
-	 * Obtains the model casted to its specific type.
-	 * 
-	 * @return Model casted to its specific type.
-	 */
-	@SuppressWarnings( { "unchecked" })
-	public M getCastedModel() {
-		return (M) this.getModel();
-	}
-
-	/**
 	 * Specifies the location for the figure.
+	 * <p>
+	 * This is utilised by {@link MovePositionalModelCommand}.
 	 * 
 	 * @param location
 	 *            Location for the figure.
@@ -288,90 +122,6 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 
 		// Refresh the view
 		this.refreshVisuals();
-	}
-
-	/**
-	 * Executes the input {@link Command}.
-	 * 
-	 * @param command
-	 *            {@link Command}.
-	 */
-	protected void executeCommand(OfficeFloorCommand command) {
-		if (command != null) {
-			this.getViewer().getEditDomain().getCommandStack().execute(command);
-		}
-	}
-
-	@Override
-	public void performRequest(Request req) {
-		// Obtain the command and execute if have
-		Command command = this.getCommand(req);
-
-		// Execute the command
-		if (command != null) {
-			this.getViewer().getEditDomain().getCommandStack().execute(command);
-		}
-	}
-
-	@Override
-	public void activate() {
-		if (!this.isActive()) {
-			super.activate();
-
-			// Start listening to model
-			this.getCastedModel().addPropertyChangeListener(this);
-		}
-	}
-
-	@Override
-	public void deactivate() {
-		if (this.isActive()) {
-			// Stop listening to model
-			this.getCastedModel().removePropertyChangeListener(this);
-
-			super.deactivate();
-		}
-	}
-
-	/**
-	 * Provides an {@link EditPolicy} that delegates back to this
-	 * {@link EditPart}.
-	 */
-	// TODO move out to its own package
-	private class OfficeFloorEditPolicy extends AbstractEditPolicy {
-
-		/*
-		 * ==================== EditPolicy ===========================
-		 */
-
-		@Override
-		public Command getCommand(Request request) {
-			// Obtain request type
-			Object type = request.getType();
-
-			// Handle request by delegating back to Edit Part
-			if (REQ_OPEN.equals(type)) {
-				// Double Click on Edit Part
-				return handleDoubleClick(request);
-			}
-
-			// Not to be handled
-			return null;
-		}
-
-	}
-
-	/**
-	 * Override to handle the double click on the {@link EditPart}.
-	 * 
-	 * @param request
-	 *            Request.
-	 */
-	// TODO use EditPolicy
-	@Deprecated
-	protected Command handleDoubleClick(Request request) {
-		// By default not handled
-		return null;
 	}
 
 	/**
@@ -488,6 +238,348 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, F extends Off
 	 */
 	public void messageWarning(String message) {
 		this.getEditor().messageWarning(message);
+	}
+
+	/*
+	 * ================== PropertyChangeListener ==============================
+	 */
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+
+		// Obtain the event name
+		String eventName = evt.getPropertyName();
+
+		// Obtain the event property
+		E event = null;
+		E[] events = this.getPropertyChangeEventType().getEnumConstants();
+		for (E currentEvent : events) {
+			if (currentEvent.name().equals(eventName)) {
+				event = currentEvent;
+			}
+		}
+
+		// Handle the property
+		if (event != null) {
+			this.handlePropertyChange(event, evt);
+		}
+	}
+
+	/**
+	 * Obtains the {@link Enum} type for the property change events.
+	 * 
+	 * @return {@link Enum} type for the property change events.
+	 */
+	protected abstract Class<E> getPropertyChangeEventType();
+
+	/**
+	 * Handles the {@link PropertyChangeEvent}.
+	 * 
+	 * @param property
+	 *            {@link Enum} property change event.
+	 * @param evt
+	 *            {@link PropertyChangeEvent}.
+	 */
+	protected abstract void handlePropertyChange(E property,
+			PropertyChangeEvent evt);
+
+	/*
+	 * ================== AbstractGraphicalEditPart ========================
+	 */
+
+	@Override
+	protected void createEditPolicies() {
+		// Disallow resizing
+		this.installEditPolicy(EditPolicy.SELECTION_FEEDBACK_ROLE,
+				new NonResizableEditPolicy());
+
+		// Allow delegating back to this EditPart
+		OfficeFloorEditPolicy officeFloorEditPolicy = new OfficeFloorEditPolicy();
+		this.populateOfficeFloorEditPolicy(officeFloorEditPolicy);
+		this.installEditPolicy("OfficeFloor", officeFloorEditPolicy);
+
+		// Install the graphical node edit policy
+		this.installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE, this.getEditor()
+				.createGraphicalEditPolicy());
+
+		// Initialise
+		this.init();
+	}
+
+	/**
+	 * Sub classes may override to populate the {@link OfficeFloorEditPolicy}.
+	 * 
+	 * @param policy
+	 *            {@link OfficeFloorEditPolicy} to populate.
+	 */
+	protected void populateOfficeFloorEditPolicy(OfficeFloorEditPolicy policy) {
+		// Default, do nothing
+	}
+
+	/**
+	 * Sub classes may override this method to initialise various state.
+	 */
+	protected void init() {
+	}
+
+	@Override
+	public void setModel(Object model) {
+
+		// Register with the model if capable
+		if (model instanceof Model) {
+			Model modelElement = (Model) model;
+			modelElement.addPropertyChangeListener(this);
+		}
+
+		// Now register the model
+		super.setModel(model);
+	}
+
+	@Override
+	protected IFigure createFigure() {
+
+		// Obtain the figure
+		IFigure figure = this.getOfficeFloorFigure().getFigure();
+		if (this.isFreeformFigure()) {
+			// Wrap with free form wrapper
+			figure = new FreeformWrapperFigure((Figure) figure);
+		}
+
+		// Return the figure
+		return figure;
+	}
+
+	/**
+	 * <p>
+	 * Obtains the {@link OfficeFloorFigure} for this {@link EditPart}.
+	 * <p>
+	 * This will lazy create the {@link OfficeFloorFigure}.
+	 * 
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	public F getOfficeFloorFigure() {
+		if (this.officeFloorFigure == null) {
+			this.officeFloorFigure = this.createOfficeFloorFigure();
+		}
+		return this.officeFloorFigure;
+	}
+
+	/**
+	 * <p>
+	 * Override to indicate that {@link IFigure} needs a
+	 * {@link FreeformWrapperFigure}.
+	 * <p>
+	 * By default this will return <code>true</code> only if the parent
+	 * {@link EditPart} is a {@link AbstractOfficeFloorDiagramEditPart}.
+	 * Typically this default behaviour will cover most scenarios.
+	 * 
+	 * @return <code>true</code> if {@link IFigure} needs a
+	 *         {@link FreeformWrapperFigure}.
+	 */
+	protected boolean isFreeformFigure() {
+
+		// Obtain the parent edit part
+		EditPart parent = this.getParent();
+		boolean isFreeForm = (parent instanceof AbstractOfficeFloorDiagramEditPart);
+		return isFreeForm;
+	}
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for this {@link EditPart}.
+	 * 
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	protected abstract F createOfficeFloorFigure();
+
+	@Override
+	public IFigure getContentPane() {
+		// Return the content pane of the Office Floor Figure
+		OfficeFloorFigure officeFloorFigure = this.getOfficeFloorFigure();
+		IFigure contentPane = officeFloorFigure.getContentPane();
+
+		// Use top level figure if no content pane provided
+		return (contentPane == null ? this.getFigure() : contentPane);
+	}
+
+	@Override
+	protected List<?> getModelChildren() {
+		// Create the list of model children
+		List<Object> models = new LinkedList<Object>();
+
+		// Populate the children
+		this.populateModelChildren(models);
+
+		// Return the children
+		return models;
+	}
+
+	/**
+	 * Override to populate the children of this model.
+	 * 
+	 * @param childModels
+	 *            List to be populated with the children models.
+	 */
+	protected void populateModelChildren(List<Object> childModels) {
+		// By default no children
+	}
+
+	@Override
+	protected List<?> getModelSourceConnections() {
+		// Create list of connections
+		List<Object> connections = new LinkedList<Object>();
+
+		// Populate the Source Connection Models
+		this.populateConnectionSourceModels(connections);
+
+		// Return the source connection models
+		return connections;
+	}
+
+	/**
+	 * Populates the Models that are sources of connections.
+	 * 
+	 * @param models
+	 *            List to be populated with Models that are the sources of
+	 *            connections.
+	 */
+	protected void populateConnectionSourceModels(List<Object> models) {
+		// By default no sources
+	}
+
+	@Override
+	protected List<?> getModelTargetConnections() {
+		// Create list of connections
+		List<Object> connections = new LinkedList<Object>();
+
+		// Populate the Target Connection Models
+		this.populateConnectionTargetModels(connections);
+
+		// Return the source connection models
+		return connections;
+	}
+
+	/**
+	 * Populates the Models that are targets of connections.
+	 * 
+	 * @param models
+	 *            List to be populated with Models that are the targets of
+	 *            connections.
+	 */
+	protected void populateConnectionTargetModels(List<Object> models) {
+		// By default no targets
+	}
+
+	/**
+	 * Refresh the visuals.
+	 */
+	protected void refreshVisuals() {
+		// Specify location for the model
+		Model model = this.getCastedModel();
+
+		// Obtain the size of the figure
+		Dimension figureSize = this.getFigure().getSize();
+
+		// Refresh the view off the model
+		this.getFigure().setBounds(
+				new Rectangle(model.getX(), model.getY(), figureSize.width,
+						figureSize.height));
+	}
+
+	/**
+	 * Obtains the model casted to its specific type.
+	 * 
+	 * @return Model casted to its specific type.
+	 */
+	@SuppressWarnings( { "unchecked" })
+	public M getCastedModel() {
+		return (M) this.getModel();
+	}
+
+	/**
+	 * Executes the input {@link Command}.
+	 * 
+	 * @param command
+	 *            {@link Command}.
+	 */
+	protected void executeCommand(OfficeFloorCommand command) {
+		if (command != null) {
+			this.getViewer().getEditDomain().getCommandStack().execute(command);
+		}
+	}
+
+	@Override
+	public void performRequest(Request req) {
+		// Obtain the command and execute if have
+		Command command = this.getCommand(req);
+
+		// Execute the command
+		if (command != null) {
+			this.getViewer().getEditDomain().getCommandStack().execute(command);
+		}
+	}
+
+	@Override
+	public void activate() {
+		if (!this.isActive()) {
+			super.activate();
+
+			// Start listening to model
+			this.getCastedModel().addPropertyChangeListener(this);
+		}
+	}
+
+	@Override
+	public void deactivate() {
+		if (this.isActive()) {
+			// Stop listening to model
+			this.getCastedModel().removePropertyChangeListener(this);
+
+			super.deactivate();
+		}
+	}
+
+	/*
+	 * ================== NodeEditPart ==============================
+	 */
+
+	@Override
+	public ConnectionAnchor getSourceConnectionAnchor(
+			ConnectionEditPart connection) {
+		// Obtain the type of connection
+		Class<?> connectionModelType = connection.getModel().getClass();
+		ConnectionAnchor anchor = this.getOfficeFloorFigure()
+				.getSourceConnectionAnchor(connectionModelType);
+		if (anchor != null) {
+			return anchor;
+		}
+
+		// No anchor so provide around figure
+		return new ChopboxAnchor(this.getFigure());
+	}
+
+	@Override
+	public ConnectionAnchor getSourceConnectionAnchor(Request request) {
+		return new ChopboxAnchor(this.getFigure());
+	}
+
+	@Override
+	public ConnectionAnchor getTargetConnectionAnchor(
+			ConnectionEditPart connection) {
+		// Obtain the type of connection
+		Class<?> connectionModelType = connection.getModel().getClass();
+		ConnectionAnchor anchor = this.getOfficeFloorFigure()
+				.getTargetConnectionAnchor(connectionModelType);
+		if (anchor != null) {
+			return anchor;
+		}
+
+		// No anchor so provide around figure
+		return new ChopboxAnchor(this.getFigure());
+	}
+
+	@Override
+	public ConnectionAnchor getTargetConnectionAnchor(Request request) {
+		return new ChopboxAnchor(this.getFigure());
 	}
 
 }

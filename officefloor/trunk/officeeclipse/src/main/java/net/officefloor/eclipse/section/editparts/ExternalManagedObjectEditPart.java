@@ -20,11 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.action.Operation;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editparts.RemovableEditPart;
-import net.officefloor.eclipse.section.operations.RemoveExternalManagedObjectOperation;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigureContext;
 import net.officefloor.model.section.ExternalManagedObjectModel;
@@ -39,36 +35,8 @@ import org.eclipse.gef.EditPart;
  */
 public class ExternalManagedObjectEditPart
 		extends
-		AbstractOfficeFloorNodeEditPart<ExternalManagedObjectModel, OfficeFloorFigure>
-		implements RemovableEditPart, ExternalManagedObjectFigureContext {
-
-	@Override
-	protected void populateConnectionSourceModels(List<Object> models) {
-		// Not a source
-	}
-
-	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getSubSectionObjects());
-	}
-
-	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<ExternalManagedObjectEvent>(
-				ExternalManagedObjectEvent.values()) {
-			protected void handlePropertyChange(
-					ExternalManagedObjectEvent property, PropertyChangeEvent evt) {
-				switch (property) {
-				case ADD_SUB_SECTION_OBJECT:
-				case REMOVE_SUB_SECTION_OBJECT:
-					ExternalManagedObjectEditPart.this
-							.refreshTargetConnections();
-					break;
-				}
-			}
-		});
-	}
+		AbstractOfficeFloorEditPart<ExternalManagedObjectModel, ExternalManagedObjectEvent, OfficeFloorFigure>
+		implements ExternalManagedObjectFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
@@ -77,13 +45,24 @@ public class ExternalManagedObjectEditPart
 	}
 
 	@Override
-	protected boolean isFreeformFigure() {
-		return true;
+	protected void populateConnectionTargetModels(List<Object> models) {
+		models.addAll(this.getCastedModel().getSubSectionObjects());
 	}
 
 	@Override
-	public Operation getRemoveOperation() {
-		return new RemoveExternalManagedObjectOperation();
+	protected Class<ExternalManagedObjectEvent> getPropertyChangeEventType() {
+		return ExternalManagedObjectEvent.class;
+	}
+
+	@Override
+	protected void handlePropertyChange(ExternalManagedObjectEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case ADD_SUB_SECTION_OBJECT:
+		case REMOVE_SUB_SECTION_OBJECT:
+			ExternalManagedObjectEditPart.this.refreshTargetConnections();
+			break;
+		}
 	}
 
 	/*

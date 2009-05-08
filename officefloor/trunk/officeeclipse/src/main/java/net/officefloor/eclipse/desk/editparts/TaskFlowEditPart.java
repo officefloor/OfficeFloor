@@ -20,83 +20,30 @@ import java.beans.PropertyChangeEvent;
 import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorSourceNodeEditPart;
-import net.officefloor.eclipse.common.editparts.PropertyChangeHandler;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionModelFactory;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.TaskFlowFigureContext;
-import net.officefloor.model.ConnectionModel;
-import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowModel;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
-import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.TaskFlowModel.TaskFlowEvent;
 
 import org.eclipse.gef.EditPart;
-import org.eclipse.gef.requests.CreateConnectionRequest;
 
 /**
  * {@link EditPart} for the {@link TaskFlowModel}.
  * 
  * @author Daniel
  */
-public class TaskFlowEditPart extends
-		AbstractOfficeFloorSourceNodeEditPart<TaskFlowModel, OfficeFloorFigure>
+public class TaskFlowEditPart
+		extends
+		AbstractOfficeFloorEditPart<TaskFlowModel, TaskFlowEvent, OfficeFloorFigure>
 		implements TaskFlowFigureContext {
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createTaskFlowFigure(this);
-	}
-
-	@Override
-	protected ConnectionModelFactory createConnectionModelFactory() {
-		return new ConnectionModelFactory() {
-			public ConnectionModel createConnection(Object source,
-					Object target, CreateConnectionRequest request) {
-
-				// TODO Handle always only connected to one type
-
-				// Obtain the type of link
-				String linkType = (String) request.getNewObject();
-
-				if (target instanceof TaskModel) {
-					// Create the task connection
-					TaskFlowToTaskModel conn = new TaskFlowToTaskModel();
-					conn.setTaskFlow((TaskFlowModel) source);
-					conn.setTask((TaskModel) target);
-					conn.setLinkType(linkType);
-					conn.connect();
-					return conn;
-
-				} else if (target instanceof ExternalFlowModel) {
-					// Create the external flow connection
-					TaskFlowToExternalFlowModel conn = new TaskFlowToExternalFlowModel();
-					conn.setTaskFlow((TaskFlowModel) source);
-					conn.setExternalFlow((ExternalFlowModel) target);
-					conn.setLinkType(linkType);
-					conn.connect();
-					return conn;
-
-				} else {
-					throw new OfficeFloorPluginFailure(
-							"Unknown connection target type "
-									+ target.getClass().getName()
-									+ " for "
-									+ TaskFlowEditPart.this.getClass()
-											.getName());
-				}
-			}
-		};
-	}
-
-	@Override
-	protected void populateConnectionTargetTypes(List<Class<?>> types) {
-		types.add(TaskModel.class);
-		types.add(ExternalFlowModel.class);
 	}
 
 	@Override
@@ -116,25 +63,19 @@ public class TaskFlowEditPart extends
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		// Not a target
+	protected Class<TaskFlowEvent> getPropertyChangeEventType() {
+		return TaskFlowEvent.class;
 	}
 
 	@Override
-	protected void populatePropertyChangeHandlers(
-			List<PropertyChangeHandler<?>> handlers) {
-		handlers.add(new PropertyChangeHandler<TaskFlowEvent>(TaskFlowEvent
-				.values()) {
-			protected void handlePropertyChange(TaskFlowEvent property,
-					PropertyChangeEvent evt) {
-				switch (property) {
-				case CHANGE_TASK:
-				case CHANGE_EXTERNAL_FLOW:
-					TaskFlowEditPart.this.refreshSourceConnections();
-					break;
-				}
-			}
-		});
+	protected void handlePropertyChange(TaskFlowEvent property,
+			PropertyChangeEvent evt) {
+		switch (property) {
+		case CHANGE_TASK:
+		case CHANGE_EXTERNAL_FLOW:
+			TaskFlowEditPart.this.refreshSourceConnections();
+			break;
+		}
 	}
 
 	/*
