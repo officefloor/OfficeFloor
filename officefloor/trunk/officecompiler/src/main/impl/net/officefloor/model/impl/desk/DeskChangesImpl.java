@@ -32,6 +32,7 @@ import net.officefloor.compile.work.TaskObjectType;
 import net.officefloor.compile.work.TaskType;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.frame.api.execute.Work;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskModel;
@@ -1070,8 +1071,7 @@ public class DeskChangesImpl implements DeskChanges {
 			@Override
 			public void apply() {
 				// Add external managed object (ensure ordering)
-				DeskChangesImpl.this.desk
-						.addExternalManagedObject(externalMo);
+				DeskChangesImpl.this.desk.addExternalManagedObject(externalMo);
 				DeskChangesImpl.this.sortExternalManagedObjects();
 			}
 
@@ -1145,6 +1145,93 @@ public class DeskChangesImpl implements DeskChanges {
 				for (ConnectionModel conn : this.connections) {
 					conn.connect();
 				}
+			}
+		};
+	}
+
+	@Override
+	public Change<WorkTaskObjectToExternalManagedObjectModel> linkWorkTaskObjectToExternalManagedObject(
+			WorkTaskObjectModel workTaskObject,
+			ExternalManagedObjectModel externalManagedObject) {
+
+		// TODO test this method (linkWorkTaskObjectToExternalManagedObject)
+
+		// Create the connection
+		final WorkTaskObjectToExternalManagedObjectModel conn = new WorkTaskObjectToExternalManagedObjectModel();
+		conn.setTaskObject(workTaskObject);
+		conn.setExternalManagedObject(externalManagedObject);
+
+		// Return the change
+		return new AbstractChange<WorkTaskObjectToExternalManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskFlowToTaskModel> linkTaskFlowToTask(
+			TaskFlowModel taskFlow, TaskModel task,
+			FlowInstigationStrategyEnum instigationStrategy) {
+
+		// TODO test this method (linkTaskFlowToTask)
+
+		// Create the connection
+		final TaskFlowToTaskModel conn = new TaskFlowToTaskModel();
+		conn.setTaskFlow(taskFlow);
+		conn.setTask(task);
+		switch (instigationStrategy) {
+		case SEQUENTIAL:
+			conn.setLinkType(DeskChanges.SEQUENTIAL_LINK);
+			break;
+		case PARALLEL:
+			conn.setLinkType(DeskChanges.PARALLEL_LINK);
+			break;
+		case ASYNCHRONOUS:
+			conn.setLinkType(DeskChanges.ASYNCHRONOUS_LINK);
+			break;
+		default:
+			throw new IllegalStateException("Unknown instigation strategy "
+					+ instigationStrategy);
+		}
+
+		// Return the change
+		return new AbstractChange<TaskFlowToTaskModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskFlowToTaskModel> removeTaskFlowToTask(
+			final TaskFlowToTaskModel taskFlowToTask) {
+
+		// TODO test this method (removeTaskFlowToTask)
+
+		// Return the change
+		return new AbstractChange<TaskFlowToTaskModel>(taskFlowToTask, "Remove") {
+			@Override
+			public void apply() {
+				taskFlowToTask.remove();
+			}
+
+			@Override
+			public void revert() {
+				taskFlowToTask.connect();
 			}
 		};
 	}

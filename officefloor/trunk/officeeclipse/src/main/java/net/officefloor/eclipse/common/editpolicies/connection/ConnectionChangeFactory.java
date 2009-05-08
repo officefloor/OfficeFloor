@@ -16,6 +16,8 @@
  */
 package net.officefloor.eclipse.common.editpolicies.connection;
 
+import org.eclipse.gef.requests.CreateConnectionRequest;
+
 import net.officefloor.model.ConnectionModel;
 import net.officefloor.model.Model;
 import net.officefloor.model.change.Change;
@@ -35,9 +37,11 @@ public interface ConnectionChangeFactory<S, T> {
 	 *            Source {@link Model} of the {@link ConnectionModel}.
 	 * @param target
 	 *            Target {@link Model} of the {@link ConnectionModel}.
+	 * @param request
+	 *            {@link CreateConnectionRequest}.
 	 * @return {@link Change} to add a {@link ConnectionModel} between the
 	 *         source and target.
 	 */
-	Change<?> createChange(S source, T target);
+	Change<?> createChange(S source, T target, CreateConnectionRequest request);
 
 }

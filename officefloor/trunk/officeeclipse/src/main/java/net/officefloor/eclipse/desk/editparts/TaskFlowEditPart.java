@@ -23,9 +23,8 @@ import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.desk.TaskFlowFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.desk.TaskFlowModel;
-import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
-import net.officefloor.model.desk.TaskFlowToTaskModel;
 import net.officefloor.model.desk.TaskFlowModel.TaskFlowEvent;
 
 import org.eclipse.gef.EditPart;
@@ -48,18 +47,8 @@ public class TaskFlowEditPart
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
-		// Task
-		TaskFlowToTaskModel flowTask = this.getCastedModel().getTask();
-		if (flowTask != null) {
-			models.add(flowTask);
-		}
-
-		// External flow
-		TaskFlowToExternalFlowModel extFlow = this.getCastedModel()
-				.getExternalFlow();
-		if (extFlow != null) {
-			models.add(extFlow);
-		}
+		EclipseUtil.addToList(models, this.getCastedModel().getTask());
+		EclipseUtil.addToList(models, this.getCastedModel().getExternalFlow());
 	}
 
 	@Override

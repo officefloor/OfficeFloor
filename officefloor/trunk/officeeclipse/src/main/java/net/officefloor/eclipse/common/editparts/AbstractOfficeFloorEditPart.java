@@ -222,6 +222,18 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	}
 
 	/**
+	 * Displays the message and its cause as an error {@link MessageDialog}.
+	 * 
+	 * @param message
+	 *            Error message.
+	 * @param cause
+	 *            Cause of error.
+	 */
+	public void messageError(String message, Throwable cause) {
+		this.getEditor().messageError(message, cause);
+	}
+
+	/**
 	 * Displays the {@link IStatus} error.
 	 * 
 	 * @param status

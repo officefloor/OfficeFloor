@@ -22,7 +22,7 @@ import net.officefloor.compile.spi.work.source.WorkSource;
 import net.officefloor.compile.work.WorkLoader;
 import net.officefloor.compile.work.WorkType;
 import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.model.Model;
 import net.officefloor.model.desk.PropertyModel;
 import net.officefloor.model.desk.WorkModel;
@@ -39,25 +39,25 @@ public class ModelUtil {
 	 * 
 	 * @param workModel
 	 *            {@link WorkModel}.
-	 * @param editPart
-	 *            {@link AbstractOfficeFloorEditPart} requiring the
+	 * @param editor
+	 *            {@link AbstractOfficeFloorEditor} requiring the
 	 *            {@link WorkType}.
 	 * @return {@link WorkType} or <code>null</code> if issue obtaining it.
 	 */
 	@SuppressWarnings("unchecked")
 	public static WorkType<?> getWorkType(WorkModel workModel,
-			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+			AbstractOfficeFloorEditor<?, ?> editor) {
 
 		// Obtain the office floor compiler
 		OfficeFloorCompiler compiler = OfficeFloorPlugin.getDefault()
-				.createCompiler(editPart);
+				.createCompiler(editor);
 
 		// Obtain the work loader
 		WorkLoader workLoader = compiler.getWorkLoader();
 
 		// Obtain the work class
 		Class<? extends WorkSource> workSourceClass = EclipseUtil.obtainClass(
-				workModel.getWorkSourceClassName(), WorkSource.class);
+				workModel.getWorkSourceClassName(), WorkSource.class, editor);
 
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();

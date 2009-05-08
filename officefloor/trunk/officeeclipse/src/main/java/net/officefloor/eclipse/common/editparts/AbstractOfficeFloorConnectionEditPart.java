@@ -18,8 +18,8 @@ package net.officefloor.eclipse.common.editparts;
 
 import net.officefloor.model.ConnectionModel;
 
+import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.PolygonDecoration;
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editparts.AbstractConnectionEditPart;
@@ -30,8 +30,8 @@ import org.eclipse.gef.editpolicies.ConnectionEndpointEditPolicy;
  * 
  * @author Daniel
  */
-public class OfficeFloorConnectionEditPart<M extends ConnectionModel> extends
-		AbstractConnectionEditPart {
+public abstract class AbstractOfficeFloorConnectionEditPart<M extends ConnectionModel>
+		extends AbstractConnectionEditPart {
 
 	/*
 	 * =============== AbstractConnectionEditPart =============================
@@ -43,11 +43,19 @@ public class OfficeFloorConnectionEditPart<M extends ConnectionModel> extends
 		// Create the default connection figure
 		PolylineConnection connFigure = (PolylineConnection) super
 				.createFigure();
-		connFigure.setTargetDecoration(new PolygonDecoration());
+		this.decorateFigure(connFigure);
 
 		// Return the figure
 		return connFigure;
 	}
+
+	/**
+	 * Invoked to decorate the {@link Figure} for the {@link ConnectionModel}.
+	 * 
+	 * @param figure
+	 *            {@link PolylineConnection}.
+	 */
+	protected abstract void decorateFigure(PolylineConnection figure);
 
 	@Override
 	protected void createEditPolicies() {

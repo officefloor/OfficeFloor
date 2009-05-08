@@ -58,7 +58,8 @@ public class CreateTaskFromWorkTaskOperation extends
 		WorkModel work = (WorkModel) workEditPart.getModel();
 
 		// Obtain the work type
-		WorkType<?> workType = ModelUtil.getWorkType(work, editPart);
+		WorkType<?> workType = ModelUtil
+				.getWorkType(work, editPart.getEditor());
 		if (workType == null) {
 			return null; // must have work type
 		}

@@ -21,8 +21,8 @@ import java.util.Map;
 
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionGraphicalNodeEditPolicy;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
@@ -96,11 +96,11 @@ public class OfficeEditor extends
 
 		// Connections
 		map.put(OfficeSectionOutputToOfficeSectionInputModel.class,
-				OfficeFloorConnectionEditPart.class);
+				AbstractOfficeFloorConnectionEditPart.class);
 		map.put(OfficeSectionObjectToExternalManagedObjectModel.class,
-				OfficeFloorConnectionEditPart.class);
+				AbstractOfficeFloorConnectionEditPart.class);
 		map.put(OfficeSectionResponsibilityToOfficeTeamModel.class,
-				OfficeFloorConnectionEditPart.class);
+				AbstractOfficeFloorConnectionEditPart.class);
 	}
 
 	@Override
@@ -110,7 +110,7 @@ public class OfficeEditor extends
 
 	@Override
 	protected void populateGraphicalEditPolicy(
-			ConnectionGraphicalNodeEditPolicy policy) {
+			OfficeFloorGraphicalNodeEditPolicy policy) {
 		// TODO populate the connection policy for Office
 	}
 

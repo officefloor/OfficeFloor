@@ -21,8 +21,9 @@ import java.util.Map;
 
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.editparts.OfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionGraphicalNodeEditPolicy;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
+import net.officefloor.eclipse.common.editpolicies.connection.ConnectionChangeFactory;
+import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.desk.editparts.DeskEditPart;
@@ -31,9 +32,12 @@ import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskEscalationEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskFlowEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskFlowToTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkTaskObjectToExternalManagedObjectEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkTaskToTaskEditPart;
 import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.AddWorkOperation;
@@ -41,6 +45,7 @@ import net.officefloor.eclipse.desk.operations.CreateTaskFromWorkTaskOperation;
 import net.officefloor.eclipse.desk.operations.RefreshWorkOperation;
 import net.officefloor.eclipse.desk.operations.ToggleFlowItemPublicOperation;
 import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperation;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.DeskModel;
@@ -69,6 +74,7 @@ import net.officefloor.model.repository.ConfigurationItem;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.palette.ConnectionCreationToolEntry;
 import org.eclipse.gef.palette.PaletteGroup;
+import org.eclipse.gef.requests.CreateConnectionRequest;
 import org.eclipse.ui.IEditorPart;
 
 /**
@@ -126,21 +132,23 @@ public class DeskEditor extends
 		map.put(ExternalFlowModel.class, ExternalFlowEditPart.class);
 
 		// Connections
+		map.put(WorkTaskToTaskModel.class, WorkTaskToTaskEditPart.class);
 		map.put(WorkTaskObjectToExternalManagedObjectModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(TaskFlowToTaskModel.class, OfficeFloorConnectionEditPart.class);
+				WorkTaskObjectToExternalManagedObjectEditPart.class);
+		map.put(TaskFlowToTaskModel.class, TaskFlowToTaskEditPart.class);
+
 		map.put(TaskFlowToExternalFlowModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(WorkTaskToTaskModel.class, OfficeFloorConnectionEditPart.class);
+				AbstractOfficeFloorConnectionEditPart.class);
 		map.put(WorkToInitialTaskModel.class,
-				OfficeFloorConnectionEditPart.class);
-		map.put(TaskToNextTaskModel.class, OfficeFloorConnectionEditPart.class);
+				AbstractOfficeFloorConnectionEditPart.class);
+		map.put(TaskToNextTaskModel.class,
+				AbstractOfficeFloorConnectionEditPart.class);
 		map.put(TaskToNextExternalFlowModel.class,
-				OfficeFloorConnectionEditPart.class);
+				AbstractOfficeFloorConnectionEditPart.class);
 		map.put(TaskEscalationToTaskModel.class,
-				OfficeFloorConnectionEditPart.class);
+				AbstractOfficeFloorConnectionEditPart.class);
 		map.put(TaskEscalationToExternalFlowModel.class,
-				OfficeFloorConnectionEditPart.class);
+				AbstractOfficeFloorConnectionEditPart.class);
 	}
 
 	@Override
@@ -183,12 +191,62 @@ public class DeskEditor extends
 								.removeExternalFlow(target);
 					}
 				});
+
+		// Allow deleting task flow to task
+		policy.addDelete(TaskFlowToTaskModel.class,
+				new DeleteChangeFactory<TaskFlowToTaskModel>() {
+					@Override
+					public Change<TaskFlowToTaskModel> createChange(
+							TaskFlowToTaskModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeTaskFlowToTask(target);
+					}
+				});
 	}
 
 	@Override
 	protected void populateGraphicalEditPolicy(
-			ConnectionGraphicalNodeEditPolicy policy) {
-		// TODO populate the connection policy for Desk
+			OfficeFloorGraphicalNodeEditPolicy policy) {
+
+		// Connect work task object to external managed object
+		policy
+				.addConnection(
+						WorkTaskObjectModel.class,
+						ExternalManagedObjectModel.class,
+						new ConnectionChangeFactory<WorkTaskObjectModel, ExternalManagedObjectModel>() {
+							@Override
+							public Change<?> createChange(
+									WorkTaskObjectModel source,
+									ExternalManagedObjectModel target,
+									CreateConnectionRequest request) {
+								return DeskEditor.this
+										.getModelChanges()
+										.linkWorkTaskObjectToExternalManagedObject(
+												source, target);
+							}
+						});
+
+		// Connect task flow to task
+		policy.addConnection(TaskFlowModel.class, TaskModel.class,
+				new ConnectionChangeFactory<TaskFlowModel, TaskModel>() {
+					@Override
+					public Change<?> createChange(TaskFlowModel source,
+							TaskModel target, CreateConnectionRequest request) {
+
+						// Obtain the instigation strategy
+						FlowInstigationStrategyEnum instigationStrategy = DeskEditor.this
+								.getFlowInstigationStrategy(request
+										.getNewObject());
+						if (instigationStrategy == null) {
+							return null; // must have instigation strategy
+						}
+
+						// Return the change to the link
+						return DeskEditor.this.getModelChanges()
+								.linkTaskFlowToTask(source, target,
+										instigationStrategy);
+					}
+				});
 	}
 
 	@Override
@@ -230,4 +288,34 @@ public class DeskEditor extends
 		this.paletteRoot.add(linkGroup);
 	}
 
+	/**
+	 * Obtains the {@link FlowInstigationStrategyEnum}.
+	 * 
+	 * @param instigationType
+	 *            Instigation type.
+	 * @return {@link FlowInstigationStrategyEnum} or <code>null</code> if
+	 *         unknown instigation strategy.
+	 */
+	public FlowInstigationStrategyEnum getFlowInstigationStrategy(
+			Object instigationStrategy) {
+
+		// Ensure have a instigation strategy
+		if (instigationStrategy == null) {
+			this.messageError("Must select instigation strategy");
+			return null;
+		}
+
+		// Obtain the flow instigation strategy
+		if (DeskChanges.SEQUENTIAL_LINK.equals(instigationStrategy)) {
+			return FlowInstigationStrategyEnum.SEQUENTIAL;
+		} else if (DeskChanges.PARALLEL_LINK.equals(instigationStrategy)) {
+			return FlowInstigationStrategyEnum.PARALLEL;
+		} else if (DeskChanges.ASYNCHRONOUS_LINK.equals(instigationStrategy)) {
+			return FlowInstigationStrategyEnum.ASYNCHRONOUS;
+		} else {
+			this.messageError("Unknown instigation strategy "
+					+ instigationStrategy);
+			return null; // must have instigation strategy
+		}
+	}
 }

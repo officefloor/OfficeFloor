@@ -29,7 +29,7 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.action.OperationAction;
 import net.officefloor.eclipse.common.drag.LocalSelectionTransferDragTargetListener;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.common.editpolicies.connection.ConnectionGraphicalNodeEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.CommonGraphicalViewerKeyHandler;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.repository.project.FileConfigurationItem;
@@ -213,6 +213,19 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	}
 
 	/**
+	 * Displays the message and its cause as an error {@link MessageDialog}.
+	 * 
+	 * @param message
+	 *            Error message.
+	 * @param cause
+	 *            Cause of error.
+	 */
+	public void messageError(String message, Throwable cause) {
+		this.messageError(message + "\n\n" + cause.getClass().getSimpleName()
+				+ ": " + cause.getMessage());
+	}
+
+	/**
 	 * Displays the message as a warning {@link MessageDialog}.
 	 * 
 	 * @param message
@@ -272,19 +285,19 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 * @return {@link GraphicalEditPolicy} to be installed.
 	 */
 	public GraphicalNodeEditPolicy createGraphicalEditPolicy() {
-		ConnectionGraphicalNodeEditPolicy policy = new ConnectionGraphicalNodeEditPolicy();
+		OfficeFloorGraphicalNodeEditPolicy policy = new OfficeFloorGraphicalNodeEditPolicy();
 		this.populateGraphicalEditPolicy(policy);
 		return policy;
 	}
 
 	/**
-	 * Populates the {@link ConnectionGraphicalNodeEditPolicy}.
+	 * Populates the {@link OfficeFloorGraphicalNodeEditPolicy}.
 	 * 
 	 * @param policy
-	 *            {@link ConnectionGraphicalNodeEditPolicy}.
+	 *            {@link OfficeFloorGraphicalNodeEditPolicy}.
 	 */
 	protected abstract void populateGraphicalEditPolicy(
-			ConnectionGraphicalNodeEditPolicy policy);
+			OfficeFloorGraphicalNodeEditPolicy policy);
 
 	/*
 	 * =================== GraphicalEditor =========================
@@ -434,7 +447,12 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 		}
 
 		// Create the instance of the edit part
-		EditPart editPart = EclipseUtil.createInstance(editPartType);
+		EditPart editPart = EclipseUtil.createInstance(editPartType, this);
+		if (editPart == null) {
+			this.messageError("Failed to obtain EditPart for model "
+					+ model.getClass().getSimpleName());
+			return null;
+		}
 
 		// Load in the model
 		editPart.setModel(model);

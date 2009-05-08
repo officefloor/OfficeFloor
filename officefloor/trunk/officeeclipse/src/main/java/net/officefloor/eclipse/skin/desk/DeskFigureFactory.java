@@ -22,11 +22,15 @@ import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskEscalationModel;
 import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskFlowToTaskModel;
 import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
+import net.officefloor.model.desk.WorkTaskToTaskModel;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PolylineConnection;
 
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
@@ -112,5 +116,30 @@ public interface DeskFigureFactory {
 	 */
 	TaskEscalationFigure createTaskEscalationFigure(
 			TaskEscalationFigureContext context);
+
+	/**
+	 * Decorates the {@link WorkTaskToTaskModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 */
+	void decorateWorkTaskToTaskFigure(PolylineConnection figure);
+
+	/**
+	 * Decorates the {@link WorkTaskObjectToExternalManagedObjectModel}
+	 * connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 */
+	void decorateWorkTaskObjectToExternalManagedObjectFigure(PolylineConnection figure);
+
+	/**
+	 * Decorates the {@link TaskFlowToTaskModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 */
+	void decorateTaskFlowToTaskFigure(PolylineConnection figure);
 
 }
