@@ -21,11 +21,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.desk.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalFlowModel.ExternalFlowEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,11 +40,11 @@ import org.eclipse.gef.EditPart;
  */
 public class ExternalFlowEditPart
 		extends
-		AbstractOfficeFloorEditPart<ExternalFlowModel, ExternalFlowEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<ExternalFlowModel, ExternalFlowEvent, ExternalFlowFigure>
 		implements ExternalFlowFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected ExternalFlowFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createExternalFlowFigure(this);
 	}
@@ -52,6 +57,32 @@ public class ExternalFlowEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<ExternalFlowModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<DeskChanges, ExternalFlowModel>() {
+					@Override
+					public String getInitialValue() {
+						return ExternalFlowEditPart.this.getCastedModel()
+								.getExternalFlowName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return ExternalFlowEditPart.this.getOfficeFloorFigure()
+								.getExternalFlowNameFigure();
+					}
+
+					@Override
+					public Change<ExternalFlowModel> createChange(
+							DeskChanges changes, ExternalFlowModel target,
+							String newValue) {
+						return changes.renameExternalFlow(target, newValue);
+					}
+				});
+	}
+
+	@Override
 	protected Class<ExternalFlowEvent> getPropertyChangeEventType() {
 		return ExternalFlowEvent.class;
 	}
@@ -60,13 +91,17 @@ public class ExternalFlowEditPart
 	protected void handlePropertyChange(ExternalFlowEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_EXTERNAL_FLOW_NAME:
+			this.getOfficeFloorFigure().setExternalFlowName(
+					this.getCastedModel().getExternalFlowName());
+			break;
 		case ADD_TASK_FLOW:
 		case REMOVE_TASK_FLOW:
 		case ADD_TASK_ESCALATION:
 		case REMOVE_TASK_ESCALATION:
 		case ADD_PREVIOUS_TASK:
 		case REMOVE_PREVIOUS_TASK:
-			ExternalFlowEditPart.this.refreshTargetConnections();
+			this.refreshTargetConnections();
 			break;
 		}
 	}

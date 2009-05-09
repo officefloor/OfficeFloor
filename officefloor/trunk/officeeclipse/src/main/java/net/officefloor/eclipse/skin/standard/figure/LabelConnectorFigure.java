@@ -36,6 +36,11 @@ public class LabelConnectorFigure extends Figure {
 	private final ConnectorFigure connector;
 
 	/**
+	 * {@link Label}.
+	 */
+	private final Label label;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param label
@@ -62,6 +67,7 @@ public class LabelConnectorFigure extends Figure {
 	 */
 	public LabelConnectorFigure(Label label, ConnectorDirection direction,
 			Color colour) {
+		this.label = label;
 
 		// Ensure render
 		this.setLayoutManager(new NoSpacingToolbarLayout(true));
@@ -108,6 +114,15 @@ public class LabelConnectorFigure extends Figure {
 
 		// Add the figure
 		this.add(figure);
+	}
+
+	/**
+	 * Obtains the {@link Label}.
+	 * 
+	 * @return {@link Label}.
+	 */
+	public Label getLabel() {
+		return this.label;
 	}
 
 	/**

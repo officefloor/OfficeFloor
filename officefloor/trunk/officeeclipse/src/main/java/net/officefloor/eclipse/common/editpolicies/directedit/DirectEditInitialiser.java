@@ -14,37 +14,31 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.desk;
-
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.desk.ExternalFlowModel;
+package net.officefloor.eclipse.common.editpolicies.directedit;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 
 /**
- * {@link OfficeFloorFigure} for the {@link ExternalFlowModel}.
+ * Provides the necessary information to initialise a direct edit.
  * 
  * @author Daniel
  */
-public interface ExternalFlowFigure extends OfficeFloorFigure {
+public interface DirectEditInitialiser {
 
 	/**
-	 * Indicates a change in the {@link ExternalFlowModel} name.
+	 * Obtains the initial value.
 	 * 
-	 * @param externalFlowName
-	 *            Name to display for the {@link ExternalFlowModel}.
+	 * @return Initial value.
 	 */
-	void setExternalFlowName(String externalFlowName);
+	String getInitialValue();
 
 	/**
-	 * <p>
-	 * Obtains the {@link IFigure} containing the {@link ExternalFlowModel}
-	 * name.
-	 * <p>
-	 * This is to allow placement of the editor in changing the
-	 * {@link ExternalFlowModel} name.
+	 * Obtains the {@link IFigure} that is used to determine the location of the
+	 * direct edit. This is typically the {@link Label} containing the value
+	 * being directly edited.
 	 * 
-	 * @return {@link IFigure} containing the {@link ExternalFlowModel} name.
+	 * @return {@link IFigure} to use to determine the location.
 	 */
-	IFigure getExternalFlowNameFigure();
+	IFigure getLocationFigure();
 }

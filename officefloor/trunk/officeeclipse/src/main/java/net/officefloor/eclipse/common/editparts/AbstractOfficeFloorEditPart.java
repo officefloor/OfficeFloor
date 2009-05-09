@@ -26,6 +26,7 @@ import net.officefloor.eclipse.classpath.ProjectClassLoader;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.MovePositionalModelCommand;
 import net.officefloor.eclipse.common.editpolicies.officefloor.OfficeFloorEditPolicy;
 import net.officefloor.eclipse.common.figure.FreeformWrapperFigure;
@@ -52,6 +53,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.NodeEditPart;
 import org.eclipse.gef.Request;
+import org.eclipse.gef.RequestConstants;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
@@ -85,6 +87,11 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 * {@link OfficeFloorFigure} for this {@link EditPart}.
 	 */
 	private F officeFloorFigure = null;
+
+	/**
+	 * {@link OfficeFloorDirectEditPolicy}.
+	 */
+	private OfficeFloorDirectEditPolicy<M> officeFloorDirectEditPolicy;
 
 	/**
 	 * Specifies the {@link AbstractOfficeFloorEditor} that contains this
@@ -318,6 +325,13 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 		this.populateOfficeFloorEditPolicy(officeFloorEditPolicy);
 		this.installEditPolicy("OfficeFloor", officeFloorEditPolicy);
 
+		// Allow direct editing (if configured)
+		this.officeFloorDirectEditPolicy = new OfficeFloorDirectEditPolicy<M>();
+		this
+				.populateOfficeFloorDirectEditPolicy(this.officeFloorDirectEditPolicy);
+		this.installEditPolicy(EditPolicy.DIRECT_EDIT_ROLE,
+				this.officeFloorDirectEditPolicy);
+
 		// Install the graphical node edit policy
 		this.installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE, this.getEditor()
 				.createGraphicalEditPolicy());
@@ -333,6 +347,18 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 	 *            {@link OfficeFloorEditPolicy} to populate.
 	 */
 	protected void populateOfficeFloorEditPolicy(OfficeFloorEditPolicy policy) {
+		// Default, do nothing
+	}
+
+	/**
+	 * Sub classes may override to populate the
+	 * {@link OfficeFloorDirectEditPolicy}.
+	 * 
+	 * @param policy
+	 *            {@link OfficeFloorDirectEditPolicy} to populate.
+	 */
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<M> policy) {
 		// Default, do nothing
 	}
 
@@ -530,6 +556,13 @@ public abstract class AbstractOfficeFloorEditPart<M extends Model, E extends Enu
 
 	@Override
 	public void performRequest(Request req) {
+
+		// Determine if direct edit
+		if (RequestConstants.REQ_DIRECT_EDIT.equals(req.getType())) {
+			this.officeFloorDirectEditPolicy.doDirectEdit(this);
+			return; // edit policy will handle creating commands
+		}
+
 		// Obtain the command and execute if have
 		Command command = this.getCommand(req);
 

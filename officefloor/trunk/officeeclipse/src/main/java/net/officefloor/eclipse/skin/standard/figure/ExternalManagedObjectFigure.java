@@ -59,6 +59,15 @@ public class ExternalManagedObjectFigure extends Ellipse {
 	}
 
 	/**
+	 * Obtains the {@link Label} containing the {@link ManagedObject} name.
+	 * 
+	 * @return {@link Label} containing the {@link ManagedObject} name.
+	 */
+	public Label getLabel() {
+		return this.name;
+	}
+
+	/**
 	 * Specifies the {@link ManagedObject} name.
 	 * 
 	 * @param managedObjectName
@@ -67,4 +76,5 @@ public class ExternalManagedObjectFigure extends Ellipse {
 	public void setManagedObjectName(String managedObjectName) {
 		this.name.setText(managedObjectName);
 	}
+
 }

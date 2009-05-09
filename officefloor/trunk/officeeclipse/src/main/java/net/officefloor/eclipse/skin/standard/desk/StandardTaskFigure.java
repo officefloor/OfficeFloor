@@ -34,6 +34,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -88,8 +89,8 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 		figure.add(flowItemAndTaskLink);
 
 		// Create the flow item container
-		this.flowItem = new ContainerFigure(context.getTaskName(),
-				flowColour, 20, true);
+		this.flowItem = new ContainerFigure(context.getTaskName(), flowColour,
+				20, true);
 		flowItemAndTaskLink.add(this.flowItem);
 
 		// Initiate state of is public
@@ -122,14 +123,22 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.desk.FlowItemFigure#setIsPublic(boolean)
+	 * ================= FlowItemFigure =================================
 	 */
+
+	@Override
+	public void setTaskName(String taskName) {
+		this.flowItem.getContainerName().setText(taskName);
+	}
+
 	@Override
 	public void setIsPublic(boolean isPublic) {
 		this.flowItem.setIsPublic(isPublic);
+	}
+
+	@Override
+	public IFigure getTaskNameFigure() {
+		return this.flowItem.getContainerName();
 	}
 
 }

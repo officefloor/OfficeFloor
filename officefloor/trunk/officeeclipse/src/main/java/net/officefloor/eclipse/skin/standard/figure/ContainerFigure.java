@@ -51,6 +51,11 @@ public class ContainerFigure extends Figure {
 	private final Figure contentPane;
 
 	/**
+	 * {@link Label} for the container name.
+	 */
+	private final Label containerName;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param containerName
@@ -94,9 +99,9 @@ public class ContainerFigure extends Figure {
 		}
 
 		// Specify the container name
-		Label containerLabel = new Label(containerName);
-		containerLabel.setLayoutManager(new NoSpacingToolbarLayout(true));
-		header.add(containerLabel);
+		this.containerName = new Label(containerName);
+		this.containerName.setLayoutManager(new NoSpacingToolbarLayout(true));
+		header.add(this.containerName);
 
 		// Content pane
 		Figure contentPaneWrap = new Figure();
@@ -123,6 +128,15 @@ public class ContainerFigure extends Figure {
 	}
 
 	/**
+	 * Obtains the {@link Label} for the container name.
+	 * 
+	 * @return {@link Label} for the container name.
+	 */
+	public Label getContainerName() {
+		return this.containerName;
+	}
+
+	/**
 	 * Specifies if public.
 	 * 
 	 * @param isPublic
@@ -138,21 +152,13 @@ public class ContainerFigure extends Figure {
 	private class ContentBorder extends AbstractBorder {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.draw2d.Border#getInsets(org.eclipse.draw2d.IFigure)
+		 * ============ Border ================================
 		 */
 		@Override
 		public Insets getInsets(IFigure figure) {
 			return new Insets(0);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.draw2d.Border#paint(org.eclipse.draw2d.IFigure,
-		 * org.eclipse.draw2d.Graphics, org.eclipse.draw2d.geometry.Insets)
-		 */
 		@Override
 		public void paint(IFigure figure, Graphics graphics, Insets insets) {
 			Rectangle paintRectangle = getPaintRectangle(figure, insets);
