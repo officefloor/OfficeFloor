@@ -21,13 +21,20 @@ import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.desk.ExternalFlowModel;
 import net.officefloor.model.desk.ExternalManagedObjectModel;
 import net.officefloor.model.desk.TaskEscalationModel;
+import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
+import net.officefloor.model.desk.TaskEscalationToTaskModel;
 import net.officefloor.model.desk.TaskFlowModel;
+import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToTaskModel;
 import net.officefloor.model.desk.TaskModel;
+import net.officefloor.model.desk.TaskToNextExternalFlowModel;
+import net.officefloor.model.desk.TaskToNextTaskModel;
+import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
 
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PolylineConnection;
@@ -123,7 +130,8 @@ public interface DeskFigureFactory {
 	 * @param figure
 	 *            {@link IFigure} to decorate.
 	 */
-	void decorateWorkTaskToTaskFigure(PolylineConnection figure);
+	void decorateWorkTaskToTaskFigure(PolylineConnection figure,
+			WorkTaskToTaskFigureContext context);
 
 	/**
 	 * Decorates the {@link WorkTaskObjectToExternalManagedObjectModel}
@@ -131,15 +139,87 @@ public interface DeskFigureFactory {
 	 * 
 	 * @param figure
 	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link WorkTaskObjectToExternalManagedObjectModel}.
 	 */
-	void decorateWorkTaskObjectToExternalManagedObjectFigure(PolylineConnection figure);
+	void decorateWorkTaskObjectToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			WorkTaskObjectToExternalManagedObjectFigureContext context);
 
 	/**
 	 * Decorates the {@link TaskFlowToTaskModel} connection.
 	 * 
 	 * @param figure
 	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TaskFlowToTaskFigureContext}.
 	 */
-	void decorateTaskFlowToTaskFigure(PolylineConnection figure);
+	void decorateTaskFlowToTaskFigure(PolylineConnection figure,
+			TaskFlowToTaskFigureContext context);
+
+	/**
+	 * Decorates the {@link TaskFlowToExternalFlowModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TaskFlowToExternalFlowFigureContext}.
+	 */
+	void decorateTaskFlowToExternalFlowFigure(PolylineConnection figure,
+			TaskFlowToExternalFlowFigureContext context);
+
+	/**
+	 * Decorates the {@link TaskToNextTaskModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TaskToNextTaskFigureContext}.
+	 */
+	void decorateTaskToNextTaskFigure(PolylineConnection figure,
+			TaskToNextTaskFigureContext context);
+
+	/**
+	 * Decorates the {@link TaskToNextExternalFlowModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TaskToNextExternalFlowModel}.
+	 */
+	void decorateTaskToNextExternalFlowFigure(PolylineConnection figure,
+			TaskToNextExternalFlowFigureContext context);
+
+	/**
+	 * Decorates the {@link TaskEscalationToTaskModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TaskEscalationToTaskFigureContext}.
+	 */
+	void decorateTaskEscalationToTaskFigure(PolylineConnection figure,
+			TaskEscalationToTaskFigureContext context);
+
+	/**
+	 * Decorates the {@link TaskEscalationToExternalFlowModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link TaskEscalationToExternalFlowModel}.
+	 */
+	void decorateTaskEscalationToExternalFlowFigure(PolylineConnection figure,
+			TaskEscalationToExternalFlowFigureContext context);
+
+	/**
+	 * Decorates the {@link WorkToInitialTaskModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param workToInitialTaskEditPart
+	 */
+	void decorateWorkToInitialTaskFigure(PolylineConnection figure,
+			WorkToInitialTaskFigureContext context);
 
 }

@@ -14,33 +14,14 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.editparts;
+package net.officefloor.eclipse.skin.desk;
 
-import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.skin.desk.WorkTaskToTaskFigureContext;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
 
-import org.eclipse.draw2d.PolylineConnection;
-import org.eclipse.gef.EditPart;
-
 /**
- * {@link EditPart} for the {@link WorkTaskToTaskModel}.
+ * Context for the {@link WorkTaskToTaskModel} connection.
  * 
  * @author Daniel
  */
-public class WorkTaskToTaskEditPart extends
-		AbstractOfficeFloorConnectionEditPart<WorkTaskToTaskModel> implements
-		WorkTaskToTaskFigureContext {
-
-	/*
-	 * ============= AbstractOfficeFloorConnectionEditPart =====================
-	 */
-
-	@Override
-	protected void decorateFigure(PolylineConnection figure) {
-		OfficeFloorPlugin.getSkin().getDeskFigureFactory()
-				.decorateWorkTaskToTaskFigure(figure, this);
-	}
-
+public interface WorkTaskToTaskFigureContext {
 }

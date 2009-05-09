@@ -54,6 +54,7 @@ import net.officefloor.model.desk.WorkTaskModel;
 import net.officefloor.model.desk.WorkTaskObjectModel;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 import net.officefloor.model.desk.WorkTaskToTaskModel;
+import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.impl.change.AbstractChange;
 import net.officefloor.model.impl.change.NoChange;
 
@@ -63,6 +64,35 @@ import net.officefloor.model.impl.change.NoChange;
  * @author Daniel
  */
 public class DeskChangesImpl implements DeskChanges {
+
+	/**
+	 * Obtains the link type name for the {@link FlowInstigationStrategyEnum}.
+	 * 
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 * @return Link type name for the {@link FlowInstigationStrategyEnum}.
+	 */
+	public static String getFlowInstigationStrategyLink(
+			FlowInstigationStrategyEnum instigationStrategy) {
+
+		// Ensure have instigation strategy
+		if (instigationStrategy == null) {
+			return null;
+		}
+
+		// Return instigation strategy link type
+		switch (instigationStrategy) {
+		case SEQUENTIAL:
+			return DeskChanges.SEQUENTIAL_LINK;
+		case PARALLEL:
+			return DeskChanges.PARALLEL_LINK;
+		case ASYNCHRONOUS:
+			return DeskChanges.ASYNCHRONOUS_LINK;
+		default:
+			throw new IllegalStateException("Unknown instigation strategy "
+					+ instigationStrategy);
+		}
+	}
 
 	/**
 	 * <p>
@@ -1187,20 +1217,7 @@ public class DeskChangesImpl implements DeskChanges {
 		final TaskFlowToTaskModel conn = new TaskFlowToTaskModel();
 		conn.setTaskFlow(taskFlow);
 		conn.setTask(task);
-		switch (instigationStrategy) {
-		case SEQUENTIAL:
-			conn.setLinkType(DeskChanges.SEQUENTIAL_LINK);
-			break;
-		case PARALLEL:
-			conn.setLinkType(DeskChanges.PARALLEL_LINK);
-			break;
-		case ASYNCHRONOUS:
-			conn.setLinkType(DeskChanges.ASYNCHRONOUS_LINK);
-			break;
-		default:
-			throw new IllegalStateException("Unknown instigation strategy "
-					+ instigationStrategy);
-		}
+		conn.setLinkType(getFlowInstigationStrategyLink(instigationStrategy));
 
 		// Return the change
 		return new AbstractChange<TaskFlowToTaskModel>(conn, "Connect") {
@@ -1232,6 +1249,284 @@ public class DeskChangesImpl implements DeskChanges {
 			@Override
 			public void revert() {
 				taskFlowToTask.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskFlowToExternalFlowModel> linkTaskFlowToExternalFlow(
+			TaskFlowModel taskFlow, ExternalFlowModel externalFlow,
+			FlowInstigationStrategyEnum instigationStrategy) {
+
+		// TODO test this method (linkTaskFlowToExternalFlow)
+
+		// Create the connection
+		final TaskFlowToExternalFlowModel conn = new TaskFlowToExternalFlowModel();
+		conn.setTaskFlow(taskFlow);
+		conn.setExternalFlow(externalFlow);
+		conn.setLinkType(getFlowInstigationStrategyLink(instigationStrategy));
+
+		// Return the change
+		return new AbstractChange<TaskFlowToExternalFlowModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskFlowToExternalFlowModel> removeTaskFlowToExternalFlow(
+			final TaskFlowToExternalFlowModel taskFlowToExternalFlow) {
+
+		// TODO test this method (removeTaskFlowToExternalFlow)
+
+		// Return the change
+		return new AbstractChange<TaskFlowToExternalFlowModel>(
+				taskFlowToExternalFlow, "Remove") {
+			@Override
+			public void apply() {
+				taskFlowToExternalFlow.remove();
+			}
+
+			@Override
+			public void revert() {
+				taskFlowToExternalFlow.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskToNextTaskModel> linkTaskToNextTask(TaskModel task,
+			TaskModel nextTask) {
+
+		// TODO test this method (linkTaskToNextTask)
+
+		// Create the connection
+		final TaskToNextTaskModel conn = new TaskToNextTaskModel();
+		conn.setPreviousTask(task);
+		conn.setNextTask(nextTask);
+
+		// Return the change
+		return new AbstractChange<TaskToNextTaskModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskToNextTaskModel> removeTaskToNextTask(
+			final TaskToNextTaskModel taskToNextTask) {
+
+		// TODO test this method (removeTaskToNextTaskModel)
+
+		// Return the change
+		return new AbstractChange<TaskToNextTaskModel>(taskToNextTask, "Remove") {
+			@Override
+			public void apply() {
+				taskToNextTask.remove();
+			}
+
+			@Override
+			public void revert() {
+				taskToNextTask.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskToNextExternalFlowModel> linkTaskToNextExternalFlow(
+			TaskModel task, ExternalFlowModel nextExternalFlow) {
+
+		// TODO test this method (linkTaskToNextExternalFlow)
+
+		// Create the connection
+		final TaskToNextExternalFlowModel conn = new TaskToNextExternalFlowModel();
+		conn.setPreviousTask(task);
+		conn.setNextExternalFlow(nextExternalFlow);
+
+		// Return the change
+		return new AbstractChange<TaskToNextExternalFlowModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskToNextExternalFlowModel> removeTaskToNextExternalFlow(
+			final TaskToNextExternalFlowModel taskToNextExternalFlow) {
+
+		// TODO test this method (removeTaskToNextExternalFlow)
+
+		// Return the change
+		return new AbstractChange<TaskToNextExternalFlowModel>(
+				taskToNextExternalFlow, "Remove") {
+			@Override
+			public void apply() {
+				taskToNextExternalFlow.remove();
+			}
+
+			@Override
+			public void revert() {
+				taskToNextExternalFlow.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskEscalationToTaskModel> linkTaskEscalationToTask(
+			TaskEscalationModel taskEscalation, TaskModel task) {
+
+		// TODO test this method (linkTaskEscalationToTask)
+
+		// Create the connection
+		final TaskEscalationToTaskModel conn = new TaskEscalationToTaskModel();
+		conn.setEscalation(taskEscalation);
+		conn.setTask(task);
+
+		// Return the change
+		return new AbstractChange<TaskEscalationToTaskModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskEscalationToTaskModel> removeTaskEscalationToTask(
+			final TaskEscalationToTaskModel taskEscalationToTask) {
+
+		// TODO test this method (removeTaskEscalationToTask)
+
+		// Return the change
+		return new AbstractChange<TaskEscalationToTaskModel>(
+				taskEscalationToTask, "Remove") {
+			@Override
+			public void apply() {
+				taskEscalationToTask.remove();
+			}
+
+			@Override
+			public void revert() {
+				taskEscalationToTask.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskEscalationToExternalFlowModel> linkTaskEscalationToExternalFlow(
+			TaskEscalationModel taskEscalation, ExternalFlowModel externalFlow) {
+
+		// TODO test this method (linkTaskEscalationToExternalFlow)
+
+		// Create the connection
+		final TaskEscalationToExternalFlowModel conn = new TaskEscalationToExternalFlowModel();
+		conn.setTaskEscalation(taskEscalation);
+		conn.setExternalFlow(externalFlow);
+
+		// Return the change
+		return new AbstractChange<TaskEscalationToExternalFlowModel>(conn,
+				"Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<TaskEscalationToExternalFlowModel> removeTaskEscalationToExternalFlow(
+			final TaskEscalationToExternalFlowModel taskEscalationToExternalFlow) {
+
+		// TODO test this method (removeTaskEscalationToExternalFlow)
+
+		// Return the change
+		return new AbstractChange<TaskEscalationToExternalFlowModel>(
+				taskEscalationToExternalFlow, "Remove") {
+			@Override
+			public void apply() {
+				taskEscalationToExternalFlow.remove();
+			}
+
+			@Override
+			public void revert() {
+				taskEscalationToExternalFlow.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<WorkToInitialTaskModel> linkWorkToInitialTask(WorkModel work,
+			TaskModel initialTask) {
+
+		// TODO test this method (linkWorkToInitialTask)
+
+		// Create the connection
+		final WorkToInitialTaskModel conn = new WorkToInitialTaskModel();
+		conn.setWork(work);
+		conn.setInitialTask(initialTask);
+
+		// Return the change
+		return new AbstractChange<WorkToInitialTaskModel>(conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<WorkToInitialTaskModel> removeWorkToInitialTask(
+			final WorkToInitialTaskModel workToInitialTask) {
+
+		// TODO test this method (removeWorkToInitialTask)
+
+		// Return the change
+		return new AbstractChange<WorkToInitialTaskModel>(workToInitialTask,
+				"Remove") {
+			@Override
+			public void apply() {
+				workToInitialTask.remove();
+			}
+
+			@Override
+			public void revert() {
+				workToInitialTask.connect();
 			}
 		};
 	}

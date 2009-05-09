@@ -14,31 +14,15 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.editparts;
+package net.officefloor.eclipse.skin.desk;
 
-import net.officefloor.eclipse.OfficeFloorPlugin;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
-import net.officefloor.eclipse.skin.desk.WorkTaskObjectToExternalManagedObjectFigureContext;
 import net.officefloor.model.desk.WorkTaskObjectToExternalManagedObjectModel;
 
-import org.eclipse.draw2d.PolylineConnection;
-import org.eclipse.gef.EditPart;
-
 /**
- * {@link EditPart} for the {@link WorkTaskObjectToExternalManagedObjectModel}.
+ * Context for the {@link WorkTaskObjectToExternalManagedObjectModel}
+ * connection.
  * 
  * @author Daniel
  */
-public class WorkTaskObjectToExternalManagedObjectEditPart
-		extends
-		AbstractOfficeFloorConnectionEditPart<WorkTaskObjectToExternalManagedObjectModel>
-		implements WorkTaskObjectToExternalManagedObjectFigureContext {
-
-	@Override
-	protected void decorateFigure(PolylineConnection figure) {
-		OfficeFloorPlugin.getSkin().getDeskFigureFactory()
-				.decorateWorkTaskObjectToExternalManagedObjectFigure(figure,
-						this);
-	}
-
+public interface WorkTaskObjectToExternalManagedObjectFigureContext {
 }

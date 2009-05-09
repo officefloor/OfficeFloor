@@ -277,10 +277,146 @@ public interface DeskChanges {
 	 * Removes the {@link TaskFlowToTaskModel}.
 	 * 
 	 * @param taskFlowToTask
-	 *            {@link TaskFlowToTaskModel}.
-	 * @return {@link TaskFlowToTaskModel} to remove.
+	 *            {@link TaskFlowToTaskModel} to remove.
+	 * @return {@link Change} to remove {@link TaskFlowToTaskModel}.
 	 */
 	Change<TaskFlowToTaskModel> removeTaskFlowToTask(
 			TaskFlowToTaskModel taskFlowToTask);
+
+	/**
+	 * Links the {@link TaskFlowModel} to the {@link ExternalFlowModel}.
+	 * 
+	 * @param taskFlow
+	 *            {@link TaskFlowModel}.
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel}.
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}.
+	 * @return {@link Change} to add a {@link TaskFlowToExternalFlowModel}.
+	 */
+	Change<TaskFlowToExternalFlowModel> linkTaskFlowToExternalFlow(
+			TaskFlowModel taskFlow, ExternalFlowModel externalFlow,
+			FlowInstigationStrategyEnum instigationStrategy);
+
+	/**
+	 * Removes the {@link TaskFlowToExternalFlowModel}.
+	 * 
+	 * @param taskFlowToExternalFlow
+	 *            {@link TaskFlowToExternalFlowModel} to remove.
+	 * @return {@link Change} to remove {@link TaskFlowToExternalFlowModel}.
+	 */
+	Change<TaskFlowToExternalFlowModel> removeTaskFlowToExternalFlow(
+			TaskFlowToExternalFlowModel taskFlowToExternalFlow);
+
+	/**
+	 * Links {@link TaskModel} to next {@link TaskModel}.
+	 * 
+	 * @param task
+	 *            {@link TaskModel}.
+	 * @param next
+	 *            Next {@link TaskModel}.
+	 * @return {@link Change} to add a {@link TaskToNextTaskModel}.
+	 */
+	Change<TaskToNextTaskModel> linkTaskToNextTask(TaskModel task,
+			TaskModel nextTask);
+
+	/**
+	 * Removes the {@link TaskToNextTaskModel}.
+	 * 
+	 * @param taskToNextTask
+	 *            {@link TaskToNextTaskModel} to remove.
+	 * @return {@link Change} to remove {@link TaskToNextTaskModel}.
+	 */
+	Change<TaskToNextTaskModel> removeTaskToNextTask(
+			TaskToNextTaskModel taskToNextTask);
+
+	/**
+	 * Links {@link TaskModel} to next {@link ExternalFlowModel}.
+	 * 
+	 * @param task
+	 *            {@link TaskModel}.
+	 * @param nextExternalFlow
+	 *            Next {@link ExternalFlowModel}.
+	 * @return {@link Change} to add a {@link TaskToNextExternalFlowModel}.
+	 */
+	Change<TaskToNextExternalFlowModel> linkTaskToNextExternalFlow(
+			TaskModel task, ExternalFlowModel nextExternalFlow);
+
+	/**
+	 * Removes the {@link TaskToNextExternalFlowModel}.
+	 * 
+	 * @param taskToNextExternalFlow
+	 *            {@link TaskToNextExternalFlowModel} to remove.
+	 * @return {@link Change} to remove {@link TaskToNextExternalFlowModel}.
+	 */
+	Change<TaskToNextExternalFlowModel> removeTaskToNextExternalFlow(
+			TaskToNextExternalFlowModel taskToNextExternalFlow);
+
+	/**
+	 * Links {@link TaskEscalationModel} to the {@link TaskModel}.
+	 * 
+	 * @param taskEscalation
+	 *            {@link TaskEscalationModel}.
+	 * @param task
+	 *            {@link TaskModel}.
+	 * @return {@link Change} to add a {@link TaskEscalationToTaskModel}.
+	 */
+	Change<TaskEscalationToTaskModel> linkTaskEscalationToTask(
+			TaskEscalationModel taskEscalation, TaskModel task);
+
+	/**
+	 * Removes the {@link TaskEscalationToTaskModel}.
+	 * 
+	 * @param taskEscalationToTask
+	 *            {@link TaskEscalationToTaskModel} to remove.
+	 * @return {@link Change} to remove {@link TaskEscalationToTaskModel}.
+	 */
+	Change<TaskEscalationToTaskModel> removeTaskEscalationToTask(
+			TaskEscalationToTaskModel taskEscalationToTask);
+
+	/**
+	 * Links {@link TaskEscalationModel} to the {@link ExternalFlowModel}.
+	 * 
+	 * @param taskEscalation
+	 *            {@link TaskEscalationModel}.
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel}.
+	 * @return {@link Change} to add {@link TaskEscalationToExternalFlowModel}.
+	 */
+	Change<TaskEscalationToExternalFlowModel> linkTaskEscalationToExternalFlow(
+			TaskEscalationModel taskEscalation, ExternalFlowModel externalFlow);
+
+	/**
+	 * Removes the {@link TaskEscalationToExternalFlowModel}.
+	 * 
+	 * @param taskEscalationToExternalFlow
+	 *            {@link TaskEscalationToExternalFlowModel} to remove.
+	 * @return {@link Change} to remove
+	 *         {@link TaskEscalationToExternalFlowModel}.
+	 */
+	Change<TaskEscalationToExternalFlowModel> removeTaskEscalationToExternalFlow(
+			TaskEscalationToExternalFlowModel taskEscalationToExternalFlow);
+
+	/**
+	 * Links the {@link WorkModel} to its initial {@link TaskModel}.
+	 * 
+	 * @param work
+	 *            {@link WorkModel}.
+	 * @param initialTask
+	 *            Initial {@link TaskModel}.
+	 * @return {@link Change} to add a {@link WorkToInitialTaskModel}.
+	 */
+	Change<WorkToInitialTaskModel> linkWorkToInitialTask(WorkModel work,
+			TaskModel initialTask);
+
+	/**
+	 * Removes the {@link WorkToInitialTaskModel}.
+	 * 
+	 * @param workToInitialTask
+	 *            {@link WorkToInitialTaskModel} to remove.
+	 * @return {@link Change} to remove {@link WorkToInitialTaskModel}.
+	 */
+	Change<WorkToInitialTaskModel> removeWorkToInitialTask(
+			WorkToInitialTaskModel workToInitialTask);
 
 }

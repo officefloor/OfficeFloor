@@ -23,18 +23,33 @@ import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.desk.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.desk.TaskEscalationFigure;
 import net.officefloor.eclipse.skin.desk.TaskEscalationFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskEscalationToExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskEscalationToTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.TaskFigure;
 import net.officefloor.eclipse.skin.desk.TaskFigureContext;
 import net.officefloor.eclipse.skin.desk.TaskFlowFigure;
 import net.officefloor.eclipse.skin.desk.TaskFlowFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskFlowToExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskFlowToTaskFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskToNextExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskToNextTaskFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkFigure;
 import net.officefloor.eclipse.skin.desk.WorkFigureContext;
 import net.officefloor.eclipse.skin.desk.WorkTaskFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure;
 import net.officefloor.eclipse.skin.desk.WorkTaskObjectFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkTaskObjectToExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkTaskToTaskFigureContext;
+import net.officefloor.eclipse.skin.desk.WorkToInitialTaskFigureContext;
+import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.Graphics;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.draw2d.PolylineDecoration;
 
 /**
  * Standard {@link DeskFigureFactory}.
@@ -42,6 +57,51 @@ import org.eclipse.draw2d.PolylineConnection;
  * @author Daniel
  */
 public class StandardDeskFigureFactory implements DeskFigureFactory {
+
+	/**
+	 * Decorates the {@link Figure} based on the
+	 * {@link FlowInstigationStrategyEnum}.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param instigationStrategy
+	 *            {@link FlowInstigationStrategyEnum}. May be <code>null</code>.
+	 */
+	private void decorateInstigationStrategy(PolylineConnection figure,
+			FlowInstigationStrategyEnum instigationStrategy) {
+
+		// Ensure have flow instigation strategy
+		if (instigationStrategy == null) {
+			figure.setForegroundColor(ColorConstants.red);
+			return;
+		}
+
+		// Decorate based on flow instigation strategy
+		switch (instigationStrategy) {
+		case SEQUENTIAL:
+			PolylineDecoration sequentialArrow = new PolylineDecoration();
+			sequentialArrow.setLineWidth(2);
+			figure.setTargetDecoration(sequentialArrow);
+			figure.setLineWidth(2);
+			break;
+		case PARALLEL:
+			PolylineDecoration parallelSourceArrow = new PolylineDecoration();
+			parallelSourceArrow.setLineWidth(2);
+			figure.setSourceDecoration(parallelSourceArrow);
+			PolylineDecoration parallelTargetArrow = new PolylineDecoration();
+			parallelTargetArrow.setLineWidth(2);
+			figure.setTargetDecoration(parallelTargetArrow);
+			figure.setLineWidth(2);
+			break;
+		case ASYNCHRONOUS:
+			figure.setTargetDecoration(new PolylineDecoration());
+			figure.setLineStyle(Graphics.LINE_DASH);
+			break;
+		default:
+			throw new IllegalStateException("Unknown instigation strategy "
+					+ instigationStrategy);
+		}
+	}
 
 	/*
 	 * ===================== DeskFigureFactory ============================
@@ -59,7 +119,7 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	}
 
 	@Override
-	public net.officefloor.eclipse.skin.desk.WorkTaskObjectFigure createWorkTaskObjectFigure(
+	public WorkTaskObjectFigure createWorkTaskObjectFigure(
 			final WorkTaskObjectFigureContext context) {
 		return new StandardWorkTaskObjectFigure(context);
 	}
@@ -93,19 +153,69 @@ public class StandardDeskFigureFactory implements DeskFigureFactory {
 	}
 
 	@Override
-	public void decorateWorkTaskToTaskFigure(PolylineConnection figure) {
+	public void decorateWorkTaskToTaskFigure(PolylineConnection figure,
+			WorkTaskToTaskFigureContext context) {
 		figure.setForegroundColor(ColorConstants.lightGray);
 	}
 
 	@Override
 	public void decorateWorkTaskObjectToExternalManagedObjectFigure(
-			PolylineConnection figure) {
+			PolylineConnection figure,
+			WorkTaskObjectToExternalManagedObjectFigureContext context) {
 		// Leave as default line
 	}
 
 	@Override
-	public void decorateTaskFlowToTaskFigure(PolylineConnection figure) {
-		// TODO provide decoration based on instigation strategy
+	public void decorateTaskFlowToTaskFigure(PolylineConnection figure,
+			TaskFlowToTaskFigureContext context) {
+		this.decorateInstigationStrategy(figure, context
+				.getFlowInstigationStrategy());
+	}
+
+	@Override
+	public void decorateTaskFlowToExternalFlowFigure(PolylineConnection figure,
+			TaskFlowToExternalFlowFigureContext context) {
+		this.decorateInstigationStrategy(figure, context
+				.getFlowInstigationStrategy());
+	}
+
+	@Override
+	public void decorateTaskToNextTaskFigure(PolylineConnection figure,
+			TaskToNextTaskFigureContext context) {
+		PolylineDecoration arrow = new PolylineDecoration();
+		arrow.setLineWidth(2);
+		figure.setTargetDecoration(arrow);
+		figure.setLineWidth(2);
+	}
+
+	@Override
+	public void decorateTaskToNextExternalFlowFigure(PolylineConnection figure,
+			TaskToNextExternalFlowFigureContext context) {
+		PolylineDecoration arrow = new PolylineDecoration();
+		arrow.setLineWidth(2);
+		figure.setTargetDecoration(arrow);
+		figure.setLineWidth(2);
+	}
+
+	@Override
+	public void decorateTaskEscalationToTaskFigure(PolylineConnection figure,
+			TaskEscalationToTaskFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+		figure.setForegroundColor(ColorConstants.red);
+	}
+
+	@Override
+	public void decorateTaskEscalationToExternalFlowFigure(
+			PolylineConnection figure,
+			TaskEscalationToExternalFlowFigureContext context) {
+		figure.setTargetDecoration(new PolylineDecoration());
+		figure.setForegroundColor(ColorConstants.red);
+	}
+
+	@Override
+	public void decorateWorkToInitialTaskFigure(PolylineConnection figure,
+			WorkToInitialTaskFigureContext context) {
+		figure.setForegroundColor(ColorConstants.lightBlue);
 	}
 
 }

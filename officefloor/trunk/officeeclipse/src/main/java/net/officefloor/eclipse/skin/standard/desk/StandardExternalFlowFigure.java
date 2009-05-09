@@ -21,6 +21,7 @@ import net.officefloor.eclipse.skin.desk.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.desk.TaskEscalationToExternalFlowModel;
 import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 import net.officefloor.model.desk.TaskToNextExternalFlowModel;
 
@@ -45,11 +46,18 @@ public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
 				.getExternalFlowName(), ConnectorDirection.WEST,
 				ColorConstants.black);
+
+		// Register anchors
 		ConnectionAnchor anchor = figure.getConnectionAnchor();
-		this.registerConnectionAnchor(TaskToNextExternalFlowModel.class,
+		this
+				.registerConnectionAnchor(TaskToNextExternalFlowModel.class,
+						anchor);
+		this
+				.registerConnectionAnchor(TaskFlowToExternalFlowModel.class,
+						anchor);
+		this.registerConnectionAnchor(TaskEscalationToExternalFlowModel.class,
 				anchor);
-		this.registerConnectionAnchor(TaskFlowToExternalFlowModel.class,
-				anchor);
+
 		this.setFigure(figure);
 	}
 }

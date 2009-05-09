@@ -19,33 +19,34 @@ package net.officefloor.eclipse.desk.editparts;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.desk.DeskEditor;
-import net.officefloor.eclipse.skin.desk.TaskFlowToTaskFigureContext;
+import net.officefloor.eclipse.skin.desk.TaskFlowToExternalFlowFigureContext;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
-import net.officefloor.model.desk.TaskFlowToTaskModel;
+import net.officefloor.model.desk.TaskFlowToExternalFlowModel;
 
 import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the {@link TaskFlowToTaskModel}.
+ * {@link EditPart} for the {@link TaskFlowToExternalFlowModel}.
  * 
  * @author Daniel
  */
-public class TaskFlowToTaskEditPart extends
-		AbstractOfficeFloorConnectionEditPart<TaskFlowToTaskModel> implements
-		TaskFlowToTaskFigureContext {
+public class TaskFlowToExternalFlowEditPart extends
+		AbstractOfficeFloorConnectionEditPart<TaskFlowToExternalFlowModel>
+		implements TaskFlowToExternalFlowFigureContext {
 
 	/*
-	 * ============= AbstractOfficeFloorConnectionEditPart ==================
+	 * ============== AbstractOfficeFloorConnectionEditPart ==================
 	 */
+
 	@Override
 	protected void decorateFigure(PolylineConnection figure) {
 		OfficeFloorPlugin.getSkin().getDeskFigureFactory()
-				.decorateTaskFlowToTaskFigure(figure, this);
+				.decorateTaskFlowToExternalFlowFigure(figure, this);
 	}
 
 	/*
-	 * ==================== TaskFlowToTaskFigureContext ======================
+	 * ============== TaskFlowToExternalFlowFigureContext ===================
 	 */
 
 	@Override
