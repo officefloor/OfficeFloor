@@ -221,6 +221,18 @@ public interface DeskChanges {
 	Change<ExternalFlowModel> removeExternalFlow(ExternalFlowModel externalFlow);
 
 	/**
+	 * Renames the {@link ExternalFlowModel}.
+	 * 
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel} to rename.
+	 * @param newExternalFlowName
+	 *            New name for the {@link ExternalFlowModel}.
+	 * @return {@link Change} to rename the {@link ExternalFlowModel}.
+	 */
+	Change<ExternalFlowModel> renameExternalFlow(
+			ExternalFlowModel externalFlow, String newExternalFlowName);
+
+	/**
 	 * Adds an {@link ExternalManagedObjectModel} to the {@link DeskModel}.
 	 * 
 	 * @param externalManagedObjectName
@@ -243,6 +255,19 @@ public interface DeskChanges {
 	 */
 	Change<ExternalManagedObjectModel> removeExternalManagedObject(
 			ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Renames the {@link ExternalManagedObjectModel}.
+	 * 
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel} to rename.
+	 * @param newExternalManagedObjectName
+	 *            New name for the {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to rename the {@link ExternalManagedObjectModel}.
+	 */
+	Change<ExternalManagedObjectModel> renameExternalManagedObject(
+			ExternalManagedObjectModel externalManagedObject,
+			String newExternalManagedObjectName);
 
 	/**
 	 * Links the {@link WorkTaskObjectModel} to be the

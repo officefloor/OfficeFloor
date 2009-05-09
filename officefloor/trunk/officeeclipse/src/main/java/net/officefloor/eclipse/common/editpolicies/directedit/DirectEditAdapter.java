@@ -14,38 +14,14 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.desk;
-
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.frame.api.execute.Work;
-import net.officefloor.model.desk.WorkModel;
-
-import org.eclipse.draw2d.IFigure;
+package net.officefloor.eclipse.common.editpolicies.directedit;
 
 /**
- * {@link OfficeFloorFigure} for the {@link WorkModel}.
+ * Adapter that provides both {@link DirectEditInitialiser} and
+ * {@link DirectEditChangeFactory}.
  * 
  * @author Daniel
  */
-public interface WorkFigure extends OfficeFloorFigure {
-
-	/**
-	 * Indicates a change in the {@link WorkModel} name.
-	 * 
-	 * @param workName
-	 *            Name to display for the {@link WorkModel}.
-	 */
-	void setWorkName(String workName);
-
-	/**
-	 * <p>
-	 * Obtains the {@link IFigure} containing the {@link Work} name.
-	 * <p>
-	 * This is to allow placement of the editor in changing the {@link Work}
-	 * name.
-	 * 
-	 * @return {@link IFigure} containing the {@link Work} name.
-	 */
-	IFigure getWorkNameFigure();
-
+public interface DirectEditAdapter<C, M> extends DirectEditInitialiser,
+		DirectEditChangeFactory<C, M> {
 }

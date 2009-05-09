@@ -21,12 +21,17 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.desk.WorkFigure;
 import net.officefloor.eclipse.skin.desk.WorkFigureContext;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.WorkModel;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
 import net.officefloor.model.desk.WorkModel.WorkEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -34,13 +39,12 @@ import org.eclipse.gef.EditPart;
  * 
  * @author Daniel
  */
-public class WorkEditPart
-		extends
-		AbstractOfficeFloorEditPart<WorkModel, WorkEvent, OfficeFloorFigure>
-		implements WorkFigureContext {
+public class WorkEditPart extends
+		AbstractOfficeFloorEditPart<WorkModel, WorkEvent, WorkFigure> implements
+		WorkFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected WorkFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getDeskFigureFactory()
 				.createWorkFigure(this);
 	}
@@ -49,7 +53,6 @@ public class WorkEditPart
 	protected void populateModelChildren(List<Object> childModels) {
 		childModels.addAll(this.getCastedModel().getWorkTasks());
 	}
-
 
 	@Override
 	protected void populateConnectionSourceModels(List<Object> models) {
@@ -61,6 +64,29 @@ public class WorkEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<WorkModel> policy) {
+		policy.allowDirectEdit(new DirectEditAdapter<DeskChanges, WorkModel>() {
+			@Override
+			public String getInitialValue() {
+				return WorkEditPart.this.getCastedModel().getWorkName();
+			}
+
+			@Override
+			public IFigure getLocationFigure() {
+				return WorkEditPart.this.getOfficeFloorFigure()
+						.getWorkNameFigure();
+			}
+
+			@Override
+			public Change<WorkModel> createChange(DeskChanges changes,
+					WorkModel target, String newValue) {
+				return changes.renameWork(target, newValue);
+			}
+		});
+	}
+
+	@Override
 	protected Class<WorkEvent> getPropertyChangeEventType() {
 		return WorkEvent.class;
 	}
@@ -69,6 +95,10 @@ public class WorkEditPart
 	protected void handlePropertyChange(WorkEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_WORK_NAME:
+			this.getOfficeFloorFigure().setWorkName(
+					this.getCastedModel().getWorkName());
+			break;
 		case CHANGE_INITIAL_TASK:
 			WorkEditPart.this.refreshSourceConnections();
 			break;

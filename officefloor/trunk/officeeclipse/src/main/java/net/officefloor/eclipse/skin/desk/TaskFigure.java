@@ -16,7 +16,10 @@
  */
 package net.officefloor.eclipse.skin.desk;
 
+import org.eclipse.draw2d.IFigure;
+
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.frame.api.execute.Task;
 import net.officefloor.model.desk.TaskModel;
 
 /**
@@ -27,11 +30,30 @@ import net.officefloor.model.desk.TaskModel;
 public interface TaskFigure extends OfficeFloorFigure {
 
 	/**
+	 * Indicates a change in the {@link TaskModel} name.
+	 * 
+	 * @param taskName
+	 *            Name to display for the {@link TaskModel}.
+	 */
+	void setTaskName(String taskName);
+
+	/**
 	 * Flags on display whether is public.
 	 * 
 	 * @param isPublic
 	 *            <code>true</code> if public.
 	 */
 	void setIsPublic(boolean isPublic);
+
+	/**
+	 * <p>
+	 * Obtains the {@link IFigure} containing the {@link Task} name.
+	 * <p>
+	 * This is to allow placement of the editor in changing the {@link Task}
+	 * name.
+	 * 
+	 * @return {@link IFigure} containing the {@link Task} name.
+	 */
+	IFigure getTaskNameFigure();
 
 }

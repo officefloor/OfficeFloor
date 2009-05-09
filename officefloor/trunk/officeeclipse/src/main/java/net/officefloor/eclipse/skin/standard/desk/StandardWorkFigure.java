@@ -23,6 +23,7 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.frame.api.execute.Work;
 import net.officefloor.model.desk.WorkToInitialTaskModel;
 
 import org.eclipse.draw2d.AbstractBorder;
@@ -49,6 +50,11 @@ public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
 		WorkFigure {
 
 	/**
+	 * {@link Label} containing the {@link Work} name.
+	 */
+	private final Label workName;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param context
@@ -69,9 +75,9 @@ public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
 		figure.add(workFigure);
 
 		// Name of work
-		Label nameFigure = new Label(context.getWorkName());
-		nameFigure.setBorder(new MarginBorder(2, 5, 2, 2));
-		workFigure.add(nameFigure);
+		this.workName = new Label(context.getWorkName());
+		this.workName.setBorder(new MarginBorder(2, 5, 2, 2));
+		workFigure.add(this.workName);
 
 		// Content pane
 		Figure contentPaneWrap = new Figure();
@@ -101,33 +107,39 @@ public class StandardWorkFigure extends AbstractOfficeFloorFigure implements
 		this.setContentPane(contentPane);
 	}
 
+	/*
+	 * ==================== WorkFigure ========================================
+	 */
+
+	@Override
+	public void setWorkName(String workName) {
+		this.workName.setText(workName);
+	}
+
+	@Override
+	public IFigure getWorkNameFigure() {
+		return this.workName;
+	}
+
 	/**
 	 * {@link Border} for the content.
 	 */
 	private class ContentBorder extends AbstractBorder {
 
 		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.draw2d.Border#getInsets(org.eclipse.draw2d.IFigure)
+		 * =============== Border ========================================
 		 */
+
 		@Override
 		public Insets getInsets(IFigure figure) {
 			return new Insets(0);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.draw2d.Border#paint(org.eclipse.draw2d.IFigure,
-		 * org.eclipse.draw2d.Graphics, org.eclipse.draw2d.geometry.Insets)
-		 */
 		@Override
 		public void paint(IFigure figure, Graphics graphics, Insets insets) {
 			Rectangle paintRectangle = getPaintRectangle(figure, insets);
 			graphics.drawLine(paintRectangle.getTopLeft(), paintRectangle
 					.getTopRight());
 		}
-
 	}
 }

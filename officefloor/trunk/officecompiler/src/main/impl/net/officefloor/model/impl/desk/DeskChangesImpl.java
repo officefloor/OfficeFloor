@@ -1088,6 +1088,31 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
+	public Change<ExternalFlowModel> renameExternalFlow(
+			final ExternalFlowModel externalFlow,
+			final String newExternalFlowName) {
+
+		// TODO test this method (renameExternalFlow)
+
+		// Obtain the old name
+		final String oldExternalFlowName = externalFlow.getExternalFlowName();
+
+		// Return change to rename the external flow
+		return new AbstractChange<ExternalFlowModel>(externalFlow,
+				"Rename external flow to " + newExternalFlowName) {
+			@Override
+			public void apply() {
+				externalFlow.setExternalFlowName(newExternalFlowName);
+			}
+
+			@Override
+			public void revert() {
+				externalFlow.setExternalFlowName(oldExternalFlowName);
+			}
+		};
+	}
+
+	@Override
 	public Change<ExternalManagedObjectModel> addExternalManagedObject(
 			String externalManagedObjectName, String objectType) {
 
@@ -1175,6 +1200,35 @@ public class DeskChangesImpl implements DeskChanges {
 				for (ConnectionModel conn : this.connections) {
 					conn.connect();
 				}
+			}
+		};
+	}
+
+	@Override
+	public Change<ExternalManagedObjectModel> renameExternalManagedObject(
+			final ExternalManagedObjectModel externalManagedObject,
+			final String newExternalManagedObjectName) {
+
+		// TODO test this method (renameExternalManagedObject)
+
+		// Obtain the old name
+		final String oldExternalManagedObjectName = externalManagedObject
+				.getExternalManagedObjectName();
+
+		// Return change to rename the external managed object
+		return new AbstractChange<ExternalManagedObjectModel>(
+				externalManagedObject, "Rename external managed object to "
+						+ newExternalManagedObjectName) {
+			@Override
+			public void apply() {
+				externalManagedObject
+						.setExternalManagedObjectName(newExternalManagedObjectName);
+			}
+
+			@Override
+			public void revert() {
+				externalManagedObject
+						.setExternalManagedObjectName(oldExternalManagedObjectName);
 			}
 		};
 	}

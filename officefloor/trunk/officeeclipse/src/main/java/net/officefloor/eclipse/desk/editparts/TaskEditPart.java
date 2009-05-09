@@ -22,14 +22,19 @@ import java.util.List;
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.skin.desk.TaskFigure;
 import net.officefloor.eclipse.skin.desk.TaskFigureContext;
 import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.desk.DeskChanges;
 import net.officefloor.model.desk.TaskModel;
 import net.officefloor.model.desk.TaskToNextExternalFlowModel;
 import net.officefloor.model.desk.TaskToNextTaskModel;
 import net.officefloor.model.desk.TaskModel.TaskEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -85,6 +90,29 @@ public class TaskEditPart extends
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<TaskModel> policy) {
+		policy.allowDirectEdit(new DirectEditAdapter<DeskChanges, TaskModel>() {
+			@Override
+			public String getInitialValue() {
+				return TaskEditPart.this.getCastedModel().getTaskName();
+			}
+
+			@Override
+			public IFigure getLocationFigure() {
+				return TaskEditPart.this.getOfficeFloorFigure()
+						.getTaskNameFigure();
+			}
+
+			@Override
+			public Change<TaskModel> createChange(DeskChanges changes,
+					TaskModel target, String newValue) {
+				return changes.renameTask(target, newValue);
+			}
+		});
+	}
+
+	@Override
 	protected Class<TaskEvent> getPropertyChangeEventType() {
 		return TaskEvent.class;
 	}
@@ -93,6 +121,10 @@ public class TaskEditPart extends
 	protected void handlePropertyChange(TaskEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_TASK_NAME:
+			this.getOfficeFloorFigure().setTaskName(
+					this.getCastedModel().getTaskName());
+			break;
 		case CHANGE_IS_PUBLIC:
 			// Ensure display is public
 			this.getOfficeFloorFigure().setIsPublic(
