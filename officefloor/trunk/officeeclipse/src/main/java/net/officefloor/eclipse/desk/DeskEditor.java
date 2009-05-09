@@ -21,7 +21,6 @@ import java.util.Map;
 
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
-import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.common.editpolicies.connection.ConnectionChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
 import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
@@ -31,13 +30,19 @@ import net.officefloor.eclipse.desk.editparts.ExternalFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.ExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskEscalationEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskEscalationToExternalFlowEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskEscalationToTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskFlowEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskFlowToExternalFlowEditPart;
 import net.officefloor.eclipse.desk.editparts.TaskFlowToTaskEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskToNextExternalFlowEditPart;
+import net.officefloor.eclipse.desk.editparts.TaskToNextTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskObjectToExternalManagedObjectEditPart;
 import net.officefloor.eclipse.desk.editparts.WorkTaskToTaskEditPart;
+import net.officefloor.eclipse.desk.editparts.WorkToInitialTaskEditPart;
 import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.AddWorkOperation;
@@ -136,19 +141,16 @@ public class DeskEditor extends
 		map.put(WorkTaskObjectToExternalManagedObjectModel.class,
 				WorkTaskObjectToExternalManagedObjectEditPart.class);
 		map.put(TaskFlowToTaskModel.class, TaskFlowToTaskEditPart.class);
-
 		map.put(TaskFlowToExternalFlowModel.class,
-				AbstractOfficeFloorConnectionEditPart.class);
-		map.put(WorkToInitialTaskModel.class,
-				AbstractOfficeFloorConnectionEditPart.class);
-		map.put(TaskToNextTaskModel.class,
-				AbstractOfficeFloorConnectionEditPart.class);
+				TaskFlowToExternalFlowEditPart.class);
+		map.put(TaskToNextTaskModel.class, TaskToNextTaskEditPart.class);
 		map.put(TaskToNextExternalFlowModel.class,
-				AbstractOfficeFloorConnectionEditPart.class);
+				TaskToNextExternalFlowEditPart.class);
 		map.put(TaskEscalationToTaskModel.class,
-				AbstractOfficeFloorConnectionEditPart.class);
+				TaskEscalationToTaskEditPart.class);
 		map.put(TaskEscalationToExternalFlowModel.class,
-				AbstractOfficeFloorConnectionEditPart.class);
+				TaskEscalationToExternalFlowEditPart.class);
+		map.put(WorkToInitialTaskModel.class, WorkToInitialTaskEditPart.class);
 	}
 
 	@Override
@@ -202,6 +204,72 @@ public class DeskEditor extends
 								.removeTaskFlowToTask(target);
 					}
 				});
+
+		// Allow deleting task flow to external flow
+		policy.addDelete(TaskFlowToExternalFlowModel.class,
+				new DeleteChangeFactory<TaskFlowToExternalFlowModel>() {
+					@Override
+					public Change<TaskFlowToExternalFlowModel> createChange(
+							TaskFlowToExternalFlowModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeTaskFlowToExternalFlow(target);
+					}
+				});
+
+		// Allow deleting task to next task
+		policy.addDelete(TaskToNextTaskModel.class,
+				new DeleteChangeFactory<TaskToNextTaskModel>() {
+					@Override
+					public Change<TaskToNextTaskModel> createChange(
+							TaskToNextTaskModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeTaskToNextTask(target);
+					}
+				});
+
+		// Allow deleting task to next external flow
+		policy.addDelete(TaskToNextExternalFlowModel.class,
+				new DeleteChangeFactory<TaskToNextExternalFlowModel>() {
+					@Override
+					public Change<TaskToNextExternalFlowModel> createChange(
+							TaskToNextExternalFlowModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeTaskToNextExternalFlow(target);
+					}
+				});
+
+		// Allow deleting task escalation to task
+		policy.addDelete(TaskEscalationToTaskModel.class,
+				new DeleteChangeFactory<TaskEscalationToTaskModel>() {
+					@Override
+					public Change<TaskEscalationToTaskModel> createChange(
+							TaskEscalationToTaskModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeTaskEscalationToTask(target);
+					}
+				});
+
+		// Allow deleting task escalation to external flow
+		policy.addDelete(TaskEscalationToExternalFlowModel.class,
+				new DeleteChangeFactory<TaskEscalationToExternalFlowModel>() {
+					@Override
+					public Change<TaskEscalationToExternalFlowModel> createChange(
+							TaskEscalationToExternalFlowModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeTaskEscalationToExternalFlow(target);
+					}
+				});
+
+		// Allow deleting work to initial task
+		policy.addDelete(WorkToInitialTaskModel.class,
+				new DeleteChangeFactory<WorkToInitialTaskModel>() {
+					@Override
+					public Change<WorkToInitialTaskModel> createChange(
+							WorkToInitialTaskModel target) {
+						return DeskEditor.this.getModelChanges()
+								.removeWorkToInitialTask(target);
+					}
+				});
 	}
 
 	@Override
@@ -234,17 +302,105 @@ public class DeskEditor extends
 							TaskModel target, CreateConnectionRequest request) {
 
 						// Obtain the instigation strategy
-						FlowInstigationStrategyEnum instigationStrategy = DeskEditor.this
+						FlowInstigationStrategyEnum strategy = DeskEditor.this
 								.getFlowInstigationStrategy(request
 										.getNewObject());
-						if (instigationStrategy == null) {
+						if (strategy == null) {
 							return null; // must have instigation strategy
 						}
 
 						// Return the change to the link
 						return DeskEditor.this.getModelChanges()
-								.linkTaskFlowToTask(source, target,
-										instigationStrategy);
+								.linkTaskFlowToTask(source, target, strategy);
+					}
+				});
+
+		// Connect task flow to external flow
+		policy
+				.addConnection(
+						TaskFlowModel.class,
+						ExternalFlowModel.class,
+						new ConnectionChangeFactory<TaskFlowModel, ExternalFlowModel>() {
+							@Override
+							public Change<?> createChange(TaskFlowModel source,
+									ExternalFlowModel target,
+									CreateConnectionRequest request) {
+
+								// Obtain the instigation strategy
+								FlowInstigationStrategyEnum strategy = DeskEditor.this
+										.getFlowInstigationStrategy(request
+												.getNewObject());
+								if (strategy == null) {
+									return null; // must have instigation
+									// strategy
+								}
+
+								// Return the change to the link
+								return DeskEditor.this.getModelChanges()
+										.linkTaskFlowToExternalFlow(source,
+												target, strategy);
+							}
+						});
+
+		// Connect task to next task
+		policy.addConnection(TaskModel.class, TaskModel.class,
+				new ConnectionChangeFactory<TaskModel, TaskModel>() {
+					@Override
+					public Change<?> createChange(TaskModel source,
+							TaskModel target, CreateConnectionRequest request) {
+						return DeskEditor.this.getModelChanges()
+								.linkTaskToNextTask(source, target);
+					}
+				});
+
+		// Connect task to next external flow
+		policy.addConnection(TaskModel.class, ExternalFlowModel.class,
+				new ConnectionChangeFactory<TaskModel, ExternalFlowModel>() {
+					@Override
+					public Change<?> createChange(TaskModel source,
+							ExternalFlowModel target,
+							CreateConnectionRequest request) {
+						return DeskEditor.this.getModelChanges()
+								.linkTaskToNextExternalFlow(source, target);
+					}
+				});
+
+		// Connect task escalation to task
+		policy.addConnection(TaskEscalationModel.class, TaskModel.class,
+				new ConnectionChangeFactory<TaskEscalationModel, TaskModel>() {
+					@Override
+					public Change<?> createChange(TaskEscalationModel source,
+							TaskModel target, CreateConnectionRequest request) {
+						return DeskEditor.this.getModelChanges()
+								.linkTaskEscalationToTask(source, target);
+					}
+				});
+
+		// Connect task escalation to external flow
+		policy
+				.addConnection(
+						TaskEscalationModel.class,
+						ExternalFlowModel.class,
+						new ConnectionChangeFactory<TaskEscalationModel, ExternalFlowModel>() {
+							@Override
+							public Change<?> createChange(
+									TaskEscalationModel source,
+									ExternalFlowModel target,
+									CreateConnectionRequest request) {
+								return DeskEditor.this.getModelChanges()
+										.linkTaskEscalationToExternalFlow(
+												source, target);
+							}
+						});
+
+		// Connect work to initial task
+		policy.addConnection(WorkModel.class, TaskModel.class,
+				new ConnectionChangeFactory<WorkModel, TaskModel>() {
+					@Override
+					public Change<?> createChange(WorkModel source,
+							TaskModel target, CreateConnectionRequest request) {
+						return DeskEditor.this.getModelChanges()
+								.linkWorkToInitialTask(source, target);
 					}
 				});
 	}
@@ -306,6 +462,30 @@ public class DeskEditor extends
 		}
 
 		// Obtain the flow instigation strategy
+		FlowInstigationStrategyEnum enumStrategy = getFlowInstigationStrategy(instigationStrategy
+				.toString());
+		if (enumStrategy == null) {
+			this.messageError("Unknown instigation strategy "
+					+ instigationStrategy);
+			return null; // must have instigation strategy
+		}
+
+		// Return the instigation strategy
+		return enumStrategy;
+	}
+
+	/**
+	 * Obtains the {@link FlowInstigationStrategyEnum}.
+	 * 
+	 * @param instigationStrategy
+	 *            Text name of the {@link FlowInstigationStrategyEnum}.
+	 * @return {@link FlowInstigationStrategyEnum} or <code>null</code> if
+	 *         unknown.
+	 */
+	public static FlowInstigationStrategyEnum getFlowInstigationStrategy(
+			String instigationStrategy) {
+
+		// Obtain the flow instigation strategy
 		if (DeskChanges.SEQUENTIAL_LINK.equals(instigationStrategy)) {
 			return FlowInstigationStrategyEnum.SEQUENTIAL;
 		} else if (DeskChanges.PARALLEL_LINK.equals(instigationStrategy)) {
@@ -313,9 +493,8 @@ public class DeskEditor extends
 		} else if (DeskChanges.ASYNCHRONOUS_LINK.equals(instigationStrategy)) {
 			return FlowInstigationStrategyEnum.ASYNCHRONOUS;
 		} else {
-			this.messageError("Unknown instigation strategy "
-					+ instigationStrategy);
-			return null; // must have instigation strategy
+			// Unknown flow instigation strategy
+			return null;
 		}
 	}
 }
