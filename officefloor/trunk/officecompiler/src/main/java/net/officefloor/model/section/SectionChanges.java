@@ -104,6 +104,18 @@ public interface SectionChanges {
 	Change<ExternalFlowModel> removeExternalFlow(ExternalFlowModel externalFlow);
 
 	/**
+	 * Renames the {@link ExternalFlowModel}.
+	 * 
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel} to rename.
+	 * @param newExternalFlowName
+	 *            New name for the {@link ExternalFlowModel}.
+	 * @return {@link Change} to rename the {@link ExternalFlowModel}.
+	 */
+	Change<ExternalFlowModel> renameExternalFlow(
+			ExternalFlowModel externalFlow, String newExternalFlowName);
+
+	/**
 	 * Adds the {@link ExternalManagedObjectModel} to the {@link SectionModel}.
 	 * 
 	 * @param externalManagedObjectName
@@ -125,5 +137,96 @@ public interface SectionChanges {
 	 */
 	Change<ExternalManagedObjectModel> removeExternalManagedObject(
 			ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Renames the {@link ExternalManagedObjectModel}.
+	 * 
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel} to rename.
+	 * @param newExternalManagedObjectName
+	 *            New name for the {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to rename the {@link ExternalManagedObjectModel}.
+	 */
+	Change<ExternalManagedObjectModel> renameExternalManagedObject(
+			ExternalManagedObjectModel externalManagedObject,
+			String newExternalManagedObjectName);
+
+	/**
+	 * Links the {@link SubSectionInputModel} to the
+	 * {@link ExternalManagedObjectModel}.
+	 * 
+	 * @param subSectionObject
+	 *            {@link SubSectionObjectModel}.
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to add
+	 *         {@link SubSectionObjectToExternalManagedObjectModel}.
+	 */
+	Change<SubSectionObjectToExternalManagedObjectModel> linkSubSectionObjectToExternalManagedObject(
+			SubSectionObjectModel subSectionObject,
+			ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Removes the {@link SubSectionObjectToExternalManagedObjectModel}.
+	 * 
+	 * @param subSectionObjectToExternalManagedObject
+	 *            {@link SubSectionObjectToExternalManagedObjectModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SubSectionObjectToExternalManagedObjectModel}.
+	 */
+	Change<SubSectionObjectToExternalManagedObjectModel> removeSubSectionObjectToExternalManagedObject(
+			SubSectionObjectToExternalManagedObjectModel subSectionObjectToExternalManagedObject);
+
+	/**
+	 * Links the {@link SubSectionOutputModel} to the
+	 * {@link SubSectionInputModel}.
+	 * 
+	 * @param subSectionOutput
+	 *            {@link SubSectionOutputModel}.
+	 * @param subSectionInput
+	 *            {@link SubSectionInputModel}.
+	 * @return {@link Change} to add
+	 *         {@link SubSectionOutputToSubSectionInputModel}.
+	 */
+	Change<SubSectionOutputToSubSectionInputModel> linkSubSectionOutputToSubSectionInput(
+			SubSectionOutputModel subSectionOutput,
+			SubSectionInputModel subSectionInput);
+
+	/**
+	 * Removes the {@link SubSectionOutputToSubSectionInputModel}.
+	 * 
+	 * @param subSectionOutputToSubSectionInput
+	 *            {@link SubSectionOutputToSubSectionInputModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SubSectionOutputToSubSectionInputModel}.
+	 */
+	Change<SubSectionOutputToSubSectionInputModel> removeSubSectionOutputToSubSectionInput(
+			SubSectionOutputToSubSectionInputModel subSectionOutputToSubSectionInput);
+
+	/**
+	 * Links the {@link SubSectionOutputModel} to the {@link ExternalFlowModel}.
+	 * 
+	 * @param subSectionOutput
+	 *            {@link SubSectionOutputModel}.
+	 * @param externalFlow
+	 *            {@link ExternalFlowModel}.
+	 * @return {@link Change} to add {@link SubSectionOutputToExternalFlowModel}
+	 *         .
+	 */
+	Change<SubSectionOutputToExternalFlowModel> linkSubSectionOutputToExternalFlow(
+			SubSectionOutputModel subSectionOutput,
+			ExternalFlowModel externalFlow);
+
+	/**
+	 * Removes the {@link SubSectionOutputToExternalFlowModel}.
+	 * 
+	 * @param subSectionOutputToExternalFlow
+	 *            {@link SubSectionOutputToExternalFlowModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link SubSectionOutputToExternalFlowModel}.
+	 */
+	Change<SubSectionOutputToExternalFlowModel> removeSubSectionOutputToExternalFlow(
+			SubSectionOutputToExternalFlowModel subSectionOutputToExternalFlow);
 
 }

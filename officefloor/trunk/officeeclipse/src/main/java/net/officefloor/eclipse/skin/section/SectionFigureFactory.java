@@ -22,8 +22,14 @@ import net.officefloor.model.section.ExternalManagedObjectModel;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionInputModel;
 import net.officefloor.model.section.SubSectionModel;
+import net.officefloor.model.section.SubSectionObjectModel;
+import net.officefloor.model.section.SubSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.section.SubSectionOutputModel;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
+import net.officefloor.model.section.SubSectionOutputToSubSectionInputModel;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PolylineConnection;
 
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
@@ -95,5 +101,41 @@ public interface SectionFigureFactory {
 	 */
 	SubSectionOutputFigure createSubSectionOutputFigure(
 			SubSectionOutputFigureContext context);
+
+	/**
+	 * Decorates the {@link SubSectionObjectToExternalManagedObjectModel}
+	 * connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SubSectionObjectToExternalManagedObjectFigureContext}.
+	 */
+	void decorateSubSectionObjectToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			SubSectionObjectToExternalManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the {@link SubSectionOutputToSubSectionInputModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SubSectionObjectToExternalManagedObjectFigureContext}.
+	 */
+	void decorateSubSectionOutputToSubSectionInput(PolylineConnection figure,
+			SubSectionOutputToSubSectionInputFigureContext context);
+
+	/**
+	 * Decorates the {@link SubSectionOutputToExternalFlowModel} connection.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link SubSectionOutputToExternalFlowFigureContext}.
+	 */
+	void decorateSubSectionOutputToExternalFlowFigure(
+			PolylineConnection figure,
+			SubSectionOutputToExternalFlowFigureContext context);
 
 }

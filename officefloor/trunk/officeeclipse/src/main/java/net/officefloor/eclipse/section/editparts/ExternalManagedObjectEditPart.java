@@ -21,11 +21,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigureContext;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.ExternalManagedObjectModel.ExternalManagedObjectEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,18 +40,47 @@ import org.eclipse.gef.EditPart;
  */
 public class ExternalManagedObjectEditPart
 		extends
-		AbstractOfficeFloorEditPart<ExternalManagedObjectModel, ExternalManagedObjectEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<ExternalManagedObjectModel, ExternalManagedObjectEvent, ExternalManagedObjectFigure>
 		implements ExternalManagedObjectFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+	protected ExternalManagedObjectFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getSectionFigureFactory()
 				.createExternalManagedObjectFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getSubSectionObjects());
+	}
+
+	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<ExternalManagedObjectModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<SectionChanges, ExternalManagedObjectModel>() {
+					@Override
+					public String getInitialValue() {
+						return ExternalManagedObjectEditPart.this
+								.getCastedModel()
+								.getExternalManagedObjectName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return ExternalManagedObjectEditPart.this
+								.getOfficeFloorFigure()
+								.getExternalManagedObjectNameFigure();
+					}
+
+					@Override
+					public Change<ExternalManagedObjectModel> createChange(
+							SectionChanges changes,
+							ExternalManagedObjectModel target, String newValue) {
+						return changes.renameExternalManagedObject(target,
+								newValue);
+					}
+				});
 	}
 
 	@Override
@@ -58,9 +92,13 @@ public class ExternalManagedObjectEditPart
 	protected void handlePropertyChange(ExternalManagedObjectEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_EXTERNAL_MANAGED_OBJECT_NAME:
+			this.getOfficeFloorFigure().setExternalManagedObjectName(
+					this.getCastedModel().getExternalManagedObjectName());
+			break;
 		case ADD_SUB_SECTION_OBJECT:
 		case REMOVE_SUB_SECTION_OBJECT:
-			ExternalManagedObjectEditPart.this.refreshTargetConnections();
+			this.refreshTargetConnections();
 			break;
 		}
 	}

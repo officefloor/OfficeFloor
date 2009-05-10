@@ -19,10 +19,34 @@ package net.officefloor.eclipse.skin.section;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.section.ExternalManagedObjectModel;
 
+import org.eclipse.draw2d.IFigure;
+
 /**
  * {@link OfficeFloorFigure} for the {@link ExternalManagedObjectModel}.
  * 
  * @author Daniel
  */
 public interface ExternalManagedObjectFigure extends OfficeFloorFigure {
+
+	/**
+	 * Indicates a change to the {@link ExternalManagedObjectModel} name.
+	 * 
+	 * @param externalManagedObjectName
+	 *            Name to display for the {@link ExternalManagedObjectModel}.
+	 */
+	void setExternalManagedObjectName(String externalManagedObjectName);
+
+	/**
+	 * <p>
+	 * Obtains the {@link IFigure} containing the
+	 * {@link ExternalManagedObjectModel} name.
+	 * <p>
+	 * This is to allow placement of the editor in changing the
+	 * {@link ExternalManagedObjectModel} name.
+	 * 
+	 * @return {@link IFigure} containing the {@link ExternalManagedObjectModel}
+	 *         name.
+	 */
+	IFigure getExternalManagedObjectNameFigure();
+
 }

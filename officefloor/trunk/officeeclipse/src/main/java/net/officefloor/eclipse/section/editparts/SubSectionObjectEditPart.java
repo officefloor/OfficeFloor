@@ -41,7 +41,7 @@ public class SubSectionObjectEditPart
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+		return OfficeFloorPlugin.getSkin().getSectionFigureFactory()
 				.createSubSectionObjectFigure(this);
 	}
 

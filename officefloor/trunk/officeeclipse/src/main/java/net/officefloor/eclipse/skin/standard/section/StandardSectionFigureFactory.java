@@ -16,6 +16,9 @@
  */
 package net.officefloor.eclipse.skin.standard.section;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.draw2d.PolylineDecoration;
+
 import net.officefloor.eclipse.skin.section.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.section.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigure;
@@ -27,8 +30,11 @@ import net.officefloor.eclipse.skin.section.SubSectionInputFigure;
 import net.officefloor.eclipse.skin.section.SubSectionInputFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionObjectFigure;
 import net.officefloor.eclipse.skin.section.SubSectionObjectFigureContext;
+import net.officefloor.eclipse.skin.section.SubSectionObjectToExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.section.SubSectionOutputFigure;
 import net.officefloor.eclipse.skin.section.SubSectionOutputFigureContext;
+import net.officefloor.eclipse.skin.section.SubSectionOutputToExternalFlowFigureContext;
+import net.officefloor.eclipse.skin.section.SubSectionOutputToSubSectionInputFigureContext;
 
 /**
  * Standard {@link SectionFigureFactory}.
@@ -55,7 +61,6 @@ public class StandardSectionFigureFactory implements SectionFigureFactory {
 		return new StandardSubSectionFigure(context);
 	}
 
-
 	@Override
 	public SubSectionInputFigure createSubSectionInputFigure(
 			final SubSectionInputFigureContext context) {
@@ -72,6 +77,29 @@ public class StandardSectionFigureFactory implements SectionFigureFactory {
 	public SubSectionOutputFigure createSubSectionOutputFigure(
 			SubSectionOutputFigureContext context) {
 		return new StandardSubSectionOutputFigure(context);
+	}
+
+	@Override
+	public void decorateSubSectionObjectToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			SubSectionObjectToExternalManagedObjectFigureContext context) {
+		// Leave as default
+	}
+
+	@Override
+	public void decorateSubSectionOutputToSubSectionInput(
+			PolylineConnection figure,
+			SubSectionOutputToSubSectionInputFigureContext context) {
+		// Provide arrow
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateSubSectionOutputToExternalFlowFigure(
+			PolylineConnection figure,
+			SubSectionOutputToExternalFlowFigureContext context) {
+		// Provide arrow
+		figure.setTargetDecoration(new PolylineDecoration());
 	}
 
 }

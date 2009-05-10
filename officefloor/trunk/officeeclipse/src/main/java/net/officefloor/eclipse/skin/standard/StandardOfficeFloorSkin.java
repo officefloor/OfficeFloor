@@ -92,7 +92,7 @@ public class StandardOfficeFloorSkin implements OfficeFloorSkin {
 	 * @see net.officefloor.eclipse.skin.OfficeFloorSkin#getRoomFigureFactory()
 	 */
 	@Override
-	public SectionFigureFactory getRoomFigureFactory() {
+	public SectionFigureFactory getSectionFigureFactory() {
 		return this.roomFigureFactory;
 	}
 
