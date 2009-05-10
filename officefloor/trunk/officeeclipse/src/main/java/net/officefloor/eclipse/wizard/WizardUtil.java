@@ -45,38 +45,46 @@ public class WizardUtil {
 	public static boolean runWizard(IWizard wizard,
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
 
-		// Obtain the editor size
-		IEditorSite editorSite = editPart.getEditor().getEditorSite();
+		try {
 
-		// Initiate the wizard
-		if (wizard instanceof IWorkbenchWizard) {
-			IWorkbenchWizard workbenchWizard = (IWorkbenchWizard) wizard;
+			// Obtain the editor size
+			IEditorSite editorSite = editPart.getEditor().getEditorSite();
 
-			// Obtain the work bench
-			IWorkbench workbench = editorSite.getWorkbenchWindow()
-					.getWorkbench();
+			// Initiate the wizard
+			if (wizard instanceof IWorkbenchWizard) {
+				IWorkbenchWizard workbenchWizard = (IWorkbenchWizard) wizard;
 
-			// Obtain the selection
-			IStructuredSelection structuredSelection = null;
-			ISelection selection = editorSite.getPage().getSelection();
-			if (selection instanceof IStructuredSelection) {
-				structuredSelection = (IStructuredSelection) selection;
+				// Obtain the work bench
+				IWorkbench workbench = editorSite.getWorkbenchWindow()
+						.getWorkbench();
+
+				// Obtain the selection
+				IStructuredSelection structuredSelection = null;
+				ISelection selection = editorSite.getPage().getSelection();
+				if (selection instanceof IStructuredSelection) {
+					structuredSelection = (IStructuredSelection) selection;
+				}
+
+				// Initiate the workbench wizard
+				workbenchWizard.init(workbench, structuredSelection);
 			}
 
-			// Initiate the workbench wizard
-			workbenchWizard.init(workbench, structuredSelection);
+			// Create the wizard dialog
+			WizardDialog dialog = new WizardDialog(editorSite.getShell(),
+					wizard);
+			dialog.setBlockOnOpen(true);
+			int status = dialog.open();
+
+			// Determine if successful
+			boolean isSuccessful = (status == WizardDialog.OK);
+
+			// Return whether successful
+			return isSuccessful;
+
+		} catch (Throwable ex) {
+			editPart.messageError(ex);
+			return false;
 		}
-
-		// Create the wizard dialog
-		WizardDialog dialog = new WizardDialog(editorSite.getShell(), wizard);
-		dialog.setBlockOnOpen(true);
-		int status = dialog.open();
-
-		// Determine if successful
-		boolean isSuccessful = (status == WizardDialog.OK);
-
-		// Return whether successful
-		return isSuccessful;
 	}
 
 	/**

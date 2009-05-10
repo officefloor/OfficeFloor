@@ -14,26 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.wizard.file;
+package net.officefloor.eclipse.wizard.sectionsource;
 
-import net.officefloor.model.section.SectionModel;
-
-import org.eclipse.jface.wizard.IWizard;
+import net.officefloor.compile.section.SectionType;
 
 /**
- * {@link IWizard} to create a {@link SectionModel}.
+ * Context for a {@link SectionSourceInstance}.
  * 
  * @author Daniel
  */
-// TODO rename to SectionNewWizard
-public class RoomNewWizard extends AbstractNewWizard {
+public interface SectionSourceInstanceContext {
 
 	/**
-	 * Initiate.
+	 * Specifies the title.
+	 * 
+	 * @param title
+	 *            Title.
 	 */
-	public RoomNewWizard() {
-		super("New Section", "Create a new Section", "new_section", "section",
-				"<section/>");
-	}
+	void setTitle(String title);
+
+	/**
+	 * Specifies an error message.
+	 * 
+	 * @param message
+	 *            Error message or <code>null</code> to indicate no error.
+	 */
+	void setErrorMessage(String message);
+
+	/**
+	 * Flags if {@link SectionType} is loaded.
+	 * 
+	 * @param isSectionTypeLoade
+	 *            <code>true</code> {@link SectionType} loaded.
+	 */
+	void setSectionTypeLoaded(boolean isSectionTypeLoaded);
 
 }

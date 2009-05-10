@@ -198,7 +198,8 @@ public class CompileUtil {
 		} catch (Throwable ex) {
 			// Indicate issue (catching exception from constructor)
 			issues.addIssue(locationType, location, assetType, assetName,
-					"Failed to instantiate " + clazz.getName()
+					"Failed to instantiate "
+							+ (clazz != null ? clazz.getName() : null)
 							+ " by default constructor", ex);
 			return null; // no instance
 		}

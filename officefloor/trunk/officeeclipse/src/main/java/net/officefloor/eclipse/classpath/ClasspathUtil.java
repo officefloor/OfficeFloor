@@ -288,13 +288,22 @@ public class ClasspathUtil {
 	 * @return Location on the class path for the input full path.
 	 */
 	public static String getClassPathLocation(String fullPath) {
+		return getClassPathLocation(new Path(fullPath));
+	}
 
-		// Obtain the java element
-		IPath path = new Path(fullPath);
+	/**
+	 * Obtains the location on the class path for the input {@link IPath}.
+	 * 
+	 * @param path
+	 *            {@link IPath}.
+	 * @return Location on the class path for the input {@link IPath}.
+	 */
+	public static String getClassPathLocation(IPath path) {
 
 		// Obtain the resource for the path
 		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-		IResource resource = workspaceRoot.findMember(path);
+		IResource pathResource = workspaceRoot.findMember(path);
+		IResource resource = pathResource;
 
 		// Obtain the java element
 		IJavaElement javaElement = null;
@@ -340,6 +349,7 @@ public class ClasspathUtil {
 				+ "/";
 
 		// Obtain the class path location (by removing fragment root path)
+		String fullPath = pathResource.getFullPath().toString();
 		String location = fullPath.substring(fragmentPath.length());
 
 		// Return the location

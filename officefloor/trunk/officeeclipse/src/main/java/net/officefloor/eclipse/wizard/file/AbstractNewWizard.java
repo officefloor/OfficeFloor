@@ -20,9 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.classpath.ClasspathUtil;
-import net.officefloor.eclipse.wizard.file.OfficeItemNewWizardPage;
 import net.officefloor.model.desk.DeskModel;
 
 import org.eclipse.core.resources.IContainer;
@@ -94,7 +92,6 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 	 */
 	public AbstractNewWizard(String title, String description,
 			String initialItemName, String extension, String itemFileContents) {
-		super();
 		this.title = title;
 		this.description = description;
 		this.initialItemName = initialItemName;
@@ -103,11 +100,9 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench,
-	 * org.eclipse.jface.viewers.IStructuredSelection)
+	 * ================== IWorkbenchWizard =======================
 	 */
+
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		// Create the page
@@ -117,21 +112,15 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#addPages()
+	 * ================== Wizard =================================
 	 */
+
 	@Override
 	public void addPages() {
 		// Add the page
 		this.addPage(this.page);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish() {
 
@@ -186,8 +175,9 @@ public abstract class AbstractNewWizard extends Wizard implements INewWizard {
 
 		// Obtain the Container
 		if ((!resource.exists()) || (!(resource instanceof IContainer))) {
-			throw new OfficeFloorPluginFailure("Container \"" + resource
-					+ "\" does not exist.");
+			MessageDialog.openError(this.getShell(), "Error", "Container \""
+					+ resource + "\" does not exist.");
+			return; // container must exist
 		}
 		IContainer container = (IContainer) resource;
 
