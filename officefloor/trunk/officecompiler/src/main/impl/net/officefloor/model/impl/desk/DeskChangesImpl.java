@@ -1261,6 +1261,28 @@ public class DeskChangesImpl implements DeskChanges {
 	}
 
 	@Override
+	public Change<WorkTaskObjectToExternalManagedObjectModel> removeWorkTaskObjectToExternalManagedObject(
+			final WorkTaskObjectToExternalManagedObjectModel objectToExternalManagedObject) {
+
+		// TODO test this method (removeWorkTaskObjectToExternalManagedObject)
+
+		// Return change to remove object to external managed object
+		return new AbstractChange<WorkTaskObjectToExternalManagedObjectModel>(
+				objectToExternalManagedObject,
+				"Remove object to external managed object") {
+			@Override
+			public void apply() {
+				objectToExternalManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				objectToExternalManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
 	public Change<TaskFlowToTaskModel> linkTaskFlowToTask(
 			TaskFlowModel taskFlow, TaskModel task,
 			FlowInstigationStrategyEnum instigationStrategy) {

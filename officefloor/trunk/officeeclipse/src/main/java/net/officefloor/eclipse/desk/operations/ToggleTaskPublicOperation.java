@@ -16,54 +16,41 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.desk.editparts.TaskEditPart;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.desk.DeskChanges;
+import net.officefloor.model.desk.TaskModel;
 
 /**
  * Toggles {@link FlowItemModel} being public.
  * 
  * @author Daniel
  */
-public class ToggleFlowItemPublicOperation extends
-		AbstractOperation<TaskEditPart> {
+public class ToggleTaskPublicOperation extends
+		AbstractDeskChangeOperation<TaskEditPart> {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param deskChanges
+	 *            {@link DeskChanges}.
 	 */
-	public ToggleFlowItemPublicOperation() {
-		super("Toggle public", TaskEditPart.class);
+	public ToggleTaskPublicOperation(DeskChanges deskChanges) {
+		super("Toggle public", TaskEditPart.class, deskChanges);
 	}
 
 	/*
-	 * (non-Javadoc)
-	 * 
-	 * @seenet.officefloor.eclipse.common.action.AbstractOperation#perform(net.
-	 * officefloor.eclipse.common.action.AbstractOperation.Context)
+	 * =============== AbstractDeskChangeOperation =======================
 	 */
+
 	@Override
-	protected void perform(Context context) {
-//
-//		// Obtain the flow item
-//		final FlowItemModel flowItem = context.getEditPart().getCastedModel();
-//
-//		// Obtain initial public state
-//		final boolean initialState = flowItem.getIsPublic();
-//
-//		// Make change
-//		context.execute(new OfficeFloorCommand() {
-//
-//			@Override
-//			protected void doCommand() {
-//				// Toggle
-//				flowItem.setIsPublic(!initialState);
-//			}
-//
-//			@Override
-//			protected void undoCommand() {
-//				// Set back to initial state
-//				flowItem.setIsPublic(initialState);
-//			}
-//		});
+	protected Change<?> getChange(DeskChanges changes, Context context) {
+
+		// Obtain the task
+		TaskModel task = context.getEditPart().getCastedModel();
+
+		// Return change to toggle public
+		return changes.setTaskAsPublic(!task.getIsPublic(), task);
 	}
 
 }
