@@ -19,10 +19,32 @@ package net.officefloor.eclipse.skin.section;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.section.SubSectionModel;
 
+import org.eclipse.draw2d.IFigure;
+
 /**
  * {@link OfficeFloorFigure} for the {@link SubSectionModel}.
  * 
  * @author Daniel
  */
 public interface SubSectionFigure extends OfficeFloorFigure {
+
+	/**
+	 * Indicates a change to the {@link SubSectionModel} name.
+	 * 
+	 * @param subSectionName
+	 *            Name to display for the {@link SubSectionModel}.
+	 */
+	void setSubSectionName(String subSectionName);
+
+	/**
+	 * <p>
+	 * Obtains the {@link IFigure} containing the {@link SubSectionModel} name.
+	 * <p>
+	 * This is to allow placement of the editor in changing the
+	 * {@link SubSectionModel} name.
+	 * 
+	 * @return {@link IFigure} containing the {@link SubSectionModel} name.
+	 */
+	IFigure getSubSectionNameFigure();
+
 }

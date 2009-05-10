@@ -16,11 +16,13 @@
  */
 package net.officefloor.eclipse.section.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.section.editparts.SectionEditPart;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.section.ExternalManagedObjectModel;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 
 /**
@@ -29,46 +31,51 @@ import net.officefloor.model.section.SectionModel;
  * @author Daniel
  */
 public class AddExternalManagedObjectOperation extends
-		AbstractOperation<SectionEditPart> {
+		AbstractSectionChangeOperation<SectionEditPart> {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param sectionChanges
+	 *            {@link SectionChanges}.
 	 */
-	public AddExternalManagedObjectOperation() {
-		super("Add managed object", SectionEditPart.class);
+	public AddExternalManagedObjectOperation(SectionChanges sectionChanges) {
+		super("Add external managed object", SectionEditPart.class,
+				sectionChanges);
 	}
 
-	@Override
-	protected void perform(Context context) {
+	/*
+	 * ==================== AbstractSectionChangeOperation ====================
+	 */
 
-		// Obtain the edit part
+	@Override
+	protected Change<?> getChange(SectionChanges changes, Context context) {
+
+		// Obtain the section edit part
 		final SectionEditPart editPart = context.getEditPart();
 
-		// Add the populated External Managed Object
+		// Create the populated External Managed Object
 		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel();
-		BeanDialog dialog = editPart.createBeanDialog(mo, "Object Type", "X",
-				"Y");
+		BeanDialog dialog = editPart.createBeanDialog(mo, "X", "Y");
+		ClasspathFilter filter = new ClasspathFilter();
+		filter.addJavaClassFilter();
+		dialog.registerPropertyInput("Object Type",
+				new ClasspathSelectionInput(editPart.getEditor(), filter));
 		if (!dialog.populate()) {
-			// Not created
-			return;
+			// Not created so do not provide command
+			return null;
 		}
 
-		// Set location
-		context.positionModel(mo);
+		// Add the external managed object
+		Change<ExternalManagedObjectModel> change = changes
+				.addExternalManagedObject(mo.getExternalManagedObjectName(), mo
+						.getObjectType());
 
-		// Make the change
-		context.execute(new OfficeFloorCommand() {
+		// Position the model
+		context.positionModel(change.getTarget());
 
-			@Override
-			protected void doCommand() {
-				editPart.getCastedModel().addExternalManagedObject(mo);
-			}
-
-			@Override
-			protected void undoCommand() {
-				editPart.getCastedModel().removeExternalManagedObject(mo);
-			}
-		});
+		// Return the change
+		return change;
 	}
 
 }

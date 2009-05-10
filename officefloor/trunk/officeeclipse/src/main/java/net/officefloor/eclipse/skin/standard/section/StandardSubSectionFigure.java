@@ -20,7 +20,10 @@ import net.officefloor.eclipse.skin.section.SubSectionFigure;
 import net.officefloor.eclipse.skin.section.SubSectionFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
+import net.officefloor.model.section.SubSectionModel;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 import org.eclipse.swt.graphics.Color;
 
 /**
@@ -28,8 +31,13 @@ import org.eclipse.swt.graphics.Color;
  * 
  * @author Daniel
  */
-public class StandardSubSectionFigure extends AbstractOfficeFloorFigure implements
-		SubSectionFigure {
+public class StandardSubSectionFigure extends AbstractOfficeFloorFigure
+		implements SubSectionFigure {
+
+	/**
+	 * {@link Label} for the {@link SubSectionModel} name.
+	 */
+	private final Label subSectionName;
 
 	/**
 	 * Initiate.
@@ -39,15 +47,30 @@ public class StandardSubSectionFigure extends AbstractOfficeFloorFigure implemen
 	 */
 	public StandardSubSectionFigure(SubSectionFigureContext context) {
 
-		Color subRoomColour = new Color(null, 130, 255, 150);
+		Color subSectionColour = new Color(null, 130, 255, 150);
 
-		// Create the container for the sub room
-		ContainerFigure subRoomFigure = new ContainerFigure(context
-				.getSubSectionName(), subRoomColour, 5, false);
+		// Create the container for the sub section
+		ContainerFigure subSectionFigure = new ContainerFigure(context
+				.getSubSectionName(), subSectionColour, 5, false);
+		this.subSectionName = subSectionFigure.getContainerName();
 
 		// Specify the figures
-		this.setFigure(subRoomFigure);
-		this.setContentPane(subRoomFigure.getContentPane());
+		this.setFigure(subSectionFigure);
+		this.setContentPane(subSectionFigure.getContentPane());
+	}
+
+	/*
+	 * =================== SubSectionFigure =============================
+	 */
+
+	@Override
+	public void setSubSectionName(String subSectionName) {
+		this.subSectionName.setText(subSectionName);
+	}
+
+	@Override
+	public IFigure getSubSectionNameFigure() {
+		return this.subSectionName;
 	}
 
 }

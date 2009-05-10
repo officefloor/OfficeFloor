@@ -16,35 +16,13 @@
  */
 package net.officefloor.eclipse.skin.section;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.section.ExternalFlowModel;
-
-import org.eclipse.draw2d.IFigure;
+import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 
 /**
- * {@link OfficeFloorFigure} for the {@link ExternalFlowModel}.
+ * Context to decorate the {@link SubSectionOutputToExternalFlowModel}
+ * connection.
  * 
  * @author Daniel
  */
-public interface ExternalFlowFigure extends OfficeFloorFigure {
-
-	/**
-	 * Indicates a change in the {@link ExternalFlowModel} name.
-	 * 
-	 * @param externalFlowName
-	 *            Name to display for the {@link ExternalFlowModel}.
-	 */
-	void setExternalFlowName(String externalFlowName);
-
-	/**
-	 * <p>
-	 * Obtains the {@link IFigure} containing the {@link ExternalFlowModel} name.
-	 * <p>
-	 * This is to allow placement of the editor in changing the {@link ExternalFlowModel}
-	 * name.
-	 * 
-	 * @return {@link IFigure} containing the {@link ExternalFlowModel} name.
-	 */
-	IFigure getExternalFlowNameFigure();
-
+public interface SubSectionOutputToExternalFlowFigureContext {
 }

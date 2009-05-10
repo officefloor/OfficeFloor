@@ -23,6 +23,7 @@ import net.officefloor.eclipse.skin.section.SectionFigureFactory;
 import net.officefloor.model.desk.DeskModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorModel;
+import net.officefloor.model.section.SectionModel;
 
 import org.eclipse.draw2d.IFigure;
 
@@ -59,11 +60,11 @@ public interface OfficeFloorSkin {
 	OfficeFloorFigureFactory getOfficeFloorFigureFactory();
 
 	/**
-	 * Obtains the {@link SectionFigureFactory} to create necessary {@link IFigure}
-	 * instances for the {@link RoomModel}.
+	 * Obtains the {@link SectionFigureFactory} to create necessary
+	 * {@link IFigure} instances for the {@link SectionModel}.
 	 * 
 	 * @return {@link SectionFigureFactory}.
 	 */
-	SectionFigureFactory getRoomFigureFactory();
+	SectionFigureFactory getSectionFigureFactory();
 
 }

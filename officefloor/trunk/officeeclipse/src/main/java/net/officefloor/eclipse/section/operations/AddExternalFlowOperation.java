@@ -16,11 +16,13 @@
  */
 package net.officefloor.eclipse.section.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
+import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
+import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
 import net.officefloor.eclipse.section.editparts.SectionEditPart;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 
 /**
@@ -28,45 +30,51 @@ import net.officefloor.model.section.SectionModel;
  * 
  * @author Daniel
  */
-public class AddExternalFlowOperation extends AbstractOperation<SectionEditPart> {
+public class AddExternalFlowOperation extends
+		AbstractSectionChangeOperation<SectionEditPart> {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param sectionChanges
+	 *            {@link SectionChanges}.
 	 */
-	public AddExternalFlowOperation() {
-		super("Add external flow", SectionEditPart.class);
+	public AddExternalFlowOperation(SectionChanges sectionChanges) {
+		super("Add external flow", SectionEditPart.class, sectionChanges);
 	}
 
+	/*
+	 * ================== AbstractSectionChangeOperation ======================
+	 */
+
 	@Override
-	protected void perform(Context context) {
+	protected Change<?> getChange(SectionChanges changes, Context context) {
 
 		// Obtain the edit part
-		final SectionEditPart editPart = context.getEditPart();
+		SectionEditPart editPart = context.getEditPart();
 
 		// Create the populated External Flow
 		final ExternalFlowModel flow = new ExternalFlowModel();
-		BeanDialog dialog = editPart.createBeanDialog(flow, "X", "Y");
+		BeanDialog dialog = context.getEditPart().createBeanDialog(flow, "X",
+				"Y");
+		ClasspathFilter filter = new ClasspathFilter();
+		filter.addJavaClassFilter();
+		dialog.registerPropertyInput("Argument Type",
+				new ClasspathSelectionInput(editPart.getEditor(), filter));
 		if (!dialog.populate()) {
 			// Not created
-			return;
+			return null;
 		}
 
-		// Set location
-		context.positionModel(flow);
+		// Create the change
+		Change<ExternalFlowModel> change = changes.addExternalFlow(flow
+				.getExternalFlowName(), flow.getArgumentType());
 
-		// Make change
-		context.execute(new OfficeFloorCommand() {
+		// Position the flow
+		context.positionModel(change.getTarget());
 
-			@Override
-			protected void doCommand() {
-				editPart.getCastedModel().addExternalFlow(flow);
-			}
-
-			@Override
-			protected void undoCommand() {
-				editPart.getCastedModel().removeExternalFlow(flow);
-			}
-		});
+		// Return the change
+		return change;
 	}
 
 }

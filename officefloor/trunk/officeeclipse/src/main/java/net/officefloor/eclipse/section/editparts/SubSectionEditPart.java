@@ -21,11 +21,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.section.SubSectionFigure;
 import net.officefloor.eclipse.skin.section.SubSectionFigureContext;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SubSectionModel;
 import net.officefloor.model.section.SubSectionModel.SubSectionEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,12 +40,12 @@ import org.eclipse.gef.EditPart;
  */
 public class SubSectionEditPart
 		extends
-		AbstractOfficeFloorEditPart<SubSectionModel, SubSectionEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<SubSectionModel, SubSectionEvent, SubSectionFigure>
 		implements SubSectionFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+	protected SubSectionFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getSectionFigureFactory()
 				.createSubSectionFigure(this);
 	}
 
@@ -52,6 +57,32 @@ public class SubSectionEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<SubSectionModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<SectionChanges, SubSectionModel>() {
+					@Override
+					public String getInitialValue() {
+						return SubSectionEditPart.this.getCastedModel()
+								.getSubSectionName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return SubSectionEditPart.this.getOfficeFloorFigure()
+								.getSubSectionNameFigure();
+					}
+
+					@Override
+					public Change<SubSectionModel> createChange(
+							SectionChanges changes, SubSectionModel target,
+							String newValue) {
+						return changes.renameSubSection(target, newValue);
+					}
+				});
+	}
+
+	@Override
 	protected Class<SubSectionEvent> getPropertyChangeEventType() {
 		return SubSectionEvent.class;
 	}
@@ -60,13 +91,17 @@ public class SubSectionEditPart
 	protected void handlePropertyChange(SubSectionEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_SUB_SECTION_NAME:
+			this.getOfficeFloorFigure().setSubSectionName(
+					this.getCastedModel().getSubSectionName());
+			break;
 		case ADD_SUB_SECTION_INPUT:
 		case REMOVE_SUB_SECTION_INPUT:
 		case ADD_SUB_SECTION_OUTPUT:
 		case REMOVE_SUB_SECTION_OUTPUT:
 		case ADD_SUB_SECTION_OBJECT:
 		case REMOVE_SUB_SECTION_OBJECT:
-			SubSectionEditPart.this.refreshChildren();
+			this.refreshChildren();
 			break;
 		}
 	}

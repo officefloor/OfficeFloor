@@ -41,7 +41,7 @@ public class SubSectionInputEditPart
 
 	@Override
 	protected SubSectionInputFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+		return OfficeFloorPlugin.getSkin().getSectionFigureFactory()
 				.createSubSectionInputFigure(this);
 	}
 

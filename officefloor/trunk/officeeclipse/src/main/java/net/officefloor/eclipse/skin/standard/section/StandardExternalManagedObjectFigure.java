@@ -16,9 +16,13 @@
  */
 package net.officefloor.eclipse.skin.standard.section;
 
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
+
 import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.section.ExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
+import net.officefloor.model.section.ExternalManagedObjectModel;
 
 /**
  * Standard {@link ExternalManagedObjectFigure}.
@@ -29,6 +33,11 @@ public class StandardExternalManagedObjectFigure extends
 		AbstractOfficeFloorFigure implements ExternalManagedObjectFigure {
 
 	/**
+	 * {@link Label} containing the {@link ExternalManagedObjectModel} name.
+	 */
+	private final Label externalManagedObjectName;
+
+	/**
 	 * Initiate.
 	 * 
 	 * @param context
@@ -36,8 +45,24 @@ public class StandardExternalManagedObjectFigure extends
 	 */
 	public StandardExternalManagedObjectFigure(
 			ExternalManagedObjectFigureContext context) {
-		this
-				.setFigure(new net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure(
-						context.getExternalManagedObjectName()));
+		net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure mo = new net.officefloor.eclipse.skin.standard.figure.ExternalManagedObjectFigure(
+				context.getExternalManagedObjectName());
+		this.externalManagedObjectName = mo.getLabel();
+		this.setFigure(mo);
 	}
+
+	/*
+	 * ==================== ExternalManagedObjectFigure ========================
+	 */
+
+	@Override
+	public void setExternalManagedObjectName(String externalManagedObjectName) {
+		this.externalManagedObjectName.setText(externalManagedObjectName);
+	}
+
+	@Override
+	public IFigure getExternalManagedObjectNameFigure() {
+		return this.externalManagedObjectName;
+	}
+
 }

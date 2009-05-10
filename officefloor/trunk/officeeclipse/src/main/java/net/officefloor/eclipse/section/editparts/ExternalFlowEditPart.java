@@ -21,11 +21,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.section.ExternalFlowFigure;
 import net.officefloor.eclipse.skin.section.ExternalFlowFigureContext;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.section.ExternalFlowModel;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.ExternalFlowModel.ExternalFlowEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,18 +40,44 @@ import org.eclipse.gef.EditPart;
  */
 public class ExternalFlowEditPart
 		extends
-		AbstractOfficeFloorEditPart<ExternalFlowModel, ExternalFlowEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<ExternalFlowModel, ExternalFlowEvent, ExternalFlowFigure>
 		implements ExternalFlowFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
-		return OfficeFloorPlugin.getSkin().getRoomFigureFactory()
+	protected ExternalFlowFigure createOfficeFloorFigure() {
+		return OfficeFloorPlugin.getSkin().getSectionFigureFactory()
 				.createExternalFlowFigure(this);
 	}
 
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
 		models.addAll(this.getCastedModel().getSubSectionOutputs());
+	}
+
+	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<ExternalFlowModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<SectionChanges, ExternalFlowModel>() {
+					@Override
+					public String getInitialValue() {
+						return ExternalFlowEditPart.this.getCastedModel()
+								.getExternalFlowName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return ExternalFlowEditPart.this.getOfficeFloorFigure()
+								.getExternalFlowNameFigure();
+					}
+
+					@Override
+					public Change<ExternalFlowModel> createChange(
+							SectionChanges changes, ExternalFlowModel target,
+							String newValue) {
+						return changes.renameExternalFlow(target, newValue);
+					}
+				});
 	}
 
 	@Override
@@ -58,9 +89,13 @@ public class ExternalFlowEditPart
 	protected void handlePropertyChange(ExternalFlowEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_EXTERNAL_FLOW_NAME:
+			this.getOfficeFloorFigure().setExternalFlowName(
+					this.getCastedModel().getExternalFlowName());
+			break;
 		case ADD_SUB_SECTION_OUTPUT:
 		case REMOVE_SUB_SECTION_OUTPUT:
-			ExternalFlowEditPart.this.refreshTargetConnections();
+			this.refreshTargetConnections();
 			break;
 		}
 	}

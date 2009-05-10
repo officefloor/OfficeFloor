@@ -21,9 +21,12 @@ import net.officefloor.eclipse.skin.section.ExternalFlowFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.section.ExternalFlowModel;
 import net.officefloor.model.section.SubSectionOutputToExternalFlowModel;
 
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 
 /**
  * Standard {@link ExternalFlowFigure}.
@@ -32,6 +35,11 @@ import org.eclipse.draw2d.ColorConstants;
  */
 public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 		implements ExternalFlowFigure {
+
+	/**
+	 * {@link Label} containing the {@link ExternalFlowModel} name.
+	 */
+	private final Label externalFlowName;
 
 	/**
 	 * Initiate.
@@ -43,8 +51,26 @@ public class StandardExternalFlowFigure extends AbstractOfficeFloorFigure
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
 				.getExternalFlowName(), ConnectorDirection.WEST,
 				ColorConstants.black);
-		this.registerConnectionAnchor(SubSectionOutputToExternalFlowModel.class,
-				figure.getConnectionAnchor());
+		this.externalFlowName = figure.getLabel();
+
+		this.registerConnectionAnchor(
+				SubSectionOutputToExternalFlowModel.class, figure
+						.getConnectionAnchor());
 		this.setFigure(figure);
 	}
+
+	/*
+	 * ================== ExternalFlowFigure ================================
+	 */
+
+	@Override
+	public void setExternalFlowName(String externalFlowName) {
+		this.externalFlowName.setText(externalFlowName);
+	}
+
+	@Override
+	public IFigure getExternalFlowNameFigure() {
+		return this.externalFlowName;
+	}
+
 }

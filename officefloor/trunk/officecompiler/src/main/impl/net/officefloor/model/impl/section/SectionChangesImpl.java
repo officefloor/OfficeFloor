@@ -418,8 +418,7 @@ public class SectionChangesImpl implements SectionChanges {
 			@Override
 			public void apply() {
 				// Add the external flow (ensuring ordering)
-				SectionChangesImpl.this.section
-						.addExternalFlow(externalFlow);
+				SectionChangesImpl.this.section.addExternalFlow(externalFlow);
 				SectionChangesImpl.this.sortExternalFlows();
 			}
 
@@ -482,14 +481,38 @@ public class SectionChangesImpl implements SectionChanges {
 			@Override
 			public void revert() {
 				// Add the external flow (ensuring order)
-				SectionChangesImpl.this.section
-						.addExternalFlow(externalFlow);
+				SectionChangesImpl.this.section.addExternalFlow(externalFlow);
 				SectionChangesImpl.this.sortExternalFlows();
 
 				// Reconnect the connections
 				for (ConnectionModel conn : this.connections) {
 					conn.connect();
 				}
+			}
+		};
+	}
+
+	@Override
+	public Change<ExternalFlowModel> renameExternalFlow(
+			final ExternalFlowModel externalFlow,
+			final String newExternalFlowName) {
+
+		// TODO test this method (renameExternalFlow)
+
+		// Obtain the old name
+		final String oldExternalFlowName = externalFlow.getExternalFlowName();
+
+		// Return change to rename the external flow
+		return new AbstractChange<ExternalFlowModel>(externalFlow,
+				"Rename exernal flow to " + newExternalFlowName) {
+			@Override
+			public void apply() {
+				externalFlow.setExternalFlowName(newExternalFlowName);
+			}
+
+			@Override
+			public void revert() {
+				externalFlow.setExternalFlowName(oldExternalFlowName);
 			}
 		};
 	}
@@ -508,8 +531,7 @@ public class SectionChangesImpl implements SectionChanges {
 			@Override
 			public void apply() {
 				// Add the external managed object (ensuring order)
-				SectionChangesImpl.this.section
-						.addExternalManagedObject(extMo);
+				SectionChangesImpl.this.section.addExternalManagedObject(extMo);
 				SectionChangesImpl.this.sortExternalManagedObjects();
 			}
 
@@ -584,6 +606,179 @@ public class SectionChangesImpl implements SectionChanges {
 				for (ConnectionModel conn : this.connections) {
 					conn.connect();
 				}
+			}
+		};
+	}
+
+	@Override
+	public Change<ExternalManagedObjectModel> renameExternalManagedObject(
+			final ExternalManagedObjectModel externalManagedObject,
+			final String newExternalManagedObjectName) {
+
+		// TODO test this method (renameExternalManagedObject)
+
+		// Obtain the old name
+		final String oldExternalManagedObjectName = externalManagedObject
+				.getExternalManagedObjectName();
+
+		// Return change to rename the external managed object
+		return new AbstractChange<ExternalManagedObjectModel>(
+				externalManagedObject, "Rename exernal managed object to "
+						+ newExternalManagedObjectName) {
+			@Override
+			public void apply() {
+				externalManagedObject
+						.setExternalManagedObjectName(newExternalManagedObjectName);
+			}
+
+			@Override
+			public void revert() {
+				externalManagedObject
+						.setExternalManagedObjectName(oldExternalManagedObjectName);
+			}
+		};
+	}
+
+	@Override
+	public Change<SubSectionObjectToExternalManagedObjectModel> linkSubSectionObjectToExternalManagedObject(
+			SubSectionObjectModel subSectionObject,
+			ExternalManagedObjectModel externalManagedObject) {
+
+		// TODO test this method (linkSubSectionObjectToExternalManagedObject)
+
+		// Create the connection
+		final SubSectionObjectToExternalManagedObjectModel conn = new SubSectionObjectToExternalManagedObjectModel();
+		conn.setSubSectionObject(subSectionObject);
+		conn.setExternalManagedObject(externalManagedObject);
+
+		// Return change to add connection
+		return new AbstractChange<SubSectionObjectToExternalManagedObjectModel>(
+				conn, "Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<SubSectionObjectToExternalManagedObjectModel> removeSubSectionObjectToExternalManagedObject(
+			final SubSectionObjectToExternalManagedObjectModel subSectionObjectToExternalManagedObject) {
+
+		// TODO test this method (removeSubSectionObjectToExternalManagedObject)
+
+		// Create change to remove connection
+		return new AbstractChange<SubSectionObjectToExternalManagedObjectModel>(
+				subSectionObjectToExternalManagedObject, "Remove") {
+			@Override
+			public void apply() {
+				subSectionObjectToExternalManagedObject.remove();
+			}
+
+			@Override
+			public void revert() {
+				subSectionObjectToExternalManagedObject.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<SubSectionOutputToSubSectionInputModel> linkSubSectionOutputToSubSectionInput(
+			SubSectionOutputModel subSectionOutput,
+			SubSectionInputModel subSectionInput) {
+
+		// TODO test this method (linkSubSectionOutputToSubSectionInput)
+
+		// Create the connection
+		final SubSectionOutputToSubSectionInputModel conn = new SubSectionOutputToSubSectionInputModel();
+		conn.setSubSectionOutput(subSectionOutput);
+		conn.setSubSectionInput(subSectionInput);
+
+		// Return change to add connection
+		return new AbstractChange<SubSectionOutputToSubSectionInputModel>(conn,
+				"Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<SubSectionOutputToSubSectionInputModel> removeSubSectionOutputToSubSectionInput(
+			final SubSectionOutputToSubSectionInputModel subSectionOutputToSubSectionInput) {
+
+		// TODO test this method (removeSubSectionOutputToSubSectionInputModel)
+
+		// Create change to remove connection
+		return new AbstractChange<SubSectionOutputToSubSectionInputModel>(
+				subSectionOutputToSubSectionInput, "Remove") {
+			@Override
+			public void apply() {
+				subSectionOutputToSubSectionInput.remove();
+			}
+
+			@Override
+			public void revert() {
+				subSectionOutputToSubSectionInput.connect();
+			}
+		};
+	}
+
+	@Override
+	public Change<SubSectionOutputToExternalFlowModel> linkSubSectionOutputToExternalFlow(
+			SubSectionOutputModel subSectionOutput,
+			ExternalFlowModel externalFlow) {
+
+		// TODO test this method (linkSubSectionOutputToExternalFlow)
+
+		// Create the connection
+		final SubSectionOutputToExternalFlowModel conn = new SubSectionOutputToExternalFlowModel();
+		conn.setSubSectionOutput(subSectionOutput);
+		conn.setExternalFlow(externalFlow);
+
+		// Return change to add connection
+		return new AbstractChange<SubSectionOutputToExternalFlowModel>(conn,
+				"Connect") {
+			@Override
+			public void apply() {
+				conn.connect();
+			}
+
+			@Override
+			public void revert() {
+				conn.remove();
+			}
+		};
+	}
+
+	@Override
+	public Change<SubSectionOutputToExternalFlowModel> removeSubSectionOutputToExternalFlow(
+			final SubSectionOutputToExternalFlowModel subSectionOutputToExternalFlow) {
+
+		// TODO test this method (removeSubSectionOutputToExternalFlow)
+
+		// Create change to remove connection
+		return new AbstractChange<SubSectionOutputToExternalFlowModel>(
+				subSectionOutputToExternalFlow, "Remove") {
+			@Override
+			public void apply() {
+				subSectionOutputToExternalFlow.remove();
+			}
+
+			@Override
+			public void revert() {
+				subSectionOutputToExternalFlow.connect();
 			}
 		};
 	}

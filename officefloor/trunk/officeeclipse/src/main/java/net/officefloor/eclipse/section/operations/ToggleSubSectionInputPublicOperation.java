@@ -16,51 +16,42 @@
  */
 package net.officefloor.eclipse.section.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
-import net.officefloor.eclipse.common.commands.OfficeFloorCommand;
 import net.officefloor.eclipse.section.editparts.SubSectionInputEditPart;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SubSectionInputModel;
 
 /**
- * Toggle {@link SubRoomModel} is public.
+ * Toggle {@link SubSectionInputModel} public.
  * 
  * @author Daniel
  */
 public class ToggleSubSectionInputPublicOperation extends
-		AbstractOperation<SubSectionInputEditPart> {
+		AbstractSectionChangeOperation<SubSectionInputEditPart> {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param sectionChanges
+	 *            {@link SectionChanges}.
 	 */
-	public ToggleSubSectionInputPublicOperation() {
-		super("Toggle public", SubSectionInputEditPart.class);
+	public ToggleSubSectionInputPublicOperation(SectionChanges sectionChanges) {
+		super("Toggle public", SubSectionInputEditPart.class, sectionChanges);
 	}
 
+	/*
+	 * ================= AbstractSectionChangeOperation =====================
+	 */
+
 	@Override
-	protected void perform(Context context) {
+	protected Change<?> getChange(SectionChanges changes, Context context) {
 
-		// Obtain the sub section input flow model
-		final SubSectionInputModel subSectionInput = context.getEditPart()
-				.getCastedModel();
+		// Obtain the sub section input
+		SubSectionInputModel input = context.getEditPart().getCastedModel();
 
-		// Initial public state
-		final boolean initialPublicState = subSectionInput.getIsPublic();
-
-		// Make change
-		context.execute(new OfficeFloorCommand() {
-
-			@Override
-			protected void doCommand() {
-				// Toggle public state
-				subSectionInput.setIsPublic(!initialPublicState);
-			}
-
-			@Override
-			protected void undoCommand() {
-				// Reset to initial public state
-				subSectionInput.setIsPublic(initialPublicState);
-			}
-		});
+		// Toggle input public
+		return changes.setSubSectionInputPublic(!input.getIsPublic(), null,
+				input);
 	}
 
 }
