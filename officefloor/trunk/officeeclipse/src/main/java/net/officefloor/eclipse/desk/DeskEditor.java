@@ -47,8 +47,11 @@ import net.officefloor.eclipse.desk.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.desk.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.desk.operations.AddWorkOperation;
 import net.officefloor.eclipse.desk.operations.CreateTaskFromWorkTaskOperation;
-import net.officefloor.eclipse.desk.operations.RefreshWorkOperation;
-import net.officefloor.eclipse.desk.operations.ToggleFlowItemPublicOperation;
+import net.officefloor.eclipse.desk.operations.DeleteExternalFlowOperation;
+import net.officefloor.eclipse.desk.operations.DeleteExternalManagedObjectOperation;
+import net.officefloor.eclipse.desk.operations.DeleteTaskOperation;
+import net.officefloor.eclipse.desk.operations.DeleteWorkOperation;
+import net.officefloor.eclipse.desk.operations.ToggleTaskPublicOperation;
 import net.officefloor.eclipse.desk.operations.ToggleTaskObjectParameterOperation;
 import net.officefloor.frame.internal.structure.FlowInstigationStrategyEnum;
 import net.officefloor.model.change.Change;
@@ -260,6 +263,21 @@ public class DeskEditor extends
 					}
 				});
 
+		// Allow deleting work task object to external managed object
+		policy
+				.addDelete(
+						WorkTaskObjectToExternalManagedObjectModel.class,
+						new DeleteChangeFactory<WorkTaskObjectToExternalManagedObjectModel>() {
+							@Override
+							public Change<WorkTaskObjectToExternalManagedObjectModel> createChange(
+									WorkTaskObjectToExternalManagedObjectModel target) {
+								return DeskEditor.this
+										.getModelChanges()
+										.removeWorkTaskObjectToExternalManagedObject(
+												target);
+							}
+						});
+
 		// Allow deleting work to initial task
 		policy.addDelete(WorkToInitialTaskModel.class,
 				new DeleteChangeFactory<WorkToInitialTaskModel>() {
@@ -412,20 +430,23 @@ public class DeskEditor extends
 		DeskModel desk = this.getCastedModel();
 		DeskChanges deskChanges = new DeskChangesImpl(desk);
 
-		// Add model actions
+		// Add actions
 		list.add(new AddWorkOperation(deskChanges));
+		list.add(new CreateTaskFromWorkTaskOperation(deskChanges));
 		list.add(new AddExternalFlowOperation(deskChanges));
 		list.add(new AddExternalManagedObjectOperation(deskChanges));
 
-		// Refresh work action
-		list.add(new RefreshWorkOperation());
+		// Delete actions
+		list.add(new DeleteWorkOperation(deskChanges));
+		list.add(new DeleteTaskOperation(deskChanges));
+		list.add(new DeleteExternalFlowOperation(deskChanges));
+		list.add(new DeleteExternalManagedObjectOperation(deskChanges));
 
-		// Task operations
-		list.add(new CreateTaskFromWorkTaskOperation(deskChanges));
-		list.add(new ToggleFlowItemPublicOperation());
+		// Task actions
+		list.add(new ToggleTaskPublicOperation(deskChanges));
 
-		// Toggle as parameter
-		list.add(new ToggleTaskObjectParameterOperation());
+		// Work Task actions
+		list.add(new ToggleTaskObjectParameterOperation(deskChanges));
 	}
 
 	@Override

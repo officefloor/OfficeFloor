@@ -16,18 +16,19 @@
  */
 package net.officefloor.eclipse.desk.operations;
 
-import net.officefloor.eclipse.desk.editparts.WorkTaskObjectEditPart;
+import net.officefloor.eclipse.common.action.Operation;
+import net.officefloor.eclipse.desk.editparts.TaskEditPart;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.desk.DeskChanges;
-import net.officefloor.model.desk.WorkTaskObjectModel;
+import net.officefloor.model.desk.TaskModel;
 
 /**
- * Toggles whether the {@link DeskTaskObjectModel} is a parameter.
+ * {@link Operation} to delete a {@link TaskModel}.
  * 
  * @author Daniel
  */
-public class ToggleTaskObjectParameterOperation extends
-		AbstractDeskChangeOperation<WorkTaskObjectEditPart> {
+public class DeleteTaskOperation extends
+		AbstractDeskChangeOperation<TaskEditPart> {
 
 	/**
 	 * Initiate.
@@ -35,21 +36,22 @@ public class ToggleTaskObjectParameterOperation extends
 	 * @param deskChanges
 	 *            {@link DeskChanges}.
 	 */
-	public ToggleTaskObjectParameterOperation(DeskChanges deskChanges) {
-		super("Toggle as parameter", WorkTaskObjectEditPart.class, deskChanges);
+	public DeleteTaskOperation(DeskChanges deskChanges) {
+		super("Delete Task", TaskEditPart.class, deskChanges);
 	}
 
 	/*
-	 * ============ AbstractDeskChangeOperation =========================
+	 * ================= AbstractDeskChangeOperation =================
 	 */
+
 	@Override
 	protected Change<?> getChange(DeskChanges changes, Context context) {
 
-		// Obtain the work task object
-		WorkTaskObjectModel object = context.getEditPart().getCastedModel();
+		// Obtain the task
+		TaskModel task = context.getEditPart().getCastedModel();
 
-		// Return change to toggle as parameter
-		return changes.setObjectAsParameter(!object.getIsParameter(), object);
+		// Remove the task
+		return changes.removeTask(task);
 	}
 
 }
