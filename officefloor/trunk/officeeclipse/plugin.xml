@@ -3,6 +3,7 @@
 <plugin>
    <extension-point id="worksource" name="Work Source" schema="schema/worksource.exsd"/>
    <extension-point id="managedobjectsource" name="Managed Object Source" schema="schema/managedobjectsource.exsd"/>
+   <extension-point id="sectionsource" name="Section Source" schema="schema/sectionsource.exsd"/>
     <extension id="net.officefloor.editors" name="Editors" point="org.eclipse.ui.editors">
         <editor
               class="net.officefloor.eclipse.desk.DeskEditor"
@@ -16,10 +17,10 @@
               class="net.officefloor.eclipse.section.SectionEditor"
               contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
               default="true"
-              extensions="room"
-              icon="icons/room.gif"
-              id="net.officefloor.editors.room"
-              name="Room Editor"/>
+              extensions="section"
+              icon="icons/section.gif"
+              id="net.officefloor.editors.section"
+              name="Section Editor"/>
         <editor
               class="net.officefloor.eclipse.office.OfficeEditor"
               contributorClass="net.officefloor.eclipse.common.editor.CoreEditorActionContributor"
@@ -42,7 +43,7 @@
       </category>
         <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.file.DeskNewWizard" icon="icons/desk.gif" id="net.officefloor.eclipse.wizards.DeskNewWizard" name="Desk">
       </wizard>
-        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.file.RoomNewWizard" icon="icons/room.gif" id="net.officefloor.eclipse.wizards.RoomNewWizard" name="Room">
+        <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.file.SectionNewWizard" icon="icons/section.gif" id="net.officefloor.eclipse.wizards.SectionNewWizard" name="Section">
       </wizard>
         <wizard category="net.officefloor.eclipse" class="net.officefloor.eclipse.wizard.file.OfficeNewWizard" icon="icons/office.gif" id="net.officefloor.eclipse.wizards.OfficeNewWizard" name="Office">
       </wizard>
@@ -105,6 +106,16 @@
        <managedobjectsource
              class="net.officefloor.eclipse.extension.managedobjectsource.internal.MockManagedObjectSourceExtension">
        </managedobjectsource>
+    </extension>
+    <extension
+          point="net.officefloor.eclipse.sectionsource">
+          <sectionsource class="net.officefloor.eclipse.extension.sectionsource.desk.DeskModelSectionSourceExtension" >
+          </sectionsource>
+    </extension>
+    <extension
+          point="net.officefloor.eclipse.sectionsource">
+          <sectionsource class="net.officefloor.eclipse.extension.sectionsource.section.SectionModelSectionSourceExtension">
+          </sectionsource>
     </extension>
     <extension
           point="org.eclipse.jdt.core.classpathContainerInitializer">

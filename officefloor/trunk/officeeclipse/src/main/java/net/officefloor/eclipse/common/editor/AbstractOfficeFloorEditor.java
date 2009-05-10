@@ -196,9 +196,24 @@ public abstract class AbstractOfficeFloorEditor<M extends Model, C> extends
 	 *            Error.
 	 */
 	public void messageError(Throwable error) {
+
+		// Obtain the location of the error
+		final int DEPTH = 10;
+		StringBuilder location = new StringBuilder();
+		StackTraceElement[] stackTrace = error.getStackTrace();
+		for (int i = 0; i < DEPTH; i++) {
+			if (i < stackTrace.length) {
+				location.append("\n " + stackTrace[i].toString());
+			}
+		}
+		if (DEPTH < stackTrace.length) {
+			location.append("\n ...");
+		}
+
 		this.messageError(new Status(IStatus.ERROR,
 				OfficeFloorPlugin.PLUGIN_ID, error.getClass().getSimpleName()
-						+ ": " + error.getMessage(), error));
+						+ ": " + error.getMessage() + "\n"
+						+ location.toString(), error));
 	}
 
 	/**

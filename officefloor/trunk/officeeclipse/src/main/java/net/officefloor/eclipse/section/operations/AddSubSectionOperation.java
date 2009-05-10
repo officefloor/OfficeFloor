@@ -16,8 +16,11 @@
  */
 package net.officefloor.eclipse.section.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.section.editparts.SectionEditPart;
+import net.officefloor.eclipse.wizard.sectionsource.SectionInstance;
+import net.officefloor.eclipse.wizard.sectionsource.SectionSourceWizard;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.section.SectionChanges;
 import net.officefloor.model.section.SectionModel;
 import net.officefloor.model.section.SubSectionModel;
 
@@ -26,116 +29,44 @@ import net.officefloor.model.section.SubSectionModel;
  * 
  * @author Daniel
  */
-public class AddSubSectionOperation extends AbstractOperation<SectionEditPart> {
+public class AddSubSectionOperation extends
+		AbstractSectionChangeOperation<SectionEditPart> {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param sectionChanges
+	 *            {@link SectionChanges}.
 	 */
-	public AddSubSectionOperation() {
-		super("Add sub room", SectionEditPart.class);
+	public AddSubSectionOperation(SectionChanges sectionChanges) {
+		super("Add sub section", SectionEditPart.class, sectionChanges);
 	}
+
+	/*
+	 * ================== AbstractSectionChangeOperation ============
+	 */
 
 	@Override
-	protected void perform(Context context) {
-//
-//		// Obtain the room edit part
-//		final RoomEditPart editPart = context.getEditPart();
-//
-//		// Add the Sub Room
-//		SubRoomAddBean bean = new SubRoomAddBean();
-//		BeanDialog dialog = editPart.createBeanDialog(bean);
-//		dialog.registerPropertyInput("File", new ClasspathSelectionInput(
-//				editPart.getEditor(), new ClasspathFilter(IFile.class,
-//						new FileExtensionInputFilter("desk", "room"))));
-//		dialog.registerPropertyValueTranslator("File",
-//				new ResourceFullPathValueTranslator());
-//		SubRoomModel subRoom = null;
-//		if (dialog.populate()) {
-//			try {
-//				// Obtain the class path location
-//				String classPathLocation = ClasspathUtil
-//						.getClassPathLocation(bean.file);
-//
-//				// Obtain the configuration item
-//				ConfigurationItem configItem = ProjectClassLoader
-//						.findConfigurationItem(editPart.getEditor(),
-//								classPathLocation);
-//				if (configItem == null) {
-//					editPart.messageError("Can not find '" + classPathLocation
-//							+ "' on class path");
-//					return;
-//				}
-//
-//				// Create the sub room
-//				RoomLoader roomLoader = new RoomLoader();
-//				subRoom = roomLoader.loadSubRoom(configItem);
-//				subRoom.setId(bean.name);
-//
-//			} catch (Exception ex) {
-//				editPart.messageError(ex);
-//			}
-//		}
-//
-//		// Ensure have the sub room
-//		if (subRoom == null) {
-//			return;
-//		}
-//
-//		// Set location
-//		context.positionModel(subRoom);
-//
-//		// Make the change
-//		final SubRoomModel newSubRoom = subRoom;
-//		context.execute(new OfficeFloorCommand() {
-//
-//			@Override
-//			protected void doCommand() {
-//				// Add the sub room
-//				editPart.getCastedModel().addSubRoom(newSubRoom);
-//			}
-//
-//			@Override
-//			protected void undoCommand() {
-//				// Remove the sub room
-//				editPart.getCastedModel().removeSubRoom(newSubRoom);
-//			}
-//		});
-	}
+	protected Change<?> getChange(SectionChanges changes, Context context) {
 
-	/**
-	 * Object to add a {@link SubRoomModel}.
-	 */
-	public static class SubRoomAddBean {
-
-		/**
-		 * Name of the {@link SubRoomModel}.
-		 */
-		public String name;
-
-		/**
-		 * Name of the file.
-		 */
-		public String file;
-
-		/**
-		 * Specify the name.
-		 * 
-		 * @param name
-		 *            Name of the {@link SubRoomModel}.
-		 */
-		public void setName(String name) {
-			this.name = name;
+		// Obtain the section instance
+		SectionInstance section = SectionSourceWizard.getSectionInstance(
+				context.getEditPart(), null);
+		if (section == null) {
+			return null; // must have section
 		}
 
-		/**
-		 * Specify the file name.
-		 * 
-		 * @param file
-		 *            File name.
-		 */
-		public void setFile(String file) {
-			this.file = file;
-		}
+		// Obtain the add sub section change
+		Change<SubSectionModel> change = changes.addSubSection(section
+				.getSectionName(), section.getSectionSourceClassName(), section
+				.getSectionLocation(), section.getPropertylist(), section
+				.getSectionType());
+
+		// Position the section
+		context.positionModel(change.getTarget());
+
+		// Return change to add sub section
+		return change;
 	}
 
 }

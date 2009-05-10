@@ -34,7 +34,6 @@ import net.officefloor.eclipse.section.editparts.SubSectionOutputEditPart;
 import net.officefloor.eclipse.section.operations.AddExternalFlowOperation;
 import net.officefloor.eclipse.section.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.section.operations.AddSubSectionOperation;
-import net.officefloor.eclipse.section.operations.RefreshSubSectionOperation;
 import net.officefloor.eclipse.section.operations.ToggleSubSectionInputPublicOperation;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.impl.section.SectionChangesImpl;
@@ -67,6 +66,26 @@ public class SectionEditor extends
 	 * ID for this {@link IEditorPart}.
 	 */
 	public static final String EDITOR_ID = "net.officefloor.editors.section";
+
+	@Override
+	protected boolean isDragTarget() {
+		// Disallow as drag target
+		return false;
+	}
+
+	@Override
+	protected SectionModel retrieveModel(ConfigurationItem configuration)
+			throws Exception {
+		return new SectionRepositoryImpl(new ModelRepositoryImpl())
+				.retrieveSection(configuration);
+	}
+
+	@Override
+	protected void storeModel(SectionModel model,
+			ConfigurationItem configuration) throws Exception {
+		new SectionRepositoryImpl(new ModelRepositoryImpl()).storeSection(
+				model, configuration);
+	}
 
 	@Override
 	protected SectionChanges createModelChanges(SectionModel model) {
@@ -107,34 +126,15 @@ public class SectionEditor extends
 	}
 
 	@Override
-	protected boolean isDragTarget() {
-		// Disallow as drag target
-		return false;
-	}
-
-	@Override
-	protected SectionModel retrieveModel(ConfigurationItem configuration)
-			throws Exception {
-		return new SectionRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveSection(configuration);
-	}
-
-	@Override
-	protected void storeModel(SectionModel model,
-			ConfigurationItem configuration) throws Exception {
-		new SectionRepositoryImpl(new ModelRepositoryImpl()).storeSection(
-				model, configuration);
-	}
-
-	@Override
 	protected void populateOperations(List<Operation> list) {
+
+		// Obtain the section changes
+		SectionChanges sectionChanges = this.getModelChanges();
+
 		// Add model add operations
-		list.add(new AddSubSectionOperation());
+		list.add(new AddSubSectionOperation(sectionChanges));
 		list.add(new AddExternalManagedObjectOperation());
 		list.add(new AddExternalFlowOperation());
-
-		// Add refresh operations
-		list.add(new RefreshSubSectionOperation());
 
 		// Sub room input flow operations
 		list.add(new ToggleSubSectionInputPublicOperation());

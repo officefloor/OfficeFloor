@@ -427,8 +427,7 @@ public class DeskEditor extends
 	protected void populateOperations(List<Operation> list) {
 
 		// Obtain the desk model and create changes for it
-		DeskModel desk = this.getCastedModel();
-		DeskChanges deskChanges = new DeskChangesImpl(desk);
+		DeskChanges deskChanges = this.getModelChanges();
 
 		// Add actions
 		list.add(new AddWorkOperation(deskChanges));
