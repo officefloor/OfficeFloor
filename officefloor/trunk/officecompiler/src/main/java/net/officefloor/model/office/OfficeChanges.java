@@ -45,4 +45,91 @@ public interface OfficeChanges {
 			String sectionLocation, PropertyList properties,
 			OfficeSection officeSection);
 
+	/**
+	 * Removes the {@link OfficeSectionModel}.
+	 * 
+	 * @param officeSection
+	 *            {@link OfficeSectionModel} to remove.
+	 * @return {@link Change} to remove the {@link OfficeSectionModel}.
+	 */
+	Change<OfficeSectionModel> removeOfficeSection(
+			OfficeSectionModel officeSection);
+
+	/**
+	 * Renames the {@link OfficeSectionModel}.
+	 * 
+	 * @param officeSection
+	 *            {@link OfficeSectionModel} to rename.
+	 * @param newOfficeSectionName
+	 *            New {@link OfficeSectionModel} name.
+	 * @return {@link Change} to rename the {@link OfficeSectionModel}.
+	 */
+	Change<OfficeSectionModel> renameOfficeSection(
+			OfficeSectionModel officeSection, String newOfficeSectionName);
+
+	/**
+	 * Adds an {@link OfficeTeamModel} to the {@link OfficeModel}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link OfficeTeamModel}.
+	 * @return {@link Change} to add the {@link OfficeTeamModel}.
+	 */
+	Change<OfficeTeamModel> addOfficeTeam(String teamName);
+
+	/**
+	 * Removes the {@link OfficeTeamModel}.
+	 * 
+	 * @param officeTeam
+	 *            {@link OfficeTeamModel} to remove.
+	 * @return {@link Change} to remove the {@link OfficeTeamModel}.
+	 */
+	Change<OfficeTeamModel> removeOfficeTeam(OfficeTeamModel officeTeam);
+
+	/**
+	 * Renames the {@link OfficeTeamModel}.
+	 * 
+	 * @param officeTeam
+	 *            {@link OfficeTeamModel} to rename.
+	 * @param newOfficeTeamName
+	 *            New name for the {@link OfficeTeamModel}.
+	 * @return {@link Change} to rename the {@link OfficeTeamModel}.
+	 */
+	Change<OfficeTeamModel> renameOfficeTeam(OfficeTeamModel officeTeam,
+			String newOfficeTeamName);
+
+	/**
+	 * Adds an {@link ExternalManagedObjectModel} to the {@link OfficeModel}.
+	 * 
+	 * @param externalManagedObjectName
+	 *            Name of the {@link ExternalManagedObjectModel}.
+	 * @param objectType
+	 *            Object type.
+	 * @return {@link Change} to add the {@link ExternalManagedObjectModel}.
+	 */
+	Change<ExternalManagedObjectModel> addExternalManagedObject(
+			String externalManagedObjectName, String objectType);
+
+	/**
+	 * Removes the {@link ExternalManagedObjectModel}.
+	 * 
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the {@link ExternalManagedObjectModel}.
+	 */
+	Change<ExternalManagedObjectModel> removeExternalManagedObject(
+			ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Renames the {@link ExternalManagedObjectModel}.
+	 * 
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel} to rename.
+	 * @param newExternalManagedObjectName
+	 *            New name for the {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to rename the {@link ExternalManagedObjectModel}.
+	 */
+	Change<ExternalManagedObjectModel> renameExternalManagedObject(
+			ExternalManagedObjectModel externalManagedObject,
+			String newExternalManagedObjectName);
+
 }

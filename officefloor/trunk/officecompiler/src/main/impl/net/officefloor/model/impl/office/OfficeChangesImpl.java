@@ -24,12 +24,14 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
+import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
+import net.officefloor.model.office.OfficeTeamModel;
 import net.officefloor.model.office.PropertyModel;
 
 /**
@@ -105,6 +107,196 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				OfficeChangesImpl.this.office.removeOfficeSection(section);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeSectionModel> removeOfficeSection(
+			final OfficeSectionModel officeSection) {
+
+		// TODO test this method (removeOfficeSection)
+
+		return new AbstractChange<OfficeSectionModel>(officeSection,
+				"Remove section") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office
+						.removeOfficeSection(officeSection);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.addOfficeSection(officeSection);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeSectionModel> renameOfficeSection(
+			final OfficeSectionModel officeSection,
+			final String newOfficeSectionName) {
+
+		// TODO test this method (renameOfficeSection)
+
+		// Obtain the old name
+		final String oldOfficeSectionName = officeSection
+				.getOfficeSectionName();
+
+		// Return the change to rename the office section
+		return new AbstractChange<OfficeSectionModel>(officeSection,
+				"Rename office section to " + newOfficeSectionName) {
+			@Override
+			public void apply() {
+				officeSection.setOfficeSectionName(newOfficeSectionName);
+			}
+
+			@Override
+			public void revert() {
+				officeSection.setOfficeSectionName(oldOfficeSectionName);
+			}
+		};
+	}
+
+	@Override
+	public Change<ExternalManagedObjectModel> addExternalManagedObject(
+			String externalManagedObjectName, String objectType) {
+
+		// TODO test this method (addExternalManagedObject)
+
+		// Create the external managed object
+		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel(
+				externalManagedObjectName, objectType);
+
+		// Return change to add external managed object
+		return new AbstractChange<ExternalManagedObjectModel>(mo,
+				"Add external object") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office.addExternalManagedObject(mo);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.removeExternalManagedObject(mo);
+			}
+		};
+	}
+
+	@Override
+	public Change<ExternalManagedObjectModel> removeExternalManagedObject(
+			final ExternalManagedObjectModel externalManagedObject) {
+
+		// TODO test this method (removeExternalManagedObject)
+
+		// Return change to remove external managed object
+		return new AbstractChange<ExternalManagedObjectModel>(
+				externalManagedObject, "Remove external object") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office
+						.removeExternalManagedObject(externalManagedObject);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office
+						.addExternalManagedObject(externalManagedObject);
+			}
+		};
+	}
+
+	@Override
+	public Change<ExternalManagedObjectModel> renameExternalManagedObject(
+			final ExternalManagedObjectModel externalManagedObject,
+			final String newExternalManagedObjectName) {
+
+		// TODO test this method (renameExternalManagedObject)
+
+		// Obtain the old name for the external managed object
+		final String oldExternalManagedObjectName = externalManagedObject
+				.getExternalManagedObjectName();
+
+		// Return change to rename external managed object
+		return new AbstractChange<ExternalManagedObjectModel>(
+				externalManagedObject, "Rename external object to "
+						+ newExternalManagedObjectName) {
+			@Override
+			public void apply() {
+				externalManagedObject
+						.setExternalManagedObjectName(newExternalManagedObjectName);
+			}
+
+			@Override
+			public void revert() {
+				externalManagedObject
+						.setExternalManagedObjectName(oldExternalManagedObjectName);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeTeamModel> addOfficeTeam(String teamName) {
+
+		// TODO test this method (addOfficeTeam)
+
+		// Create the office team
+		final OfficeTeamModel team = new OfficeTeamModel(teamName);
+
+		// Return change to add team
+		return new AbstractChange<OfficeTeamModel>(team, "Add team") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office.addOfficeTeam(team);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.removeOfficeTeam(team);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeTeamModel> removeOfficeTeam(
+			final OfficeTeamModel officeTeam) {
+
+		// TODO test this method (removeOfficeTeam)
+
+		// Return change to remove team
+		return new AbstractChange<OfficeTeamModel>(officeTeam, "Remove team") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office.removeOfficeTeam(officeTeam);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office.addOfficeTeam(officeTeam);
+			}
+		};
+	}
+
+	@Override
+	public Change<OfficeTeamModel> renameOfficeTeam(
+			final OfficeTeamModel officeTeam, final String newOfficeTeamName) {
+
+		// TODO test this method (renameOfficeTeam)
+
+		// Obtain the old team name
+		final String oldOfficeTeamName = officeTeam.getOfficeTeamName();
+
+		// Return change to rename the office team
+		return new AbstractChange<OfficeTeamModel>(officeTeam,
+				"Rename team to " + newOfficeTeamName) {
+			@Override
+			public void apply() {
+				officeTeam.setOfficeTeamName(newOfficeTeamName);
+			}
+
+			@Override
+			public void revert() {
+				officeTeam.setOfficeTeamName(oldOfficeTeamName);
 			}
 		};
 	}

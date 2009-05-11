@@ -21,10 +21,9 @@ import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.section.SectionType;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
-import net.officefloor.frame.api.execute.Work;
 
 /**
- * Instance of a {@link Work}.
+ * Instance of a {@link OfficeSection}.
  * 
  * @author Daniel
  */

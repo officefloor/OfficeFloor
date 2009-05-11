@@ -20,11 +20,16 @@ import java.beans.PropertyChangeEvent;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.ExternalManagedObjectModel.ExternalManagedObjectEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -44,6 +49,35 @@ public class ExternalManagedObjectEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<ExternalManagedObjectModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<OfficeChanges, ExternalManagedObjectModel>() {
+					@Override
+					public String getInitialValue() {
+						return ExternalManagedObjectEditPart.this
+								.getCastedModel()
+								.getExternalManagedObjectName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return ExternalManagedObjectEditPart.this
+								.getOfficeFloorFigure()
+								.getExternalManagedObjectNameFigure();
+					}
+
+					@Override
+					public Change<ExternalManagedObjectModel> createChange(
+							OfficeChanges changes,
+							ExternalManagedObjectModel target, String newValue) {
+						return changes.renameExternalManagedObject(target,
+								newValue);
+					}
+				});
+	}
+
+	@Override
 	protected Class<ExternalManagedObjectEvent> getPropertyChangeEventType() {
 		return ExternalManagedObjectEvent.class;
 	}
@@ -52,6 +86,10 @@ public class ExternalManagedObjectEditPart
 	protected void handlePropertyChange(ExternalManagedObjectEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_EXTERNAL_MANAGED_OBJECT_NAME:
+			this.getOfficeFloorFigure().setExternalManagedObjectName(
+					this.getCastedModel().getExternalManagedObjectName());
+			break;
 		// case ADD_ADMINISTRATOR:
 		// case REMOVE_ADMINISTRATOR:
 		// ExternalManagedObjectEditPart.this

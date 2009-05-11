@@ -17,6 +17,7 @@
 package net.officefloor.eclipse.skin.standard.office;
 
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.IFigure;
 
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
@@ -55,18 +56,6 @@ public class StandardExternalManagedObjectFigure extends
 		this.setFigure(this.figure);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure#setScope
-	 * (java.lang.String)
-	 */
-	@Override
-	public void setScope(String scope) {
-		this.figure.setManagedObjectName(this.getManagedObjectText(scope));
-	}
-
 	/**
 	 * Obtains the {@link ExternalManagedObjectModel} text.
 	 * 
@@ -77,7 +66,26 @@ public class StandardExternalManagedObjectFigure extends
 	 * @return {@link ExternalManagedObjectModel} text.
 	 */
 	private String getManagedObjectText(String scope) {
-		return this.context.getExternalManagedObjectName() + " (" + scope
-				+ ")";
+		return this.context.getExternalManagedObjectName() + " (" + scope + ")";
 	}
+
+	/*
+	 * ================ ExternalManagedObjectFigure ==========================
+	 */
+
+	@Override
+	public void setExternalManagedObjectName(String externalManagedObjectName) {
+		this.figure.getLabel().setText(externalManagedObjectName);
+	}
+
+	@Override
+	public void setScope(String scope) {
+		this.figure.setManagedObjectName(this.getManagedObjectText(scope));
+	}
+
+	@Override
+	public IFigure getExternalManagedObjectNameFigure() {
+		return this.figure.getLabel();
+	}
+
 }

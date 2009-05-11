@@ -14,37 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.skin.office;
+package net.officefloor.eclipse.wizard.teamsource;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.office.OfficeTeamModel;
-
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.IFigure;
+import net.officefloor.compile.team.TeamType;
 
 /**
- * {@link Figure} for the {@link OfficeTeamModel}.
+ * Context for a {@link TeamSourceInstance}.
  * 
  * @author Daniel
  */
-public interface OfficeTeamFigure extends OfficeFloorFigure {
+public interface TeamSourceInstanceContext {
 
 	/**
-	 * Indicates a change to the name of the {@link OfficeTeamModel}.
+	 * Specifies the title.
 	 * 
-	 * @param officeTeamName
-	 *            Name to display for the {@link OfficeTeamModel}.
+	 * @param title
+	 *            Title.
 	 */
-	void setOfficeTeamName(String officeTeamName);
+	void setTitle(String title);
 
 	/**
-	 * <p>
-	 * Obtains the {@link IFigure} containing the {@link OfficeTeamModel} name.
-	 * <p>
-	 * This is to allow placement of the editor in changing the
-	 * {@link OfficeTeamModel} name.
+	 * Specifies an error message.
 	 * 
-	 * @return {@link IFigure} containing the {@link OfficeTeamModel} name.
+	 * @param message
+	 *            Error message or <code>null</code> to indicate no error.
 	 */
-	IFigure getOfficeTeamNameFigure();
+	void setErrorMessage(String message);
+
+	/**
+	 * Flags if {@link TeamType} is loaded.
+	 * 
+	 * @param isTeamTypeLoaded
+	 *            <code>true</code> {@link TeamType} loaded.
+	 */
+	void setTeamTypeLoaded(boolean isTeamLoaded);
+
 }

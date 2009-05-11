@@ -17,34 +17,11 @@
 package net.officefloor.eclipse.skin.office;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.office.OfficeTeamModel;
-
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.IFigure;
 
 /**
- * {@link Figure} for the {@link OfficeTeamModel}.
+ * {@link OfficeFloorFigure} for the {@link OfficeSectionOutputFigure}.
  * 
  * @author Daniel
  */
-public interface OfficeTeamFigure extends OfficeFloorFigure {
-
-	/**
-	 * Indicates a change to the name of the {@link OfficeTeamModel}.
-	 * 
-	 * @param officeTeamName
-	 *            Name to display for the {@link OfficeTeamModel}.
-	 */
-	void setOfficeTeamName(String officeTeamName);
-
-	/**
-	 * <p>
-	 * Obtains the {@link IFigure} containing the {@link OfficeTeamModel} name.
-	 * <p>
-	 * This is to allow placement of the editor in changing the
-	 * {@link OfficeTeamModel} name.
-	 * 
-	 * @return {@link IFigure} containing the {@link OfficeTeamModel} name.
-	 */
-	IFigure getOfficeTeamNameFigure();
+public interface OfficeSectionOutputFigure extends OfficeFloorFigure {
 }

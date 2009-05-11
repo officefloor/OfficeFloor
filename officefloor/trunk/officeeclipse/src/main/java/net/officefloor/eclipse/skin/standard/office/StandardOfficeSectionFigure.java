@@ -16,20 +16,28 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import org.eclipse.draw2d.Figure;
-
 import net.officefloor.eclipse.skin.office.OfficeSectionFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.figure.NoSpacingToolbarLayout;
+import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
+import net.officefloor.model.office.OfficeSectionModel;
+
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
+import org.eclipse.swt.graphics.Color;
 
 /**
  * Standard {@link OfficeSectionFigure}.
  * 
  * @author Daniel
  */
-public class StandardOfficeSectionFigure extends AbstractOfficeFloorFigure implements
-		OfficeSectionFigure {
+public class StandardOfficeSectionFigure extends AbstractOfficeFloorFigure
+		implements OfficeSectionFigure {
+
+	/**
+	 * {@link Label} containing the {@link OfficeSectionModel} name.
+	 */
+	private final Label officeSectionName;
 
 	/**
 	 * Initiate.
@@ -38,8 +46,30 @@ public class StandardOfficeSectionFigure extends AbstractOfficeFloorFigure imple
 	 *            {@link OfficeSectionFigureContext}.
 	 */
 	public StandardOfficeSectionFigure(OfficeSectionFigureContext context) {
-		Figure figure = new Figure();
-		figure.setLayoutManager(new NoSpacingToolbarLayout(false));
-		this.setFigure(figure);
+
+		Color flowColour = new Color(null, 130, 255, 150);
+
+		ContainerFigure container = new ContainerFigure(context
+				.getOfficeSectionName(), flowColour, 20, false);
+		this.officeSectionName = container.getContainerName();
+
+		// Specify figures
+		this.setFigure(container);
+		this.setContentPane(container.getContentPane());
 	}
+
+	/*
+	 * ================== OfficeSectionFigure ==========================
+	 */
+
+	@Override
+	public void setOfficeSectionName(String officeSectionName) {
+		this.officeSectionName.setText(officeSectionName);
+	}
+
+	@Override
+	public IFigure getOfficeSectionNameFigure() {
+		return this.officeSectionName;
+	}
+
 }

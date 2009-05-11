@@ -19,10 +19,32 @@ package net.officefloor.eclipse.skin.office;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.office.OfficeSectionModel;
 
+import org.eclipse.draw2d.IFigure;
+
 /**
  * {@link OfficeFloorFigure} for the {@link OfficeSectionModel}.
  * 
  * @author Daniel
  */
 public interface OfficeSectionFigure extends OfficeFloorFigure {
+
+	/**
+	 * Indicates a change to the name of the {@link OfficeSectionModel}.
+	 * 
+	 * @param officeSectionName
+	 *            Name to display for the {@link OfficeSectionModel}.
+	 */
+	void setOfficeSectionName(String officeSectionName);
+
+	/**
+	 * <p>
+	 * Obtains the {@link IFigure} containing the {@link OfficeSectionModel}
+	 * name.
+	 * <p>
+	 * This is to allow placement of the editor in changing the
+	 * {@link OfficeSectionModel} name.
+	 * 
+	 * @return {@link IFigure} containing the {@link OfficeSectionModel} name.
+	 */
+	IFigure getOfficeSectionNameFigure();
 }
