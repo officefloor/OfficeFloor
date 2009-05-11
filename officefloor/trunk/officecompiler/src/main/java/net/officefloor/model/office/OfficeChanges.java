@@ -16,9 +16,11 @@
  */
 package net.officefloor.model.office;
 
+import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.model.change.Change;
 
 /**
@@ -131,5 +133,44 @@ public interface OfficeChanges {
 	Change<ExternalManagedObjectModel> renameExternalManagedObject(
 			ExternalManagedObjectModel externalManagedObject,
 			String newExternalManagedObjectName);
+
+	/**
+	 * Adds an {@link AdministratorModel} to the {@link OfficeModel}.
+	 * 
+	 * @param administratorName
+	 *            Name of the {@link AdministratorModel}.
+	 * @param administratorSourceClassName
+	 *            Class name of the {@link AdministratorSource}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param administratorType
+	 *            {@link AdministratorType}.
+	 * @return {@link Change} to add the {@link AdministratorModel}.
+	 */
+	Change<AdministratorModel> addAdministrator(String administratorName,
+			String administratorSourceClassName, PropertyList properties,
+			AdministratorType<?, ?> administratorType);
+
+	/**
+	 * Removes the {@link AdministratorModel}.
+	 * 
+	 * @param administrator
+	 *            {@link AdministratorModel} to remove.
+	 * @return {@link Change} to remove the {@link AdministratorModel}.
+	 */
+	Change<AdministratorModel> removeAdministrator(
+			AdministratorModel administrator);
+
+	/**
+	 * Renames the {@link AdministratorModel}.
+	 * 
+	 * @param administrator
+	 *            {@link AdministratorModel}.
+	 * @param newAdministratorName
+	 *            New name for the {@link AdministratorModel}.
+	 * @return {@link Change} to rename the {@link AdministratorModel}.
+	 */
+	Change<AdministratorModel> renameAdministrator(
+			AdministratorModel administrator, String newAdministratorName);
 
 }

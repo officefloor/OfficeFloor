@@ -55,6 +55,7 @@ import org.eclipse.swt.widgets.Text;
  * 
  * @author Daniel
  */
+@Deprecated
 public class AdministratorSourceCreateDialog extends Dialog {
 
 	/**

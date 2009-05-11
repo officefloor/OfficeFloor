@@ -16,9 +16,12 @@
  */
 package net.officefloor.eclipse.office.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
+import net.officefloor.eclipse.wizard.administratorsource.AdministratorInstance;
+import net.officefloor.eclipse.wizard.administratorsource.AdministratorSourceWizard;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeModel;
 
 /**
@@ -27,56 +30,41 @@ import net.officefloor.model.office.OfficeModel;
  * @author Daniel
  */
 public class AddAdministratorOperation extends
-		AbstractOperation<OfficeEditPart> {
+		AbstractOfficeChangeOperation<OfficeEditPart> {
 
 	/**
 	 * Initiate.
 	 */
-	public AddAdministratorOperation() {
-		super("Add administrator", OfficeEditPart.class);
+	public AddAdministratorOperation(OfficeChanges officeChanges) {
+		super("Add administrator", OfficeEditPart.class, officeChanges);
 	}
 
-	@Override
-	protected void perform(Context context) {
+	/*
+	 * ================== AbstractOfficeChangeOperation =====================
+	 */
 
-//		// Obtain the edit part
-//		final OfficeEditPart editPart = context.getEditPart();
-//
-//		// Create the Administrator Source
-//		AdministratorModel administrator = null;
-//		try {
-//			AbstractOfficeFloorEditor<?, ?> editor = editPart.getEditor();
-//			IProject project = ProjectConfigurationContext.getProject(editor
-//					.getEditorInput());
-//			AdministratorSourceCreateDialog dialog = new AdministratorSourceCreateDialog(
-//					editor.getSite().getShell(), project);
-//			administrator = dialog.createAdministratorSource();
-//		} catch (Throwable ex) {
-//			editPart.messageError(ex);
-//		}
-//
-//		// Ensure created
-//		if (administrator == null) {
-//			return;
-//		}
-//
-//		// Set location
-//		context.positionModel(administrator);
-//
-//		// Make the change
-//		final AdministratorModel newAdministrator = administrator;
-//		context.execute(new OfficeFloorCommand() {
-//
-//			@Override
-//			protected void doCommand() {
-//				editPart.getCastedModel().addAdministrator(newAdministrator);
-//			}
-//
-//			@Override
-//			protected void undoCommand() {
-//				editPart.getCastedModel().removeAdministrator(newAdministrator);
-//			}
-//		});
+	@Override
+	protected Change<?> getChange(OfficeChanges changes, Context context) {
+
+		// Obtain the administrator instance
+		AdministratorInstance administrator = AdministratorSourceWizard
+				.getAdministratorInstance(context.getEditPart(), null);
+		if (administrator == null) {
+			return null; // must have administrator
+		}
+
+		// Create change to add administrator
+		Change<AdministratorModel> change = changes.addAdministrator(
+				administrator.getAdministratorName(), administrator
+						.getAdministratorSourceClassName(), administrator
+						.getPropertylist(), administrator
+						.getAdministratorType());
+
+		// Position the administrator
+		context.positionModel(change.getTarget());
+
+		// Return the change to add the administrator
+		return change;
 	}
 
 }
