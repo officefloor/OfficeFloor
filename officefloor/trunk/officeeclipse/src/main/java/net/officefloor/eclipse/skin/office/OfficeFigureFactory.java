@@ -22,6 +22,11 @@ import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeSectionInputModel;
+import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionObjectModel;
+import net.officefloor.model.office.OfficeSectionOutputModel;
+import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.office.OfficeTeamModel;
 
 import org.eclipse.draw2d.IFigure;
@@ -71,8 +76,7 @@ public interface OfficeFigureFactory {
 	 *            {@link OfficeTeamFigureContext}.
 	 * @return {@link OfficeFloorFigure}.
 	 */
-	OfficeTeamFigure createOfficeTeamFigure(
-			OfficeTeamFigureContext context);
+	OfficeTeamFigure createOfficeTeamFigure(OfficeTeamFigureContext context);
 
 	/**
 	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeTaskModel}.
@@ -84,20 +88,54 @@ public interface OfficeFigureFactory {
 	OfficeTaskFigure createOfficeTaskFigure(OfficeTaskFigureContext context);
 
 	/**
-	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeSectionModel}.
-	 * 
-	 * @param context
-	 *            {@link OfficeSectionFigureContext}.
-	 * @return {@link OfficeFloorFigure}.
-	 */
-	OfficeSectionFigure createOfficeSectionFigure(OfficeSectionFigureContext context);
-
-	/**
 	 * Creates the {@link OfficeFloorFigure} for the
 	 * {@link AbstractTaskAdministrationJoinPointModel}.
 	 * 
 	 * @return {@link OfficeFloorFigure}.
 	 */
 	TaskAdministrationJoinPointFigure createTaskAdministrationJoinPointFigure();
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the {@link OfficeSectionModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeSectionFigureContext}.
+	 * @return {@link OfficeFloorFigure}.
+	 */
+	OfficeSectionFigure createOfficeSectionFigure(
+			OfficeSectionFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeSectionInputModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeSectionInputFigureContext}.
+	 * @return {@link OfficeSectionInputFigure}.
+	 */
+	OfficeSectionInputFigure createOfficeSectionInputFigure(
+			OfficeSectionInputFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeSectionOutputModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeSectionOutputFigureContext}.
+	 * @return {@link OfficeSectionOutputFigure}.
+	 */
+	OfficeSectionOutputFigure createOfficeSectionOutputFigure(
+			OfficeSectionOutputFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeSectionObjectModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeSectionObjectFigure}.
+	 * @return {@link OfficeSectionObjectFigure}.
+	 */
+	OfficeSectionObjectFigure createOfficeSectionObjectFigure(
+			OfficeSectionObjectFigureContext context);
 
 }

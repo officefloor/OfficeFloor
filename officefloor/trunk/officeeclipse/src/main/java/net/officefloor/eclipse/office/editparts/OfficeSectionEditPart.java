@@ -21,11 +21,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.office.OfficeSectionFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigureContext;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionModel.OfficeSectionEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,11 +40,11 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeSectionEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeSectionModel, OfficeSectionEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeSectionModel, OfficeSectionEvent, OfficeSectionFigure>
 		implements OfficeSectionFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeSectionFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createOfficeSectionFigure(this);
 	}
@@ -54,6 +59,33 @@ public class OfficeSectionEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<OfficeSectionModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<OfficeChanges, OfficeSectionModel>() {
+					@Override
+					public String getInitialValue() {
+						return OfficeSectionEditPart.this.getCastedModel()
+								.getOfficeSectionName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return OfficeSectionEditPart.this
+								.getOfficeFloorFigure()
+								.getOfficeSectionNameFigure();
+					}
+
+					@Override
+					public Change<OfficeSectionModel> createChange(
+							OfficeChanges changes, OfficeSectionModel target,
+							String newValue) {
+						return changes.renameOfficeSection(target, newValue);
+					}
+				});
+	}
+
+	@Override
 	protected Class<OfficeSectionEvent> getPropertyChangeEventType() {
 		return OfficeSectionEvent.class;
 	}
@@ -62,6 +94,10 @@ public class OfficeSectionEditPart
 	protected void handlePropertyChange(OfficeSectionEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_SECTION_NAME:
+			this.getOfficeFloorFigure().setOfficeSectionName(
+					this.getCastedModel().getOfficeSectionName());
+			break;
 		case ADD_OFFICE_SECTION_INPUT:
 		case REMOVE_OFFICE_SECTION_INPUT:
 		case ADD_OFFICE_SECTION_OUTPUT:
@@ -70,7 +106,7 @@ public class OfficeSectionEditPart
 		case REMOVE_OFFICE_SECTION_OBJECT:
 		case ADD_OFFICE_SECTION_RESPONSIBILITY:
 		case REMOVE_OFFICE_SECTION_RESPONSIBILITY:
-			OfficeSectionEditPart.this.refreshChildren();
+			this.refreshChildren();
 			break;
 		}
 	}

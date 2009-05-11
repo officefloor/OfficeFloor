@@ -16,54 +16,58 @@
  */
 package net.officefloor.eclipse.office.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
+import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeTeamModel;
 
 /**
  * Adds an {@link ExternalTeamModel} to the {@link OfficeModel}.
  * 
  * @author Daniel
  */
-public class AddOfficeTeamOperation extends AbstractOperation<OfficeEditPart> {
+public class AddOfficeTeamOperation extends
+		AbstractOfficeChangeOperation<OfficeEditPart> {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param officeChanges
+	 *            {@link OfficeChanges}.
 	 */
-	public AddOfficeTeamOperation() {
-		super("Add team", OfficeEditPart.class);
+	public AddOfficeTeamOperation(OfficeChanges officeChanges) {
+		super("Add team", OfficeEditPart.class, officeChanges);
 	}
 
-	@Override
-	protected void perform(Context context) {
+	/*
+	 * ============ AbstractOfficeChangeOperation =========================
+	 */
 
-//		// Obtain the edit part
-//		final OfficeEditPart editPart = context.getEditPart();
-//
-//		// Add the team
-//		final ExternalTeamModel team = new ExternalTeamModel();
-//		BeanDialog dialog = editPart.createBeanDialog(team, "X", "Y");
-//		if (!dialog.populate()) {
-//			// Not created
-//			return;
-//		}
-//		
-//		// Set location
-//		context.positionModel(team);
-//
-//		// Make changes
-//		context.execute(new OfficeFloorCommand() {
-//
-//			@Override
-//			protected void doCommand() {
-//				editPart.getCastedModel().addExternalTeam(team);
-//			}
-//
-//			@Override
-//			protected void undoCommand() {
-//				editPart.getCastedModel().removeExternalTeam(team);
-//			}
-//		});
+	@Override
+	protected Change<?> getChange(OfficeChanges changes, Context context) {
+
+		// Obtain the office edit part
+		final OfficeEditPart editPart = context.getEditPart();
+
+		// Create the populated Office Team
+		final OfficeTeamModel team = new OfficeTeamModel();
+		BeanDialog dialog = editPart.createBeanDialog(team, "X", "Y");
+		if (!dialog.populate()) {
+			// Not created so do not provide command
+			return null;
+		}
+
+		// Add the office team
+		Change<OfficeTeamModel> change = changes.addOfficeTeam(team
+				.getOfficeTeamName());
+
+		// Position the model
+		context.positionModel(change.getTarget());
+
+		// Return the change
+		return change;
 	}
 
 }

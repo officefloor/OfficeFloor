@@ -22,6 +22,12 @@ import net.officefloor.eclipse.skin.office.DutyFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionInputFigure;
+import net.officefloor.eclipse.skin.office.OfficeSectionInputFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigure;
+import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionOutputFigure;
+import net.officefloor.eclipse.skin.office.OfficeSectionOutputFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeTeamFigure;
 import net.officefloor.eclipse.skin.office.OfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.office.TaskAdministrationJoinPointFigure;
@@ -62,18 +68,38 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	}
 
 	@Override
-	public OfficeTaskFigure createOfficeTaskFigure(OfficeTaskFigureContext context) {
+	public OfficeTaskFigure createOfficeTaskFigure(
+			OfficeTaskFigureContext context) {
 		return new StandardOfficeTaskFigure(context);
-	}
-
-	@Override
-	public OfficeSectionFigure createOfficeSectionFigure(OfficeSectionFigureContext context) {
-		return new StandardOfficeSectionFigure(context);
 	}
 
 	@Override
 	public TaskAdministrationJoinPointFigure createTaskAdministrationJoinPointFigure() {
 		return new StandardTaskAdministrationJoinPointFigure();
+	}
+
+	@Override
+	public OfficeSectionFigure createOfficeSectionFigure(
+			OfficeSectionFigureContext context) {
+		return new StandardOfficeSectionFigure(context);
+	}
+
+	@Override
+	public OfficeSectionInputFigure createOfficeSectionInputFigure(
+			OfficeSectionInputFigureContext context) {
+		return new StandardOfficeSectionInputFigure(context);
+	}
+
+	@Override
+	public OfficeSectionOutputFigure createOfficeSectionOutputFigure(
+			OfficeSectionOutputFigureContext context) {
+		return new StandardOfficeSectionOutputFigure(context);
+	}
+
+	@Override
+	public OfficeSectionObjectFigure createOfficeSectionObjectFigure(
+			OfficeSectionObjectFigureContext context) {
+		return new StandardOfficeSectionObjectFigure(context);
 	}
 
 }

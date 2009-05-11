@@ -16,64 +16,42 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
-import net.officefloor.eclipse.skin.office.OfficeTeamFigure;
-import net.officefloor.eclipse.skin.office.OfficeTeamFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigure;
+import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
-import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
-import net.officefloor.model.office.OfficeTeamModel;
+import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.ConnectionAnchor;
-import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 
 /**
- * Standard {@link OfficeTeamFigure}.
+ * {@link OfficeSectionObjectFigure} implementation.
  * 
  * @author Daniel
  */
-public class StandardOfficeTeamFigure extends AbstractOfficeFloorFigure
-		implements OfficeTeamFigure {
-
-	/**
-	 * {@link Label} containing the {@link OfficeTeamModel} name.
-	 */
-	private final Label officeTeamName;
+public class StandardOfficeSectionObjectFigure extends
+		AbstractOfficeFloorFigure implements OfficeSectionObjectFigure {
 
 	/**
 	 * Initiate.
 	 * 
 	 * @param context
-	 *            {@link OfficeTeamFigureContext}.
+	 *            {@link OfficeSectionObjectFigureContext}.
 	 */
-	public StandardOfficeTeamFigure(OfficeTeamFigureContext context) {
-		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getOfficeTeamName(), ConnectorDirection.WEST,
+	public StandardOfficeSectionObjectFigure(
+			OfficeSectionObjectFigureContext context) {
+		LabelConnectorFigure connector = new LabelConnectorFigure(context
+				.getOfficeSectionObjectName(), ConnectorDirection.WEST,
 				ColorConstants.black);
-		this.officeTeamName = figure.getLabel();
 
 		// Register the anchors
-		ConnectionAnchor anchor = figure.getConnectionAnchor();
+		ConnectionAnchor anchor = connector.getConnectionAnchor();
 		this.registerConnectionAnchor(
-				OfficeSectionResponsibilityToOfficeTeamModel.class, anchor);
+				OfficeSectionObjectToExternalManagedObjectModel.class, anchor);
 
-		this.setFigure(figure);
-	}
-
-	/*
-	 * ================== OfficeTeamFigure ===================================
-	 */
-
-	@Override
-	public void setOfficeTeamName(String officeTeamName) {
-		this.officeTeamName.setText(officeTeamName);
-	}
-
-	@Override
-	public IFigure getOfficeTeamNameFigure() {
-		return this.officeTeamName;
+		this.setFigure(connector);
 	}
 
 }

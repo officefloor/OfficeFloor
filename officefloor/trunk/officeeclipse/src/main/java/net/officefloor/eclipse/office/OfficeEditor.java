@@ -23,22 +23,26 @@ import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.editor.AbstractOfficeFloorEditor;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorConnectionEditPart;
 import net.officefloor.eclipse.common.editpolicies.connection.OfficeFloorGraphicalNodeEditPolicy;
+import net.officefloor.eclipse.common.editpolicies.layout.DeleteChangeFactory;
 import net.officefloor.eclipse.common.editpolicies.layout.OfficeFloorLayoutEditPolicy;
 import net.officefloor.eclipse.office.editparts.AdministratorEditPart;
 import net.officefloor.eclipse.office.editparts.DutyEditPart;
 import net.officefloor.eclipse.office.editparts.ExternalManagedObjectEditPart;
-import net.officefloor.eclipse.office.editparts.OfficeTeamEditPart;
-import net.officefloor.eclipse.office.editparts.TaskAdministrationJoinPointEditPart;
-import net.officefloor.eclipse.office.editparts.OfficeTaskEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.eclipse.office.editparts.OfficeSectionEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeSectionInputEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeSectionObjectEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeSectionOutputEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeTaskEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeTeamEditPart;
+import net.officefloor.eclipse.office.editparts.TaskAdministrationJoinPointEditPart;
 import net.officefloor.eclipse.office.models.PostTaskAdministrationJointPointModel;
 import net.officefloor.eclipse.office.models.PreTaskAdministrationJointPointModel;
 import net.officefloor.eclipse.office.operations.AddAdministratorOperation;
+import net.officefloor.eclipse.office.operations.AddExternalManagedObjectOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeSectionOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeTeamOperation;
-import net.officefloor.eclipse.office.operations.CycleManagedObjectScopeOperation;
-import net.officefloor.eclipse.office.operations.RefreshOfficeSectionOperation;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.office.OfficeChangesImpl;
 import net.officefloor.model.impl.office.OfficeRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
@@ -47,8 +51,11 @@ import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeModel;
+import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
+import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeTaskModel;
@@ -104,14 +111,21 @@ public class OfficeEditor extends
 		map.put(OfficeTeamModel.class, OfficeTeamEditPart.class);
 		map.put(ExternalManagedObjectModel.class,
 				ExternalManagedObjectEditPart.class);
-		map.put(OfficeSectionModel.class, OfficeSectionEditPart.class);
-		map.put(OfficeTaskModel.class, OfficeTaskEditPart.class);
 		map.put(AdministratorModel.class, AdministratorEditPart.class);
 		map.put(DutyModel.class, DutyEditPart.class);
 		map.put(PreTaskAdministrationJointPointModel.class,
 				TaskAdministrationJoinPointEditPart.class);
 		map.put(PostTaskAdministrationJointPointModel.class,
 				TaskAdministrationJoinPointEditPart.class);
+		map.put(OfficeSectionModel.class, OfficeSectionEditPart.class);
+		map
+				.put(OfficeSectionInputModel.class,
+						OfficeSectionInputEditPart.class);
+		map.put(OfficeSectionOutputModel.class,
+				OfficeSectionOutputEditPart.class);
+		map.put(OfficeSectionObjectModel.class,
+				OfficeSectionObjectEditPart.class);
+		map.put(OfficeTaskModel.class, OfficeTaskEditPart.class);
 
 		// Connections
 		map.put(OfficeSectionOutputToOfficeSectionInputModel.class,
@@ -124,7 +138,39 @@ public class OfficeEditor extends
 
 	@Override
 	protected void populateLayoutEditPolicy(OfficeFloorLayoutEditPolicy policy) {
-		// TODO populate layout edit policy for Office
+
+		// Allow deleting the office section
+		policy.addDelete(OfficeSectionModel.class,
+				new DeleteChangeFactory<OfficeSectionModel>() {
+					@Override
+					public Change<OfficeSectionModel> createChange(
+							OfficeSectionModel target) {
+						return OfficeEditor.this.getModelChanges()
+								.removeOfficeSection(target);
+					}
+				});
+
+		// Allow deleting the office team
+		policy.addDelete(OfficeTeamModel.class,
+				new DeleteChangeFactory<OfficeTeamModel>() {
+					@Override
+					public Change<OfficeTeamModel> createChange(
+							OfficeTeamModel target) {
+						return OfficeEditor.this.getModelChanges()
+								.removeOfficeTeam(target);
+					}
+				});
+
+		// Allow deleting the external managed object
+		policy.addDelete(ExternalManagedObjectModel.class,
+				new DeleteChangeFactory<ExternalManagedObjectModel>() {
+					@Override
+					public Change<ExternalManagedObjectModel> createChange(
+							ExternalManagedObjectModel target) {
+						return OfficeEditor.this.getModelChanges()
+								.removeExternalManagedObject(target);
+					}
+				});
 	}
 
 	@Override
@@ -141,12 +187,9 @@ public class OfficeEditor extends
 
 		// Add model operations
 		list.add(new AddOfficeSectionOperation(officeChanges));
+		list.add(new AddOfficeTeamOperation(officeChanges));
+		list.add(new AddExternalManagedObjectOperation(officeChanges));
 		list.add(new AddAdministratorOperation());
-		list.add(new AddOfficeTeamOperation());
-		list.add(new CycleManagedObjectScopeOperation());
-
-		// Refresh model operations
-		list.add(new RefreshOfficeSectionOperation());
 	}
 
 }

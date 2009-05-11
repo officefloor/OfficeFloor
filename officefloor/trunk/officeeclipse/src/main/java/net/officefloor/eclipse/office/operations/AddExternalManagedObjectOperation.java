@@ -14,16 +14,16 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.desk.operations;
+package net.officefloor.eclipse.office.operations;
 
 import net.officefloor.eclipse.common.action.Operation;
 import net.officefloor.eclipse.common.dialog.BeanDialog;
 import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
-import net.officefloor.eclipse.desk.editparts.DeskEditPart;
+import net.officefloor.eclipse.office.editparts.OfficeEditPart;
 import net.officefloor.model.change.Change;
-import net.officefloor.model.desk.DeskChanges;
-import net.officefloor.model.desk.ExternalManagedObjectModel;
+import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeChanges;
 
 /**
  * {@link Operation} to add the {@link ExternalManagedObjectModel}.
@@ -31,23 +31,23 @@ import net.officefloor.model.desk.ExternalManagedObjectModel;
  * @author Daniel
  */
 public class AddExternalManagedObjectOperation extends
-		AbstractDeskChangeOperation<DeskEditPart> {
+		AbstractOfficeChangeOperation<OfficeEditPart> {
 
 	/**
 	 * Initiate.
 	 * 
-	 * @param deskChanges
-	 *            {@link DeskChanges}.
+	 * @param officeChanges
+	 *            {@link OfficeChanges}.
 	 */
-	public AddExternalManagedObjectOperation(DeskChanges deskChanges) {
-		super("Add external object", DeskEditPart.class, deskChanges);
+	public AddExternalManagedObjectOperation(OfficeChanges officeChanges) {
+		super("Add external object", OfficeEditPart.class, officeChanges);
 	}
 
 	@Override
-	protected Change<?> getChange(DeskChanges changes, Context context) {
+	protected Change<?> getChange(OfficeChanges changes, Context context) {
 
-		// Obtain the desk edit part
-		final DeskEditPart editPart = context.getEditPart();
+		// Obtain the office edit part
+		final OfficeEditPart editPart = context.getEditPart();
 
 		// Create the populated External Managed Object
 		final ExternalManagedObjectModel mo = new ExternalManagedObjectModel();
