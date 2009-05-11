@@ -94,6 +94,16 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	private SectionType sectionType;
 
 	/**
+	 * {@link OfficeSection}.
+	 */
+	private OfficeSection officeSection;
+
+	/**
+	 * Name of the {@link OfficeSection}.
+	 */
+	private String sectionName;
+
+	/**
 	 * Location of the {@link OfficeSection}.
 	 */
 	private String sectionLocation;
@@ -133,10 +143,14 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	/**
 	 * Specifies the location of the {@link OfficeSection}.
 	 * 
+	 * @param sectionName
+	 *            Name of the {@link OfficeSection}.
 	 * @param sectionLocation
 	 *            Location of the {@link OfficeSection}.
 	 */
-	public void setSectionLocation(String sectionLocation) {
+	public void setSectionNameAndLocation(String sectionName,
+			String sectionLocation) {
+		this.sectionName = sectionName;
 		this.sectionLocation = sectionLocation;
 
 		// Notify properties changed as now have location
@@ -148,9 +162,18 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	 */
 	public void loadSectionType() {
 
+		// Ensure have name
+		if (EclipseUtil.isBlank(this.sectionName)) {
+			this.sectionType = null;
+			this.officeSection = null;
+			this.setErrorMessage("Must specify section name");
+			return; // must have name
+		}
+
 		// Ensure have location
 		if (EclipseUtil.isBlank(this.sectionLocation)) {
 			this.sectionType = null;
+			this.officeSection = null;
 			this.setErrorMessage("Must specify section location");
 			return; // must have location
 		}
@@ -160,9 +183,18 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 			return; // page controls not yet loaded
 		}
 
-		// Attempt to load the section type
-		this.sectionType = this.sectionLoader.loadSectionType(
-				this.sectionSourceClass, this.sectionLocation, this.properties);
+		// Load the section type or office section
+		if (this.context.isLoadType()) {
+			// Attempt to load the section type
+			this.sectionType = this.sectionLoader.loadSectionType(
+					this.sectionSourceClass, this.sectionLocation,
+					this.properties);
+		} else {
+			// Attempt to load the office section
+			this.officeSection = this.sectionLoader.loadOfficeSection(
+					this.sectionName, this.sectionSourceClass,
+					this.sectionLocation, this.properties);
+		}
 	}
 
 	/**
@@ -195,6 +227,15 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	}
 
 	/**
+	 * Obtains the name of the {@link OfficeSection}.
+	 * 
+	 * @return Name of the {@link OfficeSection}.
+	 */
+	public String getSectionName() {
+		return this.sectionName;
+	}
+
+	/**
 	 * Obtains the location of the {@link OfficeSection}.
 	 * 
 	 * @return Location of the {@link OfficeSection}.
@@ -223,20 +264,13 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 	}
 
 	/**
-	 * Obtains the suggested name for the {@link OfficeSection}.
+	 * Obtains the loaded {@link OfficeSection}.
 	 * 
-	 * @return Suggested name for the {@link OfficeSection}.
+	 * @return Loaded {@link OfficeSection} or <code>null</code> if issue
+	 *         loading.
 	 */
-	public String getSuggestedSectionName() {
-
-		// Ensure have extension
-		if (this.sectionSourceExtension == null) {
-			return ""; // no suggestion
-		}
-
-		// Return the suggested name
-		return this.sectionSourceExtension
-				.getSuggestedSectionName(this.properties);
+	public OfficeSection getOfficeSection() {
+		return this.officeSection;
 	}
 
 	/**
@@ -338,8 +372,12 @@ public class SectionSourceInstance implements SectionSourceExtensionContext,
 		// Issues notified back via the section loader.
 		this.loadSectionType();
 
-		// Flag whether the section type was loaded
-		this.context.setSectionTypeLoaded(this.sectionType != null);
+		// Flag whether the section type or office section was loaded
+		if (this.context.isLoadType()) {
+			this.context.setSectionLoaded(this.sectionType != null);
+		} else {
+			this.context.setSectionLoaded(this.officeSection != null);
+		}
 	}
 
 	@Override

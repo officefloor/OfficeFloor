@@ -56,6 +56,11 @@ public class SectionInstance {
 	private final SectionType sectionType;
 
 	/**
+	 * {@link OfficeSection}.
+	 */
+	private final OfficeSection officeSection;
+
+	/**
 	 * Initiate for public use.
 	 * 
 	 * @param sectionName
@@ -72,6 +77,7 @@ public class SectionInstance {
 		this.sectionLocation = sectionLocation;
 		this.propertyList = OfficeFloorCompiler.newPropertyList();
 		this.sectionType = null;
+		this.officeSection = null;
 	}
 
 	/**
@@ -87,15 +93,18 @@ public class SectionInstance {
 	 *            {@link PropertyList}.
 	 * @param sectionType
 	 *            {@link SectionType}.
+	 * @param officeSection
+	 *            {@link OfficeSection}.
 	 */
 	SectionInstance(String sectionName, String sectionSourceClassName,
 			String sectionLocation, PropertyList propertyList,
-			SectionType sectionType) {
+			SectionType sectionType, OfficeSection officeSection) {
 		this.sectionName = sectionName;
 		this.sectionSourceClassName = sectionSourceClassName;
 		this.sectionLocation = sectionLocation;
 		this.propertyList = propertyList;
 		this.sectionType = sectionType;
+		this.officeSection = officeSection;
 	}
 
 	/**
@@ -138,11 +147,28 @@ public class SectionInstance {
 	 * Obtains the {@link SectionType}.
 	 * 
 	 * @return {@link SectionType} if obtained from
-	 *         {@link SectionSourceInstance} or <code>null</code> if initiated
-	 *         by <code>public</code> constructor.
+	 *         {@link SectionSourceInstance} or <code>null</code> if:
+	 *         <ol>
+	 *         <li>initiated by <code>public</code> constructor</li>
+	 *         <li>loading {@link OfficeSection}</li>
+	 *         </ol>
 	 */
 	public SectionType getSectionType() {
 		return this.sectionType;
+	}
+
+	/**
+	 * Obtains the {@link OfficeSection}.
+	 * 
+	 * @return {@link OfficeSection} if obtained from
+	 *         {@link SectionSourceInstance} or <code>null</code> if:
+	 *         <ol>
+	 *         <li>initiated by <code>public</code> constructor</li>
+	 *         <li>loading {@link SectionType}</li>
+	 *         </ol>
+	 */
+	public OfficeSection getOfficeSection() {
+		return this.officeSection;
 	}
 
 }

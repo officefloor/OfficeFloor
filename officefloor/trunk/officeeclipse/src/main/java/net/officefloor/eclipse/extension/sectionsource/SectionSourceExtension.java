@@ -18,7 +18,6 @@ package net.officefloor.eclipse.extension.sectionsource;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
@@ -71,15 +70,5 @@ public interface SectionSourceExtension<S extends SectionSource> {
 	 *            {@link SectionSourceExtensionContext}.
 	 */
 	void createControl(Composite page, SectionSourceExtensionContext context);
-
-	/**
-	 * Obtains the suggested name of the {@link OfficeSection}.
-	 * 
-	 * @param properties
-	 *            {@link PropertyList}.
-	 * @return Suggested {@link OfficeSection} name or <code>null</code> if no
-	 *         suggestion.
-	 */
-	String getSuggestedSectionName(PropertyList properties);
 
 }

@@ -17,6 +17,7 @@
 package net.officefloor.eclipse.wizard.sectionsource;
 
 import net.officefloor.compile.section.SectionType;
+import net.officefloor.compile.spi.office.OfficeSection;
 
 /**
  * Context for a {@link SectionSourceInstance}.
@@ -24,6 +25,15 @@ import net.officefloor.compile.section.SectionType;
  * @author Daniel
  */
 public interface SectionSourceInstanceContext {
+
+	/**
+	 * Flags to load the {@link SectionType} rather than the
+	 * {@link OfficeSection}.
+	 * 
+	 * @return <code>true</code> to load {@link SectionType}, <code>false</code>
+	 *         to load {@link OfficeSection}.
+	 */
+	boolean isLoadType();
 
 	/**
 	 * Specifies the title.
@@ -42,11 +52,12 @@ public interface SectionSourceInstanceContext {
 	void setErrorMessage(String message);
 
 	/**
-	 * Flags if {@link SectionType} is loaded.
+	 * Flags if {@link SectionType} or {@link OfficeSection} is loaded.
 	 * 
 	 * @param isSectionTypeLoade
-	 *            <code>true</code> {@link SectionType} loaded.
+	 *            <code>true</code> {@link SectionType} or {@link OfficeSection}
+	 *            loaded.
 	 */
-	void setSectionTypeLoaded(boolean isSectionTypeLoaded);
+	void setSectionLoaded(boolean isSectionLoaded);
 
 }

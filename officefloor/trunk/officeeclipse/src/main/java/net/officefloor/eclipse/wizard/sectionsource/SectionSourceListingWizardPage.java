@@ -32,12 +32,16 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Text;
 
 /**
  * {@link IWizardPage} providing the listing of {@link SectionSourceInstance}.
@@ -61,6 +65,11 @@ public class SectionSourceListingWizardPage extends WizardPage {
 	 * {@link SectionSourceInstance} listing.
 	 */
 	private final String[] sectionSourceLabels;
+
+	/**
+	 * {@link Text} of the {@link OfficeSection} name.
+	 */
+	private Text sectionName;
 
 	/**
 	 * List containing the {@link SectionSource} labels.
@@ -121,12 +130,31 @@ public class SectionSourceListingWizardPage extends WizardPage {
 	@Override
 	public void createControl(Composite parent) {
 
-		// Fill the width
-		Composite page = new Composite(parent, SWT.NULL);
-		page.setLayout(new FillLayout(SWT.HORIZONTAL));
+		Composite page = new Composite(parent, SWT.NONE);
+		page.setLayout(new GridLayout(1, true));
+
+		// Add means to specify section name
+		Composite nameComposite = new Composite(page, SWT.NONE);
+		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
+				false));
+		nameComposite.setLayout(new GridLayout(2, false));
+		Label nameLabel = new Label(nameComposite, SWT.NONE);
+		nameLabel.setText("Section name: ");
+		this.sectionName = new Text(nameComposite, SWT.BORDER);
+		this.sectionName.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
+				true, false));
+		this.sectionName.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				// Flag the name changed
+				SectionSourceListingWizardPage.this.handleChange();
+			}
+		});
 
 		// Add listing of section sources
 		this.list = new List(page, SWT.SINGLE | SWT.BORDER);
+		this.list.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true,
+				false));
 		this.list.setItems(this.sectionSourceLabels);
 		this.list.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -136,8 +164,6 @@ public class SectionSourceListingWizardPage extends WizardPage {
 		});
 
 		// Provide means to specify section location
-		Composite location = new Composite(page, SWT.NONE);
-		location.setLayout(new GridLayout(1, true));
 		ClasspathFilter filter = new ClasspathFilter();
 		filter.addFileFilter(new InputFilter<IFile>() {
 			@Override
@@ -145,8 +171,8 @@ public class SectionSourceListingWizardPage extends WizardPage {
 				return false; // include all files
 			}
 		});
-		new InputHandler<String>(location, new ClasspathSelectionInput(project,
-				filter), new InputListener() {
+		new InputHandler<String>(page, new ClasspathSelectionInput(
+				this.project, filter), new InputListener() {
 			@Override
 			public void notifyValueChanged(Object value) {
 
@@ -156,14 +182,39 @@ public class SectionSourceListingWizardPage extends WizardPage {
 				}
 
 				// Obtain the location
+				String location;
 				if (value instanceof IFile) {
 					IFile file = (IFile) value;
-					SectionSourceListingWizardPage.this.sectionLocation = ClasspathUtil
-							.getClassPathLocation(file.getFullPath());
+					location = ClasspathUtil.getClassPathLocation(file
+							.getFullPath());
 				} else {
 					// No file selected
-					SectionSourceListingWizardPage.this.sectionLocation = null;
+					location = null;
 				}
+
+				// Determine if default section name
+				String name = SectionSourceListingWizardPage.this.sectionName
+						.getText();
+				if ((!EclipseUtil.isBlank(location))
+						&& (EclipseUtil.isBlank(name))) {
+					// Use simple name of location
+					name = location;
+					int index = name.lastIndexOf('/');
+					if (index >= 0) {
+						name = name.substring(index + "/".length());
+					}
+					index = name.indexOf('.');
+					if (index >= 0) {
+						name = name.substring(0, index);
+					}
+					SectionSourceListingWizardPage.this.sectionName
+							.setText(name);
+				}
+
+				// Specify the location
+				SectionSourceListingWizardPage.this.sectionLocation = location;
+
+				// Flag the location changed
 				SectionSourceListingWizardPage.this.handleChange();
 			}
 
@@ -190,6 +241,14 @@ public class SectionSourceListingWizardPage extends WizardPage {
 	 */
 	protected void handleChange() {
 
+		// Ensure have section name
+		String name = this.sectionName.getText();
+		if (EclipseUtil.isBlank(name)) {
+			this.setErrorMessage("Must specify name of section");
+			this.setPageComplete(false);
+			return;
+		}
+
 		// Determine if section source selected
 		int selectionIndex = this.list.getSelectionIndex();
 		if (selectionIndex < 0) {
@@ -206,8 +265,8 @@ public class SectionSourceListingWizardPage extends WizardPage {
 		}
 
 		// Specify location for section source and is complete
-		this.sectionSourceInstances[selectionIndex]
-				.setSectionLocation(this.sectionLocation);
+		this.sectionSourceInstances[selectionIndex].setSectionNameAndLocation(
+				name, this.sectionLocation);
 		this.setErrorMessage(null);
 		this.setPageComplete(true);
 	}
