@@ -16,7 +16,6 @@
  */
 package net.officefloor.eclipse.extension.sectionsource.desk;
 
-import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtension;
 import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
 import net.officefloor.model.impl.desk.DeskModelSectionSource;
@@ -53,12 +52,6 @@ public class DeskModelSectionSourceExtension implements
 			SectionSourceExtensionContext context) {
 		page.setLayout(new FillLayout());
 		new Label(page, SWT.NONE).setText("No properties required for Desk");
-	}
-
-	@Override
-	public String getSuggestedSectionName(PropertyList properties) {
-		// No suggested name
-		return null;
 	}
 
 }

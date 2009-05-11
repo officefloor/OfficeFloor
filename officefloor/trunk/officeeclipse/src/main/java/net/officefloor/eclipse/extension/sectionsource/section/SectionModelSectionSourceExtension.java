@@ -16,15 +16,14 @@
  */
 package net.officefloor.eclipse.extension.sectionsource.section;
 
+import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtension;
+import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
+import net.officefloor.model.impl.section.SectionModelSectionSource;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-
-import net.officefloor.compile.properties.PropertyList;
-import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtension;
-import net.officefloor.eclipse.extension.sectionsource.SectionSourceExtensionContext;
-import net.officefloor.model.impl.section.SectionModelSectionSource;
 
 /**
  * {@link SectionSourceExtension} for the {@link SectionModelSectionSource}.
@@ -53,12 +52,6 @@ public class SectionModelSectionSourceExtension implements
 			SectionSourceExtensionContext context) {
 		page.setLayout(new FillLayout());
 		new Label(page, SWT.NONE).setText("No properties required for Section");
-	}
-
-	@Override
-	public String getSuggestedSectionName(PropertyList properties) {
-		// No suggested name
-		return null;
 	}
 
 }

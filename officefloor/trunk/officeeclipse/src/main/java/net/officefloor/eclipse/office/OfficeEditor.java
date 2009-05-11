@@ -35,14 +35,17 @@ import net.officefloor.eclipse.office.editparts.OfficeSectionEditPart;
 import net.officefloor.eclipse.office.models.PostTaskAdministrationJointPointModel;
 import net.officefloor.eclipse.office.models.PreTaskAdministrationJointPointModel;
 import net.officefloor.eclipse.office.operations.AddAdministratorOperation;
+import net.officefloor.eclipse.office.operations.AddOfficeSectionOperation;
 import net.officefloor.eclipse.office.operations.AddOfficeTeamOperation;
 import net.officefloor.eclipse.office.operations.CycleManagedObjectScopeOperation;
 import net.officefloor.eclipse.office.operations.RefreshOfficeSectionOperation;
+import net.officefloor.model.impl.office.OfficeChangesImpl;
 import net.officefloor.model.impl.office.OfficeRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
@@ -60,9 +63,8 @@ import org.eclipse.ui.IEditorPart;
  * 
  * @author Daniel
  */
-// TODO provide OfficeChanges
 public class OfficeEditor extends
-		AbstractOfficeFloorEditor<OfficeModel, OfficeModel> {
+		AbstractOfficeFloorEditor<OfficeModel, OfficeChanges> {
 
 	/**
 	 * ID for this {@link IEditorPart}.
@@ -70,10 +72,27 @@ public class OfficeEditor extends
 	public static final String EDITOR_ID = "net.officefloor.editors.office";
 
 	@Override
-	protected OfficeModel createModelChanges(OfficeModel model) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractOfficeFloorEditor<OfficeModel,OfficeModel,OfficeEditPart>.createModelChanges");
+	protected boolean isDragTarget() {
+		return false;
+	}
+
+	@Override
+	protected OfficeModel retrieveModel(ConfigurationItem configuration)
+			throws Exception {
+		return new OfficeRepositoryImpl(new ModelRepositoryImpl())
+				.retrieveOffice(configuration);
+	}
+
+	@Override
+	protected void storeModel(OfficeModel model, ConfigurationItem configuration)
+			throws Exception {
+		new OfficeRepositoryImpl(new ModelRepositoryImpl()).storeOffice(model,
+				configuration);
+	}
+
+	@Override
+	protected OfficeChanges createModelChanges(OfficeModel model) {
+		return new OfficeChangesImpl(model);
 	}
 
 	@Override
@@ -115,28 +134,13 @@ public class OfficeEditor extends
 	}
 
 	@Override
-	protected boolean isDragTarget() {
-		return false;
-	}
-
-	@Override
-	protected OfficeModel retrieveModel(ConfigurationItem configuration)
-			throws Exception {
-		return new OfficeRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveOffice(configuration);
-	}
-
-	@Override
-	protected void storeModel(OfficeModel model, ConfigurationItem configuration)
-			throws Exception {
-		new OfficeRepositoryImpl(new ModelRepositoryImpl()).storeOffice(model,
-				configuration);
-	}
-
-	@Override
 	protected void populateOperations(List<Operation> list) {
 
+		// Obtain the office changes
+		OfficeChanges officeChanges = this.getModelChanges();
+
 		// Add model operations
+		list.add(new AddOfficeSectionOperation(officeChanges));
 		list.add(new AddAdministratorOperation());
 		list.add(new AddOfficeTeamOperation());
 		list.add(new CycleManagedObjectScopeOperation());

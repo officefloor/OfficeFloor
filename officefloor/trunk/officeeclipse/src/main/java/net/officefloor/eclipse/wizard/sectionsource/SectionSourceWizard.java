@@ -50,6 +50,42 @@ public class SectionSourceWizard extends Wizard implements
 		SectionSourceInstanceContext {
 
 	/**
+	 * Facade method to obtain the {@link SectionInstance} containing the loaded
+	 * {@link SectionType}.
+	 * 
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
+	 *            objects to run the {@link SectionSourceWizard}.
+	 * @param sectionInstance
+	 *            {@link SectionInstance} to based decisions. <code>null</code>
+	 *            if creating new {@link SectionInstance}.
+	 * @return {@link SectionInstance} or <code>null</code> if cancelled.
+	 */
+	public static SectionInstance loadSectionType(
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+			SectionInstance sectionInstance) {
+		return getSectionInstance(true, editPart, sectionInstance);
+	}
+
+	/**
+	 * Facade method to obtain the {@link SectionInstance} containing the loaded
+	 * {@link OfficeSection}.
+	 * 
+	 * @param editPart
+	 *            {@link AbstractOfficeFloorEditPart} to obtain necessary
+	 *            objects to run the {@link SectionSourceWizard}.
+	 * @param sectionInstance
+	 *            {@link SectionInstance} to based decisions. <code>null</code>
+	 *            if creating new {@link SectionInstance}.
+	 * @return {@link SectionInstance} or <code>null</code> if cancelled.
+	 */
+	public static SectionInstance loadOfficeSection(
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
+			SectionInstance sectionInstance) {
+		return getSectionInstance(false, editPart, sectionInstance);
+	}
+
+	/**
 	 * Facade method to obtain the {@link SectionInstance}.
 	 * 
 	 * @param editPart
@@ -60,7 +96,7 @@ public class SectionSourceWizard extends Wizard implements
 	 *            if creating new {@link SectionInstance}.
 	 * @return {@link SectionInstance} or <code>null</code> if cancelled.
 	 */
-	public static SectionInstance getSectionInstance(
+	public static SectionInstance getSectionInstance(boolean isLoadType,
 			AbstractOfficeFloorEditPart<?, ?, ?> editPart,
 			SectionInstance sectionInstance) {
 
@@ -69,7 +105,8 @@ public class SectionSourceWizard extends Wizard implements
 				.getEditor().getEditorInput());
 
 		// Create and run the wizard
-		SectionSourceWizard wizard = new SectionSourceWizard(project);
+		SectionSourceWizard wizard = new SectionSourceWizard(isLoadType,
+				project, sectionInstance);
 		if (WizardUtil.runWizard(wizard, editPart)) {
 			// Successful so return the section instance
 			return wizard.getSectionInstance();
@@ -139,6 +176,12 @@ public class SectionSourceWizard extends Wizard implements
 	}
 
 	/**
+	 * Flag indicating to load {@link SectionType} rather than
+	 * {@link OfficeSection}.
+	 */
+	private final boolean isLoadType;
+
+	/**
 	 * {@link SectionSourceListingWizardPage}.
 	 */
 	private final SectionSourceListingWizardPage listingPage;
@@ -148,11 +191,6 @@ public class SectionSourceWizard extends Wizard implements
 	 * {@link SectionSourceInstance}.
 	 */
 	private final Map<SectionSourceInstance, SectionSourcePropertiesWizardPage> propertiesPages = new HashMap<SectionSourceInstance, SectionSourcePropertiesWizardPage>();
-
-	/**
-	 * {@link SectionSourceNameWizardPage}.
-	 */
-	private final SectionSourceNameWizardPage tasksPage;
 
 	/**
 	 * Selected {@link SectionSourceInstance}.
@@ -172,23 +210,31 @@ public class SectionSourceWizard extends Wizard implements
 	/**
 	 * Initiate to create a new {@link SectionInstance}.
 	 * 
+	 * @param isLoadType
+	 *            Flag indicating to load {@link SectionType} rather than
+	 *            {@link OfficeSection}.
 	 * @param project
 	 *            {@link IProject}.
 	 */
-	public SectionSourceWizard(IProject project) {
-		this(project, null);
+	public SectionSourceWizard(boolean isLoadType, IProject project) {
+		this(isLoadType, project, null);
 	}
 
 	/**
 	 * Initiate.
 	 * 
+	 * @param isLoadType
+	 *            Flag indicating to load {@link SectionType} rather than
+	 *            {@link OfficeSection}.
 	 * @param project
 	 *            {@link IProject}.
 	 * @param sectionInstance
 	 *            {@link SectionInstance} to be edited, or <code>null</code> to
 	 *            create a new {@link SectionInstance}.
 	 */
-	public SectionSourceWizard(IProject project, SectionInstance sectionInstance) {
+	public SectionSourceWizard(boolean isLoadType, IProject project,
+			SectionInstance sectionInstance) {
+		this.isLoadType = isLoadType;
 
 		// Obtain the class loader for the project
 		ProjectClassLoader classLoader = ProjectClassLoader.create(project);
@@ -218,7 +264,6 @@ public class SectionSourceWizard extends Wizard implements
 					new SectionSourcePropertiesWizardPage(this,
 							sectionSourceInstance));
 		}
-		this.tasksPage = new SectionSourceNameWizardPage();
 	}
 
 	/**
@@ -242,7 +287,6 @@ public class SectionSourceWizard extends Wizard implements
 			this.addPage(this.propertiesPages.values().toArray(
 					new IWizardPage[0])[0]);
 		}
-		this.addPage(this.tasksPage);
 	}
 
 	@Override
@@ -260,12 +304,6 @@ public class SectionSourceWizard extends Wizard implements
 
 			// Load section type to set state and return as next page
 			return this.currentPropertiesPage;
-
-		} else if (page instanceof SectionSourcePropertiesWizardPage) {
-			// Properties specified, so now select tasks
-			this.tasksPage
-					.loadSectionSourceInstance(this.selectedSectionSourceInstance);
-			return this.tasksPage;
 
 		} else {
 			// Tasks selected, nothing further
@@ -289,11 +327,6 @@ public class SectionSourceWizard extends Wizard implements
 			return false;
 		}
 
-		// Ensure the tasks page complete
-		if (!this.tasksPage.isPageComplete()) {
-			return false;
-		}
-
 		// All pages complete, may finish
 		return true;
 	}
@@ -302,7 +335,8 @@ public class SectionSourceWizard extends Wizard implements
 	public boolean performFinish() {
 
 		// Obtain the details of the section instance
-		String sectionName = this.tasksPage.getSectionName();
+		String sectionName = this.selectedSectionSourceInstance
+				.getSectionName();
 		String sectionSourceClassName = this.selectedSectionSourceInstance
 				.getSectionSourceClassName();
 		String sectionLocation = this.selectedSectionSourceInstance
@@ -311,11 +345,13 @@ public class SectionSourceWizard extends Wizard implements
 				.getPropertyList();
 		SectionType sectionType = this.selectedSectionSourceInstance
 				.getSectionType();
+		OfficeSection officeSection = this.selectedSectionSourceInstance
+				.getOfficeSection();
 
 		// Specify the section instance
 		this.sectionInstance = new SectionInstance(sectionName,
 				sectionSourceClassName, sectionLocation, propertyList,
-				sectionType);
+				sectionType, officeSection);
 
 		// Finished
 		return true;
@@ -324,6 +360,11 @@ public class SectionSourceWizard extends Wizard implements
 	/*
 	 * ================== SectionSourceInstanceContext ======================
 	 */
+
+	@Override
+	public boolean isLoadType() {
+		return this.isLoadType;
+	}
 
 	@Override
 	public void setTitle(String title) {
@@ -340,7 +381,7 @@ public class SectionSourceWizard extends Wizard implements
 	}
 
 	@Override
-	public void setSectionTypeLoaded(boolean isSectionTypeLoaded) {
+	public void setSectionLoaded(boolean isSectionTypeLoaded) {
 		if (this.currentPropertiesPage != null) {
 			this.currentPropertiesPage.setPageComplete(isSectionTypeLoaded);
 		}
