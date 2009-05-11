@@ -189,7 +189,7 @@ public class OfficeEditor extends
 		list.add(new AddOfficeSectionOperation(officeChanges));
 		list.add(new AddOfficeTeamOperation(officeChanges));
 		list.add(new AddExternalManagedObjectOperation(officeChanges));
-		list.add(new AddAdministratorOperation());
+		list.add(new AddAdministratorOperation(officeChanges));
 	}
 
 }

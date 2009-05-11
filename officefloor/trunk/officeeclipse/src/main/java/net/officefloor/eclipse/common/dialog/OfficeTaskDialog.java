@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Shell;
  * 
  * @author Daniel
  */
+@Deprecated
 public class OfficeTaskDialog extends Dialog {
 
 	/**

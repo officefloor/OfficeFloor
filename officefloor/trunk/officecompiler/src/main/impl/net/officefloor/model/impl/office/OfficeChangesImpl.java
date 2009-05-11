@@ -16,6 +16,8 @@
  */
 package net.officefloor.model.impl.office;
 
+import net.officefloor.compile.administrator.AdministratorType;
+import net.officefloor.compile.administrator.DutyType;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
@@ -24,6 +26,8 @@ import net.officefloor.compile.spi.office.OfficeSectionObject;
 import net.officefloor.compile.spi.office.OfficeSectionOutput;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.impl.change.AbstractChange;
+import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.OfficeModel;
@@ -297,6 +301,92 @@ public class OfficeChangesImpl implements OfficeChanges {
 			@Override
 			public void revert() {
 				officeTeam.setOfficeTeamName(oldOfficeTeamName);
+			}
+		};
+	}
+
+	@Override
+	public Change<AdministratorModel> addAdministrator(
+			String administratorName, String administratorSourceClassName,
+			PropertyList properties, AdministratorType<?, ?> administratorType) {
+
+		// TODO test this method (addAdministrator)
+
+		// Create the administrator
+		final AdministratorModel administrator = new AdministratorModel(
+				administratorName, administratorSourceClassName);
+		for (Property property : properties) {
+			administrator.addProperty(new PropertyModel(property.getName(),
+					property.getValue()));
+		}
+
+		// Add the duties
+		for (DutyType<?, ?> duty : administratorType.getDutyTypes()) {
+			administrator.addDuty(new DutyModel(duty.getDutyKey().name()));
+		}
+
+		// Return change to add the administrator
+		return new AbstractChange<AdministratorModel>(administrator,
+				"Add administrator") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office
+						.addOfficeAdministrator(administrator);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office
+						.removeOfficeAdministrator(administrator);
+			}
+		};
+	}
+
+	@Override
+	public Change<AdministratorModel> removeAdministrator(
+			final AdministratorModel administrator) {
+
+		// TODO test this method (removeAdministrator)
+
+		// Return change to remove administrator
+		return new AbstractChange<AdministratorModel>(administrator,
+				"Remove administrator") {
+			@Override
+			public void apply() {
+				OfficeChangesImpl.this.office
+						.removeOfficeAdministrator(administrator);
+			}
+
+			@Override
+			public void revert() {
+				OfficeChangesImpl.this.office
+						.addOfficeAdministrator(administrator);
+			}
+		};
+	}
+
+	@Override
+	public Change<AdministratorModel> renameAdministrator(
+			final AdministratorModel administrator,
+			final String newAdministratorName) {
+
+		// TODO test this method (renameAdministrator)
+
+		// Obtain the old name
+		final String oldAdministratorName = administrator
+				.getAdministratorName();
+
+		// Return change to rename the administrator
+		return new AbstractChange<AdministratorModel>(administrator,
+				"Rename administrator to " + newAdministratorName) {
+			@Override
+			public void apply() {
+				administrator.setAdministratorName(newAdministratorName);
+			}
+
+			@Override
+			public void revert() {
+				administrator.setAdministratorName(oldAdministratorName);
 			}
 		};
 	}
