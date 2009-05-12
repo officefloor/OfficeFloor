@@ -17,11 +17,13 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionOutputFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.office.OfficeSectionOutputModel;
 import net.officefloor.model.office.OfficeSectionOutputModel.OfficeSectionOutputEvent;
 
@@ -48,6 +50,12 @@ public class OfficeSectionOutputEditPart
 	}
 
 	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getOfficeSectionInput());
+	}
+
+	@Override
 	protected Class<OfficeSectionOutputEvent> getPropertyChangeEventType() {
 		return OfficeSectionOutputEvent.class;
 	}
@@ -56,7 +64,9 @@ public class OfficeSectionOutputEditPart
 	protected void handlePropertyChange(OfficeSectionOutputEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		// TODO handle event changes
+		case CHANGE_OFFICE_SECTION_INPUT:
+			this.refreshSourceConnections();
+			break;
 		}
 	}
 

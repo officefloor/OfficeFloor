@@ -16,37 +16,20 @@
  */
 package net.officefloor.eclipse.skin.office;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.office.AdministratorModel;
-
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.IFigure;
+import net.officefloor.model.office.OfficeSectionResponsibilityModel;
 
 /**
- * {@link Figure} for the {@link AdministratorModel}.
+ * Context for the {@link OfficeSectionResponsibilityFigure}.
  * 
  * @author Daniel
  */
-public interface AdministratorFigure extends OfficeFloorFigure {
+public interface OfficeSectionResponsibilityFigureContext {
 
 	/**
-	 * Indicates a change in name of the {@link AdministratorModel}.
+	 * Obtains the name of the {@link OfficeSectionResponsibilityModel}.
 	 * 
-	 * @param administratorName
-	 *            Name to display for the {@link AdministratorModel}.
+	 * @return {@link OfficeSectionResponsibilityModel} name.
 	 */
-	void setAdministratorName(String administratorName);
-
-	/**
-	 * <p>
-	 * Obtains the {@link IFigure} containing the {@link AdministratorModel}
-	 * name.
-	 * <p>
-	 * This is to allow placement of the editor in changing the
-	 * {@link AdministratorModel} name.
-	 * 
-	 * @return {@link IFigure} containing the {@link AdministratorModel} name.
-	 */
-	IFigure getAdministratorNameFigure();
+	String getOfficeSectionResponsibilityName();
 
 }

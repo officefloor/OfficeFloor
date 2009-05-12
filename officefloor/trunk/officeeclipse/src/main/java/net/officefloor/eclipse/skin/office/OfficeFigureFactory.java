@@ -21,15 +21,21 @@ import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.model.office.AdministratorModel;
 import net.officefloor.model.office.DutyModel;
 import net.officefloor.model.office.ExternalManagedObjectModel;
+import net.officefloor.model.office.OfficeEscalationModel;
 import net.officefloor.model.office.OfficeModel;
 import net.officefloor.model.office.OfficeSectionInputModel;
 import net.officefloor.model.office.OfficeSectionModel;
 import net.officefloor.model.office.OfficeSectionObjectModel;
+import net.officefloor.model.office.OfficeSectionObjectToExternalManagedObjectModel;
 import net.officefloor.model.office.OfficeSectionOutputModel;
+import net.officefloor.model.office.OfficeSectionOutputToOfficeSectionInputModel;
+import net.officefloor.model.office.OfficeSectionResponsibilityModel;
+import net.officefloor.model.office.OfficeSectionResponsibilityToOfficeTeamModel;
 import net.officefloor.model.office.OfficeTaskModel;
 import net.officefloor.model.office.OfficeTeamModel;
 
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.PolylineConnection;
 
 /**
  * Factory to create the {@link IFigure} instances for the skin of the
@@ -137,5 +143,66 @@ public interface OfficeFigureFactory {
 	 */
 	OfficeSectionObjectFigure createOfficeSectionObjectFigure(
 			OfficeSectionObjectFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeEscalationModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeEscalationFigureContext}.
+	 * @return {@link OfficeEscalationFigure}.
+	 */
+	OfficeEscalationFigure createOfficeEscalationFigure(
+			OfficeEscalationFigureContext context);
+
+	/**
+	 * Creates the {@link OfficeFloorFigure} for the
+	 * {@link OfficeSectionResponsibilityModel}.
+	 * 
+	 * @param context
+	 *            {@link OfficeSectionResponsibilityFigureContext}.
+	 * @return {@link OfficeSectionResponsibilityFigure}.
+	 */
+	OfficeSectionResponsibilityFigure createOfficeSectionResponsibilityFigure(
+			OfficeSectionResponsibilityFigureContext context);
+
+	/**
+	 * Decorates the {@link OfficeSectionObjectToExternalManagedObjectModel}
+	 * figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeSectionObjectToExternalManagedObjectFigureContext}
+	 */
+	void decorateOfficeSectionObjectToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeSectionObjectToExternalManagedObjectFigureContext context);
+
+	/**
+	 * Decorates the {@link OfficeSectionOutputToOfficeSectionInputModel}
+	 * figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeSectionOutputToOfficeSectionInputFigureContext}.
+	 */
+	void decorateOfficeSectionOutputToOfficeSectionInput(
+			PolylineConnection figure,
+			OfficeSectionOutputToOfficeSectionInputFigureContext context);
+
+	/**
+	 * Decorates the {@link OfficeSectionResponsibilityToOfficeTeamModel}
+	 * figure.
+	 * 
+	 * @param figure
+	 *            {@link IFigure} to decorate.
+	 * @param context
+	 *            {@link OfficeSectionResponsibilityToOfficeTeamFigureContext}.
+	 */
+	void decorateOfficeSectionResponsibilityToOfficeTeam(
+			PolylineConnection figure,
+			OfficeSectionResponsibilityToOfficeTeamFigureContext context);
 
 }

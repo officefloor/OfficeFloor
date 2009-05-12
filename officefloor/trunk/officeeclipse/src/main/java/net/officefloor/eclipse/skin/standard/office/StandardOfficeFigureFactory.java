@@ -16,18 +16,28 @@
  */
 package net.officefloor.eclipse.skin.standard.office;
 
+import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.draw2d.PolylineDecoration;
+
 import net.officefloor.eclipse.skin.office.AdministratorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
 import net.officefloor.eclipse.skin.office.DutyFigure;
 import net.officefloor.eclipse.skin.office.DutyFigureContext;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigure;
 import net.officefloor.eclipse.skin.office.ExternalManagedObjectFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeEscalationFigure;
+import net.officefloor.eclipse.skin.office.OfficeEscalationFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionInputFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionInputFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionObjectToExternalManagedObjectFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeSectionOutputFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionOutputFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionOutputToOfficeSectionInputFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityFigure;
+import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityFigureContext;
+import net.officefloor.eclipse.skin.office.OfficeSectionResponsibilityToOfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.office.OfficeTeamFigure;
 import net.officefloor.eclipse.skin.office.OfficeTeamFigureContext;
 import net.officefloor.eclipse.skin.office.TaskAdministrationJoinPointFigure;
@@ -100,6 +110,40 @@ public class StandardOfficeFigureFactory implements OfficeFigureFactory {
 	public OfficeSectionObjectFigure createOfficeSectionObjectFigure(
 			OfficeSectionObjectFigureContext context) {
 		return new StandardOfficeSectionObjectFigure(context);
+	}
+
+	@Override
+	public OfficeEscalationFigure createOfficeEscalationFigure(
+			OfficeEscalationFigureContext context) {
+		return new StandardOfficeEscalationFigure(context);
+	}
+
+	@Override
+	public OfficeSectionResponsibilityFigure createOfficeSectionResponsibilityFigure(
+			OfficeSectionResponsibilityFigureContext context) {
+		return new StandardOficeSectionResponsibilityFigure(context);
+	}
+
+	@Override
+	public void decorateOfficeSectionObjectToExternalManagedObjectFigure(
+			PolylineConnection figure,
+			OfficeSectionObjectToExternalManagedObjectFigureContext context) {
+		// Leave as default line
+	}
+
+	@Override
+	public void decorateOfficeSectionOutputToOfficeSectionInput(
+			PolylineConnection figure,
+			OfficeSectionOutputToOfficeSectionInputFigureContext context) {
+		// Provide arrow
+		figure.setTargetDecoration(new PolylineDecoration());
+	}
+
+	@Override
+	public void decorateOfficeSectionResponsibilityToOfficeTeam(
+			PolylineConnection figure,
+			OfficeSectionResponsibilityToOfficeTeamFigureContext context) {
+		// Leave as default line
 	}
 
 }
