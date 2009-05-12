@@ -14,7 +14,7 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.extension.worksource.clazz;
+package net.officefloor.eclipse.extension.managedobjectsource.clazz;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -23,54 +23,52 @@ import net.officefloor.eclipse.common.dialog.input.ClasspathFilter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.InputListener;
 import net.officefloor.eclipse.common.dialog.input.impl.ClasspathSelectionInput;
-import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
-import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
-import net.officefloor.eclipse.extension.classpath.TypeClasspathProvision;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtension;
-import net.officefloor.eclipse.extension.worksource.WorkSourceExtensionContext;
-import net.officefloor.plugin.work.clazz.ClassWork;
-import net.officefloor.plugin.work.clazz.ClassWorkSource;
+import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
+import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
+import net.officefloor.eclipse.util.EclipseUtil;
+import net.officefloor.frame.api.build.Indexed;
+import net.officefloor.plugin.managedobject.clazz.ClassManagedObjectSource;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 /**
- * {@link WorkSourceExtension} for the {@link ClassWorkSource}.
+ * {@link ManagedObjectSourceExtension} for {@link ClassManagedObjectSource}.
  * 
  * @author Daniel
  */
-public class ClassWorkSourceExtension implements
-		WorkSourceExtension<ClassWork, ClassWorkSource>,
-		ExtensionClasspathProvider {
+public class ClassManagedObjectSourceExtension
+		implements
+		ManagedObjectSourceExtension<Indexed, Indexed, ClassManagedObjectSource> {
 
 	/*
-	 * =================== WorkSourceExtension ==========================
+	 * ================ ManagedObjectSourceExtension =========================
 	 */
 
 	@Override
-	public Class<ClassWorkSource> getWorkSourceClass() {
-		return ClassWorkSource.class;
+	public Class<ClassManagedObjectSource> getManagedObjectSourceClass() {
+		return ClassManagedObjectSource.class;
 	}
 
 	@Override
-	public String getWorkSourceLabel() {
+	public String getManagedObjectSourceLabel() {
 		return "Class";
 	}
 
 	@Override
 	public void createControl(Composite page,
-			final WorkSourceExtensionContext context) {
+			final ManagedObjectSourceExtensionContext context) {
 
 		// Specify layout
 		page.setLayout(new GridLayout(1, false));
 
 		// Obtain the class name property
 		Property property = context.getPropertyList().getProperty(
-				ClassWorkSource.CLASS_NAME_PROPERTY_NAME);
+				ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME);
 		if (property == null) {
 			property = context.getPropertyList().addProperty(
-					ClassWorkSource.CLASS_NAME_PROPERTY_NAME);
+					ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME);
 		}
 		final Property classNameProperty = property;
 
@@ -102,11 +100,11 @@ public class ClassWorkSourceExtension implements
 	}
 
 	@Override
-	public String getSuggestedWorkName(PropertyList properties) {
+	public String getSuggestedManagedObjectSourceName(PropertyList properties) {
 
 		// Obtain the class name property
 		Property classNameProperty = properties
-				.getProperty(ClassWorkSource.CLASS_NAME_PROPERTY_NAME);
+				.getProperty(ClassManagedObjectSource.CLASS_NAME_PROPERTY_NAME);
 		if (classNameProperty == null) {
 			// No suggestion as no class name
 			return null;
@@ -114,7 +112,7 @@ public class ClassWorkSourceExtension implements
 
 		// Ensure have class name
 		String className = classNameProperty.getValue();
-		if ((className == null) || (className.trim().length() == 0)) {
+		if (EclipseUtil.isBlank(className)) {
 			return null;
 		}
 
@@ -124,16 +122,6 @@ public class ClassWorkSourceExtension implements
 
 		// Return the simple class name
 		return simpleClassName;
-	}
-
-	/*
-	 * ======================= ExtensionClasspathProvider ======================
-	 */
-
-	@Override
-	public ClasspathProvision[] getClasspathProvisions() {
-		return new ClasspathProvision[] { new TypeClasspathProvision(
-				ClassWorkSource.class) };
 	}
 
 }

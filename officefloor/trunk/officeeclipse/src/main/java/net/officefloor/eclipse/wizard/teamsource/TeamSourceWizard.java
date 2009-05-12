@@ -312,6 +312,7 @@ public class TeamSourceWizard extends Wizard implements
 
 	@Override
 	public void setErrorMessage(String message) {
+		this.listingPage.setErrorMessage(message);
 		if (this.currentPropertiesPage != null) {
 			this.currentPropertiesPage.setErrorMessage(message);
 		}

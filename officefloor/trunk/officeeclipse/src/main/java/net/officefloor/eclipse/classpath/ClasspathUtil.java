@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.officefloor.eclipse.OfficeFloorPluginFailure;
 import net.officefloor.eclipse.classpathcontainer.OfficeFloorClasspathContainer;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.classpath.ClasspathProvision;
@@ -53,6 +52,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JarEntryResource;
 import org.eclipse.jdt.internal.core.NonJavaResource;
+import org.eclipse.jface.dialogs.MessageDialog;
 
 /**
  * Utility methods for working with class path.
@@ -161,9 +161,7 @@ public class ClasspathUtil {
 	 * 
 	 * @param provision
 	 *            {@link ClasspathProvision}.
-	 * @return {@link IClasspathEntry}.
-	 * @throws Exception
-	 *             If fails to create the {@link IClasspathEntry}.
+	 * @return {@link IClasspathEntry} or <code>null</code> if fails.
 	 */
 	public static IClasspathEntry createClasspathEntry(
 			ClasspathProvision provision) throws Exception {
@@ -182,9 +180,10 @@ public class ClasspathUtil {
 			// Unknown provision type
 			String provisionTypeName = (provision == null ? null : provision
 					.getClass().getName());
-			throw new OfficeFloorPluginFailure("Unknown "
+			MessageDialog.openWarning(null, "Unknown", "Unknown "
 					+ ClasspathProvision.class.getSimpleName() + " type "
 					+ provisionTypeName);
+			return null;
 		}
 	}
 
@@ -422,8 +421,9 @@ public class ClasspathUtil {
 
 		} else {
 			// Unhandled type
-			throw new OfficeFloorPluginFailure("Unhandled parent type "
+			MessageDialog.openWarning(null, "Unknown", "Unhandled parent type "
 					+ parent.getClass().getName());
+			return new Object[0];
 		}
 	}
 
@@ -480,12 +480,15 @@ public class ClasspathUtil {
 
 			} else {
 				// Unhandled resource
-				throw new OfficeFloorPluginFailure("Unhandled resource type "
-						+ resource.getClass().getName());
+				MessageDialog.openWarning(null, "Unhandled resource type",
+						"Unhandled resource type "
+								+ resource.getClass().getName());
+				return new Object[0];
 			}
 
 		} catch (CoreException ex) {
-			throw new OfficeFloorPluginFailure(ex);
+			MessageDialog.openError(null, "Error", ex.getMessage());
+			return new Object[0];
 		}
 	}
 
@@ -539,7 +542,7 @@ public class ClasspathUtil {
 
 			} else {
 				// Unhandled java type
-				throw new OfficeFloorPluginFailure(
+				MessageDialog.openWarning(null, "Unhandled java element type",
 						"Unhandled java element type "
 								+ javaElement.getClass().getName());
 			}
@@ -548,7 +551,8 @@ public class ClasspathUtil {
 			return children.toArray();
 
 		} catch (CoreException ex) {
-			throw new OfficeFloorPluginFailure(ex);
+			MessageDialog.openError(null, "Error", ex.getMessage());
+			return new Object[0];
 		}
 	}
 
@@ -587,7 +591,8 @@ public class ClasspathUtil {
 			}
 
 		} catch (CoreException ex) {
-			throw new OfficeFloorPluginFailure(ex);
+			MessageDialog.openError(null, "Error", ex.getMessage());
+			return project; // just return the project
 		}
 	}
 

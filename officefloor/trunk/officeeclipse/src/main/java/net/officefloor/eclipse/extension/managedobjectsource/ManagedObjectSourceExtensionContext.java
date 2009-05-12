@@ -16,13 +16,13 @@
  */
 package net.officefloor.eclipse.extension.managedobjectsource;
 
-import java.util.List;
-
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.properties.Property;
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Shell;
 
 /**
  * Context for the {@link ManagedObjectSourceExtension}.
@@ -40,12 +40,33 @@ public interface ManagedObjectSourceExtensionContext {
 	void setTitle(String title);
 
 	/**
-	 * Notifies of a change to the properties.
+	 * <p>
+	 * Obtains the {@link PropertyList}. All changes to {@link Property}
+	 * instances for the {@link ManagedObjectSource} are to be done on this
+	 * {@link PropertyList}.
+	 * <p>
+	 * The {@link PropertyList} may be in any state:
+	 * <ol>
+	 * <li>no value {@link PropertyList} populated from the
+	 * {@link ManagedObjectSourceSpecification} (creating a
+	 * {@link ManagedObjectSource})</li>
+	 * <li>any changed state based on editing of the {@link ManagedObjectSource}
+	 * (editing {@link ManagedObjectSource})</li>
+	 * </ol>
 	 * 
-	 * @param properties
-	 *            {@link InitiateProperty} instances.
+	 * @return {@link PropertyList}.
 	 */
-	void notifyPropertiesChanged(List<InitiateProperty> properties);
+	PropertyList getPropertyList();
+
+	/**
+	 * <p>
+	 * Notifies of a change to the {@link PropertyList}.
+	 * <p>
+	 * This allows for to report issues in attempting to source the
+	 * {@link ManagedObjectType} from the {@link ManagedObjectSource} with the
+	 * {@link PropertyList}.
+	 */
+	void notifyPropertiesChanged();
 
 	/**
 	 * Specifies an error message. Calling this after notifying of property
@@ -63,13 +84,5 @@ public interface ManagedObjectSourceExtensionContext {
 	 * @return {@link IProject} that is adding the {@link ManagedObjectSource}.
 	 */
 	IProject getProject();
-
-	/**
-	 * Obtains the {@link Shell} to enable {@link MessageDialog} or other
-	 * graphics requiring it.
-	 * 
-	 * @return {@link Shell}.
-	 */
-	Shell getShell();
 
 }

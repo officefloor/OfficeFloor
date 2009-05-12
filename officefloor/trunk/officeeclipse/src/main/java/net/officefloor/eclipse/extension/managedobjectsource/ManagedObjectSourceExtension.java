@@ -16,13 +16,10 @@
  */
 package net.officefloor.eclipse.extension.managedobjectsource;
 
-import java.util.List;
-
+import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.eclipse.extension.ExtensionUtil;
 import net.officefloor.eclipse.extension.classpath.ExtensionClasspathProvider;
 import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceProperty;
-import net.officefloor.frame.spi.managedobject.source.ManagedObjectSourceSpecification;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -35,7 +32,7 @@ import org.eclipse.swt.widgets.Control;
  * 
  * @see ExtensionClasspathProvider
  */
-public interface ManagedObjectSourceExtension {
+public interface ManagedObjectSourceExtension<D extends Enum<D>, F extends Enum<F>, S extends ManagedObjectSource<D, F>> {
 
 	/**
 	 * Extension ID.
@@ -50,18 +47,7 @@ public interface ManagedObjectSourceExtension {
 	 * @return Class of the {@link ManagedObjectSource} being enriched in its
 	 *         usage.
 	 */
-	Class<? extends ManagedObjectSource<?, ?>> getManagedObjectSourceClass();
-
-	/**
-	 * Flags if the {@link ManagedObjectSource} represented by this
-	 * {@link ManagedObjectSourceExtension} is usable. <code>false</code>
-	 * indicates the {@link ManagedObjectSource} is likely a mock/test that
-	 * should not be used.
-	 * 
-	 * @return <code>true</code> if the {@link ManagedObjectSource} may be used
-	 *         in an application.
-	 */
-	boolean isUsable();
+	Class<S> getManagedObjectSourceClass();
 
 	/**
 	 * Obtains the display name. This is a descriptive name that can be used
@@ -69,7 +55,7 @@ public interface ManagedObjectSourceExtension {
 	 * 
 	 * @return Display name.
 	 */
-	String getDisplayName();
+	String getManagedObjectSourceLabel();
 
 	/**
 	 * Populates the input page with the necessary {@link Control} instances to
@@ -79,24 +65,19 @@ public interface ManagedObjectSourceExtension {
 	 * @param page
 	 *            Page to be setup for obtaining the properties.
 	 * @param context
-	 *            {@link ManagedObjectSourceExtensionContext} to notify of
-	 *            changes to the properties.
-	 * @return Initial set of properties. Providing <code>null</code> or an
-	 *         empty list will initiate on the
-	 *         {@link ManagedObjectSourceProperty} instances obtained from the
-	 *         {@link ManagedObjectSourceSpecification}.
+	 *            {@link ManagedObjectSourceExtensionContext}.
 	 */
-	List<InitiateProperty> createControl(Composite page,
+	void createControl(Composite page,
 			ManagedObjectSourceExtensionContext context);
 
 	/**
 	 * Obtains the suggested name of the {@link ManagedObjectSource}.
 	 * 
 	 * @param properties
-	 *            Listing of populated {@link InitiateProperty} instances.
+	 *            Populate {@link PropertyList}.
 	 * @return Suggested {@link ManagedObjectSource} name or <code>null</code>
 	 *         if no suggestion.
 	 */
-	String getSuggestedManagedObjectSourceName(List<InitiateProperty> properties);
+	String getSuggestedManagedObjectSourceName(PropertyList properties);
 
 }
