@@ -16,65 +16,56 @@
  */
 package net.officefloor.eclipse.officefloor.operations;
 
-import net.officefloor.eclipse.common.action.AbstractOperation;
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
+import net.officefloor.eclipse.wizard.teamsource.TeamInstance;
+import net.officefloor.eclipse.wizard.teamsource.TeamSourceWizard;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorModel;
+import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 
 /**
  * Adds a {@link TeamModel} to the {@link OfficeFloorModel}.
  * 
  * @author Daniel
  */
-public class AddOfficeFloorTeamOperation extends AbstractOperation<OfficeFloorEditPart> {
+public class AddOfficeFloorTeamOperation extends
+		AbstractOfficeFloorChangeOperation<OfficeFloorEditPart> {
 
 	/**
 	 * Initiate.
+	 * 
+	 * @param officeFloorChanges
+	 *            {@link OfficeFloorChanges}.
 	 */
-	public AddOfficeFloorTeamOperation() {
-		super("Add team", OfficeFloorEditPart.class);
+	public AddOfficeFloorTeamOperation(OfficeFloorChanges officeFloorChanges) {
+		super("Add team", OfficeFloorEditPart.class, officeFloorChanges);
 	}
 
+	/*
+	 * =============== AbstractOfficeFloorChangeOperation ====================
+	 */
+
 	@Override
-	protected void perform(Context context) {
-//
-//		// Obtain the edit part
-//		final OfficeFloorEditPart editPart = context.getEditPart();
-//
-//		// Create the Team
-//		TeamModel team = null;
-//		try {
-//			AbstractOfficeFloorEditor<?, ?> editor = editPart.getEditor();
-//			IProject project = ProjectConfigurationContext.getProject(editor
-//					.getEditorInput());
-//			TeamCreateDialog dialog = new TeamCreateDialog(editor.getSite()
-//					.getShell(), project);
-//			team = dialog.createTeam();
-//		} catch (Exception ex) {
-//			editPart.messageError(ex);
-//		}
-//
-//		// Ensure created
-//		if (team == null) {
-//			return;
-//		}
-//
-//		// Set location
-//		context.positionModel(team);
-//
-//		// Make changes
-//		final TeamModel newTeam = team;
-//		context.execute(new OfficeFloorCommand() {
-//
-//			@Override
-//			protected void doCommand() {
-//				editPart.getCastedModel().addTeam(newTeam);
-//			}
-//
-//			@Override
-//			protected void undoCommand() {
-//				editPart.getCastedModel().removeTeam(newTeam);
-//			}
-//		});
+	protected Change<?> getChange(OfficeFloorChanges changes, Context context) {
+
+		// Obtain the team instance
+		TeamInstance team = TeamSourceWizard.getTeamInstance(context
+				.getEditPart(), null);
+		if (team == null) {
+			return null; // must have team
+		}
+
+		// Create change to add the team
+		Change<OfficeFloorTeamModel> change = changes.addOfficeFloorTeam(team
+				.getTeamName(), team.getTeamSourceClassName(), team
+				.getPropertylist(), team.getTeamType());
+
+		// Position the team
+		context.positionModel(change.getTarget());
+
+		// Return change to add the team
+		return change;
 	}
 
 }
