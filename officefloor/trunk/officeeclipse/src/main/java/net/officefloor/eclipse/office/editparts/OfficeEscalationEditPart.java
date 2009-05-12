@@ -17,65 +17,56 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
-import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.eclipse.skin.office.OfficeSectionInputFigureContext;
-import net.officefloor.model.office.OfficeSectionInputModel;
-import net.officefloor.model.office.OfficeSectionInputModel.OfficeSectionInputEvent;
+import net.officefloor.eclipse.skin.office.OfficeEscalationFigureContext;
+import net.officefloor.model.office.OfficeEscalationModel;
+import net.officefloor.model.office.OfficeEscalationModel.OfficeEscalationEvent;
 
 import org.eclipse.gef.EditPart;
 
 /**
- * {@link EditPart} for the {@link OfficeSectionInputModel}.
+ * {@link EditPart} for the {@link OfficeEscalationModel}.
  * 
  * @author Daniel
  */
-public class OfficeSectionInputEditPart
+public class OfficeEscalationEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeSectionInputModel, OfficeSectionInputEvent, OfficeFloorFigure>
-		implements OfficeSectionInputFigureContext {
+		AbstractOfficeFloorEditPart<OfficeEscalationModel, OfficeEscalationEvent, OfficeFloorFigure>
+		implements OfficeEscalationFigureContext {
 
 	/*
-	 * ================= AbstractOfficeFloorEditPart ===========================
+	 * ==================== AbstractOfficeFloorEditPart =======================
 	 */
 
 	@Override
 	protected OfficeFloorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
-				.createOfficeSectionInputFigure(this);
+				.createOfficeEscalationFigure(this);
 	}
 
 	@Override
-	protected void populateConnectionTargetModels(List<Object> models) {
-		models.addAll(this.getCastedModel().getOfficeSectionOutputs());
+	protected Class<OfficeEscalationEvent> getPropertyChangeEventType() {
+		return OfficeEscalationEvent.class;
 	}
 
 	@Override
-	protected Class<OfficeSectionInputEvent> getPropertyChangeEventType() {
-		return OfficeSectionInputEvent.class;
-	}
-
-	@Override
-	protected void handlePropertyChange(OfficeSectionInputEvent property,
+	protected void handlePropertyChange(OfficeEscalationEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		case ADD_OFFICE_SECTION_OUTPUT:
-		case REMOVE_OFFICE_SECTION_OUTPUT:
-			this.refreshTargetConnections();
-			break;
+		// TODO handle property changes
 		}
 	}
 
 	/*
-	 * ==================== OfficeSectionInputFigureContext ====================
+	 * ================== OfficeEscalationFigureContext ========================
 	 */
 
 	@Override
-	public String getOfficeSectionInputName() {
-		return this.getCastedModel().getOfficeSectionInputName();
+	public String getOfficeEscalationTypeName() {
+		return this.getCastedModel().getEscalationType();
 	}
 
 }

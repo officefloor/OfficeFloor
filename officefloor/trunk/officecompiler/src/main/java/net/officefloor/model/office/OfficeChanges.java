@@ -20,6 +20,7 @@ import net.officefloor.compile.administrator.AdministratorType;
 import net.officefloor.compile.properties.PropertyList;
 import net.officefloor.compile.spi.office.OfficeSection;
 import net.officefloor.compile.spi.section.source.SectionSource;
+import net.officefloor.frame.api.escalate.Escalation;
 import net.officefloor.frame.spi.administration.source.AdministratorSource;
 import net.officefloor.model.change.Change;
 
@@ -172,5 +173,145 @@ public interface OfficeChanges {
 	 */
 	Change<AdministratorModel> renameAdministrator(
 			AdministratorModel administrator, String newAdministratorName);
+
+	/**
+	 * Adds an {@link OfficeEscalationModel} to the {@link OfficeModel}.
+	 * 
+	 * @param escalationType
+	 *            Type of {@link Escalation}.
+	 * @return {@link Change} to add the {@link OfficeEscalationModel}.
+	 */
+	Change<OfficeEscalationModel> addOfficeEscalation(String escalationType);
+
+	/**
+	 * Removes the {@link OfficeEscalationModel}.
+	 * 
+	 * @param officeEscalation
+	 *            {@link OfficeEscalationModel} to remove.
+	 * @return {@link Change} to remove the {@link OfficeEscalationModel}.
+	 */
+	Change<OfficeEscalationModel> removeOfficeEscalation(
+			OfficeEscalationModel officeEscalation);
+
+	/**
+	 * Adds a {@link OfficeSectionResponsibilityModel} to the
+	 * {@link OfficeSectionModel}.
+	 * 
+	 * @param section
+	 *            {@link OfficeSectionModel} to receive the added
+	 *            {@link OfficeSectionResponsibilityModel}.
+	 * @param officeSectionResponsibilityName
+	 *            Name of the {@link OfficeSectionResponsibilityModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeSectionResponsibilityModel}.
+	 */
+	Change<OfficeSectionResponsibilityModel> addOfficeSectionResponsibility(
+			OfficeSectionModel section, String officeSectionResponsibilityName);
+
+	/**
+	 * Removes the {@link OfficeSectionResponsibilityModel}.
+	 * 
+	 * @param officeSectionResponsibility
+	 *            {@link OfficeSectionResponsibilityModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeSectionResponsibilityModel}.
+	 */
+	Change<OfficeSectionResponsibilityModel> removeOfficeSectionResponsibility(
+			OfficeSectionResponsibilityModel officeSectionResponsibility);
+
+	/**
+	 * Rename the {@link OfficeSectionResponsibilityModel}.
+	 * 
+	 * @param officeSectionResponsibility
+	 *            {@link OfficeSectionResponsibilityModel} to rename.
+	 * @param newOfficeSectionResponsibilityName
+	 *            New name for the {@link OfficeSectionResponsibilityModel}.
+	 * @return {@link Change} to rename the
+	 *         {@link OfficeSectionResponsibilityModel}.
+	 */
+	Change<OfficeSectionResponsibilityModel> renameOfficeSectionResponsibility(
+			OfficeSectionResponsibilityModel officeSectionResponsibility,
+			String newOfficeSectionResponsibilityName);
+
+	/**
+	 * Links the {@link OfficeSectionObjectModel} to the
+	 * {@link ExternalManagedObjectModel}.
+	 * 
+	 * @param officeSectionObject
+	 *            {@link OfficeSectionObjectModel}.
+	 * @param externalManagedObject
+	 *            {@link ExternalManagedObjectModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeSectionObjectToExternalManagedObjectModel}.
+	 */
+	Change<OfficeSectionObjectToExternalManagedObjectModel> linkOfficeSectionObjectToExternalManagedObject(
+			OfficeSectionObjectModel officeSectionObject,
+			ExternalManagedObjectModel externalManagedObject);
+
+	/**
+	 * Removes the {@link OfficeSectionObjectToExternalManagedObjectModel}.
+	 * 
+	 * @param officeSectionObjectToExternalManagedObject
+	 *            {@link OfficeSectionObjectToExternalManagedObjectModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeSectionObjectToExternalManagedObjectModel}.
+	 */
+	Change<OfficeSectionObjectToExternalManagedObjectModel> removeOfficeSectionObjectToExternalManagedObject(
+			OfficeSectionObjectToExternalManagedObjectModel officeSectionObjectToExternalManagedObject);
+
+	/**
+	 * Links the {@link OfficeSectionOutputModel} to the
+	 * {@link OfficeSectionInputModel}.
+	 * 
+	 * @param officeSectionOutput
+	 *            {@link OfficeSectionOutputModel}.
+	 * @param officeSectionInput
+	 *            {@link OfficeSectionInputModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeSectionOutputToOfficeSectionInputModel}.
+	 */
+	Change<OfficeSectionOutputToOfficeSectionInputModel> linkOfficeSectionOutputToOfficeSectionInput(
+			OfficeSectionOutputModel officeSectionOutput,
+			OfficeSectionInputModel officeSectionInput);
+
+	/**
+	 * Removes the {@link OfficeSectionOutputToOfficeSectionInputModel}.
+	 * 
+	 * @param officeSectionOutputToOfficeSectionInput
+	 *            {@link OfficeSectionOutputToOfficeSectionInputModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeSectionOutputToOfficeSectionInputModel}.
+	 */
+	Change<OfficeSectionOutputToOfficeSectionInputModel> removeOfficeSectionOutputToOfficeSectionInput(
+			OfficeSectionOutputToOfficeSectionInputModel officeSectionOutputToOfficeSectionInput);
+
+	/**
+	 * Links the {@link OfficeSectionResponsibilityModel} to the
+	 * {@link OfficeTeamModel}.
+	 * 
+	 * @param officeSectionResponsibility
+	 *            {@link OfficeSectionResponsibilityModel}.
+	 * @param officeTeam
+	 *            {@link OfficeTeamModel}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeSectionResponsibilityToOfficeTeamModel}.
+	 */
+	Change<OfficeSectionResponsibilityToOfficeTeamModel> linkOfficeSectionResponsibilityToOfficeTeam(
+			OfficeSectionResponsibilityModel officeSectionResponsibility,
+			OfficeTeamModel officeTeam);
+
+	/**
+	 * Removes the {@link OfficeSectionResponsibilityToOfficeTeamModel}.
+	 * 
+	 * @param officeSectionResponsibilityToOfficeTeam
+	 *            {@link OfficeSectionResponsibilityToOfficeTeamModel} to
+	 *            remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeSectionResponsibilityToOfficeTeamModel}.
+	 */
+	Change<OfficeSectionResponsibilityToOfficeTeamModel> removeOfficeSectionResponsibilityToOfficeTeam(
+			OfficeSectionResponsibilityToOfficeTeamModel officeSectionResponsibilityToOfficeTeam);
 
 }

@@ -17,11 +17,13 @@
 package net.officefloor.eclipse.office.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionObjectFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.office.OfficeSectionObjectModel;
 import net.officefloor.model.office.OfficeSectionObjectModel.OfficeSectionObjectEvent;
 
@@ -48,6 +50,12 @@ public class OfficeSectionObjectEditPart
 	}
 
 	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getExternalManagedObject());
+	}
+
+	@Override
 	protected Class<OfficeSectionObjectEvent> getPropertyChangeEventType() {
 		return OfficeSectionObjectEvent.class;
 	}
@@ -56,7 +64,9 @@ public class OfficeSectionObjectEditPart
 	protected void handlePropertyChange(OfficeSectionObjectEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-
+		case CHANGE_EXTERNAL_MANAGED_OBJECT:
+			this.refreshSourceConnections();
+			break;
 		}
 	}
 

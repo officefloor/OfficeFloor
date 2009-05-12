@@ -21,11 +21,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.office.AdministratorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.office.AdministratorModel;
+import net.officefloor.model.office.OfficeChanges;
 import net.officefloor.model.office.AdministratorModel.AdministratorEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,11 +40,11 @@ import org.eclipse.gef.EditPart;
  */
 public class AdministratorEditPart
 		extends
-		AbstractOfficeFloorEditPart<AdministratorModel, AdministratorEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<AdministratorModel, AdministratorEvent, AdministratorFigure>
 		implements AdministratorFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected AdministratorFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFigureFactory()
 				.createAdministratorFigure(this);
 	}
@@ -59,6 +64,33 @@ public class AdministratorEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<AdministratorModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<OfficeChanges, AdministratorModel>() {
+					@Override
+					public String getInitialValue() {
+						return AdministratorEditPart.this.getCastedModel()
+								.getAdministratorName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return AdministratorEditPart.this
+								.getOfficeFloorFigure()
+								.getAdministratorNameFigure();
+					}
+
+					@Override
+					public Change<AdministratorModel> createChange(
+							OfficeChanges changes, AdministratorModel target,
+							String newValue) {
+						return changes.renameAdministrator(target, newValue);
+					}
+				});
+	}
+
+	@Override
 	protected Class<AdministratorEvent> getPropertyChangeEventType() {
 		return AdministratorEvent.class;
 	}
@@ -67,9 +99,13 @@ public class AdministratorEditPart
 	protected void handlePropertyChange(AdministratorEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_ADMINISTRATOR_NAME:
+			this.getOfficeFloorFigure().setAdministratorName(
+					this.getCastedModel().getAdministratorName());
+			break;
 		case ADD_DUTY:
 		case REMOVE_DUTY:
-			AdministratorEditPart.this.refreshChildren();
+			this.refreshChildren();
 			break;
 		// case ADD_MANAGED_OBJECT:
 		// case REMOVE_MANAGED_OBJECT:

@@ -23,10 +23,13 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.office.AdministratorModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -38,6 +41,11 @@ import org.eclipse.swt.graphics.Color;
  */
 public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 		implements AdministratorFigure {
+
+	/**
+	 * {@link Label} containing the {@link AdministratorModel} name.
+	 */
+	private final Label administratorName;
 
 	/**
 	 * Initiate.
@@ -58,8 +66,8 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 		ConnectorFigure team = new ConnectorFigure(ConnectorDirection.WEST,
 				ColorConstants.black);
 		team.setBorder(new MarginBorder(10, 0, 0, 0));
-//		this.registerConnectionAnchor(AdministratorToTeamModel.class, team
-//				.getConnectionAnchor());
+		// this.registerConnectionAnchor(AdministratorToTeamModel.class, team
+		// .getConnectionAnchor());
 		figure.add(team);
 		layout
 				.setConstraint(team, new GridData(0, SWT.BEGINNING, false,
@@ -69,19 +77,34 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 		ContainerFigure administrator = new ContainerFigure(context
 				.getAdministratorName(), administratorColour, 20, false);
 		figure.add(administrator);
+		this.administratorName = administrator.getContainerName();
 
 		// Managed Object connector
 		ConnectorFigure mo = new ConnectorFigure(ConnectorDirection.EAST,
 				ColorConstants.black);
 		mo.setBorder(new MarginBorder(10, 0, 0, 0));
-//		this.registerConnectionAnchor(AdministratorToManagedObjectModel.class,
-//				mo.getConnectionAnchor());
+		// this.registerConnectionAnchor(AdministratorToManagedObjectModel.class,
+		// mo.getConnectionAnchor());
 		figure.add(mo);
 		layout.setConstraint(mo, new GridData(0, SWT.BEGINNING, false, false));
 
 		// Specify the figures
 		this.setFigure(figure);
 		this.setContentPane(administrator.getContentPane());
+	}
+
+	/*
+	 * ===================== AdministratorFigure =========================
+	 */
+
+	@Override
+	public void setAdministratorName(String administratorName) {
+		this.administratorName.setText(administratorName);
+	}
+
+	@Override
+	public IFigure getAdministratorNameFigure() {
+		return this.administratorName;
 	}
 
 }

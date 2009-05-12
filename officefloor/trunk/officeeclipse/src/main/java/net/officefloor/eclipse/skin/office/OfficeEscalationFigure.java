@@ -17,36 +17,12 @@
 package net.officefloor.eclipse.skin.office;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.office.AdministratorModel;
-
-import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.IFigure;
+import net.officefloor.model.office.OfficeEscalationModel;
 
 /**
- * {@link Figure} for the {@link AdministratorModel}.
+ * {@link OfficeFloorFigure} for the {@link OfficeEscalationModel}.
  * 
  * @author Daniel
  */
-public interface AdministratorFigure extends OfficeFloorFigure {
-
-	/**
-	 * Indicates a change in name of the {@link AdministratorModel}.
-	 * 
-	 * @param administratorName
-	 *            Name to display for the {@link AdministratorModel}.
-	 */
-	void setAdministratorName(String administratorName);
-
-	/**
-	 * <p>
-	 * Obtains the {@link IFigure} containing the {@link AdministratorModel}
-	 * name.
-	 * <p>
-	 * This is to allow placement of the editor in changing the
-	 * {@link AdministratorModel} name.
-	 * 
-	 * @return {@link IFigure} containing the {@link AdministratorModel} name.
-	 */
-	IFigure getAdministratorNameFigure();
-
+public interface OfficeEscalationFigure extends OfficeFloorFigure {
 }
