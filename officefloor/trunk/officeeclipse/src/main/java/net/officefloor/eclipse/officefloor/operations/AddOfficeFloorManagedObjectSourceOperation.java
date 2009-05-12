@@ -17,6 +17,8 @@
 package net.officefloor.eclipse.officefloor.operations;
 
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
+import net.officefloor.eclipse.wizard.managedobjectsource.ManagedObjectInstance;
+import net.officefloor.eclipse.wizard.managedobjectsource.ManagedObjectSourceWizard;
 import net.officefloor.model.change.Change;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
@@ -46,9 +48,25 @@ public class AddOfficeFloorManagedObjectSourceOperation extends
 
 	@Override
 	protected Change<?> getChange(OfficeFloorChanges changes, Context context) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractOfficeFloorChangeOperation<OfficeFloorEditPart>.getChange");
+
+		// Obtain the managed object source
+		ManagedObjectInstance mo = ManagedObjectSourceWizard
+				.getManagedObjectInstance(context.getEditPart(), null);
+		if (mo == null) {
+			return null; // must have the managed object
+		}
+
+		// Create change to add the managed object source
+		Change<OfficeFloorManagedObjectSourceModel> change = changes
+				.addOfficeFloorManagedObjectSource(mo.getManagedObjectName(),
+						mo.getManagedObjectSourceClassName(), mo
+								.getPropertylist(), mo.getManagedObjectType());
+
+		// Position the managed object source
+		context.positionModel(change.getTarget());
+
+		// Return the change to add the managed object source
+		return change;
 	}
 
 }

@@ -14,24 +14,39 @@
  *  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, 
  *  MA 02111-1307 USA
  */
-package net.officefloor.eclipse.extension.managedobjectsource.internal;
+package net.officefloor.eclipse.wizard.managedobjectsource;
 
-import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
-import net.officefloor.frame.test.MockManagedObjectSource;
+import net.officefloor.compile.managedobject.ManagedObjectType;
 
 /**
- * {@link ManagedObjectSourceExtension} for the {@link MockManagedObjectSource}.
+ * Context for a {@link ManagedObjectSourceInstance}.
  * 
  * @author Daniel
  */
-public class MockManagedObjectSourceExtension extends
-		AbstractInternalManagedObjectSourceExtension {
+public interface ManagedObjectSourceInstanceContext {
 
 	/**
-	 * Initiate.
+	 * Specifies the title.
+	 * 
+	 * @param title
+	 *            Title.
 	 */
-	public MockManagedObjectSourceExtension() {
-		super(MockManagedObjectSource.class);
-	}
+	void setTitle(String title);
+
+	/**
+	 * Specifies an error message.
+	 * 
+	 * @param message
+	 *            Error message or <code>null</code> to indicate no error.
+	 */
+	void setErrorMessage(String message);
+
+	/**
+	 * Flags if {@link ManagedObjectType} is loaded.
+	 * 
+	 * @param isManagedObjectTypeLoaded
+	 *            <code>true</code> {@link ManagedObjectType} loaded.
+	 */
+	void setManagedObjectTypeLoaded(boolean isManagedObjectTypeLoaded);
 
 }

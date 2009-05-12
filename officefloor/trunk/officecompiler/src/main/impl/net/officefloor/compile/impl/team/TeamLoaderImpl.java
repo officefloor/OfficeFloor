@@ -187,9 +187,10 @@ public class TeamLoaderImpl implements TeamLoader {
 	@Override
 	public <TS extends TeamSource> TeamType loadTeam(Class<TS> teamSourceClass,
 			PropertyList propertyList) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement TeamLoader.loadTeam");
+
+		// TODO test this method (loadTeam)
+
+		return new TeamTypeImpl();
 	}
 
 	/**

@@ -112,7 +112,17 @@ public class PropertyListImpl implements PropertyList {
 		Properties utilProperties = new Properties();
 		for (int i = this.properties.size() - 1; i >= 0; i--) {
 			Property property = this.properties.get(i);
-			utilProperties.setProperty(property.getName(), property.getValue());
+
+			// Ensure have name and value
+			String name = property.getName();
+			if (name == null) {
+				continue; // ignore the property
+			}
+			String value = property.getValue();
+			value = (value == null ? "" : value); // default empty string
+
+			// Add the property
+			utilProperties.setProperty(name, value);
 		}
 		return utilProperties;
 	}

@@ -103,9 +103,7 @@
     </extension>
     <extension
           point="net.officefloor.eclipse.managedobjectsource">
-       <managedobjectsource
-             class="net.officefloor.eclipse.extension.managedobjectsource.internal.MockManagedObjectSourceExtension">
-       </managedobjectsource>
+          <managedobjectsource class="net.officefloor.eclipse.extension.managedobjectsource.clazz.ClassManagedObjectSourceExtension" />
     </extension>
     <extension
           point="net.officefloor.eclipse.sectionsource">
