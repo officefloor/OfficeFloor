@@ -17,7 +17,10 @@
 package net.officefloor.eclipse.officefloor.operations;
 
 import net.officefloor.eclipse.officefloor.editparts.OfficeFloorEditPart;
+import net.officefloor.eclipse.wizard.officesource.OfficeInstance;
+import net.officefloor.eclipse.wizard.officesource.OfficeSourceWizard;
 import net.officefloor.model.change.Change;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorModel;
 
@@ -45,9 +48,25 @@ public class AddDeployedOfficeOperation extends
 
 	@Override
 	protected Change<?> getChange(OfficeFloorChanges changes, Context context) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractOfficeFloorChangeOperation<OfficeFloorEditPart>.getChange");
+
+		// Obtain the office instance
+		OfficeInstance office = OfficeSourceWizard.getOfficeInstance(context
+				.getEditPart(), null);
+		if (office == null) {
+			return null; // must have office
+		}
+
+		// Create change to add the office
+		Change<DeployedOfficeModel> change = changes.addDeployedOffice(office
+				.getOfficeName(), office.getOfficeSourceClassName(), office
+				.getOfficeLocation(), office.getPropertylist(), office
+				.getOfficeType());
+
+		// Position the office
+		context.positionModel(change.getTarget());
+
+		// Return the change to add the office
+		return change;
 	}
 
 }
