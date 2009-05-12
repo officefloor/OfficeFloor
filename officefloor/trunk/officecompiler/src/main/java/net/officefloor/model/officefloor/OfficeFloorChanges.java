@@ -16,7 +16,16 @@
  */
 package net.officefloor.model.officefloor;
 
+import net.officefloor.compile.managedobject.ManagedObjectType;
+import net.officefloor.compile.office.OfficeType;
+import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.compile.spi.office.source.OfficeSource;
+import net.officefloor.compile.team.TeamType;
+import net.officefloor.frame.api.manage.Office;
 import net.officefloor.frame.internal.structure.ManagedObjectScope;
+import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
+import net.officefloor.frame.spi.team.source.TeamSource;
+import net.officefloor.model.change.Change;
 
 /**
  * Changes that can be made to an {@link OfficeFloorModel}.
@@ -42,5 +51,176 @@ public interface OfficeFloorChanges {
 	 * {@link OfficeFloorManagedObjectModel} instances.
 	 */
 	String WORK_MANAGED_OBJECT_SCOPE = ManagedObjectScope.WORK.name();
+
+	/**
+	 * Adds a {@link OfficeFloorTeamModel} to the {@link OfficeFloorModel}.
+	 * 
+	 * @param teamName
+	 *            Name of the {@link OfficeFloorTeamModel}.
+	 * @param teamSourceClassName
+	 *            Class name for the {@link TeamSource}.
+	 * @param propertylist
+	 *            {@link PropertyList}.
+	 * @param teamType
+	 *            {@link TeamType}.
+	 * @return {@link Change} to add the {@link OfficeFloorTeamModel}.
+	 */
+	Change<OfficeFloorTeamModel> addOfficeFloorTeam(String teamName,
+			String teamSourceClassName, PropertyList propertylist,
+			TeamType teamType);
+
+	/**
+	 * Removes the {@link OfficeFloorTeamModel}.
+	 * 
+	 * @param officeFloorTeam
+	 *            {@link OfficeFloorTeamModel} to remove.
+	 * @return {@link Change} to remove the {@link OfficeFloorTeamModel}.
+	 */
+	Change<OfficeFloorTeamModel> removeOfficeFloorTeam(
+			OfficeFloorTeamModel officeFloorTeam);
+
+	/**
+	 * Renames the {@link OfficeFloorTeamModel}.
+	 * 
+	 * @param officeFloorTeam
+	 *            {@link OfficeFloorTeamModel} to rename.
+	 * @param newOfficeFloorTeamName
+	 *            New name for the {@link OfficeFloorTeamModel}.
+	 * @return {@link Change} to rename the {@link OfficeFloorTeamModel}.
+	 */
+	Change<OfficeFloorTeamModel> renameOfficeFloorTeam(
+			OfficeFloorTeamModel officeFloorTeam, String newOfficeFloorTeamName);
+
+	/**
+	 * Adds a {@link DeployedOfficeModel} to the {@link OfficeFloorModel}.
+	 * 
+	 * @param officeName
+	 *            Name of the {@link DeployedOfficeModel}.
+	 * @param officeSourceClassName
+	 *            Class name of the {@link OfficeSource}.
+	 * @param officeLocation
+	 *            Location of the {@link Office}.
+	 * @param propertyList
+	 *            {@link PropertyList}.
+	 * @param officeType
+	 *            {@link OfficeType}.
+	 * @return {@link Change} to add the {@link DeployedOfficeModel}.
+	 */
+	Change<DeployedOfficeModel> addDeployedOffice(String officeName,
+			String officeSourceClassName, String officeLocation,
+			PropertyList propertyList, OfficeType officeType);
+
+	/**
+	 * Removes the {@link DeployedOfficeModel}.
+	 * 
+	 * @param deployedOffice
+	 *            {@link DeployedOfficeModel} to remove.
+	 * @return {@link Change} to remove the {@link DeployedOfficeModel}.
+	 */
+	Change<DeployedOfficeModel> removeDeployedOffice(
+			DeployedOfficeModel deployedOffice);
+
+	/**
+	 * Renames the {@link DeployedOfficeModel}.
+	 * 
+	 * @param deployedOffice
+	 *            {@link DeployedOfficeModel} to rename.
+	 * @param newDeployedOfficeName
+	 *            New name for the {@link DeployedOfficeModel}.
+	 * @return {@link Change} to rename the {@link DeployedOfficeModel}.
+	 */
+	Change<DeployedOfficeModel> renameDeployedOffice(
+			DeployedOfficeModel deployedOffice, String newDeployedOfficeName);
+
+	/**
+	 * Adds an {@link OfficeFloorManagedObjectSourceModel} to the
+	 * {@link OfficeFloorModel}.
+	 * 
+	 * @param managedObjectSourceName
+	 *            Name of the {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param managedObjectSourceClassName
+	 *            Class name of the {@link ManagedObjectSource}.
+	 * @param properties
+	 *            {@link PropertyList}.
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return {@link Change} to add the
+	 *         {@link OfficeFloorManagedObjectSourceModel}.
+	 */
+	Change<OfficeFloorManagedObjectSourceModel> addOfficeFloorManagedObjectSource(
+			String managedObjectSourceName,
+			String managedObjectSourceClassName, PropertyList properties,
+			ManagedObjectType<?> managedObjectType);
+
+	/**
+	 * Removes the {@link OfficeFloorManagedObjectSourceModel}.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link OfficeFloorManagedObjectSourceModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFloorManagedObjectSourceModel}.
+	 */
+	Change<OfficeFloorManagedObjectSourceModel> removeOfficeFloorManagedObjectSource(
+			OfficeFloorManagedObjectSourceModel managedObjectSource);
+
+	/**
+	 * Renames the {@link OfficeFloorManagedObjectSourceModel}.
+	 * 
+	 * @param managedObjectSource
+	 *            {@link OfficeFloorManagedObjectSourceModel} to rename.
+	 * @param newManagedObjectSourceName
+	 *            New name for the {@link OfficeFloorManagedObjectSourceModel}.
+	 * @return {@link Change} to rename the
+	 *         {@link OfficeFloorManagedObjectSourceModel}.
+	 */
+	Change<OfficeFloorManagedObjectSourceModel> renameOfficeFloorManagedObjectSource(
+			OfficeFloorManagedObjectSourceModel managedObjectSource,
+			String newManagedObjectSourceName);
+
+	/**
+	 * Adds an {@link OfficeFloorManagedObjectModel} for an
+	 * {@link OfficeFloorManagedObjectSourceModel} to the
+	 * {@link OfficeFloorModel}.
+	 * 
+	 * @param managedObjectName
+	 *            Name of the {@link OfficeFloorManagedObjectModel}.
+	 * @param managedObjectScope
+	 *            {@link ManagedObjectScope} for the
+	 *            {@link OfficeFloorManagedObjectModel}.
+	 * @param managedObjectSource
+	 *            {@link OfficeFloorManagedObjectSourceModel}.
+	 * @param managedObjectType
+	 *            {@link ManagedObjectType}.
+	 * @return {@link Change} to add the {@link OfficeFloorManagedObjectModel}.
+	 */
+	Change<OfficeFloorManagedObjectModel> addOfficeFloorManagedObject(
+			String managedObjectName, ManagedObjectScope managedObjectScope,
+			OfficeFloorManagedObjectSourceModel managedObjectSource,
+			ManagedObjectType<?> managedObjectType);
+
+	/**
+	 * Removes the {@link OfficeFloorManagedObjectModel}.
+	 * 
+	 * @param managedObject
+	 *            {@link OfficeFloorManagedObjectModel} to remove.
+	 * @return {@link Change} to remove the
+	 *         {@link OfficeFloorManagedObjectModel}.
+	 */
+	Change<OfficeFloorManagedObjectModel> removeOfficeFloorManagedObject(
+			OfficeFloorManagedObjectModel managedObject);
+
+	/**
+	 * Renames the {@link OfficeFloorManagedObjectModel}.
+	 * 
+	 * @param managedObject
+	 *            {@link OfficeFloorManagedObjectModel} to rename.
+	 * @param newManagedObjectName
+	 *            New name for the {@link OfficeFloorManagedObjectModel}.
+	 * @return {@link Change} to rename the
+	 *         {@link OfficeFloorManagedObjectModel}.
+	 */
+	Change<OfficeFloorManagedObjectModel> renameOfficeFloorManagedObject(
+			OfficeFloorManagedObjectModel managedObject,
+			String newManagedObjectName);
 
 }

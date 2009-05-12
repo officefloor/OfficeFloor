@@ -37,6 +37,7 @@ import net.officefloor.eclipse.officefloor.editparts.OfficeFloorTeamEditPart;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorManagedObjectSourceOperation;
 import net.officefloor.eclipse.officefloor.operations.AddDeployedOfficeOperation;
 import net.officefloor.eclipse.officefloor.operations.AddOfficeFloorTeamOperation;
+import net.officefloor.model.impl.officefloor.OfficeFloorChangesImpl;
 import net.officefloor.model.impl.officefloor.OfficeFloorRepositoryImpl;
 import net.officefloor.model.impl.repository.ModelRepositoryImpl;
 import net.officefloor.model.officefloor.DeployedOfficeInputModel;
@@ -72,10 +73,27 @@ public class OfficeFloorEditor extends
 	public static final String EDITOR_ID = "net.officefloor.editors.officefloor";
 
 	@Override
+	protected boolean isDragTarget() {
+		return false;
+	}
+
+	@Override
+	protected OfficeFloorModel retrieveModel(ConfigurationItem configuration)
+			throws Exception {
+		return new OfficeFloorRepositoryImpl(new ModelRepositoryImpl())
+				.retrieveOfficeFloor(configuration);
+	}
+
+	@Override
+	protected void storeModel(OfficeFloorModel model,
+			ConfigurationItem configuration) throws Exception {
+		new OfficeFloorRepositoryImpl(new ModelRepositoryImpl())
+				.storeOfficeFloor(model, configuration);
+	}
+
+	@Override
 	protected OfficeFloorChanges createModelChanges(OfficeFloorModel model) {
-		// TODO Implement
-		throw new UnsupportedOperationException(
-				"TODO implement AbstractOfficeFloorEditor<OfficeFloorModel,OfficeFloorChanges,OfficeFloorEditPart>.createModelChanges");
+		return new OfficeFloorChangesImpl(model);
 	}
 
 	@Override
@@ -125,30 +143,16 @@ public class OfficeFloorEditor extends
 	}
 
 	@Override
-	protected boolean isDragTarget() {
-		return false;
-	}
-
-	@Override
-	protected OfficeFloorModel retrieveModel(ConfigurationItem configuration)
-			throws Exception {
-		return new OfficeFloorRepositoryImpl(new ModelRepositoryImpl())
-				.retrieveOfficeFloor(configuration);
-	}
-
-	@Override
-	protected void storeModel(OfficeFloorModel model,
-			ConfigurationItem configuration) throws Exception {
-		new OfficeFloorRepositoryImpl(new ModelRepositoryImpl())
-				.storeOfficeFloor(model, configuration);
-	}
-
-	@Override
 	protected void populateOperations(List<Operation> list) {
+
+		// Obtain the office floor changes
+		OfficeFloorChanges officeFloorChanges = this.getModelChanges();
+
 		// Add model operations
-		list.add(new AddDeployedOfficeOperation());
-		list.add(new AddOfficeFloorTeamOperation());
-		list.add(new AddOfficeFloorManagedObjectSourceOperation());
+		list.add(new AddDeployedOfficeOperation(officeFloorChanges));
+		list.add(new AddOfficeFloorTeamOperation(officeFloorChanges));
+		list.add(new AddOfficeFloorManagedObjectSourceOperation(
+				officeFloorChanges));
 	}
 
 }
