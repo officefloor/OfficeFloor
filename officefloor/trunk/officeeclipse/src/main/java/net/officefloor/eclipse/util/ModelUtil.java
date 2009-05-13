@@ -62,6 +62,9 @@ public class ModelUtil {
 		// Obtain the work class
 		Class<? extends WorkSource> workSourceClass = EclipseUtil.obtainClass(
 				workModel.getWorkSourceClassName(), WorkSource.class, editor);
+		if (workSourceClass == null) {
+			return null; // must have work source class
+		}
 
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();
@@ -106,6 +109,9 @@ public class ModelUtil {
 				.obtainClass(managedObjectSource
 						.getManagedObjectSourceClassName(),
 						ManagedObjectSource.class, editor);
+		if (managedObjectSourceClass == null) {
+			return null; // must have managed object source class
+		}
 
 		// Obtain the properties
 		PropertyList properties = compiler.createPropertyList();

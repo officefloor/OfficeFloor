@@ -21,9 +21,11 @@ import net.officefloor.compile.issues.CompilerIssues;
 import net.officefloor.compile.managedobject.ManagedObjectLoader;
 import net.officefloor.compile.managedobject.ManagedObjectType;
 import net.officefloor.compile.properties.PropertyList;
+import net.officefloor.eclipse.classpath.ClasspathUtil;
 import net.officefloor.eclipse.common.dialog.input.InputAdapter;
 import net.officefloor.eclipse.common.dialog.input.InputHandler;
 import net.officefloor.eclipse.common.dialog.input.impl.PropertyListInput;
+import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtension;
 import net.officefloor.eclipse.extension.managedobjectsource.ManagedObjectSourceExtensionContext;
 import net.officefloor.eclipse.util.EclipseUtil;
@@ -33,6 +35,7 @@ import net.officefloor.frame.spi.managedobject.source.ManagedObjectSource;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.gef.EditPart;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -81,7 +84,8 @@ public class ManagedObjectSourceInstance implements
 	/**
 	 * {@link ManagedObjectSource} class.
 	 */
-	private Class<? extends ManagedObjectSource<?, ?>> managedObjectSourceClass;
+	@SuppressWarnings("unchecked")
+	private Class<? extends ManagedObjectSource> managedObjectSourceClass;
 
 	/**
 	 * {@link PropertyList}.
@@ -99,8 +103,9 @@ public class ManagedObjectSourceInstance implements
 	 * @param managedObjectSourceClassName
 	 *            Fully qualified class name of the {@link ManagedObjectSource}.
 	 * @param managedObjectSourceExtension
-	 *            {@link ManagedObjectSourceExtension}. May be <code>null</code>
-	 *            .
+	 *            {@link ManagedObjectSourceExtension}. <code>null</code> if no
+	 *            {@link ManagedObjectSourceExtension} and using
+	 *            {@link ManagedObjectSource}.
 	 * @param classLoader
 	 *            {@link ClassLoader}.
 	 * @param project
@@ -130,7 +135,7 @@ public class ManagedObjectSourceInstance implements
 	 * Attempts to load the {@link ManagedObjectType}.
 	 */
 	public void loadManagedObjectType() {
-		
+
 		// Ensure have managed object source class
 		if (this.managedObjectSourceClass == null) {
 			return; // page controls not yet loaded
@@ -145,6 +150,26 @@ public class ManagedObjectSourceInstance implements
 		this.managedObjectType = this.managedObjectLoader
 				.loadManagedObjectType(this.managedObjectSourceClass,
 						this.properties);
+	}
+
+	/**
+	 * Includes the {@link ManagedObjectSourceExtension} on the {@link IProject}
+	 * class path.
+	 * 
+	 * @param editPart
+	 *            {@link EditPart} adding the {@link ManagedObjectSource}.
+	 */
+	public void includeExtensionOnProjectClassPath(
+			AbstractOfficeFloorEditPart<?, ?, ?> editPart) {
+
+		// Only include if have extension
+		if (this.managedObjectSourceExtension == null) {
+			return;
+		}
+
+		// Update the class path to include the extension
+		ClasspathUtil.attemptUpdateOfficeFloorClasspath(editPart, null,
+				this.managedObjectSourceClassName);
 	}
 
 	/**
@@ -257,7 +282,7 @@ public class ManagedObjectSourceInstance implements
 
 		// Obtain specification properties for managed object source
 		this.properties = this.managedObjectLoader
-				.loadSpecification(managedObjectSourceClass);
+				.loadSpecification(this.managedObjectSourceClass);
 
 		// Determine if have extension
 		if (this.managedObjectSourceExtension != null) {

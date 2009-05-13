@@ -81,7 +81,8 @@ public class AdministratorSourceInstance implements
 	/**
 	 * {@link AdministratorSource} class.
 	 */
-	private Class<? extends AdministratorSource<?, ?>> administratorSourceClass;
+	@SuppressWarnings("unchecked")
+	private Class<? extends AdministratorSource> administratorSourceClass;
 
 	/**
 	 * {@link PropertyList}.
@@ -273,7 +274,7 @@ public class AdministratorSourceInstance implements
 
 		// Obtain specification properties for administrator source
 		this.properties = this.administratorLoader
-				.loadSpecification(administratorSourceClass);
+				.loadSpecification(this.administratorSourceClass);
 		if (this.properties == null) {
 			page.setLayout(new GridLayout());
 			Label label = new Label(page, SWT.NONE);
