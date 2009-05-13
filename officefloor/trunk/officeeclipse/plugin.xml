@@ -107,13 +107,11 @@
     </extension>
     <extension
           point="net.officefloor.eclipse.sectionsource">
-          <sectionsource class="net.officefloor.eclipse.extension.sectionsource.desk.DeskModelSectionSourceExtension" >
-          </sectionsource>
+          <sectionsource class="net.officefloor.eclipse.extension.sectionsource.desk.DeskModelSectionSourceExtension" />
     </extension>
     <extension
           point="net.officefloor.eclipse.sectionsource">
-          <sectionsource class="net.officefloor.eclipse.extension.sectionsource.section.SectionModelSectionSourceExtension">
-          </sectionsource>
+          <sectionsource class="net.officefloor.eclipse.extension.sectionsource.section.SectionModelSectionSourceExtension" />
     </extension>
     <extension
           point="org.eclipse.jdt.core.classpathContainerInitializer">

@@ -348,6 +348,9 @@ public class SectionSourceWizard extends Wizard implements
 		OfficeSection officeSection = this.selectedSectionSourceInstance
 				.getOfficeSection();
 
+		// Normalise the properties
+		propertyList.normalise();
+
 		// Specify the section instance
 		this.sectionInstance = new SectionInstance(sectionName,
 				sectionSourceClassName, sectionLocation, propertyList,

@@ -3,7 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Office Floor Eclipse Jars
 Bundle-SymbolicName: net.officefloor.eclipse.jars;singleton:=true
 Bundle-Version: 1.0.0
-Export-Package: junit.framework,
+Export-Package: com.mysql.jdbc.jdbc2.optional,
+ junit.framework,
+ org.apache.commons.dbcp.cpdsadapter,
  org.easymock,
  org.easymock.internal,
  org.hsqldb

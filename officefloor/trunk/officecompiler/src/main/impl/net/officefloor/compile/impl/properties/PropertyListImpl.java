@@ -16,11 +16,17 @@
  */
 package net.officefloor.compile.impl.properties;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
+import net.officefloor.compile.impl.util.CompileUtil;
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
 
@@ -125,6 +131,46 @@ public class PropertyListImpl implements PropertyList {
 			utilProperties.setProperty(name, value);
 		}
 		return utilProperties;
+	}
+
+	@Override
+	public void clear() {
+		this.properties.clear();
+	}
+
+	@Override
+	public void sort(Comparator<? super Property> comparator) {
+		Collections.sort(this.properties, comparator);
+	}
+
+	@Override
+	public void normalise() {
+		// Iterate over the properties removing duplicates and null values
+		Set<String> propertyNames = new HashSet<String>();
+		for (Property property : new ArrayList<Property>(this.properties)) {
+
+			// Remove if blank name
+			String propertyName = property.getName();
+			if (CompileUtil.isBlank(propertyName)) {
+				this.properties.remove(property);
+				continue;
+			}
+
+			// Remove if blank value
+			if (CompileUtil.isBlank(property.getValue())) {
+				this.properties.remove(property);
+				continue;
+			}
+
+			// Property has value, determine if duplicate
+			if (propertyNames.contains(propertyName)) {
+				this.properties.remove(property);
+				continue;
+			}
+
+			// Property to stay in list
+			propertyNames.add(propertyName);
+		}
 	}
 
 }

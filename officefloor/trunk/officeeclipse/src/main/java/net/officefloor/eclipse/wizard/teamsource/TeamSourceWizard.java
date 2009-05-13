@@ -291,6 +291,9 @@ public class TeamSourceWizard extends Wizard implements
 				.getPropertyList();
 		TeamType teamType = this.selectedTeamSourceInstance.getTeamType();
 
+		// Normalise the properties
+		propertyList.normalise();
+
 		// Specify the team instance
 		this.teamInstance = new TeamInstance(teamName, teamSourceClassName,
 				propertyList, teamType);

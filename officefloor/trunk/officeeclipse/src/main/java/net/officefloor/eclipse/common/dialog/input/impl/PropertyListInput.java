@@ -16,8 +16,10 @@
  */
 package net.officefloor.eclipse.common.dialog.input.impl;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.officefloor.compile.properties.Property;
 import net.officefloor.compile.properties.PropertyList;
@@ -65,6 +67,11 @@ public class PropertyListInput implements Input<Table> {
 	private final PropertyList propertyList;
 
 	/**
+	 * Set of names of the {@link Property} instances to not display.
+	 */
+	private final Set<String> hiddenProperties = new HashSet<String>();
+
+	/**
 	 * {@link Table}.
 	 */
 	private Table table;
@@ -87,6 +94,24 @@ public class PropertyListInput implements Input<Table> {
 	 */
 	public PropertyListInput(PropertyList propertyList) {
 		this.propertyList = propertyList;
+	}
+
+	/**
+	 * Hides the {@link Property} from being displayed.
+	 * 
+	 * @param propertyName
+	 *            Name of {@link Property} to no display.
+	 */
+	public void hideProperty(String propertyName) {
+		this.hiddenProperties.add(propertyName);
+	}
+
+	/**
+	 * Refreshes for all {@link Property} instances in the {@link PropertyList}.
+	 */
+	public void refreshProperties() {
+		// Reset property list to refresh all properties
+		this.tableViewer.setInput(this.propertyList);
 	}
 
 	/*
@@ -288,6 +313,14 @@ public class PropertyListInput implements Input<Table> {
 			// Obtain the listing of properties
 			List<Property> properties = new LinkedList<Property>();
 			for (Property property : PropertyListInput.this.propertyList) {
+
+				// Determine if hidden property
+				if (PropertyListInput.this.hiddenProperties.contains(property
+						.getName())) {
+					continue; // not add as hidden property
+				}
+
+				// Add the property to be displayed
 				properties.add(property);
 			}
 

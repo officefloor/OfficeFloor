@@ -294,6 +294,9 @@ public class OfficeSourceWizard extends Wizard implements
 		OfficeType officeType = this.selectedOfficeSourceInstance
 				.getOfficeType();
 
+		// Normalise the properties
+		propertyList.normalise();
+
 		// Specify the office instance
 		this.officeInstance = new OfficeInstance(officeName,
 				officeSourceClassName, officeLocation, propertyList, officeType);
