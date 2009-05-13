@@ -21,11 +21,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigureContext;
+import net.officefloor.model.change.Change;
 import net.officefloor.model.officefloor.DeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.DeployedOfficeModel.DeployedOfficeEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,25 +40,53 @@ import org.eclipse.gef.EditPart;
  */
 public class DeployedOfficeEditPart
 		extends
-		AbstractOfficeFloorEditPart<DeployedOfficeModel, DeployedOfficeEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<DeployedOfficeModel, DeployedOfficeEvent, DeployedOfficeFigure>
 		implements DeployedOfficeFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected DeployedOfficeFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createDeployedOfficeFigure(this);
 	}
 
 	@Override
 	protected void populateModelChildren(List<Object> childModels) {
+		childModels.addAll(this.getCastedModel().getDeployedOfficeInputs());
 		childModels.addAll(this.getCastedModel().getDeployedOfficeTeams());
 		childModels.addAll(this.getCastedModel().getDeployedOfficeObjects());
-		childModels.addAll(this.getCastedModel().getDeployedOfficeInputs());
 	}
 
 	@Override
 	protected void populateConnectionTargetModels(List<Object> models) {
-		// models.addAll(this.getCastedModel().getResponsibleManagedObjects());
+		models.addAll(this.getCastedModel()
+				.getOfficeFloorManagedObjectSources());
+	}
+
+	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<DeployedOfficeModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, DeployedOfficeModel>() {
+					@Override
+					public String getInitialValue() {
+						return DeployedOfficeEditPart.this.getCastedModel()
+								.getDeployedOfficeName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return DeployedOfficeEditPart.this
+								.getOfficeFloorFigure()
+								.getDeployedOfficeNameFigure();
+					}
+
+					@Override
+					public Change<DeployedOfficeModel> createChange(
+							OfficeFloorChanges changes,
+							DeployedOfficeModel target, String newValue) {
+						return changes.renameDeployedOffice(target, newValue);
+					}
+				});
 	}
 
 	@Override
@@ -65,18 +98,22 @@ public class DeployedOfficeEditPart
 	protected void handlePropertyChange(DeployedOfficeEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_DEPLOYED_OFFICE_NAME:
+			this.getOfficeFloorFigure().setDeployedOfficeName(
+					this.getCastedModel().getDeployedOfficeName());
+			break;
 		case ADD_DEPLOYED_OFFICE_OBJECT:
 		case REMOVE_DEPLOYED_OFFICE_OBJECT:
 		case ADD_DEPLOYED_OFFICE_TEAM:
 		case REMOVE_DEPLOYED_OFFICE_TEAM:
 		case ADD_DEPLOYED_OFFICE_INPUT:
 		case REMOVE_DEPLOYED_OFFICE_INPUT:
-			DeployedOfficeEditPart.this.refreshChildren();
+			this.refreshChildren();
 			break;
-		// case ADD_RESPONSIBLE_MANAGED_OBJECT:
-		// case REMOVE_RESPONSIBLE_MANAGED_OBJECT:
-		// OfficeEditPart.this.refreshTargetConnections();
-		// break;
+		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
+		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE:
+			this.refreshTargetConnections();
+			break;
 		}
 	}
 

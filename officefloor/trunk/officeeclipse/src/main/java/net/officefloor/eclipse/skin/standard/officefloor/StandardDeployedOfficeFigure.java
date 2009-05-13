@@ -20,14 +20,17 @@ import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigure;
 import net.officefloor.eclipse.skin.officefloor.DeployedOfficeFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.officefloor.DeployedOfficeModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
 
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -37,8 +40,13 @@ import org.eclipse.swt.graphics.Color;
  * 
  * @author Daniel
  */
-public class StandardDeployedOfficeFigure extends AbstractOfficeFloorFigure implements
-		DeployedOfficeFigure {
+public class StandardDeployedOfficeFigure extends AbstractOfficeFloorFigure
+		implements DeployedOfficeFigure {
+
+	/**
+	 * {@link Label} containing the {@link DeployedOfficeModel} name.
+	 */
+	private final Label deployedOfficeName;
 
 	/**
 	 * Initiate.
@@ -56,8 +64,9 @@ public class StandardDeployedOfficeFigure extends AbstractOfficeFloorFigure impl
 		figure.setLayoutManager(figureLayout);
 
 		// Create the office
-		ContainerFigure office = new ContainerFigure(context.getDeployedOfficeName(),
-				officeColour, 20, false);
+		RoundedContainerFigure office = new RoundedContainerFigure(context
+				.getDeployedOfficeName(), officeColour, 20, false);
+		this.deployedOfficeName = office.getContainerName();
 		figure.add(office);
 
 		// Create the managing object connection
@@ -74,6 +83,20 @@ public class StandardDeployedOfficeFigure extends AbstractOfficeFloorFigure impl
 		// Specify figures
 		this.setFigure(figure);
 		this.setContentPane(office.getContentPane());
+	}
+
+	/*
+	 * ============== DeployedOfficeFigure ==================================
+	 */
+
+	@Override
+	public void setDeployedOfficeName(String deployedOfficeName) {
+		this.deployedOfficeName.setText(deployedOfficeName);
+	}
+
+	@Override
+	public IFigure getDeployedOfficeNameFigure() {
+		return this.deployedOfficeName;
 	}
 
 }

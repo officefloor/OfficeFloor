@@ -19,7 +19,7 @@ package net.officefloor.eclipse.skin.standard.section;
 import net.officefloor.eclipse.skin.section.SubSectionFigure;
 import net.officefloor.eclipse.skin.section.SubSectionFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.model.section.SubSectionModel;
 
 import org.eclipse.draw2d.IFigure;
@@ -50,7 +50,7 @@ public class StandardSubSectionFigure extends AbstractOfficeFloorFigure
 		Color subSectionColour = new Color(null, 130, 255, 150);
 
 		// Create the container for the sub section
-		ContainerFigure subSectionFigure = new ContainerFigure(context
+		RoundedContainerFigure subSectionFigure = new RoundedContainerFigure(context
 				.getSubSectionName(), subSectionColour, 5, false);
 		this.subSectionName = subSectionFigure.getContainerName();
 

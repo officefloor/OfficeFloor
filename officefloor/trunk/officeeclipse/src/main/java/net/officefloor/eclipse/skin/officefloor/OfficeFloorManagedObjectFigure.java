@@ -17,35 +17,35 @@
 package net.officefloor.eclipse.skin.officefloor;
 
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.officefloor.OfficeFloorTeamModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectModel;
 
 import org.eclipse.draw2d.IFigure;
 
 /**
- * {@link OfficeFloorFigure} for the {@link OfficeFloorTeamModel}.
+ * {@link OfficeFloorFigure} for the {@link OfficeFloorManagedObjectModel}.
  * 
  * @author Daniel
  */
-public interface OfficeFloorTeamFigure extends OfficeFloorFigure {
+public interface OfficeFloorManagedObjectFigure extends OfficeFloorFigure {
 
 	/**
-	 * Indicates a change in name for the {@link OfficeFloorTeamModel}.
+	 * Indicates a change in name for the {@link OfficeFloorManagedObjectModel}.
 	 * 
-	 * @param officeFloorTeamName
-	 *            Name to display for the {@link OfficeFloorTeamModel}.
+	 * @param officeFloorManagedObjectName
+	 *            Name to display for the {@link OfficeFloorManagedObjectModel}.
 	 */
-	void setOfficeFloorTeamName(String officeFloorTeamName);
+	void setOfficeFloorManagedObjectName(String officeFloorManagedObjectName);
 
 	/**
 	 * <p>
-	 * Obtains the {@link IFigure} containing the {@link OfficeFloorTeamModel}
-	 * name.
+	 * Obtains the {@link IFigure} containing the
+	 * {@link OfficeFloorManagedObjectModel} name.
 	 * <p>
 	 * This is to allow placement of the editor in changing the
-	 * {@link OfficeFloorTeamModel} name.
+	 * {@link OfficeFloorManagedObjectModel} name.
 	 * 
-	 * @return {@link IFigure} containing the {@link OfficeFloorTeamModel} name.
+	 * @return {@link IFigure} containing the
+	 *         {@link OfficeFloorManagedObjectModel} name.
 	 */
-	IFigure getOfficeFloorTeamNameFigure();
-
+	IFigure getOfficeFloorManagedObjectNameFigure();
 }

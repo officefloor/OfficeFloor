@@ -20,7 +20,7 @@ import net.officefloor.eclipse.skin.office.AdministratorFigure;
 import net.officefloor.eclipse.skin.office.AdministratorFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.office.AdministratorModel;
@@ -74,7 +74,7 @@ public class StandardAdministratorFigure extends AbstractOfficeFloorFigure
 						false));
 
 		// Create the administrator container
-		ContainerFigure administrator = new ContainerFigure(context
+		RoundedContainerFigure administrator = new RoundedContainerFigure(context
 				.getAdministratorName(), administratorColour, 20, false);
 		figure.add(administrator);
 		this.administratorName = administrator.getContainerName();

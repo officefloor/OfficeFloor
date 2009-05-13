@@ -17,11 +17,13 @@
 package net.officefloor.eclipse.officefloor.editparts;
 
 import java.beans.PropertyChangeEvent;
+import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
 import net.officefloor.eclipse.skin.OfficeFloorFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
+import net.officefloor.eclipse.util.EclipseUtil;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyModel.OfficeFloorManagedObjectDependencyEvent;
 
@@ -44,6 +46,12 @@ public class OfficeFloorManagedObjectDependencyEditPart
 	}
 
 	@Override
+	protected void populateConnectionSourceModels(List<Object> models) {
+		EclipseUtil.addToList(models, this.getCastedModel()
+				.getOfficeFloorManagedObject());
+	}
+
+	@Override
 	protected Class<OfficeFloorManagedObjectDependencyEvent> getPropertyChangeEventType() {
 		return OfficeFloorManagedObjectDependencyEvent.class;
 	}
@@ -53,7 +61,9 @@ public class OfficeFloorManagedObjectDependencyEditPart
 			OfficeFloorManagedObjectDependencyEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
-		// TODO provide connection handling
+		case CHANGE_OFFICE_FLOOR_MANAGED_OBJECT:
+			this.refreshSourceConnections();
+			break;
 		}
 	}
 

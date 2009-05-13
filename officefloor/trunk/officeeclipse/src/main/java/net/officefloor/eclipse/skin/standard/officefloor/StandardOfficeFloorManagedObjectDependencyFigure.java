@@ -17,12 +17,14 @@
 package net.officefloor.eclipse.skin.standard.officefloor;
 
 import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.draw2d.ConnectionAnchor;
 
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectDependencyFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.LabelConnectorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel;
 
 /**
  * Standard {@link OfficeFloorManagedObjectDependencyFigure}.
@@ -30,7 +32,8 @@ import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDir
  * @author Daniel
  */
 public class StandardOfficeFloorManagedObjectDependencyFigure extends
-		AbstractOfficeFloorFigure implements OfficeFloorManagedObjectDependencyFigure {
+		AbstractOfficeFloorFigure implements
+		OfficeFloorManagedObjectDependencyFigure {
 
 	/**
 	 * Initiate.
@@ -41,8 +44,16 @@ public class StandardOfficeFloorManagedObjectDependencyFigure extends
 	public StandardOfficeFloorManagedObjectDependencyFigure(
 			OfficeFloorManagedObjectDependencyFigureContext context) {
 		LabelConnectorFigure figure = new LabelConnectorFigure(context
-				.getOfficeFloorManagedObjectDependencyName(), ConnectorDirection.WEST,
-				ColorConstants.black);
+				.getOfficeFloorManagedObjectDependencyName(),
+				ConnectorDirection.EAST, ColorConstants.black);
+
+		// Register connections
+		ConnectionAnchor anchor = figure.getConnectionAnchor();
+		this
+				.registerConnectionAnchor(
+						OfficeFloorManagedObjectDependencyToOfficeFloorManagedObjectModel.class,
+						anchor);
+
 		this.setFigure(figure);
 	}
 

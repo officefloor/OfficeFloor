@@ -20,15 +20,18 @@ import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFi
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorManagedObjectSourceFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
+import net.officefloor.eclipse.skin.standard.figure.RectangleContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceModel;
 import net.officefloor.model.officefloor.OfficeFloorManagedObjectSourceToDeployedOfficeModel;
+import net.officefloor.model.officefloor.OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel;
 
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.draw2d.ConnectionAnchor;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.MarginBorder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -39,7 +42,14 @@ import org.eclipse.swt.graphics.Color;
  * @author Daniel
  */
 public class StandardOfficeFloorManagedObjectSourceFigure extends
-		AbstractOfficeFloorFigure implements OfficeFloorManagedObjectSourceFigure {
+		AbstractOfficeFloorFigure implements
+		OfficeFloorManagedObjectSourceFigure {
+
+	/**
+	 * {@link Label} containing the {@link OfficeFloorManagedObjectSourceModel}
+	 * name.
+	 */
+	private final Label officeFloorManagedObjectSourceName;
 
 	/**
 	 * Initiate.
@@ -50,33 +60,70 @@ public class StandardOfficeFloorManagedObjectSourceFigure extends
 	public StandardOfficeFloorManagedObjectSourceFigure(
 			OfficeFloorManagedObjectSourceFigureContext context) {
 
-		Color moColor = ColorConstants.lightBlue;
+		Color moColor = ColorConstants.lightGray;
 
 		// Create the figure
 		Figure figure = new Figure();
-		NoSpacingGridLayout figureLayout = new NoSpacingGridLayout(2);
+		NoSpacingGridLayout figureLayout = new NoSpacingGridLayout(1);
 		figure.setLayoutManager(figureLayout);
+
+		// Add the managed object connector
+		ConnectorFigure managedObject = new ConnectorFigure(
+				ConnectorDirection.NORTH, ColorConstants.lightBlue);
+		figureLayout.setConstraint(managedObject, new GridData(SWT.CENTER,
+				SWT.BEGINNING, true, false));
+		figure.add(managedObject);
+
+		// Register the connections to managed objects
+		this
+				.registerConnectionAnchor(
+						OfficeFloorManagedObjectToOfficeFloorManagedObjectSourceModel.class,
+						managedObject.getConnectionAnchor());
+
+		// Figure to contain office connector and source container
+		Figure officeAndMos = new Figure();
+		NoSpacingGridLayout officeAndMosLayout = new NoSpacingGridLayout(2);
+		officeAndMos.setLayoutManager(officeAndMosLayout);
+		figure.add(officeAndMos);
 
 		// Add the office connector
 		ConnectorFigure office = new ConnectorFigure(ConnectorDirection.WEST,
 				ColorConstants.black);
 		office.setBorder(new MarginBorder(10, 0, 0, 0));
-		ConnectionAnchor anchor = office.getConnectionAnchor();
-		this.registerConnectionAnchor(
-				OfficeFloorManagedObjectSourceToDeployedOfficeModel.class, anchor);
-//		this.registerConnectionAnchor(
-//				OfficeManagedObjectToManagedObjectSourceModel.class, anchor);
-		figure.add(office);
-		figureLayout.setConstraint(office, new GridData(SWT.BEGINNING,
+		officeAndMos.add(office);
+		officeAndMosLayout.setConstraint(office, new GridData(SWT.BEGINNING,
 				SWT.BEGINNING, false, false));
 
+		// Register the connection to managing office
+		this.registerConnectionAnchor(
+				OfficeFloorManagedObjectSourceToDeployedOfficeModel.class,
+				office.getConnectionAnchor());
+
 		// Create the managed object source
-		ContainerFigure mos = new ContainerFigure(context
+		RectangleContainerFigure mos = new RectangleContainerFigure(context
 				.getOfficeFloorManagedObjectSourceName(), moColor, 20, false);
-		figure.add(mos);
+		this.officeFloorManagedObjectSourceName = mos.getContainerName();
+		officeAndMos.add(mos);
 
 		// Specify the figures
 		this.setFigure(figure);
 		this.setContentPane(mos.getContentPane());
 	}
+
+	/*
+	 * ================ OfficeFloorManagedObjectSourceFigure ===================
+	 */
+
+	@Override
+	public void setOfficeFloorManagedObjectName(
+			String officeFloorManagedObjectSourceName) {
+		this.officeFloorManagedObjectSourceName
+				.setText(officeFloorManagedObjectSourceName);
+	}
+
+	@Override
+	public IFigure getOfficeFloorManagedObjectSourceNameFigure() {
+		return this.officeFloorManagedObjectSourceName;
+	}
+
 }

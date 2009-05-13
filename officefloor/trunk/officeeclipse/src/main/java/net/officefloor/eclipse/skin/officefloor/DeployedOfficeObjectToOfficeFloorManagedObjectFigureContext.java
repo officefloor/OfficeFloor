@@ -16,36 +16,12 @@
  */
 package net.officefloor.eclipse.skin.officefloor;
 
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
-import net.officefloor.model.officefloor.OfficeFloorTeamModel;
-
-import org.eclipse.draw2d.IFigure;
 
 /**
- * {@link OfficeFloorFigure} for the {@link OfficeFloorTeamModel}.
+ * Context to decorate the {@link link
+ * DeployedOfficeObjectToOfficeFloorManagedObjectModel} connection.
  * 
  * @author Daniel
  */
-public interface OfficeFloorTeamFigure extends OfficeFloorFigure {
-
-	/**
-	 * Indicates a change in name for the {@link OfficeFloorTeamModel}.
-	 * 
-	 * @param officeFloorTeamName
-	 *            Name to display for the {@link OfficeFloorTeamModel}.
-	 */
-	void setOfficeFloorTeamName(String officeFloorTeamName);
-
-	/**
-	 * <p>
-	 * Obtains the {@link IFigure} containing the {@link OfficeFloorTeamModel}
-	 * name.
-	 * <p>
-	 * This is to allow placement of the editor in changing the
-	 * {@link OfficeFloorTeamModel} name.
-	 * 
-	 * @return {@link IFigure} containing the {@link OfficeFloorTeamModel} name.
-	 */
-	IFigure getOfficeFloorTeamNameFigure();
-
+public interface DeployedOfficeObjectToOfficeFloorManagedObjectFigureContext {
 }

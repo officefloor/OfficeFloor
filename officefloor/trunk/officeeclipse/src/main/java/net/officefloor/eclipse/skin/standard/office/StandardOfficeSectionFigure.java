@@ -19,7 +19,7 @@ package net.officefloor.eclipse.skin.standard.office;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigure;
 import net.officefloor.eclipse.skin.office.OfficeSectionFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
-import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.model.office.OfficeSectionModel;
 
 import org.eclipse.draw2d.IFigure;
@@ -49,7 +49,7 @@ public class StandardOfficeSectionFigure extends AbstractOfficeFloorFigure
 
 		Color flowColour = new Color(null, 130, 255, 150);
 
-		ContainerFigure container = new ContainerFigure(context
+		RoundedContainerFigure container = new RoundedContainerFigure(context
 				.getOfficeSectionName(), flowColour, 20, false);
 		this.officeSectionName = container.getContainerName();
 

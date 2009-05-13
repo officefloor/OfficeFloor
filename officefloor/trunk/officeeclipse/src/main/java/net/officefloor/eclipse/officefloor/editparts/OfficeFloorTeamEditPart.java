@@ -21,11 +21,16 @@ import java.util.List;
 
 import net.officefloor.eclipse.OfficeFloorPlugin;
 import net.officefloor.eclipse.common.editparts.AbstractOfficeFloorEditPart;
-import net.officefloor.eclipse.skin.OfficeFloorFigure;
+import net.officefloor.eclipse.common.editpolicies.directedit.DirectEditAdapter;
+import net.officefloor.eclipse.common.editpolicies.directedit.OfficeFloorDirectEditPolicy;
+import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigure;
 import net.officefloor.eclipse.skin.officefloor.OfficeFloorTeamFigureContext;
+import net.officefloor.model.change.Change;
+import net.officefloor.model.officefloor.OfficeFloorChanges;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel;
 import net.officefloor.model.officefloor.OfficeFloorTeamModel.OfficeFloorTeamEvent;
 
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.gef.EditPart;
 
 /**
@@ -35,11 +40,11 @@ import org.eclipse.gef.EditPart;
  */
 public class OfficeFloorTeamEditPart
 		extends
-		AbstractOfficeFloorEditPart<OfficeFloorTeamModel, OfficeFloorTeamEvent, OfficeFloorFigure>
+		AbstractOfficeFloorEditPart<OfficeFloorTeamModel, OfficeFloorTeamEvent, OfficeFloorTeamFigure>
 		implements OfficeFloorTeamFigureContext {
 
 	@Override
-	protected OfficeFloorFigure createOfficeFloorFigure() {
+	protected OfficeFloorTeamFigure createOfficeFloorFigure() {
 		return OfficeFloorPlugin.getSkin().getOfficeFloorFigureFactory()
 				.createOfficeFloorTeamFigure(this);
 	}
@@ -52,6 +57,33 @@ public class OfficeFloorTeamEditPart
 	}
 
 	@Override
+	protected void populateOfficeFloorDirectEditPolicy(
+			OfficeFloorDirectEditPolicy<OfficeFloorTeamModel> policy) {
+		policy
+				.allowDirectEdit(new DirectEditAdapter<OfficeFloorChanges, OfficeFloorTeamModel>() {
+					@Override
+					public String getInitialValue() {
+						return OfficeFloorTeamEditPart.this.getCastedModel()
+								.getOfficeFloorTeamName();
+					}
+
+					@Override
+					public IFigure getLocationFigure() {
+						return OfficeFloorTeamEditPart.this
+								.getOfficeFloorFigure()
+								.getOfficeFloorTeamNameFigure();
+					}
+
+					@Override
+					public Change<OfficeFloorTeamModel> createChange(
+							OfficeFloorChanges changes,
+							OfficeFloorTeamModel target, String newValue) {
+						return changes.renameOfficeFloorTeam(target, newValue);
+					}
+				});
+	}
+
+	@Override
 	protected Class<OfficeFloorTeamEvent> getPropertyChangeEventType() {
 		return OfficeFloorTeamEvent.class;
 	}
@@ -60,11 +92,15 @@ public class OfficeFloorTeamEditPart
 	protected void handlePropertyChange(OfficeFloorTeamEvent property,
 			PropertyChangeEvent evt) {
 		switch (property) {
+		case CHANGE_OFFICE_FLOOR_TEAM_NAME:
+			this.getOfficeFloorFigure().setOfficeFloorTeamName(
+					this.getCastedModel().getOfficeFloorTeamName());
+			break;
 		case ADD_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
 		case REMOVE_OFFICE_FLOOR_MANAGED_OBJECT_SOURCE_TEAM:
 		case ADD_DEPLOYED_OFFICE_TEAM:
 		case REMOVE_DEPLOYED_OFFICE_TEAM:
-			OfficeFloorTeamEditPart.this.refreshTargetConnections();
+			this.refreshTargetConnections();
 			break;
 		}
 	}

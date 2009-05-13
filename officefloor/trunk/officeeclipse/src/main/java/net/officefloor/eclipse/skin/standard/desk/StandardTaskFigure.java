@@ -20,7 +20,7 @@ import net.officefloor.eclipse.skin.desk.TaskFigure;
 import net.officefloor.eclipse.skin.desk.TaskFigureContext;
 import net.officefloor.eclipse.skin.standard.AbstractOfficeFloorFigure;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure;
-import net.officefloor.eclipse.skin.standard.figure.ContainerFigure;
+import net.officefloor.eclipse.skin.standard.figure.RoundedContainerFigure;
 import net.officefloor.eclipse.skin.standard.figure.NoSpacingGridLayout;
 import net.officefloor.eclipse.skin.standard.figure.ConnectorFigure.ConnectorDirection;
 import net.officefloor.model.desk.TaskEscalationToTaskModel;
@@ -50,7 +50,7 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 	/**
 	 * Flow item {@link Figure}.
 	 */
-	private final ContainerFigure flowItem;
+	private final RoundedContainerFigure flowItem;
 
 	/**
 	 * Initiate.
@@ -89,7 +89,7 @@ public class StandardTaskFigure extends AbstractOfficeFloorFigure implements
 		figure.add(flowItemAndTaskLink);
 
 		// Create the flow item container
-		this.flowItem = new ContainerFigure(context.getTaskName(), flowColour,
+		this.flowItem = new RoundedContainerFigure(context.getTaskName(), flowColour,
 				20, true);
 		flowItemAndTaskLink.add(this.flowItem);
 
