@@ -92,7 +92,7 @@ public class EclipseUtil {
 		try {
 			return clazz.newInstance();
 		} catch (Throwable ex) {
-			editor.messageError("Faile to instantiate " + clazz.getName(), ex);
+			editor.messageError("Failed to instantiate " + clazz.getName(), ex);
 			return null;
 		}
 	}
